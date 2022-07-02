@@ -3,28 +3,28 @@ SPL: ArrayObject: ensure a wrapped object's magic methods for property access ar
 --FILE--
 <?php
 class UsesMagic {
-	public $a = 1;
-	public $b = 2;
-	public $c = 3;
+    public $a = 1;
+    public $b = 2;
+    public $c = 3;
 
-	private $priv = 'secret';
+    private $priv = 'secret';
 
-	function __get($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __set($name, $value) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __isset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __unset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
+    function __get($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __set($name, $value) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __isset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __unset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
 
 }
 
@@ -69,6 +69,10 @@ var_dump($ao);
 ?>
 --EXPECTF--
 --> Write existent, non-existent and dynamic:
+
+Deprecated: Creation of dynamic property ArrayObject::$a is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayObject::$dynamic is deprecated in %s on line %d
   Original wrapped object:
 object(UsesMagic)#1 (4) {
   ["a"]=>

@@ -2,8 +2,9 @@
 ldap_add_ext() - Add operation with controls
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
 require_once('skipifcontrol.inc');
@@ -16,23 +17,22 @@ require "connect.inc";
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 var_dump(
-	$result = ldap_add_ext($link, "o=test_ldap_add_ext,$base", array(
-		"objectClass"	=> array(
-			"top",
-			"organization"),
-		"o"	=> "test_ldap_add_ext",
-	), [['oid' => LDAP_CONTROL_POST_READ, 'iscritical' => TRUE, 'value' => ['attrs' => ['o']]]]),
-	ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
-	$errcode,
-	$errmsg,
-	$ctrls[LDAP_CONTROL_POST_READ],
-	ldap_get_entries(
-		$link,
-		ldap_search($link, "$base", "(o=test_ldap_add_ext)")
-	)
+    $result = ldap_add_ext($link, "o=test_ldap_add_ext,$base", array(
+        "objectClass"	=> array(
+            "top",
+            "organization"),
+        "o"	=> "test_ldap_add_ext",
+    ), [['oid' => LDAP_CONTROL_POST_READ, 'iscritical' => TRUE, 'value' => ['attrs' => ['o']]]]),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
+    $errcode,
+    $errmsg,
+    $ctrls[LDAP_CONTROL_POST_READ],
+    ldap_get_entries(
+        $link,
+        ldap_search($link, "$base", "(o=test_ldap_add_ext)")
+    )
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -42,7 +42,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ldap_delete($link, "o=test_ldap_add_ext,$base");
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 bool(true)
 int(0)
 string(0) ""
@@ -91,4 +92,3 @@ array(2) {
     string(%d) "o=test_ldap_add_ext,%s"
   }
 }
-===DONE===

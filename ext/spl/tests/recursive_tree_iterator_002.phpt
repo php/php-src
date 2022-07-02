@@ -5,12 +5,10 @@ error_reporting=E_ALL&~E_NOTICE
 --FILE--
 <?php
 try {
-	new RecursiveTreeIterator();
-} catch (InvalidArgumentException $e) {
-	echo "InvalidArgumentException thrown\n";
+    new RecursiveTreeIterator();
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECT--
-InvalidArgumentException thrown
-===DONE===
+RecursiveTreeIterator::__construct() expects at least 1 argument, 0 given

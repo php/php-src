@@ -1,7 +1,7 @@
 --TEST--
 gmp_import() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) echo "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -48,37 +48,52 @@ foreach ($import as $k => $test) {
 var_dump($passed);
 
 // Invalid word sizes
-var_dump(gmp_import('a', -1));
-var_dump(gmp_import('a', 0));
+try {
+    var_dump(gmp_import('a', -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_import('a', 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 // Invalid data lengths
-var_dump(gmp_import('a', 2));
-var_dump(gmp_import('aa', 3));
-var_dump(gmp_import(str_repeat('a', 100), 64));
+try {
+    var_dump(gmp_import('a', 2));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_import('aa', 3));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_import(str_repeat('a', 100), 64));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 // Invalid options
-var_dump(gmp_import('a', 1, GMP_MSW_FIRST | GMP_LSW_FIRST));
-var_dump(gmp_import('a', 1, GMP_BIG_ENDIAN | GMP_LITTLE_ENDIAN));
---EXPECTF--
+try {
+    var_dump(gmp_import('a', 1, GMP_MSW_FIRST | GMP_LSW_FIRST));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_import('a', 1, GMP_BIG_ENDIAN | GMP_LITTLE_ENDIAN));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+?>
+--EXPECT--
 bool(true)
-
-Warning: gmp_import(): Word size must be positive, -1 given in %s on line %d
-bool(false)
-
-Warning: gmp_import(): Word size must be positive, 0 given in %s on line %d
-bool(false)
-
-Warning: gmp_import(): Input length must be a multiple of word size in %s on line %d
-bool(false)
-
-Warning: gmp_import(): Input length must be a multiple of word size in %s on line %d
-bool(false)
-
-Warning: gmp_import(): Input length must be a multiple of word size in %s on line %d
-bool(false)
-
-Warning: gmp_import(): Invalid options: Conflicting word orders in %s on line %d
-bool(false)
-
-Warning: gmp_import(): Invalid options: Conflicting word endianness in %s on line %d
-bool(false)
+gmp_import(): Argument #2 ($word_size) must be greater than or equal to 1
+gmp_import(): Argument #2 ($word_size) must be greater than or equal to 1
+gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
+gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
+gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
+gmp_import(): Argument #3 ($flags) cannot use multiple word order options
+gmp_import(): Argument #3 ($flags) cannot use multiple endian options

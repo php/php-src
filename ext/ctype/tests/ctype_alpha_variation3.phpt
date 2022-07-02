@@ -1,14 +1,9 @@
 --TEST--
 Test ctype_alpha() function : usage variations - different strings
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
-/* Prototype  : bool ctype_alpha(mixed $c)
- * Description: Checks for alphabetic character(s)
- * Source code: ext/ctype/ctype.c
- */
-
 /*
  * Pass strings containing different character types to ctype_alpha() to test
  * which are considered valid alphabetic character only strings
@@ -55,7 +50,6 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_alpha() : usage variations ***
 
@@ -127,4 +121,3 @@ bool(false)
 
 -- Iteration 23 --
 bool(false)
-===DONE===

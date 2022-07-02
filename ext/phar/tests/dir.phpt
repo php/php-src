@@ -1,7 +1,7 @@
 --TEST--
 Phar: mkdir/rmdir test
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -50,7 +50,6 @@ rmdir($pname);
 rmdir($pname . '/');
 mkdir($pname . '/');
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/ok.phar'); ?>
@@ -89,4 +88,3 @@ Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php
 Warning: rmdir(): phar error: cannot remove directory "" in phar "%sdir.phar.php", directory does not exist in %sdir.php on line %d
 
 Warning: mkdir(): phar error: cannot create directory "" in phar "%sdir.phar.php", phar error: invalid path "" must not be empty in %sdir.php on line %d
-===DONE===

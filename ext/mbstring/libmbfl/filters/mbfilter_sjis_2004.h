@@ -33,14 +33,14 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_sjis2004;
-extern const struct mbfl_identify_vtbl vtbl_identify_sjis2004;
 extern const struct mbfl_convert_vtbl vtbl_sjis2004_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_sjis2004;
 
 int mbfl_filt_conv_jis2004_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_jis2004(int c, mbfl_convert_filter *filter);
 
-int mbfl_filt_conv_jis2004_flush(mbfl_convert_filter *filter);
+int mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter);
+int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_SJIS_2004_H */
 

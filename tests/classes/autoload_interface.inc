@@ -1,7 +1,7 @@
 <?php
 
 interface autoload_interface {
-	function testFunction();
+    function testFunction();
 }
 
 ?>

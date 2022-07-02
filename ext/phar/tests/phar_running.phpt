@@ -1,7 +1,7 @@
 --TEST--
 Phar: Phar::running()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -17,11 +17,9 @@ var_dump(Phar::running(false));
 include $pname . '/index.php';
 var_dump(Phar::running());
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 string(%d) "phar://%sphar_running.phar.php"
 string(%d) "%sphar_running.phar.php"
 string(0) ""
-===DONE===

@@ -1,7 +1,7 @@
 --TEST--
 Bug #53463 (sqlite3 columnName() segfaults on bad column_number)
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 

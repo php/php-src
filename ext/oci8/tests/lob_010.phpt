@@ -1,5 +1,7 @@
 --TEST--
 oci_lob_save()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -34,7 +36,7 @@ oci_execute($s, OCI_DEFAULT);
 $row = oci_fetch_array($s);
 
 while (!$row[0]->eof()) {
-	var_dump($row[0]->read(1024));
+    var_dump($row[0]->read(1024));
 }
 
 require __DIR__.'/drop_table.inc';

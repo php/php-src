@@ -32,16 +32,16 @@ $code = <<<CODE
 <?php
 
 foreach(["test", "таст"] as \$fn) {
-	file_put_contents("\$fn.txt", "");
+    file_put_contents("\$fn.txt", "");
 }
 
 var_dump(getcwd());
 if (\$dh = opendir(getcwd())) {
-	while ((\$file = readdir(\$dh)) !== false) {
-		if ("." == \$file || ".." == \$file) continue;
-		var_dump(\$file);
-	}
-	closedir(\$dh);
+    while ((\$file = readdir(\$dh)) !== false) {
+        if ("." == \$file || ".." == \$file) continue;
+        var_dump(\$file);
+    }
+    closedir(\$dh);
 }
 CODE;
 $code_fn = "code.php";
@@ -52,7 +52,6 @@ print(shell_exec(getenv('TEST_PHP_EXECUTABLE') . " -nf code.php"));
 chdir($old_cwd);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_basename = "тест";
@@ -61,8 +60,8 @@ $d0 = $prefix . DIRECTORY_SEPARATOR . $dir_basename;
 
 $obj = scandir($d0);
 foreach ($obj as $file) {
-	if ("." == $file || ".." == $file) continue;
-	unlink($d0 . DIRECTORY_SEPARATOR . $file);
+    if ("." == $file || ".." == $file) continue;
+    unlink($d0 . DIRECTORY_SEPARATOR . $file);
 }
 
 rmdir($d0);
@@ -76,4 +75,3 @@ string(%d) "%sbug75063-utf8%eтест"
 string(8) "code.php"
 string(8) "test.txt"
 string(12) "таст.txt"
-===DONE===

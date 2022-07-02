@@ -15,7 +15,7 @@ $code = '
 $test = "var";
 
 class test {
-	private $var;
+    private $var;
 }
 
 echo test::$var;
@@ -31,8 +31,8 @@ var_dump(`"$php" -n -l some.unknown`);
 $code = '
 <?php
 
-class test 
-	private $var;
+class test
+    private $var;
 }
 
 ?>

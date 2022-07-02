@@ -2,11 +2,6 @@
 Test array_pad() function : usage variations - different arrays for 'input' argument
 --FILE--
 <?php
-/* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
- * Description: Returns a copy of input array padded with pad_value to size pad_size
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different arrays to $input argument and testing whether
 * array_pad() behaves in an expected way with the other arguments passed to the function.
@@ -71,7 +66,7 @@ $inputs = array (
        array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
        array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
 
-       // array with repetative keys
+       // array with repetitive keys
 /*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
 );
 

@@ -1,8 +1,10 @@
 --TEST--
 shm_get_var() tests
+--EXTENSIONS--
+sysvshm
 --SKIPIF--
 <?php
-if (!extension_loaded("sysvshm")){ print 'skip'; }
+
 if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
@@ -36,10 +38,10 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: shm_get_var(): variable key 1000 doesn't exist in %s005.php on line %d
+Warning: shm_get_var(): Variable key 1000 doesn't exist in %s005.php on line %d
 bool(false)
 
-Warning: shm_get_var(): variable key -10000 doesn't exist in %s005.php on line %d
+Warning: shm_get_var(): Variable key -10000 doesn't exist in %s005.php on line %d
 bool(false)
 string(11) "test string"
 object(stdClass)#%d (0) {

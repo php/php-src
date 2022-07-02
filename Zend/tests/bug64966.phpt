@@ -3,18 +3,18 @@ Bug #64966 (segfault in zend_do_fcall_common_helper_SPEC)
 --FILE--
 <?php
 function test($func) {
-	try {
-		$a = $func("");
-	} catch (Error $e) {
-		throw new Exception();
-	}
-	return true;
+    try {
+        $a = $func("");
+    } catch (Error $e) {
+        throw new Exception();
+    }
+    return true;
 }
 class A {
-	public function b() {
-		test("strlen");
-		test("iterator_apply");
-	}
+    public function b() {
+        test("strlen");
+        test("iterator_apply");
+    }
 }
 
 $a = new A();

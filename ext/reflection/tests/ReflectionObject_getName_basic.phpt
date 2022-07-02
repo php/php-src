@@ -15,7 +15,7 @@ $r3 = new ReflectionObject($r2);
 var_dump($r3->getName());
 
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "stdClass"
 string(1) "C"
 string(16) "ReflectionObject"

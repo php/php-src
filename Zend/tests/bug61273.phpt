@@ -10,6 +10,7 @@ Bug #61273 (call_user_func_array with more than 16333 arguments leaks / crashes)
 $args = array_fill(0, 64 * 1024 - 64, 0);
 call_user_func_array(function(&$a) {}, $args);
 echo strval("okey");
+?>
 --EXPECTF--
-Warning: Parameter 1 to {closure}() expected to be a reference, value given in %sbug61273.php on line %d
+Warning: {closure}(): Argument #1 ($a) must be passed by reference, value given in %s on line %d
 okey

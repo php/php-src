@@ -3,26 +3,26 @@ Bug #42937 (__call() method not invoked when methods are called on parent from c
 --FILE--
 <?php
 class A {
-	function __call($strMethod, $arrArgs) {
-		echo "$strMethod\n";
-	}
+    function __call($strMethod, $arrArgs) {
+        echo "$strMethod\n";
+    }
 }
 
 class C {
-	function __call($strMethod, $arrArgs) {
-		echo "$strMethod\n";
-	}
+    function __call($strMethod, $arrArgs) {
+        echo "$strMethod\n";
+    }
 }
 
 class B extends A {
-	function test() {
-		self::test1();
-		parent::test2();
-		static::test3();
-		A::test4();
-		B::test5();
-		C::test6();
-	}
+    function test() {
+        self::test1();
+        parent::test2();
+        static::test3();
+        A::test4();
+        B::test5();
+        C::test6();
+    }
 }
 
 $a = new A();
@@ -39,7 +39,7 @@ test3
 test4
 test5
 
-Fatal error: Uncaught Error: Call to undefined method C::test6() in %sbug42937.php:21
+Fatal error: Uncaught Error: Call to undefined method C::test6() in %s:%d
 Stack trace:
 #0 %s(%d): B->test()
 #1 {main}

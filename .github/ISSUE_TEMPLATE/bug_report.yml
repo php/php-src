@@ -1,0 +1,36 @@
+name: Bug report
+description: Create a bug report
+labels: ["Bug", "Status: Needs Triage"]
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: "Please provide a minimal way to reproduce the problem and describe what the expected vs actual behavior is. Provide a [3v4l.org](https://3v4l.org/) link if possible."
+      value: |
+        The following code:
+
+        ```php
+        <?php
+        ```
+
+        Resulted in this output:
+        ```
+        ```
+
+        But I expected this output instead:
+        ```
+        ```
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: PHP Version
+      description: "The used PHP version. Make sure it is [supported](https://www.php.net/supported-versions.php)."
+      placeholder: "PHP 8.0.12"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Operating System
+      description: "The used operating system, if relevant."
+      placeholder: "Ubuntu 20.04"

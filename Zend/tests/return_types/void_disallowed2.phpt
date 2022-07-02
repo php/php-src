@@ -8,5 +8,6 @@ function foo(): void {
 }
 
 // Note the lack of function call: function validated at compile-time
+?>
 --EXPECTF--
 Fatal error: A void function must not return a value in %s on line %d

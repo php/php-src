@@ -6,8 +6,8 @@ zend.enable_gc=1
 <?php
 $a = new stdClass();
 for ($i = 0; $i < 10001; $i++) {
-	$b =& $a;
-	$a->{"a".$i} = $a;
+    $b =& $a;
+    $a->{"a".$i} = $a;
 }
 unset($b);
 $a->b = "xxx";

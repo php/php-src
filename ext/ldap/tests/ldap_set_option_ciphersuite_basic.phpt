@@ -2,8 +2,8 @@
 ldap_set_option() - Basic test for TLS cipher suite ldap option
 --CREDITS--
 Chad Sikorra <Chad.Sikorra@gmail.com>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 require "connect.inc";
@@ -15,8 +15,6 @@ var_dump($result);
 ldap_get_option($link, LDAP_OPT_X_TLS_CIPHER_SUITE, $optionval);
 var_dump($optionval);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 string(4) "3DES"
-===DONE===

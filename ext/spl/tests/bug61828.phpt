@@ -3,9 +3,13 @@ Bug #61828 (Memleak when calling Directory(Recursive)Iterator/Spl(Temp)FileObjec
 --FILE--
 <?php
 $x = new DirectoryIterator('.');
-$x->__construct('/tmp');
-echo "Okey";
+
+try {
+    $x->__construct('/tmp');
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
-Warning: DirectoryIterator::__construct(): Directory object is already initialized in %sbug61828.php on line 3
-Okey
+--EXPECT--
+Directory object is already initialized

@@ -2,11 +2,6 @@
 Test array_intersect() function : usage variations - assoc array with diff values for 'arr1' argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_intersect() by passing different
  * associative arrays having different possible values to $arr1 argument.
@@ -51,8 +46,8 @@ $arrays = array (
        array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.333333),
 
        // arrays with string values
-/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "pen\n"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'),
+/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"),
+       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'),
        array(1 => "hello", "heredoc" => $heredoc),
 
        // array with object, unset variable and resource variable
@@ -68,7 +63,7 @@ $arrays = array (
 $arr2 = array(1, 2, 1.2, 2.3333, "col\tor", '\v\fworld', $fp,
               "Hello world", $heredoc, new classA(), 444.432, "fruit");
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect()
+// loop through each sub-array within $arrays to check the behavior of array_intersect()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iterator $iterator --\n";

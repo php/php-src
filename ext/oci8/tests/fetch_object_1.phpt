@@ -1,5 +1,7 @@
 --TEST--
 oci_fetch_object()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -77,8 +79,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 object(stdClass)#%d (3) {
@@ -118,6 +118,5 @@ Test 2
 Test 3
 123
 
-Notice: Undefined property: stdClass::$CASESENSITIVE in %sfetch_object_1.php on line %d
+Warning: Undefined property: stdClass::$CASESENSITIVE in %sfetch_object_1.php on line %d
 
-===DONE===

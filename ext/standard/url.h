@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -31,18 +31,12 @@ typedef struct php_url {
 PHPAPI void php_url_free(php_url *theurl);
 PHPAPI php_url *php_url_parse(char const *str);
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length);
+PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port);
 PHPAPI size_t php_url_decode(char *str, size_t len); /* return value: length of decoded string */
 PHPAPI size_t php_raw_url_decode(char *str, size_t len); /* return value: length of decoded string */
 PHPAPI zend_string *php_url_encode(char const *s, size_t len);
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len);
 PHPAPI char *php_replace_controlchars_ex(char *str, size_t len);
-
-PHP_FUNCTION(parse_url);
-PHP_FUNCTION(urlencode);
-PHP_FUNCTION(urldecode);
-PHP_FUNCTION(rawurlencode);
-PHP_FUNCTION(rawurldecode);
-PHP_FUNCTION(get_headers);
 
 #define PHP_URL_SCHEME 0
 #define PHP_URL_HOST 1

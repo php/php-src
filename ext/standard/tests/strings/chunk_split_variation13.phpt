@@ -2,12 +2,6 @@
 Test chunk_split() function : usage variations - default 'chunklen' with long string as 'str'argument
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions:
-*/
-
 /*
 * passing long string as 'str' and testing default value of chunklen which is 76
 */

@@ -1,7 +1,7 @@
 --TEST--
 FR #77711 (CURLFile should support UNICODE filenames)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';
@@ -21,11 +21,9 @@ var_dump(curl_setopt($ch, CURLOPT_POSTFIELDS, $params));
 var_dump(curl_exec($ch));
 curl_close($ch);
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
-string(%d) "АБВ.txt|application/octet-stream"
-===DONE===
+string(%d) "АБВ.txt|application/octet-stream|5"
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/АБВ.txt');

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -37,7 +37,7 @@ typedef struct filter_list_entry {
 /* {{{ filter_list */
 static const filter_list_entry filter_list[] = {
 	{ "int",             FILTER_VALIDATE_INT,           php_filter_int             },
-	{ "boolean",         FILTER_VALIDATE_BOOLEAN,       php_filter_boolean         },
+	{ "boolean",         FILTER_VALIDATE_BOOL,          php_filter_boolean         },
 	{ "float",           FILTER_VALIDATE_FLOAT,         php_filter_float           },
 
 	{ "validate_regexp", FILTER_VALIDATE_REGEXP,        php_filter_validate_regexp },
@@ -57,7 +57,6 @@ static const filter_list_entry filter_list[] = {
 	{ "url",             FILTER_SANITIZE_URL,           php_filter_url             },
 	{ "number_int",      FILTER_SANITIZE_NUMBER_INT,    php_filter_number_int      },
 	{ "number_float",    FILTER_SANITIZE_NUMBER_FLOAT,  php_filter_number_float    },
-	{ "magic_quotes",    FILTER_SANITIZE_MAGIC_QUOTES,  php_filter_magic_quotes    },
 	{ "add_slashes",     FILTER_SANITIZE_ADD_SLASHES,   php_filter_add_slashes     },
 
 	{ "callback",        FILTER_CALLBACK,               php_filter_callback        },
@@ -76,29 +75,14 @@ static const filter_list_entry filter_list[] = {
 #define PARSE_SESSION 6
 #endif
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len);
+static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len);
 static unsigned int php_sapi_filter_init(void);
 
-/* {{{ filter_functions[]
- */
-static const zend_function_entry filter_functions[] = {
-	PHP_FE(filter_input,		arginfo_filter_input)
-	PHP_FE(filter_var,		arginfo_filter_var)
-	PHP_FE(filter_input_array,	arginfo_filter_input_array)
-	PHP_FE(filter_var_array,	arginfo_filter_var_array)
-	PHP_FE(filter_list,		arginfo_filter_list)
-	PHP_FE(filter_has_var,		arginfo_filter_has_var)
-	PHP_FE(filter_id,		arginfo_filter_id)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ filter_module_entry
- */
+/* {{{ filter_module_entry */
 zend_module_entry filter_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"filter",
-	filter_functions,
+	ext_functions,
 	PHP_MINIT(filter),
 	PHP_MSHUTDOWN(filter),
 	NULL,
@@ -123,6 +107,9 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 	for (i = 0; i < size; ++i) {
 		if ((strcasecmp(ZSTR_VAL(new_value), filter_list[i].name) == 0)) {
 			IF_G(default_filter) = filter_list[i].id;
+			if (IF_G(default_filter) != FILTER_DEFAULT) {
+				zend_error(E_DEPRECATED, "The filter.default ini setting is deprecated");
+			}
 			return SUCCESS;
 		}
 	}
@@ -132,8 +119,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 }
 /* }}} */
 
-/* {{{ PHP_INI
- */
+/* {{{ PHP_INI */
 static PHP_INI_MH(OnUpdateFlags)
 {
 	if (!new_value) {
@@ -169,82 +155,14 @@ ZEND_TSRMLS_CACHE_UPDATE();
 
 #define PARSE_REQUEST 99
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(filter)
 {
 	ZEND_INIT_MODULE_GLOBALS(filter, php_filter_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("INPUT_POST",	PARSE_POST, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_GET",		PARSE_GET,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_COOKIE",	PARSE_COOKIE, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_ENV",		PARSE_ENV,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_SERVER",	PARSE_SERVER, 	CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_NONE", FILTER_FLAG_NONE, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_REQUIRE_SCALAR", FILTER_REQUIRE_SCALAR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_REQUIRE_ARRAY", FILTER_REQUIRE_ARRAY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FORCE_ARRAY", FILTER_FORCE_ARRAY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_NULL_ON_FAILURE", FILTER_NULL_ON_FAILURE, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_FLOAT", FILTER_VALIDATE_FLOAT, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_REGEXP", FILTER_VALIDATE_REGEXP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_DOMAIN", FILTER_VALIDATE_DOMAIN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_URL", FILTER_VALIDATE_URL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_EMAIL", FILTER_VALIDATE_EMAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_IP", FILTER_VALIDATE_IP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_MAC", FILTER_VALIDATE_MAC, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_DEFAULT", FILTER_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_UNSAFE_RAW", FILTER_UNSAFE_RAW, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRING", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRIPPED", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_ENCODED", FILTER_SANITIZE_ENCODED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_SPECIAL_CHARS", FILTER_SANITIZE_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_FULL_SPECIAL_CHARS", FILTER_SANITIZE_FULL_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_EMAIL", FILTER_SANITIZE_EMAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_URL", FILTER_SANITIZE_URL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_INT", FILTER_SANITIZE_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_FLOAT", FILTER_SANITIZE_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_MAGIC_QUOTES", FILTER_SANITIZE_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_ADD_SLASHES", FILTER_SANITIZE_ADD_SLASHES, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_CALLBACK", FILTER_CALLBACK, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_OCTAL", FILTER_FLAG_ALLOW_OCTAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_HEX", FILTER_FLAG_ALLOW_HEX, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_LOW", FILTER_FLAG_STRIP_LOW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_HIGH", FILTER_FLAG_STRIP_HIGH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_BACKTICK", FILTER_FLAG_STRIP_BACKTICK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_LOW", FILTER_FLAG_ENCODE_LOW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_HIGH", FILTER_FLAG_ENCODE_HIGH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_AMP", FILTER_FLAG_ENCODE_AMP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_ENCODE_QUOTES", FILTER_FLAG_NO_ENCODE_QUOTES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMPTY_STRING_NULL", FILTER_FLAG_EMPTY_STRING_NULL, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_FRACTION", FILTER_FLAG_ALLOW_FRACTION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_THOUSAND", FILTER_FLAG_ALLOW_THOUSAND, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_SCIENTIFIC", FILTER_FLAG_ALLOW_SCIENTIFIC, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_PATH_REQUIRED", FILTER_FLAG_PATH_REQUIRED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_QUERY_REQUIRED", FILTER_FLAG_QUERY_REQUIRED, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_IPV4", FILTER_FLAG_IPV4, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_IPV6", FILTER_FLAG_IPV6, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_RES_RANGE", FILTER_FLAG_NO_RES_RANGE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_PRIV_RANGE", FILTER_FLAG_NO_PRIV_RANGE, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_HOSTNAME", FILTER_FLAG_HOSTNAME, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMAIL_UNICODE", FILTER_FLAG_EMAIL_UNICODE, CONST_CS | CONST_PERSISTENT);
+	register_filter_symbols(module_number);
 
 	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
 
@@ -252,8 +170,7 @@ PHP_MINIT_FUNCTION(filter)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(filter)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -262,8 +179,7 @@ PHP_MSHUTDOWN_FUNCTION(filter)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 #define VAR_ARRAY_COPY_DTOR(a)   \
 	if (!Z_ISUNDEF(IF_G(a))) {   \
 		zval_ptr_dtor(&IF_G(a)); \
@@ -284,8 +200,7 @@ PHP_RSHUTDOWN_FUNCTION(filter)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(filter)
 {
 	php_info_print_table_start();
@@ -329,7 +244,7 @@ static unsigned int php_sapi_filter_init(void)
 	return SUCCESS;
 }
 
-static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, zend_bool copy) /* {{{ */
+static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, bool copy) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -375,7 +290,7 @@ handle_default:
 }
 /* }}} */
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len) /* {{{ */
+static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len) /* {{{ */
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
@@ -454,7 +369,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_l
 }
 /* }}} */
 
-static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, zend_bool copy) /* {{{ */
+static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, bool copy) /* {{{ */
 {
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
@@ -497,19 +412,19 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			break;
 		case PARSE_SERVER:
 			if (PG(auto_globals_jit)) {
-				zend_is_auto_global_str(ZEND_STRL("_SERVER"));
+				zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
 			}
 			array_ptr = &IF_G(server_array);
 			break;
 		case PARSE_ENV:
 			if (PG(auto_globals_jit)) {
-				zend_is_auto_global_str(ZEND_STRL("_ENV"));
+				zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV));
 			}
 			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown source");
-			break;
+			zend_argument_value_error(1, "must be an INPUT_* constant");
+			return NULL;
 	}
 
 	if (array_ptr && Z_TYPE_P(array_ptr) != IS_ARRAY) {
@@ -521,9 +436,7 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed filter_has_var(constant type, string variable_name)
- * Returns true if the variable with the name 'name' exists in source.
- */
+/* {{{ Returns true if the variable with the name 'name' exists in source. */
 PHP_FUNCTION(filter_has_var)
 {
 	zend_long         arg;
@@ -531,10 +444,13 @@ PHP_FUNCTION(filter_has_var)
 	zval        *array_ptr = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS", &arg, &var) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	array_ptr = php_filter_get_storage(arg);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	if (array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var)) {
 		RETURN_TRUE;
@@ -544,31 +460,31 @@ PHP_FUNCTION(filter_has_var)
 }
 /* }}} */
 
-static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args, const int copy, zend_long filter_flags) /* {{{ */
-{
+static void php_filter_call(
+	zval *filtered, zend_long filter, HashTable *filter_args_ht, zend_long filter_args_long,
+	const int copy, zend_long filter_flags
+) /* {{{ */ {
 	zval *options = NULL;
 	zval *option;
 	char *charset = NULL;
 
-	if (filter_args && Z_TYPE_P(filter_args) != IS_ARRAY) {
-		zend_long lval = zval_get_long(filter_args);
-
+	if (!filter_args_ht) {
 		if (filter != -1) { /* handler for array apply */
 			/* filter_args is the filter_flags */
-			filter_flags = lval;
+			filter_flags = filter_args_long;
 
 			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
 				filter_flags |= FILTER_REQUIRE_SCALAR;
 			}
 		} else {
-			filter = lval;
+			filter = filter_args_long;
 		}
-	} else if (filter_args) {
-		if ((option = zend_hash_str_find(Z_ARRVAL_P(filter_args), "filter", sizeof("filter") - 1)) != NULL) {
+	} else {
+		if ((option = zend_hash_str_find(filter_args_ht, "filter", sizeof("filter") - 1)) != NULL) {
 			filter = zval_get_long(option);
 		}
 
-		if ((option = zend_hash_str_find(Z_ARRVAL_P(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
+		if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
 			filter_flags = zval_get_long(option);
 
 			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
@@ -576,7 +492,7 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 			}
 		}
 
-		if ((option = zend_hash_str_find_deref(Z_ARRVAL_P(filter_args), "options", sizeof("options") - 1)) != NULL) {
+		if ((option = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL) {
 			if (filter != FILTER_CALLBACK) {
 				if (Z_TYPE_P(option) == IS_ARRAY) {
 					options = option;
@@ -621,30 +537,26 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 }
 /* }}} */
 
-static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty) /* {{{ */
-{
+static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op_long,
+	zval *return_value, bool add_empty
+) /* {{{ */ {
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
 
-	if (!op) {
+	if (!op_ht) {
 		ZVAL_DUP(return_value, input);
-		php_filter_call(return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY);
-	} else if (Z_TYPE_P(op) == IS_LONG) {
-		ZVAL_DUP(return_value, input);
-		php_filter_call(return_value, Z_LVAL_P(op), NULL, 0, FILTER_REQUIRE_ARRAY);
-	} else if (Z_TYPE_P(op) == IS_ARRAY) {
+		php_filter_call(return_value, -1, NULL, op_long, 0, FILTER_REQUIRE_ARRAY);
+	} else {
 		array_init(return_value);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(op), arg_key, arg_elm) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(op_ht, arg_key, arg_elm) {
 			if (arg_key == NULL) {
-				php_error_docref(NULL, E_WARNING, "Numeric keys are not allowed in the definition array");
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+				zend_argument_type_error(2, "must contain only string keys");
+				RETURN_THROWS();
 	 		}
 			if (ZSTR_LEN(arg_key) == 0) {
-				php_error_docref(NULL, E_WARNING, "Empty keys are not allowed in the definition array");
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+				zend_argument_value_error(2, "cannot contain empty keys");
+				RETURN_THROWS();
 			}
 			if ((tmp = zend_hash_find(Z_ARRVAL_P(input), arg_key)) == NULL) {
 				if (add_empty) {
@@ -654,49 +566,59 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 				zval nval;
 				ZVAL_DEREF(tmp);
 				ZVAL_DUP(&nval, tmp);
-				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR);
+				php_filter_call(&nval, -1,
+					Z_TYPE_P(arg_elm) == IS_ARRAY ? Z_ARRVAL_P(arg_elm) : NULL,
+					Z_TYPE_P(arg_elm) == IS_ARRAY ? 0 : zval_get_long(arg_elm),
+					0, FILTER_REQUIRE_SCALAR
+				);
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else {
-		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input(constant type, string variable_name [, int filter [, mixed options]])
- * Returns the filtered variable 'name'* from source `type`.
- */
+/* {{{ Returns the filtered variable 'name'* from source `type`. */
 PHP_FUNCTION(filter_input)
 {
 	zend_long fetch_from, filter = FILTER_DEFAULT;
-	zval *filter_args = NULL, *tmp;
-	zval *input = NULL;
+	zval *input = NULL, *tmp;
 	zend_string *var;
+	HashTable *filter_args_ht = NULL;
+	zend_long filter_args_long = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS|lz", &fetch_from, &var, &filter, &filter_args) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_LONG(fetch_from)
+		Z_PARAM_STR(var)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(filter)
+		Z_PARAM_ARRAY_HT_OR_LONG(filter_args_ht, filter_args_long)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, filter);
 		RETURN_FALSE;
 	}
 
 	input = php_filter_get_storage(fetch_from);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	if (!input || (tmp = zend_hash_find(Z_ARRVAL_P(input), var)) == NULL) {
 		zend_long filter_flags = 0;
 		zval *option, *opt, *def;
-		if (filter_args) {
-			if (Z_TYPE_P(filter_args) == IS_LONG) {
-				filter_flags = Z_LVAL_P(filter_args);
-			} else if (Z_TYPE_P(filter_args) == IS_ARRAY && (option = zend_hash_str_find(Z_ARRVAL_P(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
+		if (!filter_args_ht) {
+			filter_flags = filter_args_long;
+		} else {
+			if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
 				filter_flags = zval_get_long(option);
 			}
-			if (Z_TYPE_P(filter_args) == IS_ARRAY &&
-				(opt = zend_hash_str_find_deref(Z_ARRVAL_P(filter_args), "options", sizeof("options") - 1)) != NULL &&
+
+			if ((opt = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL &&
 				Z_TYPE_P(opt) == IS_ARRAY &&
-				(def = zend_hash_str_find_deref(Z_ARRVAL_P(opt), "default", sizeof("default") - 1)) != NULL) {
+				(def = zend_hash_str_find_deref(Z_ARRVAL_P(opt), "default", sizeof("default") - 1)) != NULL
+			) {
 				ZVAL_COPY(return_value, def);
 				return;
 			}
@@ -716,60 +638,69 @@ PHP_FUNCTION(filter_input)
 
 	ZVAL_DUP(return_value, tmp);
 
-	php_filter_call(return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR);
+	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, 1, FILTER_REQUIRE_SCALAR);
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var(mixed variable [, int filter [, mixed options]])
- * Returns the filtered version of the variable.
- */
+/* {{{ Returns the filtered version of the variable. */
 PHP_FUNCTION(filter_var)
 {
 	zend_long filter = FILTER_DEFAULT;
-	zval *filter_args = NULL, *data;
+	zval *data;
+	HashTable *filter_args_ht = NULL;
+	zend_long filter_args_long = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lz", &data, &filter, &filter_args) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ZVAL(data)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(filter)
+		Z_PARAM_ARRAY_HT_OR_LONG(filter_args_ht, filter_args_long)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PHP_FILTER_ID_EXISTS(filter)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, filter);
 		RETURN_FALSE;
 	}
 
 	ZVAL_DUP(return_value, data);
 
-	php_filter_call(return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR);
+	php_filter_call(return_value, filter, filter_args_ht, filter_args_long, 1, FILTER_REQUIRE_SCALAR);
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input_array(constant type, [, mixed options [, bool add_empty]]])
- * Returns an array with all arguments defined in 'definition'.
- */
+/* {{{ Returns an array with all arguments defined in 'definition'. */
 PHP_FUNCTION(filter_input_array)
 {
 	zend_long    fetch_from;
-	zval   *array_input = NULL, *op = NULL;
-	zend_bool add_empty = 1;
+	zval   *array_input = NULL;
+	bool add_empty = 1;
+	HashTable *op_ht = NULL;
+	zend_long op_long = FILTER_DEFAULT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|zb",  &fetch_from, &op, &add_empty) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_LONG(fetch_from)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_LONG(op_ht, op_long)
+		Z_PARAM_BOOL(add_empty)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
+	if (!op_ht && !PHP_FILTER_ID_EXISTS(op_long)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, op_long);
 		RETURN_FALSE;
 	}
 
 	array_input = php_filter_get_storage(fetch_from);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	if (!array_input) {
 		zend_long filter_flags = 0;
 		zval *option;
-		if (op) {
-			if (Z_TYPE_P(op) == IS_LONG) {
-				filter_flags = Z_LVAL_P(op);
-			} else if (Z_TYPE_P(op) == IS_ARRAY && (option = zend_hash_str_find(Z_ARRVAL_P(op), "flags", sizeof("flags") - 1)) != NULL) {
-				filter_flags = zval_get_long(option);
-			}
+		if (op_long) {
+			filter_flags = op_long;
+		} else if (op_ht && (option = zend_hash_str_find(op_ht, "flags", sizeof("flags") - 1)) != NULL) {
+			filter_flags = zval_get_long(option);
 		}
 
 		/* The FILTER_NULL_ON_FAILURE flag inverts the usual return values of
@@ -784,38 +715,41 @@ PHP_FUNCTION(filter_input_array)
 		}
 	}
 
-	php_filter_array_handler(array_input, op, return_value, add_empty);
+	php_filter_array_handler(array_input, op_ht, op_long, return_value, add_empty);
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var_array(array data, [, mixed options [, bool add_empty]]])
- * Returns an array with all arguments defined in 'definition'.
- */
+/* {{{ Returns an array with all arguments defined in 'definition'. */
 PHP_FUNCTION(filter_var_array)
 {
-	zval *array_input = NULL, *op = NULL;
-	zend_bool add_empty = 1;
+	zval *array_input = NULL;
+	bool add_empty = 1;
+	HashTable *op_ht = NULL;
+	zend_long op_long = FILTER_DEFAULT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|zb",  &array_input, &op, &add_empty) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ARRAY(array_input)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_LONG(op_ht, op_long)
+		Z_PARAM_BOOL(add_empty)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (op && (Z_TYPE_P(op) != IS_ARRAY) && !(Z_TYPE_P(op) == IS_LONG && PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
+	if (!op_ht && !PHP_FILTER_ID_EXISTS(op_long)) {
+		php_error_docref(NULL, E_WARNING, "Unknown filter with ID " ZEND_LONG_FMT, op_long);
 		RETURN_FALSE;
 	}
 
-	php_filter_array_handler(array_input, op, return_value, add_empty);
+	php_filter_array_handler(array_input, op_ht, op_long, return_value, add_empty);
 }
 /* }}} */
 
-/* {{{ proto filter_list()
- * Returns a list of all supported filters */
+/* {{{ Returns a list of all supported filters */
 PHP_FUNCTION(filter_list)
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -825,8 +759,7 @@ PHP_FUNCTION(filter_list)
 }
 /* }}} */
 
-/* {{{ proto filter_id(string filtername)
- * Returns the filter ID belonging to a named filter */
+/* {{{ Returns the filter ID belonging to a named filter */
 PHP_FUNCTION(filter_id)
 {
 	int i;
@@ -835,7 +768,7 @@ PHP_FUNCTION(filter_id)
 	char *filter;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filter, &filter_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	for (i = 0; i < size; ++i) {

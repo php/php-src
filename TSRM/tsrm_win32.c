@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -69,10 +69,8 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 
 	if (globals->shm) {
 		for (ptr = globals->shm; ptr < (globals->shm + globals->shm_size); ptr++) {
-			UnmapViewOfFile(ptr->addr);
-			CloseHandle(ptr->segment);
 			UnmapViewOfFile(ptr->descriptor);
-			CloseHandle(ptr->info);
+			CloseHandle(ptr->segment);
 		}
 		free(globals->shm);
 	}
@@ -103,7 +101,7 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }/*}}}*/
 
-char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
+const char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
 {/*{{{*/
 	PSID pSid = TWG(impersonation_token_sid);
 	char *ptcSid = NULL;
@@ -254,7 +252,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 		goto Finished;
 	}
 
-	/* Different identity, we need a new impersontated token as well */
+	/* Different identity, we need a new impersonated token as well */
 	if (!TWG(impersonation_token_sid) || !EqualSid(token_sid, TWG(impersonation_token_sid))) {
 		if (TWG(impersonation_token_sid)) {
 			free(TWG(impersonation_token_sid));
@@ -443,7 +441,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 	return popen_ex(command, type, NULL, NULL);
 }/*}}}*/
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, const char *env)
 {/*{{{*/
 	FILE *stream = NULL;
 	int fno, type_len, read, mode;
@@ -478,12 +476,12 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
+	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /s /c ")+2);
 	if (!cmd) {
 		return NULL;
 	}
 
-	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
+	sprintf(cmd, "%s /s /c \"%s\"", TWG(comspec), command);
 	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
@@ -609,21 +607,28 @@ TSRM_API int pclose(FILE *stream)
 	return termstat;
 }/*}}}*/
 
+#define SEGMENT_PREFIX "TSRM_SHM_SEGMENT:"
+#define INT_MIN_AS_STRING "-2147483648"
+
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
-	char shm_segment[26], shm_info[29];
-	HANDLE shm_handle, info_handle;
+	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)];
+	HANDLE shm_handle = NULL, info_handle = NULL;
 	BOOL created = FALSE;
 
-	snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
-	snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
+	if (key != IPC_PRIVATE) {
+		snprintf(shm_segment, sizeof(shm_segment), SEGMENT_PREFIX "%d", key);
 
-	shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
-	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
+		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
+	}
 
-	if (!shm_handle && !info_handle) {
+	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
+			if (size > SIZE_MAX - sizeof(shm->descriptor)) {
+				return -1;
+			}
+			size += sizeof(shm->descriptor);
 #if SIZEOF_SIZE_T == 8
 			DWORD high = size >> 32;
 			DWORD low = (DWORD)size;
@@ -631,27 +636,15 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 			DWORD high = 0;
 			DWORD low = size;
 #endif
-			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, shm_segment);
-			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
+			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, key == IPC_PRIVATE ? NULL : shm_segment);
 			created		= TRUE;
 		}
-		if (!shm_handle || !info_handle) {
-			if (shm_handle) {
-				CloseHandle(shm_handle);
-			}
-			if (info_handle) {
-				CloseHandle(info_handle);
-			}
+		if (!shm_handle) {
 			return -1;
 		}
 	} else {
 		if (flags & IPC_EXCL) {
-			if (shm_handle) {
-				CloseHandle(shm_handle);
-			}
-			if (info_handle) {
-				CloseHandle(info_handle);
-			}
+			CloseHandle(shm_handle);
 			return -1;
 		}
 	}
@@ -659,12 +652,10 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	shm = shm_get(key, NULL);
 	if (!shm) {
 		CloseHandle(shm_handle);
-		CloseHandle(info_handle);
 		return -1;
 	}
 	shm->segment = shm_handle;
-	shm->info	 = info_handle;
-	shm->descriptor = MapViewOfFileEx(shm->info, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+	shm->descriptor = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 
 	if (NULL != shm->descriptor && created) {
 		shm->descriptor->shm_perm.key	= key;
@@ -685,7 +676,6 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 			CloseHandle(shm->segment);
 		}
 		UnmapViewOfFile(shm->descriptor);
-		CloseHandle(shm->info);
 		return -1;
 	}
 
@@ -700,7 +690,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 		return (void*)-1;
 	}
 
-	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+	shm->addr = shm->descriptor + sizeof(shm->descriptor);
 
 	if (NULL == shm->addr) {
 		int err = GetLastError();
@@ -718,6 +708,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 TSRM_API int shmdt(const void *shmaddr)
 {/*{{{*/
 	shm_pair *shm = shm_get(0, (void*)shmaddr);
+	int ret;
 
 	if (!shm->segment) {
 		return -1;
@@ -727,7 +718,12 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch--;
 
-	return UnmapViewOfFile(shm->addr) ? 0 : -1;
+	ret = 1;
+	if (!ret  && shm->descriptor->shm_nattch <= 0) {
+		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
+		shm->descriptor = NULL;
+	}
+	return ret;
 }/*}}}*/
 
 TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
@@ -761,7 +757,6 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 	}
 }/*}}}*/
 
-#if HAVE_UTIME
 static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 {
 	// Note that LONGLONG is a 64-bit value
@@ -815,5 +810,4 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 	return 1;
 }
 /* }}} */
-#endif
 #endif

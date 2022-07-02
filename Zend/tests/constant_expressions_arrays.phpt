@@ -11,13 +11,13 @@ const e = ["string" => [1]]["string"][0];
 var_dump(b, c, e);
 
 function test ($a = d[1][0]) {
-	var_dump($a);
+    var_dump($a);
 }
 
 test();
 
 class foo {
-	const bar = [1][0];
+    const bar = [1][0];
 }
 
 var_dump(foo::bar);
@@ -32,7 +32,7 @@ int(1)
 int(4)
 int(1)
 
-Notice: Undefined offset: 3 in %s on line %d
+Warning: Undefined array key 3 in %s on line %d
 array(3) {
   [0]=>
   int(1)

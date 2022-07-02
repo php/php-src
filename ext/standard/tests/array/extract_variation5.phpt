@@ -6,7 +6,7 @@ Test extract() function (variation 5)
 $mixed_array = array(
   array( array("oNe", "tWo", 4), array(10, 20, 30, 40, 50), array() ),
   array( "one" => 1, "one" => 2, "three" => 3, 3, 4, 3 => 33, 4 => 44, 5, 6,
-          5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 )
+          5 => 57, "5.4" => 554, "5.7" => 557 )
 );
 
 $counter = 0;

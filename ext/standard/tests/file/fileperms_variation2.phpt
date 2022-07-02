@@ -2,12 +2,10 @@
 Test fileperms() function: usage variations - invalid filenames
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype: int fileperms ( string $filename )
- * Description: Returns the group ID of the file, or FALSE in case of an error.
- */
-
 /* Testing fileperms() with invalid arguments -int, float, bool, NULL, resource */
 
 $file_path = __DIR__;
@@ -20,7 +18,6 @@ $filenames = array(
   "",
   TRUE,
   FALSE,
-  NULL,
 
   /* scalars */
   1234,
@@ -32,13 +29,6 @@ foreach( $filenames as $filename ) {
   var_dump( fileperms($filename) );
   clearstatcache();
 }
-
-echo "\n*** Done ***";
-?>
---CLEAN--
-<?php
-$file_path = __DIR__;
-unlink($file_path."/fileperms_variation2.tmp");
 ?>
 --EXPECTF--
 *** Testing Invalid file types ***
@@ -53,12 +43,9 @@ bool(false)
 Warning: fileperms(): stat failed for 1 in %s on line %d
 bool(false)
 bool(false)
-bool(false)
 
 Warning: fileperms(): stat failed for 1234 in %s on line %d
 bool(false)
 
 Warning: fileperms(): stat failed for 0 in %s on line %d
 bool(false)
-
-*** Done ***

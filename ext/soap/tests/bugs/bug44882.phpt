@@ -1,18 +1,18 @@
 --TEST--
 Bug #44882 (SOAP extension object decoding bug)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestSoapClient extends SoapClient
 {
-    public function __doRequest($req, $loc, $act, $ver, $one_way = 0)
-	{
-		return <<<XML
+    public function __doRequest($req, $loc, $act, $ver, $one_way = 0): ?string
+    {
+        return <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope 
+<SOAP-ENV:Envelope
   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:ns="urn:ebay:api:PayPalAPI">
@@ -35,7 +35,7 @@ class TestSoapClient extends SoapClient
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 XML;
-	}
+    }
 }
 
 $client = new TestSoapClient(__DIR__.'/bug44882.wsdl');

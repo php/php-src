@@ -2,9 +2,10 @@
 ldap_search() bug 48441 - options persists after specifying them in ldap_search
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--
@@ -18,19 +19,18 @@ $dn = "$base";
 $filter = "(objectclass=person)";
 
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn')),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn')),
+    ldap_get_entries($link, $result)
 );
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 1, LDAP_DEREF_ALWAYS),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 1, LDAP_DEREF_ALWAYS),
+    ldap_get_entries($link, $result)
 );
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn')),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn')),
+    ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -39,7 +39,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(4) {
   ["count"]=>
   int(3)
@@ -94,7 +95,8 @@ array(4) {
 }
 
 Warning: ldap_search(): Partial search results returned: Sizelimit exceeded in %s on line %d
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(2) {
   ["count"]=>
   int(1)
@@ -113,7 +115,8 @@ array(2) {
     string(%d) "cn=userA,%s"
   }
 }
-resource(%d) of type (ldap result)
+object(LDAP\Result)#%d (0) {
+}
 array(4) {
   ["count"]=>
   int(3)
@@ -166,4 +169,3 @@ array(4) {
     string(%d) "cn=userC,cn=userB,%s"
   }
 }
-===DONE===

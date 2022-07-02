@@ -1,23 +1,25 @@
 --TEST--
 Bug #46614 (Extended MySQLi class gives incorrect empty() result)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!defined("MYSQLI_ASYNC")) {
-	die("skip mysqlnd only");
+    die("skip mysqlnd only");
 }
 ?>
 --FILE--
 <?php
 class MySQL_Ext extends mysqli{
-	protected $fooData = array();
+    protected $fooData = array();
+    private $extData;
 
-	public function isEmpty()
-	{
-		$this->extData[] = 'Bar';
-		return empty($this->extData);
-	}
+    public function isEmpty()
+    {
+        $this->extData[] = 'Bar';
+        return empty($this->extData);
+    }
 }
 
 include ("connect.inc");

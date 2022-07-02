@@ -2,7 +2,7 @@
 
 #include "fpm_config.h"
 
-#if defined(HAVE_CLOCK_GETTIME)
+#ifdef HAVE_CLOCK_GETTIME
 #include <time.h> /* for CLOCK_MONOTONIC */
 #endif
 
@@ -48,7 +48,7 @@ int fpm_clock_get(struct timeval *tv) /* {{{ */
 }
 /* }}} */
 
-/* macosx clock */
+/* macOS clock */
 #elif defined(HAVE_CLOCK_GET_TIME)
 
 #include <mach/mach.h>

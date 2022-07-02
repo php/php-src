@@ -1,9 +1,7 @@
 --TEST--
 Test function gzfile() by substituting argument 2 with int values.
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
@@ -23,7 +21,6 @@ foreach ( $variation as $var ) {
   var_dump(gzfile( $filename, $var  ) );
 }
 ?>
-===DONE===
 --EXPECT--
 array(6) {
   [0]=>
@@ -105,4 +102,3 @@ array(6) {
   string(39) "and I know that it descends down on me
 "
 }
-===DONE===

@@ -1,7 +1,7 @@
 --TEST--
 Bug #39760 (autocreating element doesn't assign value to first node)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip simplexml extension is not loaded"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

@@ -1,8 +1,10 @@
 --TEST--
 PDO PgSQL Bug #70313 (PDO statement fails to throw exception)
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -15,23 +17,23 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 try {
-	$stmt = $db->prepare(");");
+    $stmt = $db->prepare(");");
 
-	$stmt->execute([1]);
+    $stmt->execute([1]);
 } catch (PDOException $e) {
-	var_dump($e->getCode());
+    echo $e->getMessage(), "\n";
 }
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 try {
-	$stmt = $db->prepare(");");
+    $stmt = $db->prepare(");");
 
-	$stmt->execute([1]);
+    $stmt->execute([1]);
 } catch (PDOException $e) {
-	var_dump($e->getCode());
+    echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECT--
-string(5) "42601"
-string(5) "42601"
+--EXPECTF--
+SQLSTATE[42601]: Syntax error: %A
+SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens

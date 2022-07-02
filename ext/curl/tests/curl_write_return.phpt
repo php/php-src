@@ -6,8 +6,8 @@ Dutch UG, TestFest 2009, Utrecht
 --DESCRIPTION--
 Writes the value 'test' to a temporary file. Use curl to access this file and have it return the content from curl_exec(). Tests the PHP_CURL_RETURN case
 of curl_write().
---SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

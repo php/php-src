@@ -50,6 +50,10 @@ typedef struct _zend_object_iterator_funcs {
 
 	/* invalidate current value/key (optional, may be NULL) */
 	void (*invalidate_current)(zend_object_iterator *iter);
+
+	/* Expose owned values to GC.
+	 * This has the same semantics as the corresponding object handler. */
+	HashTable *(*get_gc)(zend_object_iterator *iter, zval **table, int *n);
 } zend_object_iterator_funcs;
 
 struct _zend_object_iterator {
@@ -67,6 +71,13 @@ typedef struct _zend_class_iterator_funcs {
 	zend_function *zf_next;
 	zend_function *zf_rewind;
 } zend_class_iterator_funcs;
+
+typedef struct _zend_class_arrayaccess_funcs {
+	zend_function *zf_offsetget;
+	zend_function *zf_offsetexists;
+	zend_function *zf_offsetset;
+	zend_function *zf_offsetunset;
+} zend_class_arrayaccess_funcs;
 
 BEGIN_EXTERN_C()
 /* given a zval, returns stuff that can be used to iterate it. */

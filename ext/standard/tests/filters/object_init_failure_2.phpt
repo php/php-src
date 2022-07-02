@@ -13,9 +13,7 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: main(): unable to create or locate filter "sample.filter" in %s on line %d
+Warning: main(): Unable to create or locate filter "sample.filter" in %s on line %d
 
 Warning: main(): Unable to create filter (sample.filter) in %s on line %d
-
-Warning: main(): Failed opening '%s' for inclusion (include_path='%s') in %s on line %d
-Undefined constant 'FOO'
+Undefined constant "FOO"

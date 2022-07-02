@@ -13,6 +13,7 @@ class Foo {
 
 $foo = new Foo;
 var_dump($foo->foo(new \EmptyIterator()));
+?>
 --EXPECTF--
 object(EmptyIterator)#%d (0) {
 }

@@ -3,16 +3,11 @@ Test fscanf() function: usage variations - tracking file pointer while reading
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
-	die("skip this test is for 32bit platform only");
+    die("skip this test is for 32bit platform only");
 }
 ?>
 --FILE--
 <?php
-
-/*
-  Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
-  Description: Parses input from a file according to a format
-*/
 
 /*
   Test fscanf() to scan data using different format types and also

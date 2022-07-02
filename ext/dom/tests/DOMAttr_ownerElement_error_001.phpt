@@ -3,8 +3,8 @@ Read $ownerElement with null parent.
 --CREDITS--
 Travis Pew
 # TestFest Atlanta 2009-05-14
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -14,10 +14,11 @@ $document->appendChild($root);
 $attr = $root->setAttribute('category', 'books');
 $document->removeChild($root);
 $root = null;
-var_dump($attr->ownerElement);
+try {
+    var_dump($attr->ownerElement);
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: Couldn't fetch DOMAttr. Node no longer exists in %s on line %d
-
-Warning: Undefined property: DOMAttr::$ownerElement in %s on line %d
-NULL
+--EXPECT--
+Error: Couldn't fetch DOMAttr. Node no longer exists

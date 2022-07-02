@@ -2,15 +2,10 @@
 Test ksort() function : usage variations - sort heredoc strings
 --FILE--
 <?php
-/* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing ksort() by providing array of heredoc strings for $array argument with
  * following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
@@ -37,7 +32,7 @@ $array = array (
   $multiline_heredoc => "heredoc string\twith!@# and 123\nTest this!!!"
 );
 
-echo "\n-- Testing ksort() by supplying heredoc string array, 'flag' value is defualt --\n";
+echo "\n-- Testing ksort() by supplying heredoc string array, 'flag' value is default --\n";
 $temp_array = $array;
 var_dump(ksort($temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
@@ -57,7 +52,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing ksort() : usage variations ***
 
--- Testing ksort() by supplying heredoc string array, 'flag' value is defualt --
+-- Testing ksort() by supplying heredoc string array, 'flag' value is default --
 bool(true)
 array(3) {
   ["HEREDOC"]=>

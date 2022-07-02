@@ -1,7 +1,7 @@
 --TEST--
 Bug #55700 (XPath namespace prefix conflict, global registerNodeNS flag)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

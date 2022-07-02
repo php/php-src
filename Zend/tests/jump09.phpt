@@ -3,9 +3,9 @@ jump 09: goto into switch (backward)
 --FILE--
 <?php
 switch (0) {
-	case 1:
-		L1: echo "bug\n";
-		break;
+    case 1:
+        L1: echo "bug\n";
+        break;
 }
 goto L1;
 ?>

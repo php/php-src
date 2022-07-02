@@ -4,19 +4,19 @@ Reflection::getClosureThis()
 <?php
 class StaticExample
 {
-	static function foo()
-	{
-		var_dump( "Static Example class, Hello World!" );
-	}
+    static function foo()
+    {
+        var_dump( "Static Example class, Hello World!" );
+    }
 }
 
 class Example
 {
-	public $bar = 42;
-	public function foo()
-	{
-		var_dump( "Example class, bar: " . $this->bar );
-	}
+    public $bar = 42;
+    public function foo()
+    {
+        var_dump( "Example class, bar: " . $this->bar );
+    }
 }
 
 // Initialize classes

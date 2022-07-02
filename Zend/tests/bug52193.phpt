@@ -10,7 +10,7 @@ var_dump($h = (array) function () { return 2; });
 var_dump($h[0]());
 
 $i = function () use (&$h) {
-	return $h;
+    return $h;
 };
 
 var_dump($x = (array)$i);

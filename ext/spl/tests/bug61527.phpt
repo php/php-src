@@ -42,12 +42,12 @@ var_dump($ai2->next());
 var_dump($ai2->key());
 
 /* testing RecursiveArrayIterator */
-$ao3 = new ArrayObject(array(), NULL, 'RecursiveArrayIterator');
+$ao3 = new ArrayObject(array(), 0, 'RecursiveArrayIterator');
 $ai3 = $ao3->getIterator();
 
 var_dump($ai3->getChildren());
 
-$ao4 = new ArrayObject(array(1, 2), NULL, 'RecursiveArrayIterator');
+$ao4 = new ArrayObject(array(1, 2), 0, 'RecursiveArrayIterator');
 $ai4 = $ao4->getIterator();
 
 $ai4->next();

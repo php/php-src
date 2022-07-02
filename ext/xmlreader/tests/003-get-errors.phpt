@@ -2,8 +2,8 @@
 XMLReader: libxml2 XML Reader, Get an attribute, with invalid arguments
 --CREDITS--
 Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2017
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 // Set up test data in a new file
@@ -31,8 +31,12 @@ while ($reader->read()) {
             echo $reader->value . "\n";
 
             // Test for call with an empty string argument
-            $attr = $reader->getAttribute('');
-            var_dump($attr);
+            try {
+                $reader->getAttribute('');
+            } catch (ValueError $exception) {
+                echo $exception->getMessage() . "\n";
+            }
+
             // Ensure that node pointer has not changed position
             echo $reader->name . ": ";
             echo $reader->value . "\n";
@@ -57,21 +61,17 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/003-get-errors.xml');
 ?>
---EXPECTF--
+--EXPECT--
 book
 bool(true)
 num: 1
-
-Warning: XMLReader::getAttribute(): Argument cannot be an empty string in %s on line %d
-bool(false)
+XMLReader::getAttribute(): Argument #1 ($name) cannot be empty
 num: 1
 NULL
 num: 1
 NULL
 num: 1
-===DONE===

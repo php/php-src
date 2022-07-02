@@ -9,11 +9,11 @@ function foo($arg) {
 }
 
 function bar() {
-	throw new Exception("test");
+    throw new Exception("test");
 }
 
 try {
-	@foo(@bar());
+    @foo(@bar());
 } catch (Exception $e) {
 }
 

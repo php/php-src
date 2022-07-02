@@ -1,18 +1,19 @@
 --TEST--
 SOAP XML Schema 27: SOAP 1.1 Multidimensional array
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";
 $schema = <<<EOF
-	<complexType name="testType">
-		<complexContent>
-			<restriction base="SOAP-ENC:Array">
-  	    <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="int[,]"/>
-    	</restriction>
+    <complexType name="testType">
+        <complexContent>
+            <restriction base="SOAP-ENC:Array">
+        <attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="int[,]"/>
+        </restriction>
     </complexContent>
-	</complexType>
+    </complexType>
 EOF;
 test_schema($schema,'type="tns:testType"',array(array(123),array(123.5)));
 echo "ok";

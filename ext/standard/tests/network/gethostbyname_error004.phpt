@@ -9,8 +9,8 @@ if (getenv("SKIP_ONLINE_TESTS")) die("skip test requiring internet connection");
 ?>
 --FILE--
 <?php
-	$ip = gethostbyname("www.php.net");
-	var_dump((bool) ip2long($ip));
+    $ip = gethostbyname("www.php.net");
+    var_dump((bool) ip2long($ip));
 ?>
 --EXPECT--
 bool(true)

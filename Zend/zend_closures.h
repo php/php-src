@@ -29,13 +29,14 @@ BEGIN_EXTERN_C()
 void zend_register_closure_ce(void);
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
 void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val);
+void zend_closure_from_frame(zval *closure_zv, zend_execute_data *frame);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
 
 ZEND_API void zend_create_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr);
 ZEND_API void zend_create_fake_closure(zval *res, zend_function *op_array, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr);
 ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
-ZEND_API const zend_function *zend_get_closure_method_def(zval *obj);
+ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj);
 
 END_EXTERN_C()

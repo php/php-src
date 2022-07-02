@@ -1,14 +1,9 @@
 --TEST--
 Test token_get_all() function : usage variations - with class/object constructs
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
-/* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
- * Source code: ext/tokenizer/tokenizer.c
-*/
-
 /*
  * Testing token_get_all() with different class/object keywords
  *   scope related :
@@ -35,7 +30,7 @@ abstract class MyClass
   protected var $c;
   static $d;
   final $e = 10;
-  
+
   abstract public function myFunction($a);
 }
 class ChildClass extends MyClass implements MyInterface
@@ -573,8 +568,8 @@ array(145) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "
-  
+    string(4) "
+
   "
     [2]=>
     int(12)

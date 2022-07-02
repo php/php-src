@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start
- * Source code: ext/standard/dir.c
- * Alias to functions: rewind
- */
-
 /*
  * Test basic functionality of rewinddir()
  */
@@ -36,7 +30,7 @@ var_dump($dh2 = opendir($dir_path2));
 $data = array();
 echo "\n-- Read and rewind first directory (argument supplied) --\n";
 while(FALSE !== $file1 = readdir($dh1)) {
-	$data[] = $file1;
+    $data[] = $file1;
 }
 $first = $data[0];
 sort($data);
@@ -48,7 +42,7 @@ var_dump(readdir($dh1) == $first);
 $data = array();
 echo "\n-- Read and rewind second directory (no argument supplied) --\n";
 while(FALSE !== $file2 = readdir()) {
-	$data[] = $file2;
+    $data[] = $file2;
 }
 $first = $data[0];
 sort($data);
@@ -63,7 +57,6 @@ closedir($dh2);
 delete_files($dir_path1, 1, "私はガラスを食べられますfile");
 delete_files($dir_path2, 1, "私はガラスを食べられますfile", 2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path1 = __DIR__ . "/私はガラスを食べられますrewinddir_basic_dir1";
@@ -99,4 +92,3 @@ array(3) {
 }
 NULL
 bool(true)
-===DONE===

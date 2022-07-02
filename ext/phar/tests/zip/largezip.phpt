@@ -1,7 +1,7 @@
 --TEST--
 Phar: large zip file (zip edge cases)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -20,10 +20,8 @@ copy($fname, $fname2);
 $p2 = new Phar($fname2);
 var_dump(strlen($p2['big']->getContent()));
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php'); ?>
 --EXPECT--
 int(200000)
-===DONE===

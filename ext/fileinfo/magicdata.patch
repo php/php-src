@@ -1,7 +1,22 @@
-diff --git a/magic/Magdir/rpm b/magic/Magdir/rpm
-index 9a795f8..31db083 100644
---- a/magic/Magdir/rpm
-+++ b/magic/Magdir/rpm
+diff -ur Magdir.orig/mail.news Magdir/mail.news
+--- Magdir.orig/mail.news	2021-03-31 01:47:28.000000000 +0200
++++ Magdir/mail.news	2021-04-05 19:41:55.168556972 +0200
+@@ -1,5 +1,5 @@
+ #------------------------------------------------------------------------------
+-# $File: mail.news,v 1.26 2021/03/21 14:37:03 christos Exp $
++# $File: mail.news,v 1.27 2021/04/05 16:36:14 christos Exp $
+ # mail.news:  file(1) magic for mail and news
+ #
+ # Unfortunately, saved netnews also has From line added in some news software.
+@@ -81,4 +81,4 @@
+ # File format spec: https://wiki.dovecot.org/Design/Dcrypt/#File_format
+ # From: Stephen Gildea
+ 0	string	CRYPTED\003\007		Dovecot encrypted message
+->9	byte	xu			\b, dcrypt version %d
++>9	byte	x			\b, dcrypt version %d
+diff -ur Magdir.orig/rpm Magdir/rpm
+--- Magdir.orig/rpm	2021-02-23 01:49:24.000000000 +0100
++++ Magdir/rpm	2021-04-05 19:40:55.080911893 +0200
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -10,54 +25,12 @@ index 9a795f8..31db083 100644
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff --git a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
-index 8785dd8..1c340be 100644
---- a/magic/Magdir/securitycerts
-+++ b/magic/Magdir/securitycerts
+diff -ur Magdir.orig/securitycerts Magdir/securitycerts
+--- Magdir.orig/securitycerts	2021-02-23 01:49:24.000000000 +0100
++++ Magdir/securitycerts	2021-04-05 19:40:55.080911893 +0200
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
-
-
---- a/magic.orig.0/Magdir/images	2019-04-19 02:42:27.000000000 +0200
-+++ b/magic/Magdir/images	2019-06-29 16:09:31.654107495 +0200
-@@ -30,22 +30,22 @@
- # Prevent conflicts with CRI ADX.
- >(2.S-2) belong	!0x28632943
- # skip more garbage like *.iso by looking for positive image type
-->>2	ubyte			>0
-+>2	ubyte			>0
- # skip some compiled terminfo like xterm+tmux by looking for image type less equal 33
-->>>2	ubyte			<34
-+>>2	ubyte			<34
- # skip arches.3200 , Finder.Root , Slp.1 by looking for low pixel depth 1 8 15 16 24 32
-->>>>16	ubyte			1
-->>>>>0		use		tga-image
-->>>>16	ubyte			8
-->>>>>0		use		tga-image
-->>>>16	ubyte			15
-->>>>>0		use		tga-image
-->>>>16	ubyte			16
-->>>>>0		use		tga-image
-->>>>16	ubyte			24
-->>>>>0		use		tga-image
-->>>>16	ubyte			32
-->>>>>0		use		tga-image
-+>>>16	ubyte			1
-+>>>>0		use		tga-image
-+>>>16	ubyte			8
-+>>>>0		use		tga-image
-+>>>16	ubyte			15
-+>>>>0		use		tga-image
-+>>>16	ubyte			16
-+>>>>0		use		tga-image
-+>>>16	ubyte			24
-+>>>>0		use		tga-image
-+>>>16	ubyte			32
-+>>>>0		use		tga-image
- #	display tga bitmap image information
- 0	name				tga-image
- >2	ubyte		<34		Targa image data

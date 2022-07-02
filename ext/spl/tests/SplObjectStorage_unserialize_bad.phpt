@@ -15,17 +15,18 @@ try {
   $so->unserialize($blob);
   var_dump($so);
 } catch(UnexpectedValueException $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 }
 echo "DONE\n";
---EXPECTF--
+?>
+--EXPECT--
 Error at offset 6 of 34 bytes
 Error at offset 46 of 89 bytes
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {
-    ["%s"]=>
+    [0]=>
     array(2) {
       ["obj"]=>
       object(stdClass)#3 (0) {
@@ -33,7 +34,7 @@ object(SplObjectStorage)#2 (1) {
       ["inf"]=>
       int(1)
     }
-    ["%s"]=>
+    [1]=>
     array(2) {
       ["obj"]=>
       object(stdClass)#1 (0) {

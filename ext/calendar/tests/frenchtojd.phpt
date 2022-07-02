@@ -1,7 +1,7 @@
 --TEST--
 frenchtojd()
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 echo frenchtojd(-1,-1,-1), "\n";

@@ -5,8 +5,8 @@ errmsg: cannot redeclare (method)
 
 class test {
 
-	function foo() {}
-	function foo() {}
+    function foo() {}
+    function foo() {}
 
 }
 

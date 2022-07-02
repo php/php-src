@@ -4,7 +4,7 @@ proc_open() with invalid pipes
 <?php
 
 for ($i = 3; $i<= 5; $i++) {
-	$spec[$i] = array('pipe', 'w');
+    $spec[$i] = array('pipe', 'w');
 }
 
 $php = getenv("TEST_PHP_EXECUTABLE");
@@ -14,7 +14,11 @@ $spec[$i] = array('pi');
 proc_open("$php -n $callee", $spec, $pipes);
 
 $spec[$i] = 1;
-proc_open("$php -n $callee", $spec, $pipes);
+try {
+    proc_open("$php -n $callee", $spec, $pipes);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 $spec[$i] = array('pipe', "test");
 proc_open("$php -n $callee", $spec, $pipes);
@@ -28,8 +32,7 @@ echo "END\n";
 ?>
 --EXPECTF--
 Warning: proc_open(): pi is not a valid descriptor spec/mode in %s on line %d
-
-Warning: proc_open(): Descriptor item must be either an array or a File-Handle in %s on line %d
+proc_open(): Argument #2 ($descriptor_spec) must only contain arrays and streams
 array(4) {
   [3]=>
   resource(%d) of type (Unknown)
@@ -41,7 +44,7 @@ array(4) {
   resource(%d) of type (Unknown)
 }
 
-Warning: proc_open(test): failed to open stream: %s in %s on line %d
+Warning: proc_open(test): Failed to open stream: %s in %s on line %d
 array(4) {
   [3]=>
   resource(%d) of type (Unknown)

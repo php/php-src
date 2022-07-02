@@ -1,5 +1,7 @@
 --TEST--
 collection methods
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -29,7 +31,7 @@ require __DIR__."/drop_type.inc";
 int(0)
 int(0)
 
-Warning: OCI-Collection::trim(): OCI-22167: given trim size [3] must be less than or equal to [0] in %s on line %d
+Warning: OCICollection::trim(): OCI-22167: given trim size [3] must be less than or equal to [0] in %s on line %d
 bool(false)
 bool(true)
 float(1)

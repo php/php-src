@@ -3,7 +3,6 @@ Test preg_replace_callback() function : error
 --FILE--
 <?php
 /*
-* proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -26,13 +25,12 @@ foreach($regex_array as $regex_value) {
     var_dump(preg_replace_callback($regex_value, 'integer_word', $subject));
 }
 ?>
-===Done===
 --EXPECTF--
 *** Testing preg_replace_callback() : error conditions ***
 
 Arg value is abcdef
 
-Warning: preg_replace_callback(): Delimiter must not be alphanumeric or backslash in %s on line %d
+Warning: preg_replace_callback(): Delimiter must not be alphanumeric, backslash, or NUL in %s on line %d
 NULL
 
 Arg value is /[a-zA-Z]
@@ -55,4 +53,3 @@ string(9) "number 1."
 
 Arg value is /[0-9]/
 string(11) "number one."
-===Done===

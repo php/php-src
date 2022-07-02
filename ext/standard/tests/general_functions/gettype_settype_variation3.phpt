@@ -4,17 +4,8 @@ Test gettype() & settype() functions : usage variations
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
---INI--
-precision=14
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
-
-   Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type
-*/
-
 /* Test usage variation of gettype() and settype() functions:
          settype() to float/double type.
    Set type of the data to "float"/"double" and verify using gettype
@@ -278,7 +269,7 @@ string(6) "double"
 -- Iteration 20 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 21 --
 string(6) "string"
@@ -308,7 +299,7 @@ string(6) "double"
 -- Iteration 26 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 27 --
 string(6) "string"
@@ -557,19 +548,19 @@ float(-512000)
 string(6) "double"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
@@ -673,7 +664,7 @@ string(6) "double"
 -- Iteration 20 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 21 --
 string(6) "string"
@@ -703,7 +694,7 @@ string(6) "double"
 -- Iteration 26 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 27 --
 string(6) "string"
@@ -952,19 +943,19 @@ float(-512000)
 string(6) "double"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"

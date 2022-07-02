@@ -1,5 +1,6 @@
 steps:
   - script: |
+      set -e
       sudo make install
       sudo mkdir     /etc/php.d
       sudo chmod 777 /etc/php.d

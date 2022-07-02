@@ -1,9 +1,7 @@
 --TEST--
 Test function gzfile() by substituting argument 1 with float values.
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
@@ -24,20 +22,18 @@ foreach ( $variation as $var ) {
   var_dump(gzfile( $var ,  $use_include_path ) );
 }
 ?>
-===DONE===
 --EXPECTF--
-Warning: gzfile(10.5): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(10.5): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(-10.5): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(-10.5): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(123456789000): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(123456789000): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(-123456789000): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(-123456789000): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(0.5): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(0.5): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===DONE===

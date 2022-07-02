@@ -1,8 +1,9 @@
 --TEST--
 Test curl_exec() function with basic functionality
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 if (false === getenv('PHP_CURL_FTP_REMOTE_SERVER'))  exit("skip PHP_CURL_FTP_REMOTE_SERVER env variable is not defined");
 if (false === getenv('PHP_CURL_FTP_REMOTE_USER'))  exit("skip PHP_CURL_FTP_REMOTE_USER env variable is not defined");
 if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REMOTE_PASSWD env variable is not defined");
@@ -23,15 +24,15 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
   // curl_setopt ( $ch , CURLOPT_VERBOSE, 1 );
 
   /* Without enabling SKIP_PASV_IP flag, the following output will be seen..
-	< 227 Entering Passive Mode (10,5,80,146,100,199)
-	*   Trying 10.5.80.146... * connected
-	* Connecting to 10.5.80.146 (10.5.80.146) port 25799
+    < 227 Entering Passive Mode (10,5,80,146,100,199)
+    *   Trying 10.5.80.146... * connected
+    * Connecting to 10.5.80.146 (10.5.80.146) port 25799
    */
 
   /* After enabling SKIP_PASV_IP flag, the following output will be seen..
-	< 227 Entering Passive Mode (10,5,80,146,50,229)
-	* Skips 10.5.80.146 for data connection, uses 10.5.80.146 instead
-	*   Trying 10.5.80.146... * connected
+    < 227 Entering Passive Mode (10,5,80,146,50,229)
+    * Skips 10.5.80.146 for data connection, uses 10.5.80.146 instead
+    *   Trying 10.5.80.146... * connected
    */
 
   curl_setopt ( $ch , CURLOPT_URL, $url );
@@ -52,7 +53,5 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
   curl_close ( $ch );
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

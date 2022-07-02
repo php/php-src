@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,48 +22,17 @@
 PHP_MINIT_FUNCTION(file);
 PHP_MSHUTDOWN_FUNCTION(file);
 
-PHP_FUNCTION(tempnam);
-PHP_NAMED_FUNCTION(php_if_tmpfile);
-PHP_NAMED_FUNCTION(php_if_fopen);
 PHPAPI PHP_FUNCTION(fclose);
-PHP_FUNCTION(popen);
-PHP_FUNCTION(pclose);
 PHPAPI PHP_FUNCTION(feof);
 PHPAPI PHP_FUNCTION(fread);
 PHPAPI PHP_FUNCTION(fgetc);
 PHPAPI PHP_FUNCTION(fgets);
-PHP_FUNCTION(fscanf);
-PHP_FUNCTION(fgetcsv);
-PHP_FUNCTION(fputcsv);
 PHPAPI PHP_FUNCTION(fwrite);
 PHPAPI PHP_FUNCTION(fflush);
 PHPAPI PHP_FUNCTION(rewind);
 PHPAPI PHP_FUNCTION(ftell);
 PHPAPI PHP_FUNCTION(fseek);
-PHP_FUNCTION(mkdir);
-PHP_FUNCTION(rmdir);
 PHPAPI PHP_FUNCTION(fpassthru);
-PHP_FUNCTION(readfile);
-PHP_FUNCTION(umask);
-PHP_FUNCTION(rename);
-PHP_FUNCTION(unlink);
-PHP_FUNCTION(copy);
-PHP_FUNCTION(file);
-PHP_FUNCTION(file_get_contents);
-PHP_FUNCTION(file_put_contents);
-PHP_FUNCTION(get_meta_tags);
-PHP_FUNCTION(flock);
-PHP_FUNCTION(fd_set);
-PHP_FUNCTION(fd_isset);
-#if HAVE_REALPATH || defined(ZTS)
-PHP_FUNCTION(realpath);
-#endif
-#ifdef HAVE_FNMATCH
-PHP_FUNCTION(fnmatch);
-#endif
-PHP_NAMED_FUNCTION(php_if_ftruncate);
-PHP_NAMED_FUNCTION(php_if_fstat);
-PHP_FUNCTION(sys_get_temp_dir);
 
 PHP_MINIT_FUNCTION(user_streams);
 
@@ -74,18 +43,21 @@ PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk);
 PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx);
 PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
 PHPAPI int php_mkdir(const char *dir, zend_long mode);
+PHPAPI void php_fstat(php_stream *stream, zval *return_value);
+PHPAPI void php_flock_common(php_stream *stream, zend_long operation, uint32_t operation_arg_num,
+	zval *wouldblock, zval *return_value);
 
 #define PHP_CSV_NO_ESCAPE EOF
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value);
-PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char);
+PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str);
 
 #define META_DEF_BUFSIZE 8192
 
-#define PHP_FILE_USE_INCLUDE_PATH 1
-#define PHP_FILE_IGNORE_NEW_LINES 2
-#define PHP_FILE_SKIP_EMPTY_LINES 4
-#define PHP_FILE_APPEND 8
-#define PHP_FILE_NO_DEFAULT_CONTEXT 16
+#define PHP_FILE_USE_INCLUDE_PATH (1 << 0)
+#define PHP_FILE_IGNORE_NEW_LINES (1 << 1)
+#define PHP_FILE_SKIP_EMPTY_LINES (1 << 2)
+#define PHP_FILE_APPEND (1 << 3)
+#define PHP_FILE_NO_DEFAULT_CONTEXT (1 << 4)
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,
@@ -114,7 +86,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
 typedef struct {
 	int pclose_ret;
 	size_t def_chunk_size;
-	zend_bool auto_detect_line_endings;
+	bool auto_detect_line_endings;
 	zend_long default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */
@@ -124,7 +96,7 @@ typedef struct {
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
 	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
 	int pclose_wait;
-#if defined(HAVE_GETHOSTBYNAME_R)
+#ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;
 	char *tmp_host_buf;
 	size_t tmp_host_buf_len;

@@ -4,18 +4,14 @@ Test session_module_name() function : variation
 session.save_path=
 session.name=PHPSESSID
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : string session_module_name([string $module])
- * Description : Get and/or set the current session module
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_module_name() : variation ***\n";
 function open($save_path, $session_name) {
@@ -42,11 +38,9 @@ ob_end_flush();
 string(5) "files"
 string(4) "user"
 
-Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line 25
-
-Fatal error: Uncaught Exception: Stop...! in %s:13
+Fatal error: Uncaught Exception: Stop...! in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
-#1 %s(25): session_start()
+#1 %s(%d): session_start()
 #2 {main}
-  thrown in %s on line 13
+  thrown in %s on line %d

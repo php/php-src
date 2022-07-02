@@ -1,7 +1,5 @@
 --TEST--
 json_decode() tests
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -23,7 +21,6 @@ var_dump(json_decode('{ "": { "": "" }'));
 var_dump(json_decode('{ "": "": "" } }'));
 
 ?>
-===DONE===
 --EXPECTF--
 NULL
 NULL
@@ -34,6 +31,8 @@ NULL
 NULL
 NULL
 NULL
+
+Deprecated: json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
 NULL
 object(stdClass)#%d (1) {
   ["test"]=>
@@ -65,4 +64,3 @@ object(stdClass)#%d (1) {
 }
 NULL
 NULL
-===DONE===

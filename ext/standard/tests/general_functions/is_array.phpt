@@ -2,10 +2,6 @@
 Test is_array() function
 --FILE--
 <?php
-/* Prototype: bool is_array ( mixed $var );
- * Description: Finds whether the given variable is an array
- */
-
 echo "*** Testing is_array() on different type of arrays ***\n";
 /* different types of arrays */
 $arrays = array(
@@ -103,7 +99,7 @@ echo "Done\n";
 fclose($fp);
 closedir($dfp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_array() on different type of arrays ***
 -- Iteration 1 --
 bool(true)

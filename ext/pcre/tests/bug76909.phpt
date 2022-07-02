@@ -3,7 +3,7 @@ Bug #76909 preg_match difference between 7.3 and < 7.3
 --SKIPIF--
 <?php
 if(!ini_get("pcre.jit")) {
-	echo "skip JIT is disabled";
+    echo "skip JIT is disabled";
 }
 ?>
 --FILE--

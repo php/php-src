@@ -8,12 +8,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: void var_dump ( mixed $expression [, mixed $expression [, $...]] );
-   Description: Displays structured information about one or more expressions that includes its type and value.
-*/
 
-/* Prototype: void check_vardump( $variables );
-   Description: use var_dump() to display the variables */
 function check_vardump( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {
@@ -99,7 +94,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_vardump() to display contents of strings
    using var_dump() */
@@ -139,6 +134,7 @@ $arrays = array (
 check_vardump($arrays);
 
 echo "\n*** Testing var_dump() on object variables ***\n";
+#[AllowDynamicProperties]
 class object_class
 {
   var       $value;
@@ -171,6 +167,7 @@ class no_member_class {
 }
 
 /* class with member as object of other class */
+#[AllowDynamicProperties]
 class contains_object_class
 {
    var       $p = 30;
@@ -239,8 +236,8 @@ $resources = array (
    using var_dump() */
 check_vardump($resources);
 
-echo "\n*** Testing var_dump() on different combinations of scalar 
-            and non-scalar variables ***\n";
+echo "\n*** Testing var_dump() on different combinations of scalar
+    and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
 unset($unset_var);
@@ -260,14 +257,14 @@ $variations = array (
    non-scalar variables using var_dump() */
 check_vardump($variations);
 
-echo "\n*** Testing var_dump() on miscelleneous input arguments ***\n";
+echo "\n*** Testing var_dump() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_vardump() to display miscelleneous data using var_dump() */
+/* calling check_vardump() to display miscellaneous data using var_dump() */
 check_vardump($misc_values);
 
 echo "\n*** Testing var_dump() on multiple arguments ***\n";
@@ -432,7 +429,7 @@ string(1) " "
 -- Iteration 5 --
 string(1) "0"
 -- Iteration 6 --
-string(1) " "
+string(1) "%0"
 -- Iteration 7 --
 string(2) "\0"
 -- Iteration 8 --
@@ -444,13 +441,13 @@ string(3) "PHP"
 -- Iteration 11 --
 string(3) "PHP"
 -- Iteration 12 --
-string(29) "abcd n1234 05678 00efgh\xijkl"
+string(29) "abcd%0n1234%005678%000efgh\xijkl"
 -- Iteration 13 --
-string(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
+string(34) "abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz"
 -- Iteration 14 --
 string(22) "1234	
 5678
-	9100abcda"
+	9100"abcda"
 
 *** Testing var_dump() on boolean variables ***
 -- Iteration 1 --
@@ -836,8 +833,8 @@ resource(%d) of type (stream)
 -- Iteration 2 --
 resource(%d) of type (stream)
 
-*** Testing var_dump() on different combinations of scalar 
-            and non-scalar variables ***
+*** Testing var_dump() on different combinations of scalar
+    and non-scalar variables ***
 -- Iteration 1 --
 array(3) {
   [0]=>
@@ -923,7 +920,7 @@ array(4) {
   string(5) "/00\7"
 }
 
-*** Testing var_dump() on miscelleneous input arguments ***
+*** Testing var_dump() on miscellaneous input arguments ***
 -- Iteration 1 --
 NULL
 -- Iteration 2 --
@@ -1086,7 +1083,7 @@ array(14) {
   [4]=>
   string(1) "0"
   [5]=>
-  string(1) " "
+  string(1) "%0"
   [6]=>
   string(2) "\0"
   [7]=>
@@ -1098,13 +1095,13 @@ array(14) {
   [10]=>
   string(3) "PHP"
   [11]=>
-  string(29) "abcd n1234 05678 00efgh\xijkl"
+  string(29) "abcd%0n1234%005678%000efgh\xijkl"
   [12]=>
-  string(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
+  string(34) "abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz"
   [13]=>
   string(22) "1234	
 5678
-	9100abcda"
+	9100"abcda"
 }
 array(15) {
   [0]=>

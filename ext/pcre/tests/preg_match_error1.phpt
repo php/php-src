@@ -2,10 +2,7 @@
 Test preg_match() function : error conditions - bad regular expressions
 --FILE--
 <?php
-/*
- *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
- * Function is implemented in ext/pcre/php_pcre.c
-*/
+/* Function is implemented in ext/pcre/php_pcre.c */
 /*
 * Testing how preg_match reacts to being passed the wrong type of regex argument
 */
@@ -37,7 +34,7 @@ try {
 
 Arg value is abcdef
 
-Warning: preg_match(): Delimiter must not be alphanumeric or backslash in %spreg_match_error1.php on line %d
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_match_error1.php on line %d
 bool(false)
 
 Arg value is /[a-zA-Z]
@@ -56,8 +53,8 @@ Warning: preg_match(): Unknown modifier 'F' in %spreg_match_error1.php on line %
 bool(false)
 
 Arg value is Array
-preg_match() expects parameter 1 to be string, array given
+preg_match(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 int(1)
-preg_match() expects parameter 1 to be string, object given
+preg_match(): Argument #1 ($pattern) must be of type string, stdClass given

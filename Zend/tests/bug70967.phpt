@@ -3,9 +3,9 @@ Bug #70967 (Weird error handling for __toString when Error is thrown)
 --FILE--
 <?php
 class A {
-	public function __toString() {
-		undefined_function();
-	}
+    public function __toString() {
+        undefined_function();
+    }
 }
 
 echo (new A);

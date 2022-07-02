@@ -4,7 +4,7 @@ Bug #76713 (Segmentation fault caused by property corruption)
 <?php
 
 function test($obj) {
-	return array_column(array($obj), "prop");
+    return array_column(array($obj), "prop");
 }
 
 $obj = new Stdclass();
@@ -18,10 +18,10 @@ test($obj);
 var_dump($obj->prop);
 
 class C {
-	public $name;
-	public function __get($name) {
-		return $this->name;
-	}
+    public $name;
+    public function __get($name) {
+        return $this->name;
+    }
 }
 
 $obj = new C;

@@ -42,6 +42,7 @@ xxx();
 gc_collect_cycles();
 
 var_dump('end');
+?>
 --EXPECT--
 bool(true)
 string(5) "start"

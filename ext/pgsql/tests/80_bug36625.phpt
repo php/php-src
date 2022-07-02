@@ -1,5 +1,7 @@
 --TEST--
 Bug #36625 (8.0+) (pg_trace() does not work)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -11,7 +13,7 @@ require_once('config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
-	die ('Could not connect to the server');
+    die ('Could not connect to the server');
 }
 
 $tracefile = __DIR__ . '/trace.tmp';
@@ -27,9 +29,9 @@ pg_close($dbh);
 $found = 0;
 function search_trace_file($line)
 {
-	if (strpos($line, '"select 1"') !== false || strpos($line, "'select 1'") !== false) {
-		$GLOBALS['found']++;
-	}
+    if (strpos($line, '"select 1"') !== false || strpos($line, "'select 1'") !== false) {
+        $GLOBALS['found']++;
+    }
 }
 
 $trace = file($tracefile);
@@ -37,21 +39,15 @@ array_walk($trace, 'search_trace_file');
 var_dump($found > 0);
 var_dump(file_exists($tracefile));
 
-@unlink($tracefile);
-
 ?>
-===DONE===
 --CLEAN--
 <?php
-
 $tracefile = __DIR__ . '/trace.tmp';
-
 unlink($tracefile);
-
 ?>
 --EXPECTF--
 bool(false)
-resource(%d) of type (pgsql result)
+object(PgSql\Result)#%d (0) {
+}
 bool(true)
 bool(true)
-===DONE===

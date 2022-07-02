@@ -2,8 +2,6 @@
 bug #50224 (json_encode() does not always encode a float as a float)
 --INI--
 serialize_precision=-1
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 echo "* Testing JSON output\n\n";

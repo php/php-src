@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_insert()
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

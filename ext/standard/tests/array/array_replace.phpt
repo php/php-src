@@ -4,26 +4,26 @@ Test array_replace and array_replace_recursive
 <?php
 
 $array1 = array(
-	0 => 'dontclobber',
-	'1' => 'unclobbered',
-	'test2' => 0.0,
-	'test3' => array(
-		'testarray2' => true,
-		1 => array(
-			'testsubarray1' => 'dontclobber2',
-			'testsubarray2' => 'dontclobber3',
-	),
+    0 => 'dontclobber',
+    '1' => 'unclobbered',
+    'test2' => 0.0,
+    'test3' => array(
+        'testarray2' => true,
+        1 => array(
+            'testsubarray1' => 'dontclobber2',
+            'testsubarray2' => 'dontclobber3',
+    ),
     ),
 );
 
 $array2 = array(
-	1 => 'clobbered',
-	'test3' => array(
-		'testarray2' => false,
-	),
-	'test4' => array(
-		'clobbered3' => array(0, 1, 2),
-	),
+    1 => 'clobbered',
+    'test3' => array(
+        'testarray2' => false,
+    ),
+    'test4' => array(
+        'clobbered3' => array(0, 1, 2),
+    ),
 );
 
 $array3 = array(array(array(array())));

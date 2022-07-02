@@ -4,13 +4,11 @@ Test fopen and fclose() functions - usage variations - "xt" mode
 <?php
 /*
  fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
+
  Description: Opens file or URL.
 */
 /*
  fclose() function:
- Prototype: bool fclose ( resource $handle );
  Description: Closes an open file pointer
 */
 
@@ -50,11 +48,11 @@ int(0)
 int(37)
 int(37)
 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(true)
 string(7) "Unknown"
 
-Warning: fopen(%s): failed to open stream: File exists in %s on line %d
+Warning: fopen(%s): Failed to open stream: File exists in %s on line %d
 *** Done ***

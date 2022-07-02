@@ -6,12 +6,13 @@ error_reporting=-1
 <?php
 function eh()
 {
-	throw new Exception("error!");
-	return false;
+    throw new Exception("error!");
+    return false;
 }
 
 set_error_handler("eh");
 $a = $empty($b);
+?>
 --EXPECTF--
 Fatal error: Uncaught Exception: error! in %sbug51394.php:%d
 Stack trace:

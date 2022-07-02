@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1254, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp1254
 --INI--
 default_charset=cp1254
 --FILE--
@@ -34,10 +36,8 @@ system("dir /b \"" . $fn . "\"");
 remove_data("file_cp1254");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\çokbaytlý iþleri"
 bool(true)
 bool(true)
 çokbaytlý iþleri
-===DONE===

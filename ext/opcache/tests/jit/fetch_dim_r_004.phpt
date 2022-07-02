@@ -6,13 +6,17 @@ opcache.enable_cli=1
 opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 ;opcache.jit_debug=257
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function foo($n) {
-	$a = "ABCDEF";
-	var_dump($a[$n]);
+    $a = "ABCDEF";
+    try {
+        var_dump($a[$n]);
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 foo(0);
 foo(2);
@@ -30,6 +34,7 @@ foo("2x");
 $x=2;
 $y="x";
 foo($x.$y);
+?>
 --EXPECTF--
 string(1) "A"
 string(1) "C"
@@ -47,15 +52,11 @@ string(1) "B"
 
 Warning: String offset cast occurred in %s on line %d
 string(1) "A"
+Cannot access offset of type string on string
+Cannot access offset of type string on string
 
-Warning: Illegal string offset 'ab' in %sfetch_dim_r_004.php on line 4
-string(1) "A"
-
-Warning: Illegal string offset 'ab' in %sfetch_dim_r_004.php on line 4
-string(1) "A"
-
-Notice: A non well formed numeric value encountered in %sfetch_dim_r_004.php on line 4
+Warning: Illegal string offset "2x" in %sfetch_dim_r_004.php on line 5
 string(1) "C"
 
-Notice: A non well formed numeric value encountered in %sfetch_dim_r_004.php on line 4
+Warning: Illegal string offset "2x" in %sfetch_dim_r_004.php on line 5
 string(1) "C"

@@ -4,12 +4,6 @@ Test readfile() function : variation - variable types of path
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing readfile() : variation ***\n";
 $mainDir = "readfileVar8";
 $subDir = "readfileVar8Sub";
@@ -78,11 +72,11 @@ The File Contents
 The File Contents
 -- Iteration 5 --
 
-Warning: readfile(%sreadfileVar8Sub/..///readfileVar8Sub//..//../readfileVar8Sub/fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%sreadfileVar8Sub/..///readfileVar8Sub//..//../readfileVar8Sub/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- Iteration 6 --
 
-Warning: readfile(%sreadfileVar8Sub/BADDIR/fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%sreadfileVar8Sub/BADDIR/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- Iteration 7 --
 The File Contents
@@ -94,6 +88,6 @@ The File Contents
 The File Contents
 -- Iteration 11 --
 
-Warning: readfile(BADDIR/fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(BADDIR/fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 *** Done ***

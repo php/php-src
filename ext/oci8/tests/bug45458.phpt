@@ -1,7 +1,7 @@
 --TEST--
 Bug #45458 (OCI8: Numeric keys for associative arrays are not handled properly)
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 
@@ -37,8 +37,6 @@ oci_free_statement($s);
 oci_close($c);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 array(1) {
@@ -81,4 +79,3 @@ array(1) {
 }
 string(1) "X"
 string(1) "X"
-===DONE===

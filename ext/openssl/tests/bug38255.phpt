@@ -1,9 +1,7 @@
 --TEST--
 openssl key from zval leaks
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $pub_key_id = false;
@@ -25,11 +23,11 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: openssl_verify(): supplied key param cannot be coerced into a public key in %s on line %d
+Warning: openssl_verify(): Supplied key param cannot be coerced into a public key in %s on line %d
 
-Warning: openssl_verify(): supplied key param cannot be coerced into a public key in %s on line %d
+Warning: openssl_verify(): Supplied key param cannot be coerced into a public key in %s on line %d
 bool(false)
 
-Warning: openssl_verify(): supplied key param cannot be coerced into a public key in %s on line %d
+Warning: openssl_verify(): Supplied key param cannot be coerced into a public key in %s on line %d
 bool(false)
 Done

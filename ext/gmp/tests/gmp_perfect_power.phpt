@@ -1,7 +1,7 @@
 --TEST--
 gmp_perfect_power(): Check if number is a perfect power
---SKIPIF--
-<?php if (!extension_loaded('gmp')) die('skip gmp extension not loaded'); ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 

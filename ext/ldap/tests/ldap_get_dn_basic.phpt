@@ -3,8 +3,9 @@ ldap_get_dn() - Basic ldap_get_dn test
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -15,10 +16,9 @@ insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(objectclass=organization)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	ldap_get_dn($link, $entry)
+    ldap_get_dn($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -28,4 +28,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 string(%d) "%s"
-===DONE===

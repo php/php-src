@@ -1,7 +1,7 @@
 --TEST--
 Phar::setAlias() error zip-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -21,7 +21,7 @@ $files['b'] = 'b';
 $files['c'] = 'c';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 $phar->stopBuffering();
 
@@ -31,12 +31,11 @@ echo $phar->getAlias() . "\n";
 $b = $phar;
 $phar = new Phar(__DIR__ . '/notphar.phar');
 try {
-	$phar->setAlias('test');
+    $phar->setAlias('test');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -46,4 +45,3 @@ __HALT_COMPILER();
 hio
 test
 alias "test" is already used for archive "%sphar_setalias2.phar.zip" and cannot be used for other archives
-===DONE===

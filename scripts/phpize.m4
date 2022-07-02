@@ -164,11 +164,19 @@ all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"
 phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
-CFLAGS_CLEAN='$(CFLAGS)'
+CFLAGS_CLEAN='$(CFLAGS) -D_GNU_SOURCE'
 CXXFLAGS_CLEAN='$(CXXFLAGS)'
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+if test "$cross_compiling" = yes ; then
+  AC_MSG_CHECKING(for native build C compiler)
+  AC_CHECK_PROGS(BUILD_CC, [gcc clang c99 c89 cc cl],none)
+  AC_MSG_RESULT($BUILD_CC)
+else
+  BUILD_CC=$CC
+fi
 
 PHP_SUBST(PHP_MODULES)
 PHP_SUBST(PHP_ZEND_EX)
@@ -202,6 +210,7 @@ PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
 PHP_SUBST(INSTALL_HEADERS)
+PHP_SUBST(BUILD_CC)
 
 PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE

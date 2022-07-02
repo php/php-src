@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -108,7 +108,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 #if PHP_DEBUG
 	size_t save_in_len = in_len;
 #endif
- 
+
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
 	if (!in) {
@@ -555,20 +555,19 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 
 /* Userspace functions, see basic_functions.* for arginfo and decls. */
 
-/* {{{ proto bool sapi_windows_cp_set(int cp)
- * Set process codepage. */
+/* {{{ Set process codepage. */
 PHP_FUNCTION(sapi_windows_cp_set)
 {
 	zend_long id;
 	const struct php_win32_cp *cp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_LONG_UINT_OVFL(id)) {
-		php_error_docref(NULL, E_WARNING, "Argument %d is out of range", id);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+		RETURN_THROWS();
 	}
 
 	if (php_win32_console_is_cli_sapi()) {
@@ -585,22 +584,24 @@ PHP_FUNCTION(sapi_windows_cp_set)
 }
 /* }}} */
 
-/* {{{ proto int sapi_windows_cp_get([string kind])
- * Get process codepage. */
+/* {{{ Get process codepage. */
 PHP_FUNCTION(sapi_windows_cp_get)
 {
-	char *kind;
-	size_t kind_len = 0;
+	zend_string *kind = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &kind, &kind_len) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &kind) == FAILURE) {
+		RETURN_THROWS();
 	}
 
-	if (kind_len == sizeof("ansi")-1 && !strncasecmp(kind, "ansi", kind_len)) {
+	if (!kind) {
+		const struct php_win32_cp *cp = php_win32_cp_get_current();
+		RETURN_LONG(cp->id);
+	} else if (zend_string_equals_literal_ci(kind, "ansi")) {
 		RETURN_LONG(GetACP());
-	} else if (kind_len == sizeof("oem")-1 && !strncasecmp(kind, "oem", kind_len)) {
+	} else if (zend_string_equals_literal_ci(kind, "oem")) {
 		RETURN_LONG(GetOEMCP());
 	} else {
+		/* TODO Warn/ValueError for invalid kind? */
 		const struct php_win32_cp *cp = php_win32_cp_get_current();
 		RETURN_LONG(cp->id);
 	}
@@ -608,84 +609,80 @@ PHP_FUNCTION(sapi_windows_cp_get)
 /* }}} */
 
 
-/* {{{ proto bool sapi_windows_cp_is_utf8(void)
- * Indicates whether the codepage is UTF-8 compatible. */
+/* {{{ Indicates whether the codepage is UTF-8 compatible. */
 PHP_FUNCTION(sapi_windows_cp_is_utf8)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(php_win32_cp_use_unicode());
 }
 /* }}} */
 
-/* {{{ proto string sapi_windows_cp_conv(int|string in_codepage, int|string out_codepage, string subject)
- * Convert string from one codepage to another. */
+/* {{{ Convert string from one codepage to another. */
 PHP_FUNCTION(sapi_windows_cp_conv)
 {
-	char *subj, *ret;
-	size_t subj_len, ret_len, tmpw_len;
+	char *ret;
+	size_t ret_len, tmpw_len;
 	wchar_t *tmpw;
 	const struct php_win32_cp *in_cp, *out_cp;
-	zval *z_in_cp, *z_out_cp;
+	zend_string *string_in_codepage = NULL;
+	zend_long int_in_codepage = 0;
+	zend_string *string_out_codepage = NULL;
+	zend_long int_out_codepage = 0;
+	zend_string *subject;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzs", &z_in_cp, &z_out_cp, &subj, &subj_len) == FAILURE) {
-		return;
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR_OR_LONG(string_in_codepage, int_in_codepage)
+		Z_PARAM_STR_OR_LONG(string_out_codepage, int_out_codepage)
+		Z_PARAM_STR(subject)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(subject))) {
+		zend_argument_value_error(1, "is too long");
+		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_INT_OVFL(subj_len)) {
-		php_error_docref(NULL, E_WARNING, "String is too long");
-		RETURN_NULL();
-	}
-
-	if (IS_LONG == Z_TYPE_P(z_in_cp)) {
-		if (ZEND_LONG_UINT_OVFL(Z_LVAL_P(z_in_cp))) {
-			php_error_docref(NULL, E_WARNING, "Argument %d is out of range", Z_LVAL_P(z_in_cp));
-			RETURN_NULL();
-		}
-
-		in_cp = php_win32_cp_get_by_id((DWORD)Z_LVAL_P(z_in_cp));
+	if (string_in_codepage != NULL) {
+		in_cp = php_win32_cp_get_by_enc(ZSTR_VAL(string_in_codepage));
 		if (!in_cp) {
-			php_error_docref(NULL, E_WARNING, "Invalid codepage %d", Z_LVAL_P(z_in_cp));
-			RETURN_NULL();
+			zend_argument_value_error(1, "must be a valid charset");
+			RETURN_THROWS();
 		}
 	} else {
-		if (!try_convert_to_string(z_in_cp)) {
-			return;
+		if (ZEND_LONG_UINT_OVFL(int_in_codepage)) {
+			zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+			RETURN_THROWS();
 		}
 
-		in_cp = php_win32_cp_get_by_enc(Z_STRVAL_P(z_in_cp));
+		in_cp = php_win32_cp_get_by_id((DWORD)int_in_codepage);
 		if (!in_cp) {
-			php_error_docref(NULL, E_WARNING, "Invalid charset %s", Z_STRVAL_P(z_in_cp));
-			RETURN_NULL();
+			zend_argument_value_error(1, "must be a valid codepage");
+			RETURN_THROWS();
 		}
 	}
 
-	if (IS_LONG == Z_TYPE_P(z_out_cp)) {
-		if (ZEND_LONG_UINT_OVFL(Z_LVAL_P(z_out_cp))) {
-			php_error_docref(NULL, E_WARNING, "Argument %d is out of range", Z_LVAL_P(z_out_cp));
-			RETURN_NULL();
-		}
-
-		out_cp = php_win32_cp_get_by_id((DWORD)Z_LVAL_P(z_out_cp));
+	if (string_out_codepage != NULL) {
+		out_cp = php_win32_cp_get_by_enc(ZSTR_VAL(string_out_codepage));
 		if (!out_cp) {
-			php_error_docref(NULL, E_WARNING, "Invalid codepage %d", Z_LVAL_P(z_out_cp));
-			RETURN_NULL();
+			zend_argument_value_error(2, "must be a valid charset");
+			RETURN_THROWS();
 		}
 	} else {
-		if (!try_convert_to_string(z_out_cp)) {
-			return;
+		if (ZEND_LONG_UINT_OVFL(int_out_codepage)) {
+			zend_argument_value_error(2, "must be between 0 and %u", UINT_MAX);
+			RETURN_THROWS();
 		}
 
-		out_cp = php_win32_cp_get_by_enc(Z_STRVAL_P(z_out_cp));
+		out_cp = php_win32_cp_get_by_id((DWORD)int_out_codepage);
 		if (!out_cp) {
-			php_error_docref(NULL, E_WARNING, "Invalid charset %s", Z_STRVAL_P(z_out_cp));
-			RETURN_NULL();
+			zend_argument_value_error(2, "must be a valid codepage");
+			RETURN_THROWS();
 		}
 	}
 
-	tmpw = php_win32_cp_conv_to_w(in_cp->id, in_cp->to_w_fl, subj, subj_len, &tmpw_len);
+	tmpw = php_win32_cp_conv_to_w(in_cp->id, in_cp->to_w_fl, ZSTR_VAL(subject), ZSTR_LEN(subject), &tmpw_len);
 	if (!tmpw) {
 		php_error_docref(NULL, E_WARNING, "Wide char conversion failed");
 		RETURN_NULL();

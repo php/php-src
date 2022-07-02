@@ -3,15 +3,15 @@ Test assign to typed property taken by reference
 --FILE--
 <?php
 class A {
-	public $foo = 1;
-	public int $bar = 2;
+    public $foo = 1;
+    public int $bar = 2;
 }
 class B {
-	public A $a;
+    public A $a;
 }
 $f = function (&$n) {
-	var_dump($n);
-	$n = "ops";
+    var_dump($n);
+    $n = "ops";
 };
 $o = new B;
 $o->a = new A;

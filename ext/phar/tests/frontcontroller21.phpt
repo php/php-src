@@ -3,8 +3,8 @@ Phar front controller $_SERVER munging success
 --INI--
 default_charset=UTF-8
 cgi.fix_pathinfo=1
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller21.php
 REQUEST_URI=/frontcontroller21.php/index.php?test=hi

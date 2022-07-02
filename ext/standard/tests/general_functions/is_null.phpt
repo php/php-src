@@ -2,10 +2,6 @@
 Test is_null() function
 --FILE--
 <?php
-/* Prototype: bool is_null ( mixed $var );
- * Description: Finds whether the given variable is NULL
- */
-
 echo "*** Testing is_null() with valid null values ***\n";
 // different valid  null values
 $unset_array = array();
@@ -134,7 +130,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_null() with valid null values ***
 -- Iteration 1 --
 bool(true)

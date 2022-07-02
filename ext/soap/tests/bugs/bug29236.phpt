@@ -1,7 +1,7 @@
 --TEST--
 Bug #29236 (memory error when wsdl-cache is enabled)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=1
 --FILE--

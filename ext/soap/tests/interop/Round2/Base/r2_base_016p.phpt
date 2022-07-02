@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 base 016 (php/direct): echoVoid
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 $client = new SoapClient(NULL,array("location"=>"test://","uri"=>"http://soapinterop.org/","trace"=>1,"exceptions"=>0));

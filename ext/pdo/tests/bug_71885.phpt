@@ -1,11 +1,13 @@
 --TEST--
 PDO Common: FR #71885 (Allow escaping question mark placeholders)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'pgsql', strlen('pgsql'))) die('skip not relevant for pgsql driver');
+if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip not relevant for OCI driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'odbc', strlen('odbc'))) die('skip inconsistent error message with odbc');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
@@ -22,33 +24,31 @@ $db->exec("CREATE TABLE test (a int)");
 $sql = "SELECT * FROM test WHERE a ?? 1";
 
 try {
-	$db->exec($sql);
+    $db->exec($sql);
 } catch (PDOException $e) {
-	var_dump(strpos($e->getMessage(), "?") !== false);
+    var_dump(strpos($e->getMessage(), "?") !== false);
 }
 
 try {
-	$stmt = $db->prepare($sql);
-	$stmt->execute();
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
 } catch (PDOException $e) {
-	var_dump(strpos($e->getMessage(), "?") !== false);
+    var_dump(strpos($e->getMessage(), "?") !== false);
 }
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
 }
 
 try {
-	$stmt = $db->prepare($sql);
-	$stmt->execute();
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
 } catch (PDOException $e) {
-	var_dump(strpos($e->getMessage(), "?") !== false);
+    var_dump(strpos($e->getMessage(), "?") !== false);
 }
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
 bool(true)
-===DONE===

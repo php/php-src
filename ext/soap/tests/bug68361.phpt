@@ -1,7 +1,7 @@
 --TEST--
 Bug #68361 Segmentation fault on SoapClient::__getTypes
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

@@ -1,25 +1,19 @@
 --TEST--
 Test imap_clearflag_full() function : basic functionality
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : bool imap_clearflag_full  ( resource $imap_stream  , string $sequence  , string $flag  [, string $options  ] )
- * Description: Clears flags on messages.
- * Source code: ext/imap/php_imap.c
- */
-
 echo "*** Testing imap_clearflag_full() : basic functionality ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 echo "Create a new mailbox for test\n";
-$imap_stream = setup_test_mailbox("", 10);
-if (!is_resource($imap_stream)) {
-	exit("TEST FAILED: Unable to create test mailbox\n");
-}
+$imap_stream = setup_test_mailbox("imapclearflagfullbasic", 10);
 
 $check = imap_check($imap_stream);
 echo "Initial msg count in new_mailbox : ". $check->Nmsgs . "\n";
@@ -47,16 +41,16 @@ var_dump(imap_search($imap_stream, "DELETED"));
 
 imap_close($imap_stream);
 ?>
-===Done===
 --CLEAN--
 <?php
-require_once('clean.inc');
+$mailbox_suffix = 'imapclearflagfullbasic';
+require_once(__DIR__ . '/setup/clean.inc');
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing imap_clearflag_full() : basic functionality ***
 Create a new mailbox for test
 Create a temporary mailbox and add 10 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 Initial msg count in new_mailbox : 10
 Set some flags
 bool(true)
@@ -124,4 +118,3 @@ array(3) {
   int(10)
 }
 bool(false)
-===Done===

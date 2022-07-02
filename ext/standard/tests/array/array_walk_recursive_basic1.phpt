@@ -2,21 +2,11 @@
 Test array_walk_recursive() function : basic functionality - regular array
 --FILE--
 <?php
-/* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 echo "*** Testing array_walk_recursive() : basic functionality ***\n";
 
 // regular array
 $fruits = array("lemon", array("orange", "banana"), array("apple"));
 
-/*  Prototype : test_print(mixed $item, mixed $key)
- *  Parameters : item - item in key/item pair
- *               key - key in key/item pair
- *  Description : prints the array values with keys
- */
 function test_print($item, $key)
 {
    // dump the arguments to check that they are passed

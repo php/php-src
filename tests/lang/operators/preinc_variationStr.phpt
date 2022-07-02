@@ -16,7 +16,6 @@ foreach ($strVals as $strVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: '0' ---
 int(1)
@@ -64,4 +63,3 @@ string(3) "10a"
 string(3) "20a"
 --- testing: '99z' ---
 string(4) "100a"
-===DONE===

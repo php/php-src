@@ -1,5 +1,7 @@
 --TEST--
 oci_fetch_all() - 2
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -16,7 +18,7 @@ $insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value) VALUES (1,1)";
 $s = oci_parse($c, $insert_sql);
 
 for ($i = 0; $i<3; $i++) {
-	oci_execute($s);
+    oci_execute($s);
 }
 
 oci_commit($c);

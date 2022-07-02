@@ -2,11 +2,6 @@
 Test natcasesort() function : usage variations - Different array keys
 --FILE--
 <?php
-/* Prototype  : bool natcasesort(array &$array_arg)
- * Description: Sort an array using case-insensitive natural sort
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays where the keys are different data types to test behaviour of natcasesort()
  */
@@ -31,18 +26,6 @@ $inputs = array(
        1 => 'one',
        12345 => 'positive',
        -2345 => 'negative',
-       ),
-
-       // float data
-/*2*/  'float' => array(
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ),
-
-/*3*/  'extreme floats' => array(
-       12.3456789000e6 => 'large',
-       12.3456789000E-10 => 'small',
        ),
 
        // null data
@@ -103,10 +86,10 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of natcasesort()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( natcasesort($input) );
-	var_dump($input);
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( natcasesort($input) );
+    var_dump($input);
+    $iterator++;
 };
 
 echo "Done";
@@ -129,39 +112,19 @@ array(4) {
 
 -- Iteration 2 --
 bool(true)
-array(3) {
-  [0]=>
-  string(4) "half"
-  [-10]=>
-  string(8) "negative"
-  [10]=>
-  string(8) "positive"
-}
-
--- Iteration 3 --
-bool(true)
-array(2) {
-  [12345678]=>
-  string(5) "large"
-  [0]=>
-  string(5) "small"
-}
-
--- Iteration 4 --
-bool(true)
 array(1) {
   [""]=>
   string(6) "null 1"
 }
 
--- Iteration 5 --
+-- Iteration 3 --
 bool(true)
 array(1) {
   [""]=>
   string(6) "null 2"
 }
 
--- Iteration 6 --
+-- Iteration 4 --
 bool(true)
 array(2) {
   [0]=>
@@ -170,7 +133,7 @@ array(2) {
   string(6) "lowert"
 }
 
--- Iteration 7 --
+-- Iteration 5 --
 bool(true)
 array(2) {
   [0]=>
@@ -179,21 +142,21 @@ array(2) {
   string(6) "uppert"
 }
 
--- Iteration 8 --
+-- Iteration 6 --
 bool(true)
 array(1) {
   [""]=>
   string(6) "emptyd"
 }
 
--- Iteration 9 --
+-- Iteration 7 --
 bool(true)
 array(1) {
   [""]=>
   string(6) "emptys"
 }
 
--- Iteration 10 --
+-- Iteration 8 --
 bool(true)
 array(3) {
   ["stringd"]=>
@@ -204,21 +167,21 @@ array(3) {
   string(7) "strings"
 }
 
--- Iteration 11 --
+-- Iteration 9 --
 bool(true)
 array(1) {
   [""]=>
   string(9) "undefined"
 }
 
--- Iteration 12 --
+-- Iteration 10 --
 bool(true)
 array(1) {
   [""]=>
   string(5) "unset"
 }
 
--- Iteration 13 --
+-- Iteration 11 --
 bool(true)
 array(3) {
   ["foo"]=>

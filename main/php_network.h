@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -47,6 +47,13 @@
 
 #ifndef EWOULDBLOCK
 # define EWOULDBLOCK EAGAIN
+#endif
+
+/* This is a work around for GCC bug 69602: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69602 */
+#if EAGAIN != EWOULDBLOCK
+# define PHP_IS_TRANSIENT_ERROR(err) (err == EAGAIN || err == EWOULDBLOCK)
+#else
+# define PHP_IS_TRANSIENT_ERROR(err) (err == EAGAIN)
 #endif
 
 #ifdef PHP_WIN32
@@ -241,7 +248,7 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
-		int *error_code, char *bindto, unsigned short bindport, long sockopts
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts
 		);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
@@ -315,7 +322,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
 		zend_long addrlen, struct sockaddr *sa, socklen_t *sl);
 
-PHPAPI struct hostent*	php_network_gethostbyname(char *name);
+PHPAPI struct hostent*	php_network_gethostbyname(const char *name);
 
 PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
 END_EXTERN_C()

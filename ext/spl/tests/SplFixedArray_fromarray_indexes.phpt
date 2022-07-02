@@ -5,8 +5,8 @@ Philip Norton philipnorton42@gmail.com
 --FILE--
 <?php
 $array = SplFixedArray::fromArray(array(1 => 1,
-										2 => '2',
-										3 => false));
+                                        2 => '2',
+                                        3 => false));
 var_dump($array);
 ?>
 --EXPECT--

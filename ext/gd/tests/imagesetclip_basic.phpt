@@ -1,9 +1,7 @@
 --TEST--
 imagesetclip() - basic functionality
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip ext/gd required');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 // draw a clipped diagonal line

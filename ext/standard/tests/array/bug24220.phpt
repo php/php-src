@@ -2,9 +2,9 @@
 Bug #24220 (range() numeric string handling)
 --FILE--
 <?php
-	var_dump(range("2003", "2004"));
-	var_dump(range("a", "z"));
-	var_dump(range("1", "10"));
+    var_dump(range("2003", "2004"));
+    var_dump(range("a", "z"));
+    var_dump(range("1", "10"));
 ?>
 --EXPECT--
 array(2) {

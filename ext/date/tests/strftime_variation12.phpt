@@ -8,12 +8,6 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -27,11 +21,13 @@ var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with  Abbreviated month name format %h --
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(3) "Aug"
-===DONE===

@@ -1,7 +1,7 @@
 --TEST--
 Phar::setStub()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -61,7 +61,7 @@ fclose($fp);
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 if (fread($fp, strlen('booya')) == 'booya') {
-	echo 'failed - copied booya';
+    echo 'failed - copied booya';
 }
 fclose($fp);
 $phar['testing'] = 'hi';
@@ -70,12 +70,11 @@ $phar['testing'] = 'hi';
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 if (fread($fp, strlen('booya')) == 'booya') {
-	echo 'failed - copied booya';
+    echo 'failed - copied booya';
 }
 fclose($fp);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -89,4 +88,3 @@ __HALT_COMPILER();
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
-===DONE===

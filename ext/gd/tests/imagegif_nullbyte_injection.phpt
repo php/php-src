@@ -1,9 +1,7 @@
 --TEST--
 Testing null byte injection in imagegif
---SKIPIF--
-<?php
-if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
@@ -14,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid 2nd parameter, filename must not contain null bytes
+imagegif(): Argument #2 ($file) must not contain null bytes

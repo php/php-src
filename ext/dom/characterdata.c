@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,36 +20,8 @@
 #endif
 
 #include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
+#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
-
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_substring_data, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_append_data, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_insert_data, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_delete_data, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_replace_data, 0, 0, 3)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, count)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMCharacterData extends DOMNode
@@ -57,15 +29,6 @@ ZEND_END_ARG_INFO();
 * URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
 * Since:
 */
-
-const zend_function_entry php_dom_characterdata_class_functions[] = {
-	PHP_FALIAS(substringData, dom_characterdata_substring_data, arginfo_dom_characterdata_substring_data)
-	PHP_FALIAS(appendData, dom_characterdata_append_data, arginfo_dom_characterdata_append_data)
-	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_dom_characterdata_insert_data)
-	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_dom_characterdata_delete_data)
-	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_dom_characterdata_replace_data)
-	PHP_FE_END
-};
 
 /* {{{ data	string
 readonly=no
@@ -78,7 +41,7 @@ int dom_characterdata_data_read(dom_object *obj, zval *retval)
 	xmlChar *content;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -98,7 +61,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval)
 	zend_string *str;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -127,7 +90,7 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 	long length = 0;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -145,11 +108,10 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto string dom_characterdata_substring_data(int offset, int count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since:
 */
-PHP_FUNCTION(dom_characterdata_substring_data)
+PHP_METHOD(DOMCharacterData, substringData)
 {
 	zval       *id;
 	xmlChar    *cur;
@@ -161,7 +123,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -195,11 +157,10 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 }
 /* }}} end dom_characterdata_substring_data */
 
-/* {{{ proto void dom_characterdata_append_data(string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since:
 */
-PHP_FUNCTION(dom_characterdata_append_data)
+PHP_METHOD(DOMCharacterData, appendData)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -209,7 +170,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
@@ -218,11 +179,10 @@ PHP_FUNCTION(dom_characterdata_append_data)
 }
 /* }}} end dom_characterdata_append_data */
 
-/* {{{ proto void dom_characterdata_insert_data(int offset, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since:
 */
-PHP_FUNCTION(dom_characterdata_insert_data)
+PHP_METHOD(DOMCharacterData, insertData)
 {
 	zval *id;
 	xmlChar		*cur, *first, *second;
@@ -235,7 +195,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset, &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -268,11 +228,10 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 }
 /* }}} end dom_characterdata_insert_data */
 
-/* {{{ proto void dom_characterdata_delete_data(int offset, int count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since:
 */
-PHP_FUNCTION(dom_characterdata_delete_data)
+PHP_METHOD(DOMCharacterData, deleteData)
 {
 	zval *id;
 	xmlChar    *cur, *substring, *second;
@@ -283,7 +242,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -324,11 +283,10 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 }
 /* }}} end dom_characterdata_delete_data */
 
-/* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since:
 */
-PHP_FUNCTION(dom_characterdata_replace_data)
+PHP_METHOD(DOMCharacterData, replaceData)
 {
 	zval *id;
 	xmlChar		*cur, *substring, *second = NULL;
@@ -341,7 +299,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count, &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -387,5 +345,73 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_replace_data */
+
+PHP_METHOD(DOMCharacterData, remove)
+{
+	zval *id = ZEND_THIS;
+	xmlNodePtr child;
+	dom_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
+
+	dom_child_node_remove(intern);
+	RETURN_NULL();
+}
+
+PHP_METHOD(DOMCharacterData, after)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+}
+
+PHP_METHOD(DOMCharacterData, before)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_before(intern, args, argc);
+}
+
+PHP_METHOD(DOMCharacterData, replaceWith)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+	dom_child_node_remove(intern);
+}
 
 #endif

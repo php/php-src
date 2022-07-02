@@ -7,6 +7,7 @@ function foo() : callable {
 }
 
 var_dump(foo());
+?>
 --EXPECTF--
 object(Closure)#%d (%d) {
 }

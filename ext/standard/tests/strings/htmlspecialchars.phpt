@@ -2,10 +2,6 @@
 Test htmlspecialchars() function
 --FILE--
 <?php
-/* Prototype: string htmlspecialchars ( string $string [, int $quote_style [, string $charset]] );
-   Description: Convert special characters to HTML entities
-*/
-
 /* retrieving htmlspecialchars from the ANSI character table */
 echo "*** Retrieving htmlspecialchars for 256 characters ***\n";
 for($i=0; $i<256; $i++)
@@ -13,11 +9,9 @@ var_dump( bin2hex( htmlspecialchars("chr($i)") ) );
 
 /* giving NULL as the argument */
 echo "\n*** Testing htmlspecialchars() with NULL as first, second and third argument ***\n";
-var_dump( htmlspecialchars("<br>", NULL, 'iso-8859-1') );
 var_dump( htmlspecialchars("<br>", ENT_NOQUOTES, NULL) );
 var_dump( htmlspecialchars("<br>", ENT_QUOTES, NULL) );
 var_dump( htmlspecialchars("<br>", ENT_COMPAT, NULL) );
-var_dump( htmlspecialchars(NULL, NULL, NULL) );
 
 /* giving long string to check for proper memory re-allocation */
 echo "\n*** Checking a long string for proper memory allocation ***\n";
@@ -37,7 +31,7 @@ var_dump( htmlspecialchars($str, ENT_COMPAT) );
 
 echo "Done\n"
 ?>
---EXPECTF--
+--EXPECT--
 *** Retrieving htmlspecialchars for 256 characters ***
 string(12) "636872283029"
 string(12) "636872283129"
@@ -300,8 +294,6 @@ string(16) "6368722832353529"
 string(10) "&lt;br&gt;"
 string(10) "&lt;br&gt;"
 string(10) "&lt;br&gt;"
-string(10) "&lt;br&gt;"
-string(0) ""
 
 *** Checking a long string for proper memory allocation ***
 string(187) "&lt;br&gt;Testing&lt;p&gt;New file.&lt;/p&gt;&lt;p&gt;&lt;br&gt;File &lt;b&gt;&lt;i&gt;&lt;u&gt;WORKS!!!&lt;/i&gt;&lt;/u&gt;&lt;/b&gt;&lt;/p&gt;&lt;br&gt;&lt;p&gt;End of file!!!&lt;/p&gt;"
@@ -310,7 +302,7 @@ string(187) "&lt;br&gt;Testing&lt;p&gt;New file.&lt;/p&gt;&lt;p&gt;&lt;br&gt;Fil
 string(46) "&lt;br&gt;Testing&lt;p&gt;New file.&lt;/p&gt; "
 
 *** Testing htmlspecialchars() on a quote...
-string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
+string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"

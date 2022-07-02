@@ -1,51 +1,85 @@
 <?php
 
+/** @generate-class-entries */
+
 interface Traversable {}
 
 interface IteratorAggregate extends Traversable
 {
-    /** @return Traversable */
-    function getIterator();
+    /** @tentative-return-type */
+    public function getIterator(): Traversable;
 }
 
 interface Iterator extends Traversable
 {
-    function current();
+    /** @tentative-return-type */
+    public function current(): mixed;
 
-    /** @return void */
-    function next();
+    /** @tentative-return-type */
+    public function next(): void;
 
-    function key();
+    /** @tentative-return-type */
+    public function key(): mixed;
 
-    /** @return bool */
-    function valid();
+    /** @tentative-return-type */
+    public function valid(): bool;
 
-    /** @return void */
-    function rewind();
+    /** @tentative-return-type */
+    public function rewind(): void;
 }
 
 interface ArrayAccess
 {
-    function offsetExists($offset);
+    /** @tentative-return-type */
+    public function offsetExists(mixed $offset): bool;
 
-    /* actually this should be return by ref but atm cannot be */
-    function offsetGet($offset);
+    /**
+     * Actually this should be return by ref but atm cannot be.
+     * @tentative-return-type
+     */
+    public function offsetGet(mixed $offset): mixed;
 
-    function offsetSet($offset, $value);
+    /** @tentative-return-type */
+    public function offsetSet(mixed $offset, mixed $value): void;
 
-    function offsetUnset($offset);
+    /** @tentative-return-type */
+    public function offsetUnset(mixed $offset): void;
 }
 
 interface Serializable
 {
-    /** @return string */
-    function serialize();
+    /** @return string|null */
+    public function serialize();
 
-    function unserialize(string $serialized);
+    /** @return void */
+    public function unserialize(string $data);
 }
 
 interface Countable
 {
-    /** @return int */
-    function count();
+    /** @tentative-return-type */
+    public function count(): int;
+}
+
+interface Stringable
+{
+    public function __toString(): string;
+}
+
+/**
+ * @not-serializable
+ */
+final class InternalIterator implements Iterator
+{
+    private function __construct() {}
+
+    public function current(): mixed {}
+
+    public function key(): mixed {}
+
+    public function next(): void {}
+
+    public function valid(): bool {}
+
+    public function rewind(): void {}
 }

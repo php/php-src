@@ -3,8 +3,8 @@ Phar front controller rewrite array [cache_list]
 --INI--
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller9.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller9.php
 REQUEST_URI=/frontcontroller9.php/hi

@@ -1,7 +1,7 @@
 --TEST--
 Bug #48762 (IPv6 address filter still rejects valid address)
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 

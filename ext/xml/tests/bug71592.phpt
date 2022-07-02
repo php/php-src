@@ -1,9 +1,7 @@
 --TEST--
 Bug #71592 (External entity processing never fails)
---SKIPIF--
-<?php
-if (!extension_loaded('xml')) die('skip xml extension not available');
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 // The tag mismatch at the end of the XML is on purpose, to make sure that the
@@ -26,7 +24,5 @@ xml_set_external_entity_ref_handler($parser, function () {
 xml_parse($parser, $xml);
 var_dump(xml_get_error_code($parser) === XML_ERROR_EXTERNAL_ENTITY_HANDLING);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

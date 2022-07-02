@@ -3,7 +3,7 @@ A (PCRE_ANCHORED) modifier
 --SKIPIF--
 <?php
 if (@preg_match_all('/\p{N}/', '0123456789', $dummy) === false) {
-	die("skip no support for \p support PCRE library");
+    die("skip no support for \p support PCRE library");
 }
 ?>
 --FILE--

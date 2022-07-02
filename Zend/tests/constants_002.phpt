@@ -4,17 +4,13 @@ Defining constants with non-scalar values
 <?php
 
 define('foo', new stdClass);
-try {
-    var_dump(foo);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
-
-define('foo', fopen(__FILE__, 'r'));
 var_dump(foo);
+
+define('bar', fopen(__FILE__, 'r'));
+var_dump(bar);
 
 ?>
 --EXPECTF--
-Warning: Constants may only evaluate to scalar values, arrays or resources in %s on line %d
-Undefined constant 'foo'
-resource(5) of type (stream)
+object(stdClass)#1 (0) {
+}
+resource(%d) of type (stream)

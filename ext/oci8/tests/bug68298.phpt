@@ -1,8 +1,9 @@
 --TEST--
 Bug #68298 (OCI int overflow)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 ?>
 --FILE--
@@ -11,8 +12,8 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 require(__DIR__.'/connect.inc');
 
 $stmtarray = array(
-	"DROP TABLE BUG68298",
-	"CREATE TABLE BUG68298 (COL1 NUMBER(20))"
+    "DROP TABLE BUG68298",
+    "CREATE TABLE BUG68298 (COL1 NUMBER(20))"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -36,8 +37,6 @@ var_dump($r);
 $stmtarray = array("DROP TABLE BUG68298");
 oci8_test_sql_execute($c, $stmtarray);
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 array(1) {
   ["COL1"]=>
@@ -48,4 +47,3 @@ array(1) {
     string(20) "-1152921504606846975"
   }
 }
-===DONE===

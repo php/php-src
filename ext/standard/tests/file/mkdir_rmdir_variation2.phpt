@@ -9,9 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*  Prototype: bool mkdir ( string $pathname [, int $mode [, bool $recursive [, resource $context]]] );
-    Description: Makes directory
-*/
 
 $context = stream_context_create();
 
@@ -28,16 +25,16 @@ var_dump( rmdir("$file_path/mkdir_variation2/") );
 echo "\n*** Testing mkdir() and rmdir() for binary safe functionality ***\n";
 try {
     var_dump( mkdir("$file_path/temp".chr(0)."/") );
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( rmdir("$file_path/temp".chr(0)."/") );
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
-echo "\n*** Testing mkdir() with miscelleneous input ***\n";
+echo "\n*** Testing mkdir() with miscellaneous input ***\n";
 /* changing mode of mkdir to prevent creating sub-directory under it */
 var_dump( chmod("$file_path/mkdir_variation2/", 0000) );
 /* creating sub-directory test1 under mkdir, expected: false */
@@ -63,10 +60,10 @@ Warning: rmdir(%s/mkdir_variation2/): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-mkdir() expects parameter 1 to be a valid path, string given
-rmdir() expects parameter 1 to be a valid path, string given
+mkdir(): Argument #1 ($directory) must not contain any null bytes
+rmdir(): Argument #1 ($directory) must not contain any null bytes
 
-*** Testing mkdir() with miscelleneous input ***
+*** Testing mkdir() with miscellaneous input ***
 bool(true)
 
 Warning: mkdir(): Permission denied in %s on line %d

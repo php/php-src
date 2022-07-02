@@ -62,7 +62,7 @@ var_dump(empty($str[$f]));
 print "done\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 - empty ---
 bool(false)
 bool(true)
@@ -98,14 +98,32 @@ bool(true)
 - null ---
 bool(false)
 - double ---
+
+Deprecated: Implicit conversion from float -1.1 to int loses precision in %s on line %d
 bool(false)
+
+Deprecated: Implicit conversion from float -10.5 to int loses precision in %s on line %d
 bool(true)
+
+Deprecated: Implicit conversion from float -4.1 to int loses precision in %s on line %d
 bool(true)
+
+Deprecated: Implicit conversion from float -0.8 to int loses precision in %s on line %d
 bool(false)
+
+Deprecated: Implicit conversion from float -0.1 to int loses precision in %s on line %d
 bool(false)
+
+Deprecated: Implicit conversion from float 0.2 to int loses precision in %s on line %d
 bool(false)
+
+Deprecated: Implicit conversion from float 0.9 to int loses precision in %s on line %d
 bool(false)
+
+Deprecated: Implicit conversion from float 3.141592653589793 to int loses precision in %s on line %d
 bool(false)
+
+Deprecated: Implicit conversion from float 100.5001 to int loses precision in %s on line %d
 bool(true)
 - array ---
 bool(true)

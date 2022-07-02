@@ -1,7 +1,7 @@
 --TEST--
 Tidy::diagnose() NULL pointer dereference
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 
@@ -10,4 +10,4 @@ $nx->diagnose();
 
 ?>
 --EXPECTF--
-Warning: tidy::__construct(): Cannot Load '*' into memory%win %s on line %d
+Warning: tidy::__construct(): Cannot load "*" into memory%win %s on line %d

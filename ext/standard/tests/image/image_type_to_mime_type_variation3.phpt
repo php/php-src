@@ -4,11 +4,6 @@ image_type_to_mime_type() (passinf equivalent integer values)
 Sanjay Mantoor <sanjay.mantoor@gmail.com>
 --FILE--
 <?php
-/* Prototype  : string image_type_to_mime_type(int imagetype)
- * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype
- * Source code: ext/standard/image.c
- */
-
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
 for($imagetype = 0; $imagetype <= IMAGETYPE_COUNT; ++$imagetype) {
@@ -16,7 +11,6 @@ for($imagetype = 0; $imagetype <= IMAGETYPE_COUNT; ++$imagetype) {
   var_dump(image_type_to_mime_type($imagetype));
 }
 ?>
-===DONE===
 --EXPECTREGEX--
 \*\*\* Testing image_type_to_mime_type\(\) : usage variations \*\*\*
 
@@ -78,5 +72,7 @@ string\(24\) "image\/vnd.microsoft.icon"
 string\(10\) "image\/webp"
 
 -- Iteration 19 --
+string\(10\) "image\/avif"
+
+-- Iteration 20 --
 string\(24\) "application\/octet-stream"
-===DONE===

@@ -1,8 +1,10 @@
 --TEST--
 PECL PDO_OCI Bug #6364 (segmentation fault on stored procedure call with OUT binds)
+--EXTENSIONS--
+pdo
+pdo_oci
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
@@ -32,7 +34,7 @@ var_dump($out_param1);
 var_dump($out_param2);
 
 foreach ($dbh->query("select * from bug_6364_t") as $row) {
-	var_dump($row);
+    var_dump($row);
 }
 
 print "Done\n";

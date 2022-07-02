@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -175,7 +175,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *domain;
-	zend_long option = 0,
+	zend_long option = UIDNA_DEFAULT,
 	variant = INTL_IDN_VARIANT_UTS46;
 	zval *idna_info = NULL;
 
@@ -183,7 +183,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz",
 			&domain, &option, &variant, &idna_info) == FAILURE) {
-		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
+		RETURN_THROWS();
 	}
 
 	if (variant != INTL_IDN_VARIANT_UTS46) {
@@ -204,15 +204,14 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (idna_info != NULL) {
 		idna_info = zend_try_array_init(idna_info);
 		if (!idna_info) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
 	php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (uint32_t)option, mode, idna_info);
 }
 
-/* {{{ proto string idn_to_ascii(string domain[, int options[, int variant[, array &idna_info]]])
-   Converts an Unicode domain to ASCII representation, as defined in the IDNA RFC */
+/* {{{ Converts an Unicode domain to ASCII representation, as defined in the IDNA RFC */
 PHP_FUNCTION(idn_to_ascii)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_ASCII);
@@ -220,8 +219,7 @@ PHP_FUNCTION(idn_to_ascii)
 /* }}} */
 
 
-/* {{{ proto string idn_to_utf8(string domain[, int options[, int variant[, array &idna_info]]])
-   Converts an ASCII representation of the domain to Unicode (UTF-8), as defined in the IDNA RFC */
+/* {{{ Converts an ASCII representation of the domain to Unicode (UTF-8), as defined in the IDNA RFC */
 PHP_FUNCTION(idn_to_utf8)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_UTF8);

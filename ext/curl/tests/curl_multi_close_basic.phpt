@@ -3,17 +3,14 @@ curl_multi_close
 --CREDITS--
 Stefan Koopmanschap <stefan@php.net>
 #testfest Utrecht 2009
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) print 'skip';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $ch = curl_multi_init();
 curl_multi_close($ch);
 var_dump($ch);
 ?>
-===DONE===
---EXPECTF--
-resource(%d) of type (Unknown)
-===DONE===
+--EXPECT--
+object(CurlMultiHandle)#1 (0) {
+}

@@ -22,48 +22,69 @@ $supported_hash_al = array(
 $data = "This is the test of the mhash extension...";
 
 foreach ($supported_hash_al as $hash=>$wanted) {
-	$result = mhash(constant($hash), $data);
-	if (bin2hex($result)==$wanted) {
-		echo "$hash\nok\n";
-	} else {
-		echo "$hash: ";
-		var_dump($wanted);
-		echo "$hash: ";
-		var_dump(bin2hex($result));
-	}
-	echo "\n";
+    $result = mhash(constant($hash), $data);
+    if (bin2hex($result)==$wanted) {
+        echo "$hash\nok\n";
+    } else {
+        echo "$hash: ";
+        var_dump($wanted);
+        echo "$hash: ";
+        var_dump(bin2hex($result));
+    }
+    echo "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_MD5
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_SHA1
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL256
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL192
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL224
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL160
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_RIPEMD160
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_GOST
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_TIGER
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_CRC32
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_CRC32B
 ok

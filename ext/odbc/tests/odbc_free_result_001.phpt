@@ -1,5 +1,7 @@
 --TEST--
 odbc_free_result(): Basic test
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
@@ -37,13 +39,15 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-
-odbc_exec($conn, 'DROP TABLE FOO');
-
-odbc_exec($conn, 'DROP DATABASE odbcTEST');
-
 ?>
---EXPECTF--
+--CLEAN--
+<?php
+require 'config.inc';
+$conn = odbc_connect($dsn, $user, $pass);
+odbc_exec($conn, 'DROP TABLE FOO');
+odbc_exec($conn, 'DROP DATABASE odbcTEST');
+?>
+--EXPECT--
 bool(true)
 string(1) "1"
 bool(true)

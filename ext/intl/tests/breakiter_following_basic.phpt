@@ -1,9 +1,7 @@
 --TEST--
 IntlBreakIterator::following(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -16,9 +14,7 @@ var_dump($bi->following(5));
 var_dump($bi->following(50));
 var_dump($bi->following(-1));
 ?>
-==DONE==
 --EXPECT--
 int(7)
 int(-1)
 int(0)
-==DONE==

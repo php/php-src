@@ -83,7 +83,7 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 				/* epoll_wait() may report signal fd before read events for a finished child
 				 * in the same bunch of events. Prevent immediate free of the child structure
 				 * and so the fpm_event_s instance. Otherwise use after free happens during
-				 * attemp to process following read event. */
+				 * attempt to process following read event. */
 				fpm_event_set_timer(&children_bury_timer, 0, &fpm_postponed_children_bury, NULL);
 				fpm_event_add(&children_bury_timer, 0);
 				break;
@@ -245,12 +245,12 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue) /* {{{ */
 }
 /* }}} */
 
-int fpm_event_pre_init(char *machanism) /* {{{ */
+int fpm_event_pre_init(char *mechanism) /* {{{ */
 {
 	/* kqueue */
 	module = fpm_event_kqueue_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -258,7 +258,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* port */
 	module = fpm_event_port_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -266,7 +266,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* epoll */
 	module = fpm_event_epoll_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -274,7 +274,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* /dev/poll */
 	module = fpm_event_devpoll_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -282,7 +282,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* poll */
 	module = fpm_event_poll_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -290,13 +290,13 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* select */
 	module = fpm_event_select_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
 
-	if (machanism) {
-		zlog(ZLOG_ERROR, "event mechanism '%s' is not available on this system", machanism);
+	if (mechanism) {
+		zlog(ZLOG_ERROR, "event mechanism '%s' is not available on this system", mechanism);
 	} else {
 		zlog(ZLOG_ERROR, "unable to find a suitable event mechanism on this system");
 	}
@@ -304,7 +304,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 }
 /* }}} */
 
-const char *fpm_event_machanism_name() /* {{{ */
+const char *fpm_event_mechanism_name() /* {{{ */
 {
 	return module ? module->name : NULL;
 }

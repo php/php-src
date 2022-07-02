@@ -1,11 +1,7 @@
 --TEST--
 Bug #70219 Use after free vulnerability in session deserializer
---SKIPIF--
-<?php
-if (!extension_loaded("session")) {
-    die("skip Session module not loaded");
-}
-?>
+--EXTENSIONS--
+session
 --FILE--
 <?php
 ini_set('session.serialize_handler', 'php_serialize');
@@ -18,7 +14,6 @@ class obj implements Serializable {
     }
     function unserialize($data) {
         session_decode($data);
-        return null;
     }
 }
 
@@ -34,18 +29,21 @@ for ($i = 0; $i < 5; $i++) {
 var_dump($data);
 var_dump($_SESSION);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 array(2) {
   [0]=>
-  object(obj)#1 (1) {
+  object(obj)#%d (1) {
     ["data"]=>
     NULL
   }
   [1]=>
-  object(obj)#2 (1) {
+  object(obj)#%d (1) {
     ["data"]=>
     NULL
   }
 }
-array(0) {
+object(obj)#1 (1) {
+  ["data"]=>
+  NULL
 }

@@ -1,7 +1,7 @@
 --TEST--
 ldap_escape() test ignore
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 

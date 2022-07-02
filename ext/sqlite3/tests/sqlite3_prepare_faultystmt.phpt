@@ -3,8 +3,8 @@ SQLite3::prepare test, testing for faulty statement
 --CREDITS--
 Michelangelo van Dam
 # Belgian PHP Testfest 2009
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: foreach
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -34,33 +34,32 @@ EOF
 );
 
 foreach($sxe as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===CLONE===\n";
 
 foreach(clone $sxe as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===ELEMENT===\n";
 
 foreach($sxe->elem11 as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===COMMENT===\n";
 
 foreach($sxe->elem1 as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 ?>
-===DONE===
 --EXPECT--
 string(5) "elem1"
 string(10) "Bla bla 1."
@@ -77,4 +76,3 @@ string(10) "Bla bla 2."
 ===COMMENT===
 string(5) "elem1"
 string(10) "Bla bla 1."
-===DONE===

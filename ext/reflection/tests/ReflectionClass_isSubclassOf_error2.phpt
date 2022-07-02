@@ -1,5 +1,9 @@
 --TEST--
 ReflectionClass::isSubclassOf() - fixed crash for unbound anonymous class
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Anon class is linked during preloading');
+?>
 --FILE--
 <?php
 class X {
@@ -11,7 +15,7 @@ class Base {}
 $check = function () {
     $base = Base::class;
     foreach (get_declared_classes() as $class) {
-        if (strpos($class, 'class@anonymous') === false) {
+        if (strpos($class, '@anonymous') === false) {
             continue;
         }
         echo "Checking for $class\n";
@@ -30,6 +34,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 After first check
-Checking for class@%s
+Checking for Base@%s
 true
 Done

@@ -1,7 +1,7 @@
 --TEST--
 Phar::setStub()/stopBuffering()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -21,7 +21,6 @@ __HALT_COMPILER();
 ?>");
 var_dump($p->getStub());
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/phar_commitwrite.phar');
@@ -37,4 +36,3 @@ Phar::mapPhar('phar_commitwrite.phar');
 include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER(); ?>
 "
-===DONE===

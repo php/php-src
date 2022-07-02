@@ -1,14 +1,14 @@
 --TEST--
-output buffering - stati
+output buffering - statuses
 --INI--
 opcache.optimization_level=0
 --FILE--
 <?php
-$stati = array();
+$statuses = array();
 function oh($str, $flags) {
-	global $stati;
-	$stati[] = "$flags: $str";
-	return $str;
+    global $statuses;
+    $statuses[] = "$flags: $str";
+    return $str;
 }
 ob_start("oh", 3);
 echo "yes";
@@ -19,7 +19,7 @@ ob_clean();
 echo "yes!\n";
 echo "no";
 ob_end_clean();
-print_r($stati);
+print_r($statuses);
 ?>
 --EXPECT--
 yes!

@@ -1,7 +1,7 @@
 --TEST--
 Phar::mapPhar truncated manifest/improper params
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {
@@ -17,5 +17,5 @@ try {
 }
 __HALT_COMPILER(); ?>
 --EXPECTF--
-Phar::mapPhar() expects at most 2 parameters, 3 given
+Phar::mapPhar() expects at most 2 arguments, 3 given
 internal corruption of phar "%s002.php" (truncated manifest at manifest length)

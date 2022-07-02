@@ -25,7 +25,6 @@ foreach ($longVals as $longVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
 bool(false)
@@ -57,4 +56,3 @@ bool(false)
 bool(false)
 --- testing: -9.2233720368548E+18 ---
 bool(false)
-===DONE===

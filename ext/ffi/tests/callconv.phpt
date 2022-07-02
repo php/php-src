@@ -1,8 +1,9 @@
 --TEST--
 Different calling conventions
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (substr(PHP_OS, 0, 3) != 'WIN') die('skip for Windows only');
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");
 ?>

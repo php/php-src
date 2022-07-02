@@ -1,14 +1,14 @@
 --TEST--
 Bug #54395 (Phar::mount() crashes when calling with wrong parameters)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 
 try {
-	phar::mount(1,1);
+    phar::mount(1,1);
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>

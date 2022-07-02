@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and FILTER_VALIDATE_EMAIL
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $values = Array(
@@ -22,7 +22,7 @@ $values = Array(
 'foo@bar.-'
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
+    var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
 }
 
 echo "Done\n";

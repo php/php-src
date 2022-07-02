@@ -19,7 +19,7 @@ try { $x = $badStr . $str; }
 catch (Exception $e) { echo $e->getMessage(), "\n"; }
 try { $x = $str .= $badStr; }
 catch (Exception $e) { echo $e->getMessage(), "\n"; }
-var_dump($str); 
+var_dump($str);
 try { $x = $num . $badStr; }
 catch (Exception $e) { echo $e->getMessage(), "\n"; }
 try { $x = $badStr . $num; }

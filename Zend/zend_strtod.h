@@ -24,7 +24,8 @@
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_freedtoa(char *s);
-ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char **rve);
+ZEND_API char *zend_dtoa(double _d, int mode, int ndigits, int *decpt, bool *sign, char **rve);
+ZEND_API char *zend_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 ZEND_API double zend_strtod(const char *s00, const char **se);
 ZEND_API double zend_hex_strtod(const char *str, const char **endptr);
 ZEND_API double zend_oct_strtod(const char *str, const char **endptr);
@@ -32,5 +33,13 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr);
 ZEND_API int zend_startup_strtod(void);
 ZEND_API int zend_shutdown_strtod(void);
 END_EXTERN_C()
+
+/* double limits */
+#include <float.h>
+#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
+#define ZEND_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
+#else
+#define ZEND_DOUBLE_MAX_LENGTH 1080
+#endif
 
 #endif

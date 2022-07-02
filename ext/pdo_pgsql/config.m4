@@ -24,7 +24,6 @@ if test "$PHP_PDO_PGSQL" != "no"; then
     AC_MSG_RESULT([$PG_CONFIG])
     PGSQL_INCLUDE=`$PG_CONFIG --includedir`
     PGSQL_LIBDIR=`$PG_CONFIG --libdir`
-    AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
   else
     AC_MSG_RESULT(not found)
     if test "$PHP_PDO_PGSQL" = "yes"; then
@@ -38,9 +37,6 @@ if test "$PHP_PDO_PGSQL" != "no"; then
         if test -r "$i/$j/libpq-fe.h"; then
           PGSQL_INC_BASE=$i
           PGSQL_INCLUDE=$i/$j
-          if test -r "$i/$j/pg_config.h"; then
-            AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
-          fi
         fi
       done
 
@@ -70,10 +66,7 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="-L$PGSQL_LIBDIR $LDFLAGS"
 
-  AC_CHECK_LIB(pq, PQprepare,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: a newer libpq is required]))
-  AC_CHECK_LIB(pq, PQexecParams,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: a newer libpq is required]))
-  AC_CHECK_LIB(pq, PQescapeStringConn,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: a newer libpq is required]))
-  AC_CHECK_LIB(pq, PQescapeByteaConn,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: a newer libpq is required]))
+  AC_CHECK_LIB(pq, PQlibVersion,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: at least libpq 9.1 is required]))
 
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS

@@ -4,7 +4,7 @@
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
 #  | available through the world-wide-web at the following url:           |
-#  | http://www.php.net/license/3_01.txt                                  |
+#  | https://www.php.net/license/3_01.txt                                 |
 #  | If you did not receive a copy of the PHP license and are unable to   |
 #  | obtain it through the world-wide-web, please send a note to          |
 #  | license@php.net so we can mail you a copy immediately.               |
@@ -75,16 +75,16 @@ $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
 
 Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
-	$(BISON) --output=Zend/zend_ini_parser.c -v -d -p ini_ Zend/zend_ini_parser.y
+	$(BISON) --output=Zend/zend_ini_parser.c -v -d Zend/zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
-	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
+	$(BISON) --output=Zend/zend_language_parser.c -v -d Zend/zend_language_parser.y
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.c
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.h
 	@if "$(SED)" neq "" $(SED) -i "s,^#ifndef YYTOKENTYPE,#include \"zend.h\"\n#ifndef YYTOKENTYPE,g" Zend/zend_language_parser.h
 
 sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
-	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
+	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
 
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
@@ -98,15 +98,15 @@ sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
 !endif
 
 !if "$(ZTS)" == "1"
-PHP7_PGD_SUFFIX=ts
+PHP8_PGD_SUFFIX=ts
 !else
-PHP7_PGD_SUFFIX=
+PHP8_PGD_SUFFIX=
 !endif
 
 !if $(PGOMGR) != ""
-PHP7_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php7$(PHP7_PGD_SUFFIX).pgd
+PHP8_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php8$(PHP8_PGD_SUFFIX).pgd
 !else
-PHP7_PGD_OPTION=
+PHP8_PGD_OPTION=
 !endif
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
@@ -132,8 +132,8 @@ $(PHPDLL_RES): win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
 	@copy win32\build\default.manifest $(BUILD_DIR)\$(PHPDLL).manifest >nul
-#	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
-	@"$(LINK)" $(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+#	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP8_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	@"$(LINK)" $(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP8_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
@@ -237,6 +237,7 @@ build-devel: build-headers build-lib
 	@if not exist $(BUILD_DIR_DEV)\script mkdir $(BUILD_DIR_DEV)\script >nul
 	@if not exist $(BUILD_DIR_DEV)\build mkdir $(BUILD_DIR_DEV)\build >nul
 	@copy run-tests.php $(BUILD_DIR_DEV)\script\ /y >nul
+	@copy build\gen_stub.php $(BUILD_DIR_DEV)\build\ /y >nul
 	@copy win32\build\confutils.js $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\configure.tail $(BUILD_DIR_DEV)\script\ /y >nul
 	@copy win32\build\config.w32.phpize.in $(BUILD_DIR_DEV)\script\ /y >nul

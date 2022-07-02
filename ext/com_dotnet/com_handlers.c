@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -25,7 +25,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cahce_slot, zval *rv)
+static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -38,8 +38,8 @@ static zval *com_property_read(zend_object *object, zend_string *member, int typ
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		res = php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1);
+		res = php_com_do_invoke(obj, member, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
+			&v, 0, NULL, 1);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(rv, &v, obj->code_page);
@@ -67,7 +67,7 @@ static zval *com_property_write(zend_object *object, zend_string *member, zval *
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		if (SUCCESS == php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
+		if (SUCCESS == php_com_do_invoke(obj, member,
 				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0)) {
 			VariantClear(&v);
 		}
@@ -177,7 +177,7 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	}
 }
 
-static zval *com_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot)
+static zval *com_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
 {
 	return NULL;
 }
@@ -190,7 +190,7 @@ static int com_property_exists(zend_object *object, zend_string *member, int che
 	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		if (SUCCEEDED(php_com_get_id_of_name(obj, ZSTR_VAL(member), ZSTR_LEN(member), &dispid))) {
+		if (SUCCEEDED(php_com_get_id_of_name(obj, member, &dispid))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
 		}
@@ -203,18 +203,19 @@ static int com_property_exists(zend_object *object, zend_string *member, int che
 
 static int com_dimension_exists(zend_object *object, zval *member, int check_empty)
 {
-	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
+	/* TODO Add support */
+	zend_throw_error(NULL, "Cannot check dimension on a COM object");
 	return 0;
 }
 
 static void com_property_delete(zend_object *object, zend_string *member, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete properties from a COM object");
 }
 
 static void com_dimension_delete(zend_object *object, zval *offset)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete dimension from a COM object");
 }
 
 static HashTable *com_properties_get(zend_object *object)
@@ -224,7 +225,14 @@ static HashTable *com_properties_get(zend_object *object)
 	 * infinite recursion when the hash is displayed via var_dump().
 	 * Perhaps it is best to leave it un-implemented.
 	 */
-	return &zend_empty_array;
+	return (HashTable *) &zend_empty_array;
+}
+
+static HashTable *com_get_gc(zend_object *object, zval **table, int *n)
+{
+	*table = NULL;
+	*n = 0;
+	return NULL;
 }
 
 static void function_dtor(zval *zv)
@@ -246,7 +254,7 @@ static PHP_FUNCTION(com_method_handler)
 	php_com_dotnet_object *obj = CDNO_FETCH(object);
 	int nargs;
 	VARIANT v;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	if (V_VT(&obj->v) != VT_DISPATCH) {
 		goto exit;
@@ -262,8 +270,7 @@ static PHP_FUNCTION(com_method_handler)
 	VariantInit(&v);
 
 	if (SUCCESS == php_com_do_invoke_byref(obj, (zend_internal_function*)EX(func), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args)) {
-		php_com_zval_from_variant(return_value, &v, obj->code_page);
-		ret = SUCCESS;
+		ret = php_com_zval_from_variant(return_value, &v, obj->code_page);
 		VariantClear(&v);
 	}
 
@@ -290,7 +297,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 		return NULL;
 	}
 
-	if (FAILED(php_com_get_id_of_name(obj, name->val, name->len, &dummy))) {
+	if (FAILED(php_com_get_id_of_name(obj, name, &dummy))) {
 		return NULL;
 	}
 
@@ -319,7 +326,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 
 			if (SUCCEEDED(ITypeInfo_GetTypeComp(obj->typeinfo, &comp))) {
 				olename = php_com_string_to_olestring(name->val, name->len, obj->code_page);
-				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_SYSTEM_DEFAULT, olename);
+				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_NEUTRAL, olename);
 
 				if (SUCCEEDED(ITypeComp_Bind(comp, olename, lhash, INVOKE_FUNC, &TI, &kind, &bindptr))) {
 					switch (kind) {
@@ -327,10 +334,8 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-								f.arg_info[i].type = ZEND_TYPE_ENCODE_NONE();
-								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
-									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
-								}
+								bool by_ref = (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) != 0;
+								f.arg_info[i].type = (zend_type) ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(by_ref, 0, 0));
 							}
 
 							f.num_args = bindptr.lpfuncdesc->cParams;
@@ -382,38 +387,6 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 	return NULL;
 }
 
-static zend_function *com_constructor_get(zend_object *object)
-{
-	php_com_dotnet_object *obj = (php_com_dotnet_object *) object;
-	static zend_internal_function c, d, v;
-
-#define POPULATE_CTOR(f, fn)	\
-	f.type = ZEND_INTERNAL_FUNCTION; \
-	f.function_name = obj->ce->name; \
-	f.scope = obj->ce; \
-	f.arg_info = NULL; \
-	f.num_args = 0; \
-	f.fn_flags = 0; \
-	f.handler = ZEND_FN(fn); \
-	return (zend_function*)&f;
-
-	switch (obj->ce->name->val[0]) {
-#if HAVE_MSCOREE_H
-		case 'd':
-			POPULATE_CTOR(d, com_dotnet_create_instance);
-#endif
-
-		case 'c':
-			POPULATE_CTOR(c, com_create_instance);
-
-		case 'v':
-			POPULATE_CTOR(v, com_variant_create_instance);
-
-		default:
-			return NULL;
-	}
-}
-
 static zend_string* com_class_name_get(const zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
@@ -437,7 +410,7 @@ static int com_objects_compare(zval *object1, zval *object2)
 	obja = CDNO_FETCH(object1);
 	objb = CDNO_FETCH(object2);
 
-	switch (VarCmp(&obja->v, &objb->v, LOCALE_SYSTEM_DEFAULT, 0)) {
+	switch (VarCmp(&obja->v, &objb->v, LOCALE_NEUTRAL, 0)) {
 		case VARCMP_LT:
 			ret = -1;
 			break;
@@ -456,7 +429,7 @@ static int com_objects_compare(zval *object1, zval *object2)
 	return ret;
 }
 
-static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
+static zend_result com_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -479,7 +452,11 @@ static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
 	switch(type) {
 		case IS_LONG:
 		case _IS_NUMBER:
-			vt = VT_INT;
+#if SIZEOF_ZEND_LONG == 4
+			vt = VT_I4;
+#else
+			vt = VT_I8;
+#endif
 			break;
 		case IS_DOUBLE:
 			vt = VT_R8;
@@ -513,7 +490,7 @@ static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
 	return zend_std_cast_object_tostring(readobj, writeobj, type);
 }
 
-static int com_object_count(zend_object *object, zend_long *count)
+static zend_result com_object_count(zend_object *object, zend_long *count)
 {
 	php_com_dotnet_object *obj;
 	LONG ubound = 0, lbound = 0;
@@ -548,19 +525,19 @@ zend_object_handlers php_com_object_handlers = {
 	com_dimension_delete,
 	com_properties_get,
 	com_method_get,
-	com_constructor_get,
+	zend_std_get_constructor,
 	com_class_name_get,
 	com_object_cast,
 	com_object_count,
 	NULL,									/* get_debug_info */
 	NULL,									/* get_closure */
-	zend_std_get_gc,						/* get_gc */
+	com_get_gc,								/* get_gc */
 	NULL,									/* do_operation */
 	com_objects_compare,					/* compare */
 	NULL,									/* get_properties_for */
 };
 
-void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable)
+void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable)
 {
 	if (obj->sink_dispatch) {
 		IConnectionPointContainer *cont;
@@ -594,7 +571,7 @@ void php_com_object_free_storage(zend_object *object)
 	}
 
 	if (obj->sink_dispatch) {
-		php_com_object_enable_event_sink(obj, FALSE);
+		php_com_object_enable_event_sink(obj, /* enable */ false);
 		IDispatch_Release(obj->sink_dispatch);
 		obj->sink_dispatch = NULL;
 	}

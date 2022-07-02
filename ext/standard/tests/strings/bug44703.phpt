@@ -22,25 +22,25 @@ var_dump(htmlspecialchars("<>", ENT_COMPAT, str_repeat('a', 100)));
 
 ?>
 --EXPECTF--
-Warning: htmlspecialchars(): charset `1' not supported, assuming utf-8 in %s on line %d
+Warning: htmlspecialchars(): Charset "1" is not supported, assuming UTF-8 in %s on line %d
 string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
 
-Warning: htmlspecialchars(): charset `12' not supported, assuming utf-8 in %s on line %d
+Warning: htmlspecialchars(): Charset "12" is not supported, assuming UTF-8 in %s on line %d
 string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
 
-Warning: htmlspecialchars(): charset `125' not supported, assuming utf-8 in %s on line %d
+Warning: htmlspecialchars(): Charset "125" is not supported, assuming UTF-8 in %s on line %d
 string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
 string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
 
-Warning: htmlspecialchars(): charset `12526' not supported, assuming utf-8 in %s on line %d
+Warning: htmlspecialchars(): Charset "12526" is not supported, assuming UTF-8 in %s on line %d
 string(35) "&lt;a href='test'&gt;Test&lt;/a&gt;"
 string(8) "&lt;&gt;"
 
-Warning: htmlspecialchars(): charset `8666' not supported, assuming utf-8 in %s on line %d
+Warning: htmlspecialchars(): Charset "8666" is not supported, assuming UTF-8 in %s on line %d
 string(8) "&lt;&gt;"
 string(8) "&lt;&gt;"
 string(8) "&lt;&gt;"
 string(8) "&lt;&gt;"
 
-Warning: htmlspecialchars(): charset `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' not supported, assuming utf-8 in %s on line %d
+Warning: htmlspecialchars(): Charset "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" is not supported, assuming UTF-8 in %s on line %d
 string(8) "&lt;&gt;"

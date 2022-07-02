@@ -1,8 +1,9 @@
 --TEST--
 Writing temporary lob before binding
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 ?>
@@ -27,7 +28,6 @@ oci_fetch_all($s, $res);
 var_dump($res);
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 array(1) {
@@ -37,4 +37,3 @@ array(1) {
     string(4) "test"
   }
 }
-===DONE===

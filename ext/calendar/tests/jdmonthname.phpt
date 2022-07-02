@@ -1,7 +1,7 @@
 --TEST--
 jdmonthname()
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 foreach (array(2440588, 2452162, 2453926) as $jd) {

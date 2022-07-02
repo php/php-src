@@ -2,11 +2,6 @@
 Test stripslashes() function : usage variations - double dimensional arrays
 --FILE--
 <?php
-/* Prototype  : string stripslashes ( string $str )
- * Description: Returns an un-quoted string
- * Source code: ext/standard/string.c
-*/
-
 /*
  * Test stripslashes() with double dimensional arrays
 */

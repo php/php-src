@@ -2,20 +2,14 @@
 Test array_multisort() function : usage variation
 --FILE--
 <?php
-/* Prototype  : bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
- * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL
- * Source code: ext/standard/array.c
- * Alias to functions:
- */
-
 echo "*** Testing array_multisort() : usage variation ***\n";
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	if (error_reporting() & $err_no) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() & $err_no) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
 set_error_handler('test_error_handler');
 
@@ -30,9 +24,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -107,13 +101,12 @@ foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
         var_dump( array_multisort($ar1, $value) );
-    } catch (Error $e) {
+    } catch (\ValueError | \TypeError $e) {
         echo $e->getMessage() . "\n";
     }
 };
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : usage variation ***
 
@@ -124,25 +117,25 @@ bool(true)
 bool(true)
 
 --int 12345--
-Argument #2 is an unknown sort flag
+array_multisort(): Argument #2 must be a valid sort flag
 
 --int -12345--
-Argument #2 is an unknown sort flag
+array_multisort(): Argument #2 must be a valid sort flag
 
 --float 10.5--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --float -10.5--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --float 12.3456789000e10--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --float -12.3456789000e10--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --float .5--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --empty array--
 Array sizes are inconsistent
@@ -157,50 +150,49 @@ bool(true)
 Array sizes are inconsistent
 
 --uppercase NULL--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --lowercase null--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --lowercase true--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --lowercase false--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --uppercase TRUE--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --uppercase FALSE--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --empty string DQ--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --empty string SQ--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --string DQ--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --string SQ--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --mixed case string--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --heredoc--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --instance of classWithToString--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --instance of classWithoutToString--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --undefined var--
-Argument #2 is expected to be an array or a sort flag
+array_multisort(): Argument #2 must be an array or a sort flag
 
 --unset var--
-Argument #2 is expected to be an array or a sort flag
-===DONE===
+array_multisort(): Argument #2 must be an array or a sort flag

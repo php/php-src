@@ -6,7 +6,8 @@ $f = (new ReflectionFunction('iterator_to_array'))->getClosure();
 $r = new ReflectionMethod($f, '__invoke');
 var_dump($r->getParameters()[0]->getClass());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
 object(ReflectionClass)#4 (1) {
   ["name"]=>
   string(11) "Traversable"

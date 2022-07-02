@@ -1,36 +1,41 @@
 <?php
 
-/** @return string|false */
-function textdomain(?string $domain) {}
+/** @generate-class-entries */
 
-/** @return string|false */
-function gettext(string $msgid) {}
+/** @refcount 1 */
+function textdomain(?string $domain): string {}
 
-/** @return string|false */
-function dgettext(string $domain_name, string $msgid) {}
+/** @refcount 1 */
+function gettext(string $message): string {}
 
-/** @return string|false */
-function dcgettext(string $domain_name, string $msgid, int $category) {}
+/** @alias gettext */
+function _(string $message): string {}
 
-/** @return string|false */
-function bindtextdomain(string $domain_name, string $dir) {}
+/** @refcount 1 */
+function dgettext(string $domain, string $message): string {}
 
-#if HAVE_NGETTEXT
-/** @return string|false */
-function ngettext(string $msgid1, string $msgid2, int $n) {}
+/** @refcount 1 */
+function dcgettext(string $domain, string $message, int $category): string {}
+
+/** @refcount 1 */
+function bindtextdomain(string $domain, ?string $directory): string|false {}
+
+#ifdef HAVE_NGETTEXT
+/** @refcount 1 */
+function ngettext(string $singular, string $plural, int $count): string {}
 #endif
 
-#if HAVE_DNGETTEXT
-/** @return string|false */
-function dngettext(string $domain, string $msgid1, string $msgid2, int $count) {}
+#ifdef HAVE_DNGETTEXT
+/** @refcount 1 */
+function dngettext(string $domain, string $singular, string $plural, int $count): string {}
 #endif
 
-#if HAVE_DCNGETTEXT
-/** @return string|false */
-function dcngettext(string $domain, string $msgid1, string $msgid2, int $count, int $category) {}
+#ifdef HAVE_DCNGETTEXT
+/** @refcount 1 */
+function dcngettext(string $domain, string $singular, string $plural, int $count, int $category): string {}
 #endif
 
-#if HAVE_BIND_TEXTDOMAIN_CODESET
-/** @return string|false */
-function bind_textdomain_codeset(string $domain, string $codeset) {}
+#ifdef HAVE_BIND_TEXTDOMAIN_CODESET
+/** @refcount 1 */
+function bind_textdomain_codeset(string $domain, ?string $codeset): string|false {}
 #endif

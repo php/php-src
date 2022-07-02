@@ -4,10 +4,6 @@ Test file_get_contents() function : error conditions
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype: string file_get_contents( string $filename{, bool $use_include_path[,
- *                                      resource $context[, int $offset[, int $maxlen]]]] )
- * Description: Reads entire file into a string
- */
 
 echo "*** Testing error conditions ***\n";
 
@@ -20,8 +16,12 @@ print( file_get_contents("/no/such/file/or/dir") );
 create_files($file_path, 1, "text", 0755, 100, "w", "file", 1, "byte");
 $file_handle = fopen($file_path."/file_put_contents_error.tmp", "w");
 
-echo "\n-- Testing for invalid negative maxlen values --";
-var_dump( file_get_contents($file_path."/file1.tmp", FALSE, $file_handle, 0, -5) );
+echo "\n-- Testing for invalid negative maxlen values --\n";
+try {
+    file_get_contents($file_path."/file1.tmp", FALSE, $file_handle, 0, -5);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 delete_files($file_path, 1);
 fclose($file_handle);
@@ -44,10 +44,9 @@ if(file_exists($file_path."/file_put_contents1.tmp")) {
 
 -- Testing with  Non-existing file --
 
-Warning: file_get_contents(/no/such/file/or/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(/no/such/file/or/dir): Failed to open stream: No such file or directory in %s on line %d
 
 -- Testing for invalid negative maxlen values --
-Warning: file_get_contents(): length must be greater than or equal to zero in %s on line %d
-bool(false)
+file_get_contents(): Argument #5 ($length) must be greater than or equal to 0
 
 *** Done ***

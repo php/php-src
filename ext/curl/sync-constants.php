@@ -12,10 +12,11 @@ const CURL_DOC_FILE = 'https://curl.haxx.se/libcurl/c/symbols-in-versions.html';
 
 const SOURCE_FILE = __DIR__ . '/interface.c';
 
-const MIN_SUPPORTED_CURL_VERSION = '7.15.5';
+const MIN_SUPPORTED_CURL_VERSION = '7.29.0';
 
 const IGNORED_CONSTANTS = [
-    'CURLOPT_PROGRESSDATA'
+    'CURLOPT_PROGRESSDATA',
+    'CURLOPT_XFERINFODATA'
 ];
 
 const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION)_[A-Z0-9_]+$~';

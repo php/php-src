@@ -9,11 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects of rename() on stats of dir/file */
 
 $file_path = __DIR__;
@@ -35,7 +30,7 @@ $old_filename = "$file_path/stat_variation1_私はガラスを食べられます
 $new_filename = "$file_path/stat_variation1a_私はガラスを食べられます.tmp";
 $old_stat = stat($old_filename);
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( rename($old_filename, $new_filename) );
 $new_stat = stat($new_filename);
 

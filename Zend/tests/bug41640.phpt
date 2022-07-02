@@ -8,6 +8,7 @@ class foo {
 }
 
 var_dump(get_class_vars("foo"));
+?>
 --EXPECT--
 array(1) {
   ["x"]=>

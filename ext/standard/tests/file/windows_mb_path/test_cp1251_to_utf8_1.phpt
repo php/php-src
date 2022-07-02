@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+dir_cp1251
 --FILE--
 <?php
 /*
@@ -22,7 +24,7 @@ $item = iconv('cp1251', 'utf-8', "������"); // cp1251 string
 $prefix = create_data("dir_cp1251", $item . "3");
 $path = $prefix . DIRECTORY_SEPARATOR . $item . "3";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));
@@ -36,7 +38,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1251");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -48,4 +49,3 @@ bool(true)
 string(%d) "%s\привет3\привет4"
 Active code page: %d
 bool(true)
-===DONE===

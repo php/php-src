@@ -1,8 +1,9 @@
 --TEST--
 mb_ereg_replace_callback()
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 function_exists('mb_ereg_replace_callback') or die("skip mb_ereg_replace_callback() is not available in this build");
 ?>
 --FILE--

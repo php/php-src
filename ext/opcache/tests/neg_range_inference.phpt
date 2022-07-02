@@ -1,7 +1,7 @@
 --TEST--
 Incorrect negative range inference
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+mb_names
 --FILE--
 <?php
 
@@ -47,14 +49,13 @@ if (is_dir($dirw)) {
         closedir($dh);
     }
 } else {
-	echo "is_dir failed\n";
+    echo "is_dir failed\n";
 }
 set_active_cp($old_cp);
 
 remove_data("mb_names");
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: 65001
 filename: . : filetype: dir
@@ -76,4 +77,3 @@ filename: テストマルチバイト・パス42 : filetype: dir
 filename: 測試多字節路徑 : filetype: file
 filename: 測試多字節路徑5 : filetype: dir
 Active code page: %d
-===DONE===

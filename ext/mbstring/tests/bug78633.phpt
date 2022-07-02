@@ -1,13 +1,19 @@
 --TEST--
 Bug #78633 (Heap buffer overflow (read) in mb_eregi)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 if (!function_exists('mb_eregi')) die('skip mb_eregi function not available');
 ?>
 --FILE--
 <?php
-var_dump(mb_eregi(".+Isssǰ", ".+Isssǰ"));
+$res = mb_eregi(".+Isssǰ", ".+Isssǰ");
+if (is_bool($res)) {
+    echo "ok\n";
+} else {
+    var_dump($res);
+}
 ?>
 --EXPECT--
-bool(false)
+ok

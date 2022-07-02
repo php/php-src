@@ -1,7 +1,7 @@
 --TEST--
 Bug #71534 (Type confusion in exif_read_data() leading to heap overflow in debug mode)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 // This is kinda bad, I know! But, this generates about 200+ warnings due to its

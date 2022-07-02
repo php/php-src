@@ -5,6 +5,6 @@
 
 void *fpm_shm_alloc(size_t size);
 int fpm_shm_free(void *mem, size_t size);
-size_t fpm_shm_get_size_allocated();
+size_t fpm_shm_get_size_allocated(void);
 
 #endif

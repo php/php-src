@@ -3,19 +3,19 @@ Bug #76539 (Trait attribute is set incorrectly when using self::class with anoth
 --FILE--
 <?php
 trait MyTrait {
-	protected $attr = self::class . 'Test';
+    protected $attr = self::class . 'Test';
 
-	public function test() {
-		echo $this->attr, PHP_EOL;
-	}
+    public function test() {
+        echo $this->attr, PHP_EOL;
+    }
 }
 
 class A {
-	use MyTrait;
+    use MyTrait;
 }
 
 class B {
-	use MyTrait;
+    use MyTrait;
 }
 
 (new A())->test();

@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,6 +29,12 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 
+#ifdef __APPLE__
+#include <mach/vm_statistics.h>
+#endif
+
+#include "zend_execute.h"
+
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
 #endif
@@ -36,10 +42,91 @@
 # define MAP_HUGETLB MAP_ALIGNED_SUPER
 #endif
 
+#if defined(__linux__) && (defined(__x86_64__) || defined (__aarch64__))
+static void *find_prefered_mmap_base(size_t requested_size)
+{
+	FILE *f;
+	size_t huge_page_size = 2 * 1024 * 1024;
+	uintptr_t last_free_addr = 0;
+	uintptr_t last_candidate = (uintptr_t)MAP_FAILED;
+	uintptr_t start, end, text_start = 0;
+	char buffer[MAXPATHLEN];
+
+	f = fopen("/proc/self/maps", "r");
+	if (!f) {
+		return MAP_FAILED;
+	}
+
+	while (fgets(buffer, MAXPATHLEN, f) && sscanf(buffer, "%lx-%lx", &start, &end) == 2) {
+		if ((uintptr_t)execute_ex >= start) {
+			/* the current segment lays before PHP .text segment or PHP .text segment itself */
+			if (last_free_addr + requested_size <= start) {
+				last_candidate = last_free_addr;
+			}
+			if ((uintptr_t)execute_ex < end) {
+				/* the current segment is PHP .text segment itself */
+				if (last_candidate != (uintptr_t)MAP_FAILED) {
+					if (end - last_candidate < UINT32_MAX) {
+						/* we have found a big enough hole before the text segment */
+						break;
+					}
+					last_candidate = (uintptr_t)MAP_FAILED;
+				}
+				text_start = start;
+			}
+		} else {
+			/* the current segment lays after PHP .text segment */
+			if (last_free_addr + requested_size - text_start > UINT32_MAX) {
+				/* the current segment and the following segments lay too far from PHP .text segment */
+				break;
+			}
+			if (last_free_addr + requested_size <= start) {
+				last_candidate = last_free_addr;
+				break;
+			}
+		}
+		last_free_addr = ZEND_MM_ALIGNED_SIZE_EX(end, huge_page_size);
+
+	}
+	fclose(f);
+
+	return (void*)last_candidate;
+}
+#endif
+
 static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
 	zend_shared_segment *shared_segment;
+	int flags = PROT_READ | PROT_WRITE, fd = -1;
 	void *p;
+#ifdef PROT_MPROTECT
+	flags |= PROT_MPROTECT(PROT_EXEC);
+#endif
+#ifdef VM_MAKE_TAG
+	/* allows tracking segments via tools such as vmmap */
+	fd = VM_MAKE_TAG(251U);
+#endif
+#ifdef PROT_MAX
+	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
+#endif
+#if defined(__linux__) && (defined(__x86_64__) || defined (__aarch64__))
+	void *hint = find_prefered_mmap_base(requested_size);
+	if (hint != MAP_FAILED) {
+# ifdef MAP_HUGETLB
+		size_t huge_page_size = 2 * 1024 * 1024;
+		if (requested_size >= huge_page_size && requested_size % huge_page_size == 0) {
+			p = mmap(hint, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB|MAP_FIXED, -1, 0);
+			if (p != MAP_FAILED) {
+				goto success;
+			}
+		}
+#endif
+		p = mmap(hint, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+		if (p != MAP_FAILED) {
+			goto success;
+		}
+	}
+#endif
 #ifdef MAP_HUGETLB
 	size_t huge_page_size = 2 * 1024 * 1024;
 
@@ -58,34 +145,34 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		/* to got HUGE PAGES in low 32-bit address we have to reserve address
 		   space and then remap it using MAP_HUGETLB */
 
-		p = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
+		p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 		if (p != MAP_FAILED) {
 			munmap(p, requested_size);
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
-			p = mmap(p, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
+			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
 				goto success;
 			} else {
-				p = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
+				p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 				if (p != MAP_FAILED) {
 					goto success;
 				}
 			}
 		}
 # endif
-		p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);
+		p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, fd, 0);
 		if (p != MAP_FAILED) {
 			goto success;
 		}
 	}
 #elif defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
-	p = mmap(NULL, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, -1, 0);
+	p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 	if (p != MAP_FAILED) {
 		goto success;
 	}
 #endif
 
-	p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+	p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS, fd, 0);
 	if (p == MAP_FAILED) {
 		*error_in = "mmap";
 		return ALLOC_FAILURE;

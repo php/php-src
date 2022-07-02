@@ -1,8 +1,10 @@
 --TEST--
 PDO PgSQL Large Objects
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -38,8 +40,8 @@ $stmt->bindColumn('bloboid', $lob, PDO::PARAM_LOB);
 $stmt->execute();
 echo "Fetching:\n";
 while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
-	var_dump($row['blobid']);
-	var_dump(stream_get_contents($lob));
+    var_dump($row['blobid']);
+    var_dump(stream_get_contents($lob));
 }
 echo "Fetched!\n";
 
@@ -49,8 +51,8 @@ $stmt->execute();
 $stmt->bindColumn('bloboid', $lob, PDO::PARAM_LOB);
 echo "Fetching late bind:\n";
 while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
-	var_dump($row['blobid']);
-	var_dump(is_int($row['bloboid']));
+    var_dump($row['blobid']);
+    var_dump(is_int($row['bloboid']));
 }
 echo "Fetched!\n";
 
@@ -60,16 +62,16 @@ $stmt->execute();
 $stmt->bindColumn('bloboid', $lob, PDO::PARAM_LOB);
 echo "Fetching NO bind:\n";
 while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
-	var_dump($row['blobid']);
-	var_dump(is_int($row['bloboid']));
+    var_dump($row['blobid']);
+    var_dump(is_int($row['bloboid']));
 }
 echo "Fetched!\n";
 
 } catch (Exception $e) {
-	/* catch exceptions so that we can guarantee to clean
-	 * up the LOB */
-	echo "Exception! at line ", $e->getLine(), "\n";
-	var_dump($e->getMessage());
+    /* catch exceptions so that we can guarantee to clean
+     * up the LOB */
+    echo "Exception! at line ", $e->getLine(), "\n";
+    var_dump($e->getMessage());
 }
 
 /* Now to remove the large object from the database, so it doesn't

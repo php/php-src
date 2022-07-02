@@ -2,11 +2,6 @@
 Test count() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : int count(mixed $var [, int $mode])
- * Description: Count the number of elements in a variable (usually an array)
- * Source code: ext/standard/array.c
- */
-
 /*
  * Test basic functionality of count() using an array as $var argument
  * and different values as $mode argument.

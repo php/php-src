@@ -10,6 +10,7 @@ foreach (range(90, 100, .1) as $i => $v){
 foreach (range("90", "100", .1) as $i => $v){
   echo $i, ' = ', $v, PHP_EOL;
 }
+?>
 --EXPECT--
 0 = 90
 1 = 90.1

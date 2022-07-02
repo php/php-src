@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDOStatement::execute with parameters
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -15,7 +16,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-	$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+    $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 }
 
 $db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');

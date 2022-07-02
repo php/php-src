@@ -8,12 +8,12 @@ Chris Scott chris.scott@nstein.com
 
 class MyHeap extends SplHeap
 {
-    public function compare($a,$b)
+    public function compare($a,$b): int
     {
         return ($a < $b);
     }
 
-    public function count() // override count to force failure
+    public function count(): int // override count to force failure
     {
         throw new Exception('Cause count to fail');
         return parent::count();
@@ -24,9 +24,9 @@ class MyHeap extends SplHeap
 $heap = new MyHeap();
 $heap->insert(1);
 try {
-	count($heap);// refers to MyHeap->count() method
+    count($heap);// refers to MyHeap->count() method
 } catch (Exception $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 ?>

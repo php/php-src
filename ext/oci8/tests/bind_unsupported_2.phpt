@@ -1,9 +1,7 @@
 --TEST--
 Bind with various unsupported 10g+ bind types
---SKIPIF--
-<?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
-?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 
@@ -24,8 +22,6 @@ foreach ($types as $t => $v) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test - SQLT_BDOUBLE
 
@@ -33,4 +29,3 @@ Warning: oci_bind_by_name(): Unknown or unsupported datatype given: 22 in %sbind
 Test - SQLT_BFLOAT
 
 Warning: oci_bind_by_name(): Unknown or unsupported datatype given: 21 in %sbind_unsupported_2.php on line %d
-===DONE===

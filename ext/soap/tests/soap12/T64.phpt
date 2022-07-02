@@ -1,7 +1,7 @@
 --TEST--
 SOAP 1.2: T64 echoOk
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 $HTTP_RAW_POST_DATA = <<<EOF
@@ -9,7 +9,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
 <!DOCTYPE DOC [
 <!NOTATION application_xml SYSTEM 'http://www.isi.edu/in-notes/iana/assignments/media-types/application/xml'>
 ]>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"> 
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">
  <env:Body>
     <test:echoOk xmlns:test="http://example.org/ts-tests">
       foo

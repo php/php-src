@@ -1,8 +1,9 @@
 --TEST--
 Bug #78559 (#78559	Heap buffer overflow in mb_eregi)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 if (!function_exists('mb_ereg')) die('skip mb_ereg() not available');
 ?>
 --FILE--

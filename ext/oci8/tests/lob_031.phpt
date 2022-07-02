@@ -1,5 +1,7 @@
 --TEST--
 Test LOB->read(), LOB->seek() and LOB->tell() with nul bytes in data
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

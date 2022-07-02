@@ -1,5 +1,7 @@
 --TEST--
 Bug #38173 (Freeing nested cursors causes OCI8 to segfault)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -26,15 +28,15 @@ oci_execute($s1);
 oci_execute($s2);
 
 for($i=0; $i < 5; $i++) {
-	$insert = "INSERT INTO t1 VALUES(".$i.")";
-	$s = oci_parse($c, $insert);
-	oci_execute($s);
+    $insert = "INSERT INTO t1 VALUES(".$i.")";
+    $s = oci_parse($c, $insert);
+    oci_execute($s);
 }
 
 for($i=0; $i < 5; $i++) {
-	$insert = "INSERT INTO t2 VALUES(".$i.")";
-	$s = oci_parse($c, $insert);
-	oci_execute($s);
+    $insert = "INSERT INTO t2 VALUES(".$i.")";
+    $s = oci_parse($c, $insert);
+    oci_execute($s);
 }
 
 $query ="

@@ -1,9 +1,10 @@
 --TEST--
 PECL Bug #7976 (Calling stored procedure several times)
+--EXTENSIONS--
+pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -11,12 +12,12 @@ $db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
 $matches = array();
 if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-	die(sprintf("skip Cannot determine MySQL Server version\n"));
+    die(sprintf("skip Cannot determine MySQL Server version\n"));
 
 $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 50000)
-	die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
-		$matches[1], $matches[2], $matches[3], $version));
+    die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
+        $matches[1], $matches[2], $matches[3], $version));
 ?>
 --FILE--
 <?php
@@ -25,16 +26,16 @@ $db = MySQLPDOTest::factory();
 
 function bug_pecl_7976($db) {
 
-	$db->exec('DROP PROCEDURE IF EXISTS p');
-	$db->exec('CREATE PROCEDURE p() BEGIN SELECT "1" AS _one; END;');
+    $db->exec('DROP PROCEDURE IF EXISTS p');
+    $db->exec('CREATE PROCEDURE p() BEGIN SELECT "1" AS _one; END;');
 
-	$stmt = $db->query('CALL p()');
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-	$stmt->closeCursor();
+    $stmt = $db->query('CALL p()');
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt->closeCursor();
 
-	$stmt = $db->query('CALL p()');
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-	$stmt->closeCursor();
+    $stmt = $db->query('CALL p()');
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt->closeCursor();
 
 }
 
@@ -56,8 +57,6 @@ require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP PROCEDURE IF EXISTS p');
 ?>
---XFAIL--
-Works with mysqlnd. It is not supported by libmysql. For libmysql is good enough to see no crash.
 --EXPECT--
 Emulated...
 array(1) {

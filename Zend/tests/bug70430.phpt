@@ -7,4 +7,4 @@ $"*** Testing function() :  ***\n";
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected '"*** Testing function() :  ***' (T_CONSTANT_ENCAPSED_STRING), expecting variable (T_VARIABLE) or '{' or '$' in %s on line %d
+Parse error: syntax error, unexpected double-quoted string "*** Testing function() :  ***\n", expecting variable or "{" or "$" in %s on line %d

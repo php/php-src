@@ -8,17 +8,13 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 precision=14
 --FILE--
 <?php
-/* Prototype: mixed end ( array &$array );
-   Description: Advances internal pointer of array to last element, and returns its value.
-*/
-
 $arrays = array (
   array( 0 ),
   range(1, 100 ),
   range('a', 'z', 2 ),
   array("a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL ),
   array(1, array(1, 2 => 3 ), "one" => 1, "5" => 5 ),
-  array(-1, -2, -3, -4, "-0.005" => "neg0.005", 2.0 => "float2", "neg.9" => -.9 ),
+  array(-1, -2, -3, -4, "-0.005" => "neg0.005", 2 => "float2", "neg.9" => -.9 ),
   array(1.0005, 2.000000, -3.000000, -4.9999999 ),
   array(true, false),
   array("PHP", "Web2.0", "SOA"),
@@ -109,10 +105,6 @@ var_dump( current($resources) );
 echo "Done\n";
 
 ?>
---CLEAN--
-/* cleaning resource handles */
-fclose( $file_handle );  //file resource handle deleted
-closedir( $dir_handle );  //dir resource handle deleted
 --EXPECTF--
 *** Testing end() on different arrays ***
 -- Iteration 1 --

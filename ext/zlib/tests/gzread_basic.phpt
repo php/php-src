@@ -1,11 +1,7 @@
 --TEST--
 Test function gzread() by calling it with its expected arguments
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 // note that gzread is an alias to fread. parameter checking tests will be
@@ -21,7 +17,6 @@ foreach ($lengths as $length) {
 gzclose($h);
 
 ?>
-===DONE===
 --EXPECT--
 string(10) "When you'r"
 string(14) "e taught throu"
@@ -34,4 +29,3 @@ as it turns "
 string(46) "around
 and I know that it descends down on me
 "
-===DONE===

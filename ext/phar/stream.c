@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -90,7 +90,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	resource->path = zend_string_init(entry, entry_len, 0);
 	efree(entry);
 
-#if MBO_0
+#ifdef MBO_0
 		if (resource) {
 			fprintf(stderr, "Alias:     %s\n", alias);
 			fprintf(stderr, "Scheme:    %s\n", ZSTR_VAL(resource->scheme));
@@ -223,13 +223,10 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				idata->internal_file->flags |= Z_LVAL_P(pzoption);
 			}
 			if ((pzoption = zend_hash_str_find(pharcontext, "metadata", sizeof("metadata")-1)) != NULL) {
-				if (Z_TYPE(idata->internal_file->metadata) != IS_UNDEF) {
-					zval_ptr_dtor(&idata->internal_file->metadata);
-					ZVAL_UNDEF(&idata->internal_file->metadata);
-				}
+				phar_metadata_tracker_free(&idata->internal_file->metadata_tracker, idata->internal_file->is_persistent);
 
 				metadata = pzoption;
-				ZVAL_COPY_DEREF(&idata->internal_file->metadata, metadata);
+				ZVAL_COPY_DEREF(&idata->internal_file->metadata_tracker.val, metadata);
 				idata->phar->is_modified = 1;
 			}
 		}
@@ -299,7 +296,7 @@ idata_error:
 		}
 	}
 	php_url_free(resource);
-#if MBO_0
+#ifdef MBO_0
 		fprintf(stderr, "Pharname:   %s\n", idata->phar->filename);
 		fprintf(stderr, "Filename:   %s\n", internal_file);
 		fprintf(stderr, "Entry:      %s\n", idata->internal_file->filename);
@@ -318,7 +315,7 @@ idata_error:
 		return NULL;
 	}
 
-	if (!PHAR_G(cwd_init) && options & STREAM_OPEN_FOR_INCLUDE) {
+	if (!PHAR_G(cwd_init) && (options & STREAM_OPEN_FOR_INCLUDE)) {
 		char *entry = idata->internal_file->filename, *cwd;
 
 		PHAR_G(cwd_init) = 1;
@@ -483,7 +480,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 /**
  * stat an opened phar file handle stream, used by phar_stat()
  */
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_temp_dir)
+void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_temp_dir)
 {
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 
@@ -616,7 +613,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	if (HT_IS_INITIALIZED(&phar->mounted_dirs) && zend_hash_num_elements(&phar->mounted_dirs)) {
 		zend_string *str_key;
 
-		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
 			if (ZSTR_LEN(str_key) >= internal_file_len || strncmp(ZSTR_VAL(str_key), internal_file, ZSTR_LEN(str_key))) {
 				continue;
 			} else {
@@ -846,7 +843,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		/* mark the old one for deletion */
 		entry->is_deleted = 1;
 		entry->fp = NULL;
-		ZVAL_UNDEF(&entry->metadata);
+		ZVAL_UNDEF(&entry->metadata_tracker.val);
 		entry->link = entry->tmp = NULL;
 		source = entry;
 
@@ -886,7 +883,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		uint32_t from_len = ZSTR_LEN(resource_from->path) - 1;
 		uint32_t to_len = ZSTR_LEN(resource_to->path) - 1;
 
-		ZEND_HASH_FOREACH_BUCKET(&phar->manifest, b) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&phar->manifest, b) {
 			str_key = b->key;
 			entry = Z_PTR(b->val);
 			if (!entry->is_deleted &&
@@ -913,10 +910,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_rehash(&phar->manifest);
 
-		ZEND_HASH_FOREACH_BUCKET(&phar->virtual_dirs, b) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&phar->virtual_dirs, b) {
 			str_key = b->key;
-			if (ZSTR_LEN(str_key) >= from_len &&
-				memcmp(ZSTR_VAL(str_key), ZSTR_VAL(resource_from->path)+1, from_len) == 0 &&
+			if (zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource_from->path)+1, from_len) &&
 				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
 				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);
@@ -931,10 +927,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_rehash(&phar->virtual_dirs);
 
-		ZEND_HASH_FOREACH_BUCKET(&phar->mounted_dirs, b) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&phar->mounted_dirs, b) {
 			str_key = b->key;
-			if (ZSTR_LEN(str_key) >= from_len &&
-				memcmp(ZSTR_VAL(str_key), ZSTR_VAL(resource_from->path)+1, from_len) == 0 &&
+			if (zend_string_starts_with_cstr(str_key, ZSTR_VAL(resource_from->path)+1, from_len) &&
 				(ZSTR_LEN(str_key) == from_len || IS_SLASH(ZSTR_VAL(str_key)[from_len]))) {
 
 				new_str_key = zend_string_alloc(ZSTR_LEN(str_key) + to_len - from_len, 0);

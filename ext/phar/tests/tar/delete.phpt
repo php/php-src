@@ -1,7 +1,7 @@
 --TEST--
 Phar: delete test, tar-based phar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -29,4 +29,4 @@ echo file_get_contents($alias . '/a') . "\n";
 --EXPECTF--
 a
 
-Warning: file_get_contents(phar://%sdelete.phar.tar/a): failed to open stream: phar error: "a" is not a file in phar "%sdelete.phar.tar" in %sdelete.php on line %d
+Warning: file_get_contents(phar://%sdelete.phar.tar/a): Failed to open stream: phar error: "a" is not a file in phar "%sdelete.phar.tar" in %sdelete.php on line %d

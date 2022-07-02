@@ -3,28 +3,28 @@ SPL: ArrayObject: ensure a wrapped object's magic methods for property access ar
 --FILE--
 <?php
 class UsesMagic {
-	public $a = 1;
-	public $b = 2;
-	public $c = 3;
+    public $a = 1;
+    public $b = 2;
+    public $c = 3;
 
-	private $priv = 'secret';
+    private $priv = 'secret';
 
-	function __get($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __set($name, $value) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __isset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __unset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
+    function __get($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __set($name, $value) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __isset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __unset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
 
 }
 
@@ -102,7 +102,7 @@ object(ArrayObject)#2 (1) {
 --> Read existent, non-existent and dynamic:
 string(7) "changed"
 
-Notice: Undefined index: nonexistent in %s on line 42
+Warning: Undefined array key "nonexistent" in %s on line %d
 NULL
 string(11) "new.changed"
   Original wrapped object:
@@ -170,8 +170,6 @@ object(ArrayObject)#2 (1) {
 }
 
 --> Unset existent, non-existent and dynamic:
-
-Notice: Undefined index: nonexistent in %s on line 60
   Original wrapped object:
 object(UsesMagic)#1 (3) {
   ["b"]=>

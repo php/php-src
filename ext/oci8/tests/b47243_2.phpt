@@ -1,5 +1,7 @@
 --TEST--
 Bug #47243 (Crash on exit with ZTS mode)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -21,6 +23,5 @@ oci_free_statement($s);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===DONE===

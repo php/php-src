@@ -2,11 +2,6 @@
 Test fgetcsv() : usage variations - reading the blank line
 --FILE--
 <?php
-/*
- Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
- Description: Gets line from file pointer and parse for CSV fields
-*/
-
 /* Testing fgetcsv() by reading a file containing a blank line */
 
 echo "*** Testing fgetcsv() : reading the blank line ***\n";

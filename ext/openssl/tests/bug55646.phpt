@@ -1,7 +1,7 @@
 --TEST--
 Bug #55646: textual input in openssl_csr_new() is not expected in UTF-8
---SKIPIF--
-<?php if (!extension_loaded("openssl")) die("skip"); ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 
@@ -36,7 +36,7 @@ $csr_res = openssl_csr_new(
 if (!$csr_res) {
     while ($e = openssl_error_string()) {
         $err = $e;
-	}
+    }
     die("Failed; last error: $err");
 }
 openssl_csr_export($csr_res, $csr);

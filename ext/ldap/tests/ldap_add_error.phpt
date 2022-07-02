@@ -3,8 +3,9 @@ ldap_add() - Add operation that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -16,16 +17,16 @@ var_dump(ldap_add($link, "$base", array()));
 
 // Invalid DN
 var_dump(
-	ldap_add($link, "weirdAttribute=val", array(
-		"weirdAttribute"			=> "val",
-	)),
-	ldap_error($link),
-	ldap_errno($link)
+    ldap_add($link, "weirdAttribute=val", array(
+        "weirdAttribute"			=> "val",
+    )),
+    ldap_error($link),
+    ldap_errno($link)
 );
 
 // Duplicate entry
 for ($i = 0; $i < 2; $i++)
-	var_dump(
+    var_dump(
     ldap_add($link, "dc=my-domain,$base", array(
       "objectClass"	=> array(
         "top",
@@ -34,52 +35,53 @@ for ($i = 0; $i < 2; $i++)
       "dc"			=> "my-domain",
       "o"				=> "my-domain",
     ))
-	);
+    );
 var_dump(ldap_error($link), ldap_errno($link));
 
 // Wrong array indexes
-var_dump(
-	ldap_add($link, "dc=my-domain2,dc=com", array(
-		"objectClass"	=> array(
-			0	=> "top",
-			2	=> "dcObject",
-			5	=> "organization"),
-		"dc"			=> "my-domain",
-		"o"				=> "my-domain",
-	))
-	/* Is this correct behaviour to still have "Already exists" as error/errno?
-	,
-	ldap_error($link),
-	ldap_errno($link)
-	*/
-);
+try {
+    ldap_add($link, "dc=my-domain2,dc=com", array(
+        "objectClass"	=> array(
+            0	=> "top",
+            2	=> "dcObject",
+            5	=> "organization"),
+        "dc"			=> "my-domain",
+        "o"				=> "my-domain",
+    ));
+    /* Is this correct behaviour to still have "Already exists" as error/errno?
+    ,
+    ldap_error($link),
+    ldap_errno($link)
+    */
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 // Invalid attribute
 var_dump(
-	ldap_add($link, "$base", array(
-		"objectClass"	=> array(
-			"top",
-			"dcObject",
-			"organization"),
-		"dc"			=> "my-domain",
-		"o"				=> "my-domain",
-		"weirdAttr"		=> "weirdVal",
-	)),
-	ldap_error($link),
-	ldap_errno($link)
+    ldap_add($link, "$base", array(
+        "objectClass"	=> array(
+            "top",
+            "dcObject",
+            "organization"),
+        "dc"			=> "my-domain",
+        "o"				=> "my-domain",
+        "weirdAttr"		=> "weirdVal",
+    )),
+    ldap_error($link),
+    ldap_errno($link)
 );
 
 var_dump(
-	ldap_add($link, "$base", array(array( "Oops"
-	)))
-	/* Is this correct behaviour to still have "Undefined attribute type" as error/errno?
-	,
-	ldap_error($link),
-	ldap_errno($link)
-	*/
+    ldap_add($link, "$base", array(array( "Oops"
+    )))
+    /* Is this correct behaviour to still have "Undefined attribute type" as error/errno?
+    ,
+    ldap_error($link),
+    ldap_errno($link)
+    */
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -102,9 +104,7 @@ Warning: ldap_add(): Add: Already exists in %s on line %d
 bool(false)
 string(14) "Already exists"
 int(68)
-
-Warning: ldap_add(): Value array must have consecutive indices 0, 1, ... in %s on line %d
-bool(false)
+ldap_add(): Argument #3 ($entry) must contain arrays with consecutive integer indices starting from 0
 
 Warning: ldap_add(): Add: Undefined attribute type in %s on line %d
 bool(false)
@@ -113,4 +113,3 @@ int(17)
 
 Warning: ldap_add(): Unknown attribute in the data in %s on line %d
 bool(false)
-===DONE===

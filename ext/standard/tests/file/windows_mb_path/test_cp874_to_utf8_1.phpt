@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+file_cp874
 --FILE--
 <?php
 /*
@@ -31,10 +33,8 @@ system("dir /b " . $fn);
 remove_data("file_cp874");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\เป็นแฟ้มที่ทดสอบ11"
 bool(true)
 bool(true)
 เป็นแฟ้มที่ทดสอบ11
-===DONE===

@@ -2,11 +2,6 @@
 Test array_rand() function : usage variation - with MultiDimensional array
 --FILE--
 <?php
-/* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Test behaviour of array_rand() function when multi-dimensional array
 * is passed to 'input' argument

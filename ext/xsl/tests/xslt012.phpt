@@ -1,7 +1,7 @@
 --TEST--
 Test 12: Using Associative Array of Parameters
---SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 echo "Test 12: Using Associative Array of Parameters";
@@ -30,9 +30,9 @@ if(!$proc) {
 $proc->importStylesheet($xsl);
 
 $parameters = Array(
-					'foo' => 'barbar',
-					'foo1' => 'test',
-					);
+                    'foo' => 'barbar',
+                    'foo1' => 'test',
+                    );
 
 $proc->setParameter( "", $parameters);
 

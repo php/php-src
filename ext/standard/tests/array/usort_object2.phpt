@@ -2,11 +2,6 @@
 Test usort() function : object functionality - Different types of classes
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass an array of objects which are either:
  * 1. Empty
@@ -95,7 +90,6 @@ $array_arg = array(
 var_dump( usort($array_arg, 'cmp_function') );
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usort() : object functionality ***
 -- Testing usort() with StaticClass objects --
@@ -135,31 +129,30 @@ bool(true)
 array(4) {
   [0]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(15)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(15)
   }
   [1]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(20)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(20)
   }
   [2]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(500)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(500)
   }
   [3]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(700)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(700)
   }
 }
-===DONE===

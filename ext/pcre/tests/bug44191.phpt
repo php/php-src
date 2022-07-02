@@ -8,7 +8,7 @@ $array = range(1, 10);
 preg_grep('/asdf/', $array);
 
 foreach ($array as $k => $v) {
-	print $k;
+    print $k;
 }
 
 ?>

@@ -10,9 +10,7 @@ var_dump(
     $regex->getPregFlags()
 );
 ?>
-===DONE===
 --EXPECT--
 int(0)
 int(0)
 int(0)
-===DONE===

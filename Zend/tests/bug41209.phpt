@@ -20,13 +20,13 @@ class cache implements ArrayAccess
 {
     private $container = array();
 
-    public function offsetGet($id) {}
+    public function offsetGet($id): mixed {}
 
-    public function offsetSet($id, $value) {}
+    public function offsetSet($id, $value): void {}
 
-    public function offsetUnset($id) {}
+    public function offsetUnset($id): void {}
 
-    public function offsetExists($id)
+    public function offsetExists($id): bool
     {
         return isset($this->containers[(string) $id]);
     }
@@ -39,7 +39,7 @@ var_dump(isset($cache[$id]));
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught ErrorException: Undefined variable: id in %s:%d
+Fatal error: Uncaught ErrorException: Undefined variable $id in %s:%d
 Stack trace:
 #0 %s(%d): env::errorHandler(2, 'Undefined varia...', '%s', %d)
 #1 {main}

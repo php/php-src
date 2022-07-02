@@ -1,8 +1,9 @@
 --TEST--
 Bug #73053 (XML reader with setSchema now fails under 5.6.25)
+--EXTENSIONS--
+xmlreader
 --SKIPIF--
 <?php
-if (!extension_loaded('xmlreader')) die('skip xmlreader extension not available');
 if (LIBXML_VERSION === 20904) die('skip fails with libxml 2.9.4');
 ?>
 --FILE--
@@ -15,7 +16,5 @@ var_dump($xml->open($xmlfile, null, LIBXML_PARSEHUGE));
 $xml->setSchema($xsdfile);
 while($xml->read());
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

@@ -21,6 +21,7 @@ list(STDIN => $resource) = [];
 
 ?>
 --EXPECTF--
+Deprecated: Implicit conversion from float 1.5 to int loses precision in %s on line %d
 string(0) ""
 int(1)
 int(0)
@@ -31,4 +32,4 @@ int(1)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Notice: Undefined offset: 1 in %s on line %d
+Warning: Undefined array key 1 in %s on line %d

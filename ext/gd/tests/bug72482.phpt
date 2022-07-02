@@ -1,9 +1,7 @@
 --TEST--
 Bug #72482 (Ilegal write/read access caused by gdImageAALine overflow)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $img = imagecreatetruecolor(13, 1007);

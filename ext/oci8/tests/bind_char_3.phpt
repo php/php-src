@@ -1,8 +1,9 @@
 --TEST--
 PL/SQL oci_bind_by_name with SQLT_AFC aka CHAR to CHAR parameter
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(__DIR__."/connect.inc");
 // The bind buffer size edge cases seem to change each DB version.
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -20,7 +21,7 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"create or replace function bind_char_3_fn(p1 char) return char as begin return p1; end;",
+    "create or replace function bind_char_3_fn(p1 char) return char as begin return p1; end;",
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -33,7 +34,7 @@ $s = oci_parse($c, "begin :bv2 := bind_char_3_fn(:bv1); end;");
 $bv1 = 'abc';
 $r = oci_bind_by_name($s, ':bv1', $bv1) && oci_bind_by_name($s, ':bv2', $bv2);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 echo "Test 1.2 In Length: default.  In Type: default.  Out Length: 10.               Out Type: default\n";
@@ -41,7 +42,7 @@ echo "Test 1.2 In Length: default.  In Type: default.  Out Length: 10.          
 $bv1 = 'abc';
 $r = oci_bind_by_name($s, ':bv1', $bv1) && oci_bind_by_name($s, ':bv2', $bv2, 10);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -50,7 +51,7 @@ echo "Test 1.3 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = 'abc';
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -60,7 +61,7 @@ echo "Test 1.4 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = 'abc';
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -69,7 +70,7 @@ echo "Test 1.5 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)
 $bv1 = 'abc';
 $r = oci_bind_by_name($s, ':bv1', $bv1, strlen($bv1), SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, strlen($bv1), SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -78,7 +79,7 @@ echo "Test 1.6 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)
 $bv1 = 'abc';
 $r = oci_bind_by_name($s, ':bv1', $bv1, strlen($bv1), SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, strlen($bv1)-1, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -87,7 +88,7 @@ echo "Test 1.7 In Length: strlen.   In Type: AFC.      Out Length: strlen(input)
 $bv1 = 'abc';
 $r = oci_bind_by_name($s, ':bv1', $bv1, strlen($bv1), SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, strlen($bv1)+1, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -98,7 +99,7 @@ echo "Test 2.1 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = '';
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -106,7 +107,7 @@ echo "Test 2.2 In Length: default.  In Type: default.  Out Length: 10.          
 
 $r = oci_bind_by_name($s, ':bv1', $bv1) && oci_bind_by_name($s, ':bv2', $bv2, 10);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -116,7 +117,7 @@ echo "Test 2.3 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = '';
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -126,7 +127,7 @@ echo "Test 2.4 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = '';
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -136,7 +137,7 @@ echo "Test 2.5 In Length: -1.       In Type: AFC.      Out Length: 0.           
 $bv1 = '';
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 0, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -146,7 +147,7 @@ echo "Test 2.6 In Length: 0.        In Type: AFC.      Out Length: 0.           
 $bv1 = '';
 $r = oci_bind_by_name($s, ':bv1', $bv1, 0, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 0, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -156,7 +157,7 @@ echo "Test 2.7 In Length: 1.        In Type: AFC.      Out Length: 1.           
 $bv1 = '';
 $r = oci_bind_by_name($s, ':bv1', $bv1, 1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 1, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -168,7 +169,7 @@ echo "Test 3.1 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = null;
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -177,7 +178,7 @@ echo "Test 3.2 In Length: default.  In Type: default.  Out Length: 10.          
 $bv1 = null;
 $r = oci_bind_by_name($s, ':bv1', $bv1) && oci_bind_by_name($s, ':bv2', $bv2, 10);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -187,7 +188,7 @@ echo "Test 3.3 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = null;
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -197,7 +198,7 @@ echo "Test 3.4 In Length: -1.       In Type: AFC.      Out Length: 10.          
 $bv1 = null;
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 10, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -206,7 +207,7 @@ echo "Test 3.5 In Length: -1.       In Type: AFC.      Out Length: 0.           
 $bv1 = null;
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 0, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
@@ -216,26 +217,26 @@ echo "Test 3.6 In Length: -1.       In Type: AFC.      Out Length: 1.           
 $bv1 = null;
 $r = oci_bind_by_name($s, ':bv1', $bv1, -1, SQLT_AFC) && oci_bind_by_name($s, ':bv2', $bv2, 1, SQLT_AFC);
 if ($r)
-	do_e($s);
+    do_e($s);
 var_dump($bv1, $bv2);
 
 
 function do_e($s)
 {
-	echo "  Executing:\n";
+    echo "  Executing:\n";
 
-	$r = @oci_execute($s);
-	if (!$r) {
-		$m = oci_error($s);
-		echo "    Oci_execute error ORA-".$m['code']."\n";
-		return;
-	}
+    $r = @oci_execute($s);
+    if (!$r) {
+        $m = oci_error($s);
+        echo "    Oci_execute error ORA-".$m['code']."\n";
+        return;
+    }
 }
 
 // Cleanup
 
 $stmtarray = array(
-	"drop function bind_char_3_fn"
+    "drop function bind_char_3_fn"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

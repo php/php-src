@@ -1,7 +1,7 @@
 --TEST--
 Bug #69679 (DOMDocument::loadHTML refuses to accept NULL bytes)
---SKIPIF--
-<?php require 'skipif.inc' ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();

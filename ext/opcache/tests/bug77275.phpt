@@ -3,17 +3,17 @@ Bug #77275: OPcache optimization problem for ArrayAccess->offsetGet(string)
 --INI--
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 namespace Foo;
 class Bar { public function get() {} }
 class Record implements \ArrayAccess {
-    public function offsetSet($offset, $value) { throw new \Exception; }
-    public function offsetGet($offset) { var_dump($offset); }
-    public function offsetExists($offset) { throw new \Exception; }
-    public function offsetUnset($offset) { throw new \Exception; }
+    public function offsetSet($offset, $value): void { throw new \Exception; }
+    public function offsetGet($offset): mixed { var_dump($offset); return null; }
+    public function offsetExists($offset): bool { throw new \Exception; }
+    public function offsetUnset($offset): void { throw new \Exception; }
 }
 class Baz {
     public function run() {

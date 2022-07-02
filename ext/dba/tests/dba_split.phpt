@@ -1,14 +1,17 @@
 --TEST--
 DBA Split Test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	require_once __DIR__ .'/skipif.inc';
-	die("info $HND handler used");
+    require_once __DIR__ .'/skipif.inc';
+    die("info $HND handler used");
 ?>
 --FILE--
 <?php
-var_dump(dba_key_split(1));
 var_dump(dba_key_split(null));
+var_dump(dba_key_split(false));
+var_dump(dba_key_split(1));
 var_dump(dba_key_split(""));
 var_dump(dba_key_split("name1"));
 var_dump(dba_key_split("[key1"));
@@ -19,16 +22,15 @@ var_dump(dba_key_split("[key1]name1[key2]name2"));
 var_dump(dba_key_split("[key1]name1"));
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
+bool(false)
+bool(false)
 array(2) {
   [0]=>
   string(0) ""
   [1]=>
   string(1) "1"
 }
-bool(false)
 array(2) {
   [0]=>
   string(0) ""
@@ -77,4 +79,3 @@ array(2) {
   [1]=>
   string(5) "name1"
 }
-===DONE===

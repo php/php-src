@@ -16,5 +16,5 @@ try {
 
 ?>
 --EXPECT--
-Cannot use "self" when no class scope is active
-Cannot use "self" when no class scope is active
+Cannot use "self" in the global scope
+Cannot use "self" in the global scope

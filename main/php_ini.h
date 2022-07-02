@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,7 +29,7 @@ PHPAPI zval *cfg_get_entry(const char *name, size_t name_length);
 PHPAPI int cfg_get_long(const char *varname, zend_long *result);
 PHPAPI int cfg_get_double(const char *varname, double *result);
 PHPAPI int cfg_get_string(const char *varname, char **result);
-PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash);
+PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename, HashTable *target_hash);
 PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage);
 PHPAPI int php_ini_has_per_dir_config(void);
 PHPAPI int php_ini_has_per_host_config(void);

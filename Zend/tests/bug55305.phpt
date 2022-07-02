@@ -2,6 +2,7 @@
 Bug #55305 (ref lost: 1st ref instantiated in class def, 2nd ref made w/o instantiating)
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class Foo {
   var $foo = "test";
 }

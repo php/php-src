@@ -10,12 +10,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- * Description: Send an email message with invalid addtional_headers
- * Source code: ext/standard/mail.c
- * Alias to functions:
- */
-
 echo "*** Testing mail() : basic functionality ***\n";
 
 
@@ -220,7 +214,6 @@ echo @file_get_contents($outFile);
 @unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 -- Valid Header --
@@ -326,4 +319,3 @@ HEAD1: a
 HEAD2: b
 
 A Message
-===DONE===

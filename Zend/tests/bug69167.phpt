@@ -3,7 +3,7 @@ Bug #69167 (call_user_func does not support references anymore)
 --FILE--
 <?php
 function l($m) {
-	    echo $m . "\n";
+        echo $m . "\n";
 }
 
 $cb = 'l';

@@ -29,7 +29,6 @@ steps:
         --enable-xmlreader \
         --with-xsl \
         --with-tidy \
-        --with-xmlrpc \
         --enable-sysvsem \
         --enable-sysvshm \
         --enable-shmop \
@@ -51,10 +50,29 @@ steps:
         --enable-sysvmsg \
         --with-ffi \
         --enable-zend-test \
+        --enable-dl-test=shared \
         --with-ldap \
         --with-ldap-sasl \
         --with-password-argon2 \
         --with-mhash \
+        --with-sodium \
+        --enable-dba \
+        --with-cdb \
+        --enable-flatfile \
+        --enable-inifile \
+        --with-tcadb \
+        --with-lmdb \
+        --with-qdbm \
+        --with-snmp \
+        --with-unixODBC \
+        --with-imap \
+        --with-kerberos \
+        --with-imap-ssl \
+        --with-pdo-odbc=unixODBC,/usr \
+        --with-pdo-firebird \
+        --with-pdo-dblib \
+        --with-pdo-oci=shared,instantclient,/opt/oracle/instantclient \
+        --with-oci8=shared,instantclient,/opt/oracle/instantclient \
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d

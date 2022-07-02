@@ -17,15 +17,7 @@
 #ifndef _CRYPT_BLOWFISH_H
 #define _CRYPT_BLOWFISH_H
 
-#if 0
-extern int _crypt_output_magic(const char *setting, char *output, int size);
-#endif
 extern char *php_crypt_blowfish_rn(const char *key, const char *setting,
 	char *output, int size);
-#if 0
-extern char *_crypt_gensalt_blowfish_rn(const char *prefix,
-	unsigned long count,
-	const char *input, int size, char *output, int output_size);
-#endif
 
 #endif

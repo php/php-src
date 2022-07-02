@@ -1,7 +1,7 @@
 --TEST--
 Bug #46419 (Elements of associative arrays with NULL value are lost)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function bar() {
@@ -9,6 +9,7 @@ function bar() {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -16,7 +17,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('bar');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

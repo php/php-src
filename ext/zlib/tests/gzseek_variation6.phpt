@@ -1,11 +1,7 @@
 --TEST--
 Test function gzseek() by calling it with SEEK_END when reading
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $f = __DIR__."/004.txt.gz";
@@ -25,7 +21,6 @@ var_dump(gzeof($h));
 var_dump(gzread($h, 10));
 gzclose($h);
 ?>
-===DONE===
 --EXPECTF--
 move 40 bytes
 tell=int(40)
@@ -36,4 +31,3 @@ int(-1)
 tell=int(40)
 eof=bool(false)
 string(10) "iny flying"
-===DONE===

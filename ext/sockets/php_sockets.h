@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,6 +29,8 @@
 #include <php.h>
 #ifdef PHP_WIN32
 # include "windows_common.h"
+#else
+# define IS_INVALID_SOCKET(a) (a->bsd_socket < 0)
 #endif
 
 #define PHP_SOCKETS_VERSION PHP_VERSION
@@ -46,11 +48,23 @@ extern zend_module_entry sockets_module_entry;
 
 #ifndef PHP_WIN32
 typedef int PHP_SOCKET;
-# define PHP_SOCKETS_API PHPAPI
 #else
-# define PHP_SOCKETS_API __declspec(dllexport)
 typedef SOCKET PHP_SOCKET;
 #endif
+
+#ifdef PHP_WIN32
+#	ifdef PHP_SOCKETS_EXPORTS
+#		define PHP_SOCKETS_API __declspec(dllexport)
+#	else
+#		define PHP_SOCKETS_API __declspec(dllimport)
+#	endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_SOCKETS_API __attribute__ ((visibility("default")))
+#else
+#	define PHP_SOCKETS_API
+#endif
+
+/* Socket class */
 
 typedef struct {
 	PHP_SOCKET	bsd_socket;
@@ -58,7 +72,23 @@ typedef struct {
 	int			error;
 	int			blocking;
 	zval		zstream;
+	zend_object std;
 } php_socket;
+
+extern PHP_SOCKETS_API zend_class_entry *socket_ce;
+
+static inline php_socket *socket_from_obj(zend_object *obj) {
+	return (php_socket *)((char *)(obj) - XtOffsetOf(php_socket, std));
+}
+
+#define Z_SOCKET_P(zv) socket_from_obj(Z_OBJ_P(zv))
+
+#define ENSURE_SOCKET_VALID(php_sock) do { \
+	if (IS_INVALID_SOCKET(php_sock)) { \
+		zend_argument_error(NULL, 1, "has already been closed"); \
+		RETURN_THROWS(); \
+	} \
+} while (0)
 
 #ifdef PHP_WIN32
 struct	sockaddr_un {
@@ -66,14 +96,6 @@ struct	sockaddr_un {
 	char	sun_path[108];
 };
 #endif
-
-PHP_SOCKETS_API int php_sockets_le_socket(void);
-PHP_SOCKETS_API php_socket *php_create_socket(void);
-PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc);
-PHP_SOCKETS_API void php_destroy_sockaddr(zend_resource *rsrc);
-
-#define php_sockets_le_socket_name "Socket"
-#define php_sockets_le_addrinfo_name "AddressInfo"
 
 #define PHP_SOCKET_ERROR(socket, msg, errn) \
 		do { \
@@ -94,7 +116,7 @@ ZEND_BEGIN_MODULE_GLOBALS(sockets)
 #endif
 ZEND_END_MODULE_GLOBALS(sockets)
 
-ZEND_EXTERN_MODULE_GLOBALS(sockets)
+PHP_SOCKETS_API ZEND_EXTERN_MODULE_GLOBALS(sockets)
 #define SOCKETS_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(sockets, v)
 
 enum sockopt_return {
@@ -103,8 +125,8 @@ enum sockopt_return {
 	SOCKOPT_SUCCESS
 };
 
-char *sockets_strerror(int error);
-php_socket *socket_import_file_descriptor(PHP_SOCKET sock);
+PHP_SOCKETS_API char *sockets_strerror(int error);
+PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock);
 
 #else
 #define phpext_sockets_ptr NULL

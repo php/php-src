@@ -1,5 +1,7 @@
 --TEST--
 Bug #42841 (REF CURSOR and oci_new_cursor PHP crash)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -99,7 +101,7 @@ function bug43449_getCur($c)
 
     $ret = array();
 
-    while (ocifetchinto($cur, $row, OCI_ASSOC)) {
+    while ($row = oci_fetch_assoc($cur)) {
         $ret[] = $row;
     }
 

@@ -2,7 +2,7 @@
 str_word_count()
 --FILE--
 <?php
-$str = "Hello friend, you're  
+$str = "Hello friend, you're
     looking          good today!";
 $b =& $str;
 var_dump(str_word_count($str, 1));
@@ -11,35 +11,35 @@ var_dump(str_word_count($str));
 
 try {
     var_dump(str_word_count($str, 3));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(str_word_count($str, 123));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(str_word_count($str, -1));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(str_word_count($str, 999999999));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 var_dump($str);
 
 $str2 = "F0o B4r 1s bar foo";
-var_dump(str_word_count($str2, NULL, "04"));
-var_dump(str_word_count($str2, NULL, "01"));
-var_dump(str_word_count($str2, NULL, "014"));
-var_dump(str_word_count($str2, NULL, ""));
+var_dump(str_word_count($str2, 0, "04"));
+var_dump(str_word_count($str2, 0, "01"));
+var_dump(str_word_count($str2, 0, "014"));
+var_dump(str_word_count($str2, 0, ""));
 var_dump(str_word_count($str2, 1, "04"));
 var_dump(str_word_count($str2, 1, "01"));
 var_dump(str_word_count($str2, 1, "014"));
@@ -79,19 +79,19 @@ array(6) {
   string(6) "friend"
   [14]=>
   string(6) "you're"
-  [27]=>
+  [25]=>
   string(7) "looking"
-  [44]=>
+  [42]=>
   string(4) "good"
-  [49]=>
+  [47]=>
   string(5) "today"
 }
 int(6)
-Invalid format value 3
-Invalid format value 123
-Invalid format value -1
-Invalid format value 999999999
-string(55) "Hello friend, you're  
+str_word_count(): Argument #2 ($format) must be a valid format value
+str_word_count(): Argument #2 ($format) must be a valid format value
+str_word_count(): Argument #2 ($format) must be a valid format value
+str_word_count(): Argument #2 ($format) must be a valid format value
+string(53) "Hello friend, you're
     looking          good today!"
 int(5)
 int(6)

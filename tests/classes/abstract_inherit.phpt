@@ -4,7 +4,7 @@ ZE2 A class that inherits an abstract method is abstract
 <?php
 
 abstract class pass {
-	abstract function show();
+    abstract function show();
 }
 
 abstract class fail extends pass {

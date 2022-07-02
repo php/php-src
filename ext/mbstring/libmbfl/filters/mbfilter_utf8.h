@@ -31,7 +31,6 @@
 #define MBFL_MBFILTER_UTF8_H
 
 extern const mbfl_encoding mbfl_encoding_utf8;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf8;
 extern const struct mbfl_convert_vtbl vtbl_utf8_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_utf8;
 

@@ -3,7 +3,6 @@ Test preg_split() function : error conditions - bad regular expressions
 --FILE--
 <?php
 /*
-* proto array preg_split(string pattern, string subject [, int limit [, int flags]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -37,7 +36,7 @@ try {
 
 Arg value is abcdef
 
-Warning: preg_split(): Delimiter must not be alphanumeric or backslash in %spreg_split_error1.php on line %d
+Warning: preg_split(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_split_error1.php on line %d
 bool(false)
 
 Arg value is /[a-zA-Z]
@@ -56,7 +55,7 @@ Warning: preg_split(): Unknown modifier 'F' in %spreg_split_error1.php on line %
 bool(false)
 
 Arg value is Array
-preg_split() expects parameter 1 to be string, array given
+preg_split(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 array(3) {
@@ -67,4 +66,4 @@ array(3) {
   [2]=>
   string(4) " 5 6"
 }
-preg_split() expects parameter 1 to be string, object given
+preg_split(): Argument #1 ($pattern) must be of type string, stdClass given

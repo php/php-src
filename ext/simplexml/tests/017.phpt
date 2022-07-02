@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: iteration through subnodes
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF
@@ -52,7 +52,6 @@ print_xml2(simplexml_load_string($xml));
 echo "---22---\n";
 print_xml2(simplexml_load_string($xml1));
 ?>
-===DONE===
 --EXPECT--
 ---11---
 person: Joe
@@ -74,4 +73,3 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
-===DONE===

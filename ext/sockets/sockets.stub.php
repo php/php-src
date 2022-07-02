@@ -1,173 +1,141 @@
 <?php
 
-/** @return int|false */
-function socket_select(?array &$read_fds, ?array &$write_fds, ?array &$except_fds, ?int $tv_sec, int $tv_usec = 0) {}
-
-/** @return resource|false */
-function socket_create_listen(int $port, int $backlog = 128) {}
+/** @generate-class-entries */
 
 /**
- * @param resource $socket
- *
- * @return resource|false
+ * @strict-properties
+ * @not-serializable
  */
-function socket_accept($socket) {}
-
-/** @param resource $socket */
-function socket_set_nonblock($socket): bool {}
-
-/** @param resource $socket */
-function socket_set_block($socket): bool {}
-
-/** @param resource $socket */
-function socket_listen($socket, int $backlog = 0): bool {}
-
-/** @param resource $socket */
-function socket_close($socket): void {}
+final class Socket
+{
+}
 
 /**
- * @param resource $socket
- * 
- * @return int|false
+ * @strict-properties
+ * @not-serializable
  */
-function socket_write($socket, string $buf, int $length = 0) {}
+final class AddressInfo
+{
+}
+
+function socket_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
+
+function socket_create_listen(int $port, int $backlog = 128): Socket|false {}
+
+function socket_accept(Socket $socket): Socket|false {}
+
+function socket_set_nonblock(Socket $socket): bool {}
+
+function socket_set_block(Socket $socket): bool {}
+
+function socket_listen(Socket $socket, int $backlog = 0): bool {}
+
+function socket_close(Socket $socket): void {}
+
+function socket_write(Socket $socket, string $data, ?int $length = null): int|false {}
+
+function socket_read(Socket $socket, int $length, int $mode = PHP_BINARY_READ): string|false {}
 
 /**
- * @param resource $socket
- * 
- * @return string|false
+ * @param string $address
+ * @param int $port
  */
-function socket_read($socket, int $length, int $type = PHP_BINARY_READ) {}
-
-/** @param resource $socket */
-function socket_getsockname($socket, &$addr, &$port = UNKNOWN): bool {}
-
-/** @param resource $socket */
-function socket_getpeername($socket, &$addr, &$port = UNKNOWN): bool {}
-
-/** @return resource|false */
-function socket_create(int $domain, int $type, int $protocol) {}
-
-/** @param resource $socket */
-function socket_connect($socket, string $addr, int $port = 0): bool {}
-
-function socket_strerror(int $errno): string {}
-
-/** @param resource $socket */
-function socket_bind($socket, string $addr, int $port = 0): bool {}
+function socket_getsockname(Socket $socket, &$address, &$port = null): bool {}
 
 /**
- * @param resource $socket
- * 
- * @return int|false
+ * @param string $address
+ * @param int $port
  */
-function socket_recv($socket, &$buf, int $len, int $flags) {}
+function socket_getpeername(Socket $socket, &$address, &$port = null): bool {}
+
+function socket_create(int $domain, int $type, int $protocol): Socket|false {}
+
+function socket_connect(Socket $socket, string $address, ?int $port = null): bool {}
+
+function socket_strerror(int $error_code): string {}
+
+function socket_bind(Socket $socket, string $address, int $port = 0): bool {}
+
+/** @param string|null $data */
+function socket_recv(Socket $socket, &$data, int $length, int $flags): int|false {}
+
+function socket_send(Socket $socket, string $data, int $length, int $flags): int|false {}
 
 /**
- * @param resource $socket
- * 
- * @return int|false
+ * @param string $data
+ * @param string $address
+ * @param int $port
  */
-function socket_send($socket, string $buf, int $len, int $flags) {}
+function socket_recvfrom(Socket $socket, &$data, int $length, int $flags, &$address, &$port = null): int|false {}
+
+function socket_sendto(Socket $socket, string $data, int $length, int $flags, string $address, ?int $port = null): int|false {}
 
 /**
- * @param resource $socket
- * 
- * @return int|false
+ * @return array<string, mixed>|int|false
+ * @refcount 1
  */
-function socket_recvfrom($socket, &$buf, int $len, int $flags, &$name, &$port = UNKNOWN) {}
+function socket_get_option(Socket $socket, int $level, int $option): array|int|false {}
 
 /**
- * @param resource $socket
- * 
- * @return int|false
+ * @return array<string, mixed>|int|false
+ * @alias socket_get_option
  */
-function socket_sendto($socket, string $buf, int $len, int $flags, string $addr, int $port = 0) {}
+function socket_getopt(Socket $socket, int $level, int $option): array|int|false {}
+
+/** @param array|string|int $value */
+function socket_set_option(Socket $socket, int $level, int $option, $value): bool {}
 
 /**
- * @param resource $socket
- * 
- * @return array|int|false
+ * @param array|string|int $value
+ * @alias socket_set_option
  */
-function socket_get_option($socket, int $level, int $optname) {}
-
-/** @param resource $socket */
-function socket_set_option($socket, int $level, int $optname, $optval): bool {}
+function socket_setopt(Socket $socket, int $level, int $option, $value): bool {}
 
 #ifdef HAVE_SOCKETPAIR
-/** @return bool|null */
-function socket_create_pair(int $domain, int $type, int $protocol, &$fd) {}
+/** @param array $pair */
+function socket_create_pair(int $domain, int $type, int $protocol, &$pair): bool {}
 #endif
 
 #ifdef HAVE_SHUTDOWN
-/** @param resource $socket */
-function socket_shutdown($socket, int $how = 2): bool {}
+function socket_shutdown(Socket $socket, int $mode = 2): bool {}
 #endif
 
-/** @param resource $socket */
-function socket_last_error($socket = UNKNOWN): int {}
+function socket_last_error(?Socket $socket = null): int {}
 
-/** @param resource $socket */
-function socket_clear_error($socket = UNKNOWN): void {}
+function socket_clear_error(?Socket $socket = null): void {}
 
-/**
- * @param resource $stream
- * 
- * @return resource|false
- */
-function socket_import_stream($stream) {}
+/** @param resource $stream */
+function socket_import_stream($stream): Socket|false {}
 
-/** @param resource $socket */
-function socket_export_stream($socket) {}
+/** @return resource|false */
+function socket_export_stream(Socket $socket) {}
 
-/**
- * @param resource $socket
- * 
- * @return int|false
- */
-function socket_sendmsg($socket, array $msghdr, int $flags = 0) {}
+function socket_sendmsg(Socket $socket, array $message, int $flags = 0): int|false {}
+
+function socket_recvmsg(Socket $socket, array &$message, int $flags = 0): int|false {}
+
+function socket_cmsg_space(int $level, int $type, int $num = 0): ?int {}
 
 /**
- * @param resource $socket
- * 
- * @return int|false
+ * @return array<int, AddressInfo>|false
+ * @refcount 1
  */
-function socket_recvmsg($socket, array &$msghdr, int $flags = 0) {}
+function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = []): array|false {}
 
-function socket_cmsg_space(int $level, int $type, int $n = 0): ?int {}
+function socket_addrinfo_connect(AddressInfo $address): Socket|false {}
 
-/** @return array|false */
-function socket_addrinfo_lookup(string $host, string $service = UNKNOWN, array $hints = UNKNOWN) {}
+function socket_addrinfo_bind(AddressInfo $address): Socket|false {}
 
 /**
- * @param resource $addr
- * 
- * @return resource|false
+ * @return array<string, int|string|array>
+ * @refcount 1
  */
-function socket_addrinfo_connect($addr) {}
-
-/**
- * @param resource $addr
- * 
- * @return resource|false
- */
-function socket_addrinfo_bind($addr) {}
-
-/** @param resource $addr */
-function socket_addrinfo_explain($addr): array {}
+function socket_addrinfo_explain(AddressInfo $address): array {}
 
 #ifdef PHP_WIN32
-/**
- * @param resource $socket
- * 
- * @return string|false
- */
-function socket_wsaprotocol_info_export($socket, int $target_pid) {}
+function socket_wsaprotocol_info_export(Socket $socket, int $process_id): string|false {}
 
-/**
- * @return resource|false
- */
-function socket_wsaprotocol_info_import(string $info_id) {}
+function socket_wsaprotocol_info_import(string $info_id): Socket|false {}
 
 function socket_wsaprotocol_info_release(string $info_id): bool {}
 #endif

@@ -1,5 +1,7 @@
 --TEST--
 lob buffering - 2
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -48,6 +50,6 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: OCI-Lob::flush(): Invalid flag value: -1 in %s on line %d
+Warning: OCILob::flush(): Invalid flag value: -1 in %s on line %d
 bool(false)
 Done

@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::escapeString
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 
@@ -19,7 +19,7 @@ echo "SELECTING results\n";
 $results = $db->query("SELECT * FROM test ORDER BY id ASC");
 while ($result = $results->fetchArray(SQLITE3_NUM))
 {
-	var_dump($result);
+    var_dump($result);
 }
 $results->finalize();
 

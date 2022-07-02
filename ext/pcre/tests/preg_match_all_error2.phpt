@@ -3,7 +3,6 @@ Test preg_match_all() function : error conditions - wrong arg types
 --FILE--
 <?php
 /*
-* proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -23,11 +22,11 @@ foreach($input as $value) {
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_match_all() : error conditions ***
 
 Arg value is: Array
-preg_match_all() expects parameter 2 to be string, array given
+preg_match_all(): Argument #2 ($subject) must be of type string, array given
 NULL
 
 Arg value is: test

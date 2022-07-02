@@ -1,8 +1,9 @@
 --TEST--
 Testing reading and writing to DOMNode::textContent
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (LIBXML_VERSION < 20707) die ('skip requires libxml2-2.7.7 or higher');
 ?>
 --FILE--

@@ -1,8 +1,9 @@
 --TEST--
 Oracle Database 12c Implicit Result Sets: oci_get_implicit_resultset: similar to imp_res_get_1 but with unrolled loop
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -94,8 +95,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
   1  abcde
@@ -104,4 +103,3 @@ Test 1
   t
   u
   X
-===DONE===

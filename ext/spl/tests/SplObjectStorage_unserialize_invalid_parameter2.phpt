@@ -15,7 +15,7 @@ $data_provider = array(
 
 foreach($data_provider as $input) {
 
-	$s = new SplObjectStorage();
+    $s = new SplObjectStorage();
 
     try {
         $s->unserialize($input);

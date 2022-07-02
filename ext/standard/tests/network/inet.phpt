@@ -23,19 +23,19 @@ var_dump(inet_pton(-1));
 var_dump(inet_pton("abra"));
 
 $array = array(
-	"127.0.0.1",
-	"66.163.161.116",
-	"255.255.255.255",
-	"0.0.0.0",
-	);
+    "127.0.0.1",
+    "66.163.161.116",
+    "255.255.255.255",
+    "0.0.0.0",
+    );
 foreach ($array as $val) {
-	var_dump(bin2hex($packed = inet_pton($val)));
-	var_dump(inet_ntop($packed));
+    var_dump(bin2hex($packed = inet_pton($val)));
+    var_dump(inet_ntop($packed));
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(9) "127.0.0.1"
 string(13) "255.255.255.0"
 bool(false)

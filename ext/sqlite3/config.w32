@@ -8,6 +8,7 @@ if (PHP_SQLITE3 != "no") {
 
 		AC_DEFINE("HAVE_SQLITE3", 1, "SQLite support");
 		AC_DEFINE("HAVE_SQLITE3_ERRSTR", 1, "have sqlite3_errstr function");
+		AC_DEFINE("HAVE_SQLITE3_EXPANDED_SQL", 1, "have sqlite3_expanded_sql function");
 	} else {
 		WARNING("sqlite3 not enabled; libraries and/or headers not found");
 	}

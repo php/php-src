@@ -1,9 +1,7 @@
 --TEST--
 IntlBreakIterator::isBoundary(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -18,11 +16,9 @@ var_dump($bi->isBoundary(-1));
 var_dump($bi->isBoundary(1));
 var_dump($bi->isBoundary(50));
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
 bool(false)
 bool(false)
 bool(false)
-==DONE==

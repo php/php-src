@@ -12,19 +12,12 @@ if (PHP_OS_FAMILY === 'Darwin') {
 precision=14
 --FILE--
 <?php
-/* Prototype: string gettype ( mixed $var );
-   Description: Returns the type of the PHP variable var
-
-   Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type
-*/
-
 /* Test usage variation of gettype() and settype() functions:
          settype() to int/integer type.
    Set type of the data to "int"/"integer" and verify using gettype
    Following are performed in the listed sequence:
      get the current type of the variable
-     set the type of the variable to interger/int type
+     set the type of the variable to integer/int type
      dump the variable to see its new data
      get the new type of the variable
 */
@@ -561,19 +554,19 @@ int(-512000)
 string(7) "integer"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
@@ -956,19 +949,19 @@ int(-512000)
 string(7) "integer"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"

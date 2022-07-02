@@ -1,7 +1,7 @@
 --TEST--
 gmp_xor() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -10,37 +10,46 @@ var_dump(gmp_strval(gmp_xor(123123, 435234)));
 var_dump(gmp_strval(gmp_xor(555, "2342341123")));
 var_dump(gmp_strval(gmp_xor(-1, 3333)));
 var_dump(gmp_strval(gmp_xor(4545, -20)));
-var_dump(gmp_strval(gmp_xor("test", "no test")));
+
+try {
+    var_dump(gmp_strval(gmp_xor("test", "no test")));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $n = gmp_init("987657876543456");
 var_dump(gmp_strval(gmp_xor($n, "34332")));
 $n1 = gmp_init("987657878765436543456");
 var_dump(gmp_strval(gmp_xor($n, $n1)));
 
-var_dump(gmp_xor(array(), 1));
-var_dump(gmp_xor(1, array()));
-var_dump(gmp_xor(array(), array()));
+try {
+    var_dump(gmp_xor(array(), 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_xor(1, array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_xor(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(7) "2120329"
 string(6) "476369"
 string(10) "2342340648"
 string(5) "-3334"
 string(5) "-4563"
-
-Warning: gmp_xor(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-string(1) "0"
+gmp_xor(): Argument #1 ($num1) is not an integer string
 string(15) "987657876574716"
 string(21) "987658017016065701376"
-
-Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_xor(): Argument #1 ($num1) must be of type GMP|string|int, array given
+gmp_xor(): Argument #2 ($num2) must be of type GMP|string|int, array given
+gmp_xor(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

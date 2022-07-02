@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -26,8 +26,7 @@ extern "C" {
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "calendar_class.h"
-#include "calendar_methods.h"
-#include "gregoriancalendar_methods.h"
+#include "calendar_arginfo.h"
 #include <zend_exceptions.h>
 #include <assert.h>
 }
@@ -58,9 +57,9 @@ U_CFUNC	void calendar_object_create(zval *object,
 	calendar_object_construct(object, calendar);
 }
 
-U_CFUNC Calendar *calendar_fetch_native_calendar(zval *object)
+U_CFUNC Calendar *calendar_fetch_native_calendar(zend_object *object)
 {
-	Calendar_object *co = Z_INTL_CALENDAR_P(object);
+	Calendar_object *co = php_intl_calendar_fetch_object(object);
 
 	return co->ucal;
 }
@@ -264,188 +263,14 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
 }
 /* }}} */
 
-/* {{{ Calendar methods arguments info */
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_field, 0, 0, 1)
-	ZEND_ARG_INFO(0, field)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_dow, 0, 0, 1)
-	ZEND_ARG_INFO(0, dayOfWeek)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_other_cal, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_date, 0, 0, 1)
-	ZEND_ARG_INFO(0, date)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_date_optional, 0, 0, 0)
-	ZEND_ARG_INFO(0, date)
-ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_createInstance, 0, 0, 0)
-	ZEND_ARG_INFO(0, timeZone)
-	ZEND_ARG_INFO(0, locale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_get_keyword_values_for_locale, 0, 0, 3)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, commonlyUsed)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_add, 0, 0, 2)
-	ZEND_ARG_INFO(0, field)
-	ZEND_ARG_INFO(0, amount)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setTimeZone, 0, 0, 1)
-	ZEND_ARG_INFO(0, timeZone)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_set, 0, 0, 2)
-	ZEND_ARG_INFO(0, fieldOrYear)
-	ZEND_ARG_INFO(0, valueOrMonth)
-	ZEND_ARG_INFO(0, dayOfMonth)
-	ZEND_ARG_INFO(0, hour)
-	ZEND_ARG_INFO(0, minute)
-	ZEND_ARG_INFO(0, second)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_roll, 0, 0, 2)
-	ZEND_ARG_INFO(0, field)
-	ZEND_ARG_INFO(0, amountOrUpOrDown)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_clear, 0, 0, 0)
-	ZEND_ARG_INFO(0, field)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_field_difference, 0, 0, 2)
-	ZEND_ARG_INFO(0, when)
-	ZEND_ARG_INFO(0, field)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, localeType)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setLenient, 0, 0, 1)
-	ZEND_ARG_INFO(0, isLenient)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_set_minimal_days_in_first_week, 0, 0, 1)
-	ZEND_ARG_INFO(0, numberOfDays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_from_date_time, 0, 0, 1)
-	ZEND_ARG_INFO(0, dateTime)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_wall_time_option, 0, 0, 1)
-	ZEND_ARG_INFO(0, wallTimeOption)
-ZEND_END_ARG_INFO()
-
-/* Gregorian Calendar */
-ZEND_BEGIN_ARG_INFO_EX(ainfo_gregcal___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, timeZoneOrYear)
-	ZEND_ARG_INFO(0, localeOrMonth)
-	ZEND_ARG_INFO(0, dayOfMonth)
-	ZEND_ARG_INFO(0, hour)
-	ZEND_ARG_INFO(0, minute)
-	ZEND_ARG_INFO(0, second)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_gregcal_isLeapYear, 0, 0, 1)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-/* }}} */
-
-/* {{{ Calendar_class_functions
- * Every 'IntlCalendar' class method has an entry in this table
- */
-static const zend_function_entry Calendar_class_functions[] = {
-	PHP_ME(IntlCalendar,				__construct,				ainfo_cal_void,						ZEND_ACC_PRIVATE)
-	PHP_ME_MAPPING(createInstance,		intlcal_create_instance,	ainfo_cal_createInstance,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getKeywordValuesForLocale, intlcal_get_keyword_values_for_locale, ainfo_cal_get_keyword_values_for_locale, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getNow,				intlcal_get_now,			ainfo_cal_void,						ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getAvailableLocales,	intlcal_get_available_locales, ainfo_cal_void,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(get,					intlcal_get,				ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getTime,				intlcal_get_time,			ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setTime,				intlcal_set_time,			ainfo_cal_date,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(add,					intlcal_add,				ainfo_cal_add,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setTimeZone,			intlcal_set_time_zone,		ainfo_cal_setTimeZone,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(after,				intlcal_after,				ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(before,				intlcal_before,				ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(set,					intlcal_set,				ainfo_cal_set,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(roll,				intlcal_roll,				ainfo_cal_roll,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(clear,				intlcal_clear,				ainfo_cal_clear,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(fieldDifference,		intlcal_field_difference,	ainfo_cal_field_difference,			ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getActualMaximum,	intlcal_get_actual_maximum,	ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getActualMinimum,	intlcal_get_actual_minimum,	ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getDayOfWeekType,	intlcal_get_day_of_week_type, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getFirstDayOfWeek,	intlcal_get_first_day_of_week, ainfo_cal_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getGreatestMinimum,	intlcal_get_greatest_minimum, ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getLeastMaximum,		intlcal_get_least_maximum,	ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getLocale,			intlcal_get_locale,			ainfo_cal_get_locale,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getMaximum,			intlcal_get_maximum,		ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getMinimalDaysInFirstWeek, intlcal_get_minimal_days_in_first_week, ainfo_cal_void,	ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getMinimum,			intlcal_get_minimum,		ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getTimeZone,			intlcal_get_time_zone,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getType,				intlcal_get_type,			ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getWeekendTransition,intlcal_get_weekend_transition, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(inDaylightTime,		intlcal_in_daylight_time,	ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(isEquivalentTo,		intlcal_is_equivalent_to,	ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(isLenient,			intlcal_is_lenient,			ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(isSet,				intlcal_is_set,				ainfo_cal_field,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(isWeekend,			intlcal_is_weekend,			ainfo_cal_date_optional,			ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setFirstDayOfWeek,	intlcal_set_first_day_of_week, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setLenient,			intlcal_set_lenient,		ainfo_cal_setLenient,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setMinimalDaysInFirstWeek,intlcal_set_minimal_days_in_first_week,ainfo_cal_set_minimal_days_in_first_week,ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(equals,				intlcal_equals,				ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRepeatedWallTimeOption,intlcal_get_repeated_wall_time_option,ainfo_cal_void,		ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getSkippedWallTimeOption,intlcal_get_skipped_wall_time_option,ainfo_cal_void,		ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setRepeatedWallTimeOption,intlcal_set_repeated_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setSkippedWallTimeOption,intlcal_set_skipped_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(fromDateTime,		intlcal_from_date_time,		ainfo_cal_from_date_time,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(toDateTime,			intlcal_to_date_time,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getErrorCode,		intlcal_get_error_code,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getErrorMessage,		intlcal_get_error_message,	ainfo_cal_void,						ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ GregorianCalendar_class_functions
- */
-static const zend_function_entry GregorianCalendar_class_functions[] = {
-	PHP_ME(IntlGregorianCalendar,		__construct,				ainfo_gregcal___construct,			ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setGregorianChange,	intlgregcal_set_gregorian_change, ainfo_cal_date,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getGregorianChange,	intlgregcal_get_gregorian_change, ainfo_cal_void,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(isLeapYear,			intlgregcal_is_leap_year,	ainfo_gregcal_isLeapYear,			ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
-
 /* {{{ calendar_register_IntlCalendar_class
  * Initialize 'IntlCalendar' class
  */
 void calendar_register_IntlCalendar_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlCalendar' class. */
-	INIT_CLASS_ENTRY(ce, "IntlCalendar", Calendar_class_functions);
-	ce.create_object = Calendar_object_create;
-	Calendar_ce_ptr = zend_register_internal_class(&ce);
+	Calendar_ce_ptr = register_class_IntlCalendar();
+	Calendar_ce_ptr->create_object = Calendar_object_create;
 
 	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
@@ -503,8 +328,6 @@ void calendar_register_IntlCalendar_class(void)
 	CALENDAR_DECL_LONG_CONST("WALLTIME_NEXT_VALID",			UCAL_WALLTIME_NEXT_VALID);
 
 	/* Create and register 'IntlGregorianCalendar' class. */
-	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
-	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
-		Calendar_ce_ptr);
+	GregorianCalendar_ce_ptr = register_class_IntlGregorianCalendar(Calendar_ce_ptr);
 }
 /* }}} */

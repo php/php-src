@@ -1,7 +1,7 @@
 --TEST--
 oci_define_by_name()
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 
@@ -29,7 +29,7 @@ oci_define_by_name($stmt, "STRING", $string, 20);
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 // Cleanup

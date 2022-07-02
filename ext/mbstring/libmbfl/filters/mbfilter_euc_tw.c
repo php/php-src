@@ -27,16 +27,14 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_euc_tw.h"
 
 #include "unicode_table_cns11643.h"
 
-static int mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter);
+static int mbfl_filt_conv_euctw_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_euctw_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_euctw(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 static const unsigned char mblen_table_euctw[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -64,172 +62,142 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 	mbfl_no_encoding_euc_tw,
 	"EUC-TW",
 	"EUC-TW",
-	(const char *(*)[])&mbfl_encoding_euc_tw_aliases,
+	mbfl_encoding_euc_tw_aliases,
 	mblen_table_euctw,
-	MBFL_ENCTYPE_MBCS,
+	0,
 	&vtbl_euctw_wchar,
-	&vtbl_wchar_euctw
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_euctw = {
-	mbfl_no_encoding_euc_tw,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_euctw
+	&vtbl_wchar_euctw,
+	mb_euctw_to_wchar,
+	mb_wchar_to_euctw
 };
 
 const struct mbfl_convert_vtbl vtbl_euctw_wchar = {
 	mbfl_no_encoding_euc_tw,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_euctw_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_euctw_wchar_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_euctw = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_tw,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_euctw,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-/*
- * EUC-TW => wchar
- */
-int
-mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter)
 {
-	int c1, s, w, plane;
+	int c1, s, w;
 
 	switch (filter->status) {
 	case 0:
-		if (c >= 0 && c < 0x80) {	/* latin */
+		if (c >= 0 && c < 0x80) { /* latin */
 			CK((*filter->output_function)(c, filter->data));
-		} else if (c > 0xa0 && c < 0xff) {	/* dbcs first byte */
+		} else if (((c >= 0xA1 && c <= 0xA6) || (c >= 0xC2 && c <= 0xFD)) && c != 0xC3) { /* 2-byte character, first byte */
 			filter->status = 1;
 			filter->cache = c;
-		} else if (c == 0x8e) {	/* mbcs first byte */
+		} else if (c == 0x8E) { /* 4-byte character, first byte */
 			filter->status = 2;
-			filter->cache = c;
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	case 1:		/* mbcs second byte */
+	case 1: /* 2-byte character, second byte */
 		filter->status = 0;
 		c1 = filter->cache;
-		if (c > 0xa0 && c < 0xff) {
-			w = (c1 - 0xa1)*94 + (c - 0xa1);
+		if (c > 0xA0 && c < 0xFF) {
+			w = (c1 - 0xA1)*94 + (c - 0xA1);
 			if (w >= 0 && w < cns11643_1_ucs_table_size) {
 				w = cns11643_1_ucs_table[w];
 			} else {
 				w = 0;
 			}
+
 			if (w <= 0) {
-				w = (c1 << 8) | c;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_CNS11643;
+				w = MBFL_BAD_INPUT;
 			}
+
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			filter->status = filter->cache = 0;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	case 2:	/* got 0x8e,  first char */
-		c1 = filter->cache;
-		if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-			filter->status = 0;
-		} else if (c > 0xa0 && c < 0xaf) {
+	case 2: /* got 0x8e, second byte */
+		if (c == 0xA1 || c == 0xA2 || c == 0xAE) {
 			filter->status = 3;
-			filter->cache = c - 0xa1;
+			filter->cache = c - 0xA1;
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			filter->status = filter->cache = 0;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	case 3:	/* got 0x8e,  third char */
+	case 3: /* got 0x8e, third byte */
 		filter->status = 0;
 		c1 = filter->cache;
-		if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
-			filter->status = 0;
-		} else if (c > 0xa0 && c < 0xff) {
+		if (c >= 0xA1 && ((c1 == 0 && ((c >= 0xA1 && c <= 0xA6) || (c >= 0xC2 && c <= 0xFD)) && c != 0xC3) ||
+				(c1 == 1 && c <= 0xF2) || (c1 == 13 && c <= 0xE7))) {
 			filter->status = 4;
-			filter->cache = (c1 << 8) + c - 0xa1;
+			filter->cache = (c1 << 8) + c - 0xA1;
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			filter->status = filter->cache = 0;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	case 4:	/* mbcs fourth char */
+	case 4:	/* multi-byte character, fourth byte */
 		filter->status = 0;
 		c1 = filter->cache;
-		if (c1 >= 0x100 && c1 <= 0xdff && c > 0xa0 && c < 0xff) {
-			plane = (c1 & 0xf00) >> 8;
-			s = (c1 & 0xff)*94 + c - 0xa1;
+		if (c1 <= 0xDFF && c > 0xA0 && c < 0xFF) {
+			int plane = (c1 & 0xF00) >> 8; /* This is actually the CNS-11643 plane minus one */
+			s = (c1 & 0xFF)*94 + c - 0xA1;
 			w = 0;
 			if (s >= 0) {
-				if (plane == 1 && s < cns11643_2_ucs_table_size) {
+				/* A later version of CNS-11643 moved all the characters in "plane 14" to "plane 3",
+				 * and added tens of thousands more characters in planes 4, 5, 6, and 7
+				 * We only support the older version of CNS-11643
+				 * This is the same as iconv from glibc 2.2 */
+				if (plane == 0 && s < cns11643_1_ucs_table_size) {
+					w = cns11643_1_ucs_table[s];
+				} else if (plane == 1 && s < cns11643_2_ucs_table_size) {
 					w = cns11643_2_ucs_table[s];
-				}
-				if (plane == 13 && s < cns11643_14_ucs_table_size) {
+				} else if (plane == 13 && s < cns11643_14_ucs_table_size) {
 					w = cns11643_14_ucs_table[s];
 				}
 			}
+
 			if (w <= 0) {
-				w = ((c1 & 0x7f) << 8) | (c & 0x7f);
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_CNS11643;
+				w = MBFL_BAD_INPUT;
 			}
+
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = (c1 << 8) | c | 0x8e0000;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			filter->status = filter->cache = 0;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	return c;
+	return 0;
 }
 
-/*
- * wchar => EUC-TW
- */
-int
-mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
+int mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
 {
-	int c1, s, plane;
+	int s = 0;
 
-	s = 0;
 	if (c >= ucs_a1_cns11643_table_min && c < ucs_a1_cns11643_table_max) {
 		s = ucs_a1_cns11643_table[c - ucs_a1_cns11643_table_min];
 	} else if (c >= ucs_a2_cns11643_table_min && c < ucs_a2_cns11643_table_max) {
@@ -241,88 +209,165 @@ mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter)
 	} else if (c >= ucs_r_cns11643_table_min && c < ucs_r_cns11643_table_max) {
 		s = ucs_r_cns11643_table[c - ucs_r_cns11643_table_min];
 	}
+
 	if (s <= 0) {
-		c1 = c & ~MBFL_WCSPLANE_MASK;
-		if (c1 == MBFL_WCSPLANE_CNS11643) {
-			s = c & MBFL_WCSPLANE_MASK;
-		}
 		if (c == 0) {
 			s = 0;
 		} else if (s <= 0) {
 			s = -1;
 		}
 	}
+
 	if (s >= 0) {
-		plane = (s & 0x1f0000) >> 16;
-		if (plane <= 1){
-			if (s < 0x80) {	/* latin */
+		int plane = (s & 0x1F0000) >> 16;
+		if (plane <= 1) {
+			if (s < 0x80) { /* latin */
 				CK((*filter->output_function)(s, filter->data));
 			} else {
-				s = (s & 0xffff) | 0x8080;
-				CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-				CK((*filter->output_function)(s & 0xff, filter->data));
+				s = (s & 0xFFFF) | 0x8080;
+				CK((*filter->output_function)((s >> 8) & 0xFF, filter->data));
+				CK((*filter->output_function)(s & 0xFF, filter->data));
 			}
 		} else {
-			s = (0x8ea00000 + (plane << 16)) | ((s & 0xffff) | 0x8080);
+			s = (0x8EA00000 + (plane << 16)) | ((s & 0xFFFF) | 0x8080);
 			CK((*filter->output_function)(0x8e , filter->data));
-			CK((*filter->output_function)((s >> 16) & 0xff, filter->data));
-			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
-			CK((*filter->output_function)(s & 0xff, filter->data));
+			CK((*filter->output_function)((s >> 16) & 0xFF, filter->data));
+			CK((*filter->output_function)((s >> 8) & 0xFF, filter->data));
+			CK((*filter->output_function)(s & 0xFF, filter->data));
 		}
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }
 
-static int mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter)
+static int mbfl_filt_conv_euctw_wchar_flush(mbfl_convert_filter *filter)
 {
-	switch (filter->status) {
-	case  0:	/* latin */
-		if (c >= 0 && c < 0x80) {	/* ok */
-			;
-		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
-			filter->status = 1;
-		} else if (c == 0x8e) {	/* DBCS lead byte */
-			filter->status = 2;
-		} else {							/* bad */
-			filter->flag = 1;
-		}
-		break;
-
-	case  1:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	case  2:	/* got lead byte */
-		if (c >= 0xa1 && c < 0xaf) {	/* ok */
-			filter->status = 3;
-		} else {
-			filter->flag = 1; /* bad */
-		}
-		break;
-
-	case  3:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 4;
-		break;
-
-	case  4:	/* got lead byte */
-		if (c < 0xa1 || c > 0xfe) {		/* bad */
-			filter->flag = 1;
-		}
-		filter->status = 0;
-		break;
-
-	default:
-		filter->status = 0;
-		break;
+	if (filter->status) {
+		/* 2-byte or 4-byte character was truncated */
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
-	return c;
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
+	return 0;
+}
+
+static size_t mb_euctw_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c < 0x80) {
+			*out++ = c;
+		} else if (((c >= 0xA1 && c <= 0xA6) || (c >= 0xC2 && c <= 0xFD)) && c != 0xC3 && p < e) {
+			unsigned char c2 = *p++;
+
+			if (c2 >= 0xA1 && c2 <= 0xFE) {
+				unsigned int w = (c - 0xA1)*94 + (c2 - 0xA1);
+				if (w < cns11643_1_ucs_table_size) {
+					w = cns11643_1_ucs_table[w];
+				} else {
+					w = 0;
+				}
+				if (!w)
+					w = MBFL_BAD_INPUT;
+				*out++ = w;
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else if (c == 0x8E && p < e) {
+			unsigned char c2 = *p++;
+
+			if ((c2 == 0xA1 || c2 == 0xA2 || c2 == 0xAE) && p < e) {
+				unsigned int plane = c2 - 0xA1; /* This is actually the CNS-11643 plane minus one */
+				unsigned char c3 = *p++;
+
+				if (c3 >= 0xA1 && ((plane == 0 && ((c3 >= 0xA1 && c3 <= 0xA6) || (c3 >= 0xC2 && c3 <= 0xFD)) && c3 != 0xC3) || (plane == 1 && c3 <= 0xF2) || (plane == 13 && c3 <= 0xE7)) && p < e) {
+					unsigned char c4 = *p++;
+
+					if (c2 <= 0xAE && c4 > 0xA0 && c4 < 0xFF) {
+						unsigned int s = (c3 - 0xA1)*94 + c4 - 0xA1, w = 0;
+
+						/* A later version of CNS-11643 moved all the characters in "plane 14" to "plane 3",
+						 * and added tens of thousands more characters in planes 4, 5, 6, and 7
+						 * We only support the older version of CNS-11643
+						 * This is the same as iconv from glibc 2.2 */
+						if (plane == 0 && s < cns11643_1_ucs_table_size) {
+							w = cns11643_1_ucs_table[s];
+						} else if (plane == 1 && s < cns11643_2_ucs_table_size) {
+							w = cns11643_2_ucs_table[s];
+						} else if (plane == 13 && s < cns11643_14_ucs_table_size) {
+							w = cns11643_14_ucs_table[s];
+						}
+
+						if (!w)
+							w = MBFL_BAD_INPUT;
+						*out++ = w;
+						continue;
+					}
+				}
+			}
+
+			*out++ = MBFL_BAD_INPUT;
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+		}
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_euctw(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s = 0;
+
+		if (w >= ucs_a1_cns11643_table_min && w < ucs_a1_cns11643_table_max) {
+			s = ucs_a1_cns11643_table[w - ucs_a1_cns11643_table_min];
+		} else if (w >= ucs_a2_cns11643_table_min && w < ucs_a2_cns11643_table_max) {
+			s = ucs_a2_cns11643_table[w - ucs_a2_cns11643_table_min];
+		} else if (w >= ucs_a3_cns11643_table_min && w < ucs_a3_cns11643_table_max) {
+			s = ucs_a3_cns11643_table[w - ucs_a3_cns11643_table_min];
+		} else if (w >= ucs_i_cns11643_table_min && w < ucs_i_cns11643_table_max) {
+			s = ucs_i_cns11643_table[w - ucs_i_cns11643_table_min];
+		} else if (w >= ucs_r_cns11643_table_min && w < ucs_r_cns11643_table_max) {
+			s = ucs_r_cns11643_table[w - ucs_r_cns11643_table_min];
+		}
+
+		if (!s) {
+			if (w == 0) {
+				out = mb_convert_buf_add(out, 0);
+			} else {
+				MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_euctw);
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+			}
+		} else {
+			unsigned int plane = s >> 16;
+			if (plane <= 1) {
+				if (s < 0x80) {
+					out = mb_convert_buf_add(out, s);
+				} else {
+					out = mb_convert_buf_add2(out, ((s >> 8) & 0xFF) | 0x80, (s & 0xFF) | 0x80);
+				}
+			} else {
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 4);
+				out = mb_convert_buf_add4(out, 0x8E, 0xA0 + plane, ((s >> 8) & 0xFF) | 0x80, (s & 0xFF) | 0x80);
+			}
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

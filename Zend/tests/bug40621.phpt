@@ -4,10 +4,10 @@ Bug #40621 (Crash when constructor called inappropriately (statically))
 <?php
 
 class Foo {
-	private function __construct() { }
-	function get() {
-		self::__construct();
-	}
+    private function __construct() { }
+    function get() {
+        self::__construct();
+    }
 }
 
 Foo::get();

@@ -3,33 +3,33 @@ SPL: ArrayObject: ensure the magic methods for property access of a subclass of 
 --FILE--
 <?php
 class C {
-	public $a = 1;
-	public $b = 2;
-	public $c = 3;
+    public $a = 1;
+    public $b = 2;
+    public $c = 3;
 
-	private $priv = 'secret';
+    private $priv = 'secret';
 }
 
 class UsesMagic extends ArrayObject {
 
-	public $b = "This should never appear in storage";
+    public $b = "This should never appear in storage";
 
-	function __get($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __set($name, $value) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __isset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __unset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
+    function __get($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __set($name, $value) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __isset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __unset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
 
 }
 $obj = new C;
@@ -107,7 +107,7 @@ object(UsesMagic)#2 (2) {
 --> Read existent, non-existent and dynamic:
 string(7) "changed"
 
-Notice: Undefined index: nonexistent in %s on line 45
+Warning: Undefined array key "nonexistent" in %s on line %d
 NULL
 string(11) "new.changed"
   Original wrapped object:
@@ -179,8 +179,6 @@ object(UsesMagic)#2 (2) {
 }
 
 --> Unset existent, non-existent and dynamic:
-
-Notice: Undefined index: nonexistent in %s on line 63
   Original wrapped object:
 object(C)#1 (3) {
   ["b"]=>

@@ -1,7 +1,7 @@
 --TEST--
 Emoji (Pictogram characters for cellular phone in Japan) test based on Unicode 6.0
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 mb_substitute_character(0x3f);
@@ -68,6 +68,7 @@ var_dump(bin2hex(mb_convert_encoding("\x00\x00\x00\x23\x00\x00\x20\xe3", "UTF-8-
 var_dump(bin2hex(mb_convert_encoding("\x00\x00\x00\x23\x00\x00\x20\xe3", "UTF-8-Mobile#KDDI", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x00\x00\x23\x00\x00\x20\xe3", "UTF-8-Mobile#SOFTBANK", "UCS-4BE")));
 
+/* Chinese flag emoji */
 var_dump(bin2hex(mb_convert_encoding("\x00\x01\xf1\xe8\x00\x01\xf1\xf3", "UTF-8-Mobile#DOCOMO", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x01\xf1\xe8\x00\x01\xf1\xf3", "UTF-8-Mobile#KDDI", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x01\xf1\xe8\x00\x01\xf1\xf3", "UTF-8-Mobile#SOFTBANK", "UCS-4BE")));

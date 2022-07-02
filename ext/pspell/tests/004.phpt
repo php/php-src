@@ -1,8 +1,9 @@
 --TEST--
 pspell configs
+--EXTENSIONS--
+pspell
 --SKIPIF--
 <?php
-if (!extension_loaded('pspell')) die('skip');
 if (!@pspell_new('en')) die('skip English dictionary is not available');
 ?>
 --FILE--
@@ -22,14 +23,11 @@ var_dump(pspell_config_runtogether($cfg, true));
 $p = pspell_new_config($cfg);
 var_dump(pspell_check($p, 'theoasis'));
 
-var_dump(pspell_config_runtogether($cfg, NULL))
-
 ?>
 --EXPECT--
 bool(true)
 bool(true)
 bool(false)
 ---
-bool(true)
 bool(true)
 bool(true)

@@ -1,11 +1,7 @@
 --TEST--
 Test compress.zlib:// scheme with the file
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $inputFileName = __DIR__."/004.txt.gz";
@@ -13,7 +9,6 @@ $srcFile = "compress.zlib://$inputFileName";
 $contents = file($srcFile);
 var_dump($contents);
 ?>
-===DONE===
 --EXPECT--
 array(6) {
   [0]=>
@@ -35,4 +30,3 @@ array(6) {
   string(39) "and I know that it descends down on me
 "
 }
-===DONE===

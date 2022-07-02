@@ -12,8 +12,8 @@ class DateTimeExt1 extends DateTime {
 }
 
 class DateTimeExt2 extends DateTime{
-	public $foo = "Hello";
-	private $bar = 99;
+    public $foo = "Hello";
+    private $bar = 99;
 }
 
 class DateTimeExt3 extends DateTimeExt2 {
@@ -49,7 +49,6 @@ var_dump($obj1 == $obj2);
 var_dump($obj1 == $obj3);
 var_dump($obj1 == $obj4);
 ?>
-===DONE===
 --EXPECT--
 Simple test for DateTime compare object handler
 
@@ -74,4 +73,3 @@ bool(false)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

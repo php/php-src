@@ -1,13 +1,13 @@
 --TEST--
 Test function gzgetc() by calling it with its expected arguments zlib 1.2.5
+--EXTENSIONS--
+zlib
 --SKIPIF--
 <?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
+
 include 'func.inc';
 if (version_compare(get_zlib_version(), '1.2.5') > 0) {
-	die('skip - only for zlib <= 1.2.5');
+    die('skip - only for zlib <= 1.2.5');
 }
 ?>
 --FILE--
@@ -29,7 +29,6 @@ echo "\ncharacters counted=$count\n";
 gzclose($h);
 
 ?>
-===DONE===
 --EXPECT--
 When you're taught through feelings
 Destiny flying high above
@@ -39,4 +38,3 @@ as it turns around
 and I know that it descends down on me
 
 characters counted=176
-===DONE===

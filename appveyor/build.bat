@@ -1,6 +1,6 @@
 @echo off
 
-set SDK_REMOTE=https://github.com/Microsoft/php-sdk-binary-tools.git
+set SDK_REMOTE=https://github.com/php/php-sdk-binary-tools.git
 set SDK_BRANCH=%PHP_BUILD_SDK_BRANCH%
 set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-%PLATFORM%.bat
 
@@ -20,7 +20,7 @@ if not exist "%SDK_RUNNER%" (
 
 if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 	echo Cloning remote SDK repository
-	git clone --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
+	git clone --branch %SDK_BRANCH% %SDK_REMOTE% --depth 1 "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
 )
 
 for /f "tokens=*" %%a in ('type %PHP_BUILD_CACHE_SDK_DIR%\VERSION') do set GOT_SDK_VER=%%a

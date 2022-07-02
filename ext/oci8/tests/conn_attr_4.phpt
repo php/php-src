@@ -1,5 +1,7 @@
 --TEST--
 Set and get of connection attributes with errors.
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -15,11 +17,13 @@ if (!(isset($matches[0]) &&
        ($matches[1] >= 12)
        ))) {
     // Bug fixed in 11.2 prevents client_info being reset
-	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
+    die("skip expected output only valid when using Oracle 11gR2 or greater database server");
 }
 ?>
 --FILE--
 <?php
+
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
 $testpassword = 'testuser';
@@ -30,20 +34,32 @@ $attr_array = array('MODULE','ACTION','CLIENT_INFO','CLIENT_IDENTIFIER');
 
 echo"**Test  Negative cases************\n";
 
-echo "\nInvalid Connection resource\n";
+echo "\nInvalid Connection resource 1\n";
 $nc1=NULL;
 // Invalid connection handle.
-var_dump(oci_set_action($nc1,$nc1));
+try {
+    oci_set_action($nc1,$nc1);
+} catch (TypeError $e) {
+    var_dump($e->getMessage());
+}
 
 // Variable instead of a connection resource.
 echo "\nInvalid Connection resource 2\n";
 $str1= 'not a conn';
-var_dump(oci_set_client_info($str1,$str1));
+try {
+    oci_set_client_info($str1,$str1);
+} catch (TypeError $e) {
+    var_dump($e->getMessage());
+}
 
 // Setting an Invalid value.
-echo "\nInvalid Value \n";
+echo "\nInvalid Action value \n";
 $c1=oci_connect($testuser,$testpassword,$dbase);
-var_dump(oci_set_action($c1,$c1));
+try {
+    oci_set_action($c1,$c1);
+} catch (TypeError $e) {
+    var_dump($e->getMessage());
+}
 
 // Setting values multiple times.
 echo "\nSet Values multiple times \n";
@@ -59,16 +75,16 @@ echo "\nSetting to different values \n";
 $values_array = array(1000,NULL,'this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!');
 
 foreach($values_array as $val ) {
-	oci_set_module_name($c1,$val);
-	oci_set_client_identifier($c1,$val);
-	oci_set_client_info($c1,$val);
-	$r = oci_set_action($c1,$val);
-	if ($r) {
-		echo "Values set successfully to $val\n";
-		foreach($attr_array as $attr) {
+    oci_set_module_name($c1,$val);
+    oci_set_client_identifier($c1,$val);
+    oci_set_client_info($c1,$val);
+    $r = oci_set_action($c1,$val);
+    if ($r) {
+        echo "Values set successfully to $val\n";
+        foreach($attr_array as $attr) {
             get_attr($c1,$attr);
         }
-	}
+    }
 }
 
 clean_up($c);
@@ -77,20 +93,14 @@ echo "Done\n";
 --EXPECTF--
 **Test  Negative cases************
 
-Invalid Connection resource
-
-Warning: oci_set_action() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+Invalid Connection resource 1
+string(%d) "oci_set_action(): Argument #1 ($connection) must be of type resource, null given"
 
 Invalid Connection resource 2
+string(%d) "oci_set_client_info(): Argument #1 ($connection) must be of type resource, string given"
 
-Warning: oci_set_client_info() expects parameter 1 to be resource, %s given in %s on line %d
-NULL
-
-Invalid Value 
-
-Warning: oci_set_action() expects parameter 2 to be %s, resource given in %s on line %d
-NULL
+Invalid Action value 
+string(%d) "oci_set_action(): Argument #2 ($action) must be of type string, resource given"
 
 Set Values multiple times 
 bool(true)

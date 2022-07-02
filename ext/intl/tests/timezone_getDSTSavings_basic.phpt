@@ -1,9 +1,7 @@
 --TEST--
 IntlTimeZone::getDSTSavings(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -14,8 +12,6 @@ var_dump($lsb->getDSTSavings());
 var_dump(intltz_get_dst_savings($lsb));
 
 ?>
-==DONE==
 --EXPECT--
 int(3600000)
-int(3600000)
-==DONE==
+int(3600000)

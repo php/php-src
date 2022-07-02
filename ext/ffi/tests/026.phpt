@@ -1,7 +1,7 @@
 --TEST--
 FFI 026: Array iteration by reference
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
@@ -11,7 +11,7 @@ $a[1] = 10;
 $a[2] = 20;
 var_dump($a);
 foreach ($a as &$val) {
-	$val->cdata += 5;
+    $val->cdata += 5;
 }
 var_dump($a);
 ?>

@@ -16,7 +16,7 @@ try {
 }
 
 try {
-    ReflectionReference::fromArrayElement([], 1.5);
+    ReflectionReference::fromArrayElement([], []);
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -36,17 +36,16 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-var_dump(unserialize('O:19:"ReflectionReference":0:{}'));
-
+try {
+    var_dump(unserialize('O:19:"ReflectionReference":0:{}'));
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
-Call to private ReflectionReference::__construct() from invalid context
-ReflectionReference::fromArrayElement() expects parameter 1 to be array, object given
-Key must be array or string
+Call to private ReflectionReference::__construct() from global scope
+ReflectionReference::fromArrayElement(): Argument #1 ($array) must be of type array, stdClass given
+ReflectionReference::fromArrayElement(): Argument #2 ($key) must be of type string|int, array given
 Array key not found
 Serialization of 'ReflectionReference' is not allowed
-
-Warning: Erroneous data format for unserializing 'ReflectionReference' in %s on line %d
-
-Notice: unserialize(): Error at offset 30 of 31 bytes in %s on line %d
-bool(false)
+Unserialization of 'ReflectionReference' is not allowed

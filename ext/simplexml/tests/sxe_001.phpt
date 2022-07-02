@@ -1,10 +1,8 @@
 --TEST--
 SPL: SimpleXMLIterator
---SKIPIF--
-<?php
-if (!extension_loaded("simplexml")) print "skip SimpleXML not present";
-if (!extension_loaded("libxml")) print "skip LibXML not present";
-?>
+--EXTENSIONS--
+simplexml
+libxml
 --FILE--
 <?php
 
@@ -28,7 +26,6 @@ EOF;
 var_dump(simplexml_load_string($xml, 'SimpleXMLIterator'));
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLIterator)#%d (2) {
   ["@attributes"]=>
@@ -60,4 +57,3 @@ object(SimpleXMLIterator)#%d (2) {
     }
   }
 }
-===DONE===

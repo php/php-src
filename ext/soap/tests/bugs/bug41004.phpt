@@ -1,23 +1,23 @@
 --TEST--
 Bug #41004 (minOccurs="0" and null class member variable)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set('soap.wsdl_cache_enabled', false);
 
 class EchoBean{
-	public $mandatoryElement;
-	public $optionalElement;
+    public $mandatoryElement;
+    public $optionalElement;
 
 }
 
 class EchoRequest{
-	public $in;
+    public $in;
 }
 
 class EchoResponse{
-	public $out;
+    public $out;
 }
 
 $wsdl = __DIR__."/bug41004.wsdl";

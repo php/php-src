@@ -2,11 +2,6 @@
 Test array_push() function : usage variations - Pass different data types as $var arg
 --FILE--
 <?php
-/* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass different data types as $var argument to array_push to test behaviour
  */

@@ -1,7 +1,7 @@
 --TEST--
 GMP functionality test - factorial
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 function fact($x) {

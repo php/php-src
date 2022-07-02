@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing readfile() : variation ***\n";
 $mainDir = "readfileVar私はガラスを食べられます8";
 $subDir = "readfileVar私はガラスを食べられます8Sub";
@@ -86,11 +80,11 @@ The File Contents
 The File Contents
 -- %s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub --
 
-Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- %s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR --
 
-Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub --
 The File Contents
@@ -102,7 +96,7 @@ The File Contents
 The File Contents
 -- BADDIR --
 
-Warning: readfile(BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(BADDIR\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- /%s/readfileVar私はガラスを食べられます8/readfileVar私はガラスを食べられます8Sub --
 The File Contents

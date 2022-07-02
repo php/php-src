@@ -56,6 +56,7 @@
 #define	MAGIC_NO_CHECK_ELF	0x0010000 /* Don't check for elf details */
 #define	MAGIC_NO_CHECK_TEXT	0x0020000 /* Don't check for text files */
 #define	MAGIC_NO_CHECK_CDF	0x0040000 /* Don't check for cdf files */
+#define MAGIC_NO_CHECK_CSV	0x0080000 /* Don't check for CSV files */
 #define	MAGIC_NO_CHECK_TOKENS	0x0100000 /* Don't check tokens */
 #define MAGIC_NO_CHECK_ENCODING 0x0200000 /* Don't check text encodings */
 #define MAGIC_NO_CHECK_JSON	0x0400000 /* Don't check for JSON files */
@@ -68,6 +69,7 @@
 	MAGIC_NO_CHECK_APPTYPE	| \
 	MAGIC_NO_CHECK_ELF	| \
 	MAGIC_NO_CHECK_TEXT	| \
+	MAGIC_NO_CHECK_CSV	| \
 	MAGIC_NO_CHECK_CDF	| \
 	MAGIC_NO_CHECK_TOKENS	| \
 	MAGIC_NO_CHECK_ENCODING	| \
@@ -111,7 +113,7 @@ b\31transp_compression\0\
 #define	MAGIC_NO_CHECK_FORTRAN	0x000000 /* Don't check ascii/fortran */
 #define	MAGIC_NO_CHECK_TROFF	0x000000 /* Don't check ascii/troff */
 
-#define MAGIC_VERSION		537	/* This implementation */
+#define MAGIC_VERSION		540	/* This implementation */
 
 
 #ifdef __cplusplus
@@ -148,6 +150,7 @@ int magic_errno(magic_t);
 #define MAGIC_PARAM_ELF_NOTES_MAX	4
 #define MAGIC_PARAM_REGEX_MAX		5
 #define	MAGIC_PARAM_BYTES_MAX		6
+#define	MAGIC_PARAM_ENCODING_MAX	7
 
 int magic_setparam(magic_t, int, const void *);
 int magic_getparam(magic_t, int, void *);

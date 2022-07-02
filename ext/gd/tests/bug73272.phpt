@@ -1,9 +1,7 @@
 --TEST--
 Bug #73272 (imagescale() is not affected by, but affects imagesetinterpolation())
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';
@@ -18,7 +16,5 @@ $dst = imagerotate($src, 60, 0xFFFFFF);
 
 test_image_equals_file(__DIR__ . DIRECTORY_SEPARATOR . 'bug73272.png', $dst);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

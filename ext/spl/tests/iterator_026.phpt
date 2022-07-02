@@ -11,13 +11,11 @@ $it = new RecursiveIteratorIterator($it);
 
 foreach($it as $k=>$v)
 {
-	echo "$k=>$v\n";
-	echo "hasNext: " . ($it->getInnerIterator()->hasNext() ? "yes" : "no") . "\n";
+    echo "$k=>$v\n";
+    echo "hasNext: " . ($it->getInnerIterator()->hasNext() ? "yes" : "no") . "\n";
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 0=>1
 hasNext: yes
@@ -35,4 +33,3 @@ Warning: Array to string conversion in %s on line %d
 hasNext: no
 3=>4
 hasNext: no
-===DONE===

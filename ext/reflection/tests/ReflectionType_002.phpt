@@ -10,6 +10,7 @@ $rt = $rp->getType();
 $rrt = $rm->getReturnType();
 unset($rm, $rp);
 var_dump($rt->getName(), $rrt->getName());
+?>
 --EXPECT--
 string(4) "Test"
 string(5) "Test2"

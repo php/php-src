@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDO::FETCH_CLASSTYPE and GROUP/UNIQUE
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -28,26 +29,35 @@ $stmt = $db->prepare('SELECT classtypes.name, test.grp AS grp, test.id AS id, te
 
 class Test1
 {
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    public $id;
+    public $val;
+
+    public function __construct()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 class Test2
 {
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    public $id;
+    public $val;
+
+    public function __construct()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 class Test3
 {
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    public $id;
+    public $val;
+
+    public function __construct()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 

@@ -14,8 +14,8 @@ trait THello2 {
 echo "PRE-CLASS-GUARD\n";
 
 class TraitsTest {
-	use THello1;
-	use THello2;
+    use THello1;
+    use THello2;
 }
 
 echo "POST-CLASS-GUARD\n";

@@ -8,12 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : void closedir([resource $dir_handle])
- * Description: Close directory connection identified by the dir_handle
- * Source code: ext/standard/dir.c
- * Alias to functions: close
- */
-
 /*
  * close the directory handle twice using closedir() to test behaviour
  */
@@ -40,7 +34,6 @@ try {
 echo "Directory Handle: ";
 var_dump($dh);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $directory = __DIR__ . "/私はガラスを食べられますclosedir_variation2";
@@ -56,4 +49,3 @@ Directory Handle: resource(%d) of type (Unknown)
 -- Close directory handle second time: --
 closedir(): %s is not a valid Directory resource
 Directory Handle: resource(%d) of type (Unknown)
-===DONE===

@@ -1,5 +1,7 @@
 --TEST--
 Set and get connection attributes with scope end.
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -10,7 +12,7 @@ if ($test_drcp) die("skip output might vary with DRCP");
 
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) && $matches[1] >= 10)) {
-	die("skip expected output only valid when using Oracle 10g or greater database server");
+    die("skip expected output only valid when using Oracle 10g or greater database server");
 }
 ?>
 --FILE--

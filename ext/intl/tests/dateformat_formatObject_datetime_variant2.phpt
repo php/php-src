@@ -1,8 +1,8 @@
 --TEST--
 IntlDateFormatter::formatObject(): DateTime tests
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0 || version_compare(INTL_ICU_VERSION, '52.1') >= 0) die('skip for ICU >= 51.2 and < 52.1'); ?>
 --FILE--
 <?php
@@ -21,7 +21,6 @@ $dt = new DateTime('2012-01-01 05:00:00+03:00');
 echo IntlDateFormatter::formatObject($dt, IntlDateFormatter::FULL), "\n";
 
 ?>
-==DONE==
 --EXPECTF--
 01/01/2012, 00:00:00
 Domingo, 1 de Janeiro de 2012 às 00:00:00 Hora %Sda Europa Ocidental
@@ -29,4 +28,3 @@ Jan 1, 2012, 12:00:00 AM
 1/1/12, 12:00:00 AM Western European Standard %STime
 Sun 2012-01-1 00,00,00.000 Portugal Time
 Domingo, 1 de Janeiro de 2012 às 05:00:00 GMT+03:00
-==DONE==

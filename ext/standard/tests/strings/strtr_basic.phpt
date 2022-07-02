@@ -2,11 +2,6 @@
 Test strtr() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string strtr(string $str, string $from[, string $to]);
- * Description: Translates characters in str using given translation pairs
- * Source code: ext/standard/string.c
-*/
-
 echo "*** Testing strtr() : basic functionality ***\n";
 //definitions of required input variables
 $trans1_arr = array("t" => "T", "e" => "E", "st" => "ST");

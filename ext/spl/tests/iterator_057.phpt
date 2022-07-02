@@ -11,9 +11,9 @@ Sebastian Schürmann
 class myArrayIterator extends ArrayIterator {
 }
 try {
-	$it = new myArrayIterator();
+    $it = new myArrayIterator();
 } catch (InvalidArgumentException $e) {
-	echo 'InvalidArgumentException thrown';
+    echo 'InvalidArgumentException thrown';
 }
 echo 'no Exception thrown'
 ?>

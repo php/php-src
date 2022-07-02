@@ -9,7 +9,7 @@
 #define NTDDI_VERSION 0x06010000
 
 /* Default PHP / PEAR directories */
-#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot")?getenv("SystemRoot"):"")
+#define PHP_CONFIG_FILE_PATH ""
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define PEAR_INSTALLDIR "@PREFIX@\\pear"
 #define PHP_BINDIR "@PREFIX@"
@@ -27,6 +27,10 @@
 #define DEFAULT_SHORT_OPEN_TAG "1"
 
 /* Platform-Specific Configuration. Should not be changed. */
+/* Alignment for Zend memory allocator */
+#define ZEND_MM_ALIGNMENT (size_t)8
+#define ZEND_MM_ALIGNMENT_LOG2 (size_t)3
+#define ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT 0
 #define PHP_SIGCHILD 0
 #define HAVE_GETSERVBYNAME 1
 #define HAVE_GETSERVBYPORT 1
@@ -44,7 +48,6 @@
 /* its in win32/time.c */
 #define HAVE_USLEEP 1
 #define HAVE_NANOSLEEP 1
-#define PHP_SLEEP_NON_VOID 1
 
 #define HAVE_GETCWD 1
 #define NEED_ISBLANK 1
@@ -100,6 +103,7 @@
 # define SIZEOF_SIZE_T 4
 # define SIZEOF_PTRDIFF_T 4
 #endif
+#define SIZEOF_OFF_T 4
 #define HAVE_FNMATCH
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
@@ -117,12 +121,6 @@
 #define HAVE_INET_PTON 1
 #define HAVE_INET_NTOP 1
 
-#define HAVE_MBLEN
-
-#undef HAVE_ATOF_ACCEPTS_NAN
-#undef HAVE_ATOF_ACCEPTS_INF
-#define HAVE_HUGE_VAL_NAN 0
-
 /* vs.net 2005 has a 64-bit time_t.  This will likely break
  * 3rdParty libs that were built with older compilers; switch
  * back to 32-bit */
@@ -131,10 +129,6 @@
 #endif
 
 #define _REENTRANT 1
-#define HAVE_MBRLEN 1
-#define HAVE_MBSTATE_T 1
-
-#define HAVE_HUGE_VAL_INF 1
 
 #define HAVE_GETRUSAGE
 
@@ -145,3 +139,5 @@
 #ifdef __clang__
 #define HAVE_FUNC_ATTRIBUTE_TARGET 1
 #endif
+
+#define HAVE_GETADDRINFO 1

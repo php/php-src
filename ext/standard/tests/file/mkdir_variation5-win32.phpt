@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
- * Description: Create a directory
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing mkdir() : variation ***\n";
 
 $workDir = "mkdirVar5.tmp";
@@ -68,7 +62,6 @@ foreach($dirs as $dir) {
 rmdir($workDir);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mkdir() : variation ***
 -- creating mkdirVar5.tmp\aSubDir --
@@ -102,4 +95,3 @@ Directory created
 Directory created
 -- creating /%s/mkdirVar5.tmp/aSubDir --
 Directory created
-===DONE===

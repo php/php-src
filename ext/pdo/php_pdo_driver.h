@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -26,15 +26,6 @@ typedef struct _pdo_stmt_t		 pdo_stmt_t;
 typedef struct _pdo_row_t		 pdo_row_t;
 struct pdo_bound_param_data;
 
-#ifdef PHP_WIN32
-typedef __int64 pdo_int64_t;
-typedef unsigned __int64 pdo_uint64_t;
-#else
-typedef long long int pdo_int64_t;
-typedef unsigned long long int pdo_uint64_t;
-#endif
-PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
-
 #ifndef TRUE
 # define TRUE 1
 #endif
@@ -44,33 +35,16 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 
 #define PDO_DRIVER_API	20170320
 
+/* Doctrine hardcodes these constants, avoid changing their values. */
 enum pdo_param_type {
-	PDO_PARAM_NULL,
+	PDO_PARAM_NULL = 0,
+	PDO_PARAM_BOOL = 5,
+	PDO_PARAM_INT = 1,
+	PDO_PARAM_STR = 2,
+	PDO_PARAM_LOB = 3,
 
-	/* int as in long (the php native int type).
-	 * If you mark a column as an int, PDO expects get_col to return
-	 * a pointer to a long */
-	PDO_PARAM_INT,
-
-	/* get_col ptr should point to start of the string buffer */
-	PDO_PARAM_STR,
-
-	/* get_col: when len is 0 ptr should point to a php_stream *,
-	 * otherwise it should behave like a string. Indicate a NULL field
-	 * value by setting the ptr to NULL */
-	PDO_PARAM_LOB,
-
-	/* get_col: will expect the ptr to point to a new PDOStatement object handle,
-	 * but this isn't wired up yet */
-	PDO_PARAM_STMT, /* hierarchical result set */
-
-	/* get_col ptr should point to a zend_bool */
-	PDO_PARAM_BOOL,
-
-	/* get_col ptr should point to a zval*
-	   and the driver is responsible for adding correct type information to get_column_meta()
-	 */
-	PDO_PARAM_ZVAL,
+	/* get_col: Not supported (yet?) */
+	PDO_PARAM_STMT = 4, /* hierarchical result set */
 
 	/* magic flag to denote a parameter as being input/output */
 	PDO_PARAM_INPUT_OUTPUT = 0x80000000,
@@ -199,7 +173,7 @@ enum pdo_null_handling {
 };
 
 /* {{{ utils for reading attributes set as driver_options */
-static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type option_name, zend_long defval)
+static inline zend_long pdo_attr_lval(zval *options, unsigned option_name, zend_long defval)
 {
 	zval *v;
 
@@ -208,7 +182,7 @@ static inline zend_long pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	}
 	return defval;
 }
-static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_type option_name, zend_string *defval)
+static inline zend_string *pdo_attr_strval(zval *options, unsigned option_name, zend_string *defval)
 {
 	zval *v;
 
@@ -244,47 +218,62 @@ typedef struct {
 /* {{{ methods for a database handle */
 
 /* close or otherwise disconnect the database */
-typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
+typedef void (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
 
-/* prepare a statement and stash driver specific portion into stmt */
-typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options);
+/* prepare a statement and stash driver specific portion into stmt
+ * return true on success, false otherwise */
+typedef bool (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options);
 
-/* execute a statement (that does not return a result set) */
-typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len);
+/* execute a statement (that does not return a result set)
+ * Return -1 on failure, otherwise the number of affected rows */
+typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const zend_string *sql);
 
 /* quote a string */
-typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype);
+typedef zend_string* (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype);
 
-/* transaction related */
-typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh);
+/* transaction related (beingTransaction(), commit, rollBack, inTransaction)
+ * Return true if currently inside a transaction, false otherwise. */
+typedef bool (*pdo_dbh_txn_func)(pdo_dbh_t *dbh);
 
-/* setting of attributes */
-typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
+/* setting of attributes
+ * Return true on success and false in case of failure */
+typedef bool (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
 
-/* return last insert id.  NULL indicates error condition, otherwise, the return value
- * MUST be an emalloc'd NULL terminated string. */
-typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, size_t *len);
+/* return last insert id.  NULL indicates error condition.
+ * name MIGHT be NULL */
+typedef zend_string *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const zend_string *name);
 
-/* fetch error information.  if stmt is not null, fetch information pertaining
- * to the statement, otherwise fetch global error information.  The driver
- * should add the following information to the array "info" in this order:
+/* Fetch error information.
+ * If stmt is not null, fetch information pertaining to the statement,
+ * otherwise fetch global error information.
+ * info is an initialized PHP array, if there are no messages leave it empty.
+ * The driver should add the following information to the array "info" in this order:
  * - native error code
  * - string representation of the error code ... any other optional driver
- *   specific data ...  */
-typedef	int (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info);
+ *   specific data ...
+ * PDO takes care of normalizing the array. */
+typedef void (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info);
 
-/* fetching of attributes */
+/* fetching of attributes
+ * There are 3 return states:
+ * * -1 for errors while retrieving a valid attribute
+ * * 0 for attempting to retrieve an attribute which is not supported by the driver
+ * * any other value for success, *val must be set to the attribute value */
 typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
 
 /* checking/pinging persistent connections; return SUCCESS if the connection
  * is still alive and ready to be used, FAILURE otherwise.
  * You may set this handler to NULL, which is equivalent to returning SUCCESS. */
-typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh);
+typedef zend_result (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh);
 
 /* called at request end for each persistent dbh; this gives the driver
  * the opportunity to safely release resources that only have per-request
  * scope */
 typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh);
+
+/* Called when the PDO handle is scanned for GC. Should populate the get_gc buffer
+ * with any zvals in the driver_data that would be freed if the handle is destroyed. */
+typedef void (*pdo_dbh_get_gc_func)(pdo_dbh_t *dbh, zend_get_gc_buffer *buffer);
 
 /* for adding methods to the dbh or stmt objects
 pointer to a list of driver specific functions. The convention is
@@ -315,7 +304,9 @@ struct pdo_dbh_methods {
 	pdo_dbh_check_liveness_func	check_liveness;
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
+	/* if defined to NULL, PDO will use its internal transaction tracking state */
 	pdo_dbh_txn_func		in_transaction;
+	pdo_dbh_get_gc_func		get_gc;
 };
 
 /* }}} */
@@ -338,13 +329,13 @@ typedef int (*pdo_stmt_fetch_func)(pdo_stmt_t *stmt,
  * Driver should populate stmt->columns[colno] with appropriate info */
 typedef int (*pdo_stmt_describe_col_func)(pdo_stmt_t *stmt, int colno);
 
-/* retrieves pointer and size of the value for a column.
- * Note that PDO expects the driver to manage the lifetime of this data;
- * it will copy the value into a zval on behalf of the script.
- * If the driver sets caller_frees, ptr should point to emalloc'd memory
- * and PDO will free it as soon as it is done using it.
- */
-typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees);
+/* Retrieves zval value of a column. If type is non-NULL, then this specifies the type which
+ * the user requested through bindColumn(). The driver does not need to check this argument,
+ * as PDO will perform any necessary conversions itself. However, it might be used to fetch
+ * a value more efficiently into the final type, or make the behavior dependent on the requested
+ * type. */
+typedef int (*pdo_stmt_get_col_data_func)(
+	pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type);
 
 /* hook for bound params */
 enum pdo_param_event {
@@ -377,8 +368,8 @@ typedef int (*pdo_stmt_get_attr_func)(pdo_stmt_t *stmt, zend_long attr, zval *va
  *   name => the column name
  *   len => the length/size of the column
  *   precision => precision of the column
- *   pdo_type => an integer, one of the PDO_PARAM_XXX values
  *
+ *   pdo_type => an integer, one of the PDO_PARAM_XXX values
  *   scale => the floating point scale
  *   table => the table for that column
  *   type => a string representation of the type, mapped to the PHP equivalent type name
@@ -455,7 +446,7 @@ struct _pdo_dbh_t {
 	unsigned alloc_own_columns:1;
 
 	/* if true, commit or rollBack is allowed to be called */
-	unsigned in_txn:1;
+	bool in_txn:1;
 
 	/* max length a single character can become after correct quoting */
 	unsigned max_escaped_char_length:3;
@@ -466,9 +457,12 @@ struct _pdo_dbh_t {
 	/* when set, convert int/floats to strings */
 	unsigned stringify:1;
 
+	/* bitmap for pdo_param_event(s) to skip in dispatch_param_event */
+	unsigned skip_param_evt:7;
+
 	/* the sum of the number of bits here and the bit fields preceding should
 	 * equal 32 */
-	unsigned _reserved_flags:21;
+	unsigned _reserved_flags:14;
 
 	/* data source string used to open this handle */
 	const char *data_source;
@@ -533,7 +527,6 @@ struct pdo_column_data {
 	zend_string *name;
 	size_t maxlen;
 	zend_ulong precision;
-	enum pdo_param_type param_type;
 };
 
 /* describes a bound parameter */
@@ -596,12 +589,10 @@ struct _pdo_stmt_t {
 	zend_long row_count;
 
 	/* used to hold the statement's current query */
-	char *query_string;
-	size_t query_stringlen;
+	zend_string *query_string;
 
 	/* the copy of the query with expanded binds ONLY for emulated-prepare drivers */
-	char *active_query_string;
-	size_t active_query_stringlen;
+	zend_string *active_query_string;
 
 	/* the cursor specific error code. */
 	pdo_error_type error_code;
@@ -656,8 +647,9 @@ struct _pdo_row_t {
 	pdo_stmt_t *stmt;
 };
 
-/* call this in MINIT to register your PDO driver */
-PDO_API int php_pdo_register_driver(const pdo_driver_t *driver);
+/* Call this in MINIT to register the PDO driver.
+ * Registering the driver might fail and should be reported accordingly in MINIT. */
+PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver);
 /* call this in MSHUTDOWN to unregister your PDO driver */
 PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver);
 
@@ -677,16 +669,20 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len,
-	char **outquery, size_t *outquery_len);
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string **outquery);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
-	const char *sqlstate, const char *supp);
+	pdo_error_type sqlstate, const char *supp);
 
 PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh);
 PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);
 
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
+PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count);
 
+/* Normalization for fetching long param for driver attributes */
+PDO_API bool pdo_get_long_param(zend_long *lval, zval *value);
+PDO_API bool pdo_get_bool_param(bool *bval, zval *value);
 
+PDO_API void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_error_type *pdo_error);
 #endif /* PHP_PDO_DRIVER_H */

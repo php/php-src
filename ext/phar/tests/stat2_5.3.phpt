@@ -1,7 +1,7 @@
 --TEST--
 Phar: test stat function interceptions and is_file/is_link edge cases (PHP 5.3+)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -32,11 +32,12 @@ include "phar://" . __FILE__ . "/foo/stat.php";
 __HALT_COMPILER();');
 include $fname3;
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
---EXPECTF--
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+@unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
+?>
+--EXPECT--
 bool(true)
 is_link
 bool(false)
@@ -52,4 +53,3 @@ bool(false)
 dir
 bool(true)
 bool(false)
-===DONE===

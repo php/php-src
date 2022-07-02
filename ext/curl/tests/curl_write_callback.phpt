@@ -5,15 +5,15 @@ Mathieu Kooiman <mathieuk@gmail.com>
 Dutch UG, TestFest 2009, Utrecht
 --DESCRIPTION--
 Writes the value 'test' to a temporary file. Use curl to access this file, passing the output into a callback. Tests the PHP_CURL_USER case in curl_write.
---SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
 function curl_callback($curl_handle, $received_data)
 {
-	echo $received_data;
-	return strlen($received_data);
+    echo $received_data;
+    return strlen($received_data);
 }
 
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');

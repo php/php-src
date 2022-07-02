@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #42917 (PDO::FETCH_KEY_PAIR doesn't work with setFetchMode)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -17,7 +18,7 @@ $db = PDOTest::factory();
 $db->exec("CREATE TABLE test (a varchar(100), b varchar(100), c varchar(100))");
 
 for ($i = 0; $i < 5; $i++) {
-	$db->exec("INSERT INTO test (a,b,c) VALUES('test".$i."','".$i."','".$i."')");
+    $db->exec("INSERT INTO test (a,b,c) VALUES('test".$i."','".$i."','".$i."')");
 }
 
 $res = $db->query("SELECT a,b FROM test");

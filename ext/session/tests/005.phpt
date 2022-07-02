@@ -1,5 +1,7 @@
 --TEST--
 custom save handler, multiple session_start()s, complex data structure test.
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -14,31 +16,31 @@ error_reporting(E_ALL);
 ob_start();
 
 class handler {
-	public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
-    function open($save_path, $session_name)
+    public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';
+    function open($save_path, $session_name): bool
     {
         print "OPEN: $session_name\n";
         return true;
     }
-    function close()
+    function close(): bool
     {
-		print "CLOSE\n";
+        print "CLOSE\n";
         return true;
     }
-    function read($key)
+    function read($key): string|false
     {
         print "READ: $key\n";
         return $GLOBALS["hnd"]->data;
     }
 
-    function write($key, $val)
+    function write($key, $val): bool
     {
         print "WRITE: $key, $val\n";
-		$GLOBALS["hnd"]->data = $val;
+        $GLOBALS["hnd"]->data = $val;
         return true;
     }
 
-    function destroy($key)
+    function destroy($key): bool
     {
         print "DESTROY: $key\n";
         return true;
@@ -56,7 +58,7 @@ class foo {
 
 session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
 
-session_id("abtest");
+session_id("test005");
 session_start();
 session_decode($hnd->data);
 
@@ -91,7 +93,7 @@ session_destroy();
 ?>
 --EXPECT--
 OPEN: PHPSESSID
-READ: abtest
+READ: test005
 object(foo)#4 (2) {
   ["bar"]=>
   string(2) "ok"
@@ -107,10 +109,10 @@ array(1) {
     int(2)
   }
 }
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
+WRITE: test005, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:2;}}
 CLOSE
 OPEN: PHPSESSID
-READ: abtest
+READ: test005
 object(foo)#2 (2) {
   ["bar"]=>
   string(2) "ok"
@@ -127,10 +129,10 @@ array(1) {
   }
 }
 int(123)
-WRITE: abtest, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;
+WRITE: test005, baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:3;}}c|i:123;
 CLOSE
 OPEN: PHPSESSID
-READ: abtest
+READ: test005
 object(foo)#4 (2) {
   ["bar"]=>
   string(2) "ok"
@@ -147,5 +149,5 @@ array(1) {
   }
 }
 int(123)
-DESTROY: abtest
+DESTROY: test005
 CLOSE

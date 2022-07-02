@@ -1,7 +1,7 @@
 --TEST--
 Test: registerNodeClass()
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 class myAttribute extends DOMAttr {

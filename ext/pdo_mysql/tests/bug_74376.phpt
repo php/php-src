@@ -1,9 +1,10 @@
 --TEST--
 Bug #74376 (Invalid free of persistent results on error/connection loss)
+--EXTENSIONS--
+pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -23,5 +24,7 @@ $stmt = $db->query("select (select 1 union select 2)");
 
 print "ok";
 ?>
---EXPECT--
+--EXPECTF--
+
+Warning: PDO::query(): SQLSTATE[21000]: Cardinality violation: 1242 Subquery returns more than 1 row in %s on line %d
 ok

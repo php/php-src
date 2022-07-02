@@ -11,6 +11,7 @@ var_dump($a->{0});
 $b = unserialize(serialize($a));
 var_dump(serialize($b));
 var_dump($b->{0});
+?>
 --EXPECT--
 string(51) "O:8:"stdClass":2:{s:1:"0";s:1:"X";s:1:"1";s:1:"Y";}"
 string(1) "X"

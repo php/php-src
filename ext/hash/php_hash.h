@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -25,18 +25,28 @@
 
 #define PHP_HASH_HMAC		0x0001
 
+#define PHP_HASH_SERIALIZE_MAGIC_SPEC          2
+
 #define L64 INT64_C
 
-typedef void (*php_hash_init_func_t)(void *context);
+typedef struct _php_hashcontext_object php_hashcontext_object;
+
+typedef void (*php_hash_init_func_t)(void *context, HashTable *args);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, size_t count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
 typedef int  (*php_hash_copy_func_t)(const void *ops, void *orig_context, void *dest_context);
+typedef int  (*php_hash_serialize_func_t)(const php_hashcontext_object *hash, zend_long *magic, zval *zv);
+typedef int  (*php_hash_unserialize_func_t)(php_hashcontext_object *hash, zend_long magic, const zval *zv);
 
 typedef struct _php_hash_ops {
+	const char *algo;
 	php_hash_init_func_t hash_init;
 	php_hash_update_func_t hash_update;
 	php_hash_final_func_t hash_final;
 	php_hash_copy_func_t hash_copy;
+	php_hash_serialize_func_t hash_serialize;
+	php_hash_unserialize_func_t hash_unserialize;
+	const char *serialize_spec;
 
 	size_t digest_size;
 	size_t block_size;
@@ -44,7 +54,7 @@ typedef struct _php_hash_ops {
 	unsigned is_crypto: 1;
 } php_hash_ops;
 
-typedef struct _php_hashcontext_object {
+struct _php_hashcontext_object {
 	const php_hash_ops *ops;
 	void *context;
 
@@ -52,7 +62,7 @@ typedef struct _php_hashcontext_object {
 	unsigned char *key;
 
 	zend_object std;
-} php_hashcontext_object;
+};
 
 static inline php_hashcontext_object *php_hashcontext_from_object(zend_object *obj) {
 	return ((php_hashcontext_object*)(obj + 1)) - 1;
@@ -95,6 +105,13 @@ extern const php_hash_ops php_hash_fnv1a32_ops;
 extern const php_hash_ops php_hash_fnv164_ops;
 extern const php_hash_ops php_hash_fnv1a64_ops;
 extern const php_hash_ops php_hash_joaat_ops;
+extern const php_hash_ops php_hash_murmur3a_ops;
+extern const php_hash_ops php_hash_murmur3c_ops;
+extern const php_hash_ops php_hash_murmur3f_ops;
+extern const php_hash_ops php_hash_xxh32_ops;
+extern const php_hash_ops php_hash_xxh64_ops;
+extern const php_hash_ops php_hash_xxh3_64_ops;
+extern const php_hash_ops php_hash_xxh3_128_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern const php_hash_ops php_hash_##p##haval##b##_ops;
 
@@ -127,24 +144,19 @@ extern zend_module_entry hash_module_entry;
 #	define PHP_HASH_API
 #endif
 
-PHP_FUNCTION(hash);
-PHP_FUNCTION(hash_file);
-PHP_FUNCTION(hash_hkdf);
-PHP_FUNCTION(hash_hmac);
-PHP_FUNCTION(hash_hmac_file);
-PHP_FUNCTION(hash_init);
-PHP_FUNCTION(hash_update);
-PHP_FUNCTION(hash_update_stream);
-PHP_FUNCTION(hash_update_file);
-PHP_FUNCTION(hash_final);
-PHP_FUNCTION(hash_algos);
-PHP_FUNCTION(hash_pbkdf2);
-PHP_FUNCTION(hash_equals);
-
 extern PHP_HASH_API zend_class_entry *php_hashcontext_ce;
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t algo_len);
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
+PHP_HASH_API int php_hash_serialize(const php_hashcontext_object *context, zend_long *magic, zval *zv);
+PHP_HASH_API int php_hash_unserialize(php_hashcontext_object *context, zend_long magic, const zval *zv);
+PHP_HASH_API int php_hash_serialize_spec(const php_hashcontext_object *context, zval *zv, const char *spec);
+PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const zval *zv, const char *spec);
+
+static inline void *php_hash_alloc_context(const php_hash_ops *ops) {
+	/* Zero out context memory so serialization doesn't expose internals */
+	return ecalloc(1, ops->context_size);
+}
 
 static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t in_len)
 {

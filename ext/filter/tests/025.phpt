@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and FILTER_SANITIZE_STRING
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 
@@ -15,12 +15,25 @@ var_dump(filter_var(".", FILTER_SANITIZE_STRING));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 string(0) ""
+
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 string(12) "!@#$%^&*()'""
+
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 string(24) "!@#$%^&#38;*()&#39;&#34;"
+
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 string(11) "`1234567890"
+
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 string(5) "`123`"
+
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 string(1) "."
 Done

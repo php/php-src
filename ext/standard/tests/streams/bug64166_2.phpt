@@ -9,8 +9,8 @@ function test_64166($data) {
     rewind($fd);
 
     $res = stream_filter_append($fd, 'convert.quoted-printable-encode', STREAM_FILTER_READ, array(
-		'line-break-chars' => "\n",
-		'line-length' => 74
+        'line-break-chars' => "\n",
+        'line-length' => 74
     ));
     $str = "";
     while(($c = fread($fd, 1))!= "") $str .= $c;
@@ -20,8 +20,8 @@ function test_64166($data) {
 
     rewind($fd);
     stream_filter_append($fd, 'convert.quoted-printable-encode', STREAM_FILTER_READ, array(
-		'line-break-chars' => "\n",
-		'line-length' => 6
+        'line-break-chars' => "\n",
+        'line-length' => 6
     ));
     $str = "";
     while(($c = fread($fd, 1))!= "") $str .= $c;

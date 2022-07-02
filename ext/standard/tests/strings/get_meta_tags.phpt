@@ -47,8 +47,8 @@ DATA;
 $array = array($data, $data1, $data2, $data3, $data4, "", "<>", "<meta<<<<<");
 
 foreach ($array as $html) {
-	file_put_contents($filename, $html);
-	var_dump(get_meta_tags($filename));
+    file_put_contents($filename, $html);
+    var_dump(get_meta_tags($filename));
 }
 
 @unlink($filename);

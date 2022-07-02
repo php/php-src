@@ -1,5 +1,7 @@
 --TEST--
 PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside the callback)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -34,7 +36,7 @@ $row = oci_fetch_assoc($statement);
 $string = str_repeat("test", 32768*4*4);
 
 for ($i = 0; $i < 8; $i++) {
-	$row['CLOB']->write($string);
+    $row['CLOB']->write($string);
 }
 
 oci_commit($c);

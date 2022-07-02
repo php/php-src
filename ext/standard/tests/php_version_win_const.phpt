@@ -10,9 +10,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 var_dump(PHP_WINDOWS_VERSION_MAJOR > 0, PHP_WINDOWS_VERSION_MAJOR, PHP_WINDOWS_VERSION_MINOR);
 ?>
-==DONE==
 --EXPECTF--
 bool(true)
 int(%d)
 int(%d)
-==DONE==

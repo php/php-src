@@ -1,12 +1,13 @@
 --TEST--
 PDO_sqlite: Testing PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
 echo "Creating new PDO" . PHP_EOL;
 $db = new PDO('sqlite::memory:');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 $db->exec("CREATE TABLE dog ( id INTEGER PRIMARY KEY, name TEXT, annoying INTEGER )");
 
@@ -23,6 +24,7 @@ echo sprintf("Second Error Info: SQLSTATE Error Code: (%s), Driver Specific Erro
 
 echo "Creating new PDO with Extended Result Codes turned on" . PHP_EOL;
 $db = new PDO('sqlite::memory:', '', '', [PDO::SQLITE_ATTR_EXTENDED_RESULT_CODES => TRUE]);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 $db->exec("CREATE TABLE dog ( id INTEGER PRIMARY KEY, name TEXT, annoying INTEGER )");
 

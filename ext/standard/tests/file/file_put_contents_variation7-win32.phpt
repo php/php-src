@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
 $mainDir = "filePutContentsVar7.dir";
@@ -99,12 +93,12 @@ Data written correctly
 
 -- Iteration 5 --
 
-Warning: file_put_contents(%sfilePutContentsVar7.dir\filePutContentsVar7Sub\..\\\filePutContentsVar7Sub\\..\\..\filePutContentsVar7Sub\FileGetContentsVar7.tmp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sfilePutContentsVar7.dir\filePutContentsVar7Sub\..\\\filePutContentsVar7Sub\\..\\..\filePutContentsVar7Sub\FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
 -- Iteration 6 --
 
-Warning: file_put_contents(%sfilePutContentsVar7.dir\filePutContentsVar7Sub\BADDIR\FileGetContentsVar7.tmp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sfilePutContentsVar7.dir\filePutContentsVar7Sub\BADDIR\FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
 -- Iteration 7 --
@@ -121,7 +115,7 @@ Data written correctly
 
 -- Iteration 11 --
 
-Warning: file_put_contents(BADDIR\FileGetContentsVar7.tmp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(BADDIR\FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
 -- Iteration 12 --

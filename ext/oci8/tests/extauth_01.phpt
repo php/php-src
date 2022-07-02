@@ -1,8 +1,9 @@
 --TEST--
 Test External Authentication errors with oci_connect
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 if (substr(PHP_OS, 0, 3) == 'WIN') die("skip feature not available on Windows platforms");
 require(__DIR__.'/details.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
@@ -12,14 +13,16 @@ oci8.privileged_connect=1
 --FILE--
 <?php
 
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 // Run Test
 
 echo "Test 1\n";
 
 $c = oci_connect('/', 'notemtpy', 'anything', null, OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -27,8 +30,8 @@ echo "Test 2\n";
 
 $c = oci_connect('notemtpy', 'notemtpy', 'anything', null, OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -36,8 +39,8 @@ echo "Test 3\n";
 
 $c = oci_connect('notemtpy', '', 'anything', null, OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -45,8 +48,8 @@ echo "Test 4\n";
 
 $c = oci_connect('a', 'b', 'c', null, OCI_SYSDBA+OCI_SYSOPER);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -54,8 +57,8 @@ echo "Test 5\n";
 
 $c = oci_connect('a', 'b', 'c', null, OCI_SYSDBA+OCI_SYSOPER+OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -63,8 +66,8 @@ echo "Test 6\n";
 
 $c = oci_connect('', '', 'anything', null, OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -72,8 +75,8 @@ echo "Test 7\n";
 
 $c = oci_connect('/', '', 'anything', null, OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -81,8 +84,8 @@ echo "Test 8\n";
 
 $c = oci_connect('/', null, 'anything', null, OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -90,8 +93,8 @@ echo "Test 9\n";
 
 $c = oci_connect('/', '', 'd', null, OCI_SYSDBA+OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
@@ -99,15 +102,13 @@ echo "Test 10\n";
 
 $c = oci_connect('/', '', 'd', null, OCI_SYSOPER+OCI_CRED_EXT);
 if (!$c) {
-	$m = oci_error();
-	var_dump($m);
+    $m = oci_error();
+    var_dump($m);
 }
 var_dump($c);
 
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 
@@ -195,4 +196,3 @@ array(4) {
   string(0) ""
 }
 bool(false)
-===DONE===

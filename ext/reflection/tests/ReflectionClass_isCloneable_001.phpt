@@ -1,7 +1,8 @@
 --TEST--
 Testing ReflectionClass::isCloneable()
---SKIPIF--
-<?php if (!extension_loaded('simplexml') || !extension_loaded('xmlwriter')) die("skip SimpleXML and XMLWriter is required for this test"); ?>
+--EXTENSIONS--
+simplexml
+xmlwriter
 --FILE--
 <?php
 
@@ -17,8 +18,8 @@ var_dump($obj->isCloneable());
 $h = clone $foo;
 
 class bar {
-	private function __clone() {
-	}
+    private function __clone() {
+    }
 }
 $bar = new bar;
 print "User class - private __clone\n";

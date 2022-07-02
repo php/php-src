@@ -1,8 +1,8 @@
 --TEST--
 Phar::decompressFiles()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not present"); ?>
+--EXTENSIONS--
+phar
+zlib
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -49,10 +49,8 @@ var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['a']->isCompressed());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--
@@ -77,4 +75,3 @@ string(1) "b"
 bool(false)
 string(1) "c"
 bool(false)
-===DONE===

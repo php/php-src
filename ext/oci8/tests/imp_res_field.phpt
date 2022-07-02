@@ -1,8 +1,9 @@
 --TEST--
 Oracle Database 12c Implicit Result Sets: field tests
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -124,8 +125,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1 - can't get IRS fields from parent
 num fields : 0
@@ -224,4 +223,3 @@ array(1) {
 }
 num fields : 1
 C4_NUMBER52	: is_null T, precision 5, scale 2, size 22, typeraw 2, type NUMBER
-===DONE===

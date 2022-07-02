@@ -1,7 +1,7 @@
 --TEST--
 Test mb_get_info() function
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 mbstring.encoding_translation=1
 mbstring.language=Korean
@@ -23,6 +23,11 @@ foreach (array_keys($result) as $key) {
 }
 ?>
 --EXPECT--
+Deprecated: PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
 array(13) {
   ["internal_encoding"]=>
   string(5) "UTF-8"

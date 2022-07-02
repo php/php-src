@@ -5,7 +5,6 @@ Bug #63762 - Sigsegv when Exception::$trace is changed by user
 $e = new Exception();
 
 $ref = new ReflectionProperty($e, 'trace');
-$ref->setAccessible(TRUE);
 
 echo "Array of NULL:\n";
 $ref->setValue($e, array(NULL));
@@ -39,14 +38,14 @@ string(36) "#0 [internal function]: ()
 
 Array of array of NULL values:
 
-Warning: Function name is no string in %s on line %d
+Warning: File name is not a string in %s on line %d
 
-Warning: Value for class is no string in %s on line %d
+Warning: Value for class is not a string in %s on line %d
 
-Warning: Value for type is no string in %s on line %d
+Warning: Value for type is not a string in %s on line %d
 
-Warning: Value for function is no string in %s on line %d
+Warning: Value for function is not a string in %s on line %d
 
-Warning: args element is no array in %s on line %d
-string(60) "#0 [unknown function][unknown][unknown][unknown]()
+Warning: args element is not an array in %s on line %d
+string(58) "#0 [unknown file]: [unknown][unknown][unknown]()
 #1 {main}"

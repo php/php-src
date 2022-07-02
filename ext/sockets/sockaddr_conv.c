@@ -60,10 +60,12 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 
 	}
 
-	if (scope++) {
+	if (scope) {
 		zend_long lval = 0;
 		double dval = 0;
 		unsigned scope_id = 0;
+
+		scope++;
 
 		if (IS_LONG == is_numeric_string(scope, strlen(scope), &lval, &dval, 0)) {
 			if (lval > 0 && (zend_ulong)lval <= UINT_MAX) {
@@ -87,7 +89,11 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	struct in_addr tmp;
 	struct hostent *host_entry;
 
+#ifdef HAVE_INET_PTON
+	if (inet_pton(AF_INET, string, &tmp)) {
+#else
 	if (inet_aton(string, &tmp)) {
+#endif
 		sin->sin_addr.s_addr = tmp.s_addr;
 	} else {
 		if (strlen(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(string))) {

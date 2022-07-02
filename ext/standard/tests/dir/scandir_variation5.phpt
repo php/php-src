@@ -3,17 +3,12 @@ Test scandir() function : usage variations - different directory permissions
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip Not for Windows');
+    die('skip Not for Windows');
 }
 require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * remove the execute permission from the parent dir and test scandir() on child dir
  * 1. remove write & execute permission from the 1st parent and test scandir()
@@ -42,20 +37,19 @@ chmod($sub_dir_path, 0777);
 $child_dir_path = $sub_dir_path."/child_dir";
 mkdir($child_dir_path);
 
-// remove the write and execute permisson from sub parent
+// remove the write and execute permission from sub parent
 chmod($sub_dir_path, 0444);
 
 echo "\n-- After restricting 1st level parent directory --\n";
 var_dump(scandir($child_dir_path));
 
-// remove the execute permisson from parent dir, allowing all permission for sub dir
-chmod($sub_dir_path, 0777); // all permisson to sub dir
+// remove the execute permission from parent dir, allowing all permission for sub dir
+chmod($sub_dir_path, 0777); // all permission to sub dir
 chmod($parent_dir_path, 0666); // restricting parent directory
 
 echo "\n-- After restricting parent directory --\n";
 var_dump(scandir($child_dir_path));
 ?>
-===DONE===
 --CLEAN--
 <?php
 $parent_dir_path = __DIR__ . "/scandir_variation5";
@@ -76,15 +70,14 @@ rmdir($parent_dir_path);
 
 -- After restricting 1st level parent directory --
 
-Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- After restricting parent directory --
 
-Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
-===DONE===

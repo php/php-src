@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -53,7 +53,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err);
 
 PHP_WINUTIL_API char *php_win32_get_username(void);
 
-PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *img, char **err);
-PHP_WINUTIL_API BOOL php_win32_crt_compatible(const char *img, char **err);
+PHP_WINUTIL_API BOOL php_win32_image_compatible(HMODULE handle, char **err);
+PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err);
 
 #endif

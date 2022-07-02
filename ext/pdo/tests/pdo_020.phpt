@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDOStatement::columnCount
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -21,10 +22,10 @@ $db->exec("INSERT INTO test VALUES(3, 'C', 'C')");
 
 foreach (array('SELECT id, val FROM test', 'SELECT id, val, val2 FROM test', 'SELECT COUNT(*) FROM test') as $sql) {
 
-	$stmt = $db->query($sql);
-	$res = $stmt->columnCount();
+    $stmt = $db->query($sql);
+    $res = $stmt->columnCount();
     echo "Counted $res columns after $sql.\n";
-	$stmt = null;
+    $stmt = null;
 }
 
 ?>

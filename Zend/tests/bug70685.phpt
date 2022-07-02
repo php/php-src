@@ -18,5 +18,5 @@ var_dump($c);
 Warning: Cannot bind method SplDoublyLinkedList::count() to object of class cls in %s on line %d
 NULL
 
-Warning: Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure() in %s on line %d
+Warning: Cannot rebind scope of closure created from method in %s on line %d
 NULL

@@ -22,35 +22,44 @@ echo "\nInstance without property:\n";
 $propInfo = new ReflectionProperty('TestClass', 'stat');
 
 echo "\nStatic property / too many args:\n";
-var_dump($propInfo->getValue($instance, true));
+try {
+    var_dump($propInfo->getValue($instance, true));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\nProtected property:\n";
-try {
-    $propInfo = new ReflectionProperty('TestClass', 'prot');
-    var_dump($propInfo->getValue($instance));
-}
-catch(Exception $exc) {
-    echo $exc->getMessage();
-}
+$propInfo = new ReflectionProperty('TestClass', 'prot');
+var_dump($propInfo->getValue($instance));
 
 echo "\n\nInvalid instance:\n";
 $propInfo = new ReflectionProperty('TestClass', 'pub2');
-var_dump($propInfo->getValue($invalidInstance));
+try {
+    var_dump($propInfo->getValue($invalidInstance));
+} catch (ReflectionException $e) {
+    echo $e->getMessage();
+}
+
+echo "\n\nMissing instance:\n";
+try {
+    var_dump($propInfo->getValue());
+} catch (TypeError $e) {
+    echo $e->getMessage();
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 Instance without property:
 
 Static property / too many args:
-string(15) "static property"
+ReflectionProperty::getValue() expects at most 1 argument, 2 given
 
 Protected property:
-Cannot access non-public member TestClass::$prot
+int(4)
+
 
 Invalid instance:
+Given object is not an instance of the class this property was declared in
 
-Fatal error: Uncaught ReflectionException: Given object is not an instance of the class this property was declared in in %s:%d
-Stack trace:
-#0 %s(%d): ReflectionProperty->getValue(Object(AnotherClass))
-#1 {main}
-  thrown in %s on line %d
+Missing instance:
+ReflectionProperty::getValue(): Argument #1 ($object) must be provided for instance properties

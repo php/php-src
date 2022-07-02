@@ -1,7 +1,7 @@
 --TEST--
 Phar::setStub()/stopBuffering() tar-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -22,7 +22,6 @@ __HALT_COMPILER();
 var_dump($p->getStub());
 var_dump($p->isFileFormat(Phar::TAR));
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/phar_commitwrite.phar.tar');
@@ -39,4 +38,3 @@ include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER(); ?>
 "
 bool(true)
-===DONE===

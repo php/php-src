@@ -184,7 +184,7 @@ ZEND_API void zend_strip(void)
 					zend_write(" ", sizeof(" ") - 1);
 					prev_space = 1;
 				}
-						/* lack of break; is intentional */
+				ZEND_FALLTHROUGH;
 			case T_COMMENT:
 			case T_DOC_COMMENT:
 				ZVAL_UNDEF(&token);

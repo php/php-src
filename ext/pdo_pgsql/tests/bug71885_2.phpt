@@ -1,9 +1,10 @@
 --TEST--
 Request #71855 (PDO placeholder escaping, part 2)
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-if (!extension_loaded('json')) die('skip json extension not available');
 require_once dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 require_once dirname(__FILE__) . '/config.inc';
 PDOTest::skip();
@@ -25,15 +26,15 @@ $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_NUM);
 $jsonb = $db->quote(json_encode(['a' => 1]));
 
 foreach ([false, true] as $emulate) {
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
 
-	$stmt = $db->prepare("SELECT {$jsonb}::jsonb ?? ?");
-	$stmt->execute(['b']);
-	var_dump($stmt->fetch());
+    $stmt = $db->prepare("SELECT {$jsonb}::jsonb ?? ?");
+    $stmt->execute(['b']);
+    var_dump($stmt->fetch());
 
-	$stmt = $db->prepare("SELECT {$jsonb}::jsonb ???");
-	$stmt->execute(['a']);
-	var_dump($stmt->fetch());
+    $stmt = $db->prepare("SELECT {$jsonb}::jsonb ???");
+    $stmt->execute(['a']);
+    var_dump($stmt->fetch());
 }
 
 ?>
@@ -41,18 +42,18 @@ foreach ([false, true] as $emulate) {
 --EXPECT--
 array(1) {
   [0]=>
-  bool(false)
+  string(1) "0"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 array(1) {
   [0]=>
-  bool(false)
+  string(1) "0"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 ==OK==

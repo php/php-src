@@ -13,6 +13,7 @@ var_dump(unserialize($c, ["allowed_classes" => ["C"]]));
 var_dump(unserialize($c, ["allowed_classes" => ["D"]]));
 var_dump(unserialize($d, ["allowed_classes" => ["C"]]));
 var_dump(unserialize($d, ["allowed_classes" => ["D"]]));
+?>
 --EXPECTF--
 object(C)#%d (0) {
 }

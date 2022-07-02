@@ -8,13 +8,13 @@ class Cycle
 
     public function __construct()
     {
-		$obj = $this;
+        $obj = $this;
         $this->thing = function() use($obj) {};
     }
 
     public function __destruct()
     {
-		($this->thing)();
+        ($this->thing)();
     }
 
 }

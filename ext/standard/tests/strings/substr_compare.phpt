@@ -17,14 +17,12 @@ echo "Test\n";
 
 try {
     substr_compare("abcde", "abc", 0, -1);
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 var_dump(substr_compare("abcde", "abc", -1, NULL, -5) > 0);
-
-echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 int(0)
@@ -36,6 +34,5 @@ int(-1)
 bool(true)
 int(0)
 Test
-The length must be greater than or equal to zero
+substr_compare(): Argument #4 ($length) must be greater than or equal to 0
 bool(true)
-Done

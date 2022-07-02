@@ -9,11 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects on the stats of dir/file for changing permissions of dir/file */
 
 
@@ -31,12 +26,13 @@ fclose($file_handle);
 
 
 // checking stat() on file
-echo "\n*** Testing stat() on file with miscelleneous file permission and content ***\n";
+echo "\n*** Testing stat() on file with miscellaneous file permission and content ***\n";
+clearstatcache();
 $old_stat = stat($filename);
+sleep(1);
 var_dump( chmod($filename, 0777) );
 // clear the stat
 clearstatcache();
-sleep(2);
 $new_stat = stat($filename);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
@@ -48,12 +44,12 @@ var_dump( compare_stats($old_stat, $new_stat, $affected_members, "==") );
 clearstatcache();  // clear statement cache
 
 // checking stat() on directory
-echo "\n*** Testing stat() on directory with miscelleneous file permission ***\n";
+echo "\n*** Testing stat() on directory with miscellaneous file permission ***\n";
 $old_stat = stat($dirname);
+sleep(1);
 var_dump( chmod($dirname, 0777) );
 // clear the stat
 clearstatcache();
-sleep(2);
 $new_stat = stat($dirname);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
@@ -74,13 +70,13 @@ unlink("$file_path/stat_variation6.tmp");
 rmdir("$file_path/stat_variation6");
 ?>
 --EXPECT--
-*** Testing stat() on file with miscelleneous file permission and content ***
+*** Testing stat() on file with miscellaneous file permission and content ***
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 
-*** Testing stat() on directory with miscelleneous file permission ***
+*** Testing stat() on directory with miscellaneous file permission ***
 bool(true)
 bool(true)
 bool(true)

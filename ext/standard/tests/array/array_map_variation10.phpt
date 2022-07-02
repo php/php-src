@@ -2,13 +2,8 @@
 Test array_map() function : usage variations - anonymous callback function
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
- * Test array_map() by passing anoymous callback function with following variations
+ * Test array_map() by passing anonymous callback function with following variations
  */
 
 echo "*** Testing array_map() : anonymous callback function ***\n";
@@ -21,9 +16,9 @@ var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1, $array
 
 echo "-- anonymous function with two parameters and passing one array --\n";
 try {
-	var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
+    var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "-- anonymous function with NULL parameter --\n";
@@ -32,7 +27,7 @@ var_dump( array_map( function() { return NULL; }, $array1));
 echo "-- anonymous function with NULL body --\n";
 var_dump( array_map( function($a) { }, $array1));
 
-echo "-- passing NULL as 'arr1' --\n";
+echo "-- passing NULL as 'array1' --\n";
 try {
     var_dump( array_map( function($a) { return array($a); }, NULL));
 } catch (TypeError $e) {
@@ -87,6 +82,6 @@ array(3) {
   [2]=>
   NULL
 }
--- passing NULL as 'arr1' --
-Expected parameter 2 to be an array, null given
+-- passing NULL as 'array1' --
+array_map(): Argument #2 ($array) must be of type array, null given
 Done

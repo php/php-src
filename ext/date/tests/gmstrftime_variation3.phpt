@@ -2,12 +2,6 @@
 Test gmstrftime() function : usage variation - Passing week related format strings to format argument.
 --FILE--
 <?php
-/* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -17,8 +11,8 @@ $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated weekday name' => "%a",
       'Full weekday name' => "%A",
-	  'Week number of the year' => "%U",
-	  'Week number of the year in decimal number' => "%W",
+      'Week number of the year' => "%U",
+      'Week number of the year in decimal number' => "%W",
 );
 
 // loop through each element of the array for timestamp
@@ -30,23 +24,37 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
 --Abbreviated weekday name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(3) "Fri"
 
 --Full weekday name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(6) "Friday"
 
 --Week number of the year--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "31"
 
 --Week number of the year in decimal number--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "31"
-===DONE===

@@ -1,9 +1,7 @@
 --TEST--
 zip_entry_name() function
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zip = zip_open(__DIR__."/test_procedural.zip");
@@ -15,8 +13,29 @@ while ($entry = zip_read($zip)) {
 zip_close($zip);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function zip_open() is deprecated in %s on line %d
+
+Deprecated: Function zip_read() is deprecated in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated in %s on line %d
 foo
+
+Deprecated: Function zip_read() is deprecated in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated in %s on line %d
 bar
+
+Deprecated: Function zip_read() is deprecated in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated in %s on line %d
 foobar/
+
+Deprecated: Function zip_read() is deprecated in %s on line %d
+
+Deprecated: Function zip_entry_name() is deprecated in %s on line %d
 foobar/baz
+
+Deprecated: Function zip_read() is deprecated in %s on line %d
+
+Deprecated: Function zip_close() is deprecated in %s on line %d

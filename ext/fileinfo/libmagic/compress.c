@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.121 2019/05/07 02:27:11 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.129 2020/12/08 21:26:00 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -45,6 +45,8 @@ FILE_RCSID("@(#)$File: compress.c,v 1.121 2019/05/07 02:27:11 christos Exp $")
 #endif
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
+#include <stdarg.h>
 #include <signal.h>
 #ifndef HAVE_SIG_T
 typedef void (*sig_t)(int);
@@ -68,6 +70,11 @@ typedef void (*sig_t)(int);
 #if defined(PHP_FILEINFO_UNCOMPRESS)
 #define BUILTIN_BZLIB
 #include <bzlib.h>
+#endif
+
+#if defined(HAVE_LZMA_H) && defined(XZLIBSUPPORT)
+#define BUILTIN_XZLIB
+#include <lzma.h>
 #endif
 
 #ifdef DEBUG
@@ -112,10 +119,21 @@ zlibcmp(const unsigned char *buf)
 }
 #endif
 
+#ifdef PHP_FILEINFO_UNCOMPRESS
+
+static int
+lzmacmp(const unsigned char *buf)
+{
+	if (buf[0] != 0x5d || buf[1] || buf[2])
+		return 0;
+	if (buf[12] && buf[12] != 0xff)
+		return 0;
+	return 1;
+}
+
 #define gzip_flags "-cd"
 #define lrzip_flags "-do"
 #define lzip_flags gzip_flags
-#ifdef PHP_FILEINFO_UNCOMPRESS
 
 static const char *gzip_args[] = {
 	"gzip", gzip_flags, NULL
@@ -146,30 +164,39 @@ static const char *zstd_args[] = {
 #define	do_bzlib	NULL
 
 private const struct {
-	const void *magic;
-	size_t maglen;
+	union {
+		const char *magic;
+		int (*func)(const unsigned char *);
+	} u;
+	int maglen;
 	const char **argv;
 	void *unused;
 } compr[] = {
-	{ "\037\235",	2, gzip_args, NULL },		/* compressed */
-	/* Uncompress can get stuck; so use gzip first if we have it
-	 * Idea from Damien Clark, thanks! */
-	{ "\037\235",	2, uncompress_args, NULL },	/* compressed */
-	{ "\037\213",	2, gzip_args, do_zlib },	/* gzipped */
-	{ "\037\236",	2, gzip_args, NULL },		/* frozen */
-	{ "\037\240",	2, gzip_args, NULL },		/* SCO LZH */
-	/* the standard pack utilities do not accept standard input */
-	{ "\037\036",	2, gzip_args, NULL },		/* packed */
-	{ "PK\3\4",	4, gzip_args, NULL },		/* pkzipped, */
-	/* ...only first file examined */
-	{ "BZh",	3, bzip2_args, do_bzlib },	/* bzip2-ed */
-	{ "LZIP",	4, lzip_args, NULL },		/* lzip-ed */
- 	{ "\3757zXZ\0",	6, xz_args, NULL },		/* XZ Utils */
- 	{ "LRZI",	4, lrzip_args, NULL },	/* LRZIP */
- 	{ "\004\"M\030",4, lz4_args, NULL },		/* LZ4 */
- 	{ "\x28\xB5\x2F\xFD", 4, zstd_args, NULL },	/* zstd */
+#define METH_FROZEN	2
+#define METH_BZIP	7
+#define METH_XZ		9
+#define METH_LZMA	13
+#define METH_ZLIB	14
+    { { .magic = "\037\235" },	2, gzip_args, NULL },	/* 0, compressed */
+    /* Uncompress can get stuck; so use gzip first if we have it
+     * Idea from Damien Clark, thanks! */
+    { { .magic = "\037\235" },	2, uncompress_args, NULL },/* 1, compressed */
+    { { .magic = "\037\213" },	2, gzip_args, do_zlib },/* 2, gzipped */
+    { { .magic = "\037\236" },	2, gzip_args, NULL },	/* 3, frozen */
+    { { .magic = "\037\240" },	2, gzip_args, NULL },	/* 4, SCO LZH */
+    /* the standard pack utilities do not accept standard input */
+    { { .magic = "\037\036" },	2, gzip_args, NULL },	/* 5, packed */
+    { { .magic = "PK\3\4" },	4, gzip_args, NULL },	/* 6, pkziped */
+    /* ...only first file examined */
+    { { .magic = "BZh" },	3, bzip2_args, do_bzlib },/* 7, bzip2-ed */
+    { { .magic = "LZIP" },	4, lzip_args, NULL },	/* 8, lzip-ed */
+    { { .magic = "\3757zXZ\0" },6, xz_args, NULL },	/* 9, XZ Util */
+    { { .magic = "LRZI" },	4, lrzip_args, NULL },	/* 10, LRZIP */
+    { { .magic = "\004\"M\030" },4, lz4_args, NULL },	/* 11, LZ4 */
+    { { .magic = "\x28\xB5\x2F\xFD" }, 4, zstd_args, NULL },/* 12, zstd */
+    { { .func = lzmacmp },	-13, xz_args, NULL },	/* 13, lzma */
 #ifdef ZLIBSUPPORT
-	{ RCAST(const void *, zlibcmp),	0, zlib_args, NULL },	/* zlib */
+    { { .func = zlibcmp },	-2, zlib_args, NULL },	/* 14, zlib */
 #endif
 };
 
@@ -190,7 +217,11 @@ private int uncompressgzipped(const unsigned char *, unsigned char **, size_t,
 #endif
 #ifdef BUILTIN_BZLIB
 private int uncompressbzlib(const unsigned char *, unsigned char **, size_t,
-    size_t *, int);
+    size_t *);
+#endif
+#ifdef BUILTIN_XZLIB
+private int uncompressxzlib(const unsigned char *, unsigned char **, size_t,
+    size_t *);
 #endif
 
 static int makeerror(unsigned char **, size_t *, const char *, ...);
@@ -233,15 +264,14 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
 
 	for (i = 0; i < ncompr; i++) {
 		int zm;
-		if (nbytes < compr[i].maglen)
+		if (nbytes < CAST(size_t, abs(compr[i].maglen)))
 			continue;
-#ifdef ZLIBSUPPORT
-		if (compr[i].maglen == 0)
-			zm = (RCAST(int (*)(const unsigned char *),
-			    CCAST(void *, compr[i].magic)))(buf);
-		else
-#endif
-			zm = memcmp(buf, compr[i].magic, compr[i].maglen) == 0;
+		if (compr[i].maglen < 0) {
+			zm = (*compr[i].u.func)(buf);
+		} else {
+			zm = memcmp(buf, compr[i].u.magic,
+			    CAST(size_t, compr[i].maglen)) == 0;
+		}
 
 		if (!zm)
 			continue;
@@ -434,6 +464,7 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 #else
 	{
 		int te;
+		mode_t ou = umask(0);
 		tfd = mkstemp(buf);
 		(void)umask(ou);
 		te = errno;
@@ -569,6 +600,90 @@ err:
 }
 #endif
 
+#ifdef BUILTIN_BZLIB
+private int
+uncompressbzlib(const unsigned char *old, unsigned char **newch,
+    size_t bytes_max, size_t *n)
+{
+	int rc;
+	bz_stream bz;
+
+	memset(&bz, 0, sizeof(bz));
+	rc = BZ2_bzDecompressInit(&bz, 0, 0);
+	if (rc != BZ_OK)
+		goto err;
+
+	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
+		return makeerror(newch, n, "No buffer, %s", strerror(errno));
+
+	bz.next_in = CCAST(char *, RCAST(const char *, old));
+	bz.avail_in = CAST(uint32_t, *n);
+	bz.next_out = RCAST(char *, *newch);
+	bz.avail_out = CAST(unsigned int, bytes_max);
+
+	rc = BZ2_bzDecompress(&bz);
+	if (rc != BZ_OK && rc != BZ_STREAM_END)
+		goto err;
+
+	/* Assume byte_max is within 32bit */
+	/* assert(bz.total_out_hi32 == 0); */
+	*n = CAST(size_t, bz.total_out_lo32);
+	rc = BZ2_bzDecompressEnd(&bz);
+	if (rc != BZ_OK)
+		goto err;
+
+	/* let's keep the nul-terminate tradition */
+	(*newch)[*n] = '\0';
+
+	return OKDATA;
+err:
+	snprintf(RCAST(char *, *newch), bytes_max, "bunzip error %d", rc);
+	*n = strlen(RCAST(char *, *newch));
+	return ERRDATA;
+}
+#endif
+
+#ifdef BUILTIN_XZLIB
+private int
+uncompressxzlib(const unsigned char *old, unsigned char **newch,
+    size_t bytes_max, size_t *n)
+{
+	int rc;
+	lzma_stream xz;
+
+	memset(&xz, 0, sizeof(xz));
+	rc = lzma_auto_decoder(&xz, UINT64_MAX, 0);
+	if (rc != LZMA_OK)
+		goto err;
+
+	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
+		return makeerror(newch, n, "No buffer, %s", strerror(errno));
+
+	xz.next_in = CCAST(const uint8_t *, old);
+	xz.avail_in = CAST(uint32_t, *n);
+	xz.next_out = RCAST(uint8_t *, *newch);
+	xz.avail_out = CAST(unsigned int, bytes_max);
+
+	rc = lzma_code(&xz, LZMA_RUN);
+	if (rc != LZMA_OK && rc != LZMA_STREAM_END)
+		goto err;
+
+	*n = CAST(size_t, xz.total_out);
+
+	lzma_end(&xz);
+
+	/* let's keep the nul-terminate tradition */
+	(*newch)[*n] = '\0';
+
+	return OKDATA;
+err:
+	snprintf(RCAST(char *, *newch), bytes_max, "unxz error %d", rc);
+	*n = strlen(RCAST(char *, *newch));
+	return ERRDATA;
+}
+#endif
+
+
 static int
 makeerror(unsigned char **buf, size_t *len, const char *fmt, ...)
 {
@@ -675,12 +790,24 @@ filter_error(unsigned char *ubuf, ssize_t n)
 private const char *
 methodname(size_t method)
 {
+	switch (method) {
 #ifdef BUILTIN_DECOMPRESS
-        /* FIXME: This doesn't cope with bzip2 */
-	if (method == 2 || compr[method].maglen == 0)
-	    return "zlib";
+	case METH_FROZEN:
+	case METH_ZLIB:
+		return "zlib";
 #endif
-	return compr[method].argv[0];
+#ifdef BUILTIN_BZLIB
+	case METH_BZIP:
+		return "bzlib";
+#endif
+#ifdef BUILTIN_XZLIB
+	case METH_XZ:
+	case METH_LZMA:
+		return "xzlib";
+#endif
+	default:
+		return compr[method].argv[0];
+	}
 }
 
 private int
@@ -694,21 +821,49 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 	size_t i;
 	ssize_t r;
 
+	switch (method) {
 #ifdef BUILTIN_DECOMPRESS
-        /* FIXME: This doesn't cope with bzip2 */
-	if (method == 2)
+	case METH_FROZEN:
 		return uncompressgzipped(old, newch, bytes_max, n);
-	if (compr[method].maglen == 0)
+	case METH_ZLIB:
 		return uncompresszlib(old, newch, bytes_max, n, 1);
 #endif
+#ifdef BUILTIN_BZLIB
+	case METH_BZIP:
+		return uncompressbzlib(old, newch, bytes_max, n);
+#endif
+#ifdef BUILTIN_XZLIB
+	case METH_XZ:
+	case METH_LZMA:
+		return uncompressxzlib(old, newch, bytes_max, n);
+#endif
+	default:
+		break;
+	}
+
 	(void)fflush(stdout);
 	(void)fflush(stderr);
 
 	for (i = 0; i < __arraycount(fdp); i++)
 		fdp[i][0] = fdp[i][1] = -1;
 
-	if ((fd == -1 && pipe(fdp[STDIN_FILENO]) == -1) ||
-	    pipe(fdp[STDOUT_FILENO]) == -1 || pipe(fdp[STDERR_FILENO]) == -1) {
+	/*
+	 * There are multithreaded users who run magic_file()
+	 * from dozens of threads. If two parallel magic_file() calls
+	 * analyze two large compressed files, both will spawn
+	 * an uncompressing child here, which writes out uncompressed data.
+	 * We read some portion, then close the pipe, then waitpid() the child.
+	 * If uncompressed data is larger, child shound get EPIPE and exit.
+	 * However, with *parallel* calls OTHER child may unintentionally
+	 * inherit pipe fds, thus keeping pipe open and making writes in
+	 * our child block instead of failing with EPIPE!
+	 * (For the bug to occur, two threads must mutually inherit their pipes,
+	 * and both must have large outputs. Thus it happens not that often).
+	 * To avoid this, be sure to create pipes with O_CLOEXEC.
+	 */
+	if ((fd == -1 && file_pipe_closexec(fdp[STDIN_FILENO]) == -1) ||
+	    file_pipe_closexec(fdp[STDOUT_FILENO]) == -1 ||
+	    file_pipe_closexec(fdp[STDERR_FILENO]) == -1) {
 		closep(fdp[STDIN_FILENO]);
 		closep(fdp[STDOUT_FILENO]);
 		return makeerror(newch, n, "Cannot create pipe, %s",
@@ -739,16 +894,20 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 			if (fdp[STDIN_FILENO][1] > 2)
 				(void) close(fdp[STDIN_FILENO][1]);
 		}
+		file_clear_closexec(STDIN_FILENO);
+
 ///FIXME: if one of the fdp[i][j] is 0 or 1, this can bomb spectacularly
 		if (copydesc(STDOUT_FILENO, fdp[STDOUT_FILENO][1]))
 			(void) close(fdp[STDOUT_FILENO][1]);
 		if (fdp[STDOUT_FILENO][0] > 2)
 			(void) close(fdp[STDOUT_FILENO][0]);
+		file_clear_closexec(STDOUT_FILENO);
 
 		if (copydesc(STDERR_FILENO, fdp[STDERR_FILENO][1]))
 			(void) close(fdp[STDERR_FILENO][1]);
 		if (fdp[STDERR_FILENO][0] > 2)
 			(void) close(fdp[STDERR_FILENO][0]);
+		file_clear_closexec(STDERR_FILENO);
 
 		(void)execvp(compr[method].argv[0],
 		    RCAST(char *const *, RCAST(intptr_t, compr[method].argv)));

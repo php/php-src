@@ -1,17 +1,13 @@
 --TEST--
 Test session_id() function : error functionality
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : string session_id([string $id])
- * Description : Get and/or set the current session id
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_id() : error functionality ***\n";
 
@@ -35,7 +31,7 @@ string(4) "test"
 string(10) "1234567890"
 bool(true)
 
-Warning: session_id(): Cannot change session id when session is active in %s on line %d
+Warning: session_id(): Session ID cannot be changed when a session is active in %s on line %d
 bool(false)
 bool(true)
 string(0) ""

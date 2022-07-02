@@ -2,11 +2,6 @@
 Test vsprintf() function : basic functionality - octal format
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string $format , array $args)
- * Description: Return a formatted string
- * Source code: ext/standard/formatted_print.c
-*/
-
 echo "*** Testing vsprintf() : basic functionality - using octal format ***\n";
 
 // Initialise all required variables

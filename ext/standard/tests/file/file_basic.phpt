@@ -3,9 +3,7 @@ Test file() function : basic functionality
 --FILE--
 <?php
 /*
- * Prototype: array file ( string filename [,int use-include_path [,resource context]] );
  * Description: Reads entire file into an array
- *              Returns the  file in an array
  */
 require(__DIR__ . '/file.inc');
 $file_path = __DIR__;

@@ -1,19 +1,29 @@
 --TEST--
 gmp_testbit() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
 $n = gmp_init(0);
-var_dump(gmp_testbit($n, -10));
+
+try {
+    var_dump(gmp_testbit($n, -10));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump(gmp_testbit($n, 0));
 var_dump(gmp_testbit($n, 1));
 var_dump(gmp_testbit($n, 100));
 
 $n = gmp_init(-1);
 var_dump(gmp_testbit($n, 1));
-var_dump(gmp_testbit($n, -1));
+try {
+    var_dump(gmp_testbit($n, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $n = gmp_init("1000000");
 var_dump(gmp_testbit($n, 1));
@@ -37,16 +47,13 @@ var_dump(gmp_strval($n));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
-bool(false)
+--EXPECT--
+gmp_testbit(): Argument #2 ($index) must be greater than or equal to 0
 bool(false)
 bool(false)
 bool(false)
 bool(true)
-
-Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
-bool(false)
+gmp_testbit(): Argument #2 ($index) must be greater than or equal to 0
 bool(false)
 bool(true)
 string(7) "1000002"

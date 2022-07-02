@@ -30,6 +30,7 @@ extern ZEND_API zend_class_entry *zend_ce_iterator;
 extern ZEND_API zend_class_entry *zend_ce_arrayaccess;
 extern ZEND_API zend_class_entry *zend_ce_serializable;
 extern ZEND_API zend_class_entry *zend_ce_countable;
+extern ZEND_API zend_class_entry *zend_ce_stringable;
 
 typedef struct _zend_user_iterator {
 	zend_object_iterator     it;
@@ -37,7 +38,7 @@ typedef struct _zend_user_iterator {
 	zval                     value;
 } zend_user_iterator;
 
-ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, int param_count, zval* arg1, zval* arg2);
+ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, uint32_t param_count, zval* arg1, zval* arg2);
 
 #define zend_call_method_with_0_params(obj, obj_ce, fn_proxy, function_name, retval) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 0, NULL, NULL)
@@ -48,23 +49,13 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2)
 
-#define REGISTER_MAGIC_INTERFACE(class_name, class_name_str) \
-	{\
-		zend_class_entry ce;\
-		INIT_CLASS_ENTRY(ce, # class_name_str, zend_funcs_ ## class_name) \
-		zend_ce_ ## class_name = zend_register_internal_interface(&ce);\
-		zend_ce_ ## class_name->interface_gets_implemented = zend_implement_ ## class_name;\
-	}
-
-#define REGISTER_MAGIC_IMPLEMENT(class_name, interface_name) \
-	zend_class_implements(zend_ce_ ## class_name, 1, zend_ce_ ## interface_name)
-
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter);
-ZEND_API int zend_user_it_valid(zend_object_iterator *_iter);
+ZEND_API zend_result zend_user_it_valid(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key);
 ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter);
+ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n);
 
 ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *iterator);
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref);
@@ -74,8 +65,7 @@ ZEND_API void zend_register_interfaces(void);
 ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
 
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
-ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
+ZEND_API zend_result zend_create_internal_iterator_zval(zval *return_value, zval *obj);
 
 END_EXTERN_C()
 

@@ -292,10 +292,6 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #include "math.h"
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef CONST
 #ifdef KR_headers
 #define CONST /* blank */
@@ -528,12 +524,6 @@ BCinfo { int dp0, dp1, dplen, dsign, e0, inexact, nd, nd0, rounding, scale, uflc
 
 #define Kmax 7
 
-#ifdef __cplusplus
-extern "C" double strtod(const char *s00, char **se);
-extern "C" char *dtoa(double d, int mode, int ndigits,
-			int *decpt, int *sign, char **rve);
-#endif
-
  struct
 Bigint {
 	struct Bigint *next;
@@ -546,6 +536,7 @@ Bigint {
  static Bigint *freelist[Kmax+1];
 
 static void destroy_freelist(void);
+static void free_p5s(void);
 
 #ifdef ZTS
 static MUTEX_T dtoa_mutex;
@@ -564,6 +555,8 @@ ZEND_API int zend_startup_strtod(void) /* {{{ */
 ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
+	free_p5s();
+
 #ifdef ZTS
 	tsrm_mutex_free(dtoa_mutex);
 	dtoa_mutex = NULL;
@@ -1560,7 +1553,7 @@ hexdig_init(void)	/* Use of hexdig_init omitted 20121220 to avoid a */
 	htinit(hexdig, USC "ABCDEF", 0x10 + 10);
 	}
 #else
-static unsigned char hexdig[256] = {
+static const unsigned char hexdig[256] = {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -1908,7 +1901,7 @@ gethex( CONST char **sp, U *rvp, int rounding, int sign)
 		switch(*++s) {
 		  case '-':
 			esign = 1;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		  case '+':
 			s++;
 		  }
@@ -2575,11 +2568,11 @@ zend_strtod
 	for(s = s00;;s++) switch(*s) {
 		case '-':
 			sign = 1;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case '+':
 			if (*++s)
 				goto break2;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 0:
 			goto ret0;
 		case '\t':
@@ -2695,6 +2688,7 @@ zend_strtod
 		switch(c = *++s) {
 			case '-':
 				esign = 1;
+				ZEND_FALLTHROUGH;
 			case '+':
 				c = *++s;
 			}
@@ -3707,14 +3701,7 @@ zend_freedtoa(char *s)
  *	   calculation.
  */
 
-ZEND_API char *
-zend_dtoa
-#ifdef KR_headers
-	(dd, mode, ndigits, decpt, sign, rve)
-	double dd; int mode, ndigits, *decpt, *sign; char **rve;
-#else
-	(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve)
-#endif
+ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sign, char **rve)
 {
  /*	Arguments ndigits, decpt, sign are similar to those
 	of ecvt and fcvt; trailing zeros are suppressed from
@@ -3949,7 +3936,7 @@ zend_dtoa
 			break;
 		case 2:
 			leftright = 0;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 4:
 			if (ndigits <= 0)
 				ndigits = 1;
@@ -3957,7 +3944,7 @@ zend_dtoa
 			break;
 		case 3:
 			leftright = 0;
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 5:
 			i = ndigits + k + 1;
 			ilim = i;
@@ -4210,7 +4197,7 @@ zend_dtoa
 	 *
 	 * Perhaps we should just compute leading 28 bits of S once
 	 * and for all and pass them and a shift to quorem, so it
-	 * can do shifts and ors to compute the numerator for q.
+	 * can do shifts and ORs to compute the numerator for q.
 	 */
 	i = dshift(S, s2);
 	b2 += i;
@@ -4464,9 +4451,6 @@ ZEND_API double zend_oct_strtod(const char *str, const char **endptr)
 		return 0.0;
 	}
 
-	/* skip leading zero */
-	s++;
-
 	while ((c = *s++)) {
 		if (c < '0' || c > '7') {
 			/* break and return the current value if the number is not well-formed
@@ -4523,6 +4507,105 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
 	return value;
 }
 
+ZEND_API char *zend_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf)
+{
+	char *digits, *dst, *src;
+	int i, decpt;
+	bool sign;
+	int mode = ndigit >= 0 ? 2 : 0;
+
+	if (mode == 0) {
+		ndigit = 17;
+	}
+	digits = zend_dtoa(value, mode, ndigit, &decpt, &sign, NULL);
+	if (decpt == 9999) {
+		/*
+		 * Infinity or NaN, convert to inf or nan with sign.
+		 * We assume the buffer is at least ndigit long.
+		 */
+		snprintf(buf, ndigit + 1, "%s%s", (sign && *digits == 'I') ? "-" : "", *digits == 'I' ? "INF" : "NAN");
+		zend_freedtoa(digits);
+		return (buf);
+	}
+
+	dst = buf;
+	if (sign) {
+		*dst++ = '-';
+	}
+
+	if ((decpt >= 0 && decpt > ndigit) || decpt < -3) { /* use E-style */
+		/* exponential format (e.g. 1.2345e+13) */
+		if (--decpt < 0) {
+			sign = 1;
+			decpt = -decpt;
+		} else {
+			sign = 0;
+		}
+		src = digits;
+		*dst++ = *src++;
+		*dst++ = dec_point;
+		if (*src == '\0') {
+			*dst++ = '0';
+		} else {
+			do {
+				*dst++ = *src++;
+			} while (*src != '\0');
+		}
+		*dst++ = exponent;
+		if (sign) {
+			*dst++ = '-';
+		} else {
+			*dst++ = '+';
+		}
+		if (decpt < 10) {
+			*dst++ = '0' + decpt;
+			*dst = '\0';
+		} else {
+			/* XXX - optimize */
+			int n;
+			for (n = decpt, i = 0; (n /= 10) != 0; i++);
+			dst[i + 1] = '\0';
+			while (decpt != 0) {
+				dst[i--] = '0' + decpt % 10;
+				decpt /= 10;
+			}
+		}
+	} else if (decpt < 0) {
+		/* standard format 0. */
+		*dst++ = '0';   /* zero before decimal point */
+		*dst++ = dec_point;
+		do {
+			*dst++ = '0';
+		} while (++decpt < 0);
+		src = digits;
+		while (*src != '\0') {
+			*dst++ = *src++;
+		}
+		*dst = '\0';
+	} else {
+		/* standard format */
+		for (i = 0, src = digits; i < decpt; i++) {
+			if (*src != '\0') {
+				*dst++ = *src++;
+			} else {
+				*dst++ = '0';
+			}
+		}
+		if (*src != '\0') {
+			if (src == digits) {
+				*dst++ = '0';   /* zero before decimal point */
+			}
+			*dst++ = dec_point;
+			for (i = decpt; digits[i] != '\0'; i++) {
+				*dst++ = digits[i];
+			}
+		}
+		*dst = '\0';
+	}
+	zend_freedtoa(digits);
+	return (buf);
+}
+
 static void destroy_freelist(void)
 {
 	int i;
@@ -4540,6 +4623,15 @@ static void destroy_freelist(void)
 	FREE_DTOA_LOCK(0)
 }
 
-#ifdef __cplusplus
+static void free_p5s(void)
+{
+	Bigint **listp, *tmp;
+
+	ACQUIRE_DTOA_LOCK(1)
+	listp = &p5s;
+	while ((tmp = *listp) != NULL) {
+		*listp = tmp->next;
+		free(tmp);
+	}
+	FREE_DTOA_LOCK(1)
 }
-#endif

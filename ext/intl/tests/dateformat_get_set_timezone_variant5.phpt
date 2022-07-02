@@ -1,8 +1,8 @@
 --TEST--
 IntlDateFormatter: get/setTimeZone()
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '55.1') < 0) die('skip for ICU >= 55.1'); ?>
 --FILE--
 <?php
@@ -37,7 +37,6 @@ $df->setTimeZone(new DateTimeZone('Europe/Amsterdam'));
 d($df);
 
 ?>
-==DONE==
 --EXPECTF--
 domingo, 1 de janeiro de 2012 às 03:00:00 Hor%s do Extremo Leste da Europa
 string(12) "Europe/Minsk"
@@ -59,4 +58,3 @@ domingo, 1 de janeiro de 2012 às 01:00:00 Hor%s padrão %Sda Europa Central
 string(16) "Europe/Amsterdam"
 string(16) "Europe/Amsterdam"
 
-==DONE==

@@ -1,7 +1,7 @@
 --TEST--
 Phar: test that refcounting avoids problems with deleting a file
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -34,7 +34,6 @@ var_dump(fread($b, 20));
 include $pname . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -57,4 +56,3 @@ object(PharFileInfo)#%d (2) {
 }
 string(5) "extra"
 extra
-===DONE===

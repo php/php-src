@@ -2,12 +2,6 @@
 Test array_chunk() function : usage variations - different 'size' values
 --FILE--
 <?php
-/* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks
- *            : Chunks an array into size large chunks
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_chunk() function with following conditions
  *   1. -ve size value
@@ -22,37 +16,35 @@ echo "*** Testing array_chunk() : usage variations ***\n";
 $input_array = array(1, 2, 3);
 
 // different magnitude's
-$sizes = array(-1, count($input_array) + 1, 0, 1.5);
+$sizes = array(-1, count($input_array) + 1, 0, 1);
 
 // loop through the array for size argument
 foreach ($sizes as $size){
     echo "\n-- Testing array_chunk() when size = $size --\n";
     try {
         var_dump( array_chunk($input_array, $size) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, true) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, false) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
 }
 ?>
-
-DONE
 --EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() when size = -1 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($length) must be greater than 0
+array_chunk(): Argument #2 ($length) must be greater than 0
+array_chunk(): Argument #2 ($length) must be greater than 0
 
 -- Testing array_chunk() when size = 4 --
 array(1) {
@@ -90,11 +82,11 @@ array(1) {
 }
 
 -- Testing array_chunk() when size = 0 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($length) must be greater than 0
+array_chunk(): Argument #2 ($length) must be greater than 0
+array_chunk(): Argument #2 ($length) must be greater than 0
 
--- Testing array_chunk() when size = 1.5 --
+-- Testing array_chunk() when size = 1 --
 array(3) {
   [0]=>
   array(1) {
@@ -146,5 +138,3 @@ array(3) {
     int(3)
   }
 }
-
-DONE

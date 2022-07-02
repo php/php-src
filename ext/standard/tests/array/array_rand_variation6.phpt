@@ -2,11 +2,6 @@
 Test array_rand() function : usage variation - with heredoc string as key in the 'input' array
 --FILE--
 <?php
-/* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Test behaviour of array_rand() when keys of the 'input' array is heredoc string
 */

@@ -1,30 +1,56 @@
 <?php
 
-/** @return string|false */
-function iconv_strlen(string $str, string $charset = UNKNOWN) {}
+/** @generate-class-entries */
 
-/** @return string|false */
-function iconv_substr(string $str, int $offset, ?int $length = null, string $charset = UNKNOWN) {}
+/**
+ * @var string
+ * @cname PHP_ICONV_IMPL_VALUE
+ */
+const ICONV_IMPL = UNKNOWN;
+/**
+ * @var string
+ * @cname get_iconv_version()
+ */
+const ICONV_VERSION = UNKNOWN;
+/**
+ * @var int
+ * @cname PHP_ICONV_MIME_DECODE_STRICT
+ */
+const ICONV_MIME_DECODE_STRICT = UNKNOWN;
+/**
+ * @var int
+ * @cname PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR
+ */
+const ICONV_MIME_DECODE_CONTINUE_ON_ERROR = UNKNOWN;
 
-/** @return int|false */
-function iconv_strpos(string $haystack, string $needle, int $offset = 0, string $charset = UNKNOWN) {}
+function iconv_strlen(string $string, ?string $encoding = null): int|false {}
 
-/** @return int|false */
-function iconv_strrpos(string $haystack, string $needle, string $charset = UNKNOWN) {}
+/** @refcount 1 */
+function iconv_substr(string $string, int $offset, ?int $length = null, ?string $encoding = null): string|false {}
 
-/** @return string|false */
-function iconv_mime_encode(string $field_name, string $field_value, array $preference = []) {}
+function iconv_strpos(string $haystack, string $needle, int $offset = 0, ?string $encoding = null): int|false {}
 
-/** @return string|false */
-function iconv_mime_decode(string $encoded_string, int $mode = 0, string $charset = UNKNOWN) {}
+function iconv_strrpos(string $haystack, string $needle, ?string $encoding = null): int|false {}
 
-/** @return array|false */
-function iconv_mime_decode_headers(string $headers, int $mode = 0, string $charset = UNKNOWN) {}
+/** @refcount 1 */
+function iconv_mime_encode(string $field_name, string $field_value, array $options = []): string|false {}
 
-/** @return string|false */
-function iconv(string $in_charset, string $out_charset, string $str) {}
+/** @refcount 1 */
+function iconv_mime_decode(string $string, int $mode = 0, ?string $encoding = null): string|false {}
 
-function iconv_set_encoding(string $type, string $charset): bool {}
+/**
+ * @return array<string, string|array>|false
+ * @refcount 1
+ */
+function iconv_mime_decode_headers(string $headers, int $mode = 0, ?string $encoding = null): array|false {}
 
-/** @return array|string|false */
-function iconv_get_encoding(string $type = 'all') {}
+/** @refcount 1 */
+function iconv(string $from_encoding, string $to_encoding, string $string): string|false {}
+
+function iconv_set_encoding(string $type, string $encoding): bool {}
+
+/**
+ * @return array<string, string>|string|false
+ * @refcount 1
+ */
+function iconv_get_encoding(string $type = "all"): array|string|false {}

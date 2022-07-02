@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -53,11 +53,11 @@ PHP_MINFO_FUNCTION(pdo);
 #define REGISTER_PDO_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_stringl(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, value, sizeof(value)-1);
 
-#define PDO_CONSTRUCT_CHECK	\
-	if (!dbh->driver) {	\
-		pdo_raise_impl_error(dbh, NULL, "00000", "PDO constructor was not called");	\
-		return;	\
-	}	\
+#define PDO_CONSTRUCT_CHECK \
+	if (!dbh->driver) { \
+		zend_throw_error(NULL, "PDO object is not initialized, constructor was not called"); \
+		RETURN_THROWS(); \
+	} \
 
 
 #endif	/* PHP_PDO_H */

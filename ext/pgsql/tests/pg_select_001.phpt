@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_select() - basic test using schema
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -9,17 +11,17 @@ include('config.inc');
 
 $conn = pg_connect($conn_str);
 
-pg_query('CREATE SCHEMA phptests');
+pg_query($conn, 'CREATE SCHEMA phptests');
 
-pg_query('CREATE TABLE phptests.foo (id INT, id2 INT)');
-pg_query('INSERT INTO phptests.foo VALUES (1,2)');
-pg_query('INSERT INTO phptests.foo VALUES (2,3)');
+pg_query($conn, 'CREATE TABLE phptests.foo (id INT, id2 INT)');
+pg_query($conn, 'INSERT INTO phptests.foo VALUES (1,2)');
+pg_query($conn, 'INSERT INTO phptests.foo VALUES (2,3)');
 
-pg_query('CREATE TABLE phptests.bar (id4 INT, id3 INT)');
-pg_query('INSERT INTO phptests.bar VALUES (4,5)');
-pg_query('INSERT INTO phptests.bar VALUES (6,7)');
+pg_query($conn, 'CREATE TABLE phptests.bar (id4 INT, id3 INT)');
+pg_query($conn, 'INSERT INTO phptests.bar VALUES (4,5)');
+pg_query($conn, 'INSERT INTO phptests.bar VALUES (6,7)');
 
-/* Inexistent table */
+/* Nonexistent table */
 var_dump(pg_select($conn, 'foo', array('id' => 1)));
 
 /* Existent column */
@@ -31,10 +33,12 @@ var_dump(pg_select($conn, 'phptests.bar', array('id' => 1)));
 /* Existent column */
 var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4)));
 
+/* Use a different result type */
+var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4), 0, PGSQL_NUM));
 
-pg_query('DROP TABLE phptests.foo');
-pg_query('DROP TABLE phptests.bar');
-pg_query('DROP SCHEMA phptests');
+pg_query($conn, 'DROP TABLE phptests.foo');
+pg_query($conn, 'DROP TABLE phptests.bar');
+pg_query($conn, 'DROP SCHEMA phptests');
 
 ?>
 --EXPECTF--
@@ -58,6 +62,15 @@ array(1) {
     ["id4"]=>
     string(1) "4"
     ["id3"]=>
+    string(1) "5"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(1) "4"
+    [1]=>
     string(1) "5"
   }
 }

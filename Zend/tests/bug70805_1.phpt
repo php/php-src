@@ -5,18 +5,20 @@ zend.enable_gc = 1
 --FILE--
 <?php
 class A {
+    public $b;
 }
 
 class B {
+    public $a;
 }
 
 class C {
-	public function __destruct() {
-		if (isset($GLOBALS["a"])) {
-			unset($GLOBALS["array"]);
-			unset($GLOBALS["a"]);
-		}
-	}
+    public function __destruct() {
+        if (isset($GLOBALS["a"])) {
+            unset($GLOBALS["array"]);
+            unset($GLOBALS["a"]);
+        }
+    }
 }
 
 $a = new A;
@@ -30,9 +32,9 @@ $array = array($c);
 unset($c);
 
 while ($i++ < 9998) {
-	$t = [];
-	$t[] = &$t;
-	unset($t);
+    $t = [];
+    $t[] = &$t;
+    unset($t);
 }
 $t = [new C];
 $t[] = &$t;

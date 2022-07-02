@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PECL Bug #5772 (PDO::FETCH_FUNC breaks on mixed case func name)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -18,11 +19,12 @@ $db->exec("CREATE TABLE test (id int NOT NULL, PRIMARY KEY (id))");
 $db->exec("INSERT INTO test (id) VALUES (1)");
 
 function heLLO($row) {
-	return $row;
+    return $row;
 }
 
 foreach ($db->query("SELECT * FROM test")->fetchAll(PDO::FETCH_FUNC, 'heLLO') as $row) {
-	var_dump($row);
+    var_dump($row);
 }
+?>
 --EXPECT--
 string(1) "1"

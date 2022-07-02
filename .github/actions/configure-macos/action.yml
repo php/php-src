@@ -1,0 +1,72 @@
+name: ./configure
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        export PATH="/usr/local/opt/bison/bin:$PATH"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/krb5/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxml2/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxslt/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/zlib/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
+        ./buildconf --force
+        ./configure \
+          --enable-option-checking=fatal \
+          --prefix=/usr/local \
+          --enable-fpm \
+          --with-pdo-mysql=mysqlnd \
+          --with-mysqli=mysqlnd \
+          --with-pgsql=/usr/local/opt/libpq \
+          --with-pdo-pgsql=/usr/local/opt/libpq \
+          --with-pdo-sqlite \
+          --without-pear \
+          --enable-gd \
+          --with-jpeg \
+          --with-webp \
+          --with-freetype \
+          --enable-exif \
+          --with-zip \
+          --with-zlib \
+          --enable-soap \
+          --enable-xmlreader \
+          --with-xsl \
+          --with-tidy=/usr/local/opt/tidyp \
+          --with-libxml \
+          --enable-sysvsem \
+          --enable-sysvshm \
+          --enable-shmop \
+          --enable-pcntl \
+          --with-readline=/usr/local/opt/readline \
+          --enable-mbstring \
+          --with-curl \
+          --with-gettext=/usr/local/opt/gettext \
+          --enable-sockets \
+          --with-bz2=/usr/local/opt/bzip2 \
+          --with-openssl \
+          --with-gmp=/usr/local/opt/gmp \
+          --with-iconv=/usr/local/opt/libiconv \
+          --enable-bcmath \
+          --enable-calendar \
+          --enable-ftp \
+          --with-pspell=/usr/local/opt/aspell \
+          --with-kerberos \
+          --enable-sysvmsg \
+          --with-ffi \
+          --enable-zend-test \
+          --enable-dl-test=shared \
+          --enable-intl \
+          --with-mhash \
+          --with-sodium \
+          --enable-dba \
+          --enable-werror \
+          --with-config-file-path=/etc \
+          --with-config-file-scan-dir=/etc/php.d \
+          ${{ inputs.configurationParameters }}

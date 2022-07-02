@@ -1,9 +1,7 @@
 --TEST--
 IntlCalendar::setTimeZone() variation with NULL arg
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -21,10 +19,8 @@ echo "\n";
 var_dump($intlcal->get(IntlCalendar::FIELD_ZONE_OFFSET));
 
 ?>
-==DONE==
 --EXPECT--
 Europe/Amsterdam
 int(3600000)
 Europe/Amsterdam
-int(3600000)
-==DONE==
+int(3600000)

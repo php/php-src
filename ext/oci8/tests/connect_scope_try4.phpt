@@ -1,7 +1,7 @@
 --TEST--
 Check oci_new_connect try/catch end-of-scope with old_oci_close_semantics On
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 oci8.old_oci_close_semantics=1
 --FILE--
@@ -12,14 +12,14 @@ require(__DIR__.'/details.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table scope_try4_tab",
-	"create table scope_try4_tab (c1 number)"
+    "drop table scope_try4_tab",
+    "create table scope_try4_tab (c1 number)"
 );
 
 if (!empty($dbase))
-	$c1 = oci_new_connect($user,$password,$dbase);
+    $c1 = oci_new_connect($user,$password,$dbase);
 else
-	$c1 = oci_new_connect($user,$password);
+    $c1 = oci_new_connect($user,$password);
 
 oci8_test_sql_execute($c1, $stmtarray);
 
@@ -33,28 +33,28 @@ set_error_handler(function($x, $y) { throw new Exception($y, $x); });
 
 try
 {
-	if (!empty($dbase))
-		$c = oci_new_connect($user,$password,$dbase);
-	else
-		$c = oci_new_connect($user,$password);
-	$s = oci_parse($c, "insert into scope_try4_tab values (1)");
-	oci_execute($s, OCI_DEFAULT);  // no commit
-	$s = oci_parse($c, "insert into scope_try4_tab values (ABC)"); // syntax error -> throws exception
-	oci_execute($s, OCI_DEFAULT);  // no commit
+    if (!empty($dbase))
+        $c = oci_new_connect($user,$password,$dbase);
+    else
+        $c = oci_new_connect($user,$password);
+    $s = oci_parse($c, "insert into scope_try4_tab values (1)");
+    oci_execute($s, OCI_DEFAULT);  // no commit
+    $s = oci_parse($c, "insert into scope_try4_tab values (ABC)"); // syntax error -> throws exception
+    oci_execute($s, OCI_DEFAULT);  // no commit
 }
 catch (Exception $e)
 {
-	echo "Caught Exception: ". $e->getMessage(), "\n";
-	var_dump($c);
+    echo "Caught Exception: ". $e->getMessage(), "\n";
+    var_dump($c);
 
-	// Verify data is not yet committed
-	$s1 = oci_parse($c1, "select * from scope_try4_tab");
-	oci_execute($s1);
-	oci_fetch_all($s1, $r);
-	var_dump($r);
+    // Verify data is not yet committed
+    $s1 = oci_parse($c1, "select * from scope_try4_tab");
+    oci_execute($s1);
+    oci_fetch_all($s1, $r);
+    var_dump($r);
 
-	// Now commit
-	oci_commit($c);
+    // Now commit
+    oci_commit($c);
 }
 
 // Verify data was committed in the Catch block
@@ -67,7 +67,7 @@ var_dump($r);
 // Cleanup
 
 $stmtarray = array(
-	"drop table scope_try4_tab"
+    "drop table scope_try4_tab"
 );
 
 oci8_test_sql_execute($c1, $stmtarray);
@@ -76,6 +76,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Deprecated: Directive oci8.old_oci_close_semantics is deprecated%s
 Test 1
 Caught Exception: oci_execute(): ORA-%r(00984|57000: TT2957)%r: %s
 resource(%d) of type (oci8 connection)

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -33,45 +33,6 @@ PHP_RINIT_FUNCTION(pcntl);
 PHP_RSHUTDOWN_FUNCTION(pcntl);
 PHP_MINFO_FUNCTION(pcntl);
 
-PHP_FUNCTION(pcntl_alarm);
-PHP_FUNCTION(pcntl_fork);
-PHP_FUNCTION(pcntl_waitpid);
-PHP_FUNCTION(pcntl_wait);
-PHP_FUNCTION(pcntl_wifexited);
-PHP_FUNCTION(pcntl_wifstopped);
-PHP_FUNCTION(pcntl_wifsignaled);
-#ifdef HAVE_WCONTINUED
-PHP_FUNCTION(pcntl_wifcontinued);
-#endif
-PHP_FUNCTION(pcntl_wexitstatus);
-PHP_FUNCTION(pcntl_wtermsig);
-PHP_FUNCTION(pcntl_wstopsig);
-PHP_FUNCTION(pcntl_signal);
-PHP_FUNCTION(pcntl_signal_get_handler);
-PHP_FUNCTION(pcntl_signal_dispatch);
-PHP_FUNCTION(pcntl_get_last_error);
-PHP_FUNCTION(pcntl_strerror);
-#ifdef HAVE_SIGPROCMASK
-PHP_FUNCTION(pcntl_sigprocmask);
-#endif
-#ifdef HAVE_STRUCT_SIGINFO_T
-# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
-PHP_FUNCTION(pcntl_sigwaitinfo);
-PHP_FUNCTION(pcntl_sigtimedwait);
-# endif
-#endif
-PHP_FUNCTION(pcntl_exec);
-#ifdef HAVE_GETPRIORITY
-PHP_FUNCTION(pcntl_getpriority);
-#endif
-#ifdef HAVE_SETPRIORITY
-PHP_FUNCTION(pcntl_setpriority);
-#endif
-PHP_FUNCTION(pcntl_async_signals);
-#ifdef HAVE_UNSHARE
-PHP_FUNCTION(pcntl_unshare);
-#endif
-
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
 	zend_long signo;
@@ -86,7 +47,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	struct php_pcntl_pending_signal *head, *tail, *spares;
 	int last_error;
 	volatile char pending_signals;
-	zend_bool async_signals;
+	bool async_signals;
+	unsigned num_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #if defined(ZTS) && defined(COMPILE_DL_PCNTL)

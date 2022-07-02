@@ -1,11 +1,11 @@
 --TEST--
 mysqli get_client_info
---SKIPIF--
-<?php	require_once('skipif.inc'); ?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
-	$s = mysqli_get_client_info();
-	echo gettype($s);
+    $s = mysqli_get_client_info();
+    echo gettype($s);
 ?>
 --EXPECT--
 string

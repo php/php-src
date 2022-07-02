@@ -3,9 +3,9 @@ Bug #21094 (set_error_handler not accepting methods)
 --FILE--
 <?php
 class test {
-	function hdlr($errno, $errstr, $errfile, $errline) {
-		printf("[%d] errstr: %s, errfile: %s, errline: %d\n", $errno, $errstr, $errfile, $errline, $errstr);
-	}
+    function hdlr($errno, $errstr, $errfile, $errline) {
+        printf("[%d] errstr: %s, errfile: %s, errline: %d\n", $errno, $errstr, $errfile, $errline, $errstr);
+    }
 }
 
 set_error_handler(array(new test(), "hdlr"));

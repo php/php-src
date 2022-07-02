@@ -30,7 +30,7 @@ var_dump(is_uploaded_file('random_filename.txt'));
 var_dump(is_uploaded_file('__FILE__'));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(false)

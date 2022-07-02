@@ -58,9 +58,9 @@ See also
 
 ## Type specifiers
 
-The following list shows the type specifier, its meaning and the parameter types
+The following list shows the type specifier, its meaning, and the parameter types
 that need to be passed by address. All passed parameters are set if the PHP
-parameter is non optional and untouched if optional and the parameter is not
+parameter is non-optional and untouched if optional and the parameter is not
 present. The only exception is O where the zend_class_entry* has to be provided
 on input and is used to verify the PHP parameter is an instance of that class.
 
@@ -75,6 +75,7 @@ f  - function or array containing php method call info (returned as
 h  - array (returned as HashTable*)
 H  - array or HASH_OF(object) (returned as HashTable*)
 l  - long (zend_long)
+n  - long or double (zval*)
 o  - object of any type (zval*)
 O  - object of specific type given by class entry (zval*, zend_class_entry)
 p  - valid path (string without null bytes in the middle) and its length (char*, size_t)
@@ -92,13 +93,16 @@ The following characters also have a meaning in the specifier string:
 * `|` - indicates that the remaining parameters are optional, they should be
   initialized to default values by the extension since they will not be touched
   by the parsing function if they are not passed to it.
-* `/` - use SEPARATE_ZVAL_IF_NOT_REF() on the parameter it follows
+* `/` - use SEPARATE_ZVAL() on the parameter it follows
 * `!` - the parameter it follows can be of specified type or NULL. If NULL is
-  passed and the output for such type is a pointer, then the output pointer is
+  passed, and the output for such type is a pointer, then the output pointer is
   set to a native NULL pointer. For 'b', 'l' and 'd', an extra argument of type
   zend_bool* must be passed after the corresponding bool*, zend_long* or
   double* arguments, respectively. A non-zero value will be written to the
   zend_bool if a PHP NULL is passed.
+  For `f` use the ``ZEND_FCI_INITIALIZED(fci)`` macro to check if a callable
+  has been provided and ``!ZEND_FCI_INITIALIZED(fci)`` to check if a PHP NULL
+  is passed.
 
 ## Note on 64bit compatibility
 

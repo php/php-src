@@ -1,19 +1,20 @@
 --TEST--
 Cloning unconstructed numfmt
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
 class A extends NumberFormatter {
-	function __construct() {}
+    function __construct() {}
 }
 
 $a = new A;
 try {
-	$b = clone $a;
+    $b = clone $a;
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
+?>
 --EXPECT--
 string(42) "Cannot clone unconstructed NumberFormatter"

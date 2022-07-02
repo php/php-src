@@ -1,7 +1,7 @@
 --TEST--
 PDO_sqlite: Testing sqliteCreateCollation()
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
@@ -18,7 +18,7 @@ $db->sqliteCreateCollation('MYCOLLATE', function($a, $b) { return strnatcmp($a, 
 
 $result = $db->query('SELECT name FROM foobar ORDER BY name COLLATE MYCOLLATE');
 foreach ($result as $row) {
-	echo $row['name'] . "\n";
+    echo $row['name'] . "\n";
 }
 
 $result = $db->query('SELECT name FROM foobar ORDER BY name');

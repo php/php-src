@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: extending PDO
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -13,46 +14,48 @@ PDOTest::skip();
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
+#[AllowDynamicProperties]
 class PDOStatementX extends PDOStatement
 {
     public $test1 = 1;
 
     protected function __construct()
     {
-    	$this->test2 = 2;
-    	$this->test2 = 22;
-    	echo __METHOD__ . "()\n";
+        $this->test2 = 2;
+        $this->test2 = 22;
+        echo __METHOD__ . "()\n";
     }
 
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
 }
 
+#[AllowDynamicProperties]
 class PDODatabaseX extends PDO
 {
     public $test1 = 1;
 
     function __destruct()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
     }
 
     function test()
     {
-    	$this->test2 = 2;
+        $this->test2 = 2;
         var_dump($this->test1);
         var_dump($this->test2);
-    	$this->test2 = 22;
+        $this->test2 = 22;
     }
 
-    function query($sql)
+    function query($sql, ...$rest): PDOStatement|false
     {
-    	echo __METHOD__ . "()\n";
-    	$stmt = parent::prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx')));
-    	$stmt->execute();
-    	return $stmt;
+        echo __METHOD__ . "()\n";
+        $stmt = parent::prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx')));
+        $stmt->execute();
+        return $stmt;
     }
 }
 
@@ -95,10 +98,10 @@ PDOStatementX::__destruct()
 PDODatabaseX::query()
 PDOStatementX::__construct()
 object(PDOStatementX)#%d (3) {
-  ["test1"]=>
-  int(1)
   ["queryString"]=>
   string(24) "SELECT val, id FROM test"
+  ["test1"]=>
+  int(1)
   ["test2"]=>
   int(22)
 }

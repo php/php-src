@@ -6,14 +6,14 @@ namespace Foo;
 use Error;
 
 function f1($a=bar) {
-	return $a;
+    return $a;
 }
 function f2($a=array(bar)) {
-	return $a[0];
+    return $a[0];
 }
 function f3($a=array(bar=>0)) {
-	reset($a);
-	return key($a);
+    reset($a);
+    return key($a);
 }
 
 try {
@@ -39,7 +39,7 @@ try {
 
 ?>
 --EXPECT--
-Undefined constant 'Foo\bar'
-Undefined constant 'Foo\bar'
-Undefined constant 'Foo\bar'
-Undefined constant 'Foo\bar'
+Undefined constant "Foo\bar"
+Undefined constant "Foo\bar"
+Undefined constant "Foo\bar"
+Undefined constant "Foo\bar"

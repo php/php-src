@@ -1,5 +1,7 @@
 --TEST--
 Bug #49560 (LOB resource destructor and refcount test)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -14,9 +16,9 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table lob_043_tab",
-	"create table lob_043_tab(id number, c1 clob)",
-	"begin
+    "drop table lob_043_tab",
+    "create table lob_043_tab(id number, c1 clob)",
+    "begin
        for i in 1..50000 loop
          insert into lob_043_tab (id, c1) values (i, i || ' abcdefghijklmnopq');
       end loop;
@@ -70,7 +72,7 @@ $r = f2($c);
 // Clean up
 
 $stmtarray = array(
-	"drop table lob_043_tab"
+    "drop table lob_043_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -78,11 +80,8 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 f1 ended
 Test 2
 f2 ended
-===DONE===

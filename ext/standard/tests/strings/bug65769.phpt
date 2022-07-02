@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip Windows only');
 }
 if (PHP_WINDOWS_VERSION_MAJOR < 10) {
-	die("skip for Windows 10 and above");
+    die("skip for Windows 10 and above");
 }
 ?>
 --FILE--
@@ -15,21 +15,21 @@ if (PHP_WINDOWS_VERSION_MAJOR < 10) {
 $locales = array('sve', 'french', 'us', 'ru', 'czech', 'serbian');
 
 foreach ($locales as $locale) {
-	$locale = setlocale(LC_ALL, $locale);
-	$lconv = localeconv();
-	var_dump(
-		$locale,
-		$lconv['decimal_point'],
-		$lconv['thousands_sep'],
-		$lconv['int_curr_symbol'],
-		$lconv['currency_symbol'],
-		$lconv['mon_decimal_point'],
-		$lconv['mon_thousands_sep']
-	);
-	if ($locale === 'Swedish_Sweden.1252') {
-		var_dump(in_array($lconv['mon_thousands_sep'], ['.', ' ']));
-	}
-	echo '++++++++++++++++++++++', "\n";
+    $locale = setlocale(LC_ALL, $locale);
+    $lconv = localeconv();
+    var_dump(
+        $locale,
+        $lconv['decimal_point'],
+        $lconv['thousands_sep'],
+        $lconv['int_curr_symbol'],
+        $lconv['currency_symbol'],
+        $lconv['mon_decimal_point'],
+        $lconv['mon_thousands_sep']
+    );
+    if ($locale === 'Swedish_Sweden.1252') {
+        var_dump(in_array($lconv['mon_thousands_sep'], ['.', ' ']));
+    }
+    echo '++++++++++++++++++++++', "\n";
 }
 
 ?>

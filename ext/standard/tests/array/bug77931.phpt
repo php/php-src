@@ -21,6 +21,6 @@ try {
 
 ?>
 --EXPECT--
-Expected parameter 3 to be an array, int given
-Expected parameter 4 to be an array, bool given
-Expected parameter 5 to be an array, null given
+array_map(): Argument #3 must be of type array, int given
+array_map(): Argument #4 must be of type array, bool given
+array_map(): Argument #5 must be of type array, null given

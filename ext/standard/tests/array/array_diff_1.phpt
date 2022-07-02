@@ -14,6 +14,6 @@ try {
 //-=-=-=-=-=-
 echo "OK!";
 ?>
---EXPECTF--
-Expected parameter 2 to be an array, int given
+--EXPECT--
+array_diff(): Argument #2 must be of type array, int given
 OK!

@@ -3,7 +3,7 @@ mkdir(dir, 0777) tests
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+    die('skip not for Windows');
 }
 ?>
 --FILE--

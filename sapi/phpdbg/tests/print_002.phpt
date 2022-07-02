@@ -17,16 +17,19 @@ prompt> string(4) "test"
  00016: 	}
  00017: 
 prompt> [Stack in foo() (8 ops)]
-L14-16 foo() %s - %s + 8 ops
- L14   #0     RECV                    1                                         $baz                
- L15   #1     INIT_FCALL%s %d %s "var_dump"                               
- L15   #2     INIT_FCALL%s %d %s "strrev"                                 
- L15   #3     SEND_VAR                $baz                 1                                        
- L15   #4     DO_%cCALL                                                          @0                  
- L15   #5     SEND_VAR                @0                   1                                        
- L15   #6     DO_%cCALL                                                                              
- L16   #7     RETURN<-1>              null                                                          
-prompt> [L15 %s INIT_FCALL%s %d %s "var_dump"                                %s]
+
+foo:
+     ; (lines=8, args=1, vars=1, tmps=2)
+     ; %s:14-16
+L0014 0000 CV0($baz) = RECV 1
+L0015 0001 INIT_FCALL %d %d string("var_dump")
+L0015 0002 INIT_FCALL %d %d string("strrev")
+L0015 0003 SEND_VAR CV0($baz) 1
+L0015 0004 V1 = DO_ICALL
+L0015 0005 SEND_VAR V1 1
+L0015 0006 DO_ICALL
+L0016 0007 RETURN null
+prompt> L0015 0001 INIT_FCALL %d %d string("var_dump")
 prompt> 
 --FILE--
 <?php

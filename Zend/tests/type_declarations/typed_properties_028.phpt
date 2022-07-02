@@ -3,7 +3,7 @@ Test typed properties respect strict types (off)
 --FILE--
 <?php
 class Foo {
-	public int $bar;
+    public int $bar;
 }
 
 $foo = new Foo;

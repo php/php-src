@@ -4,8 +4,8 @@ Bug #69549 (Memory leak with opcache.optimization_level=0xFFFFFFFF)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $a = array(true);

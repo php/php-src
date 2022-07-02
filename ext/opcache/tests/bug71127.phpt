@@ -4,8 +4,8 @@ Bug #71127 (Define in auto_prepend_file is overwrite)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=0x7FFFBFFF
---SKIPIF--
-<?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $file = __DIR__ . "/bug71127.inc";
@@ -21,5 +21,5 @@ include($file);
 @unlink(__DIR__ . "/bug71127.inc");
 ?>
 --EXPECTF--
-Notice: Constant FOO already defined in %sbug71127.inc on line %d
+Warning: Constant FOO already defined in %sbug71127.inc on line %d
 okey

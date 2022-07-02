@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data, JPEG with IFD and EXIF data in Motorola byte-order.
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0

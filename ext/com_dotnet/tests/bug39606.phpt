@@ -1,8 +1,7 @@
 --TEST--
 COM: Loading typelib corrupts memory
---SKIPIF--
-<?php
-if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 error_reporting(E_ALL);
@@ -15,8 +14,6 @@ $typelib = $root.'\activeds.tlb';
 var_dump(com_load_typelib($typelib));
 var_dump(com_load_typelib($typelib));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,16 +19,11 @@
 #include "dateformat_class.h"
 #include "../intl_convert.h"
 #include "dateformat_class.h"
-#include "dateformat_attr.h"
 
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
 
-/* {{{ proto unicode IntlDateFormatter::getDateType( )
- * Get formatter datetype. }}} */
-/* {{{ proto string datefmt_get_datetype( IntlDateFormatter $mf )
- * Get formatter datetype.
- */
+/* {{{ Get formatter datetype. */
 PHP_FUNCTION( datefmt_get_datetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -36,7 +31,7 @@ PHP_FUNCTION( datefmt_get_datetype )
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -48,11 +43,7 @@ PHP_FUNCTION( datefmt_get_datetype )
 }
 /* }}} */
 
-/* {{{ proto unicode IntlDateFormatter::getTimeType( )
- * Get formatter timetype. }}} */
-/* {{{ proto string datefmt_get_timetype( IntlDateFormatter $mf )
- * Get formatter timetype.
- */
+/* {{{ Get formatter timetype. */
 PHP_FUNCTION( datefmt_get_timetype )
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -60,7 +51,7 @@ PHP_FUNCTION( datefmt_get_timetype )
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -72,24 +63,20 @@ PHP_FUNCTION( datefmt_get_timetype )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::getPattern( )
- * Get formatter pattern. }}} */
-/* {{{ proto string datefmt_get_pattern( IntlDateFormatter $mf )
- * Get formatter pattern.
- */
+/* {{{ Get formatter pattern. */
 PHP_FUNCTION( datefmt_get_pattern )
 {
 	UChar  value_buf[64];
 	uint32_t    length = USIZE( value_buf );
 	UChar* value  = value_buf;
-	zend_bool   is_pattern_localized =FALSE;
+	bool   is_pattern_localized = false;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -112,18 +99,14 @@ PHP_FUNCTION( datefmt_get_pattern )
 }
 /* }}} */
 
-/* {{{ proto bool IntlDateFormatter::setPattern( string $pattern )
- * Set formatter pattern. }}} */
-/* {{{ proto bool datefmt_set_pattern( IntlDateFormatter $mf, string $pattern )
- * Set formatter pattern.
- */
+/* {{{ Set formatter pattern. */
 PHP_FUNCTION( datefmt_set_pattern )
 {
 	char*       value = NULL;
 	size_t      value_len = 0;
 	int32_t     slength = 0;
 	UChar*	    svalue  = NULL;
-	zend_bool   is_pattern_localized =FALSE;
+	bool   is_pattern_localized = false;
 
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -132,7 +115,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, IntlDateFormatter_ce_ptr,  &value, &value_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -152,11 +135,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::getLocale()
- * Get formatter locale. }}} */
-/* {{{ proto string datefmt_get_locale(IntlDateFormatter $mf)
- * Get formatter locale.
- */
+/* {{{ Get formatter locale. */
 PHP_FUNCTION( datefmt_get_locale )
 {
 	char *loc;
@@ -169,7 +148,7 @@ PHP_FUNCTION( datefmt_get_locale )
 		&object, IntlDateFormatter_ce_ptr,&loc_type) == FAILURE )
 	{
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -181,11 +160,7 @@ PHP_FUNCTION( datefmt_get_locale )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::isLenient()
- * Get formatter isLenient. }}} */
-/* {{{ proto string datefmt_isLenient(IntlDateFormatter $mf)
- * Get formatter locale.
- */
+/* {{{ Get formatter isLenient. */
 PHP_FUNCTION( datefmt_is_lenient )
 {
 
@@ -196,7 +171,7 @@ PHP_FUNCTION( datefmt_is_lenient )
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -206,14 +181,10 @@ PHP_FUNCTION( datefmt_is_lenient )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::setLenient()
- * Set formatter lenient. }}} */
-/* {{{ proto string datefmt_setLenient(IntlDateFormatter $mf)
- * Set formatter lenient.
- */
+/* {{{ Set formatter lenient. */
 PHP_FUNCTION( datefmt_set_lenient )
 {
-	zend_bool isLenient  = FALSE;
+	bool isLenient = false;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -221,7 +192,7 @@ PHP_FUNCTION( datefmt_set_lenient )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ob",
 	&object, IntlDateFormatter_ce_ptr,&isLenient ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

@@ -23,23 +23,21 @@ var_dump($ar);
 
 foreach($it as $k => $v)
 {
-	$ar->offsetUnset($k+1);
-	echo "$k=>$v\n";
+    $ar->offsetUnset($k+1);
+    echo "$k=>$v\n";
 }
 
 var_dump($ar);
 
 foreach($it as $k => $v)
 {
-	$ar->offsetUnset($k);
-	echo "$k=>$v\n";
+    $ar->offsetUnset($k);
+    echo "$k=>$v\n";
 }
 
 var_dump($ar);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(ArrayObject)#%d (1) {
   %s"storage"%s"ArrayObject":private]=>
@@ -89,4 +87,3 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-===DONE===

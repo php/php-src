@@ -3,9 +3,9 @@ Bug #30140 (Problem with array in static properties)
 --FILE--
 <?php
 class A {
-	public static $test1 = true;
-	public static $test2 = array();
-	public static $test3 = "str";
+    public static $test1 = true;
+    public static $test2 = array();
+    public static $test3 = "str";
 }
 
 class B extends A {

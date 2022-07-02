@@ -12,9 +12,9 @@ $a[0] = "t";
 var_dump($array[$a]);
 ?>
 --EXPECTF--
-Notice: Undefined index: lest in %sbug72943.php on line %d
+Warning: Undefined array key "lest" in %s on line %d
 NULL
 
-Notice: Undefined index: fest in %sbug72943.php on line %d
+Warning: Undefined array key "fest" in %s on line %d
 NULL
 int(1)

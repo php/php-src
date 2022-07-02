@@ -1,5 +1,7 @@
 --TEST--
 Null bytes in SQL statements
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -31,8 +33,6 @@ oci_execute($s);
 
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1: Valid use of a null byte
 array(1) {
@@ -47,4 +47,3 @@ Test 3: Using a null byte in a bind variable name
 Warning: oci_bind_by_name(): ORA-01036: %s in %snull_byte_2.php on line %d
 
 Warning: oci_execute(): ORA-01008: %s in %snull_byte_2.php on line %d
-===DONE===

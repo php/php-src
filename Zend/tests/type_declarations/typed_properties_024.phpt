@@ -3,7 +3,7 @@ Test typed properties ignore private props during inheritance
 --FILE--
 <?php
 class Foo {
-	private int $thing;
+    private int $thing;
 }
 
 class Bar extends Foo {

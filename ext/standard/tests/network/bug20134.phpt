@@ -1,21 +1,23 @@
 --TEST--
 Bug #20134 (UDP reads from invalid ports)
+--INI--
+default_socket_timeout=1
 --FILE--
 <?php
 
 $fp = fsockopen("udp://localhost", 65534, $errno, $errstr);
 if (!$fp) {
-	/* UDP will never cause a connection error, as it is
-	 * a connection-LESS protocol */
+    /* UDP will never cause a connection error, as it is
+     * a connection-LESS protocol */
     echo "ERROR: $errno - $errstr<br>\n";
 }
 else {
-	/* Likewise, writes will always appear to succeed */
+    /* Likewise, writes will always appear to succeed */
     $x = fwrite($fp,"\n");
-	var_dump($x);
-	/* But reads should always fail */
+    var_dump($x);
+    /* But reads should always fail */
     $content = fread($fp, 40);
-	var_dump($content);
+    var_dump($content);
     fclose($fp);
 }
 ?>

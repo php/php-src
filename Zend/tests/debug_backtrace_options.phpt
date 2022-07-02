@@ -5,39 +5,39 @@ debug_backtrace options
 
 function backtrace_print($opt = null)
 {
-	if(is_null($opt)) {
-		print_r(debug_backtrace());
-	} else {
-		print_r(debug_backtrace($opt));
-	}
+    if(is_null($opt)) {
+        print_r(debug_backtrace());
+    } else {
+        print_r(debug_backtrace($opt));
+    }
 }
 
 function doit($a, $b, $how)
 {
-	echo "==default\n";
-	$how();
-	echo "==true\n";
-	$how(true);
-	echo "==false\n";
-	$how(false);
-	echo "==DEBUG_BACKTRACE_PROVIDE_OBJECT\n";
-	$how(DEBUG_BACKTRACE_PROVIDE_OBJECT);
-	echo "==DEBUG_BACKTRACE_IGNORE_ARGS\n";
-	$how(DEBUG_BACKTRACE_IGNORE_ARGS);
-	echo "==both\n";
-	$how(DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_IGNORE_ARGS);
+    echo "==default\n";
+    $how();
+    echo "==true\n";
+    $how(true);
+    echo "==false\n";
+    $how(false);
+    echo "==DEBUG_BACKTRACE_PROVIDE_OBJECT\n";
+    $how(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+    echo "==DEBUG_BACKTRACE_IGNORE_ARGS\n";
+    $how(DEBUG_BACKTRACE_IGNORE_ARGS);
+    echo "==both\n";
+    $how(DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_IGNORE_ARGS);
 }
 
 class foo {
-	protected function doCall($dowhat, $how)
-	{
-	   $dowhat('a','b', $how);
-	}
-	static function statCall($dowhat, $how)
-	{
-		$obj = new self();
-		$obj->doCall($dowhat, $how);
-	}
+    protected function doCall($dowhat, $how)
+    {
+       $dowhat('a','b', $how);
+    }
+    static function statCall($dowhat, $how)
+    {
+        $obj = new self();
+        $obj->doCall($dowhat, $how);
+    }
 }
 foo::statCall("doit", "debug_print_backtrace");
 foo::statCall("doit", "backtrace_print");
@@ -45,29 +45,29 @@ foo::statCall("doit", "backtrace_print");
 ?>
 --EXPECTF--
 ==default
-#0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#0 %sdebug_backtrace_options.php(%d): doit('a', 'b', 'debug_print_bac...')
+#1 %sdebug_backtrace_options.php(%d): foo->doCall('doit', 'debug_print_bac...')
+#2 %sdebug_backtrace_options.php(%d): foo::statCall('doit', 'debug_print_bac...')
 ==true
-#0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#0 %sdebug_backtrace_options.php(%d): doit('a', 'b', 'debug_print_bac...')
+#1 %sdebug_backtrace_options.php(%d): foo->doCall('doit', 'debug_print_bac...')
+#2 %sdebug_backtrace_options.php(%d): foo::statCall('doit', 'debug_print_bac...')
 ==false
-#0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#0 %sdebug_backtrace_options.php(%d): doit('a', 'b', 'debug_print_bac...')
+#1 %sdebug_backtrace_options.php(%d): foo->doCall('doit', 'debug_print_bac...')
+#2 %sdebug_backtrace_options.php(%d): foo::statCall('doit', 'debug_print_bac...')
 ==DEBUG_BACKTRACE_PROVIDE_OBJECT
-#0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
-#2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#0 %sdebug_backtrace_options.php(%d): doit('a', 'b', 'debug_print_bac...')
+#1 %sdebug_backtrace_options.php(%d): foo->doCall('doit', 'debug_print_bac...')
+#2 %sdebug_backtrace_options.php(%d): foo::statCall('doit', 'debug_print_bac...')
 ==DEBUG_BACKTRACE_IGNORE_ARGS
-#0  doit() called at [%sdebug_backtrace_options.php:%d]
-#1  foo->doCall() called at [%sdebug_backtrace_options.php:%d]
-#2  foo::statCall() called at [%sdebug_backtrace_options.php:%d]
+#0 %sdebug_backtrace_options.php(%d): doit()
+#1 %sdebug_backtrace_options.php(%d): foo->doCall()
+#2 %sdebug_backtrace_options.php(%d): foo::statCall()
 ==both
-#0  doit() called at [%sdebug_backtrace_options.php:%d]
-#1  foo->doCall() called at [%sdebug_backtrace_options.php:%d]
-#2  foo::statCall() called at [%sdebug_backtrace_options.php:%d]
+#0 %sdebug_backtrace_options.php(%d): doit()
+#1 %sdebug_backtrace_options.php(%d): foo->doCall()
+#2 %sdebug_backtrace_options.php(%d): foo::statCall()
 ==default
 Array
 (

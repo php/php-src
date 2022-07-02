@@ -1,19 +1,9 @@
 --TEST--
 Test xml_set_notation_decl_handler function : basic
---SKIPIF--
-<?php
-if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded";
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
-/* Prototype  : proto bool xml_set_notation_decl_handler  ( resource $parser  , callback $handler  )
- * Description: Sets the notation declaration handler function for the XML parser.
- * Source code: ext/xml/xml.c
- * Alias to functions:
- */
-
 echo "Simple testcase for xml_parser_get_option() function\n";
 
 $parser = xml_parser_create_ns();

@@ -2,12 +2,6 @@
 Test parse_ini_file() function : error conditions
 --FILE--
 <?php
-/* Prototype  : proto array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file
- * Source code: ext/standard/basic_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing parse_ini_file() : error conditions ***\n";
 
 //Test parse_ini_file with one more than the expected number of arguments
@@ -28,11 +22,11 @@ echo "Done";
 
 -- Testing parse_ini_file() function with more than expected no. of arguments --
 
-Warning: parse_ini_file(%s): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%s): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Testing parse_ini_file() function with a non-existent file --
 
-Warning: parse_ini_file(%s): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%s): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 Done

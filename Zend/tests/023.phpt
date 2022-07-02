@@ -10,20 +10,20 @@ print "\n";
 
 
 class bar {
-	public function a() {
-		return "bar!";
-	}
+    public function a() {
+        return "bar!";
+    }
 }
 
 class foo {
-	public function test() {
-		print "foo!\n";
-		return new bar;
-	}
+    public function test() {
+        print "foo!\n";
+        return new bar;
+    }
 }
 
 function test() {
-	return new foo;
+    return new foo;
 }
 
 $a = 'test';

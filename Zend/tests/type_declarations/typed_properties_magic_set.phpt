@@ -5,12 +5,29 @@ __set() should not be invoked when setting an uninitialized typed property
 
 class Test {
     public int $foo;
+    public function __get($name) {
+        echo "__get ", $name, "\n";
+        return null;
+    }
     public function __set($name, $value) {
         echo "__set ", $name, " = ", $value, "\n";
+    }
+    public function __isset($name) {
+        echo "__isset ", $name, "\n";
+        return true;
+    }
+    public function __unset($name) {
+        echo "__unset ", $name, "\n";
     }
 }
 
 $test = new Test;
+try {
+    var_dump($test->foo);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+var_dump(isset($test->foo));
 $test->foo = 42;
 var_dump($test->foo);
 
@@ -44,6 +61,8 @@ $test->foo = 42;
 
 ?>
 --EXPECT--
+Typed property Test::$foo must not be accessed before initialization
+bool(false)
 int(42)
 __set foo = 42
 __set foo = 42

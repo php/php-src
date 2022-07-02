@@ -1,13 +1,13 @@
 --TEST--
 ldap_escape() test filter
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ldap
 --FILE--
 <?php
 
 $subject = 'foo=bar(baz)*';
 
-var_dump(ldap_escape($subject, null, LDAP_ESCAPE_FILTER));
+var_dump(ldap_escape($subject, '', LDAP_ESCAPE_FILTER));
 
 ?>
 --EXPECT--

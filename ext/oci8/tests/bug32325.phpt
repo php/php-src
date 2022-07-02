@@ -1,5 +1,7 @@
 --TEST--
 Bug #32325 (Cannot retrieve collection using OCI8)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -23,8 +25,8 @@ oci8_test_sql_execute($c, $stmtarray);
 $collection = oci_new_collection($c, "BUG32325_T");
 
 $sql = "begin
-		select bug32325_t(1,2,3,4) into :list from dual;
-		end;";
+        select bug32325_t(1,2,3,4) into :list from dual;
+        end;";
 
 $stmt = oci_parse($c, $sql);
 

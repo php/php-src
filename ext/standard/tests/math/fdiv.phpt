@@ -41,8 +41,8 @@ var_dump(fdiv(NAN, 0.));
 
 ?>
 --EXPECT--
-float(3.3333333333333)
-float(3.3333333333333)
+float(3.3333333333333335)
+float(3.3333333333333335)
 float(-4)
 float(-4)
 

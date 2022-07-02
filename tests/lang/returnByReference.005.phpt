@@ -3,17 +3,17 @@ Returning a reference from a method
 --FILE--
 <?php
 Class C {
-	function returnConstantByValue() {
-		return 100;
-	}
+    function returnConstantByValue() {
+        return 100;
+    }
 
-	function &returnConstantByRef() {
-		return 100;
-	}
+    function &returnConstantByRef() {
+        return 100;
+    }
 
-	static function &returnVariableByRef() {
-		return $GLOBALS['a'];
-	}
+    static function &returnVariableByRef() {
+        return $GLOBALS['a'];
+    }
 }
 $c = new C;
 

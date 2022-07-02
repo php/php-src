@@ -1,9 +1,7 @@
 --TEST--
 IntlCalendar::setTimeZone(): valid time zones for DateTime but not ICU
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -19,6 +17,7 @@ var_dump($intlcal->getTimeZone()->getID());
 $pstdate = new DateTime('2012-01-01 00:00:00 +24:00');
 $intlcal->setTimeZone($pstdate->getTimeZone());
 var_dump($intlcal->getTimeZone()->getID());
+?>
 --EXPECTF--
 Warning: IntlCalendar::setTimeZone(): intlcal_set_time_zone: time zone id 'WEST' extracted from ext/date DateTimeZone not recognized in %s on line %d
 string(16) "Europe/Amsterdam"

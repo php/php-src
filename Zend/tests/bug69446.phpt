@@ -5,12 +5,13 @@ zend.enable_gc = 1
 --FILE--
 <?php
 $bar = NULL;
+#[AllowDynamicProperties]
 class bad {
-	public function __destruct() {
-		global $bar;
-		$bar = $this;
-		$bar->y = new stdClass;
-	}
+    public function __destruct() {
+        global $bar;
+        $bar = $this;
+        $bar->y = new stdClass;
+    }
 }
 
 $foo = new stdClass;
@@ -21,6 +22,7 @@ $foo->bad->x = new stdClass;
 unset($foo);
 gc_collect_cycles();
 var_dump($bar);
+?>
 --EXPECT--
 object(bad)#2 (2) {
   ["x"]=>

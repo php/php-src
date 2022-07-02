@@ -2,10 +2,6 @@
 Test uasort() function : object functionality - sort diff. objects
 --FILE--
 <?php
-/* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association
- * Source code: ext/standard/array.c
-*
 
 /*
  * This testcase tests uasort() functionality with different objects
@@ -19,13 +15,6 @@ Test uasort() function : object functionality - sort diff. objects
 echo "*** Testing uasort() : object functionality ***\n";
 
 // comparison function
-/* Prototype : int cmp_function(mixed $value1, mixed $value2)
- * Parameters : $value1 and $value2 - values to be compared
- * Return value : 0 - if both values are same
- *                1 - if value1 is greater than value2
- *               -1 - if value1 is less than value2
- * Description : compares value1 and value2
- */
 function cmp_function($value1, $value2)
 {
   if($value1 == $value2) {
@@ -157,31 +146,31 @@ bool(true)
 array(4) {
   [2]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(15)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(15)
   }
   [0]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(20)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(20)
   }
   [1]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(500)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(500)
   }
   [3]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(700)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(700)
   }
 }
 Done

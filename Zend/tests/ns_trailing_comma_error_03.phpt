@@ -5,4 +5,4 @@ Group use declarations mustn't allow more than one comma
 use Baz\{Foo,,};
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected ',', expecting '}' in %s on line %d
+Parse error: syntax error, unexpected token ",", expecting "}" in %s on line %d

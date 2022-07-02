@@ -2,9 +2,6 @@
 Testing unlink() function : basic functionality
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
 $file_path = __DIR__;
 
@@ -16,7 +13,7 @@ fclose($fp);
 
 // delete file
 var_dump( unlink($filename) );
-var_dump( file_exists($filename) );  // confirm file doesnt exist
+var_dump( file_exists($filename) );  // confirm file doesn't exist
 
 echo "\n*** Testing unlink() : checking second argument ***\n";
 // creating a context
@@ -28,7 +25,7 @@ fclose($fp);
 
 // delete file
 var_dump( unlink($filename, $context) );  // using $context in second argument
-var_dump( file_exists($filename) );  // confirm file doesnt exist
+var_dump( file_exists($filename) );  // confirm file doesn't exist
 
 echo "Done\n";
 ?>

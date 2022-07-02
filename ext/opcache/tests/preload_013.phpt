@@ -6,8 +6,12 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.preload={PWD}/preload_nested_function.inc
 opcache.interned_strings_buffer=0
+--EXTENSIONS--
+opcache
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+?>
 --FILE--
 <?php
 test();

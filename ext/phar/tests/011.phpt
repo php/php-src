@@ -1,7 +1,7 @@
 --TEST--
 Phar::mapPhar filesize too small in manifest
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -12,7 +12,7 @@ $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 
-// compressed file length does not match incompressed lentgh for an uncompressed file
+// compressed file length does not match incompressed length for an uncompressed file
 
 $files = array();
 $files['a'] = array('cont'=>'a','ulen'=>1,'clen'=>2);

@@ -19,9 +19,9 @@ echo $zip->filename . "\n";
 var_dump($zip);
 $files = array('test', 'testdir/test2');
 if (!$zip->extractTo("./testext/path/to", $files)) {
-	echo "error!\n";
-	echo $zip->status . "\n";
-	echo $zip->statusSys . "\n";
+    echo "error!\n";
+    echo $zip->status . "\n";
+    echo $zip->statusSys . "\n";
 
 }
 

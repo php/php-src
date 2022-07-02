@@ -1,8 +1,9 @@
 --TEST--
 Bug #41125 (PDO mysql + quote() + prepare() can result in seg fault)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
@@ -24,19 +25,19 @@ print implode(' - ', $stmt->errorinfo()) ."\n";
 print "-------------------------------------------------------\n";
 
 $queries = array(
-	"SELECT 1 FROM DUAL WHERE 1 = '?\'\''",
-	"SELECT 'a\\'0' FROM DUAL WHERE 1 = ?",
-	"SELECT 'a', 'b\'' FROM DUAL WHERE '''' LIKE '\\'' AND ?",
-	"SELECT 'foo?bar', '', '''' FROM DUAL WHERE ?"
+    "SELECT 1 FROM DUAL WHERE 1 = '?\'\''",
+    "SELECT 'a\\'0' FROM DUAL WHERE 1 = ?",
+    "SELECT 'a', 'b\'' FROM DUAL WHERE '''' LIKE '\\'' AND ?",
+    "SELECT 'foo?bar', '', '''' FROM DUAL WHERE ?"
 );
 
 foreach ($queries as $k => $query) {
-	$stmt = $db->prepare($query);
-	$stmt->execute(array(1));
-	printf("[%d] Query: [[%s]]\n", $k + 1, $query);
-	print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
-	print implode(' - ', $stmt->errorinfo()) ."\n";
-	print "--------\n";
+    $stmt = $db->prepare($query);
+    $stmt->execute(array(1));
+    printf("[%d] Query: [[%s]]\n", $k + 1, $query);
+    print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
+    print implode(' - ', $stmt->errorinfo()) ."\n";
+    print "--------\n";
 }
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
@@ -53,40 +54,42 @@ print implode(' - ', $stmt->errorinfo()) ."\n";
 print "-------------------------------------------------------\n";
 
 $queries = array(
-	"SELECT 1, 'foo' FROM DUAL WHERE 1 = :id AND '\\0' IS NULL AND  2 <> :id",
-	"SELECT 1 FROM DUAL WHERE 1 = :id AND '' AND  2 <> :id",
-	"SELECT 1 FROM DUAL WHERE 1 = :id AND '\'\'' = '''' AND  2 <> :id",
-	"SELECT 1 FROM DUAL WHERE 1 = :id AND '\'' = '''' AND  2 <> :id",
-	"SELECT 'a', 'b\'' FROM DUAL WHERE '''' LIKE '\\'' AND 1",
-	"SELECT 'a''', '\'b\'' FROM DUAL WHERE '''' LIKE '\\'' AND 1",
-	"SELECT UPPER(:id) FROM DUAL WHERE '1'",
-	"SELECT 1 FROM DUAL WHERE '\''",
-	"SELECT 1 FROM DUAL WHERE :id AND '\\0' OR :id",
-	"SELECT 1 FROM DUAL WHERE 'a\\f\\n\\0' AND 1 >= :id",
-	"SELECT 1 FROM DUAL WHERE '\'' = ''''",
-	"SELECT '\\n' '1 FROM DUAL WHERE '''' and :id'",
-	"SELECT 1 'FROM DUAL WHERE :id AND '''' = '''' OR 1 = 1 AND ':id",
+    "SELECT 1, 'foo' FROM DUAL WHERE 1 = :id AND '\\0' IS NULL AND  2 <> :id",
+    "SELECT 1 FROM DUAL WHERE 1 = :id AND '' AND  2 <> :id",
+    "SELECT 1 FROM DUAL WHERE 1 = :id AND '\'\'' = '''' AND  2 <> :id",
+    "SELECT 1 FROM DUAL WHERE 1 = :id AND '\'' = '''' AND  2 <> :id",
+    "SELECT 'a', 'b\'' FROM DUAL WHERE '''' LIKE '\\'' AND 1",
+    "SELECT 'a''', '\'b\'' FROM DUAL WHERE '''' LIKE '\\'' AND 1",
+    "SELECT UPPER(:id) FROM DUAL WHERE '1'",
+    "SELECT 1 FROM DUAL WHERE '\''",
+    "SELECT 1 FROM DUAL WHERE :id AND '\\0' OR :id",
+    "SELECT 1 FROM DUAL WHERE 'a\\f\\n\\0' AND 1 >= :id",
+    "SELECT 1 FROM DUAL WHERE '\'' = ''''",
+    "SELECT '\\n' '1 FROM DUAL WHERE '''' and :id'",
+    "SELECT 1 'FROM DUAL WHERE :id AND '''' = '''' OR 1 = 1 AND ':id",
 );
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
 $id = 1;
 
 foreach ($queries as $k => $query) {
-	$stmt = $db->prepare($query);
-	$stmt->bindParam(':id', $id);
-	$stmt->execute();
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
 
-	printf("[%d] Query: [[%s]]\n", $k + 1, $query);
-	print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
-	print implode(' - ', $stmt->errorinfo()) ."\n";
-	print "--------\n";
+    printf("[%d] Query: [[%s]]\n", $k + 1, $query);
+    print implode(' - ', (($r = @$stmt->fetch(PDO::FETCH_NUM)) ? $r : array())) ."\n";
+    print implode(' - ', $stmt->errorinfo()) ."\n";
+    print "--------\n";
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 1
 00000 -  - 
 -------------------------------------------------------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [1] Query: [[SELECT 1 FROM DUAL WHERE 1 = '?\'\'']]
 
 00000 -  - 
@@ -123,18 +126,24 @@ O'\0
 1
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [5] Query: [[SELECT 'a', 'b\'' FROM DUAL WHERE '''' LIKE '\'' AND 1]]
-a - b'
+
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [6] Query: [[SELECT 'a''', '\'b\'' FROM DUAL WHERE '''' LIKE '\'' AND 1]]
-a' - 'b'
+
 00000 -  - 
 --------
 [7] Query: [[SELECT UPPER(:id) FROM DUAL WHERE '1']]
 1
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [8] Query: [[SELECT 1 FROM DUAL WHERE '\'']]
 
 00000 -  - 
@@ -147,13 +156,16 @@ a' - 'b'
 
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [11] Query: [[SELECT 1 FROM DUAL WHERE '\'' = '''']]
-1
+
 00000 -  - 
 --------
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
 [12] Query: [[SELECT '\n' '1 FROM DUAL WHERE '''' and :id']]
 
-1 FROM DUAL WHERE '' and :id
 00000 -  - 
 --------
 [13] Query: [[SELECT 1 'FROM DUAL WHERE :id AND '''' = '''' OR 1 = 1 AND ':id]]

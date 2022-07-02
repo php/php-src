@@ -3,7 +3,6 @@ Test preg_match_all() function : error conditions - bad regular expressions
 --FILE--
 <?php
 /*
-* proto int preg_match_all(string pattern, string subject, array subpatterns [, int flags [, int offset]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -39,7 +38,7 @@ var_dump($matches);
 
 Arg value is abcdef
 
-Warning: preg_match_all(): Delimiter must not be alphanumeric or backslash in %spreg_match_all_error1.php on line %d
+Warning: preg_match_all(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
 
@@ -62,7 +61,7 @@ bool(false)
 NULL
 
 Arg value is Array
-preg_match_all() expects parameter 1 to be string, array given
+preg_match_all(): Argument #1 ($pattern) must be of type string, array given
 NULL
 
 Arg value is /[a-zA-Z]/
@@ -80,5 +79,5 @@ array(1) {
     string(1) "t"
   }
 }
-preg_match_all() expects parameter 1 to be string, object given
+preg_match_all(): Argument #1 ($pattern) must be of type string, stdClass given
 NULL

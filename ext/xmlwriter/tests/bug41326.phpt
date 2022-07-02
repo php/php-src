@@ -1,9 +1,7 @@
 --TEST--
 Bug #41287 (Writing empty tags with Xmlwriter::WriteElement[ns])
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 $xml = new XmlWriter();
@@ -35,7 +33,7 @@ $xw->endElement();
 $xw->endDocument();
 print $xw->flush(true);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <test>
  <foo/>

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -105,6 +105,8 @@ typedef struct CharSet {
 		char end;
 	} *ranges;
 } CharSet;
+
+typedef zend_long (*int_string_formater)(const char*, char**, int);
 
 /*
  * Declarations for functions used only in this file.
@@ -387,7 +389,7 @@ notXpg:
 		gotSequential = 1;
 		if (gotXpg) {
 mixedXPG:
-			php_error_docref(NULL, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
+			zend_value_error("%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
 			goto error;
 		}
 
@@ -469,11 +471,11 @@ xpgCheckDone:
 				}
 				break;
 badSet:
-				php_error_docref(NULL, E_WARNING, "Unmatched [ in format string");
+				zend_value_error("Unmatched [ in format string");
 				goto error;
 
 			default: {
-				php_error_docref(NULL, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
+				zend_value_error("Bad scan conversion character \"%c\"", *ch);
 				goto error;
 			}
 		}
@@ -523,14 +525,14 @@ badSet:
 	}
 	for (i = 0; i < numVars; i++) {
 		if (nassign[i] > 1) {
-			php_error_docref(NULL, E_WARNING, "%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
+			zend_value_error("%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
 			goto error;
 		} else if (!xpgSize && (nassign[i] == 0)) {
 			/*
 			 * If the space is empty, and xpgSize is 0 (means XPG wasn't
 			 * used, and/or numVars != 0), then too many vars were given
 			 */
-			php_error_docref(NULL, E_WARNING, "Variable is not assigned by any conversion specifiers");
+			zend_value_error("Variable is not assigned by any conversion specifiers");
 			goto error;
 		}
 	}
@@ -542,9 +544,9 @@ badSet:
 
 badIndex:
 	if (gotXpg) {
-		php_error_docref(NULL, E_WARNING, "%s", "\"%n$\" argument index out of range");
+		zend_value_error("%s", "\"%n$\" argument index out of range");
 	} else {
-		php_error_docref(NULL, E_WARNING, "Different numbers of variable names and field specifiers");
+		zend_value_error("Different numbers of variable names and field specifiers");
 	}
 
 error:
@@ -583,7 +585,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	int  base = 0;
 	int  underflow = 0;
 	size_t width;
-	zend_long (*fn)() = NULL;
+	int_string_formater fn = NULL;
 	char *ch, sch;
 	int  flags;
 	char buf[64];	/* Temporary buffer to hold scanned number
@@ -598,10 +600,6 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 		numVars = 0;
 	}
 
-#if 0
-	zend_printf("<br>in sscanf_internal : <br> string is \"%s\", format = \"%s\"<br> NumVars = %d. VarStart = %d<br>-------------------------<br>",
-					string, format, numVars, varStart);
-#endif
 	/*
 	 * Check for errors in the format string.
 	 */
@@ -617,11 +615,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	 */
 	if (numVars) {
 		for (i = varStart;i < argCount;i++){
-			if ( ! Z_ISREF(args[ i ] ) ) {
-				php_error_docref(NULL, E_WARNING, "Parameter %d must be passed by reference", i);
-				scan_set_error_return(numVars, return_value);
-				return SCAN_ERROR_VAR_PASSED_BYVAL;
-			}
+			ZEND_ASSERT(Z_ISREF(args[i]) && "Parameter must be passed by reference");
 		}
 	}
 
@@ -748,29 +742,29 @@ literal:
 			case 'D':
 				op = 'i';
 				base = 10;
-				fn = (zend_long (*)())ZEND_STRTOL_PTR;
+				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'i':
 				op = 'i';
 				base = 0;
-				fn = (zend_long (*)())ZEND_STRTOL_PTR;
+				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'o':
 				op = 'i';
 				base = 8;
-				fn = (zend_long (*)())ZEND_STRTOL_PTR;
+				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'x':
 			case 'X':
 				op = 'i';
 				base = 16;
-				fn = (zend_long (*)())ZEND_STRTOL_PTR;
+				fn = (int_string_formater)ZEND_STRTOL_PTR;
 				break;
 			case 'u':
 				op = 'i';
 				base = 10;
 				flags |= SCAN_UNSIGNED;
-				fn = (zend_long (*)())ZEND_STRTOUL_PTR;
+				fn = (int_string_formater)ZEND_STRTOUL_PTR;
 				break;
 
 			case 'f':
@@ -914,7 +908,7 @@ literal:
 						__buf[0] = sch;
 						__buf[1] = '\0';
 						current = args[objIndex++];
-						zval_dtor(*current);
+						zval_ptr_dtor_nogc(*current);
 						ZVAL_STRINGL( *current, __buf, 1);
 					} else {
 						add_index_stringl(return_value, objIndex++, &sch, 1);

@@ -2,12 +2,6 @@
 Test gmstrftime() function : usage variation - Passing month related format strings to format argument.
 --FILE--
 <?php
-/* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -17,7 +11,7 @@ $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated month name' => "%b",
       'Full month name' => "%B",
-	  'Month as decimal' => "%m",
+      'Month as decimal' => "%m",
 );
 
 // loop through each element of the array for timestamp
@@ -29,19 +23,29 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
 --Abbreviated month name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(3) "Aug"
 
 --Full month name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(6) "August"
 
 --Month as decimal--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "08"
-===DONE===

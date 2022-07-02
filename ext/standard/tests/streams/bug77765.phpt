@@ -14,9 +14,7 @@ $path = "ftp://localhost:" . $port."/www";
 
 var_dump(stat($path)['mode']);
 ?>
-==DONE==
---EXPECTF--
+--EXPECT--
 string(11) "SIZE /www
 "
 int(16877)
-==DONE==

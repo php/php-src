@@ -9,40 +9,16 @@ files will need to be changed to match the local mailserver configuration.
 The tests have been checked using dovecot (on Linux 32 and 64 bit systems) and
 hMailServer on Windows. The tests are intended to be mailserver agnostic.
 
-The tests can be run without modification with a fairly minimal dovecot
-installation. For information, the dovecot.conf file used in running the tests
-is given below. The dovecot password file (dovecotpass) requires a password for
-one user, `webmaster@something.com`. It's also necessary to set up one
-additional user ID (vmail) to own the mail directory.
+## Set-up tests on Ubuntu (checked on Ubuntu 18.04 (Bionic))
+The necessary packages can be installed using the following command;
+`apt-get install libc-client-dev libkrb5-dev dovecot-core dovecot-pop3d dovecot-imapd sendmail`
 
-```txt
-protocols = imap imaps
-
-listen = *
-
-ssl_disable = yes
-
-disable_plaintext_auth=yes
-
-## Mailbox locations and namespaces
-
-mail_location = maildir:/home/vmail/mail/%d/%n/Maildir
-
-auth_verbose = yes
-
-auth_debug = yes
-
-auth default {
-  mechanisms = login
-
-  passdb passwd-file {
-    args = /etc/dovecot/dovecotpass
-  }
-
-  userdb static {
-    args = uid=11459 gid=1002 home=/home/vmail/dovecot/mail/%d/%n
-  }
-
-  user = root
-}
+The build of PHP will need to be compiled with the following flags:
 ```
+--with-imap --with-kerberos --with-imap-ssl
+```
+
+Then run the set-up script `ext/imap/tests/setup/setup.sh` which will add the `vmail`
+group and user which is used by Dovecot for the mailbox. It will also copy the
+`ext/imap/tests/setup/dovecot.conf` and `ext/imap/tests/setup/dovecotpass` to the correct
+location for Dovecot and restarts it for the new configuration to be enabled.

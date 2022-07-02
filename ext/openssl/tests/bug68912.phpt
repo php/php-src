@@ -1,8 +1,9 @@
 --TEST--
 Bug #68912 (Segmentation fault at openssl_spki_new)
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--
@@ -19,4 +20,4 @@ try {
 }
 ?>
 --EXPECT--
-openssl_spki_new(): supplied resource is not a valid OpenSSL X.509/key resource
+openssl_spki_new(): Argument #1 ($private_key) must be of type OpenSSLAsymmetricKey, resource given

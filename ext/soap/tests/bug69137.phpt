@@ -1,8 +1,9 @@
 --TEST--
 SOAP Bug #69137 - Peer verification fails when using a proxy with SoapClient
+--EXTENSIONS--
+soap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (getenv("SKIP_ONLINE_TESTS")) { die("skip test requiring internet connection"); }
 if (!getenv('http_proxy')) { die("skip test unless an HTTP/HTTPS proxy server is specified in http_proxy environment variable"); }
 ?>
@@ -26,9 +27,9 @@ $client = new SoapClient($testServiceWsdl);
 unset($client);
 
 $parameters = [
-	'proxy_host' => $proxyHost,
-	'proxy_port' => $proxyPort,
-	'trace' => 1,
+    'proxy_host' => $proxyHost,
+    'proxy_port' => $proxyPort,
+    'trace' => 1,
 ];
 $client = new SoapClient($testServiceWsdl, $parameters);
 
@@ -39,7 +40,7 @@ $lookup->ipAddress = '72.52.91.14';
 $result = $client->ResolveIP($lookup);
 
 if ($result && is_object($result) && $result->ResolveIPResult && is_object($result->ResolveIPResult)) {
-	print "successful lookup";
+    print "successful lookup";
 }
 ?>
 --EXPECT--

@@ -4,7 +4,7 @@ Bug #73586 (php_user_filter::$stream is not set to the stream the filter is work
 <?php
 class append_filter extends php_user_filter {
     public $stream;
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         while ($bucket = stream_bucket_make_writeable($in)) {
             $consumed += $bucket->datalen;
             stream_bucket_append($out, $bucket);
@@ -25,7 +25,7 @@ stream_copy_to_stream($fin, STDOUT);
 <?php
 class append_filter extends php_user_filter {
     public $stream;
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         while ($bucket = stream_bucket_make_writeable($in)) {
             $consumed += $bucket->datalen;
             stream_bucket_append($out, $bucket);

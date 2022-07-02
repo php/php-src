@@ -8,13 +8,13 @@ Testfest 2009 Munich
 <?php
 class A
 {
-	protected function a() {}
+    protected function a() {}
 
 }
 
 class B extends A
 {
-	public function b() {}
+    public function b() {}
 }
 
 $B = new B();

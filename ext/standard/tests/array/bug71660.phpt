@@ -4,7 +4,7 @@ Bug #71660 (array_column behaves incorrectly after foreach by reference)
 <?php
 $arr = array('id' => 12345, 'name' => 'sam');
 foreach ($arr as &$v) {
-	    $v = $v;
+        $v = $v;
 }
 
 $arr = [$arr];

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_DB2
+#ifdef DBA_DB2
 #include "php_db2.h"
 #include <sys/stat.h>
 
@@ -28,12 +28,6 @@
 #ifdef DB2_INCLUDE_FILE
 #include DB2_INCLUDE_FILE
 #endif
-
-#define DB2_DATA dba_db2_data *dba = info->dbf
-#define DB2_GKEY \
-	DBT gkey = {0}; \
-	gkey.data = (char *) key; \
-	gkey.size = keylen
 
 typedef struct {
 	DB *dbp;
@@ -45,7 +39,7 @@ DBA_OPEN_FUNC(db2)
 	DB *dbp;
 	DBTYPE type;
 	int gmode = 0;
-	int filemode = 0644;
+	int filemode = info->file_permission;
 	struct stat check_stat;
 	int s = VCWD_STAT(info->path, &check_stat);
 
@@ -67,10 +61,6 @@ DBA_OPEN_FUNC(db2)
 		return FAILURE;/* not possible */
 	}
 
-	if (info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
-	}
-
 	if (db_open(info->path, type, gmode, filemode, NULL, NULL, &dbp)) {
 		return FAILURE;
 	}
@@ -83,7 +73,7 @@ DBA_OPEN_FUNC(db2)
 
 DBA_CLOSE_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 
 	if (dba->cursor)
 		dba->cursor->c_close(dba->cursor);
@@ -93,26 +83,31 @@ DBA_CLOSE_FUNC(db2)
 
 DBA_FETCH_FUNC(db2)
 {
+	dba_db2_data *dba = info->dbf;
 	DBT gval = {0};
-	DB2_DATA;
-	DB2_GKEY;
+	DBT gkey = {0};
+
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return NULL;
 	}
 
-	if (newlen) *newlen = gval.size;
-	return estrndup(gval.data, gval.size);
+	return zend_string_init(gval.data, gval.size, /* persistent */ false);
 }
 
 DBA_UPDATE_FUNC(db2)
 {
+	dba_db2_data *dba = info->dbf;
 	DBT gval = {0};
-	DB2_DATA;
-	DB2_GKEY;
+	DBT gkey = {0};
 
-	gval.data = (char *) val;
-	gval.size = vallen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
+
+	gval.data = ZSTR_VAL(val);
+	gval.size = ZSTR_LEN(val);
 
 	if (dba->dbp->put(dba->dbp, NULL, &gkey, &gval,
 				mode == 1 ? DB_NOOVERWRITE : 0)) {
@@ -123,9 +118,12 @@ DBA_UPDATE_FUNC(db2)
 
 DBA_EXISTS_FUNC(db2)
 {
+	dba_db2_data *dba = info->dbf;
 	DBT gval = {0};
-	DB2_DATA;
-	DB2_GKEY;
+	DBT gkey = {0};
+
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return FAILURE;
@@ -135,15 +133,18 @@ DBA_EXISTS_FUNC(db2)
 
 DBA_DELETE_FUNC(db2)
 {
-	DB2_DATA;
-	DB2_GKEY;
+	dba_db2_data *dba = info->dbf;
+	DBT gkey = {0};
+
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	return dba->dbp->del(dba->dbp, NULL, &gkey, 0) ? FAILURE : SUCCESS;
 }
 
 DBA_FIRSTKEY_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 
 	if (dba->cursor) {
 		dba->cursor->c_close(dba->cursor);
@@ -158,21 +159,20 @@ DBA_FIRSTKEY_FUNC(db2)
 		return NULL;
 	}
 
-	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db2(info, newlen);
+	return dba_nextkey_db2(info);
 }
 
 DBA_NEXTKEY_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 	DBT gkey = {0}, gval = {0};
 
 	if (dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT)
-			|| !gkey.data)
+			|| !gkey.data) {
 		return NULL;
+	}
 
-	if (newlen) *newlen = gkey.size;
-	return estrndup(gkey.data, gkey.size);
+	return zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 }
 
 DBA_OPTIMIZE_FUNC(db2)
@@ -182,7 +182,7 @@ DBA_OPTIMIZE_FUNC(db2)
 
 DBA_SYNC_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 
 	return dba->dbp->sync(dba->dbp, 0) ? FAILURE : SUCCESS;
 }

@@ -39,5 +39,6 @@ class Bar extends Foo
 }
 
 echo "OK\n";
+?>
 --EXPECT--
 OK

@@ -11,17 +11,17 @@ var_dump($a->count());
 
 /* negative init value */
 try {
-	$b = new SplFixedArray(-10);
-} catch (Exception $e) {
-	var_dump($e->getMessage());
+    $b = new SplFixedArray(-10);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 
 /* resize and negative value */
 $b = new SplFixedArray();
 try {
-	$b->setSize(-5);
-} catch (Exception $e) {
-	var_dump($e->getMessage());
+    $b->setSize(-5);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 
 /* calling __construct() twice */
@@ -43,11 +43,11 @@ $e[1] = 5;
 $e[2] = 10;
 
 try {
-	foreach ($e as $k=>&$v) {
-		var_dump($v);
-	}
-} catch (Exception $e) {
-	var_dump($e->getMessage());
+    foreach ($e as $k=>&$v) {
+        var_dump($v);
+    }
+} catch (\Error $e) {
+    var_dump($e->getMessage());
 }
 
 //non-long indexes
@@ -60,12 +60,11 @@ var_dump(isset($a["0"], $a[-1]), $a["1"]);
 var_dump(empty($a["3"]));
 
 ?>
-==DONE==
 --EXPECTF--
 int(0)
 int(0)
-string(35) "array size cannot be less than zero"
-string(35) "array size cannot be less than zero"
+SplFixedArray::__construct(): Argument #1 ($size) must be greater than or equal to 0
+SplFixedArray::setSize(): Argument #1 ($size) must be greater than or equal to 0
 NULL
 int(0)
 int(0)
@@ -75,4 +74,3 @@ string(52) "An iterator cannot be used with foreach by reference"
 bool(false)
 string(3) "foo"
 bool(true)
-==DONE==

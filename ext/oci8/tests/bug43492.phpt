@@ -1,5 +1,7 @@
 --TEST--
 Bug #43492 (Nested cursor leaks)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -40,22 +42,22 @@ will fail with the error "ORA-01000: maximum open cursors exceeded".
 
 function fetch($c, $i) {
     global $s;   //  (*) Allow parent statement to be available when child is used
-    $s = ociparse($c, 'select cursor(select * from bug43492_tab) c from bug43492_tab');
-    ociexecute($s, OCI_DEFAULT);
-    ocifetchinto($s, $result, OCI_ASSOC);
-    ociexecute($result['C'], OCI_DEFAULT);
+    $s = oci_parse($c, 'select cursor(select * from bug43492_tab) c from bug43492_tab');
+    oci_execute($s, OCI_DEFAULT);
+    $result = oci_fetch_assoc($s);
+    oci_execute($result['C'], OCI_DEFAULT);
     return $result['C'];
 }
 
 for($i = 0; $i < 300; $i++) {
     $cur = fetch($c, $i);
     for($j = 0; $j < 10; $j++) {
-        ocifetchinto($cur, $row, OCI_NUM);
+        $row = oci_fetch_row($cur);
         echo "$row[0] ";
     }
     echo "\n";
-    ocifreestatement($cur);
-    ocifreestatement($s);   // (*) Free the parent statement cleanly
+    oci_free_statement($cur);
+    oci_free_statement($s);   // (*) Free the parent statement cleanly
 }
 
 echo "Done\n";

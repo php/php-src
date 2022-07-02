@@ -1,7 +1,7 @@
 --TEST--
 Bug #29109 (Uncaught SoapFault exception: [WSDL] Out of memory)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

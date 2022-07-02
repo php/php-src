@@ -2,11 +2,6 @@
 Test array_diff_key() function : usage variation - Passing unexpected values to first argument
 --FILE--
 <?php
-/* Prototype  : array array_diff_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -23,9 +18,9 @@ $fp = fopen(__FILE__, "r");
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -87,7 +82,7 @@ $inputs = array(
       'resource' => $fp,
 );
 
-// loop through each element of the array for arr1
+// loop through each element of the array for array1
 foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
@@ -104,111 +99,109 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
 --int 0--
-Expected parameter 1 to be an array, int given
-Expected parameter 1 to be an array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
 
 --int 1--
-Expected parameter 1 to be an array, int given
-Expected parameter 1 to be an array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
 
 --int 12345--
-Expected parameter 1 to be an array, int given
-Expected parameter 1 to be an array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
 
 --int -12345--
-Expected parameter 1 to be an array, int given
-Expected parameter 1 to be an array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
+array_diff_key(): Argument #1 ($array) must be of type array, int given
 
 --float 10.5--
-Expected parameter 1 to be an array, float given
-Expected parameter 1 to be an array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
 
 --float -10.5--
-Expected parameter 1 to be an array, float given
-Expected parameter 1 to be an array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
 
 --float 12.3456789000e10--
-Expected parameter 1 to be an array, float given
-Expected parameter 1 to be an array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
 
 --float -12.3456789000e10--
-Expected parameter 1 to be an array, float given
-Expected parameter 1 to be an array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
 
 --float .5--
-Expected parameter 1 to be an array, float given
-Expected parameter 1 to be an array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
+array_diff_key(): Argument #1 ($array) must be of type array, float given
 
 --uppercase NULL--
-Expected parameter 1 to be an array, null given
-Expected parameter 1 to be an array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
 
 --lowercase null--
-Expected parameter 1 to be an array, null given
-Expected parameter 1 to be an array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
 
 --lowercase true--
-Expected parameter 1 to be an array, bool given
-Expected parameter 1 to be an array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
 
 --lowercase false--
-Expected parameter 1 to be an array, bool given
-Expected parameter 1 to be an array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
 
 --uppercase TRUE--
-Expected parameter 1 to be an array, bool given
-Expected parameter 1 to be an array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
 
 --uppercase FALSE--
-Expected parameter 1 to be an array, bool given
-Expected parameter 1 to be an array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
+array_diff_key(): Argument #1 ($array) must be of type array, bool given
 
 --empty string DQ--
-Expected parameter 1 to be an array, string given
-Expected parameter 1 to be an array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
 
 --empty string SQ--
-Expected parameter 1 to be an array, string given
-Expected parameter 1 to be an array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
 
 --string DQ--
-Expected parameter 1 to be an array, string given
-Expected parameter 1 to be an array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
 
 --string SQ--
-Expected parameter 1 to be an array, string given
-Expected parameter 1 to be an array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
 
 --mixed case string--
-Expected parameter 1 to be an array, string given
-Expected parameter 1 to be an array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
 
 --heredoc--
-Expected parameter 1 to be an array, string given
-Expected parameter 1 to be an array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
+array_diff_key(): Argument #1 ($array) must be of type array, string given
 
 --instance of classWithToString--
-Expected parameter 1 to be an array, object given
-Expected parameter 1 to be an array, object given
+array_diff_key(): Argument #1 ($array) must be of type array, classWithToString given
+array_diff_key(): Argument #1 ($array) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-Expected parameter 1 to be an array, object given
-Expected parameter 1 to be an array, object given
+array_diff_key(): Argument #1 ($array) must be of type array, classWithoutToString given
+array_diff_key(): Argument #1 ($array) must be of type array, classWithoutToString given
 
 --undefined var--
-Expected parameter 1 to be an array, null given
-Expected parameter 1 to be an array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
 
 --unset var--
-Expected parameter 1 to be an array, null given
-Expected parameter 1 to be an array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
+array_diff_key(): Argument #1 ($array) must be of type array, null given
 
 --resource--
-Expected parameter 1 to be an array, resource given
-Expected parameter 1 to be an array, resource given
-===DONE===
+array_diff_key(): Argument #1 ($array) must be of type array, resource given
+array_diff_key(): Argument #1 ($array) must be of type array, resource given

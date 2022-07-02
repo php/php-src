@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PECL Bug #5809 (PDOStatement::execute(array()) changes param)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -22,6 +23,7 @@ var_dump($values);
 $stmt = $db->prepare('SELECT * FROM test WHERE id = ?');
 $stmt->execute($values);
 var_dump($values);
+?>
 --EXPECT--
 array(1) {
   [0]=>

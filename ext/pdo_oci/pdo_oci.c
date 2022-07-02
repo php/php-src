@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -29,12 +29,6 @@
 #include <TSRM/TSRM.h>
 #endif
 
-/* {{{ pdo_oci_functions[] */
-static const zend_function_entry pdo_oci_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_oci_module_entry */
 
 static const zend_module_dep pdo_oci_deps[] = {
@@ -46,7 +40,7 @@ zend_module_entry pdo_oci_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_oci_deps,
 	"PDO_OCI",
-	pdo_oci_functions,
+	NULL,
 	PHP_MINIT(pdo_oci),
 	PHP_MSHUTDOWN(pdo_oci),
 	PHP_RINIT(pdo_oci),
@@ -84,16 +78,18 @@ OCIEnv *pdo_oci_Env = NULL;
 static MUTEX_T pdo_oci_env_mutex;
 #endif
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_oci)
 {
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_ACTION", (zend_long)PDO_OCI_ATTR_ACTION);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_INFO", (zend_long)PDO_OCI_ATTR_CLIENT_INFO);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_IDENTIFIER", (zend_long)PDO_OCI_ATTR_CLIENT_IDENTIFIER);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_MODULE", (zend_long)PDO_OCI_ATTR_MODULE);
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CALL_TIMEOUT", (zend_long)PDO_OCI_ATTR_CALL_TIMEOUT);
 
-	php_pdo_register_driver(&pdo_oci_driver);
+	if (FAILURE == php_pdo_register_driver(&pdo_oci_driver)) {
+		return FAILURE;
+	}
 
 	// Defer OCI init to PHP_RINIT_FUNCTION because with php-fpm,
 	// NLS_LANG is not yet available here.
@@ -106,8 +102,7 @@ PHP_MINIT_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_RINIT_FUNCTION
- */
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(pdo_oci)
 {
 	if (!pdo_oci_Env) {
@@ -115,7 +110,7 @@ PHP_RINIT_FUNCTION(pdo_oci)
 		tsrm_mutex_lock(pdo_oci_env_mutex);
 		if (!pdo_oci_Env) { // double-checked locking idiom
 #endif
-#if HAVE_OCIENVCREATE
+#ifdef HAVE_OCIENVCREATE
 		OCIEnvCreate(&pdo_oci_Env, PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL, 0, NULL);
 #else
 		OCIInitialize(PDO_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
@@ -131,8 +126,7 @@ PHP_RINIT_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 {
 	php_pdo_unregister_driver(&pdo_oci_driver);
@@ -149,8 +143,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_oci)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo_oci)
 {
 	php_info_print_table_start();

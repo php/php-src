@@ -1,8 +1,9 @@
 --TEST--
 Test: Xinclude and Streams
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 in_array('compress.zlib', stream_get_wrappers()) or die('skip compress.zlib wrapper is not available');
 ?>
 --FILE--
@@ -12,7 +13,7 @@ $dom = new domdocument;
 $data = file_get_contents(__DIR__."/xinclude.xml");
 $reldir = str_replace(getcwd(),".",__DIR__);
 if (DIRECTORY_SEPARATOR == '\\') {
-	$reldir = str_replace('\\',"/", $reldir);
+    $reldir = str_replace('\\',"/", $reldir);
 }
 $data = str_replace('compress.zlib://ext/dom/tests/','compress.zlib://'.$reldir."/", $data);
 
@@ -21,7 +22,7 @@ $dom->loadXML($data);
 $dom->xinclude();
 print $dom->saveXML()."\n";
 foreach ($dom->documentElement->childNodes as $node) {
-	print $node->nodeName."\n";
+    print $node->nodeName."\n";
 }
 ?>
 --EXPECTF--

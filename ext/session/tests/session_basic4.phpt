@@ -14,18 +14,14 @@ session.save_path=
 session.name=PHPSESSID
 session.trans_sid_tags="a=href,area=href,frame=src,form="
 url_rewriter.tags="a=href,area=href,frame=src,form="
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : session.use_trans_sid=1
- * Description : Test basic functionality.
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing basic session functionality : variation4 use_trans_sid ***\n";
 
@@ -52,6 +48,7 @@ echo '
 <form action="" method="post">
 </form>
 ';
+?>
 --EXPECT--
 *** Testing basic session functionality : variation4 use_trans_sid ***
 *** Test trans sid ***

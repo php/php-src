@@ -1,9 +1,7 @@
 --TEST--
 Bug #38212 (Seg Fault on invalid imagecreatefromgd2part() parameters)
---SKIPIF--
-<?php
-        if (!function_exists('imagecopy')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require __DIR__ . '/func.inc';
@@ -21,5 +19,5 @@ trycatch_dump(
 unlink($file);
 ?>
 --EXPECT--
-!! [ValueError] Width must be at least 1
-!! [ValueError] Height must be at least 1
+!! [ValueError] imagecreatefromgd2part(): Argument #4 ($width) must be greater than or equal to 1
+!! [ValueError] imagecreatefromgd2part(): Argument #5 ($height) must be greater than or equal to 1

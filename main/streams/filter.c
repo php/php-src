@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -253,9 +253,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	if (filter == NULL) {
 		/* TODO: these need correct docrefs */
 		if (factory == NULL)
-			php_error_docref(NULL, E_WARNING, "unable to locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to locate filter \"%s\"", filtername);
 		else
-			php_error_docref(NULL, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to create or locate filter \"%s\"", filtername);
 	}
 
 	return filter;
@@ -416,7 +416,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	for(current = filter; current; current = current->next) {
 		php_stream_filter_status_t status;
 
-		status = filter->fops->filter(stream, current, inp, outp, NULL, flags);
+		status = current->fops->filter(stream, current, inp, outp, NULL, flags);
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
 			return SUCCESS;
@@ -468,7 +468,10 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 	} else if (chain == &(stream->writefilters)) {
 		/* Send flushed data to the stream */
 		while ((bucket = inp->head)) {
-			stream->ops->write(stream, bucket->buf, bucket->buflen);
+			ssize_t count = stream->ops->write(stream, bucket->buf, bucket->buflen);
+			if (count > 0) {
+				stream->position += count;
+			}
 			php_stream_bucket_unlink(bucket);
 			php_stream_bucket_delref(bucket);
 		}

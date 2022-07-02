@@ -1,18 +1,9 @@
 --TEST--
 Test mb_strripos() function : usage variations - Pass different integers as $offset argument
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strripos') or die("skip mb_strripos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of last occurrence of a string within another, case insensitive
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
-
 /*
  * Test how mb_strripos() behaves when passed different integers as $offset argument
  * The character length of $string_ascii and $string_mb is the same,
@@ -35,16 +26,24 @@ $needle_mb = base64_decode('44CC');
  * 60 is larger than *BYTE* count for $string_mb
  */
 for ($i = -10; $i <= 60; $i += 10) {
-	echo "\n**-- Offset is: $i --**\n";
-	echo "-- ASCII String --\n";
-	var_dump(mb_strripos($string_ascii, $needle_ascii, $i));
-	echo "--Multibyte String --\n";
-	var_dump(mb_strripos($string_mb, $needle_mb, $i, 'UTF-8'));
+    echo "\n**-- Offset is: $i --**\n";
+    echo "-- ASCII String --\n";
+    try {
+        var_dump(mb_strripos($string_ascii, $needle_ascii, $i));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
+    echo "--Multibyte String --\n";
+    try {
+        var_dump(mb_strripos($string_mb, $needle_mb, $i, 'UTF-8'));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strripos() : usage variations ***
 
 **-- Offset is: -10 --**
@@ -73,41 +72,24 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 40 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 50 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 60 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-Done
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

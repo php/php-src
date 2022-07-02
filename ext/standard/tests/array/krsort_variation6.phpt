@@ -2,15 +2,10 @@
 Test krsort() function : usage variations - sort hexadecimal values
 --FILE--
 <?php
-/* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * testing krsort() by providing array of hexa-decimal values for $array argument
  * with following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
 */
@@ -23,7 +18,7 @@ $unsorted_hex_array = array (
   0x1ab => 0x1ab, 0xff => 0xff, -0xff => -0xFF, 0 => 0, -0x2aa => -0x2aa
 );
 
-echo "\n-- Testing krsort() by supplying hexadecimal value array, 'flag' value is defualt  --\n";
+echo "\n-- Testing krsort() by supplying hexadecimal value array, 'flag' value is default  --\n";
 $temp_array = $unsorted_hex_array;
 var_dump(krsort( $temp_array) ); // expecting : bool(true)
 var_dump($temp_array);
@@ -43,7 +38,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing krsort() : usage variations ***
 
--- Testing krsort() by supplying hexadecimal value array, 'flag' value is defualt  --
+-- Testing krsort() by supplying hexadecimal value array, 'flag' value is default  --
 bool(true)
 array(9) {
   [4095]=>

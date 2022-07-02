@@ -1,8 +1,9 @@
 --TEST--
 PDO_sqlite: Testing sqliteCreateFunction() with flags
+--EXTENSIONS--
+pdo_sqlite
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 if (!defined('PDO::SQLITE_DETERMINISTIC')) die('skip system sqlite is too old');
 ?>
 --FILE--
@@ -20,7 +21,7 @@ $db->sqliteCreateFunction('testing', function($v) { return strtolower($v); }, 1,
 
 
 foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
-	var_dump($row);
+    var_dump($row);
 }
 
 $db->query('DROP TABLE foobar');

@@ -1,8 +1,9 @@
 --TEST--
 imagecreatefromstring() - BMP format
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip ext/gd required');
 if (!(imagetypes() & IMG_BMP)) die('skip BMP support required');
 ?>
 --FILE--
@@ -22,7 +23,5 @@ $im = imagecreatefromstring($bmp);
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/imagecreatefromstring_bmp.png', $im);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_rand.h"
+#include "php_random.h"
 #include "php_mt_rand.h"
 
 /* MT RAND FUNCTIONS */
@@ -91,8 +92,7 @@
 #define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(v))) & 0x9908b0dfU))
 #define twist_php(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
-/* {{{ php_mt_initialize
- */
+/* {{{ php_mt_initialize */
 static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 {
 	/* Initialize generator state with seed
@@ -100,9 +100,9 @@ static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 	   In previous versions, most significant bits (MSBs) of the seed affect
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-	register uint32_t *s = state;
-	register uint32_t *r = state;
-	register int i = 1;
+	uint32_t *s = state;
+	uint32_t *r = state;
+	int i = 1;
 
 	*s++ = seed & 0xffffffffU;
 	for( ; i < N; ++i ) {
@@ -112,16 +112,15 @@ static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 }
 /* }}} */
 
-/* {{{ php_mt_reload
- */
+/* {{{ php_mt_reload */
 static inline void php_mt_reload(void)
 {
 	/* Generate N new values in state
 	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-	register uint32_t *state = BG(state);
-	register uint32_t *p = state;
-	register int i;
+	uint32_t *state = BG(state);
+	uint32_t *p = state;
+	int i;
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
 		for (i = N - M; i--; ++p)
@@ -142,8 +141,7 @@ static inline void php_mt_reload(void)
 }
 /* }}} */
 
-/* {{{ php_mt_srand
- */
+/* {{{ php_mt_srand */
 PHPAPI void php_mt_srand(uint32_t seed)
 {
 	/* Seed the generator with a simple uint32 */
@@ -155,17 +153,20 @@ PHPAPI void php_mt_srand(uint32_t seed)
 }
 /* }}} */
 
-/* {{{ php_mt_rand
- */
+/* {{{ php_mt_rand */
 PHPAPI uint32_t php_mt_rand(void)
 {
 	/* Pull a 32-bit integer from the generator state
 	   Every other access function simply transforms the numbers extracted here */
 
-	register uint32_t s1;
+	uint32_t s1;
 
 	if (UNEXPECTED(!BG(mt_rand_is_seeded))) {
-		php_mt_srand(GENERATE_SEED());
+		zend_long bytes;
+		if (php_random_bytes_silent(&bytes, sizeof(zend_long)) == FAILURE) {
+			bytes = GENERATE_SEED();
+		}
+		php_mt_srand(bytes);
 	}
 
 	if (BG(left) == 0) {
@@ -181,8 +182,7 @@ PHPAPI uint32_t php_mt_rand(void)
 }
 /* }}} */
 
-/* {{{ proto void mt_srand([int seed])
-   Seeds Mersenne Twister random number generator */
+/* {{{ Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
@@ -194,8 +194,11 @@ PHP_FUNCTION(mt_srand)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 0)
-		seed = GENERATE_SEED();
+	if (ZEND_NUM_ARGS() == 0) {
+		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
+			seed = GENERATE_SEED();
+		}
+	}
 
 	switch (mode) {
 		case MT_RAND_PHP:
@@ -271,8 +274,7 @@ static uint64_t rand_range64(uint64_t umax) {
 }
 #endif
 
-/* {{{ php_mt_rand_range
- */
+/* {{{ php_mt_rand_range */
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
 {
 	zend_ulong umax = max - min;
@@ -306,8 +308,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 }
 /* }}} */
 
-/* {{{ proto int mt_rand([int min, int max])
-   Returns a random number from Mersenne Twister */
+/* {{{ Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
 	zend_long min;
@@ -325,27 +326,24 @@ PHP_FUNCTION(mt_rand)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(max < min)) {
-		php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(php_mt_rand_common(min, max));
 }
 /* }}} */
 
-/* {{{ proto int mt_getrandmax(void)
-   Returns the maximum value a random number from Mersenne Twister can have */
+/* {{{ Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	/*
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
-  	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
+	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
 }
 /* }}} */
 

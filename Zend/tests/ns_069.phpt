@@ -16,9 +16,7 @@ class Test {
 Test::f();
 
 ?>
-===DONE===
 --EXPECT--
 string(3) "foo"
 string(0) ""
 string(3) "foo"
-===DONE===

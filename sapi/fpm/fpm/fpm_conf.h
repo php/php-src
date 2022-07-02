@@ -70,9 +70,11 @@ struct fpm_worker_pool_config_s {
 	int pm_start_servers;
 	int pm_min_spare_servers;
 	int pm_max_spare_servers;
+	int pm_max_spawn_rate;
 	int pm_process_idle_timeout;
 	int pm_max_requests;
 	char *pm_status_path;
+	char *pm_status_listen;
 	char *ping_path;
 	char *ping_response;
 	char *access_log;
@@ -117,7 +119,7 @@ enum {
 
 int fpm_conf_init_main(int test_conf, int force_daemon);
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
-int fpm_conf_write_pid();
-int fpm_conf_unlink_pid();
+int fpm_conf_write_pid(void);
+int fpm_conf_unlink_pid(void);
 
 #endif

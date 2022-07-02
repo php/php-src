@@ -2,12 +2,6 @@
 Test closedir() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : void closedir([resource $dir_handle])
- * Description: Close directory connection identified by the dir_handle
- * Source code: ext/standard/dir.c
- * Alias to functions: close
- */
-
 /*
  * Test basic functionality of closedir()
  */
@@ -28,13 +22,12 @@ echo "\n-- Call closedir() with \$dir_handle argument supplied: --\n";
 $dh2 = opendir($dir_path);
 
 if ((int)$dh1 === (int)$dh2) {
-	echo "\nNo new resource created\n";
+    echo "\nNo new resource created\n";
 }
 var_dump(closedir($dh2));
 echo "-- Check Directory Handle: --\n";
 var_dump($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir = __DIR__;
@@ -53,4 +46,3 @@ resource(%d) of type (Unknown)
 NULL
 -- Check Directory Handle: --
 resource(%d) of type (Unknown)
-===DONE===

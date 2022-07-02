@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -18,10 +18,14 @@
 #include "php_hash_md.h"
 
 const php_hash_ops php_hash_md5_ops = {
-	(php_hash_init_func_t) PHP_MD5Init,
+	"md5",
+	(php_hash_init_func_t) PHP_MD5InitArgs,
 	(php_hash_update_func_t) PHP_MD5Update,
 	(php_hash_final_func_t) PHP_MD5Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_MD5_SPEC,
 	16,
 	64,
 	sizeof(PHP_MD5_CTX),
@@ -29,21 +33,31 @@ const php_hash_ops php_hash_md5_ops = {
 };
 
 const php_hash_ops php_hash_md4_ops = {
-	(php_hash_init_func_t) PHP_MD4Init,
+	"md4",
+	(php_hash_init_func_t) PHP_MD4InitArgs,
 	(php_hash_update_func_t) PHP_MD4Update,
 	(php_hash_final_func_t) PHP_MD4Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_MD4_SPEC,
 	16,
 	64,
 	sizeof(PHP_MD4_CTX),
 	1
 };
 
+static int php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv);
+
 const php_hash_ops php_hash_md2_ops = {
-	(php_hash_init_func_t) PHP_MD2Init,
+	"md2",
+	(php_hash_init_func_t) PHP_MD2InitArgs,
 	(php_hash_update_func_t) PHP_MD2Update,
 	(php_hash_final_func_t) PHP_MD2Final,
-	(php_hash_copy_func_t) php_hash_copy,
+	php_hash_copy,
+	php_hash_serialize,
+	php_md2_unserialize,
+	PHP_MD2_SPEC,
 	16,
 	16,
 	sizeof(PHP_MD2_CTX),
@@ -168,10 +182,10 @@ static void MD4Transform(uint32_t state[4], const unsigned char block[64])
 	state[3] += d;
 }
 
-/* {{{ PHP_MD4Init
+/* {{{ PHP_MD4InitArgs
  * MD4 initialization. Begins an MD4 operation, writing a new context.
  */
-PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX * context)
+PHP_HASH_API void PHP_MD4InitArgs(PHP_MD4_CTX * context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->count[0] = context->count[1] = 0;
 	/* Load magic initialization constants.
@@ -273,7 +287,7 @@ static const unsigned char MD2_S[256] = {
 	242, 239, 183,  14, 102,  88, 208, 228, 166, 119, 114, 248, 235, 117,  75,  10,
 	 49,  68,  80, 180, 143, 237,  31,  26, 219, 153, 141,  51, 159,  17, 131,  20 };
 
-PHP_HASH_API void PHP_MD2Init(PHP_MD2_CTX *context)
+PHP_HASH_API void PHP_MD2InitArgs(PHP_MD2_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	memset(context, 0, sizeof(PHP_MD2_CTX));
 }
@@ -339,4 +353,17 @@ PHP_HASH_API void PHP_MD2Final(unsigned char output[16], PHP_MD2_CTX *context)
 	MD2_Transform(context, context->checksum);
 
 	memcpy(output, context->state, 16);
+}
+
+static int php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv)
+{
+	PHP_MD2_CTX *ctx = (PHP_MD2_CTX *) hash->context;
+	int r = FAILURE;
+	if (magic == PHP_HASH_SERIALIZE_MAGIC_SPEC
+		&& (r = php_hash_unserialize_spec(hash, zv, PHP_MD2_SPEC)) == SUCCESS
+		&& (unsigned char) ctx->in_buffer < sizeof(ctx->buffer)) {
+		return SUCCESS;
+	} else {
+		return r != SUCCESS ? r : -2000;
+	}
 }

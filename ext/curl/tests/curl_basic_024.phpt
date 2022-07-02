@@ -1,10 +1,11 @@
 --TEST--
 Test curl_getinfo() function with CURLINFO_* from curl >= 7.52.0
+--EXTENSIONS--
+curl
 --SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip";
-$curl_version = curl_version();
+<?php $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x073400) {
-	    exit("skip: test works only with curl >= 7.52.0");
+        exit("skip: test works only with curl >= 7.52.0");
 }
 ?>
 --FILE--
@@ -24,9 +25,7 @@ var_dump(0 === curl_getinfo($ch, CURLINFO_PROXY_SSL_VERIFYRESULT));
 var_dump(curl_getinfo($ch, CURLINFO_SCHEME));
 curl_close($ch);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
 string(4) "HTTP"
-===DONE===

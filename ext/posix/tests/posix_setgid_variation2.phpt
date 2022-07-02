@@ -1,8 +1,9 @@
 --TEST--
 Test function posix_setgid() by substituting argument 1 with boolean values.
+--EXTENSIONS--
+posix
 --SKIPIF--
 <?php
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
         if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
 ?>
 --CREDITS--
@@ -29,11 +30,9 @@ foreach ( $variation_array as $var ) {
   var_dump(posix_setgid( $var  ) );
 }
 ?>
-===DONE===
 --EXPECT--
 *** Test substituting argument 1 with boolean values ***
 bool(false)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

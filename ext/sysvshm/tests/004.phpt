@@ -1,8 +1,10 @@
 --TEST--
 shm_put_var() tests
+--EXTENSIONS--
+sysvshm
 --SKIPIF--
 <?php
-if (!extension_loaded("sysvshm")){ print 'skip'; }
+
 if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
@@ -27,6 +29,6 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: shm_put_var(): not enough shared memory left in %s004.php on line %d
+Warning: shm_put_var(): Not enough shared memory left in %s004.php on line %d
 bool(false)
 Done

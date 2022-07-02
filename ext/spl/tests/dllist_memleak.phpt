@@ -16,9 +16,6 @@ $dll->next();
 echo $dll->current()."\n";
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 1
 3
-===DONE===

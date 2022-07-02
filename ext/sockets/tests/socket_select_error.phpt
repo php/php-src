@@ -1,9 +1,7 @@
 --TEST--
 socket_select() error conditions
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) die('skip socket extension not available');
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $r = $w = $e = ['no resource'];
@@ -14,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-socket_select(): supplied argument is not a valid Socket resource
+socket_select(): Argument #1 ($read) must only have elements of type Socket, string given

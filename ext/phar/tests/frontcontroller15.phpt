@@ -2,8 +2,8 @@
 Phar front controller mime type override, Phar::PHPS
 --INI--
 default_charset=UTF-8
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller15.php
 REQUEST_URI=/frontcontroller15.php/a.php

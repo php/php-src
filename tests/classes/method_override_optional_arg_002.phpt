@@ -4,13 +4,13 @@ Omitting optional arg in method inherited from abstract class
 <?php
 
 abstract class A {
-	function foo($arg = 1) {}
+    function foo($arg = 1) {}
 }
 
 class B extends A {
-	function foo() {
-		echo "foo\n";
-	}
+    function foo() {
+        echo "foo\n";
+    }
 }
 
 $b = new B();

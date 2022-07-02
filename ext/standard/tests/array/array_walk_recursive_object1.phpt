@@ -2,22 +2,9 @@
 Test array_walk_recursive() function : object functionality
 --FILE--
 <?php
-/* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /* Passing object in place of an 'input' argument to test object functionality
  */
 echo "*** Testing array_walk_recursive() : object functionality ***\n";
-
-/*
- * Prototype : callback(mixed $value, mixed $key, int $addvalue
- * Parameters : $value - values in given input array
- *              $key - keys in given input array
- *              $addvalue - value to be added
- * Description : Function adds the addvalue to each element of an array
-*/
 
 function callback($value, $key, $user_data)
 {

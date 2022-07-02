@@ -1,7 +1,7 @@
 --TEST--
 Bug #77895: IntlDateFormatter::create fails in strict mode if $locale = null 
---SKIPIF--
-<?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

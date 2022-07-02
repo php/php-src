@@ -19,15 +19,15 @@ echo "Done\n";
 ?>
 --EXPECTF--
 NULL
-error_get_last() expects exactly 0 parameters, 1 given
+error_get_last() expects exactly 0 arguments, 1 given
 NULL
 
-Warning: Undefined variable: b in %s on line %d
+Warning: Undefined variable $b in %s on line %d
 array(4) {
   ["type"]=>
   int(2)
   ["message"]=>
-  string(21) "Undefined variable: b"
+  string(21) "Undefined variable $b"
   ["file"]=>
   string(%d) "%s"
   ["line"]=>

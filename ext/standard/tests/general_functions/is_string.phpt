@@ -2,10 +2,6 @@
 Test is_string() function
 --FILE--
 <?php
-/* Prototype: bool is_string ( mixed $var );
- * Description: Finds whether the given variable is a string
- */
-
 echo "*** Testing is_string() with valid string values ***\n";
 // different valid strings
 
@@ -17,7 +13,7 @@ EOT;
 /* heredoc string with only numerics */
 $heredoc_numeric_string = <<<EOT
 123456 3993
-4849 string 
+4849 string
 EOT;
 /* null heardoc string */
 $heredoc_empty_string = <<<EOT
@@ -147,7 +143,7 @@ fclose($fp);
 closedir($dfp);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_string() with valid string values ***
 -- Iteration 1 --
 bool(true)

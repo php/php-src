@@ -1,0 +1,10 @@
+name: Feature request
+description: Create a feature request
+labels: ["Feature", "Status: Needs Triage"]
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: "Please describe the requested feature and why it should be included in PHP."
+    validations:
+      required: true

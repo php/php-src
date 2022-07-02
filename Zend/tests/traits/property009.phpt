@@ -1,5 +1,5 @@
 --TEST--
-Handling of public fields with traits needs to have same semantics as with normal inheritance, however, we do add strict warnings since it is easier to run into something unexpeted with changing traits.
+Handling of public fields with traits needs to have same semantics as with normal inheritance, however, we do add strict warnings since it is easier to run into something unexpected with changing traits.
 --FILE--
 <?php
 

@@ -11,7 +11,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /*
- * proto string basename(string path [, string suffix])
  * Function is implemented in ext/standard/string.c
  */
 $file_paths = array (
@@ -57,13 +56,11 @@ $file_path_variations = array (
   /* paths with shortcut home dir char, with suffix variation */
   array("C:\\temp\\bar"),
   array("C:\\temp\\bar", ""),
-  array("C:\\temp\\bar", NULL),
   array("C:\\temp\\bar", ' '),
   array("C:\\temp\\bar.tar", ".tar"),
   array("C:\\temp\\bar.tar", "~"),
   array("C:\\temp\\bar.tar\\", "~"),
   array("C:\\temp\\bar.tar\\", ""),
-  array("C:\\temp\\bar.tar", NULL),
   array("C:\\temp\\bar.tar", ''),
   array("C:\\temp\\bar.tar", " "),
 
@@ -85,7 +82,6 @@ $file_path_variations = array (
   array("\\bar.zip\\", "\\bar.zip\\"),
   array(" ", " "),
   array(' ', ' '),
-  array(NULL, NULL),
 
   /* path with spaces */
   array(" "),
@@ -94,7 +90,6 @@ $file_path_variations = array (
   /* empty paths */
   array(""),
   array(''),
-  array(NULL)
 );
 
 function check_basename( $path_arrays ) {
@@ -117,7 +112,7 @@ check_basename( $file_path_variations );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 
 --Iteration 1--
@@ -210,7 +205,7 @@ string(3) "bar"
 string(3) "bar"
 
 --Iteration 5--
-string(3) "bar"
+string(7) "bar.tar"
 
 --Iteration 6--
 string(7) "bar.tar"
@@ -225,10 +220,10 @@ string(7) "bar.tar"
 string(7) "bar.tar"
 
 --Iteration 10--
-string(7) "bar.tar"
+string(4) "10.5"
 
 --Iteration 11--
-string(7) "bar.tar"
+string(2) "10"
 
 --Iteration 12--
 string(4) "10.5"
@@ -237,37 +232,37 @@ string(4) "10.5"
 string(2) "10"
 
 --Iteration 14--
-string(4) "10.5"
+string(2) "10"
 
 --Iteration 15--
-string(2) "10"
+string(4) "10.5"
 
 --Iteration 16--
-string(2) "10"
+string(4) "10.5"
 
 --Iteration 17--
-string(4) "10.5"
-
---Iteration 18--
-string(4) "10.5"
-
---Iteration 19--
 string(6) "10.zip"
 
---Iteration 20--
+--Iteration 18--
 string(1) "0"
 
---Iteration 21--
+--Iteration 19--
 string(1) "0"
+
+--Iteration 20--
+string(7) "bar.zip"
+
+--Iteration 21--
+string(7) "bar.zip"
 
 --Iteration 22--
 string(7) "bar.zip"
 
 --Iteration 23--
-string(7) "bar.zip"
+string(1) " "
 
 --Iteration 24--
-string(7) "bar.zip"
+string(1) " "
 
 --Iteration 25--
 string(1) " "
@@ -279,17 +274,5 @@ string(1) " "
 string(0) ""
 
 --Iteration 28--
-string(1) " "
-
---Iteration 29--
-string(1) " "
-
---Iteration 30--
-string(0) ""
-
---Iteration 31--
-string(0) ""
-
---Iteration 32--
 string(0) ""
 Done

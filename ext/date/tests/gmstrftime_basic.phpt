@@ -2,12 +2,6 @@
 Test gmstrftime() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing gmstrftime() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -21,9 +15,11 @@ var_dump( gmstrftime($format, $timestamp) );
 var_dump( gmstrftime($format) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : basic functionality ***
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(20) "Aug 08 2008 08:08:08"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s %d %d %d:%d:%d"
-===DONE===

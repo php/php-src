@@ -1,5 +1,7 @@
 --TEST--
 collections and numbers (2)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -11,19 +13,19 @@ require(__DIR__.'/skipif.inc');
 require __DIR__."/connect.inc";
 
 $ora_sql = "DROP TYPE
-						".$type_name."
-		   ";
+                        ".$type_name."
+           ";
 
-$statement = OCIParse($c,$ora_sql);
-@OCIExecute($statement);
+$statement = oci_parse($c,$ora_sql);
+@oci_execute($statement);
 
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF NUMBER";
 
-$statement = OCIParse($c,$ora_sql);
-OCIExecute($statement);
+$statement = oci_parse($c,$ora_sql);
+oci_execute($statement);
 
 
-$coll1 = ocinewcollection($c, $type_name);
+$coll1 = oci_new_collection($c, $type_name);
 
 var_dump($coll1->append(1));
 var_dump($coll1->assignElem(0,2345));

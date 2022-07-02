@@ -1,5 +1,7 @@
 --TEST--
 Bug #27597 (pg_fetch_array not returning false)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -11,35 +13,34 @@ require_once(__DIR__ . '/config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
-	die ("Could not connect to the server");
+    die ("Could not connect to the server");
 }
 
-@pg_query("DROP TABLE id");
-pg_query("CREATE TABLE id (id INT)");
+@pg_query($dbh, "DROP TABLE id");
+pg_query($dbh, "CREATE TABLE id (id INT)");
 
 for ($i=0; $i<4; $i++) {
-	pg_query("INSERT INTO id (id) VALUES ($i)");
+    pg_query($dbh, "INSERT INTO id (id) VALUES ($i)");
 }
 
 function xi_fetch_array($res, $type = PGSQL_ASSOC) {
-	$a = pg_fetch_array($res, NULL, $type) ;
-	return $a ;
+    $a = pg_fetch_array($res, NULL, $type) ;
+    return $a ;
 }
 
-$res = pg_query("SELECT * FROM id");
+$res = pg_query($dbh, "SELECT * FROM id");
 $i = 0; // endless-loop protection
 while($row = xi_fetch_array($res)) {
-	print_r($row);
-	if ($i++ > 4) {
-		echo "ENDLESS-LOOP";
-		exit(1);
-	}
+    print_r($row);
+    if ($i++ > 4) {
+        echo "ENDLESS-LOOP";
+        exit(1);
+    }
 }
 
 pg_close($dbh);
 
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -57,4 +58,3 @@ Array
 (
     [id] => 3
 )
-===DONE===

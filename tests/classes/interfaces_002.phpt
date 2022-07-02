@@ -4,16 +4,16 @@ ZE2 interface with an unimplemented method
 <?php
 
 interface ThrowableInterface {
-	public function getMessage();
-	public function getErrno();
+    public function getMessage();
+    public function getErrno();
 }
 
 class Exception_foo implements ThrowableInterface {
-	public $foo = "foo";
+    public $foo = "foo";
 
-	public function getMessage() {
-		return $this->foo;
-	}
+    public function getMessage() {
+        return $this->foo;
+    }
 }
 
 // this should die -- Exception class must be abstract...

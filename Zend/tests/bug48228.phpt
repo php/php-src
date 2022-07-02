@@ -4,19 +4,19 @@ Bug #48228 (crash when exception is thrown while passing function arguments)
 <?php
 
 function do_throw() {
-	throw new Exception();
+    throw new Exception();
 }
 
 class aa
 {
-	function check()
-	{
-	}
+    function check()
+    {
+    }
 
-	function dosome()
-	{
-		$this->check(do_throw());
-	}
+    function dosome()
+    {
+        $this->check(do_throw());
+    }
 }
 $l_aa=new aa();
 

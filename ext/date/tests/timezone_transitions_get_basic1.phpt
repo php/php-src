@@ -2,12 +2,6 @@
 Test timezone_transitions_get() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array timezone_transitions_get  ( DateTimeZone $object, [ int $timestamp_begin  [, int $timestamp_end  ]]  )
- * Description: Returns all transitions for the timezone
- * Source code: ext/date/php_date.c
- * Alias to functions: DateTimeZone::getTransitions()
- */
-
 echo "*** Testing timezone_transitions_get() : basic functionality ***\n";
 
 //Set the default time zone
@@ -28,7 +22,6 @@ echo "\n-- Format a sample entry pfor Spring 1963 --\n";
 var_dump( $tran[6] );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing timezone_transitions_get() : basic functionality ***
 
@@ -50,4 +43,3 @@ array(5) {
   ["abbr"]=>
   string(3) "BST"
 }
-===DONE===

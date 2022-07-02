@@ -7,10 +7,6 @@ Mats Lindh <mats at lindh.no>
 precision=14
 --FILE--
 <?php
-/* Prototype  : proto int similar_text(string str1, string str2 [, float percent])
-* Description: Calculates the similarity between two strings
-* Source code: ext/standard/string.c
-*/
 var_dump(similar_text("abcdefgh", "efg"));
 var_dump(similar_text("abcdefgh", "mno"));
 var_dump(similar_text("abcdefghcc", "c"));
@@ -26,14 +22,12 @@ var_dump($percent);
 similar_text("abcdefghabcdef", "zzzzabcdefggg", $percent);
 var_dump($percent);
 ?>
-===DONE===
 --EXPECT--
 int(3)
 int(0)
 int(1)
 int(7)
-float(54.545454545455)
+float(54.54545454545455)
 float(0)
-float(18.181818181818)
-float(51.851851851852)
-===DONE===
+float(18.181818181818183)
+float(51.851851851851855)

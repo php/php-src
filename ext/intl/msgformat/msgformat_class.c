@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,10 +17,7 @@
 #include "msgformat_class.h"
 #include "php_intl.h"
 #include "msgformat_data.h"
-#include "msgformat_format.h"
-#include "msgformat_parse.h"
-#include "msgformat.h"
-#include "msgformat_attr.h"
+#include "msgformat_arginfo.h"
 
 #include <zend_exceptions.h>
 
@@ -65,6 +62,8 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
 	zend_object *new_obj;
 
 	mfo = php_intl_messageformatter_fetch_object(object);
+	intl_error_reset(INTL_DATA_ERROR_P(mfo));
+
 	new_obj = MessageFormatter_ce_ptr->create_object(object->ce);
 	new_mfo = php_intl_messageformatter_fetch_object(new_obj);
 	/* clone standard parts */
@@ -91,64 +90,14 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
  * 'MessageFormatter' class registration structures & functions
  */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_messageformatter_geterrormessage, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_formatmessage, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_format, 0, 0, 1)
-	ZEND_ARG_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_setpattern, 0, 0, 1)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_parse, 0, 0, 1)
-	ZEND_ARG_INFO(0, source)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ MessageFormatter_class_functions
- * Every 'MessageFormatter' class method has an entry in this table
- */
-static const zend_function_entry MessageFormatter_class_functions[] = {
-	PHP_ME( MessageFormatter, __construct, arginfo_messageformatter___construct, ZEND_ACC_PUBLIC )
-	ZEND_FENTRY(  create, ZEND_FN( msgfmt_create ), arginfo_messageformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( format, ZEND_FN( msgfmt_format ), arginfo_messageformatter_format )
-	ZEND_FENTRY(  formatMessage, ZEND_FN( msgfmt_format_message ), arginfo_messageformatter_formatmessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( parse, ZEND_FN( msgfmt_parse ), arginfo_messageformatter_parse )
-	ZEND_FENTRY(  parseMessage, ZEND_FN( msgfmt_parse_message ), arginfo_messageformatter_formatmessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( setPattern, ZEND_FN( msgfmt_set_pattern ), arginfo_messageformatter_setpattern )
-	PHP_NAMED_FE( getPattern, ZEND_FN( msgfmt_get_pattern ), arginfo_messageformatter_geterrormessage )
-	PHP_NAMED_FE( getLocale, ZEND_FN( msgfmt_get_locale ), arginfo_messageformatter_geterrormessage )
-	PHP_NAMED_FE( getErrorCode, ZEND_FN( msgfmt_get_error_code ), arginfo_messageformatter_geterrormessage )
-	PHP_NAMED_FE( getErrorMessage, ZEND_FN( msgfmt_get_error_message ), arginfo_messageformatter_geterrormessage )
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ msgformat_register_class
  * Initialize 'MessageFormatter' class
  */
 void msgformat_register_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'MessageFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "MessageFormatter", MessageFormatter_class_functions );
-	ce.create_object = MessageFormatter_object_create;
-	MessageFormatter_ce_ptr = zend_register_internal_class( &ce );
+	MessageFormatter_ce_ptr = register_class_MessageFormatter();
+	MessageFormatter_ce_ptr->create_object = MessageFormatter_object_create;
 
 	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);

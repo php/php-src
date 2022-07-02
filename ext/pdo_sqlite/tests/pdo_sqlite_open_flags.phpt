@@ -1,7 +1,7 @@
 --TEST--
 PDO_sqlite: Testing open flags
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ var_dump($db->exec('CREATE TABLE test2 (id INT);'));
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . "pdo_sqlite_open_flags.db";
 if (file_exists($filename)) {
-	unlink($filename);
+    unlink($filename);
 }
 ?>
 --EXPECTF--

@@ -8,10 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
-   Description: Renames a file or directory
-*/
-
 require __DIR__.'/file.inc';
 
 /* create directory */
@@ -50,16 +46,12 @@ foreach($src_filenames as $src_filename) {
   unlink($dest_filename);
 }
 
-rmdir("$file_path/rename_variation");
-
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
 $file_path = __DIR__;
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
-rmdir($file_path."/rename_variation_dir");
+rmdir($file_path."/rename_variation");
 ?>
 --EXPECTF--
 *** Testing rename() : rename files across directories ***
@@ -69,7 +61,7 @@ bool(false)
 bool(true)
 -- Iteration 2 --
 
-Warning: rename(%s/rename_variation/rename_variation.tmp/,%s/rename_variation2.tmp): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(%s/rename_variation/rename_variation.tmp/,%s/rename_variation2.tmp): The filename, directory name, or volume label syntax is incorrect (code: 123) in %s on line %d
 bool(false)
 bool(false)
 bool(false)

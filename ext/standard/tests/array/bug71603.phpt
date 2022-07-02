@@ -10,5 +10,6 @@ $array = compact('foo_reference');
 $foo = 'changed!';
 
 var_dump($array['foo_reference']);
+?>
 --EXPECT--
 string(4) "okey"

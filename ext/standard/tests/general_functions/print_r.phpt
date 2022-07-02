@@ -4,12 +4,7 @@ Test print_r() function
 precision=14
 --FILE--
 <?php
-/* Prototype: bool print_r ( mixed $expression [, bool $return] );
-   Description: Prints human-readable information about a variable
-*/
 
-/* Prototype: void check_printr( $variables )
-   Description: use print_r() to print variables */
 function check_printr( $variables ) {
   $counter = 1;
   foreach( $variables as $variable ) {
@@ -101,7 +96,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_printr() to display contents of strings using print_r() */
 check_printr($strings);
@@ -141,6 +136,7 @@ $arrays = array (
 check_printr($arrays);
 
 echo "\n*** Testing print_r() on object variables ***\n";
+#[AllowDynamicProperties]
 class object_class
 {
   var       $value;
@@ -173,6 +169,7 @@ class no_member_class {
 }
 
 /* class with member as object of other class */
+#[AllowDynamicProperties]
 class contains_object_class
 {
    var       $p = 30;
@@ -240,8 +237,8 @@ $resources = array (
    using print_r() */
 check_printr($resources);
 
-echo "\n*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***\n";
+echo "\n*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
 unset($unset_var);
@@ -261,14 +258,14 @@ $variations = array (
    non-scalar variables using print_r() */
 check_printr($variations);
 
-echo "\n*** Testing print_r() on miscelleneous input arguments ***\n";
+echo "\n*** Testing print_r() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_printr() to display miscelleneous data using print_r() */
+/* calling check_printr() to display miscellaneous data using print_r() */
 check_printr($misc_values);
 
 /* closing resource handle used */
@@ -570,9 +567,9 @@ Array
 0
 0
 -- Iteration 6 --
- 
- 
- 
+%0
+%0
+%0
 -- Iteration 7 --
 \0
 \0
@@ -594,23 +591,23 @@ PHP
 PHP
 PHP
 -- Iteration 12 --
-abcd n1234 05678 00efgh\xijkl
-abcd n1234 05678 00efgh\xijkl
-abcd n1234 05678 00efgh\xijkl
+abcd%0n1234%005678%000efgh\xijkl
+abcd%0n1234%005678%000efgh\xijkl
+abcd%0n1234%005678%000efgh\xijkl
 -- Iteration 13 --
-abcd efgh ijkl mnop 0qrst uvwx 0yz
-abcd efgh ijkl mnop 0qrst uvwx 0yz
-abcd efgh ijkl mnop 0qrst uvwx 0yz
+abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz
+abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz
+abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz
 -- Iteration 14 --
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 *** Testing print_r() on boolean variables ***
 
 -- Iteration 1 --
@@ -1462,15 +1459,15 @@ object_class Object
 *** Testing print_r() on resources ***
 
 -- Iteration 1 --
-Resource id #%d
-Resource id #%d
-Resource id #%d
+Resource id #5
+Resource id #5
+Resource id #5
 -- Iteration 2 --
-Resource id #%d
-Resource id #%d
-Resource id #%d
-*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***
+Resource id #6
+Resource id #6
+Resource id #6
+*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***
 
 -- Iteration 1 --
 Array
@@ -1679,7 +1676,7 @@ Array
     [3] => /00\7
 )
 
-*** Testing print_r() on miscelleneous input arguments ***
+*** Testing print_r() on miscellaneous input arguments ***
 
 -- Iteration 1 --
 

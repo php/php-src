@@ -1,19 +1,20 @@
 --TEST--
 PDO Common: Bug #44861 (scrollable cursor don't work with pgsql)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 $allowed = array('oci', 'pgsql');
 $ok = false;
 foreach ($allowed as $driver) {
-	if (!strncasecmp(getenv('PDOTEST_DSN'), $driver, strlen($driver))) {
-		$ok = true;
-	}
+    if (!strncasecmp(getenv('PDOTEST_DSN'), $driver, strlen($driver))) {
+        $ok = true;
+    }
 }
 if (!$ok) {
-	die("skip Scrollable cursors not supported");
+    die("skip Scrollable cursors not supported");
 }
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
@@ -27,11 +28,11 @@ $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
-	$from = 'FROM DUAL';
-	$ob = '1';
+    $from = 'FROM DUAL';
+    $ob = '1';
 } else {
-	$from = '';
-	$ob = 'r';
+    $from = '';
+    $ob = 'r';
 }
 
 $query = "SELECT 'row1' AS r $from UNION SELECT 'row2' $from UNION SELECT 'row3' $from UNION SELECT 'row4' $from ORDER BY $ob";

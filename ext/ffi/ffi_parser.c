@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -54,89 +54,90 @@ static void yy_error_sym(const char *msg, int sym);
 #define YY___INLINE 13
 #define YY___INLINE__ 14
 #define YY__NORETURN 15
-#define YY___CDECL 16
-#define YY___STDCALL 17
-#define YY___FASTCALL 18
-#define YY___THISCALL 19
-#define YY__ALIGNAS 20
-#define YY_CONST 21
-#define YY___CONST 22
-#define YY___CONST__ 23
-#define YY_RESTRICT 24
-#define YY___RESTRICT 25
-#define YY___RESTRICT__ 26
-#define YY_VOLATILE 27
-#define YY___VOLATILE 28
-#define YY___VOLATILE__ 29
-#define YY__ATOMIC 30
-#define YY_VOID 31
-#define YY_CHAR 32
-#define YY_SHORT 33
-#define YY_INT 34
-#define YY_LONG 35
-#define YY_FLOAT 36
-#define YY_DOUBLE 37
-#define YY_SIGNED 38
-#define YY_UNSIGNED 39
-#define YY__BOOL 40
-#define YY__COMPLEX 41
-#define YY_COMPLEX 42
-#define YY___COMPLEX 43
-#define YY___COMPLEX__ 44
-#define YY_STRUCT 45
-#define YY_UNION 46
-#define YY__LBRACE 47
-#define YY__RBRACE 48
-#define YY__COLON 49
-#define YY_ENUM 50
-#define YY__EQUAL 51
-#define YY__STAR 52
-#define YY__LBRACK 53
-#define YY__RBRACK 54
-#define YY__POINT_POINT_POINT 55
-#define YY___ATTRIBUTE 56
-#define YY___ATTRIBUTE__ 57
-#define YY___DECLSPEC 58
-#define YY__POINT 59
-#define YY__QUERY 60
-#define YY__BAR_BAR 61
-#define YY__AND_AND 62
-#define YY__BAR 63
-#define YY__UPARROW 64
-#define YY__AND 65
-#define YY__EQUAL_EQUAL 66
-#define YY__BANG_EQUAL 67
-#define YY__LESS 68
-#define YY__GREATER 69
-#define YY__LESS_EQUAL 70
-#define YY__GREATER_EQUAL 71
-#define YY__LESS_LESS 72
-#define YY__GREATER_GREATER 73
-#define YY__PLUS 74
-#define YY__MINUS 75
-#define YY__SLASH 76
-#define YY__PERCENT 77
-#define YY__MINUS_GREATER 78
-#define YY__PLUS_PLUS 79
-#define YY__MINUS_MINUS 80
-#define YY__TILDE 81
-#define YY__BANG 82
-#define YY_SIZEOF 83
-#define YY__ALIGNOF 84
-#define YY___ALIGNOF 85
-#define YY___ALIGNOF__ 86
-#define YY___RESTICT 87
-#define YY_ID 88
-#define YY_OCTNUMBER 89
-#define YY_DECNUMBER 90
-#define YY_HEXNUMBER 91
-#define YY_FLOATNUMBER 92
-#define YY_STRING 93
-#define YY_CHARACTER 94
-#define YY_EOL 95
-#define YY_WS 96
-#define YY_ONE_LINE_COMMENT 97
-#define YY_COMMENT 98
+#define YY__ALIGNAS 16
+#define YY_CONST 17
+#define YY___CONST 18
+#define YY___CONST__ 19
+#define YY_RESTRICT 20
+#define YY___RESTRICT 21
+#define YY___RESTRICT__ 22
+#define YY_VOLATILE 23
+#define YY___VOLATILE 24
+#define YY___VOLATILE__ 25
+#define YY__ATOMIC 26
+#define YY_VOID 27
+#define YY_CHAR 28
+#define YY_SHORT 29
+#define YY_INT 30
+#define YY_LONG 31
+#define YY_FLOAT 32
+#define YY_DOUBLE 33
+#define YY_SIGNED 34
+#define YY_UNSIGNED 35
+#define YY__BOOL 36
+#define YY__COMPLEX 37
+#define YY_COMPLEX 38
+#define YY___COMPLEX 39
+#define YY___COMPLEX__ 40
+#define YY_STRUCT 41
+#define YY_UNION 42
+#define YY__LBRACE 43
+#define YY__RBRACE 44
+#define YY__COLON 45
+#define YY_ENUM 46
+#define YY__EQUAL 47
+#define YY__STAR 48
+#define YY__LBRACK 49
+#define YY__RBRACK 50
+#define YY__POINT_POINT_POINT 51
+#define YY___ATTRIBUTE 52
+#define YY___ATTRIBUTE__ 53
+#define YY___DECLSPEC 54
+#define YY___CDECL 55
+#define YY___STDCALL 56
+#define YY___FASTCALL 57
+#define YY___THISCALL 58
+#define YY___VECTORCALL 59
+#define YY__POINT 60
+#define YY__QUERY 61
+#define YY__BAR_BAR 62
+#define YY__AND_AND 63
+#define YY__BAR 64
+#define YY__UPARROW 65
+#define YY__AND 66
+#define YY__EQUAL_EQUAL 67
+#define YY__BANG_EQUAL 68
+#define YY__LESS 69
+#define YY__GREATER 70
+#define YY__LESS_EQUAL 71
+#define YY__GREATER_EQUAL 72
+#define YY__LESS_LESS 73
+#define YY__GREATER_GREATER 74
+#define YY__PLUS 75
+#define YY__MINUS 76
+#define YY__SLASH 77
+#define YY__PERCENT 78
+#define YY__MINUS_GREATER 79
+#define YY__PLUS_PLUS 80
+#define YY__MINUS_MINUS 81
+#define YY__TILDE 82
+#define YY__BANG 83
+#define YY_SIZEOF 84
+#define YY__ALIGNOF 85
+#define YY___ALIGNOF 86
+#define YY___ALIGNOF__ 87
+#define YY___RESTICT 88
+#define YY_ID 89
+#define YY_OCTNUMBER 90
+#define YY_DECNUMBER 91
+#define YY_HEXNUMBER 92
+#define YY_FLOATNUMBER 93
+#define YY_STRING 94
+#define YY_CHARACTER 95
+#define YY_EOL 96
+#define YY_WS 97
+#define YY_ONE_LINE_COMMENT 98
+#define YY_COMMENT 99
 
 static const char * sym_name[] = {
 	"<EOF>",
@@ -155,10 +156,6 @@ static const char * sym_name[] = {
 	"__inline",
 	"__inline__",
 	"_Noreturn",
-	"__cdecl",
-	"__stdcall",
-	"__fastcall",
-	"__thiscall",
 	"_Alignas",
 	"const",
 	"__const",
@@ -198,6 +195,11 @@ static const char * sym_name[] = {
 	"__attribute",
 	"__attribute__",
 	"__declspec",
+	"__cdecl",
+	"__stdcall",
+	"__fastcall",
+	"__thiscall",
+	"__vectorcall",
 	".",
 	"?",
 	"||",
@@ -347,7 +349,7 @@ _yy_state_start:
 							ch = *++YYPOS;
 							if (ch != '_') goto _yy_tunnel_9;
 							ret = YY___EXTENSION__;
-							goto _yy_state_381;
+							goto _yy_state_390;
 						case 'i':
 							ch = *++YYPOS;
 							if (ch != 'n') goto _yy_tunnel_9;
@@ -360,105 +362,11 @@ _yy_state_start:
 							ch = *++YYPOS;
 							if (ch != 'e') goto _yy_tunnel_9;
 							ch = *++YYPOS;
-							if (ch != '_') {ret = YY___INLINE; goto _yy_tunnel_381;}
+							if (ch != '_') {ret = YY___INLINE; goto _yy_tunnel_390;}
 							ch = *++YYPOS;
 							if (ch != '_') goto _yy_tunnel_9;
 							ret = YY___INLINE__;
-							goto _yy_state_381;
-						case 'c':
-							ch = *++YYPOS;
-							if (ch == 'd') {
-								ch = *++YYPOS;
-								if (ch != 'e') goto _yy_tunnel_9;
-								ch = *++YYPOS;
-								if (ch != 'c') goto _yy_tunnel_9;
-								ch = *++YYPOS;
-								if (ch != 'l') goto _yy_tunnel_9;
-								ret = YY___CDECL;
-								goto _yy_state_381;
-							} else if (ch == 'o') {
-								ch = *++YYPOS;
-								if (ch == 'm') {
-									ch = *++YYPOS;
-									if (ch != 'p') goto _yy_tunnel_9;
-									ch = *++YYPOS;
-									if (ch != 'l') goto _yy_tunnel_9;
-									ch = *++YYPOS;
-									if (ch != 'e') goto _yy_tunnel_9;
-									ch = *++YYPOS;
-									if (ch != 'x') goto _yy_tunnel_9;
-									ch = *++YYPOS;
-									if (ch != '_') {ret = YY___COMPLEX; goto _yy_tunnel_381;}
-									ch = *++YYPOS;
-									if (ch != '_') goto _yy_tunnel_9;
-									ret = YY___COMPLEX__;
-									goto _yy_state_381;
-								} else if (ch == 'n') {
-									ch = *++YYPOS;
-									if (ch != 's') goto _yy_tunnel_9;
-									ch = *++YYPOS;
-									if (ch != 't') goto _yy_tunnel_9;
-									ch = *++YYPOS;
-									if (ch != '_') {ret = YY___CONST; goto _yy_tunnel_381;}
-									ch = *++YYPOS;
-									if (ch != '_') goto _yy_tunnel_9;
-									ret = YY___CONST__;
-									goto _yy_state_381;
-								} else {
-									goto _yy_tunnel_9;
-								}
-							} else {
-								goto _yy_tunnel_9;
-							}
-						case 's':
-							ch = *++YYPOS;
-							if (ch != 't') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'd') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'c') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'a') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'l') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'l') goto _yy_tunnel_9;
-							ret = YY___STDCALL;
-							goto _yy_state_381;
-						case 'f':
-							ch = *++YYPOS;
-							if (ch != 'a') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 's') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 't') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'c') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'a') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'l') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'l') goto _yy_tunnel_9;
-							ret = YY___FASTCALL;
-							goto _yy_state_381;
-						case 't':
-							ch = *++YYPOS;
-							if (ch != 'h') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'i') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 's') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'c') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'a') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'l') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'l') goto _yy_tunnel_9;
-							ret = YY___THISCALL;
-							goto _yy_state_381;
+							goto _yy_state_390;
 						case 'a':
 							ch = *++YYPOS;
 							if (ch == 'l') {
@@ -473,11 +381,11 @@ _yy_state_start:
 								ch = *++YYPOS;
 								if (ch != 'f') goto _yy_tunnel_9;
 								ch = *++YYPOS;
-								if (ch != '_') {ret = YY___ALIGNOF; goto _yy_tunnel_381;}
+								if (ch != '_') {ret = YY___ALIGNOF; goto _yy_tunnel_390;}
 								ch = *++YYPOS;
 								if (ch != '_') goto _yy_tunnel_9;
 								ret = YY___ALIGNOF__;
-								goto _yy_state_381;
+								goto _yy_state_390;
 							} else if (ch == 's') {
 								ch = *++YYPOS;
 								if (ch != 'm') goto _yy_tunnel_9;
@@ -486,7 +394,7 @@ _yy_state_start:
 								ch = *++YYPOS;
 								if (ch != '_') goto _yy_tunnel_9;
 								ret = YY___ASM__;
-								goto _yy_state_381;
+								goto _yy_state_390;
 							} else if (ch == 't') {
 								ch = *++YYPOS;
 								if (ch != 't') goto _yy_tunnel_9;
@@ -503,11 +411,56 @@ _yy_state_start:
 								ch = *++YYPOS;
 								if (ch != 'e') goto _yy_tunnel_9;
 								ch = *++YYPOS;
-								if (ch != '_') {ret = YY___ATTRIBUTE; goto _yy_tunnel_381;}
+								if (ch != '_') {ret = YY___ATTRIBUTE; goto _yy_tunnel_390;}
 								ch = *++YYPOS;
 								if (ch != '_') goto _yy_tunnel_9;
 								ret = YY___ATTRIBUTE__;
-								goto _yy_state_381;
+								goto _yy_state_390;
+							} else {
+								goto _yy_tunnel_9;
+							}
+						case 'c':
+							ch = *++YYPOS;
+							if (ch == 'd') {
+								ch = *++YYPOS;
+								if (ch != 'e') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'c') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'l') goto _yy_tunnel_9;
+								ret = YY___CDECL;
+								goto _yy_state_390;
+							} else if (ch == 'o') {
+								ch = *++YYPOS;
+								if (ch == 'm') {
+									ch = *++YYPOS;
+									if (ch != 'p') goto _yy_tunnel_9;
+									ch = *++YYPOS;
+									if (ch != 'l') goto _yy_tunnel_9;
+									ch = *++YYPOS;
+									if (ch != 'e') goto _yy_tunnel_9;
+									ch = *++YYPOS;
+									if (ch != 'x') goto _yy_tunnel_9;
+									ch = *++YYPOS;
+									if (ch != '_') {ret = YY___COMPLEX; goto _yy_tunnel_390;}
+									ch = *++YYPOS;
+									if (ch != '_') goto _yy_tunnel_9;
+									ret = YY___COMPLEX__;
+									goto _yy_state_390;
+								} else if (ch == 'n') {
+									ch = *++YYPOS;
+									if (ch != 's') goto _yy_tunnel_9;
+									ch = *++YYPOS;
+									if (ch != 't') goto _yy_tunnel_9;
+									ch = *++YYPOS;
+									if (ch != '_') {ret = YY___CONST; goto _yy_tunnel_390;}
+									ch = *++YYPOS;
+									if (ch != '_') goto _yy_tunnel_9;
+									ret = YY___CONST__;
+									goto _yy_state_390;
+								} else {
+									goto _yy_tunnel_9;
+								}
 							} else {
 								goto _yy_tunnel_9;
 							}
@@ -527,7 +480,24 @@ _yy_state_start:
 							ch = *++YYPOS;
 							if (ch != 'c') goto _yy_tunnel_9;
 							ret = YY___DECLSPEC;
-							goto _yy_state_381;
+							goto _yy_state_390;
+						case 'f':
+							ch = *++YYPOS;
+							if (ch != 'a') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 's') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 't') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'c') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'a') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'l') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'l') goto _yy_tunnel_9;
+							ret = YY___FASTCALL;
+							goto _yy_state_390;
 						case 'r':
 							ch = *++YYPOS;
 							if (ch != 'e') goto _yy_tunnel_9;
@@ -542,7 +512,7 @@ _yy_state_start:
 								ch = *++YYPOS;
 								if (ch != 't') goto _yy_tunnel_9;
 								ret = YY___RESTICT;
-								goto _yy_state_381;
+								goto _yy_state_390;
 							} else if (ch == 'r') {
 								ch = *++YYPOS;
 								if (ch != 'i') goto _yy_tunnel_9;
@@ -551,35 +521,89 @@ _yy_state_start:
 								ch = *++YYPOS;
 								if (ch != 't') goto _yy_tunnel_9;
 								ch = *++YYPOS;
-								if (ch != '_') {ret = YY___RESTRICT; goto _yy_tunnel_381;}
+								if (ch != '_') {ret = YY___RESTRICT; goto _yy_tunnel_390;}
 								ch = *++YYPOS;
 								if (ch != '_') goto _yy_tunnel_9;
 								ret = YY___RESTRICT__;
-								goto _yy_state_381;
+								goto _yy_state_390;
 							} else {
 								goto _yy_tunnel_9;
 							}
-						case 'v':
-							ch = *++YYPOS;
-							if (ch != 'o') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'l') goto _yy_tunnel_9;
-							ch = *++YYPOS;
-							if (ch != 'a') goto _yy_tunnel_9;
+						case 's':
 							ch = *++YYPOS;
 							if (ch != 't') goto _yy_tunnel_9;
 							ch = *++YYPOS;
-							if (ch != 'i') goto _yy_tunnel_9;
+							if (ch != 'd') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'c') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'a') goto _yy_tunnel_9;
 							ch = *++YYPOS;
 							if (ch != 'l') goto _yy_tunnel_9;
 							ch = *++YYPOS;
-							if (ch != 'e') goto _yy_tunnel_9;
+							if (ch != 'l') goto _yy_tunnel_9;
+							ret = YY___STDCALL;
+							goto _yy_state_390;
+						case 't':
 							ch = *++YYPOS;
-							if (ch != '_') {ret = YY___VOLATILE; goto _yy_tunnel_381;}
+							if (ch != 'h') goto _yy_tunnel_9;
 							ch = *++YYPOS;
-							if (ch != '_') goto _yy_tunnel_9;
-							ret = YY___VOLATILE__;
-							goto _yy_state_381;
+							if (ch != 'i') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 's') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'c') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'a') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'l') goto _yy_tunnel_9;
+							ch = *++YYPOS;
+							if (ch != 'l') goto _yy_tunnel_9;
+							ret = YY___THISCALL;
+							goto _yy_state_390;
+						case 'v':
+							ch = *++YYPOS;
+							if (ch == 'e') {
+								ch = *++YYPOS;
+								if (ch != 'c') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 't') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'o') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'r') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'c') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'a') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'l') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'l') goto _yy_tunnel_9;
+								ret = YY___VECTORCALL;
+								goto _yy_state_390;
+							} else if (ch == 'o') {
+								ch = *++YYPOS;
+								if (ch != 'l') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'a') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 't') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'i') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'l') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != 'e') goto _yy_tunnel_9;
+								ch = *++YYPOS;
+								if (ch != '_') {ret = YY___VOLATILE; goto _yy_tunnel_390;}
+								ch = *++YYPOS;
+								if (ch != '_') goto _yy_tunnel_9;
+								ret = YY___VOLATILE__;
+								goto _yy_state_390;
+							} else {
+								goto _yy_tunnel_9;
+							}
 						default:
 							goto _yy_tunnel_9;
 					}
@@ -599,7 +623,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'n') goto _yy_tunnel_9;
 					ret = YY__NORETURN;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				case 'A':
 					ch = *++YYPOS;
 					if (ch == 'l') {
@@ -614,12 +638,12 @@ _yy_state_start:
 							ch = *++YYPOS;
 							if (ch != 's') goto _yy_tunnel_9;
 							ret = YY__ALIGNAS;
-							goto _yy_state_381;
+							goto _yy_state_390;
 						} else if (ch == 'o') {
 							ch = *++YYPOS;
 							if (ch != 'f') goto _yy_tunnel_9;
 							ret = YY__ALIGNOF;
-							goto _yy_state_381;
+							goto _yy_state_390;
 						} else {
 							goto _yy_tunnel_9;
 						}
@@ -633,7 +657,7 @@ _yy_state_start:
 						ch = *++YYPOS;
 						if (ch != 'c') goto _yy_tunnel_9;
 						ret = YY__ATOMIC;
-						goto _yy_state_381;
+						goto _yy_state_390;
 					} else {
 						goto _yy_tunnel_9;
 					}
@@ -645,7 +669,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'l') goto _yy_tunnel_9;
 					ret = YY__BOOL;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				case 'C':
 					ch = *++YYPOS;
 					if (ch != 'o') goto _yy_tunnel_9;
@@ -660,7 +684,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'x') goto _yy_tunnel_9;
 					ret = YY__COMPLEX;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				default:
 					goto _yy_tunnel_9;
 			}
@@ -678,7 +702,7 @@ _yy_state_start:
 			ch = *++YYPOS;
 			if (ch != 'f') goto _yy_tunnel_9;
 			ret = YY_TYPEDEF;
-			goto _yy_state_381;
+			goto _yy_state_390;
 		case 'e':
 			ch = *++YYPOS;
 			if (ch == 'x') {
@@ -691,14 +715,14 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 'n') goto _yy_tunnel_9;
 				ret = YY_EXTERN;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else if (ch == 'n') {
 				ch = *++YYPOS;
 				if (ch != 'u') goto _yy_tunnel_9;
 				ch = *++YYPOS;
 				if (ch != 'm') goto _yy_tunnel_9;
 				ret = YY_ENUM;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else {
 				goto _yy_tunnel_9;
 			}
@@ -714,7 +738,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'c') goto _yy_tunnel_9;
 					ret = YY_STATIC;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else if (ch == 'r') {
 					ch = *++YYPOS;
 					if (ch != 'u') goto _yy_tunnel_9;
@@ -723,7 +747,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 't') goto _yy_tunnel_9;
 					ret = YY_STRUCT;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else {
 					goto _yy_tunnel_9;
 				}
@@ -735,7 +759,7 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 't') goto _yy_tunnel_9;
 				ret = YY_SHORT;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else if (ch == 'i') {
 				ch = *++YYPOS;
 				if (ch == 'g') {
@@ -746,7 +770,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'd') goto _yy_tunnel_9;
 					ret = YY_SIGNED;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else if (ch == 'z') {
 					ch = *++YYPOS;
 					if (ch != 'e') goto _yy_tunnel_9;
@@ -755,7 +779,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'f') goto _yy_tunnel_9;
 					ret = YY_SIZEOF;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else {
 					goto _yy_tunnel_9;
 				}
@@ -770,7 +794,7 @@ _yy_state_start:
 			ch = *++YYPOS;
 			if (ch != 'o') goto _yy_tunnel_9;
 			ret = YY_AUTO;
-			goto _yy_state_381;
+			goto _yy_state_390;
 		case 'r':
 			ch = *++YYPOS;
 			if (ch != 'e') goto _yy_tunnel_9;
@@ -787,7 +811,7 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 'r') goto _yy_tunnel_9;
 				ret = YY_REGISTER;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else if (ch == 's') {
 				ch = *++YYPOS;
 				if (ch != 't') goto _yy_tunnel_9;
@@ -800,7 +824,7 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 't') goto _yy_tunnel_9;
 				ret = YY_RESTRICT;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else {
 				goto _yy_tunnel_9;
 			}
@@ -816,10 +840,10 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 'e') goto _yy_tunnel_9;
 				ret = YY_INLINE;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else if (ch == 't') {
 				ret = YY_INT;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else {
 				goto _yy_tunnel_9;
 			}
@@ -884,7 +908,7 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 'r') goto _yy_tunnel_9;
 				ret = YY_CHAR;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else if (ch == 'o') {
 				ch = *++YYPOS;
 				if (ch == 'm') {
@@ -897,14 +921,14 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'x') goto _yy_tunnel_9;
 					ret = YY_COMPLEX;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else if (ch == 'n') {
 					ch = *++YYPOS;
 					if (ch != 's') goto _yy_tunnel_9;
 					ch = *++YYPOS;
 					if (ch != 't') goto _yy_tunnel_9;
 					ret = YY_CONST;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else {
 					goto _yy_tunnel_9;
 				}
@@ -923,7 +947,7 @@ _yy_state_start:
 			ch = *++YYPOS;
 			if (ch != 'e') goto _yy_tunnel_9;
 			ret = YY_DOUBLE;
-			goto _yy_state_381;
+			goto _yy_state_390;
 		case 'f':
 			ch = *++YYPOS;
 			if (ch != 'l') goto _yy_tunnel_9;
@@ -934,7 +958,7 @@ _yy_state_start:
 			ch = *++YYPOS;
 			if (ch != 't') goto _yy_tunnel_9;
 			ret = YY_FLOAT;
-			goto _yy_state_381;
+			goto _yy_state_390;
 		case 'l':
 			ch = *++YYPOS;
 			if (ch != 'o') goto _yy_tunnel_9;
@@ -943,7 +967,7 @@ _yy_state_start:
 			ch = *++YYPOS;
 			if (ch != 'g') goto _yy_tunnel_9;
 			ret = YY_LONG;
-			goto _yy_state_381;
+			goto _yy_state_390;
 		case 'u':
 			ch = *++YYPOS;
 			if (ch == 'n') {
@@ -954,7 +978,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'n') goto _yy_tunnel_9;
 					ret = YY_UNION;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else if (ch == 's') {
 					ch = *++YYPOS;
 					if (ch != 'i') goto _yy_tunnel_9;
@@ -967,7 +991,7 @@ _yy_state_start:
 					ch = *++YYPOS;
 					if (ch != 'd') goto _yy_tunnel_9;
 					ret = YY_UNSIGNED;
-					goto _yy_state_381;
+					goto _yy_state_390;
 				} else {
 					goto _yy_tunnel_9;
 				}
@@ -990,7 +1014,7 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 'd') goto _yy_tunnel_9;
 				ret = YY_VOID;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else if (ch == 'l') {
 				ch = *++YYPOS;
 				if (ch != 'a') goto _yy_tunnel_9;
@@ -1003,7 +1027,7 @@ _yy_state_start:
 				ch = *++YYPOS;
 				if (ch != 'e') goto _yy_tunnel_9;
 				ret = YY_VOLATILE;
-				goto _yy_state_381;
+				goto _yy_state_390;
 			} else {
 				goto _yy_tunnel_9;
 			}
@@ -1568,7 +1592,7 @@ _yy_state_156:
 		accept = YY_HEXNUMBER;
 		accept_pos = yy_pos;
 		if (ch == 'L') {
-			goto _yy_state_263;
+			goto _yy_state_265;
 		} else if (ch == 'U' || ch == 'u') {
 			YYPOS++;
 			ret = YY_HEXNUMBER;
@@ -1586,7 +1610,7 @@ _yy_state_156:
 			ret = YY_HEXNUMBER;
 			goto _yy_fin;
 		} else if (ch == 'l') {
-			goto _yy_state_263;
+			goto _yy_state_265;
 		} else {
 			ret = YY_HEXNUMBER;
 			goto _yy_fin;
@@ -1618,7 +1642,7 @@ _yy_state_163:
 	} else {
 		goto _yy_state_error;
 	}
-_yy_state_263:
+_yy_state_265:
 	ch = *++YYPOS;
 	if (ch == 'U' || ch == 'u') {
 		YYPOS++;
@@ -1627,9 +1651,9 @@ _yy_state_263:
 	} else {
 		goto _yy_state_error;
 	}
-_yy_state_381:
+_yy_state_390:
 	ch = *++YYPOS;
-_yy_tunnel_381:
+_yy_tunnel_390:
 	if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= 'a' && ch <= 'z')) {
 		goto _yy_state_9;
 	} else {
@@ -1986,7 +2010,7 @@ static int synpred_6(int sym) {
 }
 
 static int parse_declarations(int sym) {
-	while (YY_IN_SET(sym, (YY___EXTENSION__,YY_TYPEDEF,YY_EXTERN,YY_STATIC,YY_AUTO,YY_REGISTER,YY_INLINE,YY___INLINE,YY___INLINE__,YY__NORETURN,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY__ALIGNAS,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID), "\202\377\377\377\377\177\004\007\000\000\000\001\000")) {
+	while (YY_IN_SET(sym, (YY___EXTENSION__,YY_TYPEDEF,YY_EXTERN,YY_STATIC,YY_AUTO,YY_REGISTER,YY_INLINE,YY___INLINE,YY___INLINE__,YY__NORETURN,YY__ALIGNAS,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID), "\202\377\377\377\377\107\360\017\000\000\000\002\000")) {
 		zend_ffi_dcl common_dcl = ZEND_FFI_ATTR_INIT;
 		if (sym == YY___EXTENSION__) {
 			sym = get_sym();
@@ -2013,7 +2037,7 @@ static int parse_declarations(int sym) {
 				}
 				sym = get_sym();
 			}
-			if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, &dcl);
 			}
 			if (sym == YY__EQUAL) {
@@ -2024,7 +2048,7 @@ static int parse_declarations(int sym) {
 				sym = get_sym();
 				dcl = common_dcl;
 				sym = parse_declarator(sym, &dcl, &name, &name_len);
-				if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+				if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 					sym = parse_attributes(sym, &dcl);
 				}
 				if (sym == YY__EQUAL) {
@@ -2079,33 +2103,17 @@ static int parse_declaration_specifiers(int sym, zend_ffi_dcl *dcl) {
 				sym = get_sym();
 				dcl->flags |= ZEND_FFI_DCL_NO_RETURN;
 				break;
-			case YY___CDECL:
-				sym = get_sym();
-				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_CDECL);
-				break;
-			case YY___STDCALL:
-				sym = get_sym();
-				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_STDCALL);
-				break;
-			case YY___FASTCALL:
-				sym = get_sym();
-				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);
-				break;
-			case YY___THISCALL:
-				sym = get_sym();
-				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);
-				break;
 			case YY__ALIGNAS:
 				sym = get_sym();
 				if (sym != YY__LPAREN) {
 					yy_error_sym("'(' expected, got", sym);
 				}
 				sym = get_sym();
-				if ((YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\002\000\340\377\377\177\004\007\000\000\000\001\000")) && synpred_1(sym)) {
+				if ((YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\002\000\376\377\377\107\360\017\000\000\000\002\000")) && synpred_1(sym)) {
 					zend_ffi_dcl align_dcl = ZEND_FFI_ATTR_INIT;
 					sym = parse_type_name(sym, &align_dcl);
 					zend_ffi_align_as_type(dcl, &align_dcl);
-				} else if (YY_IN_SET(sym, (YY__LPAREN,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\020\000\002\214\177\177\000")) {
+				} else if (YY_IN_SET(sym, (YY__LPAREN,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\001\000\004\030\377\376\000")) {
 					zend_ffi_val align_val;
 					sym = parse_constant_expression(sym, &align_val);
 					zend_ffi_align_as_val(dcl, &align_val);
@@ -2120,6 +2128,11 @@ static int parse_declaration_specifiers(int sym, zend_ffi_dcl *dcl) {
 			case YY___ATTRIBUTE:
 			case YY___ATTRIBUTE__:
 			case YY___DECLSPEC:
+			case YY___CDECL:
+			case YY___STDCALL:
+			case YY___FASTCALL:
+			case YY___THISCALL:
+			case YY___VECTORCALL:
 				sym = parse_attributes(sym, dcl);
 				break;
 			case YY_CONST:
@@ -2157,7 +2170,7 @@ static int parse_declaration_specifiers(int sym, zend_ffi_dcl *dcl) {
 			default:
 				yy_error_sym("unexpected", sym);
 		}
-	} while ((YY_IN_SET(sym, (YY_TYPEDEF,YY_EXTERN,YY_STATIC,YY_AUTO,YY_REGISTER,YY_INLINE,YY___INLINE,YY___INLINE__,YY__NORETURN,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY__ALIGNAS,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID), "\200\377\377\377\377\177\004\007\000\000\000\001\000")) && (sym != YY_ID || !(dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS)));
+	} while ((YY_IN_SET(sym, (YY_TYPEDEF,YY_EXTERN,YY_STATIC,YY_AUTO,YY_REGISTER,YY_INLINE,YY___INLINE,YY___INLINE__,YY__NORETURN,YY__ALIGNAS,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID), "\200\377\377\377\377\107\360\017\000\000\000\002\000")) && (sym != YY_ID || !(dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS)));
 	return sym;
 }
 
@@ -2166,29 +2179,29 @@ static int parse_specifier_qualifier_list(int sym, zend_ffi_dcl *dcl) {
 		sym = get_sym();
 	}
 	do {
-		if (YY_IN_SET(sym, (YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID), "\000\000\000\200\377\177\004\000\000\000\000\001\000")) {
+		if (YY_IN_SET(sym, (YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID), "\000\000\000\370\377\107\000\000\000\000\000\002\000")) {
 			sym = parse_type_specifier(sym, dcl);
-		} else if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC), "\000\000\340\177\000\000\000\000\000\000\000\000\000")) {
+		} else if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC), "\000\000\376\007\000\000\000\000\000\000\000\000\000")) {
 			sym = parse_type_qualifier(sym, dcl);
-		} else if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+		} else if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 			sym = parse_attributes(sym, dcl);
 		} else {
 			yy_error_sym("unexpected", sym);
 		}
-	} while ((YY_IN_SET(sym, (YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\000\000\340\377\377\177\004\007\000\000\000\001\000")) && (sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)));
+	} while ((YY_IN_SET(sym, (YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\376\377\377\107\360\017\000\000\000\002\000")) && (sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text) || (dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS) == 0));
 	return sym;
 }
 
 static int parse_type_qualifier_list(int sym, zend_ffi_dcl *dcl) {
 	do {
-		if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC), "\000\000\340\177\000\000\000\000\000\000\000\000\000")) {
+		if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC), "\000\000\376\007\000\000\000\000\000\000\000\000\000")) {
 			sym = parse_type_qualifier(sym, dcl);
-		} else if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+		} else if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 			sym = parse_attributes(sym, dcl);
 		} else {
 			yy_error_sym("unexpected", sym);
 		}
-	} while (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\000\000\340\177\000\000\000\007\000\000\000\000\000"));
+	} while (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\376\007\000\000\360\017\000\000\000\000\000"));
 	return sym;
 }
 
@@ -2311,7 +2324,7 @@ static int parse_struct_or_union_specifier(int sym, zend_ffi_dcl *dcl) {
 	} else {
 		yy_error_sym("unexpected", sym);
 	}
-	if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+	if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 		sym = parse_attributes(sym, dcl);
 	}
 	if (sym == YY_ID) {
@@ -2342,7 +2355,7 @@ static int parse_struct_contents(int sym, zend_ffi_dcl *dcl) {
 		yy_error_sym("'{' expected, got", sym);
 	}
 	sym = get_sym();
-	if (YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\002\000\340\377\377\177\004\007\000\000\000\001\000")) {
+	if (YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\002\000\376\377\377\107\360\017\000\000\000\002\000")) {
 		sym = parse_struct_declaration(sym, dcl);
 		while (1) {
 			save_pos  = yy_pos;
@@ -2360,7 +2373,7 @@ static int parse_struct_contents(int sym, zend_ffi_dcl *dcl) {
 				yy_error_sym("unexpected", sym2);
 			}
 _yy_state_2_1:
-			if (YY_IN_SET(sym2, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\002\000\340\377\377\177\004\007\000\000\000\001\000")) {
+			if (YY_IN_SET(sym2, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\002\000\376\377\377\107\360\017\000\000\000\002\000")) {
 				alt2 = 3;
 				goto _yy_state_2;
 			} else if (sym2 == YY__RBRACE) {
@@ -2387,7 +2400,7 @@ _yy_state_2:
 		yy_error_sym("'}' expected, got", sym);
 	}
 	sym = get_sym();
-	if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+	if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 		sym = parse_attributes(sym, dcl);
 	}
 	zend_ffi_adjust_struct_size(dcl);
@@ -2404,7 +2417,7 @@ static int parse_struct_declaration(int sym, zend_ffi_dcl *struct_dcl) {
 		while (sym == YY__COMMA) {
 			sym = get_sym();
 			zend_ffi_dcl field_dcl = common_field_dcl;
-			if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, &field_dcl);
 			}
 			sym = parse_struct_declarator(sym, struct_dcl, &field_dcl);
@@ -2424,12 +2437,12 @@ static int parse_struct_declarator(int sym, zend_ffi_dcl *struct_dcl, zend_ffi_d
 		if (sym == YY__COLON) {
 			sym = get_sym();
 			sym = parse_constant_expression(sym, &bits);
-			if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, field_dcl);
 			}
 			zend_ffi_add_bit_field(struct_dcl, name, name_len, field_dcl, &bits);
-		} else if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY__COMMA,YY__SEMICOLON,YY__RBRACE), "\140\000\000\000\000\000\001\007\000\000\000\000\000")) {
-			if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+		} else if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL,YY__COMMA,YY__SEMICOLON,YY__RBRACE), "\140\000\000\000\000\020\360\017\000\000\000\000\000")) {
+			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, field_dcl);
 			}
 			zend_ffi_add_field(struct_dcl, name, name_len, field_dcl);
@@ -2452,7 +2465,7 @@ static int parse_enum_specifier(int sym, zend_ffi_dcl *dcl) {
 	}
 	sym = get_sym();
 	dcl->flags |= ZEND_FFI_DCL_ENUM;
-	if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+	if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 		sym = parse_attributes(sym, dcl);
 	}
 	if (sym == YY_ID) {
@@ -2467,10 +2480,10 @@ static int parse_enum_specifier(int sym, zend_ffi_dcl *dcl) {
 				yy_error_sym("'}' expected, got", sym);
 			}
 			sym = get_sym();
-			if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, dcl);
 			}
-		} else if (YY_IN_SET(sym, (YY_TYPEDEF,YY_EXTERN,YY_STATIC,YY_AUTO,YY_REGISTER,YY_INLINE,YY___INLINE,YY___INLINE__,YY__NORETURN,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY__ALIGNAS,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY__STAR,YY__LPAREN,YY__SEMICOLON,YY__COLON,YY__LBRACK,YY__RBRACE,YY__COMMA,YY__RPAREN,YY_EOF), "\371\377\377\377\377\177\067\007\000\000\000\001\000")) {
+		} else if (YY_IN_SET(sym, (YY_TYPEDEF,YY_EXTERN,YY_STATIC,YY_AUTO,YY_REGISTER,YY_INLINE,YY___INLINE,YY___INLINE__,YY__NORETURN,YY__ALIGNAS,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY__STAR,YY__LPAREN,YY__SEMICOLON,YY__COLON,YY__LBRACK,YY__RBRACE,YY__COMMA,YY__RPAREN,YY_EOF), "\371\377\377\377\377\167\363\017\000\000\000\002\000")) {
 			zend_ffi_declare_tag(name, name_len, dcl, 1);
 		} else {
 			yy_error_sym("unexpected", sym);
@@ -2483,7 +2496,7 @@ static int parse_enum_specifier(int sym, zend_ffi_dcl *dcl) {
 			yy_error_sym("'}' expected, got", sym);
 		}
 		sym = get_sym();
-		if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+		if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 			sym = parse_attributes(sym, dcl);
 		}
 	} else {
@@ -2497,45 +2510,45 @@ static int parse_enumerator_list(int sym, zend_ffi_dcl *enum_dcl) {
 	const unsigned char *save_pos;
 	const unsigned char *save_text;
 	int   save_line;
-	int alt249;
+	int alt250;
 	int64_t min = 0, max = 0, last = -1;
 	sym = parse_enumerator(sym, enum_dcl, &min, &max, &last);
 	while (1) {
 		save_pos  = yy_pos;
 		save_text = yy_text;
 		save_line = yy_line;
-		alt249 = -2;
+		alt250 = -2;
 		sym2 = sym;
 		if (sym2 == YY__COMMA) {
 			sym2 = get_sym();
-			goto _yy_state_249_1;
+			goto _yy_state_250_1;
 		} else if (sym2 == YY__RBRACE) {
-			alt249 = -1;
-			goto _yy_state_249;
+			alt250 = -1;
+			goto _yy_state_250;
 		} else {
 			yy_error_sym("unexpected", sym2);
 		}
-_yy_state_249_1:
+_yy_state_250_1:
 		if (sym2 == YY_ID) {
-			alt249 = 250;
-			goto _yy_state_249;
+			alt250 = 251;
+			goto _yy_state_250;
 		} else if (sym2 == YY__RBRACE) {
-			alt249 = 252;
-			goto _yy_state_249;
+			alt250 = 253;
+			goto _yy_state_250;
 		} else {
 			yy_error_sym("unexpected", sym2);
 		}
-_yy_state_249:
+_yy_state_250:
 		yy_pos  = save_pos;
 		yy_text = save_text;
 		yy_line = save_line;
-		if (alt249 != 250) {
+		if (alt250 != 251) {
 			break;
 		}
 		sym = get_sym();
 		sym = parse_enumerator(sym, enum_dcl, &min, &max, &last);
 	}
-	if (alt249 == 252) {
+	if (alt250 == 253) {
 		sym = get_sym();
 	}
 	return sym;
@@ -2556,7 +2569,7 @@ static int parse_enumerator(int sym, zend_ffi_dcl *enum_dcl, int64_t *min, int64
 
 static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	zend_bool nested = 0;
+	bool nested = 0;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2564,7 +2577,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 		sym = parse_ID(sym, name, name_len);
 	} else if (sym == YY__LPAREN) {
 		sym = get_sym();
-		if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+		if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 			sym = parse_attributes(sym, &nested_dcl);
 		}
 		sym = parse_declarator(sym, &nested_dcl, name, name_len);
@@ -2585,13 +2598,13 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 
 static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	zend_bool nested = 0;
+	bool nested = 0;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
 	if ((sym == YY__LPAREN) && synpred_2(sym)) {
 		sym = get_sym();
-		if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+		if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 			sym = parse_attributes(sym, &nested_dcl);
 		}
 		sym = parse_abstract_declarator(sym, &nested_dcl);
@@ -2610,13 +2623,13 @@ static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 
 static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	zend_bool nested = 0;
+	bool nested = 0;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
 	if ((sym == YY__LPAREN) && synpred_3(sym)) {
 		sym = get_sym();
-		if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC) {
+		if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 			sym = parse_attributes(sym, &nested_dcl);
 		}
 		sym = parse_parameter_declarator(sym, &nested_dcl, name, name_len);
@@ -2645,7 +2658,7 @@ static int parse_pointer(int sym, zend_ffi_dcl *dcl) {
 	do {
 		sym = get_sym();
 		zend_ffi_make_pointer_type(dcl);
-		if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\000\000\340\177\000\000\000\007\000\000\000\000\000")) {
+		if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\376\007\000\000\360\017\000\000\000\000\000")) {
 			sym = parse_type_qualifier_list(sym, dcl);
 		}
 	} while (sym == YY__STAR);
@@ -2657,9 +2670,9 @@ static int parse_array_or_function_declarators(int sym, zend_ffi_dcl *dcl, zend_
 	const unsigned char *save_pos;
 	const unsigned char *save_text;
 	int   save_line;
-	int alt104;
-	int alt100;
-	int alt114;
+	int alt109;
+	int alt105;
+	int alt119;
 	zend_ffi_dcl dummy = ZEND_FFI_ATTR_INIT;
 	zend_ffi_val len = {.kind = ZEND_FFI_VAL_EMPTY};
 	HashTable *args = NULL;
@@ -2669,99 +2682,99 @@ static int parse_array_or_function_declarators(int sym, zend_ffi_dcl *dcl, zend_
 		save_pos  = yy_pos;
 		save_text = yy_text;
 		save_line = yy_line;
-		alt100 = -2;
+		alt105 = -2;
 		sym2 = sym;
 		if (sym2 == YY_STATIC) {
-			alt100 = 101;
-			goto _yy_state_100;
-		} else if (YY_IN_SET(sym2, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\000\000\340\177\000\000\000\007\000\000\000\000\000")) {
-			alt100 = 104;
-			goto _yy_state_100;
+			alt105 = 106;
+			goto _yy_state_105;
+		} else if (YY_IN_SET(sym2, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\376\007\000\000\360\017\000\000\000\000\000")) {
+			alt105 = 109;
+			goto _yy_state_105;
 		} else if (sym2 == YY__STAR) {
 			sym2 = get_sym();
-			goto _yy_state_100_15;
-		} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER), "\010\000\000\000\000\000\000\000\002\214\177\177\000")) {
-			alt100 = 110;
-			goto _yy_state_100;
+			goto _yy_state_105_20;
+		} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER), "\010\000\000\000\000\000\000\000\004\030\377\376\000")) {
+			alt105 = 115;
+			goto _yy_state_105;
 		} else if (sym2 == YY__RBRACK) {
-			alt100 = 111;
-			goto _yy_state_100;
+			alt105 = 116;
+			goto _yy_state_105;
 		} else {
 			yy_error_sym("unexpected", sym2);
 		}
-_yy_state_100_15:
+_yy_state_105_20:
 		if (sym2 == YY__RBRACK) {
-			alt100 = 109;
-			goto _yy_state_100;
-		} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__STAR), "\010\000\000\000\000\000\020\000\002\214\177\177\000")) {
-			alt100 = 110;
-			goto _yy_state_100;
+			alt105 = 114;
+			goto _yy_state_105;
+		} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__STAR), "\010\000\000\000\000\000\001\000\004\030\377\376\000")) {
+			alt105 = 115;
+			goto _yy_state_105;
 		} else {
 			yy_error_sym("unexpected", sym2);
 		}
-_yy_state_100:
+_yy_state_105:
 		yy_pos  = save_pos;
 		yy_text = save_text;
 		yy_line = save_line;
-		if (alt100 == 101) {
+		if (alt105 == 106) {
 			sym = get_sym();
-			if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\000\000\340\177\000\000\000\007\000\000\000\000\000")) {
+			if (YY_IN_SET(sym, (YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\376\007\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_type_qualifier_list(sym, &dummy);
 			}
 			sym = parse_assignment_expression(sym, &len);
-		} else if (alt100 == 104) {
+		} else if (alt105 == 109) {
 			sym = parse_type_qualifier_list(sym, &dummy);
 			save_pos  = yy_pos;
 			save_text = yy_text;
 			save_line = yy_line;
-			alt104 = -2;
+			alt109 = -2;
 			sym2 = sym;
 			if (sym2 == YY_STATIC) {
-				alt104 = 105;
-				goto _yy_state_104;
+				alt109 = 110;
+				goto _yy_state_109;
 			} else if (sym2 == YY__STAR) {
 				sym2 = get_sym();
-				goto _yy_state_104_2;
-			} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER), "\010\000\000\000\000\000\000\000\002\214\177\177\000")) {
-				alt104 = 108;
-				goto _yy_state_104;
+				goto _yy_state_109_2;
+			} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER), "\010\000\000\000\000\000\000\000\004\030\377\376\000")) {
+				alt109 = 113;
+				goto _yy_state_109;
 			} else if (sym2 == YY__RBRACK) {
-				alt104 = 111;
-				goto _yy_state_104;
+				alt109 = 116;
+				goto _yy_state_109;
 			} else {
 				yy_error_sym("unexpected", sym2);
 			}
-_yy_state_104_2:
+_yy_state_109_2:
 			if (sym2 == YY__RBRACK) {
-				alt104 = 107;
-				goto _yy_state_104;
-			} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__STAR), "\010\000\000\000\000\000\020\000\002\214\177\177\000")) {
-				alt104 = 108;
-				goto _yy_state_104;
+				alt109 = 112;
+				goto _yy_state_109;
+			} else if (YY_IN_SET(sym2, (YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__STAR), "\010\000\000\000\000\000\001\000\004\030\377\376\000")) {
+				alt109 = 113;
+				goto _yy_state_109;
 			} else {
 				yy_error_sym("unexpected", sym2);
 			}
-_yy_state_104:
+_yy_state_109:
 			yy_pos  = save_pos;
 			yy_text = save_text;
 			yy_line = save_line;
-			if (alt104 == 105) {
+			if (alt109 == 110) {
 				sym = get_sym();
 				sym = parse_assignment_expression(sym, &len);
-			} else if (alt104 == 111) {
+			} else if (alt109 == 116) {
 				attr |= ZEND_FFI_ATTR_INCOMPLETE_ARRAY;
-			} else if (alt104 == 107) {
+			} else if (alt109 == 112) {
 				sym = get_sym();
 				attr |= ZEND_FFI_ATTR_VLA;
-			} else if (alt104 == 108) {
+			} else if (alt109 == 113) {
 				sym = parse_assignment_expression(sym, &len);
 			} else {
 				yy_error_sym("unexpected", sym);
 			}
-		} else if (alt100 == 111 || alt100 == 109 || alt100 == 110) {
-			if (alt100 == 111) {
+		} else if (alt105 == 116 || alt105 == 114 || alt105 == 115) {
+			if (alt105 == 116) {
 				attr |= ZEND_FFI_ATTR_INCOMPLETE_ARRAY;
-			} else if (alt100 == 109) {
+			} else if (alt105 == 114) {
 				sym = get_sym();
 				attr |= ZEND_FFI_ATTR_VLA;
 			} else {
@@ -2781,45 +2794,45 @@ _yy_state_104:
 		zend_ffi_make_array_type(dcl, &len);
 	} else if (sym == YY__LPAREN) {
 		sym = get_sym();
-		if (YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY__POINT_POINT_POINT), "\002\000\340\377\377\177\204\007\000\000\000\001\000")) {
-			if (YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\002\000\340\377\377\177\004\007\000\000\000\001\000")) {
+		if (YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL,YY__POINT_POINT_POINT), "\002\000\376\377\377\107\370\017\000\000\000\002\000")) {
+			if (YY_IN_SET(sym, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\002\000\376\377\377\107\360\017\000\000\000\002\000")) {
 				sym = parse_parameter_declaration(sym, &args);
 				while (1) {
 					save_pos  = yy_pos;
 					save_text = yy_text;
 					save_line = yy_line;
-					alt114 = -2;
+					alt119 = -2;
 					sym2 = sym;
 					if (sym2 == YY__COMMA) {
 						sym2 = get_sym();
-						goto _yy_state_114_1;
+						goto _yy_state_119_1;
 					} else if (sym2 == YY__RPAREN) {
-						alt114 = 120;
-						goto _yy_state_114;
+						alt119 = 125;
+						goto _yy_state_119;
 					} else {
 						yy_error_sym("unexpected", sym2);
 					}
-_yy_state_114_1:
-					if (YY_IN_SET(sym2, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC), "\002\000\340\377\377\177\004\007\000\000\000\001\000")) {
-						alt114 = 115;
-						goto _yy_state_114;
+_yy_state_119_1:
+					if (YY_IN_SET(sym2, (YY___EXTENSION__,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\002\000\376\377\377\107\360\017\000\000\000\002\000")) {
+						alt119 = 120;
+						goto _yy_state_119;
 					} else if (sym2 == YY__POINT_POINT_POINT) {
-						alt114 = 117;
-						goto _yy_state_114;
+						alt119 = 122;
+						goto _yy_state_119;
 					} else {
 						yy_error_sym("unexpected", sym2);
 					}
-_yy_state_114:
+_yy_state_119:
 					yy_pos  = save_pos;
 					yy_text = save_text;
 					yy_line = save_line;
-					if (alt114 != 115) {
+					if (alt119 != 120) {
 						break;
 					}
 					sym = get_sym();
 					sym = parse_parameter_declaration(sym, &args);
 				}
-				if (alt114 == 117) {
+				if (alt119 == 122) {
 					sym = get_sym();
 					if (sym != YY__POINT_POINT_POINT) {
 						yy_error_sym("'...' expected, got", sym);
@@ -2850,7 +2863,7 @@ _yy_state_114:
 static int parse_parameter_declaration(int sym, HashTable **args) {
 	const char *name = NULL;
 	size_t name_len = 0;
-	zend_bool old_allow_vla = FFI_G(allow_vla);
+	bool old_allow_vla = FFI_G(allow_vla);
 	FFI_G(allow_vla) = 1;
 	zend_ffi_dcl param_dcl = ZEND_FFI_ATTR_INIT;
 	sym = parse_specifier_qualifier_list(sym, &param_dcl);
@@ -2871,55 +2884,79 @@ static int parse_attributes(int sym, zend_ffi_dcl *dcl) {
 	size_t name_len;
 	zend_ffi_val val;
 	do {
-		if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__) {
-			sym = get_sym();
-			if (sym != YY__LPAREN) {
-				yy_error_sym("'(' expected, got", sym);
-			}
-			sym = get_sym();
-			if (sym != YY__LPAREN) {
-				yy_error_sym("'(' expected, got", sym);
-			}
-			sym = get_sym();
-			sym = parse_attrib(sym, dcl);
-			while (sym == YY__COMMA) {
+		switch (sym) {
+			case YY___ATTRIBUTE:
+			case YY___ATTRIBUTE__:
+				sym = get_sym();
+				if (sym != YY__LPAREN) {
+					yy_error_sym("'(' expected, got", sym);
+				}
+				sym = get_sym();
+				if (sym != YY__LPAREN) {
+					yy_error_sym("'(' expected, got", sym);
+				}
 				sym = get_sym();
 				sym = parse_attrib(sym, dcl);
-			}
-			if (sym != YY__RPAREN) {
-				yy_error_sym("')' expected, got", sym);
-			}
-			sym = get_sym();
-			if (sym != YY__RPAREN) {
-				yy_error_sym("')' expected, got", sym);
-			}
-			sym = get_sym();
-		} else if (sym == YY___DECLSPEC) {
-			sym = get_sym();
-			if (sym != YY__LPAREN) {
-				yy_error_sym("'(' expected, got", sym);
-			}
-			sym = get_sym();
-			do {
-				sym = parse_ID(sym, &name, &name_len);
-				if (sym == YY__LPAREN) {
+				while (sym == YY__COMMA) {
 					sym = get_sym();
-					sym = parse_assignment_expression(sym, &val);
-					zend_ffi_add_msvc_attribute_value(dcl, name, name_len, &val);
-					if (sym != YY__RPAREN) {
-						yy_error_sym("')' expected, got", sym);
-					}
-					sym = get_sym();
+					sym = parse_attrib(sym, dcl);
 				}
-			} while (sym == YY_ID);
-			if (sym != YY__RPAREN) {
-				yy_error_sym("')' expected, got", sym);
-			}
-			sym = get_sym();
-		} else {
-			yy_error_sym("unexpected", sym);
+				if (sym != YY__RPAREN) {
+					yy_error_sym("')' expected, got", sym);
+				}
+				sym = get_sym();
+				if (sym != YY__RPAREN) {
+					yy_error_sym("')' expected, got", sym);
+				}
+				sym = get_sym();
+				break;
+			case YY___DECLSPEC:
+				sym = get_sym();
+				if (sym != YY__LPAREN) {
+					yy_error_sym("'(' expected, got", sym);
+				}
+				sym = get_sym();
+				do {
+					sym = parse_ID(sym, &name, &name_len);
+					if (sym == YY__LPAREN) {
+						sym = get_sym();
+						sym = parse_assignment_expression(sym, &val);
+						zend_ffi_add_msvc_attribute_value(dcl, name, name_len, &val);
+						if (sym != YY__RPAREN) {
+							yy_error_sym("')' expected, got", sym);
+						}
+						sym = get_sym();
+					}
+				} while (sym == YY_ID);
+				if (sym != YY__RPAREN) {
+					yy_error_sym("')' expected, got", sym);
+				}
+				sym = get_sym();
+				break;
+			case YY___CDECL:
+				sym = get_sym();
+				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_CDECL);
+				break;
+			case YY___STDCALL:
+				sym = get_sym();
+				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_STDCALL);
+				break;
+			case YY___FASTCALL:
+				sym = get_sym();
+				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);
+				break;
+			case YY___THISCALL:
+				sym = get_sym();
+				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);
+				break;
+			case YY___VECTORCALL:
+				sym = get_sym();
+				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_VECTORCALL);
+				break;
+			default:
+				yy_error_sym("unexpected", sym);
 		}
-	} while (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__ || sym == YY___DECLSPEC);
+	} while (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000"));
 	return sym;
 }
 
@@ -2928,7 +2965,7 @@ static int parse_attrib(int sym, zend_ffi_dcl *dcl) {
 	size_t name_len;
 	int n;
 	zend_ffi_val val;
-	zend_bool orig_attribute_parsing;
+	bool orig_attribute_parsing;
 	if (sym == YY_ID || sym == YY_CONST || sym == YY___CONST || sym == YY___CONST__) {
 		if (sym == YY_ID) {
 			sym = parse_ID(sym, &name, &name_len);
@@ -2970,13 +3007,13 @@ static int parse_initializer(int sym) {
 	const unsigned char *save_pos;
 	const unsigned char *save_text;
 	int   save_line;
-	int alt342;
+	int alt343;
 	zend_ffi_val dummy;
 	if (sym != YY__EQUAL) {
 		yy_error_sym("'=' expected, got", sym);
 	}
 	sym = get_sym();
-	if (YY_IN_SET(sym, (YY__LPAREN,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\020\000\002\214\177\177\000")) {
+	if (YY_IN_SET(sym, (YY__LPAREN,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\001\000\004\030\377\376\000")) {
 		sym = parse_assignment_expression(sym, &dummy);
 	} else if (sym == YY__LBRACE) {
 		sym = get_sym();
@@ -2988,32 +3025,32 @@ static int parse_initializer(int sym) {
 			save_pos  = yy_pos;
 			save_text = yy_text;
 			save_line = yy_line;
-			alt342 = -2;
+			alt343 = -2;
 			sym2 = sym;
 			if (sym2 == YY__COMMA) {
 				sym2 = get_sym();
-				goto _yy_state_342_1;
+				goto _yy_state_343_1;
 			} else if (sym2 == YY__RBRACE) {
-				alt342 = 347;
-				goto _yy_state_342;
+				alt343 = 348;
+				goto _yy_state_343;
 			} else {
 				yy_error_sym("unexpected", sym2);
 			}
-_yy_state_342_1:
+_yy_state_343_1:
 			if (sym2 == YY__LBRACK || sym2 == YY__POINT || sym2 == YY__EQUAL) {
-				alt342 = 343;
-				goto _yy_state_342;
+				alt343 = 344;
+				goto _yy_state_343;
 			} else if (sym2 == YY__RBRACE) {
-				alt342 = 346;
-				goto _yy_state_342;
+				alt343 = 347;
+				goto _yy_state_343;
 			} else {
 				yy_error_sym("unexpected", sym2);
 			}
-_yy_state_342:
+_yy_state_343:
 			yy_pos  = save_pos;
 			yy_text = save_text;
 			yy_line = save_line;
-			if (alt342 != 343) {
+			if (alt343 != 344) {
 				break;
 			}
 			sym = get_sym();
@@ -3022,7 +3059,7 @@ _yy_state_342:
 			}
 			sym = parse_initializer(sym);
 		}
-		if (alt342 == 346) {
+		if (alt343 == 347) {
 			sym = get_sym();
 		}
 		if (sym != YY__RBRACE) {
@@ -3283,7 +3320,7 @@ static int parse_unary_expression(int sym, zend_ffi_val *val) {
 		case YY_ID:
 			sym = parse_ID(sym, &name, &name_len);
 			zend_ffi_resolve_const(name, name_len, val);
-			while (YY_IN_SET(sym, (YY__LBRACK,YY__LPAREN,YY__POINT,YY__MINUS_GREATER,YY__PLUS_PLUS,YY__MINUS_MINUS), "\010\000\000\000\000\000\040\010\000\300\001\000\000")) {
+			while (YY_IN_SET(sym, (YY__LBRACK,YY__LPAREN,YY__POINT,YY__MINUS_GREATER,YY__PLUS_PLUS,YY__MINUS_MINUS), "\010\000\000\000\000\000\002\020\000\200\003\000\000")) {
 				switch (sym) {
 					case YY__LBRACK:
 						sym = get_sym();
@@ -3295,7 +3332,7 @@ static int parse_unary_expression(int sym, zend_ffi_val *val) {
 						break;
 					case YY__LPAREN:
 						sym = get_sym();
-						if (YY_IN_SET(sym, (YY__LPAREN,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\020\000\002\214\177\177\000")) {
+						if (YY_IN_SET(sym, (YY__LPAREN,YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\001\000\004\030\377\376\000")) {
 							sym = parse_expr_list(sym);
 						}
 						if (sym != YY__RPAREN) {
@@ -3397,7 +3434,7 @@ static int parse_unary_expression(int sym, zend_ffi_val *val) {
 				}
 				sym = get_sym();
 				zend_ffi_expr_sizeof_type(val, &dcl);
-			} else if (YY_IN_SET(sym, (YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\020\000\002\214\177\177\000")) {
+			} else if (YY_IN_SET(sym, (YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\001\000\004\030\377\376\000")) {
 				sym = parse_unary_expression(sym, val);
 				zend_ffi_expr_sizeof_val(val);
 			} else {
@@ -3428,7 +3465,7 @@ static int parse_unary_expression(int sym, zend_ffi_val *val) {
 				}
 				sym = get_sym();
 				zend_ffi_expr_alignof_type(val, &dcl);
-			} else if (YY_IN_SET(sym, (YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\020\000\002\214\177\177\000")) {
+			} else if (YY_IN_SET(sym, (YY_ID,YY_OCTNUMBER,YY_DECNUMBER,YY_HEXNUMBER,YY_FLOATNUMBER,YY_STRING,YY_CHARACTER,YY__LPAREN,YY__PLUS_PLUS,YY__MINUS_MINUS,YY__AND,YY__STAR,YY__PLUS,YY__MINUS,YY__TILDE,YY__BANG,YY_SIZEOF,YY__ALIGNOF,YY___ALIGNOF,YY___ALIGNOF__), "\010\000\000\000\000\000\001\000\004\030\377\376\000")) {
 				sym = parse_unary_expression(sym, val);
 				zend_ffi_expr_alignof_val(val);
 			} else {

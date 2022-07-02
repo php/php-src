@@ -3,8 +3,8 @@ Test curl_copy_handle() after exec()
 --CREDITS--
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -30,7 +30,6 @@ Rick Buitenman <rick@meritos.nl>
 
   var_dump( $curl_content_copy );
 ?>
-===DONE===
 --EXPECT--
 *** Test curl_copy_handle() after exec() ***
 string(106) "array(2) {
@@ -42,4 +41,3 @@ string(106) "array(2) {
 array(0) {
 }
 "
-===DONE=== 

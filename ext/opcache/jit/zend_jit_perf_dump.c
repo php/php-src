@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,18 +22,31 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/mman.h>
-#include <sys/syscall.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#if defined(__darwin__)
+#if defined(__linux__)
+#include <sys/syscall.h>
+#elif defined(__darwin__)
 # include <pthread.h>
 #elif defined(__FreeBSD__)
 # include <sys/thr.h>
 # include <sys/sysctl.h>
 #elif defined(__NetBSD__)
 # include <lwp.h>
+#elif defined(__DragonFly__)
+# include <sys/lwp.h>
+# include <sys/sysctl.h>
+#elif defined(__sun)
+// avoiding thread.h inclusion as it conflicts with vtunes types.
+extern unsigned int thr_self(void);
+#elif defined(__HAIKU__)
+#include <FindDirectory.h>
 #endif
 
 #include "zend_elf.h"
+#include "zend_mmap.h"
 
 /*
  * 1) Profile using perf-<pid>.map
@@ -63,14 +76,14 @@
 #define PADDING8(size) (ALIGN8(size) - (size))
 
 typedef struct zend_perf_jitdump_header {
-  uint32_t magic;
-  uint32_t version;
-  uint32_t size;
-  uint32_t elf_mach_target;
-  uint32_t reserved;
-  uint32_t process_id;
-  uint64_t time_stamp;
-  uint64_t flags;
+	uint32_t magic;
+	uint32_t version;
+	uint32_t size;
+	uint32_t elf_mach_target;
+	uint32_t reserved;
+	uint32_t process_id;
+	uint64_t time_stamp;
+	uint64_t flags;
 } zend_perf_jitdump_header;
 
 typedef struct _zend_perf_jitdump_record {
@@ -118,13 +131,23 @@ static void zend_jit_perf_jitdump_open(void)
 	fd = open("/proc/self/exe", O_RDONLY);
 #elif defined(__NetBSD__)
 	fd = open("/proc/curproc/exe", O_RDONLY);
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
 	char path[PATH_MAX];
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
 	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
-             return;
+		return;
 	}
+	fd = open(path, O_RDONLY);
+#elif defined(__sun)
+	fd = open("/proc/self/path/a.out", O_RDONLY);
+#elif defined(__HAIKU__)
+	char path[PATH_MAX];
+	if (find_path(B_APP_IMAGE_SYMBOL, B_FIND_PATH_IMAGE_PATH,
+		NULL, path, sizeof(path)) != B_OK) {
+		return;
+	}
+
 	fd = open(path, O_RDONLY);
 #else
 	fd = -1;
@@ -149,8 +172,9 @@ static void zend_jit_perf_jitdump_open(void)
 		return;
 	}
 
+	const size_t page_size = sysconf(_SC_PAGESIZE);
 	jitdump_mem = mmap(NULL,
-			sysconf(_SC_PAGESIZE),
+			page_size,
 			PROT_READ|PROT_EXEC,
 			MAP_PRIVATE, jitdump_fd, 0);
 
@@ -159,6 +183,8 @@ static void zend_jit_perf_jitdump_open(void)
 		jitdump_fd = -1;
 		return;
 	}
+
+	zend_mmap_set_name(jitdump_mem, page_size, "zend_jitdump");
 
 	memset(&jit_hdr, 0, sizeof(jit_hdr));
 	jit_hdr.magic           = ZEND_PERF_JITDUMP_HEADER_MAGIC;
@@ -209,6 +235,10 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		thread_id = getthrid();
 #elif defined(__NetBSD__)
 		thread_id = _lwp_self();
+#elif defined(__DragonFly__)
+		thread_id = lwp_gettid();
+#elif defined(__sun)
+		thread_id = thr_self();
 #endif
 
 		memset(&rec, 0, sizeof(rec));

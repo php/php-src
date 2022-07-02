@@ -1,7 +1,7 @@
 --TEST--
 Test curl_copy_handle() with simple POST
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -27,7 +27,6 @@ Test curl_copy_handle() with simple POST
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl copy handle with simple POST using array as arguments ***
 string(163) "array(1) {
@@ -43,4 +42,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE=== 

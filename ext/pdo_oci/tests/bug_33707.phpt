@@ -1,8 +1,10 @@
 --TEST--
 PDO OCI Bug #33707 (Errors in select statements not reported)
+--EXTENSIONS--
+pdo
+pdo_oci
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require __DIR__.'/../../pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
@@ -12,9 +14,10 @@ require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-$rs = $db->query('select blah from a_table_that_doesnt_exist');
+$rs = $db->query('select blah from a_table_that_does_not_exist');
 var_dump($rs);
 var_dump($db->errorInfo());
+?>
 --EXPECTF--
 bool(false)
 array(3) {

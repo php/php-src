@@ -3,7 +3,6 @@ Test uksort(): basic functionality
 --FILE--
 <?php
 /*
-* proto bool uksort ( array &$array, callback $cmp_function )
 * Function is implemented in ext/standard/array.c
 */
 function cmp($a, $b) {

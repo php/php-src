@@ -1,4 +1,4 @@
-%{
+%require "3.0"
 /*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
@@ -19,7 +19,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_compile.h"
+%code top {
 #include "zend.h"
 #include "zend_list.h"
 #include "zend_globals.h"
@@ -32,25 +32,26 @@
 #define yytnamerr zend_yytnamerr
 static YYSIZE_T zend_yytnamerr(char*, const char*);
 
-#define YYERROR_VERBOSE
-#define YYSTYPE zend_parser_stack_elem
-
 #ifdef _MSC_VER
 #define YYMALLOC malloc
 #define YYFREE free
 #endif
-
-%}
-
-%define api.pure full
-%expect 0
+}
 
 %code requires {
+#include "zend_compile.h"
 }
+
+%define api.prefix {zend}
+%define api.pure full
+%define api.value.type {zend_parser_stack_elem}
+%define parse.error verbose
+%expect 0
 
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
+%precedence T_THROW
 %precedence PREC_ARROW_FUNCTION
 %precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
 %left T_LOGICAL_OR
@@ -67,7 +68,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_BOOLEAN_AND
 %left '|'
 %left '^'
-%left '&'
+%left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
 %left '.'
@@ -78,191 +79,215 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_INSTANCEOF
 %precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right T_POW
-%precedence T_NEW T_CLONE
+%precedence T_CLONE
 
 /* Resolve danging else conflict */
 %precedence T_NOELSE
 %precedence T_ELSEIF
 %precedence T_ELSE
 
-%token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
-%token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
-%token <ast> T_STRING    "identifier (T_STRING)"
-%token <ast> T_VARIABLE  "variable (T_VARIABLE)"
+%token <ast> T_LNUMBER   "integer"
+%token <ast> T_DNUMBER   "floating-point number"
+%token <ast> T_STRING    "identifier"
+%token <ast> T_NAME_FULLY_QUALIFIED "fully qualified name"
+%token <ast> T_NAME_RELATIVE "namespace-relative name"
+%token <ast> T_NAME_QUALIFIED "namespaced name"
+%token <ast> T_VARIABLE  "variable"
 %token <ast> T_INLINE_HTML
-%token <ast> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
-%token <ast> T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
-%token <ast> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
-%token <ast> T_NUM_STRING "number (T_NUM_STRING)"
+%token <ast> T_ENCAPSED_AND_WHITESPACE  "string content"
+%token <ast> T_CONSTANT_ENCAPSED_STRING "quoted string"
+%token <ast> T_STRING_VARNAME "variable name"
+%token <ast> T_NUM_STRING "number"
+
+%token <ident> T_INCLUDE       "'include'"
+%token <ident> T_INCLUDE_ONCE  "'include_once'"
+%token <ident> T_EVAL          "'eval'"
+%token <ident> T_REQUIRE       "'require'"
+%token <ident> T_REQUIRE_ONCE  "'require_once'"
+%token <ident> T_LOGICAL_OR    "'or'"
+%token <ident> T_LOGICAL_XOR   "'xor'"
+%token <ident> T_LOGICAL_AND   "'and'"
+%token <ident> T_PRINT         "'print'"
+%token <ident> T_YIELD         "'yield'"
+%token <ident> T_YIELD_FROM    "'yield from'"
+%token <ident> T_INSTANCEOF    "'instanceof'"
+%token <ident> T_NEW           "'new'"
+%token <ident> T_CLONE         "'clone'"
+%token <ident> T_EXIT          "'exit'"
+%token <ident> T_IF            "'if'"
+%token <ident> T_ELSEIF        "'elseif'"
+%token <ident> T_ELSE          "'else'"
+%token <ident> T_ENDIF         "'endif'"
+%token <ident> T_ECHO          "'echo'"
+%token <ident> T_DO            "'do'"
+%token <ident> T_WHILE         "'while'"
+%token <ident> T_ENDWHILE      "'endwhile'"
+%token <ident> T_FOR           "'for'"
+%token <ident> T_ENDFOR        "'endfor'"
+%token <ident> T_FOREACH       "'foreach'"
+%token <ident> T_ENDFOREACH    "'endforeach'"
+%token <ident> T_DECLARE       "'declare'"
+%token <ident> T_ENDDECLARE    "'enddeclare'"
+%token <ident> T_AS            "'as'"
+%token <ident> T_SWITCH        "'switch'"
+%token <ident> T_ENDSWITCH     "'endswitch'"
+%token <ident> T_CASE          "'case'"
+%token <ident> T_DEFAULT       "'default'"
+%token <ident> T_MATCH         "'match'"
+%token <ident> T_BREAK         "'break'"
+%token <ident> T_CONTINUE      "'continue'"
+%token <ident> T_GOTO          "'goto'"
+%token <ident> T_FUNCTION      "'function'"
+%token <ident> T_FN            "'fn'"
+%token <ident> T_CONST         "'const'"
+%token <ident> T_RETURN        "'return'"
+%token <ident> T_TRY           "'try'"
+%token <ident> T_CATCH         "'catch'"
+%token <ident> T_FINALLY       "'finally'"
+%token <ident> T_THROW         "'throw'"
+%token <ident> T_USE           "'use'"
+%token <ident> T_INSTEADOF     "'insteadof'"
+%token <ident> T_GLOBAL        "'global'"
+%token <ident> T_STATIC        "'static'"
+%token <ident> T_ABSTRACT      "'abstract'"
+%token <ident> T_FINAL         "'final'"
+%token <ident> T_PRIVATE       "'private'"
+%token <ident> T_PROTECTED     "'protected'"
+%token <ident> T_PUBLIC        "'public'"
+%token <ident> T_READONLY      "'readonly'"
+%token <ident> T_VAR           "'var'"
+%token <ident> T_UNSET         "'unset'"
+%token <ident> T_ISSET         "'isset'"
+%token <ident> T_EMPTY         "'empty'"
+%token <ident> T_HALT_COMPILER "'__halt_compiler'"
+%token <ident> T_CLASS         "'class'"
+%token <ident> T_TRAIT         "'trait'"
+%token <ident> T_INTERFACE     "'interface'"
+%token <ident> T_ENUM          "'enum'"
+%token <ident> T_EXTENDS       "'extends'"
+%token <ident> T_IMPLEMENTS    "'implements'"
+%token <ident> T_NAMESPACE     "'namespace'"
+%token <ident> T_LIST            "'list'"
+%token <ident> T_ARRAY           "'array'"
+%token <ident> T_CALLABLE        "'callable'"
+%token <ident> T_LINE            "'__LINE__'"
+%token <ident> T_FILE            "'__FILE__'"
+%token <ident> T_DIR             "'__DIR__'"
+%token <ident> T_CLASS_C         "'__CLASS__'"
+%token <ident> T_TRAIT_C         "'__TRAIT__'"
+%token <ident> T_METHOD_C        "'__METHOD__'"
+%token <ident> T_FUNC_C          "'__FUNCTION__'"
+%token <ident> T_NS_C            "'__NAMESPACE__'"
 
 %token END 0 "end of file"
-%token T_INCLUDE      "include (T_INCLUDE)"
-%token T_INCLUDE_ONCE "include_once (T_INCLUDE_ONCE)"
-%token T_EVAL         "eval (T_EVAL)"
-%token T_REQUIRE      "require (T_REQUIRE)"
-%token T_REQUIRE_ONCE "require_once (T_REQUIRE_ONCE)"
-%token T_LOGICAL_OR   "or (T_LOGICAL_OR)"
-%token T_LOGICAL_XOR  "xor (T_LOGICAL_XOR)"
-%token T_LOGICAL_AND  "and (T_LOGICAL_AND)"
-%token T_PRINT        "print (T_PRINT)"
-%token T_YIELD        "yield (T_YIELD)"
-%token T_YIELD_FROM   "yield from (T_YIELD_FROM)"
-%token T_PLUS_EQUAL   "+= (T_PLUS_EQUAL)"
-%token T_MINUS_EQUAL  "-= (T_MINUS_EQUAL)"
-%token T_MUL_EQUAL    "*= (T_MUL_EQUAL)"
-%token T_DIV_EQUAL    "/= (T_DIV_EQUAL)"
-%token T_CONCAT_EQUAL ".= (T_CONCAT_EQUAL)"
-%token T_MOD_EQUAL    "%= (T_MOD_EQUAL)"
-%token T_AND_EQUAL    "&= (T_AND_EQUAL)"
-%token T_OR_EQUAL     "|= (T_OR_EQUAL)"
-%token T_XOR_EQUAL    "^= (T_XOR_EQUAL)"
-%token T_SL_EQUAL     "<<= (T_SL_EQUAL)"
-%token T_SR_EQUAL     ">>= (T_SR_EQUAL)"
-%token T_COALESCE_EQUAL "??= (T_COALESCE_EQUAL)"
-%token T_BOOLEAN_OR   "|| (T_BOOLEAN_OR)"
-%token T_BOOLEAN_AND  "&& (T_BOOLEAN_AND)"
-%token T_IS_EQUAL     "== (T_IS_EQUAL)"
-%token T_IS_NOT_EQUAL "!= (T_IS_NOT_EQUAL)"
-%token T_IS_IDENTICAL "=== (T_IS_IDENTICAL)"
-%token T_IS_NOT_IDENTICAL "!== (T_IS_NOT_IDENTICAL)"
-%token T_IS_SMALLER_OR_EQUAL "<= (T_IS_SMALLER_OR_EQUAL)"
-%token T_IS_GREATER_OR_EQUAL ">= (T_IS_GREATER_OR_EQUAL)"
-%token T_SPACESHIP "<=> (T_SPACESHIP)"
-%token T_SL "<< (T_SL)"
-%token T_SR ">> (T_SR)"
-%token T_INSTANCEOF  "instanceof (T_INSTANCEOF)"
-%token T_INC "++ (T_INC)"
-%token T_DEC "-- (T_DEC)"
-%token T_INT_CAST    "(int) (T_INT_CAST)"
-%token T_DOUBLE_CAST "(double) (T_DOUBLE_CAST)"
-%token T_STRING_CAST "(string) (T_STRING_CAST)"
-%token T_ARRAY_CAST  "(array) (T_ARRAY_CAST)"
-%token T_OBJECT_CAST "(object) (T_OBJECT_CAST)"
-%token T_BOOL_CAST   "(bool) (T_BOOL_CAST)"
-%token T_UNSET_CAST  "(unset) (T_UNSET_CAST)"
-%token T_NEW       "new (T_NEW)"
-%token T_CLONE     "clone (T_CLONE)"
-%token T_EXIT      "exit (T_EXIT)"
-%token T_IF        "if (T_IF)"
-%token T_ELSEIF    "elseif (T_ELSEIF)"
-%token T_ELSE      "else (T_ELSE)"
-%token T_ENDIF     "endif (T_ENDIF)"
-%token T_ECHO       "echo (T_ECHO)"
-%token T_DO         "do (T_DO)"
-%token T_WHILE      "while (T_WHILE)"
-%token T_ENDWHILE   "endwhile (T_ENDWHILE)"
-%token T_FOR        "for (T_FOR)"
-%token T_ENDFOR     "endfor (T_ENDFOR)"
-%token T_FOREACH    "foreach (T_FOREACH)"
-%token T_ENDFOREACH "endforeach (T_ENDFOREACH)"
-%token T_DECLARE    "declare (T_DECLARE)"
-%token T_ENDDECLARE "enddeclare (T_ENDDECLARE)"
-%token T_AS         "as (T_AS)"
-%token T_SWITCH     "switch (T_SWITCH)"
-%token T_ENDSWITCH  "endswitch (T_ENDSWITCH)"
-%token T_CASE       "case (T_CASE)"
-%token T_DEFAULT    "default (T_DEFAULT)"
-%token T_BREAK      "break (T_BREAK)"
-%token T_CONTINUE   "continue (T_CONTINUE)"
-%token T_GOTO       "goto (T_GOTO)"
-%token T_FUNCTION   "function (T_FUNCTION)"
-%token T_FN         "fn (T_FN)"
-%token T_CONST      "const (T_CONST)"
-%token T_RETURN     "return (T_RETURN)"
-%token T_TRY        "try (T_TRY)"
-%token T_CATCH      "catch (T_CATCH)"
-%token T_FINALLY    "finally (T_FINALLY)"
-%token T_THROW      "throw (T_THROW)"
-%token T_USE        "use (T_USE)"
-%token T_INSTEADOF  "insteadof (T_INSTEADOF)"
-%token T_GLOBAL     "global (T_GLOBAL)"
-%token T_STATIC     "static (T_STATIC)"
-%token T_ABSTRACT   "abstract (T_ABSTRACT)"
-%token T_FINAL      "final (T_FINAL)"
-%token T_PRIVATE    "private (T_PRIVATE)"
-%token T_PROTECTED  "protected (T_PROTECTED)"
-%token T_PUBLIC     "public (T_PUBLIC)"
-%token T_VAR        "var (T_VAR)"
-%token T_UNSET      "unset (T_UNSET)"
-%token T_ISSET      "isset (T_ISSET)"
-%token T_EMPTY      "empty (T_EMPTY)"
-%token T_HALT_COMPILER "__halt_compiler (T_HALT_COMPILER)"
-%token T_CLASS      "class (T_CLASS)"
-%token T_TRAIT      "trait (T_TRAIT)"
-%token T_INTERFACE  "interface (T_INTERFACE)"
-%token T_EXTENDS    "extends (T_EXTENDS)"
-%token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
-%token T_OBJECT_OPERATOR "-> (T_OBJECT_OPERATOR)"
-%token T_DOUBLE_ARROW    "=> (T_DOUBLE_ARROW)"
-%token T_LIST            "list (T_LIST)"
-%token T_ARRAY           "array (T_ARRAY)"
-%token T_CALLABLE        "callable (T_CALLABLE)"
-%token T_LINE            "__LINE__ (T_LINE)"
-%token T_FILE            "__FILE__ (T_FILE)"
-%token T_DIR             "__DIR__ (T_DIR)"
-%token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
-%token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
-%token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
-%token T_FUNC_C          "__FUNCTION__ (T_FUNC_C)"
-%token T_COMMENT         "comment (T_COMMENT)"
-%token T_DOC_COMMENT     "doc comment (T_DOC_COMMENT)"
-%token T_OPEN_TAG        "open tag (T_OPEN_TAG)"
-%token T_OPEN_TAG_WITH_ECHO "open tag with echo (T_OPEN_TAG_WITH_ECHO)"
-%token T_CLOSE_TAG       "close tag (T_CLOSE_TAG)"
-%token T_WHITESPACE      "whitespace (T_WHITESPACE)"
-%token T_START_HEREDOC   "heredoc start (T_START_HEREDOC)"
-%token T_END_HEREDOC     "heredoc end (T_END_HEREDOC)"
-%token T_DOLLAR_OPEN_CURLY_BRACES "${ (T_DOLLAR_OPEN_CURLY_BRACES)"
-%token T_CURLY_OPEN      "{$ (T_CURLY_OPEN)"
-%token T_PAAMAYIM_NEKUDOTAYIM ":: (T_PAAMAYIM_NEKUDOTAYIM)"
-%token T_NAMESPACE       "namespace (T_NAMESPACE)"
-%token T_NS_C            "__NAMESPACE__ (T_NS_C)"
-%token T_NS_SEPARATOR    "\\ (T_NS_SEPARATOR)"
-%token T_ELLIPSIS        "... (T_ELLIPSIS)"
-%token T_COALESCE        "?? (T_COALESCE)"
-%token T_POW             "** (T_POW)"
-%token T_POW_EQUAL       "**= (T_POW_EQUAL)"
-%token T_BAD_CHARACTER   "invalid character (T_BAD_CHARACTER)"
+%token T_ATTRIBUTE    "'#['"
+%token T_PLUS_EQUAL   "'+='"
+%token T_MINUS_EQUAL  "'-='"
+%token T_MUL_EQUAL    "'*='"
+%token T_DIV_EQUAL    "'/='"
+%token T_CONCAT_EQUAL "'.='"
+%token T_MOD_EQUAL    "'%='"
+%token T_AND_EQUAL    "'&='"
+%token T_OR_EQUAL     "'|='"
+%token T_XOR_EQUAL    "'^='"
+%token T_SL_EQUAL     "'<<='"
+%token T_SR_EQUAL     "'>>='"
+%token T_COALESCE_EQUAL "'??='"
+%token T_BOOLEAN_OR   "'||'"
+%token T_BOOLEAN_AND  "'&&'"
+%token T_IS_EQUAL     "'=='"
+%token T_IS_NOT_EQUAL "'!='"
+%token T_IS_IDENTICAL "'==='"
+%token T_IS_NOT_IDENTICAL "'!=='"
+%token T_IS_SMALLER_OR_EQUAL "'<='"
+%token T_IS_GREATER_OR_EQUAL "'>='"
+%token T_SPACESHIP "'<=>'"
+%token T_SL "'<<'"
+%token T_SR "'>>'"
+%token T_INC "'++'"
+%token T_DEC "'--'"
+%token T_INT_CAST    "'(int)'"
+%token T_DOUBLE_CAST "'(double)'"
+%token T_STRING_CAST "'(string)'"
+%token T_ARRAY_CAST  "'(array)'"
+%token T_OBJECT_CAST "'(object)'"
+%token T_BOOL_CAST   "'(bool)'"
+%token T_UNSET_CAST  "'(unset)'"
+%token T_OBJECT_OPERATOR "'->'"
+%token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
+%token T_DOUBLE_ARROW    "'=>'"
+%token T_COMMENT         "comment"
+%token T_DOC_COMMENT     "doc comment"
+%token T_OPEN_TAG        "open tag"
+%token T_OPEN_TAG_WITH_ECHO "'<?='"
+%token T_CLOSE_TAG       "'?>'"
+%token T_WHITESPACE      "whitespace"
+%token T_START_HEREDOC   "heredoc start"
+%token T_END_HEREDOC     "heredoc end"
+%token T_DOLLAR_OPEN_CURLY_BRACES "'${'"
+%token T_CURLY_OPEN      "'{$'"
+%token T_PAAMAYIM_NEKUDOTAYIM "'::'"
+%token T_NS_SEPARATOR    "'\\'"
+%token T_ELLIPSIS        "'...'"
+%token T_COALESCE        "'??'"
+%token T_POW             "'**'"
+%token T_POW_EQUAL       "'**='"
+/* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
+ * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
+ * or shift to continue parsing an intersection type. */
+%token T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG     "'&'"
+/* Bison warns on duplicate token literals, so use a different dummy value here.
+ * It will be fixed up by zend_yytnamerr() later. */
+%token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
+%token T_BAD_CHARACTER   "invalid character"
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
-%type <ast> class_declaration_statement trait_declaration_statement
+%type <ast> class_declaration_statement trait_declaration_statement legacy_namespace_name
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument global_var
+%type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
 %type <ast> internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
-%type <ast> variable_class_name dereferencable_scalar constant dereferencable
+%type <ast> variable_class_name dereferenceable_scalar constant class_constant
+%type <ast> fully_dereferenceable array_object_dereferenceable
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
-%type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
+%type <ast> echo_expr_list unset_variables catch_name_list catch_list optional_variable parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
-%type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
+%type <ast> class_const_list class_const_decl class_name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
-%type <ast> isset_variable type return_type type_expr
-%type <ast> identifier
-%type <ast> inline_function
+%type <ast> isset_variable type return_type type_expr type_without_static
+%type <ast> identifier type_expr_without_static union_type_without_static intersection_type_without_static
+%type <ast> inline_function union_type intersection_type
+%type <ast> attributed_statement attributed_class_statement attributed_parameter
+%type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
+%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
+%type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
+%type <num> optional_property_modifiers property_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
+
+%type <ident> reserved_non_modifiers semi_reserved
 
 %% /* Rules */
 
@@ -277,53 +302,101 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
 ;
 
 semi_reserved:
 	  reserved_non_modifiers
-	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY
+;
+
+ampersand:
+		T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
+	|	T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
 ;
 
 identifier:
 		T_STRING { $$ = $1; }
 	| 	semi_reserved  {
 			zval zv;
-			zend_lex_tstring(&zv);
+			if (zend_lex_tstring(&zv, $1) == FAILURE) { YYABORT; }
 			$$ = zend_ast_create_zval(&zv);
 		}
 ;
 
 top_statement_list:
 		top_statement_list top_statement { $$ = zend_ast_list_add($1, $2); }
-	|	/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
+	|	%empty { $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
+/* Name usable in a namespace declaration. */
+namespace_declaration_name:
+		identifier								{ $$ = $1; }
+	|	T_NAME_QUALIFIED						{ $$ = $1; }
+;
+
+/* Name usable in "use" declarations (leading separator forbidden). */
 namespace_name:
 		T_STRING								{ $$ = $1; }
-	|	namespace_name T_NS_SEPARATOR T_STRING	{ $$ = zend_ast_append_str($1, $3); }
+	|	T_NAME_QUALIFIED						{ $$ = $1; }
+;
+
+/* Name usable in "use" declarations (leading separator allowed). */
+legacy_namespace_name:
+		namespace_name							{ $$ = $1; }
+	|	T_NAME_FULLY_QUALIFIED					{ $$ = $1; }
 ;
 
 name:
-		namespace_name								{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name	{ $$ = $3; $$->attr = ZEND_NAME_RELATIVE; }
-	|	T_NS_SEPARATOR namespace_name				{ $$ = $2; $$->attr = ZEND_NAME_FQ; }
+		T_STRING									{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
+	|	T_NAME_QUALIFIED							{ $$ = $1; $$->attr = ZEND_NAME_NOT_FQ; }
+	|	T_NAME_FULLY_QUALIFIED						{ $$ = $1; $$->attr = ZEND_NAME_FQ; }
+	|	T_NAME_RELATIVE								{ $$ = $1; $$->attr = ZEND_NAME_RELATIVE; }
+;
+
+attribute_decl:
+		class_name
+			{ $$ = zend_ast_create(ZEND_AST_ATTRIBUTE, $1, NULL); }
+	|	class_name argument_list
+			{ $$ = zend_ast_create(ZEND_AST_ATTRIBUTE, $1, $2); }
+;
+
+attribute_group:
+		attribute_decl
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ATTRIBUTE_GROUP, $1); }
+	|	attribute_group ',' attribute_decl
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+attribute:
+		T_ATTRIBUTE attribute_group possible_comma ']'	{ $$ = $2; }
+;
+
+attributes:
+		attribute				{ $$ = zend_ast_create_list(1, ZEND_AST_ATTRIBUTE_LIST, $1); }
+	|	attributes attribute	{ $$ = zend_ast_list_add($1, $2); }
+;
+
+attributed_statement:
+		function_declaration_statement		{ $$ = $1; }
+	|	class_declaration_statement			{ $$ = $1; }
+	|	trait_declaration_statement			{ $$ = $1; }
+	|	interface_declaration_statement		{ $$ = $1; }
+	|	enum_declaration_statement			{ $$ = $1; }
 ;
 
 top_statement:
 		statement							{ $$ = $1; }
-	|	function_declaration_statement		{ $$ = $1; }
-	|	class_declaration_statement			{ $$ = $1; }
-	|	trait_declaration_statement			{ $$ = $1; }
-	|	interface_declaration_statement		{ $$ = $1; }
+	|	attributed_statement					{ $$ = $1; }
+	|	attributes attributed_statement		{ $$ = zend_ast_with_attributes($2, $1); }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
 			  zend_stop_lexing(); }
-	|	T_NAMESPACE namespace_name ';'
+	|	T_NAMESPACE namespace_declaration_name ';'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, NULL);
 			  RESET_DOC_COMMENT(); }
-	|	T_NAMESPACE namespace_name { RESET_DOC_COMMENT(); }
+	|	T_NAMESPACE namespace_declaration_name { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, $5); }
 	|	T_NAMESPACE { RESET_DOC_COMMENT(); }
@@ -342,21 +415,17 @@ use_type:
 ;
 
 group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
+		legacy_namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 mixed_group_use_declaration:
-		namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
+		legacy_namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
 			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4);}
-	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 possible_comma:
-		/* empty */
+		%empty
 	|	','
 ;
 
@@ -394,8 +463,10 @@ unprefixed_use_declaration:
 ;
 
 use_declaration:
-		unprefixed_use_declaration                { $$ = $1; }
-	|	T_NS_SEPARATOR unprefixed_use_declaration { $$ = $2; }
+		legacy_namespace_name
+			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, NULL); }
+	|	legacy_namespace_name T_AS T_STRING
+			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, $3); }
 ;
 
 const_list:
@@ -406,17 +477,15 @@ const_list:
 inner_statement_list:
 		inner_statement_list inner_statement
 			{ $$ = zend_ast_list_add($1, $2); }
-	|	/* empty */
+	|	%empty
 			{ $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 
 inner_statement:
 		statement { $$ = $1; }
-	|	function_declaration_statement 		{ $$ = $1; }
-	|	class_declaration_statement 		{ $$ = $1; }
-	|	trait_declaration_statement			{ $$ = $1; }
-	|	interface_declaration_statement		{ $$ = $1; }
+	|	attributed_statement					{ $$ = $1; }
+	|	attributes attributed_statement		{ $$ = zend_ast_with_attributes($2, $1); }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = NULL; zend_throw_exception(zend_ce_compile_error,
 			      "__HALT_COMPILER() can only be used from the outermost scope", 0); YYERROR; }
@@ -456,25 +525,29 @@ statement:
 	|	';'	/* empty statement */ { $$ = NULL; }
 	|	T_TRY '{' inner_statement_list '}' catch_list finally_statement
 			{ $$ = zend_ast_create(ZEND_AST_TRY, $3, $5, $6); }
-	|	T_THROW expr ';' { $$ = zend_ast_create(ZEND_AST_THROW, $2); }
 	|	T_GOTO T_STRING ';' { $$ = zend_ast_create(ZEND_AST_GOTO, $2); }
 	|	T_STRING ':' { $$ = zend_ast_create(ZEND_AST_LABEL, $1); }
 ;
 
 catch_list:
-		/* empty */
+		%empty
 			{ $$ = zend_ast_create_list(0, ZEND_AST_CATCH_LIST); }
-	|	catch_list T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
+	|	catch_list T_CATCH '(' catch_name_list optional_variable ')' '{' inner_statement_list '}'
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_CATCH, $4, $5, $8)); }
 ;
 
 catch_name_list:
-		name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
-	|	catch_name_list '|' name { $$ = zend_ast_list_add($1, $3); }
+		class_name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+	|	catch_name_list '|' class_name { $$ = zend_ast_list_add($1, $3); }
+;
+
+optional_variable:
+		%empty { $$ = NULL; }
+	|	T_VARIABLE { $$ = $1; }
 ;
 
 finally_statement:
-		/* empty */ { $$ = NULL; }
+		%empty { $$ = NULL; }
 	|	T_FINALLY '{' inner_statement_list '}' { $$ = $3; }
 ;
 
@@ -491,26 +564,26 @@ function_declaration_statement:
 	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
 	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
-		      zend_ast_get_str($3), $6, NULL, $11, $8); CG(extra_fn_flags) = $9; }
+		      zend_ast_get_str($3), $6, NULL, $11, $8, NULL); CG(extra_fn_flags) = $9; }
 ;
 
 is_reference:
-		/* empty */	{ $$ = 0; }
-	|	'&'			{ $$ = ZEND_PARAM_REF; }
+		%empty	{ $$ = 0; }
+	|	T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG	{ $$ = ZEND_PARAM_REF; }
 ;
 
 is_variadic:
-		/* empty */ { $$ = 0; }
+		%empty { $$ = 0; }
 	|	T_ELLIPSIS  { $$ = ZEND_PARAM_VARIADIC; }
 ;
 
 class_declaration_statement:
 		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
 	|	T_CLASS { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
 ;
 
 class_modifiers:
@@ -522,38 +595,60 @@ class_modifiers:
 class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
+	|	T_READONLY 		{ $$ = ZEND_ACC_READONLY_CLASS|ZEND_ACC_NO_DYNAMIC_PROPERTIES; }
 ;
 
 trait_declaration_statement:
 		T_TRAIT { $<num>$ = CG(zend_lineno); }
 		T_STRING backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL, NULL); }
 ;
 
 interface_declaration_statement:
 		T_INTERFACE { $<num>$ = CG(zend_lineno); }
 		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL, NULL); }
+;
+
+enum_declaration_statement:
+		T_ENUM { $<num>$ = CG(zend_lineno); }
+		T_STRING enum_backing_type implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_ENUM|ZEND_ACC_FINAL, $<num>2, $6, zend_ast_get_str($3), NULL, $5, $8, NULL, $4); }
+;
+
+enum_backing_type:
+		%empty	{ $$ = NULL; }
+	|	':' type_expr { $$ = $2; }
+;
+
+enum_case:
+		T_CASE backup_doc_comment identifier enum_case_expr ';'
+			{ $$ = zend_ast_create(ZEND_AST_ENUM_CASE, $3, $4, ($2 ? zend_ast_create_zval_from_str($2) : NULL), NULL); }
+;
+
+enum_case_expr:
+		%empty	{ $$ = NULL; }
+	|	'=' expr { $$ = $2; }
 ;
 
 extends_from:
-		/* empty */		{ $$ = NULL; }
-	|	T_EXTENDS name	{ $$ = $2; }
+		%empty				{ $$ = NULL; }
+	|	T_EXTENDS class_name	{ $$ = $2; }
 ;
 
 interface_extends_list:
-		/* empty */			{ $$ = NULL; }
-	|	T_EXTENDS name_list	{ $$ = $2; }
+		%empty			        { $$ = NULL; }
+	|	T_EXTENDS class_name_list	{ $$ = $2; }
 ;
 
 implements_list:
-		/* empty */				{ $$ = NULL; }
-	|	T_IMPLEMENTS name_list	{ $$ = $2; }
+		%empty		        		{ $$ = NULL; }
+	|	T_IMPLEMENTS class_name_list	{ $$ = $2; }
 ;
 
 foreach_variable:
 		variable			{ $$ = $1; }
-	|	'&' variable		{ $$ = zend_ast_create(ZEND_AST_REF, $2); }
+	|	ampersand variable	{ $$ = zend_ast_create(ZEND_AST_REF, $2); }
 	|	T_LIST '(' array_pair_list ')' { $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_LIST; }
 	|	'[' array_pair_list ']' { $$ = $2; $$->attr = ZEND_ARRAY_SYNTAX_SHORT; }
 ;
@@ -581,7 +676,7 @@ switch_case_list:
 ;
 
 case_list:
-		/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
+		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
 	|	case_list T_CASE expr case_separator inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
 	|	case_list T_DEFAULT case_separator inner_statement_list
@@ -591,6 +686,34 @@ case_list:
 case_separator:
 		':'
 	|	';'
+;
+
+
+match:
+		T_MATCH '(' expr ')' '{' match_arm_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+;
+
+match_arm_list:
+		%empty { $$ = zend_ast_create_list(0, ZEND_AST_MATCH_ARM_LIST); }
+	|	non_empty_match_arm_list possible_comma { $$ = $1; }
+;
+
+non_empty_match_arm_list:
+		match_arm { $$ = zend_ast_create_list(1, ZEND_AST_MATCH_ARM_LIST, $1); }
+	|	non_empty_match_arm_list ',' match_arm { $$ = zend_ast_list_add($1, $3); }
+;
+
+match_arm:
+		match_arm_cond_list possible_comma T_DOUBLE_ARROW expr
+			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, $1, $4); }
+	|	T_DEFAULT possible_comma T_DOUBLE_ARROW expr
+			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, NULL, $4); }
+;
+
+match_arm_cond_list:
+		expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
+	|	match_arm_cond_list ',' expr { $$ = zend_ast_list_add($1, $3); }
 ;
 
 
@@ -632,50 +755,113 @@ alt_if_stmt:
 ;
 
 parameter_list:
-		non_empty_parameter_list { $$ = $1; }
-	|	/* empty */	{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
+		non_empty_parameter_list possible_comma { $$ = $1; }
+	|	%empty	{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
 ;
 
 
 non_empty_parameter_list:
-		parameter
+		attributed_parameter
 			{ $$ = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, $1); }
-	|	non_empty_parameter_list ',' parameter
+	|	non_empty_parameter_list ',' attributed_parameter
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
+attributed_parameter:
+		attributes parameter	{ $$ = zend_ast_with_attributes($2, $1); }
+	|	parameter				{ $$ = $1; }
+;
+
+optional_property_modifiers:
+		%empty					{ $$ = 0; }
+	|	optional_property_modifiers property_modifier
+			{ $$ = zend_add_member_modifier($1, $2); if (!$$) { YYERROR; } }
+
+property_modifier:
+		T_PUBLIC				{ $$ = ZEND_ACC_PUBLIC; }
+	|	T_PROTECTED				{ $$ = ZEND_ACC_PROTECTED; }
+	|	T_PRIVATE				{ $$ = ZEND_ACC_PRIVATE; }
+	|	T_READONLY				{ $$ = ZEND_ACC_READONLY; }
+;
+
 parameter:
-		optional_type is_reference is_variadic T_VARIABLE
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, NULL); }
-	|	optional_type is_reference is_variadic T_VARIABLE '=' expr
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, $6); }
+		optional_property_modifiers optional_type_without_static
+		is_reference is_variadic T_VARIABLE backup_doc_comment
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL,
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
+	|	optional_property_modifiers optional_type_without_static
+		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $8,
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
 ;
 
 
-optional_type:
-		/* empty */	{ $$ = NULL; }
-	|	type_expr	{ $$ = $1; }
+optional_type_without_static:
+		%empty	{ $$ = NULL; }
+	|	type_expr_without_static	{ $$ = $1; }
 ;
 
 type_expr:
-		type		{ $$ = $1; }
-	|	'?' type	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+		type				{ $$ = $1; }
+	|	'?' type			{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+	|	union_type			{ $$ = $1; }
+	|	intersection_type	{ $$ = $1; }
 ;
 
 type:
+		type_without_static	{ $$ = $1; }
+	|	T_STATIC			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_STATIC); }
+;
+
+union_type:
+		type '|' type       { $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
+	|	union_type '|' type { $$ = zend_ast_list_add($1, $3); }
+;
+
+intersection_type:
+		type T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type       { $$ = zend_ast_create_list(2, ZEND_AST_TYPE_INTERSECTION, $1, $3); }
+	|	intersection_type T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type { $$ = zend_ast_list_add($1, $3); }
+;
+
+/* Duplicate the type rules without "static",
+ * to avoid conflicts with "static" modifier for properties. */
+
+type_expr_without_static:
+		type_without_static			{ $$ = $1; }
+	|	'?' type_without_static		{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+	|	union_type_without_static	{ $$ = $1; }
+	|	intersection_type_without_static	{ $$ = $1; }
+;
+
+type_without_static:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
 	|	name		{ $$ = $1; }
 ;
 
+union_type_without_static:
+		type_without_static '|' type_without_static
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
+	|	union_type_without_static '|' type_without_static
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+intersection_type_without_static:
+		type_without_static T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type_without_static
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_INTERSECTION, $1, $3); }
+	|	intersection_type_without_static T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG type_without_static
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
 return_type:
-		/* empty */	{ $$ = NULL; }
+		%empty	{ $$ = NULL; }
 	|	':' type_expr	{ $$ = $2; }
 ;
 
 argument_list:
 		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_argument_list possible_comma ')' { $$ = $2; }
+	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create(ZEND_AST_CALLABLE_CONVERT); }
 ;
 
 non_empty_argument_list:
@@ -686,7 +872,9 @@ non_empty_argument_list:
 ;
 
 argument:
-		expr			{ $$ = $1; }
+		expr				{ $$ = $1; }
+	|	identifier ':' expr
+			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 ;
 
@@ -711,32 +899,38 @@ static_var:
 	|	T_VARIABLE '=' expr	{ $$ = zend_ast_create(ZEND_AST_STATIC, $1, $3); }
 ;
 
-
 class_statement_list:
 		class_statement_list class_statement
 			{ $$ = zend_ast_list_add($1, $2); }
-	|	/* empty */
+	|	%empty
 			{ $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 
-class_statement:
-		variable_modifiers optional_type property_list ';'
-			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3);
+attributed_class_statement:
+		variable_modifiers optional_type_without_static property_list ';'
+			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3, NULL);
 			  $$->attr = $1; }
 	|	method_modifiers T_CONST class_const_list ';'
-			{ $$ = $3; $$->attr = $1; }
-	|	T_USE name_list trait_adaptations
-			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST_GROUP, $3, NULL);
+			  $$->attr = $1; }
 	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
 		return_type backup_fn_flags method_body backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
-				  zend_ast_get_str($4), $7, NULL, $11, $9); CG(extra_fn_flags) = $10; }
+				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
+	|	enum_case { $$ = $1; }
 ;
 
-name_list:
-		name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
-	|	name_list ',' name { $$ = zend_ast_list_add($1, $3); }
+class_statement:
+		attributed_class_statement { $$ = $1; }
+	|	attributes attributed_class_statement { $$ = zend_ast_with_attributes($2, $1); }
+	|	T_USE class_name_list trait_adaptations
+			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
+;
+
+class_name_list:
+		class_name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+	|	class_name_list ',' class_name { $$ = zend_ast_list_add($1, $3); }
 ;
 
 trait_adaptations:
@@ -758,7 +952,7 @@ trait_adaptation:
 ;
 
 trait_precedence:
-	absolute_trait_method_reference T_INSTEADOF name_list
+	absolute_trait_method_reference T_INSTEADOF class_name_list
 		{ $$ = zend_ast_create(ZEND_AST_TRAIT_PRECEDENCE, $1, $3); }
 ;
 
@@ -766,7 +960,9 @@ trait_alias:
 		trait_method_reference T_AS T_STRING
 			{ $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, $3); }
 	|	trait_method_reference T_AS reserved_non_modifiers
-			{ zval zv; zend_lex_tstring(&zv); $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, zend_ast_create_zval(&zv)); }
+			{ zval zv;
+			  if (zend_lex_tstring(&zv, $3) == FAILURE) { YYABORT; }
+			  $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, zend_ast_create_zval(&zv)); }
 	|	trait_method_reference T_AS member_modifier identifier
 			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3, $1, $4); }
 	|	trait_method_reference T_AS member_modifier
@@ -780,7 +976,7 @@ trait_method_reference:
 ;
 
 absolute_trait_method_reference:
-	name T_PAAMAYIM_NEKUDOTAYIM identifier
+	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
 		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
 ;
 
@@ -795,7 +991,7 @@ variable_modifiers:
 ;
 
 method_modifiers:
-		/* empty */						{ $$ = ZEND_ACC_PUBLIC; }
+		%empty						{ $$ = ZEND_ACC_PUBLIC; }
 	|	non_empty_member_modifiers
 			{ $$ = $1; if (!($$ & ZEND_ACC_PPP_MASK)) { $$ |= ZEND_ACC_PUBLIC; } }
 ;
@@ -813,6 +1009,7 @@ member_modifier:
 	|	T_STATIC				{ $$ = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ $$ = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ $$ = ZEND_ACC_FINAL; }
+	|	T_READONLY				{ $$ = ZEND_ACC_READONLY; }
 ;
 
 property_list:
@@ -849,7 +1046,7 @@ echo_expr:
 ;
 
 for_exprs:
-		/* empty */			{ $$ = NULL; }
+		%empty			{ $$ = NULL; }
 	|	non_empty_for_exprs	{ $$ = $1; }
 ;
 
@@ -863,7 +1060,7 @@ anonymous_class:
 		extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
 			zend_ast *decl = zend_ast_create_decl(
 				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS, $<num>2, $6, NULL,
-				$4, $5, $8, NULL);
+				$4, $5, $8, NULL, NULL);
 			$$ = zend_ast_create(ZEND_AST_NEW, decl, $3);
 		}
 ;
@@ -873,6 +1070,8 @@ new_expr:
 			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, $3); }
 	|	T_NEW anonymous_class
 			{ $$ = $2; }
+	|	T_NEW attributes anonymous_class
+			{ zend_ast_with_attributes($3->child[0], $2); $$ = $3; }
 ;
 
 expr:
@@ -884,7 +1083,7 @@ expr:
 			{ $2->attr = ZEND_ARRAY_SYNTAX_SHORT; $$ = zend_ast_create(ZEND_AST_ASSIGN, $2, $5); }
 	|	variable '=' expr
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
-	|	variable '=' '&' variable
+	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
 	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
 	|	variable T_PLUS_EQUAL expr
@@ -928,9 +1127,10 @@ expr:
 	|	expr T_LOGICAL_XOR expr
 			{ $$ = zend_ast_create_binary_op(ZEND_BOOL_XOR, $1, $3); }
 	|	expr '|' expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_OR, $1, $3); }
-	|	expr '&' expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_AND, $1, $3); }
+	|	expr T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_AND, $1, $3); }
+	|	expr T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_AND, $1, $3); }
 	|	expr '^' expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_XOR, $1, $3); }
-	|	expr '.' expr 	{ $$ = zend_ast_create_binary_op(ZEND_CONCAT, $1, $3); }
+	|	expr '.' expr 	{ $$ = zend_ast_create_concat_op($1, $3); }
 	|	expr '+' expr 	{ $$ = zend_ast_create_binary_op(ZEND_ADD, $1, $3); }
 	|	expr '-' expr 	{ $$ = zend_ast_create_binary_op(ZEND_SUB, $1, $3); }
 	|	expr '*' expr	{ $$ = zend_ast_create_binary_op(ZEND_MUL, $1, $3); }
@@ -991,8 +1191,13 @@ expr:
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_THROW expr { $$ = zend_ast_create(ZEND_AST_THROW, $2); }
 	|	inline_function { $$ = $1; }
+	|	attributes inline_function { $$ = zend_ast_with_attributes($2, $1); }
 	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	attributes T_STATIC inline_function
+			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	match { $$ = $1; }
 ;
 
 
@@ -1001,11 +1206,12 @@ inline_function:
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-				  $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
-	|	fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $7,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $4, NULL,
-				  zend_ast_create(ZEND_AST_RETURN, $11), $6);
+				  $5, $7, $11, $8, NULL); CG(extra_fn_flags) = $9; }
+	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
+		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $5, NULL,
+				  zend_ast_create(ZEND_AST_RETURN, $11), $7, NULL);
 				  ((zend_ast_decl *) $$)->lex_pos = $10;
 				  CG(extra_fn_flags) = $9; }
 ;
@@ -1019,25 +1225,25 @@ function:
 ;
 
 backup_doc_comment:
-	/* empty */ { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
+	%empty { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
 ;
 
 backup_fn_flags:
-	%prec PREC_ARROW_FUNCTION /* empty */ { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
+	%prec PREC_ARROW_FUNCTION %empty { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
 ;
 
 backup_lex_pos:
-	/* empty */ { $$ = LANG_SCNG(yy_text); }
+	%empty { $$ = LANG_SCNG(yy_text); }
 ;
 
 returns_ref:
-		/* empty */	{ $$ = 0; }
-	|	'&'			{ $$ = ZEND_ACC_RETURN_REFERENCE; }
+		%empty	{ $$ = 0; }
+	|	ampersand	{ $$ = ZEND_ACC_RETURN_REFERENCE; }
 ;
 
 lexical_vars:
-		/* empty */ { $$ = NULL; }
-	|	T_USE '(' lexical_var_list ')' { $$ = $3; }
+		%empty { $$ = NULL; }
+	|	T_USE '(' lexical_var_list possible_comma ')' { $$ = $3; }
 ;
 
 lexical_var_list:
@@ -1047,7 +1253,7 @@ lexical_var_list:
 
 lexical_var:
 		T_VARIABLE		{ $$ = $1; }
-	|	'&' T_VARIABLE	{ $$ = $2; $$->attr = ZEND_BIND_REF; }
+	|	ampersand T_VARIABLE	{ $$ = $2; $$->attr = ZEND_BIND_REF; }
 ;
 
 function_call:
@@ -1057,8 +1263,10 @@ function_call:
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
-	|	callable_expr argument_list
-			{ $$ = zend_ast_create(ZEND_AST_CALL, $1, $2); }
+	|	callable_expr { $<num>$ = CG(zend_lineno); } argument_list { 
+			$$ = zend_ast_create(ZEND_AST_CALL, $1, $3); 
+			$$->lineno = $<num>2;
+		}
 ;
 
 class_name:
@@ -1071,15 +1279,16 @@ class_name:
 class_name_reference:
 		class_name		{ $$ = $1; }
 	|	new_variable	{ $$ = $1; }
+	|	'(' expr ')'	{ $$ = $2; }
 ;
 
 exit_expr:
-		/* empty */				{ $$ = NULL; }
+		%empty				{ $$ = NULL; }
 	|	'(' optional_expr ')'	{ $$ = $2; }
 ;
 
 backticks_expr:
-		/* empty */
+		%empty
 			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
 	|	T_ENCAPSED_AND_WHITESPACE { $$ = $1; }
 	|	encaps_list { $$ = $1; }
@@ -1087,20 +1296,32 @@ backticks_expr:
 
 
 ctor_arguments:
-		/* empty */	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+		%empty	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	argument_list { $$ = $1; }
 ;
 
 
-dereferencable_scalar:
+dereferenceable_scalar:
 		T_ARRAY '(' array_pair_list ')'	{ $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_LONG; }
 	|	'[' array_pair_list ']'			{ $$ = $2; $$->attr = ZEND_ARRAY_SYNTAX_SHORT; }
 	|	T_CONSTANT_ENCAPSED_STRING		{ $$ = $1; }
+	|	'"' encaps_list '"'			 	{ $$ = $2; }
 ;
 
 scalar:
 		T_LNUMBER 	{ $$ = $1; }
 	|	T_DNUMBER 	{ $$ = $1; }
+	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
+	|	T_START_HEREDOC T_END_HEREDOC
+			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
+	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
+	|	dereferenceable_scalar	{ $$ = $1; }
+	|	constant				{ $$ = $1; }
+	|	class_constant			{ $$ = $1; }
+;
+
+constant:
+		name		{ $$ = zend_ast_create(ZEND_AST_CONST, $1); }
 	|	T_LINE 		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_LINE); }
 	|	T_FILE 		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_FILE); }
 	|	T_DIR   	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_DIR); }
@@ -1109,55 +1330,53 @@ scalar:
 	|	T_FUNC_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_FUNC_C); }
 	|	T_NS_C		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_NS_C); }
 	|	T_CLASS_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C); }
-	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
-	|	T_START_HEREDOC T_END_HEREDOC
-			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
-	|	'"' encaps_list '"' 	{ $$ = $2; }
-	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
-	|	dereferencable_scalar	{ $$ = $1; }
-	|	constant			{ $$ = $1; }
 ;
 
-constant:
-		name { $$ = zend_ast_create(ZEND_AST_CONST, $1); }
-	|	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+class_constant:
+		class_name T_PAAMAYIM_NEKUDOTAYIM identifier
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 ;
 
 optional_expr:
-		/* empty */	{ $$ = NULL; }
+		%empty	{ $$ = NULL; }
 	|	expr		{ $$ = $1; }
 ;
 
 variable_class_name:
-	dereferencable { $$ = $1; }
+		fully_dereferenceable { $$ = $1; }
 ;
 
-dereferencable:
+fully_dereferenceable:
 		variable				{ $$ = $1; }
 	|	'(' expr ')'			{ $$ = $2; }
-	|	dereferencable_scalar	{ $$ = $1; }
+	|	dereferenceable_scalar	{ $$ = $1; }
+	|	class_constant			{ $$ = $1; }
+;
+
+array_object_dereferenceable:
+		fully_dereferenceable	{ $$ = $1; }
+	|	constant				{ $$ = $1; }
 ;
 
 callable_expr:
 		callable_variable		{ $$ = $1; }
 	|	'(' expr ')'			{ $$ = $2; }
-	|	dereferencable_scalar	{ $$ = $1; }
+	|	dereferenceable_scalar	{ $$ = $1; }
 ;
 
 callable_variable:
 		simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
-	|	dereferencable '[' optional_expr ']'
+	|	array_object_dereferenceable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
-	|	constant '[' optional_expr ']'
-			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
-	|	dereferencable '{' expr '}'
+	|	array_object_dereferenceable '{' expr '}'
 			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_DIM_ALTERNATIVE_SYNTAX, $1, $3); }
-	|	dereferencable T_OBJECT_OPERATOR property_name argument_list
+	|	array_object_dereferenceable T_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
+	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
+			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_METHOD_CALL, $1, $3, $4); }
 	|	function_call { $$ = $1; }
 ;
 
@@ -1166,8 +1385,10 @@ variable:
 			{ $$ = $1; }
 	|	static_member
 			{ $$ = $1; }
-	|	dereferencable T_OBJECT_OPERATOR property_name
+	|	array_object_dereferenceable T_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
+	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name
+			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_PROP, $1, $3); }
 ;
 
 simple_variable:
@@ -1192,6 +1413,8 @@ new_variable:
 			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_DIM_ALTERNATIVE_SYNTAX, $1, $3); }
 	|	new_variable T_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
+	|	new_variable T_NULLSAFE_OBJECT_OPERATOR property_name
+			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_PROP, $1, $3); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
@@ -1216,7 +1439,7 @@ array_pair_list:
 ;
 
 possible_array_pair:
-		/* empty */ { $$ = NULL; }
+		%empty { $$ = NULL; }
 	|	array_pair  { $$ = $1; }
 ;
 
@@ -1232,9 +1455,9 @@ array_pair:
 			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
 	|	expr
 			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
-	|	expr T_DOUBLE_ARROW '&' variable
+	|	expr T_DOUBLE_ARROW ampersand variable
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $4, $1); }
-	|	'&' variable
+	|	ampersand variable
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
 	|	T_ELLIPSIS expr
 			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
@@ -1266,12 +1489,15 @@ encaps_var:
 	|	T_VARIABLE T_OBJECT_OPERATOR T_STRING
 			{ $$ = zend_ast_create(ZEND_AST_PROP,
 			      zend_ast_create(ZEND_AST_VAR, $1), $3); }
+	|	T_VARIABLE T_NULLSAFE_OBJECT_OPERATOR T_STRING
+			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_PROP,
+			      zend_ast_create(ZEND_AST_VAR, $1), $3); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES expr '}'
-			{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_VAR, ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR, $2); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
-			{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_VAR, ZEND_ENCAPS_VAR_DOLLAR_CURLY, $2); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
-			{ $$ = zend_ast_create(ZEND_AST_DIM,
+			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_ENCAPS_VAR_DOLLAR_CURLY,
 			      zend_ast_create(ZEND_AST_VAR, $2), $4); }
 	|	T_CURLY_OPEN variable '}' { $$ = $2; }
 ;
@@ -1311,15 +1537,16 @@ isset_variable:
 
 %%
 
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
+/* Over-ride Bison formatting routine to give better token descriptions.
+   Copy to YYRES the contents of YYSTR for use in yyerror.
+   YYSTR is taken from yytname, from the %token declaration.
+   If YYRES is null, do not copy; instead, return the length of what
+   the result would have been.  */
 static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 {
+	const char *toktype = yystr;
+	size_t toktype_len = strlen(toktype);
+
 	/* CG(parse_error) states:
 	 * 0 => yyres = NULL, yystr is the unexpected token
 	 * 1 => yyres = NULL, yystr is one of the expected tokens
@@ -1333,63 +1560,149 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 	if (CG(parse_error) % 2 == 0) {
 		/* The unexpected token */
 		char buffer[120];
-		const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
-		unsigned int len = 0, toklen = 0, yystr_len;
+		const unsigned char *tokcontent, *tokcontent_end;
+		size_t tokcontent_len;
 
 		CG(parse_error)++;
 
 		if (LANG_SCNG(yy_text)[0] == 0 &&
 			LANG_SCNG(yy_leng) == 1 &&
-			strcmp(yystr, "\"end of file\"") == 0) {
+			strcmp(toktype, "\"end of file\"") == 0) {
 			if (yyres) {
 				yystpcpy(yyres, "end of file");
 			}
 			return sizeof("end of file")-1;
 		}
 
-		str = LANG_SCNG(yy_text);
-		end = memchr(str, '\n', LANG_SCNG(yy_leng));
-		yystr_len = (unsigned int)yystrlen(yystr);
-
-		if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
-			&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
-			toklen = (tok2 - tok1) + 1;
-		} else {
-			tok1 = tok2 = NULL;
-			toklen = 0;
-		}
-
-		if (end == NULL) {
-			len = LANG_SCNG(yy_leng) > 30 ? 30 : LANG_SCNG(yy_leng);
-		} else {
-			len = (end - str) > 30 ? 30 : (end - str);
-		}
-		if (yyres) {
-			if (toklen) {
-				snprintf(buffer, sizeof(buffer), "'%.*s' %.*s", len, str, toklen, tok1);
-			} else {
-				snprintf(buffer, sizeof(buffer), "'%.*s'", len, str);
+		/* Prevent the backslash getting doubled in the output (eugh) */
+		if (strcmp(toktype, "\"'\\\\'\"") == 0) {
+			if (yyres) {
+				yystpcpy(yyres, "token \"\\\"");
 			}
+			return sizeof("token \"\\\"")-1;
+		}
+
+		/* We used "amp" as a dummy label to avoid a duplicate token literal warning. */
+		if (strcmp(toktype, "\"amp\"") == 0) {
+			if (yyres) {
+				yystpcpy(yyres, "token \"&\"");
+			}
+			return sizeof("token \"&\"")-1;
+		}
+
+		/* Avoid unreadable """ */
+		/* "'" would theoretically be just as bad, but is never currently parsed as a separate token */
+		if (strcmp(toktype, "'\"'") == 0) {
+			if (yyres) {
+				yystpcpy(yyres, "double-quote mark");
+			}
+			return sizeof("double-quote mark")-1;
+		}
+
+		/* Strip off the outer quote marks */
+		if (toktype_len >= 2 && *toktype == '"') {
+			toktype++;
+			toktype_len -= 2;
+		}
+
+		/* If the token always has one form, the %token line should have a single-quoted name */
+		/* The parser rules also include single-character un-named tokens which will be single-quoted here */
+		/* We re-format this with double quotes here to ensure everything's consistent */
+		if (toktype_len > 0 && *toktype == '\'') {
+			if (yyres) {
+				snprintf(buffer, sizeof(buffer), "token \"%.*s\"", (int)toktype_len-2, toktype+1);
+				yystpcpy(yyres, buffer);
+			}
+			return toktype_len + sizeof("token ")-1;
+		}
+
+		/* Fetch the content of the last seen token from global lexer state */
+		tokcontent = LANG_SCNG(yy_text);
+		tokcontent_len = LANG_SCNG(yy_leng);
+
+		/* For T_BAD_CHARACTER, the content probably won't be a printable char */
+		/* Also, "unexpected invalid character" sounds a bit redundant */
+		if (tokcontent_len == 1 && strcmp(yystr, "\"invalid character\"") == 0) {
+			if (yyres) {
+				snprintf(buffer, sizeof(buffer), "character 0x%02hhX", *tokcontent);
+				yystpcpy(yyres, buffer);
+			}
+			return sizeof("character 0x00")-1;
+		}
+
+		/* Truncate at line end to avoid messing up log formats */
+		tokcontent_end = memchr(tokcontent, '\n', tokcontent_len);
+		if (tokcontent_end != NULL) {
+			tokcontent_len = (tokcontent_end - tokcontent);
+		}
+
+		/* Try to be helpful about what kind of string was found, before stripping the quotes */
+		if (tokcontent_len > 0 && strcmp(yystr, "\"quoted string\"") == 0) {
+			if (*tokcontent == '"') {
+				toktype = "double-quoted string";
+				toktype_len = sizeof("double-quoted string")-1;
+			}
+			else if (*tokcontent == '\'') {
+				toktype = "single-quoted string";
+				toktype_len = sizeof("single-quoted string")-1;
+			}
+		}
+
+		/* For quoted strings, strip off another layer of quotes to avoid putting quotes inside quotes */
+		if (tokcontent_len > 0 && (*tokcontent == '\'' || *tokcontent=='"'))  {
+			tokcontent++;
+			tokcontent_len--;
+		}
+		if (tokcontent_len > 0 && (tokcontent[tokcontent_len-1] == '\'' || tokcontent[tokcontent_len-1] == '"'))  {
+			tokcontent_len--;
+		}
+
+		/* Truncate to 30 characters and add a ... */
+		if (tokcontent_len > 30 + sizeof("...")-1) {
+			if (yyres) {
+				snprintf(buffer, sizeof(buffer), "%.*s \"%.*s...\"", (int)toktype_len, toktype, 30, tokcontent);
+				yystpcpy(yyres, buffer);
+			}
+			return toktype_len + 30 + sizeof(" \"...\"")-1;
+		}
+
+		if (yyres) {
+			snprintf(buffer, sizeof(buffer), "%.*s \"%.*s\"", (int)toktype_len, toktype, (int)tokcontent_len, tokcontent);
 			yystpcpy(yyres, buffer);
 		}
-		return len + (toklen ? toklen + 1 : 0) + 2;
+		return toktype_len + tokcontent_len + sizeof(" \"\"")-1;
 	}
 
 	/* One of the expected tokens */
-	if (!yyres) {
-		return yystrlen(yystr) - (*yystr == '"' ? 2 : 0);
-	}
 
-	if (*yystr == '"') {
-		YYSIZE_T yyn = 0;
-		const char *yyp = yystr;
-
-		for (; *++yyp != '"'; ++yyn) {
-			yyres[yyn] = *yyp;
+	/* Prevent the backslash getting doubled in the output (eugh) */
+	if (strcmp(toktype, "\"'\\\\'\"") == 0) {
+		if (yyres) {
+			yystpcpy(yyres, "\"\\\"");
 		}
-		yyres[yyn] = '\0';
-		return yyn;
+		return sizeof("\"\\\"")-1;
 	}
-	yystpcpy(yyres, yystr);
-	return strlen(yystr);
+
+	/* Strip off the outer quote marks */
+	if (toktype_len >= 2 && *toktype == '"') {
+		toktype++;
+		toktype_len -= 2;
+	}
+
+	if (yyres) {
+		YYSIZE_T yyn = 0;
+
+		for (; yyn < toktype_len; ++yyn) {
+			/* Replace single quotes with double for consistency */
+			if (toktype[yyn] == '\'') {
+				yyres[yyn] = '"';
+			}
+			else {
+				yyres[yyn] = toktype[yyn];
+			}
+		}
+		yyres[toktype_len] = '\0';
+	}
+
+	return toktype_len;
 }

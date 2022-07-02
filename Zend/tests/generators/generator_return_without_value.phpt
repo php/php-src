@@ -14,12 +14,12 @@ function gen2() {
 }
 
 function gen3() {
-	return;
+    return;
     yield;
 }
 
 function gen4() {
-	return;
+    return;
     yield;
 }
 

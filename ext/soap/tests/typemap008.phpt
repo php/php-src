@@ -1,36 +1,36 @@
 --TEST--
 SOAP Typemap 8: SoapClient support for typemap's to_xml() (without WSDL, using SoapVar)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestSoapClient extends SoapClient{
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
-  		echo $request;
-  		exit;
-	}
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+        echo $request;
+        exit;
+    }
 }
 
 class book{
-	public $a="a";
-	public $b="c";
+    public $a="a";
+    public $b="c";
 
 }
 
 function book_to_xml($book) {
-	return '<book xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
+    return '<book xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><a xsi:type="xsd:string">'.$book->a.'!</a><b xsi:type="xsd:string">'.$book->b.'!</b></book>';
 }
 
 $options=Array(
         'uri'      => 'http://schemas.nothing.com',
         'location' => 'test://',
-		'actor'    => 'http://schemas.nothing.com',
-		'typemap'  => array(array("type_ns"   => "http://schemas.nothing.com",
-		                          "type_name" => "book",
-		                          "to_xml"  => "book_to_xml"))
-		);
+        'actor'    => 'http://schemas.nothing.com',
+        'typemap'  => array(array("type_ns"   => "http://schemas.nothing.com",
+                                  "type_name" => "book",
+                                  "to_xml"  => "book_to_xml"))
+        );
 
 $client = new TestSoapClient(NULL, $options);
 $book = new book();

@@ -1,5 +1,7 @@
 --TEST--
 oci_new_collection()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -20,7 +22,7 @@ require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECTF--
-object(OCI-Collection)#%d (1) {
+object(OCICollection)#%d (1) {
   ["collection"]=>
   resource(%d) of type (oci8 collection)
 }

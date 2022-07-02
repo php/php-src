@@ -1,8 +1,10 @@
 --TEST--
 PDO PgSQL Bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used), 32-bit
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -56,14 +58,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "int2"
+    ["pdo_type"]=>
+    int(1)
     ["name"]=>
     string(7) "int2col"
     ["len"]=>
     int(2)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(1)
   }
   [1]=>
   array(8) {
@@ -75,14 +77,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "int4"
+    ["pdo_type"]=>
+    int(1)
     ["name"]=>
     string(7) "int4col"
     ["len"]=>
     int(4)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(1)
   }
   [2]=>
   array(8) {
@@ -94,14 +96,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "int8"
+    ["pdo_type"]=>
+    int(1)
     ["name"]=>
     string(7) "int8col"
     ["len"]=>
     int(8)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [3]=>
   array(8) {
@@ -113,14 +115,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(7) "varchar"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(9) "stringcol"
     ["len"]=>
     int(-1)
     ["precision"]=>
     int(259)
-    ["pdo_type"]=>
-    int(2)
   }
   [4]=>
   array(8) {
@@ -132,14 +134,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "bool"
+    ["pdo_type"]=>
+    int(5)
     ["name"]=>
     string(7) "boolcol"
     ["len"]=>
     int(1)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(5)
   }
   [5]=>
   array(8) {
@@ -151,14 +153,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "date"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(7) "datecol"
     ["len"]=>
     int(4)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [6]=>
   array(8) {
@@ -170,14 +172,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(4) "text"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(7) "textcol"
     ["len"]=>
     int(-1)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [7]=>
   array(8) {
@@ -189,14 +191,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(9) "timestamp"
+    ["pdo_type"]=>
+    int(2)
     ["name"]=>
     string(5) "tscol"
     ["len"]=>
     int(8)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(2)
   }
   [8]=>
   array(8) {
@@ -208,14 +210,14 @@ array(9) {
     string(13) "bugtest_62498"
     ["native_type"]=>
     string(5) "bytea"
+    ["pdo_type"]=>
+    int(3)
     ["name"]=>
     string(8) "byteacol"
     ["len"]=>
     int(-1)
     ["precision"]=>
     int(-1)
-    ["pdo_type"]=>
-    int(3)
   }
 }
 Done

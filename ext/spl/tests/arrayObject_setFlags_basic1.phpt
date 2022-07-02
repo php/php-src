@@ -3,7 +3,7 @@ SPL: ArrayObject::setFlags basic usage with ArrayObject::ARRAY_AS_PROPS. Current
 --FILE--
 <?php
 class C extends ArrayObject {
-	public $p = 'object property';
+    public $p = 'object property';
 }
 
 function access_p($ao) {
@@ -44,8 +44,8 @@ string(21) "array element.changed"
 --> Remove the array element and try access again:
 bool(false)
 
-Notice: Undefined index: p in %s on line 10
+Warning: Undefined array key "p" in %s on line %d
 NULL
 
-Notice: Undefined index: p in %s on line 12
+Warning: Undefined array key "p" in %s on line %d
 string(8) ".changed"

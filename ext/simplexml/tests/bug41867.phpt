@@ -1,7 +1,7 @@
 --TEST--
 Bug #41867 (getName is broken)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -10,9 +10,7 @@ echo $a->getName()."\n";
 echo $a->b->getName()."\n";
 echo $a->b->c->getName()."\n";
 ?>
-===DONE===
 --EXPECT--
 a
 b
 c
-===DONE===

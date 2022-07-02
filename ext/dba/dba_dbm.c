@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,13 +20,13 @@
 
 #include "php.h"
 
-#if DBA_DBM
+#ifdef DBA_DBM
 #include "php_dbm.h"
 
 #ifdef DBM_INCLUDE_FILE
 #include DBM_INCLUDE_FILE
 #endif
-#if DBA_GDBM
+#ifdef DBA_GDBM
 #include "php_gdbm.h"
 #endif
 
@@ -34,9 +34,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#define DBM_DATA dba_dbm_data *dba = info->dbf
-#define DBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
 
 #define TRUNC_IT(extension, mode) \
 	snprintf(buf, MAXPATHLEN, "%s" extension, info->path); \
@@ -53,11 +50,7 @@ typedef struct {
 DBA_OPEN_FUNC(dbm)
 {
 	int fd;
-	int filemode = 0644;
-
-	if(info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
-	}
+	int filemode = info->file_permission;
 
 	if(info->mode == DBA_TRUNC) {
 		char buf[MAXPATHLEN];
@@ -92,32 +85,34 @@ DBA_CLOSE_FUNC(dbm)
 DBA_FETCH_FUNC(dbm)
 {
 	datum gval;
-	char *new = NULL;
+	datum gkey;
 
-	DBM_GKEY;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	gval = fetch(gkey);
-	if(gval.dptr) {
-		if(newlen) *newlen = gval.dsize;
-		new = estrndup(gval.dptr, gval.dsize);
+	if (gval.dptr) {
+		return zend_string_init(gval.dptr, gval.dsize, /* persistent */ false);
 	}
-	return new;
+	return NULL;
 }
 
 DBA_UPDATE_FUNC(dbm)
 {
 	datum gval;
+	datum gkey;
 
-	DBM_GKEY;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 
 	if (mode == 1) { /* insert */
 		gval = fetch(gkey);
-		if(gval.dptr) {
+		if (gval.dptr) {
 			return FAILURE;
 		}
 	}
 
-	gval.dptr = (char *) val;
-	gval.dsize = vallen;
+	gval.dptr = ZSTR_VAL(val);
+	gval.dsize = ZSTR_LEN(val);
 
 	return (store(gkey, gval) == -1 ? FAILURE : SUCCESS);
 }
@@ -125,10 +120,13 @@ DBA_UPDATE_FUNC(dbm)
 DBA_EXISTS_FUNC(dbm)
 {
 	datum gval;
-	DBM_GKEY;
+	datum gkey;
+
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 
 	gval = fetch(gkey);
-	if(gval.dptr) {
+	if (gval.dptr) {
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -136,42 +134,45 @@ DBA_EXISTS_FUNC(dbm)
 
 DBA_DELETE_FUNC(dbm)
 {
-	DBM_GKEY;
+	datum gkey;
+
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	return(delete(gkey) == -1 ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(dbm)
 {
-	DBM_DATA;
+	dba_dbm_data *dba = info->dbf;
 	datum gkey;
-	char *key = NULL;
+	zend_string *key = NULL;
 
 	gkey = firstkey();
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		key = estrndup(gkey.dptr, gkey.dsize);
+	if (gkey.dptr) {
+		key = zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 		dba->nextkey = gkey;
-	} else
+	} else {
 		dba->nextkey.dptr = NULL;
+	}
 	return key;
 }
 
 DBA_NEXTKEY_FUNC(dbm)
 {
-	DBM_DATA;
+	dba_dbm_data *dba = info->dbf;
 	datum gkey;
-	char *nkey = NULL;
+	zend_string *key = NULL;
 
-	if(!dba->nextkey.dptr) return NULL;
+	if (!dba->nextkey.dptr) { return NULL; }
 
 	gkey = nextkey(dba->nextkey);
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		nkey = estrndup(gkey.dptr, gkey.dsize);
+	if (gkey.dptr) {
+		key = zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 		dba->nextkey = gkey;
-	} else
+	} else {
 		dba->nextkey.dptr = NULL;
-	return nkey;
+	}
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(dbm)

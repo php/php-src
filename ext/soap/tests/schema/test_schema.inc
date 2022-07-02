@@ -2,8 +2,8 @@
 $val = null;
 
 function test($input) {
-	global $val;
-	$val = $input;
+    global $val;
+    $val = $input;
 }
 
 function test_schema($schema,$type,$param,$style="rpc",$use="encoded", $attributeFormDefault='',$features=0) {
@@ -22,27 +22,27 @@ $wsdl  = <<<EOF
   <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://test-uri/" $attributeFormDefault>
    <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
    <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
-  	$schema
+    $schema
   </schema>
   </types>
   <message name="testMessage">
-  	<part name="testParam" $type/>
+    <part name="testParam" $type/>
   </message>
-	<portType name="testPortType">
-		<operation name="test">
-			<input message="testMessage"/>
-		</operation>
-	</portType>
-	<binding name="testBinding" type="testPortType">
-		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
-		<operation name="test">
-			<soap:operation soapAction="#test" style="$style"/>
-			<input>
-				<soap:body use="$use" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
-			</input>
-		</operation>
-	</binding>
-	<service name="testService">
+    <portType name="testPortType">
+        <operation name="test">
+            <input message="testMessage"/>
+        </operation>
+    </portType>
+    <binding name="testBinding" type="testPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="test">
+            <soap:operation soapAction="#test" style="$style"/>
+            <input>
+                <soap:body use="$use" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+        </operation>
+    </binding>
+    <service name="testService">
    <port name="testPort" binding="tns:testBinding">
      <soap:address location="test://" />
    </port>
@@ -57,7 +57,7 @@ EOF;
   ini_set("soap.wsdl_cache_enabled",0);
   $x = new SoapClient($fname, array("trace"=>1,"exceptions"=>0,"features"=>$features));
   $y = new SoapServer($fname, array("features"=>$features));
-	$y->addfunction("test");
+    $y->addfunction("test");
   unlink($fname);
 
   $x->test($param);

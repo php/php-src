@@ -1,9 +1,7 @@
 --TEST--
 openssl_csr_get_public_key() tests
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
@@ -13,7 +11,7 @@ $phex = 'dcf93a0b883972ec0e19989ac5a2ce310e1d37717e8d9571bb7623731866e61e' .
         '6634af1949e5b535cc829a483b8a76223e5d490a257f05bdff16f2fb22c583ab';
 $dh_details = array('p' => $phex, 'g' => '2');
 $dh = openssl_pkey_new(array(
-	'dh'=> array('p' => hex2bin($phex), 'g' => '2'))
+    'dh'=> array('p' => hex2bin($phex), 'g' => '2'))
 );
 
 $dn = array(
@@ -25,7 +23,7 @@ $dn = array(
 );
 
 $args = array(
-    "digest_alg" => "sha1",
+    "digest_alg" => "sha256",
     "private_key_bits" => 2048,
     "private_key_type" => OPENSSL_KEYTYPE_DSA,
     "encrypt_key" => true,
@@ -40,5 +38,7 @@ var_dump(openssl_csr_get_public_key($csr));
 var_dump(openssl_csr_get_public_key($csr_file));
 ?>
 --EXPECTF--
-resource(%d) of type (OpenSSL key)
-resource(%d) of type (OpenSSL key)
+object(OpenSSLAsymmetricKey)#%d (0) {
+}
+object(OpenSSLAsymmetricKey)#%d (0) {
+}

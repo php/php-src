@@ -2,11 +2,6 @@
 Test array_change_key_case() function : usage variations - different data types as keys
 --FILE--
 <?php
-/* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Returns an array with all string keys lowercased [or uppercased]
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays with different data types as keys to array_change_key_case()
  * to test conversion
@@ -32,18 +27,6 @@ $inputs = array(
        1 => 'one',
        12345 => 'positive',
        -2345 => 'negative',
-       ),
-
-       // float data
-/*2*/  'float' => array(
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ),
-
-       'extreme floats' => array(
-       12.3456789000e6 => 'large',
-       12.3456789000E-10 => 'small',
        ),
 
        // null data
@@ -115,37 +98,19 @@ array(4) {
   string(8) "negative"
 }
 
--- Iteration 2 : float data --
-array(3) {
-  [10]=>
-  string(8) "positive"
-  [-10]=>
-  string(8) "negative"
-  [0]=>
-  string(4) "half"
-}
-
--- Iteration 3 : extreme floats data --
-array(2) {
-  [12345678]=>
-  string(5) "large"
-  [0]=>
-  string(5) "small"
-}
-
--- Iteration 4 : null uppercase data --
+-- Iteration 2 : null uppercase data --
 array(1) {
   [""]=>
   string(6) "null 1"
 }
 
--- Iteration 5 : null lowercase data --
+-- Iteration 3 : null lowercase data --
 array(1) {
   [""]=>
   string(6) "null 2"
 }
 
--- Iteration 6 : bool lowercase data --
+-- Iteration 4 : bool lowercase data --
 array(2) {
   [1]=>
   string(6) "lowert"
@@ -153,7 +118,7 @@ array(2) {
   string(6) "lowerf"
 }
 
--- Iteration 7 : bool uppercase data --
+-- Iteration 5 : bool uppercase data --
 array(2) {
   [1]=>
   string(6) "uppert"
@@ -161,19 +126,19 @@ array(2) {
   string(6) "upperf"
 }
 
--- Iteration 8 : empty double quotes data --
+-- Iteration 6 : empty double quotes data --
 array(1) {
   [""]=>
   string(6) "emptyd"
 }
 
--- Iteration 9 : empty single quotes data --
+-- Iteration 7 : empty single quotes data --
 array(1) {
   [""]=>
   string(6) "emptys"
 }
 
--- Iteration 10 : string data --
+-- Iteration 8 : string data --
 array(3) {
   ["STRINGD"]=>
   string(7) "stringd"
@@ -183,13 +148,13 @@ array(3) {
   string(7) "stringh"
 }
 
--- Iteration 11 : undefined data --
+-- Iteration 9 : undefined data --
 array(1) {
   [""]=>
   string(9) "undefined"
 }
 
--- Iteration 12 : unset data --
+-- Iteration 10 : unset data --
 array(1) {
   [""]=>
   string(5) "unset"

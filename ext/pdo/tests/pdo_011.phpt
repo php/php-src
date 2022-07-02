@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDO::FETCH_FUNC and statement overloading
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -22,16 +23,15 @@ $db->exec('INSERT INTO test VALUES(4, \'D\', \'Group2\')');
 
 class DerivedStatement extends PDOStatement
 {
-	private function __construct($name, $db)
-	{
-		$this->name = $name;
-		echo __METHOD__ . "($name)\n";
-	}
+    private function __construct(public $name, $db)
+    {
+        echo __METHOD__ . "($name)\n";
+    }
 
-	function reTrieve($id, $val) {
-		echo __METHOD__ . "($id,$val)\n";
-		return array($id=>$val);
-	}
+    function reTrieve($id, $val) {
+        echo __METHOD__ . "($id,$val)\n";
+        return array($id=>$val);
+    }
 }
 
 $select1 = $db->prepare('SELECT grp, id FROM test');
@@ -40,24 +40,22 @@ $derived = $db->prepare('SELECT id, val FROM test', array(PDO::ATTR_STATEMENT_CL
 
 class Test1
 {
-	public function __construct($id, $val)
-	{
-		echo __METHOD__ . "($id,$val)\n";
-		$this->id = $id;
-		$this->val = $val;
-	}
+    public function __construct(public $id, public $val)
+    {
+        echo __METHOD__ . "($id,$val)\n";
+    }
 
-	static public function factory($id, $val)
-	{
-		echo __METHOD__ . "($id,$val)\n";
-		return new self($id, $val);
-	}
+    static public function factory($id, $val)
+    {
+        echo __METHOD__ . "($id,$val)\n";
+        return new self($id, $val);
+    }
 }
 
 function test($id,$val='N/A')
 {
-	echo __METHOD__ . "($id,$val)\n";
-	return array($id=>$val);
+    echo __METHOD__ . "($id,$val)\n";
+    return array($id=>$val);
 }
 
 $f = new Test1(0,0);

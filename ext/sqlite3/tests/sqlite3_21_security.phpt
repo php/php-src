@@ -1,7 +1,7 @@
 --TEST--
 SQLite3 open_basedir checks
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --INI--
 open_basedir=.
 --FILE--
@@ -19,9 +19,9 @@ unlink($directory . $file);
 
 echo "Above test directory\n";
 try {
-	$db = new SQLite3('../bad' . $file);
+    $db = new SQLite3('../bad' . $file);
 } catch (Exception $e) {
-	echo $e . "\n";
+    echo $e . "\n";
 }
 
 echo "Done\n";

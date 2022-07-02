@@ -5,14 +5,14 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=0x4ff
 opcache.file_update_protection=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 if (true) {
-	class A { }
-	function A() { }
-	function A() { }
+    class A { }
+    function A() { }
+    function A() { }
 }
 ?>
 --EXPECTF--

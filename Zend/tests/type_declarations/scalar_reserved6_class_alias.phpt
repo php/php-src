@@ -5,5 +5,6 @@ Scalar type names cannot be used as class, trait or interface names (6) - class_
 
 class foobar {}
 class_alias("foobar", "bool");
+?>
 --EXPECTF--
 Fatal error: Cannot use 'bool' as class name as it is reserved in %s on line %d

@@ -1,16 +1,14 @@
 --TEST--
 Bug #26528 (HTML entities are not being decoded)
---SKIPIF--
-<?php
-require_once("skipif.inc");
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
-	$sample = "<?xml version=\"1.0\"?><test attr=\"angle&lt;bracket\"/>";
-	$parser = xml_parser_create();
-	$res = xml_parse_into_struct($parser,$sample,$vals,$index);
-	xml_parser_free($parser);
-	var_dump($vals);
+    $sample = "<?xml version=\"1.0\"?><test attr=\"angle&lt;bracket\"/>";
+    $parser = xml_parser_create();
+    $res = xml_parse_into_struct($parser,$sample,$vals,$index);
+    xml_parser_free($parser);
+    var_dump($vals);
 ?>
 --EXPECT--
 array(1) {

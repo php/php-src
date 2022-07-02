@@ -6,6 +6,7 @@ $a = "string";
 $b = &$a[1];
 $b = "f";
 echo $a;
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot create references to/from string offsets in %sbug49866.php:3
 Stack trace:

@@ -384,7 +384,7 @@ CompareImages (char *msg, gdImagePtr im1, gdImagePtr im2)
 
   if (cmpRes & GD_CMP_NUM_COLORS)
     {
-      printf ("-%s: INFO number of pallette entries differ %d Vs. %d\n", msg,
+      printf ("-%s: INFO number of palette entries differ %d Vs. %d\n", msg,
 	      im1->colorsTotal, im2->colorsTotal);
     }
 

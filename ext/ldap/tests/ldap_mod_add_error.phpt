@@ -3,8 +3,9 @@ ldap_mod_add() - ldap_mod_add() operations that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -19,12 +20,12 @@ var_dump(ldap_mod_add($link, "dc=my-domain,$base", array()));
 var_dump(ldap_mod_add($link, "weirdAttribute=val", array()));
 
 $entry = array(
-	"objectClass"	=> array(
-		"top",
-		"dcObject",
-		"organization"),
-	"dc"			=> "my-domain",
-	"o"				=> "my-domain",
+    "objectClass"	=> array(
+        "top",
+        "dcObject",
+        "organization"),
+    "dc"			=> "my-domain",
+    "o"				=> "my-domain",
 );
 
 ldap_add($link, "dc=my-domain,$base", $entry);
@@ -39,7 +40,6 @@ $entry2["weirdAttribute"] = "weirdVal";
 
 var_dump(ldap_mod_add($link, "dc=my-domain,$base", $entry2));
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -60,4 +60,3 @@ bool(false)
 
 Warning: ldap_mod_add(): Modify: Undefined attribute type in %s on line %d
 bool(false)
-===DONE===

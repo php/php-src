@@ -4,12 +4,6 @@ Test file_put_contents() function : variation - include path testing
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_put_contents() : variation ***\n";
 
 require_once('fopen_include_path.inc');
@@ -47,9 +41,7 @@ function runtest() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing file_put_contents() : variation ***
 File in include path. This was appended
 File in include path. This was appended
-===DONE===

@@ -5,22 +5,22 @@ Bug #71731: Null coalescing operator and ArrayAccess
 
 class AA implements ArrayAccess {
     private $data = [];
-    public function offsetExists($name) {
+    public function offsetExists($name): bool {
         echo "offsetExists($name)\n";
         return array_key_exists($name, $this->data);
     }
-    public function &offsetGet($name) {
+    public function &offsetGet($name): mixed {
         echo "offsetGet($name)\n";
         if (!array_key_exists($name, $this->data)) {
             throw new Exception('Unknown offset');
         }
         return $this->data[$name];
     }
-    public function offsetSet($name, $value) {
+    public function offsetSet($name, $value): void {
         echo "offsetSet($name)\n";
         $this->data[$name] = $value;
     }
-    public function offsetUnset($name) {
+    public function offsetUnset($name): void {
         echo "offsetUnset($name)\n";
         unset($this->data[$name]);
     }

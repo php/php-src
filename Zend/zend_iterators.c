@@ -30,12 +30,12 @@ static const zend_object_handlers iterator_object_handlers = {
 	0,
 	iter_wrapper_free,
 	iter_wrapper_dtor,
-	NULL,
+	NULL, /* clone_obj */
 	NULL, /* prop read */
 	NULL, /* prop write */
 	NULL, /* read dim */
 	NULL, /* write dim */
-	NULL,
+	NULL, /* get_property_ptr_ptr */
 	NULL, /* has prop */
 	NULL, /* unset prop */
 	NULL, /* has dim */
@@ -50,7 +50,8 @@ static const zend_object_handlers iterator_object_handlers = {
 	NULL, /* get_closure */
 	iter_wrapper_get_gc,
 	NULL, /* do_operation */
-	NULL  /* compare */
+	NULL, /* compare */
+	NULL  /* get_properties_for */
 };
 
 ZEND_API void zend_register_iterator_wrapper(void)
@@ -69,7 +70,11 @@ static void iter_wrapper_dtor(zend_object *object)
 }
 
 static HashTable *iter_wrapper_get_gc(zend_object *object, zval **table, int *n) {
-	/* TODO: We need a get_gc iterator handler */
+	zend_object_iterator *iter = (zend_object_iterator*)object;
+	if (iter->funcs->get_gc) {
+		return iter->funcs->get_gc(iter, table, n);
+	}
+
 	*table = NULL;
 	*n = 0;
 	return NULL;

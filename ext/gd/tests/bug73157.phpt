@@ -1,9 +1,7 @@
 --TEST--
 Bug #73157 (imagegd2() ignores 3rd param if 4 are given)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreate(8, 8);
@@ -16,7 +14,5 @@ $buffer = ob_get_clean();
 $header = unpack('@10/nchunk_size', $buffer);
 printf("chunk size: %d\n", $header['chunk_size']);
 ?>
-===DONE===
 --EXPECT--
 chunk size: 256
-===DONE===

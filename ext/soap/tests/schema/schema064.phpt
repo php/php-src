@@ -1,39 +1,42 @@
 --TEST--
 SOAP XML Schema 64: standard date/time types
+--EXTENSIONS--
+soap
+xml
 --SKIPIF--
 <?php
 if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
-	die('skip, windows has different TZ format');
+    die('skip, windows has different TZ format');
 }
-require_once('skipif.inc'); ?>
+?>
 --FILE--
 <?php
 include "test_schema.inc";
 $schema = <<<EOF
-	<complexType name="testType">
-		<sequence>
-			<element name="dateTime" type="dateTime"/>
-			<element name="time" type="time"/>
-			<element name="date" type="date"/>
-			<element name="gYearMonth" type="gYearMonth"/>
-			<element name="gYear" type="gYear"/>
-			<element name="gMonthDay" type="gMonthDay"/>
-			<element name="gDay" type="gDay"/>
-			<element name="gMonth" type="gMonth"/>
-		</sequence>
-	</complexType>
+    <complexType name="testType">
+        <sequence>
+            <element name="dateTime" type="dateTime"/>
+            <element name="time" type="time"/>
+            <element name="date" type="date"/>
+            <element name="gYearMonth" type="gYearMonth"/>
+            <element name="gYear" type="gYear"/>
+            <element name="gMonthDay" type="gMonthDay"/>
+            <element name="gDay" type="gDay"/>
+            <element name="gMonth" type="gMonth"/>
+        </sequence>
+    </complexType>
 EOF;
 $date = gmmktime(1,2,3,4,5,1976);
 putenv('TZ=GMT');
 test_schema($schema,'type="tns:testType"',array(
-	'dateTime' => $date,
-	'time' => $date,
-	'date' => $date,
-	'gYearMonth' => $date,
-	'gYear' => $date,
-	'gMonthDay' => $date,
-	'gDay' => $date,
-	'gMonth' => $date
+    'dateTime' => $date,
+    'time' => $date,
+    'date' => $date,
+    'gYearMonth' => $date,
+    'gYear' => $date,
+    'gMonthDay' => $date,
+    'gDay' => $date,
+    'gMonth' => $date
 ));
 echo "ok";
 ?>

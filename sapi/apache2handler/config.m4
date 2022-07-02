@@ -77,6 +77,9 @@ if test "$PHP_APXS2" != "no"; then
                        -i -a -n php"
   fi
 
+  LIBPHP_CFLAGS="-shared"
+  PHP_SUBST(LIBPHP_CFLAGS)
+
   case $host_alias in
   *aix*)
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"

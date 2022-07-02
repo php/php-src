@@ -1,9 +1,7 @@
 --TEST--
 Bug #74903 openssl_pkcs7_encrypt() uses different EOL than before
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 
@@ -75,8 +73,6 @@ unlink($tmpFileIn);
 unlink($tmpFileOut);
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
-==DONE==

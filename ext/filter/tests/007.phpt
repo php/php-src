@@ -1,7 +1,7 @@
 --TEST--
 filter_has_var()
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --GET--
 a=qwe&abc=<a>href</a>
 --POST--
@@ -23,7 +23,7 @@ var_dump(filter_has_var(INPUT_POST, ""));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(false)

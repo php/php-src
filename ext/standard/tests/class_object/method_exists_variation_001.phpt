@@ -2,18 +2,12 @@
 Test method_exists() function : usage variations  - unexpected type for arg 1
 --FILE--
 <?php
-/* Prototype  : proto bool method_exists(object object, string method)
- * Description: Checks if the class method exists
- * Source code: Zend/zend_builtin_functions.c
- * Alias to functions:
- */
-
 spl_autoload_register(function ($className) {
-	echo "In autoload($className)\n";
+    echo "In autoload($className)\n";
 });
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	echo "Error: $err_no - $err_msg\n";
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 
@@ -78,80 +72,84 @@ $values = array(
 
 foreach($values as $value) {
       echo "\nArg value $value \n";
-      var_dump( method_exists($value, $method) );
+      try {
+        var_dump( method_exists($value, $method) );
+      } catch (TypeError $e) {
+        echo $e->getMessage(), PHP_EOL;
+      }
 };
 
 echo "Done";
 ?>
 --EXPECT--
 *** Testing method_exists() : usage variations ***
-Error: 2 - Undefined variable: undefined_var
-Error: 2 - Undefined variable: unset_var
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 1 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 12345 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value -2345 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 10.5 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value -10.5 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 101234567000 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 1.07654321E-9 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 0.5 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value 1 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value 1 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value  
 bool(false)
@@ -168,8 +166,8 @@ In autoload(String)
 bool(false)
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 Done

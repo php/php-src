@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1255, "ansi");
 
 ?>
+--CONFLICTS--
+dir_cp1255
 --INI--
 default_charset=cp1255
 --FILE--
@@ -22,10 +24,10 @@ default_charset=cp1255
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "כללים מרובים";
-$prefix = create_data("dir_cp1255", "${item}42", 1255);
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}42";
+$prefix = create_data("dir_cp1255", "{$item}42", 1255);
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}42";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));
@@ -39,7 +41,6 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1255");
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s\כללים מרובים42\כללים מרובים4"
 Active code page: %d
 bool(true)
-===DONE===

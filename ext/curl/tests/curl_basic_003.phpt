@@ -3,16 +3,10 @@ Test curl_opt() function with POST parameters
 --CREDITS--
 Sebastian Deutsch <sebastian.deutsch@9elements.com>
 TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
-/* Prototype  : bool curl_setopt(resource ch, int option, mixed value)
- * Description: Set an option for a cURL transfer
- * Source code: ext/curl/interface.c
- * Alias to functions:
- */
-
   include 'server.inc';
   $host = curl_cli_server_start();
 
@@ -33,7 +27,6 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl sending through GET an POST ***
 string(208) "array(2) {
@@ -51,4 +44,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE===

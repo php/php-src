@@ -1,17 +1,9 @@
 --TEST--
 Test mb_substr() function : usage variations - pass different integers to $length arg
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_substr') or die("skip mb_substr() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * Test how mb_substr() behaves when passed a range of integers as $length argument
  */
@@ -30,21 +22,21 @@ $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXv
  * 60 is larger than *BYTE* count for $string_mb
  */
 for ($i = -60; $i <= 60; $i += 10) {
-	if (@$a || @$b) {
-		$a = null;
-		$b = null;
-	}
-	echo "\n**-- Offset is: $i --**\n";
-	echo "-- ASCII String --\n";
-	$a = mb_substr($string_ascii, 1, $i);
-	var_dump(base64_encode($a));
-	echo "--Multibyte String --\n";
-	$b = mb_substr($string_mb, 1, $i, 'UTF-8');
-	if (strlen($a) == mb_strlen($b, 'UTF-8')) { // should return same length
-		var_dump(base64_encode($b));
-	} else {
-		echo "Difference in length of ASCII string and multibyte string\n";
-	}
+    if (@$a || @$b) {
+        $a = null;
+        $b = null;
+    }
+    echo "\n**-- Offset is: $i --**\n";
+    echo "-- ASCII String --\n";
+    $a = mb_substr($string_ascii, 1, $i);
+    var_dump(base64_encode($a));
+    echo "--Multibyte String --\n";
+    $b = mb_substr($string_mb, 1, $i, 'UTF-8');
+    if (strlen($a) == mb_strlen($b, 'UTF-8')) { // should return same length
+        var_dump(base64_encode($b));
+    } else {
+        echo "Difference in length of ASCII string and multibyte string\n";
+    }
 
 }
 

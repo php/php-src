@@ -1,13 +1,30 @@
 <?php
 
-/** @return string|false */
-function exif_tagname(int $index) {}
+/** @generate-class-entries */
 
-/** @return array|false */
-function exif_read_data($filename, ?string $sections_needed = null, bool $sub_arrays = false, bool $read_thumbnail = false) {}
+/**
+ * @var int
+ * @cname USE_MBSTRING
+ */
+const EXIF_USE_MBSTRING = UNKNOWN;
 
-/** @return string|false */
-function exif_thumbnail($filename, &$width = null, &$height = null, &$imagetype = null) {}
+/** @refcount 1 */
+function exif_tagname(int $index): string|false {}
 
-/** @return int|false */
-function exif_imagetype(string $filename) {}
+/**
+ * @param resource|string $file
+ * @return array<string, mixed>|false
+ * @refcount 1
+ */
+function exif_read_data($file, ?string $required_sections = null, bool $as_arrays = false, bool $read_thumbnail = false): array|false {}
+
+/**
+ * @param resource|string $file
+ * @param int $width
+ * @param int $height
+ * @param int $image_type
+ * @refcount 1
+ */
+function exif_thumbnail($file, &$width = null, &$height = null, &$image_type = null): string|false {}
+
+function exif_imagetype(string $filename): int|false {}

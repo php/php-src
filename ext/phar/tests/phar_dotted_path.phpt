@@ -1,7 +1,7 @@
 --TEST--
 Phar: create new Phar with broken.dirname in path
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 default_charset=
 phar.readonly=0
@@ -29,7 +29,6 @@ foreach ($phar as $entry) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/broken.dirname/dotted_path.phar');
@@ -38,4 +37,3 @@ rmdir(__DIR__ . '/broken.dirname');
 --EXPECT--
 this is a
 this is b
-===DONE===

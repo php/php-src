@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of chdir() with absolute and relative paths
  */
@@ -40,7 +35,6 @@ echo "\n-- Testing chdir() with relative paths: --\n";
 var_dump(chdir($level_two_dir_name));
 var_dump(getcwd());
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/chdir_basic-win32-mb';
@@ -59,4 +53,3 @@ string(%d) "%s私はガラスを食べられますlevel_one"
 -- Testing chdir() with relative paths: --
 bool(true)
 string(%d) "%s私はガラスを食べられますlevel_one%e私はガラスを食べられますlevel_two"
-===DONE===

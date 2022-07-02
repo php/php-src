@@ -34,9 +34,9 @@ $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
 $tester->request()->expectEmptyBody();
+$tester->expectLogLine('msg 1 - msg 2 - msg 3');
+$tester->expectLogLine('msg 1 - msg 2 - msg 3');
 $tester->terminate();
-$tester->expectLogLine('msg 1 - msg 2 - msg 3');
-$tester->expectLogLine('msg 1 - msg 2 - msg 3');
 $tester->close();
 ?>
 Done
@@ -47,5 +47,3 @@ Done
 require_once "tester.inc";
 FPM\Tester::clean();
 ?>
---XFAIL--
-There are bugs in FPM

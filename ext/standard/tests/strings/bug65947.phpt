@@ -8,8 +8,9 @@ $csv = base64_decode('6Q==');
 $adata = str_getcsv($csv,";");
 $b2 = basename($filename);
 if ($filename != $b2)
-	print "BUG";
+    print "BUG";
 else
-	print "OKEY";
+    print "OKEY";
+?>
 --EXPECT--
 OKEY

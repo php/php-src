@@ -1,7 +1,7 @@
 --TEST--
 PDO_sqlite: Testing sqliteCreateAggregate()
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
@@ -16,7 +16,7 @@ $db->sqliteCreateAggregate('testing', function(&$a, $b) { $a .= $b; return $a; }
 
 
 foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
-	var_dump($row);
+    var_dump($row);
 }
 
 $db->query('DROP TABLE foobar');

@@ -1,5 +1,5 @@
 --TEST--
-ReflectionMethod class __toString() and export() methods
+ReflectionMethod class __toString() method
 --FILE--
 <?php
 
@@ -9,8 +9,6 @@ function reflectMethod($class, $method) {
     echo "Reflecting on method $class::$method()\n\n";
     echo "__toString():\n";
     var_dump($methodInfo->__toString());
-    echo "\nexport():\n";
-    var_dump(ReflectionMethod::export($class, $method, true));
     echo "\n**********************************\n";
 }
 
@@ -55,15 +53,7 @@ Reflecting on method DerivedClass::foo()
 
 __toString():
 string(%d) "Method [ <user, inherits TestClass> public method foo ] {
-  @@ %s 16 - 18
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <user, inherits TestClass> public method foo ] {
-  @@ %s 16 - 18
+  @@ %s 14 - 16
 }
 "
 
@@ -73,15 +63,7 @@ Reflecting on method TestClass::stat()
 
 __toString():
 string(%d) "Method [ <user> static public method stat ] {
-  @@ %s 20 - 22
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <user> static public method stat ] {
-  @@ %s 20 - 22
+  @@ %s 18 - 20
 }
 "
 
@@ -91,15 +73,7 @@ Reflecting on method TestClass::priv()
 
 __toString():
 string(%d) "Method [ <user> private method priv ] {
-  @@ %s 24 - 26
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <user> private method priv ] {
-  @@ %s 24 - 26
+  @@ %s 22 - 24
 }
 "
 
@@ -109,15 +83,7 @@ Reflecting on method TestClass::prot()
 
 __toString():
 string(%d) "Method [ <user> protected method prot ] {
-  @@ %s 28 - 28
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <user> protected method prot ] {
-  @@ %s 28 - 28
+  @@ %s 26 - 26
 }
 "
 
@@ -127,15 +93,7 @@ Reflecting on method DerivedClass::prot()
 
 __toString():
 string(%d) "Method [ <user, inherits TestClass> protected method prot ] {
-  @@ %s 28 - 28
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <user, inherits TestClass> protected method prot ] {
-  @@ %s 28 - 28
+  @@ %s 26 - 26
 }
 "
 
@@ -145,15 +103,7 @@ Reflecting on method TestInterface::int()
 
 __toString():
 string(%d) "Method [ <user> abstract public method int ] {
-  @@ %s 36 - 36
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <user> abstract public method int ] {
-  @@ %s 36 - 36
+  @@ %s 34 - 34
 }
 "
 
@@ -165,20 +115,8 @@ __toString():
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> $class ]
-    Parameter #1 [ <required> string $name ]
-  }
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
-
-  - Parameters [2] {
-    Parameter #0 [ <required> $class ]
-    Parameter #1 [ <required> string $name ]
+    Parameter #0 [ <required> object|string $class ]
+    Parameter #1 [ <required> string $property ]
   }
 }
 "
@@ -188,16 +126,8 @@ string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 Reflecting on method TestClass::__destruct()
 
 __toString():
-string(%d) "Method [ <user, dtor> public method __destruct ] {
-  @@ %s 30 - 30
-}
-"
-
-export():
-
-Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
-string(%d) "Method [ <user, dtor> public method __destruct ] {
-  @@ %s 30 - 30
+string(%d) "Method [ <user> public method __destruct ] {
+  @@ %s 28 - 28
 }
 "
 

@@ -1,18 +1,9 @@
 --TEST--
 Test mb_decode_mimeheader() function : variation
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : string mb_decode_mimeheader(string string)
- * Description: Decodes the MIME "encoded-word" in the string
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
-
 echo "*** Testing mb_decode_mimeheader() : variation ***\n";
 mb_internal_encoding('utf-8');
 
@@ -39,7 +30,6 @@ $encoded_words = array(
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_decode_mimeheader() : variation ***
 string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
@@ -48,4 +38,3 @@ string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323
 string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
-===DONE===

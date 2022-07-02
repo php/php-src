@@ -24,5 +24,6 @@ class B extends A {}
 
 $input = new B();
 echo $input->getEmail();
+?>
 --EXPECT--
 No such method - 'noSuchMethod'

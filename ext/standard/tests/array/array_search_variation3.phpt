@@ -2,12 +2,6 @@
 Test array_search() function : usage variations - haystack as sub-array/object
 --FILE--
 <?php
-/*
- * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
- * Source Code: ext/standard/array.c
-*/
-
 /* checking for sub-arrays with array_search() */
 echo "*** Testing sub-arrays with array_search() ***\n";
 $sub_array = array (
@@ -49,14 +43,14 @@ var_dump( array_search("one", $array_search_obj->array_var) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sub-arrays with array_search() ***
 int(4)
 string(5) "three"
 int(5)
 
 *** Testing objects with array_search() ***
-array_search() expects parameter 2 to be array, object given
-array_search() expects parameter 2 to be array, object given
+array_search(): Argument #2 ($haystack) must be of type array, array_search_check given
+array_search(): Argument #2 ($haystack) must be of type array, array_search_check given
 int(1)
 Done

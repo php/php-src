@@ -1,8 +1,10 @@
 --TEST--
 PDO_OCI: stream_get_contents length & offset test
+--EXTENSIONS--
+pdo
+pdo_oci
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for WE8MSWIN1252 character set');
 PDOTest::skip();
@@ -20,11 +22,11 @@ $dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 @$dbh->exec("drop table pdo_oci_stream_1_tab");
 
 $stmtarray = array(
-	"create table pdo_oci_stream_1_tab (id number, data clob)",
+    "create table pdo_oci_stream_1_tab (id number, data clob)",
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 $dbh->exec("
@@ -76,11 +78,11 @@ echo 'Read '.stream_get_contents($r['data'], -1, 30000)."\n";      // jjjxyz
 // Clean up
 
 $stmtarray = array(
-	"drop table pdo_oci_stream_1_tab"
+    "drop table pdo_oci_stream_1_tab"
 );
 
 foreach ($stmtarray as $stmt) {
-	$dbh->exec($stmt);
+    $dbh->exec($stmt);
 }
 
 ?>

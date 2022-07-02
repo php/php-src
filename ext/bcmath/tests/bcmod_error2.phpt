@@ -1,12 +1,16 @@
 --TEST--
 bcmod() - mod by 0
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--EXTENSIONS--
+bcmath
 --INI--
 bcmath.scale=0
 --FILE--
 <?php
-echo bcmod("10", "0");
+try {
+    bcmod("10", "0");
+} catch (DivisionByZeroError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: bcmod(): Division by zero in %s on line %d
+--EXPECT--
+Modulo by zero

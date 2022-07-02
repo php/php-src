@@ -15,10 +15,10 @@ class TestClass {
     public static function staticMethod() {
         echo "Called staticMethod()\n";
         try {
-	        var_dump($this);
-		} catch (Throwable $e) {
-			echo "Exception: " . $e->getMessage() . "\n";
-		}
+            var_dump($this);
+        } catch (Throwable $e) {
+            echo "Exception: " . $e->getMessage() . "\n";
+        }
     }
 
     private static function privateMethod() {
@@ -49,11 +49,7 @@ echo "\nStatic method:\n";
 var_dump($staticMethod->invokeArgs(null, array()));
 
 echo "\nPrivate method:\n";
-try {
-    var_dump($privateMethod->invokeArgs($testClassInstance, array()));
-} catch (ReflectionException $e) {
-    var_dump($e->getMessage());
-}
+var_dump($privateMethod->invokeArgs($testClassInstance, array()));
 
 echo "\nAbstract method:\n";
 $abstractMethod = new ReflectionMethod("AbstractClass::foo");
@@ -69,7 +65,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Non-instance:
 string(72) "Given object is not an instance of the class this method was declared in"
 
@@ -79,7 +75,8 @@ Exception: Using $this when not in object context
 NULL
 
 Private method:
-string(86) "Trying to invoke private method TestClass::privateMethod() from scope ReflectionMethod"
+Called privateMethod()
+NULL
 
 Abstract method:
 string(53) "Trying to invoke abstract method AbstractClass::foo()"

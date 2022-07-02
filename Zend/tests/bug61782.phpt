@@ -23,6 +23,7 @@ Bug #61782 (__clone/__destruct do not match other methods when checking access c
 
     $obj = new LatchkeyKid();
 echo "DONE\n";
+?>
 --EXPECT--
 In LatchkeyKid:
 MommasBoy::__clone

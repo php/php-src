@@ -1,8 +1,8 @@
 --TEST--
 IntlDateFormatter::formatObject(): returns wrong value when time style is NONE.
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') < 0) die('skip for ICU >= 51.1.2'); ?>
 --FILE--
 <?php
@@ -12,8 +12,6 @@ $date->setTime($millitimestamp);
 echo IntlDateFormatter::formatObject($date, array(IntlDateFormatter::SHORT, IntlDateFormatter::NONE), 'vi_VN'), "\n";
 echo IntlDateFormatter::formatObject ($date, array(IntlDateFormatter::SHORT, IntlDateFormatter::NONE), 'ko_KR'), "\n";
 ?>
-==DONE==
 --EXPECT--
 04/04/2015
 15. 4. 4.
-==DONE==

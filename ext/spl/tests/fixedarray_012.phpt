@@ -6,14 +6,14 @@ SPL: FixedArray: Assigning the object to another variable using []
 $a = new SplFixedArray(100);
 
 try {
-	$b = &$a[];
-} catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    $b = &$a[];
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
 
 print "ok\n";
 
 ?>
 --EXPECT--
-Index invalid or out of range
+[] operator not supported for SplFixedArray
 ok

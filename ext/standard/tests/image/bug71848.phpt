@@ -5,7 +5,6 @@ Bug #71848 (getimagesize with $imageinfo returns false)
 var_dump(getimagesize(__DIR__ . '/bug71848.jpg', $info));
 var_dump(array_keys($info));
 ?>
-===DONE===
 --EXPECT--
 array(7) {
   [0]=>
@@ -29,4 +28,3 @@ array(2) {
   [1]=>
   string(4) "APP5"
 }
-===DONE===

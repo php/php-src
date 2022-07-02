@@ -2,7 +2,7 @@
 
 // Observer objects for the Zend/tests/list_keyed_evaluation_order.* tests
 
-class Stringable
+class StringCapable
 {
     private $name;
     public function __construct(string $name) {
@@ -32,7 +32,7 @@ class Indexable implements ArrayAccess
         echo "Offset $offset removed.", PHP_EOL;
     }
 
-    public function offsetGet($offset) {
+    public function offsetGet($offset): mixed {
         echo "Offset $offset retrieved.", PHP_EOL;
         return $this->array[$offset];
     }

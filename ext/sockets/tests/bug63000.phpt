@@ -1,9 +1,12 @@
 --TEST--
 Bug #63000: Multicast on OSX
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
+
+if (str_contains(PHP_OS, 'FreeBSD')) {
+    die('skip option not supported on FreeBSD');
 }
 --FILE--
 <?php
@@ -15,5 +18,6 @@ $so = socket_set_option($socket, IPPROTO_IP, MCAST_JOIN_GROUP, array(
     "interface" => 0,
 ));
 var_dump($so);
+?>
 --EXPECT--
 bool(true)

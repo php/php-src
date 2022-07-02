@@ -1,17 +1,9 @@
 --TEST--
 Test mb_strpos() function : mb_strpos bounds check is byte count rather than a character count
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strpos') or die("skip mb_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : int mb_strpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another
- * Source code: ext/mbstring/mbstring.c
- */
-
 /*
  * mb_strpos bounds check is byte count rather than a character count:
  * The multibyte string should be returning the same results as the ASCII string.
@@ -24,14 +16,22 @@ $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXv
 $needle = base64_decode('44CC');
 
 foreach($offsets as $i) {
-	echo "\n-- Offset is $i --\n";
-	echo "--Multibyte String:--\n";
-	var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
-	echo"--ASCII String:--\n";
-	var_dump(mb_strpos('This is na English ta', 'a', $i));
+    echo "\n-- Offset is $i --\n";
+    echo "--Multibyte String:--\n";
+    try {
+        var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    echo"--ASCII String:--\n";
+    try {
+        var_dump(mb_strpos('This is na English ta', 'a', $i));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 ?>
---EXPECTF--
+--EXPECT--
 -- Offset is 20 --
 --Multibyte String:--
 int(20)
@@ -46,30 +46,18 @@ bool(false)
 
 -- Offset is 22 --
 --Multibyte String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is 53 --
 --Multibyte String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is 54 --
 --Multibyte String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

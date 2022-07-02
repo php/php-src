@@ -3,10 +3,10 @@ Bug #48476 (cloning extended DateTime class without calling parent::__constr cra
 --FILE--
 <?php
 class MyDateTime extends DateTime {
-	public function __construct() { }
+    public function __construct() { }
 }
 class MyDateTimeZone extends DateTimeZone {
-	public function __construct() { }
+    public function __construct() { }
 }
 
 $o = new MyDateTime;

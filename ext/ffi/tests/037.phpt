@@ -1,16 +1,16 @@
 --TEST--
 FFI 037: Type memory management
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
 <?php
 function foo($ptr) {
-	$buf = FFI::new("int*[1]");
-	$buf[0] = $ptr;
-	//...
-	return $buf[0];
+    $buf = FFI::new("int*[1]");
+    $buf[0] = $ptr;
+    //...
+    return $buf[0];
 }
 
 $int = FFI::new("int");

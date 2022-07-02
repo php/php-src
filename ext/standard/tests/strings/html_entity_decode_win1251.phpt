@@ -149,6 +149,7 @@ foreach ($arr as $u => $v) {
         $res = unpack("H*", $res)[1];
     echo sprintf("%s => %s\n\n", $ent, $res);
 }
+?>
 --EXPECT--
 Special test for &#x98; (shouldn't decode):
 &#x98;

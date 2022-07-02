@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #38394 (Prepared statement error stops subsequent statements)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite2', strlen('sqlite2'))) die('skip not relevant for pdo_sqlite2 driver');
@@ -26,7 +27,6 @@ $s->execute(array('a' => 9, 'b' => 10, 'c' => 11));
 
 var_dump($db->query("SELECT * FROM test")->fetchAll(PDO::FETCH_ASSOC));
 ?>
-===DONE===
 --EXPECT--
 array(2) {
   [0]=>
@@ -48,4 +48,3 @@ array(2) {
     string(2) "11"
   }
 }
-===DONE===

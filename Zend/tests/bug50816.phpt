@@ -35,6 +35,7 @@ var_dump($mapWithoutConst0[1]);
 var_dump($mapWithoutConst1[1]);
 var_dump($mapWithoutConst2[1]);
 var_dump($mapWithoutConst3[1]);
+?>
 --EXPECT--
 string(3) "two"
 string(3) "two"

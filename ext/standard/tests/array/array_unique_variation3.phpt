@@ -2,11 +2,6 @@
 Test array_unique() function : usage variations - associative array with different keys
 --FILE--
 <?php
-/* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_unique() by passing different
  * associative arrays having different keys to $input argument.
@@ -39,10 +34,6 @@ $inputs = array (
 /*1*/  // arrays with integer keys
        array(0 => "0", 1 => "0"),
        array(1 => "1", 2 => "2", 3 => 1, 4 => "4"),
-
-       // arrays with float keys
-/*3*/  array(2.3333 => "float", 44.44 => "float"),
-       array(1.2 => "f1", 3.33 => "f2", 4.89999922839999 => "f1", 3333333.333333 => "f4"),
 
        // arrays with string keys
 /*5*/  array('\tHello' => 111, 're\td' => "color", '\v\fworld' => 2.2, 'pen\n' => 111),
@@ -84,20 +75,6 @@ array(3) {
   string(1) "4"
 }
 -- Iteration 3 --
-array(1) {
-  [2]=>
-  string(5) "float"
-}
--- Iteration 4 --
-array(3) {
-  [1]=>
-  string(2) "f1"
-  [3]=>
-  string(2) "f2"
-  [3333333]=>
-  string(2) "f4"
-}
--- Iteration 5 --
 array(3) {
   ["\tHello"]=>
   int(111)
@@ -106,7 +83,7 @@ array(3) {
   ["\v\fworld"]=>
   float(2.2)
 }
--- Iteration 6 --
+-- Iteration 4 --
 array(3) {
   ["	Hello"]=>
   int(111)
@@ -115,14 +92,14 @@ array(3) {
   ["world"]=>
   float(2.2)
 }
--- Iteration 7 --
+-- Iteration 5 --
 array(2) {
   [0]=>
   string(5) "hello"
   ["Hello world"]=>
   string(6) "string"
 }
--- Iteration 8 --
+-- Iteration 6 --
 array(3) {
   [""]=>
   string(5) "hello"

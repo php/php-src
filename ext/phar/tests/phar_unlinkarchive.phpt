@@ -1,7 +1,7 @@
 --TEST--
 Phar::unlinkArchive()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -80,7 +80,6 @@ $phar['another.php'] = "hi\n";
 unset($phar);
 include $pname . '/evil.php';
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -93,7 +92,7 @@ __HALT_COMPILER();
 Unknown phar archive ""
 Unknown phar archive "%sphar_unlinkarchive.phar"
 Unknown phar archive "%sphar_unlinkarchive.phar.tar": internal corruption of phar "%sphar_unlinkarchive.phar.tar" (truncated entry)
-Phar::unlinkArchive() expects parameter 1 to be a valid path, array given
+Phar::unlinkArchive(): Argument #1 ($filename) must be of type string, array given
 bool(false)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 phar archive "%sphar_unlinkarchive.phar" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()
@@ -108,4 +107,3 @@ int(0)
 phar archive "%sphar_unlinkarchive.phar" cannot be unlinked from within itself
 string(%d) "%sphar_unlinkarchive.phar"
 hi
-===DONE===

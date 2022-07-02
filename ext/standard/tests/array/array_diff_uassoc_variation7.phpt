@@ -2,12 +2,6 @@
 Test array_diff_uassoc() function : usage variation - Comparing strings containing integers and float
 --FILE--
 <?php
-/* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a
- * 				user supplied callback function
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 //Initialize variables
@@ -27,7 +21,6 @@ var_dump( array_diff_uassoc($arr_string_int, $arr_string_float, "key_compare_fun
 var_dump( array_diff_uassoc($arr_string_float, $arr_string_int, "key_compare_func") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -44,4 +37,3 @@ array(2) {
   ["1.00"]=>
   string(4) "2.00"
 }
-===DONE===

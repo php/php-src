@@ -1,5 +1,7 @@
 --TEST--
-Bug #44008 (Incorrect usage of OCI-Lob->close crashes PHP)
+Bug #44008 (Incorrect usage of OCILob->close crashes PHP)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -13,9 +15,9 @@ require __DIR__.'/connect.inc';
 // Initialization
 
 $stmtarray = array(
-		"create or replace procedure bug44008_proc (p in out clob)
-		as begin p := 'A';
-		end;"
+        "create or replace procedure bug44008_proc (p in out clob)
+        as begin p := 'A';
+        end;"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -30,7 +32,7 @@ $r = $textLob->load();
 echo "$r\n";
 
 // Incorrectly closing the lob doesn't cause a crash.
-// OCI-LOB->close() is documented for use only with OCI-Lob->writeTemporary()
+// OCI-LOB->close() is documented for use only with OCILob->writeTemporary()
 $textLob->close();
 
 // Cleanup

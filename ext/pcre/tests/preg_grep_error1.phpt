@@ -3,7 +3,6 @@ Test preg_grep() function : error conditions - bad regular expressions
 --FILE--
 <?php
 /*
-* proto array preg_grep(string regex, array input [, int flags])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -38,7 +37,7 @@ echo "Done"
 
 Arg value is abcdef
 
-Warning: preg_grep(): Delimiter must not be alphanumeric or backslash in %spreg_grep_error1.php on line %d
+Warning: preg_grep(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_grep_error1.php on line %d
 bool(false)
 
 Arg value is /[a-zA-Z]
@@ -57,7 +56,7 @@ Warning: preg_grep(): Unknown modifier 'F' in %spreg_grep_error1.php on line %d
 bool(false)
 
 Arg value is Array
-preg_grep() expects parameter 1 to be string, array given
+preg_grep(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 array(2) {
@@ -66,5 +65,5 @@ array(2) {
   [2]=>
   string(4) "test"
 }
-preg_grep() expects parameter 1 to be string, object given
+preg_grep(): Argument #1 ($pattern) must be of type string, stdClass given
 Done

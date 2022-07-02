@@ -1,9 +1,7 @@
 --TEST--
 Testing imageflip() of GD library
---SKIPIF--
-<?php
-if ( ! extension_loaded('gd') || !function_exists('imageflip')) die( 'skip GD not present; skipping test' );
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

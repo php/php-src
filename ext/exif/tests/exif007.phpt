@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data, baseline JPEG with no IFD, EXIF, GPS or Interoperability data in Intel byte-order.
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0

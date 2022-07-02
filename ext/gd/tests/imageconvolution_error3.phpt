@@ -3,10 +3,8 @@ Testing wrong array size 3x2 in imageconvolution() of GD library
 --CREDITS--
 Guilherme Blanco <guilhermeblanco [at] hotmail [dot] com>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-if (!extension_loaded("gd")) die("skip GD not present");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require __DIR__ . '/func.inc';
@@ -35,5 +33,5 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] Convolution matrix must be a 3x3 array, matrix[2] only has 2 elements
-!! [ValueError] Convolution matrix must be a 3x3 array, matrix[2][2] cannot be found (missing integer key)
+!! [ValueError] imageconvolution(): Argument #2 ($matrix) must be a 3x3 array, matrix[2] only has 2 elements
+!! [ValueError] imageconvolution(): Argument #2 ($matrix) must be a 3x3 array, matrix[2][2] cannot be found (missing integer key)

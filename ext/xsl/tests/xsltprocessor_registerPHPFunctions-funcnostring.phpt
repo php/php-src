@@ -3,12 +3,8 @@ Check xsltprocessor::registerPHPFunctions and a non-string function in xsl
 --DESCRIPTION--
 The XSL script tries to call a php function that is not a string which
 is expected to fail
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';
@@ -21,6 +17,7 @@ if(!$phpfuncxsl) {
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions());
 var_dump($proc->transformToXml($dom));
+?>
 --EXPECTF--
 NULL
 

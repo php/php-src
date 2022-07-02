@@ -3,11 +3,11 @@ SPL: Ensure access to non-visible properties falls back to dimension access with
 --FILE--
 <?php
 class C extends ArrayObject {
-	private $x = 'secret';
+    private $x = 'secret';
 
-	static function go($c) {
-	  var_dump($c->x);
-	}
+    static function go($c) {
+      var_dump($c->x);
+    }
 }
 
 $c = new C(array('x'=>'public'));

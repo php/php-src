@@ -15,8 +15,8 @@ trait THelloA {
 }
 
 class TraitsTest1 {
-	use THelloA;
-	use THelloB;
+    use THelloA;
+    use THelloB;
 }
 
 

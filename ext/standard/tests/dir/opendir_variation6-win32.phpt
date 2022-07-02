@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass paths containing wildcards to test if opendir() recognises them
  */
@@ -37,7 +32,6 @@ var_dump( opendir($dir_path . "/sub_dir?") );
 var_dump( opendir($dir_path . "/sub?dir1") );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/opendir_variation6";
@@ -51,25 +45,24 @@ rmdir($dir_path);
 
 -- Wildcard = '*' --
 
-Warning: opendir(%s/opendir_var*,%s/opendir_var*): %s in %s on line %d
+Warning: opendir(%s/opendir_var*): %s in %s on line %d
 
-Warning: opendir(%s/opendir_var*): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/opendir_var*): Failed to open directory: %s in %s on line %d
 bool(false)
 
-Warning: opendir(%s/*,%s/*): %s in %s on line %d
+Warning: opendir(%s/*): %s in %s on line %d
 
-Warning: opendir(%s/*): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/*): Failed to open directory: %s in %s on line %d
 bool(false)
 
 -- Wildcard = '?' --
 
-Warning: opendir(%s/opendir_variation6/sub_dir?,%s/opendir_variation6/sub_dir?): %s in %s on line %d
+Warning: opendir(%s/opendir_variation6/sub_dir?): %s in %s on line %d
 
-Warning: opendir(%s/opendir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/opendir_variation6/sub_dir?): Failed to open directory: %s in %s on line %d
 bool(false)
 
-Warning: opendir(%s/opendir_variation6/sub?dir1,%s/opendir_variation6/sub?dir1): %s in %s on line %d
+Warning: opendir(%s/opendir_variation6/sub?dir1): %s in %s on line %d
 
-Warning: opendir(%s/opendir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/opendir_variation6/sub?dir1): Failed to open directory: %s in %s on line %d
 bool(false)
-===DONE===

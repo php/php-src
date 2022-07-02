@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -32,85 +32,16 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "php_memory_streams.h"
+#include "pdo_stmt_arginfo.h"
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_pdostatement__void, 0)
-ZEND_END_ARG_INFO()
+#define PHP_STMT_GET_OBJ \
+	pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS); \
+	if (!stmt->dbh) { \
+		zend_throw_error(NULL, "PDO object is uninitialized"); \
+		RETURN_THROWS(); \
+	} \
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_execute, 0, 0, 0)
-	ZEND_ARG_INFO(0, bound_input_params) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetch, 0, 0, 0)
-	ZEND_ARG_INFO(0, how)
-	ZEND_ARG_INFO(0, orientation)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchobject, 0, 0, 0)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, ctor_args) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchcolumn, 0, 0, 0)
-	ZEND_ARG_INFO(0, column_number)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchall, 0, 0, 0)
-	ZEND_ARG_INFO(0, how)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, ctor_args) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindvalue, 0, 0, 2)
-	ZEND_ARG_INFO(0, paramno)
-	ZEND_ARG_INFO(0, param)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindparam, 0, 0, 2)
-	ZEND_ARG_INFO(0, paramno)
-	ZEND_ARG_INFO(1, param)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, maxlen)
-	ZEND_ARG_INFO(0, driverdata)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindcolumn, 0, 0, 2)
-	ZEND_ARG_INFO(0, column)
-	ZEND_ARG_INFO(1, param)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, maxlen)
-	ZEND_ARG_INFO(0, driverdata)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_setattribute, 0)
-	ZEND_ARG_INFO(0, attribute)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_getattribute, 0)
-	ZEND_ARG_INFO(0, attribute)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_getcolumnmeta, 0)
-	ZEND_ARG_INFO(0, column)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_setfetchmode, 0, 0, 1)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, param)
-	ZEND_ARG_INFO(0, params)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-#define PHP_STMT_GET_OBJ	\
-  pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS);	\
-  if (!stmt->dbh) {	\
-	  RETURN_FALSE;	\
-  }	\
-
-static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
+static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
 {
 	if (stmt->bound_param_map) {
 		/* rewriting :name to ? style.
@@ -119,7 +50,7 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		 * we will raise an error, as we can't be sure that it is safe
 		 * to bind multiple parameters onto the same zval in the underlying
 		 * driver */
-		char *name;
+		zend_string *name;
 		int position = 0;
 
 		if (stmt->named_rewrite_template) {
@@ -129,25 +60,28 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		if (!param->name) {
 			/* do the reverse; map the parameter number to the name */
 			if ((name = zend_hash_index_find_ptr(stmt->bound_param_map, param->paramno)) != NULL) {
-				param->name = zend_string_init(name, strlen(name), 0);
+				param->name = zend_string_copy(name);
 				return 1;
 			}
+			/* TODO Error? */
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 			return 0;
 		}
 
 		ZEND_HASH_FOREACH_PTR(stmt->bound_param_map, name) {
-			if (strncmp(name, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1)) {
+			if (!zend_string_equals(name, param->name)) {
 				position++;
 				continue;
 			}
 			if (param->paramno >= 0) {
+				/* TODO Error? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO refuses to handle repeating the same :named parameter for multiple positions with this driver, as it might be unsafe to do so.  Consider using a separate name for each parameter instead");
 				return -1;
 			}
 			param->paramno = position;
 			return 1;
 		} ZEND_HASH_FOREACH_END();
+		/* TODO Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 		return 0;
 	}
@@ -156,11 +90,15 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 /* }}} */
 
 /* trigger callback hook for parameters */
-static int dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type) /* {{{ */
+static bool dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_type) /* {{{ */
 {
-	int ret = 1, is_param = 1;
+	bool ret = 1, is_param = 1;
 	struct pdo_bound_param_data *param;
 	HashTable *ht;
+
+	if (stmt->dbh->skip_param_evt & (1 << event_type)) {
+		return 1;
+	}
 
 	if (!stmt->methods->param_hook) {
 		return 1;
@@ -187,7 +125,7 @@ iterate:
 }
 /* }}} */
 
-int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
+bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 {
 	int col;
 
@@ -195,28 +133,27 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 
 	for (col = 0; col < stmt->column_count; col++) {
 		if (!stmt->methods->describer(stmt, col)) {
-			return 0;
+			return false;
 		}
 
 		/* if we are applying case conversions on column names, do so now */
 		if (stmt->dbh->native_case != stmt->dbh->desired_case && stmt->dbh->desired_case != PDO_CASE_NATURAL) {
-			char *s = ZSTR_VAL(stmt->columns[col].name);
-
+			zend_string *orig_name = stmt->columns[col].name;
 			switch (stmt->dbh->desired_case) {
-				case PDO_CASE_UPPER:
+				case PDO_CASE_LOWER:
+					stmt->columns[col].name = zend_string_tolower(orig_name);
+					zend_string_release(orig_name);
+					break;
+				case PDO_CASE_UPPER: {
+					stmt->columns[col].name = zend_string_separate(orig_name, 0);
+					char *s = ZSTR_VAL(stmt->columns[col].name);
 					while (*s != '\0') {
 						*s = toupper(*s);
 						s++;
 					}
 					break;
-				case PDO_CASE_LOWER:
-					while (*s != '\0') {
-						*s = tolower(*s);
-						s++;
-					}
-					break;
-				default:
-					;
+				}
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		}
 
@@ -231,9 +168,48 @@ int pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 		}
 
 	}
-	return 1;
+	return true;
 }
 /* }}} */
+
+static void pdo_stmt_reset_columns(pdo_stmt_t *stmt) {
+	if (stmt->columns) {
+		int i;
+		struct pdo_column_data *cols = stmt->columns;
+
+		for (i = 0; i < stmt->column_count; i++) {
+			if (cols[i].name) {
+				zend_string_release_ex(cols[i].name, 0);
+			}
+		}
+		efree(stmt->columns);
+	}
+	stmt->columns = NULL;
+	stmt->column_count = 0;
+}
+
+/**
+ * Change the column count on the statement. If it differs from the previous one,
+ * discard existing columns information.
+ */
+PDO_API void php_pdo_stmt_set_column_count(pdo_stmt_t *stmt, int new_count)
+{
+	/* Columns not yet "described". */
+	if (!stmt->columns) {
+		stmt->column_count = new_count;
+		return;
+	}
+
+	/* The column count has not changed: No need to reload columns description.
+	 * Note: Do not handle attribute name change, without column count change. */
+	if (new_count == stmt->column_count) {
+		return;
+	}
+
+	/* Free previous columns to force reload description. */
+	pdo_stmt_reset_columns(stmt);
+	stmt->column_count = new_count;
+}
 
 static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 {
@@ -274,7 +250,7 @@ static void param_dtor(zval *el) /* {{{ */
 }
 /* }}} */
 
-static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, int is_param) /* {{{ */
+static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_stmt_t *stmt, bool is_param) /* {{{ */
 {
 	HashTable *hash;
 	zval *parameter;
@@ -300,15 +276,8 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	}
 
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !Z_ISNULL_P(parameter)) {
-		if (Z_TYPE_P(parameter) == IS_DOUBLE) {
-			char *p;
-			int len = zend_spprintf_unchecked(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(parameter));
-			ZVAL_STRINGL(parameter, p, len);
-			efree(p);
-		} else {
-			if (!try_convert_to_string(parameter)) {
-				return 0;
-			}
+		if (!try_convert_to_string(parameter)) {
+			return 0;
 		}
 	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE)) {
 		convert_to_long(parameter);
@@ -328,8 +297,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		int i;
 
 		for (i = 0; i < stmt->column_count; i++) {
-			if (ZSTR_LEN(stmt->columns[i].name) == ZSTR_LEN(param->name) &&
-			    strncmp(ZSTR_VAL(stmt->columns[i].name), ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1) == 0) {
+			if (zend_string_equals(stmt->columns[i].name, param->name)) {
 				param->paramno = i;
 				break;
 			}
@@ -338,7 +306,9 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		/* if you prepare and then execute passing an array of params keyed by names,
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
+			/* Should this always be an Error? */
 			char *tmp;
+			/* TODO Error? */
 			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
 			efree(tmp);
@@ -369,8 +339,8 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	 * a reference to param, as it resides in transient storage only
 	 * at this time. */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
-				)) {
+		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE)) {
+			PDO_HANDLE_STMT_ERR();
 			if (param->name) {
 				zend_string_release_ex(param->name, 0);
 				param->name = NULL;
@@ -395,8 +365,8 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
-		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC
-					)) {
+		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC)) {
+			PDO_HANDLE_STMT_ERR();
 			/* undo storage allocation; the hash will free the parameter
 			 * name if required */
 			if (pparam->name) {
@@ -413,19 +383,18 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::execute([array $bound_input_params])
-   Execute a prepared statement, optionally binding parameters */
-static PHP_METHOD(PDOStatement, execute)
+/* {{{ Execute a prepared statement, optionally binding parameters */
+PHP_METHOD(PDOStatement, execute)
 {
 	zval *input_params = NULL;
 	int ret = 1;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_EX(input_params, 1, 0)
+		Z_PARAM_ARRAY_OR_NULL(input_params)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
 	if (input_params) {
@@ -449,12 +418,7 @@ static PHP_METHOD(PDOStatement, execute)
 				param.paramno = -1;
 			} else {
 				/* we're okay to be zero based here */
-				/* num_index is unsignend
-				if (num_index < 0) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY093", NULL);
-					RETURN_FALSE;
-				}
-				*/
+				/* num_index is unsignend */
 				param.paramno = num_index;
 			}
 
@@ -472,27 +436,24 @@ static PHP_METHOD(PDOStatement, execute)
 
 	if (PDO_PLACEHOLDER_NONE == stmt->supports_placeholders) {
 		/* handle the emulated parameter binding,
-         * stmt->active_query_string holds the query with binds expanded and
+		 * stmt->active_query_string holds the query with binds expanded and
 		 * quoted.
-         */
+		 */
 
 		/* string is leftover from previous calls so PDOStatement::debugDumpParams() can access */
-		if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-			efree(stmt->active_query_string);
+		if (stmt->active_query_string) {
+			zend_string_release(stmt->active_query_string);
+			stmt->active_query_string = NULL;
 		}
-		stmt->active_query_string = NULL;
 
-		ret = pdo_parse_params(stmt, stmt->query_string, stmt->query_stringlen,
-			&stmt->active_query_string, &stmt->active_query_stringlen);
+		ret = pdo_parse_params(stmt, stmt->query_string, &stmt->active_query_string);
 
 		if (ret == 0) {
 			/* no changes were made */
-			stmt->active_query_string = stmt->query_string;
-			stmt->active_query_stringlen = stmt->query_stringlen;
+			stmt->active_query_string = zend_string_copy(stmt->query_string);
 			ret = 1;
 		} else if (ret == -1) {
 			/* something broke */
-			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
 	} else if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE)) {
@@ -513,6 +474,7 @@ static PHP_METHOD(PDOStatement, execute)
 		}
 
 		if (ret && !dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_POST)) {
+			PDO_HANDLE_STMT_ERR();
 			RETURN_FALSE;
 		}
 
@@ -523,137 +485,76 @@ static PHP_METHOD(PDOStatement, execute)
 }
 /* }}} */
 
-static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *type_override) /* {{{ */
+static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo_param_type *type_override) /* {{{ */
 {
-	struct pdo_column_data *col;
-	char *value = NULL;
-	size_t value_len = 0;
-	int caller_frees = 0;
-	int type, new_type;
-
-	if (colno < 0 || colno >= stmt->column_count) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
-		ZVAL_FALSE(dest);
-
+	if (colno < 0) {
+		zend_value_error("Column index must be greater than or equal to 0");
+		ZVAL_NULL(dest);
 		return;
 	}
 
-	col = &stmt->columns[colno];
-	type = PDO_PARAM_TYPE(col->param_type);
-	new_type =  type_override ? (int)PDO_PARAM_TYPE(*type_override) : type;
-
-	value = NULL;
-	value_len = 0;
-
-	stmt->methods->get_col(stmt, colno, &value, &value_len, &caller_frees);
-
-	switch (type) {
-		case PDO_PARAM_ZVAL:
-			if (value && value_len == sizeof(zval)) {
-				ZVAL_COPY_VALUE(dest, (zval *)value);
-			} else {
-				ZVAL_NULL(dest);
-			}
-
-			if (Z_TYPE_P(dest) == IS_NULL) {
-				type = new_type;
-			}
-			break;
-
-		case PDO_PARAM_INT:
-			if (value && value_len == sizeof(zend_long)) {
-				ZVAL_LONG(dest, *(zend_long*)value);
-				break;
-			}
-			ZVAL_NULL(dest);
-			break;
-
-		case PDO_PARAM_BOOL:
-			if (value && value_len == sizeof(zend_bool)) {
-				ZVAL_BOOL(dest, *(zend_bool*)value);
-				break;
-			}
-			ZVAL_NULL(dest);
-			break;
-
-		case PDO_PARAM_LOB:
-			if (value == NULL) {
-				ZVAL_NULL(dest);
-			} else if (value_len == 0) {
-				/* Warning, empty strings need to be passed as stream */
-				if (stmt->dbh->stringify || new_type == PDO_PARAM_STR) {
-					zend_string *buf;
-					buf = php_stream_copy_to_mem((php_stream*)value, PHP_STREAM_COPY_ALL, 0);
-					if (buf == NULL) {
-						ZVAL_EMPTY_STRING(dest);
-					} else {
-						ZVAL_STR(dest, buf);
-					}
-					php_stream_close((php_stream*)value);
-				} else {
-					php_stream_to_zval((php_stream*)value, dest);
-				}
-			} else if (!stmt->dbh->stringify && new_type != PDO_PARAM_STR) {
-				/* they gave us a string, but LOBs are represented as streams in PDO */
-				php_stream *stm;
-#ifdef TEMP_STREAM_TAKE_BUFFER
-				if (caller_frees) {
-					stm = php_stream_memory_open(TEMP_STREAM_TAKE_BUFFER, value, value_len);
-					if (stm) {
-						caller_frees = 0;
-					}
-				} else
-#endif
-				{
-					stm = php_stream_memory_open(TEMP_STREAM_READONLY, value, value_len);
-				}
-				if (stm) {
-					php_stream_to_zval(stm, dest);
-				} else {
-					ZVAL_NULL(dest);
-				}
-			} else {
-				ZVAL_STRINGL(dest, value, value_len);
-			}
-			break;
-
-		case PDO_PARAM_STR:
-			if (value && !(value_len == 0 && stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING)) {
-				ZVAL_STRINGL(dest, value, value_len);
-				break;
-			}
-		default:
-			ZVAL_NULL(dest);
+	if (colno >= stmt->column_count) {
+		zend_value_error("Invalid column index");
+		ZVAL_NULL(dest);
+		return;
 	}
 
-	if (type != new_type) {
-		switch (new_type) {
+	ZVAL_NULL(dest);
+	stmt->methods->get_col(stmt, colno, dest, type_override);
+
+	if (Z_TYPE_P(dest) == IS_STRING && Z_STRLEN_P(dest) == 0
+			&& stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING) {
+		zval_ptr_dtor_str(dest);
+		ZVAL_NULL(dest);
+	}
+
+	/* If stringification is requested, override with PDO_PARAM_STR. */
+	enum pdo_param_type pdo_param_str = PDO_PARAM_STR;
+	if (stmt->dbh->stringify) {
+		type_override = &pdo_param_str;
+	}
+
+	if (type_override && Z_TYPE_P(dest) != IS_NULL) {
+		switch (*type_override) {
 			case PDO_PARAM_INT:
-				convert_to_long_ex(dest);
+				convert_to_long(dest);
 				break;
 			case PDO_PARAM_BOOL:
-				convert_to_boolean_ex(dest);
+				convert_to_boolean(dest);
 				break;
 			case PDO_PARAM_STR:
-				convert_to_string_ex(dest);
+				if (Z_TYPE_P(dest) == IS_FALSE) {
+					/* Return "0" rather than "", because this is what database drivers that
+					 * don't have a dedicated boolean type would return. */
+					zval_ptr_dtor_nogc(dest);
+					ZVAL_INTERNED_STR(dest, ZSTR_CHAR('0'));
+				} else if (Z_TYPE_P(dest) == IS_RESOURCE) {
+					/* Convert LOB stream to string */
+					php_stream *stream;
+					php_stream_from_zval_no_verify(stream, dest);
+					zend_string *str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
+					zval_ptr_dtor_nogc(dest);
+					if (str == NULL) {
+						ZVAL_EMPTY_STRING(dest);
+					} else {
+						ZVAL_STR(dest, str);
+					}
+				} else {
+					convert_to_string(dest);
+				}
 				break;
 			case PDO_PARAM_NULL:
-				convert_to_null_ex(dest);
+				convert_to_null(dest);
+				break;
+			case PDO_PARAM_LOB:
+				if (Z_TYPE_P(dest) == IS_STRING) {
+					php_stream *stream =
+						php_stream_memory_open(TEMP_STREAM_READONLY, Z_STR_P(dest));
+					zval_ptr_dtor_str(dest);
+					php_stream_to_zval(stream, dest);
+				}
 				break;
 			default:
-				;
-		}
-	}
-
-	if (caller_frees && value) {
-		efree(value);
-	}
-
-	if (stmt->dbh->stringify) {
-		switch (Z_TYPE_P(dest)) {
-			case IS_LONG:
-			case IS_DOUBLE:
-				convert_to_string(dest);
 				break;
 		}
 	}
@@ -664,7 +565,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 }
 /* }}} */
 
-static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset, int do_bind) /* {{{ */
+static bool do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
 {
 	if (!stmt->executed) {
 		return 0;
@@ -687,7 +588,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zen
 		return 0;
 	}
 
-	if (do_bind && stmt->bound_columns) {
+	if (stmt->bound_columns) {
 		/* update those bound column variables now */
 		struct pdo_bound_param_data *param;
 
@@ -701,7 +602,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zen
 				zval_ptr_dtor(Z_REFVAL(param->parameter));
 
 				/* set new value */
-				fetch_value(stmt, Z_REFVAL(param->parameter), param->paramno, (int *)&param->param_type);
+				fetch_value(stmt, Z_REFVAL(param->parameter), param->paramno, &param->param_type);
 
 				/* TODO: some smart thing that avoids duplicating the value in the
 				 * general loop below.  For now, if you're binding output columns,
@@ -715,7 +616,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zen
 }
 /* }}} */
 
-static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
+static bool do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 {
 	zend_class_entry *ce = stmt->fetch.cls.ce;
 	zend_fcall_info *fci = &stmt->fetch.cls.fci;
@@ -733,7 +634,6 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		fci->retval = &stmt->fetch.cls.retval;
 		fci->param_count = 0;
 		fci->params = NULL;
-		fci->no_separation = 1;
 
 		zend_fcall_info_args_ex(fci, ce->constructor, &stmt->fetch.cls.ctor_args);
 
@@ -741,7 +641,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		fcc->called_scope = ce;
 		return 1;
 	} else if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not have a constructor, use NULL for the ctor_params parameter, or simply omit it");
+		zend_throw_error(NULL, "User-supplied statement does not accept constructor arguments");
 		return 0;
 	} else {
 		return 1; /* no ctor no args is also ok */
@@ -749,18 +649,18 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args) /* {{{ */
+static bool make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args) /* {{{ */
 {
 	char *is_callable_error = NULL;
 
 	if (zend_fcall_info_init(callable, 0, fci, fcc, NULL, &is_callable_error) == FAILURE) {
 		if (is_callable_error) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", is_callable_error);
+			zend_type_error("%s", is_callable_error);
 			efree(is_callable_error);
 		} else {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback");
+			zend_type_error("User-supplied function must be a valid callback");
 		}
-		return 0;
+		return false;
 	}
 	if (is_callable_error) {
 		/* Possible error message */
@@ -770,20 +670,20 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 	fci->param_count = num_args; /* probably less */
 	fci->params = safe_emalloc(sizeof(zval), num_args, 0);
 
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
+static bool do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
 {
 	zend_fcall_info *fci = &stmt->fetch.cls.fci;
 	zend_fcall_info_cache *fcc = &stmt->fetch.cls.fcc;
 
 	if (!make_callable_ex(stmt, &stmt->fetch.func.function, fci, fcc, stmt->column_count)) {
-		return 0;
+		return false;
 	} else {
 		stmt->fetch.func.values = safe_emalloc(sizeof(zval), stmt->column_count, 0);
-		return 1;
+		return true;
 	}
 }
 /* }}} */
@@ -793,7 +693,7 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 	/* fci.size is used to check if it is valid */
 	if (stmt->fetch.cls.fci.size && stmt->fetch.cls.fci.params) {
 		if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
-		    /* Added to free constructor arguments */
+			/* Added to free constructor arguments */
 			zend_fcall_info_args_clear(&stmt->fetch.cls.fci, 1);
 		} else {
 			efree(stmt->fetch.cls.fci.params);
@@ -814,14 +714,15 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 }
 /* }}} */
 
-/* perform a fetch.  If do_bind is true, update any bound columns.
+/* perform a fetch.
  * If return_value is not null, store values into it according to HOW. */
-static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
+static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
 {
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
-	zval grp_val, *pgrp, retval, old_ctor_args = {{0}};
+	zval grp_val, *pgrp, retval, old_ctor_args = {{0}, {0}, {0}};
 	int colno;
+	int i = 0;
 
 	if (how == PDO_FETCH_USE_DEFAULT) {
 		how = stmt->default_fetch_type;
@@ -829,7 +730,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 	flags = how & PDO_FETCH_FLAGS;
 	how = how & ~PDO_FETCH_FLAGS;
 
-	if (!do_fetch_common(stmt, ori, offset, do_bind)) {
+	if (!do_fetch_common(stmt, ori, offset)) {
 		return 0;
 	}
 
@@ -838,362 +739,370 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 		return 1;
 	}
 
-	if (flags & PDO_FETCH_GROUP && stmt->fetch.column == -1) {
+	if ((flags & PDO_FETCH_GROUP) && stmt->fetch.column == -1) {
 		colno = 1;
 	} else {
 		colno = stmt->fetch.column;
 	}
 
-	if (return_value) {
-		int i = 0;
+	/* If no return value we are done */
+	if (!return_value) {
+		return true;
+	}
 
-		if (how == PDO_FETCH_LAZY) {
-			get_lazy_object(stmt, return_value);
-			return 1;
-		}
+	if (how == PDO_FETCH_LAZY) {
+		get_lazy_object(stmt, return_value);
+		return 1;
+	}
 
-		RETVAL_FALSE;
+	RETVAL_FALSE;
 
-		switch (how) {
-			case PDO_FETCH_USE_DEFAULT:
-			case PDO_FETCH_ASSOC:
-			case PDO_FETCH_BOTH:
-			case PDO_FETCH_NUM:
-			case PDO_FETCH_NAMED:
-				if (!return_all) {
-					array_init_size(return_value, stmt->column_count);
-				} else {
-					array_init(return_value);
-				}
-				break;
+	switch (how) {
+		case PDO_FETCH_USE_DEFAULT:
+		case PDO_FETCH_ASSOC:
+		case PDO_FETCH_BOTH:
+		case PDO_FETCH_NUM:
+		case PDO_FETCH_NAMED:
+			if (!return_all) {
+				array_init_size(return_value, stmt->column_count);
+			} else {
+				array_init(return_value);
+			}
+			break;
 
-			case PDO_FETCH_KEY_PAIR:
-				if (stmt->column_count != 2) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns.");
-					return 0;
-				}
-				if (!return_all) {
-					array_init(return_value);
-				}
-				break;
-
-			case PDO_FETCH_COLUMN:
-				if (colno >= 0 && colno < stmt->column_count) {
-					if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
-						fetch_value(stmt, return_value, 1, NULL);
-					} else if (flags == PDO_FETCH_GROUP && colno) {
-						fetch_value(stmt, return_value, 0, NULL);
-					} else {
-						fetch_value(stmt, return_value, colno, NULL);
-					}
-					if (!return_all) {
-						return 1;
-					} else {
-						break;
-					}
-				} else {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid column index");
-				}
+		case PDO_FETCH_KEY_PAIR:
+			if (stmt->column_count != 2) {
+				/* TODO: Error? */
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns.");
 				return 0;
+			}
+			if (!return_all) {
+				array_init(return_value);
+			}
+			break;
 
-			case PDO_FETCH_OBJ:
-				object_init_ex(return_value, ZEND_STANDARD_CLASS_DEF_PTR);
-				break;
+		case PDO_FETCH_COLUMN:
+			if (colno < 0 ) {
+				zend_value_error("Column index must be greater than or equal to 0");
+				return false;
+			}
 
-			case PDO_FETCH_CLASS:
-				if (flags & PDO_FETCH_CLASSTYPE) {
-					zval val;
-					zend_class_entry *cep;
+			if (colno >= stmt->column_count) {
+				zend_value_error("Invalid column index");
+				return false;
+			}
 
-					old_ce = stmt->fetch.cls.ce;
-					ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
-					old_arg_count = stmt->fetch.cls.fci.param_count;
-					do_fetch_opt_finish(stmt, 0);
+			if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
+				fetch_value(stmt, return_value, 1, NULL);
+			} else if (flags == PDO_FETCH_GROUP && colno) {
+				fetch_value(stmt, return_value, 0, NULL);
+			} else {
+				fetch_value(stmt, return_value, colno, NULL);
+			}
+			if (!return_all) {
+				return 1;
+			}
+			break;
 
-					fetch_value(stmt, &val, i++, NULL);
-					if (Z_TYPE(val) != IS_NULL) {
-						if (!try_convert_to_string(&val)) {
-							return 0;
-						}
-						if ((cep = zend_lookup_class(Z_STR(val))) == NULL) {
-							stmt->fetch.cls.ce = ZEND_STANDARD_CLASS_DEF_PTR;
-						} else {
-							stmt->fetch.cls.ce = cep;
-						}
-					}
+		case PDO_FETCH_OBJ:
+			object_init_ex(return_value, ZEND_STANDARD_CLASS_DEF_PTR);
+			break;
 
-					do_fetch_class_prepare(stmt);
-					zval_ptr_dtor_str(&val);
-				}
-				ce = stmt->fetch.cls.ce;
-				if (!ce) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch class specified");
-					return 0;
-				}
-				if ((flags & PDO_FETCH_SERIALIZE) == 0) {
-					if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
+		case PDO_FETCH_CLASS:
+			if (flags & PDO_FETCH_CLASSTYPE) {
+				zval val;
+				zend_class_entry *cep;
+
+				old_ce = stmt->fetch.cls.ce;
+				ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
+				old_arg_count = stmt->fetch.cls.fci.param_count;
+				do_fetch_opt_finish(stmt, 0);
+
+				fetch_value(stmt, &val, i++, NULL);
+				if (Z_TYPE(val) != IS_NULL) {
+					if (!try_convert_to_string(&val)) {
 						return 0;
 					}
-					if (!stmt->fetch.cls.fci.size) {
-						if (!do_fetch_class_prepare(stmt))
-						{
-							return 0;
-						}
-					}
-					if (ce->constructor && (flags & PDO_FETCH_PROPS_LATE)) {
-						stmt->fetch.cls.fci.object = Z_OBJ_P(return_value);
-						stmt->fetch.cls.fcc.object = Z_OBJ_P(return_value);
-						if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc) == FAILURE) {
-							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor");
-							return 0;
-						} else {
-							if (!Z_ISUNDEF(stmt->fetch.cls.retval)) {
-								zval_ptr_dtor(&stmt->fetch.cls.retval);
-								ZVAL_UNDEF(&stmt->fetch.cls.retval);
-							}
-						}
+					if ((cep = zend_lookup_class(Z_STR(val))) == NULL) {
+						stmt->fetch.cls.ce = ZEND_STANDARD_CLASS_DEF_PTR;
+					} else {
+						stmt->fetch.cls.ce = cep;
 					}
 				}
-				break;
 
-			case PDO_FETCH_INTO:
-				if (Z_ISUNDEF(stmt->fetch.into)) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch-into object specified.");
-					return 0;
-					break;
-				}
-
-				ZVAL_COPY(return_value, &stmt->fetch.into);
-
-				if (Z_OBJ_P(return_value)->ce == ZEND_STANDARD_CLASS_DEF_PTR) {
-					how = PDO_FETCH_OBJ;
-				}
-				break;
-
-			case PDO_FETCH_FUNC:
-				if (Z_ISUNDEF(stmt->fetch.func.function)) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
+				do_fetch_class_prepare(stmt);
+				zval_ptr_dtor_str(&val);
+			}
+			ce = stmt->fetch.cls.ce;
+			/* TODO: Make this an assertion and ensure this is true higher up? */
+			if (!ce) {
+				/* TODO Error? */
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch class specified");
+				return 0;
+			}
+			if ((flags & PDO_FETCH_SERIALIZE) == 0) {
+				if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
 					return 0;
 				}
-				if (!stmt->fetch.func.fci.size) {
-					if (!do_fetch_func_prepare(stmt))
-					{
+				if (!stmt->fetch.cls.fci.size) {
+					if (!do_fetch_class_prepare(stmt)) {
+						zval_ptr_dtor(return_value);
 						return 0;
 					}
 				}
-				break;
-
-
-			default:
-				/* shouldn't happen */
-				return 0;
-		}
-
-		if (return_all && how != PDO_FETCH_KEY_PAIR) {
-			if (flags == PDO_FETCH_GROUP && how == PDO_FETCH_COLUMN && stmt->fetch.column > 0) {
-				fetch_value(stmt, &grp_val, colno, NULL);
-			} else {
-				fetch_value(stmt, &grp_val, i, NULL);
-			}
-			convert_to_string(&grp_val);
-			if (how == PDO_FETCH_COLUMN) {
-				i = stmt->column_count; /* no more data to fetch */
-			} else {
-				i++;
-			}
-		}
-
-		for (idx = 0; i < stmt->column_count; i++, idx++) {
-			zval val;
-			fetch_value(stmt, &val, i, NULL);
-
-			switch (how) {
-				case PDO_FETCH_ASSOC:
-					zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
-					break;
-
-				case PDO_FETCH_KEY_PAIR:
-					{
-						zval tmp;
-						fetch_value(stmt, &tmp, ++i, NULL);
-
-						if (Z_TYPE(val) == IS_LONG) {
-							zend_hash_index_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_LVAL(val), &tmp);
-						} else {
-							convert_to_string(&val);
-							zend_symtable_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_STR(val), &tmp);
-						}
-						zval_ptr_dtor(&val);
-						return 1;
-					}
-					break;
-
-				case PDO_FETCH_USE_DEFAULT:
-				case PDO_FETCH_BOTH:
-					zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
-					if (Z_REFCOUNTED(val)) {
-						Z_ADDREF(val);
-					}
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val);
-					break;
-
-				case PDO_FETCH_NAMED:
-					/* already have an item with this name? */
-					{
-						zval *curr_val;
-						if ((curr_val = zend_hash_find(Z_ARRVAL_P(return_value), stmt->columns[i].name))) {
-							zval arr;
-							if (Z_TYPE_P(curr_val) != IS_ARRAY) {
-								/* a little bit of black magic here:
-								 * we're creating a new array and swapping it for the
-								 * zval that's already stored in the hash under the name
-								 * we want.  We then add that zval to the array.
-								 * This is effectively the same thing as:
-								 * if (!is_array($hash[$name])) {
-								 *   $hash[$name] = array($hash[$name]);
-								 * }
-								 * */
-								zval cur;
-
-								array_init(&arr);
-
-								ZVAL_COPY_VALUE(&cur, curr_val);
-								ZVAL_COPY_VALUE(curr_val, &arr);
-
-								zend_hash_next_index_insert_new(Z_ARRVAL(arr), &cur);
-							} else {
-								ZVAL_COPY_VALUE(&arr, curr_val);
-							}
-							zend_hash_next_index_insert_new(Z_ARRVAL(arr), &val);
-						} else {
-							zend_hash_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
-						}
-					}
-					break;
-
-				case PDO_FETCH_NUM:
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &val);
-					break;
-
-				case PDO_FETCH_OBJ:
-				case PDO_FETCH_INTO:
-					zend_update_property_ex(NULL, return_value,
-						stmt->columns[i].name,
-						&val);
-					zval_ptr_dtor(&val);
-					break;
-
-				case PDO_FETCH_CLASS:
-					if ((flags & PDO_FETCH_SERIALIZE) == 0 || idx) {
-						zend_update_property_ex(ce, return_value,
-							stmt->columns[i].name,
-							&val);
-						zval_ptr_dtor(&val);
-					} else {
-						if (!ce->unserialize) {
-							zval_ptr_dtor(&val);
-							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class");
-							return 0;
-						} else if (ce->unserialize(return_value, ce, (unsigned char *)(Z_TYPE(val) == IS_STRING ? Z_STRVAL(val) : ""), Z_TYPE(val) == IS_STRING ? Z_STRLEN(val) : 0, NULL) == FAILURE) {
-							zval_ptr_dtor(&val);
-							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class");
-							zval_ptr_dtor(return_value);
-							ZVAL_NULL(return_value);
-							return 0;
-						} else {
-							zval_ptr_dtor(&val);
-						}
-					}
-					break;
-
-				case PDO_FETCH_FUNC:
-					ZVAL_COPY_VALUE(&stmt->fetch.func.values[idx], &val);
-					ZVAL_COPY_VALUE(&stmt->fetch.cls.fci.params[idx], &stmt->fetch.func.values[idx]);
-					break;
-
-				default:
-					zval_ptr_dtor(&val);
-					pdo_raise_impl_error(stmt->dbh, stmt, "22003", "mode is out of range");
-					return 0;
-					break;
-			}
-		}
-
-		switch (how) {
-			case PDO_FETCH_CLASS:
-				if (ce->constructor && !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
+				if (ce->constructor && (flags & PDO_FETCH_PROPS_LATE)) {
 					stmt->fetch.cls.fci.object = Z_OBJ_P(return_value);
 					stmt->fetch.cls.fcc.object = Z_OBJ_P(return_value);
 					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc) == FAILURE) {
+						/* TODO Error? */
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor");
 						return 0;
 					} else {
 						if (!Z_ISUNDEF(stmt->fetch.cls.retval)) {
 							zval_ptr_dtor(&stmt->fetch.cls.retval);
+							ZVAL_UNDEF(&stmt->fetch.cls.retval);
 						}
 					}
 				}
-				if (flags & PDO_FETCH_CLASSTYPE) {
-					do_fetch_opt_finish(stmt, 0);
-					stmt->fetch.cls.ce = old_ce;
-					ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
-					stmt->fetch.cls.fci.param_count = old_arg_count;
+			}
+			break;
+
+		case PDO_FETCH_INTO:
+			/* TODO: Make this an assertion and ensure this is true higher up? */
+			if (Z_ISUNDEF(stmt->fetch.into)) {
+				/* TODO ArgumentCountError? */
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch-into object specified.");
+				return 0;
+				break;
+			}
+
+			ZVAL_COPY(return_value, &stmt->fetch.into);
+
+			if (Z_OBJ_P(return_value)->ce == ZEND_STANDARD_CLASS_DEF_PTR) {
+				how = PDO_FETCH_OBJ;
+			}
+			break;
+
+		case PDO_FETCH_FUNC:
+			/* TODO: Make this an assertion and ensure this is true higher up? */
+			if (Z_ISUNDEF(stmt->fetch.func.function)) {
+				/* TODO ArgumentCountError? */
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch function specified");
+				return 0;
+			}
+			if (!stmt->fetch.func.fci.size) {
+				if (!do_fetch_func_prepare(stmt))
+				{
+					return 0;
+				}
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+
+	if (return_all && how != PDO_FETCH_KEY_PAIR) {
+		if (flags == PDO_FETCH_GROUP && how == PDO_FETCH_COLUMN && stmt->fetch.column > 0) {
+			fetch_value(stmt, &grp_val, colno, NULL);
+		} else {
+			fetch_value(stmt, &grp_val, i, NULL);
+		}
+		convert_to_string(&grp_val);
+		if (how == PDO_FETCH_COLUMN) {
+			i = stmt->column_count; /* no more data to fetch */
+		} else {
+			i++;
+		}
+	}
+
+	for (idx = 0; i < stmt->column_count; i++, idx++) {
+		zval val;
+		fetch_value(stmt, &val, i, NULL);
+
+		switch (how) {
+			case PDO_FETCH_ASSOC:
+				zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+				break;
+
+			case PDO_FETCH_KEY_PAIR:
+				{
+					zval tmp;
+					fetch_value(stmt, &tmp, ++i, NULL);
+
+					if (Z_TYPE(val) == IS_LONG) {
+						zend_hash_index_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_LVAL(val), &tmp);
+					} else {
+						convert_to_string(&val);
+						zend_symtable_update((return_all ? Z_ARRVAL_P(return_all) : Z_ARRVAL_P(return_value)), Z_STR(val), &tmp);
+					}
+					zval_ptr_dtor(&val);
+					return 1;
+				}
+				break;
+
+			case PDO_FETCH_USE_DEFAULT:
+			case PDO_FETCH_BOTH:
+				zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+				if (zend_hash_index_add(Z_ARRVAL_P(return_value), i, &val) != NULL) {
+					Z_TRY_ADDREF(val);
+				}
+				break;
+
+			case PDO_FETCH_NAMED:
+				/* already have an item with this name? */
+				{
+					zval *curr_val;
+					if ((curr_val = zend_hash_find(Z_ARRVAL_P(return_value), stmt->columns[i].name))) {
+						zval arr;
+						if (Z_TYPE_P(curr_val) != IS_ARRAY) {
+							/* a little bit of black magic here:
+							 * we're creating a new array and swapping it for the
+							 * zval that's already stored in the hash under the name
+							 * we want.  We then add that zval to the array.
+							 * This is effectively the same thing as:
+							 * if (!is_array($hash[$name])) {
+							 *   $hash[$name] = array($hash[$name]);
+							 * }
+							 * */
+							zval cur;
+
+							array_init(&arr);
+
+							ZVAL_COPY_VALUE(&cur, curr_val);
+							ZVAL_COPY_VALUE(curr_val, &arr);
+
+							zend_hash_next_index_insert_new(Z_ARRVAL(arr), &cur);
+						} else {
+							ZVAL_COPY_VALUE(&arr, curr_val);
+						}
+						zend_hash_next_index_insert_new(Z_ARRVAL(arr), &val);
+					} else {
+						zend_hash_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
+					}
+				}
+				break;
+
+			case PDO_FETCH_NUM:
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &val);
+				break;
+
+			case PDO_FETCH_OBJ:
+			case PDO_FETCH_INTO:
+				zend_update_property_ex(NULL, Z_OBJ_P(return_value),
+					stmt->columns[i].name,
+					&val);
+				zval_ptr_dtor(&val);
+				break;
+
+			case PDO_FETCH_CLASS:
+				if ((flags & PDO_FETCH_SERIALIZE) == 0 || idx) {
+					zend_update_property_ex(ce, Z_OBJ_P(return_value),
+						stmt->columns[i].name,
+						&val);
+					zval_ptr_dtor(&val);
+				} else {
+					if (!ce->unserialize) {
+						zval_ptr_dtor(&val);
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class");
+						return 0;
+					} else if (ce->unserialize(return_value, ce, (unsigned char *)(Z_TYPE(val) == IS_STRING ? Z_STRVAL(val) : ""), Z_TYPE(val) == IS_STRING ? Z_STRLEN(val) : 0, NULL) == FAILURE) {
+						zval_ptr_dtor(&val);
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class");
+						zval_ptr_dtor(return_value);
+						ZVAL_NULL(return_value);
+						return 0;
+					} else {
+						zval_ptr_dtor(&val);
+					}
 				}
 				break;
 
 			case PDO_FETCH_FUNC:
-				stmt->fetch.func.fci.param_count = idx;
-				stmt->fetch.func.fci.retval = &retval;
-				if (zend_call_function(&stmt->fetch.func.fci, &stmt->fetch.func.fcc) == FAILURE) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call user-supplied function");
-					return 0;
-				} else {
-					if (return_all) {
-						zval_ptr_dtor(return_value); /* we don't need that */
-						ZVAL_COPY_VALUE(return_value, &retval);
-					} else if (!Z_ISUNDEF(retval)) {
-						ZVAL_COPY_VALUE(return_value, &retval);
-					}
-				}
-				while (idx--) {
-					zval_ptr_dtor(&stmt->fetch.func.values[idx]);
-				}
+				ZVAL_COPY_VALUE(&stmt->fetch.func.values[idx], &val);
+				ZVAL_COPY_VALUE(&stmt->fetch.cls.fci.params[idx], &stmt->fetch.func.values[idx]);
 				break;
 
 			default:
-				break;
+				zval_ptr_dtor(&val);
+				zend_value_error("Fetch mode must be a bitmask of PDO::FETCH_* constants");
+				return 0;
 		}
+	}
 
-		if (return_all) {
-			if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
-				zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), return_value);
-			} else {
-				zval grp;
-				if ((pgrp = zend_symtable_find(Z_ARRVAL_P(return_all), Z_STR(grp_val))) == NULL) {
-					array_init(&grp);
-					zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), &grp);
+	switch (how) {
+		case PDO_FETCH_CLASS:
+			if (ce->constructor && !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
+				stmt->fetch.cls.fci.object = Z_OBJ_P(return_value);
+				stmt->fetch.cls.fcc.object = Z_OBJ_P(return_value);
+				if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc) == FAILURE) {
+					/* TODO Error? */
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor");
+					return 0;
 				} else {
-					ZVAL_COPY_VALUE(&grp, pgrp);
+					if (!Z_ISUNDEF(stmt->fetch.cls.retval)) {
+						zval_ptr_dtor(&stmt->fetch.cls.retval);
+					}
 				}
-				zend_hash_next_index_insert(Z_ARRVAL(grp), return_value);
 			}
-			zval_ptr_dtor_str(&grp_val);
-		}
+			if (flags & PDO_FETCH_CLASSTYPE) {
+				do_fetch_opt_finish(stmt, 0);
+				stmt->fetch.cls.ce = old_ce;
+				ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
+				stmt->fetch.cls.fci.param_count = old_arg_count;
+			}
+			break;
 
+		case PDO_FETCH_FUNC:
+			stmt->fetch.func.fci.param_count = idx;
+			stmt->fetch.func.fci.retval = &retval;
+			if (zend_call_function(&stmt->fetch.func.fci, &stmt->fetch.func.fcc) == FAILURE) {
+				/* TODO Error? */
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call user-supplied function");
+				return 0;
+			} else {
+				if (return_all) {
+					zval_ptr_dtor(return_value); /* we don't need that */
+					ZVAL_COPY_VALUE(return_value, &retval);
+				} else if (!Z_ISUNDEF(retval)) {
+					ZVAL_COPY_VALUE(return_value, &retval);
+				}
+			}
+			while (idx--) {
+				zval_ptr_dtor(&stmt->fetch.func.values[idx]);
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	if (return_all) {
+		if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
+			zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), return_value);
+		} else {
+			zval grp;
+			if ((pgrp = zend_symtable_find(Z_ARRVAL_P(return_all), Z_STR(grp_val))) == NULL) {
+				array_init(&grp);
+				zend_symtable_update(Z_ARRVAL_P(return_all), Z_STR(grp_val), &grp);
+			} else {
+				ZVAL_COPY_VALUE(&grp, pgrp);
+			}
+			zend_hash_next_index_insert(Z_ARRVAL(grp), return_value);
+		}
+		zval_ptr_dtor_str(&grp_val);
 	}
 
 	return 1;
 }
 /* }}} */
 
-static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all) /* {{{ */
+static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_arg_num, bool fetch_all) /* {{{ */
 {
 	int flags = mode & PDO_FETCH_FLAGS;
 
 	mode = mode & ~PDO_FETCH_FLAGS;
 
 	if (mode < 0 || mode > PDO_FETCH__MAX) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "invalid fetch mode");
+		zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
 		return 0;
 	}
 
@@ -1205,46 +1114,47 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all)
 	switch(mode) {
 		case PDO_FETCH_FUNC:
 			if (!fetch_all) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_FUNC is only allowed in PDOStatement::fetchAll()");
+				zend_value_error("Can only use PDO::FETCH_FUNC in PDOStatement::fetchAll()");
 				return 0;
 			}
 			return 1;
 
 		case PDO_FETCH_LAZY:
 			if (fetch_all) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_LAZY can't be used with PDOStatement::fetchAll()");
+				zend_argument_value_error(mode_arg_num, "cannot be PDO::FETCH_LAZY in PDOStatement::fetchAll()");
 				return 0;
 			}
-			/* fall through */
+			ZEND_FALLTHROUGH;
 		default:
 			if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_SERIALIZE can only be used together with PDO::FETCH_CLASS");
+				zend_argument_value_error(mode_arg_num, "must use PDO::FETCH_SERIALIZE with PDO::FETCH_CLASS");
 				return 0;
 			}
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_CLASSTYPE can only be used together with PDO::FETCH_CLASS");
+				zend_argument_value_error(mode_arg_num, "must use PDO::FETCH_CLASSTYPE with PDO::FETCH_CLASS");
 				return 0;
 			}
 			if (mode >= PDO_FETCH__MAX) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "invalid fetch mode");
+				zend_argument_value_error(mode_arg_num, "must be a bitmask of PDO::FETCH_* constants");
 				return 0;
 			}
-			/* no break; */
+			ZEND_FALLTHROUGH;
 
 		case PDO_FETCH_CLASS:
+			if (flags & PDO_FETCH_SERIALIZE) {
+				php_error_docref(NULL, E_DEPRECATED, "The PDO::FETCH_SERIALIZE mode is deprecated");
+			}
 			return 1;
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::fetch([int $how = PDO_FETCH_BOTH [, int $orientation [, int $offset]]])
-   Fetches the next row and returns it, or false if there are no more rows */
-static PHP_METHOD(PDOStatement, fetch)
+/* {{{ Fetches the next row and returns it, or false if there are no more rows */
+PHP_METHOD(PDOStatement, fetch)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
 	zend_long ori = PDO_FETCH_ORI_NEXT;
 	zend_long off = 0;
-    PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
@@ -1253,44 +1163,36 @@ static PHP_METHOD(PDOStatement, fetch)
 		Z_PARAM_LONG(off)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
-	if (!pdo_stmt_verify_mode(stmt, how, 0)) {
-		RETURN_FALSE;
+	if (!pdo_stmt_verify_mode(stmt, how, 1, false)) {
+		RETURN_THROWS();
 	}
 
-	if (!do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
+	if (!do_fetch(stmt, return_value, how, ori, off, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::fetchObject([string class_name [, NULL|array ctor_args]])
-   Fetches the next row and returns it as an object. */
-static PHP_METHOD(PDOStatement, fetchObject)
+/* {{{ Fetches the next row and returns it as an object. */
+PHP_METHOD(PDOStatement, fetchObject)
 {
-	zend_long how = PDO_FETCH_CLASS;
-	zend_long ori = PDO_FETCH_ORI_NEXT;
-	zend_long off = 0;
-	zend_string *class_name = NULL;
+	zend_class_entry *ce = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
-	int error = 0, old_arg_count;
-
-	PHP_STMT_GET_OBJ;
+	int old_arg_count;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(class_name, 1, 0)
+		Z_PARAM_CLASS_OR_NULL(ce)
 		Z_PARAM_ARRAY(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
-
-	if (!pdo_stmt_verify_mode(stmt, how, 0)) {
-		RETURN_FALSE;
-	}
 
 	old_ce = stmt->fetch.cls.ce;
 	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
@@ -1298,56 +1200,43 @@ static PHP_METHOD(PDOStatement, fetchObject)
 
 	do_fetch_opt_finish(stmt, 0);
 
-	if (ctor_args) {
-		if (Z_TYPE_P(ctor_args) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-			ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
-		} else {
-			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
-		}
+	if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
+		ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
+	} else {
+		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 	}
-	if (class_name && !error) {
-		stmt->fetch.cls.ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);
-
-		if (!stmt->fetch.cls.ce) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Could not find user-supplied class");
-			error = 1;
-		}
-	} else if (!error) {
+	if (ce) {
+		stmt->fetch.cls.ce = ce;
+	} else {
 		stmt->fetch.cls.ce = zend_standard_class_def;
 	}
 
-	if (!error && !do_fetch(stmt, TRUE, return_value, how, ori, off, 0)) {
-		error = 1;
-	}
-	if (error) {
+	if (!do_fetch(stmt, return_value, PDO_FETCH_CLASS, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 		PDO_HANDLE_STMT_ERR();
+		RETVAL_FALSE;
 	}
 	do_fetch_opt_finish(stmt, 1);
 
 	stmt->fetch.cls.ce = old_ce;
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
-	if (error) {
-		RETURN_FALSE;
-	}
 }
 /* }}} */
 
-/* {{{ proto string PDOStatement::fetchColumn([int column_number])
-   Returns a data of the specified column in the result set. */
-static PHP_METHOD(PDOStatement, fetchColumn)
+/* {{{ Returns a data of the specified column in the result set. */
+PHP_METHOD(PDOStatement, fetchColumn)
 {
 	zend_long col_n = 0;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(col_n)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
-	if (!do_fetch_common(stmt, PDO_FETCH_ORI_NEXT, 0, TRUE)) {
+	if (!do_fetch_common(stmt, PDO_FETCH_ORI_NEXT, 0)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -1356,27 +1245,27 @@ static PHP_METHOD(PDOStatement, fetchColumn)
 }
 /* }}} */
 
-/* {{{ proto array PDOStatement::fetchAll([int $how = PDO_FETCH_BOTH [, string class_name [, NULL|array ctor_args]]])
-   Returns an array of all of the results. */
-static PHP_METHOD(PDOStatement, fetchAll)
+/* {{{ Returns an array of all of the results. */
+PHP_METHOD(PDOStatement, fetchAll)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
-	zval data, *return_all;
+	zval data, *return_all = NULL;
 	zval *arg2 = NULL;
 	zend_class_entry *old_ce;
 	zval old_ctor_args, *ctor_args = NULL;
-	int error = 0, flags, old_arg_count;
-	PHP_STMT_GET_OBJ;
+	bool error = false;
+	int flags, old_arg_count;
 
 	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(how)
-		Z_PARAM_ZVAL(arg2)
-		Z_PARAM_ZVAL(ctor_args)
+		Z_PARAM_ZVAL_OR_NULL(arg2)
+		Z_PARAM_ARRAY_OR_NULL(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!pdo_stmt_verify_mode(stmt, how, 1)) {
-		RETURN_FALSE;
+	PHP_STMT_GET_OBJ;
+	if (!pdo_stmt_verify_mode(stmt, how, 1, true)) {
+		RETURN_THROWS();
 	}
 
 	old_ce = stmt->fetch.cls.ce;
@@ -1385,85 +1274,88 @@ static PHP_METHOD(PDOStatement, fetchAll)
 
 	do_fetch_opt_finish(stmt, 0);
 
-	switch(how & ~PDO_FETCH_FLAGS) {
-	case PDO_FETCH_CLASS:
-		switch(ZEND_NUM_ARGS()) {
-		case 0:
-		case 1:
-			stmt->fetch.cls.ce = zend_standard_class_def;
-			break;
-		case 3:
-			if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array");
-				error = 1;
-				break;
+	/* TODO Would be good to reuse part of pdo_stmt_setup_fetch_mode() in some way */
+
+	switch (how & ~PDO_FETCH_FLAGS) {
+		case PDO_FETCH_CLASS:
+			/* Figure out correct class */
+			if (arg2) {
+				if (Z_TYPE_P(arg2) != IS_STRING) {
+					zend_argument_type_error(2, "must be of type string, %s given", zend_zval_type_name(arg2));
+					RETURN_THROWS();
+				}
+				stmt->fetch.cls.ce = zend_fetch_class(Z_STR_P(arg2), ZEND_FETCH_CLASS_AUTO);
+				if (!stmt->fetch.cls.ce) {
+					zend_argument_type_error(2, "must be a valid class");
+					RETURN_THROWS();
+				}
+			} else {
+				stmt->fetch.cls.ce = zend_standard_class_def;
 			}
-			if (Z_TYPE_P(ctor_args) != IS_ARRAY || !zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-				ctor_args = NULL;
-			}
-			/* no break */
-		case 2:
-			if (ctor_args) {
+
+			if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args)) > 0) {
 				ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, ctor_args); /* we're not going to free these */
 			} else {
 				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 			}
-			if (Z_TYPE_P(arg2) != IS_STRING) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid class name (should be a string)");
-				error = 1;
-				break;
-			} else {
-				stmt->fetch.cls.ce = zend_fetch_class(Z_STR_P(arg2), ZEND_FETCH_CLASS_AUTO);
-				if (!stmt->fetch.cls.ce) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not find user-specified class");
-					error = 1;
-					break;
-				}
-			}
-		}
-		if (!error) {
+
 			do_fetch_class_prepare(stmt);
-		}
-		break;
+			break;
 
-	case PDO_FETCH_FUNC:
-		switch (ZEND_NUM_ARGS()) {
-			case 0:
-			case 1:
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "no fetch function specified");
-				error = 1;
-				break;
-			case 3:
-			case 2:
-				ZVAL_COPY_VALUE(&stmt->fetch.func.function, arg2);
-				if (do_fetch_func_prepare(stmt) == 0) {
-					error = 1;
+		case PDO_FETCH_FUNC: /* Cannot be a default fetch mode */
+			if (ZEND_NUM_ARGS() != 2) {
+				zend_string *func = get_active_function_or_method_name();
+				zend_argument_count_error("%s() expects exactly 2 argument for PDO::FETCH_FUNC, %d given",
+					ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_string_release(func);
+				RETURN_THROWS();
+			}
+			if (arg2 == NULL) {
+				/* TODO use "must be of type callable" format? */
+				zend_argument_type_error(2, "must be a callable, null given");
+				RETURN_THROWS();
+			}
+			/* TODO Check it is a callable? */
+			ZVAL_COPY_VALUE(&stmt->fetch.func.function, arg2);
+			if (do_fetch_func_prepare(stmt) == false) {
+				RETURN_THROWS();
+			}
+			break;
+
+		case PDO_FETCH_COLUMN:
+			if (ZEND_NUM_ARGS() > 2) {
+				zend_string *func = get_active_function_or_method_name();
+				zend_argument_count_error("%s() expects at most 2 argument for the fetch mode provided, %d given",
+					ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_string_release(func);
+				RETURN_THROWS();
+			}
+			/* Is column index passed? */
+			if (arg2) {
+				// Reuse convert_to_long(arg2); ?
+				if (Z_TYPE_P(arg2) != IS_LONG) {
+					zend_argument_type_error(2, "must be of type int, %s given", zend_zval_type_name(arg2));
+					RETURN_THROWS();
 				}
-				break;
-		}
-		break;
-
-	case PDO_FETCH_COLUMN:
-		switch(ZEND_NUM_ARGS()) {
-		case 0:
-		case 1:
-			stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
+				if (Z_LVAL_P(arg2) < 0) {
+					zend_argument_value_error(2, "must be greater than or equal to 0");
+					RETURN_THROWS();
+				}
+				stmt->fetch.column = Z_LVAL_P(arg2);
+			} else {
+				stmt->fetch.column = how & PDO_FETCH_GROUP ? -1 : 0;
+			}
 			break;
-		case 2:
-			convert_to_long(arg2);
-			stmt->fetch.column = Z_LVAL_P(arg2);
-			break;
-		case 3:
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Third parameter not allowed for PDO::FETCH_COLUMN");
-			error = 1;
-		}
-		break;
 
-	default:
-		if (ZEND_NUM_ARGS() > 1) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Extraneous additional parameters");
-			error = 1;
-		}
+		default:
+			/* No support for PDO_FETCH_INTO which takes 2 args??? */
+			if (ZEND_NUM_ARGS() > 1) {
+				zend_string *func = get_active_function_or_method_name();
+				zend_argument_count_error("%s() expects exactly 1 argument for the fetch mode provided, %d given",
+				ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_string_release(func);
+				RETURN_THROWS();
+			}
 	}
 
 	flags = how & PDO_FETCH_FLAGS;
@@ -1473,79 +1365,79 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		how |= stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	}
 
-	if (!error)	{
-		PDO_STMT_CLEAR_ERR();
+	PDO_STMT_CLEAR_ERR();
+	if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
+		(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
+	) {
+		array_init(return_value);
+		return_all = return_value;
+	}
+	if (!do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all)) {
+		error = true;
+	}
+
+	if (!error) {
 		if ((how & PDO_FETCH_GROUP) || how == PDO_FETCH_KEY_PAIR ||
 			(how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)
 		) {
-			array_init(return_value);
-			return_all = return_value;
-		} else {
-			return_all = 0;
-		}
-		if (!do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all)) {
-			error = 2;
-		}
-	}
-	if (!error) {
-		if ((how & PDO_FETCH_GROUP)) {
-			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
-		} else if (how == PDO_FETCH_KEY_PAIR || (how == PDO_FETCH_USE_DEFAULT && stmt->default_fetch_type == PDO_FETCH_KEY_PAIR)) {
-			while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, return_all));
+			while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, return_all));
 		} else {
 			array_init(return_value);
 			do {
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &data);
-			} while (do_fetch(stmt, 1, &data, how | flags, PDO_FETCH_ORI_NEXT, 0, 0));
+			} while (do_fetch(stmt, &data, how | flags, PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL));
 		}
 	}
 
 	do_fetch_opt_finish(stmt, 0);
 
+	/* Restore defaults which were changed by PDO_FETCH_CLASS mode */
 	stmt->fetch.cls.ce = old_ce;
 	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 
+	/* on no results, return an empty array */
 	if (error) {
 		PDO_HANDLE_STMT_ERR();
-		if (error != 2) {
-			RETURN_FALSE;
-		} else { /* on no results, return an empty array */
-			if (Z_TYPE_P(return_value) != IS_ARRAY) {
-				array_init(return_value);
-			}
-			return;
+		if (Z_TYPE_P(return_value) != IS_ARRAY) {
+			array_init(return_value);
 		}
 	}
 }
 /* }}} */
 
-static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
+static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* {{{ */
 {
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter, *driver_params = NULL;
 
 	memset(&param, 0, sizeof(param));
-	param.paramno = -1;
 
-	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-			"lz|llz!", &param.paramno, &parameter, &param_type, &param.max_value_len,
-			&driver_params)) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|llz!", &param.name,
-				&parameter, &param_type, &param.max_value_len,
-				&driver_params)) {
-			return 0;
-		}
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
+		Z_PARAM_ZVAL(parameter)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(param_type)
+		Z_PARAM_LONG(param.max_value_len)
+		Z_PARAM_ZVAL_OR_NULL(driver_params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_STMT_GET_OBJ;
 
 	param.param_type = (int) param_type;
 
-	if (param.paramno > 0) {
+	if (param.name) {
+		if (ZSTR_LEN(param.name) == 0) {
+			zend_argument_value_error(1, "cannot be empty");
+			RETURN_THROWS();
+		}
+		param.paramno = -1;
+	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
-	} else if (!param.name) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
-		return 0;
+	} else {
+		zend_argument_value_error(1, "must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	if (driver_params) {
@@ -1557,38 +1449,43 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
 		}
-		return 0;
+
+		RETURN_FALSE;
 	}
-	return 1;
+
+	RETURN_TRUE;
 } /* }}} */
 
-/* {{{ proto bool PDOStatement::bindValue(mixed $paramno, mixed $param [, int $type ])
-   bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
-static PHP_METHOD(PDOStatement, bindValue)
+/* {{{ bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
+PHP_METHOD(PDOStatement, bindValue)
 {
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter;
-	PHP_STMT_GET_OBJ;
 
 	memset(&param, 0, sizeof(param));
-	param.paramno = -1;
 
-	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-			"lz|l", &param.paramno, &parameter, &param_type)) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &param.name,
-				&parameter, &param_type)) {
-			RETURN_FALSE;
-		}
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR_OR_LONG(param.name, param.paramno)
+		Z_PARAM_ZVAL(parameter)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(param_type)
+	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	param.param_type = (int) param_type;
 
-	if (param.paramno > 0) {
+	if (param.name) {
+		if (ZSTR_LEN(param.name) == 0) {
+			zend_argument_value_error(1, "cannot be empty");
+			RETURN_THROWS();
+		}
+		param.paramno = -1;
+	} else if (param.paramno > 0) {
 		--param.paramno; /* make it zero-based internally */
-	} else if (!param.name) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based");
-		RETURN_FALSE;
+	} else {
+		zend_argument_value_error(1, "must be greater than or equal to 1");
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(&param.parameter, parameter);
@@ -1603,44 +1500,36 @@ static PHP_METHOD(PDOStatement, bindValue)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::bindParam(mixed $paramno, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
-   bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
-static PHP_METHOD(PDOStatement, bindParam)
+/* {{{ bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
+PHP_METHOD(PDOStatement, bindParam)
 {
-	PHP_STMT_GET_OBJ;
-	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, TRUE));
+	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::bindColumn(mixed $column, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
-   bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
-static PHP_METHOD(PDOStatement, bindColumn)
+/* {{{ bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
+PHP_METHOD(PDOStatement, bindColumn)
 {
-	PHP_STMT_GET_OBJ;
-	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 0));
+	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::rowCount()
-   Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
-static PHP_METHOD(PDOStatement, rowCount)
+/* {{{ Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
+PHP_METHOD(PDOStatement, rowCount)
 {
-	PHP_STMT_GET_OBJ;
+	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	RETURN_LONG(stmt->row_count);
 }
 /* }}} */
 
-/* {{{ proto string PDOStatement::errorCode()
-   Fetch the error code associated with the last operation on the statement handle */
-static PHP_METHOD(PDOStatement, errorCode)
+/* {{{ Fetch the error code associated with the last operation on the statement handle */
+PHP_METHOD(PDOStatement, errorCode)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PHP_STMT_GET_OBJ;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
 	if (stmt->error_code[0] == '\0') {
 		RETURN_NULL();
 	}
@@ -1649,25 +1538,23 @@ static PHP_METHOD(PDOStatement, errorCode)
 }
 /* }}} */
 
-/* {{{ proto array PDOStatement::errorInfo()
-   Fetch extended error information associated with the last operation on the statement handle */
-static PHP_METHOD(PDOStatement, errorInfo)
+/* {{{ Fetch extended error information associated with the last operation on the statement handle */
+PHP_METHOD(PDOStatement, errorInfo)
 {
 	int error_count;
-	int error_count_diff     = 0;
+	int error_count_diff = 0;
 	int error_expected_count = 3;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PHP_STMT_GET_OBJ;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
 	array_init(return_value);
 	add_next_index_string(return_value, stmt->error_code);
 
-	if (stmt->dbh->methods->fetch_err) {
-		stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value);
+	if (strncmp(stmt->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE))) {
+		if (stmt->dbh->methods->fetch_err) {
+			stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value);
+		}
 	}
 
 	error_count = zend_hash_num_elements(Z_ARRVAL_P(return_value));
@@ -1683,21 +1570,23 @@ static PHP_METHOD(PDOStatement, errorInfo)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::setAttribute(long attribute, mixed value)
-   Set an attribute */
-static PHP_METHOD(PDOStatement, setAttribute)
+/* {{{ Set an attribute */
+PHP_METHOD(PDOStatement, setAttribute)
 {
 	zend_long attr;
 	zval *value = NULL;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(attr)
-		Z_PARAM_ZVAL_EX(value, 1, 0)
+		Z_PARAM_ZVAL_OR_NULL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
+
+	/* Driver hasn't registered a function for setting attributes */
 	if (!stmt->methods->set_attribute) {
-		goto fail;
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "This driver doesn't support setting attributes");
+		RETURN_FALSE;
 	}
 
 	PDO_STMT_CLEAR_ERR();
@@ -1705,20 +1594,15 @@ static PHP_METHOD(PDOStatement, setAttribute)
 		RETURN_TRUE;
 	}
 
-fail:
-	if (!stmt->methods->set_attribute) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "This driver doesn't support setting attributes");
-	} else {
-		PDO_HANDLE_STMT_ERR();
-	}
+	/* Error while setting attribute */
+	PDO_HANDLE_STMT_ERR();
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::getAttribute(long attribute)
-   Get an attribute */
+/* {{{ Get an attribute */
 
-static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long attr)
+static bool generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long attr)
 {
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
@@ -1728,15 +1612,15 @@ static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long
 	return 0;
 }
 
-static PHP_METHOD(PDOStatement, getAttribute)
+PHP_METHOD(PDOStatement, getAttribute)
 {
 	zend_long attr;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(attr)
 	ZEND_PARSE_PARAMETERS_END();
 
+	PHP_STMT_GET_OBJ;
 	if (!stmt->methods->get_attribute) {
 		if (!generic_stmt_attr_get(stmt, return_value, attr)) {
 			pdo_raise_impl_error(stmt->dbh, stmt, "IM001",
@@ -1767,33 +1651,30 @@ static PHP_METHOD(PDOStatement, getAttribute)
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::columnCount()
-   Returns the number of columns in the result set */
-static PHP_METHOD(PDOStatement, columnCount)
+/* {{{ Returns the number of columns in the result set */
+PHP_METHOD(PDOStatement, columnCount)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PHP_STMT_GET_OBJ;
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
 	RETURN_LONG(stmt->column_count);
 }
 /* }}} */
 
-/* {{{ proto array PDOStatement::getColumnMeta(int $column)
-   Returns meta data for a numbered column */
-static PHP_METHOD(PDOStatement, getColumnMeta)
+/* {{{ Returns meta data for a numbered column */
+PHP_METHOD(PDOStatement, getColumnMeta)
 {
 	zend_long colno;
 	struct pdo_column_data *col;
-	PHP_STMT_GET_OBJ;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(colno)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(colno < 0) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative");
-		RETURN_FALSE;
+	PHP_STMT_GET_OBJ;
+	if (colno < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	if (!stmt->methods->get_column_meta) {
@@ -1812,25 +1693,18 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 	add_assoc_str(return_value, "name", zend_string_copy(col->name));
 	add_assoc_long(return_value, "len", col->maxlen); /* FIXME: unsigned ? */
 	add_assoc_long(return_value, "precision", col->precision);
-	if (col->param_type != PDO_PARAM_ZVAL) {
-		/* if param_type is PDO_PARAM_ZVAL the driver has to provide correct data */
-		add_assoc_long(return_value, "pdo_type", col->param_type);
-	}
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::setFetchMode(int mode [mixed* params])
-   Changes the default fetch mode for subsequent fetches (params have different meaning for different fetch modes) */
+/* {{{ Changes the default fetch mode for subsequent fetches (params have different meaning for different fetch modes) */
 
-int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
+bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_arg_num,
+	zval *args, uint32_t variadic_num_args)
 {
-	zend_long mode = PDO_FETCH_BOTH;
-	int flags = 0, argc = ZEND_NUM_ARGS() - skip;
-	zval *args;
-	zend_class_entry *cep;
-	int retval;
-
-	do_fetch_opt_finish(stmt, 1);
+	int flags = 0;
+	uint32_t arg1_arg_num = mode_arg_num + 1;
+	uint32_t constructor_arg_num = mode_arg_num + 2;
+	uint32_t total_num_args = mode_arg_num + variadic_num_args;
 
 	switch (stmt->default_fetch_type) {
 		case PDO_FETCH_INTO:
@@ -1845,33 +1719,12 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
 
-	if (argc == 0) {
-		return SUCCESS;
+	flags = mode & PDO_FETCH_FLAGS;
+
+	if (!pdo_stmt_verify_mode(stmt, mode, mode_arg_num, false)) {
+		return false;
 	}
 
-	args = safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval), 0);
-
-	retval = zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args);
-
-	if (SUCCESS == retval) {
-		if (Z_TYPE(args[skip]) != IS_LONG) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "mode must be an integer");
-			retval = FAILURE;
-		} else {
-			mode = Z_LVAL(args[skip]);
-			flags = mode & PDO_FETCH_FLAGS;
-
-			retval = pdo_stmt_verify_mode(stmt, mode, 0);
-		}
-	}
-
-	if (FAILURE == retval) {
-		PDO_STMT_CLEAR_ERR();
-		efree(args);
-		return FAILURE;
-	}
-
-	retval = FAILURE;
 	switch (mode & ~PDO_FETCH_FLAGS) {
 		case PDO_FETCH_USE_DEFAULT:
 		case PDO_FETCH_LAZY:
@@ -1882,144 +1735,150 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 		case PDO_FETCH_BOUND:
 		case PDO_FETCH_NAMED:
 		case PDO_FETCH_KEY_PAIR:
-			if (argc != 1) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode doesn't allow any extra arguments");
-			} else {
-				retval = SUCCESS;
+			if (variadic_num_args != 0) {
+				zend_string *func = get_active_function_or_method_name();
+				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
+					ZSTR_VAL(func), mode_arg_num, total_num_args);
+				zend_string_release(func);
+				return false;
 			}
 			break;
 
 		case PDO_FETCH_COLUMN:
-			if (argc != 2) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode requires the colno argument");
-			} else	if (Z_TYPE(args[skip+1]) != IS_LONG) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "colno must be an integer");
-			} else {
-				stmt->fetch.column = Z_LVAL(args[skip+1]);
-				retval = SUCCESS;
+			if (variadic_num_args != 1) {
+				zend_string *func = get_active_function_or_method_name();
+				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
+					ZSTR_VAL(func), arg1_arg_num, total_num_args);
+				zend_string_release(func);
+				return false;
 			}
+			if (Z_TYPE(args[0]) != IS_LONG) {
+				zend_argument_type_error(arg1_arg_num, "must be of type int, %s given", zend_zval_type_name(&args[0]));
+				return false;
+			}
+			if (Z_LVAL(args[0]) < 0) {
+				zend_argument_value_error(arg1_arg_num, "must be greater than or equal to 0");
+				return false;
+			}
+			stmt->fetch.column = Z_LVAL(args[0]);
 			break;
 
-		case PDO_FETCH_CLASS:
+		case PDO_FETCH_CLASS: {
+			HashTable *constructor_args = NULL;
+			/* Undef constructor arguments */
+			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 			/* Gets its class name from 1st column */
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
-				if (argc != 1) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode doesn't allow any extra arguments");
-				} else {
-					stmt->fetch.cls.ce = NULL;
-					retval = SUCCESS;
+				if (variadic_num_args != 0) {
+					zend_string *func = get_active_function_or_method_name();
+					zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
+						ZSTR_VAL(func), mode_arg_num, total_num_args);
+					zend_string_release(func);
+					return false;
 				}
+				stmt->fetch.cls.ce = NULL;
 			} else {
-				if (argc < 2) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode requires the classname argument");
-				} else if (argc > 3) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "too many arguments");
-				} else if (Z_TYPE(args[skip+1]) != IS_STRING) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "classname must be a string");
-				} else {
-					cep = zend_lookup_class(Z_STR(args[skip+1]));
-					if (cep) {
-						retval = SUCCESS;
-						stmt->fetch.cls.ce = cep;
+				zend_class_entry *cep;
+				if (variadic_num_args == 0) {
+					zend_string *func = get_active_function_or_method_name();
+					zend_argument_count_error("%s() expects at least %d arguments for the fetch mode provided, %d given",
+						ZSTR_VAL(func), arg1_arg_num, total_num_args);
+					zend_string_release(func);
+					return false;
+				}
+				/* constructor_arguments can be null/not passed */
+				if (variadic_num_args > 2) {
+					zend_string *func = get_active_function_or_method_name();
+					zend_argument_count_error("%s() expects at most %d arguments for the fetch mode provided, %d given",
+						ZSTR_VAL(func), constructor_arg_num, total_num_args);
+					zend_string_release(func);
+					return false;
+				}
+				if (Z_TYPE(args[0]) != IS_STRING) {
+					zend_argument_type_error(arg1_arg_num, "must be of type string, %s given", zend_zval_type_name(&args[0]));
+					return false;
+				}
+				cep = zend_lookup_class(Z_STR(args[0]));
+				if (!cep) {
+					zend_argument_type_error(arg1_arg_num, "must be a valid class");
+					return false;
+				}
+				/* Verify constructor_args (args[1]) is ?array */
+				/* TODO: Improve logic? */
+				if (variadic_num_args == 2) {
+					if (Z_TYPE(args[1]) != IS_NULL && Z_TYPE(args[1]) != IS_ARRAY) {
+						zend_argument_type_error(constructor_arg_num, "must be of type ?array, %s given",
+							zend_zval_type_name(&args[1]));
+						return false;
 					}
+					if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
+						constructor_args = Z_ARRVAL(args[1]);
+					}
+				}
+				stmt->fetch.cls.ce = cep;
+
+				/* If constructor arguments are present and not empty */
+				if (constructor_args) {
+					ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(constructor_args));
 				}
 			}
 
-			if (SUCCESS == retval) {
-				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
-#ifdef ilia_0 /* we'll only need this when we have persistent statements, if ever */
-				if (stmt->dbh->is_persistent) {
-					php_error_docref(NULL, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
-				}
-#endif
-				if (argc == 3) {
-					if (Z_TYPE(args[skip+2]) != IS_NULL && Z_TYPE(args[skip+2]) != IS_ARRAY) {
-						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array");
-						retval = FAILURE;
-					} else if (Z_TYPE(args[skip+2]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[skip+2]))) {
-						ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL(args[skip+2])));
-					}
-				}
-
-				if (SUCCESS == retval) {
-					do_fetch_class_prepare(stmt);
-				}
-			}
-
+			do_fetch_class_prepare(stmt);
 			break;
-
+		}
 		case PDO_FETCH_INTO:
-			if (argc != 2) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "fetch mode requires the object parameter");
-			} else if (Z_TYPE(args[skip+1]) != IS_OBJECT) {
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "object must be an object");
-			} else {
-				retval = SUCCESS;
+			if (total_num_args != arg1_arg_num) {
+				zend_string *func = get_active_function_or_method_name();
+				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
+					ZSTR_VAL(func), arg1_arg_num, total_num_args);
+				zend_string_release(func);
+				return false;
+			}
+			if (Z_TYPE(args[0]) != IS_OBJECT) {
+				zend_argument_type_error(arg1_arg_num, "must be of type object, %s given", zend_zval_type_name(&args[0]));
+				return false;
 			}
 
-			if (SUCCESS == retval) {
-#ifdef ilia_0 /* we'll only need this when we have persistent statements, if ever */
-				if (stmt->dbh->is_persistent) {
-					php_error_docref(NULL, E_WARNING, "PHP might crash if you don't call $stmt->setFetchMode() to reset to defaults on this persistent statement.  This will be fixed in a later release");
-				}
-#endif
-				ZVAL_COPY(&stmt->fetch.into, &args[skip+1]);
-			}
-
+			ZVAL_COPY(&stmt->fetch.into, &args[0]);
 			break;
-
 		default:
-			pdo_raise_impl_error(stmt->dbh, stmt, "22003", "Invalid fetch mode specified");
+			zend_argument_value_error(mode_arg_num, "must be one of the PDO::FETCH_* constants");
+			return false;
 	}
 
-	if (SUCCESS == retval) {
-		stmt->default_fetch_type = mode;
-	}
+	stmt->default_fetch_type = mode;
 
-	/*
-	 * PDO error (if any) has already been raised at this point.
-	 *
-	 * The error_code is cleared, otherwise the caller will read the
-	 * last error message from the driver.
-	 *
-	 */
-	PDO_STMT_CLEAR_ERR();
-
-	efree(args);
-
-	return retval;
+	return true;
 }
 
-static PHP_METHOD(PDOStatement, setFetchMode)
+PHP_METHOD(PDOStatement, setFetchMode)
 {
+	zend_long fetch_mode;
+	zval *args = NULL;
+	uint32_t num_args = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l*", &fetch_mode, &args, &num_args) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	PHP_STMT_GET_OBJ;
 
-	RETVAL_BOOL(
-		pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-			stmt, 0) == SUCCESS
-		);
+	do_fetch_opt_finish(stmt, 1);
+
+	if (!pdo_stmt_setup_fetch_mode(stmt, fetch_mode, 1, args, num_args)) {
+		RETURN_THROWS();
+	}
+
+	// TODO Void return?
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::nextRowset()
-   Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
+/* {{{ Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
 
-static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
+static bool pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 {
-	/* un-describe */
-	if (stmt->columns) {
-		int i;
-		struct pdo_column_data *cols = stmt->columns;
-
-		for (i = 0; i < stmt->column_count; i++) {
-			if (cols[i].name) {
-				zend_string_release_ex(cols[i].name, 0);
-			}
-		}
-		efree(stmt->columns);
-		stmt->columns = NULL;
-		stmt->column_count = 0;
-	}
+	pdo_stmt_reset_columns(stmt);
 
 	if (!stmt->methods->next_rowset(stmt)) {
 		/* Set the executed flag to 0 to reallocate columns on next execute */
@@ -2032,10 +1891,11 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 	return 1;
 }
 
-static PHP_METHOD(PDOStatement, nextRowset)
+PHP_METHOD(PDOStatement, nextRowset)
 {
-	PHP_STMT_GET_OBJ;
+	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	if (!stmt->methods->next_rowset) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets");
 		RETURN_FALSE;
@@ -2052,12 +1912,12 @@ static PHP_METHOD(PDOStatement, nextRowset)
 }
 /* }}} */
 
-/* {{{ proto bool PDOStatement::closeCursor()
-   Closes the cursor, leaving the statement ready for re-execution. */
-static PHP_METHOD(PDOStatement, closeCursor)
+/* {{{ Closes the cursor, leaving the statement ready for re-execution. */
+PHP_METHOD(PDOStatement, closeCursor)
 {
-	PHP_STMT_GET_OBJ;
+	ZEND_PARSE_PARAMETERS_NONE();
 
+	PHP_STMT_GET_OBJ;
 	if (!stmt->methods->cursor_closer) {
 		/* emulate it by fetching and discarding rows */
 		do {
@@ -2087,12 +1947,16 @@ static PHP_METHOD(PDOStatement, closeCursor)
 }
 /* }}} */
 
-/* {{{ proto void PDOStatement::debugDumpParams()
-   A utility for internals hackers to debug parameter internals */
-static PHP_METHOD(PDOStatement, debugDumpParams)
+/* {{{ A utility for internals hackers to debug parameter internals */
+PHP_METHOD(PDOStatement, debugDumpParams)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	php_stream *out = php_stream_open_wrapper("php://output", "w", 0, NULL);
 	struct pdo_bound_param_data *param;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PHP_STMT_GET_OBJ;
 
 	if (out == NULL) {
@@ -2100,16 +1964,16 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 	}
 
 	/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
-	php_stream_printf(out, "SQL: [%zd] ", stmt->query_stringlen);
-	php_stream_write(out, stmt->query_string, stmt->query_stringlen);
+	php_stream_printf(out, "SQL: [%zd] ", ZSTR_LEN(stmt->query_string));
+	php_stream_write(out, ZSTR_VAL(stmt->query_string), ZSTR_LEN(stmt->query_string));
 	php_stream_write(out, "\n", 1);
 
 	/* show parsed SQL if emulated prepares enabled */
 	/* pointers will be equal if PDO::query() was invoked */
 	if (stmt->active_query_string != NULL && stmt->active_query_string != stmt->query_string) {
 		/* break into multiple operations so query string won't be truncated at FORMAT_CONV_MAX_PRECISION */
-		php_stream_printf(out, "Sent SQL: [%zd] ", stmt->active_query_stringlen);
-		php_stream_write(out, stmt->active_query_string, stmt->active_query_stringlen);
+		php_stream_printf(out, "Sent SQL: [%zd] ", ZSTR_LEN(stmt->active_query_string));
+		php_stream_write(out, ZSTR_VAL(stmt->active_query_string), ZSTR_LEN(stmt->active_query_string));
 		php_stream_write(out, "\n", 1);
 	}
 
@@ -2144,48 +2008,32 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 }
 /* }}} */
 
-const zend_function_entry pdo_dbstmt_functions[] = {
-	PHP_ME(PDOStatement, execute,		arginfo_pdostatement_execute,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetch,			arginfo_pdostatement_fetch,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindParam,		arginfo_pdostatement_bindparam,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindColumn,	arginfo_pdostatement_bindcolumn,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindValue,		arginfo_pdostatement_bindvalue,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, rowCount,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchColumn,	arginfo_pdostatement_fetchcolumn,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchAll,		arginfo_pdostatement_fetchall,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchObject,	arginfo_pdostatement_fetchobject,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, errorCode,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, errorInfo,		arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, setAttribute,	arginfo_pdostatement_setattribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, getAttribute,	arginfo_pdostatement_getattribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, columnCount,	arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, getColumnMeta,	arginfo_pdostatement_getcolumnmeta,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, setFetchMode,	arginfo_pdostatement_setfetchmode,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, nextRowset,	arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, closeCursor,	arginfo_pdostatement__void,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, debugDumpParams, arginfo_pdostatement__void,		ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
+PHP_METHOD(PDOStatement, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
 
 /* {{{ overloaded handlers for PDOStatement class */
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
-
-	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
-		return value;
-	} else {
-		return zend_std_write_property(object, name, value, cache_slot);
+	if (zend_string_equals_literal(name, "queryString")) {
+		zval *query_string = OBJ_PROP_NUM(object, 0);
+		if (!Z_ISUNDEF_P(query_string)) {
+			zend_throw_error(NULL, "Property queryString is read only");
+			return value;
+		}
 	}
+	return zend_std_write_property(object, name, value, cache_slot);
 }
 
 static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **cache_slot)
 {
-	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
-
-	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
+	if (zend_string_equals_literal(name, "queryString")) {
+		zend_throw_error(NULL, "Property queryString is read only");
 	} else {
 		zend_std_unset_property(object, name, cache_slot);
 	}
@@ -2229,11 +2077,6 @@ out:
 	return fbc;
 }
 
-static int dbstmt_compare(zval *object1, zval *object2)
-{
-	return -1;
-}
-
 zend_object_handlers pdo_dbstmt_object_handlers;
 zend_object_handlers pdo_row_object_handlers;
 
@@ -2258,26 +2101,14 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 	if (stmt->methods && stmt->methods->dtor) {
 		stmt->methods->dtor(stmt);
 	}
-	if (stmt->active_query_string && stmt->active_query_string != stmt->query_string) {
-		efree(stmt->active_query_string);
+	if (stmt->active_query_string) {
+		zend_string_release(stmt->active_query_string);
 	}
 	if (stmt->query_string) {
-		efree(stmt->query_string);
+		zend_string_release(stmt->query_string);
 	}
 
-	if (stmt->columns) {
-		int i;
-		struct pdo_column_data *cols = stmt->columns;
-
-		for (i = 0; i < stmt->column_count; i++) {
-			if (cols[i].name) {
-				zend_string_release_ex(cols[i].name, 0);
-				cols[i].name = NULL;
-			}
-		}
-		efree(stmt->columns);
-		stmt->columns = NULL;
-	}
+	pdo_stmt_reset_columns(stmt);
 
 	if (!Z_ISUNDEF(stmt->fetch.into) && stmt->default_fetch_type == PDO_FETCH_INTO) {
 		zval_ptr_dtor(&stmt->fetch.into);
@@ -2370,8 +2201,8 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 		zval_ptr_dtor(&I->fetch_ahead);
 	}
 
-	if (!do_fetch(stmt, TRUE, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, 0, 0)) {
+	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
@@ -2390,27 +2221,31 @@ static const zend_object_iterator_funcs pdo_stmt_iter_funcs = {
 	pdo_stmt_iter_get_key,
 	pdo_stmt_iter_move_forwards,
 	NULL,
-	NULL
+	NULL,
+	NULL, /* get_gc */
 };
 
 zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int by_ref)
 {
-	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
-	struct php_pdo_iterator *I;
-
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 
-	I = ecalloc(1, sizeof(struct php_pdo_iterator));
+	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
+	if (!stmt->dbh) {
+		zend_throw_error(NULL, "PDO object is uninitialized");
+		return NULL;
+	}
+
+	struct php_pdo_iterator *I = ecalloc(1, sizeof(struct php_pdo_iterator));
 	zend_iterator_init(&I->iter);
 	I->iter.funcs = &pdo_stmt_iter_funcs;
 	Z_ADDREF_P(object);
 	ZVAL_OBJ(&I->iter.data, Z_OBJ_P(object));
 
-	if (!do_fetch(stmt, 1, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
-			PDO_FETCH_ORI_NEXT, 0, 0)) {
+	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
 		ZVAL_UNDEF(&I->fetch_ahead);
@@ -2423,36 +2258,28 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 
 /* {{{ overloaded handlers for PDORow class (used by PDO_FETCH_LAZY) */
 
-const zend_function_entry pdo_row_functions[] = {
-	PHP_FE_END
-};
-
 static zval *row_prop_read(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	pdo_row_t *row = (pdo_row_t *)object;
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
 	zend_long lval;
+	ZEND_ASSERT(stmt);
 
 	ZVAL_NULL(rv);
-	if (stmt) {
-		if (is_numeric_string_ex(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0, NULL) == IS_LONG)	{
-			if (lval >= 0 && lval < stmt->column_count) {
-				fetch_value(stmt, rv, lval, NULL);
-			}
-		} else {
-			/* TODO: replace this with a hash of available column names to column
-			 * numbers */
-			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (ZSTR_LEN(stmt->columns[colno].name) == ZSTR_LEN(name) &&
-				    strncmp(ZSTR_VAL(stmt->columns[colno].name), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
-					fetch_value(stmt, rv, colno, NULL);
-					return rv;
-				}
-			}
-			if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
-				//zval_ptr_dtor(rv);
-				return zend_std_read_property(&stmt->std, name, type, cache_slot, rv);
+	if (zend_string_equals_literal(name, "queryString")) {
+		return zend_std_read_property(&stmt->std, name, type, cache_slot, rv);
+	} else if (is_numeric_string(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0) == IS_LONG) {
+		if (lval >= 0 && lval < stmt->column_count) {
+			fetch_value(stmt, rv, lval, NULL);
+		}
+	} else {
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (zend_string_equals(stmt->columns[colno].name, name)) {
+				fetch_value(stmt, rv, colno, NULL);
+				return rv;
 			}
 		}
 	}
@@ -2466,35 +2293,33 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
 	zend_long lval;
+	ZEND_ASSERT(stmt);
 
 	ZVAL_NULL(rv);
-	if (stmt) {
-		if (Z_TYPE_P(member) == IS_LONG) {
-			if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
-				fetch_value(stmt, rv, Z_LVAL_P(member), NULL);
-			}
-		} else if (Z_TYPE_P(member) == IS_STRING
-			   && is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
-			if (lval >= 0 && lval < stmt->column_count) {
-				fetch_value(stmt, rv, lval, NULL);
-			}
-		} else {
-			if (!try_convert_to_string(member)) {
-				return &EG(uninitialized_zval);
-			}
+	if (Z_TYPE_P(member) == IS_LONG) {
+		if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
+			fetch_value(stmt, rv, Z_LVAL_P(member), NULL);
+		}
+	} else if (Z_TYPE_P(member) == IS_STRING
+		   && is_numeric_string(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0) == IS_LONG)	{
+		if (lval >= 0 && lval < stmt->column_count) {
+			fetch_value(stmt, rv, lval, NULL);
+		}
+	} else {
+		if (!try_convert_to_string(member)) {
+			return &EG(uninitialized_zval);
+		}
 
-			/* TODO: replace this with a hash of available column names to column
-			 * numbers */
-			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (ZSTR_LEN(stmt->columns[colno].name) == Z_STRLEN_P(member) &&
-				    strncmp(ZSTR_VAL(stmt->columns[colno].name), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
-					fetch_value(stmt, rv, colno, NULL);
-					return rv;
-				}
-			}
-			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
-				//zval_ptr_dtor(rv);
-				return zend_std_read_property(&stmt->std, Z_STR_P(member), type, NULL, rv);
+		if (zend_string_equals_literal(Z_STR_P(member), "queryString")) {
+			return zend_std_read_property(&stmt->std, Z_STR_P(member), type, NULL, rv);
+		}
+
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (zend_string_equals(stmt->columns[colno].name, Z_STR_P(member))) {
+				fetch_value(stmt, rv, colno, NULL);
+				return rv;
 			}
 		}
 	}
@@ -2504,13 +2329,13 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 
 static zval *row_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
+	zend_throw_error(NULL, "Cannot write to PDORow property");
 	return value;
 }
 
 static void row_dim_write(zend_object *object, zval *member, zval *value)
 {
-	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
+	zend_throw_error(NULL, "Cannot write to PDORow offset");
 }
 
 static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
@@ -2519,26 +2344,24 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
 	zend_long lval;
+	ZEND_ASSERT(stmt);
 
-	if (stmt) {
-		if (is_numeric_string_ex(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0, NULL) == IS_LONG)	{
-			return lval >=0 && lval < stmt->column_count;
-		}
+	if (is_numeric_string(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0) == IS_LONG)	{
+		return lval >=0 && lval < stmt->column_count;
+	}
 
-		/* TODO: replace this with a hash of available column names to column
-		 * numbers */
-		for (colno = 0; colno < stmt->column_count; colno++) {
-			if (ZSTR_LEN(stmt->columns[colno].name) == ZSTR_LEN(name) &&
-			    strncmp(ZSTR_VAL(stmt->columns[colno].name), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
-					int res;
-					zval val;
+	/* TODO: replace this with a hash of available column names to column
+	 * numbers */
+	for (colno = 0; colno < stmt->column_count; colno++) {
+		if (zend_string_equals(stmt->columns[colno].name, name)) {
+			int res;
+			zval val;
 
-					fetch_value(stmt, &val, colno, NULL);
-					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
-					zval_ptr_dtor_nogc(&val);
+			fetch_value(stmt, &val, colno, NULL);
+			res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
+			zval_ptr_dtor_nogc(&val);
 
-					return res;
-			}
+			return res;
 		}
 	}
 
@@ -2551,34 +2374,32 @@ static int row_dim_exists(zend_object *object, zval *member, int check_empty)
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
 	zend_long lval;
+	ZEND_ASSERT(stmt);
 
-	if (stmt) {
-		if (Z_TYPE_P(member) == IS_LONG) {
-			return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
-		} else if (Z_TYPE_P(member) == IS_STRING) {
-			if (is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
-				return lval >=0 && lval < stmt->column_count;
-			}
-		} else {
-			if (!try_convert_to_string(member)) {
-				return 0;
-			}
+	if (Z_TYPE_P(member) == IS_LONG) {
+		return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
+	} else if (Z_TYPE_P(member) == IS_STRING) {
+		if (is_numeric_string(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0) == IS_LONG)	{
+			return lval >=0 && lval < stmt->column_count;
 		}
+	} else {
+		if (!try_convert_to_string(member)) {
+			return 0;
+		}
+	}
 
-		/* TODO: replace this with a hash of available column names to column
-		 * numbers */
-		for (colno = 0; colno < stmt->column_count; colno++) {
-			if (ZSTR_LEN(stmt->columns[colno].name) == Z_STRLEN_P(member) &&
-			    strncmp(ZSTR_VAL(stmt->columns[colno].name), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
-					int res;
-					zval val;
+	/* TODO: replace this with a hash of available column names to column
+	 * numbers */
+	for (colno = 0; colno < stmt->column_count; colno++) {
+		if (zend_string_equals(stmt->columns[colno].name, Z_STR_P(member))) {
+			int res;
+			zval val;
 
-					fetch_value(stmt, &val, colno, NULL);
-					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
-					zval_ptr_dtor_nogc(&val);
+			fetch_value(stmt, &val, colno, NULL);
+			res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
+			zval_ptr_dtor_nogc(&val);
 
-					return res;
-			}
+			return res;
 		}
 	}
 
@@ -2587,12 +2408,12 @@ static int row_dim_exists(zend_object *object, zval *member, int check_empty)
 
 static void row_prop_delete(zend_object *object, zend_string *offset, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
+	zend_throw_error(NULL, "Cannot unset PDORow property");
 }
 
 static void row_dim_delete(zend_object *object, zval *offset)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
+	zend_throw_error(NULL, "Cannot unset PDORow offset");
 }
 
 static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose purpose)
@@ -2601,8 +2422,9 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 	pdo_stmt_t *stmt = row->stmt;
 	HashTable *props;
 	int i;
+	ZEND_ASSERT(stmt);
 
-	if (purpose != ZEND_PROP_PURPOSE_DEBUG || stmt == NULL) {
+	if (purpose != ZEND_PROP_PURPOSE_DEBUG) {
 		return zend_std_get_properties_for(object, purpose);
 	}
 
@@ -2611,6 +2433,10 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 	}
 	props = zend_array_dup(stmt->std.properties);
 	for (i = 0; i < stmt->column_count; i++) {
+		if (zend_string_equals_literal(stmt->columns[i].name, "queryString")) {
+			continue;
+		}
+
 		zval val;
 		fetch_value(stmt, &val, i, NULL);
 
@@ -2619,39 +2445,10 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 	return props;
 }
 
-static zend_function *row_method_get(
-	zend_object **object_pp,
-	zend_string *method_name, const zval *key)
-{
-	zend_function *fbc;
-	zend_string *lc_method_name;
-
-	lc_method_name = zend_string_tolower(method_name);
-
-	if ((fbc = zend_hash_find_ptr(&pdo_row_ce->function_table, lc_method_name)) == NULL) {
-		zend_string_release_ex(lc_method_name, 0);
-		return NULL;
-	}
-
-	zend_string_release_ex(lc_method_name, 0);
-
-	return fbc;
-}
-
 static zend_function *row_get_ctor(zend_object *object)
 {
 	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
 	return NULL;
-}
-
-static zend_string *row_get_classname(const zend_object *object)
-{
-	return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
-}
-
-static int row_compare(zval *object1, zval *object2)
-{
-	return -1;
 }
 
 void pdo_row_free_storage(zend_object *std)
@@ -2674,33 +2471,21 @@ zend_object *pdo_row_new(zend_class_entry *ce)
 
 void pdo_stmt_init(void)
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
-	pdo_dbstmt_ce = zend_register_internal_class(&ce);
+	pdo_dbstmt_ce = register_class_PDOStatement(zend_ce_aggregate);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
-	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
-	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
-	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_traversable);
-	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC);
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
-	pdo_dbstmt_object_handlers.dtor_obj = zend_objects_destroy_object;
 	pdo_dbstmt_object_handlers.free_obj = pdo_dbstmt_free_storage;
 	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
 	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
 	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
-	pdo_dbstmt_object_handlers.compare = dbstmt_compare;
+	pdo_dbstmt_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbstmt_object_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
-	pdo_row_ce = zend_register_internal_class(&ce);
-	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
+	pdo_row_ce = register_class_PDORow();
 	pdo_row_ce->create_object = pdo_row_new;
-	pdo_row_ce->serialize = zend_class_serialize_deny;
-	pdo_row_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
@@ -2715,8 +2500,6 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.has_dimension = row_dim_exists;
 	pdo_row_object_handlers.unset_dimension = row_dim_delete;
 	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
-	pdo_row_object_handlers.get_method = row_method_get;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
-	pdo_row_object_handlers.get_class_name = row_get_classname;
-	pdo_row_object_handlers.compare = row_compare;
+	pdo_row_object_handlers.compare = zend_objects_not_comparable;
 }

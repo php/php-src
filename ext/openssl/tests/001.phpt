@@ -1,8 +1,9 @@
 --TEST--
 OpenSSL private key functions
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--
@@ -27,7 +28,7 @@ echo "Export key to file\n";
 if (!openssl_pkey_export_to_file($privkey, $key_file_name, $passphrase, $conf)) {
     die("failed to export to file $key_file_name");
 }
-var_dump(is_resource($privkey));
+var_dump($privkey instanceof OpenSSLAsymmetricKey);
 
 echo "Load key from file - array syntax\n";
 
@@ -62,16 +63,22 @@ openssl_pkey_free($loaded_key);
 echo "OK!\n";
 
 ?>
---EXPECT--
-Creating private key
-Export key to file
-bool(true)
-Load key from file - array syntax
-Load key using direct syntax
-Load key manually and use string syntax
-OK!
 --CLEAN--
 <?php
 $key_file_name = __DIR__ . DIRECTORY_SEPARATOR . '001-tmp.key';
 @unlink($key_file_name);
 ?>
+--EXPECTF--
+Creating private key
+Export key to file
+bool(true)
+Load key from file - array syntax
+
+Deprecated: Function openssl_pkey_free() is deprecated in %s on line %d
+Load key using direct syntax
+
+Deprecated: Function openssl_pkey_free() is deprecated in %s on line %d
+Load key manually and use string syntax
+
+Deprecated: Function openssl_pkey_free() is deprecated in %s on line %d
+OK!

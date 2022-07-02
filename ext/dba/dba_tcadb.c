@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,14 +20,12 @@
 
 #include "php.h"
 
-#if DBA_TCADB
+#ifdef DBA_TCADB
 #include "php_tcadb.h"
 
 #ifdef TCADB_INCLUDE_FILE
 #include TCADB_INCLUDE_FILE
 #endif
-
-#define TCADB_DATA dba_tcadb_data *dba = info->dbf
 
 typedef struct {
 	TCADB *tcadb;
@@ -76,59 +74,58 @@ DBA_OPEN_FUNC(tcadb)
 
 DBA_CLOSE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
 	tcadbclose(dba->tcadb);
+	tcadbdel(dba->tcadb);
 	pefree(dba, info->flags & DBA_PERSISTENT);
 }
 
 DBA_FETCH_FUNC(tcadb)
 {
-	TCADB_DATA;
-	char *value, *new = NULL;
+	dba_tcadb_data *dba = info->dbf;
+	char *value;
 	int value_size;
+	zend_string *fetched_val = NULL;
 
-	value = tcadbget(dba->tcadb, key, keylen, &value_size);
+	value = tcadbget(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key), &value_size);
 	if (value) {
-		if (newlen) {
-			*newlen = value_size;
-		}
-		new = estrndup(value, value_size);
+		fetched_val = zend_string_init(value, value_size, /* persistent */ false);
 		tcfree(value);
 	}
 
-	return new;
+	return fetched_val;
 }
 
 DBA_UPDATE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	int result;
 
 	if (mode == 1) {
 		/* Insert */
-		if (tcadbvsiz(dba->tcadb, key, keylen) > -1) {
+		if (tcadbvsiz(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key)) > -1) {
 			return FAILURE;
 		}
 	}
 
-	result = tcadbput(dba->tcadb, key, keylen, val, vallen);
+	result = tcadbput(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(val), ZSTR_LEN(val));
 
 	if (result) {
 		return SUCCESS;
 	}
 
-	php_error_docref2(NULL, key, val, E_WARNING, "Error updating data");
+	php_error_docref(NULL, E_WARNING, "Error updating data");
 	return FAILURE;
 }
 
 DBA_EXISTS_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	char *value;
 	int value_len;
 
-	value = tcadbget(dba->tcadb, key, keylen, &value_len);
+	value = tcadbget(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key), &value_len);
 	if (value) {
 		tcfree(value);
 		return SUCCESS;
@@ -139,52 +136,48 @@ DBA_EXISTS_FUNC(tcadb)
 
 DBA_DELETE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
-	return tcadbout(dba->tcadb, key, keylen) ? SUCCESS : FAILURE;
+	return tcadbout(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key)) ? SUCCESS : FAILURE;
 }
 
 DBA_FIRSTKEY_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	int value_size;
-	char *value, *new = NULL;
+	char *value;
+	zend_string *key = NULL;
 
 	tcadbiterinit(dba->tcadb);
 
 	value = tcadbiternext(dba->tcadb, &value_size);
 	if (value) {
-		if (newlen) {
-			*newlen = value_size;
-		}
-		new = estrndup(value, value_size);
+		key = zend_string_init(value, value_size, /* persistent */ false);
 		tcfree(value);
 	}
 
-	return new;
+	return key;
 }
 
 DBA_NEXTKEY_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	int value_size;
-	char *value, *new = NULL;
+	char *value;
+	zend_string *key = NULL;
 
 	value = tcadbiternext(dba->tcadb, &value_size);
 	if (value) {
-		if (newlen) {
-			*newlen = value_size;
-		}
-		new = estrndup(value, value_size);
+		key = zend_string_init(value, value_size, /* persistent */ false);
 		tcfree(value);
 	}
 
-	return new;
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
 #if _TC_LIBVER >= 811
 	return tcadboptimize(dba->tcadb, NULL) ? SUCCESS : FAILURE;
@@ -195,7 +188,7 @@ DBA_OPTIMIZE_FUNC(tcadb)
 
 DBA_SYNC_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
 	return tcadbsync(dba->tcadb) ? SUCCESS : FAILURE;
 }

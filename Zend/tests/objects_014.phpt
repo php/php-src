@@ -12,4 +12,4 @@ interface bar extends foo, foo {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Class bar cannot implement previously implemented interface foo in %s on line %d
+Fatal error: Interface bar cannot implement previously implemented interface foo in %s on line %d

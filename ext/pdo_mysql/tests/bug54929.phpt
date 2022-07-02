@@ -1,8 +1,9 @@
 --TEST--
 Bug #54929 (Parse error with single quote in sql comment (pdo-mysql))
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
@@ -16,14 +17,14 @@ $pdodb = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 
 function testQuery($query) {
-	global $pdodb;
-	$stmt = $pdodb->prepare($query);
+    global $pdodb;
+    $stmt = $pdodb->prepare($query);
 
-	if (!$stmt->execute(array("foo"))) {
-		var_dump($stmt->errorInfo());
-	} else{
-		var_dump($stmt->fetch(PDO::FETCH_ASSOC));
-	}
+    if (!$stmt->execute(array("foo"))) {
+        var_dump($stmt->errorInfo());
+    } else{
+        var_dump($stmt->fetch(PDO::FETCH_ASSOC));
+    }
 }
 
 testQuery("/* ' */ select ? as f1 /* ' */");

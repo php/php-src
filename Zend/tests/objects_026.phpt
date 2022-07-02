@@ -4,7 +4,7 @@ Using $this when out of context
 <?php
 
 try {
-	$this->a = 1;
+    $this->a = 1;
 } catch (Exception $e) {
 }
 

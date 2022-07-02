@@ -28,7 +28,16 @@
       break;
     case 'file':
       if (isset($_FILES['file'])) {
-          echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'];
+          echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'] . '|' . $_FILES['file']['size'];
+      }
+      break;
+    case 'string_file':
+      if (isset($_FILES['file'])) {
+          if ($_FILES['file']['error'] === UPLOAD_ERR_OK) {
+              echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'] . '|' . md5_file($_FILES['file']['tmp_name']);
+          } else {
+              echo 'error:' . $_FILES['file']['error'];
+          }
       }
       break;
     case 'method':

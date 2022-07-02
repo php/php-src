@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -188,9 +188,9 @@ static unsigned int mysqlnd_mbcharlen_utf8(const unsigned int utf8)
 
 
 /* {{{ big5 functions */
-#define valid_big5head(c)	(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xF9)
-#define valid_big5tail(c)	((0x40 <= (unsigned int)(c) && (unsigned int)(c) <= 0x7E) || \
-							(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xFE))
+#define valid_big5head(c)	(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xF9)
+#define valid_big5tail(c)	((0x40 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0x7E) || \
+							(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xFE))
 
 #define isbig5code(c,d) (isbig5head(c) && isbig5tail(d))
 
@@ -410,7 +410,7 @@ static unsigned int check_mb_utf16(const char * const start, const char * const 
 
 static uint32_t mysqlnd_mbcharlen_utf16(const unsigned int utf16)
 {
-  return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
+	return UTF16_HIGH_HEAD(utf16) ? 4 : 2;
 }
 /* }}} */
 
@@ -777,7 +777,7 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
-	zend_bool	escape_overflow = FALSE;
+	bool	escape_overflow = FALSE;
 
 	DBG_ENTER("mysqlnd_cset_escape_quotes");
 
@@ -831,7 +831,7 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
-	zend_bool	escape_overflow = FALSE;
+	bool	escape_overflow = FALSE;
 
 	DBG_ENTER("mysqlnd_cset_escape_slashes");
 	DBG_INF_FMT("charset=%s", cset->name);

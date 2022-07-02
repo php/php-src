@@ -5,10 +5,10 @@ Bug #41693 (scandir() allows empty directory names)
 
 try {
     var_dump(scandir(''));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
 --EXPECT--
-Directory name cannot be empty
+scandir(): Argument #1 ($directory) cannot be empty

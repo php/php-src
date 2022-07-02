@@ -2,12 +2,6 @@
 SPL: Test class_uses() function : variation - no interfaces and autoload
 --FILE--
 <?php
-/* Prototype  : array class_uses(mixed what [, bool autoload ])
- * Description: Return all traits used by a class
- * Source code: ext/spl/php_spl.c
- * Alias to functions:
- */
-
 echo "*** Testing class_uses() : variation ***\n";
 
 echo "--- testing no traits ---\n";
@@ -24,7 +18,6 @@ var_dump(class_uses('non_existent'));
 var_dump(class_uses('non_existent2', false));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing class_uses() : variation ***
 --- testing no traits ---
@@ -41,4 +34,3 @@ bool(false)
 
 Warning: class_uses(): Class non_existent2 does not exist in %s on line %d
 bool(false)
-===DONE===

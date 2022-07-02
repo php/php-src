@@ -4,7 +4,7 @@ ZE2 A final method cannot be abstract
 <?php
 
 class fail {
-	abstract final function show();
+    abstract final function show();
 }
 
 echo "Done\n"; // Shouldn't be displayed

@@ -1,7 +1,7 @@
 --TEST--
 Phar: bad parameters to various methods
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -29,12 +29,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	$a = new Phar(array());
+    $a = new Phar(array());
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-	$a = new Phar(__DIR__ . '/files/frontcontroller10.phar');
+    $a = new Phar(__DIR__ . '/files/frontcontroller10.phar');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -49,12 +49,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	$b = new PharData(__DIR__ . '/whatever.tar');
+    $b = new PharData(__DIR__ . '/whatever.tar');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-	$c = new PharData(__DIR__ . '/whatever.zip');
+    $c = new PharData(__DIR__ . '/whatever.zip');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -227,44 +227,42 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
-Phar::mungServer() expects parameter 1 to be array, string given
-Phar::createDefaultStub() expects parameter 1 to be a valid path, array given
-Phar::loadPhar() expects parameter 1 to be a valid path, array given
-Phar::canCompress() expects parameter 1 to be int, string given
-Phar::__construct() expects parameter 1 to be a valid path, array given
-Phar::convertToExecutable() expects parameter 1 to be int, array given
-Phar::convertToData() expects parameter 1 to be int, array given
-PharData::delete() expects parameter 1 to be a valid path, array given
+Phar::mungServer(): Argument #1 ($variables) must be of type array, string given
+Phar::createDefaultStub(): Argument #1 ($index) must be of type ?string, array given
+Phar::loadPhar(): Argument #1 ($filename) must be of type string, array given
+Phar::canCompress(): Argument #1 ($compression) must be of type int, string given
+Phar::__construct(): Argument #1 ($filename) must be of type string, array given
+Phar::convertToExecutable(): Argument #1 ($format) must be of type ?int, array given
+Phar::convertToData(): Argument #1 ($format) must be of type ?int, array given
+PharData::delete(): Argument #1 ($localName) must be of type string, array given
 Cannot write out phar archive, phar is read-only
 Entry oops does not exist and cannot be deleted
 %sfrontcontroller10.phar
 Cannot write out phar archive, phar is read-only
 A Phar alias cannot be set in a plain tar archive
-Phar::setAlias() expects parameter 1 to be string, array given
+Phar::setAlias(): Argument #1 ($alias) must be of type string, array given
 Cannot change stub, phar is read-only
 A Phar stub cannot be set in a plain tar archive
-Phar::setStub() expects parameter 1 to be string, array given
+Phar::setStub(): Argument #1 ($stub) must be of type string, array given
 A Phar stub cannot be set in a plain tar archive
-Phar::setDefaultStub() expects parameter 1 to be string, array given
+Phar::setDefaultStub(): Argument #1 ($index) must be of type ?string, array given
 Cannot change stub: phar.readonly=1
 Cannot set signature algorithm, phar is read-only
-Phar::compress() expects parameter 1 to be int, array given
+Phar::compress(): Argument #1 ($compression) must be of type int, array given
 Cannot compress phar archive, phar is read-only
-Phar::compressFiles() expects parameter 1 to be int, array given
+Phar::compressFiles(): Argument #1 ($compression) must be of type int, array given
 Phar is readonly, cannot change compression
-Phar::copy() expects exactly 2 parameters, 1 given
+Phar::copy() expects exactly 2 arguments, 1 given
 Cannot copy "a" to "b", phar is read-only
-Phar::offsetExists() expects parameter 1 to be a valid path, array given
-Phar::offsetGet() expects parameter 1 to be a valid path, array given
-Phar::offsetSet() expects exactly 2 parameters, 1 given
-PharData::offsetUnset() expects parameter 1 to be a valid path, array given
+Phar::offsetExists(): Argument #1 ($localName) must be of type string, array given
+Phar::offsetGet(): Argument #1 ($localName) must be of type string, array given
+Phar::offsetSet() expects exactly 2 arguments, 1 given
+PharData::offsetUnset(): Argument #1 ($localName) must be of type string, array given
 Write operations disabled by the php.ini setting phar.readonly
-Phar::addEmptyDir() expects parameter 1 to be a valid path, array given
-Phar::addFile() expects parameter 1 to be a valid path, array given
-Phar::addFromString() expects exactly 2 parameters, 1 given
+Phar::addEmptyDir(): Argument #1 ($directory) must be of type string, array given
+Phar::addFile(): Argument #1 ($filename) must be of type string, array given
+Phar::addFromString() expects exactly 2 arguments, 1 given
 Write operations disabled by the php.ini setting phar.readonly
-Phar::setMetadata() expects exactly 1 parameter, 2 given
+Phar::setMetadata() expects exactly 1 argument, 2 given
 Write operations disabled by the php.ini setting phar.readonly
-===DONE===

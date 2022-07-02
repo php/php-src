@@ -6,10 +6,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die('skip..  not for Windows');
 ?>
 --FILE--
 <?php
-/* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
-   Description: Renames a file or directory
-*/
-
 echo "\n*** Testing rename() on non-existing file ***\n";
 $file_path = __DIR__;
 
@@ -45,7 +41,6 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__."/rename_basic_new2.tmp");
 rmdir(__DIR__."/rename_basic_dir1");
 ?>
 --EXPECTF--

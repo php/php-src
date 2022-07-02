@@ -1,8 +1,9 @@
 --TEST--
 Bug #27303 (OCIBindByName binds numeric PHP values as characters)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(__DIR__."/connect.inc");
 // The bind buffer size edge cases seem to change each DB version.
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -29,19 +30,19 @@ define('MYLIMIT', 200);
 
 $stmt = "insert into mytab (mydata, seqcol) values ('Some data', myseq.nextval) returning seqcol into :mybv";
 
-$stid = OCIParse($c, $stmt);
+$stid = oci_parse($c, $stmt);
 if (!$stid) { echo "Parse error"; die; }
 
-$r = OCIBindByName($stid, ':MYBV', $mybv, 0 );
+$r = oci_bind_by_name($stid, ':MYBV', $mybv, 0 );
 if (!$r) { echo "Bind error"; die; }
 
 for ($i = 1; $i < MYLIMIT; $i++) {
-	$r = OCIExecute($stid, OCI_DEFAULT);
-	if (!$r) { echo "Execute error"; die; }
-	var_dump($mybv);
+    $r = oci_execute($stid, OCI_DEFAULT);
+    if (!$r) { echo "Execute error"; die; }
+    var_dump($mybv);
 }
 
-OCICommit($c);
+oci_commit($c);
 
 $drop_st = array();
 $drop_st[] = "drop sequence myseq";

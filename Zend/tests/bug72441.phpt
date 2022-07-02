@@ -6,8 +6,8 @@ Bug #72441 (Segmentation fault: RFC list_keys)
 $array = [];
 
 list(
-	'' => $foo,
-	$bar
+    '' => $foo,
+    $bar
 ) = $array;
 ?>
 --EXPECTF--

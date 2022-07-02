@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,14 +19,14 @@
 #include "../fpm.h"
 #include "../zlog.h"
 
-#if HAVE_POLL
+#ifdef HAVE_POLL
 
 #include <poll.h>
 #include <errno.h>
 #include <string.h>
 
 static int fpm_event_poll_init(int max);
-static int fpm_event_poll_clean();
+static int fpm_event_poll_clean(void);
 static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long int timeout);
 static int fpm_event_poll_add(struct fpm_event_s *ev);
 static int fpm_event_poll_remove(struct fpm_event_s *ev);
@@ -50,9 +50,9 @@ static int next_free_slot = 0;
 /*
  * return the module configuration
  */
-struct fpm_event_module_s *fpm_event_poll_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_poll_module(void) /* {{{ */
 {
-#if HAVE_POLL
+#ifdef HAVE_POLL
 	return &poll_module;
 #else
 	return NULL;
@@ -60,7 +60,7 @@ struct fpm_event_module_s *fpm_event_poll_module() /* {{{ */
 }
 /* }}} */
 
-#if HAVE_POLL
+#ifdef HAVE_POLL
 
 /*
  * Init the module
@@ -136,7 +136,7 @@ static int fpm_event_poll_wait(struct fpm_event_queue_s *queue, unsigned long in
 		memcpy(active_pollfds, pollfds, sizeof(struct pollfd) * npollfds);
 	}
 
-	/* wait for inconming event or timeout */
+	/* wait for incoming event or timeout */
 	ret = poll(active_pollfds, npollfds, timeout);
 	if (ret == -1) {
 
@@ -216,7 +216,7 @@ static int fpm_event_poll_add(struct fpm_event_s *ev) /* {{{ */
 		return 0;
 	}
 
-	zlog(ZLOG_ERROR, "poll: not enought space to add event (fd=%d)", ev->fd);
+	zlog(ZLOG_ERROR, "poll: not enough space to add event (fd=%d)", ev->fd);
 	return -1;
 }
 /* }}} */

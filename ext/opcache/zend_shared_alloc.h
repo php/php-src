@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -109,7 +109,7 @@ typedef struct _zend_smm_shared_globals {
     /* Amount of shared memory allocated by garbage */
     size_t                     wasted_shared_memory;
     /* No more shared memory flag */
-    zend_bool                  memory_exhausted;
+    bool                  memory_exhausted;
     /* Saved Shared Allocator State */
     zend_shared_memory_state   shared_memory_state;
 	/* Pointer to the application's shared data structures */
@@ -125,12 +125,27 @@ extern zend_smm_shared_globals *smm_shared_globals;
 
 #define SHARED_ALLOC_REATTACHED		(SUCCESS+1)
 
+BEGIN_EXTERN_C()
+
 int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size);
 void zend_shared_alloc_shutdown(void);
 
 /* allocate shared memory block */
-void *zend_shared_alloc_pages(size_t requested_size);
 void *zend_shared_alloc(size_t size);
+
+/**
+ * Wrapper for zend_shared_alloc() which aligns at 64-byte boundary if
+ * AVX or SSE2 are used.
+ */
+static inline void *zend_shared_alloc_aligned(size_t size) {
+#if defined(__AVX__) || defined(__SSE2__)
+	/* Align to 64-byte boundary */
+	void *p = zend_shared_alloc(size + 64);
+	return (void *)(((zend_uintptr_t)p + 63L) & ~63L);
+#else
+	return zend_shared_alloc(size);
+#endif
+}
 
 /* copy into shared memory */
 void *zend_shared_memdup_get_put_free(void *source, size_t size);
@@ -139,8 +154,6 @@ void *zend_shared_memdup_free(void *source, size_t size);
 void *zend_shared_memdup_get_put(void *source, size_t size);
 void *zend_shared_memdup_put(void *source, size_t size);
 void *zend_shared_memdup(void *source, size_t size);
-void *zend_shared_memdup_arena_put(void *source, size_t size);
-void *zend_shared_memdup_arena(void *source, size_t size);
 
 int  zend_shared_memdup_size(void *p, size_t size);
 
@@ -201,5 +214,7 @@ void zend_shared_alloc_create_lock(void);
 void zend_shared_alloc_lock_win32(void);
 void zend_shared_alloc_unlock_win32(void);
 #endif
+
+END_EXTERN_C()
 
 #endif /* ZEND_SHARED_ALLOC_H */

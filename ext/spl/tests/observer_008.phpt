@@ -12,7 +12,7 @@ $a = new A;
 $a->attach($o1);
 $a->attach($o2);
 
-$b = new SplObjectSTorage();
+$b = new SplObjectStorage();
 $b->attach($o2);
 $b->attach($o3);
 
@@ -26,10 +26,7 @@ var_dump($a->count());
 $a->removeAll($b);
 var_dump($a->count());
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(3)
 int(2)
 int(1)
-===DONE===

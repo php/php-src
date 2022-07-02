@@ -2,24 +2,11 @@
 Test array_walk_recursive() function : usage variations - 'input' array with different values
 --FILE--
 <?php
-/* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing array_walk_recursive() with following types of 'input' arrays:
  *    integer, float, string, bool, null, empty & mixed
 */
 
-// callback function
-/*
- * Prototype : print_value(mixed $value, int $key, int $count)
- * Parameters : $value - array entries(values)
- *              $key - keys in given input array
- *              $count - extra parameter used as an index
- * Description : prints the array values with keys and count value
- */
 function print_value($value, $key, $count)
 {
   echo  $count." : ".$key." ".$value."\n";

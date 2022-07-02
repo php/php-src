@@ -1,7 +1,7 @@
 --TEST--
 Phar::loadPhar overloading alias names
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -29,15 +29,14 @@ var_dump(Phar::loadPhar($fname1, 'copy'));
 $a = new Phar($fname1);
 try
 {
-	var_dump(Phar::loadPhar($fname2, 'copy'));
+    var_dump(Phar::loadPhar($fname2, 'copy'));
 }
 catch (Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
@@ -47,4 +46,3 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php');
 bool(true)
 bool(true)
 alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php"
-===DONE===

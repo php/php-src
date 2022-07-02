@@ -9,9 +9,9 @@ $current = "2012-12-27 16:24:08";
 
 function dump($a, $b, $c)
 {
-	echo 'orig:    ', $a->format('Y-m-d H:i:s e'), "\n";
-	echo 'copy:    ', $b->format('Y-m-d H:i:s e'), "\n";
-	echo 'changed: ', $c->format('Y-m-d H:i:s e'), "\n";
+    echo 'orig:    ', $a->format('Y-m-d H:i:s e'), "\n";
+    echo 'copy:    ', $b->format('Y-m-d H:i:s e'), "\n";
+    echo 'changed: ', $c->format('Y-m-d H:i:s e'), "\n";
 }
 
 echo "modify():\n";

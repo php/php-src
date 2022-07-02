@@ -1,8 +1,9 @@
 --TEST--
 Segfault due to libcurl connection caching
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 if (false === getenv('PHP_CURL_FTP_REMOTE_SERVER'))  exit("skip PHP_CURL_FTP_REMOTE_SERVER env variable is not defined");
 if (false === getenv('PHP_CURL_FTP_REMOTE_USER'))  exit("skip PHP_CURL_FTP_REMOTE_USER env variable is not defined");
 if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REMOTE_PASSWD env variable is not defined");
@@ -32,16 +33,16 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
   $active = null;
 
   do {
-	  $mrc = curl_multi_exec($cmh, $active);
+      $mrc = curl_multi_exec($cmh, $active);
   } while ($mrc == CURLM_CALL_MULTI_PERFORM);
 
 
   while ($active && $mrc == CURLM_OK) {
-	  if (curl_multi_select($cmh) != -1) {
-		  do {
-			  $mrc = curl_multi_exec($cmh, $active);
-		  } while ($mrc == CURLM_CALL_MULTI_PERFORM);
-	  }
+      if (curl_multi_select($cmh) != -1) {
+          do {
+              $mrc = curl_multi_exec($cmh, $active);
+          } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+      }
   }
 
   var_dump(is_string(curl_multi_getcontent($ch)));
@@ -49,7 +50,5 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
   curl_close($ch);
   curl_multi_close($cmh);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

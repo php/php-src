@@ -3,23 +3,23 @@ Bug #69723 (Passing parameters by reference and array_column)
 --FILE--
 <?php
 function byReference( & $array){
-	foreach($array as &$item){
-		$item['nanana'] = 'batman';
-		$item['superhero'] = 'robin';
-	}
+    foreach($array as &$item){
+        $item['nanana'] = 'batman';
+        $item['superhero'] = 'robin';
+    }
 }
 
 $array = [
-	[
-	'superhero'=> 'superman',
-	'nanana' => 'no nana'
-	],
-	[
-	'superhero'=> 'acuaman',
-	'nanana' => 'no nana'
-	],
+    [
+    'superhero'=> 'superman',
+    'nanana' => 'no nana'
+    ],
+    [
+    'superhero'=> 'acuaman',
+    'nanana' => 'no nana'
+    ],
 
-	];
+    ];
 
 var_dump(array_column($array, 'superhero'));
 byReference($array);

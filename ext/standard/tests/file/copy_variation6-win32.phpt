@@ -7,11 +7,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy() function: Trying to create copy of source file
      into different destination dir paths given in various notations */
 
@@ -129,7 +124,7 @@ Size of destination file => int(0)
 
 -- Iteration 7 --
 Copy operation => 
-Warning: copy(%s/copy_variation6/copy_variation6_sub///../*): failed to open stream: No such file or directory in %s on line %d
+Warning: copy(%s/copy_variation6/copy_variation6_sub///../*): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 Existence of destination file => bool(false)
 

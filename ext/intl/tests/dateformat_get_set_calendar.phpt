@@ -1,8 +1,8 @@
 --TEST--
 IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject()
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
@@ -35,7 +35,6 @@ $df->setCalendar($cal);
 d($df);
 
 ?>
-==DONE==
 --EXPECT--
 dimanche 1 janvier 2012 ap. J.-C. 03:00:00 UTC+03:00
 int(1)
@@ -52,4 +51,3 @@ bool(false)
 string(9) "gregorian"
 string(3) "UTC"
 
-==DONE==

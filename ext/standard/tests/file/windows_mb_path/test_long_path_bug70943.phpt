@@ -17,15 +17,13 @@ touch($testFile);
 
 echo "Opening file... ";
 if ($fp = fopen($testFile, "r")) {
-	fclose($fp);
-	echo "OK", "\n";
+    fclose($fp);
+    echo "OK", "\n";
 }
 
 unlink($testFile);
 
 ?>
-===DONE===
 --EXPECT--
 Generating a file with a path length of 259 characters...
 Opening file... OK
-===DONE===

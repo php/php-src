@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 14: fault
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function Add($x,$y) {

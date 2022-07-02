@@ -3,7 +3,6 @@ Test preg_replace() function : error - bad regular expressions
 --FILE--
 <?php
 /*
-* proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
 /*
@@ -34,7 +33,7 @@ try {
 
 Arg value is abcdef
 
-Warning: preg_replace(): Delimiter must not be alphanumeric or backslash in %spreg_replace_error1.php on line %d
+Warning: preg_replace(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_error1.php on line %d
 NULL
 
 Arg value is /[a-zA-Z]
@@ -57,4 +56,4 @@ string(1) "a"
 
 Arg value is /[a-zA-Z]/
 string(1) "1"
-Object of class stdClass could not be converted to string
+preg_replace(): Argument #1 ($pattern) must be of type array|string, stdClass given

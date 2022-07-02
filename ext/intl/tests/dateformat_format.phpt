@@ -1,7 +1,8 @@
 --TEST--
 datefmt_format_code()
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
@@ -15,13 +16,13 @@ datefmt_format_code()
 
 function ut_main()
 {
-	$timezone = 'GMT-10:00';
+    $timezone = 'GMT-10:00';
 
-	$locale_arr = array (
-		'en_US'
-	);
+    $locale_arr = array (
+        'en_US'
+    );
 
-	$datetype_arr = array (
+    $datetype_arr = array (
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
                 IntlDateFormatter::MEDIUM,
@@ -32,34 +33,34 @@ function ut_main()
         $res_str = '';
 
 
-	$time_arr = array (
-		0,
-		-1200000,
-		1200000,
-		2200000000.0,
-		-2200000000.0,
-		90099999,
-		3600,
-		-3600
-	);
+    $time_arr = array (
+        0,
+        -1200000,
+        1200000,
+        2200000000.0,
+        -2200000000.0,
+        90099999,
+        3600,
+        -3600
+    );
 
-	$localtime_arr1 = array (
-	    'tm_sec' => 24 ,
-	    'tm_min' => 3,
-	    'tm_hour' => 19,
-	    'tm_mday' => 3,
-	    'tm_mon' => 3,
-	    'tm_year' => 105,
-	);
-	$localtime_arr2 = array (
-	    'tm_sec' => 21,
-	    'tm_min' => 5,
-	    'tm_hour' => 7,
-	    'tm_mday' => 13,
-	    'tm_mon' => 4,
-	    'tm_year' => 205,
-	);
-	$localtime_arr3 = array (
+    $localtime_arr1 = array (
+        'tm_sec' => 24 ,
+        'tm_min' => 3,
+        'tm_hour' => 19,
+        'tm_mday' => 3,
+        'tm_mon' => 3,
+        'tm_year' => 105,
+    );
+    $localtime_arr2 = array (
+        'tm_sec' => 21,
+        'tm_min' => 5,
+        'tm_hour' => 7,
+        'tm_mday' => 13,
+        'tm_mon' => 4,
+        'tm_year' => 205,
+    );
+    $localtime_arr3 = array (
             'tm_sec' => 11,
             'tm_min' => 13,
             'tm_hour' => 0,
@@ -68,80 +69,80 @@ function ut_main()
             'tm_year' => -5
         );
 
-	$localtime_arr = array (
-		$localtime_arr1,
-		$localtime_arr2,
-		$localtime_arr3
-	);
+    $localtime_arr = array (
+        $localtime_arr1,
+        $localtime_arr2,
+        $localtime_arr3
+    );
 
-	$d1 = new DateTime("2010-01-01 01:02:03", new DateTimeZone("UTC"));
-	$d2 = new DateTime("2000-12-31 03:04:05", new DateTimeZone("UTC"));
-	$d2->setTimezone(new DateTimeZone("PDT"));
-	$dates = array(
-		$d1,
-		$d2,
-		new StdClass(),
-	);
+    $d1 = new DateTime("2010-01-01 01:02:03", new DateTimeZone("UTC"));
+    $d2 = new DateTime("2000-12-31 03:04:05", new DateTimeZone("UTC"));
+    $d2->setTimezone(new DateTimeZone("PDT"));
+    $dates = array(
+        $d1,
+        $d2,
+        new StdClass(),
+    );
 
-	//Test format with input as a timestamp : integer
-	foreach( $time_arr as $timestamp_entry){
-		$res_str .= "\n------------\n";
-		$res_str .= "\nInput timestamp is : $timestamp_entry";
-		$res_str .= "\n------------\n";
-		foreach( $locale_arr as $locale_entry ){
-			foreach( $datetype_arr as $datetype_entry )
-	{
-		$res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
-		$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN);
-		$formatted = ut_datefmt_format( $fmt , $timestamp_entry);
-		$res_str .= "\nFormatted timestamp is : $formatted";
-	}
-	}
-	}
+    //Test format with input as a timestamp : integer
+    foreach( $time_arr as $timestamp_entry){
+        $res_str .= "\n------------\n";
+        $res_str .= "\nInput timestamp is : $timestamp_entry";
+        $res_str .= "\n------------\n";
+        foreach( $locale_arr as $locale_entry ){
+            foreach( $datetype_arr as $datetype_entry )
+    {
+        $res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
+        $fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN);
+        $formatted = ut_datefmt_format( $fmt , $timestamp_entry);
+        $res_str .= "\nFormatted timestamp is : $formatted";
+    }
+    }
+    }
 
-	//Test format with input as a localtime :array
-	foreach( $localtime_arr as $localtime_entry){
-		$res_str .= "\n------------\n";
-		$res_str .= "\nInput localtime is : ";
-		foreach( $localtime_entry as $key => $value){
+    //Test format with input as a localtime :array
+    foreach( $localtime_arr as $localtime_entry){
+        $res_str .= "\n------------\n";
+        $res_str .= "\nInput localtime is : ";
+        foreach( $localtime_entry as $key => $value){
                     $res_str .= "$key : '$value' , ";
-		}
+        }
 
-		$res_str .= "\n------------\n";
-		foreach( $locale_arr as $locale_entry ){
-			foreach( $datetype_arr as $datetype_entry )
-	{
-		$res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
-		$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
-		$formatted1 = ut_datefmt_format( $fmt , $localtime_entry);
-		if( intl_get_error_code() == U_ZERO_ERROR){
-			$res_str .= "\nFormatted localtime_array is : $formatted1";
-		}else{
-			$res_str .= "\nError while formatting as: '".intl_get_error_message()."'";
-		}
-	}
-	}
-	}
+        $res_str .= "\n------------\n";
+        foreach( $locale_arr as $locale_entry ){
+            foreach( $datetype_arr as $datetype_entry )
+    {
+        $res_str .= "\nIntlDateFormatter locale= $locale_entry ,datetype = $datetype_entry ,timetype =$datetype_entry ";
+        $fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
+        $formatted1 = ut_datefmt_format( $fmt , $localtime_entry);
+        if( intl_get_error_code() == U_ZERO_ERROR){
+            $res_str .= "\nFormatted localtime_array is : $formatted1";
+        }else{
+            $res_str .= "\nError while formatting as: '".intl_get_error_message()."'";
+        }
+    }
+    }
+    }
 
-	foreach($dates as $date_entry) {
-		foreach( $locale_arr as $locale_entry ){
-			foreach( $datetype_arr as $datetype_entry ) {
-				$res_str .= "\n------------";
-				$res_str .= "\nDate is: ".var_export($date_entry, true);
-				$res_str .= "\n------------";
+    foreach($dates as $date_entry) {
+        foreach( $locale_arr as $locale_entry ){
+            foreach( $datetype_arr as $datetype_entry ) {
+                $res_str .= "\n------------";
+                $res_str .= "\nDate is: ".var_export($date_entry, true);
+                $res_str .= "\n------------";
 
-				$fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
-				$formatted1 = ut_datefmt_format( $fmt , $date_entry);
-				if( intl_get_error_code() == U_ZERO_ERROR){
-					$res_str .= "\nFormatted DateTime is : $formatted1";
-				}else{
-					$res_str .= "\nError while formatting as: '".intl_get_error_message()."'";
-				}
-			}
-		}
-	}
+                $fmt = ut_datefmt_create( $locale_entry , $datetype_entry ,$datetype_entry, $timezone, IntlDateFormatter::GREGORIAN );
+                $formatted1 = ut_datefmt_format( $fmt , $date_entry);
+                if( intl_get_error_code() == U_ZERO_ERROR){
+                    $res_str .= "\nFormatted DateTime is : $formatted1";
+                }else{
+                    $res_str .= "\nError while formatting as: '".intl_get_error_message()."'";
+                }
+            }
+        }
+    }
 
-	return $res_str;
+    return $res_str;
 
 }
 
@@ -317,7 +318,7 @@ Formatted localtime_array is : 12/17/95 12:13 AM
 IntlDateFormatter locale= en_US ,datetype = -1 ,timetype =-1 
 Formatted localtime_array is : 18951217 12:13 AM
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2010-01-01 01:02:03.000000',
    'timezone_type' => 3,
    'timezone' => 'UTC',
@@ -325,7 +326,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : Thursday, December 31, 2009 3:02:03 PM GMT-10:00
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2010-01-01 01:02:03.000000',
    'timezone_type' => 3,
    'timezone' => 'UTC',
@@ -333,7 +334,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : December 31, 2009 3:02:03 PM GMT-10:00
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2010-01-01 01:02:03.000000',
    'timezone_type' => 3,
    'timezone' => 'UTC',
@@ -341,7 +342,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : Dec 31, 2009 3:02:03 PM
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2010-01-01 01:02:03.000000',
    'timezone_type' => 3,
    'timezone' => 'UTC',
@@ -349,7 +350,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : 12/31/09 3:02 PM
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2010-01-01 01:02:03.000000',
    'timezone_type' => 3,
    'timezone' => 'UTC',
@@ -357,7 +358,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : 20091231 03:02 PM
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05.000000',
    'timezone_type' => 2,
    'timezone' => 'PDT',
@@ -365,7 +366,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : Saturday, December 30, 2000 5:04:05 PM GMT-10:00
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05.000000',
    'timezone_type' => 2,
    'timezone' => 'PDT',
@@ -373,7 +374,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : December 30, 2000 5:04:05 PM GMT-10:00
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05.000000',
    'timezone_type' => 2,
    'timezone' => 'PDT',
@@ -381,7 +382,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : Dec 30, 2000 5:04:05 PM
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05.000000',
    'timezone_type' => 2,
    'timezone' => 'PDT',
@@ -389,7 +390,7 @@ Date is: DateTime::__set_state(array(
 ------------
 Formatted DateTime is : 12/30/00 5:04 PM
 ------------
-Date is: DateTime::__set_state(array(
+Date is: \DateTime::__set_state(array(
    'date' => '2000-12-30 19:04:05.000000',
    'timezone_type' => 2,
    'timezone' => 'PDT',

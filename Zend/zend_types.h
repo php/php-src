@@ -24,6 +24,7 @@
 
 #include "zend_portability.h"
 #include "zend_long.h"
+#include <stdbool.h>
 
 #ifdef __SSE2__
 # include <mmintrin.h>
@@ -46,13 +47,15 @@
 # define ZEND_ENDIAN_LOHI_C_4(a, b, c, d)  a, b, c, d
 #endif
 
-typedef unsigned char zend_bool;
+typedef bool zend_bool;
 typedef unsigned char zend_uchar;
 
 typedef enum {
   SUCCESS =  0,
   FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
 } ZEND_RESULT_CODE;
+
+typedef ZEND_RESULT_CODE zend_result;
 
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 # ifdef ZEND_WIN32
@@ -105,88 +108,186 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * zend_type - is an abstraction layer to represent information about type hint.
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
  *
- * ZEND_TYPE_IS_SET()     - checks if type-hint exists
- * ZEND_TYPE_IS_MASK()    - checks if type-hint refer to standard type
- * ZEND_TYPE_IS_CLASS()   - checks if type-hint refer to some class
- * ZEND_TYPE_IS_CE()      - checks if type-hint refer to some class by zend_class_entry *
- * ZEND_TYPE_IS_NAME()    - checks if type-hint refer to some class by zend_string *
+ * ZEND_TYPE_IS_SET()        - checks if there is a type-hint
+ * ZEND_TYPE_IS_ONLY_MASK()  - checks if type-hint refer to standard type only
+ * ZEND_TYPE_IS_COMPLEX()    - checks if type is a type_list, or contains a class either as a CE or as a name
+ * ZEND_TYPE_HAS_NAME()      - checks if type-hint contains some class as zend_string *
+ * ZEND_TYPE_IS_INTERSECTION() - checks if the type_list represents an intersection type list
+ * ZEND_TYPE_IS_UNION()      - checks if the type_list represents a union type list
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
- * ZEND_TYPE_CE()         - returns referenced class entry
- * ZEND_TYPE_MASK()       - returns MAY_BE_* type mask
+ * ZEND_TYPE_PURE_MASK()  - returns MAY_BE_* type mask
+ * ZEND_TYPE_FULL_MASK()  - returns MAY_BE_* type mask together with other flags
  *
  * ZEND_TYPE_ALLOW_NULL() - checks if NULL is allowed
  *
- * ZEND_TYPE_ENCODE_*() should be used for construction.
+ * ZEND_TYPE_INIT_*() should be used for construction.
  */
 
-typedef uintptr_t zend_type;
+typedef struct {
+	/* Not using a union here, because there's no good way to initialize them
+	 * in a way that is supported in both C and C++ (designated initializers
+	 * are only supported since C++20). */
+	void *ptr;
+	uint32_t type_mask;
+	/* TODO: We could use the extra 32-bit of padding on 64-bit systems. */
+} zend_type;
 
-#define _ZEND_TYPE_CODE_MAX ((Z_L(1)<<(IS_VOID+1))-1)
-#define _ZEND_TYPE_FLAG_MASK Z_L(0x3)
-#define _ZEND_TYPE_CE_BIT Z_L(0x1)
+typedef struct {
+	uint32_t num_types;
+	zend_type types[1];
+} zend_type_list;
+
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
+#define _ZEND_TYPE_MASK ((1u << 25) - 1)
+/* Only one of these bits may be set. */
+#define _ZEND_TYPE_NAME_BIT (1u << 24)
+#define _ZEND_TYPE_LIST_BIT (1u << 22)
+#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT)
+/* For BC behaviour with iterable type */
+#define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
+/* Whether the type list is arena allocated */
+#define _ZEND_TYPE_ARENA_BIT (1u << 20)
+/* Whether the type list is an intersection type */
+#define _ZEND_TYPE_INTERSECTION_BIT (1u << 19)
+/* Whether the type is a union type */
+#define _ZEND_TYPE_UNION_BIT (1u << 18)
+/* Type mask excluding the flags above. */
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << 18) - 1)
 /* Must have same value as MAY_BE_NULL */
-#define _ZEND_TYPE_NULLABLE_BIT Z_L(0x2)
+#define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
 #define ZEND_TYPE_IS_SET(t) \
-	((t) != 0)
+	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
-#define ZEND_TYPE_IS_MASK(t) \
-	((t) != 0 && (t) <= _ZEND_TYPE_CODE_MAX)
+/* If a type is complex it means it's either a list with a union or intersection,
+ * or the void pointer is a class name */
+#define ZEND_TYPE_IS_COMPLEX(t) \
+	((((t).type_mask) & _ZEND_TYPE_KIND_MASK) != 0)
 
-#define ZEND_TYPE_IS_CLASS(t) \
-	((t) > _ZEND_TYPE_CODE_MAX)
+#define ZEND_TYPE_HAS_NAME(t) \
+	((((t).type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
 
-#define ZEND_TYPE_IS_CE(t) \
-	(((t) & _ZEND_TYPE_CE_BIT) != 0)
+#define ZEND_TYPE_HAS_LIST(t) \
+	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
 
-#define ZEND_TYPE_IS_NAME(t) \
-	(ZEND_TYPE_IS_CLASS(t) && !ZEND_TYPE_IS_CE(t))
+#define ZEND_TYPE_IS_ITERABLE_FALLBACK(t) \
+	((((t).type_mask) & _ZEND_TYPE_ITERABLE_BIT) != 0)
+
+#define ZEND_TYPE_IS_INTERSECTION(t) \
+	((((t).type_mask) & _ZEND_TYPE_INTERSECTION_BIT) != 0)
+
+#define ZEND_TYPE_IS_UNION(t) \
+	((((t).type_mask) & _ZEND_TYPE_UNION_BIT) != 0)
+
+#define ZEND_TYPE_USES_ARENA(t) \
+	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)
+
+#define ZEND_TYPE_IS_ONLY_MASK(t) \
+	(ZEND_TYPE_IS_SET(t) && (t).ptr == NULL)
 
 #define ZEND_TYPE_NAME(t) \
-	((zend_string*)((t) & ~_ZEND_TYPE_FLAG_MASK))
+	((zend_string *) (t).ptr)
 
-#define ZEND_TYPE_CE(t) \
-	((zend_class_entry*)((t) & ~_ZEND_TYPE_FLAG_MASK))
+#define ZEND_TYPE_LITERAL_NAME(t) \
+	((const char *) (t).ptr)
 
-#define ZEND_TYPE_MASK(t) \
-	(t)
+#define ZEND_TYPE_LIST(t) \
+	((zend_type_list *) (t).ptr)
+
+#define ZEND_TYPE_LIST_SIZE(num_types) \
+	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(zend_type))
+
+/* This iterates over a zend_type_list. */
+#define ZEND_TYPE_LIST_FOREACH(list, type_ptr) do { \
+	zend_type *_list = (list)->types; \
+	zend_type *_end = _list + (list)->num_types; \
+	for (; _list < _end; _list++) { \
+		type_ptr = _list;
+
+#define ZEND_TYPE_LIST_FOREACH_END() \
+	} \
+} while (0)
+
+/* This iterates over any zend_type. If it's a type list, all list elements will
+ * be visited. If it's a single type, only the single type is visited. */
+#define ZEND_TYPE_FOREACH(type, type_ptr) do { \
+	zend_type *_cur, *_end; \
+	if (ZEND_TYPE_HAS_LIST(type)) { \
+		zend_type_list *_list = ZEND_TYPE_LIST(type); \
+		_cur = _list->types; \
+		_end = _cur + _list->num_types; \
+	} else { \
+		_cur = &(type); \
+		_end = _cur + 1; \
+	} \
+	do { \
+		type_ptr = _cur;
+
+#define ZEND_TYPE_FOREACH_END() \
+	} while (++_cur < _end); \
+} while (0)
+
+#define ZEND_TYPE_SET_PTR(t, _ptr) \
+	((t).ptr = (_ptr))
+
+#define ZEND_TYPE_SET_PTR_AND_KIND(t, _ptr, kind_bit) do { \
+	(t).ptr = (_ptr); \
+	(t).type_mask &= ~_ZEND_TYPE_KIND_MASK; \
+	(t).type_mask |= (kind_bit); \
+} while (0)
+
+#define ZEND_TYPE_SET_LIST(t, list) \
+	ZEND_TYPE_SET_PTR_AND_KIND(t, list, _ZEND_TYPE_LIST_BIT)
+
+/* FULL_MASK() includes the MAY_BE_* type mask, as well as additional metadata bits.
+ * The PURE_MASK() only includes the MAY_BE_* type mask. */
+#define ZEND_TYPE_FULL_MASK(t) \
+	((t).type_mask)
+
+#define ZEND_TYPE_PURE_MASK(t) \
+	((t).type_mask & _ZEND_TYPE_MAY_BE_MASK)
+
+#define ZEND_TYPE_FULL_MASK_WITHOUT_NULL(t) \
+	((t).type_mask & ~_ZEND_TYPE_NULLABLE_BIT)
+
+#define ZEND_TYPE_PURE_MASK_WITHOUT_NULL(t) \
+	((t).type_mask & _ZEND_TYPE_MAY_BE_MASK & ~_ZEND_TYPE_NULLABLE_BIT)
 
 #define ZEND_TYPE_CONTAINS_CODE(t, code) \
-	(((t) & (1 << (code))) != 0)
+	(((t).type_mask & (1u << (code))) != 0)
 
 #define ZEND_TYPE_ALLOW_NULL(t) \
-	(((t) & _ZEND_TYPE_NULLABLE_BIT) != 0)
+	(((t).type_mask & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
-#define ZEND_TYPE_WITHOUT_NULL(t) \
-	((t) & ~_ZEND_TYPE_NULLABLE_BIT)
+#define ZEND_TYPE_INIT_NONE(extra_flags) \
+	{ NULL, (extra_flags) }
 
-#define ZEND_TYPE_ENCODE_NONE() \
-	(0)
+#define ZEND_TYPE_INIT_MASK(_type_mask) \
+	{ NULL, (_type_mask) }
 
-#define ZEND_TYPE_ENCODE_MASK(maybe_code) \
-	(maybe_code)
+#define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
+	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ( (code) == IS_ITERABLE ? _ZEND_TYPE_ITERABLE_BIT : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code))))) \
+		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
-#define ZEND_TYPE_ENCODE_CODE(code, allow_null) \
-	(((code) == _IS_BOOL ? (MAY_BE_FALSE|MAY_BE_TRUE) : (1 << (code))) \
-		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
+#define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
+	{ (void *) (ptr), \
+		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
-#define ZEND_TYPE_ENCODE_CE(ce, allow_null) \
-	(((uintptr_t)(ce)) | _ZEND_TYPE_CE_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
+#define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
+	{ (void *) (ptr), (type_mask) }
 
-#define ZEND_TYPE_ENCODE_CLASS(class_name, allow_null) \
-	(((uintptr_t)(class_name)) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
+#define ZEND_TYPE_INIT_UNION(ptr, extra_flags) \
+	{ (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_UNION_BIT) | (extra_flags) }
 
-#define ZEND_TYPE_ENCODE_CLASS_CONST_0(class_name) \
-	((zend_type) class_name)
-#define ZEND_TYPE_ENCODE_CLASS_CONST_1(class_name) \
-	((zend_type) "?" class_name)
-#define ZEND_TYPE_ENCODE_CLASS_CONST_Q2(macro, class_name) \
-	macro(class_name)
-#define ZEND_TYPE_ENCODE_CLASS_CONST_Q1(allow_null, class_name) \
-	ZEND_TYPE_ENCODE_CLASS_CONST_Q2(ZEND_TYPE_ENCODE_CLASS_CONST_ ##allow_null, class_name)
-#define ZEND_TYPE_ENCODE_CLASS_CONST(class_name, allow_null) \
-	ZEND_TYPE_ENCODE_CLASS_CONST_Q1(allow_null, class_name)
+#define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
+	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
+
+#define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null, extra_flags) \
+	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
+
+#define ZEND_TYPE_INIT_CLASS_CONST_MASK(class_name, type_mask) \
+	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_NAME_BIT | (type_mask))
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
@@ -211,6 +312,7 @@ typedef union _zend_value {
 struct _zval_struct {
 	zend_value        value;			/* value */
 	union {
+		uint32_t type_info;
 		struct {
 			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    type,			/* active type */
@@ -219,7 +321,6 @@ struct _zval_struct {
 					uint16_t  extra;        /* not further specified */
 				} u)
 		} v;
-		uint32_t type_info;
 	} u1;
 	union {
 		uint32_t     next;                 /* hash collision chain */
@@ -229,7 +330,6 @@ struct _zval_struct {
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
-		uint32_t     access_flags;         /* class constant access flags */
 		uint32_t     property_guard;       /* single property guard */
 		uint32_t     constant_flags;       /* constant flags */
 		uint32_t     extra;                /* not further specified */
@@ -275,7 +375,11 @@ struct _zend_array {
 		uint32_t flags;
 	} u;
 	uint32_t          nTableMask;
-	Bucket           *arData;
+	union {
+		uint32_t     *arHash;   /* hash table (allocated above this pointer) */
+		Bucket       *arData;   /* array of hash buckets */
+		zval         *arPacked; /* packed array of zvals */
+	};
 	uint32_t          nNumUsed;
 	uint32_t          nNumOfElements;
 	uint32_t          nTableSize;
@@ -289,14 +393,14 @@ struct _zend_array {
  * =====================
  *
  *                 +=============================+
- *                 | HT_HASH(ht, ht->nTableMask) |
- *                 | ...                         |
- *                 | HT_HASH(ht, -1)             |
- *                 +-----------------------------+
- * ht->arData ---> | Bucket[0]                   |
- *                 | ...                         |
- *                 | Bucket[ht->nTableSize-1]    |
- *                 +=============================+
+ *                 | HT_HASH(ht, ht->nTableMask) |                   +=============================+
+ *                 | ...                         |                   | HT_INVALID_IDX              |
+ *                 | HT_HASH(ht, -1)             |                   | HT_INVALID_IDX              |
+ *                 +-----------------------------+                   +-----------------------------+
+ * ht->arData ---> | Bucket[0]                   | ht->arPacked ---> | ZVAL[0]                     |
+ *                 | ...                         |                   | ...                         |
+ *                 | Bucket[ht->nTableSize-1]    |                   | ZVAL[ht->nTableSize-1]      |
+ *                 +=============================+                   +=============================+
  */
 
 #define HT_INVALID_IDX ((uint32_t) -1)
@@ -327,7 +431,7 @@ struct _zend_array {
 #define HT_HASH_EX(data, idx) \
 	((uint32_t*)(data))[(int32_t)(idx)]
 #define HT_HASH(ht, idx) \
-	HT_HASH_EX((ht)->arData, idx)
+	HT_HASH_EX((ht)->arHash, idx)
 
 #define HT_SIZE_TO_MASK(nTableSize) \
 	((uint32_t)(-((nTableSize) + (nTableSize))))
@@ -341,6 +445,14 @@ struct _zend_array {
 	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
 #define HT_USED_SIZE(ht) \
 	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
+#define HT_PACKED_DATA_SIZE(nTableSize) \
+	((size_t)(nTableSize) * sizeof(zval))
+#define HT_PACKED_SIZE_EX(nTableSize, nTableMask) \
+	(HT_PACKED_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
+#define HT_PACKED_SIZE(ht) \
+	HT_PACKED_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
+#define HT_PACKED_USED_SIZE(ht) \
+	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(zval)))
 #ifdef __SSE2__
 # define HT_HASH_RESET(ht) do { \
 		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
@@ -392,21 +504,19 @@ struct _zend_object {
 
 struct _zend_resource {
 	zend_refcounted_h gc;
-	int               handle; // TODO: may be removed ???
+	zend_long         handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
 
-typedef struct _zend_property_info zend_property_info;
-
 typedef struct {
 	size_t num;
 	size_t num_allocated;
-	zend_property_info *ptr[1];
+	struct _zend_property_info *ptr[1];
 } zend_property_info_list;
 
 typedef union {
-	zend_property_info *ptr;
+	struct _zend_property_info *ptr;
 	uintptr_t list;
 } zend_property_info_source_list;
 
@@ -439,15 +549,20 @@ struct _zend_ast_ref {
 #define IS_REFERENCE				10
 #define IS_CONSTANT_AST				11 /* Constant expressions */
 
-/* Fake types used only for type hinting. IS_VOID should be the last. */
+/* Fake types used only for type hinting.
+ * These are allowed to overlap with the types below. */
 #define IS_CALLABLE					12
 #define IS_ITERABLE					13
 #define IS_VOID						14
+#define IS_STATIC					15
+#define IS_MIXED					16
+#define IS_NEVER					17
 
 /* internal types */
-#define IS_INDIRECT             	15
-#define IS_PTR						16
-#define _IS_ERROR					17
+#define IS_INDIRECT             	12
+#define IS_PTR						13
+#define IS_ALIAS_PTR				14
+#define _IS_ERROR					15
 
 /* used for casts */
 #define _IS_BOOL					18
@@ -490,9 +605,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_FE_ITER(zval)				(zval).u2.fe_iter_idx
 #define Z_FE_ITER_P(zval_p)			Z_FE_ITER(*(zval_p))
 
-#define Z_ACCESS_FLAGS(zval)		(zval).u2.access_flags
-#define Z_ACCESS_FLAGS_P(zval_p)	Z_ACCESS_FLAGS(*(zval_p))
-
 #define Z_PROPERTY_GUARD(zval)		(zval).u2.property_guard
 #define Z_PROPERTY_GUARD_P(zval_p)	Z_PROPERTY_GUARD(*(zval_p))
 
@@ -516,6 +628,8 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_DELREF(p)				zend_gc_delref(&(p)->gc)
 #define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
 #define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
+#define GC_TRY_ADDREF(p)			zend_gc_try_addref(&(p)->gc)
+#define GC_TRY_DELREF(p)			zend_gc_try_delref(&(p)->gc)
 
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
@@ -559,14 +673,19 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
 /* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
-#define GC_COLLECTABLE				(1<<4)
+#define GC_NOT_COLLECTABLE			(1<<4)
 #define GC_PROTECTED                (1<<5) /* used for recursion detection */
-#define GC_IMMUTABLE                (1<<6) /* can't be canged in place */
+#define GC_IMMUTABLE                (1<<6) /* can't be changed in place */
 #define GC_PERSISTENT               (1<<7) /* allocated using malloc */
 #define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
 
-#define GC_ARRAY					(IS_ARRAY          | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
-#define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_NULL						(IS_NULL         | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_STRING					(IS_STRING       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_ARRAY					IS_ARRAY
+#define GC_OBJECT					IS_OBJECT
+#define GC_RESOURCE					(IS_RESOURCE     | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_REFERENCE				(IS_REFERENCE    | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
+#define GC_CONSTANT_AST				(IS_CONSTANT_AST | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
 #define IS_TYPE_REFCOUNTED			(1<<0)
@@ -592,6 +711,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 /* string flags (zval.value->gc.u.flags) */
+#define IS_STR_CLASS_NAME_MAP_PTR   GC_PROTECTED  /* refcount is a map_ptr offset of class_entry */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
 #define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
 #define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
@@ -607,6 +727,29 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_OBJ_FREE_CALLED			(1<<9)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
+
+/* Fast class cache */
+#define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
+#define ZSTR_GET_CE_CACHE(s)		ZSTR_GET_CE_CACHE_EX(s, 1)
+#define ZSTR_SET_CE_CACHE(s, ce)	ZSTR_SET_CE_CACHE_EX(s, ce, 1)
+
+#define ZSTR_VALID_CE_CACHE(s)		EXPECTED((GC_REFCOUNT(s)-1)/sizeof(void *) < CG(map_ptr_last))
+
+#define ZSTR_GET_CE_CACHE_EX(s, validate) \
+	((!(validate) || ZSTR_VALID_CE_CACHE(s)) ? GET_CE_CACHE(GC_REFCOUNT(s)) : NULL)
+
+#define ZSTR_SET_CE_CACHE_EX(s, ce, validate) do { \
+		if (!(validate) || ZSTR_VALID_CE_CACHE(s)) { \
+			SET_CE_CACHE(GC_REFCOUNT(s), ce); \
+		} \
+	} while (0)
+
+#define GET_CE_CACHE(ce_cache) \
+	(*(zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR(ce_cache))
+
+#define SET_CE_CACHE(ce_cache, ce) do { \
+		*((zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR(ce_cache)) = ce; \
+	} while (0)
 
 /* Recursion protection macros must be used only for arrays and objects */
 #define GC_IS_RECURSIVE(p) \
@@ -847,14 +990,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
 	} while (0)
 
-#define ZVAL_NEW_ARR(z) do {									\
-		zval *__z = (z);										\
-		zend_array *_arr =										\
-		(zend_array *) emalloc(sizeof(zend_array));				\
-		Z_ARR_P(__z) = _arr;									\
-		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
-	} while (0)
-
 #define ZVAL_NEW_PERSISTENT_ARR(z) do {							\
 		zval *__z = (z);										\
 		zend_array *_arr =										\
@@ -869,6 +1004,14 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
 	} while (0)
 
+#define ZVAL_OBJ_COPY(z, o) do {				\
+		zval *__z = (z);						\
+		zend_object *__o = (o);					\
+		GC_ADDREF(__o);							\
+		Z_OBJ_P(__z) = __o;						\
+		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
+	} while (0)
+
 #define ZVAL_RES(z, r) do {						\
 		zval *__z = (z);						\
 		Z_RES_P(__z) = (r);						\
@@ -880,7 +1023,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		(zend_resource *) emalloc(sizeof(zend_resource));		\
 		zval *__z;												\
 		GC_SET_REFCOUNT(_res, 1);								\
-		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
+		GC_TYPE_INFO(_res) = GC_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
@@ -894,7 +1037,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		(zend_resource *) malloc(sizeof(zend_resource));		\
 		zval *__z;												\
 		GC_SET_REFCOUNT(_res, 1);								\
-		GC_TYPE_INFO(_res) = IS_RESOURCE |						\
+		GC_TYPE_INFO(_res) = GC_RESOURCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		_res->handle = (h);										\
 		_res->type = (t);										\
@@ -914,7 +1057,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		zend_reference *_ref =									\
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
 		GC_SET_REFCOUNT(_ref, 1);								\
-		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
@@ -924,7 +1067,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		zend_reference *_ref =									\
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
 		GC_SET_REFCOUNT(_ref, 1);								\
-		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
@@ -936,7 +1079,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		zend_reference *_ref =									\
 			(zend_reference *) emalloc(sizeof(zend_reference));	\
 		GC_SET_REFCOUNT(_ref, (refcount));						\
-		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		GC_TYPE_INFO(_ref) = GC_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, _z);						\
 		_ref->sources.ptr = NULL;									\
 		Z_REF_P(_z) = _ref;										\
@@ -947,7 +1090,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		zend_reference *_ref =									\
 		(zend_reference *) malloc(sizeof(zend_reference));		\
 		GC_SET_REFCOUNT(_ref, 1);								\
-		GC_TYPE_INFO(_ref) = IS_REFERENCE |						\
+		GC_TYPE_INFO(_ref) = GC_REFERENCE |						\
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		_ref->sources.ptr = NULL;									\
@@ -979,6 +1122,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define ZVAL_CE(z, c) do {										\
 		Z_CE_P(z) = (c);										\
 		Z_TYPE_INFO_P(z) = IS_PTR;								\
+	} while (0)
+
+#define ZVAL_ALIAS_PTR(z, p) do {								\
+		Z_PTR_P(z) = (p);										\
+		Z_TYPE_INFO_P(z) = IS_ALIAS_PTR;						\
 	} while (0)
 
 #define ZVAL_ERROR(z) do {				\
@@ -1015,11 +1163,16 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #endif
 
 #if ZEND_RC_DEBUG
-extern ZEND_API zend_bool zend_rc_debug;
+extern ZEND_API bool zend_rc_debug;
+/* The GC_PERSISTENT flag is reused for IS_OBJ_WEAKLY_REFERENCED on objects.
+ * Skip checks for OBJECT/NULL type to avoid interpreting the flag incorrectly. */
 # define ZEND_RC_MOD_CHECK(p) do { \
-		if (zend_rc_debug && zval_gc_type((p)->u.type_info) != IS_OBJECT) { \
-			ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
-			ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
+		if (zend_rc_debug) { \
+			zend_uchar type = zval_gc_type((p)->u.type_info); \
+			if (type != IS_OBJECT && type != IS_NULL) { \
+				ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
+				ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
+			} \
 		} \
 	} while (0)
 # define GC_MAKE_PERSISTENT_LOCAL(p) do { \
@@ -1044,6 +1197,20 @@ static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, ui
 static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
 	ZEND_RC_MOD_CHECK(p);
 	return ++(p->refcount);
+}
+
+static zend_always_inline void zend_gc_try_addref(zend_refcounted_h *p) {
+	if (!(p->u.type_info & GC_IMMUTABLE)) {
+		ZEND_RC_MOD_CHECK(p);
+		++p->refcount;
+	}
+}
+
+static zend_always_inline void zend_gc_try_delref(zend_refcounted_h *p) {
+	if (!(p->u.type_info & GC_IMMUTABLE)) {
+		ZEND_RC_MOD_CHECK(p);
+		--p->refcount;
+	}
 }
 
 static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
@@ -1153,7 +1320,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		uint32_t _t = Z_TYPE_INFO_P(_z2);								\
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);							\
 		if (Z_TYPE_INFO_REFCOUNTED(_t)) {								\
-			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT))) {			\
+			/* Objects reuse PERSISTENT as WEAKLY_REFERENCED */			\
+			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT)				\
+					|| GC_TYPE(_gc) == IS_OBJECT)) {					\
 				GC_ADDREF(_gc);											\
 			} else {													\
 				zval_copy_ctor_func(_z1);								\
@@ -1217,39 +1386,27 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 			zend_string *_str = Z_STR_P(_zv);			\
 			ZEND_ASSERT(Z_REFCOUNTED_P(_zv));			\
 			ZEND_ASSERT(!ZSTR_IS_INTERNED(_str));		\
-			Z_DELREF_P(_zv);							\
 			ZVAL_NEW_STR(_zv, zend_string_init(			\
 				ZSTR_VAL(_str),	ZSTR_LEN(_str), 0));	\
+			GC_DELREF(_str);							\
 		}												\
 	} while (0)
 
 #define SEPARATE_ARRAY(zv) do {							\
-		zval *_zv = (zv);								\
-		zend_array *_arr = Z_ARR_P(_zv);				\
-		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
-			if (Z_REFCOUNTED_P(_zv)) {					\
-				GC_DELREF(_arr);						\
-			}											\
-			ZVAL_ARR(_zv, zend_array_dup(_arr));		\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
 		zval *__zv = (zv);								\
-		if (Z_TYPE_P(__zv) == IS_ARRAY) {				\
-			if (Z_REFCOUNT_P(__zv) > 1) {				\
-				if (Z_REFCOUNTED_P(__zv)) {				\
-					Z_DELREF_P(__zv);					\
-				}										\
-				ZVAL_ARR(__zv, zend_array_dup(Z_ARR_P(__zv)));\
-			}											\
+		zend_array *_arr = Z_ARR_P(__zv);				\
+		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
+			ZVAL_ARR(__zv, zend_array_dup(_arr));		\
+			GC_TRY_DELREF(_arr);						\
 		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
 		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
-		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
+		if (Z_TYPE_P(_zv) == IS_ARRAY) {				\
+			SEPARATE_ARRAY(_zv);						\
+		}												\
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
@@ -1267,17 +1424,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 				break;									\
 			}											\
 		}												\
-		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
-	} while (0)
-
-#define SEPARATE_ARG_IF_REF(varptr) do { 				\
-		ZVAL_DEREF(varptr);								\
-		if (Z_REFCOUNTED_P(varptr)) { 					\
-			Z_ADDREF_P(varptr); 						\
+		if (Z_TYPE_P(_zv) == IS_ARRAY) {				\
+			SEPARATE_ARRAY(_zv);						\
 		}												\
 	} while (0)
 
-/* Properties store a flag distinguishing unset and unintialized properties
+/* Properties store a flag distinguishing unset and uninitialized properties
  * (both use IS_UNDEF type) in the Z_EXTRA space. As such we also need to copy
  * the Z_EXTRA space when copying property default values etc. We define separate
  * macros for this purpose, so this workaround is easier to remove in the future. */

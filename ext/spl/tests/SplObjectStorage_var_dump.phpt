@@ -11,7 +11,7 @@ var_dump($o);
 object(SplObjectStorage)#%d (1) {
   ["storage":"SplObjectStorage":private]=>
   array(1) {
-    ["%s"]=>
+    [0]=>
     array(2) {
       ["obj"]=>
       object(stdClass)#%d (0) {

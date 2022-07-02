@@ -4,11 +4,11 @@ Testing __unset with private visibility
 <?php
 
 class foo {
-	private function __unset($a) {
-		print "unset\n";
-	}
+    private function __unset($a) {
+        print "unset\n";
+    }
 }
 
 ?>
 --EXPECTF--
-Warning: The magic method __unset() must have public visibility and cannot be static in %s on line %d
+Warning: The magic method foo::__unset() must have public visibility in %s on line %d

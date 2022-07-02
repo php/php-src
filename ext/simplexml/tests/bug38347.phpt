@@ -1,7 +1,7 @@
 --TEST--
 Bug #38347 (Segmentation fault when using foreach with an unknown/empty SimpleXMLElement)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -24,5 +24,5 @@ SimpleXMLElement Object
 (
 )
 
-Warning: Invalid argument supplied for foreach() in %sbug38347.php on line 6
+Warning: foreach() argument must be of type array|object, null given in %sbug38347.php on line 6
 Done

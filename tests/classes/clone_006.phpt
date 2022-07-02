@@ -6,16 +6,16 @@ error_reporting=2047
 <?php
 
 class MyCloneable {
-	static $id = 0;
+    static $id = 0;
 
-	function __construct() {
-		$this->id = self::$id++;
-	}
+    function __construct() {
+        $this->id = self::$id++;
+    }
 
-	function __clone() {
-		$this->address = "New York";
-		$this->id = self::$id++;
-	}
+    function __clone() {
+        $this->address = "New York";
+        $this->id = self::$id++;
+    }
 }
 
 $original = new MyCloneable();

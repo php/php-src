@@ -4,17 +4,17 @@ Memory leak when returning TMP/VAR with wrong return type
 <?php
 
 function foo(): stdClass {
-	$a = new stdClass;
-	$b = [];
-	return [$a, $b];
+    $a = new stdClass;
+    $b = [];
+    return [$a, $b];
 }
 
 try {
-	foo();
+    foo();
 } catch (Error $e) {
-	echo $e->getMessage(), " in ", $e->getFile(), " on line ", $e->getLine();
+    echo $e->getMessage(), " in ", $e->getFile(), " on line ", $e->getLine();
 }
 
 ?>
 --EXPECTF--
-Return value of foo() must be an instance of stdClass, array returned in %s on line %d
+foo(): Return value must be of type stdClass, array returned in %s on line %d

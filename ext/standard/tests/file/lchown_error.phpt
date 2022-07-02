@@ -8,12 +8,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/* Prototype  : bool lchown (string filename, mixed user)
- * Description: Change file owner of a symlink
- * Source code: ext/standard/filestat.c
- * Alias to functions:
- */
-
 echo "*** Testing lchown() : error functionality ***\n";
 
 // Set up
@@ -28,7 +22,6 @@ var_dump( lchown( 'foobar_lchown.txt', $uid ) );
 var_dump( lchown( $filename, -5 ) );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -44,4 +37,3 @@ bool(false)
 
 Warning: lchown(): %r(Operation not permitted|Invalid argument)%r in %s on line %d
 bool(false)
-===DONE===

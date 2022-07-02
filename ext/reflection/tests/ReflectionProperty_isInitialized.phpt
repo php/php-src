@@ -3,13 +3,14 @@ Test ReflectionProperty::isInitialized()
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class A {
-	public static ?string $ssv = null;
-	public static ?string $ss;
-	public static $s;
-	public ?int $iv = null;
-	public ?int $i;
-	public $n;
+    public static ?string $ssv = null;
+    public static ?string $ss;
+    public static $s;
+    public ?int $iv = null;
+    public ?int $i;
+    public $n;
 
     private int $p;
 }
@@ -44,12 +45,7 @@ var_dump($rp->isInitialized($a));
 
 echo "Visibility handling:\n";
 $rp = new ReflectionProperty('A', 'p');
-try {
-    var_dump($rp->isInitialized($a));
-} catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
-}
-$rp->setAccessible(true);
+var_dump($rp->isInitialized($a));
 var_dump($rp->isInitialized($a));
 
 echo "Object type:\n";
@@ -59,6 +55,12 @@ var_dump($rp->isInitialized($a));
 try {
     var_dump($rp->isInitialized(new stdClass));
 } catch (ReflectionException $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    var_dump($rp->isInitialized());
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -103,11 +105,12 @@ Dynamic properties:
 bool(true)
 bool(false)
 Visibility handling:
-Cannot access non-public member A::$p
+bool(false)
 bool(false)
 Object type:
 bool(false)
 Given object is not an instance of the class this property was declared in
+ReflectionProperty::isInitialized(): Argument #1 ($object) must be provided for instance properties
 Class with __isset:
 bool(false)
 bool(false)

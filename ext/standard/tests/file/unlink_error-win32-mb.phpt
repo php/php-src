@@ -8,11 +8,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype : bool unlink ( string $filename [, resource $context] );
-   Description : Deletes filename
-*/
 
-$file_path = __DIR__.DIRECTORY_SEPARATOR."私はガラスを食べられます";
+$file_path = __DIR__.DIRECTORY_SEPARATOR."unlinkErr私はガラスを食べられます";
 
 @mkdir($file_path);
 
@@ -28,13 +25,10 @@ echo "*** Testing unlink() : error conditions ***\n";
 echo "\n-- Testing unlink() on invalid arguments --\n";
 // invalid arguments
 var_dump( unlink('') );  // $filename as empty string
-var_dump( file_exists('') );  // confirm file doesnt exist
-
-var_dump( unlink(NULL) );  // $filename as NULL
-var_dump( file_exists(NULL) );  // confirm file doesnt exist
+var_dump( file_exists('') );  // confirm file doesn't exist
 
 var_dump( unlink(false) );  // $filename as boolean false
-var_dump( file_exists(false) );  // confirm file doesnt exist
+var_dump( file_exists(false) );  // confirm file doesn't exist
 
 
 echo "\n-- Testing unlink() on non-existent file --\n";
@@ -52,18 +46,14 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__."/私はガラスを食べられます/unlink_error.tmp");
-rmdir(__DIR__."/私はガラスを食べられます/unlink_error");
-rmdir(__DIR__."/私はガラスを食べられます");
+unlink(__DIR__."/unlinkErr私はガラスを食べられます/unlink_error.tmp");
+rmdir(__DIR__."/unlinkErr私はガラスを食べられます/unlink_error");
+rmdir(__DIR__."/unlinkErr私はガラスを食べられます");
 ?>
 --EXPECTF--
 *** Testing unlink() : error conditions ***
 
 -- Testing unlink() on invalid arguments --
-
-Warning: unlink(): %s in %s on line %d
-bool(false)
-bool(false)
 
 Warning: unlink(): %s in %s on line %d
 bool(false)

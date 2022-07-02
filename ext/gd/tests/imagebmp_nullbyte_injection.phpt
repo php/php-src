@@ -1,8 +1,9 @@
 --TEST--
 Testing null byte injection in imagebmp
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')) die('skip gd extension not available');
 if (!gd_info()['BMP Support']) die('skip BMP support not available');
 ?>
 --FILE--
@@ -15,4 +16,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid 2nd parameter, filename must not contain null bytes
+imagebmp(): Argument #2 ($file) must not contain null bytes

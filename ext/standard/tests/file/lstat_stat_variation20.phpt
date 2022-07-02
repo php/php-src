@@ -2,19 +2,13 @@
 Test lstat() and stat() functions: usage variations - link names stored in array/object
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. lstat() not available on Windows');
+if (PHP_OS_FAMILY === 'Windows') {
+    include_once __DIR__ . '/windows_links/common.inc';
+    skipIfSeCreateSymbolicLinkPrivilegeIsDisabled(__FILE__);
 }
 ?>
 --FILE--
 <?php
-/* Prototype: array lstat ( string $filename );
-   Description: Gives information about a file or symbolic link
-
-   Prototype: array stat ( string $filename );
-   Description: Gives information about a file
-*/
-
 /* test for stats of link when their names are stored in object and array */
 
 $file_path = __DIR__;
@@ -66,7 +60,7 @@ unlink("$file_path/lstat_stat_variation20.tmp");
 -- Testing lstat() on link name stored inside an object --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -88,11 +82,11 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -114,15 +108,15 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 -- Testing stat() on link name stored inside an array --
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -144,11 +138,11 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -170,13 +164,13 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -198,11 +192,11 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -224,13 +218,13 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 array(26) {
   [0]=>
-  int(%d)
+  int(%i)
   [1]=>
   int(%d)
   [2]=>
@@ -252,11 +246,11 @@ array(26) {
   [10]=>
   int(%d)
   [11]=>
-  int(%d)
+  int(%i)
   [12]=>
-  int(%d)
+  int(%i)
   ["dev"]=>
-  int(%d)
+  int(%i)
   ["ino"]=>
   int(%d)
   ["mode"]=>
@@ -278,9 +272,9 @@ array(26) {
   ["ctime"]=>
   int(%d)
   ["blksize"]=>
-  int(%d)
+  int(%i)
   ["blocks"]=>
-  int(%d)
+  int(%i)
 }
 
 --- Done ---

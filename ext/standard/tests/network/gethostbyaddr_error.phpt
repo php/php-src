@@ -2,13 +2,6 @@
 Test gethostbyaddr() function : error conditions
 --FILE--
 <?php
-/* Prototype  : proto string gethostbyaddr(string ip_address)
- * Description: Get the Internet host name corresponding to a given IP address
- * Source code: ext/standard/dns.c
- * Alias to functions:
- */
-
-
 echo "Testing gethostbyaddr : error conditions\n";
 
 echo "\n-- Testing gethostbyaddr function with invalid addresses --\n";

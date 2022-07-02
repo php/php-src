@@ -6,15 +6,15 @@ Typed property on overloaded by-ref property
 <?php
 
 $a = new class {
-	public int $foo = 1;
+    public int $foo = 1;
 
-	function &__get($x) {
-		return $this->foo;
-	}
+    function &__get($x) {
+        return $this->foo;
+    }
 
-	function __set($x, $y) {
-		echo "set($y)\n";
-	}
+    function __set($x, $y) {
+        echo "set($y)\n";
+    }
 };
 
 $a->_ += 1;

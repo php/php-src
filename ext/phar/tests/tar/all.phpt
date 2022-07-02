@@ -1,11 +1,7 @@
 --TEST--
 Phar: test that creation of tar-based phar generates valid tar with all bells/whistles
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("zlib")) die("skip zlib not available");
-if (!extension_loaded("bz2")) die("skip bz2 not available");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -39,7 +35,6 @@ var_dump($phar->getAlias());
 var_dump($phar->getMetadata());
 var_dump($phar['a']->getMetadata());
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar.php'); ?>
 --EXPECT--
@@ -54,4 +49,3 @@ string(32) "<?php ok __HALT_COMPILER(); ?>
 string(4) "hime"
 string(8) "hi there"
 string(6) "a meta"
-===DONE===

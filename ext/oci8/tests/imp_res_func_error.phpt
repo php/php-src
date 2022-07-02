@@ -1,8 +1,9 @@
 --TEST--
 Oracle Database 12c Implicit Result Sets: test with a PL/SQL function
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -55,8 +56,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 
@@ -64,4 +63,3 @@ Warning: oci_execute(): ORA-29478: %s
 ORA-06512: %s
 ORA-06512: %s
 ORA-06512: %s
-===DONE===

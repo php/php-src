@@ -78,7 +78,7 @@ static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t 
 
 static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t count, size_t unit_size)
 {
-	int overflow;
+	bool overflow;
 	size_t size;
 	void *ret;
 
@@ -110,7 +110,7 @@ static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *
 	arena->ptr = (char*)checkpoint;
 }
 
-static zend_always_inline zend_bool zend_arena_contains(zend_arena *arena, void *ptr)
+static zend_always_inline bool zend_arena_contains(zend_arena *arena, void *ptr)
 {
 	while (arena) {
 		if ((char*)ptr > (char*)arena && (char*)ptr <= arena->ptr) {
@@ -174,7 +174,7 @@ static zend_always_inline void *zend_arena_alloc(zend_arena **arena_ptr, size_t 
 
 static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t count, size_t unit_size)
 {
-	int overflow;
+	bool overflow;
 	size_t size;
 	void *ret;
 
@@ -213,7 +213,7 @@ static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *
 	}
 }
 
-static zend_always_inline zend_bool zend_arena_contains(zend_arena *arena, void *ptr)
+static zend_always_inline bool zend_arena_contains(zend_arena *arena, void *ptr)
 {
 	/* TODO: Dummy */
 	return 1;

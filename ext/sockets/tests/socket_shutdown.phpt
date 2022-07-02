@@ -2,14 +2,14 @@
 bool socket_shutdown ( resource $socket [, int $how = 2 ] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
-if (!extension_loaded('sockets')) {
-  die('SKIP sockets extension not available.');
-}
+
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
+    die('skip not for windows');
 }
 ?>
 --FILE--
@@ -51,8 +51,8 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: Transport endpoint is not connected in %s on line %d
+Warning: socket_shutdown(): Unable to shutdown socket [%d]: %s in %s on line %d
 bool(false)
 
-Warning: socket_shutdown(): unable to shutdown socket [%d]: Invalid argument in %s on line %d
+Warning: socket_shutdown(): Unable to shutdown socket [%d]: Invalid argument in %s on line %d
 bool(false)

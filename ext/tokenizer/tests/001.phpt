@@ -1,8 +1,10 @@
 --TEST--
 token_name()
+--EXTENSIONS--
+tokenizer
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
-if (!extension_loaded("tokenizer")) print "skip"; ?>
+?>
 --FILE--
 <?php
 
@@ -129,7 +131,7 @@ echo token_name(0x8000000F), "\n";
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 T_INCLUDE
 T_INCLUDE_ONCE
 T_EVAL

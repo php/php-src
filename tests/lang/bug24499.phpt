@@ -7,7 +7,7 @@ class Id {
 
         public function tester($obj)
         {
-	        	$obj->id = "bar";
+                $obj->id = "bar";
         }
 }
 

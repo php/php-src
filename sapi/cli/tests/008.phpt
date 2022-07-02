@@ -4,7 +4,7 @@ execute a file with -f
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
@@ -17,7 +17,7 @@ $code ='
 <?php
 
 class test {
-	private $pri;
+    private $pri;
 }
 
 var_dump(test::$pri);

@@ -1,10 +1,10 @@
 <?php
 
 class autoload_root {
-	function testFunction()
-	{
-		return true;
-	}
+    function testFunction()
+    {
+        return true;
+    }
 }
 
 ?>

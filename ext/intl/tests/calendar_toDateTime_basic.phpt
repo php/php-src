@@ -1,9 +1,7 @@
 --TEST--
 IntlCalendar::toDateTime(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -16,8 +14,6 @@ $dt = $cal->toDateTime();
 
 var_dump($dt->format("c"), $dt->getTimeZone()->getName());
 ?>
-==DONE==
 --EXPECT--
 string(25) "2012-05-17T17:35:36+01:00"
 string(13) "Europe/Lisbon"
-==DONE==

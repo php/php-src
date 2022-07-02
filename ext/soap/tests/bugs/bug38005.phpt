@@ -1,23 +1,25 @@
 --TEST--
 Bug #38005 (SoapFault faultstring doesn't follow encoding rules)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 function Test($param=NULL) {
-	return new SoapFault('Test', 'This is our fault: Ä');
+    return new SoapFault('Test', 'This is our fault: Ä');
 }
 
 class TestSoapClient extends SoapClient {
+  private $server;
+
   function __construct($wsdl, $opt) {
     parent::__construct($wsdl, $opt);
     $this->server = new SoapServer($wsdl, $opt);
     $this->server->addFunction('Test');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -28,11 +30,11 @@ class TestSoapClient extends SoapClient {
 
 $client = new TestSoapClient(NULL, array(
     'encoding' => 'ISO-8859-1',
-	'uri' => "test://",
-	'location' => "test://",
-	'soap_version'=>SOAP_1_2,
-	'trace'=>1,
-	'exceptions'=>0));
+    'uri' => "test://",
+    'location' => "test://",
+    'soap_version'=>SOAP_1_2,
+    'trace'=>1,
+    'exceptions'=>0));
 $res = $client->Test();
 echo($res->faultstring."\n");
 echo($client->__getLastResponse());

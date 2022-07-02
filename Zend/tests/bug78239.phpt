@@ -1,7 +1,7 @@
 --TEST--
 Bug #78239: Deprecation notice during string conversion converted to exception hangs
---SKIPIF--
-<?php if (!extension_loaded("zend-test")) die("skip requires zend-test extension"); ?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 function handleError($level, $message, $file = '', $line = 0, $context = [])
@@ -16,7 +16,7 @@ $r = new _ZendTestClass;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ErrorException: Function _ZendTestClass::__toString() is deprecated in %s:%d
+Fatal error: Uncaught ErrorException: Method _ZendTestClass::__toString() is deprecated in %s:%d
 Stack trace:
 #0 %s(%d): handleError(%s)
 #1 {main}

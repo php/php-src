@@ -1,5 +1,7 @@
 --TEST--
 Bind with various bind types not supported by TimesTen
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => false, 'timesten' => true);  // test runs on these DBs
@@ -27,8 +29,6 @@ foreach ($types as $t => $v) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test - SQLT_CLOB
 
@@ -42,4 +42,3 @@ Warning: oci_bind_by_name(): Unable to find descriptor property in %sbind_unsupp
 Test - OCI_B_BLOB
 
 Warning: oci_bind_by_name(): Unable to find descriptor property in %sbind_unsupported_3.php on line %d
-===DONE===

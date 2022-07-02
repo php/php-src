@@ -1,7 +1,7 @@
 --TEST--
 Bind miscellaneous column types and generating errors
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 
@@ -10,9 +10,9 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table bind_misccoltypes_errs_tab",
+    "drop table bind_misccoltypes_errs_tab",
 
-	"create table bind_misccoltypes_errs_tab (
+    "create table bind_misccoltypes_errs_tab (
         id                number,
         char_t            char(1),
         char_t10          char(10),
@@ -108,7 +108,7 @@ check_col($c, 'varchar2_t10', 7);
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_misccoltypes_errs_tab"
+    "drop table bind_misccoltypes_errs_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -116,8 +116,6 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 insert numbers
 
@@ -166,4 +164,3 @@ array(1) {
   array(0) {
   }
 }
-===DONE===

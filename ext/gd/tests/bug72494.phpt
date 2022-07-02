@@ -1,9 +1,7 @@
 --TEST--
 Bug #72494 (imagecropauto out-of-bounds access)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require __DIR__ . '/func.inc';
@@ -16,4 +14,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] Color argument missing with threshold mode
+!! [ValueError] imagecropauto(): Argument #4 ($color) must be greater than or equal to 0 when using the threshold mode

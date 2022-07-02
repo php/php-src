@@ -1,7 +1,7 @@
 --TEST--
 Basic UConverter::convert() w/ Subsitution
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --INI--
 intl.use_exceptions=false
 --FILE--
@@ -21,6 +21,7 @@ foreach(array('?','','??') as $subst) {
     var_dump($ret);
   }
 }
+?>
 --EXPECT--
 string(23) "This is an ascii string"
 string(12) "Snowman: (?)"

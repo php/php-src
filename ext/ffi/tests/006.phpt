@@ -1,7 +1,7 @@
 --TEST--
 FFI 006: Pointer assignment
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--

@@ -1,8 +1,9 @@
 --TEST--
 TLS server rate-limits client-initiated renegotiation
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl help', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
@@ -70,6 +71,8 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
+    phpt_wait();
+
     $cmd = 'openssl s_client -connect 127.0.0.1:64321';
     $descriptorSpec = [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]];
     $process = proc_open($cmd, $descriptorSpec, $pipes);

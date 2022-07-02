@@ -2,11 +2,6 @@
 Test copy() function: usage variations - wildcard chars in source
 --FILE--
 <?php
-/* Prototype: bool copy ( string $source, string $dest );
-   Description: Makes a copy of the file source to dest.
-     Returns TRUE on success or FALSE on failure.
-*/
-
 /* Test copy(): Trying to copy the source file which is given with the combination of wild-card chars */
 
 $file_path = __DIR__;

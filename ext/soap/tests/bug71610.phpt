@@ -1,8 +1,9 @@
 --TEST--
 SOAP Bug #71610 - Type Confusion Vulnerability - SOAP / make_http_soap_request()
+--EXTENSIONS--
+soap
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 ?>
 --FILE--
@@ -11,7 +12,7 @@ $exploit = unserialize('O:10:"SoapClient":3:{s:3:"uri";s:1:"a";s:8:"location";s:
 try {
 $exploit->blahblah();
 } catch(SoapFault $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 ?>
 --EXPECT--

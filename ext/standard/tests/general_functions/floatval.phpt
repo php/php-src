@@ -2,10 +2,6 @@
 Testing floatval() and its alias doubleval() Functions
 --FILE--
 <?php
-/* Prototype: float floatval( mixed $var );
- * Description: Returns the float value of var.
- */
-
 echo "*** Testing floatval() with valid float values ***\n";
 // different valid  float values
 $valid_floats = array(
@@ -13,23 +9,23 @@ $valid_floats = array(
                 1.0,
                 -1.0,
                 1.234,
- 	        -1.234,
+            -1.234,
                 1.2e3,
-	        -1.2e3,
-		10.0000000000000000005,
-		10.5e+5,
+            -1.2e3,
+        10.0000000000000000005,
+        10.5e+5,
                 1e5,
-	        -1e5,
+            -1e5,
                 1e-5,
-		-1e-1,
-		1e+5,
-		-1e+5,
-		1E5,
-		-1E5,
-		1E+5,
-		-1E+5,
-		.5e+7,
-		-.5e+7
+        -1e-1,
+        1e+5,
+        -1e+5,
+        1E5,
+        -1E5,
+        1E+5,
+        -1E+5,
+        .5e+7,
+        -.5e+7
 );
 
 /* loop to check that floatval() recognizes different
@@ -65,12 +61,12 @@ $not_float_types = array (
                    $dfp,
                    "0.0", // string
                    "1.0",
-	           "-1.3e3",
-		   "bob-1.3e3",
+               "-1.3e3",
+           "bob-1.3e3",
                    "10 Some dollars",
-	           "10.2 Some Dollars",
-	       	   "10.0 dollar" + 1,
-		   "10.0 dollar" + 1.0,
+               "10.2 Some Dollars",
+               "10.0 dollar" + 1,
+           "10.0 dollar" + 1.0,
                    "",
                    true,
                    NULL,
@@ -144,13 +140,13 @@ float(-5000000)
 
 *** Testing floatval() on non floating types ***
 
-Notice: A non well formed numeric value encountered in %s on line 69
+Warning: A non-numeric value encountered in %s on line %d
 
-Notice: A non well formed numeric value encountered in %s on line 70
+Warning: A non-numeric value encountered in %s on line %d
 float(-2147483648)
 float(2147483648)
-float(%d)
-float(%d)
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)
@@ -167,8 +163,8 @@ float(0)
 *** Testing doubleval() on non floating types ***
 float(-2147483648)
 float(2147483648)
-float(%d)
-float(%d)
+float(5)
+float(6)
 float(0)
 float(1)
 float(-1300)

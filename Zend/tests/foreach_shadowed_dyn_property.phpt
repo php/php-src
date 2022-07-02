@@ -2,7 +2,7 @@
 Dynamic property shadowed by private property
 --FILE--
 <?php
-  
+
 class Test {
     private $prop = "Test";
 
@@ -13,6 +13,8 @@ class Test {
         var_dump(get_object_vars($this));
     }
 }
+
+#[AllowDynamicProperties]
 class Test2 extends Test {
 }
 

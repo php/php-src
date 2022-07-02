@@ -11,11 +11,9 @@ foreach ($i as $value) {
   echo $i->count()."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 1
 2
 3
 4
 5
-===DONE===

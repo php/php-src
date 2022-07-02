@@ -3,23 +3,23 @@ ob_start(): Check behaviour with various callback return values.
 --FILE--
 <?php
 function return_empty_string($string) {
-	return "";
+    return "";
 }
 
 function return_false($string) {
-	return false;
+    return false;
 }
 
 function return_null($string) {
-	return null;
+    return null;
 }
 
 function return_string($string) {
-	return "I stole your output.";
+    return "I stole your output.";
 }
 
 function return_zero($string) {
-	return 0;
+    return 0;
 }
 
 // Use each of the above functions as an output buffering callback:
@@ -35,7 +35,6 @@ foreach ($callbacks as $callback) {
 }
 
 ?>
-==DONE==
 --EXPECT--
 --> Use callback 'return_empty_string':
 
@@ -52,4 +51,3 @@ I stole your output.
 --> Use callback 'return_zero':
 0
 
-==DONE==

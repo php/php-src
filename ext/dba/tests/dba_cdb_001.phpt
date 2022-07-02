@@ -1,5 +1,7 @@
 --TEST--
 DBA CDB handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = 'cdb';
@@ -61,7 +63,6 @@ else {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 require(__DIR__ .'/clean.inc');
@@ -77,13 +78,12 @@ bool(true)
 bool(true)
 Test 1
 
-Warning: dba_open(%stest0.dbm,c): Driver initialization failed for handler: cdb: Update operations are not supported in %sdba_cdb_001.php on line %d
+Warning: dba_open(): Driver initialization failed for handler: cdb: Update operations are not supported in %sdba_cdb_001.php on line %d
 Failed to open DB
 Test 2
 
 Warning: dba_insert(): You cannot perform a modification to a database without proper access in %sdba_cdb_001.php on line %d
 Test 3
 
-Warning: dba_open(%stest0.dbm,w): Driver initialization failed for handler: cdb: Update operations are not supported in %sdba_cdb_001.php on line %d
+Warning: dba_open(): Driver initialization failed for handler: cdb: Update operations are not supported in %sdba_cdb_001.php on line %d
 Failed to open DB
-===DONE===

@@ -25,5 +25,5 @@ array(2) {
   [0]=>
   string(10) "testMethod"
   [1]=>
-  string(25) "testmethodfromparenttrait"
+  string(25) "testMethodFromParentTrait"
 }

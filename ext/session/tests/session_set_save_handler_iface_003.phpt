@@ -3,6 +3,8 @@ Test session_set_save_handler() function: id interface
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -10,54 +12,49 @@ session.name=PHPSESSID
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(SessionHandlerInterface $handler [, bool $register_shutdown_function = true])
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() function: id interface ***\n";
 
 class MySession2 implements SessionHandlerInterface, SessionIdInterface {
-	public $path;
+    public $path;
 
-	public function open($path, $name) {
-		if (!$path) {
-			$path = sys_get_temp_dir();
-		}
-		$this->path = $path . '/u_sess_' . $name;
-		return true;
-	}
+    public function open($path, $name): bool {
+        if (!$path) {
+            $path = sys_get_temp_dir();
+        }
+        $this->path = $path . '/u_sess_' . $name;
+        return true;
+    }
 
-	public function close() {
-		return true;
-	}
+    public function close(): bool {
+        return true;
+    }
 
-	public function read($id) {
-		return (string)@file_get_contents($this->path . $id);
-	}
+    public function read($id): string|false {
+        return (string)@file_get_contents($this->path . $id);
+    }
 
-	public function write($id, $data) {
-		// Empty $data = 0 = false
-		return (bool)file_put_contents($this->path . $id, $data);
-	}
+    public function write($id, $data): bool {
+        // Empty $data = 0 = false
+        return (bool)file_put_contents($this->path . $id, $data);
+    }
 
-	public function destroy($id) {
-		@unlink($this->path . $id);
-	}
+    public function destroy($id): bool {
+        @unlink($this->path . $id);
+    }
 
-	public function gc($maxlifetime) {
-		foreach (glob($this->path . '*') as $filename) {
-			if (filemtime($filename) + $maxlifetime < time()) {
-				@unlink($filename);
-			}
-		}
-		return true;
-	}
+    public function gc($maxlifetime): int|false {
+        foreach (glob($this->path . '*') as $filename) {
+            if (filemtime($filename) + $maxlifetime < time()) {
+                @unlink($filename);
+            }
+        }
 
-	public function create_sid() {
-		return pathinfo(__FILE__)['filename'];
-	}
+        return true;
+    }
+
+    public function create_sid(): string {
+        return pathinfo(__FILE__)['filename'];
+    }
 }
 
 $handler = new MySession2;
@@ -76,6 +73,7 @@ var_dump($_SESSION);
 --CLEAN--
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_iface_003');
+?>
 --EXPECT--
 *** Testing session_set_save_handler() function: id interface ***
 string(34) "session_set_save_handler_iface_003"

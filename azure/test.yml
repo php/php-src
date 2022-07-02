@@ -9,15 +9,18 @@ steps:
       export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
       export PDO_MYSQL_TEST_USER=root
       export PDO_MYSQL_TEST_PASS=root
+      export PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"
+      export PDO_DBLIB_TEST_USER="pdo_test"
+      export PDO_DBLIB_TEST_PASS="password"
       export TEST_PHP_JUNIT=junit.xml
       export REPORT_EXIT_STATUS=no
       export SKIP_IO_CAPTURE_TESTS=1
-      export MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.8/bin/llvm-symbolizer
       rm -rf junit.xml | true
-      php run-tests.php -P -q \
+      sapi/cli/php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \
+          --show-diff \
           --show-slow 1000 \
           --set-timeout 120 \
           ${{ parameters.runTestsParameters }}

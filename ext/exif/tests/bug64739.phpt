@@ -1,10 +1,8 @@
 --TEST--
 Bug #64739 (Invalid Title and Author data returned)
---SKIPIF--
-<?php
-extension_loaded("exif") or die("skip need exif");
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
-?>
+--EXTENSIONS--
+exif
+mbstring
 --FILE--
 <?php
 echo "Test\n";
@@ -12,8 +10,8 @@ echo "Test\n";
 $headers1 = exif_read_data(__DIR__ . '/bug64739.jpg');
 
 if ($headers1 === false) {
-	echo 'Error, failed to read exif data';
-	exit;
+    echo 'Error, failed to read exif data';
+    exit;
 }
 
 var_dump($headers1['Title'][0] === '?');
@@ -24,8 +22,8 @@ ini_set('exif.decode_unicode_motorola', 'UCS-2LE');
 $headers2 = exif_read_data(__DIR__ . '/bug64739.jpg');
 
 if ($headers2 === false) {
-	echo 'Error, failed to read exif data';
-	exit;
+    echo 'Error, failed to read exif data';
+    exit;
 }
 
 var_dump($headers2['Title']);

@@ -9,4 +9,4 @@ class test extends parent {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'parent' as class name as it is reserved in %s on line %d
+Fatal error: Cannot use 'parent' as class name, as it is reserved in %s on line %d

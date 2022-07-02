@@ -4,20 +4,21 @@ ZE2 Late Static Binding call to static::method() from internal function (string)
 <?php
 
 class Test1 {
-	static function ok() {
-		echo "bug";
-	}
-	static function test() {
-		call_user_func("static::ok");
-	}
+    static function ok() {
+        echo "bug";
+    }
+    static function test() {
+        call_user_func("static::ok");
+    }
 }
 
 class Test2 extends Test1 {
-	static function ok() {
-		echo "ok";
-	}
+    static function ok() {
+        echo "ok";
+    }
 }
 Test2::test();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Use of "static" in callables is deprecated in %s on line %d
 ok

@@ -5,4 +5,4 @@ Unmixed group use declarations mustn't allow more than one comma
 use const Baz\{Foo,,};
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected ',', expecting '}' in %s on line %d
+Parse error: syntax error, unexpected token ",", expecting "}" in %s on line %d

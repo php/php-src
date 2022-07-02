@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Class 'B' not found
+Class "B" not found

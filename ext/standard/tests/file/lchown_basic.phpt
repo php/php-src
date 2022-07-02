@@ -7,12 +7,6 @@ if (!function_exists("posix_getuid")) die("skip no posix_getuid()");
 ?>
 --FILE--
 <?php
-/* Prototype  : bool lchown (string filename, mixed user)
- * Description: Change file owner of a symlink
- * Source code: ext/standard/filestat.c
- * Alias to functions:
- */
-
 echo "*** Testing lchown() : basic functionality ***\n";
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
 $symlink = __DIR__ . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
@@ -25,7 +19,6 @@ var_dump( lchown( $filename, $uid ) );
 var_dump( fileowner( $symlink ) === $uid );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -41,4 +34,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

@@ -1,11 +1,7 @@
 --TEST--
 Bug #69092 (Declare Encoding Compile Check Wrong)
---SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) {
-  die("skip Requires mbstring extension");
-}
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=On
 --FILE--
@@ -13,7 +9,7 @@ zend.multibyte=On
 echo "Hi";
 
 function foo() {
-	declare(encoding="utf-8");
+    declare(encoding="utf-8");
 }
 
 echo "Bye"

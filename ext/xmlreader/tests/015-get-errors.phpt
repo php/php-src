@@ -2,8 +2,8 @@
 XMLReader: libxml2 XML Reader, Move cursor to a named attribute within a namespace, with invalid arguments
 --CREDITS--
 Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2017
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 // Set up test data in a new file
@@ -26,8 +26,12 @@ while ($reader->read()) {
             $attr = $reader->moveToNextAttribute();
 
             // Test for missing namespace argument
-            $attr = $reader->getAttributeNs('idx', null);
-            var_dump($attr);
+            try {
+                $attr = $reader->getAttributeNs('idx', null);
+            } catch (ValueError $exception) {
+                echo $exception->getMessage() . "\n";
+            }
+
             echo $reader->name . ": ";
             echo $reader->value . "\n";
         }
@@ -37,13 +41,11 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/015-get-errors.xml');
 ?>
 --EXPECTF--
-Warning: XMLReader::getAttributeNs(): Attribute Name and Namespace URI cannot be empty in %s on line %d
-bool(false)
+Deprecated: XMLReader::getAttributeNs(): Passing null to parameter #2 ($namespace) of type string is deprecated in %s on line %d
+XMLReader::getAttributeNs(): Argument #2 ($namespace) cannot be empty
 ns1:num: 1
-===DONE===

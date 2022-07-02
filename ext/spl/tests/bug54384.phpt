@@ -4,12 +4,12 @@ Bug #54384: Several SPL classes crash when the parent constructor is not called
 <?php
 
 function test($f) {
-	try {
-		$f();
-		echo "ran normally (unexpected)\n\n";
-	} catch (LogicException $e) {
-		echo "exception (expected)\n";
-	}
+    try {
+        $f();
+        echo "ran normally (unexpected)\n\n";
+    } catch (\Error $e) {
+        echo "Error (expected)\n";
+    }
 }
 
 echo "IteratorIterator... ";
@@ -17,24 +17,24 @@ class IteratorIteratorTest extends IteratorIterator {
     function __construct(){}
 }
 test( function() {
-	$o = new IteratorIteratorTest;
-	$o->rewind();
+    $o = new IteratorIteratorTest;
+    $o->rewind();
 } );
 
 echo "FilterIterator... ";
 class FilterIteratorTest extends FilterIterator {
     function __construct(){}
-    function accept(){}
+    function accept(): bool {}
 }
 test( function() {
-	$o = new FilterIteratorTest;
-	$o->rewind();
+    $o = new FilterIteratorTest;
+    $o->rewind();
 } );
 
 echo "RecursiveFilterIterator... ";
 class RecursiveFilterIteratorTest extends RecursiveFilterIterator {
     function __construct(){}
-    function accept(){}
+    function accept(): bool {}
 }
 test( function() {
 $o = new RecursiveFilterIteratorTest;
@@ -152,19 +152,20 @@ foreach ($o as $a) {
 echo $a,"\n";
 }
 } );
+?>
 --EXPECT--
-IteratorIterator... exception (expected)
-FilterIterator... exception (expected)
-RecursiveFilterIterator... exception (expected)
-ParentIterator... exception (expected)
-LimitIterator... exception (expected)
-CachingIterator... exception (expected)
-RecursiveCachingIterator... exception (expected)
-NoRewindIterator... exception (expected)
-RegexIterator... exception (expected)
-RecursiveRegexIterator... exception (expected)
-GlobIterator... exception (expected)
-SplFileObject... exception (expected)
-SplTempFileObject... exception (expected)
-AppendIterator... exception (expected)
-InfiniteIterator... exception (expected)
+IteratorIterator... Error (expected)
+FilterIterator... Error (expected)
+RecursiveFilterIterator... Error (expected)
+ParentIterator... Error (expected)
+LimitIterator... Error (expected)
+CachingIterator... Error (expected)
+RecursiveCachingIterator... Error (expected)
+NoRewindIterator... Error (expected)
+RegexIterator... Error (expected)
+RecursiveRegexIterator... Error (expected)
+GlobIterator... Error (expected)
+SplFileObject... Error (expected)
+SplTempFileObject... Error (expected)
+AppendIterator... Error (expected)
+InfiniteIterator... Error (expected)

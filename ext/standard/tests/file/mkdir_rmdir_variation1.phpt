@@ -9,9 +9,6 @@ require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
-/*  Prototype: bool mkdir ( string $pathname [, int $mode [, bool $recursive [, resource $context]]] );
-    Description: Makes directory
-*/
 
 echo "*** Testing mkdir() and rmdir() for different permissions ***\n";
 

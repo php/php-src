@@ -7,7 +7,7 @@ zend.multibyte=0
 echo "Hi";
 
 function foo() {
-	declare(encoding="UTF-8");
+    declare(encoding="UTF-8");
 }
 
 echo "Bye"

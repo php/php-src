@@ -1,8 +1,9 @@
 --TEST--
 Bug #65538: SSL context "cafile" disallows URL stream wrappers
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded('openssl')) die('skip, openssl required');
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 ?>
 --FILE--
@@ -22,4 +23,4 @@ Warning: remote cafile streams are disabled for security purposes in %s on line 
 
 Warning: file_get_contents(): Failed to enable crypto in %s on line %d
 
-Warning: file_get_contents(%s): failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(%s): Failed to open stream: operation failed in %s on line %d

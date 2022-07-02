@@ -11,5 +11,6 @@ $test = function() use($foo) : Closure {
 
 $callable = $test();
 var_dump($callable());
+?>
 --EXPECT--
 string(3) "bar"

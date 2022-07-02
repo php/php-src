@@ -1,7 +1,7 @@
 --TEST--
 Bug #76958: Broken UTF7-IMAP conversion
---SKIPIF--
-<?php if(!extension_loaded('mbstring')) die('skip mbstring not loaded'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,7 +20,6 @@
 
 #include "php.h"
 #include "phpdbg.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
 
@@ -39,7 +38,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ color structures */
-const static phpdbg_color_t colors[] = {
+static const phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("none",             "0;0"),
 
 	PHPDBG_COLOR_D("white",            "0;64"),
@@ -70,7 +69,7 @@ const static phpdbg_color_t colors[] = {
 }; /* }}} */
 
 /* {{{ */
-const static phpdbg_element_t elements[] = {
+static const phpdbg_element_t elements[] = {
 	PHPDBG_ELEMENT_D("prompt", PHPDBG_COLOR_PROMPT),
 	PHPDBG_ELEMENT_D("error", PHPDBG_COLOR_ERROR),
 	PHPDBG_ELEMENT_D("notice", PHPDBG_COLOR_NOTICE),
@@ -301,6 +300,23 @@ PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
 		return PHPDBG_G(prompt)[1];
 	}
 
+	uint32_t pos = 0,
+			 end = strlen(PHPDBG_G(prompt)[0]);
+	bool unicode_warned = false;
+
+	while (pos < end) {
+		if (PHPDBG_G(prompt)[0][pos] & 0x80) {
+			PHPDBG_G(prompt)[0][pos] = '?';
+
+			if (!unicode_warned) {
+				zend_error(E_WARNING,
+					"prompt contains unsupported unicode characters");
+				unicode_warned = true;
+			}
+		}
+		pos++;
+	}
+
 	/* create cached prompt */
 #ifndef HAVE_LIBEDIT
 	/* TODO: libedit doesn't seems to support coloured prompt */
@@ -319,48 +335,51 @@ PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
 
 int phpdbg_rebuild_symtable(void) {
 	if (!EG(current_execute_data) || !EG(current_execute_data)->func) {
-		phpdbg_error("inactive", "type=\"op_array\"", "No active op array!");
+		phpdbg_error("No active op array!");
 		return FAILURE;
 	}
 
 	if (!zend_rebuild_symbol_table()) {
-		phpdbg_error("inactive", "type=\"symbol_table\"", "No active symbol table!");
+		phpdbg_error("No active symbol table!");
 		return FAILURE;
 	}
 
 	return SUCCESS;
 }
 
-PHPDBG_API int phpdbg_get_terminal_width(void) /* {{{ */
+PHPDBG_API uint32_t phpdbg_get_terminal_width(void) /* {{{ */
 {
-	int columns;
+	uint32_t columns;
 #ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	columns = (uint32_t) csbi.srWindow.Right - csbi.srWindow.Left + 1;
 #elif defined(HAVE_SYS_IOCTL_H) && defined(TIOCGWINSZ)
 	struct winsize w;
 
-	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 80;
+	columns = (uint32_t) ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 80;
 #else
 	columns = 80;
 #endif
 	return columns;
 } /* }}} */
 
-PHPDBG_API int phpdbg_get_terminal_height(void) /* {{{ */
+PHPDBG_API uint32_t phpdbg_get_terminal_height(void) /* {{{ */
 {
-	int lines;
+	uint32_t lines;
 #ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+		lines = (uint32_t) csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	} else {
+		lines = 40;
+	}
 #elif defined(HAVE_SYS_IOCTL_H) && defined(TIOCGWINSZ)
 	struct winsize w;
 
-	lines = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_row : 40;
+	lines = (uint32_t) ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_row : 40;
 #else
 	lines = 40;
 #endif
@@ -397,7 +416,7 @@ int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry
 		phpdbg_try_access {
 			*ce = zend_hash_str_find_ptr(EG(class_table), lc_name, lc_length);
 		} phpdbg_catch_access {
-			phpdbg_error("signalsegv", "class=\"%.*s\"", "Could not fetch class %.*s, invalid data source", name_length, name);
+			phpdbg_error("Could not fetch class %.*s, invalid data source", name_length, name);
 		} phpdbg_end_try_access();
 
 		efree(lc_free);
@@ -421,13 +440,13 @@ static int phpdbg_parse_variable_arg_wrapper(char *name, size_t len, char *keyna
 	return callback(name, len, keyname, keylen, parent, zv);
 }
 
-PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent) {
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, bool silent) {
 	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_parse_variable_arg_wrapper, NULL, silent, callback);
 }
 
-PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, bool silent, void *arg) {
 	int ret = FAILURE;
-	zend_bool new_index = 1;
+	bool new_index = 1;
 	char *last_index = NULL;
 	size_t index_len = 0;
 	zval *zv;
@@ -468,11 +487,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 		if (new_index && index_len == 0) {
 			zend_ulong numkey;
 			zend_string *strkey;
-			ZEND_HASH_FOREACH_KEY_PTR(parent, numkey, strkey, zv) {
-				while (Z_TYPE_P(zv) == IS_INDIRECT) {
-					zv = Z_INDIRECT_P(zv);
-				}
-
+			ZEND_HASH_FOREACH_KEY_VAL_IND(parent, numkey, strkey, zv) {
 				if (i == len || (i == len - 1 && input[len - 1] == ']')) {
 					char *key, *propkey;
 					size_t namelen, keylen;
@@ -530,7 +545,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			last_index[index_len] = 0;
 			if (!(zv = zend_symtable_str_find(parent, last_index, index_len))) {
 				if (!silent) {
-					phpdbg_error("variable", "type=\"undefined\" variable=\"%.*s\"", "%.*s is undefined", (int) input[i] == ']' ? i + 1 : i, input);
+					phpdbg_error("%.*s is undefined", (int) (input[i] == ']' ? i + 1 : i), input);
 				}
 				return FAILURE;
 			}
@@ -573,7 +588,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 				ZVAL_DEREF(zv);
 				goto retry_ref_end;
 			} else {
-				phpdbg_error("variable", "type=\"notiterable\" variable=\"%.*s\"", "%.*s is nor an array nor an object", (int) (input[i] == '>' ? i - 1 : i), input);
+				phpdbg_error("%.*s is nor an array nor an object", (int) (input[i] == '>' ? i - 1 : i), input);
 				return FAILURE;
 			}
 			index_len = 0;
@@ -582,7 +597,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 
 	return ret;
 	error:
-		phpdbg_error("variable", "type=\"invalidinput\"", "Malformed input");
+		phpdbg_error("Malformed input");
 		return FAILURE;
 }
 
@@ -590,150 +605,7 @@ int phpdbg_is_auto_global(char *name, int len) {
 	return zend_is_auto_global_str(name, len);
 }
 
-static int phpdbg_xml_array_element_dump(zval *zv, zend_string *key, zend_ulong num) {
-	phpdbg_xml("<element");
-
-	phpdbg_try_access {
-		if (key) { /* string key */
-			phpdbg_xml(" name=\"%.*s\"", (int) ZSTR_LEN(key), ZSTR_VAL(key));
-		} else { /* numeric key */
-			phpdbg_xml(" name=\"%ld\"", num);
-		}
-	} phpdbg_catch_access {
-		phpdbg_xml(" severity=\"error\" ></element>");
-		return 0;
-	} phpdbg_end_try_access();
-
-	phpdbg_xml(">");
-
-	phpdbg_xml_var_dump(zv);
-
-	phpdbg_xml("</element>");
-
-	return 0;
-}
-
-static int phpdbg_xml_object_property_dump(zval *zv, zend_string *key, zend_ulong num) {
-	phpdbg_xml("<property");
-
-	phpdbg_try_access {
-		if (key) { /* string key */
-			const char *prop_name, *class_name;
-			int unmangle = zend_unmangle_property_name(key, &class_name, &prop_name);
-
-			if (class_name && unmangle == SUCCESS) {
-				phpdbg_xml(" name=\"%s\"", prop_name);
-				if (class_name[0] == '*') {
-					phpdbg_xml(" protection=\"protected\"");
-				} else {
-					phpdbg_xml(" class=\"%s\" protection=\"private\"", class_name);
-				}
-			} else {
-				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", (int) ZSTR_LEN(key), ZSTR_VAL(key));
-			}
-		} else { /* numeric key */
-			phpdbg_xml(" name=\"%ld\" protection=\"public\"", num);
-		}
-	} phpdbg_catch_access {
-		phpdbg_xml(" severity=\"error\" ></property>");
-		return 0;
-	} phpdbg_end_try_access();
-
-	phpdbg_xml(">");
-
-	phpdbg_xml_var_dump(zv);
-
-	phpdbg_xml("</property>");
-
-	return 0;
-}
-
-#define COMMON (is_ref ? "&" : "")
-
-PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
-	HashTable *myht;
-	zend_string *class_name, *key;
-	zend_ulong num;
-	zval *val;
-	int (*element_dump_func)(zval *zv, zend_string *key, zend_ulong num);
-	zend_bool is_ref = 0;
-
-	phpdbg_try_access {
-		is_ref = Z_ISREF_P(zv) && GC_REFCOUNT(Z_COUNTED_P(zv)) > 1;
-		ZVAL_DEREF(zv);
-
-		switch (Z_TYPE_P(zv)) {
-			case IS_TRUE:
-				phpdbg_xml("<bool refstatus=\"%s\" value=\"true\" />", COMMON);
-				break;
-			case IS_FALSE:
-				phpdbg_xml("<bool refstatus=\"%s\" value=\"false\" />", COMMON);
-				break;
-			case IS_NULL:
-				phpdbg_xml("<null refstatus=\"%s\" />", COMMON);
-				break;
-			case IS_LONG:
-				phpdbg_xml("<int refstatus=\"%s\" value=\"" ZEND_LONG_FMT "\" />", COMMON, Z_LVAL_P(zv));
-				break;
-			case IS_DOUBLE:
-				phpdbg_xml("<float refstatus=\"%s\" value=\"%.*G\" />", COMMON, (int) EG(precision), Z_DVAL_P(zv));
-				break;
-			case IS_STRING:
-				phpdbg_xml("<string refstatus=\"%s\" length=\"%zd\" value=\"%.*s\" />", COMMON, Z_STRLEN_P(zv), (int) Z_STRLEN_P(zv), Z_STRVAL_P(zv));
-				break;
-			case IS_ARRAY:
-				myht = Z_ARRVAL_P(zv);
-				if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
-					if (GC_IS_RECURSIVE(myht)) {
-						phpdbg_xml("<recursion />");
-						break;
-					}
-					GC_PROTECT_RECURSION(myht);
-				}
-				phpdbg_xml("<array refstatus=\"%s\" num=\"%d\">", COMMON, zend_hash_num_elements(myht));
-				element_dump_func = phpdbg_xml_array_element_dump;
-				goto head_done;
-			case IS_OBJECT:
-				myht = zend_get_properties_for(zv, ZEND_PROP_PURPOSE_DEBUG);
-				if (myht && GC_IS_RECURSIVE(myht)) {
-					phpdbg_xml("<recursion />");
-					break;
-				}
-
-				class_name = Z_OBJ_HANDLER_P(zv, get_class_name)(Z_OBJ_P(zv));
-				phpdbg_xml("<object refstatus=\"%s\" class=\"%.*s\" id=\"%d\" num=\"%d\">", COMMON, (int) ZSTR_LEN(class_name), ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(zv), myht ? zend_hash_num_elements(myht) : 0);
-				zend_string_release(class_name);
-
-				element_dump_func = phpdbg_xml_object_property_dump;
-head_done:
-				if (myht) {
-					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
-						element_dump_func(val, key, num);
-					} ZEND_HASH_FOREACH_END();
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) element_dump_func, 0);
-					GC_UNPROTECT_RECURSION(myht);
-					if (Z_TYPE_P(zv) == IS_OBJECT) {
-						zend_release_properties(myht);
-					}
-				}
-				if (Z_TYPE_P(zv) == IS_ARRAY) {
-					phpdbg_xml("</array>");
-				} else {
-					phpdbg_xml("</object>");
-				}
-				break;
-			case IS_RESOURCE: {
-				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(zv));
-				phpdbg_xml("<resource refstatus=\"%s\" id=\"%pd\" type=\"%s\" />", COMMON, Z_RES_P(zv)->handle, type_name ? type_name : "unknown");
-				break;
-			}
-			default:
-				break;
-		}
-	} phpdbg_end_try_access();
-}
-
-PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
+PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
 	const zend_op *op;
 	zend_op *cur;
 	uint32_t op_num, i;
@@ -830,7 +702,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			zend_string_release(str);
 			} break;
 		case IS_RESOURCE:
-			spprintf(&decode, 0, "Rsrc #%d", Z_RES_HANDLE_P(zv));
+			spprintf(&decode, 0, "Rsrc #" ZEND_LONG_FMT, Z_RES_HANDLE_P(zv));
 			break;
 		case IS_ARRAY:
 			spprintf(&decode, 0, "array(%d)", zend_hash_num_elements(Z_ARR_P(zv)));
@@ -846,7 +718,8 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			zend_ast *ast = Z_ASTVAL_P(zv);
 
 			if (ast->kind == ZEND_AST_CONSTANT
-			 || ast->kind == ZEND_AST_CONSTANT_CLASS) {
+			 || ast->kind == ZEND_AST_CONSTANT_CLASS
+			 || ast->kind == ZEND_AST_CLASS_CONST) {
 				decode = estrdup("<constant>");
 			} else {
 				decode = estrdup("<ast>");

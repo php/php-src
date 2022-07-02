@@ -1,70 +1,55 @@
 --TEST--
-Test imap_fetchbody() function : usage variations - $msg_no arg
+Test imap_fetchbody() function : usage variations - $message_num arg
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
-require_once(__DIR__.'/skipif.inc');
+require_once(__DIR__.'/setup/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section [, int $options])
- * Description: Get a specific body section
- * Source code: ext/imap/php_imap.c
- */
-
 /*
- * Pass different integers, strings, msg sequences and msg UIDs as $msg_no argument
+ * Pass different integers, strings, msg sequences and msg UIDs as $message_num argument
  * to test behaviour of imap_fetchbody()
  */
 
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__.'/setup/imap_include.inc');
 
 //Initialise required variables
-$stream_id = setup_test_mailbox('', 3); // set up temp mailbox with  simple msgs
+$stream_id = setup_test_mailbox('imapfetchbodyvar6', 3); // set up temp mailbox with  simple msgs
 $section = 1;
 
-$sequences = array (0,     4, // out of range
-                    '1,3', '1:3', // message sequences instead of numbers
-                   );
+$sequences = [0, /* out of range */ 4, 1];
 
-foreach($sequences as $msg_no) {
-	echo "\n-- \$msg_no is $msg_no --\n";
-	var_dump($overview = imap_fetchbody($stream_id, $msg_no, $section));
-	if (!$overview) {
-		echo imap_last_error() . "\n";
-	}
+foreach($sequences as $message_num) {
+    echo "\n-- \$message_num is $message_num --\n";
+    try {
+        var_dump(imap_fetchbody($stream_id, $message_num, $section));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
-require_once(__DIR__.'/clean.inc');
+$mailbox_suffix = 'imapfetchbodyvar6';
+require_once(__DIR__.'/setup/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchbody() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{%s}%s' created
+New mailbox created
 
--- $msg_no is 0 --
+-- $message_num is 0 --
+imap_fetchbody(): Argument #2 ($message_num) must be greater than 0
 
-Warning: imap_fetchbody(): Bad message number in %s on line %d
-bool(false)
-
-
--- $msg_no is 4 --
+-- $message_num is 4 --
 
 Warning: imap_fetchbody(): Bad message number in %s on line %d
 bool(false)
 
-
--- $msg_no is 1,3 --
-
-Notice: A non well formed numeric value encountered in %s on line %d
-string(%d) "1: this is a test message, please ignore%a"
-
--- $msg_no is 1:3 --
-
-Notice: A non well formed numeric value encountered in %s on line %d
-string(%d) "1: this is a test message, please ignore%a"
-===DONE===
+-- $message_num is 1 --
+string(%d) "1: this is a test message, please ignore
+newline%r\R?%r"

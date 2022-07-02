@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,17 +18,12 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_attr.h"
 #include "msgformat_data.h"
 #include "intl_convert.h"
 
 #include <unicode/ustring.h>
 
-/* {{{ proto string MessageFormatter::getPattern( )
- * Get formatter pattern. }}} */
-/* {{{ proto string msgfmt_get_pattern( MessageFormatter $mf )
- * Get formatter pattern.
- */
+/* {{{ Get formatter pattern. */
 PHP_FUNCTION( msgfmt_get_pattern )
 {
 	MSG_FORMAT_METHOD_INIT_VARS;
@@ -36,7 +31,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -50,11 +45,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 }
 /* }}} */
 
-/* {{{ proto bool MessageFormatter::setPattern( string $pattern )
- * Set formatter pattern. }}} */
-/* {{{ proto bool msgfmt_set_pattern( MessageFormatter $mf, string $pattern )
- * Set formatter pattern.
- */
+/* {{{ Set formatter pattern. */
 PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
@@ -67,7 +58,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, MessageFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
@@ -107,11 +98,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 }
 /* }}} */
 
-/* {{{ proto string MessageFormatter::getLocale()
- * Get formatter locale. }}} */
-/* {{{ proto string msgfmt_get_locale(MessageFormatter $mf)
- * Get formatter locale.
- */
+/* {{{ Get formatter locale. */
 PHP_FUNCTION( msgfmt_get_locale )
 {
 	char *loc;
@@ -121,7 +108,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

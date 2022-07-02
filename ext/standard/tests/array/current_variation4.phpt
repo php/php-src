@@ -2,12 +2,6 @@
 Test current() function : usage variations - multi-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : mixed current(array $array_arg)
- * Description: Return the element currently pointed to by the internal array pointer
- * Source code: ext/standard/array.c
- * Alias to functions: pos
- */
-
 /*
  * Test how current() behaves with muti-dimensional and recursive arrays
  */
@@ -45,7 +39,6 @@ var_dump(current($multi_array[3][3][3]));
 // see if internal pointer is in the same position from when accessing this inner array
 var_dump(current($multi_array[3][3][3][1]));
 ?>
-===DONE===
 --EXPECT--
 *** Testing current() : usage variations ***
 
@@ -68,4 +61,3 @@ Initial Position: int(1)
 Current Position: string(3) "two"
 string(3) "two"
 int(1)
-===DONE===

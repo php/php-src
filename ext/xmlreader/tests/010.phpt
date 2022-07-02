@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, next
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
@@ -20,7 +20,5 @@ echo " ";
 echo $reader->getAttributeNs('isbn', 'uri');
 echo "\n";
 ?>
-===DONE===
 --EXPECT--
 prefix:books 12isbn
-===DONE===

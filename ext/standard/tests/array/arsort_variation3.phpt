@@ -2,15 +2,9 @@
 Test arsort() function : usage variations - sort integer/float values
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing arsort() by providing different integer/float value arrays for $array argument with following values
- * 1. flag value as defualt
+ * 1. flag value as default
  * 2. SORT_REGULAR - compare items normally
  * 3. SORT_NUMERIC - compare items numerically
 */

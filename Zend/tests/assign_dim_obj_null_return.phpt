@@ -79,5 +79,5 @@ Cannot add element to the array as the next element is already occupied
 Illegal offset type
 Illegal offset type
 Cannot use a scalar value as an array
-Attempt to assign property 'foo' of non-object
-Attempt to assign property 'foo' of non-object
+Attempt to assign property "foo" on bool
+Attempt to assign property "foo" on bool

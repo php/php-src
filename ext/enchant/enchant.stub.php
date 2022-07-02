@@ -1,79 +1,114 @@
 <?php
 
-/** @return resource|false */
-function enchant_broker_init() {}
-
-/** @param resource $broker */
-function enchant_broker_free($broker): bool {}
+/** @generate-class-entries */
 
 /**
-* @param resource $broker
-* @return string|false
+ * @var int
+ * @cname PHP_ENCHANT_MYSPELL
+ * @deprecated
+ */
+const ENCHANT_MYSPELL = UNKNOWN;
+/**
+ * @var int
+ * @cname PHP_ENCHANT_ISPELL
+ * @deprecated
+ */
+const ENCHANT_ISPELL = UNKNOWN;
+#ifdef HAVE_ENCHANT_GET_VERSION
+/**
+ * @var string
+ * @cname PHP_ENCHANT_GET_VERSION
+ */
+const LIBENCHANT_VERSION = UNKNOWN;
+#endif
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class EnchantBroker
+{
+}
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class EnchantDictionary
+{
+}
+
+function enchant_broker_init(): EnchantBroker|false {}
+
+/** @deprecated */
+function enchant_broker_free(EnchantBroker $broker): bool {}
+
+function enchant_broker_get_error(EnchantBroker $broker): string|false {}
+
+/** @deprecated */
+function enchant_broker_set_dict_path(EnchantBroker $broker, int $type, string $path): bool {}
+
+/** @deprecated */
+function enchant_broker_get_dict_path(EnchantBroker $broker, int $type): string|false {}
+
+/**
+ * @return array<int, array>
+ * @refcount 1
+ */
+function enchant_broker_list_dicts(EnchantBroker $broker): array {}
+
+function enchant_broker_request_dict(EnchantBroker $broker, string $tag): EnchantDictionary|false {}
+
+function enchant_broker_request_pwl_dict(EnchantBroker $broker, string $filename): EnchantDictionary|false {}
+
+/** @deprecated */
+function enchant_broker_free_dict(EnchantDictionary $dictionary): bool {}
+
+function enchant_broker_dict_exists(EnchantBroker $broker, string $tag): bool {}
+
+function enchant_broker_set_ordering(EnchantBroker $broker, string $tag, string $ordering): bool {}
+
+/**
+ * @return array<int, array>
+ * @refcount 1
+ */
+function enchant_broker_describe(EnchantBroker $broker): array {}
+
+/** @param array $suggestions */
+function enchant_dict_quick_check(EnchantDictionary $dictionary, string $word, &$suggestions = null): bool {}
+
+function enchant_dict_check(EnchantDictionary $dictionary, string $word): bool {}
+
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
+function enchant_dict_suggest(EnchantDictionary $dictionary, string $word): array {}
+
+function enchant_dict_add(EnchantDictionary $dictionary, string $word): void {}
+
+/**
+* @alias enchant_dict_add
+* @deprecated
 */
-function enchant_broker_get_error($broker) {}
+function enchant_dict_add_to_personal(EnchantDictionary $dictionary, string $word): void {}
 
-/** @param resource $broker */
-function enchant_broker_set_dict_path($broker, int $name, string $value): bool {}
+function enchant_dict_add_to_session(EnchantDictionary $dictionary, string $word): void {}
 
-/**
- * @param resource $broker
- * @return string|false
- */
-function enchant_broker_get_dict_path($broker, int $name) {}
-
-/** @param resource $broker */
-function enchant_broker_list_dicts($broker): array {}
+function enchant_dict_is_added(EnchantDictionary $dictionary, string $word): bool {}
 
 /**
- * @param resource $broker
- * @return resource|false
- */
-function enchant_broker_request_dict($broker, string $tag) {}
-
-/**
- * @param resource $broker
- * @return resource|false
- */
-function enchant_broker_request_pwl_dict($broker, string $filename) {}
-
-/** @param resource $dict */
-function enchant_broker_free_dict($dict): bool {}
-
-/** @param resource $broker */
-function enchant_broker_dict_exists($broker, string $tag): bool {}
-
-/** @param resource $broker */
-function enchant_broker_set_ordering($broker, string $tag, string $ordering): bool {}
-
-/** @param resource $broker */
-function enchant_broker_describe($broker): array {}
-
-/** @param resource $dict */
-function enchant_dict_quick_check($dict, string $word, &$suggestions = UNKNOWN): bool {}
-
-/** @param resource $dict */
-function enchant_dict_check($dict, string $word): bool {}
-
-/** @param resource $dict */
-function enchant_dict_suggest($dict, string $word): ?array {}
-
-/** @param resource $dict */
-function enchant_dict_add_to_personal($dict, string $word): void {}
-
-/** @param resource $dict */
-function enchant_dict_add_to_session($dict, string $word): void {}
-
-/** @param resource $dict */
-function enchant_dict_is_in_session($dict, string $word): bool {}
-
-/** @param resource $dict */
-function enchant_dict_store_replacement($dict, string $mis, string $cor): void {}
-
-/**
-* @param resource $dict
-* @return string|false
+* @alias enchant_dict_is_added
+* @deprecated
 */
-function enchant_dict_get_error($dict) {}
+function enchant_dict_is_in_session(EnchantDictionary $dictionary, string $word): bool {}
 
-/** @param resource $dict */
-function enchant_dict_describe($dict): array {}
+function enchant_dict_store_replacement(EnchantDictionary $dictionary, string $misspelled, string $correct): void {}
+
+function enchant_dict_get_error(EnchantDictionary $dictionary): string|false {}
+
+/**
+ * @return array<string, string>
+ * @refcount 1
+ */
+function enchant_dict_describe(EnchantDictionary $dictionary): array {}

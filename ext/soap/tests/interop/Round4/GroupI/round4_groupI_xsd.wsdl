@@ -1102,7 +1102,7 @@
     </operation>
   </binding>
   <service name="Round4XSDTest">
-    <documentation>These operations implement DOC/LIT SOAP operations, for interop testing. Please email johnko@microsoft.com with any questions/coments.</documentation>
+    <documentation>These operations implement DOC/LIT SOAP operations, for interop testing. Please email johnko@microsoft.com with any questions/comments.</documentation>
     <port name="Round4XSDTestSoap" binding="s0:Round4XSDTestSoap">
       <soap:address location="test://" />
     </port>

@@ -1,10 +1,10 @@
 --TEST--
 recvmsg(): basic test
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 
 require 'ipv6_skipif.inc';
 
@@ -47,12 +47,15 @@ $data = [
 ];
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
 print_r($data);
+?>
 --EXPECTF--
 creating send socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 creating receive socket
-resource(%d) of type (Socket)
+object(Socket)#%d (0) {
+}
 bool(true)
 int(14)
 Array

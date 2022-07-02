@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,6 +21,7 @@
 #include <ext/standard/info.h>
 #include <ext/standard/php_var.h>
 #include <main/php_variables.h>
+#include <zend_exceptions.h>
 
 #ifdef __SANITIZE_ADDRESS__
 # include "sanitizer/lsan_interface.h"
@@ -34,16 +35,34 @@ const char HARDCODED_INI[] =
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"error_reporting=0\n"
-	/* Reduce oniguruma limits by a factor of 10 to speed up fuzzing */
+	/* Let the timeout be enforced by libfuzzer, not PHP. */
+	"max_execution_time=0\n"
+	/* Reduce oniguruma limits to speed up fuzzing */
 	"mbstring.regex_stack_limit=10000\n"
-	"mbstring.regex_retry_limit=100000";
+	"mbstring.regex_retry_limit=10000\n"
+	/* For the "execute" fuzzer disable some functions that are likely to have
+	 * undesirable consequences (shell execution, file system writes). */
+	"allow_url_include=0\n"
+	"allow_url_fopen=0\n"
+	"open_basedir=/tmp\n"
+	"disable_functions=dl,mail,mb_send_mail"
+	",shell_exec,exec,system,proc_open,popen,passthru,pcntl_exec"
+	",chdir,chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
+	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"
+	/* Networking code likes to wait and wait. */
+	",fsockopen,pfsockopen"
+	",stream_socket_pair,stream_socket_client,stream_socket_server"
+	/* crypt() can be very slow. */
+	",crypt"
+	/* openlog() has a known memory-management issue. */
+	",openlog"
+	/* Can cause long loops that bypass the executor step limit. */
+	"\ndisable_classes=InfiniteIterator"
+;
 
 static int startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
-		return FAILURE;
-	}
-	return SUCCESS;
+	return php_module_startup(sapi_module, NULL);
 }
 
 static size_t ub_write(const char *str, size_t str_length)
@@ -72,7 +91,7 @@ static void register_variables(zval *track_vars_array)
 	php_import_environment_variables(track_vars_array);
 }
 
-static void log_message(char *message, int level)
+static void log_message(const char *message, int level)
 {
 }
 
@@ -109,7 +128,7 @@ static sapi_module_struct fuzzer_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-int fuzzer_init_php()
+int fuzzer_init_php(const char *extra_ini)
 {
 #ifdef __SANITIZE_ADDRESS__
 	/* We're going to leak all the memory allocated during startup,
@@ -120,8 +139,20 @@ int fuzzer_init_php()
 	sapi_startup(&fuzzer_module);
 	fuzzer_module.phpinfo_as_text = 1;
 
-	fuzzer_module.ini_entries = malloc(sizeof(HARDCODED_INI));
-	memcpy(fuzzer_module.ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI));
+	size_t ini_len = sizeof(HARDCODED_INI);
+	size_t extra_ini_len = extra_ini ? strlen(extra_ini) : 0;
+	if (extra_ini) {
+		ini_len += extra_ini_len + 1;
+	}
+	char *p = fuzzer_module.ini_entries = malloc(ini_len + 1);
+	memcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
+	p += sizeof(HARDCODED_INI) - 1;
+	if (extra_ini) {
+		*p++ = '\n';
+		memcpy(p, extra_ini, extra_ini_len);
+		p += extra_ini_len;
+	}
+	*p = '\0';
 
 	/*
 	 * TODO: we might want to test both Zend and malloc MM, but testing with malloc
@@ -148,12 +179,45 @@ int fuzzer_request_startup()
 	}
 
 #ifdef ZEND_SIGNALS
-	/* Some signal handlers will be overriden,
+	/* Some signal handlers will be overridden,
 	 * don't complain about them during shutdown. */
 	SIGG(check) = 0;
 #endif
 
 	return SUCCESS;
+}
+
+void fuzzer_request_shutdown()
+{
+	zend_try {
+		/* Destroy thrown exceptions. This does not happen as part of request shutdown. */
+		if (EG(exception)) {
+			zend_object_release(EG(exception));
+			EG(exception) = NULL;
+		}
+
+		/* Some fuzzers (like unserialize) may create circular structures. Make sure we free them.
+		 * Two calls are performed to handle objects with destructors. */
+		zend_gc_collect_cycles();
+		zend_gc_collect_cycles();
+	} zend_end_try();
+
+	php_request_shutdown(NULL);
+}
+
+/* Set up a dummy stack frame so that exceptions may be thrown. */
+void fuzzer_setup_dummy_frame()
+{
+	static zend_execute_data execute_data;
+	static zend_function func;
+
+	memset(&execute_data, 0, sizeof(zend_execute_data));
+	memset(&func, 0, sizeof(zend_function));
+
+	func.type = ZEND_INTERNAL_FUNCTION;
+	func.common.function_name = ZSTR_EMPTY_ALLOC();
+	execute_data.func = &func;
+	EG(current_execute_data) = &execute_data;
 }
 
 void fuzzer_set_ini_file(const char *file)
@@ -165,7 +229,7 @@ void fuzzer_set_ini_file(const char *file)
 }
 
 
-int fuzzer_shutdown_php()
+int fuzzer_shutdown_php(void)
 {
 	php_module_shutdown();
 	sapi_shutdown();
@@ -174,7 +238,9 @@ int fuzzer_shutdown_php()
 	return SUCCESS;
 }
 
-int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
+int fuzzer_do_request_from_buffer(
+		char *filename, const char *data, size_t data_len, bool execute,
+		void (*before_shutdown)(void))
 {
 	int retval = FAILURE; /* failure by default */
 
@@ -186,56 +252,39 @@ int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
 		return FAILURE;
 	}
 
-	SG(headers_sent) = 1;
-	SG(request_info).no_headers = 1;
+	// Commented out to avoid leaking the header callback.
+	//SG(headers_sent) = 1;
+	//SG(request_info).no_headers = 1;
 	php_register_variable("PHP_SELF", filename, NULL);
 
 	zend_first_try {
-		zend_op_array *op_array = zend_compile_file(file_handle, ZEND_REQUIRE);
+		zend_file_handle file_handle;
+		zend_stream_init_filename(&file_handle, filename);
+		file_handle.primary_script = 1;
+		file_handle.buf = estrndup(data, data_len);
+		file_handle.len = data_len;
+		/* Avoid ZEND_HANDLE_FILENAME for opcache. */
+		file_handle.type = ZEND_HANDLE_STREAM;
+
+		zend_op_array *op_array = zend_compile_file(&file_handle, ZEND_REQUIRE);
+		zend_destroy_file_handle(&file_handle);
 		if (op_array) {
+			if (execute) {
+				zend_execute(op_array, NULL);
+			}
+			zend_destroy_static_vars(op_array);
 			destroy_op_array(op_array);
 			efree(op_array);
 		}
-		if (EG(exception)) {
-			zend_object_release(EG(exception));
-			EG(exception) = NULL;
-		}
-		/*retval = php_execute_script(file_handle);*/
 	} zend_end_try();
 
-	php_request_shutdown((void *) 0);
+	CG(compiled_filename) = NULL; /* ??? */
+	if (before_shutdown) {
+		before_shutdown();
+	}
+	fuzzer_request_shutdown();
 
 	return (retval == SUCCESS) ? SUCCESS : FAILURE;
-}
-
-
-int fuzzer_do_request_f(char *filename)
-{
-	zend_file_handle file_handle;
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-	file_handle.handle.fp = NULL;
-	file_handle.opened_path = NULL;
-
-	return fuzzer_do_request(&file_handle, filename);
-}
-
-int fuzzer_do_request_from_buffer(char *filename, char *data, size_t data_len)
-{
-	zend_file_handle file_handle;
-	file_handle.filename = filename;
-	file_handle.free_filename = 0;
-	file_handle.opened_path = NULL;
-	file_handle.handle.stream.handle = NULL;
-	file_handle.handle.stream.reader = (zend_stream_reader_t)_php_stream_read;
-	file_handle.handle.stream.fsizer = NULL;
-	file_handle.handle.stream.isatty = 0;
-	file_handle.handle.stream.closer   = NULL;
-	file_handle.buf = data;
-	file_handle.len = data_len;
-	file_handle.type = ZEND_HANDLE_STREAM;
-
-	return fuzzer_do_request(&file_handle, filename);
 }
 
 // Call named PHP function with N zval arguments

@@ -3,19 +3,13 @@ Hash: hash_hmac_file() function : basic functionality
 --FILE--
 <?php
 
-/* Prototype  : string hash_hmac_file ( string algo, string filename, string key [, bool raw_output] )
- * Description: Generate a keyed hash value using the HMAC method and the contents of a given file
- * Source code: ext/hash/hash.c
- * Alias to functions:
-*/
-
 echo "*** Testing hash() : error conditions ***\n";
 
 $file = __DIR__ . "hash_file.txt";
 $key = 'secret';
 
 echo "\n-- Testing hash_hmac_file() function with invalid hash algorithm --\n";
-try { 
+try {
     var_dump(hash_hmac_file('foo', $file, $key, TRUE));
 }
 catch (\Error $e) {
@@ -34,21 +28,19 @@ echo "\n-- Testing hash_hmac_file() function with bad path --\n";
 try {
     var_dump(hash_hmac_file('md5', $file.chr(0).$file, $key, TRUE));
 }
-catch (\Error $e) {
+catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash() : error conditions ***
 
 -- Testing hash_hmac_file() function with invalid hash algorithm --
-Unknown hashing algorithm: foo
+hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with non-cryptographic hash algorithm --
-Non-cryptographic hashing algorithm: crc32
+hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with bad path --
-Invalid path
-===Done===
+hash_hmac_file(): Argument #2 ($filename) must not contain any null bytes

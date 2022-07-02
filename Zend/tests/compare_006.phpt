@@ -9,41 +9,41 @@ class test {
 }
 
 $a = array(
-	array(1,2,3),
-	"",
-	1,
-	2.5,
-	0,
-	"string",
-	"123",
-	"2.5",
-	NULL,
-	true,
-	false,
-	new stdclass,
-	new stdclass,
-	new test,
-	array(),
-	-PHP_INT_MAX-1,
-	(string)(-PHP_INT_MAX-1),
+    array(1,2,3),
+    "",
+    1,
+    2.5,
+    0,
+    "string",
+    "123",
+    "2.5",
+    NULL,
+    true,
+    false,
+    new stdclass,
+    new stdclass,
+    new test,
+    array(),
+    -PHP_INT_MAX-1,
+    (string)(-PHP_INT_MAX-1),
 );
 
 $var_cnt = count($a);
 
 function my_dump($var) {
-	ob_start();
-	var_dump($var);
-	$buf = ob_get_clean();
-	echo str_replace("\n", "", $buf);
+    ob_start();
+    var_dump($var);
+    $buf = ob_get_clean();
+    echo str_replace("\n", "", $buf);
 }
 
 foreach($a as $var) {
-	for ($i = 0; $i < $var_cnt; $i++) {
-		my_dump($var);
-		echo ($var <= $a[$i]) ? " <= " : " > ";
-		my_dump($a[$i]);
-		echo "\n";
-	}
+    for ($i = 0; $i < $var_cnt; $i++) {
+        my_dump($var);
+        echo ($var <= $a[$i]) ? " <= " : " > ";
+        my_dump($a[$i]);
+        echo "\n";
+    }
 }
 
 echo "Done\n";
@@ -81,14 +81,14 @@ string(0) "" <= object(stdClass)#1 (0) {}
 string(0) "" <= object(stdClass)#2 (0) {}
 string(0) "" <= object(test)#3 (0) {}
 string(0) "" <= array(0) {}
-string(0) "" > int(-2147483648)
+string(0) "" <= int(-2147483648)
 string(0) "" <= string(11) "-2147483648"
 int(1) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 int(1) > string(0) ""
 int(1) <= int(1)
 int(1) <= float(2.5)
 int(1) > int(0)
-int(1) > string(6) "string"
+int(1) <= string(6) "string"
 int(1) <= string(3) "123"
 int(1) <= string(3) "2.5"
 int(1) > NULL
@@ -111,7 +111,7 @@ float(2.5) > string(0) ""
 float(2.5) > int(1)
 float(2.5) <= float(2.5)
 float(2.5) > int(0)
-float(2.5) > string(6) "string"
+float(2.5) <= string(6) "string"
 float(2.5) <= string(3) "123"
 float(2.5) <= string(3) "2.5"
 float(2.5) > NULL
@@ -130,7 +130,7 @@ float(2.5) <= array(0) {}
 float(2.5) > int(-2147483648)
 float(2.5) > string(11) "-2147483648"
 int(0) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-int(0) <= string(0) ""
+int(0) > string(0) ""
 int(0) <= int(1)
 int(0) <= float(2.5)
 int(0) <= int(0)
@@ -154,9 +154,9 @@ int(0) > int(-2147483648)
 int(0) > string(11) "-2147483648"
 string(6) "string" <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 string(6) "string" > string(0) ""
-string(6) "string" <= int(1)
-string(6) "string" <= float(2.5)
-string(6) "string" <= int(0)
+string(6) "string" > int(1)
+string(6) "string" > float(2.5)
+string(6) "string" > int(0)
 string(6) "string" <= string(6) "string"
 string(6) "string" > string(3) "123"
 string(6) "string" > string(3) "2.5"
@@ -347,7 +347,7 @@ array(0) {} <= array(0) {}
 array(0) {} > int(-2147483648)
 array(0) {} > string(11) "-2147483648"
 int(-2147483648) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-int(-2147483648) <= string(0) ""
+int(-2147483648) > string(0) ""
 int(-2147483648) <= int(1)
 int(-2147483648) <= float(2.5)
 int(-2147483648) <= int(0)

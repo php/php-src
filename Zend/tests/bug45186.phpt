@@ -4,25 +4,25 @@ Bug #45186 (__call depends on __callstatic in class scope)
 <?php
 
 class bar  {
-	public function __call($a, $b) {
-		print "__call:\n";
-		var_dump($a);
-	}
-	static public function __callstatic($a, $b) {
-		print "__callstatic:\n";
-		var_dump($a);
-	}
-	public function test() {
-		self::ABC();
-		bar::ABC();
-		call_user_func(array('BAR', 'xyz'));
-		call_user_func('BAR::www');
-		call_user_func(array('self', 'y'));
-		call_user_func('self::y');
-	}
-	static function x() {
-		print "ok\n";
-	}
+    public function __call($a, $b) {
+        print "__call:\n";
+        var_dump($a);
+    }
+    static public function __callstatic($a, $b) {
+        print "__callstatic:\n";
+        var_dump($a);
+    }
+    public function test() {
+        self::ABC();
+        bar::ABC();
+        call_user_func(array('BAR', 'xyz'));
+        call_user_func('BAR::www');
+        call_user_func(array('self', 'y'));
+        call_user_func('self::y');
+    }
+    static function x() {
+        print "ok\n";
+    }
 }
 
 $x = new bar;
@@ -38,7 +38,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 __call:
 string(3) "ABC"
 __call:
@@ -47,11 +47,15 @@ __call:
 string(3) "xyz"
 __call:
 string(3) "www"
+
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
 __call:
 string(1) "y"
+
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
 __call:
 string(1) "y"
 ok
 __callstatic:
 string(3) "www"
-call_user_func() expects parameter 1 to be a valid callback, cannot access self:: when no class scope is active
+call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access "self" when no class scope is active

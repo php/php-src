@@ -2,9 +2,6 @@
 Test filegroup() function: error conditions
 --FILE--
 <?php
-/* Prototype: int filegroup ( string $filename )
- *  Description: Returns the group ID of the file, or FALSE in case of an error.
- */
 
 echo "*** Testing filegroup(): error conditions ***\n";
 

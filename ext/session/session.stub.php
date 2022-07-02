@@ -1,34 +1,38 @@
 <?php
 
-/** @return string|false */
-function session_name(string $name = UNKNOWN) {}
+/** @generate-class-entries */
 
-/** @return string|false */
-function session_module_name(string $module = UNKNOWN) {}
+/** @refcount 1 */
+function session_name(?string $name = null): string|false {}
 
-/** @return string|false */
-function session_save_path(string $path = UNKNOWN) {}
+/** @refcount 1 */
+function session_module_name(?string $module = null): string|false {}
 
-/** @return string|false */
-function session_id(string $id = UNKNOWN) {}
+/** @refcount 1 */
+function session_save_path(?string $path = null): string|false {}
 
-/** @return string|false */
-function session_create_id(string $prefix = "") {}
+function session_id(?string $id = null): string|false {}
+
+/** @refcount 1 */
+function session_create_id(string $prefix = ""): string|false {}
 
 function session_regenerate_id(bool $delete_old_session = false): bool {}
 
 function session_decode(string $data): bool {}
 
-/** @return string|false */
-function session_encode() {}
+/** @refcount 1 */
+function session_encode(): string|false {}
 
 function session_destroy(): bool {}
 
 function session_unset(): bool {}
 
-/** @return int|false */
-function session_gc() {}
+function session_gc(): int|false {}
 
+/**
+ * @return array<string, mixed>
+ * @refcount 1
+ */
 function session_get_cookie_params(): array {}
 
 function session_write_close(): bool {}
@@ -41,52 +45,90 @@ function session_status(): int {}
 
 function session_register_shutdown(): void {}
 
+/** @alias session_write_close */
 function session_commit(): bool {}
 
-function session_set_save_handler($open, $close = null, $read = null, $write = null, $destroy = null, $gc = null, $create_sid = null, $validate_sid = null, $update_timestamp = null): bool {}
+/**
+ * @param callable|object $open
+ * @param callable|bool $close
+ */
+function session_set_save_handler(
+    $open,
+    $close = UNKNOWN,
+    callable $read = UNKNOWN,
+    callable $write = UNKNOWN,
+    callable $destroy = UNKNOWN,
+    callable $gc = UNKNOWN,
+    callable $create_sid = UNKNOWN,
+    callable $validate_sid = UNKNOWN,
+    callable $update_timestamp = UNKNOWN
+): bool {}
 
-/** @return string|false */
-function session_cache_limiter(string $cache_limiter = UNKNOWN) {}
+/** @refcount 1 */
+function session_cache_limiter(?string $value = null): string|false {}
 
-/** @return int|false */
-function session_cache_expire(?int $new_cache_expire = null) {}
+function session_cache_expire(?int $value = null): int|false {}
 
-function session_set_cookie_params($lifetime_or_options, string $path = UNKNOWN, string $domain  = "", ?bool $secure = null, ?bool $httponly = null): bool {}
+function session_set_cookie_params(array|int $lifetime_or_options, ?string $path = null, ?string $domain = null, ?bool $secure = null, ?bool $httponly = null): bool {}
 
 function session_start(array $options = []): bool {}
 
 interface SessionHandlerInterface
 {
-    /** @return bool */
-    function open(string $save_path, string $session_name);
+    /** @tentative-return-type */
+    public function open(string $path, string $name): bool;
 
-    /** @return bool */
-    function close();
+    /** @tentative-return-type */
+    public function close(): bool;
 
-    /** @return string */
-    function read(string $key);
+    /** @tentative-return-type */
+    public function read(string $id): string|false;
 
-    /** @return bool */
-    function write(string $key, string $val);
+    /** @tentative-return-type */
+    public function write(string $id, string $data): bool;
 
-    /** @return bool */
-    function destroy(string $key);
+    /** @tentative-return-type */
+    public function destroy(string $id): bool;
 
-    /** @return int|bool */
-    function gc(int $maxlifetime);
+    /** @tentative-return-type */
+    public function gc(int $max_lifetime): int|false;
 }
 
 interface SessionIdInterface
 {
-    /** @return string */
-    function create_sid();
+    /** @tentative-return-type */
+    public function create_sid(): string;
 }
 
 interface SessionUpdateTimestampHandlerInterface
 {
-    /** @return bool */
-    function validateId(string $key);
+    /** @tentative-return-type */
+    public function validateId(string $id): bool;
 
-    /** @return bool */
-    function updateTimestamp(string $key, string $val);
+    /** @tentative-return-type */
+    public function updateTimestamp(string $id, string $data): bool;
+}
+
+class SessionHandler implements SessionHandlerInterface, SessionIdInterface
+{
+    /** @tentative-return-type */
+    public function open(string $path, string $name): bool {}
+
+    /** @tentative-return-type */
+    public function close(): bool {}
+
+    /** @tentative-return-type */
+    public function read(string $id): string|false {}
+
+    /** @tentative-return-type */
+    public function write(string $id, string $data): bool {}
+
+    /** @tentative-return-type */
+    public function destroy(string $id): bool {}
+
+    /** @tentative-return-type */
+    public function gc(int $max_lifetime): int|false {}
+
+    /** @tentative-return-type */
+    public function create_sid(): string {}
 }

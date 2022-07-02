@@ -1,8 +1,9 @@
 --TEST--
 Translit failure
+--EXTENSIONS--
+iconv
 --SKIPIF--
 <?php
-include('skipif.inc');
 ( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\"");
 ?>
 --INI--

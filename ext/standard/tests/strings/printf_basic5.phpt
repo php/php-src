@@ -2,11 +2,6 @@
 Test printf() function : basic functionality - char format
 --FILE--
 <?php
-/* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
- * Description: Produces output according to format .
- * Source code: ext/standard/formatted_print.c
- */
-
 echo "*** Testing printf() : basic functionality - using char format ***\n";
 
 
@@ -39,7 +34,6 @@ $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using char format ***
 
@@ -58,4 +52,3 @@ int(3)
 -- Calling printf() with three arguments --
 A B C
 int(5)
-===DONE===

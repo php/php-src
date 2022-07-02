@@ -1,7 +1,8 @@
 --TEST--
 IntlRuleBasedBreakIterator::getBinaryRules(): basic test
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if (version_compare(INTL_ICU_VERSION, '61.1') >=  0) die('skip for ICU < 61.1'); ?>
 --FILE--
 <?php
@@ -31,9 +32,7 @@ $rbbi2 = new IntlRuleBasedBreakIterator($br, true);
 var_dump($rbbi->getRules(), $rbbi2->getRules());
 var_dump($rbbi->getRules() == $rbbi2->getRules());
 ?>
-==DONE==
 --EXPECT--
 string(128) "$LN = [[:letter:] [:number:]];$S = [.;,:];!!forward;$LN+ {1};$S+ {42};!!reverse;$LN+ {1};$S+ {42};!!safe_forward;!!safe_reverse;"
 string(128) "$LN = [[:letter:] [:number:]];$S = [.;,:];!!forward;$LN+ {1};$S+ {42};!!reverse;$LN+ {1};$S+ {42};!!safe_forward;!!safe_reverse;"
 bool(true)
-==DONE==

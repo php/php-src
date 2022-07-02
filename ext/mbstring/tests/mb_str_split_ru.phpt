@@ -1,10 +1,9 @@
 --TEST--
 mb_str_split()  tests for the russian language
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 output_handler=
-mbstring.func_overload=0
 --FILE--
 <?php
 ini_set('include_path','.');

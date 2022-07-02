@@ -16,5 +16,5 @@ try {
     echo "Exception: " . $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Exception: Non-static method A::foo() cannot be called statically

@@ -30,6 +30,7 @@ date.timezone=Europe/Berlin
 
   $date->modify('+0 days');
   echo $date->format('Y-m-d H:i:s T').' (offset '.$date->getOffset().")\n";
+?>
 --EXPECT--
 FROM TIMESTAMP, NO TZ:
 2012-08-21 22:00:00 GMT+0000 (offset 0)

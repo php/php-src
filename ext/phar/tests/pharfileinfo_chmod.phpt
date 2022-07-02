@@ -1,7 +1,7 @@
 --TEST--
 Phar: PharFileInfo::chmod extra code coverage
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -22,9 +22,7 @@ echo $e->getMessage(), "\n";
 lstat($pname . '/a/b'); // sets BG(CurrentLStatFile)
 $b->chmod(0666);
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
---EXPECTF--
+--EXPECT--
 Phar entry "a" is a temporary directory (not an actual entry in the archive), cannot chmod
-===DONE===

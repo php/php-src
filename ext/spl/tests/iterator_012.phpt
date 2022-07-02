@@ -17,12 +17,10 @@ echo "===Foreach===\n";
 
 foreach($it as $key=>$val)
 {
-	echo "$key=>$val\n";
+    echo "$key=>$val\n";
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===Current===
 0=>A
@@ -30,4 +28,3 @@ foreach($it as $key=>$val)
 ===Foreach===
 1=>B
 2=>C
-===DONE===

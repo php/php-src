@@ -1,7 +1,13 @@
 --TEST--
 FFI 040: Support for scalar types
+--EXTENSIONS--
+ffi
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+if (pack('S', 0xABCD) !== pack('v', 0xABCD)) {
+    die('skip for little-endian architectures only');
+}
+?>
 --INI--
 ffi.enable=1
 --FILE--

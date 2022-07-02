@@ -10,8 +10,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
-Warning: Undefined variable: nonesuchvar in %s on line %d
-array_walk() expects parameter 2 to be a valid callback, first array member is not a valid class name or object
-===DONE===
+Warning: Undefined variable $nonesuchvar in %s on line %d
+array_walk(): Argument #2 ($callback) must be a valid callback, first array member is not a valid class name or object

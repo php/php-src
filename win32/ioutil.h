@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -218,8 +218,16 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 			memmove(ret, mb, mb_len * sizeof(wchar_t));
 			ret[mb_len] = L'\0';
 		} else {
+			wchar_t *src = mb, *dst = ret + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 			memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-			memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
+			while (src < mb + mb_len) {
+				if (*src == PHP_WIN32_IOUTIL_FW_SLASHW) {
+					*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+					src++;
+				} else {
+					*dst++ = *src++;
+				}
+			}
 			ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
 
 			mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
@@ -622,7 +630,6 @@ __forceinline static int php_win32_ioutil_link(const char *target, const char *l
 	return ret;
 }/*}}}*/
 
-#define HAVE_REALPATH 1
 PW32IO char *realpath(const char *path, char *resolved);
 
 __forceinline static char *php_win32_ioutil_realpath_ex0(const char *path, char *resolved, PBY_HANDLE_FILE_INFORMATION info)
@@ -779,12 +786,14 @@ __forceinline static ssize_t php_win32_ioutil_readlink(const char *path, char *b
 
 	ret_buf = php_win32_ioutil_conv_w_to_any(retw, ret, &ret_buf_len);
 	if (!ret_buf || ret_buf_len >= buf_len || ret_buf_len >= MAXPATHLEN) {
+		free(ret_buf);
 		free(pathw);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_PATHNAME);
 		return -1;
 	}
 	memcpy(buf, ret_buf, ret_buf_len + 1);
 
+	free(ret_buf);
 	free(pathw);
 
 	return ret_buf_len;

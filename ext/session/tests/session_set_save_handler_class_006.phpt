@@ -3,6 +3,8 @@ Test session_set_save_handler() : using objects in close
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -10,28 +12,22 @@ session.name=PHPSESSID
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(SessionHandler $handler [, bool $register_shutdown_function = true])
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() : using objects in close ***\n";
 
 class MySession7_Foo {
-	public $state = 'ok';
-	function __destruct() {
-		$this->state = 'destroyed';
-	}
+    public $state = 'ok';
+    function __destruct() {
+        $this->state = 'destroyed';
+    }
 }
 
 class MySession7 extends SessionHandler {
-	public $foo;
-	public function close() {
-		var_dump($this->foo);
-		@var_dump($GLOBALS['bar']);
-		return parent::close();
-	}
+    public $foo;
+    public function close(): bool {
+        var_dump($this->foo);
+        @var_dump($GLOBALS['bar']);
+        return parent::close();
+    }
 }
 
 $bar = new MySession7_Foo;

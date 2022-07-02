@@ -1,5 +1,7 @@
 --TEST--
 various oci_lob_write() error messages
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -35,7 +37,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: OCI-Lob::save(): OCI_INVALID_HANDLE in %s on line %d
+Warning: OCILob::save(): OCI_INVALID_HANDLE in %s on line %d
 bool(true)
 bool(true)
 Done

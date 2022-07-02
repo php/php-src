@@ -1,15 +1,9 @@
 --TEST--
 Test finfo_file() function : basic functionality
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
-/* Prototype  : string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
- * Description: Return information about a file.
- * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions:
- */
-
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 $finfo = finfo_open( FILEINFO_MIME );
 
@@ -19,16 +13,16 @@ echo "*** Testing finfo_file() : basic functionality ***\n";
 var_dump( finfo_file( $finfo, __FILE__) );
 var_dump( finfo_file( $finfo, __FILE__, FILEINFO_CONTINUE ) );
 var_dump( finfo_file( $finfo, $magicFile ) );
-var_dump( finfo_file( $finfo, $magicFile.chr(0).$magicFile) );
+try {
+    var_dump( finfo_file( $finfo, $magicFile.chr(0).$magicFile) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing finfo_file() : basic functionality ***
 string(28) "text/x-php; charset=us-ascii"
-string(%d) "PHP script, ASCII text%A"
-string(32) "text/plain; charset=unknown-8bit"
-
-Warning: finfo_file(): Invalid path in %s%efinfo_file_basic.php on line %d
-bool(false)
-===DONE===
+string(22) "PHP script, ASCII text"
+string(28) "text/plain; charset=us-ascii"
+finfo_file(): Argument #1 ($finfo) must not contain any null bytes

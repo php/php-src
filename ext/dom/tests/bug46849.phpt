@@ -1,7 +1,7 @@
 --TEST--
 Bug #46849 (Cloning DOMDocument doesn't clone the properties).
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMDocument;

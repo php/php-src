@@ -1,7 +1,7 @@
 --TEST--
 DRCP: oci_pconnect() with scope end when oci8.old_oci_close_semantics OFF
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 oci8.old_oci_close_semantics=0
 --FILE--
@@ -35,16 +35,16 @@ function2($user,$password,$dbase);
 
 function function1($user,$password,$dbase)
 {
-	var_dump($c = oci_pconnect($user,$password,$dbase));
-	drcp_update_table($c);
+    var_dump($c = oci_pconnect($user,$password,$dbase));
+    drcp_update_table($c);
 }
 
 // This is the second scope
 
 function function2($user,$password,$dbase)
 {
-	var_dump($c = oci_pconnect($user,$password,$dbase));
-	drcp_select_value($c);
+    var_dump($c = oci_pconnect($user,$password,$dbase));
+    drcp_select_value($c);
 }
 
 drcp_drop_table($c);

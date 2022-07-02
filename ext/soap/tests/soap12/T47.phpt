@@ -1,7 +1,7 @@
 --TEST--
 SOAP 1.2: T47 echoFloatArray
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 --FILE--

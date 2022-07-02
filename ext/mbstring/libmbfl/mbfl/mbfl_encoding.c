@@ -28,21 +28,16 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stddef.h>
-#include <string.h>
+#include "libmbfl/config.h"
 
 #ifdef HAVE_STRINGS_H
-#include <strings.h>
+	/* For strcasecmp */
+	#include <strings.h>
 #endif
 
 #include "mbfl_encoding.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
-#include "mbfilter_wchar.h"
 
 #include "filters/mbfilter_euc_cn.h"
 #include "filters/mbfilter_hz.h"
@@ -52,7 +47,6 @@
 #include "filters/mbfilter_euc_kr.h"
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
-#include "filters/mbfilter_sjis_open.h"
 #include "filters/mbfilter_sjis_mobile.h"
 #include "filters/mbfilter_sjis_mac.h"
 #include "filters/mbfilter_sjis_2004.h"
@@ -65,30 +59,9 @@
 #include "filters/mbfilter_euc_jp_win.h"
 #include "filters/mbfilter_euc_jp_2004.h"
 #include "filters/mbfilter_gb18030.h"
-#include "filters/mbfilter_ascii.h"
-#include "filters/mbfilter_koi8r.h"
-#include "filters/mbfilter_koi8u.h"
-#include "filters/mbfilter_cp866.h"
 #include "filters/mbfilter_cp932.h"
 #include "filters/mbfilter_cp936.h"
-#include "filters/mbfilter_cp1251.h"
-#include "filters/mbfilter_cp1252.h"
-#include "filters/mbfilter_cp1254.h"
 #include "filters/mbfilter_cp5022x.h"
-#include "filters/mbfilter_iso8859_1.h"
-#include "filters/mbfilter_iso8859_2.h"
-#include "filters/mbfilter_iso8859_3.h"
-#include "filters/mbfilter_iso8859_4.h"
-#include "filters/mbfilter_iso8859_5.h"
-#include "filters/mbfilter_iso8859_6.h"
-#include "filters/mbfilter_iso8859_7.h"
-#include "filters/mbfilter_iso8859_8.h"
-#include "filters/mbfilter_iso8859_9.h"
-#include "filters/mbfilter_iso8859_10.h"
-#include "filters/mbfilter_iso8859_13.h"
-#include "filters/mbfilter_iso8859_14.h"
-#include "filters/mbfilter_iso8859_15.h"
-#include "filters/mbfilter_iso8859_16.h"
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_uuencode.h"
@@ -99,13 +72,10 @@
 #include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_utf16.h"
 #include "filters/mbfilter_utf32.h"
-#include "filters/mbfilter_byte2.h"
-#include "filters/mbfilter_byte4.h"
 #include "filters/mbfilter_ucs4.h"
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
-#include "filters/mbfilter_armscii8.h"
-#include "filters/mbfilter_cp850.h"
+#include "filters/mbfilter_singlebyte.h"
 
 #ifndef HAVE_STRCASECMP
 #ifdef HAVE_STRICMP
@@ -115,12 +85,6 @@
 
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
-	&mbfl_encoding_pass,
-	&mbfl_encoding_wchar,
-	&mbfl_encoding_byte2be,
-	&mbfl_encoding_byte2le,
-	&mbfl_encoding_byte4be,
-	&mbfl_encoding_byte4le,
 	&mbfl_encoding_base64,
 	&mbfl_encoding_uuencode,
 	&mbfl_encoding_html_ent,
@@ -147,7 +111,6 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_sjis,
 	&mbfl_encoding_eucjp_win,
 	&mbfl_encoding_eucjp2004,
-	&mbfl_encoding_sjis_open,
  	&mbfl_encoding_sjis_docomo,
  	&mbfl_encoding_sjis_kddi,
  	&mbfl_encoding_sjis_sb,
@@ -194,54 +157,40 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_koi8u,
 	&mbfl_encoding_armscii8,
 	&mbfl_encoding_cp850,
-	&mbfl_encoding_jis_ms,
 	&mbfl_encoding_2022jp_2004,
 	&mbfl_encoding_2022jp_kddi,
 	&mbfl_encoding_cp50220,
-	&mbfl_encoding_cp50220raw,
 	&mbfl_encoding_cp50221,
 	&mbfl_encoding_cp50222,
 	NULL
 };
 
-/* encoding resolver */
-const mbfl_encoding *
-mbfl_name2encoding(const char *name)
+const mbfl_encoding *mbfl_name2encoding(const char *name)
 {
-	const mbfl_encoding *encoding;
-	int i, j;
+	const mbfl_encoding **encoding;
 
-	if (name == NULL) {
-		return NULL;
-	}
-
- 	i = 0;
- 	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL){
-		if (strcasecmp(encoding->name, name) == 0) {
-			return encoding;
+	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
+		if (strcasecmp((*encoding)->name, name) == 0) {
+			return *encoding;
 		}
 	}
 
- 	/* serch MIME charset name */
- 	i = 0;
- 	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL) {
-		if (encoding->mime_name != NULL) {
-			if (strcasecmp(encoding->mime_name, name) == 0) {
-				return encoding;
+	/* search MIME charset name */
+	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
+		if ((*encoding)->mime_name) {
+			if (strcasecmp((*encoding)->mime_name, name) == 0) {
+				return *encoding;
 			}
 		}
 	}
 
- 	/* serch aliases */
- 	i = 0;
- 	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL) {
-		if (encoding->aliases != NULL) {
- 			j = 0;
- 			while ((*encoding->aliases)[j] != NULL) {
-				if (strcasecmp((*encoding->aliases)[j], name) == 0) {
-					return encoding;
+	/* search aliases */
+	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
+		if ((*encoding)->aliases) {
+			for (const char **alias = (*encoding)->aliases; *alias; alias++) {
+				if (strcasecmp(*alias, name) == 0) {
+					return *encoding;
 				}
-				j++;
 			}
 		}
 	}
@@ -249,76 +198,45 @@ mbfl_name2encoding(const char *name)
 	return NULL;
 }
 
-const mbfl_encoding *
-mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
+const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
 {
-	const mbfl_encoding *encoding;
-	int i;
+	const mbfl_encoding **encoding;
 
-	i = 0;
-	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL){
-		if (encoding->no_encoding == no_encoding) {
-			return encoding;
+	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
+		if ((*encoding)->no_encoding == no_encoding) {
+			return *encoding;
 		}
 	}
 
 	return NULL;
 }
 
-enum mbfl_no_encoding
-mbfl_name2no_encoding(const char *name)
+enum mbfl_no_encoding mbfl_name2no_encoding(const char *name)
 {
-	const mbfl_encoding *encoding;
-
-	encoding = mbfl_name2encoding(name);
-	if (encoding == NULL) {
-		return mbfl_no_encoding_invalid;
-	} else {
-		return encoding->no_encoding;
-	}
+	const mbfl_encoding *encoding = mbfl_name2encoding(name);
+	return encoding ? encoding->no_encoding : mbfl_no_encoding_invalid;
 }
 
-const char *
-mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
+const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
 {
-	const mbfl_encoding *encoding;
-
-	encoding = mbfl_no2encoding(no_encoding);
-	if (encoding == NULL) {
-		return "";
-	} else {
-		return encoding->name;
-	}
+	const mbfl_encoding *encoding = mbfl_no2encoding(no_encoding);
+	return encoding ? encoding->name : "";
 }
 
-const mbfl_encoding **
-mbfl_get_supported_encodings(void)
+const mbfl_encoding **mbfl_get_supported_encodings(void)
 {
 	return mbfl_encoding_ptr_list;
 }
 
-const char *
-mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
+const char *mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
 {
-	const mbfl_encoding *encoding;
-
-	encoding = mbfl_no2encoding(no_encoding);
-	if (encoding != NULL && encoding->mime_name != NULL && encoding->mime_name[0] != '\0') {
-		return encoding->mime_name;
-	} else {
-		return NULL;
-	}
+	return mbfl_encoding_preferred_mime_name(mbfl_no2encoding(no_encoding));
 }
 
-int
-mbfl_is_support_encoding(const char *name)
+const char *mbfl_encoding_preferred_mime_name(const mbfl_encoding *encoding)
 {
-	const mbfl_encoding *encoding;
-
-	encoding = mbfl_name2encoding(name);
-	if (encoding == NULL) {
-		return 0;
-	} else {
-		return 1;
+	if (encoding->mime_name && encoding->mime_name[0] != '\0') {
+		return encoding->mime_name;
 	}
+	return NULL;
 }

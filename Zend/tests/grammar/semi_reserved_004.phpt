@@ -163,6 +163,7 @@ echo Obj::$__NAMESPACE__, PHP_EOL;
 echo Obj::$__halt_compiler, PHP_EOL;
 
 echo "\nDone\n";
+?>
 --EXPECT--
 empty
 callable

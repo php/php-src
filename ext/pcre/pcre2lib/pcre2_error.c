@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -184,6 +184,9 @@ static const unsigned char compile_error_texts[] =
   /* 95 */
   "(*alpha_assertion) not recognized\0"
   "script runs require Unicode support, which this version of PCRE2 does not have\0"
+  "too many capturing groups (maximum 65535)\0"
+  "atomic assertion expected after (?( or (?(?C)\0"
+  "\\K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */
@@ -268,6 +271,7 @@ static const unsigned char match_error_texts[] =
   "invalid syntax\0"
   /* 65 */
   "internal error - duplicate substitution match\0"
+  "PCRE2_MATCH_INVALID_UTF is not supported for DFA matching\0"
   ;
 
 

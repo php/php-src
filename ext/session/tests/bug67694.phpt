@@ -7,6 +7,8 @@ session.auto_start = 0
 session.use_cookies = 0
 session.cache_limiter =
 date.timezone = UTC
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -36,6 +38,7 @@ session_id($newid);
 session_start();
 
 var_dump(isset($_SESSION['init']) && $data == $_SESSION['init']);
+?>
 --EXPECT--
 bool(true)
 bool(true)

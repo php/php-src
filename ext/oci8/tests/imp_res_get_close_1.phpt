@@ -1,8 +1,9 @@
 --TEST--
 Oracle Database 12c Implicit Result Sets: oci_get_implicit_resultset: oci_free_statement #1
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -40,29 +41,23 @@ echo "Test 1\n";
 $s = oci_parse($c, $plsql);
 oci_execute($s);
 
-while (($s1 = oci_get_implicit_resultset($s))) {
-    while (($row = oci_fetch_array($s1, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
-        foreach ($row as $item) {
-            echo "  ".$item;
+try {
+    while (($s1 = oci_get_implicit_resultset($s))) {
+        while (($row = oci_fetch_array($s1, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
+            foreach ($row as $item) {
+                echo "  ".$item;
+            }
+            echo "\n";
+            oci_free_statement($s1);  // Free the implicit result handle
         }
-        echo "\n";
-        oci_free_statement($s1);  // Free the implicit result handle
     }
+    oci_free_statement($s);
+} catch(\TypeError $exception) {
+    var_dump($exception->getMessage());
 }
-oci_free_statement($s);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
   1
-
-Warning: oci_fetch_array(): supplied resource is not a valid oci8 statement resource in %s on line %d
-  3
-
-Warning: oci_fetch_array(): supplied resource is not a valid oci8 statement resource in %s on line %d
-  5
-
-Warning: oci_fetch_array(): supplied resource is not a valid oci8 statement resource in %s on line %d
-===DONE===
+string(%d) "oci_fetch_array(): supplied resource is not a valid oci8 statement resource"

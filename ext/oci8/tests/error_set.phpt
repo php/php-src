@@ -1,7 +1,7 @@
 --TEST--
 Check oci_set_{action,client_identifier,module_name,client_info} error handling
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 
@@ -51,8 +51,6 @@ $r = oci_set_client_info($c, $s);
 var_dump($r);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 bool(false)
@@ -69,4 +67,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

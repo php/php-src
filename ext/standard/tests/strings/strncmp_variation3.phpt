@@ -2,11 +2,6 @@
 Test strncmp() function: usage variations - different lengths
 --FILE--
 <?php
-/* Prototype  : int strncmp ( string $str1, string $str2, int $len );
- * Description: Binary safe case-sensitive string comparison of the first n characters
- * Source code: Zend/zend_builtin_functions.c
-*/
-
 /* Test strncmp() with various lengths */
 
 echo "*** Test strncmp() function: with different lengths ***\n";

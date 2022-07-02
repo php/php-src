@@ -3,8 +3,8 @@ Bug #29038 (extract(), EXTR_PREFIX_SAME option prefixes empty strings)
 --FILE--
 <?php
 function my_print_r($a) {
-	ksort($a);
-	print_r($a);
+    ksort($a);
+    print_r($a);
 }
 function f1() {
   $c = extract(array("" => 1),EXTR_PREFIX_SAME,"prefix");

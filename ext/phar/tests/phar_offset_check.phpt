@@ -1,7 +1,7 @@
 --TEST--
 Phar: disallow stub and alias setting via offset*() methods
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=1
@@ -18,51 +18,50 @@ $phar['a.txt'] = "first file\n";
 $phar['b.txt'] = "second file\n";
 
 try {
-	$phar->offsetGet('.phar/stub.php');
+    $phar->offsetGet('.phar/stub.php');
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 
 try {
-	$phar->offsetGet('.phar/alias.txt');
+    $phar->offsetGet('.phar/alias.txt');
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 
 try {
-	$phar->offsetSet('.phar/stub.php', '<?php __HALT_COMPILER(); ?>');
+    $phar->offsetSet('.phar/stub.php', '<?php __HALT_COMPILER(); ?>');
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
-}
-
-var_dump(strlen($phar->getStub()));
-
-try {
-	$phar->offsetUnset('.phar/stub.php');
-} catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 
 var_dump(strlen($phar->getStub()));
 
 try {
-	$phar->offsetSet('.phar/alias.txt', 'dolly');
+    $phar->offsetUnset('.phar/stub.php');
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
+}
+
+var_dump(strlen($phar->getStub()));
+
+try {
+    $phar->offsetSet('.phar/alias.txt', 'dolly');
+} catch (Exception $e) {
+    echo $e->getMessage()."\n";
 }
 
 var_dump($phar->getAlias());
 
 try {
-	$phar->offsetUnset('.phar/alias.txt');
+    $phar->offsetUnset('.phar/alias.txt');
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage()."\n";
 }
 
 var_dump($phar->getAlias());
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -74,4 +73,3 @@ int(6643)
 Cannot set alias ".phar/alias.txt" directly in phar "%sphar_offset_check.phar.php", use setAlias
 string(5) "susan"
 string(5) "susan"
-===DONE===

@@ -17,14 +17,12 @@ var_dump(opendir($dir));
 
 ?>
 --EXPECTF--
-Warning: opendir(): connect() failed: %s
- in %s on line %d
+Warning: opendir(): connect() failed: %s in %s on line %d
 
-Warning: opendir(ftp://...@localhost/): failed to open dir: operation failed in %s on line %d
+Warning: opendir(ftp://...@localhost/): Failed to open directory: operation failed in %s on line %d
 bool(false)
 
-Warning: opendir(): connect() failed: %s
- in %s on line %d
+Warning: opendir(): connect() failed: %s in %s on line %d
 
-Warning: opendir(ftp://...@localhost/): failed to open dir: operation failed in %s on line %d
+Warning: opendir(ftp://...@localhost/): Failed to open directory: operation failed in %s on line %d
 bool(false)

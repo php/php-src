@@ -2,6 +2,8 @@
 Function snmp_set_enum_print
 --CREDITS--
 Olivier Doucet
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
@@ -15,7 +17,7 @@ echo "Checking working\n";
 var_dump(snmp_set_enum_print(0));
 var_dump(snmp_set_enum_print(1));
 ?>
---EXPECTF--
+--EXPECT--
 Checking working
 bool(true)
 bool(true)

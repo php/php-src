@@ -1,7 +1,7 @@
 --TEST--
 Null bytes in SQL statements
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 display_errors = On
 error_reporting = E_WARNING
@@ -27,8 +27,6 @@ oci_fetch_all($s, $res);
 var_dump($res);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1: Invalid use of a null byte
 
@@ -39,4 +37,3 @@ array(1) {
   array(0) {
   }
 }
-===DONE===

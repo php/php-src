@@ -3,8 +3,8 @@ DOMDocument::DOMImplementation - basic test for DomDocument::DOMImplementation
 --CREDITS--
 Lev Radin <prokurator@gmail.com>
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -15,6 +15,6 @@ var_dump($doc->implementation);
 
 
 ?>
---EXPECTF--
-object(DOMImplementation)#%d (0) {
+--EXPECT--
+object(DOMImplementation)#2 (0) {
 }

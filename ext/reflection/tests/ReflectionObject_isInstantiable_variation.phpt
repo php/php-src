@@ -4,43 +4,43 @@ ReflectionObject::IsInstantiable() - variation - constructors
 <?php
 
 class noCtor {
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class publicCtorNew {
-	public function __construct() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}
+    public function __construct() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class protectedCtorNew {
-	protected function __construct() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}
+    protected function __construct() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class privateCtorNew {
-	private function __construct() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}
+    private function __construct() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 $reflectionObjects = array(
-		noCtor::reflectionObjectFactory(),
-		publicCtorNew::reflectionObjectFactory(),
-		protectedCtorNew::reflectionObjectFactory(),
-		privateCtorNew::reflectionObjectFactory(),
-	);
+        noCtor::reflectionObjectFactory(),
+        publicCtorNew::reflectionObjectFactory(),
+        protectedCtorNew::reflectionObjectFactory(),
+        privateCtorNew::reflectionObjectFactory(),
+    );
 
 foreach ($reflectionObjects as $reflectionObject) {
-	$name = $reflectionObject->getName();
-	echo "Is $name instantiable? ";
-	var_dump($reflectionObject->IsInstantiable());
+    $name = $reflectionObject->getName();
+    echo "Is $name instantiable? ";
+    var_dump($reflectionObject->IsInstantiable());
 }
 ?>
 --EXPECT--

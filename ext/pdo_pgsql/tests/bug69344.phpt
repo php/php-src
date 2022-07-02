@@ -1,8 +1,10 @@
 --TEST--
 PDO PgSQL Bug #69344 (PDO PgSQL Incorrect binding numeric array with gaps)
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -16,19 +18,19 @@ $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute (\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
 $test = function () use ($pdo) {
-	$arr = [
-		0 => "a",
-		2 => "b",
-	];
+    $arr = [
+        0 => "a",
+        2 => "b",
+    ];
 
-	$stmt = $pdo->prepare("SELECT (?)::text AS a, (?)::text AS b");
+    $stmt = $pdo->prepare("SELECT (?)::text AS a, (?)::text AS b");
 
-	try {
-		$stmt->execute($arr);
-		var_dump($stmt->fetch());
-	} catch (\Exception $e) {
-		echo $e->getMessage()."\n";
-	}
+    try {
+        $stmt->execute($arr);
+        var_dump($stmt->fetch());
+    } catch (\Exception $e) {
+        echo $e->getMessage()."\n";
+    }
 };
 
 $test();

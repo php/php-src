@@ -4,8 +4,8 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at the following url:        |
-   | http://www.php.net/license/3_01.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -403,8 +403,8 @@ static void LSCRIU_Restored_Error(int iFatal, char *format, ...) {
     }
 }
 #else // no debugging
-static void inline LSCRIU_Debugging(void) {}
-static void inline LSCRIU_Restored_Error(int iFatal, char *format, ...) {}
+static inline void LSCRIU_Debugging(void) {}
+static inline void LSCRIU_Restored_Error(int iFatal, char *format, ...) {}
 #endif
 
 
@@ -469,7 +469,7 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
 }
 
 
-static void LSCRIU_Wait_Dump_Finsh_Or_Restored(int pid_parent)
+static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
 {
     // Now get restored.  We know if we're restored if the ppid changes!
     // If we're dumped, we're killed (no use worrying about that!).
@@ -528,7 +528,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
                                   s_fd_native);
         close(s_fd_native);
 
-        LSCRIU_Wait_Dump_Finsh_Or_Restored(iPidParent);
+        LSCRIU_Wait_Dump_Finish_Or_Restored(iPidParent);
         LSCRIU_Restored_Error(0, "Restored!");
         LSAPI_reset_server_state();
         s_restored = 1;
@@ -626,12 +626,14 @@ static int LSCRIU_Init_Env_Parameters(void)
                        gc_type == CRIU_GCOUNTER_SIG ? "signals" : "pipe");
             lsapi_criu_signal(SIGUSR2, lsapi_siguser2);
         }
-        else
+        else {
             lscriu_dbg("LSCRIU (%d): Use shared memory\n", getpid());
-        LSCRIU_Set_Global_Counter_Type(gc_type);
+	}
+    	LSCRIU_Set_Global_Counter_Type(gc_type);
     }
-    else
+    else {
         lscriu_dbg("LSCRIU (%d): NOT Listening\n", getpid());
+    }
 
     char *criu_mode = NULL;
     criu_mode = getenv("LSAPI_CRIU");
@@ -657,7 +659,7 @@ static int LSCRIU_Init_Env_Parameters(void)
 }
 
 
-void LSCRIU_inc_req_procssed()
+void LSCRIU_inc_req_processed()
 {
     if (!LSCRIU_Get_Global_Counter_Type()) {
         ++s_requests_count;

@@ -1,5 +1,7 @@
 --TEST--
 DBA with persistent connections
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "flatfile";
@@ -48,10 +50,9 @@ echo dba_fetch("key1", $db_file1), "\n";
 echo dba_fetch("key2", $db_file1), "\n";
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile
@@ -71,4 +72,3 @@ resource(%d) of type (Unknown)
 Test 6 - query after closing 2nd resource
 This is a test insert 1
 This is a test insert 2
-===DONE===

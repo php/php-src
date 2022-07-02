@@ -33,12 +33,10 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_2022kr;
-extern const struct mbfl_identify_vtbl vtbl_identify_2022kr;
 extern const struct mbfl_convert_vtbl vtbl_wchar_2022kr;
 extern const struct mbfl_convert_vtbl vtbl_2022kr_wchar;
 
 int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_ISO2022_KR_H */

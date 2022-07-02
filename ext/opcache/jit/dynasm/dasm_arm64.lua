@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM ARM64 module.
 --
--- Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 ------------------------------------------------------------------------------
 
@@ -9,9 +9,9 @@
 local _info = {
   arch =	"arm",
   description =	"DynASM ARM64 module",
-  version =	"1.4.0",
-  vernum =	 10400,
-  release =	"2015-10-18",
+  version =	"1.5.0",
+  vernum =	 10500,
+  release =	"2021-05-02",
   author =	"Mike Pall",
   license =	"MIT",
 }
@@ -23,12 +23,12 @@ local _M = { _info = _info }
 local type, tonumber, pairs, ipairs = type, tonumber, pairs, ipairs
 local assert, setmetatable, rawget = assert, setmetatable, rawget
 local _s = string
-local sub, format, byte, char = _s.sub, _s.format, _s.byte, _s.char
+local format, byte, char = _s.format, _s.byte, _s.char
 local match, gmatch, gsub = _s.match, _s.gmatch, _s.gsub
 local concat, sort, insert = table.concat, table.sort, table.insert
 local bit = bit or require("bit")
 local band, shl, shr, sar = bit.band, bit.lshift, bit.rshift, bit.arshift
-local ror, tohex = bit.ror, bit.tohex
+local ror, tohex, tobit = bit.ror, bit.tohex, bit.tobit
 
 -- Inherited tables and callbacks.
 local g_opt, g_arch
@@ -39,7 +39,9 @@ local wline, werror, wfatal, wwarn
 local action_names = {
   "STOP", "SECTION", "ESC", "REL_EXT",
   "ALIGN", "REL_LG", "LABEL_LG",
-  "REL_PC", "LABEL_PC", "IMM", "IMM6", "IMM12", "IMM13W", "IMM13X", "IMML",
+  "REL_PC", "LABEL_PC", "REL_A",
+  "IMM", "IMM6", "IMM12", "IMM13W", "IMM13X", "IMML", "IMMV",
+  "VREG",
 }
 
 -- Maximum number of section buffer positions for dasm_put().
@@ -246,9 +248,12 @@ local map_cond = {
 
 local parse_reg_type
 
-local function parse_reg(expr)
+local function parse_reg(expr, shift)
   if not expr then werror("expected register name") end
   local tname, ovreg = match(expr, "^([%w_]+):(@?%l%d+)$")
+  if not tname then
+    tname, ovreg = match(expr, "^([%w_]+):(R[xwqdshb]%b())$")
+  end
   local tp = map_type[tname or expr]
   if tp then
     local reg = ovreg or tp.reg
@@ -266,18 +271,28 @@ local function parse_reg(expr)
       elseif parse_reg_type ~= rt then
 	werror("register size mismatch")
       end
-      return r, tp
+      return shl(r, shift), tp
     end
+  end
+  local vrt, vreg = match(expr, "^R([xwqdshb])(%b())$")
+  if vreg then
+    if not parse_reg_type then
+      parse_reg_type = vrt
+    elseif parse_reg_type ~= vrt then
+      werror("register size mismatch")
+    end
+    if shift then waction("VREG", shift, vreg) end
+    return 0
   end
   werror("bad register name `"..expr.."'")
 end
 
 local function parse_reg_base(expr)
   if expr == "sp" then return 0x3e0 end
-  local base, tp = parse_reg(expr)
+  local base, tp = parse_reg(expr, 5)
   if parse_reg_type ~= "x" then werror("bad register type") end
   parse_reg_type = false
-  return shl(base, 5), tp
+  return base, tp
 end
 
 local parse_ctx = {}
@@ -297,7 +312,7 @@ local function parse_number(n)
   local code = loadenv("return "..n)
   if code then
     local ok, y = pcall(code)
-    if ok then return y end
+    if ok and type(y) == "number" then return y end
   end
   return nil
 end
@@ -403,7 +418,7 @@ local function parse_imm_load(imm, scale)
     end
     werror("out of range immediate `"..imm.."'")
   else
-    waction("IMML", 0, imm)
+    waction("IMML", scale, imm)
     return 0
   end
 end
@@ -462,6 +477,7 @@ end
 
 local function parse_load(params, nparams, n, op)
   if params[n+2] then werror("too many operands") end
+  local scale = shr(op, 30)
   local pn, p2 = params[n], params[n+1]
   local p1, wb = match(pn, "^%[%s*(.-)%s*%](!?)$")
   if not p1 then
@@ -470,14 +486,13 @@ local function parse_load(params, nparams, n, op)
       if reg and tailr ~= "" then
 	local base, tp = parse_reg_base(reg)
 	if tp then
-	  waction("IMML", 0, format(tp.ctypefmt, tailr))
+	  waction("IMML", scale, format(tp.ctypefmt, tailr))
 	  return op + base
 	end
       end
     end
     werror("expected address operand")
   end
-  local scale = shr(op, 30)
   if p2 then
     if wb == "!" then werror("bad use of '!'") end
     op = op + parse_reg_base(p1) + parse_imm(p2, 9, 12, 0, true) + 0x400
@@ -494,7 +509,7 @@ local function parse_load(params, nparams, n, op)
 	op = op + parse_imm_load(imm, scale)
       else
 	local p2b, p3b, p3s = match(p2a, "^,%s*([^,%s]*)%s*,?%s*(%S*)%s*(.*)$")
-	op = op + shl(parse_reg(p2b), 16) + 0x00200800
+	op = op + parse_reg(p2b, 16) + 0x00200800
 	if parse_reg_type ~= "x" and parse_reg_type ~= "w" then
 	  werror("bad index register type")
 	end
@@ -561,14 +576,14 @@ local function parse_load_pair(params, nparams, n, op)
 end
 
 local function parse_label(label, def)
-  local prefix = sub(label, 1, 2)
+  local prefix = label:sub(1, 2)
   -- =>label (pc label reference)
   if prefix == "=>" then
-    return "PC", 0, sub(label, 3)
+    return "PC", 0, label:sub(3)
   end
   -- ->name (global label reference)
   if prefix == "->" then
-    return "LG", map_global[sub(label, 3)]
+    return "LG", map_global[label:sub(3)]
   end
   if def then
     -- [1-9] (local label definition)
@@ -586,8 +601,11 @@ local function parse_label(label, def)
     if extname then
       return "EXT", map_extern[extname]
     end
+    -- &expr (pointer)
+    if label:sub(1, 1) == "&" then
+      return "A", 0, format("(ptrdiff_t)(%s)", label:sub(2))
+    end
   end
-  werror("bad label `"..label.."'")
 end
 
 local function branch_type(op)
@@ -620,24 +638,24 @@ local function alias_bfx(p)
 end
 
 local function alias_bfiz(p)
-  parse_reg(p[1])
+  parse_reg(p[1], 0)
   if parse_reg_type == "w" then
-    p[3] = "#-("..p[3]:sub(2)..")%32"
+    p[3] = "#(32-("..p[3]:sub(2).."))%32"
     p[4] = "#("..p[4]:sub(2)..")-1"
   else
-    p[3] = "#-("..p[3]:sub(2)..")%64"
+    p[3] = "#(64-("..p[3]:sub(2).."))%64"
     p[4] = "#("..p[4]:sub(2)..")-1"
   end
 end
 
 local alias_lslimm = op_alias("ubfm_4", function(p)
-  parse_reg(p[1])
+  parse_reg(p[1], 0)
   local sh = p[3]:sub(2)
   if parse_reg_type == "w" then
-    p[3] = "#-("..sh..")%32"
+    p[3] = "#(32-("..sh.."))%32"
     p[4] = "#31-("..sh..")"
   else
-    p[3] = "#-("..sh..")%64"
+    p[3] = "#(64-("..sh.."))%64"
     p[4] = "#63-("..sh..")"
   end
 end)
@@ -881,25 +899,25 @@ end
 
 -- Handle opcodes defined with template strings.
 local function parse_template(params, template, nparams, pos)
-  local op = tonumber(sub(template, 1, 8), 16)
+  local op = tonumber(template:sub(1, 8), 16)
   local n = 1
   local rtt = {}
 
   parse_reg_type = false
 
   -- Process each character.
-  for p in gmatch(sub(template, 9), ".") do
+  for p in gmatch(template:sub(9), ".") do
     local q = params[n]
     if p == "D" then
-      op = op + parse_reg(q); n = n + 1
+      op = op + parse_reg(q, 0); n = n + 1
     elseif p == "N" then
-      op = op + shl(parse_reg(q), 5); n = n + 1
+      op = op + parse_reg(q, 5); n = n + 1
     elseif p == "M" then
-      op = op + shl(parse_reg(q), 16); n = n + 1
+      op = op + parse_reg(q, 16); n = n + 1
     elseif p == "A" then
-      op = op + shl(parse_reg(q), 10); n = n + 1
+      op = op + parse_reg(q, 10); n = n + 1
     elseif p == "m" then
-      op = op + shl(parse_reg(params[n-1]), 16)
+      op = op + parse_reg(params[n-1], 16)
 
     elseif p == "p" then
       if q == "sp" then params[n] = "@x31" end
@@ -930,8 +948,14 @@ local function parse_template(params, template, nparams, pos)
 
     elseif p == "B" then
       local mode, v, s = parse_label(q, false); n = n + 1
+      if not mode then werror("bad label `"..q.."'") end
       local m = branch_type(op)
-      waction("REL_"..mode, v+m, s, 1)
+      if mode == "A" then
+	waction("REL_"..mode, v+m, format("(unsigned int)(%s)", s))
+	actargs[#actargs+1] = format("(unsigned int)((%s)>>32)", s)
+      else
+	waction("REL_"..mode, v+m, s, 1)
+      end
 
     elseif p == "I" then
       op = op + parse_imm12(q); n = n + 1
@@ -977,8 +1001,8 @@ function op_template(params, template, nparams)
   if not params then return template:gsub("%x%x%x%x%x%x%x%x", "") end
 
   -- Limit number of section buffer positions used by a single dasm_put().
-  -- A single opcode needs a maximum of 3 positions.
-  if secpos+3 > maxsecpos then wflush() end
+  -- A single opcode needs a maximum of 4 positions.
+  if secpos+4 > maxsecpos then wflush() end
   local pos = wpos()
   local lpos, apos, spos = #actlist, #actargs, secpos
 
@@ -990,9 +1014,11 @@ function op_template(params, template, nparams)
     actlist[lpos+1] = nil
     actlist[lpos+2] = nil
     actlist[lpos+3] = nil
+    actlist[lpos+4] = nil
     actargs[apos+1] = nil
     actargs[apos+2] = nil
     actargs[apos+3] = nil
+    actargs[apos+4] = nil
   end
   error(err, 0)
 end
@@ -1036,23 +1062,50 @@ map_op[".label_1"] = function(params)
   if not params then return "[1-9] | ->global | =>pcexpr" end
   if secpos+1 > maxsecpos then wflush() end
   local mode, n, s = parse_label(params[1], true)
-  if mode == "EXT" then werror("bad label definition") end
+  if not mode or mode == "EXT" then werror("bad label definition") end
   waction("LABEL_"..mode, n, s, 1)
 end
 
 ------------------------------------------------------------------------------
 
 -- Pseudo-opcodes for data storage.
-map_op[".long_*"] = function(params)
+local function op_data(params)
   if not params then return "imm..." end
+  local sz = params.op == ".long" and 4 or 8
   for _,p in ipairs(params) do
-    local n = tonumber(p)
-    if not n then werror("bad immediate `"..p.."'") end
-    if n < 0 then n = n + 2^32 end
-    wputw(n)
+    local imm = parse_number(p)
+    if imm then
+      local n = tobit(imm)
+      if n == imm or (n < 0 and n + 2^32 == imm) then
+	wputw(n < 0 and n + 2^32 or n)
+	if sz == 8 then
+	  wputw(imm < 0 and 0xffffffff or 0)
+	end
+      elseif sz == 4 then
+	werror("bad immediate `"..p.."'")
+      else
+	imm = nil
+      end
+    end
+    if not imm then
+      local mode, v, s = parse_label(p, false)
+      if sz == 4 then
+	if mode then werror("label does not fit into .long") end
+	waction("IMMV", 0, p)
+      elseif mode and mode ~= "A" then
+	waction("REL_"..mode, v+0x8000, s, 1)
+      else
+	if mode == "A" then p = s end
+	waction("IMMV", 0, format("(unsigned int)(%s)", p))
+	waction("IMMV", 0, format("(unsigned int)((unsigned long long)(%s)>>32)", p))
+      end
+    end
     if secpos+2 > maxsecpos then wflush() end
   end
 end
+map_op[".long_*"] = op_data
+map_op[".quad_*"] = op_data
+map_op[".addr_*"] = op_data
 
 -- Alignment pseudo-opcode.
 map_op[".align_1"] = function(params)

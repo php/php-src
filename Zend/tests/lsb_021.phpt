@@ -24,6 +24,10 @@ class B extends A {
         B::test();
         call_user_func("B::test");
         call_user_func(array("B", "test"));
+
+        (self::class)::test();
+        call_user_func(self::class . "::test");
+        call_user_func(array(self::class, "test"));
     }
 }
 
@@ -35,16 +39,27 @@ C::testForward();
 C::testNoForward();
 
 ?>
---EXPECT--
+--EXPECTF--
+C
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
+C
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 C
 C
+
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
 C
-C
-C
+
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
 C
 A
 A
 A
+B
+B
+B
 B
 B
 B

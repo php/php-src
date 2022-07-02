@@ -1,10 +1,7 @@
 --TEST--
 Bug #42259 (SimpleXMLIterator loses ancestry)
---SKIPIF--
-<?php
-if (!extension_loaded('simplexml')) print 'skip';
-if (!extension_loaded("libxml")) print "skip LibXML not present";
-?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF
@@ -37,7 +34,6 @@ foreach ($rit as $child) {
   echo count($ancestry) . ' steps: ' . $path . PHP_EOL;
 }
 ?>
-===DONE===
 --EXPECT--
 3 steps: xml/fieldset1/field1
 3 steps: xml/fieldset1/field2
@@ -46,4 +42,3 @@ foreach ($rit as $child) {
 4 steps: xml/fieldset2/options/option3
 3 steps: xml/fieldset2/field1
 3 steps: xml/fieldset2/field2
-===DONE===

@@ -889,7 +889,7 @@ decode_operand(struct ud           *u,
 /* 
  * decode_operands
  *
- *    Disassemble upto 3 operands of the current instruction being
+ *    Disassemble up to 3 operands of the current instruction being
  *    disassembled. By the end of the function, the operand fields
  *    of the ud structure will have been filled.
  */

@@ -7,6 +7,8 @@ session.save_path=
 session.name=PHPSESSID
 session.gc_probability=0
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -14,16 +16,11 @@ session.save_handler=files
 
 ob_start();
 
-/*
- * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c
- */
-
 echo "*** Testing session_set_save_handler() : test write short circuit ***\n";
 
 require_once "save_handler.inc";
-$path = __DIR__;
+$path = __DIR__ . '/session_set_save_handler_variation6';
+@mkdir($path);
 session_save_path($path);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc", "create_sid", "validate_sid", "update");
 
@@ -59,6 +56,7 @@ session_start();
 session_destroy();
 
 ob_end_flush();
+rmdir($path);
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : test write short circuit ***

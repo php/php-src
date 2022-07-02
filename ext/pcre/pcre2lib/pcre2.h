@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, second API, to be
 #included by applications that call PCRE2 functions.
 
-           Copyright (c) 2016-2018 University of Cambridge
+           Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE2_MAJOR           10
-#define PCRE2_MINOR           33
+#define PCRE2_MINOR           39
 #define PCRE2_PRERELEASE      
-#define PCRE2_DATE            2019-04-16
+#define PCRE2_DATE            2021-10-29
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -84,8 +84,8 @@ set, we ensure here that it has no effect. */
 /* Have to include limits.h, stdlib.h, and inttypes.h to ensure that size_t and
 uint8_t, UCHAR_MAX, etc are defined. Some systems that do have inttypes.h do
 not have stdint.h, which is why we use inttypes.h, which according to the C
-standard is a superset of stdint.h. If none of these headers are available,
-the relevant values must be provided by some other means. */
+standard is a superset of stdint.h. If inttypes.h is not available the build
+will break and the relevant values must be provided by some other means. */
 
 #include <limits.h>
 #include <stdlib.h>
@@ -142,6 +142,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_USE_OFFSET_LIMIT    0x00800000u  /*   J M D */
 #define PCRE2_EXTENDED_MORE       0x01000000u  /* C       */
 #define PCRE2_LITERAL             0x02000000u  /* C       */
+#define PCRE2_MATCH_INVALID_UTF   0x04000000u  /*   J M D */
 
 /* An additional compile options word is available in the compile context. */
 
@@ -151,6 +152,7 @@ D   is inspected during pcre2_dfa_match() execution
 #define PCRE2_EXTRA_MATCH_LINE               0x00000008u  /* C */
 #define PCRE2_EXTRA_ESCAPED_CR_IS_LF         0x00000010u  /* C */
 #define PCRE2_EXTRA_ALT_BSUX                 0x00000020u  /* C */
+#define PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK     0x00000040u  /* C */
 
 /* These are for pcre2_jit_compile(). */
 
@@ -180,6 +182,9 @@ pcre2_jit_match() ignores the latter since it bypasses all sanity checks). */
 #define PCRE2_SUBSTITUTE_OVERFLOW_LENGTH  0x00001000u  /* pcre2_substitute() only */
 #define PCRE2_NO_JIT                      0x00002000u  /* Not for pcre2_dfa_match() */
 #define PCRE2_COPY_MATCHED_SUBJECT        0x00004000u
+#define PCRE2_SUBSTITUTE_LITERAL          0x00008000u  /* pcre2_substitute() only */
+#define PCRE2_SUBSTITUTE_MATCHED          0x00010000u  /* pcre2_substitute() only */
+#define PCRE2_SUBSTITUTE_REPLACEMENT_ONLY 0x00020000u  /* pcre2_substitute() only */
 
 /* Options for pcre2_pattern_convert(). */
 
@@ -305,6 +310,9 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_INVALID_HYPHEN_IN_OPTIONS      194
 #define PCRE2_ERROR_ALPHA_ASSERTION_UNKNOWN        195
 #define PCRE2_ERROR_SCRIPT_RUN_NOT_AVAILABLE       196
+#define PCRE2_ERROR_TOO_MANY_CAPTURES              197
+#define PCRE2_ERROR_CONDITION_ATOMIC_ASSERTION_EXPECTED  198
+#define PCRE2_ERROR_BACKSLASH_K_IN_LOOKAROUND      199
 
 
 /* "Expected" matching error codes: no match and partial match. */
@@ -390,6 +398,7 @@ released, the numbers must not be changed. */
 #define PCRE2_ERROR_HEAPLIMIT         (-63)
 #define PCRE2_ERROR_CONVERT_SYNTAX    (-64)
 #define PCRE2_ERROR_INTERNAL_DUPMATCH (-65)
+#define PCRE2_ERROR_DFA_UINVALID_UTF  (-66)
 
 
 /* Request types for pcre2_pattern_info() */
@@ -441,6 +450,7 @@ released, the numbers must not be changed. */
 #define PCRE2_CONFIG_HEAPLIMIT              12
 #define PCRE2_CONFIG_NEVER_BACKSLASH_C      13
 #define PCRE2_CONFIG_COMPILED_WIDTHS        14
+#define PCRE2_CONFIG_TABLES_LENGTH          15
 
 
 /* Types for code units in patterns and subject strings. */
@@ -580,7 +590,7 @@ PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_bsr(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
-  pcre2_set_character_tables(pcre2_compile_context *, const unsigned char *); \
+  pcre2_set_character_tables(pcre2_compile_context *, const uint8_t *); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_compile_extra_options(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
@@ -675,6 +685,8 @@ PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
   pcre2_match_data_free(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SPTR PCRE2_CALL_CONVENTION \
   pcre2_get_mark(pcre2_match_data *); \
+PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION \
+  pcre2_get_match_data_size(pcre2_match_data *); \
 PCRE2_EXP_DECL uint32_t PCRE2_CALL_CONVENTION \
   pcre2_get_ovector_count(pcre2_match_data *); \
 PCRE2_EXP_DECL PCRE2_SIZE PCRE2_CALL_CONVENTION \
@@ -773,7 +785,8 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_get_error_message(int, PCRE2_UCHAR *, PCRE2_SIZE); \
 PCRE2_EXP_DECL const uint8_t PCRE2_CALL_CONVENTION \
   *pcre2_maketables(pcre2_general_context *); \
-
+PCRE2_EXP_DECL void PCRE2_CALL_CONVENTION \
+  pcre2_maketables_free(pcre2_general_context *, const uint8_t *);
 
 /* Define macros that generate width-specific names from generic versions. The
 three-level macro scheme is necessary to get the macros expanded when we want
@@ -838,6 +851,7 @@ pcre2_compile are called by application code. */
 #define pcre2_general_context_free            PCRE2_SUFFIX(pcre2_general_context_free_)
 #define pcre2_get_error_message               PCRE2_SUFFIX(pcre2_get_error_message_)
 #define pcre2_get_mark                        PCRE2_SUFFIX(pcre2_get_mark_)
+#define pcre2_get_match_data_size             PCRE2_SUFFIX(pcre2_get_match_data_size_)
 #define pcre2_get_ovector_pointer             PCRE2_SUFFIX(pcre2_get_ovector_pointer_)
 #define pcre2_get_ovector_count               PCRE2_SUFFIX(pcre2_get_ovector_count_)
 #define pcre2_get_startchar                   PCRE2_SUFFIX(pcre2_get_startchar_)
@@ -848,6 +862,7 @@ pcre2_compile are called by application code. */
 #define pcre2_jit_stack_create                PCRE2_SUFFIX(pcre2_jit_stack_create_)
 #define pcre2_jit_stack_free                  PCRE2_SUFFIX(pcre2_jit_stack_free_)
 #define pcre2_maketables                      PCRE2_SUFFIX(pcre2_maketables_)
+#define pcre2_maketables_free                 PCRE2_SUFFIX(pcre2_maketables_free_)
 #define pcre2_match                           PCRE2_SUFFIX(pcre2_match_)
 #define pcre2_match_context_copy              PCRE2_SUFFIX(pcre2_match_context_copy_)
 #define pcre2_match_context_create            PCRE2_SUFFIX(pcre2_match_context_create_)

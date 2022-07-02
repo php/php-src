@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, setRelaxNGSchema
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 
@@ -42,15 +42,15 @@ $reader->close();
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 
-if ($reader->setRelaxNGSchema('')) {
-	echo 'failed';
+try {
+    $reader->setRelaxNGSchema('');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
 }
+
 $reader->close();
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 file relaxNG: ok
 string relaxNG: ok
-
-Warning: XMLReader::setRelaxNGSchema(): Schema data source is required in %s on line %d
-===DONE===
+XMLReader::setRelaxNGSchema(): Argument #1 ($filename) cannot be empty

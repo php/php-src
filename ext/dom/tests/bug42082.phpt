@@ -1,7 +1,7 @@
 --TEST--
 Bug #42082 (NodeList length zero should be empty)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();
@@ -16,7 +16,6 @@ $doc->loadXML("<element></element>");
 var_dump($doc->firstChild->nodeValue, empty($doc->firstChild->nodeValue), isset($doc->firstChild->nodeValue));
 var_dump(empty($doc->nodeType), empty($doc->firstChild->nodeType))
 ?>
-===DONE===
 --EXPECT--
 DOMNodeList
 int(0)
@@ -27,4 +26,3 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-===DONE===

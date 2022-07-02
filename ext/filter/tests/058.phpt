@@ -1,7 +1,7 @@
 --TEST--
 FILTER_VALIDATE_EMAIL unicode support (https://tools.ietf.org/html/rfc6531)
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $values = Array(
@@ -28,7 +28,7 @@ $values = Array(
 'ǅǼ੧ఘⅧ⒇৪@example.com',
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE));
+    var_dump(filter_var($value, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE));
 }
 echo "Done\n";
 ?>

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM MIPS64 module.
 --
--- Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 ------------------------------------------------------------------------------
 -- This module just sets 64 bit mode for the combined MIPS/MIPS64 module.

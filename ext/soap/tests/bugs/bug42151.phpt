@@ -1,27 +1,27 @@
 --TEST--
 Bug #42151 (__destruct functions not called after catching a SoapFault exception)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class foo {
-	function __construct(){
-		$foo = @ new SoapClient('httpx://');
-	}
-	function __destruct(){
-		echo 'I never get executed.' . "\n";
-	}
+    function __construct(){
+        $foo = @ new SoapClient('httpx://');
+    }
+    function __destruct(){
+        echo 'I never get executed.' . "\n";
+    }
 }
 class bar {
-	function __destruct(){
-		echo 'I don\'t get executed either.' . "\n";
-	}
+    function __destruct(){
+        echo 'I don\'t get executed either.' . "\n";
+    }
 }
 try {
-	$bar = new bar();
-	$foo = new foo();
+    $bar = new bar();
+    $foo = new foo();
 } catch (Exception $e){
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 echo "ok\n";
 ?>

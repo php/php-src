@@ -1,7 +1,7 @@
 --TEST--
 Bug #41337 (WSDL parsing doesn't ignore non soap bindings)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled",0);

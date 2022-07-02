@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -25,13 +25,12 @@ typedef struct {
 	uint32_t count[2];		/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_SHA1_CTX;
+#define PHP_SHA1_SPEC "l5l2b64."
 
-PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX *);
+#define PHP_SHA1Init(ctx) PHP_SHA1InitArgs(ctx, NULL)
+PHPAPI void PHP_SHA1InitArgs(PHP_SHA1_CTX *, ZEND_ATTRIBUTE_UNUSED HashTable *);
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, size_t);
 PHPAPI void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
-PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest);
-
-PHP_FUNCTION(sha1);
-PHP_FUNCTION(sha1_file);
+PHPAPI void make_sha1_digest(char *sha1str, const unsigned char *digest);
 
 #endif

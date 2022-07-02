@@ -1,7 +1,7 @@
 --TEST--
 DRCP: oci_new_connect()
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 oci8.connection_class=test
 oci8.old_oci_close_semantics=0
@@ -24,9 +24,9 @@ $rn2 = (int)$c2;
 // rn1 and rn2 should be different.
 
 if ($rn1 === $rn2)
-	echo "First and second connections share a resource: Not OK\n";
+    echo "First and second connections share a resource: Not OK\n";
 else
-	echo "First and second connections are different  OK\n";
+    echo "First and second connections are different  OK\n";
 
 // Close the connections
 oci_close($c1);

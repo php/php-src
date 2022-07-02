@@ -1,8 +1,9 @@
 --TEST--
 Bug #72333: fwrite() on non-blocking SSL sockets doesn't work
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--

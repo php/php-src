@@ -17,12 +17,12 @@ var_dump(array_search(-1,$a, true));
 echo "Done\n";
 ?>
 --EXPECT--
-int(1)
+bool(false)
 bool(false)
 int(1)
 int(1)
 int(2)
 string(1) "c"
-int(1)
+string(1) "c"
 bool(false)
 Done

@@ -3,8 +3,9 @@ ldap_delete() - Delete operation that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -14,19 +15,18 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 // Invalid DN
 var_dump(
-	ldap_delete($link, "weirdAttribute=val"),
-	ldap_error($link),
-	ldap_errno($link)
+    ldap_delete($link, "weirdAttribute=val"),
+    ldap_error($link),
+    ldap_errno($link)
 );
 
 // Deleting unexisting data
 var_dump(
-	ldap_delete($link, "dc=my-domain,$base"),
-	ldap_error($link),
-	ldap_errno($link)
+    ldap_delete($link, "dc=my-domain,$base"),
+    ldap_error($link),
+    ldap_errno($link)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -43,4 +43,3 @@ Warning: ldap_delete(): Delete: No such object in %s on line %d
 bool(false)
 string(14) "No such object"
 int(32)
-===DONE===

@@ -2,11 +2,6 @@
 Test usort() function : usage variations - numeric data
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays of numeric data to usort() to test how it is re-ordered
  */
@@ -66,7 +61,6 @@ echo "\n-- Sorting empty array --\n";
 var_dump( usort($empty_array, 'cmp_function') );
 var_dump($empty_array);
 ?>
-===DONE===
 --EXPECT--
 *** Testing usort() : usage variation ***
 
@@ -152,4 +146,3 @@ array(7) {
 bool(true)
 array(0) {
 }
-===DONE===

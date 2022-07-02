@@ -1,16 +1,20 @@
 --TEST--
 tlsv1.0 stream wrapper
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'tlsv1.0_wrapper.pem.tmp';
+
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+        'local_cert' => '%s',
+        'security_level' => 0,
     ]]);
 
     $server = stream_socket_server('tlsv1.0://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
@@ -20,12 +24,14 @@ $serverCode = <<<'CODE'
         @stream_socket_accept($server, 3);
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
+        'security_level' => 0,
     ]]);
 
     phpt_wait();
@@ -40,8 +46,16 @@ $clientCode = <<<'CODE'
     var_dump($client);
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey('tlsv1.0_wrapper', $certFile);
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'tlsv1.0_wrapper.pem.tmp');
 ?>
 --EXPECTF--
 resource(%d) of type (stream)

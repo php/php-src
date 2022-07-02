@@ -1,5 +1,5 @@
 --TEST--
-Bug #70957 (self::class can not be resolved with reflection for abstract class)
+Bug #70957 (self::class cannot be resolved with reflection for abstract class)
 --FILE--
 <?php
 
@@ -19,4 +19,4 @@ class B extends Foo
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of T::bar() must be compatible with Foo::bar($a = 'Foo') in %sbug70957.php on line %d
+Fatal error: Declaration of T::bar() must be compatible with Foo::bar($a = 'Foo') in %s on line %d

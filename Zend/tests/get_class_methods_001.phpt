@@ -4,18 +4,18 @@ get_class_methods(): Testing scope
 <?php
 
 abstract class X {
-	public function a() { }
-	private function b() { }
-	protected function c() { }
+    public function a() { }
+    private function b() { }
+    protected function c() { }
 }
 
 class Y extends X {
-	private function bb() { }
+    private function bb() { }
 
-	static public function test() {
-		var_dump(get_class_methods('X'));
-		var_dump(get_class_methods('Y'));
-	}
+    static public function test() {
+        var_dump(get_class_methods('X'));
+        var_dump(get_class_methods('Y'));
+    }
 }
 
 

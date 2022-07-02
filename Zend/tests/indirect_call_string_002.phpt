@@ -77,10 +77,10 @@ try {
 --EXPECT--
 string(0) ""
 string(0) ""
-Class '' not found
-Class '' not found
-Class '' not found
-Class '' not found
+Class "" not found
+Class "" not found
+Class "" not found
+Class "" not found
 Call to undefined function Class:()
 Call to undefined function :method()
 Call to undefined function :()

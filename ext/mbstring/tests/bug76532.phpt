@@ -1,7 +1,7 @@
 --TEST--
 Bug #76532 (Integer overflow and excessive memory usage in mb_strimwidth)
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 $string_to_trim = '得很幸福。有一天，一个长得很丑的老人带着一只木马来到王';

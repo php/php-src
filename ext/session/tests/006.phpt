@@ -1,5 +1,7 @@
 --TEST--
 correct instantiation of references between variables in sessions
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -13,7 +15,7 @@ session.save_handler=files
 error_reporting(E_ALL);
 ob_start();
 
-session_id("abtest");
+session_id("test006");
 session_start();
 
 class a {

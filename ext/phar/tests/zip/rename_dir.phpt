@@ -1,7 +1,7 @@
 --TEST--
 Phar: rename_dir test zip-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -31,4 +31,4 @@ echo file_get_contents($alias . '/a/x') . "\n";
 a
 a
 
-Warning: file_get_contents(phar://%srename_dir.phar.zip/a/x): failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.zip" in %srename_dir.php on line %d
+Warning: file_get_contents(phar://%srename_dir.phar.zip/a/x): Failed to open stream: phar error: "a/x" is not a file in phar "%srename_dir.phar.zip" in %srename_dir.php on line %d

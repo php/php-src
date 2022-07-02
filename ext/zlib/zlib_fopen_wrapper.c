@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -15,7 +15,9 @@
    +----------------------------------------------------------------------+
  */
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 
 #include "php.h"
 #include "php_zlib.h"
@@ -112,7 +114,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	/* sanity check the stream: it can be either read-only or write-only */
 	if (strchr(mode, '+')) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "cannot open a zlib stream for reading and writing at the same time!");
+			php_error_docref(NULL, E_WARNING, "Cannot open a zlib stream for reading and writing at the same time!");
 		}
 		return NULL;
 	}

@@ -1,7 +1,7 @@
 --TEST--
 Phar::convertToZip|Tar|Phar() repeated (phar_based archives)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -85,7 +85,6 @@ var_dump($phar->getStub());
 var_dump($phar->getAlias());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -95,8 +94,6 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.2.phar.zip');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.phar.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.2.2.3.phar.zip');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
 ?>
 --EXPECTF--
 =================== new Phar() =======================
@@ -146,4 +143,3 @@ bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
 NULL
-===DONE===

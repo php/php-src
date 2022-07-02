@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,19 +29,13 @@
  */
 
 #include "php.h"
-#include "php_iptc.h"
 #include "ext/standard/head.h"
 
 #include <sys/stat.h>
 
-#ifdef PHP_WIN32
-# include "win32/php_stdint.h"
-#else
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# elif HAVE_STDINT_H
-#  include <stdint.h>
-# endif
+#include <stdint.h>
+#ifndef PHP_WIN32
+# include <inttypes.h>
 #endif
 
 /* some defines for the different JPEG block types */
@@ -78,8 +72,7 @@
 #define M_APP14 0xee
 #define M_APP15 0xef
 
-/* {{{ php_iptc_put1
- */
+/* {{{ php_iptc_put1 */
 static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **spoolbuf)
 {
 	if (spool > 0)
@@ -87,12 +80,11 @@ static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **s
 
 	if (spoolbuf) *(*spoolbuf)++ = c;
 
-  	return c;
+	return c;
 }
 /* }}} */
 
-/* {{{ php_iptc_get1
- */
+/* {{{ php_iptc_get1 */
 static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf)
 {
 	int c;
@@ -113,26 +105,24 @@ static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf)
 }
 /* }}} */
 
-/* {{{ php_iptc_read_remaining
- */
+/* {{{ php_iptc_read_remaining */
 static int php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf)
 {
-  	while (php_iptc_get1(fp, spool, spoolbuf) != EOF) continue;
+	while (php_iptc_get1(fp, spool, spoolbuf) != EOF) continue;
 
 	return M_EOI;
 }
 /* }}} */
 
-/* {{{ php_iptc_skip_variable
- */
+/* {{{ php_iptc_skip_variable */
 static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
 {
 	unsigned int  length;
 	int c1, c2;
 
-    if ((c1 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
+	if ((c1 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
 
-    if ((c2 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
+	if ((c2 = php_iptc_get1(fp, spool, spoolbuf)) == EOF) return M_EOI;
 
 	length = (((unsigned char) c1) << 8) + ((unsigned char) c2);
 
@@ -145,41 +135,39 @@ static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
 }
 /* }}} */
 
-/* {{{ php_iptc_next_marker
- */
+/* {{{ php_iptc_next_marker */
 static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf)
 {
-    int c;
+	int c;
 
-    /* skip unimportant stuff */
+	/* skip unimportant stuff */
 
-    c = php_iptc_get1(fp, spool, spoolbuf);
+	c = php_iptc_get1(fp, spool, spoolbuf);
 
 	if (c == EOF) return M_EOI;
 
-    while (c != 0xff) {
-        if ((c = php_iptc_get1(fp, spool, spoolbuf)) == EOF)
-            return M_EOI; /* we hit EOF */
-    }
+	while (c != 0xff) {
+		if ((c = php_iptc_get1(fp, spool, spoolbuf)) == EOF)
+			return M_EOI; /* we hit EOF */
+	}
 
-    /* get marker byte, swallowing possible padding */
-    do {
-        c = php_iptc_get1(fp, 0, 0);
+	/* get marker byte, swallowing possible padding */
+	do {
+		c = php_iptc_get1(fp, 0, 0);
 		if (c == EOF)
-            return M_EOI;       /* we hit EOF */
+			return M_EOI;       /* we hit EOF */
 		else
 		if (c == 0xff)
 			php_iptc_put1(fp, spool, (unsigned char)c, spoolbuf);
-    } while (c == 0xff);
+	} while (c == 0xff);
 
-    return (unsigned int) c;
+	return (unsigned int) c;
 }
 /* }}} */
 
 static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 
-/* {{{ proto string|false iptcembed(string iptcdata, string jpeg_file_name [, int spool])
-   Embed binary IPTC data into a JPEG image. */
+/* {{{ Embed binary IPTC data into a JPEG image. */
 PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
@@ -190,8 +178,8 @@ PHP_FUNCTION(iptcembed)
 	size_t inx;
 	zend_string *spoolbuf = NULL;
 	unsigned char *poi = NULL;
-	zend_stat_t sb;
-	zend_bool written = 0;
+	zend_stat_t sb = {0};
+	bool written = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(iptcdata, iptcdata_len)
@@ -205,8 +193,8 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (iptcdata_len >= SIZE_MAX - sizeof(psheader) - 1025) {
-		php_error_docref(NULL, E_WARNING, "IPTC data too large");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is too large");
+		RETURN_THROWS();
 	}
 
 	if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {
@@ -215,7 +203,9 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (spool < 2) {
-		zend_fstat(fileno(fp), &sb);
+		if (zend_fstat(fileno(fp), &sb) != 0) {
+			RETURN_FALSE;
+		}
 
 		spoolbuf = zend_string_safe_alloc(1, iptcdata_len + sizeof(psheader) + 1024 + 1, sb.st_size, 0);
 		poi = (unsigned char*)ZSTR_VAL(spoolbuf);
@@ -309,8 +299,7 @@ PHP_FUNCTION(iptcembed)
 }
 /* }}} */
 
-/* {{{ proto array|false iptcparse(string iptcdata)
-   Parse binary IPTC-data into associative array */
+/* {{{ Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
 	size_t inx = 0, len;

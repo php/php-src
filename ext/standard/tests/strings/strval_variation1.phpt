@@ -2,11 +2,6 @@
 Test strval() function : usage variations  - Pass different data types as strval
 --FILE--
 <?php
-/* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable.
- * Source code: ext/standard/string.c
- */
-
 echo "*** Testing strval() : usage variations ***\n";
 
 //get an unset variable
@@ -25,59 +20,59 @@ class MyClass
 
 //array of values to iterate over
 $values = array(
-		  //Decimal values
+          //Decimal values
 /*1*/	  0,
-		  1,
-		  12345,
-		  -12345,
+          1,
+          12345,
+          -12345,
 
-		  //Octal values
+          //Octal values
 /*5*/	  02,
-		  010,
-		  030071,
-		  -030071,
+          010,
+          030071,
+          -030071,
 
-		  //Hexadecimal values
+          //Hexadecimal values
 /*9*/	  0x0,
-		  0x1,
-		  0xABCD,
-		  -0xABCD,
+          0x1,
+          0xABCD,
+          -0xABCD,
 
-	      // float data
+          // float data
 /*13*/    100.5,
-	      -100.5,
-	      100.1234567e10,
-	      100.7654321E-10,
-	      .5,
+          -100.5,
+          100.1234567e10,
+          100.7654321E-10,
+          .5,
 
-	      // array data
+          // array data
 /*18*/    array(),
-	      array('color' => 'red', 'item' => 'pen'),
+          array('color' => 'red', 'item' => 'pen'),
 
-	      // null data
+          // null data
 /*20*/    NULL,
-	      null,
+          null,
 
-	      // boolean data
+          // boolean data
 /*22*/    true,
-	      false,
-	      TRUE,
-	      FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-	      // empty data
+          // empty data
 /*26*/    "",
-	      '',
+          '',
 
-	      // object data
+          // object data
 /*28*/    new MyClass(),
 
-	      // resource
+          // resource
 /*29*/    $file_handle,
 
-	      // undefined data
+          // undefined data
 /*30*/    @$undefined_var,
 
-	      // unset data
+          // unset data
 /*31*/    @$unset_var,
 );
 
@@ -89,7 +84,6 @@ foreach($values as $value) {
       $iterator++;
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strval() : usage variations ***
 
@@ -189,4 +183,3 @@ string(0) ""
 
 -- Iteration 31 --
 string(0) ""
-===DONE===

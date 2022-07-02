@@ -1,32 +1,41 @@
 <?php
 
+/** @generate-class-entries */
+
 function pcntl_fork(): int {}
 
-function pcntl_waitpid(int $pid, &$status, int $options = 0, &$rusage = []): int {}
-
-function pcntl_wait(&$status, int $options = 0, &$rusage = []): int {}
+/**
+ * @param int $status
+ * @param array $resource_usage
+ */
+function pcntl_waitpid(int $process_id, &$status, int $flags = 0, &$resource_usage = []): int {}
 
 /**
- * @param callable|int $handler
+ * @param int $status
+ * @param array $resource_usage
  */
-function pcntl_signal(int $signo, $handler, bool $restart_syscalls = true): bool {}
+function pcntl_wait(&$status, int $flags = 0, &$resource_usage = []): int {}
 
-/** @return mixed */
-function pcntl_signal_get_handler(int $signo) {}
+/** @param callable|int $handler */
+function pcntl_signal(int $signal, $handler, bool $restart_syscalls = true): bool {}
+
+/** @return callable|int */
+function pcntl_signal_get_handler(int $signal) {}
 
 function pcntl_signal_dispatch(): bool {}
 
 #ifdef HAVE_SIGPROCMASK
-function pcntl_sigprocmask(int $how, array $set, &$oldset = null): bool {}
+/** @param array $old_signals */
+function pcntl_sigprocmask(int $mode, array $signals, &$old_signals = null): bool {}
 #endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
-#if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
-/** @return int|false */
-function pcntl_sigwaitinfo(array $set, &$info = []) {}
+#if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
+/** @param array $info */
+function pcntl_sigwaitinfo(array $signals, &$info = []): int|false {}
 
-/** @return int|false */
-function pcntl_sigtimedwait(array $set, &$info = [], int $seconds = 0, int $nanoseconds = 0) {}
+/** @param array $info */
+function pcntl_sigtimedwait(array $signals, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
 #endif
 #endif
 
@@ -40,35 +49,41 @@ function pcntl_wifcontinued(int $status): bool {}
 
 function pcntl_wifsignaled(int $status): bool {}
 
-/** @return int|false */
-function pcntl_wifexitstatus(int $status) {}
+function pcntl_wexitstatus(int $status): int|false {}
 
-/** @return int|false */
-function pcntl_wtermsig(int $status) {}
+function pcntl_wtermsig(int $status): int|false {}
 
-/** @return int|false */
-function pcntl_wstopsig(int $status) {}
+function pcntl_wstopsig(int $status): int|false {}
 
-/** @return false */
-function pcntl_exec(string $path, array $args = [], array $envs = []): bool {}
+function pcntl_exec(string $path, array $args = [], array $env_vars = []): bool {}
 
 function pcntl_alarm(int $seconds): int {}
 
 function pcntl_get_last_error(): int {}
 
+/** @alias pcntl_get_last_error */
+function pcntl_errno(): int {}
+
 #ifdef HAVE_GETPRIORITY
-/** @return int|false */
-function pcntl_getpriority(int $pid = UNKNOWN, int $process_identifier = PRIO_PROCESS) {}
+function pcntl_getpriority(?int $process_id = null, int $mode = PRIO_PROCESS): int|false {}
 #endif
 
 #ifdef HAVE_SETPRIORITY
-function pcntl_setpriority(int $priority, int $pid = UNKNOWN, int $process_identifier = PRIO_PROCESS): bool{}
+function pcntl_setpriority(int $priority, ?int $process_id = null, int $mode = PRIO_PROCESS): bool{}
 #endif
 
-function pcntl_strerror(int $errno): string {}
+function pcntl_strerror(int $error_code): string {}
 
-function pcntl_async_signals(bool $on = UNKNOWN): bool {}
+function pcntl_async_signals(?bool $enable = null): bool {}
 
 #ifdef HAVE_UNSHARE
 function pcntl_unshare(int $flags): bool {}
+#endif
+
+#ifdef HAVE_RFORK
+function pcntl_rfork(int $flags, int $signal = 0): int{}
+#endif
+
+#ifdef HAVE_FORKX
+function pcntl_forkx(int $flags): int{}
 #endif

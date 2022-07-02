@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #35671 (binding by name breakage)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -20,9 +21,9 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $insert = $db->prepare("insert into test (field1, field2, field3) values (:value1, :value2, :value3)");
 
 $parm = array(
-	":value1" => 15,
-	":value2" => 20,
-	":value3" => 25
+    ":value1" => 15,
+    ":value2" => 20,
+    ":value3" => 25
 );
 
 $insert->execute($parm);

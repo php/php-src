@@ -1,7 +1,7 @@
 --TEST--
 Accessing root, body, html, and head nodes..
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 $a = tidy_parse_string("<HTML><BODY BGCOLOR=#FFFFFF ALINK=#000000></BODY></HTML>", array('newline' => 'LF'));
@@ -12,7 +12,7 @@ var_dump($a->head());
 
 ?>
 --EXPECTF--
-object(tidyNode)#2 (8) {
+object(tidyNode)#2 (9) {
   ["value"]=>
   string(94) "<html>
 <head>
@@ -31,6 +31,8 @@ object(tidyNode)#2 (8) {
   int(1)
   ["proprietary"]=>
   bool(false)
+  ["id"]=>
+  NULL
   ["attribute"]=>
   NULL
   ["child"]=>

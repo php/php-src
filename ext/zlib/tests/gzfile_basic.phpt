@@ -1,9 +1,7 @@
 --TEST--
 Test function gzfile() reading a gzip relative file
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $plaintxt = <<<EOT
@@ -24,7 +22,6 @@ var_dump(gzfile( $filename ) );
 unlink($filename);
 rmdir($dirname);
 ?>
-===DONE===
 --EXPECT--
 array(3) {
   [0]=>
@@ -36,4 +33,3 @@ array(3) {
   [2]=>
   string(17) "for all languages"
 }
-===DONE===

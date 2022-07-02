@@ -10,4 +10,4 @@ echo $foo;
 
 ?>
 --EXPECTF--
-Warning: Undefined variable: foo in %s on line 6
+Warning: Undefined variable $foo in %s on line 6

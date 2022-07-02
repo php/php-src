@@ -1,8 +1,8 @@
 --TEST--
 IntlDateFormatter: several forms of the calendar arg
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php
-if (!extension_loaded('intl'))	die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
@@ -41,7 +41,6 @@ $df = new IntlDateFormatter('es_ES', 0, 0, 'UTC', 0);
 echo $df->format($ts), "\n";
 
 ?>
-==DONE==
 --EXPECTF--
 domingo%S 1 de enero de 2012 00:00:00 GMT
 domingo%S 8 de Safar de 1433 00:00:00 GMT
@@ -50,4 +49,3 @@ sábado%S 31 de diciembre de 2011 d.C. 23:00:00 Hora %Sde las Azores
 sábado%S 7 de Safar de 1433 AH 23:00:00 Hora %Sde las Azores
 domingo%S 8 de Safar de 1433 AH 00:00:00 GMT
 domingo%S 1 de enero de 2012 00:00:00 GMT
-==DONE==

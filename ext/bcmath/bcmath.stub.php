@@ -1,22 +1,31 @@
 <?php
 
-function bcadd(string $left_operand, string $right_operand, int $scale = UNKNOWN) : string {}
+/** @generate-class-entries */
 
-function bcsub(string $left_operand, string $right_operand, int $scale = UNKNOWN) : string {}
+/** @refcount 1 */
+function bcadd(string $num1, string $num2, ?int $scale = null): string {}
 
-function bcmul(string $left_operand, string $right_operand, int $scale = UNKNOWN) : string {}
+/** @refcount 1 */
+function bcsub(string $num1, string $num2, ?int $scale = null): string {}
 
-function bcdiv(string $dividend, string $divisor, int $scale = UNKNOWN) : ?string {}
+/** @refcount 1 */
+function bcmul(string $num1, string $num2, ?int $scale = null): string {}
 
-function bcmod(string $dividend, string $divisor, int $scale = UNKNOWN) : ?string {}
+/** @refcount 1 */
+function bcdiv(string $num1, string $num2, ?int $scale = null): string {}
 
-/** @return string|false */
-function bcpowmod(string $base, string $exponent, string $modulus, int $scale = UNKNOWN) {}
+/** @refcount 1 */
+function bcmod(string $num1, string $num2, ?int $scale = null): string {}
 
-function bcpow(string $base, string $exponent, int $scale = UNKNOWN) : string {}
+/** @refcount 1 */
+function bcpowmod(string $num, string $exponent, string $modulus, ?int $scale = null): string {}
 
-function bcsqrt(string $operand, int $scale = UNKNOWN) : ?string {}
+/** @refcount 1 */
+function bcpow(string $num, string $exponent, ?int $scale = null): string {}
 
-function bccomp(string $left_operand, string $right_operand, int $scale = UNKNOWN) : int {}
+/** @refcount 1 */
+function bcsqrt(string $num, ?int $scale = null): string {}
 
-function bcscale(int $scale = UNKNOWN) : int {}
+function bccomp(string $num1, string $num2, ?int $scale = null): int {}
+
+function bcscale(?int $scale = null): int {}

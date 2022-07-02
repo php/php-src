@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+file_cp1254
 --FILE--
 <?php
 /*
@@ -31,10 +33,8 @@ system("dir /b \"" . $fn . "\"");
 remove_data("file_cp1254");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\çokbaytlı işleri"
 bool(true)
 bool(true)
 çokbaytlı işleri
-===DONE===

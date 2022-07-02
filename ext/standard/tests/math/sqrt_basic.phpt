@@ -5,7 +5,6 @@ precision = 14
 --FILE--
 <?php
 /*
- * proto float sqrt(float number)
  * Function is implemented in ext/standard/math.c
 */
 

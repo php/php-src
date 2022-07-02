@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,9 +29,9 @@
 #ifdef __linux__
 # include <sys/syscall.h>
 #endif
-#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__)
+#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
-# if __FreeBSD__ && __FreeBSD_version > 1200000
+# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || defined(__sun)
 #  include <sys/random.h>
 # endif
 #endif
@@ -84,7 +84,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* }}} */
 
 /* {{{ php_random_bytes */
-PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
+PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 {
 #ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
@@ -94,13 +94,13 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 		}
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001))
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__))
 	arc4random_buf(bytes, size);
 #else
 	size_t read_bytes = 0;
 	ssize_t n;
-#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000)
-	/* Linux getrandom(2) syscall or FreeBSD getrandom(2) function*/
+#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || defined(__sun)
+	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
 	while (read_bytes < size) {
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
@@ -147,7 +147,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 		struct stat st;
 
 		if (fd < 0) {
-#if HAVE_DEV_URANDOM
+#ifdef HAVE_DEV_URANDOM
 			fd = open("/dev/urandom", O_RDONLY);
 #endif
 			if (fd < 0) {
@@ -193,8 +193,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 }
 /* }}} */
 
-/* {{{ proto string random_bytes(int length)
-Return an arbitrary length of pseudo-random bytes as binary string */
+/* {{{ Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
 {
 	zend_long size;
@@ -205,15 +204,15 @@ PHP_FUNCTION(random_bytes)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 1) {
-		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
-		return;
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	bytes = zend_string_alloc(size, 0);
 
 	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
 		zend_string_release_ex(bytes, 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZSTR_VAL(bytes)[size] = '\0';
@@ -223,7 +222,7 @@ PHP_FUNCTION(random_bytes)
 /* }}} */
 
 /* {{{ */
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw)
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw)
 {
 	zend_ulong umax;
 	zend_ulong trial;
@@ -266,8 +265,7 @@ PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_
 }
 /* }}} */
 
-/* {{{ proto int random_int(int min, int max)
-Return an arbitrary pseudo-random integer */
+/* {{{ Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
 	zend_long min;
@@ -280,12 +278,12 @@ PHP_FUNCTION(random_int)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (min > max) {
-		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
-		return;
+		zend_argument_value_error(1, "must be less than or equal to argument #2 ($max)");
+		RETURN_THROWS();
 	}
 
 	if (php_random_int_throw(min, max, &result) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(result);

@@ -2,11 +2,6 @@
 Test rsort() function : usage variations - String values
 --FILE--
 <?php
-/* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass arrays containing different string data to rsort() to test behaviour
  */
@@ -26,22 +21,22 @@ $flags = array("SORT_REGULAR" => SORT_REGULAR, "SORT_STRING" => SORT_STRING);
 $count = 1;
 // loop through to test rsort() with different arrays
 foreach ($various_arrays as $array) {
-	echo "\n-- Iteration $count --\n";
+    echo "\n-- Iteration $count --\n";
 
-	echo "- With Default sort flag -\n";
-	$temp_array = $array;
-	var_dump(rsort($temp_array) );
-	var_dump($temp_array);
+    echo "- With Default sort flag -\n";
+    $temp_array = $array;
+    var_dump(rsort($temp_array) );
+    var_dump($temp_array);
 
-	// loop through $flags array and setting all possible flag values
-	foreach($flags as $key => $flag){
-		echo "- Sort flag = $key -\n";
+    // loop through $flags array and setting all possible flag values
+    foreach($flags as $key => $flag){
+        echo "- Sort flag = $key -\n";
 
-		$temp_array = $array;
-		var_dump(rsort($temp_array, $flag) );
-		var_dump($temp_array);
-	}
-	$count++;
+        $temp_array = $array;
+        var_dump(rsort($temp_array, $flag) );
+        var_dump($temp_array);
+    }
+    $count++;
 }
 
 echo "Done";

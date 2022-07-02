@@ -2,12 +2,6 @@
 Test array_diff_uassoc() function : error conditions
 --FILE--
 <?php
-/* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a
- * 				user supplied callback function
- * Source code: ext/standard/array.c
- */
-
 echo "*** Testing array_diff_uassoc() : error conditions ***\n";
 
 //Initialize array
@@ -47,14 +41,12 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : error conditions ***
 
 -- Testing array_diff_uassoc() function with more than expected no. of arguments --
-array_diff_uassoc() expects parameter 4 to be a valid callback, array must have exactly two members
-array_diff_uassoc() expects parameter 6 to be a valid callback, array must have exactly two members
+array_diff_uassoc(): Argument #4 must be a valid callback, array callback must have exactly two members
+array_diff_uassoc(): Argument #6 must be a valid callback, array callback must have exactly two members
 
 -- Testing array_diff_uassoc() function with less than expected no. of arguments --
-At least 3 parameters are required, 2 given
-===DONE===
+array_diff_uassoc(): Argument #2 must be a valid callback, array callback must have exactly two members

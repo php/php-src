@@ -19,65 +19,65 @@ const C = "foo\\C\n";
 const I = 11;
 
 class foo {
-	const C = "foo\\foo::C\n";
-	const I = 22;
-	const C1 = C;
-	const C2 = foo\C;
-	const C3 = foo\foo::C;
-	const C4 = \foo\C;
-	const C5 = \foo\foo::C;
-	const C6 = ArrayObject::STD_PROP_LIST;
-	const C7 = E_ERROR;
+    const C = "foo\\foo::C\n";
+    const I = 22;
+    const C1 = C;
+    const C2 = foo\C;
+    const C3 = foo\foo::C;
+    const C4 = \foo\C;
+    const C5 = \foo\foo::C;
+    const C6 = ArrayObject::STD_PROP_LIST;
+    const C7 = E_ERROR;
 }
 
 class bar1 {
-	static $a1 = array(I => 0);
-	static $a2 = array(foo\I => 0);
-	static $a3 = array(foo\foo::I => 0);
-	static $a4 = array(\foo\I => 0);
-	static $a5 = array(\foo\foo::I => 0);
-	static $a6 = array(ArrayObject::STD_PROP_LIST => 0);
-	static $a7 = array(E_ERROR => 0);
+    static $a1 = array(I => 0);
+    static $a2 = array(foo\I => 0);
+    static $a3 = array(foo\foo::I => 0);
+    static $a4 = array(\foo\I => 0);
+    static $a5 = array(\foo\foo::I => 0);
+    static $a6 = array(ArrayObject::STD_PROP_LIST => 0);
+    static $a7 = array(E_ERROR => 0);
 }
 
 class bar2 {
-	static $a1 = array(I => I);
-	static $a2 = array(foo\I => I);
-	static $a3 = array(foo\foo::I => I);
-	static $a4 = array(\foo\I => I);
-	static $a5 = array(\foo\foo::I => I);
-	static $a6 = array(ArrayObject::STD_PROP_LIST => I);
-	static $a7 = array(E_ERROR => I);
+    static $a1 = array(I => I);
+    static $a2 = array(foo\I => I);
+    static $a3 = array(foo\foo::I => I);
+    static $a4 = array(\foo\I => I);
+    static $a5 = array(\foo\foo::I => I);
+    static $a6 = array(ArrayObject::STD_PROP_LIST => I);
+    static $a7 = array(E_ERROR => I);
 }
 
 class bar3 {
-	static $a1 = array(I => foo\I);
-	static $a2 = array(foo\I => foo\I);
-	static $a3 = array(foo\foo::I => foo\I);
-	static $a4 = array(\foo\I => foo\I);
-	static $a5 = array(\foo\foo::I => foo\I);
-	static $a6 = array(ArrayObject::STD_PROP_LIST => foo\I);
-	static $a7 = array(E_ERROR => foo\I);
+    static $a1 = array(I => foo\I);
+    static $a2 = array(foo\I => foo\I);
+    static $a3 = array(foo\foo::I => foo\I);
+    static $a4 = array(\foo\I => foo\I);
+    static $a5 = array(\foo\foo::I => foo\I);
+    static $a6 = array(ArrayObject::STD_PROP_LIST => foo\I);
+    static $a7 = array(E_ERROR => foo\I);
 }
 
 class bar4 {
-	static $a1 = array(I => ArrayObject::STD_PROP_LIST);
-	static $a2 = array(foo\I => ArrayObject::STD_PROP_LIST);
-	static $a3 = array(foo\foo::I => ArrayObject::STD_PROP_LIST);
-	static $a4 = array(\foo\I => ArrayObject::STD_PROP_LIST);
-	static $a5 = array(\foo\foo::I => ArrayObject::STD_PROP_LIST);
-	static $a6 = array(ArrayObject::STD_PROP_LIST => ArrayObject::STD_PROP_LIST);
-	static $a7 = array(E_ERROR => ArrayObject::STD_PROP_LIST);
+    static $a1 = array(I => ArrayObject::STD_PROP_LIST);
+    static $a2 = array(foo\I => ArrayObject::STD_PROP_LIST);
+    static $a3 = array(foo\foo::I => ArrayObject::STD_PROP_LIST);
+    static $a4 = array(\foo\I => ArrayObject::STD_PROP_LIST);
+    static $a5 = array(\foo\foo::I => ArrayObject::STD_PROP_LIST);
+    static $a6 = array(ArrayObject::STD_PROP_LIST => ArrayObject::STD_PROP_LIST);
+    static $a7 = array(E_ERROR => ArrayObject::STD_PROP_LIST);
 }
 
 class bar5 {
-	static $a1 = array(I => E_ERROR);
-	static $a2 = array(foo\I => E_ERROR);
-	static $a3 = array(foo\foo::I => E_ERROR);
-	static $a4 = array(\foo\I => E_ERROR);
-	static $a5 = array(\foo\foo::I => E_ERROR);
-	static $a6 = array(ArrayObject::STD_PROP_LIST => E_ERROR);
-	static $a7 = array(E_ERROR => E_ERROR);
+    static $a1 = array(I => E_ERROR);
+    static $a2 = array(foo\I => E_ERROR);
+    static $a3 = array(foo\foo::I => E_ERROR);
+    static $a4 = array(\foo\I => E_ERROR);
+    static $a5 = array(\foo\foo::I => E_ERROR);
+    static $a6 = array(ArrayObject::STD_PROP_LIST => E_ERROR);
+    static $a7 = array(E_ERROR => E_ERROR);
 }
 
 echo "first\n";
@@ -297,7 +297,7 @@ Array
     [1] => 1
 )
 
-Fatal error: Uncaught Error: Undefined constant 'foo\foo\unknown' in %sbug42819.php:%d
+Fatal error: Uncaught Error: Undefined constant "foo\foo\unknown" in %s:%d
 Stack trace:
 #0 %s(%d): foo\oops()
 #1 {main}

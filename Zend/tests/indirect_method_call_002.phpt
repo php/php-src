@@ -4,16 +4,16 @@ Indirect method call with chaining
 <?php
 
 class foo {
-	public $x = 'testing';
+    public $x = 'testing';
 
-	public function bar() {
-		return "foo";
-	}
-	public function baz() {
-		return new self;
-	}
-	static function xyz() {
-	}
+    public function bar() {
+        return "foo";
+    }
+    public function baz() {
+        return new self;
+    }
+    static function xyz() {
+    }
 }
 
 var_dump((new foo())->bar());               // string(3) "foo"

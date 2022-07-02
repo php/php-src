@@ -4,8 +4,8 @@ Bug #67215 (php-cgi work with opcache, may be segmentation fault happen)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -25,4 +25,4 @@ unlink($file_c);
 unlink($file_p);
 ?>
 --EXPECTF--
-Fatal error: Cannot declare class c, because the name is already in use in %sbug67215.c.php on line %d
+Fatal error: Cannot declare class p, because the name is already in use in %sbug67215.p.php on line %d

@@ -1,9 +1,7 @@
 --TEST--
 IntlDateFormatter::formatObject(): error conditions
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -30,7 +28,6 @@ var_dump(IntlDateFormatter::formatObject($cal, array(1, -2)));
 var_dump(IntlDateFormatter::formatObject($cal, ""));
 
 ?>
-==DONE==
 --EXPECTF--
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the passed object must be an instance of either IntlCalendar or DateTime in %s on line %d
 bool(false)
@@ -58,4 +55,3 @@ bool(false)
 
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the format is empty in %s on line %d
 bool(false)
-==DONE==

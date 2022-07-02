@@ -26,5 +26,6 @@ class B extends A
 
 $b = new B();
 $b->aa();
+?>
 --EXPECT--
 123

@@ -25,6 +25,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#if defined(__FreeBSD__)
+# include <sys/user.h>
+# include <libutil.h>
+#endif
+
 enum {
 	ZEND_GDBJIT_NOACTION,
 	ZEND_GDBJIT_REGISTER,
@@ -49,12 +54,12 @@ ZEND_API zend_gdbjit_descriptor __jit_debug_descriptor = {
 	1, ZEND_GDBJIT_NOACTION, NULL, NULL
 };
 
-ZEND_API zend_never_inline void __jit_debug_register_code()
+ZEND_API zend_never_inline void __jit_debug_register_code(void)
 {
 	__asm__ __volatile__("");
 }
 
-ZEND_API int zend_gdb_register_code(const void *object, size_t size)
+ZEND_API bool zend_gdb_register_code(const void *object, size_t size)
 {
 	zend_gdbjit_code_entry *entry;
 
@@ -102,9 +107,10 @@ ZEND_API void zend_gdb_unregister_all(void)
 	}
 }
 
-ZEND_API int zend_gdb_present(void)
+ZEND_API bool zend_gdb_present(void)
 {
-	int ret = 0;
+	bool ret = 0;
+#if defined(__linux__) /* netbsd while having this procfs part, does not hold the tracer pid */
 	int fd = open("/proc/self/status", O_RDONLY);
 
 	if (fd > 0) {
@@ -136,6 +142,17 @@ ZEND_API int zend_gdb_present(void)
 
 		close(fd);
 	}
+#elif defined(__FreeBSD__)
+    struct kinfo_proc *proc = kinfo_getproc(getpid());
+
+    if (proc) {
+        if ((proc->ki_flag & P_TRACED) != 0) {
+            struct kinfo_proc *dbg = kinfo_getproc(proc->ki_tracer);
+
+            ret = (dbg && strstr(dbg->ki_comm, "gdb"));
+        }
+    }
+#endif
 
 	return ret;
 }

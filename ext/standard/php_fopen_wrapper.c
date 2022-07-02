@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,8 +18,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 #include "php.h"
@@ -197,7 +197,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			path += 11;
 			max_memory = ZEND_STRTOL(path, NULL, 10);
 			if (max_memory < 0) {
-				zend_throw_error(NULL, "Max memory must be >= 0");
+				zend_argument_value_error(2, "must be greater than or equal to 0");
 				return NULL;
 			}
 		}
@@ -317,7 +317,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			return NULL;
 		}
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 		dtablesize = getdtablesize();
 #else
 		dtablesize = INT_MAX;
@@ -392,7 +392,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 
 #if defined(S_IFSOCK) && !defined(PHP_WIN32)
 	do {
-		zend_stat_t st;
+		zend_stat_t st = {0};
 		memset(&st, 0, sizeof(st));
 		if (zend_fstat(fd, &st) == 0 && (st.st_mode & S_IFMT) == S_IFSOCK) {
 			stream = php_stream_sock_open_from_socket(fd, NULL);

@@ -55,7 +55,7 @@ Class constant declarations
   echo "\nYou should not see this.";
 ?>
 --EXPECTF--
-Warning: Undefined variable: undef in %s on line %d
+Warning: Undefined variable $undef in %s on line %d
 
 Attempt to access various kinds of class constants:
 int(1)
@@ -79,7 +79,7 @@ string(6) "hello2"
 
 Expecting fatal error:
 
-Fatal error: Uncaught Error: Undefined class constant 'c19' in %s:%d
+Fatal error: Uncaught Error: Undefined constant C::c19 in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

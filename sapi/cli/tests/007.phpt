@@ -4,7 +4,7 @@ strip comments and whitespace with -w
 <?php
 include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 ?>
 --FILE--
@@ -18,12 +18,12 @@ $code ='
 /* some test script */
 
 class test { /* {{{ */
-	public $var = "test"; //test var
-#perl style comment 
-	private $pri; /* private attr */
+    public $var = "test"; //test var
+#perl style comment
+    private $pri; /* private attr */
 
-	function foo(/* void */) {
-	}
+    function foo(/* void */) {
+    }
 }
 /* }}} */
 

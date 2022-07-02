@@ -5,16 +5,17 @@ assert.active = 1
 assert.warning = 0
 assert.callback =
 assert.bail = 0
+assert.exception=0
 --FILE--
 <?php
 function a($file, $line, $unused, $desc)
 {
-	        echo "assertion failed - a - $line,\"$desc\"\n";
+            echo "assertion failed - a - $line,\"$desc\"\n";
 }
 
 function b($file, $line, $unused, $desc)
 {
-	        echo "assertion failed - b - $line,\"$desc\"\n";
+            echo "assertion failed - b - $line,\"$desc\"\n";
 }
 
 assert_options(ASSERT_ACTIVE,1);
@@ -30,8 +31,6 @@ ini_set("assert.callback", "b");
 assert($a != 0);
 
 ?>
-==DONE==
 --EXPECT--
 assertion failed - a - 18,"assert($a != 0)"
 assertion failed - b - 22,"assert($a != 0)"
-==DONE==

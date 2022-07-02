@@ -1,7 +1,7 @@
 --TEST--
 oci_bind_array_by_name() and invalid values 1
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

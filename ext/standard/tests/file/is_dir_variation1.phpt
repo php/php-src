@@ -2,11 +2,6 @@
 Test is_dir() function: usage variations - dir/subdir
 --FILE--
 <?php
-/* Prototype: bool is_dir ( string $dirname );
-   Description: Tells whether the dirname is a directory
-     Returns TRUE if the dirname exists and is a directory, FALSE  otherwise.
-*/
-
 /* Testing is_dir() with base and sub dirs */
 
 $file_path = __DIR__;

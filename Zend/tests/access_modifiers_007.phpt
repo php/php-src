@@ -4,7 +4,7 @@ abstract final methods errmsg
 <?php
 
 class test {
-	final abstract function foo();
+    final abstract function foo();
 }
 
 echo "Done\n";

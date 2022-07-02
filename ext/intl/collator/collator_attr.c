@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,15 +20,10 @@
 #include "php_intl.h"
 #include "collator_class.h"
 #include "collator_convert.h"
-#include "collator_attr.h"
 
 #include <unicode/ustring.h>
 
-/* {{{ proto int Collator::getAttribute( int $attr )
- * Get collation attribute value. }}} */
-/* {{{ proto int collator_get_attribute( Collator $coll, int $attr )
- * Get collation attribute value.
- */
+/* {{{ Get collation attribute value. */
 PHP_FUNCTION( collator_get_attribute )
 {
 	zend_long attribute, value;
@@ -39,7 +34,7 @@ PHP_FUNCTION( collator_get_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &attribute ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -52,11 +47,7 @@ PHP_FUNCTION( collator_get_attribute )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::getAttribute( int $attr )
- * Get collation attribute value. }}} */
-/* {{{ proto bool collator_set_attribute( Collator $coll, int $attr, int $val )
- * Set collation attribute.
- */
+/* {{{ Set collation attribute. */
 PHP_FUNCTION( collator_set_attribute )
 {
 	zend_long attribute, value;
@@ -67,7 +58,7 @@ PHP_FUNCTION( collator_set_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oll",
 		&object, Collator_ce_ptr, &attribute, &value ) == FAILURE)
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -81,11 +72,7 @@ PHP_FUNCTION( collator_set_attribute )
 }
 /* }}} */
 
-/* {{{ proto int Collator::getStrength()
- * Returns the current collation strength. }}} */
-/* {{{ proto int collator_get_strength(Collator coll)
- * Returns the current collation strength.
- */
+/* {{{ Returns the current collation strength. */
 PHP_FUNCTION( collator_get_strength )
 {
 	COLLATOR_METHOD_INIT_VARS
@@ -94,7 +81,7 @@ PHP_FUNCTION( collator_get_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -105,11 +92,7 @@ PHP_FUNCTION( collator_get_strength )
 }
 /* }}} */
 
-/* {{{ proto bool Collator::setStrength(int strength)
- * Set the collation strength. }}} */
-/* {{{ proto bool collator_set_strength(Collator coll, int strength)
- * Set the collation strength.
- */
+/* {{{ Set the collation strength. */
 PHP_FUNCTION( collator_set_strength )
 {
 	zend_long strength;
@@ -120,7 +103,7 @@ PHP_FUNCTION( collator_set_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &strength ) == FAILURE )
 	{
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

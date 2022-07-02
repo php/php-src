@@ -14,4 +14,4 @@ $fn();
 
 ?>
 --EXPECT--
-Cannot access self:: when no class scope is active
+Cannot access "self" when no class scope is active

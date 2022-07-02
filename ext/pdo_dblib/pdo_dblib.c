@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -31,30 +31,26 @@
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 static PHP_GINIT_FUNCTION(dblib);
 
-static const zend_function_entry pdo_dblib_functions[] = {
-	PHP_FE_END
-};
-
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
 
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 zend_module_entry pdo_mssql_module_entry = {
 #else
 zend_module_entry pdo_dblib_module_entry = {
 #endif
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_dblib_deps,
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 	"pdo_mssql",
 #elif defined(PHP_WIN32)
 	"pdo_sybase",
 #else
 	"pdo_dblib",
 #endif
-	pdo_dblib_functions,
+	NULL,
 	PHP_MINIT(pdo_dblib),
 	PHP_MSHUTDOWN(pdo_dblib),
 	NULL,
@@ -72,7 +68,7 @@ zend_module_entry pdo_dblib_module_entry = {
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 ZEND_GET_MODULE(pdo_mssql)
 #else
 ZEND_GET_MODULE(pdo_dblib)
@@ -125,7 +121,7 @@ int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 }
 
 int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
-	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line)
+	int severity, char *msgtext, char *srvname, char *procname, int line)
 {
 	pdo_dblib_err *einfo;
 
@@ -209,7 +205,7 @@ PHP_MINIT_FUNCTION(pdo_dblib)
 		return FAILURE;
 	}
 
-#if !PHP_DBLIB_IS_MSSQL
+#ifndef PHP_DBLIB_IS_MSSQL
 	dberrhandle((EHANDLEFUNC) pdo_dblib_error_handler);
 	dbmsghandle((MHANDLEFUNC) pdo_dblib_msg_handler);
 #endif
@@ -228,7 +224,7 @@ PHP_MINFO_FUNCTION(pdo_dblib)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO Driver for "
-#if PDO_DBLIB_IS_MSSQL
+#ifdef PDO_DBLIB_IS_MSSQL
 		"MSSQL"
 #elif defined(PHP_WIN32)
 		"FreeTDS/Sybase/MSSQL"

@@ -1,12 +1,9 @@
 --TEST--
 Test is_dir() function: usage variations - invalid arguments
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype: bool is_dir ( string $dirname );
-   Description: Tells whether the dirname is a directory
-     Returns TRUE if the dirname exists and is a directory, FALSE  otherwise.
-*/
-
 /* Passing invalid arguments to is_dir() */
 
 echo "*** Testing is_dir() with Invalid arguments: expected bool(false) ***\n";
@@ -15,7 +12,6 @@ $dirnames = array(
   -2.34555,
   TRUE,
   FALSE,
-  NULL,
   " ",
 
   /* scalars */
@@ -27,10 +23,8 @@ $dirnames = array(
 foreach($dirnames as $dirname) {
   var_dump( is_dir($dirname) );
 }
-
-echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_dir() with Invalid arguments: expected bool(false) ***
 bool(false)
 bool(false)
@@ -38,6 +32,3 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
-
-*** Done ***

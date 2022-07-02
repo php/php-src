@@ -169,7 +169,7 @@ PHPAPI int php_stream_supports_lock(php_stream * stream);
 ```
 
 This function will return either 1 (success) or 0 (failure) indicating whether
-or not a lock can be set on this stream. Typically you can only set locks on
+or not a lock can be set on this stream. Typically, you can only set locks on
 stdio streams.
 
 ## Casting streams
@@ -209,7 +209,7 @@ if you mix ANSI stdio calls on the FILE* with php stream calls on the stream.
 
 If your system has the fopencookie function, php streams can synthesize a
 `FILE*` on top of any stream, which is useful for SSL sockets, memory based
-streams, data base streams etc. etc.
+streams, database streams etc. etc.
 
 In situations where this is not desirable, you should query the stream to see if
 it naturally supports `FILE *`. You can use this code snippet for this purpose:
@@ -353,7 +353,7 @@ stream = php_stream_alloc(&my_ops, state, 0, persistent, "r");
 ```
 
 Once you have that part figured out, you can write your implementation and
-define the your own php_stream_ops struct (we called it my_ops in the above
+define your own php_stream_ops struct (we called it my_ops in the above
 example).
 
 For example, for reading from this weird MySQL stream:

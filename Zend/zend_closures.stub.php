@@ -1,17 +1,24 @@
 <?php
 
-Class Closure
+/** @generate-class-entries */
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class Closure
 {
     private function __construct() {}
 
-    /** @return ?Closure */
-    static function bind(Closure $closure, ?object $newthis, $newscope = UNKNOWN) {}
+    public static function bind(
+        Closure $closure,
+        ?object $newThis,
+        object|string|null $newScope = "static"
+    ): ?Closure {}
 
-    /** @return ?Closure */
-    function bindTo(?object $newthis, $newscope = UNKNOWN) {}
+    public function bindTo(?object $newThis, object|string|null $newScope = "static"): ?Closure {}
 
-    function call(object $newthis, ...$parameters) {}
+    public function call(object $newThis, mixed ...$args): mixed {}
 
-    /** @return Closure */
-    function fromCallable(callable $callable) {}
+    public static function fromCallable(callable $callback): Closure {}
 }

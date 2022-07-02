@@ -2,11 +2,6 @@
 Test scandir() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test basic functionality of scandir()
  */
@@ -31,7 +26,6 @@ var_dump(scandir($directory, $sorting_order, $context));
 
 delete_files($directory, 3);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $directory = __DIR__ . '/scandir_basic';
@@ -67,4 +61,3 @@ array(5) {
   [4]=>
   string(1) "."
 }
-===DONE===

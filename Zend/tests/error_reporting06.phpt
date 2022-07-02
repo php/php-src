@@ -12,12 +12,12 @@ function foo2($arg) {
 }
 
 function foo3() {
-	echo $undef3;
-	throw new Exception("test");
+    echo $undef3;
+    throw new Exception("test");
 }
 
 try {
-	@foo1(@foo2(@foo3()));
+    @foo1(@foo2(@foo3()));
 } catch (Exception $e) {
 }
 

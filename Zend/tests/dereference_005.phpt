@@ -14,22 +14,22 @@ class obj implements arrayaccess {
             "three" => 3,
         );
     }
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value): void {
         $this->container[$offset] = $value;
     }
-    public function offsetExists($offset) {
+    public function offsetExists($offset): bool {
         return isset($this->container[$offset]);
     }
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset): void {
         unset($this->container[$offset]);
     }
-    public function offsetGet($offset) {
+    public function offsetGet($offset): mixed {
         return isset($this->container[$offset]) ? $this->container[$offset] : null;
     }
 }
 
 function x() {
-	return new obj;
+    return new obj;
 }
 var_dump(x()['two']);
 

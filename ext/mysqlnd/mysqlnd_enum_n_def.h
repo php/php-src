@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -129,6 +129,7 @@
 #define CR_PARAMS_NOT_BOUND		2031
 #define CR_INVALID_PARAMETER_NO	2034
 #define CR_INVALID_BUFFER_USE	2035
+#define CR_LOAD_DATA_LOCAL_INFILE_REJECTED 2068
 
 #define MYSQLND_EE_FILENOTFOUND	 7890
 
@@ -147,12 +148,6 @@
 #define TRANS_COR_AND_NO_CHAIN	2
 #define TRANS_COR_RELEASE		4
 #define TRANS_COR_NO_RELEASE	8
-
-typedef enum mysqlnd_extension
-{
-	MYSQLND_MYSQL = 0,
-	MYSQLND_MYSQLI
-} enum_mysqlnd_extension;
 
 enum
 {
@@ -181,18 +176,6 @@ typedef enum mysqlnd_res_type
 	MYSQLND_RES_PS_BUF,
 	MYSQLND_RES_PS_UNBUF
 } enum_mysqlnd_res_type;
-
-typedef enum mysqlnd_send_query_type
-{
-	MYSQLND_SEND_QUERY_IMPLICIT = 0,
-	MYSQLND_SEND_QUERY_EXPLICIT
-} enum_mysqlnd_send_query_type;
-
-typedef enum mysqlnd_reap_result_type
-{
-	MYSQLND_REAP_RESULT_IMPLICIT = 0,
-	MYSQLND_REAP_RESULT_EXPLICIT
-} enum_mysqlnd_reap_result_type;
 
 typedef enum mysqlnd_send_execute_type
 {
@@ -253,10 +236,9 @@ typedef enum mysqlnd_client_option
 	MYSQL_OPT_NET_BUFFER_LENGTH,
 	MYSQL_OPT_TLS_VERSION,
 	MYSQL_OPT_SSL_MODE,
+	MYSQL_OPT_LOAD_DATA_LOCAL_DIR,
 	MYSQLND_DEPRECATED_ENUM1 = 200,
-#ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	MYSQLND_OPT_INT_AND_FLOAT_NATIVE = 201,
-#endif
 	MYSQLND_OPT_NET_CMD_BUFFER_SIZE = 202,
 	MYSQLND_OPT_NET_READ_BUFFER_SIZE = 203,
 	MYSQLND_OPT_SSL_KEY = 204,
@@ -374,10 +356,6 @@ typedef enum mysqlnd_server_option
 #define IS_NOT_NULL(n)	((n) & NOT_NULL_FLAG)
 #define IS_BLOB(n)		((n) & BLOB_FLAG)
 #define IS_NUM(t)		((t) <= FIELD_TYPE_INT24 || (t) == FIELD_TYPE_YEAR || (t) == FIELD_TYPE_NEWDECIMAL)
-
-
-/* see mysqlnd_charset.c for more information */
-#define MYSQLND_BINARY_CHARSET_NR	63
 
 
 /*
@@ -689,23 +667,12 @@ enum php_mysqlnd_server_command
 #define MYSQLND_REFRESH_HOSTS		8	/* Flush host cache */
 #define MYSQLND_REFRESH_STATUS		16	/* Flush status variables */
 #define MYSQLND_REFRESH_THREADS		32	/* Flush thread cache */
-#define MYSQLND_REFRESH_SLAVE		64	/* Reset master info and restart slave */
+#define MYSQLND_REFRESH_REPLICA		64	/* Reset master info and restart replica */
+#define MYSQLND_REFRESH_SLAVE		MYSQLND_REFRESH_REPLICA	/* temporarily for backward compatibility */
 #define MYSQLND_REFRESH_MASTER		128	/* Remove all bin logs in the index */
 #define MYSQLND_REFRESH_BACKUP_LOG	0x200000L
 
 
-#define MYSQLND_STORE_PS		1
-#define MYSQLND_STORE_NO_COPY	2
-#define MYSQLND_STORE_COPY		4
-
-enum mysqlnd_buffered_type
-{
-	MYSQLND_BUFFERED_TYPE_ZVAL = 1,
-	MYSQLND_BUFFERED_TYPE_C
-};
-
-
 #define MYSQLND_CLIENT_NO_FLAG				0
-#define MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA	1
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */

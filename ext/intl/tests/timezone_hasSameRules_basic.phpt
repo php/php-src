@@ -1,9 +1,7 @@
 --TEST--
 IntlTimeZone::hasSameRules(): basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -22,7 +20,6 @@ echo "\nEurope/Lisbon has same rules as Atlantic/Azores:\n";
 var_dump(intltz_has_same_rules($lsb, $azo));
 
 ?>
-==DONE==
 --EXPECT--
 Europe/Lisbon has same rules as itself:
 bool(true)
@@ -31,5 +28,4 @@ Europe/Lisbon has same rules as Portugal:
 bool(true)
 
 Europe/Lisbon has same rules as Atlantic/Azores:
-bool(false)
-==DONE==
+bool(false)

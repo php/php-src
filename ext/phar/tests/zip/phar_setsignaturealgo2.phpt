@@ -1,7 +1,8 @@
 --TEST--
 Phar::setSupportedSignatures() with hash, zip-based
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php
 $arr = Phar::getSupportedSignatures();
 if (!in_array("OpenSSL", $arr)) die("skip openssl support required");
@@ -63,7 +64,6 @@ var_dump($p->getSignature());
 echo $e->getMessage();
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -79,7 +79,7 @@ array(2) {
   ["hash"]=>
   string(%d) "%s"
   ["hash_type"]=>
-  string(5) "SHA-1"
+  string(7) "SHA-256"
 }
 array(2) {
   ["hash"]=>
@@ -111,4 +111,3 @@ array(2) {
   ["hash_type"]=>
   string(7) "OpenSSL"
 }
-===DONE===

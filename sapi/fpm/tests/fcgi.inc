@@ -485,7 +485,7 @@ class Client
     }
 
     /**
-     * Execute a request to the FastCGI application asyncronously
+     * Execute a request to the FastCGI application asynchronously
      *
      * This sends request to application and returns the assigned ID for that request.
      *
@@ -508,7 +508,7 @@ class Client
         // Pick random number between 1 and max 16 bit unsigned int 65535
         $id = mt_rand(1, (1 << 16) - 1);
 
-        // Using persistent sockets implies you want them keept alive by server!
+        // Using persistent sockets implies you want them kept alive by server!
         $keepAlive = intval($this->_keepAlive || $this->_persistentSocket);
 
         $request = $this->buildPacket(
@@ -556,6 +556,25 @@ class Client
     }
 
     /**
+     * Append response data.
+     *
+     * @param $resp Response
+     * @param $type Either err or our
+     *
+     * @throws \Exception
+     */
+    private function fcgi_stream_append($resp, $type) {
+        if (isset($this->_requests[$resp['requestId']][$type . '_finished'])) {
+            throw new \Exception('FCGI_STD' . strtoupper($type) . ' stream already finished by empty record');
+        }
+        if ($resp['content'] === '') {
+            $this->_requests[$resp['requestId']][$type . '_finished'] = true;
+        } else {
+            $this->_requests[$resp['requestId']][$type . '_response'] .= $resp['content'];
+        }
+    }
+
+    /**
      * Blocking call that waits for response data of the specific request
      *
      * @param int $requestId
@@ -593,13 +612,12 @@ class Client
             if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
                 if ($resp['type'] == self::STDERR) {
                     $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;
-                    $this->_requests[$resp['requestId']]['err_response'] .= $resp['content'];
+                    $this->fcgi_stream_append($resp, 'err');
                 } else {
-                    $this->_requests[$resp['requestId']]['out_response'] .= $resp['content'];
+                    $this->fcgi_stream_append($resp, 'out');
                 }
                 $this->_requests[$resp['requestId']]['response'] .= $resp['content'];
-            }
-            if ($resp['type'] == self::END_REQUEST) {
+            } elseif ($resp['type'] == self::END_REQUEST) {
                 $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
                 if ($resp['requestId'] == $requestId) {
                     break;

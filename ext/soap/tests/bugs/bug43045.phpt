@@ -1,7 +1,7 @@
 --TEST--
 Bug #43045i (SOAP encoding violation on "INF" for type double/float)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function test($x) {
@@ -9,12 +9,14 @@ function test($x) {
 }
 
 class TestSoapClient extends SoapClient {
+  private $server;
+
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
     $this->server->addFunction('test');
   }
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -36,15 +38,16 @@ xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   }
 }
 $client = new TestSoapClient(NULL, array(
-			"location" => "test://",
-			"uri"      => 'urn:TestSOAP',
-			"style"    => SOAP_RPC,
-			"use"      => SOAP_ENCODED
-			));
+            "location" => "test://",
+            "uri"      => 'urn:TestSOAP',
+            "style"    => SOAP_RPC,
+            "use"      => SOAP_ENCODED
+            ));
 var_dump($client->test(0.1));
 var_dump($client->test(NAN));
 var_dump($response = $client->test(INF));
 var_dump($response = $client->test(-INF));
+?>
 --EXPECT--
 float(0.1)
 float(NAN)

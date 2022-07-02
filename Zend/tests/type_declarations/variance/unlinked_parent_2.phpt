@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Interface 'B' not found
+Interface "B" not found

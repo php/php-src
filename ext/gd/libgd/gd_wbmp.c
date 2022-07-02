@@ -51,13 +51,13 @@
    ----------------------------------------------------------------------------
  */
 
-#include <gd.h>
-#include <gdfonts.h>
-#include <gd_errors.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 
+#include "gd.h"
+#include "gdfonts.h"
+#include "gd_errors.h"
 #include "wbmp.h"
 
 

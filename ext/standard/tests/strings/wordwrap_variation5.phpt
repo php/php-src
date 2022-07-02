@@ -2,11 +2,6 @@
 Test wordwrap() function : usage variations  - valid break arguments(spaces)
 --FILE--
 <?php
-/* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
- * Description: Wraps buffer to selected number of characters using string break char
- * Source code: ext/standard/string.c
-*/
-
 /*
  *test wordwrap() with break arguments as single spaces
 */

@@ -4,12 +4,12 @@ Bug #51905 (ReflectionParameter fails if default value is an array with an acces
 <?php
 
 class Bar {
-	const Y = 20;
+    const Y = 20;
 }
 
 class Foo extends Bar {
-	const X = 12;
-	public function x($x = 1, $y = array(self::X), $z = parent::Y) {}
+    const X = 12;
+    public function x($x = 1, $y = array(self::X), $z = parent::Y) {}
 }
 
 $clazz = new ReflectionClass('Foo');

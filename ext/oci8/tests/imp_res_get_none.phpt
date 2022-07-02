@@ -1,8 +1,9 @@
 --TEST--
 Oracle Database 12c Implicit Result Sets: oci_get_implicit_resultset: no implicit results
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -38,9 +39,6 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 var_dump($s1);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 bool(false)
-===DONE===

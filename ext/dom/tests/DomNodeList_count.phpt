@@ -2,8 +2,8 @@
 Test count nodes in DOMNodeList
 --CREDITS--
 Andreas Treichel <gmblar+github@gmail.com>
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

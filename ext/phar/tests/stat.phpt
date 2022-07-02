@@ -1,7 +1,7 @@
 --TEST--
 Phar: test stat function interceptions
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=1
 phar.readonly=0
@@ -68,7 +68,6 @@ include "my/index.php";
 __HALT_COMPILER();');
 include $fname;
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -223,4 +222,3 @@ not found 2
 
 Warning: fileperms(): stat failed for not/found in phar://%sstat.phar.php/my/index.php on line %d
 bool(false)
-===DONE===

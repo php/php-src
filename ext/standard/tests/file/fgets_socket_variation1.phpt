@@ -18,7 +18,7 @@ for ($i=0; $i<100; $i++) {
 $client = fsockopen("tcp://127.0.0.1:$port");
 
 if (!$client) {
-	die("Unable to create socket");
+    die("Unable to create socket");
 }
 
 /* Accept that connection */
@@ -38,7 +38,7 @@ echo "\n\nClose the server side socket and read the remaining data from the clie
 fclose($socket);
 fclose($server);
 while(!feof($client)) {
-	fread($client, 1);
+    fread($client, 1);
 }
 
 echo "done\n";

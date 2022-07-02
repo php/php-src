@@ -7,12 +7,6 @@ if (getenv("USE_ZEND_ALLOC") === "0") die("skip ZMM is disabled");
 ?>
 --FILE--
 <?php
-/* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line
- * Source code: ext/standard/string.c
- * Alias to functions: none
-*/
-
 echo "*** Testing chunk_split() : unexpected large 'end' string argument variation 1 ***\n";
 
 $a=str_repeat("B", 65535);
@@ -23,4 +17,4 @@ var_dump(chunk_split($a,$b,$c));
 --EXPECTF--
 *** Testing chunk_split() : unexpected large 'end' string argument variation 1 ***
 
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+Fatal error: %rAllowed memory size of %d bytes exhausted%s\(tried to allocate %d bytes\)|Possible integer overflow in memory allocation \(4294901777 \+ 2097152\)%r in %s on line %d

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -34,15 +34,15 @@ extern zend_module_entry dom_module_entry;
 #include <libxml/xinclude.h>
 #include <libxml/hash.h>
 #include <libxml/c14n.h>
-#if defined(LIBXML_HTML_ENABLED)
+#ifdef LIBXML_HTML_ENABLED
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
 #endif
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #endif
-#if defined(LIBXML_XPTR_ENABLED)
+#ifdef LIBXML_XPTR_ENABLED
 #include <libxml/xpointer.h>
 #endif
 #ifdef PHP_WIN32
@@ -93,13 +93,13 @@ typedef struct {
 	HashPosition pos;
 } php_dom_iterator;
 
-#include "dom_fe.h"
+#include "domexception.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 zend_object *dom_objects_new(zend_class_entry *class_type);
 zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type);
-#if defined(LIBXML_XPATH_ENABLED)
+#ifdef LIBXML_XPATH_ENABLED
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type);
 #endif
 int dom_get_strict_error(php_libxml_ref_obj *document);
@@ -109,15 +109,16 @@ void node_list_unlink(xmlNodePtr node);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
+void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void dom_normalize (xmlNodePtr nodep);
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
 void php_dom_create_implementation(zval *retval);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
-int dom_has_feature(char *feature, char *version);
+bool dom_has_feature(zend_string *feature, zend_string *version);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
-void php_dom_create_interator(zval *return_value, int ce_type);
+void php_dom_create_iterator(zval *return_value, int ce_type);
 void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
@@ -125,27 +126,28 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
 
-#define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
-INIT_CLASS_ENTRY(ce, name, funcs); \
-ce.create_object = dom_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce);
+void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc);
+void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc);
+void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc);
+void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc);
+void dom_child_node_remove(dom_object *context);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
-  		RETURN_NULL();\
+		zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
+		RETURN_THROWS();\
   	} \
 }
 
 #define DOM_NO_ARGS() \
 	if (zend_parse_parameters_none() == FAILURE) { \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 #define DOM_NOT_IMPLEMENTED() \
-	php_error_docref(NULL, E_WARNING, "Not yet implemented"); \
-	return;
+	zend_throw_error(NULL, "Not yet implemented"); \
+	RETURN_THROWS();
 
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1

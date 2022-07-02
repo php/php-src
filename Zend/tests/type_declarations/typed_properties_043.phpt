@@ -40,10 +40,19 @@ Bar::$parentProp = new Foo;
 var_dump(Bar::$selfProp, Bar::$selfNullProp, Bar::$parentProp);
 
 ?>
---EXPECT--
-Cannot write a value to a 'self' typed static property of a trait
-Cannot write a non-null value to a 'self' typed static property of a trait
-Cannot access parent:: when current class scope has no parent
+--EXPECTF--
+Deprecated: Accessing static trait property Test::$selfProp is deprecated, it should only be accessed on a class using the trait in %s on line %d
+Cannot assign stdClass to property Test::$selfProp of type self
+
+Deprecated: Accessing static trait property Test::$selfNullProp is deprecated, it should only be accessed on a class using the trait in %s on line %d
+Cannot assign stdClass to property Test::$selfNullProp of type ?self
+
+Deprecated: Accessing static trait property Test::$parentProp is deprecated, it should only be accessed on a class using the trait in %s on line %d
+Cannot assign stdClass to property Test::$parentProp of type parent
+
+Deprecated: Accessing static trait property Test::$selfNullProp is deprecated, it should only be accessed on a class using the trait in %s on line %d
+
+Deprecated: Accessing static trait property Test::$selfNullProp is deprecated, it should only be accessed on a class using the trait in %s on line %d
 NULL
 object(Bar)#3 (0) {
 }

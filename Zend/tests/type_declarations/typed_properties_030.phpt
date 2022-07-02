@@ -3,11 +3,11 @@ Test typed properties unset __get magical magic
 --FILE--
 <?php
 class Foo {
-	public int $bar;
+    public int $bar;
 
-	public function __get($name) {
-		return "violate";
-	}
+    public function __get($name) {
+        return "violate";
+    }
 }
 
 $foo = new Foo;

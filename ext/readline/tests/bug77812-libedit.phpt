@@ -1,8 +1,9 @@
 --TEST--
 Bug #77812 (Interactive mode does not support PHP 7.3-style heredoc)
+--EXTENSIONS--
+readline
 --SKIPIF--
 <?php
-if (!extension_loaded('readline')) die('skip readline extension not available');
 if (READLINE_LIB !== "libedit") die('skip libedit only');
 if (!function_exists('proc_open')) die('skip proc_open() not available');
 ?>
@@ -29,7 +30,7 @@ bar
 xx
 xxx
 
-Warning: Uncaught Error: Undefined constant 'FOO' in php shell code:1
+Warning: Uncaught Error: Undefined constant "FOO" in php shell code:1
 Stack trace:
 #0 {main}
   thrown in php shell code on line 1

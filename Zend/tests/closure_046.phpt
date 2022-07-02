@@ -10,10 +10,10 @@ Closure 046: Rebinding: preservation of previous scope when "static" given as sc
 $nonstaticUnscoped = function () { var_dump(isset(A::$priv)); var_dump(isset($this)); };
 
 class A {
-	private static $priv = 7;
-	function getClosure() {
-		return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
-	}
+    private static $priv = 7;
+    function getClosure() {
+        return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
+    }
 }
 class B extends A {}
 
@@ -26,9 +26,7 @@ $nonstaticScoped(); echo "\n";
 
 echo "After binding, no instance", "\n";
 $d = $nonstaticUnscoped->bindTo(null, "static"); $d(); echo "\n";
-$d = $nonstaticScoped->bindTo(null, "static"); $d(); echo "\n";
-// $d is still non-static
-$d->bindTo($d);
+$d = $nonstaticScoped->bindTo(null, "static"); var_dump($d); echo "\n";
 
 echo "After binding, with same-class instance for the bound one", "\n";
 $d = $nonstaticUnscoped->bindTo(new A, "static"); $d(); echo "\n";
@@ -38,6 +36,7 @@ echo "After binding, with different instance for the bound one", "\n";
 $d = $nonstaticScoped->bindTo(new B, "static"); $d(); echo "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Before binding
 bool(false)
@@ -51,9 +50,8 @@ bool(false)
 bool(false)
 
 
-Deprecated: Unbinding $this of closure is deprecated in %s on line %d
-bool(true)
-bool(false)
+Warning: Cannot unbind $this of closure using $this in %s on line %d
+NULL
 
 After binding, with same-class instance for the bound one
 bool(false)

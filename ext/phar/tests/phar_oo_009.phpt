@@ -1,7 +1,8 @@
 --TEST--
 Phar object: iterating via SplFileObject and reading csv
+--EXTENSIONS--
+phar
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
 <?php if (!defined('SplFileObject::READ_CSV') || !defined('SplFileObject::SKIP_EMPTY')) die('skip newer SPL version is required'); ?>
 --INI--
 phar.require_hash=0
@@ -19,7 +20,7 @@ $f = $phar['a.csv'];
 $f->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE);
 foreach($f as $k => $v)
 {
-	echo "$k=>$v\n";
+    echo "$k=>$v\n";
 }
 
 ?>
@@ -29,11 +30,10 @@ foreach($f as $k => $v)
 $f->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_CSV);
 foreach($f as $k => $v)
 {
-	echo "$k=>" . join('|', $v) . "\n";
+    echo "$k=>" . join('|', $v) . "\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_009.phar.php');
@@ -53,4 +53,3 @@ __halt_compiler();
 3=>4
 4=>5|5
 6=>7|777
-===DONE===

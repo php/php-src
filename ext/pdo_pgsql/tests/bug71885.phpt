@@ -1,8 +1,10 @@
 --TEST--
 Request #71855 (PDO placeholder escaping)
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require_once dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 require_once dirname(__FILE__) . '/config.inc';
 PDOTest::skip();
@@ -16,19 +18,19 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_NUM);
 
 foreach ([false, true] as $emulate) {
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
 
-	try {
-		$stmt = $db->prepare('select ?- lseg \'((-1,0),(1,0))\'');
-		$stmt->execute();
-	} catch (PDOException $e) {
-		var_dump('ERR');
-	}
+    try {
+        $stmt = $db->prepare('select ?- lseg \'((-1,0),(1,0))\'');
+        $stmt->execute();
+    } catch (PDOException $e) {
+        var_dump('ERR');
+    }
 
-	$stmt = $db->prepare('select ??- lseg \'((-1,0),(1,0))\'');
-	$stmt->execute();
+    $stmt = $db->prepare('select ??- lseg \'((-1,0),(1,0))\'');
+    $stmt->execute();
 
-	var_dump($stmt->fetch());
+    var_dump($stmt->fetch());
 }
 
 ?>
@@ -37,10 +39,10 @@ foreach ([false, true] as $emulate) {
 string(3) "ERR"
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 array(1) {
   [0]=>
-  bool(true)
+  string(1) "1"
 }
 ==OK==

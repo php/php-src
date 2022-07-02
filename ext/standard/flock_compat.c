@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,17 +18,6 @@
 #include <errno.h>
 #include "ext/standard/flock_compat.h"
 
-#if HAVE_STRUCT_FLOCK
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/file.h>
-#endif
-
-#ifdef PHP_WIN32
-#include <io.h>
-#include "config.w32.h"
-#endif
-
 #ifndef HAVE_FLOCK
 PHPAPI int flock(int fd, int operation)
 {
@@ -37,7 +26,7 @@ PHPAPI int flock(int fd, int operation)
 #endif /* !defined(HAVE_FLOCK) */
 
 PHPAPI int php_flock(int fd, int operation)
-#if HAVE_STRUCT_FLOCK /* {{{ */
+#ifdef HAVE_STRUCT_FLOCK /* {{{ */
 {
 	struct flock flck;
 	int ret;
@@ -58,7 +47,7 @@ PHPAPI int php_flock(int fd, int operation)
 
 	ret = fcntl(fd, operation & LOCK_NB ? F_SETLK : F_SETLKW, &flck);
 
-	if (operation & LOCK_NB && ret == -1 &&
+	if ((operation & LOCK_NB) && ret == -1 &&
 			(errno == EACCES || errno == EAGAIN))
 		errno = EWOULDBLOCK;
 
@@ -113,35 +102,35 @@ PHPAPI int php_flock(int fd, int operation)
  *  Lift a leg, Yunie.  Luv ya forever!!!!
  */
 {
-    HANDLE hdl = (HANDLE) _get_osfhandle(fd);
-    DWORD low = 1, high = 0;
-    OVERLAPPED offset =
-    {0, 0, 0, 0, NULL};
+	HANDLE hdl = (HANDLE) _get_osfhandle(fd);
+	DWORD low = 0xFFFFFFFF, high = 0xFFFFFFFF;
+	OVERLAPPED offset =
+	{0, 0, 0, 0, NULL};
 	DWORD err;
 
-    if (INVALID_HANDLE_VALUE == hdl) {
+	if (INVALID_HANDLE_VALUE == hdl) {
 		_set_errno(EBADF);
-        return -1;              /* error in file descriptor */
+		return -1;              /* error in file descriptor */
 	}
-    /* bug for bug compatible with Unix */
-    UnlockFileEx(hdl, 0, low, high, &offset);
-    switch (operation & ~LOCK_NB) {    /* translate to LockFileEx() op */
-        case LOCK_EX:           /* exclusive */
-            if (LockFileEx(hdl, LOCKFILE_EXCLUSIVE_LOCK +
-                        ((operation & LOCK_NB) ? LOCKFILE_FAIL_IMMEDIATELY : 0),
-                           0, low, high, &offset))
-                return 0;
-            break;
-        case LOCK_SH:           /* shared */
-            if (LockFileEx(hdl, ((operation & LOCK_NB) ? LOCKFILE_FAIL_IMMEDIATELY : 0),
-                           0, low, high, &offset))
-                return 0;
-            break;
-        case LOCK_UN:           /* unlock */
-            return 0;           /* always succeeds */
-        default:                /* default */
-            break;
-    }
+	/* bug for bug compatible with Unix */
+	UnlockFileEx(hdl, 0, low, high, &offset);
+	switch (operation & ~LOCK_NB) {    /* translate to LockFileEx() op */
+		case LOCK_EX:           /* exclusive */
+			if (LockFileEx(hdl, LOCKFILE_EXCLUSIVE_LOCK +
+						((operation & LOCK_NB) ? LOCKFILE_FAIL_IMMEDIATELY : 0),
+						   0, low, high, &offset))
+				return 0;
+			break;
+		case LOCK_SH:           /* shared */
+			if (LockFileEx(hdl, ((operation & LOCK_NB) ? LOCKFILE_FAIL_IMMEDIATELY : 0),
+						   0, low, high, &offset))
+				return 0;
+			break;
+		case LOCK_UN:           /* unlock */
+			return 0;           /* always succeeds */
+		default:                /* default */
+			break;
+	}
 
 	err = GetLastError();
 	if (ERROR_LOCK_VIOLATION == err || ERROR_SHARING_VIOLATION == err) {
@@ -150,7 +139,7 @@ PHPAPI int php_flock(int fd, int operation)
 		_set_errno(EINVAL);             /* bad call */
 	}
 
-    return -1;
+	return -1;
 }
 /* }}} */
 #else
@@ -162,7 +151,7 @@ PHPAPI int php_flock(int fd, int operation)
 #endif
 
 #ifndef PHP_WIN32
-#if !(HAVE_INET_ATON)
+#ifndef HAVE_INET_ATON
 /* {{{ inet_aton
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.
@@ -172,56 +161,56 @@ PHPAPI int php_flock(int fd, int operation)
  */
 int inet_aton(const char *cp, struct in_addr *ap)
 {
-    int dots = 0;
-    register unsigned long acc = 0, addr = 0;
+	int dots = 0;
+	unsigned long acc = 0, addr = 0;
 
-    do {
-        register char cc = *cp;
+	do {
+		char cc = *cp;
 
-        switch (cc) {
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            acc = acc * 10 + (cc - '0');
-            break;
+		switch (cc) {
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				acc = acc * 10 + (cc - '0');
+				break;
 
-        case '.':
-            if (++dots > 3) {
-                return 0;
-            }
-            /* Fall through */
+			case '.':
+				if (++dots > 3) {
+					return 0;
+				}
+				/* Fall through */
 
-        case '\0':
-            if (acc > 255) {
-                return 0;
-            }
-            addr = addr << 8 | acc;
-            acc = 0;
-            break;
+			case '\0':
+				if (acc > 255) {
+					return 0;
+				}
+				addr = addr << 8 | acc;
+				acc = 0;
+				break;
 
-        default:
-            return 0;
-        }
-    } while (*cp++) ;
+			default:
+				return 0;
+		}
+	} while (*cp++) ;
 
-    /* Normalize the address */
-    if (dots < 3) {
-        addr <<= 8 * (3 - dots) ;
-    }
+	/* Normalize the address */
+	if (dots < 3) {
+		addr <<= 8 * (3 - dots) ;
+	}
 
-    /* Store it if requested */
-    if (ap) {
-        ap->s_addr = htonl(addr);
-    }
+	/* Store it if requested */
+	if (ap) {
+		ap->s_addr = htonl(addr);
+	}
 
-    return 1;
+	return 1;
 }
 /* }}} */
 #endif /* !HAVE_INET_ATON */

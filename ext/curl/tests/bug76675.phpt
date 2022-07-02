@@ -1,15 +1,19 @@
 --TEST--
 Bug #76675 (Segfault with H2 server push write/writeheader handlers)
+--EXTENSIONS--
+curl
+--XFAIL--
+http2.golang.org/serverpush is gone
 --SKIPIF--
 <?php
-include 'skipif.inc';
 if (getenv("SKIP_ONLINE_TESTS")) {
-	die("skip online test");
+    die("skip online test");
 }
 $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x073d00) {
-	exit("skip: test may crash with curl < 7.61.0");
+    exit("skip: test may crash with curl < 7.61.0");
 }
+die("skip test is slow due to timeout, and XFAILs anyway");
 ?>
 --FILE--
 <?php
@@ -19,8 +23,8 @@ $callback = function($parent, $passed) use (&$transfers) {
         echo "Received ".strlen($data);
         return strlen($data);
     });
-	$transfers++;
-	return CURL_PUSH_OK;
+    $transfers++;
+    return CURL_PUSH_OK;
 };
 $mh = curl_multi_init();
 curl_multi_setopt($mh, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);

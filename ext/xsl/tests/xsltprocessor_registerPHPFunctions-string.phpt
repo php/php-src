@@ -1,11 +1,7 @@
 --TEST--
 Check xsltprocessor::registerPHPFunctions with string
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';
@@ -18,6 +14,7 @@ if(!$phpfuncxsl) {
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions('ucwords'));
 var_dump($proc->transformToXml($dom));
+?>
 --EXPECT--
 NULL
 string(18) "This Is An Example"

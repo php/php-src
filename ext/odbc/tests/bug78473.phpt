@@ -1,9 +1,7 @@
 --TEST--
 Bug #78473 (odbc_close() closes arbitrary resources)
---SKIPIF--
-<?php
-if (!extension_loaded('odbc')) die('skip odbc extension not available');
-?>
+--EXTENSIONS--
+odbc
 --FILE--
 <?php
 try {

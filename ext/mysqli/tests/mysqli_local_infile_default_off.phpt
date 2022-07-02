@@ -1,8 +1,9 @@
 --TEST--
 ensure default for local infile is off
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -16,11 +17,11 @@ echo "server: ", $row['Value'], "\n";
 mysqli_free_result($res);
 mysqli_close($link);
 
-echo "connector: ", ini_get("mysqli.allow_local_infile"), "\n";
+echo 'connector: ', ini_get('mysqli.allow_local_infile'), ' ', var_export(ini_get('mysqli.local_infile_directory')), "\n";
 
 print "done!\n";
 ?>
 --EXPECTF--
 server: %s
-connector: 0
+connector: 0 ''
 done!

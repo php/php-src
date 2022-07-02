@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -72,8 +72,8 @@ PHPDBG_API void phpdbg_set_prompt(const char*);
 PHPDBG_API const char *phpdbg_get_prompt(void); /* }}} */
 
 /* {{{ Console size */
-PHPDBG_API int phpdbg_get_terminal_width(void);
-PHPDBG_API int phpdbg_get_terminal_height(void); /* }}} */
+PHPDBG_API uint32_t phpdbg_get_terminal_width(void);
+PHPDBG_API uint32_t phpdbg_get_terminal_height(void); /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd);
 
@@ -86,16 +86,14 @@ char *phpdbg_get_property_key(char *key);
 typedef int (*phpdbg_parse_var_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv);
 typedef int (*phpdbg_parse_var_with_arg_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv, void *arg);
 
-PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent);
-PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg);
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, bool silent);
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, bool silent, void *arg);
 
 int phpdbg_is_auto_global(char *name, int len);
 
-PHPDBG_API void phpdbg_xml_var_dump(zval *zv);
-
 char *phpdbg_short_zval_print(zval *zv, int maxlen);
 
-PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *ex, zend_object *exception);
+PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *ex, zend_object *exception);
 
 static zend_always_inline zend_execute_data *phpdbg_user_execute_data(zend_execute_data *ex) {
 	while (!ex->func || !ZEND_USER_CODE(ex->func->common.type)) {

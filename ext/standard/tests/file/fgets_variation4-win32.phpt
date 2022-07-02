@@ -8,12 +8,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-/*
- Prototype: string fgets ( resource $handle [, int $length] );
- Description: Gets a line from file pointer
-*/
-
-// include the file.inc for common test funcitons
+// include the file.inc for common test functions
 include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
@@ -46,14 +41,14 @@ foreach($file_modes as $file_mode) {
     var_dump( ftell($file_handle) );
     var_dump( fgets($file_handle ) );
     var_dump( ftell($file_handle) ); // ensure the file pointer position
-    var_dump( feof($file_handle) );  // enusre if eof set
+    var_dump( feof($file_handle) );  // ensure if eof set
 
     echo "-- fgets() with location set by fseek() with length = 20 --\n";
     var_dump( fseek($file_handle, 25, SEEK_SET) );
     var_dump( ftell($file_handle) );
     var_dump( fgets($file_handle, 20 ) ); // expected 19 chars
     var_dump( ftell($file_handle) ); // ensure the file pointer position
-    var_dump( feof($file_handle) );  // enusre if eof set
+    var_dump( feof($file_handle) );  // ensure if eof set
 
     //close file
     fclose($file_handle);

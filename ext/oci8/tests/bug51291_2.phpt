@@ -1,5 +1,7 @@
 --TEST--
 Bug #51291 (oci_error() doesn't report last error when called two times)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs: different error messages from TimesTen
@@ -31,8 +33,6 @@ if (!$r) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - Execute - after successful 2nd query with same statement
 bool(false)
@@ -53,4 +53,3 @@ Execute status is true
 bool(false)
 bool(false)
 bool(false)
-===DONE===

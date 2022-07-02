@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = 'db4';
@@ -11,7 +13,6 @@ $handler = 'db4';
 require_once(__DIR__ .'/test.inc');
 require_once(__DIR__ .'/dba_handler.inc');
 ?>
-===DONE===
 --CLEAN--
 <?php
 require(__DIR__ .'/clean.inc');
@@ -51,4 +52,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

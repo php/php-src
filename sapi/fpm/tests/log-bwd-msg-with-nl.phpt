@@ -29,10 +29,11 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
-$tester->terminate();
 $tester->expectLogLine('msg 1');
 $tester->expectLogLine('msg 2');
 $tester->expectLogLine('msg 3');
+$tester->terminate();
+$tester->expectLogTerminatingNotices();
 $tester->close();
 
 ?>

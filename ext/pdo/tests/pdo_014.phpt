@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: PDOStatement SPL iterator
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -21,10 +22,13 @@ $SELECT = 'SELECT val, grp FROM test';
 
 class Test
 {
-	function __construct($name = 'N/A')
-	{
-		echo __METHOD__ . "($name)\n";
-	}
+    public $val;
+    public $grp;
+
+    function __construct($name = 'N/A')
+    {
+        echo __METHOD__ . "($name)\n";
+    }
 }
 
 $stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
@@ -35,7 +39,7 @@ $it = new IteratorIterator($stmt); /* check if we can convert that thing */
 
 foreach($it as $data)
 {
-	var_dump($data);
+    var_dump($data);
 }
 
 $it->next();              /* must be allowed */
@@ -44,26 +48,26 @@ var_dump($it->valid());   /* must return false */
 
 class PDOStatementAggregate extends PDOStatement implements IteratorAggregate
 {
-	private function __construct()
-	{
-		echo __METHOD__ . "\n";
-		$this->setFetchMode(PDO::FETCH_NUM);
-		/* default fetch mode is BOTH, so we see if the ctor can overwrite that */
-	}
+    private function __construct()
+    {
+        echo __METHOD__ . "\n";
+        $this->setFetchMode(PDO::FETCH_NUM);
+        /* default fetch mode is BOTH, so we see if the ctor can overwrite that */
+    }
 
-	function getIterator()
-	{
-		echo __METHOD__ . "\n";
-		$this->execute();
-		return new IteratorIterator($this, 'PDOStatement');
-	}
+    function getIterator(): Iterator
+    {
+        echo __METHOD__ . "\n";
+        $this->execute();
+        return new IteratorIterator($this, 'PDOStatement');
+    }
 }
 
 $stmt = $db->prepare($SELECT, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementAggregate')));
 
 foreach($stmt as $data)
 {
-	var_dump($data);
+    var_dump($data);
 }
 
 ?>

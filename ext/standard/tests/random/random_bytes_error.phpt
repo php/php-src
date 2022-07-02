@@ -18,5 +18,5 @@ try {
 
 ?>
 --EXPECT--
-random_bytes() expects exactly 1 parameter, 0 given
-Length must be greater than 0
+random_bytes() expects exactly 1 argument, 0 given
+random_bytes(): Argument #1 ($length) must be greater than 0

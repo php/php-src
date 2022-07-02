@@ -8,10 +8,10 @@ namespace Foo;
 
 class Foo {
   function __construct() {
-  	echo "Method - ".__CLASS__."::".__FUNCTION__."\n";
+    echo "Method - ".__CLASS__."::".__FUNCTION__."\n";
   }
   static function Bar() {
-  	echo "Method - ".__CLASS__."::".__FUNCTION__."\n";
+    echo "Method - ".__CLASS__."::".__FUNCTION__."\n";
   }
 }
 
@@ -25,6 +25,7 @@ $x = new \Foo\Foo;
 \Foo\Foo::Bar();
 \Foo\Bar();
 Foo\Bar();
+?>
 --EXPECTF--
 Method - Foo\Foo::__construct
 Func   - Foo\Bar

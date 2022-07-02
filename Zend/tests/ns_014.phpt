@@ -5,5 +5,6 @@
 namespace test\ns1;
 
 echo strlen("Hello"),"\n";
+?>
 --EXPECT--
 5

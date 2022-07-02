@@ -1,5 +1,5 @@
 --TEST--
-Bug #53437 DateInterval unserialize bad data, 64 bit
+Bug #53437 (DateInterval unserialize bad data, 64 bit)
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) { die('skip true 64 bit only'); } ?>
 --FILE--
@@ -10,9 +10,8 @@ $di = unserialize($s);
 var_dump($di);
 
 ?>
-==DONE==
 --EXPECTF--
-object(DateInterval)#%d (16) {
+object(DateInterval)#%d (%d) {
   ["y"]=>
   int(2)
   ["m"]=>
@@ -27,23 +26,10 @@ object(DateInterval)#%d (16) {
   int(0)
   ["f"]=>
   float(0.123654)
-  ["weekday"]=>
-  int(10)
-  ["weekday_behavior"]=>
-  int(10)
-  ["first_last_day_of"]=>
-  int(0)
   ["invert"]=>
   int(0)
   ["days"]=>
   int(0)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(9223372036854775807)
-  ["have_weekday_relative"]=>
-  int(9)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
-==DONE==

@@ -2,12 +2,6 @@
 Test arsort() function : usage variations - sorting arrays with/without keys, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
-/* Prototype  : bool arsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association.
-                Elements will be arranged from highest to lowest when this function has completed.
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing arsort() by providing arrays  with key values for $array argument with following flag values.
  * 1.flag value as default
@@ -200,18 +194,18 @@ array(6) {
 - With default sort_flag -
 bool(true)
 array(2) {
-  ["foo"]=>
-  int(1)
   ["bar"]=>
   string(3) "baz"
+  ["foo"]=>
+  int(1)
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(2) {
-  ["foo"]=>
-  int(1)
   ["bar"]=>
   string(3) "baz"
+  ["foo"]=>
+  int(1)
 }
 
 -- Iteration 7 --

@@ -4,11 +4,11 @@ Testing indirect property access
 <?php
 
 class foo {
-	public $x = 1;
+    public $x = 1;
 }
 
 class bar {
-	public $y = 'foo';
+    public $y = 'foo';
 }
 
 $x = 'bar';

@@ -1,7 +1,5 @@
 --TEST--
 json_encode() & endless loop - 1
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -25,10 +23,7 @@ echo "Done\n";
 --EXPECTF--
 array(1) {
   [0]=>
-  &array(1) {
-    [0]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 
 bool(false)

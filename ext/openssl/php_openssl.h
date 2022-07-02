@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -35,12 +35,12 @@ extern zend_module_entry openssl_module_entry;
 #endif
 #else
 /* OpenSSL version check */
-#if OPENSSL_VERSION_NUMBER < 0x10002000L
-#define PHP_OPENSSL_API_VERSION 0x10001
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 #define PHP_OPENSSL_API_VERSION 0x10002
-#else
+#elif OPENSSL_VERSION_NUMBER < 0x30000000L
 #define PHP_OPENSSL_API_VERSION 0x10100
+#else
+#define PHP_OPENSSL_API_VERSION 0x30000
 #endif
 #endif
 
@@ -90,79 +90,47 @@ ZEND_TSRMLS_CACHE_EXTERN();
 
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
-void php_openssl_store_errors();
+void php_openssl_store_errors(void);
 
-PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(char *method);
+PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method);
 PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long length);
-PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len,
-		char *method, size_t method_len, char *password,
-		size_t password_len, zend_long options, char *iv, size_t iv_len,
-		zval *tag, zend_long tag_len, char *aad, size_t add_len);
-PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len,
-		char *method, size_t method_len, char *password,
-		size_t password_len, zend_long options, char *iv, size_t iv_len,
-		char *tag, zend_long tag_len, char *aad, size_t add_len);
+PHP_OPENSSL_API zend_string* php_openssl_encrypt(
+	const char *data, size_t data_len,
+	const char *method, size_t method_len,
+	const char *password, size_t password_len,
+	zend_long options,
+	const char *iv, size_t iv_len,
+	zval *tag, zend_long tag_len,
+	const char *aad, size_t aad_len);
+PHP_OPENSSL_API zend_string* php_openssl_decrypt(
+	const char *data, size_t data_len,
+	const char *method, size_t method_len,
+	const char *password, size_t password_len,
+	zend_long options,
+	const char *iv, size_t iv_len,
+	const char *tag, zend_long tag_len,
+	const char *aad, size_t aad_len);
+
+/* OpenSSLCertificate class */
+
+typedef struct _php_openssl_certificate_object {
+	X509 *x509;
+	zend_object std;
+} php_openssl_certificate_object;
+
+extern zend_class_entry *php_openssl_certificate_ce;
+
+static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(zend_object *obj) {
+	return (php_openssl_certificate_object *)((char *)(obj) - XtOffsetOf(php_openssl_certificate_object, std));
+}
+
+#define Z_OPENSSL_CERTIFICATE_P(zv) php_openssl_certificate_from_obj(Z_OBJ_P(zv))
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
 PHP_GINIT_FUNCTION(openssl);
 PHP_GSHUTDOWN_FUNCTION(openssl);
-
-PHP_FUNCTION(openssl_pkey_get_private);
-PHP_FUNCTION(openssl_pkey_get_public);
-PHP_FUNCTION(openssl_pkey_free);
-PHP_FUNCTION(openssl_pkey_new);
-PHP_FUNCTION(openssl_pkey_export);
-PHP_FUNCTION(openssl_pkey_export_to_file);
-PHP_FUNCTION(openssl_pkey_get_details);
-
-PHP_FUNCTION(openssl_sign);
-PHP_FUNCTION(openssl_verify);
-PHP_FUNCTION(openssl_seal);
-PHP_FUNCTION(openssl_open);
-PHP_FUNCTION(openssl_private_encrypt);
-PHP_FUNCTION(openssl_private_decrypt);
-PHP_FUNCTION(openssl_public_encrypt);
-PHP_FUNCTION(openssl_public_decrypt);
-
-PHP_FUNCTION(openssl_pbkdf2);
-
-PHP_FUNCTION(openssl_pkcs7_verify);
-PHP_FUNCTION(openssl_pkcs7_decrypt);
-PHP_FUNCTION(openssl_pkcs7_sign);
-PHP_FUNCTION(openssl_pkcs7_encrypt);
-PHP_FUNCTION(openssl_pkcs7_read);
-
-PHP_FUNCTION(openssl_error_string);
-
-PHP_FUNCTION(openssl_x509_read);
-PHP_FUNCTION(openssl_x509_free);
-PHP_FUNCTION(openssl_x509_parse);
-PHP_FUNCTION(openssl_x509_checkpurpose);
-PHP_FUNCTION(openssl_x509_export);
-PHP_FUNCTION(openssl_x509_fingerprint);
-PHP_FUNCTION(openssl_x509_export_to_file);
-PHP_FUNCTION(openssl_x509_check_private_key);
-PHP_FUNCTION(openssl_x509_verify);
-
-PHP_FUNCTION(openssl_pkcs12_export);
-PHP_FUNCTION(openssl_pkcs12_export_to_file);
-PHP_FUNCTION(openssl_pkcs12_read);
-
-PHP_FUNCTION(openssl_csr_new);
-PHP_FUNCTION(openssl_csr_export);
-PHP_FUNCTION(openssl_csr_export_to_file);
-PHP_FUNCTION(openssl_csr_sign);
-PHP_FUNCTION(openssl_csr_get_subject);
-PHP_FUNCTION(openssl_csr_get_public_key);
-
-PHP_FUNCTION(openssl_spki_new);
-PHP_FUNCTION(openssl_spki_verify);
-PHP_FUNCTION(openssl_spki_export);
-PHP_FUNCTION(openssl_spki_export_challenge);
-
-PHP_FUNCTION(openssl_get_cert_locations);
 
 #ifdef PHP_WIN32
 #define PHP_OPENSSL_BIO_MODE_R(flags) (((flags) & PKCS7_BINARY) ? "rb" : "r")

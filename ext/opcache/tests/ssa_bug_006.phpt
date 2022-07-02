@@ -1,7 +1,7 @@
 --TEST--
 Incorrect optimization of $i = $i++
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

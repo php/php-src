@@ -18,8 +18,10 @@ var_dump($_POST);
 --EXPECT--
 array(1) {
   ["file1"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file1.txt"
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(0) ""

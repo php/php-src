@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_convert() and JSON/Array
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");
@@ -14,16 +16,16 @@ include 'config.inc';
 $db = pg_connect($conn_str);
 
 $fields = array(
-	'textary'=>'{"meeting", "lunch", "training", "presentation"}',
-	'jsn'=>'{"f1":1,"f2":"foo"}',
+    'textary'=>'{"meeting", "lunch", "training", "presentation"}',
+    'jsn'=>'{"f1":1,"f2":"foo"}',
 );
 $converted = pg_convert($db, $table_name_92, $fields);
 var_dump($converted);
 
 if (!pg_insert($db, $table_name_92, $fields)) {
-	echo "Error\n";
+    echo "Error\n";
 } else {
-	echo "OK\n";
+    echo "OK\n";
 }
 
 ?>

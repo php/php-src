@@ -1,7 +1,7 @@
 --TEST--
 mb_stripos()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 // TODO: Add more encodings
@@ -40,30 +40,6 @@ print mb_stripos($euc_jp, 3, -15,       'EUC-JP') . "\n";
 print mb_stripos($euc_jp, 0, -15,       'EUC-JP') . "\n";
 print mb_stripos($euc_jp, 0, -43,       'EUC-JP') . "\n";
 
-
-// Invalid offset - should return false with warning
-print ("== INVALID OFFSET ==\n");
-
-$r =  mb_stripos($euc_jp, '日本語', 44, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_stripos($euc_jp, '日本語', 50, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_stripos($euc_jp, '0', 50,     'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =  mb_stripos($euc_jp, 3, 50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r =   mb_stripos($euc_jp, 0, 50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, '日本語', -50, 'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, '0', -50,     'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, 3, -50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, 0, -50,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
-$r = mb_stripos($euc_jp, 0, -44,       'EUC-JP');
-($r === FALSE) ? print "OK_INVALID_OFFSET\n"     : print "NG_INVALID_OFFSET\n";
 
 // Out of range - should return false
 print ("== OUT OF RANGE ==\n");
@@ -126,8 +102,7 @@ $r = mb_stripos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
 ?>
-==DONE==
---EXPECTF--
+--EXPECT--
 String len: 43
 == POSITIVE OFFSET ==
 10
@@ -144,37 +119,6 @@ String len: 43
 33
 30
 0
-== INVALID OFFSET ==
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-OK_INVALID_OFFSET
 == OUT OF RANGE ==
 OK_OUT_RANGE
 OK_OUT_RANGE
@@ -201,4 +145,3 @@ OK_NEWLINE
 0
 OK_STR
 OK_NEWLINE
-==DONE==

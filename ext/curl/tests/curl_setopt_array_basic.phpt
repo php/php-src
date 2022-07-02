@@ -3,12 +3,11 @@ curl_setopt_array() function - tests setting multiple cURL options with curl_set
 --CREDITS--
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 /*
- * Prototype:     bool curl_setopt_array(resource $ch, array $options)
  * Description:   Sets multiple options for a cURL session.
  * Source:        ext/curl/interface.c
  * Documentation: http://wiki.php.net/qa/temp/ext/curl

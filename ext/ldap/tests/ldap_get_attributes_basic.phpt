@@ -3,8 +3,9 @@ ldap_get_attributes() - Basic ldap_get_attributes test
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -15,10 +16,9 @@ insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(o=test)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	ldap_get_attributes($link, $entry)
+    ldap_get_attributes($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -51,4 +51,3 @@ array(5) {
   ["count"]=>
   int(2)
 }
-===DONE===

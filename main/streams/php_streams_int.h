@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -60,6 +60,3 @@
  * any other function that expects standard modes and you allow non-standard
  * ones. result should be a char[5]. */
 void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *result);
-
-void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
-void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption);

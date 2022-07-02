@@ -3,8 +3,7 @@ Bug #36424 - Serializable interface breaks object references
 --FILE--
 <?php
 
-echo "-TEST\n";
-
+#[AllowDynamicProperties]
 class a implements Serializable {
     function serialize() {
         return serialize(get_object_vars($this));
@@ -44,7 +43,11 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-%aTEST
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 C:1:"c":108:{a:1:{s:1:"a";C:1:"a":81:{a:3:{s:1:"b";C:1:"b":30:{a:2:{s:1:"c";r:1;s:1:"a";r:3;}}s:1:"c";r:1;s:1:"a";r:3;}}}}
 bool(true)
 bool(true)

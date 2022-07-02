@@ -58,13 +58,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       if test "x$SED" = "x"; then
         AC_PATH_PROG(SED, sed)
       fi
-      if test "$enable_zts" = "yes"; then
-        PDO_MYSQL_LIBNAME=mysqlclient_r
-        PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs_r | $SED -e "s/'//g"`
-      else
-        PDO_MYSQL_LIBNAME=mysqlclient
-        PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
-      fi
+      PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
       PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     elif test -n "$PDO_MYSQL_DIR"; then
       AC_MSG_RESULT([not found])
@@ -94,34 +88,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       AC_MSG_ERROR([Unable to find your mysql installation])
     fi
 
-    PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit,
-    [
-      PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
-      PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
-    ],[
-      if test "$PHP_ZLIB_DIR" != "no"; then
-        PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, PDO_MYSQL_SHARED_LIBADD)
-        PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit, [], [
-          AC_MSG_ERROR([PDO_MYSQL configure failed, MySQL 4.1 needed. Please check config.log for more information.])
-        ], [
-          -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR
-        ])
-        PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz"
-      else
-        PHP_ADD_LIBRARY(z,, PDO_MYSQL_SHARED_LIBADD)
-        PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query, [], [
-          AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
-        ], [
-          -L$PDO_MYSQL_LIB_DIR
-        ])
-        PDO_MYSQL_LIBS="$PDO_MYSQL_LIBS -lz"
-      fi
-
-      PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
-      PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
-    ],[
-      $PDO_MYSQL_LIBS
-    ])
+    PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
+    PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
   fi
 
   PHP_CHECK_PDO_INCLUDES

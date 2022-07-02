@@ -1,10 +1,9 @@
 --TEST--
 Test imagecolorallocate() function : usage variations  - passing RED, GREEN, BLUE values more than 255
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
 if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }
@@ -13,10 +12,6 @@ if(!function_exists('imagecreatetruecolor')) {
 <?php
 require  __DIR__ . '/func.inc';
 
-/* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
- * Description:  Allocate a color for an image
- * Source code: ext/gd/gd.c
- */
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
 $values = array(
@@ -47,31 +42,29 @@ foreach($values as $key => $value) {
       );
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Octal 0400--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Hexa-decimal 0x100--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-===DONE===
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)

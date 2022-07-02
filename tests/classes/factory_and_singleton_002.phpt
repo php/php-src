@@ -27,7 +27,7 @@ class test {
   }
 
   protected function __destruct() {
-  	test::$cnt--;
+    test::$cnt--;
   }
 
   public function get() {
@@ -95,4 +95,4 @@ int(1)
 int(1)
 Done
 
-Warning: Call to protected test::__destruct() from context '' during shutdown ignored in Unknown on line 0
+Warning: Call to protected test::__destruct() from global scope during shutdown ignored in Unknown on line 0

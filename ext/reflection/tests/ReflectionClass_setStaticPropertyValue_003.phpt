@@ -11,7 +11,7 @@ class Test {
 $rc = new ReflectionClass('Test');
 
 try {
-	$rc->setStaticPropertyValue("y", "foo");
+    $rc->setStaticPropertyValue("y", "foo");
 } catch (TypeError $e) { echo $e->getMessage(), "\n"; }
 var_dump(Test::$y);
 
@@ -22,7 +22,7 @@ var_dump(Test::$y);
 Test::$x =& Test::$y;
 
 try {
-	$rc->setStaticPropertyValue("x", "foo");
+    $rc->setStaticPropertyValue("x", "foo");
 } catch (TypeError $e) { echo $e->getMessage(), "\n"; }
 var_dump(Test::$y);
 

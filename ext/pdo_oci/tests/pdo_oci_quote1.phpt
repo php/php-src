@@ -1,8 +1,10 @@
 --TEST--
 Test PDO->quote() for PDO_OCI
+--EXTENSIONS--
+pdo
+pdo_oci
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
@@ -21,17 +23,17 @@ $stmt = $db->prepare('select * from poq_tab');
 
 $a = array(null, "", "a", "ab", "abc", "ab'cd", "a\b\n", "'", "''", "a'", "'z", "a''b", '"');
 foreach ($a as $u) {
-	$q = $db->quote($u);
-	echo "Unquoted : ";
-	var_dump($u);
-	echo "Quoted   : ";
-	var_dump($q);
+    $q = $db->quote($u);
+    echo "Unquoted : ";
+    var_dump($u);
+    echo "Quoted   : ";
+    var_dump($q);
 
-	$db->exec("delete from poq_tab");
+    $db->exec("delete from poq_tab");
 
-	$db->query("insert into poq_tab (t) values($q)");
-	$stmt->execute();
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $db->query("insert into poq_tab (t) values($q)");
+    $stmt->execute();
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
 echo "Done\n";

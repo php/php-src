@@ -4,7 +4,7 @@ recursive mkdir() tests
 <?php
 chdir("/");
 if (!@mkdir("testtmpskipifdir")) {
-	die("skip for root only");
+    die("skip for root only");
 }
 rmdir("testtmpskipifdir");
 ?>

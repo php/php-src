@@ -10,9 +10,17 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-var_dump(password_hash("foo", array()));
+try {
+    password_hash("foo", array());
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-var_dump(password_hash("foo", 19, new StdClass));
+try {
+    var_dump(password_hash("foo", 19, new StdClass));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 try {
     var_dump(password_hash("foo", PASSWORD_BCRYPT, "baz"));
@@ -27,15 +35,9 @@ try {
 }
 
 ?>
---EXPECTF--
-password_hash() expects at least 2 parameters, 1 given
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: password_hash(): Unknown password hashing algorithm: Array in %s on line %d
-NULL
-
-Warning: password_hash(): Unknown password hashing algorithm: 19 in %s on line %d
-NULL
-password_hash() expects parameter 3 to be array, string given
-password_hash() expects parameter 1 to be string, array given
+--EXPECT--
+password_hash() expects at least 2 arguments, 1 given
+password_hash(): Argument #2 ($algo) must be of type string|int|null, array given
+password_hash(): Argument #3 ($options) must be of type array, stdClass given
+password_hash(): Argument #3 ($options) must be of type array, string given
+password_hash(): Argument #1 ($password) must be of type string, array given

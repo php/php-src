@@ -4,14 +4,14 @@ __COMPILER_HALT_OFFSET__ is a "magic" constant, which should work if referenced 
 <?php
 
 namespace {
-	echo __COMPILER_HALT_OFFSET__, "\n";
-	echo \__COMPILER_HALT_OFFSET__, "\n";
+    echo __COMPILER_HALT_OFFSET__, "\n";
+    echo \__COMPILER_HALT_OFFSET__, "\n";
 }
 
 namespace Foo {
-	echo __COMPILER_HALT_OFFSET__, "\n";
-	echo \__COMPILER_HALT_OFFSET__, "\n";
-	echo namespace\__COMPILER_HALT_OFFSET__, "\n";
+    echo __COMPILER_HALT_OFFSET__, "\n";
+    echo \__COMPILER_HALT_OFFSET__, "\n";
+    echo namespace\__COMPILER_HALT_OFFSET__, "\n";
 
 }
 
@@ -24,7 +24,7 @@ __halt_compiler();
 %d
 %d
 
-Fatal error: Uncaught Error: Undefined constant 'Foo\__COMPILER_HALT_OFFSET__' in %s:%d
+Fatal error: Uncaught Error: Undefined constant "Foo\__COMPILER_HALT_OFFSET__" in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

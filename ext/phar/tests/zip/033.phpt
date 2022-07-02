@@ -1,7 +1,7 @@
 --TEST--
 Phar::chmod zip-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -19,26 +19,25 @@ $phar->addEmptyDir('test');
 $phar->stopBuffering();
 
 try {
-	var_dump($phar['a.php']->isExecutable());
-	$phar['a.php']->chmod(0777);
-	copy($fname, $fname2);
-	$phar->setAlias('unused');
-	$phar2 = new Phar($fname2);
-	var_dump($phar2['a.php']->isExecutable());
-	$phar['a.php']->chmod(0666);
-	var_dump($phar['a.php']->isExecutable());
-	echo "test dir\n";
-	var_dump($phar['test']->isDir());
-	var_dump($phar['test']->isReadable());
-	$phar['test']->chmod(0000);
-	var_dump($phar['test']->isReadable());
-	$phar['test']->chmod(0666);
-	var_dump($phar['test']->isReadable());
+    var_dump($phar['a.php']->isExecutable());
+    $phar['a.php']->chmod(0777);
+    copy($fname, $fname2);
+    $phar->setAlias('unused');
+    $phar2 = new Phar($fname2);
+    var_dump($phar2['a.php']->isExecutable());
+    $phar['a.php']->chmod(0666);
+    var_dump($phar['a.php']->isExecutable());
+    echo "test dir\n";
+    var_dump($phar['test']->isDir());
+    var_dump($phar['test']->isReadable());
+    $phar['test']->chmod(0000);
+    var_dump($phar['test']->isReadable());
+    $phar['test']->chmod(0666);
+    var_dump($phar['test']->isReadable());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -53,4 +52,3 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
-===DONE===

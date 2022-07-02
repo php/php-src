@@ -3,7 +3,7 @@ Bug #7515 (weird & invisible referencing of objects)
 --FILE--
 <?php
 class obj {
-	function method() {}
+    function method() {}
 }
 
 $o = new stdClass;

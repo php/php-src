@@ -12,11 +12,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef MYSQLND_PORTABILITY_H
 #define MYSQLND_PORTABILITY_H
 
-
-
-/* Comes from global.h as OFFSET, renamed to STRUCT_OFFSET */
-#define STRUCT_OFFSET(t, f)   ((size_t)(char *)&((t *)0)->f)
-
 #ifndef __attribute
 #if !defined(__GNUC__)
 #define __attribute(A)
@@ -43,7 +38,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
   #define atoll atol
 #endif
 
-#include "php_stdint.h"
+#include <stdint.h>
 
 #if SIZEOF_LONG_LONG > 4 && !defined(_LONG_LONG)
 #define _LONG_LONG 1        /* For AIX string library */
@@ -51,18 +46,12 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Go around some bugs in different OS and compilers */
 
-#if SIZEOF_LONG_LONG > 4
-#define HAVE_LONG_LONG 1
-#endif
-
 #ifdef PHP_WIN32
-#define MYSQLND_SZ_T_SPEC "%Id"
 #ifndef L64
 #define L64(x) x##i64
 #endif
 #else
 
-#define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
 #define L64(x) x##LL
 #endif
@@ -154,15 +143,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
               *(((zend_uchar *)(T))+3)=(zend_uchar) (((A) >> 24)); \
               *(((zend_uchar *)(T))+4)=(zend_uchar) (((A) >> 32)); }
 
-/* From Andrey Hristov, based on int5store() */
-#define int6store(T,A)    { \
-              *(((zend_uchar *)(T)))= (zend_uchar)((A));\
-              *(((zend_uchar *)(T))+1))=(zend_uchar) (((A) >> 8));\
-              *(((zend_uchar *)(T))+2))=(zend_uchar) (((A) >> 16));\
-              *(((zend_uchar *)(T))+3))=(zend_uchar) (((A) >> 24)); \
-              *(((zend_uchar *)(T))+4))=(zend_uchar) (((A) >> 32)); \
-              *(((zend_uchar *)(T))+5))=(zend_uchar) (((A) >> 40)); }
-
 #define int8store(T,A)    *((uint64_t *) (T))= (uint64_t) (A)
 
 typedef union {
@@ -236,14 +216,6 @@ typedef union {
                   *(((char *)(T))+2) = (char)(((A) >> 16));\
                   *(((char *)(T))+3) = (char)(((A) >> 24)); \
                   *(((char *)(T))+4) = (char)(((A) >> 32)); } while (0)
-/* Based on int5store() from Andrey Hristov */
-#define int6store(T,A)  do { \
-                  *(((char *)(T)))   = (char)((A));\
-                  *(((char *)(T))+1) = (char)(((A) >> 8));\
-                  *(((char *)(T))+2) = (char)(((A) >> 16));\
-                  *(((char *)(T))+3) = (char)(((A) >> 24)); \
-                  *(((char *)(T))+4) = (char)(((A) >> 32)); \
-                  *(((char *)(T))+5) = (char)(((A) >> 40)); } while (0)
 #define int8store(T,A)        { uint32_t def_temp= (uint32_t) (A), def_temp2= (uint32_t) ((A) >> 32); \
                   int4store((T),def_temp); \
                   int4store((T+4),def_temp2); \

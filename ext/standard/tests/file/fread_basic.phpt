@@ -2,14 +2,6 @@
 Test fread() function : basic functionality
 --FILE--
 <?php
-/*
- Prototype: string fread ( resource $handle [, int $length] );
- Description: reads up to length bytes from the file pointer referenced by handle.
-   Reading stops when up to length bytes have been read, EOF (end of file) is
-   reached, (for network streams) when a packet becomes available, or (after
-   opening userspace stream) when 8192 bytes have been read whichever comes first.
-*/
-
 // include the file.inc for common functions for test
 include ("file.inc");
 
@@ -54,7 +46,7 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
        exit();
     }
 
-    /* read file by giving the acutal length, check the length and content by calculating the
+    /* read file by giving the actual length, check the length and content by calculating the
       hash using md5() function
     */
     /* Reading 1024 bytes from file, expecting 1024 bytes */ ;

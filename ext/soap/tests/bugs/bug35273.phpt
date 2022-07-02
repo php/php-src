@@ -1,16 +1,16 @@
 --TEST--
 Bug #35273 (Error in mapping soap - java types)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestSoapClient extends SoapClient {
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
-  	echo $request;
-  	exit;
-	}
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    echo $request;
+    exit;
+    }
 }
 
 ini_set("soap.wsdl_cache_enabled", 0);

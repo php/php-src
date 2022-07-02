@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 base 018 (php/wsdl): echoHexBinary
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

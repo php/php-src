@@ -2,11 +2,6 @@
 Test array_intersect() function : usage variations - different arrays for 'arr2' argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments
- * Source code: ext/standard/array.c
-*/
-
 /*
 * Passing different types of arrays to $arr2 argument and testing whether
 * array_intersect() behaves in expected way with the other arguments passed to the function.
@@ -79,11 +74,11 @@ $arrays = array (
        array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
        array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
 
-       // array with repetative keys
+       // array with repetitive keys
 /*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
 );
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect()
+// loop through each sub-array within $arrays to check the behavior of array_intersect()
 $iterator = 1;
 foreach($arrays as $arr2) {
   echo "-- Iteration $iterator --\n";

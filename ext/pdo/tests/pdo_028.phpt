@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: bindValue
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -20,7 +21,7 @@ $stmt = $db->prepare('INSERT INTO test values (1, ?, ?, ?)');
 $data = array("one", "two", "three");
 
 foreach ($data as $i => $v) {
-	$stmt->bindValue($i+1, $v);
+    $stmt->bindValue($i+1, $v);
 }
 $stmt->execute();
 

@@ -5,11 +5,11 @@ Test typed properties error condition (type mismatch object)
 class Dummy {}
 
 new class(new Dummy) {
-	public stdClass $std;
+    public stdClass $std;
 
-	public function __construct(Dummy $dummy) {
-		$this->std = $dummy;
-	}
+    public function __construct(Dummy $dummy) {
+        $this->std = $dummy;
+    }
 };
 ?>
 --EXPECTF--

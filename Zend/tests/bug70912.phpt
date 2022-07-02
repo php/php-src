@@ -3,7 +3,7 @@ Bug #70912 (Null ptr dereference when class property is initialised to a derefer
 --FILE--
 <?php
 class A {
-	public $a=[][];
+    public $a=[][];
 }
 ?>
 --EXPECTF--

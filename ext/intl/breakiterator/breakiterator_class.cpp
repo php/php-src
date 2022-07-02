@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,9 +27,7 @@
 extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
-#include "breakiterator_methods.h"
-#include "rulebasedbreakiterator_methods.h"
-#include "codepointiterator_methods.h"
+#include "breakiterator_arginfo.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <assert.h>
@@ -71,7 +69,7 @@ U_CFUNC void breakiterator_object_construct(zval *object,
 	BreakIterator_object *bio;
 
 	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
-	assert(bio->biter == NULL);
+	ZEND_ASSERT(bio->biter == NULL);
 	bio->biter = biter;
 }
 
@@ -83,9 +81,6 @@ static int BreakIterator_compare_objects(zval *object1,
 							*bio2;
 
 	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
-	if (Z_TYPE_P(object1) != Z_TYPE_P(object2)) {
-		return 1; /* object and non-object */
-	}
 
 	bio1 = Z_INTL_BREAKITERATOR_P(object1);
 	bio2 = Z_INTL_BREAKITERATOR_P(object2);
@@ -208,10 +203,10 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
 {
 	BreakIterator_object*	intern;
 
-	intern = (BreakIterator_object*)ecalloc(1, sizeof(BreakIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	intern = (BreakIterator_object*) zend_object_alloc(sizeof(BreakIterator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
-    object_properties_init((zend_object*) intern, ce);
+	object_properties_init(&intern->zo, ce);
 	breakiterator_object_init(intern);
 
 	intern->zo.handlers = &BreakIterator_handlers;
@@ -220,105 +215,16 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
 }
 /* }}} */
 
-/* {{{ BreakIterator/RuleBasedBreakIterator methods arguments info */
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_locale, 0, 0, 0)
-	ZEND_ARG_INFO(0, locale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_setText, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_next, 0, 0, 0)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_offset, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, locale_type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_getPartsIterator, 0, 0, 0)
-	ZEND_ARG_INFO(0, key_type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_rbbi___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, rules)
-	ZEND_ARG_INFO(0, areCompiled)
-ZEND_END_ARG_INFO()
-
-/* }}} */
-
-/* {{{ BreakIterator_class_functions
- * Every 'BreakIterator' class method has an entry in this table
- */
-static const zend_function_entry BreakIterator_class_functions[] = {
-	PHP_ME(BreakIterator,					__construct,							ainfo_biter_void,					ZEND_ACC_PRIVATE)
-	PHP_ME_MAPPING(createWordInstance,		breakiter_create_word_instance,			ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createLineInstance,		breakiter_create_line_instance,			ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createCharacterInstance,	breakiter_create_character_instance,	ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createSentenceInstance,	breakiter_create_sentence_instance,		ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createTitleInstance,		breakiter_create_title_instance,		ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createCodePointInstance,	breakiter_create_code_point_instance,	ainfo_biter_void,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getText,					breakiter_get_text,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setText,					breakiter_set_text,						ainfo_biter_setText,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(first,					breakiter_first,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(last,					breakiter_last,							ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(previous,				breakiter_previous,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(next,					breakiter_next,							ainfo_biter_next,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(current,					breakiter_current,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(following,				breakiter_following,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(preceding,				breakiter_preceding,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(isBoundary,				breakiter_is_boundary,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getLocale,				breakiter_get_locale,					ainfo_biter_get_locale,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getPartsIterator,		breakiter_get_parts_iterator,			ainfo_biter_getPartsIterator,		ZEND_ACC_PUBLIC)
-
-	PHP_ME_MAPPING(getErrorCode,			breakiter_get_error_code,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getErrorMessage,			breakiter_get_error_message,			ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ RuleBasedBreakIterator_class_functions
- */
-static const zend_function_entry RuleBasedBreakIterator_class_functions[] = {
-	PHP_ME(IntlRuleBasedBreakIterator,		__construct,							ainfo_rbbi___construct,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRules,				rbbi_get_rules,							ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRuleStatus,			rbbi_get_rule_status,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRuleStatusVec,		rbbi_get_rule_status_vec,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getBinaryRules,			rbbi_get_binary_rules,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ CodePointBreakIterator_class_functions
- */
-static const zend_function_entry CodePointBreakIterator_class_functions[] = {
-	PHP_ME_MAPPING(getLastCodePoint,		cpbi_get_last_code_point,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
-
 /* {{{ breakiterator_register_BreakIterator_class
  * Initialize 'BreakIterator' class
  */
 U_CFUNC void breakiterator_register_BreakIterator_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", BreakIterator_class_functions);
-	ce.create_object = BreakIterator_object_create;
-	ce.get_iterator = _breakiterator_get_iterator;
-	BreakIterator_ce_ptr = zend_register_internal_class(&ce);
+
+	BreakIterator_ce_ptr = register_class_IntlBreakIterator(zend_ce_aggregate);
+	BreakIterator_ce_ptr->create_object = BreakIterator_object_create;
+	BreakIterator_ce_ptr->get_iterator = _breakiterator_get_iterator;
 
 	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
@@ -327,9 +233,6 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;
-
-	zend_class_implements(BreakIterator_ce_ptr, 1,
-			zend_ce_traversable);
 
 	zend_declare_class_constant_long(BreakIterator_ce_ptr,
 		"DONE", sizeof("DONE") - 1, BreakIterator::DONE );
@@ -364,15 +267,9 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 
 
 	/* Create and register 'RuleBasedBreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator",
-			RuleBasedBreakIterator_class_functions);
-	RuleBasedBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr);
+	RuleBasedBreakIterator_ce_ptr = register_class_IntlRuleBasedBreakIterator(BreakIterator_ce_ptr);
 
 	/* Create and register 'CodePointBreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator",
-			CodePointBreakIterator_class_functions);
-	CodePointBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr);
+	CodePointBreakIterator_ce_ptr = register_class_IntlCodePointBreakIterator(BreakIterator_ce_ptr);
 }
 /* }}} */

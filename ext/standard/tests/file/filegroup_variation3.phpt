@@ -4,9 +4,6 @@ Test filegroup() function: usage variations - diff. path notations
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype: int filegroup ( string $filename )
- * Description: Returns the group ID of the file, or FALSE in case of an error.
- */
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 
@@ -41,7 +38,7 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( filegroup( $file_path."/".$file ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   clearstatcache();
@@ -78,8 +75,12 @@ bool(false)
 Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-filegroup() expects parameter 1 to be a valid path, string given
+
+Warning: filegroup(): Filename contains null byte in %s on line %d
+bool(false)
 - Iteration 8 -
-filegroup() expects parameter 1 to be a valid path, string given
+
+Warning: filegroup(): Filename contains null byte in %s on line %d
+bool(false)
 
 *** Done ***

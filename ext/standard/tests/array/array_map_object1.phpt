@@ -2,11 +2,6 @@
 Test array_map() function : usage variations - object functionality
 --FILE--
 <?php
-/* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays
- * Source code: ext/standard/array.c
- */
-
 /*
  * Testing array_map() for object functionalities:
  *   1) simple class with variable and method
@@ -124,9 +119,7 @@ class InterClass implements myInterface
 test(array('InterClass', 'square'), array(1, 2));
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : object functionality ***
 -- simple class with public variable and method --
 SimpleClass::square
@@ -139,15 +132,15 @@ array(2) {
 
 -- simple class with private variable and method --
 SimpleClassPri::add
-array_map() expects parameter 1 to be a valid callback, cannot access private method SimpleClassPri::add()
+array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access private method SimpleClassPri::add()
 
 -- simple class with protected variable and method --
 SimpleClassPro::mul
-array_map() expects parameter 1 to be a valid callback, cannot access protected method SimpleClassPro::mul()
+array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method SimpleClassPro::mul()
 
 -- class without members --
 EmptyClass
-array_map() expects parameter 1 to be a valid callback, array must have exactly two members
+array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 
 -- abstract class --
 ChildClass::emptyFunction
@@ -180,9 +173,9 @@ array(2) {
   int(4)
 }
 StaticClass::cube
-array_map() expects parameter 1 to be a valid callback, cannot access private method StaticClass::cube()
+array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access private method StaticClass::cube()
 StaticClass::retVal
-array_map() expects parameter 1 to be a valid callback, cannot access protected method StaticClass::retVal()
+array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method StaticClass::retVal()
 -- class implementing an interface --
 InterClass::square
 array(2) {
@@ -191,4 +184,3 @@ array(2) {
   [1]=>
   int(4)
 }
-===DONE===

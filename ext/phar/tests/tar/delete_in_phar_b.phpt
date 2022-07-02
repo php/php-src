@@ -1,7 +1,7 @@
 --TEST--
 Phar: delete a file within a tar-based .phar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -32,7 +32,6 @@ include $alias . '/b.php';
 include $alias . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
@@ -46,4 +45,3 @@ This is a
 This is b
 This is b/c
 
-===DONE===

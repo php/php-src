@@ -2,11 +2,6 @@
 Test usort() function : usage variations - diff. array values
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function
- * Source code: ext/standard/array.c
- */
-
 /*
  * Pass an array with different data types as keys to usort() to test how it is re-ordered
  */
@@ -42,7 +37,7 @@ EOT3;
 $array_arg = array(
   // numeric keys
   -2 => 9,
-  8.9 => 8,
+  8 => 8,
   012 => 7,
   0x34 => 6,
 
@@ -74,7 +69,6 @@ var_dump( usort($array_arg, 'cmp_function') );
 echo "\n-- Sorted array after usort() function call --\n";
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECT--
 *** Testing usort() : usage variation ***
 bool(true)
@@ -112,4 +106,3 @@ array(15) {
   [14]=>
   int(0)
 }
-===DONE===

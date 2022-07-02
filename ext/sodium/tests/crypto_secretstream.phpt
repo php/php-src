@@ -1,8 +1,9 @@
 --TEST--
 Check for libsodium secretstream
+--EXTENSIONS--
+sodium
 --SKIPIF--
 <?php
-if (!extension_loaded("sodium")) print "skip extension not loaded";
 if (!defined('SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES')) print "skip libsodium without secretbytes";
 ?>
 --FILE--
@@ -46,6 +47,7 @@ $r1 = sodium_crypto_secretstream_xchacha20poly1305_pull($stream, $c1, $ad);
 var_dump($r1);
 $r2 = sodium_crypto_secretstream_xchacha20poly1305_pull($stream, $c2);
 var_dump($r2);
+?>
 --EXPECT--
 secretstream_xchacha20poly1305:
 bool(true)

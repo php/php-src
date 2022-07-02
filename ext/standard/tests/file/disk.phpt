@@ -8,6 +8,8 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for Windows');
 }
 ?>
+--CONFLICTS--
+disk_total_space
 --FILE--
 <?php
 
@@ -28,8 +30,8 @@ bool(false)
 
 Warning: disk_total_space(): No such file or directory in %s on line %d
 bool(false)
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 Warning: disk_free_space(): No such file or directory in %s on line %d
 bool(false)

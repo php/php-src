@@ -1,31 +1,22 @@
 <?php
 
-/** @return resource|false */
-function shmop_open(int $key, string $flags, int $mode, int $size) {}
+/** @generate-class-entries */
 
 /**
- * @param resource $shmid
- * @return string|false
+ * @strict-properties
+ * @not-serializable
  */
-function shmop_read($shmid, int $start, int $count) {}
+final class Shmop {}
 
-/**
- * @param resource $shmid
- */
-function shmop_close($shmid): void {}
+function shmop_open(int $key, string $mode, int $permissions, int $size): Shmop|false {}
 
-/**
- * @param resource $shmid
- */
-function shmop_size($shmid): int {}
+function shmop_read(Shmop $shmop, int $offset, int $size): string {}
 
-/**
- * @param resource $shmid
- * @return int|false
- */
-function shmop_write($shmid, string $data, int $offset) {}
+/** @deprecated */
+function shmop_close(Shmop $shmop): void {}
 
-/**
- * @param resource $shmid
- */
-function shmop_delete($shmid): bool {}
+function shmop_size(Shmop $shmop): int {}
+
+function shmop_write(Shmop $shmop, string $data, int $offset): int {}
+
+function shmop_delete(Shmop $shmop): bool {}

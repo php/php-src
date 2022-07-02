@@ -1,18 +1,33 @@
 <?php
 
+/** @generate-class-entries */
+
+/**
+ * @var float
+ * @cname M_E
+ */
+const M_E = 2.7182818284590452354;
+
+final class __PHP_Incomplete_Class
+{
+}
+
+class AssertionError extends Error
+{
+}
+
 /* main/main.c */
 
 function set_time_limit(int $seconds): bool {}
 
 /* main/SAPI.c */
 
-// TODO: Make this a proper callable argument?
-function header_register_callback($callback): bool {}
+function header_register_callback(callable $callback): bool {}
 
 /* main/output.c */
 
-function ob_start(
-    $user_function = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool {}
+/** @param callable $callback */
+function ob_start($callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool {}
 
 function ob_flush(): bool {}
 
@@ -22,26 +37,31 @@ function ob_end_flush(): bool {}
 
 function ob_end_clean(): bool {}
 
-/** @return string|false */
-function ob_get_flush() {}
+/** @refcount 1 */
+function ob_get_flush(): string|false {}
 
-/** @return string|false */
-function ob_get_clean() {}
+/** @refcount 1 */
+function ob_get_clean(): string|false {}
 
-/** @return string|false */
-function ob_get_contents() {}
+function ob_get_contents(): string|false {}
 
 function ob_get_level(): int {}
 
-/** @return int|false */
-function ob_get_length() {}
+function ob_get_length(): int|false {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function ob_list_handlers(): array {}
 
+/**
+ * @return array<int|string, int|string|array>
+ * @refcount 1
+ */
 function ob_get_status(bool $full_status = false): array {}
 
-// TODO: Shouldn't this be a bool argument?
-function ob_implicit_flush(int $flag = 1): void {}
+function ob_implicit_flush(bool $enable = true): void {}
 
 function output_reset_rewrite_vars(): bool {}
 
@@ -49,7 +69,10 @@ function output_add_rewrite_var(string $name, string $value): bool {}
 
 /* main/streams/userspace.c */
 
-function stream_wrapper_register(string $protocol, string $classname, int $flags = 0): bool {}
+function stream_wrapper_register(string $protocol, string $class, int $flags = 0): bool {}
+
+/** @alias stream_wrapper_register */
+function stream_register_wrapper(string $protocol, string $class, int $flags = 0): bool {}
 
 function stream_wrapper_unregister(string $protocol): bool {}
 
@@ -57,242 +80,574 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 /* array.c */
 
-function array_push(array &$stack, ...$args): int {}
+function array_push(array &$array, mixed ...$values): int {}
 
-function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function krsort(array &$array, int $flags = SORT_REGULAR): true {}
 
-function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function ksort(array &$array, int $flags = SORT_REGULAR): true {}
 
-/** @param array|Countable $array */
-function count($var, int $mode = COUNT_NORAML): int {}
+/** @compile-time-eval */
+function count(Countable|array $value, int $mode = COUNT_NORMAL): int {}
 
-function natsort(array &$arg): bool {}
+/** @alias count */
+function sizeof(Countable|array $value, int $mode = COUNT_NORMAL): int {}
 
-function natcasesort(array &$arg): bool {}
+function natsort(array &$array): bool {}
 
-function asort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function natcasesort(array &$array): bool {}
 
-function arsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function asort(array &$array, int $flags = SORT_REGULAR): true {}
 
-function sort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function arsort(array &$array, int $flags = SORT_REGULAR): true {}
 
-function rsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+function sort(array &$array, int $flags = SORT_REGULAR): true {}
 
-function usort(array &$arg, callable $cmp_function): bool {}
+function rsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-function uasort(array &$arg, callable $cmp_function): bool {}
+function usort(array &$array, callable $callback): true {}
 
-function uksort(array &$arg, callable $cmp_function): bool {}
+function uasort(array &$array, callable $callback): true {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function end(array &$arg) {}
+function uksort(array &$array, callable $callback): true {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function prev(&$arg) {}
+function end(array|object &$array): mixed {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function next(&$arg) {}
+function prev(array|object &$array): mixed {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function reset(&$arg) {}
+function next(array|object &$array): mixed {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function current($arg) {}
+function reset(array|object &$array): mixed {}
+
+function current(array|object $array): mixed {}
+
+/** @alias current */
+function pos(array|object $array): mixed {}
+
+function key(array|object $array): int|string|null {}
+
+/** @compile-time-eval */
+function min(mixed $value, mixed ...$values): mixed {}
+
+/** @compile-time-eval */
+function max(mixed $value, mixed ...$values): mixed {}
+
+function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
+
+function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 
 /**
- * @param array|object $arg
- * @return int|string|null
+ * @compile-time-eval
  */
-function key($arg) {}
+function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
-/** @return mixed */
-function min($arg, ...$args) {}
+/**
+ * @compile-time-eval
+ */
+function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
 
-/** @return mixed */
-function max($arg, ...$args) {}
+/** @prefer-ref $array */
+function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""): int {}
 
-/** @param array|object $input */
-function array_walk(&$input, callable $funcname, $userdata = null): bool {}
-
-/** @param array|object $input */
-function array_walk_recursive(&$input, callable $funcname, $userdata = null): bool {}
-
-function in_array($needle, array $haystack, bool $strict = false): bool {}
-
-/** @return int|string|false */
-function array_search($needle, array $haystack, bool $strict = false) {}
-
-/** @prefer-ref $arg */
-function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
-
+/**
+ * @param array|string $var_name
+ * @param array|string $var_names
+ * @return array<string, mixed|ref>
+ * @refcount 1
+ */
 function compact($var_name, ...$var_names): array {}
 
-function array_fill(int $start_key, int $num, $val): array {}
+/** @return array<int, mixed> */
+function array_fill(int $start_index, int $count, mixed $value): array {}
 
-function array_fill_keys(array $keys, $val): array {}
+/** @refcount 1 */
+function array_fill_keys(array $keys, mixed $value): array {}
 
 /**
- * @param int|float|string $low
- * @param int|float|string $high
- * @param int|float $step
+ * @param string|int|float $start
+ * @param string|int|float $end
  */
-function range($low, $high, $step = 1): array {}
+function range($start, $end, int|float $step = 1): array {}
 
-function shuffle(array &$arg): bool {}
+function shuffle(array &$array): true {}
 
-/** @return mixed */
-function array_pop(array &$stack) {}
+function array_pop(array &$array): mixed {}
 
-/** @return mixed */
-function array_shift(array &$stack) {}
+function array_shift(array &$array): mixed {}
 
-function array_unshift(array &$stack, ...$vars): int {}
+function array_unshift(array &$array, mixed ...$values): int {}
 
-function array_splice(array &$arg, int $offset, ?int $length = null, $replacement = []): array {}
+function array_splice(array &$array, int $offset, ?int $length = null, mixed $replacement = []): array {}
 
-function array_slice(array $arg, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
+function array_slice(array $array, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_merge(array ...$arrays): array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_merge_recursive(array ...$arrays): array {}
 
-function array_replace(array $arr1, array ...$arrays): array {}
-
-function array_replace_recursive(array $arr1, array ...$arrays): array {}
-
-function array_keys(array $arg, $search_value = UNKNOWN, bool $strict = false): array {}
-
-/** @return int|string|null */
-function array_key_first(array $arg) {}
-
-/** @return int|string|null */
-function array_key_last(array $arg) {}
-
-function array_values(array $arg): array {}
-
-function array_count_values(array $arg): array {}
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function array_replace(array $array, array ...$replacements): array {}
 
 /**
- * @param int|string|null $column_key
- * @param int|string|null $index_key
+ * @compile-time-eval
+ * @refcount 1
  */
-function array_column(array $arg, $column_key, $index_key = null): array {}
-
-function array_reverse(array $input, bool $preserve_keys = false): array {}
-
-function array_pad(array $arg, int $pad_size, $pad_value): array {}
-
-function array_flip(array $arg): array {}
-
-function array_change_key_case(array $input, int $case = CASE_LOWER): array {}
-
-function array_unique(array $arg, int $flags = SORT_STRING): array {}
-
-function array_intersect_key(array $arr1, array $arr2, array ...$arrays): array {}
-
-function array_intersect_ukey(array $arr1, array $arr2, ...$rest): array {}
-
-function array_intersect(array $arr1, array $arr2, array ...$arrays): array {}
-
-function array_uintersect(array $arr1, array $arr2, ...$rest): array {}
-
-function array_intersect_assoc(array $arr1, array $arr2, array ...$arrays): array {}
-
-function array_uintersect_assoc(array $arr1, array $arr2, ...$rest): array {}
-
-function array_intersect_uassoc(array $arr1, array $arr2, ...$rest): array {}
-
-function array_uintersect_uassoc(array $arr1, array $arr2, ...$rest): array {}
-
-function array_diff_key(array $arr1, array $arr2, array ...$arrays): array {}
-
-function array_diff_ukey(array $arr1, array $arr2, ...$rest): array {}
-
-function array_diff(array $arr1, array $arr2, array ...$arrays): array {}
-
-function array_udiff(array $arr1, array $arr2, ...$rest): array {}
-
-function array_diff_assoc(array $arr1, array $arr2, array ...$arrays): array {}
-
-function array_diff_uassoc(array $arr1, array $arr2, ...$rest): array {}
-
-function array_udiff_assoc(array $arr1, array $arr2, ...$rest): array {}
-
-function array_udiff_uassoc(array $arr1, array $arr2, ...$rest): array {}
+function array_replace_recursive(array $array, array ...$replacements): array {}
 
 /**
- * @prefer-ref $arr1
- * @prefer-ref $sort_order
- * @prefer-ref $sort_flags
- * @prefer-ref $arr2
+ * @return array<int, int|string>
+ * @compile-time-eval
  */
-function array_multisort(&$arr1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arr2): bool {}
-
-/** @return int|string|array */
-function array_rand(array $arg, int $num_req = 1) {}
-
-/** @return int|float */
-function array_sum(array $arg) {}
-
-/** @return int|float */
-function array_product(array $arg) {}
-
-function array_reduce(array $arg, callable $callback, $initial = null) {}
-
-function array_filter(array $arg, callable $callback = UNKNOWN, int $use_keys = 0): array {}
-
-function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
+function array_keys(array $array, mixed $filter_value = UNKNOWN, bool $strict = false): array {}
 
 /**
- * @param int|string $key
- * @param array|object $search
+ * @compile-time-eval
  */
-function array_key_exists($key, $search): bool {}
+function array_key_first(array $array): int|string|null {}
 
-function array_chunk(array $arg, int $size, bool $preserve_keys = false): array {}
+/**
+ * @compile-time-eval
+ */
+function array_key_last(array $array): int|string|null {}
+
+/**
+ * @return array<int, mixed|ref>
+ * @compile-time-eval
+ */
+function array_values(array $array): array {}
+
+/**
+ * @return array<int|string, int>
+ * @refcount 1
+ */
+function array_count_values(array $array): array {}
+
+/** @refcount 1 */
+function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
+
+/** @refcount 1 */
+function array_reverse(array $array, bool $preserve_keys = false): array {}
+
+function array_pad(array $array, int $length, mixed $value): array {}
+
+/**
+ * @return array<int|string, int|string>
+ * @refcount 1
+ * @compile-time-eval
+ */
+function array_flip(array $array): array {}
+
+/**
+ * @refcount 1
+ * @compile-time-eval
+ */
+function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
+
+/**
+ * @compile-time-eval
+ */
+function array_unique(array $array, int $flags = SORT_STRING): array {}
+
+/** @refcount 1 */
+function array_intersect_key(array $array, array ...$arrays): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_intersect_ukey(array $array, ...$rest): array {}
+
+/** @refcount 1 */
+function array_intersect(array $array, array ...$arrays): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_uintersect(array $array, ...$rest): array {}
+
+/** @refcount 1 */
+function array_intersect_assoc(array $array, array ...$arrays): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_uintersect_assoc(array $array, ...$rest): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_intersect_uassoc(array $array, ...$rest): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_uintersect_uassoc(array $array, ...$rest): array {}
+
+/**
+ * @refcount 1
+ * @compile-time-eval
+ */
+function array_diff_key(array $array, array ...$arrays): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ * @compile-time-eval
+ */
+function array_diff_ukey(array $array, ...$rest): array {}
+
+/**
+ * @compile-time-eval
+ */
+function array_diff(array $array, array ...$arrays): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_udiff(array $array, ...$rest): array {}
+
+/**
+ * @refcount 1
+ * @compile-time-eval
+ */
+function array_diff_assoc(array $array, array ...$arrays): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_diff_uassoc(array $array, ...$rest): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_udiff_assoc(array $array, ...$rest): array {}
+
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
+function array_udiff_uassoc(array $array, ...$rest): array {}
+
+/**
+ * @param array $array
+ * @param array|int $rest
+ * @prefer-ref $array
+ * @prefer-ref $rest
+ */
+function array_multisort(&$array, &...$rest): bool {}
+
+/** @return int|string|array<int, int|string> */
+function array_rand(array $array, int $num = 1): int|string|array {}
+
+function array_sum(array $array): int|float {}
+
+function array_product(array $array): int|float {}
+
+function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
+
+function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
+
+function array_map(?callable $callback, array $array, array ...$arrays): array {}
+
+/** @param string|int $key */
+function array_key_exists($key, array $array): bool {}
+
+/**
+ * @param string|int $key
+ * @alias array_key_exists
+ */
+function key_exists($key, array $array): bool {}
+
+function array_chunk(array $array, int $length, bool $preserve_keys = false): array {}
 
 function array_combine(array $keys, array $values): array {}
 
+function array_is_list(array $array): bool {}
+
 /* base64.c */
 
-function base64_encode(string $str): string {}
+/**
+ * @refcount 1
+ * @compile-time-eval
+ */
+function base64_encode(string $string): string {}
 
-/** @return string|false */
-function base64_decode(string $str, bool $strict = false) {}
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function base64_decode(string $string, bool $strict = false): string|false {}
+
+/* basic_functions.c */
+
+function constant(string $name): mixed {}
+
+function ip2long(string $ip): int|false {}
+
+/** @refcount 1 */
+function long2ip(int $ip): string|false {}
+
+/**
+ * @return string|array<string, string>|false
+ * @refcount 1
+ */
+function getenv(?string $name = null, bool $local_only = false): string|array|false {}
+
+#ifdef HAVE_PUTENV
+function putenv(string $assignment): bool {}
+#endif
+
+/**
+ * @param int $rest_index
+ * @return array<int|string, string|array|false>|false
+ * @refcount 1
+ */
+function getopt(string $short_options, array $long_options = [], &$rest_index = null): array|false {}
+
+function flush(): void {}
+
+function sleep(int $seconds): int {}
+
+function usleep(int $microseconds): void {}
+
+#ifdef HAVE_NANOSLEEP
+/**
+ * @return array<string, int>|bool
+ * @refcount 1
+ */
+function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
+
+function time_sleep_until(float $timestamp): bool {}
+#endif
+
+/** @refcount 1 */
+function get_current_user(): string {}
+
+/** @return string|array<int|string, string|array>|false */
+function get_cfg_var(string $option): string|array|false {}
+
+function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
+
+/**
+ * @return array<string, int|string>|null
+ * @refcount 1
+ */
+function error_get_last(): ?array {}
+
+function error_clear_last(): void {}
+
+function call_user_func(callable $callback, mixed ...$args): mixed {}
+
+function call_user_func_array(callable $callback, array $args): mixed {}
+
+function forward_static_call(callable $callback, mixed ...$args): mixed {}
+
+function forward_static_call_array(callable $callback, array $args): mixed {}
+
+function register_shutdown_function(callable $callback, mixed ...$args): void {}
+
+/** @refcount 1 */
+function highlight_file(string $filename, bool $return = false): string|bool {}
+
+/** @alias highlight_file */
+function show_source(string $filename, bool $return = false): string|bool {}
+
+/** @refcount 1 */
+function php_strip_whitespace(string $filename): string {}
+
+/** @refcount 1 */
+function highlight_string(string $string, bool $return = false): string|bool {}
+
+function ini_get(string $option): string|false {}
+
+/**
+ * @return array<string, string|array|null>|false
+ * @refcount 1
+ */
+function ini_get_all(?string $extension = null, bool $details = true): array|false {}
+
+function ini_set(string $option, string|int|float|bool|null $value): string|false {}
+
+/** @alias ini_set */
+function ini_alter(string $option, string|int|float|bool|null $value): string|false {}
+
+function ini_restore(string $option): void {}
+
+/** @refcount 1 */
+function set_include_path(string $include_path): string|false {}
+
+/** @refcount 1 */
+function get_include_path(): string|false {}
+
+/** @refcount 1 */
+function print_r(mixed $value, bool $return = false): string|bool {}
+
+function connection_aborted(): int {}
+
+function connection_status(): int {}
+
+function ignore_user_abort(?bool $enable = null): int {}
+
+#ifdef HAVE_GETSERVBYNAME
+function getservbyname(string $service, string $protocol): int|false {}
+#endif
+
+#ifdef HAVE_GETSERVBYPORT
+/** @refcount 1 */
+function getservbyport(int $port, string $protocol): string|false {}
+#endif
+
+#ifdef HAVE_GETPROTOBYNAME
+function getprotobyname(string $protocol): int|false {}
+#endif
+
+#ifdef HAVE_GETPROTOBYNUMBER
+/** @refcount 1 */
+function getprotobynumber(int $protocol): string|false {}
+#endif
+
+function register_tick_function(callable $callback, mixed ...$args): bool {}
+
+function unregister_tick_function(callable $callback): void {}
+
+function is_uploaded_file(string $filename): bool {}
+
+function move_uploaded_file(string $from, string $to): bool {}
+
+/**
+ * @return array<int|string, bool|int|float|string|array|null>|false
+ * @refcount 1
+ */
+function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
+
+/**
+ * @return array<int|string, bool|int|float|string|array|null>|false
+ * @refcount 1
+ */
+function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
+
+#if ZEND_DEBUG
+/**
+ * @return array<string, string|array>
+ * @refcount 1
+ */
+function config_get_hash(): array {}
+#endif
+
+#ifdef HAVE_GETLOADAVG
+/**
+ * @return array<int, float>|false
+ * @refcount 1
+ */
+function sys_getloadavg(): array|false {}
+#endif
+
+/* browscap.c */
+
+/**
+ * @return object|array<string, mixed>|false
+ * @refcount 1
+ */
+function get_browser(?string $user_agent = null, bool $return_array = false): object|array|false {}
 
 /* crc32.c */
 
-function crc32(string $str): int {}
+/** @compile-time-eval */
+function crc32(string $string): int {}
 
 /* crypt.c */
 
-function crypt(string $str, string $salt = UNKNOWN): string {}
+/** @refcount 1 */
+function crypt(string $string, string $salt): string {}
+
+/* datetime.c */
+
+#ifdef HAVE_STRPTIME
+/**
+ * @return array<string, int|string>|false
+ * @deprecated
+ * @refcount 1
+ */
+function strptime(string $timestamp, string $format): array|false {}
+#endif
+
+/* dns.c */
+
+#ifdef HAVE_GETHOSTNAME
+/** @refcount 1 */
+function gethostname(): string|false {}
+#endif
+
+/** @refcount 1 */
+function gethostbyaddr(string $ip): string|false {}
+
+/** @refcount 1 */
+function gethostbyname(string $hostname): string {}
+
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function gethostbynamel(string $hostname): array|false {}
+
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+function dns_check_record(string $hostname, string $type = "MX"): bool {}
+
+/** @alias dns_check_record */
+function checkdnsrr(string $hostname, string $type = "MX"): bool {}
+
+/**
+ * @param array $authoritative_name_servers
+ * @param array $additional_records
+ * @return array<int, array>|false
+ * @refcount 1
+ */
+function dns_get_record(string $hostname, int $type = DNS_ANY, &$authoritative_name_servers = null, &$additional_records = null, bool $raw = false): array|false {}
+
+/**
+ * @param array $hosts
+ * @param array $weights
+ */
+function dns_get_mx(string $hostname, &$hosts, &$weights = null): bool {}
+
+/**
+ * @param array $hosts
+ * @param array $weights
+ * @alias dns_get_mx
+ */
+function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
+#endif
+
+/* net.c */
+
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
+function net_get_interfaces(): array|false {}
+#endif
 
 /* ftok.c */
 
-#if HAVE_FTOK
-function ftok(string $pathname, string $proj): int {}
+#ifdef HAVE_FTOK
+function ftok(string $filename, string $project_id): int {}
 #endif
 
 /* hrtime.c */
 
-/** @return array|int|float|false */
-function hrtime(bool $get_as_number = false) {}
+function hrtime(bool $as_number = false): array|int|float|false {}
 
 /* lcg.c */
 
@@ -300,299 +655,1424 @@ function lcg_value(): float {}
 
 /* md5.c */
 
-function md5(string $str, bool $raw_output = false): string {}
+/** @refcount 1 */
+function md5(string $string, bool $binary = false): string {}
 
-/** @return string|false */
-function md5_file(string $filename, bool $raw_output = false) {}
+/** @refcount 1 */
+function md5_file(string $filename, bool $binary = false): string|false {}
 
 /* pageinfo.c */
 
-/** @return int|false */
-function getmyuid() {}
+function getmyuid(): int|false {}
 
-/** @return int|false */
-function getmygid() {}
+function getmygid(): int|false {}
 
-/** @return int|false */
-function getmypid() {}
+function getmypid(): int|false {}
 
-/** @return int|false */
-function getmyinode() {}
+function getmyinode(): int|false {}
 
-function getlastmod(): int {}
+function getlastmod(): int|false {}
 
 /* sha1.c */
 
-function sha1(string $str, bool $raw_output = false): string {}
+/** @refcount 1 */
+function sha1(string $string, bool $binary = false): string {}
 
-/** @return string|false */
-function sha1_file(string $filename, bool $raw_output = false) {}
+/** @refcount 1 */
+function sha1_file(string $filename, bool $binary = false): string|false {}
 
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
-function openlog (string $ident, int $option, int $facility): bool {}
+function openlog(string $prefix, int $flags, int $facility): bool {}
 
-function closelog (): bool {}
+function closelog(): true {}
 
-function syslog (int $priority, string $message): bool {}
+function syslog(int $priority, string $message): true {} // TODO make return type void
 #endif
 
 #ifdef HAVE_INET_NTOP
-/** @return string|false */
-function inet_ntop (string $in_addr) {}
+/** @refcount 1 */
+function inet_ntop(string $ip): string|false {}
 #endif
 
 #ifdef HAVE_INET_PTON
-/** @return string|false */
-function inet_pton (string $ip_address) {}
+/** @refcount 1 */
+function inet_pton(string $ip): string|false {}
 #endif
 
 /* metaphone.c */
 
-/** @return string|false */
-function metaphone(string $text, int $phones = 0) {}
+/** @refcount 1 */
+function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */
-function header(string $string, bool $replace = true, int $http_response_code = 0): void { }
+function header(string $header, bool $replace = true, int $response_code = 0): void {}
 
-function header_remove(string $name = UNKNOWN): void { }
+function header_remove(?string $name = null): void {}
 
-/** @param int|array $expires_or_options */
-function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setrawcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
 
+function setcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
 
-/** @param int|array $expires_or_options */
-function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function http_response_code(int $response_code = 0): int|bool {}
 
-/** @return int|bool */
-function http_response_code(int $response_code = 0) {}
+/**
+ * @param string $filename
+ * @param int $line
+ */
+function headers_sent(&$filename = null, &$line = null): bool {}
 
-function headers_sent(&$file = null, &$line = null): bool {}
-
-function headers_list(): array { }
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
+function headers_list(): array {}
 
 /* {{{ html.c */
 
-function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+/** @refcount 1 */
+function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 
-/** @return string|false */
-function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT) {}
+function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401): string {}
 
-/** @return string|false */
-function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, string $encoding = UNKNOWN) {}
+function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null): string {}
 
-function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+/** @refcount 1 */
+function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 
-function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_style = ENT_COMPAT, string $encoding = "UTF-8"): array {}
+/**
+ * @return array<string, string>
+ * @refcount 1
+ */
+function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, string $encoding = "UTF-8"): array {}
 
 /* }}} */
 
 /* assert.c */
 
-/** @param mixed $assertion */
-function assert($assertion, $description = null): bool {}
+function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
-/** @return int|string|bool|null */
-function assert_options(int $what, $value = UNKNOWN) {}
+function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */
 
-function bin2hex(string $data): string {}
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function bin2hex(string $string): string {}
 
-/** @return string|false */
-function hex2bin(string $data) {}
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function hex2bin(string $string): string|false {}
 
-/** @return int|false */
-function strspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
+function strspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
-/** @return int|false */
-function strcspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
+function strcspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
-#if HAVE_NL_LANGINFO
-/** @return string|false */
-function nl_langinfo(int $item) {}
+#ifdef HAVE_NL_LANGINFO
+/** @refcount 1 */
+function nl_langinfo(int $item): string|false {}
 #endif
 
-function strcoll(string $str1, string $str2): int {}
+function strcoll(string $string1, string $string2): int {}
 
-function trim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
+/** @compile-time-eval */
+function trim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
-function rtrim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
+/** @compile-time-eval */
+function rtrim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
-function ltrim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
+/** @alias rtrim */
+function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
 
-function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut = false): string {}
+/** @compile-time-eval */
+function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
-function explode(string $separator, string $str, int $limit = PHP_INT_MAX): array {}
+/** @refcount 1 */
+function wordwrap(string $string, int $width = 75, string $break = "\n", bool $cut_long_words = false): string {}
 
 /**
- * @param string $glue Optional - defaults to empty string
- * @param array $pieces
+ * @return array<int, string>
+ * @refcount 1
+ * @compile-time-eval
  */
-function implode($glue, $pieces = UNKNOWN): string {}
+function explode(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
 /**
- * @param string $str Optional - defaults to previous string
- * @param string $token
- * @return string|false
+ * @compile-time-eval
  */
-function strtok(string $str, string $token = UNKNOWN) {}
+function implode(string|array $separator, ?array $array = null): string {}
 
-function strtoupper(string $str): string {}
+/** @alias implode */
+function join(string|array $separator, ?array $array = null): string {}
 
-function strtolower(string $str): string {}
+/** @refcount 1 */
+function strtok(string $string, ?string $token = null): string|false {}
 
+/** @compile-time-eval */
+function strtoupper(string $string): string {}
+
+/** @compile-time-eval */
+function strtolower(string $string): string {}
+
+/** @refcount 1 */
 function basename(string $path, string $suffix = ""): string {}
 
+/** @refcount 1 */
 function dirname(string $path, int $levels = 1): string {}
 
-/** @return array|string */
-function pathinfo(string $path, int $options = UNKNOWN) {}
-
-/** @return string|false */
-function stristr(string $haystack, string $needle, bool $before_needle = false) {}
-
-/** @return string|false */
-function strstr(string $haystack, string $needle, bool $before_needle = false) {}
-
-/** @return int|false */
-function strpos(string $haystack, string $needle, int $offset = 0) {}
-
-/** @return int|false */
-function stripos(string $haystack, string $needle, int $offset = 0) {}
-
-/** @return int|false */
-function strrpos(string $haystack, string $needle, int $offset = 0) {}
-
-/** @return int|false */
-function strripos(string $haystack, string $needle, int $offset = 0) {}
-
-/** @return string|false */
-function strrchr(string $haystack, string $needle) {}
-
-function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): string {}
-
-/** @return string|false */
-function substr(string $str, int $start, ?int $length = null) {}
-
 /**
- * @param mixed $str
- * @param mixed $replace
- * @param mixed $start
- * @param mixed $length
- * @return string|array|false
+ * @return array<string, string>|string
+ * @refcount 1
  */
-function substr_replace($str, $replace, $start, $length = UNKNOWN) {}
+function pathinfo(string $path, int $flags = PATHINFO_ALL): array|string {}
 
-function quotemeta(string $str): string {}
+/** @refcount 1 */
+function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
+/** @refcount 1 */
+function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
+
+/** @alias strstr */
+function strchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
+
+/** @compile-time-eval */
+function strpos(string $haystack, string $needle, int $offset = 0): int|false {}
+
+/** @compile-time-eval */
+function stripos(string $haystack, string $needle, int $offset = 0): int|false {}
+
+/** @compile-time-eval */
+function strrpos(string $haystack, string $needle, int $offset = 0): int|false {}
+
+/** @compile-time-eval */
+function strripos(string $haystack, string $needle, int $offset = 0): int|false {}
+
+/** @refcount 1 */
+function strrchr(string $haystack, string $needle): string|false {}
+
+/** @compile-time-eval */
+function str_contains(string $haystack, string $needle): bool {}
+
+/** @compile-time-eval */
+function str_starts_with(string $haystack, string $needle): bool {}
+
+/** @compile-time-eval */
+function str_ends_with(string $haystack, string $needle): bool {}
+
+/** @refcount 1 */
+function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
+
+/** @compile-time-eval */
+function substr(string $string, int $offset, ?int $length = null): string {}
+
+/** @return string|array<int|string, string> */
+function substr_replace(array|string $string, array|string $replace, array|int $offset, array|int|null $length = null): string|array {}
+
+/** @refcount 1 */
+function quotemeta(string $string): string {}
+
+/** @compile-time-eval */
 function ord(string $character): int {}
 
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function chr(int $codepoint): string {}
 
-function ucfirst(string $str): string {}
+/** @compile-time-eval */
+function ucfirst(string $string): string {}
 
-function lcfirst(string $str): string {}
-
-function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
+/** @compile-time-eval */
+function lcfirst(string $string): string {}
 
 /**
- * @param string|array $from
- * @return string|false
+ * @compile-time-eval
+ * @refcount 1
  */
-function strtr(string $str, $from, string $to = UNKNOWN) {}
+function ucwords(string $string, string $separators = " \t\r\n\f\v"): string {}
 
-function strrev(string $str): string {}
+function strtr(string $string, string|array $from, ?string $to = null): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function strrev(string $string): string {}
 
 /** @param float $percent */
-function similar_text(string $str1, string $str2, &$percent = null): int {}
+function similar_text(string $string1, string $string2, &$percent = null): int {}
 
-function addcslashes(string $str, string $charlist): string {}
+function addcslashes(string $string, string $characters): string {}
 
-function addslashes(string $str): string {}
+function addslashes(string $string): string {}
 
-function stripcslashes(string $str): string {}
+/** @refcount 1 */
+function stripcslashes(string $string): string {}
 
-function stripslashes(string $str): string {}
-
-/**
- * @param string|array $search
- * @param string|array $replace
- * @param string|array $subject
- * @param int $replace_count
- * @return string|array
- */
-function str_replace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
+/** @refcount 1 */
+function stripslashes(string $string): string {}
 
 /**
- * @param string|array $search
- * @param string|array $replace
- * @param string|array $subject
- * @param int $replace_count
- * @return string|array
+ * @param int $count
+ * @return string|array<int|string, string>
+ * @compile-time-eval
  */
-function str_ireplace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
-
-function hebrev(string $str, int $max_chars_per_line = 0): string {}
-
-function hebrevc(string $str, int $max_chars_per_line = 0): string {}
-
-function nl2br(string $str, bool $is_xhtml = true): string {}
-
-/** @param mixed $allowable_tags */
-function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
+function str_replace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
 /**
- * @param string|array $locales
- * @return string|false
+ * @param int $count
+ * @return string|array<int|string, string>
+ * @compile-time-eval
  */
-function setlocale(int $category, $locales, ...$rest) {}
+function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
+
+/** @refcount 1 */
+function hebrev(string $string, int $max_chars_per_line = 0): string {}
+
+function nl2br(string $string, bool $use_xhtml = true): string {}
+
+/** @refcount 1 */
+function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
+
+/**
+ * @param array|string $locales
+ * @param string $rest
+ */
+function setlocale(int $category, $locales, ...$rest): string|false {}
 
 /** @param array $result */
-function parse_str(string $encoded_string, &$result): void {}
+function parse_str(string $string, &$result): void {}
 
-function str_getcsv(string $string, string $delimiter = ',', string $enclosure = '"', string $escape = '\\'): array {}
+/**
+ * @return array<int, string|null>
+ * @refcount 1
+ */
+function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array {}
 
-function str_repeat(string $input, int $mult): string {}
+/** @refcount 1 */
+function str_repeat(string $string, int $times): string {}
 
-/** @return array|string */
-function count_chars(string $input, int $mode = 0) {}
+/**
+ * @return array<int, int>|string
+ * @refcount 1
+ */
+function count_chars(string $string, int $mode = 0): array|string {}
 
-function strnatcmp(string $s1, string $s2): int {}
+function strnatcmp(string $string1, string $string2): int {}
 
+/**
+ * @return array<string, int|string|array>
+ * @refcount 1
+ */
 function localeconv(): array {}
 
-function strnatcasecmp(string $s1, string $s2): int {}
+function strnatcasecmp(string $string1, string $string2): int {}
 
-/** @return int|false */
-function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null) {}
+function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int {}
 
-function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
+function str_pad(string $string, int $length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
 
-/** @return array|int|null */
-function sscanf(string $str, string $format, &...$vars) {}
+/**
+ * @return array<int, mixed>|int|null
+ * @refcount 1
+ */
+function sscanf(string $string, string $format, mixed &...$vars): array|int|null {}
 
-function str_rot13(string $str): string {}
+/** @refcount 1 */
+function str_rot13(string $string): string {}
 
-function str_shuffle(string $str): string {}
+/** @refcount 1 */
+function str_shuffle(string $string): string {}
 
-/** @return array|int */
-function str_word_count(string $str, int $format = 0, string $charlist = UNKNOWN) {}
+/**
+ * @return array<int, string>|int
+ * @refcount 1
+ */
+function str_word_count(string $string, int $format = 0, ?string $characters = null): array|int {}
 
-#ifdef HAVE_STRFMON
-/** @return string|false */
-function money_format(string $format, float $value) {}
+/**
+ * @return array<int, string>
+ * @refcount 1
+ * @compile-time-eval
+ */
+function str_split(string $string, int $length = 1): array {}
+
+/** @refcount 1 */
+function strpbrk(string $string, string $characters): string|false {}
+
+function substr_compare(string $haystack, string $needle, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
+
+/**
+ * @refcount 1
+ * @deprecated
+ */
+function utf8_encode(string $string): string {}
+
+/**
+ * @refcount 1
+ * @deprecated
+ */
+function utf8_decode(string $string): string {}
+
+/* dir.c */
+
+/**
+ * @param resource|null $context
+ * @return resource|false
+ */
+function opendir(string $directory, $context = null) {}
+
+/**
+ * @param resource|null $context
+ * @refcount 1
+ */
+function dir(string $directory, $context = null): Directory|false {}
+
+/** @param resource|null $dir_handle */
+function closedir($dir_handle = null): void {}
+
+function chdir(string $directory): bool {}
+
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
+function chroot(string $directory): bool {}
 #endif
 
-function str_split(string $str, int $split_length = 1): array {}
+/** @refcount 1 */
+function getcwd(): string|false {}
 
-/** @return string|false */
-function strpbrk(string $haystack, string $char_list) {}
+/** @param resource|null $dir_handle */
+function rewinddir($dir_handle = null): void {}
 
-/** @return int|false */
-function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false) {}
+/**
+ * @param resource|null $dir_handle
+ * @refcount 1
+ */
+function readdir($dir_handle = null): string|false {}
 
-function utf8_encode(string $data): string {}
+/**
+ * @param resource|null $context
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
-function utf8_decode(string $data): string {}
+#ifdef HAVE_GLOB
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function glob(string $pattern, int $flags = 0): array|false {}
+#endif
+
+/* exec.c */
+
+/**
+ * @param array $output
+ * @param int $result_code
+ * @refcount 1
+ */
+function exec(string $command, &$output = null, &$result_code = null): string|false {}
+
+/**
+ * @param int $result_code
+ * @refcount 1
+ */
+function system(string $command, &$result_code = null): string|false {}
+
+/** @param int $result_code */
+function passthru(string $command, &$result_code = null): false|null {}
+
+/** @refcount 1 */
+function escapeshellcmd(string $command): string {}
+
+/** @refcount 1 */
+function escapeshellarg(string $arg): string {}
+
+/** @refcount 1 */
+function shell_exec(string $command): string|false|null {}
+
+#ifdef HAVE_NICE
+function proc_nice(int $priority): bool {}
+#endif
+
+/* file.c */
+
+/**
+ * @param resource $stream
+ * @param int $would_block
+ */
+function flock($stream, int $operation, &$would_block = null): bool {}
+
+/**
+ * @return array<string, string>|false
+ * @refcount 1
+ */
+function get_meta_tags(string $filename, bool $use_include_path = false): array|false {}
+
+/** @param resource $handle */
+function pclose($handle): int {}
+
+/**
+ * @return resource|false
+ * @refcount 1
+ */
+function popen(string $command, string $mode) {}
+
+/** @param resource|null $context */
+function readfile(string $filename, bool $use_include_path = false, $context = null): int|false {}
+
+/** @param resource $stream */
+function rewind($stream): bool {}
+
+/** @param resource|null $context */
+function rmdir(string $directory, $context = null): bool {}
+
+function umask(?int $mask = null): int {}
+
+/** @param resource $stream */
+function fclose($stream): bool {}
+
+/** @param resource $stream */
+function feof($stream): bool {}
+
+/** @param resource $stream */
+function fgetc($stream): string|false {}
+
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
+function fgets($stream, ?int $length = null): string|false {}
+
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
+function fread($stream, int $length): string|false {}
+
+/**
+ * @param resource|null $context
+ * @return resource|false
+ * @refcount 1
+ */
+function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null) {}
+
+/**
+ * @param resource $stream
+ * @return array<int, mixed>|int|false|null
+ * @refcount 1
+ */
+function fscanf($stream, string $format, mixed &...$vars): array|int|false|null {}
+
+/** @param resource $stream */
+function fpassthru($stream): int {}
+
+/** @param resource $stream */
+function ftruncate($stream, int $size): bool {}
+
+/**
+ * @param resource $stream
+ * @return array<int|string, int>|false
+ * @refcount 1
+ */
+function fstat($stream): array|false {}
+
+/** @param resource $stream */
+function fseek($stream, int $offset, int $whence = SEEK_SET): int {}
+
+/** @param resource $stream */
+function ftell($stream): int|false {}
+
+/** @param resource $stream */
+function fflush($stream): bool {}
+
+/** @param resource $stream */
+function fsync($stream): bool {}
+
+/** @param resource $stream */
+function fdatasync($stream): bool {}
+
+/** @param resource $stream */
+function fwrite($stream, string $data, ?int $length = null): int|false {}
+
+/**
+ * @param resource $stream
+ * @alias fwrite
+ */
+function fputs($stream, string $data, ?int $length = null): int|false {}
+
+/** @param resource|null $context */
+function mkdir(string $directory, int $permissions = 0777, bool $recursive = false, $context = null): bool {}
+
+/** @param resource|null $context */
+function rename(string $from, string $to, $context = null): bool {}
+
+/** @param resource|null $context */
+function copy(string $from, string $to, $context = null): bool {}
+
+/** @refcount 1 */
+function tempnam(string $directory, string $prefix): string|false {}
+
+/**
+ * @return resource|false
+ * @refcount 1
+ */
+function tmpfile() {}
+
+/**
+ * @param resource|null $context
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function file(string $filename, int $flags = 0, $context = null): array|false {}
+
+/**
+ * @param resource|null $context
+ * @refcount 1
+ */
+function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null): string|false {}
+
+/** @param resource|null $context */
+function unlink(string $filename, $context = null): bool {}
+
+/** @param resource|null $context */
+function file_put_contents(string $filename, mixed $data, int $flags = 0, $context = null): int|false {}
+
+/** @param resource $stream */
+function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
+
+/**
+ * @param resource $stream
+ * @return array<int, string|null>|false
+ * @refcount 1
+ */
+function fgetcsv($stream, ?int $length = null, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
+
+/** @refcount 1 */
+function realpath(string $path): string|false {}
+
+#ifdef HAVE_FNMATCH
+function fnmatch(string $pattern, string $filename, int $flags = 0): bool {}
+#endif
+
+/** @refcount 1 */
+function sys_get_temp_dir(): string {}
+
+/* filestat.c */
+
+function fileatime(string $filename): int|false {}
+
+function filectime(string $filename): int|false {}
+
+function filegroup(string $filename): int|false {}
+
+function fileinode(string $filename): int|false {}
+
+function filemtime(string $filename): int|false {}
+
+function fileowner(string $filename): int|false {}
+
+function fileperms(string $filename): int|false {}
+
+function filesize(string $filename): int|false {}
+
+/** @refcount 1 */
+function filetype(string $filename): string|false {}
+
+function file_exists(string $filename): bool {}
+
+function is_writable(string $filename): bool {}
+
+/** @alias is_writable */
+function is_writeable(string $filename): bool {}
+
+function is_readable(string $filename): bool {}
+
+function is_executable(string $filename): bool {}
+
+function is_file(string $filename): bool {}
+
+function is_dir(string $filename): bool {}
+
+function is_link(string $filename): bool {}
+
+/**
+ * @return array<int|string, bool|int|string>|false
+ * @refcount 1
+ */
+function stat(string $filename): array|false {}
+
+/**
+ * @return array<int|string, bool|int|string>|false
+ * @refcount 1
+ */
+function lstat(string $filename): array|false {}
+
+function chown(string $filename, string|int $user): bool {}
+
+function chgrp(string $filename, string|int $group): bool {}
+
+#ifdef HAVE_LCHOWN
+function lchown(string $filename, string|int $user): bool {}
+
+function lchgrp(string $filename, string|int $group): bool {}
+#endif
+
+function chmod(string $filename, int $permissions): bool {}
+
+#ifdef HAVE_UTIME
+function touch(string $filename, ?int $mtime = null, ?int $atime = null): bool {}
+#endif
+
+function clearstatcache(bool $clear_realpath_cache = false, string $filename = ""): void {}
+
+function disk_total_space(string $directory): float|false {}
+
+function disk_free_space(string $directory): float|false {}
+
+/** @alias disk_free_space */
+function diskfreespace(string $directory): float|false {}
+
+/**
+ * @return array<string, array>
+ * @refcount 1
+ */
+function realpath_cache_get(): array {}
+
+function realpath_cache_size(): int {}
+
+/* formatted_print.c */
+
+/** @refcount 1 */
+function sprintf(string $format, mixed ...$values): string {}
+
+function printf(string $format, mixed ...$values): int {}
+
+function vprintf(string $format, array $values): int {}
+
+/** @refcount 1 */
+function vsprintf(string $format, array $values): string {}
+
+/** @param resource $stream */
+function fprintf($stream, string $format, mixed ...$values): int {}
+
+/** @param resource $stream */
+function vfprintf($stream, string $format, array $values): int {}
+
+/* fsock.c */
+
+/**
+ * @param int $error_code
+ * @param string $error_message
+ * @return resource|false
+ * @refcount 1
+ */
+function fsockopen(string $hostname, int $port = -1, &$error_code = null, &$error_message = null, ?float $timeout = null) {}
+
+/**
+ * @param int $error_code
+ * @param string $error_message
+ * @return resource|false
+ */
+function pfsockopen(string $hostname, int $port = -1, &$error_code = null, &$error_message = null, ?float $timeout = null) {}
+
+/* http.c */
+
+/** @refcount 1 */
+function http_build_query(array|object $data, string $numeric_prefix = "", ?string $arg_separator = null, int $encoding_type = PHP_QUERY_RFC1738): string {}
+
+/* image.c */
+
+/** @refcount 1 */
+function image_type_to_mime_type(int $image_type): string {}
+
+/** @refcount 1 */
+function image_type_to_extension(int $image_type, bool $include_dot = true): string|false {}
+
+/**
+ * @param array $image_info
+ * @return array<int|string, int|string>|false
+ * @refcount 1
+ */
+function getimagesize(string $filename, &$image_info = null): array|false {}
+
+/**
+ * @param array $image_info
+ * @return array<int|string, int|string>|false
+ * @refcount 1
+ */
+function getimagesizefromstring(string $string, &$image_info = null): array|false {}
+
+/* info.c */
+
+function phpinfo(int $flags = INFO_ALL): true {} // make return type void
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function phpversion(?string $extension = null): string|false {}
+
+function phpcredits(int $flags = CREDITS_ALL): true {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function php_sapi_name(): string|false {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function php_uname(string $mode = "a"): string {}
+
+/** @refcount 1 */
+function php_ini_scanned_files(): string|false {}
+
+/** @refcount 1 */
+function php_ini_loaded_file(): string|false {}
+
+/* iptc.c */
+
+/** @refcount 1 */
+function iptcembed(string $iptc_data, string $filename, int $spool = 0): string|bool {}
+
+/**
+ * @return array<string, array>|false
+ * @refcount 1
+ */
+function iptcparse(string $iptc_block): array|false {}
+
+/* levenshtein.c */
+
+function levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1): int {}
+
+/* link.c */
+
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+/** @refcount 1 */
+function readlink(string $path): string|false {}
+
+function linkinfo(string $path): int|false {}
+
+function symlink(string $target, string $link): bool {}
+
+function link(string $target, string $link): bool {}
+#endif
+
+/* mail.c */
+
+function mail(string $to, string $subject, string $message, array|string $additional_headers = [], string $additional_params = ""): bool {}
+
+/* math.c */
+
+function abs(int|float $num): int|float {}
+
+function ceil(int|float $num): float {}
+
+function floor(int|float $num): float {}
+
+function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
+
+function sin(float $num): float {}
+
+function cos(float $num): float {}
+
+function tan(float $num): float {}
+
+function asin(float $num): float {}
+
+function acos(float $num): float {}
+
+function atan(float $num): float {}
+
+function atanh(float $num): float {}
+
+function atan2(float $y, float $x): float {}
+
+function sinh(float $num): float {}
+
+function cosh(float $num): float {}
+
+function tanh(float $num): float {}
+
+function asinh(float $num): float {}
+
+function acosh(float $num): float {}
+
+function expm1(float $num): float {}
+
+function log1p(float $num): float {}
+
+/** @compile-time-eval */
+function pi(): float {}
+
+/** @compile-time-eval */
+function is_finite(float $num): bool {}
+
+/** @compile-time-eval */
+function is_nan(float $num): bool {}
+
+/** @compile-time-eval */
+function intdiv(int $num1, int $num2): int {}
+
+/** @compile-time-eval */
+function is_infinite(float $num): bool {}
+
+/** @compile-time-eval */
+function pow(mixed $num, mixed $exponent): int|float|object {}
+
+function exp(float $num): float {}
+
+function log(float $num, float $base = M_E): float {}
+
+function log10(float $num): float {}
+
+function sqrt(float $num): float {}
+
+function hypot(float $x, float $y): float {}
+
+function deg2rad(float $num): float {}
+
+function rad2deg(float $num): float {}
+
+/** @compile-time-eval */
+function bindec(string $binary_string): int|float {}
+
+/** @compile-time-eval */
+function hexdec(string $hex_string): int|float {}
+
+/** @compile-time-eval */
+function octdec(string $octal_string): int|float {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function decbin(int $num): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function decoct(int $num): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function dechex(int $num): string {}
+
+/** @refcount 1 */
+function base_convert(string $num, int $from_base, int $to_base): string {}
+
+/** @refcount 1 */
+function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
+
+function fmod(float $num1, float $num2): float {}
+
+function fdiv(float $num1, float $num2): float {}
+
+/* microtime.c */
+
+#ifdef HAVE_GETTIMEOFDAY
+/** @refcount 1 */
+function microtime(bool $as_float = false): string|float {}
+
+/**
+ * @return array<string, int>|float
+ * @refcount 1
+ */
+function gettimeofday(bool $as_float = false): array|float {}
+#endif
+
+#ifdef HAVE_GETRUSAGE
+/**
+ * @return array<string, int>|false
+ * @refcount 1
+ */
+function getrusage(int $mode = 0): array|false {}
+#endif
+
+/* pack.c */
+
+/** @refcount 1 */
+function pack(string $format, mixed ...$values): string {}
+
+/**
+ * @return array<int|string, mixed>|false
+ * @refcount 1
+ */
+function unpack(string $format, string $string, int $offset = 0): array|false {}
+
+/* password.c */
+
+/**
+ * @return array<string, string|array|null>
+ * @refcount 1
+ */
+function password_get_info(string $hash): array {}
+
+/**
+ * @sensitive-param $password
+ * @refcount 1
+ */
+function password_hash(string $password, string|int|null $algo, array $options = []): string {}
+
+function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
+
+/** @sensitive-param $password */
+function password_verify(string $password, string $hash): bool {}
+
+function password_algos(): array {}
+
+/* proc_open.c */
+
+#ifdef PHP_CAN_SUPPORT_PROC_OPEN
+/**
+ * @param array $pipes
+ * @return resource|false
+ * @refcount 1
+ */
+function proc_open(array|string $command, array $descriptor_spec, &$pipes, ?string $cwd = null, ?array $env_vars = null, ?array $options = null) {}
+
+/** @param resource $process */
+function proc_close($process): int {}
+
+/** @param resource $process */
+function proc_terminate($process, int $signal = 15): bool {}
+
+/**
+ * @param resource $process
+ * @return array<string, bool|int|string>
+ * @refcount 1
+ */
+function proc_get_status($process): array {}
+#endif
+
+/* quot_print.c */
+
+/** @refcount 1 */
+function quoted_printable_decode(string $string): string {}
+
+/** @refcount 1 */
+function quoted_printable_encode(string $string): string {}
+
+/* mt_rand.c */
+
+function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+
+/** @alias mt_srand */
+function srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+
+function rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
+
+function mt_rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
+
+function mt_getrandmax(): int {}
+
+/** @alias mt_getrandmax */
+function getrandmax(): int {}
+
+/* random.c */
+
+/** @refcount 1 */
+function random_bytes(int $length): string {}
+
+function random_int(int $min, int $max): int {}
+
+/* soundex.c */
+
+/** @refcount 1 */
+function soundex(string $string): string {}
+
+/* streamsfuncs.c */
+
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
+
+/**
+ * @return resource
+ * @refcount 1
+ */
+function stream_context_create(?array $options = null, ?array $params = null) {}
+
+/** @param resource $context */
+function stream_context_set_params($context, array $params): bool {}
+
+/**
+ * @param resource $context
+ * @return array<string, mixed>
+ * @refcount 1
+ */
+function stream_context_get_params($context): array {}
+
+/** @param resource $context */
+function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
+
+/**
+ * @param resource $stream_or_context
+ * @return array<string, mixed>
+ */
+function stream_context_get_options($stream_or_context): array {}
+
+/** @return resource */
+function stream_context_get_default(?array $options = null) {}
+
+/** @return resource */
+function stream_context_set_default(array $options) {}
+
+/**
+ * @param resource $stream
+ * @return resource|false
+ */
+function stream_filter_prepend($stream, string $filter_name, int $mode = 0, mixed $params = UNKNOWN) {}
+
+/**
+ * @param resource $stream
+ * @return resource|false
+ */
+function stream_filter_append($stream, string $filter_name, int $mode = 0, mixed $params = UNKNOWN) {}
+
+/** @param resource $stream_filter */
+function stream_filter_remove($stream_filter): bool {}
+
+/**
+ * @param int $error_code
+ * @param string $error_message
+ * @param resource|null $context
+ * @return resource|false
+ * @refcount 1
+ */
+function stream_socket_client(string $address, &$error_code = null, &$error_message = null, ?float $timeout = null, int $flags = STREAM_CLIENT_CONNECT, $context = null) {}
+
+/**
+ * @param int $error_code
+ * @param string $error_message
+ * @param resource|null $context
+ * @return resource|false
+ * @refcount 1
+ */
+function stream_socket_server(string $address, &$error_code = null, &$error_message = null, int $flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context = null) {}
+
+/**
+ * @param resource $socket
+ * @param string $peer_name
+ * @return resource|false
+ * @refcount 1
+ */
+function stream_socket_accept($socket, ?float $timeout = null, &$peer_name = null) {}
+
+/** @param resource $socket */
+function stream_socket_get_name($socket, bool $remote): string|false {}
+
+/**
+ * @param resource $socket
+ * @param string|null $address
+ * @refcount 1
+ */
+function stream_socket_recvfrom($socket, int $length, int $flags = 0, &$address = null): string|false {}
+
+/** @param resource $socket */
+function stream_socket_sendto($socket, string $data, int $flags = 0, string $address = ""): int|false {}
+
+/**
+ * @param resource $stream
+ * @param resource|null $session_stream
+ */
+function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method = null, $session_stream = null): int|bool {}
+
+#ifdef HAVE_SHUTDOWN
+/** @param resource $stream */
+function stream_socket_shutdown($stream, int $mode): bool {}
+#endif
+
+#ifdef HAVE_SOCKETPAIR
+/**
+ * @return array<int, resource>|false
+ * @refcount 1
+ */
+function stream_socket_pair(int $domain, int $type, int $protocol): array|false {}
+#endif
+
+/**
+ * @param resource $from
+ * @param resource $to
+ */
+function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
+
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
+function stream_get_contents($stream, ?int $length = null, int $offset = -1): string|false {}
+
+/** @param resource $stream */
+function stream_supports_lock($stream): bool {}
+
+/** @param resource $stream */
+function stream_set_write_buffer($stream, int $size): int {}
+
+/**
+ * @param resource $stream
+ * @alias stream_set_write_buffer
+ */
+function set_file_buffer($stream, int $size): int {}
+
+/** @param resource $stream */
+function stream_set_read_buffer($stream, int $size): int {}
+
+/** @param resource $stream */
+function stream_set_blocking($stream, bool $enable): bool {}
+
+/**
+ * @param resource $stream
+ * @alias stream_set_blocking
+ */
+function socket_set_blocking($stream, bool $enable): bool {}
+
+/**
+ * @param resource $stream
+ * @return array<string, mixed>
+ */
+function stream_get_meta_data($stream): array {}
+
+/**
+ * @param resource $stream
+ * @return array<string, mixed>
+ * @alias stream_get_meta_data
+ */
+function socket_get_status($stream): array {}
+
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
+function stream_get_line($stream, int $length, string $ending = ""): string|false {}
+
+/** @refcount 1 */
+function stream_resolve_include_path(string $filename): string|false {}
+
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
+function stream_get_wrappers(): array {}
+
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
+function stream_get_transports(): array {}
+
+/** @param resource|string $stream */
+function stream_is_local($stream): bool {}
+
+/** @param resource $stream */
+function stream_isatty($stream): bool {}
+
+#ifdef PHP_WIN32
+/** @param resource $stream */
+function sapi_windows_vt100_support($stream, ?bool $enable = null): bool {}
+#endif
+
+/** @param resource $stream */
+function stream_set_chunk_size($stream, int $size): int {}
+
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
+/** @param resource $stream */
+function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
+
+/**
+ * @param resource $stream
+ * @alias stream_set_timeout
+ */
+function socket_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
+#endif
+
+/* type.c */
+
+function gettype(mixed $value): string {}
+
+function get_debug_type(mixed $value): string {}
+
+function settype(mixed &$var, string $type): bool {}
+
+function intval(mixed $value, int $base = 10): int {}
+
+function floatval(mixed $value): float {}
+
+/** @alias floatval */
+function doubleval(mixed $value): float {}
+
+function boolval(mixed $value): bool {}
+
+function strval(mixed $value): string {}
+
+function is_null(mixed $value): bool {}
+
+function is_resource(mixed $value): bool {}
+
+function is_bool(mixed $value): bool {}
+
+function is_int(mixed $value): bool {}
+
+/** @alias is_int */
+function is_integer(mixed $value): bool {}
+
+/** @alias is_int */
+function is_long(mixed $value): bool {}
+
+function is_float(mixed $value): bool {}
+
+/** @alias is_float */
+function is_double(mixed $value): bool {}
+
+function is_numeric(mixed $value): bool {}
+
+function is_string(mixed $value): bool {}
+
+function is_array(mixed $value): bool {}
+
+function is_object(mixed $value): bool {}
+
+function is_scalar(mixed $value): bool {}
+
+/** @param string $callable_name */
+function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool {}
+
+function is_iterable(mixed $value): bool {}
+
+function is_countable(mixed $value): bool {}
+
+/* uniqid.c */
+
+#ifdef HAVE_GETTIMEOFDAY
+/** @refcount 1 */
+function uniqid(string $prefix = "", bool $more_entropy = false): string {}
+#endif
+
+/* url.c */
+
+/**
+ * @return int|string|array<string, int|string>|null|false
+ * @refcount 1
+ */
+function parse_url(string $url, int $component = -1): int|string|array|null|false {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function urlencode(string $string): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function urldecode(string $string): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function rawurlencode(string $string): string {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function rawurldecode(string $string): string {}
+
+/**
+ * @param resource|null $context
+ * @return array<int|string, string|array>|false
+ * @refcount 1
+ */
+function get_headers(string $url, bool $associative = false, $context = null): array|false {}
+
+/* user_filters.c */
+
+/**
+ * @param resource $brigade
+ * @refcount 1
+ */
+function stream_bucket_make_writeable($brigade): ?object {}
+
+/** @param resource $brigade */
+function stream_bucket_prepend($brigade, object $bucket): void {}
+
+/** @param resource $brigade */
+function stream_bucket_append($brigade, object $bucket): void {}
+
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
+function stream_bucket_new($stream, string $buffer): object {}
+
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
+function stream_get_filters(): array {}
+
+function stream_filter_register(string $filter_name, string $class): bool {}
+
+/* uuencode.c */
+
+/** @refcount 1 */
+function convert_uuencode(string $string): string {}
+
+/** @refcount 1 */
+function convert_uudecode(string $string): string|false {}
+
+/* var.c */
+
+function var_dump(mixed $value, mixed ...$values): void {}
+
+/** @refcount 1 */
+function var_export(mixed $value, bool $return = false): ?string {}
+
+function debug_zval_dump(mixed $value, mixed ...$values): void {}
+
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function serialize(mixed $value): string {}
+
+function unserialize(string $data, array $options = []): mixed {}
+
+function memory_get_usage(bool $real_usage = false): int {}
+
+function memory_get_peak_usage(bool $real_usage = false): int {}
+
+function memory_reset_peak_usage(): void {}
+
+/* versioning.c */
+
+/** @compile-time-eval */
+function version_compare(string $version1, string $version2, ?string $operator = null): int|bool {}
+
+/* win32/codepage.c */
+
+#ifdef PHP_WIN32
+function sapi_windows_cp_set(int $codepage): bool {}
+
+function sapi_windows_cp_get(string $kind = ""): int {}
+
+function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage, string $subject): ?string {}
+
+function sapi_windows_cp_is_utf8(): bool {}
+
+function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bool {}
+
+function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
+#endif

@@ -7,8 +7,8 @@ class Meta {
 }
 
 class CParent extends Meta {
-	public $publicVar;
-	protected $protectedVar;
+    public $publicVar;
+    protected $protectedVar;
 }
 
 class Child extends CParent {

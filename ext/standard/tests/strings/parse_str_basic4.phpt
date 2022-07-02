@@ -2,11 +2,6 @@
 Test parse_str() function : test with badly formed strings
 --FILE--
 <?php
-/* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
- * Description: Parses the string into variables
- * Source code: ext/standard/string.c
-*/
-
 echo "\nTest string with badly formed strings\n";
 $str = "arr[1=sid&arr[4][2=fred";
 var_dump(parse_str($str, $res));
@@ -30,7 +25,6 @@ $str = "arr.test[1]=sid&arr test[4][two]=fred";
 var_dump(parse_str($str, $res));
 var_dump($res);
 ?>
-===DONE===
 --EXPECTF--
 Test string with badly formed strings
 NULL
@@ -89,4 +83,3 @@ array(1) {
     }
   }
 }
-===DONE===

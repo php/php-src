@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -135,7 +135,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 			h[3] = ch;
 		}
 		if (sscanf(h, "%x", &b) != 1) {
-			gd_error("invalid XBM");
+			gd_error("Invalid XBM");
 			gdImageDestroy(im);
 			return 0;
 		}

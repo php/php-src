@@ -1,9 +1,7 @@
 --TEST--
 Phar with metadata (read)
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -22,7 +20,7 @@ $files['d'] = array('cont' => 'd', 'meta' => array('hi'=>'there','foo'=>'bar'));
 include 'files/phar_test.inc';
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+    var_dump(file_get_contents($pname.'/'.$name));
 }
 
 $phar = new Phar($fname);
@@ -33,20 +31,19 @@ var_dump($phar->getMetaData());
 var_dump($phar->delMetaData());
 var_dump($phar->getMetaData());
 foreach($files as $name => $cont) {
-	echo "  meta $name\n";
-	var_dump($phar[$name]->hasMetadata());
-	var_dump($phar[$name]->getMetadata());
-	var_dump($phar[$name]->delMetadata());
-	var_dump($phar[$name]->getMetadata());
+    echo "  meta $name\n";
+    var_dump($phar[$name]->hasMetadata());
+    var_dump($phar[$name]->getMetadata());
+    var_dump($phar[$name]->delMetadata());
+    var_dump($phar[$name]->getMetadata());
 }
 
 unset($phar);
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+    var_dump(file_get_contents($pname.'/'.$name));
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
@@ -94,4 +91,3 @@ string(1) "a"
 string(1) "b"
 string(1) "c"
 string(1) "d"
-===DONE===

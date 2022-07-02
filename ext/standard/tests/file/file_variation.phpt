@@ -2,11 +2,6 @@
 Test file() function : usage variations
 --FILE--
 <?php
-/*
- *  Prototype: array file ( string filename [,int use-include_path [,resource context]] );
- *  Description: Reads entire file into an array
-                 Returns the  file in an array
- */
 require(__DIR__ . '/file.inc');
 
 $data_array = array( "Garbage data", "Gar\nba\nge d\nata", "Gar\n\nbage \n\n data" );

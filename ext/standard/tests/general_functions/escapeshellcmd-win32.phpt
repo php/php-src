@@ -10,21 +10,21 @@ if( substr(PHP_OS, 0, 3) != 'WIN' ) {
 <?php
 echo "*** Testing escapeshellcmd() basic operations ***\n";
 $data = array(
-	'"abc',
-	"'abc",
-	'?<>',
-	'()[]{}$',
-	'%^',
-	'#&;`|*?',
-	'~<>\\',
-	'%NOENV%',
-	'!NOENV!'
+    '"abc',
+    "'abc",
+    '?<>',
+    '()[]{}$',
+    '%^',
+    '#&;`|*?',
+    '~<>\\',
+    '%NOENV%',
+    '!NOENV!'
 );
 
 $count = 1;
 foreach ($data AS $value) {
-	echo "-- Test " . $count++ . " --\n";
-	var_dump(escapeshellcmd($value));
+    echo "-- Test " . $count++ . " --\n";
+    var_dump(escapeshellcmd($value));
 }
 
 echo "Done\n";

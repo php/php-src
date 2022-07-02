@@ -1,11 +1,7 @@
 --TEST--
 Test function gzgets() by calling it with its expected arguments
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
@@ -26,7 +22,6 @@ gzclose($h);
 
 
 ?>
-===DONE===
 --EXPECT--
 string(9) "When you'"
 string(13) "re taught thr"
@@ -43,4 +38,3 @@ string(19) "as it turns around
 "
 string(39) "and I know that it descends down on me
 "
-===DONE===

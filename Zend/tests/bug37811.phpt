@@ -5,25 +5,29 @@ Bug #37811 (define not using toString on objects)
 
 class TestClass
 {
-	function __toString()
-	{
-		return "Foo";
-	}
+    function __toString()
+    {
+        return "Foo";
+    }
 }
 
-define("Bar",new TestClass);
+define("Bar", new TestClass);
 var_dump(Bar);
-define("Baz",new stdClass);
+var_dump((string) Bar);
+
+define("Baz", new stdClass);
 var_dump(Baz);
+try {
+    var_dump((string) Baz);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
+object(TestClass)#1 (0) {
+}
 string(3) "Foo"
-
-Warning: Constants may only evaluate to scalar values, arrays or resources in %sbug37811.php on line %d
-
-Fatal error: Uncaught Error: Undefined constant 'Baz' in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+object(stdClass)#2 (0) {
+}
+Object of class stdClass could not be converted to string

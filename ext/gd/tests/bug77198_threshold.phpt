@@ -1,8 +1,9 @@
 --TEST--
 Bug #77198 (threshold cropping has insufficient precision)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED) die('skip upstream bugfix has not been released');
 ?>
 --FILE--

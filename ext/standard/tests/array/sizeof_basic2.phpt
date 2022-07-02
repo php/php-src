@@ -2,13 +2,6 @@
 Test sizeof() function : basic functionality - for non-scalar type(array)
 --FILE--
 <?php
-/* Prototype  : int sizeof(mixed $var[, int $mode] )
- * Description: Counts an elements in an array. If Standard PHP library is
- *              installed, it will return the properties of an object.
- * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
- */
-
 /* Testing the sizeof() for non-scalar type(array) value
  * in default, COUNT_NORMAL and COUNT_RECURSIVE modes.
  * Sizeof() has been tested for simple integer, string,

@@ -1,9 +1,7 @@
 --TEST--
 IntlCalendar::getNow() basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -16,8 +14,6 @@ var_dump(abs($now - $proc_now) < 500);
 var_dump(abs($time * 1000 - $proc_now) < 2000);
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
-==DONE==

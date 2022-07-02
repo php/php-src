@@ -4,10 +4,8 @@ Recognition of compression methods
 This test is supposed to cover all compression methods that are recognized by
 libzip, but for now only 6 methods are available in compression_methods.zip.
 The zip and the test should be extended, if possible.
---SKIPIF--
-<?php
-if (!extension_loaded('zip')) die('skip zip extension not available');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $methods = array(

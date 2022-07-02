@@ -8,11 +8,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Pass a directory path using wildcards as $dir argument to test how scandir() behaves
  */
@@ -38,7 +33,6 @@ var_dump( scandir($dir_path . "/sub_dir?") );
 var_dump( scandir($dir_path . "/sub?dir1") );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/scandir_variation6";
@@ -52,25 +46,24 @@ rmdir($dir_path);
 
 -- Wildcard = '*' --
 
-Warning: scandir(%s/scandir_var*): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_var*): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
-Warning: scandir(%s/*): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/*): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- Wildcard = '?' --
 
-Warning: scandir(%s/scandir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation6/sub_dir?): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
-Warning: scandir(%s/scandir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation6/sub?dir1): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
-===DONE===

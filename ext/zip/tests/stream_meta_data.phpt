@@ -1,9 +1,7 @@
 --TEST--
 stream_get_meta_data() on zip stream
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dirname = __DIR__ . '/';
@@ -11,7 +9,7 @@ $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 $fp = $zip->getStream('foo');
 
@@ -47,7 +45,7 @@ array(8) {
   ["unread_bytes"]=>
   int(0)
   ["seekable"]=>
-  bool(false)
+  bool(%s)
   ["uri"]=>
   string(3) "foo"
 }
@@ -67,7 +65,7 @@ array(9) {
   ["unread_bytes"]=>
   int(0)
   ["seekable"]=>
-  bool(false)
+  bool(%s)
   ["uri"]=>
   string(%d) "zip://%stest_with_comment.zip#foo"
 }

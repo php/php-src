@@ -9,11 +9,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-/*
- *  Prototype: array stat ( string $filename );
- *  Description: Gives information about a file
- */
-
 /* test the effects on the stats of dir/file for using is_dir() & is_file() on dir/file */
 
 $file_path = __DIR__;
@@ -36,7 +31,7 @@ $old_dirname = "$file_path/stat_variation4";
 $old_stat = stat($old_dirname);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( is_dir($old_dirname) );
 $new_stat = stat($old_dirname);
 

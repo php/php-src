@@ -1,9 +1,7 @@
 --TEST--
 Phar::startBuffering()/setStub()/stopBuffering() zip-based
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -41,7 +39,6 @@ $p->setStub($a, $c);
 var_dump($p->getStub());
 fclose($a);
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/phar_begin_setstub_commit.phar.zip');
@@ -67,4 +64,3 @@ string(%d) "<?php var_dump("First resource"); Phar::mapPhar("phar_begin_setstub_
 "
 string(%d) "<?php var_dump("First resource"); Phar::mapPhar("phar_begin_setstub_commit.phar"); __HALT_COMPILER(); ?>
 "
-===DONE===

@@ -4,11 +4,11 @@ Testing visibility of object returned by function
 <?php
 
 class foo {
-	private $test = 1;
+    private $test = 1;
 }
 
 function test() {
-	return new foo;
+    return new foo;
 }
 
 test()->test = 2;

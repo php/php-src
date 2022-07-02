@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,7 +21,6 @@
 extern "C" {
 #include "../php_intl.h"
 #include "dateformat_class.h"
-#include "dateformat_attrcpp.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
@@ -35,11 +34,7 @@ static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
 	return (DateFormat *)dfo->datef_data.udatf;
 }
 
-/* {{{ proto string IntlDateFormatter::getTimeZoneId()
- * Get formatter timezone_id. }}} */
-/* {{{ proto string datefmt_get_timezone_id(IntlDateFormatter $mf)
- * Get formatter timezone_id.
- */
+/* {{{ Get formatter timezone_id. */
 U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 {
 	zend_string *u8str;
@@ -47,7 +42,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -60,18 +55,14 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 	RETVAL_STR(u8str);
 }
 
-/* {{{ proto IntlTimeZone IntlDateFormatter::getTimeZone()
- * Get formatter timezone. }}} */
-/* {{{ proto IntlTimeZone datefmt_get_timezone(IntlDateFormatter $mf)
- * Get formatter timezone.
- */
+/* {{{ Get formatter timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -88,8 +79,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 	timezone_object_construct(tz_clone, return_value, 1);
 }
 
-/* {{{ proto boolean IntlDateFormatter::setTimeZone(mixed $timezone)
- * Set formatter's timezone. */
+/* {{{ Set formatter's timezone. */
 U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 {
 	zval		*timezone_zv;
@@ -99,7 +89,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 
 	if ( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Oz", &object, IntlDateFormatter_ce_ptr, &timezone_zv) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -113,18 +103,14 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 	fetch_datefmt(dfo)->adoptTimeZone(timezone);
 }
 
-/* {{{ proto int IntlDateFormatter::getCalendar( )
- * Get formatter calendar type. }}} */
-/* {{{ proto int datefmt_get_calendar(IntlDateFormatter $mf)
- * Get formatter calendar type.
- */
+/* {{{ Get formatter calendar type. */
 U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -138,18 +124,14 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
 }
 /* }}} */
 
-/* {{{ proto IntlCalendar IntlDateFormatter::getCalendarObject()
- * Get formatter calendar. }}} */
-/* {{{ proto IntlCalendar datefmt_get_calendar_object(IntlDateFormatter $mf)
- * Get formatter calendar.
- */
+/* {{{ Get formatter calendar. */
 U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 {
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -171,19 +153,25 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 }
 /* }}} */
 
-/* {{{ proto bool IntlDateFormatter::setCalendar(mixed $calendar)
- * Set formatter's calendar. }}} */
-/* {{{ proto bool datefmt_set_calendar(IntlDateFormatter $mf, mixed $calendar)
- * Set formatter's calendar.
- */
+/* {{{ Set formatter's calendar. */
 U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 {
-	zval	*calendar_zv;
+	zend_object *calendar_obj;
+	zend_long calendar_long;
+	bool calendar_is_null;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz",
-			&object, IntlDateFormatter_ce_ptr, &calendar_zv) == FAILURE) {
-		RETURN_FALSE;
+	object = getThis();
+
+	if (object) {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_OBJECT_OF_CLASS(object, IntlDateFormatter_ce_ptr)
+			Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
@@ -196,9 +184,9 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	// because we would have lost modifiers such as @calendar. We
 	// must store the requested locale on object creation
 
-	if (datefmt_process_calendar_arg(calendar_zv, locale,
-			"datefmt_set_calendar",	INTL_DATA_ERROR_P(dfo), cal, cal_type,
-			cal_owned) == FAILURE) {
+	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale,
+			"datefmt_set_calendar",	INTL_DATA_ERROR_P(dfo), cal, cal_type, cal_owned) == FAILURE
+	) {
 		RETURN_FALSE;
 	}
 

@@ -3,8 +3,9 @@ ldap_get_values_len() - Testing ldap_get_values_len() that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -17,7 +18,6 @@ $entry = ldap_first_entry($link, $result);
 
 var_dump(ldap_get_values_len($link, $entry, "inexistentAttribute"));
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -28,4 +28,3 @@ remove_dummy_data($link, $base);
 --EXPECTF--
 Warning: ldap_get_values_len(): Cannot get the value(s) of attribute %s in %s on line %d
 bool(false)
-===DONE===

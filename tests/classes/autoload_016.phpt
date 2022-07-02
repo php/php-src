@@ -17,4 +17,4 @@ $rc->getProperty("UndefC::p");
 ?>
 --EXPECT--
 In autoload: string(6) "undefc"
-Class undefc does not exist
+Class "undefc" does not exist

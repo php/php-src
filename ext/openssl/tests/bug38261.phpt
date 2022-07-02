@@ -1,9 +1,7 @@
 --TEST--
 openssl key from zval leaks
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $cert = false;
@@ -15,19 +13,31 @@ class test {
 $t = new test;
 
 var_dump(openssl_x509_parse("foo"));
-var_dump(openssl_x509_parse($t));
-var_dump(openssl_x509_parse(array()));
-var_dump(openssl_x509_parse($cert));
+
 try {
-    var_dump(openssl_x509_parse(new stdClass));
-} catch (Error $e) {
+    var_dump(openssl_x509_parse($t));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    openssl_x509_parse([]);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+var_dump(openssl_x509_parse($cert));
+
+try {
+    openssl_x509_parse(new stdClass);
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
+openssl_x509_parse(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
 bool(false)
-bool(false)
-Object of class stdClass could not be converted to string
+openssl_x509_parse(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, stdClass given

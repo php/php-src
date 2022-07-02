@@ -2,11 +2,6 @@
 Test new DateTime() : error conditions
 --FILE--
 <?php
-/* Prototype  : DateTime::__construct  ([ string $time="now"  [, DateTimeZone $timezone=NULL  ]] )
- * Description: Returns new DateTime object
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
 //Set the default time zone
 date_default_timezone_set("GMT");
 
@@ -23,10 +18,8 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_create() : error conditions ***
 
 -- Testing new DateTime() with more than expected no. of arguments --
-DateTime::__construct() expects at most 2 parameters, 3 given
-===DONE===
+DateTime::__construct() expects at most 2 arguments, 3 given

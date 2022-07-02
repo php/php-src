@@ -3,6 +3,8 @@ Userstream unlink, rename, mkdir, rmdir, and url_stat.
 --FILE--
 <?php
 class test {
+    public $context;
+
     function unlink($file) {
         print "Unlinking file: $file\n";
     }
@@ -20,9 +22,9 @@ class test {
     }
 
     function url_stat($path, $options) {
-		/* By printing out a notice that we are actively stating the file
-		   then subsequently performing multiple stat operations on it
-		   we effectively test the stat cache mechanism */
+        /* By printing out a notice that we are actively stating the file
+           then subsequently performing multiple stat operations on it
+           we effectively test the stat cache mechanism */
         print "Stating file: $path\n";
         return array('dev'=>1, 'ino'=>2, 'mode'=>0644, 'nlink'=>3,
                      'uid'=>100, 'gid'=>1000, 'rdev'=>-1, 'size'=>31337,

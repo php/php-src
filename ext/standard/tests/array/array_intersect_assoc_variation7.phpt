@@ -2,12 +2,6 @@
 Test array_intersect_assoc() function : usage variations - assoc array with diff values for 'arr1' argument
 --FILE--
 <?php
-/* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments.
- * Keys are used to do more restrictive check
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing the functionality of array_intersect_assoc() by passing different
  * associative arrays having different possible values to $arr1 argument.
@@ -52,8 +46,8 @@ $arrays = array (
        array("f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.333),
 
        // arrays with string values
-/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "pen\n"),
-       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'),
+/*7*/  array(111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"),
+       array(111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'),
        array(1 => "hello", "heredoc" => $heredoc),
 
        // array with object, unset variable and resource variable
@@ -67,11 +61,11 @@ $arrays = array (
 
 // array to be passsed to $arr2 argument
 $arr2 = array(0 => "0", 1, "two" => 2, "float" => 2.3333, "f1" => 1.2,
-              "f4" => 33333333.333, 111 => "\tHello", 3.3 => 'pen\n', '\v\fworld',
+              "f4" => 33333333.333, 111 => "\tHello", 3 => 'pen\n', '\v\fworld',
               "heredoc" => "Hello world", 11 => new classA(), "resource" => $fp,
               "int" => 133, 222 => "fruit");
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iteration $iterator --\n";

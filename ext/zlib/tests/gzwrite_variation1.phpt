@@ -1,11 +1,7 @@
 --TEST--
 Test function gzwrite() by calling it when file is opened for reading
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
@@ -19,9 +15,7 @@ var_dump(gzwrite( $h, $str, $length ) );
 gzclose($h);
 
 ?>
-===DONE===
 --EXPECT--
 int(0)
 string(10) "When you'r"
 int(0)
-===DONE===

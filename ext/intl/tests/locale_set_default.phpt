@@ -1,7 +1,7 @@
 --TEST--
 locale_set_default($locale)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -67,22 +67,22 @@ function ut_main()
     );
 
 /*
-	$locales = array(
-		'es'
-	);
+    $locales = array(
+        'es'
+    );
 */
     $res_str = '';
 
     foreach( $locales as $locale )
     {
         $isSuccessful = ut_loc_set_default( $locale);
-	if ($isSuccessful ){
-		$lang = ut_loc_get_default( );
-		$res_str .= "$locale: set locale '$lang'";
-	}
-	else{
-		$res_str .= "$locale: Error in set locale";
-	}
+    if ($isSuccessful ){
+        $lang = ut_loc_get_default( );
+        $res_str .= "$locale: set locale '$lang'";
+    }
+    else{
+        $res_str .= "$locale: Error in set locale";
+    }
         $res_str .= "\n";
     }
 

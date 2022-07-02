@@ -3,8 +3,8 @@ DOMDocument::$validateOnParse - read/write tests (dom_document_validate_on_parse
 --CREDITS--
 Hans Zaunere
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

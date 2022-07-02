@@ -2,17 +2,6 @@
 Test fopen and fclose() functions - usage variations - "ab" mode
 --FILE--
 <?php
-/*
- fopen() function:
- Prototype: resource fopen(string $filename, string $mode
-                            [, bool $use_include_path [, resource $context]] );
- Description: Opens file or URL.
-*/
-/*
- fclose() function:
- Prototype: bool fclose ( resource $handle );
- Description: Closes an open file pointer
-*/
 
 /* Test fopen() and fclose(): Opening the file in "ab" mode,
    checking for the file creation, write & read operations,
@@ -52,7 +41,7 @@ resource(%d) of type (stream)
 string(6) "stream"
 int(37)
 
-Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(true)

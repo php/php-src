@@ -5,15 +5,10 @@ Test disk_total_space() function : error conditions
 if(substr(PHP_OS, 0, 3) != 'WIN' )
   die("skip Valid only for Windows");
 ?>
+--CONFLICTS--
+disk_total_space
 --FILE--
 <?php
-/*
- *  Prototype: float disk_total_space( string $directory );
- *  Description: given a string containing a directory, this function
- *               will return the total number of bytes on the corresponding
- *               filesystem or disk partition
- */
-
 echo "*** Testing error conditions ***\n";
 $file_path = __DIR__;
 
@@ -34,12 +29,10 @@ unlink($file_path."/disk_total_space.tmp");
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: disk_total_space(): The system cannot find the path specified.
- in %s on line %d
+Warning: disk_total_space(): The system cannot find the path specified in %s on line %d
 bool(false)
 
-Warning: disk_total_space(): The directory name is invalid.
- in %s on line %d
+Warning: disk_total_space(): The directory name is invalid in %s on line %d
 bool(false)
 
 --- Done ---

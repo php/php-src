@@ -113,6 +113,7 @@ foreach ($arr as $u => $v) {
         $res = unpack("H*", $res)[1];
     echo sprintf("%s => %s\n\n", $ent, $res);
 }
+?>
 --EXPECT--
 NO-BREAK SPACE: &#xA0; => a0
 &#xA0; => a0

@@ -2,7 +2,7 @@ mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
 
-DEFS = -DPHP_ATOM_INC -I$(top_builddir)/include -I$(top_builddir)/main -I$(top_srcdir)
+DEFS = -I$(top_builddir)/include -I$(top_builddir)/main -I$(top_srcdir)
 COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(PHP_FRAMEWORKPATH)
 
 all: $(all_targets)
@@ -15,22 +15,22 @@ build-modules: $(PHP_MODULES) $(PHP_ZEND_EX)
 
 build-binaries: $(PHP_BINARIES)
 
-libphp$(PHP_MAJOR_VERSION).la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
-	$(LIBTOOL) --mode=link --tag=disable-static $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
+libphp.la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
+	$(LIBTOOL) --mode=link $(CC) $(LIBPHP_CFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
 	-@$(LIBTOOL) --silent --mode=install cp $@ $(phptempdir)/$@ >/dev/null 2>&1
 
-libs/libphp$(PHP_MAJOR_VERSION).bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
-	$(CC) $(MH_BUNDLE_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_SAPI_OBJS:.lo=.o) $(PHP_FRAMEWORKS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ libs/libphp$(PHP_MAJOR_VERSION).so
+libs/libphp.bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
+	$(CC) $(MH_BUNDLE_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_SAPI_OBJS:.lo=.o) $(PHP_FRAMEWORKS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ libs/libphp.so
 
 install: $(all_targets) $(install_targets)
 
 install-sapi: $(OVERALL_TARGET)
 	@echo "Installing PHP SAPI module:       $(PHP_SAPI)"
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
-	-@if test ! -r $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME); then \
+	-@if test ! -r $(phptempdir)/libphp.$(SHLIB_DL_SUFFIX_NAME); then \
 		for i in 0.0.0 0.0 0; do \
-			if test -r $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME).$$i; then \
-				$(LN_S) $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME).$$i $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME); \
+			if test -r $(phptempdir)/libphp.$(SHLIB_DL_SUFFIX_NAME).$$i; then \
+				$(LN_S) $(phptempdir)/libphp.$(SHLIB_DL_SUFFIX_NAME).$$i $(phptempdir)/libphp.$(SHLIB_DL_SUFFIX_NAME); \
 				break; \
 			fi; \
 		done; \
@@ -75,7 +75,10 @@ PHP_TEST_SETTINGS = -d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=
 PHP_TEST_SHARED_EXTENSIONS =  ` \
 	if test "x$(PHP_MODULES)" != "x"; then \
 		for i in $(PHP_MODULES)""; do \
-			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
+			. $$i; \
+			if test "x$$dlname" != "xdl_test.so"; then \
+				$(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
+			fi; \
 		done; \
 	fi; \
 	if test "x$(PHP_ZEND_EX)" != "x"; then \
@@ -111,11 +114,14 @@ test: all
 
 clean:
 	find . -name \*.gcno -o -name \*.gcda | xargs rm -f
-	find . -name \*.lo -o -name \*.o | xargs rm -f
+	find . -name \*.lo -o -name \*.o -o -name \*.dep | xargs rm -f
 	find . -name \*.la -o -name \*.a | xargs rm -f
 	find . -name \*.so | xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
-	rm -f libphp$(PHP_MAJOR_VERSION).la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
+	rm -f libphp.la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
+	rm -f ext/opcache/jit/zend_jit_x86.c
+	rm -f ext/opcache/jit/zend_jit_arm64.c
+	rm -f ext/opcache/minilua
 
 distclean: clean
 	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h main/internal_functions_cli.c main/internal_functions.c Zend/zend_dtrace_gen.h Zend/zend_dtrace_gen.h.bak Zend/zend_config.h
@@ -123,7 +129,6 @@ distclean: clean
 	rm -f ext/date/lib/timelib_config.h ext/mbstring/libmbfl/config.h ext/oci8/oci8_dtrace_gen.h ext/oci8/oci8_dtrace_gen.h.bak
 	rm -f scripts/man1/phpize.1 scripts/php-config scripts/man1/php-config.1 sapi/cli/php.1 sapi/cgi/php-cgi.1 sapi/phpdbg/phpdbg.1 ext/phar/phar.1 ext/phar/phar.phar.1
 	rm -f sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html
-	rm -f ext/iconv/php_have_bsd_iconv.h ext/iconv/php_have_glibc_iconv.h ext/iconv/php_have_ibm_iconv.h ext/iconv/php_have_iconv.h ext/iconv/php_have_libiconv.h ext/iconv/php_iconv_aliased_libiconv.h ext/iconv/php_iconv_supports_errno.h ext/iconv/php_php_iconv_h_path.h ext/iconv/php_php_iconv_impl.h
 	rm -f ext/phar/phar.phar ext/phar/phar.php
 	if test "$(srcdir)" != "$(builddir)"; then \
 	  rm -f ext/phar/phar/phar.inc; \
@@ -132,22 +137,27 @@ distclean: clean
 
 prof-gen:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-generate all
+	find . -name \*.gcda | xargs rm -f
 
 prof-clean:
 	find . -name \*.lo -o -name \*.o | xargs rm -f
 	find . -name \*.la -o -name \*.a | xargs rm -f
 	find . -name \*.so | xargs rm -f
-	rm -f libphp$(PHP_MAJOR_VERSION).la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
+	rm -f libphp.la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
 
 prof-use:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-use all
 
 %_arginfo.h: %.stub.php
-	if type php >/dev/null 2>/dev/null; then php $(top_srcdir)/scripts/dev/gen_stub.php $<; fi
-
-# As we don't track includes, this is just a heuristic
-%.c: %_arginfo.h
-	touch $@
+	@if test -e "$(top_srcdir)/build/gen_stub.php"; then \
+		if test ! -z "$(PHP)"; then \
+			echo Parse $< to generate $@;\
+			$(PHP) $(top_srcdir)/build/gen_stub.php $<; \
+		elif test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
+			echo Parse $< to generate $@;\
+			$(PHP_EXECUTABLE) $(top_srcdir)/build/gen_stub.php $<; \
+		fi; \
+	fi;
 
 .PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:

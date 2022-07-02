@@ -1,8 +1,9 @@
 --TEST--
 imagecreatefromstring
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-        if (!function_exists('imagecreatefromstring')) die("skip gd extension not available\n");
         if (!function_exists('imagepng')) die("skip no imagpng()\n");
 ?>
 --FILE--
@@ -18,9 +19,9 @@ $im_string = file_get_contents(__DIR__ . '/tc.png');
 $im = imagecreatefromstring($im_string);
 echo 'createfromstring truecolor png: ';
 if (imagecolorat($im, 3,3) != 0x0) {
-	echo 'failed';
+    echo 'failed';
 } else {
-	echo 'ok';
+    echo 'ok';
 }
 echo "\n";
 unlink($dir . '/tc.png');
@@ -42,16 +43,20 @@ echo'createfromstring palette png: ';
 $c = imagecolorsforindex($im, imagecolorat($im, 3,3));
 $failed = false;
 if ($c['red'] != 255 || $c['green'] != 0 || $c['blue'] != 0) {
-	echo 'failed';
+    echo 'failed';
 } else {
-	echo 'ok';
+    echo 'ok';
 }
 echo "\n";
 unlink($dir . '/p.png');
 
 
 //empty string
-$im = imagecreatefromstring('');
+try {
+    imagecreatefromstring('');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 //random string > 12
 $im = imagecreatefromstring(' asdf jklp foo');
 ?>
@@ -59,6 +64,6 @@ $im = imagecreatefromstring(' asdf jklp foo');
 createfromstring truecolor png: ok
 createfromstring palette png: ok
 
-Warning: imagecreatefromstring(): Empty string or invalid image in %screatefromstring.php on line %d
+Warning: imagecreatefromstring(): Data is not in a recognized format in %s on line %d
 
-Warning: imagecreatefromstring(): Data is not in a recognized format in %screatefromstring.php on line %d
+Warning: imagecreatefromstring(): Data is not in a recognized format in %s on line %d

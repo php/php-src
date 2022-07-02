@@ -4,7 +4,7 @@ gethostbyname() function - basic type return error test
 "Sylvain R." <sracine@phpquebec.org>
 --FILE--
 <?php
-	var_dump(is_string(gethostbyname("asdfasdf")));
+    var_dump(is_string(gethostbyname("asdfasdf")));
 ?>
 --EXPECT--
 bool(true)

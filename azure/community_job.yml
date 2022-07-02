@@ -16,21 +16,11 @@ jobs:
   - job: ${{ parameters.configurationName }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-20.04'
     variables:
       ubsan_options: 'print_stacktrace=1'
     steps:
     - template: apt.yml
-    - script: |
-        # Compile a newer version of curl, otherwise there will be an asan warning
-        # when running symfony tests.
-        wget https://curl.haxx.se/download/curl-7.65.3.tar.gz
-        tar xzf curl-7.65.3.tar.gz
-        cd curl-7.65.3/
-        ./configure
-        make -j2
-        sudo make install
-      displayName: 'Build Curl'
     - template: configure.yml
       parameters:
         configurationParameters: ${{ parameters.configurationParameters }}
@@ -51,34 +41,68 @@ jobs:
     - script: |
         git clone https://github.com/laravel/framework.git --branch=master --depth=1
         cd framework
-        php7.3 /usr/bin/composer install --no-progress
+        git rev-parse HEAD
+        php8.0 /usr/bin/composer install --no-progress
+        # Hack to disable a test that hangs on azure
+        sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
         export USE_ZEND_ALLOC=0
-        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
-        # Avoid test using exit(), which thus leaks.
-        # We can use USE_TRACKED_ALLOC=1 if more of these show up.
-        sed -i "s/function_exists('pcntl_fork')/false/" tests/Filesystem/FilesystemTest.php
-        php vendor/bin/phpunit
-      displayName: 'Test Laravel'
-    - script: |
-        git clone https://github.com/symfony/symfony.git --branch=master --depth=1
-        cd symfony
-        php7.3 /usr/bin/composer install --no-progress
-        php7.3 ./phpunit install
-        export USE_ZEND_ALLOC=0
-        export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
-        php ./phpunit --exclude-group tty,benchmark,intl-data,transient
+        php vendor/bin/phpunit
         if [ $? -gt 128 ]; then
           exit 1
         fi
+      displayName: 'Test Laravel'
+    - script: |
+        git clone https://github.com/symfony/symfony.git --depth=1
+        cd symfony
+        git rev-parse HEAD
+        php8.0 /usr/bin/composer install --no-progress
+        php8.0 ./phpunit install
+        export USE_ZEND_ALLOC=0
+        export USE_TRACKED_ALLOC=1
+        export ASAN_OPTIONS=exitcode=139
+        export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
+        X=0
+        for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
+          php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient;
+          if [ $? -gt 128 ]; then
+            X=1;
+          fi
+        done
+        exit $X
       displayName: 'Test Symfony'
       condition: or(succeeded(), failed())
     - script: |
         git clone https://github.com/amphp/amp.git --branch=master --depth=1
         cd amp
-        php7.3 /usr/bin/composer install --no-progress --ignore-platform-reqs
+        git rev-parse HEAD
+        php /usr/bin/composer install --no-progress --ignore-platform-reqs
         export USE_ZEND_ALLOC=0
         sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
         php vendor/bin/phpunit
       displayName: 'Test Amphp'
+      condition: or(succeeded(), failed())
+    - script: |
+        git clone https://github.com/sebastianbergmann/phpunit.git --branch=master --depth=1
+        cd phpunit
+        git rev-parse HEAD
+        export USE_ZEND_ALLOC=0
+        export USE_TRACKED_ALLOC=1
+        export ASAN_OPTIONS=exitcode=139
+        php8.0 /usr/bin/composer install --no-progress
+        php ./phpunit
+        if [ $? -gt 128 ]; then
+          exit 1
+        fi
+      displayName: 'Test PHPUnit'
+      condition: or(succeeded(), failed())
+    - script: |
+        php8.0 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
+        cd symfony_demo
+        git rev-parse HEAD
+        export USE_ZEND_ALLOC=0
+        export USE_TRACKED_ALLOC=1
+        sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
+        php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
+      displayName: 'Symfony Preloading'
       condition: or(succeeded(), failed())

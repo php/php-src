@@ -1,9 +1,7 @@
 --TEST--
 Phar and RecursiveDirectoryIterator
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -17,16 +15,15 @@ $it = new RecursiveIteratorIterator($it);
 
 foreach($it as $name => $ent)
 {
-	var_dump(str_replace(array('\\', $fname), array('/', '*'), $name));
-	var_dump(str_replace(array('\\', $fname), array('/', '*'), $ent->getPathname()));
-	var_dump(str_replace('\\', '/', $it->getSubPath()));
-	var_dump(str_replace('\\', '/', $it->getSubPathName()));
-	$sub = $it->getPathInfo();
-	var_dump(str_replace('\\', '/', $sub->getFilename()));
+    var_dump(str_replace(array('\\', $fname), array('/', '*'), $name));
+    var_dump(str_replace(array('\\', $fname), array('/', '*'), $ent->getPathname()));
+    var_dump(str_replace('\\', '/', $it->getSubPath()));
+    var_dump(str_replace('\\', '/', $it->getSubPathName()));
+    $sub = $it->getPathInfo();
+    var_dump(str_replace('\\', '/', $sub->getFilename()));
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_005.phar.php');
@@ -58,4 +55,3 @@ string(14) "phar://*/e.php"
 string(0) ""
 string(5) "e.php"
 string(20) "phar_oo_005.phar.php"
-===DONE===

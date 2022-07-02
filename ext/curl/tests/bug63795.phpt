@@ -1,15 +1,7 @@
 --TEST--
 Bug #63795 (CURL >= 7.28.0 no longer support value 1 for CURLOPT_SSL_VERIFYHOST)
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-        exit("skip curl extension not loaded");
-}
-$curl_version = curl_version();
-if ($curl_version['version_number'] < 0x071c01) {
-        exit("skip: test valid for libcurl >= 7.28.1");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $ch = curl_init();

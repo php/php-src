@@ -1,7 +1,7 @@
 --TEST--
 Phar::convertToTar()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -37,7 +37,6 @@ var_dump($phar->isFileFormat(Phar::TAR));
 var_dump($phar->getStub());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -54,4 +53,3 @@ __HALT_COMPILER();"
 bool(true)
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
-===DONE===

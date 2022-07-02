@@ -6,7 +6,6 @@ $a = new SplMaxHeap;
 $a->insert($a);
 var_dump($a)
 ?>
-===DONE===
 --EXPECTF--
 object(SplMaxHeap)#%d (3) {
   ["flags":"SplHeap":private]=>
@@ -19,4 +18,3 @@ object(SplMaxHeap)#%d (3) {
     *RECURSION*
   }
 }
-===DONE===

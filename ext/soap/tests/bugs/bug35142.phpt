@@ -1,7 +1,7 @@
 --TEST--
 Bug #35142 (SOAP Client/Server Complex Object Support)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -11,12 +11,13 @@ $timestamp = "2005-11-08T11:22:07+03:00";
 $wsdl = __DIR__."/bug35142.wsdl";
 
 function PostEvents($x) {
-	var_dump($x);
-	exit();
+    var_dump($x);
+    exit();
   return $x;
 }
 
 class TestSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -24,8 +25,8 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('PostEvents');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
-		echo "$request\n";
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+        echo "$request\n";
     $this->server->handle($request);
     return $response;
   }
@@ -33,10 +34,10 @@ class TestSoapClient extends SoapClient {
 }
 
 $soapClient = new TestSoapClient($wsdl,
-	array('trace' => 1, 'exceptions' => 0,
-		'classmap' => array('logOnEvent' => 'LogOnEvent',
-			'logOffEvent' => 'LogOffEvent',
-			'events' => 'IVREvents')));
+    array('trace' => 1, 'exceptions' => 0,
+        'classmap' => array('logOnEvent' => 'LogOnEvent',
+            'logOffEvent' => 'LogOffEvent',
+            'events' => 'IVREvents')));
 
 $logOnEvent = new LogOnEvent(34567, $timestamp);
 $logOffEvents[] = new LogOffEvent(34567, $timestamp, "Smoked");

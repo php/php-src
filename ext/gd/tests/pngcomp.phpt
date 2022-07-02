@@ -1,20 +1,18 @@
 --TEST--
 png compression test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-
-	if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
-		die("skip png support unavailable");
-	}
+    if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
+        die("skip png support unavailable");
+    }
 ?>
 --FILE--
 <?php
-	$cwd = __DIR__;
+    $cwd = __DIR__;
 
-	echo "PNG compression test: ";
+    echo "PNG compression test: ";
 
         $im = imagecreatetruecolor(20,20);
         imagefilledrectangle($im, 5,5, 10,10, 0xffffff);
@@ -26,7 +24,7 @@ png compression test
                 echo "ok\n";
         }
 
-	@unlink($cwd . "/test_pngcomp.png");
+    @unlink($cwd . "/test_pngcomp.png");
 ?>
 --EXPECT--
 PNG compression test: ok

@@ -1,96 +1,151 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.0alpha1
+?? ??? ????, PHP 8.2.0alpha3
 
-- Core:
-  . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
-  . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
-    (Fabien Villepinte)
+- DBA:
+  . Fixed LMDB driver hanging when attempting to delete a non-existing key
+    (Girgias)
 
-- Date:
-  . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
-    (cmb)
-  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
+- Opcache:
+  . Allocate JIT buffer close to PHP .text segemnt to allow using direct
+    IP-relative calls and jumps.
+    (Su Tao, Wang Xue, Chen Hu, Lizhen Lizhen, Dmitry)
 
-- DOM:
-  . Add property DOMXPath::$registerNodeNamespaces and constructor argument
-    that allow global flag to configure query() or evaluate() calls.
-
-- GD:
-  . Replaced gd resources with objects. (Mark Randall)
-  . Removed deprecated image2wbmp(). (cmb)
-  . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
-
-- Intl:
-  . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
-
-- JIT:
-  . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
-
-- LDAP:
-  . Removed deprecated ldap_sort. (mcmic)
-
-- MBString:
-  . Removed the unused $is_hex parameter from mb_decode_numericentity(). (cmb)
-
-- MySQLi:
-  . Fixed bug #76809 (SSL settings aren't respected when persistent connections
-    are used). (fabiomsouto)
-
-- mysqlnd:
-  . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
-
-- OpCache:
-  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
-    non-ascii characters). (mhagstrand)
-
-- PCRE:
-  . Don't ignore invalid escape sequences. (sjon)
-
-- PDO:
-  . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
-    (camporter)
-
-- phpdbg:
-  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
-  . Fixed bug #76801 (too many open files). (alekitto)
-  . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
-    (krakjoe)
-  . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
-
-- Reflection:
-  . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error 
-    message with traits). (villfa)
-
-- Session:
-  . Fixed bug #78624 (session_gc return value for user defined session
-    handlers). (bshaffer)
-
-- SimpleXML:
-  . Fixed bug #75245 (Don't set content of elements with only whitespaces).
-    (eriklundin)
-
-- sodium:
-  . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
-
-- Standard:
-  . Fixed bug #77204 (getimagesize(): Read error! should mention file path).
-    (peter279k)
-  . Fixed bug #76859 (stream_get_line skips data if used with data-generating
-    filter). (kkopachev)
-
-- tidy:
-  . Removed the unused $use_include_path parameter from tidy_repair_string().
-    (cmb)
-
-- XML:
-  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
-
-- XMLWriter:
-  . Changed functions to accept/return XMKWriter objects instead of resources.
-    (cmb)
+- Sockets:
+  . Added TCP_CONGESTION socket option. (David Carlier)
 
 - Zip:
-  . Fixed bug #72374 (remove_path strips first char of filename). (tyage)
+
+  . Implement fseek for zip stream when possible with libzip 1.9.1. (Remi)
+
+23 Jun 2022, PHP 8.2.0alpha2
+
+- Core:
+  . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
+    references). (Nicolas Grekas)
+  . Fixed bug GH-8661 (Nullsafe in coalesce triggers undefined variable
+    warning). (ilutov)
+  . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
+    enums). (ilutov)
+  . Fixed bug GH-8810 (Incorrect lineno in backtrace of multi-line function
+    calls). (ilutov)
+  . Optimised code path for newly created file with the stream plain wrapper. (Max Kellermann)
+
+- Curl:
+  . Added new constants from cURL 7.62 to 7.80. (Pierrick)
+  . New function curl_upkeep(). (Pierrick)
+
+- OpenSSL:
+  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
+
+- PCRE:
+  . Implemented FR #77726 (Allow null character in regex patterns). (cmb)
+
+- Standard:
+  . Deprecated utf8_encode() and utf8_decode(). (Rowan Tommins)
+
+- Streams:
+  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
+
+09 Jun 2022, PHP 8.2.0alpha1
+
+- CLI:
+  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
+
+- Core:
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+  . Fixed bug GH-7771 (Fix filename/lineno of constant expressions). (ilutov)
+  . Fixed bug GH-7792 (Improve class type in error messages). (ilutov)
+  . Support huge pages on MacOS. (David CARLIER)
+
+- Curl:
+  . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
+  . Added support for CURLOPT_MAXFILESIZE_LARGE. (David Carlier)
+
+- Date:
+  . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
+    non-relative items are present). (Derick)
+  . Fixed bug #52015 (Allow including end date in DatePeriod iterations)
+    (Daniel Egeberg, Derick)
+  . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
+    Year). (Pavel Djundik)
+
+- FPM:
+  . Emit error for invalid port setting. (David Carlier)
+  . Added extra check for FPM proc dumpable on SELinux based systems.
+    (David Carlier)
+  . Added support for listening queue on macOS. (David Carlier)
+  . Changed default for listen.backlog on Linux to -1. (Cristian Rodríguez)
+
+- FTP:
+  . Fix datetime format string to follow POSIX spec in ftp_mdtm(). (Jihwan Kim)
+
+- Intl:
+  . Update all grandfathered language tags with preferred values
+  . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
+
+- OCI8:
+  . Added oci8.prefetch_lob_size directive to tune LOB query performance
+  . Support for building against Oracle Client libraries 10.1 and 10.2 has been
+    dropped. Oracle Client libraries 11.2 or newer are now required.
+
+- ODBC:
+  . Fixed bug GH-8300 (User input not escaped when building connection string).
+    (Calvin Buckley)
+
+- PDO_ODBC:
+  . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
+    Buckley)
+  . Fixed bug GH-8300 (User input not escaped when building connection string).
+    (Calvin Buckley)
+
+- Reflection:
+  . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
+  . Added ReflectionMethod::hasPrototype(). (Ollie Read)
+  . Narrow ReflectionEnum::getBackingType() return type to ReflectionNamedType.
+    (SamMousa)
+
+- Session:
+  . Fixed bug GH-7787 (Improve session write failure message for user error
+    handlers). (ilutov)
+
+- Sockets:
+  . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
+  . Added SO_MEMINFO socket option. (David Carlier)
+  . Added SO_RTABLE socket option (OpenBSD), equivalent of SO_MARK (Linux).
+    (David Carlier)
+  . Added TCP_KEEPALIVE, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT socket
+    options. (David Carlier)
+  . Added ancillary data support for FreeBSD. (David Carlier)
+  . Added ancillary data support for NetBSD. (David Carlier)
+  . Added SO_BPF_EXTENSIONS socket option. (David Carlier)
+  . Added SO_SETFIB socket option. (David Carlier)
+
+- Sodium:
+  . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
+
+- SQLite3:
+  . Changed sqlite3.defensive from PHP_INI_SYSTEM to PHP_INI_USER. (bohwaz)
+
+- Standard:
+  . net_get_interfaces() also reports wireless network interfaces on Windows.
+    (Yurun)
+  . Finished AVIF support in getimagesize(). (Yannis Guyon)
+  . Fixed bug GH-7847 (stripos with large haystack has bad performance).
+    (ilutov)
+  . New function memory_reset_peak_usage(). (Patrick Allaert)
+  . Fixed parse_url(): can not recognize port without scheme. (pandaLIU)
+
+- Streams:
+  . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
+    (Cristian Rodríguez)
+  . Fixed bug GH-8548 (stream_wrapper_unregister() leaks memory). (ilutov)
+
+- Zip:
+  . add ZipArchive::clearError() method
+  . add ZipArchive::getStreamName() method
+  . add ZipArchive::getStreamIndex() method
+  . On Windows, the Zip extension is now built as shared library (DLL) by
+    default. (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

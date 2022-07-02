@@ -31,18 +31,19 @@ static HashTable list_destructors;
 
 ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 {
-	int index;
 	zval zv;
 
-	index = zend_hash_next_free_element(&EG(regular_list));
+	zend_long index = zend_hash_next_free_element(&EG(regular_list));
 	if (index == 0) {
 		index = 1;
+	} else if (index == ZEND_LONG_MAX) {
+		zend_error_noreturn(E_ERROR, "Resource ID space overflow");
 	}
 	ZVAL_NEW_RES(&zv, index, ptr, type);
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
 }
 
-ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
+ZEND_API zend_result ZEND_FASTCALL zend_list_delete(zend_resource *res)
 {
 	if (GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
@@ -51,13 +52,10 @@ ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_list_free(zend_resource *res)
+ZEND_API void ZEND_FASTCALL zend_list_free(zend_resource *res)
 {
-	if (GC_REFCOUNT(res) <= 0) {
-		return zend_hash_index_del(&EG(regular_list), res->handle);
-	} else {
-		return SUCCESS;
-	}
+	ZEND_ASSERT(GC_REFCOUNT(res) == 0);
+	zend_hash_index_del(&EG(regular_list), res->handle);
 }
 
 static void zend_resource_dtor(zend_resource *res)
@@ -69,24 +67,21 @@ static void zend_resource_dtor(zend_resource *res)
 	res->ptr = NULL;
 
 	ld = zend_hash_index_find_ptr(&list_destructors, r.type);
-	if (ld) {
-		if (ld->list_dtor_ex) {
-			ld->list_dtor_ex(&r);
-		}
-	} else {
-		zend_error(E_WARNING, "Unknown list entry type (%d)", r.type);
+	ZEND_ASSERT(ld && "Unknown list entry type");
+
+	if (ld->list_dtor_ex) {
+		ld->list_dtor_ex(&r);
 	}
 }
 
 
-ZEND_API int ZEND_FASTCALL zend_list_close(zend_resource *res)
+ZEND_API void ZEND_FASTCALL zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
-		return zend_list_free(res);
+		zend_list_free(res);
 	} else if (res->type >= 0) {
 		zend_resource_dtor(res);
 	}
-	return SUCCESS;
 }
 
 ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type)
@@ -195,41 +190,42 @@ void plist_entry_destructor(zval *zv)
 		zend_rsrc_list_dtors_entry *ld;
 
 		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
-		if (ld) {
-			if (ld->plist_dtor_ex) {
-				ld->plist_dtor_ex(res);
-			}
-		} else {
-			zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
+		ZEND_ASSERT(ld && "Unknown list entry type");
+
+		if (ld->plist_dtor_ex) {
+			ld->plist_dtor_ex(res);
 		}
 	}
 	free(res);
 }
 
-ZEND_API int zend_init_rsrc_list(void)
+ZEND_API void zend_init_rsrc_list(void)
 {
 	zend_hash_init(&EG(regular_list), 8, NULL, list_entry_destructor, 0);
 	EG(regular_list).nNextFreeElement = 0;
-	return SUCCESS;
 }
 
 
-int zend_init_rsrc_plist(void)
+void zend_init_rsrc_plist(void)
 {
-	zend_hash_init_ex(&EG(persistent_list), 8, NULL, plist_entry_destructor, 1, 0);
-	return SUCCESS;
+	zend_hash_init(&EG(persistent_list), 8, NULL, plist_entry_destructor, 1);
 }
 
 
 void zend_close_rsrc_list(HashTable *ht)
 {
-	zend_resource *res;
+	/* Reload ht->arData on each iteration, as it may be reallocated. */
+	uint32_t i = ht->nNumUsed;
 
-	ZEND_HASH_REVERSE_FOREACH_PTR(ht, res) {
-		if (res->type >= 0) {
-			zend_resource_dtor(res);
+	while (i-- > 0) {
+		zval *p = ZEND_HASH_ELEMENT(ht, i);
+		if (Z_TYPE_P(p) != IS_UNDEF) {
+			zend_resource *res = Z_PTR_P(p);
+			if (res->type >= 0) {
+				zend_resource_dtor(res);
+			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
 }
 
 
@@ -238,6 +234,7 @@ void zend_destroy_rsrc_list(HashTable *ht)
 	zend_hash_graceful_reverse_destroy(ht);
 }
 
+/* int return due to HashTable API */
 static int clean_module_resource(zval *zv, void *arg)
 {
 	int resource_id = *(int *)arg;
@@ -245,7 +242,7 @@ static int clean_module_resource(zval *zv, void *arg)
 	return Z_RES_TYPE_P(zv) == resource_id;
 }
 
-
+/* int return due to HashTable API */
 static int zend_clean_module_rsrc_dtors_cb(zval *zv, void *arg)
 {
 	zend_rsrc_list_dtors_entry *ld = (zend_rsrc_list_dtors_entry *)Z_PTR_P(zv);
@@ -288,7 +285,7 @@ ZEND_API int zend_fetch_list_dtor_id(const char *type_name)
 {
 	zend_rsrc_list_dtors_entry *lde;
 
-	ZEND_HASH_FOREACH_PTR(&list_destructors, lde) {
+	ZEND_HASH_PACKED_FOREACH_PTR(&list_destructors, lde) {
 		if (lde->type_name && (strcmp(type_name, lde->type_name) == 0)) {
 			return lde->resource_id;
 		}
@@ -302,11 +299,10 @@ static void list_destructors_dtor(zval *zv)
 	free(Z_PTR_P(zv));
 }
 
-int zend_init_rsrc_list_dtors(void)
+void zend_init_rsrc_list_dtors(void)
 {
 	zend_hash_init(&list_destructors, 64, NULL, list_destructors_dtor, 1);
 	list_destructors.nNextFreeElement=1;	/* we don't want resource type 0 */
-	return SUCCESS;
 }
 
 

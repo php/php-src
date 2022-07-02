@@ -94,53 +94,27 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
   PHP_MBSTRING_ADD_SOURCES([
     libmbfl/filters/html_entities.c
     libmbfl/filters/mbfilter_7bit.c
-    libmbfl/filters/mbfilter_ascii.c
     libmbfl/filters/mbfilter_base64.c
     libmbfl/filters/mbfilter_big5.c
-    libmbfl/filters/mbfilter_byte2.c
-    libmbfl/filters/mbfilter_byte4.c
-    libmbfl/filters/mbfilter_cp1251.c
-    libmbfl/filters/mbfilter_cp1252.c
-    libmbfl/filters/mbfilter_cp1254.c
     libmbfl/filters/mbfilter_cp5022x.c
     libmbfl/filters/mbfilter_cp51932.c
-    libmbfl/filters/mbfilter_cp850.c
-    libmbfl/filters/mbfilter_cp866.c
     libmbfl/filters/mbfilter_cp932.c
     libmbfl/filters/mbfilter_cp936.c
     libmbfl/filters/mbfilter_gb18030.c
     libmbfl/filters/mbfilter_euc_cn.c
     libmbfl/filters/mbfilter_euc_jp.c
-    libmbfl/filters/mbfilter_euc_jp_2004.c
     libmbfl/filters/mbfilter_euc_jp_win.c
     libmbfl/filters/mbfilter_euc_kr.c
     libmbfl/filters/mbfilter_euc_tw.c
     libmbfl/filters/mbfilter_htmlent.c
     libmbfl/filters/mbfilter_hz.c
     libmbfl/filters/mbfilter_iso2022_jp_ms.c
-    libmbfl/filters/mbfilter_iso2022jp_2004.c
     libmbfl/filters/mbfilter_iso2022jp_mobile.c
     libmbfl/filters/mbfilter_iso2022_kr.c
-    libmbfl/filters/mbfilter_iso8859_1.c
-    libmbfl/filters/mbfilter_iso8859_10.c
-    libmbfl/filters/mbfilter_iso8859_13.c
-    libmbfl/filters/mbfilter_iso8859_14.c
-    libmbfl/filters/mbfilter_iso8859_15.c
-    libmbfl/filters/mbfilter_iso8859_16.c
-    libmbfl/filters/mbfilter_iso8859_2.c
-    libmbfl/filters/mbfilter_iso8859_3.c
-    libmbfl/filters/mbfilter_iso8859_4.c
-    libmbfl/filters/mbfilter_iso8859_5.c
-    libmbfl/filters/mbfilter_iso8859_6.c
-    libmbfl/filters/mbfilter_iso8859_7.c
-    libmbfl/filters/mbfilter_iso8859_8.c
-    libmbfl/filters/mbfilter_iso8859_9.c
     libmbfl/filters/mbfilter_jis.c
-    libmbfl/filters/mbfilter_koi8r.c
-    libmbfl/filters/mbfilter_armscii8.c
     libmbfl/filters/mbfilter_qprint.c
+    libmbfl/filters/mbfilter_singlebyte.c
     libmbfl/filters/mbfilter_sjis.c
-    libmbfl/filters/mbfilter_sjis_open.c
     libmbfl/filters/mbfilter_sjis_mobile.c
     libmbfl/filters/mbfilter_sjis_mac.c
     libmbfl/filters/mbfilter_sjis_2004.c
@@ -155,7 +129,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/filters/mbfilter_utf8.c
     libmbfl/filters/mbfilter_utf8_mobile.c
     libmbfl/filters/mbfilter_uuencode.c
-    libmbfl/filters/mbfilter_koi8u.c
     libmbfl/mbfl/mbfilter.c
     libmbfl/mbfl/mbfilter_8bit.c
     libmbfl/mbfl/mbfilter_pass.c
@@ -163,11 +136,9 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/mbfl/mbfl_convert.c
     libmbfl/mbfl/mbfl_encoding.c
     libmbfl/mbfl/mbfl_filter_output.c
-    libmbfl/mbfl/mbfl_ident.c
     libmbfl/mbfl/mbfl_language.c
     libmbfl/mbfl/mbfl_memory_device.c
     libmbfl/mbfl/mbfl_string.c
-    libmbfl/mbfl/mbfl_allocators.c
     libmbfl/nls/nls_de.c
     libmbfl/nls/nls_en.c
     libmbfl/nls/nls_ja.c
@@ -180,8 +151,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/nls/nls_tr.c
     libmbfl/nls/nls_ua.c
   ])
-  PHP_MBSTRING_ADD_CFLAG([-DHAVE_CONFIG_H])
-  PHP_MBSTRING_ADD_INSTALL_HEADERS([libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h])
+  PHP_MBSTRING_ADD_INSTALL_HEADERS([libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h])
 ])
 
 dnl

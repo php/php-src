@@ -4,9 +4,9 @@ Testing static call method using the original class name
 <?php
 
 class foo {
-	static public function msg() {
-		print "hello\n";
-	}
+    static public function msg() {
+        print "hello\n";
+    }
 }
 
 interface test { }
@@ -15,9 +15,9 @@ interface test { }
 class_alias('foo', 'baz');
 
 class bar extends baz {
-	public function __construct() {
-		foo::msg();
-	}
+    public function __construct() {
+        foo::msg();
+    }
 }
 
 new bar;

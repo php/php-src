@@ -1,8 +1,8 @@
 --TEST--
 Phar::compressFiles(Phar::BZ2)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("bz2")) die("skip bz2 not present"); ?>
+--EXTENSIONS--
+phar
+bz2
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -41,10 +41,8 @@ var_dump($phar['c']->isCompressed(Phar::GZ));
 var_dump($phar['b']->isCompressed(Phar::BZ2));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--
@@ -63,4 +61,3 @@ bool(true)
 string(1) "c"
 bool(false)
 bool(true)
-===DONE===

@@ -8,4 +8,4 @@ fopen("\xfc\x63", "r");
 ?>
 --EXPECTF--
 <br />
-<b>Warning</b>:  : failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>%d</b><br />
+<b>Warning</b>:  fopen(�c): Failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>2</b><br />

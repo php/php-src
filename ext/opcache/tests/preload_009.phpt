@@ -5,14 +5,23 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.preload={PWD}/preload_undef_const_2.inc
+--EXTENSIONS--
+opcache
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+?>
 --FILE--
 <?php
 var_dump(trait_exists('T'));
 var_dump(class_exists('Foo'));
+try {
+    new Foo();
+} catch (Throwable $ex) {
+    echo $ex->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: Can't preload class Foo with unresolved initializer for constant C in %spreload_undef_const_2.inc on line 8
+--EXPECT--
 bool(true)
-bool(false)
+bool(true)
+Undefined constant "UNDEF"

@@ -6,9 +6,9 @@ precision=14
 <?php
 
 class test {
-	function __toString() {
-		return "this is test object";
-	}
+    function __toString() {
+        return "this is test object";
+    }
 }
 
 $a = array(1,2,3);

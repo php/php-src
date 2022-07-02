@@ -1,6 +1,8 @@
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #define _FILE_OFFSET_BITS 64
 
 #include "fpm_config.h"
@@ -9,11 +11,7 @@
 
 #include <fcntl.h>
 #include <stdio.h>
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# include <stdint.h>
-#endif
+#include <inttypes.h>
 
 #include "fpm_trace.h"
 #include "fpm_process_ctl.h"

@@ -7,8 +7,18 @@ TestFest PHP|Tek
 disable_functions=is_file
 --FILE--
 <?php
-$rc = new ReflectionFunction('is_file');
-var_dump($rc->isDisabled());
+try {
+    $rf = new ReflectionFunction('is_file');
+    var_dump($rf->isDisabled());
+} catch (ReflectionException $e) {
+    echo $e->getMessage(), "\n";
+}
+
+$rf = new ReflectionFunction('is_string');
+var_dump($rf->isDisabled());
 ?>
---EXPECT--
-bool(true)
+--EXPECTF--
+Function is_file() does not exist
+
+Deprecated: Method ReflectionFunction::isDisabled() is deprecated in %s on line %d
+bool(false)

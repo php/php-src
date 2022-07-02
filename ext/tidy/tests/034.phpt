@@ -2,10 +2,8 @@
 tidy_access_count() function - basic test for tidy_access_count()
 --CREDITS--
 Christian Wenz <wenz@php.net>
---SKIPIF--
-<?php
-  if (!extension_loaded('tidy')) die ('skip tidy not present');
-?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 $buffer = '<img src="file.png" /><php>';

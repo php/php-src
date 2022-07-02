@@ -1,5 +1,7 @@
 --TEST--
 Bug #69975 (PHP segfaults when accessing nvarchar(max) defined columns)
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

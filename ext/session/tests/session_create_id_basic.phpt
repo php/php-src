@@ -3,18 +3,14 @@ Test session_create_id() function : basic functionality
 --INI--
 session.save_handler=files
 session.sid_length=32
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : string session_create_id([string $prefix])
- * Description : Create new session ID with prefix optionally.
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_create_id() : basic functionality ***\n";
 

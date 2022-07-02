@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -30,7 +30,7 @@ typedef struct _zend_ffi_type  zend_ffi_type;
 
 ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	zend_ffi_api_restriction restriction;
-	zend_bool is_cli;
+	bool is_cli;
 
 	/* predefined ffi_types */
 	HashTable types;
@@ -54,9 +54,9 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	int line;
 	HashTable *symbols;
 	HashTable *tags;
-	zend_bool allow_vla;
-	zend_bool attribute_parsing;
-	zend_bool persistent;
+	bool allow_vla;
+	bool attribute_parsing;
+	bool persistent;
 	uint32_t  default_type_attr;
 ZEND_END_MODULE_GLOBALS(ffi)
 
@@ -130,6 +130,7 @@ ZEND_EXTERN_MODULE_GLOBALS(ffi)
 #define	ZEND_FFI_ABI_REGISTER       6  // FFI_REGISTER
 #define	ZEND_FFI_ABI_MS             7  // FFI_MS_CDECL
 #define	ZEND_FFI_ABI_SYSV           8  // FFI_SYSV
+#define ZEND_FFI_ABI_VECTORCALL     9  // FFI_VECTORCALL
 
 #define ZEND_FFI_ATTR_CONST             (1<<0)
 #define ZEND_FFI_ATTR_INCOMPLETE_TAG    (1<<1)
@@ -197,7 +198,7 @@ typedef struct _zend_ffi_val {
 		uint64_t        u64;
 		int64_t         i64;
 		zend_ffi_double d;
-		char            ch;
+		signed char     ch;
 		struct {
 			const char *str;
 			size_t      len;
@@ -205,15 +206,15 @@ typedef struct _zend_ffi_val {
 	};
 } zend_ffi_val;
 
-int zend_ffi_parse_decl(const char *str, size_t len);
-int zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl);
+zend_result zend_ffi_parse_decl(const char *str, size_t len);
+zend_result zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl);
 
 /* parser callbacks */
 void ZEND_NORETURN zend_ffi_parser_error(const char *msg, ...);
-int zend_ffi_is_typedef_name(const char *name, size_t name_len);
+bool zend_ffi_is_typedef_name(const char *name, size_t name_len);
 void zend_ffi_resolve_typedef(const char *name, size_t name_len, zend_ffi_dcl *dcl);
 void zend_ffi_resolve_const(const char *name, size_t name_len, zend_ffi_val *val);
-void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, zend_bool incomplete);
+void zend_ffi_declare_tag(const char *name, size_t name_len, zend_ffi_dcl *dcl, bool incomplete);
 void zend_ffi_make_enum_type(zend_ffi_dcl *dcl);
 void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name_len, zend_ffi_val *val, int64_t *min, int64_t *max, int64_t *last);
 void zend_ffi_make_struct_type(zend_ffi_dcl *dcl);

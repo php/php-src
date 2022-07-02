@@ -11,7 +11,6 @@ var_dump(is_string($d));
 preg_match('/x/', $d);
 var_dump(is_string($d));
 ?>
-===DONE===
 --EXPECTF--
 object(DirectoryIterator)#%d (4) {
   %s"pathName"%s"SplFileInfo":private]=>
@@ -25,4 +24,3 @@ object(DirectoryIterator)#%d (4) {
 }
 bool(false)
 bool(false)
-===DONE===

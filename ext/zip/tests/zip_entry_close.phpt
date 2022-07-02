@@ -1,9 +1,7 @@
 --TEST--
 zip_entry_close() function: simple and double call
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zip    = zip_open(__DIR__."/test_procedural.zip");
@@ -18,8 +16,19 @@ try {
 zip_close($zip);
 ?>
 Done
---EXPECT--
-entry_open:  bool(true)
-entry_close: bool(true)
-entry_close: zip_entry_close(): supplied resource is not a valid Zip Entry resource
+--EXPECTF--
+Deprecated: Function zip_open() is deprecated in %s on line %d
+
+Deprecated: Function zip_read() is deprecated in %s on line %d
+entry_open:  
+Deprecated: Function zip_entry_open() is deprecated in %s on line %d
+bool(true)
+entry_close: 
+Deprecated: Function zip_entry_close() is deprecated in %s on line %d
+bool(true)
+entry_close: 
+Deprecated: Function zip_entry_close() is deprecated in %s on line %d
+zip_entry_close(): supplied resource is not a valid Zip Entry resource
+
+Deprecated: Function zip_close() is deprecated in %s on line %d
 Done

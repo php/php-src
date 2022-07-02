@@ -30,17 +30,17 @@ var_dump(filectime("/no/such/file/or/dir"));
 echo "Done\n";
 ?>
 --EXPECTF--
+int(%i)
 int(%d)
 int(%d)
 int(%d)
 int(%d)
+int(%i)
 int(%d)
 int(%d)
 int(%d)
 int(%d)
-int(%d)
-int(%d)
-int(%d)
+int(%i)
 int(%d)
 int(%d)
 int(%d)

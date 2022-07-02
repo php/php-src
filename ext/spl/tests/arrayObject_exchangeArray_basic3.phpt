@@ -3,8 +3,9 @@ SPL: ArrayObject::exchangeArray() basic usage with object as underlying data sto
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class C {
-	public $pub1 = 'public1';
+    public $pub1 = 'public1';
 }
 
 echo "--> exchangeArray() with objects:\n";
@@ -12,10 +13,10 @@ $original = new C;
 $ao = new ArrayObject($original);
 $swapIn = new C;
 try {
-	$copy = $ao->exchangeArray($swapIn);
-	$copy['addedToCopy'] = 'added To Copy';
+    $copy = $ao->exchangeArray($swapIn);
+    $copy['addedToCopy'] = 'added To Copy';
 } catch (Exception $e) {
-	echo "Exception:" . $e->getMessage() . "\n";
+    echo "Exception:" . $e->getMessage() . "\n";
 }
 $swapIn->addedToSwapIn = 'added To Swap-In';
 $original->addedToOriginal = 'added To Original';
@@ -27,10 +28,10 @@ unset($original, $ao, $swapIn, $copy);
 $original = new C;
 $ao = new ArrayObject($original);
 try {
-	$copy = $ao->exchangeArray();
-	$copy['addedToCopy'] = 'added To Copy';
+    $copy = $ao->exchangeArray();
+    $copy['addedToCopy'] = 'added To Copy';
 } catch (TypeError $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 $original->addedToOriginal = 'added To Original';
 var_dump($ao, $original, $copy);
@@ -40,10 +41,10 @@ unset($original, $ao, $swapIn, $copy);
 $original = new C;
 $ao = new ArrayObject($original);
 try {
-	$copy = $ao->exchangeArray(null);
-	$copy['addedToCopy'] = 'added To Copy';
-} catch (Exception $e) {
-	echo "Exception:" . $e->getMessage() . "\n";
+    $copy = $ao->exchangeArray(null);
+    $copy['addedToCopy'] = 'added To Copy';
+} catch (TypeError $e) {
+    echo $e->getMessage() . "\n";
 }
 $original->addedToOriginal = 'added To Original';
 var_dump($ao, $original, $copy);
@@ -81,9 +82,9 @@ array(2) {
 
 
 --> exchangeArray() with no arg:
-Exception: ArrayObject::exchangeArray() expects exactly 1 parameter, 0 given
+Exception: ArrayObject::exchangeArray() expects exactly 1 argument, 0 given
 
-Warning: Undefined variable: copy in %s on line %d
+Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
@@ -103,9 +104,9 @@ NULL
 
 
 --> exchangeArray() with bad arg type:
-Exception:Passed variable is not an array or object
+ArrayObject::exchangeArray(): Argument #1 ($array) must be of type array, null given
 
-Warning: Undefined variable: copy in %s on line %d
+Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#3 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#2 (2) {

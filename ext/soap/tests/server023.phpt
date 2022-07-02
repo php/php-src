@@ -1,14 +1,14 @@
 --TEST--
 SOAP Server 23: Send SOAP headers those were not received
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function test() {
-	global $server;
-	$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test1", "Hello Header!"));
-	$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test2", "Hello Header!"));
-	return "Hello Body!";
+    global $server;
+    $server->addSoapHeader(new SoapHeader("http://testuri.org", "Test1", "Hello Header!"));
+    $server->addSoapHeader(new SoapHeader("http://testuri.org", "Test2", "Hello Header!"));
+    return "Hello Body!";
 }
 
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));

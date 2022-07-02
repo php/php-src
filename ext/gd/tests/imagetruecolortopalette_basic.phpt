@@ -2,13 +2,14 @@
 Testing imagetruecolortopalette() of GD library
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded("gd")) die("skip GD not present");
-	if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
-		die("skip test requires GD 2.2.2 or higher");
-	}
-	if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
+        die("skip test requires GD 2.2.2 or higher");
+    }
+    if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
 ?>
 --FILE--
 <?php

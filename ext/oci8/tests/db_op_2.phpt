@@ -1,8 +1,9 @@
 --TEST--
 oci_set_db_operation: test DBOP for end-to-end tracing
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
@@ -49,8 +50,6 @@ dq($c, 'select /*+ MONITOR */ \'dboptest\' from dual');
 dq($c, 'select sql_text, dbop_name from v$sql_monitor where sql_text like \'%dboptest%\' order by dbop_exec_id desc');
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 array(1) {
@@ -76,4 +75,3 @@ array(2) {
   ["DBOP_NAME"]=>
   NULL
 }
-===DONE===

@@ -21,5 +21,6 @@ try {
 } catch (Exception $e) {
     echo "caught {$e->getMessage()}\n";
 }
+?>
 --EXPECT--
 caught 1

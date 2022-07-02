@@ -72,7 +72,7 @@ class Tester
     /**
      * Configuration template
      *
-     * @var string
+     * @var string|array
      */
     private $configTemplate;
 
@@ -152,7 +152,14 @@ class Tester
                 unlink($filePath);
             }
         }
-        // clean config files
+
+        self::cleanConfigFiles();
+    }
+
+    /**
+     * Clean config files
+     */
+    static public function cleanConfigFiles() {
         if (is_dir(self::CONF_DIR)) {
             foreach(glob(self::CONF_DIR . '/*.conf') as $name) {
                 unlink($name);
@@ -265,6 +272,36 @@ class Tester
     {
         if (getenv("TRAVIS")) {
             die('skip Travis: ' . $message);
+        }
+    }
+
+    /**
+     * Skip if not running as root.
+     */
+    static public function skipIfNotRoot()
+    {
+        if (getmyuid() != 0) {
+            die('skip not running as root');
+        }
+    }
+
+    /**
+     * Skip if running as root.
+     */
+    static public function skipIfRoot()
+    {
+        if (getmyuid() == 0) {
+            die('skip running as root');
+        }
+    }
+
+    /**
+     * Skip if posix extension not loaded.
+     */
+    static public function skipIfPosixNotLoaded()
+    {
+        if (!extension_loaded('posix')) {
+            die('skip posix extension not loaded');
         }
     }
 
@@ -469,7 +506,7 @@ class Tester
         array $expectedFields,
         string $address = null,
         string $statusPath = '/status',
-        $formats = ['plain', 'html', 'xml', 'json']
+        $formats = ['plain', 'html', 'xml', 'json', 'openmetrics']
     ) {
         if (!is_array($formats)) {
             $formats = [$formats];
@@ -485,29 +522,20 @@ class Tester
     }
 
     /**
-     * Execute request.
+     * Get request params array.
      *
      * @param string $query
      * @param array $headers
      * @param string|null $uri
-     * @param string|null $address
-     * @param string|null $successMessage
-     * @param string|null $errorMessage
-     * @param bool $connKeepAlive
-     * @return Response
+     * @param string|null $scriptFilename
+     * @return array
      */
-    public function request(
+    private function getRequestParams(
         string $query = '',
         array $headers = [],
         string $uri = null,
-        string $address = null,
-        string $successMessage = null,
-        string $errorMessage = null,
-        bool $connKeepAlive = false
+        string $scriptFilename = null
     ) {
-        if ($this->hasError()) {
-            return new Response(null, true);
-        }
         if (is_null($uri)) {
             $uri = $this->makeSourceFile();
         }
@@ -516,7 +544,7 @@ class Tester
             [
                 'GATEWAY_INTERFACE' => 'FastCGI/1.0',
                 'REQUEST_METHOD'    => 'GET',
-                'SCRIPT_FILENAME'   => $uri,
+                'SCRIPT_FILENAME'   => $scriptFilename ?: $uri,
                 'SCRIPT_NAME'       => $uri,
                 'QUERY_STRING'      => $query,
                 'REQUEST_URI'       => $uri . ($query ? '?'.$query : ""),
@@ -534,6 +562,41 @@ class Tester
             ],
             $headers
         );
+
+        return array_filter($params, function($value) {
+            return !is_null($value);
+        });
+    }
+
+    /**
+     * Execute request.
+     *
+     * @param string $query
+     * @param array $headers
+     * @param string|null $uri
+     * @param string|null $address
+     * @param string|null $successMessage
+     * @param string|null $errorMessage
+     * @param bool $connKeepAlive
+     * @param string|null $scriptFilename = null
+     * @return Response
+     */
+    public function request(
+        string $query = '',
+        array $headers = [],
+        string $uri = null,
+        string $address = null,
+        string $successMessage = null,
+        string $errorMessage = null,
+        bool $connKeepAlive = false,
+        string $scriptFilename = null
+    ) {
+        if ($this->hasError()) {
+            return new Response(null, true);
+        }
+
+        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename);
+
         try {
             $this->response = new Response(
                 $this->getClient($address, $connKeepAlive)->request_data($params, false)
@@ -551,6 +614,68 @@ class Tester
             $this->response->debugOutput();
         }
         return $this->response;
+    }
+
+    /**
+     * Execute multiple requests in parallel.
+     *
+     * @param array|int $requests
+     * @param string|null $address
+     * @param string|null $successMessage
+     * @param string|null $errorMessage
+     * @param bool $connKeepAlive
+     * @param int $readTimeout
+     * @return Response[]
+     * @throws \Exception
+     */
+    public function multiRequest(
+        $requests,
+        string $address = null,
+        string $successMessage = null,
+        string $errorMessage = null,
+        bool $connKeepAlive = false,
+        int $readTimeout = 0
+    ) {
+        if ($this->hasError()) {
+            return new Response(null, true);
+        }
+
+        if (is_numeric($requests)) {
+            $requests = array_fill(0, $requests, []);
+        } elseif (!is_array($requests)) {
+            throw new \Exception('Requests can be either numeric or array');
+        }
+
+        try {
+            $connections = array_map(function ($requestData) use ($address, $connKeepAlive) {
+                $client = $this->getClient($address, $connKeepAlive);
+                $params = $this->getRequestParams(
+                    $requestData['query'] ?? '',
+                    $requestData['headers'] ?? [],
+                    $requestData['uri'] ?? null
+                );
+                return [
+                    'client' => $client,
+                    'requestId' => $client->async_request($params, false),
+                ];
+            }, $requests);
+
+            $responses = array_map(function ($conn) use ($readTimeout) {
+                $response = new Response($conn['client']->wait_for_response_data($conn['requestId'], $readTimeout));
+                if ($this->debug) {
+                    $response->debugOutput();
+                }
+                return $response;
+            }, $connections);
+            $this->message($successMessage);
+            return $responses;
+        } catch (\Exception $exception) {
+            if ($errorMessage === null) {
+                $this->error("Request failed", $exception);
+            } else {
+                $this->message($errorMessage);
+            }
+        }
     }
 
     /**
@@ -622,7 +747,7 @@ class Tester
         $read = [$this->outDesc];
         $write = null;
         $except = null;
-        if (stream_select($read, $write, $except, 3)) {
+        if (stream_select($read, $write, $except, $timeout=3)) {
             return fgets($this->outDesc);
         } else {
             return null;
@@ -652,6 +777,12 @@ class Tester
             }
         }
 
+        if ($this->debug) {
+            foreach ($lines as $line) {
+                echo "LOG LINE: " . $line;
+            }
+        }
+
         return $lines;
     }
 
@@ -663,6 +794,56 @@ class Tester
         $lines = $this->getLogLines();
 
         return $lines[0] ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getUser()
+    {
+        return get_current_user();
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroup()
+    {
+        return get_current_group();
+    }
+
+    /**
+     * @return int
+     */
+    public function getUid()
+    {
+        return getmyuid();
+    }
+
+    /**
+     * @return int
+     */
+    public function getGid()
+    {
+        return getmygid();
+    }
+
+    /**
+     * Reload FPM by sending USR2 signal and optionally change config before that.
+     *
+     * @param string|array $configTemplate
+     * @return string
+     * @throws \Exception
+     */
+    public function reload($configTemplate = null)
+    {
+        if (!is_null($configTemplate)) {
+            self::cleanConfigFiles();
+            $this->configTemplate = $configTemplate;
+            $this->createConfig();
+        }
+
+        return $this->signal('USR2');
     }
 
     /**
@@ -718,14 +899,13 @@ class Tester
                 throw new \Exception('The config template array has to have main config');
             }
             $mainTemplate = $configTemplates['main'];
-            unset($configTemplates['main']);
             if (!is_dir(self::CONF_DIR)) {
                 mkdir(self::CONF_DIR);
             }
-            foreach ($configTemplates as $name => $configTemplate) {
+            foreach ($this->createPoolConfigs($configTemplates) as $name => $poolConfig) {
                 $this->makeFile(
                     'conf',
-                    $this->processTemplate($configTemplate),
+                    $this->processTemplate($poolConfig),
                     self::CONF_DIR,
                     $name
                 );
@@ -735,6 +915,36 @@ class Tester
         }
 
         return $this->makeFile($extension, $this->processTemplate($mainTemplate));
+    }
+
+    /**
+     * Create pool config templates.
+     *
+     * @param array $configTemplates
+     * @return array
+     * @throws \Exception
+     */
+    private function createPoolConfigs(array $configTemplates)
+    {
+        if (!isset($configTemplates['poolTemplate'])) {
+            unset($configTemplates['main']);
+            return $configTemplates;
+        }
+        $poolTemplate = $configTemplates['poolTemplate'];
+        $configs = [];
+        if (isset($configTemplates['count'])) {
+            $start = $configTemplates['start'] ?? 1;
+            for ($i = $start;  $i < $start + $configTemplates['count']; $i++) {
+                $configs[$i] = str_replace('%index%', $i, $poolTemplate);
+            }
+        } elseif (isset($configTemplates['names'])) {
+            foreach($configTemplates['names'] as $name) {
+                $configs[$name] = str_replace('%name%', $name, $poolTemplate);
+            }
+        } else {
+            throw new \Exception('The config template requires count or names if poolTemplate set');
+        }
+        return $configs;
     }
 
     /**
@@ -761,6 +971,10 @@ class Tester
             'ADDR:UDS' => ['getAddr', 'uds'],
             'PORT' => ['getPort', 'ip'],
             'INCLUDE:CONF' => self::CONF_DIR . '/*.conf',
+            'USER' => ['getUser'],
+            'GROUP' => ['getGroup'],
+            'UID' => ['getUid'],
+            'GID' => ['getGid'],
         ];
         $aliases = [
             'ADDR' => 'ADDR:IPv4',
@@ -800,7 +1014,17 @@ class Tester
     {
         $port = $this->getPort($type, $pool, true);
         if ($type === 'uds') {
-            return $this->getFile($port . '.sock');
+            $address = $this->getFile($port . '.sock');
+
+            // Socket max path length is 108 on Linux and 104 on BSD,
+            // so we use the latter
+            if (strlen($address) <= 104) {
+                return $address;
+            }
+
+            return sys_get_temp_dir().'/'.
+                hash('crc32', dirname($address)).'-'.
+                basename($address);
         }
 
         return $this->getHost($type) . ':' . $port;
@@ -1031,6 +1255,16 @@ class Tester
     }
 
     /**
+     * Expect reloading lines to be logged.
+     *
+     * @param int $socketCount
+     */
+    public function expectLogReloadingNotices($socketCount = 1)
+    {
+        $this->logTool->expectReloadingLines($this->getLogLines($socketCount + 4));
+    }
+
+    /**
      * Expect starting lines to be logged.
      */
     public function expectLogStartNotices()
@@ -1097,15 +1331,35 @@ class Tester
     }
 
     /**
+     * Expect log entry.
+     *
+     * @param string $type The log type
+     * @param string $message The expected message
+     * @param string|null $pool The pool for pool prefixed log entry
+     * @param int $count The number of items
+     * @return bool
+     */
+    private function expectLogEntry(string $type, string $message, $pool = null, $count = 1)
+    {
+        for ($i = 0; $i < $count; $i++) {
+            if (!$this->logTool->expectEntry($type, $this->getLastLogLine(), $message, $pool)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Expect a log debug message.
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogDebug(string $message, $pool = null)
+    public function expectLogDebug(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectDebug($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::DEBUG, $message, $pool, $count);
     }
 
     /**
@@ -1113,11 +1367,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogNotice(string $message, $pool = null)
+    public function expectLogNotice(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectNotice($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::NOTICE, $message, $pool, $count);
     }
 
     /**
@@ -1125,11 +1380,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogWarning(string $message, $pool = null)
+    public function expectLogWarning(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectWarning($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::WARNING, $message, $pool, $count);
     }
 
     /**
@@ -1137,11 +1393,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogError(string $message, $pool = null)
+    public function expectLogError(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectError($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::ERROR, $message, $pool, $count);
     }
 
     /**
@@ -1149,11 +1406,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogAlert(string $message, $pool = null)
+    public function expectLogAlert(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectAlert($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::ALERT, $message, $pool, $count);
     }
 
     /**
@@ -1171,6 +1429,48 @@ class Tester
         }
 
         return true;
+    }
+
+    /**
+     * Expect log config options
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function expectLogConfigOptions(array $options)
+    {
+        $configOptions = $this->getConfigOptions();
+        foreach ($options as $name => $value) {
+            if (!isset($configOptions[$name])) {
+                return $this->error("Expected config option: {$name} = {$value} but {$name} is not set");
+            }
+            if ($configOptions[$name] != $value) {
+                return $this->error(
+                    "Expected config option: {$name} = {$value} but got: {$name} = {$configOptions[$name]}"
+                );
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get set config options
+     *
+     * @return array
+     */
+    private function getConfigOptions()
+    {
+        $options = [];
+
+        foreach ($this->getLogLines(-1) as $line) {
+            preg_match('/.+NOTICE:\s+(.+)\s=\s(.+)/', $line, $matches);
+            if ($matches) {
+                $options[$matches[1]] = $matches[2];
+            }
+        }
+
+        return $options;
     }
 
     /**

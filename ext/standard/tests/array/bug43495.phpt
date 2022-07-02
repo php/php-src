@@ -20,9 +20,5 @@ $a["key1"]["key2"]["key3"] = null;
 $b["key1"]["key2"]["key3"] = null;
 
 ?>
-
-DONE
 --EXPECT--
 Recursion detected
-
-DONE

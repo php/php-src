@@ -1,8 +1,9 @@
 --TEST--
 sni_server
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
@@ -10,7 +11,6 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/domain1.pem',
         'SNI_server_certs' => [
             "cs.php.net" => __DIR__ . "/sni_server_cs.pem",
             "uk.php.net" => __DIR__ . "/sni_server_uk.pem",

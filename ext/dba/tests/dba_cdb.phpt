@@ -1,21 +1,22 @@
 --TEST--
 DBA CDB handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'cdb';
-	require_once(__DIR__ .'/skipif.inc');
-	die('info CDB does not support replace or delete');
+    $handler = 'cdb';
+    require_once(__DIR__ .'/skipif.inc');
+    die('info CDB does not support replace or delete');
 ?>
 --FILE--
 <?php
-	$handler = 'cdb';
-	require_once(__DIR__ .'/test.inc');
-	require_once(__DIR__ .'/dba_handler.inc');
+    $handler = 'cdb';
+    require_once(__DIR__ .'/test.inc');
+    require_once(__DIR__ .'/dba_handler.inc');
 ?>
-===DONE===
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 database handler: cdb
@@ -48,4 +49,3 @@ array(5) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

@@ -1,5 +1,5 @@
 --TEST--
-Testing string scanner confirmance
+Testing string scanner conformance
 --FILE--
 <?php echo "\"\t\\'" . '\n\\\'a\\\b\\' ?>
 --EXPECT--

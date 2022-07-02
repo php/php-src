@@ -8,7 +8,7 @@ if (PHP_DOM == "yes") {
 		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c \
-			domexception.c processinginstruction.c \
+			domexception.c parentnode.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \
 			node.c characterdata.c documenttype.c \
 			entity.c nodelist.c text.c comment.c \

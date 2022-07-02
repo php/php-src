@@ -2,13 +2,6 @@
 Test preg_match() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
- * Description: Perform a Perl-style regular expression match
- * Source code: ext/pcre/php_pcre.c
- * Alias to functions:
-*/
-
-
 $string = 'Hello, world. [*], this is \ a string';
 
 var_dump(preg_match('/^[hH]ello,\s/', $string, $match1));							//finds "Hello, "

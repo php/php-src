@@ -1,11 +1,11 @@
 --TEST--
 Accessing the error buffer via $obj->error_buf...
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
-   	$a = tidy_parse_string("<HTML><asd asdf></HTML>");
-	echo $a->errorBuffer;
+    $a = tidy_parse_string("<HTML><asd asdf></HTML>");
+    echo $a->errorBuffer;
 ?>
 --EXPECT--
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration

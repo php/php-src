@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 12: WSDL generation
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --GET--
 WSDL
 --FILE--

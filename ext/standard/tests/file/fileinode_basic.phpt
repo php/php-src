@@ -2,11 +2,6 @@
 Test fileinode() function: Basic functionality
 --FILE--
 <?php
-/*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
 echo "*** Testing fileinode() with file, directory ***\n";
 
 /* Getting inode of created file */
@@ -28,9 +23,9 @@ unlink (__DIR__."/inode.tmp");
 ?>
 --EXPECTF--
 *** Testing fileinode() with file, directory ***
-%d
-%d
-%d
-%d
+%i
+%i
+%i
+%i
 
 *** Done ***

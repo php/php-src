@@ -9,12 +9,6 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 ?>
 --FILE--
 <?php
-/* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file
- * Source code: ext/standard/basic_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing parse_ini_file() : variation ***\n";
 $mainDir = "parseIniFileVar6.dir";
 $subDir = "parseIniFileVar6Sub";
@@ -97,12 +91,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: parse_ini_file(%sparseIniFileVar6.dir\parseIniFileVar6Sub\..\\\parseIniFileVar6Sub\\..\\..\parseIniFileVar6Sub\ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar6.dir\parseIniFileVar6Sub\..\\\parseIniFileVar6Sub\\..\\..\parseIniFileVar6Sub\ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: parse_ini_file(%sparseIniFileVar6.dir\parseIniFileVar6Sub\BADDIR\ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar6.dir\parseIniFileVar6Sub\BADDIR\ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -131,7 +125,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: parse_ini_file(BADDIR\ParseIniFileVar6.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(BADDIR\ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 12 --

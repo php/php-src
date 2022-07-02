@@ -8,14 +8,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
   die("skip Valid only on Windows");
 }
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
-/* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string
- * Source code: ext/standard/file.c
- * Alias to functions:
- */
-
 echo "*** Testing file_get_contents() : variation ***\n";
 
 /* An array of filenames */
@@ -24,7 +20,6 @@ $names_arr = array(
   "-1" => -1,
   "TRUE" => TRUE,
   "FALSE" => FALSE,
-  "NULL" => NULL,
   "\"\"" => "",
   "\" \"" => " ",
   "\\0" => "\0",
@@ -37,62 +32,51 @@ $names_arr = array(
 );
 
 foreach($names_arr as $key =>$value) {
-  echo "\n-- Filename: $key --\n";
-  try {
-    var_dump(file_get_contents($value));
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-  }
+    echo "\n-- Filename: $key --\n";
+    try {
+        var_dump(file_get_contents($value));
+    } catch (\TypeError|\ValueError $e) {
+        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    }
 }
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing file_get_contents() : variation ***
 
 -- Filename: -1 --
 
-Warning: file_get_contents(-1): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(-1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Filename: TRUE --
 
-Warning: file_get_contents(1): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(1): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Filename: FALSE --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
-
--- Filename: NULL --
-
-Warning: file_get_contents(): Filename cannot be empty in %sfile_get_contents_variation8-win32.php on line %d
-bool(false)
+ValueError: Path cannot be empty
 
 -- Filename: "" --
-
-Warning: file_get_contents(): Filename cannot be empty in %s on line %d
-bool(false)
+ValueError: Path cannot be empty
 
 -- Filename: " " --
 
-Warning: file_get_contents( ): failed to open stream: Permission denied in %s on line %d
+Warning: file_get_contents( ): Failed to open stream: Permission denied in %s on line %d
 bool(false)
 
 -- Filename: \0 --
-file_get_contents() expects parameter 1 to be a valid path, string given
+ValueError: file_get_contents(): Argument #1 ($filename) must not contain any null bytes
 
 -- Filename: array() --
-file_get_contents() expects parameter 1 to be a valid path, array given
+TypeError: file_get_contents(): Argument #1 ($filename) must be of type string, array given
 
 -- Filename: /no/such/file/dir --
 
-Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(/no/such/file/dir): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Filename: php/php --
 
-Warning: file_get_contents(php/php): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(php/php): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===Done===

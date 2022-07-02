@@ -11,7 +11,7 @@ class Foo
                 var_dump($arguments);
                 exit;
             }
-        } 
+        }
         echo "OK\n";
     }
 

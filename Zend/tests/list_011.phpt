@@ -7,4 +7,4 @@ var_dump(list(1, 2, 3));
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected ')', expecting '=' in %s on line %d
+Parse error: syntax error, unexpected token ")", expecting "=" in %s on line %d

@@ -3,12 +3,13 @@ Testing imagegammacorrect() of GD library with non TrueColor image
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded("gd")) die("skip GD not present");
-	if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
-		die("skip test requires GD 2.2.2 or higher");
-	}
+    if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
+        die("skip test requires GD 2.2.2 or higher");
+    }
 ?>
 --FILE--
 <?php

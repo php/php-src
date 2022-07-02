@@ -4,12 +4,6 @@ Test parse_ini_file() function : variation: include path searching
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
-/* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file
- * Source code: ext/standard/basic_functions.c
- * Alias to functions:
- */
-
 echo "*** Testing parse_ini_file() : variation ***\n";
 $pwd = getcwd();
 $f = "parse_ini_file_variation3";
@@ -39,7 +33,6 @@ error_reporting  =  E_ALL
 display_errors = On
 display_startup_errors = Off
 log_errors = Off
-log_errors_max_len = 1024
 ignore_repeated_errors = Off
 ignore_repeated_source = Off
 report_memleaks = On
@@ -52,7 +45,6 @@ file_put_contents($output_file, $iniContent);
 var_dump(parse_ini_file($iniFile));
 
 ?>
-===Done===
 --CLEAN--
 <?php
 
@@ -76,7 +68,7 @@ foreach($newdirs as $newdir) {
 --EXPECTF--
 *** Testing parse_ini_file() : variation ***
 New include path is : %sparse_ini_file_variation3.dir1%sparse_ini_file_variation3.dir2%sparse_ini_file_variation3.dir3%S
-array(10) {
+array(9) {
   ["error_reporting"]=>
   string(5) "32767"
   ["display_errors"]=>
@@ -85,8 +77,6 @@ array(10) {
   string(0) ""
   ["log_errors"]=>
   string(0) ""
-  ["log_errors_max_len"]=>
-  string(4) "1024"
   ["ignore_repeated_errors"]=>
   string(0) ""
   ["ignore_repeated_source"]=>
@@ -98,4 +88,3 @@ array(10) {
   ["docref_ext"]=>
   string(5) ".html"
 }
-===Done===

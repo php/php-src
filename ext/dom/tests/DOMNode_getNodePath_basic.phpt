@@ -1,9 +1,7 @@
 --TEST--
 DOMNode::getNodePath()
---SKIPIF--
-<?php
-include('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $file = __DIR__.'/book.xml';
@@ -11,7 +9,7 @@ $doc = new DOMDocument();
 $doc->load($file);
 $nodes = $doc->getElementsByTagName('title');
 foreach($nodes as $node) {
-	var_dump($node->getNodePath());
+    var_dump($node->getNodePath());
 }
 ?>
 --EXPECT--

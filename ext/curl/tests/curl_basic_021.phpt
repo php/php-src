@@ -2,8 +2,8 @@
 Test curl_getinfo() function with CURLINFO_CONTENT_TYPE parameter
 --CREDITS--
 Jean-Marc Fontaine <jmf@durcommefaire.net>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -16,7 +16,5 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   var_dump(curl_getinfo($ch, CURLINFO_CONTENT_TYPE));
   curl_close($ch);
 ?>
-===DONE===
 --EXPECT--
 string(24) "text/plain;charset=utf-8"
-===DONE===

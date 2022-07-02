@@ -8,12 +8,6 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -23,28 +17,34 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
 $inputs = array(
-	  'The ISO 8601:1988 week number' => "%V",
-	  'Weekday as decimal' => "%u",
+      'The ISO 8601:1988 week number' => "%V",
+      'Weekday as decimal' => "%u",
 );
 
 // loop through each element of the array for timestamp
 
 foreach($inputs as $key =>$value) {
-	echo "\n--$key--\n";
-	var_dump( strftime($value) );
-	var_dump( strftime($value, $timestamp) );
+    echo "\n--$key--\n";
+    var_dump( strftime($value) );
+    var_dump( strftime($value, $timestamp) );
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
 --The ISO 8601:1988 week number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "32"
 
 --Weekday as decimal--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(1) "5"
-===DONE===

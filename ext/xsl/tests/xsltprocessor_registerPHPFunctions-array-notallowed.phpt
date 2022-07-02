@@ -1,11 +1,7 @@
 --TEST--
 Check xsltprocessor::registerPHPFunctions with array and a not allowed function
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';
@@ -18,6 +14,7 @@ if(!$phpfuncxsl) {
 $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions(array()));
 var_dump($proc->transformToXml($dom));
+?>
 --EXPECTF--
 NULL
 

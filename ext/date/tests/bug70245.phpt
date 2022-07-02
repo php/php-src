@@ -9,5 +9,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
-strtotime() expects parameter 2 to be int, object given
+--EXPECT--
+strtotime(): Argument #2 ($baseTimestamp) must be of type ?int, DateTime given

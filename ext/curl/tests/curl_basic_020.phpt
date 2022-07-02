@@ -2,8 +2,8 @@
 Test curl_getinfo() function with CURLINFO_HTTP_CODE parameter
 --CREDITS--
 Jean-Marc Fontaine <jmf@durcommefaire.net>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';
@@ -16,8 +16,6 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   var_dump(curl_getinfo($ch, CURLINFO_HTTP_CODE));
   curl_close($ch);
 ?>
-===DONE===
 --EXPECT--
 Hello World!
 Hello World!int(200)
-===DONE===

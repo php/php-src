@@ -3,7 +3,7 @@ Bug #30702 (cannot initialize class variable from class constant)
 --FILE--
 <?php
 class foo {
-	const C1=1;
+    const C1=1;
 }
 
 class bar extends foo {

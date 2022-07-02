@@ -88,7 +88,7 @@ versa.
 
 Brief instructions are as follow:
 
-1. Login to web administration interface, go to 'Server'->'Ext App' tab, add an
+1. Log into web administration interface, go to 'Server'->'Ext App' tab, add an
    external application of type "LSAPI app", "Command" should be set to a shell
    command that executes the PHP binary you just built. "Instances" should be
    set to "1". Add "LSAPI_CHILDREN" environment variable to match the value of
@@ -132,7 +132,7 @@ behavior of LSAPI application.
   "Self Managed Mode". When set to 0, the internal process manager will stop and
   start children process on demand to save system resource. This is preferred in
   a shared hosting environment. When set to 1, the internal process manager will
-  try to avoid freqently stopping and starting children process. This might be
+  try to avoid frequently stopping and starting children process. This might be
   preferred in a dedicate hosting environment.
 
 * `LSAPI_EXTRA_CHILDREN` (default: 1/3 of `LSAPI_CHILDREN` or 0)
@@ -162,7 +162,7 @@ behavior of LSAPI application.
   In Self Managed Mode, `LSAI_MAX_IDLE_CHILDREN` controls how many idle children
   processes are allowed. Excessive idle children processes will be killed by the
   parent process immediately. When `LSAPI_AVOID_FORK` is set to 0, the default
-  value is 1/3 of `LSAPI_CHIDLREN`, When `LSAPI_AVOID_FORK` is set to 1, the
+  value is 1/3 of `LSAPI_CHILDREN`, When `LSAPI_AVOID_FORK` is set to 1, the
   default value is `LSAPI_CHILDREN`.
 
 * `LSAPI_MAX_PROCESS_TIME` (default value: 300 seconds)

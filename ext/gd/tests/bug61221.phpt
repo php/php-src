@@ -1,9 +1,7 @@
 --TEST--
 Bug #61221 - imagegammacorrect function loses alpha channel
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $imagew = 50;

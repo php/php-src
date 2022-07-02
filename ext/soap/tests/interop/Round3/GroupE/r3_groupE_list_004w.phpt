@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round3 GroupE List 004 (php/wsdl): echoLinkedList
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

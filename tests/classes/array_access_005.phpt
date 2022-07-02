@@ -4,27 +4,27 @@ ZE2 ArrayAccess and sub Arrays
 <?php
 
 class Peoples implements ArrayAccess {
-	public $person;
+    public $person;
 
-	function __construct() {
-		$this->person = array(array('name'=>'Joe'));
-	}
+    function __construct() {
+        $this->person = array(array('name'=>'Joe'));
+    }
 
-	function offsetExists($index) {
-		return array_key_exists($this->person, $index);
-	}
+    function offsetExists($index): bool {
+        return array_key_exists($this->person, $index);
+    }
 
-	function offsetGet($index) {
-		return $this->person[$index];
-	}
+    function offsetGet($index): mixed {
+        return $this->person[$index];
+    }
 
-	function offsetSet($index, $value) {
-		$this->person[$index] = $value;
-	}
+    function offsetSet($index, $value): void {
+        $this->person[$index] = $value;
+    }
 
-	function offsetUnset($index) {
-		unset($this->person[$index]);
-	}
+    function offsetUnset($index): void {
+        unset($this->person[$index]);
+    }
 }
 
 $people = new Peoples;
@@ -52,7 +52,6 @@ $people[0]['name'] = 'JoeFooBar';
 var_dump($people[0]['name']);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "Joe"
 string(6) "JoeFoo"
@@ -74,4 +73,3 @@ string(6) "JoeFoo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 48
 string(6) "JoeFoo"
-===DONE===

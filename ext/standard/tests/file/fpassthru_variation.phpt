@@ -2,12 +2,6 @@
 Test fpassthru() function: Variations
 --FILE--
 <?php
-/*
-Prototype: int fpassthru ( resource $handle );
-Description: Reads to EOF on the given file pointer from the current position
-  and writes the results to the output buffer.
-*/
-
 echo "*** Testing fpassthru() function with files ***\n\n";
 
 echo "--- Testing with different offsets ---\n";

@@ -1,8 +1,8 @@
 --TEST--
 finfo_file(): Files and directories inside an stream
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
-<?php if (!extension_loaded('zip')) { die("skip zip extension not loaded"); } ?>
+--EXTENSIONS--
+fileinfo
+zip
 --FILE--
 <?php
 

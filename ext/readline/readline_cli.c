@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -70,7 +70,7 @@
 
 #define DEFAULT_PROMPT "\\b \\> "
 
-ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
+ZEND_DECLARE_MODULE_GLOBALS(cli_readline)
 
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
@@ -135,6 +135,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 {
 	smart_str retval = {0};
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
+	bool unicode_warned = false;
 
 	do {
 		if (*prompt_spec == '\\') {
@@ -193,7 +194,16 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 				prompt_spec = prompt_end;
 			}
 		} else {
-			smart_str_appendc(&retval, *prompt_spec);
+			if (!(*prompt_spec & 0x80)) {
+				smart_str_appendc(&retval, *prompt_spec);
+			} else {
+				if (!unicode_warned) {
+					zend_error(E_WARNING,
+						"prompt contains unsupported unicode characters");
+					unicode_warned = true;
+				}
+				smart_str_appendc(&retval, '?');
+			}
 		}
 	} while (++prompt_spec && *prompt_spec);
 	smart_str_0(&retval);
@@ -250,6 +260,10 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 						code_type = dstring;
 						break;
 					case '#':
+						if (code[i+1] == '[') {
+							valid_end = 0;
+							break;
+						}
 						code_type = comment_line;
 						break;
 					case '/':
@@ -518,7 +532,7 @@ TODO:
 	}
 	if (text[0] == '$') {
 		retval = cli_completion_generator_var(text, textlen, &cli_completion_state);
-	} else if (text[0] == '#') {
+	} else if (text[0] == '#' && text[1] != '[') {
 		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
 		char *lc_text, *class_name_end;
@@ -547,12 +561,14 @@ TODO:
 				if (retval) {
 					break;
 				}
+				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
 				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}
+				ZEND_FALLTHROUGH;
 			case 4:
 			case 5:
 				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);
@@ -594,8 +610,10 @@ static int readline_shell_run(void) /* {{{ */
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		zend_file_handle prepend_file;
+
 		zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
 		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &prepend_file);
+		zend_destroy_file_handle(&prepend_file);
 	}
 
 #ifndef PHP_WIN32
@@ -603,7 +621,14 @@ static int readline_shell_run(void) /* {{{ */
 #else
 	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
 #endif
-	rl_attempted_completion_function = cli_code_completion;
+	/* Install the default completion function for 'php -a'.
+	 *
+	 * But if readline_completion_function() was called by PHP code prior to the shell starting
+	 * (e.g. with 'php -d auto_prepend_file=prepend.php -a'),
+	 * then use that instead of PHP's default. */
+	if (rl_attempted_completion_function != php_readline_completion_cb) {
+		rl_attempted_completion_function = cli_code_completion;
+	}
 #ifndef PHP_WIN32
 	rl_special_prefixes = "$";
 #endif
@@ -623,7 +648,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		len = strlen(line);
 
-		if (line[0] == '#') {
+		if (line[0] == '#' && line[1] != '[') {
 			char *param = strstr(&line[1], "=");
 			if (param) {
 				zend_string *cmd;
@@ -728,7 +753,7 @@ this extension sharedto offer compatibility.
 #define GET_SHELL_CB(cb) \
 	do { \
 		(cb) = NULL; \
-		cli_shell_callbacks_t *(*get_callbacks)(); \
+		cli_shell_callbacks_t *(*get_callbacks)(void); \
 		get_callbacks = dlsym(RTLD_DEFAULT, "php_cli_get_shell_callbacks"); \
 		if (get_callbacks) { \
 			(cb) = get_callbacks(); \

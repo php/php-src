@@ -2,12 +2,6 @@
 var_export(): simple test with arrays and objects
 --FILE--
 <?php
-/* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable
- * Source code: ext/standard/var.c
- * Alias to functions:
- */
-
 echo "\n\n-- Var export on a simple  object --\n";
 $o1 = new stdclass;
 $o1->p = '22';

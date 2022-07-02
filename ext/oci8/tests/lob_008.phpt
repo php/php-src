@@ -1,5 +1,7 @@
 --TEST--
 oci_lob_write()/read()/eof()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -37,7 +39,7 @@ var_dump($row = oci_fetch_array($s));
 
 $len = 0;
 while (!$row[0]->eof()) {
-	$len += strlen($row[0]->read(1024));
+    $len += strlen($row[0]->read(1024));
 }
 var_dump($len);
 
@@ -47,19 +49,19 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI-Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 int(7000)
 array(2) {
   [0]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCI-Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

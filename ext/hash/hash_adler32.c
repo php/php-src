@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -18,7 +18,7 @@
 #include "php_hash.h"
 #include "php_hash_adler32.h"
 
-PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context)
+PHP_HASH_API void PHP_ADLER32Init(PHP_ADLER32_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = 1;
 }
@@ -59,10 +59,14 @@ PHP_HASH_API int PHP_ADLER32Copy(const php_hash_ops *ops, PHP_ADLER32_CTX *orig_
 }
 
 const php_hash_ops php_hash_adler32_ops = {
+	"adler32",
 	(php_hash_init_func_t) PHP_ADLER32Init,
 	(php_hash_update_func_t) PHP_ADLER32Update,
 	(php_hash_final_func_t) PHP_ADLER32Final,
 	(php_hash_copy_func_t) PHP_ADLER32Copy,
+	php_hash_serialize,
+	php_hash_unserialize,
+	PHP_ADLER32_SPEC,
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_ADLER32_CTX),

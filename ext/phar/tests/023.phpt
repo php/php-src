@@ -1,7 +1,7 @@
 --TEST--
 Phar: phar:// file_get_contents
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -22,11 +22,9 @@ var_dump(file_get_contents($pname . '/b.php'));
 var_dump(file_get_contents($pname . '/b/c.php'));
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 string(28) "<?php echo "This is a\n"; ?>"
 string(28) "<?php echo "This is b\n"; ?>"
 string(30) "<?php echo "This is b/c\n"; ?>"
-===DONE===

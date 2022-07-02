@@ -1,7 +1,7 @@
 --TEST--
 Phar: test edge cases of opendir() function interception
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -18,10 +18,10 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-mkdir(__DIR__ . '/poo');
+mkdir(__DIR__ . '/opendir_edgecases');
 chdir(__DIR__);
 
-$a = opendir('poo');
+$a = opendir('opendir_edgecases');
 
 $arr = array();
 while (false !== ($b = readdir($a))) {
@@ -51,15 +51,13 @@ opendir("oops");
 include $pname . '/foo';
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(__DIR__ . '/poo');
+<?php rmdir(__DIR__ . '/opendir_edgecases');
 --EXPECTF--
-opendir() expects parameter 1 to be a valid path, array given
+opendir(): Argument #1 ($directory) must be of type string, array given
 .
 ..
 foo
 
-Warning: opendir(phar://%sopendir_edgecases.phar.php/oops): failed to open dir: %s in phar://%sopendir_edgecases.phar.php/foo on line %d
-===DONE===
+Warning: opendir(phar://%sopendir_edgecases.phar.php/oops): Failed to open directory: %s in phar://%sopendir_edgecases.phar.php/foo on line %d

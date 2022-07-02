@@ -1,7 +1,7 @@
 --TEST--
 Bug #39602 (Invalid session.save_handler crashes PHP)
---SKIPIF--
-<?php if (!extension_loaded("session")) die("skip session extension required"); ?>
+--EXTENSIONS--
+session
 --INI--
 session.save_handler=qwerty
 error_reporting=0

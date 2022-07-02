@@ -4,18 +4,14 @@ Test session_name() function : variation
 session.save_path=
 session.name=PHPSESSID
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
 ob_start();
-
-/*
- * Prototype : string session_name([string $name])
- * Description : Get and/or set the current session name
- * Source code : ext/session/session.c
- */
 
 echo "*** Testing session_name() : variation ***\n";
 
@@ -48,13 +44,17 @@ string(9) "PHPSESSID"
 bool(true)
 string(9) "PHPSESSID"
 string(9) "PHPSESSID"
+
+Warning: session_start(): session.name cannot contain any of the following '=,; \t\r\n\013\014' in %s on line %d
 bool(true)
 string(1) "	"
 bool(true)
 string(1) "	"
 
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
+Warning: session_name(): session.name "" cannot be numeric or empty in %s on line %d
 string(1) "	"
+
+Warning: session_start(): session.name cannot contain any of the following '=,; \t\r\n\013\014' in %s on line %d
 bool(true)
 string(1) "	"
 bool(true)

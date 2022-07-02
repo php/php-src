@@ -4,17 +4,17 @@ Bug #69996 (Changing the property of a cloned object affects the original)
 <?php
 
 function method($cache) {
-	  $prepared = clone $cache;
-	  var_dump($prepared->data);
-	  $prepared->data = "bad";
-	  return $prepared;
+      $prepared = clone $cache;
+      var_dump($prepared->data);
+      $prepared->data = "bad";
+      return $prepared;
 }
 
 $cache = new stdClass();
 $cache->data = "good";
 
 for ($i = 0; $i < 5; ++$i) {
-	   method($cache);
+       method($cache);
 }
 ?>
 --EXPECT--

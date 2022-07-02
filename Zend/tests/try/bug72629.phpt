@@ -7,9 +7,10 @@ $var = null;
 $e = &$var;
 
 try {
-	throw new Exception;
+    throw new Exception;
 } catch (Exception $e) { }
 
 var_dump($var === $e);
+?>
 --EXPECT--
 bool(true)

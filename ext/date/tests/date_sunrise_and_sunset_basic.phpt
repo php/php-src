@@ -17,10 +17,22 @@ echo "Basic test for date_sunrise() and date_sunset()\n";
 echo date("D M d Y") . ', sunrise time : ' . date_sunrise(time(), SUNFUNCS_RET_STRING, 38.4, -9, 90, 1) . "\n";
 echo date("D M d Y") . ', sunset time : ' . date_sunset(time(), SUNFUNCS_RET_STRING, 38.4, -9, 90, 1) . "\n";
 
+// Check that calling with just the first parameter works.
+var_dump(gettype(date_sunrise(time())));
+var_dump(gettype(date_sunset(time())));
+
 ?>
-===Done===
 --EXPECTF--
 Basic test for date_sunrise() and date_sunset()
+
+Deprecated: Function date_sunrise() is deprecated in %s on line %d
 %s %s %d %d, sunrise time : %d:%d
+
+Deprecated: Function date_sunset() is deprecated in %s on line %d
 %s %s %d %d, sunset time : %d:%d
-===Done===
+
+Deprecated: Function date_sunrise() is deprecated in %s on line %d
+string(6) "string"
+
+Deprecated: Function date_sunset() is deprecated in %s on line %d
+string(6) "string"

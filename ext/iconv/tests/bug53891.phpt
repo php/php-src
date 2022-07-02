@@ -1,9 +1,7 @@
 --TEST--
 Bug #53891 (iconv_mime_encode() fails to Q-encode UTF-8 string)
---SKIPIF--
-<?php
-if (!extension_loaded('iconv')) die('skip iconv extension not available');
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 $preferences = array(
@@ -15,7 +13,5 @@ $preferences = array(
 );
 var_dump(iconv_mime_encode('subject', "d obeybiubrsfqllpdtpge…", $preferences));
 ?>
-===DONE===
 --EXPECT--
 string(54) "subject: =?utf-8?Q?d=20obeybiubrsfqllpdtpge=E2=80=A6?="
-===DONE===

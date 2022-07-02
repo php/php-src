@@ -1,7 +1,7 @@
 --TEST--
 Phar::isWriteable
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -56,7 +56,6 @@ var_dump($a->isWritable());
 var_dump($b->isWritable());
 chmod($fname2, 0666);
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
@@ -81,4 +80,3 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
-===DONE===

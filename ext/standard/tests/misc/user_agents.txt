@@ -948,7 +948,7 @@ Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2a1pre) Gecko/20090405 Firefox/
 Mozilla/5.0 zgrab/0.x
 Mozilla/6.0 (compatible)
 Mozilla/6.0 (compatible; MSIE 7.0a1; Windows NT 5.2; SV1)
-node-fetch/1.0 (+https://github.com/bitinn/node-fetch)
+node-fetch/1.0 (+https://github.com/node-fetch/node-fetch)
 nutch-1.4/Nutch-1.4
 Opera/7.11 (Windows NT 5.1; U) [en]
 Opera/7.54 (Windows NT 5.1; U) [pl]

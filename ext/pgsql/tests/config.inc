@@ -16,8 +16,8 @@ $view_name   = "php_pgsql_viewtest";
 $view_def    = "CREATE VIEW {$view_name} AS SELECT * FROM {$table_name};";
 
 // Test table
-$table_def    = "CREATE TABLE ${table_name} (num int, str text, bin bytea);";
-$table_def_92 = "CREATE TABLE ${table_name_92} (textary text[],  jsn json);";
+$table_def    = "CREATE TABLE {$table_name} (num int, str text, bin bytea);";
+$table_def_92 = "CREATE TABLE {$table_name_92} (textary text[],  jsn json);";
 $field_name = "num";             // For pg_field_num()
 
 ?>

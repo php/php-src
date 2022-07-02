@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -28,7 +28,7 @@
 
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
-#if HAVE_EXPLICIT_MEMSET
+#ifdef HAVE_EXPLICIT_MEMSET
     explicit_memset(dst, 0, siz);
 #elif defined(PHP_WIN32)
 	RtlSecureZeroMemory(dst, siz);

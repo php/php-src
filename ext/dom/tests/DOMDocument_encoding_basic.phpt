@@ -3,8 +3,8 @@ DOMDocument::$encoding - read/write tests (dom_document_encoding_read/dom_docume
 --CREDITS--
 Hans Zaunere
 # TestFest 2009 NYPHP
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -19,10 +19,14 @@ if( !$dom )
     exit;
 }
 
-echo "Empty Encoding Read: {$dom->encoding}\n";
+echo "Empty Encoding Read: '{$dom->encoding}'\n";
 
-$ret = $dom->encoding = 'NYPHP DOMinatrix';
-echo "Adding invalid encoding: $ret\n";
+try {
+    $ret = $dom->encoding = 'NYPHP DOMinatrix';
+    echo "Adding invalid encoding: $ret\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $ret = $dom->encoding = 'ISO-8859-1';
 echo "Adding ISO-8859-1 encoding: $ret\n";
@@ -38,11 +42,9 @@ echo "UTF-16 Encoding Read: {$dom->encoding}\n";
 
 
 ?>
---EXPECTF--
-Empty Encoding Read: 
-
-Warning: main(): Invalid Document Encoding in %s on line %d
-Adding invalid encoding: NYPHP DOMinatrix
+--EXPECT--
+Empty Encoding Read: ''
+Invalid document encoding
 Adding ISO-8859-1 encoding: ISO-8859-1
 ISO-8859-1 Encoding Read: ISO-8859-1
 Adding UTF-8 encoding: UTF-8

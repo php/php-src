@@ -2,11 +2,6 @@
 Test uasort() function : object functionality
 --FILE--
 <?php
-/* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association
- * Source code: ext/standard/array.c
-*/
-
 /*
  * Testing uasort() function with the array of objects
  * array of objects which has only one member variable & more than one member variables
@@ -15,13 +10,6 @@ Test uasort() function : object functionality
 echo "*** Testing uasort() : object functionality ***\n";
 
 // comparison function
-/* Prototype : int cmp(mixed $value1, mixed $value2)
- * Parameters : $value1 and $value2 - values to be compared
- * Return value : 0 - if both values are same
- *                1 - if value1 is greater than value2
- *               -1 - if value1 is less than value3
- * Description : compares value1 and value2
- */
 function simple_cmp($value1, $value2)
 {
   if($value1 == $value2) {

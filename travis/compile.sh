@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 if [[ "$ENABLE_ZTS" == 1 ]]; then
 	TS="--enable-zts";
 else
@@ -9,21 +10,11 @@ if [[ "$ENABLE_DEBUG" == 1 ]]; then
 else
 	DEBUG="";
 fi
-
-if [[ -z "$CONFIG_LOG_FILE" ]]; then
-	CONFIG_QUIET="--quiet"
-	CONFIG_LOG_FILE="/dev/stdout"
+if [[ "$S390X" == 1 ]]; then
+	S390X_CONFIG="--without-pcre-jit";
 else
-	CONFIG_QUIET=""
+	S390X_CONFIG="";
 fi
-if [[ -z "$MAKE_LOG_FILE" ]]; then
-	MAKE_QUIET="--quiet"
-	MAKE_LOG_FILE="/dev/stdout"
-else
-	MAKE_QUIET=""
-fi
-
-MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
 
 ./buildconf --force
 ./configure \
@@ -32,6 +23,7 @@ MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
 $CONFIG_QUIET \
 $DEBUG \
 $TS \
+$S390X_CONFIG \
 --enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
@@ -54,7 +46,6 @@ $TS \
 --enable-xmlreader \
 --with-xsl \
 --with-tidy \
---with-xmlrpc \
 --enable-sysvsem \
 --enable-sysvshm \
 --enable-shmop \
@@ -75,9 +66,14 @@ $TS \
 --with-kerberos \
 --enable-sysvmsg \
 --with-ffi \
+--with-sodium \
 --enable-zend-test=shared \
+--enable-dl-test=shared \
 --enable-werror \
 --with-pear
 
-make "-j${MAKE_JOBS}" $MAKE_QUIET
-make install
+if [[ -z "$CONFIG_ONLY" ]]; then
+	MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
+	make "-j${MAKE_JOBS}" $MAKE_QUIET
+	make install
+fi

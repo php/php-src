@@ -4,8 +4,8 @@ Block Pass 001: QM_ASSIGN and DECLARE_LAMBDA_FUNCTION
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 abstract class Broadcaster {

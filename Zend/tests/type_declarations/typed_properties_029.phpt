@@ -5,7 +5,7 @@ Test typed properties respect strict types (on)
 declare(strict_types=1);
 
 class Foo {
-	public int $bar;
+    public int $bar;
 }
 
 $foo = new Foo;

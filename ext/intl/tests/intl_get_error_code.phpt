@@ -1,7 +1,7 @@
 --TEST--
 intl_get_error_code()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 /*

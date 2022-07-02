@@ -1,7 +1,7 @@
 --TEST--
 __toString() exception during PDO Sqlite parameter binding
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 

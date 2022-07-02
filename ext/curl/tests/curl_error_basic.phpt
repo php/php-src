@@ -3,10 +3,10 @@ curl_error() function - basic test for curl_error using a fake url
 --CREDITS--
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-
-if (!extension_loaded("curl")) die("skip\n");
 
 $url = "fakeURL";
 $ip = gethostbyname($url);
@@ -16,7 +16,6 @@ if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
 --FILE--
 <?php
 /*
- * Prototype:     string curl_error(resource $ch)
  * Description:   Returns a clear text error message for the last cURL operation.
  * Source:        ext/curl/interface.c
  * Documentation: http://wiki.php.net/qa/temp/ext/curl

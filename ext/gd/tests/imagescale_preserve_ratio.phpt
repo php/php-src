@@ -1,9 +1,7 @@
 --TEST--
 Scale images and preserve aspect ratio
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

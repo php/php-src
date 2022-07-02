@@ -4,10 +4,10 @@
 /**
  * This is based on the ucgendat.c file from the OpenLDAP project, licensed as
  * follows. This file is not necessary to build PHP. It's only necessary to
- * rebuild unicode_data.h from Unicode ucd files.
+ * rebuild unicode_data.h and eaw_width.h from Unicode ucd files.
  *
  * Example usage:
- * php ucgendat.php UnicodeData.txt
+ * php ucgendat.php path/to/Unicode/data/files
  */
 
 /* Copyright 1998-2007 The OpenLDAP Foundation.
@@ -45,7 +45,7 @@
 if ($argc < 2) {
     echo "Usage: php ucgendata.php ./datadir\n";
     echo "./datadir must contain:\n";
-    echo "UnicodeData.txt, CaseFolding.txt, SpecialCasing.txt and DerivedCoreProperties.txt\n";
+    echo "UnicodeData.txt, CaseFolding.txt, SpecialCasing.txt, DerivedCoreProperties.txt, and EastAsianWidth.txt\n";
     return;
 }
 
@@ -54,8 +54,9 @@ $unicodeDataFile = $dir . '/UnicodeData.txt';
 $caseFoldingFile = $dir . '/CaseFolding.txt';
 $specialCasingFile = $dir . '/SpecialCasing.txt';
 $derivedCorePropertiesFile = $dir . '/DerivedCoreProperties.txt';
+$eastAsianWidthFile = $dir . '/EastAsianWidth.txt';
 
-$files = [$unicodeDataFile, $caseFoldingFile, $specialCasingFile, $derivedCorePropertiesFile];
+$files = [$unicodeDataFile, $caseFoldingFile, $specialCasingFile, $derivedCorePropertiesFile, $eastAsianWidthFile];
 foreach ($files as $file) {
     if (!file_exists($file)) {
         echo "File $file does not exist.\n";
@@ -71,6 +72,11 @@ parseCaseFolding($data, file_get_contents($caseFoldingFile));
 parseSpecialCasing($data, file_get_contents($specialCasingFile));
 parseDerivedCoreProperties($data, file_get_contents($derivedCorePropertiesFile));
 file_put_contents($outputFile, generateData($data));
+
+$eawFile = __DIR__ . "/../libmbfl/mbfl/eaw_table.h";
+
+$eawData = parseEastAsianWidth(file_get_contents($eastAsianWidthFile));
+file_put_contents($eawFile, generateEastAsianWidthData($eawData));
 
 class Range {
     public $start;
@@ -95,13 +101,12 @@ class UnicodeData {
          */
         $this->propIndexes = array_flip([
             "Mn", "Mc", "Me", "Nd", "Nl", "No",
-            "Zs", "Zl", "Zp", "Cc", "Cf", "Cs",
-            "Co", "Cn", "Lu", "Ll", "Lt", "Lm",
-            "Lo", "Pc", "Pd", "Ps", "Pe", "Po",
-            "Sm", "Sc", "Sk", "So", "L", "R",
-            "EN", "ES", "ET", "AN", "CS", "B",
-            "S", "WS", "ON", "Pi", "Pf", "AL",
-            "Cased", "Case_Ignorable"
+            "Zs", "Zl", "Zp", "Cs", "Co", "Cn",
+            "Lu", "Ll", "Lt", "Lm", "Lo", "Sm",
+            "Sc", "Sk", "So", "L", "R", "EN",
+            "ES", "ET", "AN", "CS", "B", "S",
+            "WS", "ON", "AL",
+            "C", "P", "Cased", "Case_Ignorable"
         ]);
         $this->numProps = count($this->propIndexes);
 
@@ -123,6 +128,16 @@ class UnicodeData {
              * older versions.
              */
             $prop = "ON";
+        }
+
+        /* Merge all punctuation into a single category for efficiency of access.
+         * We're currently not interested in distinguishing different kinds of punctuation. */
+        if (in_array($prop, ["Pc", "Pd", "Ps", "Pe", "Po", "Pi", "Pf"])) {
+            $prop = "P";
+        }
+        /* Same for control. */
+        if (in_array($prop, ["Cc", "Cf"])) {
+            $prop = "C";
         }
 
         if (!isset($this->propIndexes[$prop])) {
@@ -372,6 +387,43 @@ function parseDerivedCoreProperties(UnicodeData $data, string $input) : void {
     }
 }
 
+function parseEastAsianWidth(string $input) : array {
+    $wideRanges = [];
+
+    foreach (parseDataFile($input) as $fields) {
+        if ($fields[1] == 'W' || $fields[1] == 'F') {
+            if ($dotsPos = strpos($fields[0], '..')) {
+                $startCode = intval(substr($fields[0], 0, $dotsPos), 16);
+                $endCode = intval(substr($fields[0], $dotsPos + 2), 16);
+
+                if (!empty($wideRanges)) {
+                    $lastRange = $wideRanges[count($wideRanges) - 1];
+                    if ($startCode == $lastRange->end + 1) {
+                        $lastRange->end = $endCode;
+                        continue;
+                    }
+                }
+
+                $wideRanges[] = new Range($startCode, $endCode);
+            } else {
+                $code = intval($fields[0], 16);
+
+                if (!empty($wideRanges)) {
+                    $lastRange = $wideRanges[count($wideRanges) - 1];
+                    if ($code == $lastRange->end + 1) {
+                        $lastRange->end++;
+                        continue;
+                    }
+                }
+
+                $wideRanges[] = new Range($code, $code);
+            }
+        }
+    }
+
+    return $wideRanges;
+}
+
 function formatArray(array $values, int $width, string $format) : string {
     $result = '';
     $i = 0;
@@ -404,7 +456,7 @@ function generatePropData(UnicodeData $data) {
     $idx = 0;
     foreach ($data->propRanges as $ranges) {
         $num = count($ranges);
-        $propOffsets[] = $num ? $idx : 0xffff;
+        $propOffsets[] = $idx;
         $idx += 2*$num;
     }
 
@@ -412,7 +464,7 @@ function generatePropData(UnicodeData $data) {
     $propOffsets[] = $idx;
 
     // TODO ucgendat.c pads the prop offsets to the next multiple of 4
-    // for rather debious reasons of alignment. This should probably be
+    // for rather dubious reasons of alignment. This should probably be
     // dropped
     while (count($propOffsets) % 4 != 0) {
         $propOffsets[] = 0;
@@ -509,17 +561,17 @@ function generateCaseData(UnicodeData $data) {
 
 function generateData(UnicodeData $data) {
     $result = <<<'HEADER'
-/* This file was generated from a modified version UCData's ucgendat.
+/* This file was generated from a modified version of UCData's ucgendat.
  *
  *                     DO NOT EDIT THIS FILE!
  *
- * Instead, compile ucgendat.c (bundled with PHP in ext/mbstring), download
- * the appropriate UnicodeData-x.x.x.txt and CompositionExclusions-x.x.x.txt
- * files from  http://www.unicode.org/Public/ and run this program.
+ * Instead, download the appropriate UnicodeData-x.x.x.txt and
+ * CompositionExclusions-x.x.x.txt files from http://www.unicode.org/Public/
+ * and run ext/mbstring/ucgendat/ucgendat.php.
  *
  * More information can be found in the UCData package. Unfortunately,
  * the project's page doesn't seem to be live anymore, so you can use
- * OpenLDAPs modified copy (look in libraries/liblunicode/ucdata) */
+ * OpenLDAP's modified copy (look in libraries/liblunicode/ucdata) */
 HEADER;
     $result .= "\n\n" . generatePropData($data);
     $result .= generateCaseData($data);
@@ -645,4 +697,44 @@ function generateMPH(array $map, bool $fast) {
     }
 
     return $mph;
+}
+
+function generateEastAsianWidthData(array $wideRanges) {
+    $result = <<<'HEADER'
+/* This file was generated by ext/mbstring/ucgendat/ucgendat.php.
+ *
+ *                     DO NOT EDIT THIS FILE!
+ *
+ * East Asian Width table
+ *
+ * Some characters in East Asian languages are intended to be displayed in a space
+ * which is roughly square. (This contrasts with others such as the Latin alphabet,
+ * which are taller than they are wide.) To display these East Asian characters
+ * properly, twice the horizontal space is used. This must be taken into account
+ * when doing things like wrapping text to a specific width.
+ *
+ * Each pair of numbers in the below table is a range of Unicode codepoints
+ * which should be displayed as double-width.
+ */
+
+HEADER;
+
+    $result .= "\n#define FIRST_DOUBLEWIDTH_CODEPOINT 0x" . dechex($wideRanges[0]->start) . "\n\n";
+
+    $result .= <<<'TABLESTART'
+static const struct {
+	int begin;
+	int end;
+} mbfl_eaw_table[] = {
+
+TABLESTART;
+
+    foreach ($wideRanges as $range) {
+        $startCode = dechex($range->start);
+        $endCode = dechex($range->end);
+        $result .= "\t{ 0x{$startCode}, 0x{$endCode} },\n";
+    }
+
+    $result .= "};\n";
+    return $result;
 }

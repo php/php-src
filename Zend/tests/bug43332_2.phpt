@@ -11,5 +11,6 @@ class foo {
 $foo = new foo;
 $foo->bar($foo); // Ok!
 $foo->bar(new stdclass); // Error, ok!
+?>
 --EXPECTF--
 Fatal error: '\self' is an invalid class name in %sbug43332_2.php on line 5

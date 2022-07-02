@@ -1,18 +1,9 @@
 --TEST--
 Test mb_decode_mimeheader() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
-/* Prototype  : string mb_decode_mimeheader(string string)
- * Description: Decodes the MIME "encoded-word" in the string
- * Source code: ext/mbstring/mbstring.c
- * Alias to functions:
- */
-
 echo "*** Testing mb_decode_mimeheader() : basic functionality ***\n";
 mb_internal_encoding('utf-8');
 
@@ -27,9 +18,7 @@ $b = mb_decode_mimeheader($a);
 var_dump(bin2hex($b));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_decode_mimeheader() : basic functionality ***
 string(60) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e38082"
 string(60) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e38082"
-===DONE===

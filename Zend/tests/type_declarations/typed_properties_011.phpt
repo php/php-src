@@ -3,7 +3,7 @@ Test typed properties allow fetch reference for init array
 --FILE--
 <?php
 class Foo {
-	public int $bar = 1;
+    public int $bar = 1;
 }
 
 $foo = new Foo();

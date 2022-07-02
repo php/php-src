@@ -4,9 +4,9 @@ Trying to use an undefined trait
 <?php
 
 class A {
-	use abc;
+    use abc;
 }
 
 ?>
 --EXPECTF--
-Fatal error: Trait 'abc' not found in %s on line %d
+Fatal error: Trait "abc" not found in %s on line %d

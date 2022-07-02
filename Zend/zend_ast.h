@@ -61,11 +61,17 @@ enum _zend_ast_kind {
 	ZEND_AST_NAME_LIST,
 	ZEND_AST_TRAIT_ADAPTATIONS,
 	ZEND_AST_USE,
+	ZEND_AST_TYPE_UNION,
+	ZEND_AST_TYPE_INTERSECTION,
+	ZEND_AST_ATTRIBUTE_LIST,
+	ZEND_AST_ATTRIBUTE_GROUP,
+	ZEND_AST_MATCH_ARM_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_TYPE,
 	ZEND_AST_CONSTANT_CLASS,
+	ZEND_AST_CALLABLE_CONVERT,
 
 	/* 1 child node */
 	ZEND_AST_VAR = 1 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -105,6 +111,7 @@ enum _zend_ast_kind {
 	/* 2 child nodes */
 	ZEND_AST_DIM = 2 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_PROP,
+	ZEND_AST_NULLSAFE_PROP,
 	ZEND_AST_STATIC_PROP,
 	ZEND_AST_CALL,
 	ZEND_AST_CLASS_CONST,
@@ -137,22 +144,34 @@ enum _zend_ast_kind {
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
 	ZEND_AST_GROUP_USE,
-	ZEND_AST_PROP_GROUP,
+	ZEND_AST_CLASS_CONST_GROUP,
+	ZEND_AST_ATTRIBUTE,
+	ZEND_AST_MATCH,
+	ZEND_AST_MATCH_ARM,
+	ZEND_AST_NAMED_ARG,
 
 	/* 3 child nodes */
 	ZEND_AST_METHOD_CALL = 3 << ZEND_AST_NUM_CHILDREN_SHIFT,
+	ZEND_AST_NULLSAFE_METHOD_CALL,
 	ZEND_AST_STATIC_CALL,
 	ZEND_AST_CONDITIONAL,
 
 	ZEND_AST_TRY,
 	ZEND_AST_CATCH,
-	ZEND_AST_PARAM,
+	ZEND_AST_PROP_GROUP,
 	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
+
+	// Pseudo node for initializing enums
+	ZEND_AST_CONST_ENUM_INIT,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
+	ZEND_AST_ENUM_CASE,
+
+	/* 5 child nodes */
+	ZEND_AST_PARAM = 5 << ZEND_AST_NUM_CHILDREN_SHIFT,
 };
 
 typedef uint16_t zend_ast_kind;
@@ -191,7 +210,7 @@ typedef struct _zend_ast_decl {
 	unsigned char *lex_pos;
 	zend_string *doc_comment;
 	zend_string *name;
-	zend_ast *child[4];
+	zend_ast *child[5];
 } zend_ast_decl;
 
 typedef void (*zend_ast_process_t)(zend_ast *ast);
@@ -208,12 +227,12 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *
 
 #if ZEND_AST_SPEC
 # define ZEND_AST_SPEC_CALL(name, ...) \
-	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
-# define ZEND_AST_SPEC_CALL_(name, _, _4, _3, _2, _1, suffix, ...) \
+	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _5, _4, _3, _2, _1, _0)(__VA_ARGS__))
+# define ZEND_AST_SPEC_CALL_(name, _, _5, _4, _3, _2, _1, suffix, ...) \
 	name ## suffix
 # define ZEND_AST_SPEC_CALL_EX(name, ...) \
-	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
-# define ZEND_AST_SPEC_CALL_EX_(name, _, _5, _4, _3, _2, _1, suffix, ...) \
+	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _5, _4, _3, _2, _1, _0)(__VA_ARGS__))
+# define ZEND_AST_SPEC_CALL_EX_(name, _, _6, _5, _4, _3, _2, _1, suffix, ...) \
 	name ## suffix
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_0(zend_ast_kind kind);
@@ -221,6 +240,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_1(zend_ast_kind kind, zend_ast
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_3(zend_ast_kind kind, zend_ast *child1, zend_ast *child2, zend_ast *child3);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_4(zend_ast_kind kind, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_5(zend_ast_kind kind, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4, zend_ast *child5);
 
 static zend_always_inline zend_ast * zend_ast_create_ex_0(zend_ast_kind kind, zend_ast_attr attr) {
 	zend_ast *ast = zend_ast_create_0(kind);
@@ -247,6 +267,11 @@ static zend_always_inline zend_ast * zend_ast_create_ex_4(zend_ast_kind kind, ze
 	ast->attr = attr;
 	return ast;
 }
+static zend_always_inline zend_ast * zend_ast_create_ex_5(zend_ast_kind kind, zend_ast_attr attr, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4, zend_ast *child5) {
+	zend_ast *ast = zend_ast_create_5(kind, child1, child2, child3, child4, child5);
+	ast->attr = attr;
+	return ast;
+}
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_0(zend_ast_kind kind);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_1(zend_ast_kind kind, zend_ast *child);
@@ -269,24 +294,28 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *list, zend_ast *op
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
-	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 );
 
-ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
 ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
-typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr);
-ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn);
+typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr, void *context);
+ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context);
 
-static zend_always_inline zend_bool zend_ast_is_special(zend_ast *ast) {
+static zend_always_inline size_t zend_ast_size(uint32_t children) {
+	return sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
+}
+
+static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_SPECIAL_SHIFT) & 1;
 }
 
-static zend_always_inline zend_bool zend_ast_is_list(zend_ast *ast) {
+static zend_always_inline bool zend_ast_is_list(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_IS_LIST_SHIFT) & 1;
 }
 static zend_always_inline zend_ast_list *zend_ast_get_list(zend_ast *ast) {
@@ -326,6 +355,9 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
+
+zend_ast *zend_ast_create_concat_op(zend_ast *op0, zend_ast *op1);
+
 static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
 }
@@ -339,4 +371,7 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	}
 	return ast;
 }
+
+zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr);
+
 #endif

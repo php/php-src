@@ -1,9 +1,7 @@
 --TEST--
 XMLWriter: PI, Comment, CDATA
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 /*

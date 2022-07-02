@@ -1,9 +1,9 @@
 --TEST--
 PDO Common: Bug #43663 (__call on classes derived from PDO)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
-if (!extension_loaded('pdo_sqlite')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -23,9 +23,10 @@ class test extends PDO{
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
-$a = new test('sqlite::memory:');
+$a = PDOTest::factory(test::class);
 $a->foo();
 $a->bar();
+?>
 --EXPECT--
 Called foo in test
 Called bar in test

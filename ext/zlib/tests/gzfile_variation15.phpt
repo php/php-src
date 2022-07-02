@@ -1,11 +1,7 @@
 --TEST--
 Test gzfile() function : variation: use include path (relative directories in path)
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $testName = 'gzfile_variation15';
@@ -78,7 +74,6 @@ function test_gzfile() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
@@ -105,4 +100,3 @@ array(1) {
   string(28) "This is a file in script dir"
 }
 
-===DONE===

@@ -2,11 +2,6 @@
 Test scandir() function : usage variations - different relative paths
 --FILE--
 <?php
-/* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path
- * Source code: ext/standard/dir.c
- */
-
 /*
  * Test scandir() with relative paths as $dir argument
  */
@@ -59,7 +54,6 @@ var_dump(scandir('../../level_one'));
 @delete_files($level_one_dir_path, 2, 'level_one');
 @delete_files($level_two_dir_path, 2, 'level_two');
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/scandir_variation4';
@@ -168,4 +162,3 @@ array(5) {
   [4]=>
   string(9) "level_two"
 }
-===DONE===

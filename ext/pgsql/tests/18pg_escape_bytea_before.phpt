@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_escape_bytea() functions (before connection)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -20,11 +22,12 @@ $rows = pg_fetch_all($result);
 $unesc_image = pg_unescape_bytea($rows[0]['bin']);
 
 if ($unesc_image !== $image) {
-	echo "NG";
+    echo "NG";
 }
 else {
-	echo "OK";
+    echo "OK";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: pg_escape_bytea(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 OK

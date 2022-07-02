@@ -4,20 +4,20 @@ Keep BIND_STATIC when initial value refer to unresolved constants
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function foo() {
-	static $a = UNDEFINED_CONST;
+    static $a = UNDEFINED_CONST;
 }
 try {
-	foo();
+    foo();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 ?>
 OK
 --EXPECT--
-Exception: Undefined constant 'UNDEFINED_CONST'
+Exception: Undefined constant "UNDEFINED_CONST"
 OK

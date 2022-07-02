@@ -12,5 +12,6 @@ class Bar extends Foo {
 }
 
 echo 'DONE';
+?>
 --EXPECT--
 DONE

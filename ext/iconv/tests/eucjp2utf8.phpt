@@ -1,7 +1,7 @@
 --TEST--
 EUC-JP to UTF8
---SKIPIF--
-<?php include('skipif.inc'); ?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=2039
 --FILE--

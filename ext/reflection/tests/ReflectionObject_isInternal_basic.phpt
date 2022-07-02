@@ -12,7 +12,7 @@ $r4 = new ReflectionObject(new Exception);
 $r5 = new ReflectionObject(new C);
 
 var_dump($r1->isInternal(), $r2->isInternal(), $r3->isInternal(),
-		 $r4->isInternal(), $r5->isInternal());
+         $r4->isInternal(), $r5->isInternal());
 
 ?>
 --EXPECT--

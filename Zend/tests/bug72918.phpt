@@ -13,10 +13,8 @@ $string[-3]
 
 EOT;
 ?>
-===DONE===
 --EXPECT--
 foo
 c
 foo
 c
-===DONE===

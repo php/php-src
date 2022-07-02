@@ -7,22 +7,23 @@ SPL: ArrayObject/Iterator from IteratorAggregate
 // since they cannot be accessed from the external object which iterates
 // them.
 
+#[AllowDynamicProperties]
 class test implements IteratorAggregate
 {
-	public    $pub = "public";
-	protected $pro = "protected";
-	private   $pri = "private";
+    public    $pub = "public";
+    protected $pro = "protected";
+    private   $pri = "private";
 
-	function __construct()
-	{
-		$this->imp = "implicit";
-	}
+    function __construct()
+    {
+        $this->imp = "implicit";
+    }
 
-	function getIterator()
-	{
-		$it = new ArrayObject($this);
-		return $it->getIterator();
-	}
+    function getIterator(): Traversable
+    {
+        $it = new ArrayObject($this);
+        return $it->getIterator();
+    }
 };
 
 $test = new test;
@@ -34,12 +35,10 @@ print_r($test->getIterator());
 
 foreach($test as $key => $val)
 {
-	echo "$key => $val\n";
+    echo "$key => $val\n";
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 test Object
 (
@@ -68,4 +67,3 @@ ArrayIterator Object
 pub => public
 imp => implicit
 dyn => dynamic
-===DONE===

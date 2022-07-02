@@ -26,11 +26,10 @@ $d->close();
 echo "\ntest DirectoryIterator\n";
 $dir = new DirectoryIterator($base);
 foreach ($dir as $finfo) {
-	var_dump($finfo->getFilename());
+    var_dump($finfo->getFilename());
 }
 
 ?>
-==DONE==
 --CLEAN--
 <?php
 $base = __DIR__ . DIRECTORY_SEPARATOR . "bug73971";
@@ -51,4 +50,3 @@ test DirectoryIterator
 string(1) "."
 string(2) ".."
 string(432) "テストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテスト"
-==DONE==

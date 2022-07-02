@@ -2,12 +2,6 @@
 Test strftime() function : usage variation - Passing month related format strings to format argument.
 --FILE--
 <?php
-/* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings
- * Source code: ext/date/php_date.c
- * Alias to functions:
- */
-
 echo "*** Testing strftime() : usage variation ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -18,7 +12,7 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated month name' => "%b",
       'Full month name' => "%B",
-	  'Month as decimal' => "%m",
+      'Month as decimal' => "%m",
 );
 
 // loop through each element of the array for timestamp
@@ -30,19 +24,29 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
 --Abbreviated month name--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(3) "Aug"
 
 --Full month name--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(6) "August"
 
 --Month as decimal--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "08"
-===DONE===

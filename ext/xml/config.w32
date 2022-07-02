@@ -16,6 +16,6 @@ if (PHP_XML == "yes") {
 		PHP_INSTALL_HEADERS("", "ext/xml");
 	} else {
 		WARNING("xml support can't be enabled, libraries or headers are missing")
-		PHP_ZLIB = "no"
+		PHP_XML = "no"
 	}
 }

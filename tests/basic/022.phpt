@@ -10,7 +10,7 @@ cookie1=val1  ; cookie2=val2%20; cookie3=val 3.; cookie 4= value 4 %3B; cookie1=
 var_dump($_COOKIE);
 ?>
 --EXPECT--
-array(10) {
+array(12) {
   ["cookie1"]=>
   string(6) "val1  "
   ["cookie2"]=>
@@ -19,11 +19,15 @@ array(10) {
   string(6) "val 3."
   ["cookie_4"]=>
   string(10) " value 4 ;"
+  ["%20cookie1"]=>
+  string(6) "ignore"
+  ["+cookie1"]=>
+  string(6) "ignore"
   ["cookie__5"]=>
   string(7) "  value"
-  ["cookie_6"]=>
+  ["cookie%206"]=>
   string(3) "þæö"
-  ["cookie_7"]=>
+  ["cookie+7"]=>
   string(0) ""
   ["$cookie_8"]=>
   string(0) ""

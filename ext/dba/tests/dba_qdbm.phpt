@@ -1,21 +1,22 @@
 --TEST--
 DBA QDBM handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'qdbm';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'qdbm';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-	$handler = 'qdbm';
-	require_once __DIR__ .'/test.inc';
-	$lock_flag = ''; // lock in library
-	require_once __DIR__ .'/dba_handler.inc';
+    $handler = 'qdbm';
+    require_once __DIR__ .'/test.inc';
+    $lock_flag = ''; // lock in library
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: qdbm
@@ -35,4 +36,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

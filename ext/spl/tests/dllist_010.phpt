@@ -23,11 +23,9 @@ $dll->prev();
 var_dump($dll->current());
 
 ?>
-===DONE===
 --EXPECT--
 NULL
 int(1)
 int(2)
 int(4)
 int(3)
-===DONE===

@@ -3,17 +3,17 @@ preg_replace_callback() with callback that modifies subject string
 --SKIPIF--
 <?php
 if (@preg_match('/./u', '') === false) {
-	die('skip no utf8 support in PCRE library');
+    die('skip no utf8 support in PCRE library');
 }
 ?>
 --FILE--
 <?php
 
 function evil($x) {
-	global $txt;
-	$txt[3] = "\xFF";
-	var_dump($x);
-	return $x[0];
+    global $txt;
+    $txt[3] = "\xFF";
+    var_dump($x);
+    return $x[0];
 }
 
 $txt = "ola123";
