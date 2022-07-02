@@ -254,19 +254,17 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		return -1;
 	}
 
-#ifdef HAVE_SOCKETROUTE
-	if (-1 < fpm_global_config.socketroute) {
 #ifdef SO_SETFIB
-		if (routemax < fpm_global_config.socketroute) {
-			zlog(ZLOG_ERROR, "Invalid routing table id %d, max is %d", fpm_global_config.socketroute, routemax);
+	if (-1 < wp->config->listen_setfib) {
+		if (routemax < wp->config->listen_setfib) {
+			zlog(ZLOG_ERROR, "Invalid routing table id %d, max is %d", wp->config->listen_setfib, routemax);
 			close(sock);
 			return -1;
 		}
 
-		if (0 > setsockopt(sock, SOL_SOCKET, SO_SETFIB, &fpm_global_config.socketroute, sizeof(fpm_global_config.socketroute))) {
-			zlog(ZLOG_WARNING, "failed to change socket attribute");
+		if (0 > setsockopt(sock, SOL_SOCKET, SO_SETFIB, &wp->config->listen_setfib, sizeof(wp->config->listen_setfib))) {
+			zlog(ZLOG_WARNING, "failed to change socket SO_SETFIB attribute");
 		}
-#endif
 	}
 #endif
 
@@ -406,10 +404,9 @@ static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* 
 }
 /* }}} */
 
-#ifdef HAVE_SOCKETROUTE
-static zend_result fpm_socket_setroute_init(void) /* {{{ */
-{
 #ifdef SO_SETFIB
+static zend_result fpm_socket_setfib_init(void)
+{
 	/* potentially up to 65536 but needs to check the actual cap beforehand */
 	size_t len = sizeof(routemax);
 	if (sysctlbyname("net.fibs", &routemax, &len, NULL, 0) < 0) {
@@ -418,9 +415,7 @@ static zend_result fpm_socket_setroute_init(void) /* {{{ */
 	}
 
 	return SUCCESS;
-#endif
 }
-/* }}} */
 #endif
 
 int fpm_sockets_init_main() /* {{{ */
@@ -436,8 +431,8 @@ int fpm_sockets_init_main() /* {{{ */
 		return -1;
 	}
 
-#ifdef HAVE_SOCKETROUTE
-	if (fpm_socket_setroute_init() == FAILURE) {
+#ifdef SO_SETFIB
+	if (fpm_socket_setfib_init() == FAILURE) {
 		return -1;
 	}
 #endif
