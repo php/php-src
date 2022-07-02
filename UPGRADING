@@ -163,6 +163,10 @@ PHP 8.2 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Core
+  . str*cmp, str*pos, substr_compare functions, using binary safe string
+    comparison now return -1, 0 and 1.
+
 - DBA
   . dba_open() and dba_popen() now have the following enforced function signature
     dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0)
@@ -342,6 +346,7 @@ PHP 8.2 UPGRADE NOTES
   . LOCAL_CREDS (NetBSD)
   . SO_BPF_EXTENSIONS
   . SO_SETFIB
+  . TCP_CONGESTION (Linuux, FreeBSD)
 
 ========================================
 11. Changes to INI File Handling
