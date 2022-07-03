@@ -107,6 +107,8 @@ int fpm_stdio_restore_original_stderr(void) /* {{{ */
 		zlog(ZLOG_DEBUG, "restoring original STDERR fd: dup2()");
 		if (0 > dup2(fd_stderr_original, STDERR_FILENO)) {
 			return -1;
+		} else {
+			close(fd_stderr_original);
 		}
 	} else {
 		zlog(ZLOG_DEBUG, "original STDERR fd is not restored, maybe function is called from a child: dup2()");
