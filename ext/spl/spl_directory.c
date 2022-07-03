@@ -1914,6 +1914,9 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 	}
 
 	if (!buf) {
+		if (!silent) {
+			zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot read from file %s", ZSTR_VAL(intern->file_name));
+		}
 		return FAILURE;
 	}
 
