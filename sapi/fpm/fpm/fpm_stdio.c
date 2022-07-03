@@ -20,6 +20,7 @@
 #include "fpm_stdio.h"
 #include "zlog.h"
 
+static int fd_stderr_original = -1;
 static int fd_stdout[2];
 static int fd_stderr[2];
 
@@ -67,6 +68,12 @@ int fpm_stdio_init_final() /* {{{ */
 		/* prevent duping if logging to syslog */
 		if (fpm_globals.error_log_fd > 0 && fpm_globals.error_log_fd != STDERR_FILENO) {
 
+                        /* php-fpm loses STDERR fd after call of the dup2 below. Check #8555. */
+                        if (0 > fpm_stdio_save_original_stderr()) {
+                                zlog(ZLOG_SYSERROR, "failed to save original STDERR descriptor, access.log records may appear in error_log");
+                                return -1;
+                        }
+
 			/* there might be messages to stderr from other parts of the code, we need to log them all */
 			if (0 > dup2(fpm_globals.error_log_fd, STDERR_FILENO)) {
 				zlog(ZLOG_SYSERROR, "failed to init stdio: dup2()");
@@ -82,6 +89,27 @@ int fpm_stdio_init_final() /* {{{ */
 	}
 	zlog_set_launched();
 	return 0;
+}
+/* }}} */
+
+int fpm_stdio_save_original_stderr(void) /* {{{ */
+{
+    zlog(ZLOG_DEBUG, "saving original STDERR fd: dup()");
+    fd_stderr_original = dup(STDERR_FILENO);
+    return fd_stderr_original;
+}
+/* }}} */
+
+int fpm_stdio_restore_original_stderr(void) /* {{{ */
+{
+    zlog(ZLOG_DEBUG, "restoring original STDERR fd: dup2()");
+    if (-1 != fd_stderr_original) {
+        if (0 > dup2(fd_stderr_original, STDERR_FILENO)) {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 /* }}} */
 

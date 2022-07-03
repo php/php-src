@@ -18,6 +18,7 @@
 #include "fpm_worker_pool.h"
 #include "fpm_scoreboard.h"
 #include "fpm_sockets.h"
+#include "fpm_stdio.h"
 #include "zlog.h"
 
 
@@ -81,6 +82,10 @@ static void fpm_pctl_exec(void) /* {{{ */
 	if (0 > fpm_signals_block()) {
 		zlog(ZLOG_WARNING, "concurrent reloads may be unstable");
 	}
+
+        if (0 > fpm_stdio_restore_original_stderr()) {
+            zlog(ZLOG_SYSERROR, "failed to restore original STDERR descriptor, access.log and slowlog records may appear in error_log");
+        }
 
 	zlog(ZLOG_NOTICE, "reloading: execvp(\"%s\", {\"%s\""
 			"%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s"
