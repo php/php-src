@@ -15,30 +15,30 @@ var_dump($a->$b->{$c[1]});
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $a in %s on line %d
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 NULL
 
-Warning: Undefined variable $a in %s on line %d
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $c in %s on line %d
+Warning: Undefined variable $c (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 NULL
 
-Warning: Undefined variable $a in %s on line %d
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
 int(1)
 
-Warning: Undefined variable $a in %s on line %d
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $b in %s on line %d
+Warning: Undefined variable $b (This will become an error in PHP 9.0) in %s on line %d
 int(0)
 
-Warning: Undefined variable $a in %s on line %d
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
 NULL
 
-Warning: Undefined variable $b in %s on line %d
+Warning: Undefined variable $b (This will become an error in PHP 9.0) in %s on line %d
 int(1)
 
 Warning: Attempt to read property "1" on int in %s on line %d
@@ -47,7 +47,7 @@ NULL
 Warning: Attempt to read property "1" on int in %s on line %d
 NULL
 
-Warning: Undefined variable $c in %s on line %d
+Warning: Undefined variable $c (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 

@@ -11,6 +11,6 @@ $a[0][$d]='b';
 var_dump($a);
 ?>
 --EXPECT--
-Err: Undefined variable $d
+Err: Undefined variable $d (This will become an error in PHP 9.0)
 Err: String offset cast occurred
 string(0) ""

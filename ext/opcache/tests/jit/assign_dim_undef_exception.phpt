@@ -34,5 +34,5 @@ try {
 }
 ?>
 --EXPECT--
-Undefined variable $undef
-Undefined variable $undef
+Undefined variable $undef (This will become an error in PHP 9.0)
+Undefined variable $undef (This will become an error in PHP 9.0)

@@ -94,7 +94,7 @@ try {
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
 Cannot unset offset in a non-array variable
@@ -103,7 +103,7 @@ Cannot unset offset in a non-array variable
 Cannot unset string offsets
 Cannot use object of type stdClass as array
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
 Cannot unset offset in a non-array variable

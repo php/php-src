@@ -13,7 +13,7 @@ function o(){
 o();
 ?>
 --EXPECTF--
-Warning: Undefined variable $x in %ssend_val_002.php on line 3
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %ssend_val_002.php on line 3
 
 Fatal error: Uncaught ArgumentCountError: var_dump() expects at least 1 argument, 0 given in %ssend_val_002.php:3
 Stack trace:

@@ -14,23 +14,23 @@ for ($i = 0; $i < 5; $i++) {
 ?>
 OK
 --EXPECTF--
-Warning: Undefined variable $0 in %sfe_reset_001.php on line 4
+Warning: Undefined variable $0 (This will become an error in PHP 9.0) in %sfe_reset_001.php on line 4
 
 Warning: foreach() argument must be of type array|object, null given in %sfe_reset_001.php on line 4
 
-Warning: Undefined variable $1 in %sfe_reset_001.php on line 4
+Warning: Undefined variable $1 (This will become an error in PHP 9.0) in %sfe_reset_001.php on line 4
 
 Warning: foreach() argument must be of type array|object, null given in %sfe_reset_001.php on line 4
 
-Warning: Undefined variable $2 in %sfe_reset_001.php on line 4
+Warning: Undefined variable $2 (This will become an error in PHP 9.0) in %sfe_reset_001.php on line 4
 
 Warning: foreach() argument must be of type array|object, null given in %sfe_reset_001.php on line 4
 
-Warning: Undefined variable $3 in %sfe_reset_001.php on line 4
+Warning: Undefined variable $3 (This will become an error in PHP 9.0) in %sfe_reset_001.php on line 4
 
 Warning: foreach() argument must be of type array|object, null given in %sfe_reset_001.php on line 4
 
-Warning: Undefined variable $4 in %sfe_reset_001.php on line 4
+Warning: Undefined variable $4 (This will become an error in PHP 9.0) in %sfe_reset_001.php on line 4
 
 Warning: foreach() argument must be of type array|object, null given in %sfe_reset_001.php on line 4
 OK

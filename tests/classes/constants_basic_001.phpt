@@ -55,7 +55,7 @@ Class constant declarations
   echo "\nYou should not see this.";
 ?>
 --EXPECTF--
-Warning: Undefined variable $undef in %s on line %d
+Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
 
 Attempt to access various kinds of class constants:
 int(1)

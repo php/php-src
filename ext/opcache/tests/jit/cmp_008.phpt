@@ -15,9 +15,9 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $a in %scmp_008.php on line 3
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %scmp_008.php on line 3
 
-Warning: Undefined variable $a in %scmp_008.php on line 3
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %scmp_008.php on line 3
 
 Fatal error: Uncaught DivisionByZeroError: Modulo by zero in %scmp_008.php:3
 Stack trace:

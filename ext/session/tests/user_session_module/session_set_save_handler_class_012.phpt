@@ -45,7 +45,7 @@ var_dump(session_id(), $oldHandler, ini_get('session.save_handler'), $handler->i
 Open:
 SessionHandler::open() expects exactly 2 arguments, 0 given
 
-Warning: Undefined global variable $_SESSION in %s on line %d
+Warning: Undefined global variable $_SESSION (This will become an error in PHP 9.0) in %s on line %d
 string(0) ""
 string(5) "files"
 string(4) "user"

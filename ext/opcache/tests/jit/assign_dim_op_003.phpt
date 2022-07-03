@@ -13,4 +13,4 @@ $a[] &= $b;
 --EXTENSIONS--
 opcache
 --EXPECTF--
-Warning: Undefined variable $b in %s on line %d
+Warning: Undefined variable $b (This will become an error in PHP 9.0) in %s on line %d

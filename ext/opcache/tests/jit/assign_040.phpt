@@ -23,5 +23,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 --EXPECTF--
-Warning: Undefined variable $y in %s on line %d
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to reference held by property Test::$x of type string

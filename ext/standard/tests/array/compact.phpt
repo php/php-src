@@ -20,7 +20,7 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: compact(): Undefined variable $c\u0327ity in %s on line %d
+Warning: compact(): Undefined variable $c\u0327ity (This will become an error in PHP 9.0) in %s on line %d
 array(2) {
   ["event"]=>
   string(8) "SIGGRAPH"

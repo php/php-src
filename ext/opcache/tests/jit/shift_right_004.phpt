@@ -21,11 +21,11 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $a in %sshift_right_004.php on line 8
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sshift_right_004.php on line 8
 
-Warning: Undefined variable $a in %sshift_right_004.php on line 8
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sshift_right_004.php on line 8
 
-Warning: Undefined variable $c in %sshift_right_004.php on line 7
+Warning: Undefined variable $c (This will become an error in PHP 9.0) in %sshift_right_004.php on line 7
 
 Warning: Undefined array key 0 in %sshift_right_004.php on line 7
 

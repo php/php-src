@@ -6,9 +6,9 @@ $a[$b] += 1;
 var_dump($a);
 ?>
 --EXPECTF--
-Warning: Undefined variable $a in %s on line %d
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $b in %s on line %d
+Warning: Undefined variable $b (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: Undefined array key "" in %s on line %d
 array(1) {

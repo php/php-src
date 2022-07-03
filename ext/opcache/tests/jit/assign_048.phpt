@@ -21,23 +21,23 @@ test();
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 
-Warning: Undefined variable $a in %sassign_048.php on line 7
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_048.php on line 7
 DONE

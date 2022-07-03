@@ -22,13 +22,13 @@ function createTree($depth) {
 createTree(4);
 ?>
 --EXPECTF--
-Warning: Undefined variable $d in %sreg_alloc_004.php on line 7
+Warning: Undefined variable $d (This will become an error in PHP 9.0) in %sreg_alloc_004.php on line 7
 
-Warning: Undefined variable $d in %sreg_alloc_004.php on line 7
+Warning: Undefined variable $d (This will become an error in PHP 9.0) in %sreg_alloc_004.php on line 7
 
-Warning: Undefined variable $d in %sreg_alloc_004.php on line 7
+Warning: Undefined variable $d (This will become an error in PHP 9.0) in %sreg_alloc_004.php on line 7
 
-Warning: Undefined variable $d in %sreg_alloc_004.php on line 7
+Warning: Undefined variable $d (This will become an error in PHP 9.0) in %sreg_alloc_004.php on line 7
 
 Fatal error: Uncaught Error: First array member is not a valid class name or object in %sreg_alloc_004.php:7
 Stack trace:

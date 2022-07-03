@@ -9,7 +9,7 @@ $result = compact('willNeverBeDefined');
 var_dump($result, empty($result), $result === array(), empty($willNeverBeDefined));
 ?>
 --EXPECTF--
-Warning: compact(): Undefined variable $willNeverBeDefined in %s on line %d
+Warning: compact(): Undefined variable $willNeverBeDefined (This will become an error in PHP 9.0) in %s on line %d
 array(0) {
 }
 bool(true)

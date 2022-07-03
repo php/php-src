@@ -16,8 +16,8 @@ crash();
 echo "ok\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable $i in %s on line %d
+Warning: Undefined variable $i (This will become an error in PHP 9.0) in %s on line %d
 made it once
 
-Warning: Undefined variable $i in %s on line %d
+Warning: Undefined variable $i (This will become an error in PHP 9.0) in %s on line %d
 ok

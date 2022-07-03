@@ -13,7 +13,7 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $y in %sresume_running_generator_error_003.php on line 4
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sresume_running_generator_error_003.php on line 4
 
 Fatal error: Uncaught Error: Cannot resume an already running generator in %sresume_running_generator_error_003.php:4
 Stack trace:

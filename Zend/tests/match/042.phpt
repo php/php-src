@@ -15,8 +15,8 @@ var_dump(match ($undefinedVariable) {
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $undefinedVariable in %s.php on line 3
+Warning: Undefined variable $undefinedVariable (This will become an error in PHP 9.0) in %s.php on line 3
 string(4) "null"
 
-Warning: Undefined variable $undefinedVariable in %s.php on line 8
+Warning: Undefined variable $undefinedVariable (This will become an error in PHP 9.0) in %s.php on line 8
 string(3) "bar"

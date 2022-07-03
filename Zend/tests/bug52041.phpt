@@ -47,47 +47,47 @@ foo()[0][0] += 2;
 var_dump(foo());
 ?>
 --EXPECTF--
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 Attempt to assign property "a" on null
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 Attempt to modify property "a" on null
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 Attempt to increment/decrement property "a" on null
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 Attempt to modify property "a" on null
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 Attempt to assign property "a" on null
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 Attempt to modify property "a" on null
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $x in %s on line %d
-
-Warning: Undefined array key 0 in %s on line %d
-
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: Undefined array key 0 in %s on line %d
 
-Warning: Undefined array key 0 in %s on line %d
-
-Warning: Undefined variable $x in %s on line %d
-
-Warning: Undefined array key 0 in %s on line %d
-
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: Undefined array key 0 in %s on line %d
 
 Warning: Undefined array key 0 in %s on line %d
 
-Warning: Undefined variable $x in %s on line %d
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
+
+Warning: Undefined array key 0 in %s on line %d
+
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
+
+Warning: Undefined array key 0 in %s on line %d
+
+Warning: Undefined array key 0 in %s on line %d
+
+Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
 NULL

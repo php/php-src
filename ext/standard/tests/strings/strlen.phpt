@@ -137,7 +137,7 @@ String length of '' is => int(0)
 String length of ' ' is => int(1)
 String length of '%0' is => int(1)
 String length of '%00' is => int(2)
-String length of '«C' is => int(2)
+String length of 'ï¿½C' is => int(2)
 String length of '%00' is => int(2)
 String length of '0' is => int(1)
 String length of '0' is => int(1)
@@ -150,11 +150,12 @@ String length of 'Hello%0World' is => int(11)
 String length of 'Hello, World\0' is => int(14)
 String length of 'Hello, World
 ' is => int(13)
-String length of 'Hello, World' is => int(13)
+String length of 'Hello, World
+' is => int(13)
 String length of 'Hello, World	' is => int(13)
 String length of 'Hello, World\' is => int(13)
 String length of '              ' is => int(14)
-String length of '€êAÿ%0' is => int(5)
+String length of 'ï¿½ï¿½Aï¿½%0' is => int(5)
 String length of 'abcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+=|?><-;:$
                    []{}{{{}}}[[[[]][]]]***&&&^^%$###@@!!@#$%&^&**/////|\\\
                    abcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+=|?><-;:$
@@ -181,7 +182,7 @@ int(0)
 int(5)
 int(7)
 
-Warning: Undefined variable $strS in %s on line %d
+Warning: Undefined variable $strS (This will become an error in PHP 9.0) in %s on line %d
 int(0)
 int(6)
 int(6)

@@ -8,7 +8,7 @@ foreach($a as $val);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable $a in %s on line %d
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: foreach() argument must be of type array|object, null given in %s on line %d
 Done

@@ -27,6 +27,6 @@ var_dump(error_reporting());
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable $undef3 in %s on line %d
+Warning: Undefined variable $undef3 (This will become an error in PHP 9.0) in %s on line %d
 int(32767)
 Done

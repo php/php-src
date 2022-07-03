@@ -22,5 +22,5 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $undef in %s on line %d
+Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
 offsetSet(, 1)

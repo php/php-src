@@ -16,5 +16,5 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $v in %sassign_dim_003.php on line 3
+Warning: Undefined variable $v (This will become an error in PHP 9.0) in %sassign_dim_003.php on line 3
 NULL

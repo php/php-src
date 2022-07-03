@@ -84,7 +84,7 @@ array(2) {
 --> exchangeArray() with no arg:
 Exception: ArrayObject::exchangeArray() expects exactly 1 argument, 0 given
 
-Warning: Undefined variable $copy in %s on line %d
+Warning: Undefined variable $copy (This will become an error in PHP 9.0) in %s on line %d
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
@@ -106,7 +106,7 @@ NULL
 --> exchangeArray() with bad arg type:
 ArrayObject::exchangeArray(): Argument #1 ($array) must be of type array, null given
 
-Warning: Undefined variable $copy in %s on line %d
+Warning: Undefined variable $copy (This will become an error in PHP 9.0) in %s on line %d
 object(ArrayObject)#3 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#2 (2) {

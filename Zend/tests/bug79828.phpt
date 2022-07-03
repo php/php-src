@@ -8,7 +8,7 @@ function foo(): AnyType {
 foo();
 ?>
 --EXPECTF--
-Warning: Undefined variable $uninitialized in %s on line %d
+Warning: Undefined variable $uninitialized (This will become an error in PHP 9.0) in %s on line %d
 
 Fatal error: Uncaught TypeError: foo(): Return value must be of type AnyType, null returned in %s:%d
 Stack trace:

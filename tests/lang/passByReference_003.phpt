@@ -25,7 +25,7 @@ var_dump($undef2)
 --EXPECTF--
 Passing undefined by value
 
-Warning: Undefined variable $undef1 in %s on line %d
+Warning: Undefined variable $undef1 (This will become an error in PHP 9.0) in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
@@ -34,7 +34,7 @@ NULL
 
 After call
 
-Warning: Undefined variable $undef1 in %s on line %d
+Warning: Undefined variable $undef1 (This will become an error in PHP 9.0) in %s on line %d
 NULL
 
 Passing undefined by reference

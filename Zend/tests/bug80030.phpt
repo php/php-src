@@ -10,7 +10,7 @@ test();
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $className in %s on line %d
+Warning: Undefined variable $className (This will become an error in PHP 9.0) in %s on line %d
 
 Fatal error: Uncaught Error: Class name must be a valid object or a string in %s:%d
 Stack trace:

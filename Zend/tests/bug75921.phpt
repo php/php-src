@@ -47,21 +47,21 @@ unset($null);
 --EXPECTF--
 Attempt to assign property "a" on null
 
-Warning: Undefined variable $null in %s on line %d
+Warning: Undefined variable $null (This will become an error in PHP 9.0) in %s on line %d
 NULL
 Attempt to modify property "a" on null
 
-Warning: Undefined variable $null in %s on line %d
+Warning: Undefined variable $null (This will become an error in PHP 9.0) in %s on line %d
 NULL
 Attempt to modify property "a" on null
 
-Warning: Undefined variable $null in %s on line %d
+Warning: Undefined variable $null (This will become an error in PHP 9.0) in %s on line %d
 NULL
 Attempt to modify property "a" on null
 
-Warning: Undefined variable $null in %s on line %d
+Warning: Undefined variable $null (This will become an error in PHP 9.0) in %s on line %d
 NULL
 Attempt to modify property "a" on null
 
-Warning: Undefined variable $null in %s on line %d
+Warning: Undefined variable $null (This will become an error in PHP 9.0) in %s on line %d
 NULL

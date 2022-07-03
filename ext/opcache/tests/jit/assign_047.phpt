@@ -20,6 +20,6 @@ test()
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $a in %sassign_047.php on line 5
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_047.php on line 5
 DONE
 

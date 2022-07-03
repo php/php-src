@@ -33,7 +33,7 @@ var_dump($x);
 
 ?>
 --EXPECTF--
-Warning: Undefined global variable $x in %s on line %d
+Warning: Undefined global variable $x (This will become an error in PHP 9.0) in %s on line %d
 NULL
 int(1)
 int(2)
@@ -41,7 +41,7 @@ int(4)
 bool(true)
 bool(false)
 
-Warning: Undefined variable $y in %s on line %d
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %s on line %d
 int(4)
 NULL
 array(1) {

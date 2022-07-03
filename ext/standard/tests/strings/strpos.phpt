@@ -271,7 +271,7 @@ bool(false)
 int(7)
 int(7)
 
-Warning: Undefined variable $needleS in %s on line %d
+Warning: Undefined variable $needleS (This will become an error in PHP 9.0) in %s on line %d
 int(0)
 int(7)
 int(7)

@@ -17,6 +17,6 @@ $a[$c] = 'x' ;
 var_dump($a);
 ?>
 --EXPECT--
-Error: Undefined variable $c
-Error: Undefined variable $c
+Error: Undefined variable $c (This will become an error in PHP 9.0)
+Error: Undefined variable $c (This will become an error in PHP 9.0)
 NULL

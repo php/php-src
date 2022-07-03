@@ -19,9 +19,9 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $a in %sbool_not_002.php on line 6
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sbool_not_002.php on line 6
 
-Warning: Undefined variable $a in %sbool_not_002.php on line 6
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sbool_not_002.php on line 6
 
 Deprecated: Implicit conversion from float %f to int loses precision in %sbool_not_002.php on line 6
 

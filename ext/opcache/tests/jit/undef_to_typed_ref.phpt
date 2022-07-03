@@ -88,20 +88,20 @@ try {
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $v in %s on line %d
+Warning: Undefined variable $v (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to reference held by property Test::$x of type string
 
-Warning: Undefined variable $v in %s on line %d
+Warning: Undefined variable $v (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to reference held by property Test::$x of type string
 
-Warning: Undefined variable $v in %s on line %d
+Warning: Undefined variable $v (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to reference held by property Test::$x of type string
 
-Warning: Undefined variable $v in %s on line %d
+Warning: Undefined variable $v (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to reference held by property Test::$x of type string
 
-Warning: Undefined variable $v in %s on line %d
+Warning: Undefined variable $v (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to reference held by property Test::$x of type string
 
-Warning: Undefined variable $v in %s on line %d
+Warning: Undefined variable $v (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to reference held by property Test::$x of type string

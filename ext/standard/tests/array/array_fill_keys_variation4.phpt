@@ -77,7 +77,7 @@ array(1) {
 
 -- Testing array_fill_keys() function with unset var --
 
-Warning: Undefined variable $unset_var in %s on line %d
+Warning: Undefined variable $unset_var (This will become an error in PHP 9.0) in %s on line %d
 array(1) {
   ["one"]=>
   NULL

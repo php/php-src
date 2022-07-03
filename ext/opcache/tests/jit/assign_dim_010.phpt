@@ -18,7 +18,7 @@ test();
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $a in %sassign_dim_010.php on line 4
+Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_dim_010.php on line 4
 
-Warning: Undefined variable $y in %sassign_dim_010.php on line 4
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sassign_dim_010.php on line 4
 DONE

@@ -10,4 +10,4 @@ echo $foo;
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $foo in %s on line 6
+Warning: Undefined variable $foo (This will become an error in PHP 9.0) in %s on line 6

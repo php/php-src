@@ -18,17 +18,17 @@ foo()
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $y in %sreg_alloc_006.php on line 5
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_006.php on line 5
 
-Warning: Undefined variable $y in %sreg_alloc_006.php on line 5
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_006.php on line 5
 
-Warning: Undefined variable $y in %sreg_alloc_006.php on line 5
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_006.php on line 5
 
-Warning: Undefined variable $y in %sreg_alloc_006.php on line 5
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_006.php on line 5
 
-Warning: Undefined variable $y in %sreg_alloc_006.php on line 5
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_006.php on line 5
 
-Warning: Undefined variable $y in %sreg_alloc_006.php on line 5
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_006.php on line 5
 
-Warning: Undefined variable $y in %sreg_alloc_006.php on line 5
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_006.php on line 5
 DONE

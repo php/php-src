@@ -7,7 +7,7 @@ var_dump(array($a));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable $undefined in %s on line %d
+Warning: Undefined variable $undefined (This will become an error in PHP 9.0) in %s on line %d
 array(1) {
   [0]=>
   NULL

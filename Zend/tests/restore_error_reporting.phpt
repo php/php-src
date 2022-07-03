@@ -8,7 +8,7 @@ var_dump($undef_var);
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $undef_var in %s on line %d
+Warning: Undefined variable $undef_var (This will become an error in PHP 9.0) in %s on line %d
 NULL
 
 Fatal error: Cannot use 'self' as class name as it is reserved in %s on line %d

@@ -25,7 +25,7 @@ $a->prop = new B;
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $e in %sfetch_obj_008.php on line 9
+Warning: Undefined variable $e (This will become an error in PHP 9.0) in %sfetch_obj_008.php on line 9
 
 Warning: Attempt to read property "prop" on string in %sfetch_obj_008.php on line 10
 DONE

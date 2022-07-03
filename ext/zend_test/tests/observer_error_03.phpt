@@ -31,7 +31,7 @@ echo 'Done.' . PHP_EOL;
     <!-- init foo() -->
     <foo>
 
-Warning: Undefined variable $this_does_not_exit in %s on line %d
+Warning: Undefined variable $this_does_not_exit (This will become an error in PHP 9.0) in %s on line %d
     </foo:NULL>
 After error.
   </main:NULL>

@@ -24,14 +24,14 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $u1 in %s on line %d
+Warning: Undefined variable $u1 (This will become an error in PHP 9.0) in %s on line %d
 Attempt to assign property "a" on null
 
-Warning: Undefined variable $u2 in %s on line %d
+Warning: Undefined variable $u2 (This will become an error in PHP 9.0) in %s on line %d
 Attempt to increment/decrement property "a" on null
 
-Warning: Undefined variable $u3 in %s on line %d
+Warning: Undefined variable $u3 (This will become an error in PHP 9.0) in %s on line %d
 Attempt to increment/decrement property "a" on null
 
-Warning: Undefined variable $u4 in %s on line %d
+Warning: Undefined variable $u4 (This will become an error in PHP 9.0) in %s on line %d
 Attempt to modify property "a" on null

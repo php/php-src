@@ -15,7 +15,7 @@ test();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ErrorException: Undefined variable $test in %s:%d
+Fatal error: Uncaught ErrorException: Undefined variable $test (This will become an error in PHP 9.0) in %s:%d
 Stack trace:
 #0 %s(%d): {closure}(2, 'Undefined varia...', '%s', 8)
 #1 %s(%d): test()

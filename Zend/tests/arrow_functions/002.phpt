@@ -9,5 +9,5 @@ var_dump((fn() => $b + $c)());
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $c in %s on line %d
+Warning: Undefined variable $c (This will become an error in PHP 9.0) in %s on line %d
 int(1)

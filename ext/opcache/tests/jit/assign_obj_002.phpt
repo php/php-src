@@ -29,8 +29,8 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $undef in %s on line %d
+Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
 NULL
 
-Warning: Undefined variable $undef in %s on line %d
+Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
 Cannot assign null to property Test::$prop2 of type int

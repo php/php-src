@@ -33,7 +33,7 @@ ob_end_flush();
 Warning: session_start(): Cannot find session serialization handler "blah" - session startup failed in %s on line %d
 bool(false)
 
-Warning: Undefined global variable $_SESSION in %s on line %d
+Warning: Undefined global variable $_SESSION (This will become an error in PHP 9.0) in %s on line %d
 NULL
 array(3) {
   ["foo"]=>

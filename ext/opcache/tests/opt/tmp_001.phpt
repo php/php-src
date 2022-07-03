@@ -9,7 +9,7 @@ opcache.optimization_level=-1
 is_a((int)" $y " + 0);
 ?>
 --EXPECTF--
-Warning: Undefined variable $y in %stmp_001.php on line 2
+Warning: Undefined variable $y (This will become an error in PHP 9.0) in %stmp_001.php on line 2
 
 Fatal error: Uncaught ArgumentCountError: is_a() expects at least 2 arguments, 1 given in %stmp_001.php:2
 Stack trace:

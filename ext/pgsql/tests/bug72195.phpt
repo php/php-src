@@ -14,5 +14,5 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $var1 in %s on line %d
+Warning: Undefined variable $var1 (This will become an error in PHP 9.0) in %s on line %d
 pg_pconnect() expects at most 2 arguments, 4 given

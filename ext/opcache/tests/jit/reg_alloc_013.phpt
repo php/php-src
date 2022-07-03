@@ -15,5 +15,5 @@ foo();
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $j in %sreg_alloc_013.php on line 3
+Warning: Undefined variable $j (This will become an error in PHP 9.0) in %sreg_alloc_013.php on line 3
 DONE

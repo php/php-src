@@ -72,10 +72,10 @@ register_shutdown_function(array($obj,'barfoo'));
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $obj in %s on line %d
+Warning: Undefined variable $obj (This will become an error in PHP 9.0) in %s on line %d
 register_shutdown_function(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
 
-Warning: Undefined variable $obj in %s on line %d
+Warning: Undefined variable $obj (This will become an error in PHP 9.0) in %s on line %d
 register_shutdown_function(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
 register_shutdown_function(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
 register_shutdown_function(): Argument #1 ($callback) must be a valid callback, class bar does not have a method "foo"

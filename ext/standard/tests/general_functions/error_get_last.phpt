@@ -22,12 +22,12 @@ NULL
 error_get_last() expects exactly 0 arguments, 1 given
 NULL
 
-Warning: Undefined variable $b in %s on line %d
+Warning: Undefined variable $b (This will become an error in PHP 9.0) in %s on line %d
 array(4) {
   ["type"]=>
   int(2)
   ["message"]=>
-  string(21) "Undefined variable $b"
+  string(60) "Undefined variable $b (This will become an error in PHP 9.0)"
   ["file"]=>
   string(%d) "%s"
   ["line"]=>
