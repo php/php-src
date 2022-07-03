@@ -346,7 +346,7 @@ PHP 8.2 UPGRADE NOTES
   . LOCAL_CREDS (NetBSD)
   . SO_BPF_EXTENSIONS
   . SO_SETFIB
-  . TCP_CONGESTION (Linuux, FreeBSD)
+  . TCP_CONGESTION (Linux, FreeBSD)
 
 ========================================
 11. Changes to INI File Handling
