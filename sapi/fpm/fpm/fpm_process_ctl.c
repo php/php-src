@@ -18,6 +18,7 @@
 #include "fpm_worker_pool.h"
 #include "fpm_scoreboard.h"
 #include "fpm_sockets.h"
+#include "fpm_stdio.h"
 #include "zlog.h"
 
 
@@ -99,6 +100,9 @@ static void fpm_pctl_exec(void)
 	);
 
 	fpm_cleanups_run(FPM_CLEANUP_PARENT_EXEC);
+
+	fpm_stdio_restore_original_stderr(1);
+
 	execvp(saved_argv[0], saved_argv);
 	zlog(ZLOG_SYSERROR, "failed to reload: execvp() failed");
 	exit(FPM_EXIT_SOFTWARE);
