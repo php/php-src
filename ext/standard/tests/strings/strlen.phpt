@@ -137,7 +137,7 @@ String length of '' is => int(0)
 String length of ' ' is => int(1)
 String length of '%0' is => int(1)
 String length of '%00' is => int(2)
-String length of 'ï¿½C' is => int(2)
+String length of '«C' is => int(2)
 String length of '%00' is => int(2)
 String length of '0' is => int(1)
 String length of '0' is => int(1)
@@ -155,7 +155,7 @@ String length of 'Hello, World
 String length of 'Hello, World	' is => int(13)
 String length of 'Hello, World\' is => int(13)
 String length of '              ' is => int(14)
-String length of 'ï¿½ï¿½Aï¿½%0' is => int(5)
+String length of '€êAÿ%0' is => int(5)
 String length of 'abcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+=|?><-;:$
                    []{}{{{}}}[[[[]][]]]***&&&^^%$###@@!!@#$%&^&**/////|\\\
                    abcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+=|?><-;:$
