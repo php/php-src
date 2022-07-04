@@ -254,6 +254,7 @@ DBA_DELETE_FUNC(lmdb)
 
 	php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
 
+	mdb_txn_abort(LMDB_IT(txn));
 	return FAILURE;
 }
 
