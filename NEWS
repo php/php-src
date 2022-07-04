@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0alpha3
 
+- Core:
+  . Uses safe_perealloc instead of perealloc for the
+    ZEND_PTR_STACK_RESIZE_IF_NEEDED to avoid possible overflows. (David Carlier)
+
 - DBA:
   . Fixed LMDB driver hanging when attempting to delete a non-existing key
     (Girgias)
@@ -14,8 +18,14 @@ PHP                                                                        NEWS
 - Sockets:
   . Added TCP_CONGESTION socket option. (David Carlier)
 
+- SPL:
+  . Uses safe_erealloc instead of erealloc to handle heap growth
+    for the SplHeap::insert method to avoid possible overflows. (David Carlier)
+
 - Standard:
   . Fixed the crypt_sha256/512 api build with clang > 12. (David Carlier)
+  . Uses safe_erealloc instead of erealloc to handle options in getopt
+    to avoid possible overflows. (David Carlier)
 
 - Zip:
 
