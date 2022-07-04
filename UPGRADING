@@ -239,6 +239,7 @@ PHP 8.2 UPGRADE NOTES
     mysqli with libmysql and all relevant functionality has been removed.
   . The reconnect property of mysqli_driver has been removed. It was supported only by libmysql.
   . The INI directive mysqli.reconnect has been removed.
+  . The constant MYSQLI_IS_MARIADB has been deprecated.
 
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
