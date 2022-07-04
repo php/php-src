@@ -4,6 +4,8 @@
 
 namespace {
 
+    require "Zend/zend_attributes.stub.php";
+
     interface _ZendTestInterface
     {
     }

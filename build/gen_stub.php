@@ -46,28 +46,54 @@ function processDirectory(string $dir, Context $context): array {
     return $fileInfos;
 }
 
-function processStubFile(string $stubFile, Context $context): ?FileInfo {
+function processStubFile(string $stubFile, Context $context, bool $includeOnly = false): ?FileInfo {
     try {
         if (!file_exists($stubFile)) {
             throw new Exception("File $stubFile does not exist");
         }
 
-        $stubFilenameWithoutExtension = str_replace(".stub.php", "", $stubFile);
-        $arginfoFile = "{$stubFilenameWithoutExtension}_arginfo.h";
-        $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
+        if (!$includeOnly) {
+            $stubFilenameWithoutExtension = str_replace(".stub.php", "", $stubFile);
+            $arginfoFile = "{$stubFilenameWithoutExtension}_arginfo.h";
+            $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
 
-        $stubCode = file_get_contents($stubFile);
-        $stubHash = computeStubHash($stubCode);
-        $oldStubHash = extractStubHash($arginfoFile);
-        if ($stubHash === $oldStubHash && !$context->forceParse) {
-            /* Stub file did not change, do not regenerate. */
-            return null;
+            $stubCode = file_get_contents($stubFile);
+            $stubHash = computeStubHash($stubCode);
+            $oldStubHash = extractStubHash($arginfoFile);
+            if ($stubHash === $oldStubHash && !$context->forceParse) {
+                /* Stub file did not change, do not regenerate. */
+                return null;
+            }
         }
 
-        initPhpParser();
-        $fileInfo = parseStubFile($stubCode);
-        $constInfos = $fileInfo->getAllConstInfos();
-        $context->allConstInfos = array_merge($context->allConstInfos, $constInfos);
+        if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
+            initPhpParser();
+            $fileInfo = parseStubFile($stubCode ?? file_get_contents($stubFile));
+            $context->parsedFiles[$stubFile] = $fileInfo;
+
+            foreach ($fileInfo->dependencies as $dependency) {
+                // TODO add header search path for extensions?
+                $prefixes = [dirname($stubFile) . "/", ""];
+                foreach ($prefixes as $prefix) {
+                    $depFile = $prefix . $dependency;
+                    if (file_exists($depFile)) {
+                        break;
+                    }
+                    $depFile = null;
+                }
+                if (!$depFile) {
+                    throw new Exception("File $stubFile includes a file $dependency which does not exist");
+                }
+                processStubFile($depFile, $context, true);
+            }
+
+            $constInfos = $fileInfo->getAllConstInfos();
+            $context->allConstInfos = array_merge($context->allConstInfos, $constInfos);
+        }
+
+        if ($includeOnly) {
+            return $fileInfo;
+        }
 
         $arginfoCode = generateArgInfoCode(
             basename($stubFilenameWithoutExtension),
@@ -131,6 +157,8 @@ class Context {
     public $forceRegeneration = false;
     /** @var iterable<ConstInfo> */
     public iterable $allConstInfos = [];
+    /** @var FileInfo[] */
+    public array $parsedFiles = [];
 }
 
 class ArrayType extends SimpleType {
@@ -2896,6 +2924,8 @@ class ClassInfo {
 }
 
 class FileInfo {
+    /** @var string[] */
+    public $dependencies = [];
     /** @var ConstInfo[] */
     public $constInfos = [];
     /** @var FuncInfo[] */
@@ -3544,6 +3574,14 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond
             );
             continue;
+        }
+
+        if ($stmt instanceof Stmt\Expression) {
+            $expr = $stmt->expr;
+            if ($expr instanceof Expr\Include_) {
+                $fileInfo->dependencies[] = (string)EvaluatedValue::createFromExpression($expr->expr, null, null, [])->value;
+                continue;
+            }
         }
 
         throw new Exception("Unexpected node {$stmt->getType()}");
