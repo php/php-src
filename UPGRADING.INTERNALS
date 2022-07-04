@@ -39,6 +39,9 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   - zend_object_do_operation_t
 * Added a new zero_position argument to php_stream_fopen_from_fd_rel to reflect
   if this a newly created file so the current file offset needs not to be checked.
+* zend_internal_attribute_register() no longer takes a flags argument nor
+  registers the attribute class directly. Instead specify #[Attribute] with the
+  appropriate target flags in the .stub.php file.
 
 ========================
 2. Build system changes
