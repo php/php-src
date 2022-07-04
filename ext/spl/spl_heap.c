@@ -278,7 +278,7 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 	if (heap->count+1 > heap->max_size) {
 		size_t alloc_size = heap->max_size * heap->elem_size;
 		/* we need to allocate more memory */
-		heap->elements  = erealloc(heap->elements, 2 * alloc_size);
+		heap->elements  = safe_erealloc(heap->elements, 2, alloc_size, 0);
 		memset((char *) heap->elements + alloc_size, 0, alloc_size);
 		heap->max_size *= 2;
 	}
