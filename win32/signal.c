@@ -22,7 +22,7 @@
 /* true globals; only used from main thread and from kernel callback */
 static zval ctrl_handler;
 static DWORD ctrl_evt = (DWORD)-1;
-static bool *vm_interrupt_flag = NULL;
+static zend_atomic_bool *vm_interrupt_flag = NULL;
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
@@ -77,7 +77,7 @@ static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 		return FALSE;
 	}
 
-	(void)InterlockedExchange8(vm_interrupt_flag, 1);
+	zend_atomic_bool_store_ex(vm_interrupt_flag, true);
 
 	ctrl_evt = evt;
 

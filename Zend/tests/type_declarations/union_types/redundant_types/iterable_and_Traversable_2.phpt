@@ -8,4 +8,4 @@ function test(): iterable|Traversable|ArrayAccess {
 
 ?>
 --EXPECTF--
-Fatal error: Type Traversable|ArrayAccess|iterable contains both iterable and Traversable, which is redundant in %s on line %d
+Fatal error: Duplicate type Traversable is redundant in %s on line %d

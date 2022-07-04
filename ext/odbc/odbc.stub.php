@@ -69,10 +69,16 @@ function odbc_result_all($statement, string $format = ""): int|false {}
 /** @param resource $statement */
 function odbc_free_result($statement): bool {}
 
-/** @return resource|false */
+/**
+ * @sensitive-param $password
+ * @return resource|false
+ */
 function odbc_connect(string $dsn, string $user, string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
 
-/** @return resource|false */
+/**
+ * @sensitive-param $password
+ * @return resource|false
+ */
 function odbc_pconnect(string $dsn, string $user, string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
 
 /** @param resource $odbc */
@@ -197,3 +203,11 @@ function odbc_tableprivileges($odbc, ?string $catalog, string $schema, string $t
  */
 function odbc_columnprivileges($odbc, ?string $catalog, string $schema, string $table, string $column) {}
 #endif
+
+/* odbc_utils.c */
+
+function odbc_connection_string_is_quoted(string $str): bool {}
+
+function odbc_connection_string_should_quote(string $str): bool {}
+
+function odbc_connection_string_quote(string $str): string {}

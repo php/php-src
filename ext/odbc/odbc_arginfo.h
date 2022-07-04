@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 27a50ba79ed632721ee458527ef543e4b44ee897 */
+ * Stub hash: 66b702c6f84c0ae63c8aa53c8a667324a71651a0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -245,6 +245,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_columnprivileges, 0, 0, 5)
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_connection_string_is_quoted, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_odbc_connection_string_should_quote arginfo_odbc_connection_string_is_quoted
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_connection_string_quote, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(odbc_close_all);
 ZEND_FUNCTION(odbc_binmode);
@@ -307,6 +317,9 @@ ZEND_FUNCTION(odbc_tableprivileges);
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 ZEND_FUNCTION(odbc_columnprivileges);
 #endif
+ZEND_FUNCTION(odbc_connection_string_is_quoted);
+ZEND_FUNCTION(odbc_connection_string_should_quote);
+ZEND_FUNCTION(odbc_connection_string_quote);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -373,5 +386,14 @@ static const zend_function_entry ext_functions[] = {
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 	ZEND_FE(odbc_columnprivileges, arginfo_odbc_columnprivileges)
 #endif
+	ZEND_FE(odbc_connection_string_is_quoted, arginfo_odbc_connection_string_is_quoted)
+	ZEND_FE(odbc_connection_string_should_quote, arginfo_odbc_connection_string_should_quote)
+	ZEND_FE(odbc_connection_string_quote, arginfo_odbc_connection_string_quote)
 	ZEND_FE_END
 };
+
+static void register_odbc_symbols(int module_number)
+{
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_connect", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_pconnect", 2);
+}

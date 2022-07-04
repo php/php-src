@@ -188,7 +188,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 {
 	int	rv = -1;
 	unsigned char *buf;
-	zend_stat_t   sb;
+	zend_stat_t   sb = {0};
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
 	int no_in_stream = 0;
 

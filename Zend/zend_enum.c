@@ -21,6 +21,7 @@
 #include "zend_compile.h"
 #include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
+#include "zend_enum.h"
 
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
@@ -183,6 +184,73 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 	}
 }
 
+zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
+{
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_ENUM);
+	ZEND_ASSERT(ce->type == ZEND_USER_CLASS);
+
+	uint32_t backing_type = ce->enum_backing_type;
+	ZEND_ASSERT(backing_type != IS_UNDEF);
+
+	HashTable *backed_enum_table = emalloc(sizeof(HashTable));
+	zend_hash_init(backed_enum_table, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_class_set_backed_enum_table(ce, backed_enum_table);
+
+	zend_string *enum_class_name = ce->name;
+
+	zend_string *name;
+	zval *val;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(CE_CONSTANTS_TABLE(ce), name, val) {
+		zend_class_constant *c = Z_PTR_P(val);
+		if ((ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE) == 0) {
+			continue;
+		}
+
+		zval *c_value = &c->value;
+		zval *case_name = zend_enum_fetch_case_name(Z_OBJ_P(c_value));
+		zval *case_value = zend_enum_fetch_case_value(Z_OBJ_P(c_value));
+
+		if (ce->enum_backing_type != Z_TYPE_P(case_value)) {
+			zend_type_error("Enum case type %s does not match enum backing type %s",
+				zend_get_type_by_const(Z_TYPE_P(case_value)),
+				zend_get_type_by_const(ce->enum_backing_type));
+			goto failure;
+		}
+
+		if (ce->enum_backing_type == IS_LONG) {
+			zend_long long_key = Z_LVAL_P(case_value);
+			zval *existing_case_name = zend_hash_index_find(backed_enum_table, long_key);
+			if (existing_case_name) {
+				zend_throw_error(NULL, "Duplicate value in enum %s for cases %s and %s",
+					ZSTR_VAL(enum_class_name),
+					Z_STRVAL_P(existing_case_name),
+					ZSTR_VAL(name));
+				goto failure;
+			}
+			zend_hash_index_add_new(backed_enum_table, long_key, case_name);
+		} else {
+			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+			zend_string *string_key = Z_STR_P(case_value);
+			zval *existing_case_name = zend_hash_find(backed_enum_table, string_key);
+			if (existing_case_name != NULL) {
+				zend_throw_error(NULL, "Duplicate value in enum %s for cases %s and %s",
+					ZSTR_VAL(enum_class_name),
+					Z_STRVAL_P(existing_case_name),
+					ZSTR_VAL(name));
+				goto failure;
+			}
+			zend_hash_add_new(backed_enum_table, string_key, case_name);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return SUCCESS;
+
+failure:
+	zend_hash_release(backed_enum_table);
+	zend_class_set_backed_enum_table(ce, NULL);
+	return FAILURE;
+}
+
 static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 {
 	zend_class_entry *ce = execute_data->func->common.scope;
@@ -207,31 +275,33 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
+ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try)
 {
-	zend_class_entry *ce = execute_data->func->common.scope;
-	zend_string *string_key;
-	zend_long long_key;
+	if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+		if (zend_update_class_constants(ce) == FAILURE) {
+			return FAILURE;
+		}
+	}
+
+	HashTable *backed_enum_table = CE_BACKED_ENUM_TABLE(ce);
+	if (!backed_enum_table) {
+		goto not_found;
+	}
 
 	zval *case_name_zv;
 	if (ce->enum_backing_type == IS_LONG) {
-		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_LONG(long_key)
-		ZEND_PARSE_PARAMETERS_END();
-
-		case_name_zv = zend_hash_index_find(ce->backed_enum_table, long_key);
+		case_name_zv = zend_hash_index_find(backed_enum_table, long_key);
 	} else {
-		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_STR(string_key)
-		ZEND_PARSE_PARAMETERS_END();
-
 		ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
-		case_name_zv = zend_hash_find(ce->backed_enum_table, string_key);
+		ZEND_ASSERT(string_key != NULL);
+		case_name_zv = zend_hash_find(backed_enum_table, string_key);
 	}
 
 	if (case_name_zv == NULL) {
+not_found:
 		if (try) {
-			RETURN_NULL();
+			*result = NULL;
+			return SUCCESS;
 		}
 
 		if (ce->enum_backing_type == IS_LONG) {
@@ -240,7 +310,7 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
 			zend_value_error("\"%s\" is not a valid backing value for enum \"%s\"", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
 		}
-		RETURN_THROWS();
+		return FAILURE;
 	}
 
 	// TODO: We might want to store pointers to constants in backed_enum_table instead of names,
@@ -251,11 +321,74 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 	zval *case_zv = &c->value;
 	if (Z_TYPE_P(case_zv) == IS_CONSTANT_AST) {
 		if (zval_update_constant_ex(case_zv, c->ce) == FAILURE) {
-			RETURN_THROWS();
+			return FAILURE;
 		}
 	}
 
-	ZVAL_COPY(return_value, case_zv);
+	*result = Z_OBJ_P(case_zv);
+	return SUCCESS;
+}
+
+static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
+{
+	zend_class_entry *ce = execute_data->func->common.scope;
+	bool release_string = false;
+	zend_string *string_key = NULL;
+	zend_long long_key = 0;
+
+	if (ce->enum_backing_type == IS_LONG) {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_LONG(long_key)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+
+		if (ZEND_ARG_USES_STRICT_TYPES()) {
+			ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_STR(string_key)
+			ZEND_PARSE_PARAMETERS_END();
+		} else {
+			// We allow long keys so that coercion to string doesn't happen implicitly. The JIT
+			// skips deallocation of params that don't require it. In the case of from/tryFrom
+			// passing int to from(int|string) looks like no coercion will happen, so the JIT
+			// won't emit a dtor call. Thus we allocate/free the string manually.
+			ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_STR_OR_LONG(string_key, long_key)
+			ZEND_PARSE_PARAMETERS_END();
+
+			if (string_key == NULL) {
+				release_string = true;
+				string_key = zend_long_to_str(long_key);
+			}
+		}
+	}
+
+	zend_object *case_obj;
+	if (zend_enum_get_case_by_value(&case_obj, ce, long_key, string_key, try) == FAILURE) {
+		goto throw;
+	}
+
+	if (case_obj == NULL) {
+		ZEND_ASSERT(try);
+		goto return_null;
+	}
+
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_OBJ_COPY(case_obj);
+
+throw:
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_THROWS();
+
+return_null:
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_NULL();
 }
 
 static ZEND_NAMED_FUNCTION(zend_enum_from_func)
@@ -365,8 +498,9 @@ ZEND_API zend_class_entry *zend_register_internal_enum(
 	ce->ce_flags |= ZEND_ACC_ENUM;
 	ce->enum_backing_type = type;
 	if (type != IS_UNDEF) {
-		ce->backed_enum_table = pemalloc(sizeof(HashTable), 1);
-		zend_hash_init(ce->backed_enum_table, 0, NULL, ZVAL_PTR_DTOR, 1);
+		HashTable *backed_enum_table = pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(backed_enum_table, 0, NULL, ZVAL_PTR_DTOR, 1);
+		zend_class_set_backed_enum_table(ce, backed_enum_table);
 	}
 
 	zend_enum_register_props(ce);
@@ -431,12 +565,14 @@ ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, z
 			zval_make_interned_string(value);
 		}
 
+		HashTable *backed_enum_table = CE_BACKED_ENUM_TABLE(ce);
+
 		zval case_name_zv;
 		ZVAL_STR(&case_name_zv, case_name);
 		if (Z_TYPE_P(value) == IS_LONG) {
-			zend_hash_index_add_new(ce->backed_enum_table, Z_LVAL_P(value), &case_name_zv);
+			zend_hash_index_add_new(backed_enum_table, Z_LVAL_P(value), &case_name_zv);
 		} else {
-			zend_hash_add_new(ce->backed_enum_table, Z_STR_P(value), &case_name_zv);
+			zend_hash_add_new(backed_enum_table, Z_STR_P(value), &case_name_zv);
 		}
 	} else {
 		ZEND_ASSERT(ce->enum_backing_type == IS_UNDEF);

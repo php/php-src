@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "zend_attributes.h"
 
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
@@ -33,6 +34,9 @@
 #include "php_odbc_includes.h"
 #include "php_globals.h"
 #include "odbc_arginfo.h"
+
+/* actually lives in main/ */
+#include "php_odbc_utils.h"
 
 #ifdef HAVE_UODBC
 
@@ -479,6 +483,8 @@ PHP_MINIT_FUNCTION(odbc)
 	/* DB2NOEXITLIST env variable prevents DB2 from invoking atexit() */
 	putenv("DB2NOEXITLIST=TRUE");
 #endif
+
+	register_odbc_symbols(module_number);
 
 	return SUCCESS;
 }
@@ -2167,10 +2173,41 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		char    *ldb = 0;
 		int		ldb_len = 0;
 
-		if (strstr((char*)db, ";")) {
+		/* a connection string may have = but not ; - i.e. "DSN=PHP" */
+		if (strstr((char*)db, "=")) {
 			direct = 1;
-			if (uid && !strstr ((char*)db, "uid") && !strstr((char*)db, "UID")) {
-				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid, pwd);
+			/* Force UID and PWD to be set in the DSN */
+			bool is_uid_set = uid && *uid
+				&& !strstr(db, "uid=")
+				&& !strstr(db, "UID=");
+			bool is_pwd_set = pwd && *pwd
+				&& !strstr(db, "pwd=")
+				&& !strstr(db, "PWD=");
+			if (is_uid_set && is_pwd_set) {
+				char *uid_quoted = NULL, *pwd_quoted = NULL;
+				bool should_quote_uid = !php_odbc_connstr_is_quoted(uid) && php_odbc_connstr_should_quote(uid);
+				bool should_quote_pwd = !php_odbc_connstr_is_quoted(pwd) && php_odbc_connstr_should_quote(pwd);
+				if (should_quote_uid) {
+					size_t estimated_length = php_odbc_connstr_estimate_quote_length(uid);
+					uid_quoted = emalloc(estimated_length);
+					php_odbc_connstr_quote(uid_quoted, uid, estimated_length);
+				} else {
+					uid_quoted = uid;
+				}
+				if (should_quote_pwd) {
+					size_t estimated_length = php_odbc_connstr_estimate_quote_length(pwd);
+					pwd_quoted = emalloc(estimated_length);
+					php_odbc_connstr_quote(pwd_quoted, pwd, estimated_length);
+				} else {
+					pwd_quoted = pwd;
+				}
+				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid_quoted, pwd_quoted);
+				if (uid_quoted && should_quote_uid) {
+					efree(uid_quoted);
+				}
+				if (pwd_quoted && should_quote_pwd) {
+					efree(pwd_quoted);
+				}
 			} else {
 				ldb_len = strlen(db)+1;
 				ldb = (char*) emalloc(ldb_len);

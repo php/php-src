@@ -54,6 +54,9 @@ function tidy_get_body(tidy $tidy): ?tidyNode {}
 
 class tidy
 {
+    public ?string $errorBuffer = null;
+    public ?string $value = null;
+
     public function __construct(?string $filename = null, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
 
     /**
@@ -163,6 +166,16 @@ class tidy
 
 final class tidyNode
 {
+    public readonly string $value;
+    public readonly string $name;
+    public readonly int $type;
+    public readonly int $line;
+    public readonly int $column;
+    public readonly bool $proprietary;
+    public readonly ?int $id;
+    public readonly ?array $attribute;
+    public readonly ?array $child;
+
     private function __construct() {}
 
     public function hasChildren(): bool {}

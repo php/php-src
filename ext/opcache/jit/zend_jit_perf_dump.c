@@ -46,6 +46,7 @@ extern unsigned int thr_self(void);
 #endif
 
 #include "zend_elf.h"
+#include "zend_mmap.h"
 
 /*
  * 1) Profile using perf-<pid>.map
@@ -171,8 +172,9 @@ static void zend_jit_perf_jitdump_open(void)
 		return;
 	}
 
+	const size_t page_size = sysconf(_SC_PAGESIZE);
 	jitdump_mem = mmap(NULL,
-			sysconf(_SC_PAGESIZE),
+			page_size,
 			PROT_READ|PROT_EXEC,
 			MAP_PRIVATE, jitdump_fd, 0);
 
@@ -181,6 +183,8 @@ static void zend_jit_perf_jitdump_open(void)
 		jitdump_fd = -1;
 		return;
 	}
+
+	zend_mmap_set_name(jitdump_mem, page_size, "zend_jitdump");
 
 	memset(&jit_hdr, 0, sizeof(jit_hdr));
 	jit_hdr.magic           = ZEND_PERF_JITDUMP_HEADER_MAGIC;

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 54adf746478423b7e7caa09d417fb97bb9621203 */
+ * Stub hash: 1a23b7473e5b4525352445545c6b3ab374c4e949 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -53,8 +53,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_string_or_stdclass_or_n
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
+	ZEND_ARG_OBJ_TYPE_MASK(0, arg1, Traversable, MAY_BE_ARRAY, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, arg2, Traversable, MAY_BE_ARRAY|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_weakmap_attach, 0, 2, _IS_BOOL, 0)
@@ -77,6 +77,19 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_call_method, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_MASK(0, obj_or_class, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, arg1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, arg2, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_ini_parse_quantity, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_test_zend_ini_parse_quantity
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -107,6 +120,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
 
+#define arginfo_class_ZendTestForbidDynamicCall_call arginfo_zend_test_void_return
+
+#define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_void_return
+
 #define arginfo_class_ZendTestNS_Foo_method arginfo_zend_test_void_return
 
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
@@ -134,6 +151,9 @@ static ZEND_FUNCTION(zend_weakmap_dump);
 static ZEND_FUNCTION(zend_get_unit_enum);
 static ZEND_FUNCTION(zend_test_parameter_with_attribute);
 static ZEND_FUNCTION(zend_get_current_func_name);
+static ZEND_FUNCTION(zend_call_method);
+static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
+static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -145,6 +165,8 @@ static ZEND_METHOD(ZendTestParameterAttribute, __construct);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override);
+static ZEND_METHOD(ZendTestForbidDynamicCall, call);
+static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
@@ -171,6 +193,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_get_unit_enum, arginfo_zend_get_unit_enum)
 	ZEND_FE(zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute)
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
+	ZEND_FE(zend_call_method, arginfo_zend_call_method)
+	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
+	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
@@ -226,12 +251,24 @@ static const zend_function_entry class_ZendTestChildClassWithMethodWithParameter
 };
 
 
+static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
+	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_ZendTestUnitEnum_methods[] = {
 	ZEND_FE_END
 };
 
 
 static const zend_function_entry class_ZendTestStringEnum_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestIntEnum_methods[] = {
 	ZEND_FE_END
 };
 
@@ -394,6 +431,17 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 	return class_entry;
 }
 
+static zend_class_entry *register_class_ZendTestForbidDynamicCall(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestForbidDynamicCall", class_ZendTestForbidDynamicCall_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_ZendTestUnitEnum(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, class_ZendTestUnitEnum_methods);
@@ -422,6 +470,30 @@ static zend_class_entry *register_class_ZendTestStringEnum(void)
 	zval enum_case_Baz_value;
 	zend_string *enum_case_Baz_value_str = zend_string_init("Test2\\a", sizeof("Test2\\a") - 1, 1);
 	ZVAL_STR(&enum_case_Baz_value, enum_case_Baz_value_str);
+	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
+
+	zval enum_case_FortyTwo_value;
+	zend_string *enum_case_FortyTwo_value_str = zend_string_init("42", sizeof("42") - 1, 1);
+	ZVAL_STR(&enum_case_FortyTwo_value, enum_case_FortyTwo_value_str);
+	zend_enum_add_case_cstr(class_entry, "FortyTwo", &enum_case_FortyTwo_value);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestIntEnum(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestIntEnum", IS_LONG, class_ZendTestIntEnum_methods);
+
+	zval enum_case_Foo_value;
+	ZVAL_LONG(&enum_case_Foo_value, 1);
+	zend_enum_add_case_cstr(class_entry, "Foo", &enum_case_Foo_value);
+
+	zval enum_case_Bar_value;
+	ZVAL_LONG(&enum_case_Bar_value, 3);
+	zend_enum_add_case_cstr(class_entry, "Bar", &enum_case_Bar_value);
+
+	zval enum_case_Baz_value;
+	ZVAL_LONG(&enum_case_Baz_value, -1);
 	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
 
 	return class_entry;

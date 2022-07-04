@@ -6,6 +6,7 @@ pdo
 <?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
+if (str_starts_with(getenv('PDOTEST_DSN'), "firebird")) die('xfail firebird driver does not behave as expected');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>

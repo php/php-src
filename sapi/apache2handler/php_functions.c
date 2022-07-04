@@ -317,7 +317,7 @@ PHP_FUNCTION(apache_getenv)
 }
 /* }}} */
 
-static char *php_apache_get_version()
+static char *php_apache_get_version(void)
 {
 #if MODULE_MAGIC_NUMBER_MAJOR >= 20060905
 	return (char *) ap_get_server_banner();

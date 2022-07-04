@@ -47,6 +47,32 @@
 #include "zend_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
+
+#ifdef PHP_ICONV_IMPL
+#define PHP_ICONV_IMPL_VALUE PHP_ICONV_IMPL
+#elif HAVE_LIBICONV
+#define PHP_ICONV_IMPL_VALUE "libiconv"
+#else
+#define PHP_ICONV_IMPL_VALUE "unknown"
+#endif
+
+char *get_iconv_version(void) {
+	char *version = "unknown";
+
+#ifdef HAVE_LIBICONV
+	static char buf[16];
+	snprintf(buf, sizeof(buf), "%d.%d", _libiconv_version >> 8, _libiconv_version & 0xff);
+	version = buf;
+#elif HAVE_GLIBC_ICONV
+	version = (char *) gnu_get_libc_version();
+#endif
+
+	return version;
+}
+
+#define PHP_ICONV_MIME_DECODE_STRICT            (1<<0)
+#define PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR (1<<1)
+
 #include "iconv_arginfo.h"
 
 #define _php_iconv_memequal(a, b, c) \
@@ -103,9 +129,6 @@ typedef enum _php_iconv_enc_scheme_t {
 	PHP_ICONV_ENC_SCHEME_QPRINT
 } php_iconv_enc_scheme_t;
 /* }}} */
-
-#define PHP_ICONV_MIME_DECODE_STRICT            (1<<0)
-#define PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR (1<<1)
 
 /* {{{ prototypes */
 static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l, iconv_t cd);
@@ -186,36 +209,13 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(miconv)
 {
-	char *version = "unknown";
-
 	REGISTER_INI_ENTRIES();
-
-#ifdef HAVE_LIBICONV
-	{
-		static char buf[16];
-		snprintf(buf, sizeof(buf), "%d.%d",
-			_libiconv_version >> 8, _libiconv_version & 0xff);
-		version = buf;
-	}
-#elif HAVE_GLIBC_ICONV
-	version = (char *)gnu_get_libc_version();
-#endif
-
-#ifdef PHP_ICONV_IMPL
-	REGISTER_STRING_CONSTANT("ICONV_IMPL", PHP_ICONV_IMPL, CONST_CS | CONST_PERSISTENT);
-#elif HAVE_LIBICONV
-	REGISTER_STRING_CONSTANT("ICONV_IMPL", "libiconv", CONST_CS | CONST_PERSISTENT);
-#else
-	REGISTER_STRING_CONSTANT("ICONV_IMPL", "unknown", CONST_CS | CONST_PERSISTENT);
-#endif
-	REGISTER_STRING_CONSTANT("ICONV_VERSION", version, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_STRICT", PHP_ICONV_MIME_DECODE_STRICT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_CONTINUE_ON_ERROR", PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
 	if (php_iconv_stream_filter_register_factory() != PHP_ICONV_ERR_SUCCESS) {
 		return FAILURE;
 	}
+
+	register_iconv_symbols(module_number);
 
 	php_output_handler_alias_register(ZEND_STRL("ob_iconv_handler"), php_iconv_output_handler_init);
 	php_output_handler_conflict_register(ZEND_STRL("ob_iconv_handler"), php_iconv_output_conflict);

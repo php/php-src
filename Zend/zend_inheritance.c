@@ -328,21 +328,6 @@ static bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 	return 0;
 }
 
-static bool zend_type_contains_traversable(zend_type type) {
-	zend_type *single_type;
-	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
-		return 1;
-	}
-
-	ZEND_TYPE_FOREACH(type, single_type) {
-		if (ZEND_TYPE_HAS_NAME(*single_type)
-				&& zend_string_equals_literal_ci(ZEND_TYPE_NAME(*single_type), "Traversable")) {
-			return 1;
-		}
-	} ZEND_TYPE_FOREACH_END();
-	return 0;
-}
-
 static bool zend_type_permits_self(
 		zend_type type, zend_class_entry *scope, zend_class_entry *self) {
 	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
@@ -473,15 +458,6 @@ static inheritance_status zend_is_class_subtype_of_type(
 			return INHERITANCE_SUCCESS;
 		}
 	}
-	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_ITERABLE) {
-		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
-		if (!fe_ce) {
-			have_unresolved = 1;
-		} else if (unlinked_instanceof(fe_ce, zend_ce_traversable)) {
-			track_class_dependency(fe_ce, fe_class_name);
-			return INHERITANCE_SUCCESS;
-		}
-	}
 
 	zend_type *single_type;
 
@@ -567,18 +543,6 @@ static inheritance_status zend_perform_covariant_type_check(
 	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
 	uint32_t added_types = fe_type_mask & ~proto_type_mask;
 	if (added_types) {
-		// TODO: Make "iterable" an alias of "array|Traversable" instead,
-		// so these special cases will be handled automatically.
-		if ((added_types & MAY_BE_ITERABLE)
-				&& (proto_type_mask & MAY_BE_ARRAY)
-				&& zend_type_contains_traversable(proto_type)) {
-			/* Replacing array|Traversable with iterable is okay */
-			added_types &= ~MAY_BE_ITERABLE;
-		}
-		if ((added_types & MAY_BE_ARRAY) && (proto_type_mask & MAY_BE_ITERABLE)) {
-			/* Replacing iterable with array is okay */
-			added_types &= ~MAY_BE_ARRAY;
-		}
 		if ((added_types & MAY_BE_STATIC)
 				&& zend_type_permits_self(proto_type, proto_scope, fe_scope)) {
 			/* Replacing type that accepts self with static is okay */
@@ -605,8 +569,7 @@ static inheritance_status zend_perform_covariant_type_check(
 		 * We still perform a class lookup for forward-compatibility reasons,
 		 * as we may have named types in the future that are not classes
 		 * (such as typedefs). */
-		if (proto_type_mask & (MAY_BE_OBJECT|MAY_BE_ITERABLE)) {
-			bool any_class = (proto_type_mask & MAY_BE_OBJECT) != 0;
+		if (proto_type_mask & MAY_BE_OBJECT) {
 			ZEND_TYPE_FOREACH(fe_type, single_type) {
 				zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
 				if (!fe_class_name) {
@@ -614,10 +577,8 @@ static inheritance_status zend_perform_covariant_type_check(
 				}
 				zend_class_entry *fe_ce = lookup_class(fe_scope, fe_class_name);
 				if (fe_ce) {
-					if (any_class || unlinked_instanceof(fe_ce, zend_ce_traversable)) {
-						track_class_dependency(fe_ce, fe_class_name);
-						return INHERITANCE_SUCCESS;
-					}
+					track_class_dependency(fe_ce, fe_class_name);
+					return INHERITANCE_SUCCESS;
 				} else {
 					have_unresolved = true;
 				}
@@ -1428,6 +1389,13 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 				ZSTR_VAL(ce->name), parent_ce->ce_flags & ZEND_ACC_INTERFACE ? "interface" : "trait", ZSTR_VAL(parent_ce->name)
 			);
 		}
+	}
+
+	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_READONLY_CLASS) != (parent_ce->ce_flags & ZEND_ACC_READONLY_CLASS))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "%s class %s cannot extend %s class %s",
+			ce->ce_flags & ZEND_ACC_READONLY_CLASS ? "Readonly" : "Non-readonly", ZSTR_VAL(ce->name),
+			parent_ce->ce_flags & ZEND_ACC_READONLY_CLASS ? "readonly" : "non-readonly", ZSTR_VAL(parent_ce->name)
+		);
 	}
 
 	if (ce->parent_name) {

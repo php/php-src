@@ -152,7 +152,9 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #ifdef SIGPOLL
 	REGISTER_LONG_CONSTANT("SIGPOLL",  (zend_long) SIGPOLL, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef SIGIO
 	REGISTER_LONG_CONSTANT("SIGIO",    (zend_long) SIGIO, CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef SIGPWR
 	REGISTER_LONG_CONSTANT("SIGPWR",   (zend_long) SIGPWR, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -1383,7 +1385,7 @@ static void pcntl_signal_handler(int signo)
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = 1;
 	if (PCNTL_G(async_signals)) {
-		EG(vm_interrupt) = 1;
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 	}
 }
 

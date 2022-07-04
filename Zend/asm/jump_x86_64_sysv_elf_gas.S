@@ -24,12 +24,18 @@
  *                                                                                      *
  ****************************************************************************************/
 
+# if defined __CET__
+#  include <cet.h>
+# else
+#  define _CET_ENDBR
+# endif
 .file "jump_x86_64_sysv_elf_gas.S"
 .text
 .globl jump_fcontext
 .type jump_fcontext,@function
 .align 16
 jump_fcontext:
+    _CET_ENDBR
     leaq  -0x38(%rsp), %rsp /* prepare stack */
 
 #if !defined(BOOST_USE_TSX)

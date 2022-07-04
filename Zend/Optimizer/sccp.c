@@ -1563,7 +1563,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SET_RESULT(result, op1);
 			break;
 		case ZEND_JMP_NULL:
-			switch (opline->extended_value) {
+			switch (opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK) {
 				case ZEND_SHORT_CIRCUITING_CHAIN_EXPR:
 					ZVAL_NULL(&zv);
 					break;
@@ -1721,7 +1721,7 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	}
 
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_NULL))) {
-		if (ssa->vars[var_num].definition >= 0 
+		if (ssa->vars[var_num].definition >= 0
 		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
 			return NULL;
 		}
@@ -1729,10 +1729,18 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 		return tmp;
 	}
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_FALSE))) {
+		if (ssa->vars[var_num].definition >= 0
+		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
+			return NULL;
+		}
 		ZVAL_FALSE(tmp);
 		return tmp;
 	}
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_TRUE))) {
+		if (ssa->vars[var_num].definition >= 0
+		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
+			return NULL;
+		}
 		ZVAL_TRUE(tmp);
 		return tmp;
 	}
@@ -2067,8 +2075,39 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				}
 				return 0;
 			}
-			if (ssa_op->op1_def >= 0
-					|| ssa_op->op2_def >= 0) {
+			if (ssa_op->op1_def >= 0 || ssa_op->op2_def >= 0) {
+				if (var->use_chain < 0 && var->phi_use_chain == NULL) {
+					switch (opline->opcode) {
+						case ZEND_ASSIGN:
+						case ZEND_ASSIGN_REF:
+						case ZEND_ASSIGN_DIM:
+						case ZEND_ASSIGN_OBJ:
+						case ZEND_ASSIGN_OBJ_REF:
+						case ZEND_ASSIGN_STATIC_PROP:
+						case ZEND_ASSIGN_STATIC_PROP_REF:
+						case ZEND_ASSIGN_OP:
+						case ZEND_ASSIGN_DIM_OP:
+						case ZEND_ASSIGN_OBJ_OP:
+						case ZEND_ASSIGN_STATIC_PROP_OP:
+						case ZEND_PRE_INC:
+						case ZEND_PRE_DEC:
+						case ZEND_PRE_INC_OBJ:
+						case ZEND_PRE_DEC_OBJ:
+						case ZEND_DO_ICALL:
+						case ZEND_DO_UCALL:
+						case ZEND_DO_FCALL_BY_NAME:
+						case ZEND_DO_FCALL:
+						case ZEND_INCLUDE_OR_EVAL:
+						case ZEND_YIELD:
+						case ZEND_YIELD_FROM:
+						case ZEND_ASSERT_CHECK:
+							opline->result_type = IS_UNUSED;
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							break;
+						default:
+							break;
+					}	
+				}
 				/* we cannot remove instruction that defines other variables */
 				return 0;
 			} else if (opline->opcode == ZEND_JMPZ_EX

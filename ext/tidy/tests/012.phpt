@@ -148,7 +148,7 @@ object(tidyNode)#5 (9) {
       ["child"]=>
       array(1) {
         [0]=>
-        object(tidyNode)#7 (8) {
+        object(tidyNode)#7 (9) {
           ["value"]=>
           string(2) "Hi"
           ["name"]=>
@@ -161,6 +161,8 @@ object(tidyNode)#5 (9) {
           int(46)
           ["proprietary"]=>
           bool(false)
+          ["id"]=>
+          NULL
           ["attribute"]=>
           NULL
           ["child"]=>
@@ -189,7 +191,7 @@ object(tidyNode)#5 (9) {
       ["child"]=>
       array(2) {
         [0]=>
-        object(tidyNode)#9 (8) {
+        object(tidyNode)#9 (9) {
           ["value"]=>
           string(3) "Bye"
           ["name"]=>
@@ -202,6 +204,8 @@ object(tidyNode)#5 (9) {
           int(55)
           ["proprietary"]=>
           bool(false)
+          ["id"]=>
+          NULL
           ["attribute"]=>
           NULL
           ["child"]=>
@@ -228,7 +232,7 @@ object(tidyNode)#5 (9) {
           ["child"]=>
           array(1) {
             [0]=>
-            object(tidyNode)#11 (8) {
+            object(tidyNode)#11 (9) {
               ["value"]=>
               string(4) "Test"
               ["name"]=>
@@ -241,6 +245,8 @@ object(tidyNode)#5 (9) {
               int(61)
               ["proprietary"]=>
               bool(false)
+              ["id"]=>
+              NULL
               ["attribute"]=>
               NULL
               ["child"]=>
@@ -273,7 +279,7 @@ object(tidyNode)#6 (9) {
   ["child"]=>
   array(1) {
     [0]=>
-    object(tidyNode)#7 (8) {
+    object(tidyNode)#7 (9) {
       ["value"]=>
       string(2) "Hi"
       ["name"]=>
@@ -286,6 +292,8 @@ object(tidyNode)#6 (9) {
       int(46)
       ["proprietary"]=>
       bool(false)
+      ["id"]=>
+      NULL
       ["attribute"]=>
       NULL
       ["child"]=>
@@ -294,7 +302,7 @@ object(tidyNode)#6 (9) {
   }
 }
 bool(true)
-object(tidyNode)#7 (8) {
+object(tidyNode)#7 (9) {
   ["value"]=>
   string(2) "Hi"
   ["name"]=>
@@ -307,6 +315,8 @@ object(tidyNode)#7 (8) {
   int(46)
   ["proprietary"]=>
   bool(false)
+  ["id"]=>
+  NULL
   ["attribute"]=>
   NULL
   ["child"]=>
@@ -332,7 +342,7 @@ object(tidyNode)#8 (9) {
   ["child"]=>
   array(2) {
     [0]=>
-    object(tidyNode)#9 (8) {
+    object(tidyNode)#9 (9) {
       ["value"]=>
       string(3) "Bye"
       ["name"]=>
@@ -345,6 +355,8 @@ object(tidyNode)#8 (9) {
       int(55)
       ["proprietary"]=>
       bool(false)
+      ["id"]=>
+      NULL
       ["attribute"]=>
       NULL
       ["child"]=>
@@ -371,7 +383,7 @@ object(tidyNode)#8 (9) {
       ["child"]=>
       array(1) {
         [0]=>
-        object(tidyNode)#11 (8) {
+        object(tidyNode)#11 (9) {
           ["value"]=>
           string(4) "Test"
           ["name"]=>
@@ -384,6 +396,8 @@ object(tidyNode)#8 (9) {
           int(61)
           ["proprietary"]=>
           bool(false)
+          ["id"]=>
+          NULL
           ["attribute"]=>
           NULL
           ["child"]=>
@@ -394,7 +408,7 @@ object(tidyNode)#8 (9) {
   }
 }
 bool(true)
-object(tidyNode)#9 (8) {
+object(tidyNode)#9 (9) {
   ["value"]=>
   string(3) "Bye"
   ["name"]=>
@@ -407,6 +421,8 @@ object(tidyNode)#9 (8) {
   int(55)
   ["proprietary"]=>
   bool(false)
+  ["id"]=>
+  NULL
   ["attribute"]=>
   NULL
   ["child"]=>
@@ -432,7 +448,7 @@ object(tidyNode)#10 (9) {
   ["child"]=>
   array(1) {
     [0]=>
-    object(tidyNode)#11 (8) {
+    object(tidyNode)#11 (9) {
       ["value"]=>
       string(4) "Test"
       ["name"]=>
@@ -445,6 +461,8 @@ object(tidyNode)#10 (9) {
       int(61)
       ["proprietary"]=>
       bool(false)
+      ["id"]=>
+      NULL
       ["attribute"]=>
       NULL
       ["child"]=>
@@ -453,7 +471,7 @@ object(tidyNode)#10 (9) {
   }
 }
 bool(true)
-object(tidyNode)#11 (8) {
+object(tidyNode)#11 (9) {
   ["value"]=>
   string(4) "Test"
   ["name"]=>
@@ -466,6 +484,8 @@ object(tidyNode)#11 (8) {
   int(61)
   ["proprietary"]=>
   bool(false)
+  ["id"]=>
+  NULL
   ["attribute"]=>
   NULL
   ["child"]=>

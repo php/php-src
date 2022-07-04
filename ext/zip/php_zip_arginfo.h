@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f6542fda12c523584d476d2b733b4ccc0ffffe32 */
+ * Stub hash: f8ec36ea62bfbdb74cfa6472227e08d9282413a2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -529,6 +529,14 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *property_comment_name = zend_string_init("comment", sizeof("comment") - 1, 1);
 	zend_declare_typed_property(class_entry, property_comment_name, &property_comment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_comment_name);
+
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setpassword", 0);
+#if defined(HAVE_ENCRYPTION)
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setencryptionname", 2);
+#endif
+#if defined(HAVE_ENCRYPTION)
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setencryptionindex", 2);
+#endif
 
 	return class_entry;
 }

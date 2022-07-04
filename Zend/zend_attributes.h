@@ -116,6 +116,19 @@ static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend
 	return zend_add_attribute(&c->attributes, name, argc, flags, 0, 0);
 }
 
+static zend_always_inline zend_attribute *zend_mark_function_parameter_as_sensitive(const HashTable *table, const char *func_name, uint32_t parameter)
+{
+	zend_function *func = zend_hash_str_find_ptr(table, func_name, strlen(func_name));
+	ZEND_ASSERT(func != NULL);
+
+	return zend_add_parameter_attribute(
+		func,
+		parameter,
+		zend_ce_sensitive_parameter->name,
+		0
+	);
+}
+
 void zend_register_attribute_ce(void);
 void zend_attributes_shutdown(void);
 

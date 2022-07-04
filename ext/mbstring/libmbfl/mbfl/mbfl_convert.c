@@ -348,11 +348,9 @@ int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-zend_string* mb_fast_convert(zend_string *str, const mbfl_encoding *from, const mbfl_encoding *to, uint32_t replacement_char, unsigned int error_mode, unsigned int *num_errors)
+zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encoding *from, const mbfl_encoding *to, uint32_t replacement_char, unsigned int error_mode, unsigned int *num_errors)
 {
 	uint32_t wchar_buf[128];
-	unsigned char *in = (unsigned char*)ZSTR_VAL(str);
-	size_t in_len = ZSTR_LEN(str);
 	unsigned int state = 0;
 
 	mb_convert_buf buf;
@@ -360,6 +358,7 @@ zend_string* mb_fast_convert(zend_string *str, const mbfl_encoding *from, const 
 
 	while (in_len) {
 		size_t out_len = from->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
 		to->from_wchar(wchar_buf, out_len, &buf, !in_len);
 	}
 

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2021 Derick Rethans
+ * Copyright (c) 2015-2022 Derick Rethans
  * Copyright (c) 2018,2021 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,9 +30,9 @@
 # include "timelib_config.h"
 #endif
 
-#define TIMELIB_VERSION 202111
-#define TIMELIB_EXTENDED_VERSION 20211101
-#define TIMELIB_ASCII_VERSION "2021.11"
+#define TIMELIB_VERSION 202112
+#define TIMELIB_EXTENDED_VERSION 20211201
+#define TIMELIB_ASCII_VERSION "2021.12"
 
 #include <stdlib.h>
 #include <stdbool.h>

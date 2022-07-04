@@ -266,8 +266,9 @@ retry:
 
 static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
 {
-	if ((filter->status & 0xF) == 1) {
-		/* 2-byte (JIS X 0208 or 0212) character was truncated */
+	if (filter->status & 0xF) {
+		/* 2-byte (JIS X 0208 or 0212) character was truncated,
+		 * or else escape sequence was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 	return 0;
@@ -462,6 +463,8 @@ mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter)
 
 static size_t mb_iso2022jp_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
+	ZEND_ASSERT(bufsize >= 3);
+
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 

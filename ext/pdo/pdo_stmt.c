@@ -1551,8 +1551,10 @@ PHP_METHOD(PDOStatement, errorInfo)
 	array_init(return_value);
 	add_next_index_string(return_value, stmt->error_code);
 
-	if (stmt->dbh->methods->fetch_err) {
-		stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value);
+	if (strncmp(stmt->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE))) {
+		if (stmt->dbh->methods->fetch_err) {
+			stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value);
+		}
 	}
 
 	error_count = zend_hash_num_elements(Z_ARRVAL_P(return_value));

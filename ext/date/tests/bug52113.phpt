@@ -89,9 +89,9 @@ string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h"
   ["from_string"]=>
   bool(false)
 }
-object(DatePeriod)#%d (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTime)#%d (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -130,6 +130,8 @@ object(DatePeriod)#%d (6) {
   int(3)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
 object(DateInterval)#%d (%d) {
   ["y"]=>
@@ -153,9 +155,9 @@ object(DateInterval)#%d (%d) {
   ["from_string"]=>
   bool(false)
 }
-object(DatePeriod)#%d (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTime)#%d (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -194,4 +196,6 @@ object(DatePeriod)#%d (6) {
   int(3)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }

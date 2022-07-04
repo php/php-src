@@ -26,6 +26,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_filestat.h"
+#include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
@@ -685,7 +686,7 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 		 * able to filter directories out.
 		 */
 		if (flags & GLOB_ONLYDIR) {
-			zend_stat_t s;
+			zend_stat_t s = {0};
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
 				continue;
@@ -757,7 +758,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 		/* only the files, directories are ignored */
 		for (i = 0; i < files_cnt; i++) {
-			zend_stat_t s;
+			zend_stat_t s = {0};
 			char   fullpath[MAXPATHLEN];
 			size_t    namelist_len = ZSTR_LEN(namelist[i]);
 
@@ -1482,7 +1483,7 @@ PHP_METHOD(ZipArchive, open)
 #else
 	if ((flags & ZIP_TRUNCATE) == 0) {
 #endif
-		zend_stat_t st;
+		zend_stat_t st = {0};
 
 		/* exists and is empty */
 		if (VCWD_STAT(resolved_path, &st) == 0 && st.st_size == 0) {
@@ -1570,6 +1571,9 @@ PHP_METHOD(ZipArchive, close)
 		ze_obj->err_zip = 0;
 		ze_obj->err_sys = 0;
 	}
+
+	/* clear cache as empty zip are not created but deleted */
+	php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);
 
 	efree(ze_obj->filename);
 	ze_obj->filename = NULL;

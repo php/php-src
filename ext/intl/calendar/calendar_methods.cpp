@@ -115,11 +115,11 @@ public:
 		uenum_close(uenum);
 	}
 
-	int32_t count(UErrorCode& status) const {
+	int32_t count(UErrorCode& status) const override {
 		return uenum_count(uenum, &status);
 	}
 
-	virtual const UnicodeString* snext(UErrorCode& status)
+	const UnicodeString* snext(UErrorCode& status) override
 	{
 		int32_t length;
 		const UChar* str = uenum_unext(uenum, &length, &status);
@@ -129,7 +129,7 @@ public:
 		return &unistr.setTo(str, length);
 	}
 
-	virtual const char* next(int32_t *resultLength, UErrorCode &status)
+	const char* next(int32_t *resultLength, UErrorCode &status) override
 	{
 		int32_t length = -1;
 		const char* str = uenum_next(uenum, &length, &status);
@@ -144,12 +144,12 @@ public:
 		return str;
 	}
 
-	void reset(UErrorCode& status)
+	void reset(UErrorCode& status) override
 	{
 		uenum_reset(uenum, &status);
 	}
 
-	virtual UClassID getDynamicClassID() const;
+	UClassID getDynamicClassID() const override;
 
 	static UClassID U_EXPORT2 getStaticClassID();
 

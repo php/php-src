@@ -24,6 +24,7 @@
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
+#include "zend_mmap.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -141,7 +142,7 @@ typedef struct {
 
 /* These functions are defined in assembler files provided by boost.context (located in "Zend/asm"). */
 extern void *make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
-extern boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
+extern ZEND_INDIRECT_RETURN boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
 #endif
 
 ZEND_API zend_class_entry *zend_ce_fiber;
@@ -210,6 +211,8 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 		zend_throw_exception_ex(NULL, 0, "Fiber stack allocate failed: mmap failed: %s (%d)", strerror(errno), errno);
 		return NULL;
 	}
+
+	zend_mmap_set_name(pointer, alloc_size, "zend_fiber_stack");
 
 # if ZEND_FIBER_GUARD_PAGES
 	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {

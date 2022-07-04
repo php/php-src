@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d10dbdfd55eb4a4dc779cbf4fa000cdf4fb3539 */
+ * Stub hash: 5d26f6875ff2704506a9f94b171adbe13aa40483 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -102,6 +102,8 @@ static zend_class_entry *register_class_PDO(void)
 	INIT_CLASS_ENTRY(ce, "PDO", class_PDO_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "__construct", 2);
 
 	return class_entry;
 }

@@ -22,9 +22,8 @@ var_dump(dl_test_test2("World!"));
 ini_set("dl_test.long", "1");
 ini_set("dl_test.string", "world");
 
-// ini_get() gets optimized out, so we use ini_get_all() here
-var_dump(ini_get_all()["dl_test.long"]["local_value"]);
-var_dump(ini_get_all()["dl_test.string"]["local_value"]);
+var_dump(ini_get("dl_test.long"));
+var_dump(ini_get("dl_test.string"));
 
 echo "OK\n";
 --EXPECT--

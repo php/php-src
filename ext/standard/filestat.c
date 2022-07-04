@@ -740,8 +740,8 @@ PHP_FUNCTION(clearstatcache)
 /* {{{ php_stat */
 PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 {
-	zend_stat_t *stat_sb;
-	php_stream_statbuf ssb;
+	zend_stat_t *stat_sb = {0};
+	php_stream_statbuf ssb = {0};
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	const char *local = NULL;
 	php_stream_wrapper *wrapper = NULL;

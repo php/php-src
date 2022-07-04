@@ -11,9 +11,9 @@ $functions = [
     function(): bool {},
     function(): array {},
     function(): callable {},
-    function(): iterable {},
     function(): null {},
     function(): false {},
+    function(): true {},
     function(): StdClass {}
 ];
 
@@ -31,7 +31,7 @@ string(6) "string"
 string(4) "bool"
 string(5) "array"
 string(8) "callable"
-string(8) "iterable"
 string(4) "null"
 string(5) "false"
+string(4) "true"
 string(8) "StdClass"

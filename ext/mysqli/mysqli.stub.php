@@ -13,8 +13,6 @@ final class mysqli_driver
     /** @readonly */
     public int $driver_version;
 
-    public bool $reconnect = false;
-
     public int $report_mode = 0;
 }
 
@@ -128,6 +126,7 @@ class mysqli
      */
     public int $warning_count;
 
+    /** @sensitive-param $password */
     public function __construct(
         ?string $hostname = null,
         ?string $username = null,
@@ -150,6 +149,7 @@ class mysqli
     public function begin_transaction(int $flags = 0, ?string $name = null): bool {}
 
     /**
+     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_change_user
      */
@@ -175,6 +175,7 @@ class mysqli
     public function commit(int $flags = 0, ?string $name = null): bool {}
 
     /**
+     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_connect
      * @no-verify
@@ -214,14 +215,12 @@ class mysqli
      */
     public function get_client_info(): string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @return array<string, mixed>
      * @tentative-return-type
      * @alias mysqli_get_connection_stats
      */
     public function get_connection_stats(): array {}
-#endif
 
     /**
      * @tentative-return-type
@@ -271,13 +270,11 @@ class mysqli
      */
     public function ping(): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_poll
      */
     public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
-#endif
 
     /**
      * @tentative-return-type
@@ -292,6 +289,7 @@ class mysqli
     public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
     /**
+     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_real_connect
      */
@@ -311,13 +309,11 @@ class mysqli
      */
     public function real_escape_string(string $string): string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_reap_async_query
      */
     public function reap_async_query(): mysqli_result|bool {}
-#endif
 
     /**
      * @tentative-return-type
@@ -665,13 +661,11 @@ class mysqli_stmt
      */
     public function result_metadata(): mysqli_result|false {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_stmt_more_results
      */
     public function more_results(): bool {}
-#endif
 
     /**
      * @tentative-return-type
@@ -715,13 +709,11 @@ class mysqli_stmt
      */
     public function store_result(): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_stmt_get_result
      */
     public function get_result(): mysqli_result|false {}
-#endif
 }
 
 final class mysqli_warning
@@ -751,17 +743,20 @@ function mysqli_autocommit(mysqli $mysql, bool $enable): bool {}
 
 function mysqli_begin_transaction(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
+/** @sensitive-param $password */
 function mysqli_change_user(mysqli $mysql, string $username, string $password, ?string $database): bool {}
 
 /** @refcount 1 */
 function mysqli_character_set_name(mysqli $mysql): string {}
 
-/** @return true */
-function mysqli_close(mysqli $mysql): bool {} // TODO make return type void
+function mysqli_close(mysqli $mysql): true {} // TODO make return type void
 
 function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @sensitive-param $password
+ */
 function mysqli_connect(
     ?string $hostname = null,
     ?string $username = null,
@@ -780,8 +775,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
-/** @return true */
-function mysqli_debug(string $options): bool {} // TODO make return type void
+function mysqli_debug(string $options): true {} // TODO make return type void
 
 function mysqli_errno(mysqli $mysql): int {}
 
@@ -854,7 +848,6 @@ function mysqli_field_tell(mysqli_result $result): int {}
 
 function mysqli_free_result(mysqli_result $result): void {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /**
  * @return array<string, mixed>
  * @refcount 1
@@ -866,7 +859,6 @@ function mysqli_get_connection_stats(mysqli $mysql): array {}
  * @refcount 1
  */
 function mysqli_get_client_stats(): array {}
-#endif
 
 /** @refcount 1 */
 function mysqli_get_charset(mysqli $mysql): ?object {}
@@ -928,9 +920,7 @@ function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
 
 function mysqli_ping(mysqli $mysql): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
-#endif
 
 /** @refcount 1 */
 function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
@@ -940,6 +930,7 @@ function mysqli_report(int $flags): bool {}
 /** @refcount 1 */
 function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
+/** @sensitive-param $password */
 function mysqli_real_connect(
     mysqli $mysql,
     ?string $hostname = null,
@@ -959,10 +950,8 @@ function mysqli_escape_string(mysqli $mysql, string $string): string {}
 
 function mysqli_real_query(mysqli $mysql, string $query): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /** @refcount 1 */
 function mysqli_reap_async_query(mysqli $mysql): mysqli_result|bool {}
-#endif
 
 function mysqli_release_savepoint(mysqli $mysql, string $name): bool {}
 
@@ -985,8 +974,7 @@ function mysqli_stmt_bind_param(mysqli_stmt $statement, string $types, mixed &..
 
 function mysqli_stmt_bind_result(mysqli_stmt $statement, mixed &...$vars): bool {}
 
-/** @return true */
-function mysqli_stmt_close(mysqli_stmt $statement): bool {}
+function mysqli_stmt_close(mysqli_stmt $statement): true {}
 
 function mysqli_stmt_data_seek(mysqli_stmt $statement, int $offset): void {}
 
@@ -1007,10 +995,8 @@ function mysqli_stmt_field_count(mysqli_stmt $statement): int {}
 
 function mysqli_stmt_free_result(mysqli_stmt $statement): void {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /** @refcount 1 */
 function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
-#endif
 
 /** @refcount 1 */
 function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
@@ -1021,9 +1007,7 @@ function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
 /** @refcount 1 */
 function mysqli_stmt_insert_id(mysqli_stmt $statement): int|string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_stmt_more_results(mysqli_stmt $statement): bool {}
-#endif
 
 function mysqli_stmt_next_result(mysqli_stmt $statement): bool {}
 
@@ -1049,7 +1033,6 @@ function mysqli_stmt_sqlstate(mysqli_stmt $statement): string {}
 /** @refcount 1 */
 function mysqli_sqlstate(mysqli $mysql): string {}
 
-/** @return true */
 function mysqli_ssl_set(
     mysqli $mysql,
     ?string $key,
@@ -1057,7 +1040,7 @@ function mysqli_ssl_set(
     ?string $ca_certificate,
     ?string $ca_path,
     ?string $cipher_algos
-): bool {} // TODO make return type void
+): true {} // TODO make return type void
 
 /** @refcount 1 */
 function mysqli_stat(mysqli $mysql): string|false {}

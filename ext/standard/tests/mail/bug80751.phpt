@@ -2,6 +2,8 @@
 Bug #80751 (Comma in recipient name breaks email delivery)
 --EXTENSIONS--
 imap
+--CONFLICTS--
+imap
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only test');

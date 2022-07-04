@@ -26,6 +26,7 @@
 #include "fiber.h"
 #include "zend_attributes.h"
 #include "zend_enum.h"
+#include "zend_interfaces.h"
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
@@ -40,11 +41,13 @@ static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
+static zend_class_entry *zend_test_forbid_dynamic_call;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
+static zend_class_entry *zend_test_int_enum;
 static zend_object_handlers zend_test_class_handlers;
 
 static ZEND_FUNCTION(zend_test_func)
@@ -312,11 +315,103 @@ static ZEND_FUNCTION(zend_iterable)
 	ZEND_PARSE_PARAMETERS_END();
 }
 
+static ZEND_FUNCTION(zend_iterable_legacy)
+{
+	zval *arg1, *arg2;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(arg1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ITERABLE_OR_NULL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(arg1);
+}
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry ext_function_legacy[] = {
+	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
+	ZEND_FE_END
+};
+
+/* Call a method on a class or object using zend_call_method() */
+static ZEND_FUNCTION(zend_call_method)
+{
+	zend_string *method_name;
+	zval *class_or_object, *arg1 = NULL, *arg2 = NULL;
+	zend_object *obj = NULL;
+	zend_class_entry *ce = NULL;
+	int argc = ZEND_NUM_ARGS();
+
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_ZVAL(class_or_object)
+		Z_PARAM_STR(method_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(arg1)
+		Z_PARAM_ZVAL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(class_or_object) == IS_OBJECT) {
+		obj = Z_OBJ_P(class_or_object);
+		ce = obj->ce;
+	} else if (Z_TYPE_P(class_or_object) == IS_STRING) {
+		ce = zend_lookup_class(Z_STR_P(class_or_object));
+		if (!ce) {
+			zend_error(E_ERROR, "Unknown class '%s'", Z_STRVAL_P(class_or_object));
+			return;
+		}
+	} else {
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(class_or_object));
+		return;
+	}
+
+	ZEND_ASSERT((argc >= 2) && (argc <= 4));
+	zend_call_method(obj, ce, NULL, ZSTR_VAL(method_name), ZSTR_LEN(method_name), return_value, argc - 2, arg1, arg2);
+}
+
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
+}
+
+static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)
+{
+	zend_string *str;
+	zend_string *errstr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG(zend_ini_parse_quantity(str, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
+{
+	zend_string *str;
+	zend_string *errstr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG((zend_long)zend_ini_parse_uquantity(str, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
 }
 
 static ZEND_FUNCTION(namespaced_func)
@@ -492,9 +587,25 @@ static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override)
 	RETURN_LONG(4);
 }
 
+static ZEND_METHOD(ZendTestForbidDynamicCall, call)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_forbid_dynamic_call();
+}
+
+static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_forbid_dynamic_call();
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.quantity_value", "0", PHP_INI_ALL, OnUpdateLong, quantity_value, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void (*old_zend_execute_ex)(zend_execute_data *execute_data);
@@ -582,12 +693,17 @@ PHP_MINIT_FUNCTION(zend_test)
 		ZVAL_PSTRING(&attr->args[0].value, "value4");
 	}
 
+	zend_test_forbid_dynamic_call = register_class_ZendTestForbidDynamicCall();
+
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
+	zend_test_int_enum = register_class_ZendTestIntEnum();
+
+	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {
@@ -619,6 +735,10 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 	}
 
 	zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+
+	if (ZT_G(print_stderr_mshutdown)) {
+		fprintf(stderr, "[zend-test] MSHUTDOWN\n");
+	}
 
 	return SUCCESS;
 }
@@ -683,7 +803,10 @@ ZEND_GET_MODULE(zend_test)
 /* The important part here is the ZEND_FASTCALL. */
 PHP_ZEND_TEST_API int ZEND_FASTCALL bug78270(const char *str, size_t str_len)
 {
-	return (int) zend_atol(str, str_len);
+	char * copy = zend_strndup(str, str_len);
+	int r = (int) ZEND_ATOL(copy);
+	free(copy);
+	return r;
 }
 
 PHP_ZEND_TEST_API struct bug79096 bug79096(void)

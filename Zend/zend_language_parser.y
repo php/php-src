@@ -595,6 +595,7 @@ class_modifiers:
 class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
+	|	T_READONLY 		{ $$ = ZEND_ACC_READONLY_CLASS|ZEND_ACC_NO_DYNAMIC_PROPERTIES; }
 ;
 
 trait_declaration_statement:
@@ -1262,8 +1263,10 @@ function_call:
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
-	|	callable_expr argument_list
-			{ $$ = zend_ast_create(ZEND_AST_CALL, $1, $2); }
+	|	callable_expr { $<num>$ = CG(zend_lineno); } argument_list { 
+			$$ = zend_ast_create(ZEND_AST_CALL, $1, $3); 
+			$$->lineno = $<num>2;
+		}
 ;
 
 class_name:

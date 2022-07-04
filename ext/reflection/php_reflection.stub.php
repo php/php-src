@@ -318,6 +318,8 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function isFinal(): bool {}
 
+    public function isReadOnly(): bool {}
+
     /** @tentative-return-type */
     public function getModifiers(): int {}
 
@@ -727,7 +729,7 @@ class ReflectionEnum extends ReflectionClass
 
     public function isBacked(): bool {}
 
-    public function getBackingType(): ?ReflectionType {}
+    public function getBackingType(): ?ReflectionNamedType {}
 }
 
 class ReflectionEnumUnitCase extends ReflectionClassConstant

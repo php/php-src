@@ -6,6 +6,9 @@
 #ifndef PHP_WIN32
 # include <netinet/in.h>
 # include <sys/socket.h>
+# if defined(__FreeBSD__) || defined(__NetBSD__)
+#  include <sys/un.h>
+# endif
 #else
 # include <Ws2tcpip.h>
 #endif
@@ -51,7 +54,7 @@ void from_zval_write_in6_pktinfo(const zval *container, char *in6_pktinfo_c, ser
 void to_zval_read_in6_pktinfo(const char *data, zval *zv, res_context *ctx);
 #endif
 
-#ifdef SO_PASSCRED
+#if defined(SO_PASSCRED) || defined(LOCAL_CREDS_PERSISTENT) || defined(LOCAL_CREDS)
 void from_zval_write_ucred(const zval *container, char *ucred_c, ser_context *ctx);
 void to_zval_read_ucred(const char *data, zval *zv, res_context *ctx);
 #endif

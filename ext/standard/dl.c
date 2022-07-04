@@ -58,10 +58,22 @@ PHPAPI PHP_FUNCTION(dl)
 		RETURN_FALSE;
 	}
 
+#if ZEND_RC_DEBUG
+	bool orig_rc_debug = zend_rc_debug;
+	/* FIXME: Loading extensions during the request breaks some invariants. In
+	 * particular, it will create persistent interned strings, which is not
+	 * allowed at this stage. */
+	zend_rc_debug = false;
+#endif
+
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0);
 	if (Z_TYPE_P(return_value) == IS_TRUE) {
 		EG(full_tables_cleanup) = 1;
 	}
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = orig_rc_debug;
+#endif
 }
 /* }}} */
 

@@ -29,6 +29,7 @@ extern ZEND_API zend_class_entry *zend_ce_backed_enum;
 
 void zend_register_enum_ce(void);
 void zend_enum_add_interfaces(zend_class_entry *ce);
+zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce);
 zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv);
 void zend_verify_enum(zend_class_entry *ce);
 void zend_enum_register_funcs(zend_class_entry *ce);
@@ -40,6 +41,7 @@ ZEND_API void zend_enum_add_case(zend_class_entry *ce, zend_string *case_name, z
 ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zval *value);
 ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name);
+ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try);
 
 static zend_always_inline zval *zend_enum_fetch_case_name(zend_object *zobj)
 {
