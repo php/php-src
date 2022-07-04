@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c8841d76e26596c0bda247b9e2b75cf3d12e1d72 */
+ * Stub hash: 9d9e484b4a287714fab60592ae8c12a5a46f34b3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -1172,7 +1172,6 @@ static void register_mysqli_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_AND_NO_CHAIN", TRANS_COR_AND_NO_CHAIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_RELEASE", TRANS_COR_RELEASE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_NO_RELEASE", TRANS_COR_NO_RELEASE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_BOOL_CONSTANT("MYSQLI_IS_MARIADB", MYSQLI_IS_MARIADB, CONST_CS | CONST_PERSISTENT);
 
 
 	zend_string *attribute_name_SensitiveParameter_mysqli_change_user_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
