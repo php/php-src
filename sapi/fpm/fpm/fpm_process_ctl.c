@@ -83,10 +83,6 @@ static void fpm_pctl_exec(void) /* {{{ */
 		zlog(ZLOG_WARNING, "concurrent reloads may be unstable");
 	}
 
-	if (0 > fpm_stdio_restore_original_stderr()) {
-		zlog(ZLOG_SYSERROR, "failed to restore original STDERR descriptor, access.log and slowlog records may appear in error_log");
-	}
-
 	zlog(ZLOG_NOTICE, "reloading: execvp(\"%s\", {\"%s\""
 			"%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s"
 			"%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s"
@@ -105,6 +101,9 @@ static void fpm_pctl_exec(void) /* {{{ */
 	);
 
 	fpm_cleanups_run(FPM_CLEANUP_PARENT_EXEC);
+
+	fpm_stdio_restore_original_stderr(1);
+
 	execvp(saved_argv[0], saved_argv);
 	zlog(ZLOG_SYSERROR, "failed to reload: execvp() failed");
 	exit(FPM_EXIT_SOFTWARE);

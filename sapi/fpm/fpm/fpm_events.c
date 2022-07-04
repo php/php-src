@@ -107,9 +107,7 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 
 				/* fpm_stdio_init_final tied STDERR fd with error_log fd. This affects logging to the
 				 * access.log if it was configured to write to the stderr. Check #8885. */
-				if (0 > fpm_stdio_restore_original_stderr()) {
-					zlog(ZLOG_SYSERROR, "failed to restore original STDERR descriptor, access.log records may appear in the error_log");
-				}
+				fpm_stdio_restore_original_stderr(0);
 
 				if (0 == fpm_stdio_open_error_log(1)) {
 					zlog(ZLOG_NOTICE, "error log file re-opened");
@@ -126,7 +124,7 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 				/* else no access log are set */
 
 				/* We need to tie stderr with error_log in the master process after log files reload. Check #8885. */
-				fpm_stdio_init_final();
+				fpm_stdio_redirect_stderr_to_error_log();
 
 				break;
 			case '2' :                  /* SIGUSR2 */
