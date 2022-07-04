@@ -2257,6 +2257,38 @@ class EnumCaseInfo {
     }
 }
 
+class AttributeInfo {
+    /** @var string */
+    public $class;
+    /** @var \PhpParser\Node\Arg[] */
+    public $args;
+
+    /** @param \PhpParser\Node\Arg[] $args */
+    public function __construct(string $class, array $args) {
+        $this->class = $class;
+        $this->args = $args;
+    }
+
+    /** @param iterable<ConstInfo> $allConstInfos */
+    public function generateCode(string $invocation, string $nameSuffix, iterable $allConstInfos): string {
+        $code = "\n";
+        $escapedAttributeName = strtr($this->class, '\\', '_');
+        $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
+        $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
+        $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
+        foreach ($this->args as $i => $arg) {
+            $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
+            $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
+            $code .= $value->initializeZval($zvalName, $allConstInfos);
+            $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
+            if ($arg->name) {
+                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+            }
+        }
+        return $code;
+    }
+}
+
 class ClassInfo {
     /** @var Name */
     public $name;
@@ -2272,7 +2304,7 @@ class ClassInfo {
     public $isDeprecated;
     /** @var bool */
     public $isStrictProperties;
-    /** @var array{0: string, 1: \PhpParser\Node\Arg[]}[] */
+    /** @var AttributeInfo[] */
     public $attributes;
     /** @var bool */
     public $isNotSerializable;
@@ -2292,7 +2324,7 @@ class ClassInfo {
     public $cond;
 
     /**
-     * @param array{0: string, 1: \PhpParser\Node\Arg[]}[] $attributes
+     * @param AttributeInfo[] $attributes
      * @param Name[] $extends
      * @param Name[] $implements
      * @param ConstInfo[] $constInfos
@@ -2414,7 +2446,9 @@ class ClassInfo {
             $code .= $property->getDeclaration($allConstInfos);
         }
 
-        $code .= generateAttributesCode($this->attributes, "zend_add_class_attribute(class_entry", "class_$escapedName", $allConstInfos);
+        foreach ($this->attributes as $attribute) {
+            $code .= $attribute->generateCode("zend_add_class_attribute(class_entry", "class_$escapedName", $allConstInfos);
+        }
 
         if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond)) {
             $code .= "\n" . $attributeInitializationCode;
@@ -2459,8 +2493,8 @@ class ClassInfo {
             $flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
         }
 
-        foreach ($this->attributes as list($name)) {
-            if ($name === "AllowDynamicProperties") {
+        foreach ($this->attributes as $attr) {
+            if ($attr->class === "AllowDynamicProperties") {
                 $flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
             }
         }
@@ -2980,30 +3014,6 @@ class DocCommentTag {
     }
 }
 
-/**
- * @param array{0: string, 1: \PhpParser\Node\Arg[]}[] $attributes
- * @param iterable<ConstInfo> $allConstInfos
- */
-function generateAttributesCode(array $attributes, string $invocation, string $nameSuffix, iterable $allConstInfos): string {
-    $code = "";
-    foreach ($attributes as list($name, $args)) {
-        $escapedAttributeName = strtr($name, '\\', '_');
-        $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init(\"" . addcslashes($name, "\\") . "\", sizeof(\"" . addcslashes($name, "\\") . "\") - 1, 1);\n";
-        $code .= "\t" . ($args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($args) . ");\n";
-        $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
-        foreach ($args as $i => $arg) {
-            $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
-            $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
-            $code .= $value->initializeZval($zvalName, $allConstInfos);
-            $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
-            if ($arg->name) {
-                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
-            }
-        }
-    }
-    return $code;
-}
-
 /** @return DocCommentTag[] */
 function parseDocComment(DocComment $comment): array {
     $commentText = substr($comment->getText(), 2, -2);
@@ -3330,7 +3340,7 @@ function parseClass(
 
     foreach ($class->attrGroups as $attrGroup) {
         foreach ($attrGroup->attrs as $attr) {
-            $attributes[] = [$attr->name->toString(), $attr->args];
+            $attributes[] = new AttributeInfo($attr->name->toString(), $attr->args);
             switch ($attr->name->toString()) {
                 case 'AllowDynamicProperties':
                     $allowsDynamicProperties = true;
