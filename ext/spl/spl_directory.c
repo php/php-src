@@ -1891,21 +1891,22 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 	}
 
 	if (!buf) {
-		return FAILURE;
-	}
-
-	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
-		if (line_len > 0 && buf[line_len - 1] == '\n') {
-			line_len--;
-			if (line_len > 0 && buf[line_len - 1] == '\r') {
+		intern->u.file.current_line = estrdup("");
+		intern->u.file.current_line_len = 0;
+	} else {
+		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
+			if (line_len > 0 && buf[line_len - 1] == '\n') {
 				line_len--;
+				if (line_len > 0 && buf[line_len - 1] == '\r') {
+					line_len--;
+				}
+				buf[line_len] = '\0';
 			}
-			buf[line_len] = '\0';
 		}
-	}
 
-	intern->u.file.current_line = buf;
-	intern->u.file.current_line_len = line_len;
+		intern->u.file.current_line = buf;
+		intern->u.file.current_line_len = line_len;
+	}
 	intern->u.file.current_line_num += line_add;
 
 	return SUCCESS;
