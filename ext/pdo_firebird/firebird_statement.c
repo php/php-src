@@ -204,6 +204,9 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	int colname_len;
 	char *cp;
 
+	if ((var->sqltype & ~1) == SQL_TEXT) {
+		var->sqltype = SQL_VARYING | (var->sqltype & 1);
+	}
 	colname_len = (S->H->fetch_table_names && var->relname_length)
 					? (var->aliasname_length + var->relname_length + 1)
 					: (var->aliasname_length);
