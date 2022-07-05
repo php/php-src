@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-23 Jun 2022, PHP 8.0.21RC1
+7 Jul 2022, PHP 8.0.21
 
 - Core:
   . Fixed potential use after free in php_binary_init(). (Heiko Weber)
