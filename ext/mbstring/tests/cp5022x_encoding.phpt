@@ -375,6 +375,13 @@ $converted = mb_convert_encoding("ab\x00", 'UTF-16BE', 'CP50220');
 if ($converted !== "\x00a\x00b\x00\x00")
   die("Bad handling of trailing null byte (got " . bin2hex($converted) . ")");
 
+// Previously, the CP50220 implementation would reorder error markers with
+// subsequent characters
+mb_substitute_character(0x3F);
+$converted = mb_convert_encoding("\xff\xff\x00&", 'CP50220', 'UTF-16BE');
+if ($converted !== '?&')
+  die("Bad handling of erroneous codepoint followed by good one (got " . bin2hex($converted) . ")");
+
 ?>
 --EXPECT--
 ASCII support OK
