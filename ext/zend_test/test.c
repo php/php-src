@@ -634,12 +634,12 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_attribute = register_class_ZendTestAttribute();
 	{
-		zend_internal_attribute *attr = zend_internal_attribute_register(zend_test_attribute);
+		zend_internal_attribute *attr = zend_mark_internal_attribute(zend_test_attribute);
 		attr->validator = zend_attribute_validate_zendtestattribute;
 	}
 
 	zend_test_parameter_attribute = register_class_ZendTestParameterAttribute();
-	zend_internal_attribute_register(zend_test_parameter_attribute);
+	zend_mark_internal_attribute(zend_test_parameter_attribute);
 
 	{
 		zend_attribute *attr;

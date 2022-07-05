@@ -317,7 +317,7 @@ static void free_internal_attribute(zval *v)
 	pefree(Z_PTR_P(v), 1);
 }
 
-ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce)
+ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry *ce)
 {
 	zend_internal_attribute *internal_attr;
 	zend_attribute *attr;
@@ -344,6 +344,14 @@ ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_en
 	zend_error_noreturn(E_ERROR, "Classes must be first marked as attribute before being able to be registered as internal attribute class");
 }
 
+ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags)
+{
+	zend_attribute *attr = zend_add_class_attribute(ce, zend_ce_attribute->name, 1);
+	ZVAL_LONG(&attr->args[0].value, flags);
+
+	return zend_mark_internal_attribute(ce);
+}
+
 ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname)
 {
 	return zend_hash_find_ptr(&internal_attributes, lcname);
@@ -356,23 +364,23 @@ void zend_register_attribute_ce(void)
 	zend_hash_init(&internal_attributes, 8, NULL, free_internal_attribute, 1);
 
 	zend_ce_attribute = register_class_Attribute();
-	attr = zend_internal_attribute_register(zend_ce_attribute);
+	attr = zend_mark_internal_attribute(zend_ce_attribute);
 	attr->validator = validate_attribute;
 
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
-	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute);
+	zend_mark_internal_attribute(zend_ce_return_type_will_change_attribute);
 
 	zend_ce_allow_dynamic_properties = register_class_AllowDynamicProperties();
-	attr = zend_internal_attribute_register(zend_ce_allow_dynamic_properties);
+	attr = zend_mark_internal_attribute(zend_ce_allow_dynamic_properties);
 	attr->validator = validate_allow_dynamic_properties;
 
 	zend_ce_sensitive_parameter = register_class_SensitiveParameter();
-	zend_internal_attribute_register(zend_ce_sensitive_parameter);
+	zend_mark_internal_attribute(zend_ce_sensitive_parameter);
 
 	memcpy(&attributes_object_handlers_sensitive_parameter_value, &std_object_handlers, sizeof(zend_object_handlers));
 	attributes_object_handlers_sensitive_parameter_value.get_properties_for = attributes_sensitive_parameter_value_get_properties_for;
 
-	/* This is not an actual attribute, thus the zend_internal_attribute_register() call is missing. */
+	/* This is not an actual attribute, thus the zend_mark_internal_attribute() call is missing. */
 	zend_ce_sensitive_parameter_value = register_class_SensitiveParameterValue();
 	zend_ce_sensitive_parameter_value->create_object = attributes_sensitive_parameter_value_new;
 }

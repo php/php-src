@@ -73,7 +73,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
 
             foreach ($fileInfo->dependencies as $dependency) {
                 // TODO add header search path for extensions?
-                $prefixes = [dirname($stubFile) . "/", ""];
+                $prefixes = [dirname($stubFile) . "/", dirname(__DIR__) . "/"];
                 foreach ($prefixes as $prefix) {
                     $depFile = $prefix . $dependency;
                     if (file_exists($depFile)) {
