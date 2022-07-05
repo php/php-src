@@ -3,7 +3,7 @@ env:
   ARCH: amd64
 
 freebsd_instance:
-  image_family: freebsd-13-1
+  image_family: freebsd-13-0
 
 task:
   name: FREEBSD_DEBUG_NTS
