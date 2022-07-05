@@ -30,11 +30,15 @@ PHP                                                                        NEWS
   . Fixed bug #78139 (timezone_open accepts invalid timezone string argument).
     (Derick)
 
-- GD:
-  . Fixed imagecreatefromavif() memory leak. (cmb)
+- Fileinfo:
+  . Fixed bug #81723 (Heap buffer overflow in finfo_buffer). (CVE-2022-31627)
+    (cmb)
 
 - FPM:
   . Fixed bug #67764 (fpm: syslog.ident don't work). (Jakub Zelenka)
+
+- GD:
+  . Fixed imagecreatefromavif() memory leak. (cmb)
 
 - MBString:
   . mb_detect_encoding recognizes all letters in Czech alphabet (alexdowad)
