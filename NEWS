@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0alpha3
+07 Jul 2022, PHP 8.2.0alpha3
 
 - Core:
   . Uses safe_perealloc instead of perealloc for the
