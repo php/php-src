@@ -294,7 +294,10 @@ static void register_ftp_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("FTP_FINISHED", PHP_FTP_FINISHED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FTP_MOREDATA", PHP_FTP_MOREDATA, CONST_CS | CONST_PERSISTENT);
 
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ftp_login", 2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_ftp_login_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ftp_login", sizeof("ftp_login") - 1), 2, attribute_name_SensitiveParameter_arginfo_ftp_login_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_ftp_login_arg2);
 }
 
 static zend_class_entry *register_class_FTP_Connection(void)

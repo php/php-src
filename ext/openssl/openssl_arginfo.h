@@ -536,45 +536,162 @@ static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
 
 static void register_openssl_symbols(int module_number)
 {
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_x509_check_private_key", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export_to_file", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export_to_file", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_read", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_csr_sign", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_csr_new", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export_to_file", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export_to_file", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_get_private", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_get_private", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_get_privatekey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_get_privatekey", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pbkdf2", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs7_sign", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs7_decrypt", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs7_decrypt", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_cms_sign", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_cms_decrypt", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_cms_decrypt", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_encrypt", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_encrypt", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_decrypt", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_decrypt", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_public_encrypt", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_public_decrypt", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_sign", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_seal", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_open", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_open", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_encrypt", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_encrypt", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_decrypt", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_dh_compute_key", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_derive", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_spki_new", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_x509_check_private_key_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_x509_check_private_key", sizeof("openssl_x509_check_private_key") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_x509_check_private_key_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_x509_check_private_key_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_to_file_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_to_file_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_to_file_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_to_file_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export_to_file", sizeof("openssl_pkcs12_export_to_file") - 1), 3, attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_to_file_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_to_file_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export", sizeof("openssl_pkcs12_export") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_export", sizeof("openssl_pkcs12_export") - 1), 3, attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_export_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_read_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs12_read", sizeof("openssl_pkcs12_read") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_read_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs12_read_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_csr_sign_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_csr_sign", sizeof("openssl_csr_sign") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_csr_sign_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_csr_sign_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_csr_new_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_csr_new", sizeof("openssl_csr_new") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_csr_new_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_csr_new_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_to_file_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export_to_file", sizeof("openssl_pkey_export_to_file") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_to_file_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_to_file_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_to_file_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export_to_file", sizeof("openssl_pkey_export_to_file") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_to_file_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_to_file_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_export", sizeof("openssl_pkey_export") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkey_export_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkey_get_private_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_pkey_get_private_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkey_get_private_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkey_get_private_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_get_private", sizeof("openssl_pkey_get_private") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_pkey_get_private_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkey_get_private_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_get_privatekey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_get_privatekey", sizeof("openssl_get_privatekey") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_get_privatekey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_get_privatekey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_get_privatekey_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_get_privatekey", sizeof("openssl_get_privatekey") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_get_privatekey_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_get_privatekey_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pbkdf2_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pbkdf2", sizeof("openssl_pbkdf2") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_pbkdf2_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pbkdf2_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_sign_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_sign", sizeof("openssl_pkcs7_sign") - 1), 3, attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_sign_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_sign_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_decrypt_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_decrypt", sizeof("openssl_pkcs7_decrypt") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_decrypt_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_decrypt_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_decrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkcs7_decrypt", sizeof("openssl_pkcs7_decrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_decrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkcs7_decrypt_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_cms_sign_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_cms_sign", sizeof("openssl_cms_sign") - 1), 3, attribute_name_SensitiveParameter_arginfo_openssl_cms_sign_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_cms_sign_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_cms_decrypt_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_cms_decrypt", sizeof("openssl_cms_decrypt") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_cms_decrypt_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_cms_decrypt_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_cms_decrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_cms_decrypt", sizeof("openssl_cms_decrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_openssl_cms_decrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_cms_decrypt_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_private_encrypt_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_encrypt", sizeof("openssl_private_encrypt") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_private_encrypt_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_private_encrypt_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_private_encrypt_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_encrypt", sizeof("openssl_private_encrypt") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_private_encrypt_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_private_encrypt_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_private_decrypt_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_decrypt", sizeof("openssl_private_decrypt") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_private_decrypt_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_private_decrypt_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_private_decrypt_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_private_decrypt", sizeof("openssl_private_decrypt") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_private_decrypt_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_private_decrypt_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_public_encrypt_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_public_encrypt", sizeof("openssl_public_encrypt") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_public_encrypt_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_public_encrypt_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_public_decrypt_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_public_decrypt", sizeof("openssl_public_decrypt") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_public_decrypt_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_public_decrypt_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_sign_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_sign", sizeof("openssl_sign") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_sign_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_sign_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_seal_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_seal", sizeof("openssl_seal") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_seal_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_seal_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_open_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_open", sizeof("openssl_open") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_open_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_open_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_open_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_open", sizeof("openssl_open") - 1), 3, attribute_name_SensitiveParameter_arginfo_openssl_open_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_open_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_encrypt_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_encrypt", sizeof("openssl_encrypt") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_encrypt_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_encrypt_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_encrypt_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_encrypt", sizeof("openssl_encrypt") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_encrypt_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_encrypt_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_decrypt_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_decrypt", sizeof("openssl_decrypt") - 1), 2, attribute_name_SensitiveParameter_arginfo_openssl_decrypt_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_decrypt_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_dh_compute_key_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_dh_compute_key", sizeof("openssl_dh_compute_key") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_dh_compute_key_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_dh_compute_key_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_pkey_derive_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_derive", sizeof("openssl_pkey_derive") - 1), 1, attribute_name_SensitiveParameter_arginfo_openssl_pkey_derive_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_pkey_derive_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_openssl_spki_new_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_spki_new", sizeof("openssl_spki_new") - 1), 0, attribute_name_SensitiveParameter_arginfo_openssl_spki_new_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_openssl_spki_new_arg0);
 }
 
 static zend_class_entry *register_class_OpenSSLCertificate(void)

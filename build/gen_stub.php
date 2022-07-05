@@ -815,9 +815,12 @@ class ArgInfo {
     public $phpDocType;
     /** @var string|null */
     public $defaultValue;
-    /** @var bool */
-    public $isSensitive;
+    /** @var AttributeInfo[] */
+    public $attributes;
 
+    /**
+     * @param AttributeInfo[] $attributes
+     */
     public function __construct(
         string $name,
         int $sendBy,
@@ -825,14 +828,14 @@ class ArgInfo {
         ?Type $type,
         ?Type $phpDocType,
         ?string $defaultValue,
-        bool $isSensitive
+        array $attributes
     ) {
         $this->name = $name;
         $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
         $this->setTypes($type, $phpDocType);
         $this->defaultValue = $defaultValue;
-        $this->isSensitive = $isSensitive;
+        $this->attributes = $attributes;
     }
 
     public function equals(ArgInfo $other): bool {
@@ -840,8 +843,7 @@ class ArgInfo {
             && $this->sendBy === $other->sendBy
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type)
-            && $this->defaultValue === $other->defaultValue
-            && $this->isSensitive === $other->isSensitive;
+            && $this->defaultValue === $other->defaultValue;
     }
 
     public function getSendByString(): string {
@@ -2570,7 +2572,7 @@ class ClassInfo {
             }
         }
 
-        if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond)) {
+        if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond, $allConstInfos)) {
             if (!$php82MinimumCompatibility) {
                 $code .= "#if (PHP_VERSION_ID >= " . PHP_82_VERSION_ID . ")\n";
             }
@@ -3259,16 +3261,10 @@ function parseFunctionLike(
         foreach ($func->getParams() as $i => $param) {
             $varName = $param->var->name;
             $preferRef = !empty($paramMeta[$varName]['prefer-ref']);
-            $isSensitive = false;
+            $attributes = [];
             foreach ($param->attrGroups as $attrGroup) {
                 foreach ($attrGroup->attrs as $attr) {
-                    switch ($attr->name->toCodeString()) {
-                        case '\\SensitiveParameter':
-                            $isSensitive = true;
-                            break;
-                        default:
-                            throw new Exception("Unhandled attribute {$attr->name->toCodeString()}.");
-                    }
+                    $attributes[] = new AttributeInfo($attr->name->toString(), $attr->args);
                 }
             }
             unset($paramMeta[$varName]);
@@ -3318,7 +3314,7 @@ function parseFunctionLike(
                 $type,
                 isset($docParamTypes[$varName]) ? Type::fromString($docParamTypes[$varName]) : null,
                 $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null,
-                $isSensitive
+                $attributes
             );
             if (!$param->default && !$param->variadic) {
                 $numRequiredArgs = $i + 1;
@@ -3972,7 +3968,7 @@ function generateArgInfoCode(
     }
 
     if ($fileInfo->generateClassEntries) {
-        $attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos);
+        $attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, null, $allConstInfos);
 
         if ($attributeInitializationCode !== "" || !empty($fileInfo->constInfos)) {
             $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
@@ -4039,25 +4035,23 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
 /**
  * @param iterable<FuncInfo> $funcInfos
  */
-function generateAttributeInitialization(iterable $funcInfos, ?string $parentCond = null): string {
+function generateAttributeInitialization(iterable $funcInfos, ?string $parentCond = null, iterable $allConstInfos): string {
     return generateCodeWithConditions(
         $funcInfos,
         "",
-        static function (FuncInfo $funcInfo) {
+        static function (FuncInfo $funcInfo) use ($allConstInfos) {
             $code = null;
 
             foreach ($funcInfo->args as $index => $arg) {
-                if (!$arg->isSensitive) {
-                    continue;
-                }
-
                 if ($funcInfo->name instanceof MethodName) {
                     $functionTable = "&class_entry->function_table";
                 } else {
                     $functionTable = "CG(function_table)";
                 }
 
-                $code .= "\tzend_mark_function_parameter_as_sensitive($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", $index);\n";
+                foreach ($arg->attributes as $attribute) {
+                    $code .= $attribute->generateCode("zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index", "{$funcInfo->getArgInfoName()}_arg{$index}", $allConstInfos);
+                }
             }
 
             return $code;

@@ -103,7 +103,10 @@ static zend_class_entry *register_class_PDO(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
-	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "__construct", 2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_class_PDO___construct_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, attribute_name_SensitiveParameter_arginfo_class_PDO___construct_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_class_PDO___construct_arg2);
 
 	return class_entry;
 }

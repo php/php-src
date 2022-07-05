@@ -470,9 +470,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_memcmp arginfo_sodium_compare
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_memzero, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(1, string, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_sodium_memzero arginfo_sodium_increment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_pad, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -889,114 +887,333 @@ static const zend_function_entry class_SodiumException_methods[] = {
 static void register_libsodium_symbols(int module_number)
 {
 #if defined(HAVE_AESGCM)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_aes256gcm_decrypt", 3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_decrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aes256gcm_decrypt", sizeof("sodium_crypto_aead_aes256gcm_decrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_decrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_decrypt_arg3);
 #endif
 #if defined(HAVE_AESGCM)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_aes256gcm_encrypt", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_aes256gcm_encrypt", 3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_encrypt_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aes256gcm_encrypt", sizeof("sodium_crypto_aead_aes256gcm_encrypt") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_encrypt_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_encrypt_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_encrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aes256gcm_encrypt", sizeof("sodium_crypto_aead_aes256gcm_encrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_encrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_aes256gcm_encrypt_arg3);
 #endif
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_chacha20poly1305_decrypt", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_chacha20poly1305_encrypt", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_chacha20poly1305_encrypt", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_chacha20poly1305_ietf_decrypt", 3);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_chacha20poly1305_ietf_encrypt", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_chacha20poly1305_ietf_encrypt", 3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_decrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_chacha20poly1305_decrypt", sizeof("sodium_crypto_aead_chacha20poly1305_decrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_decrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_decrypt_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_encrypt_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_chacha20poly1305_encrypt", sizeof("sodium_crypto_aead_chacha20poly1305_encrypt") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_encrypt_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_encrypt_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_encrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_chacha20poly1305_encrypt", sizeof("sodium_crypto_aead_chacha20poly1305_encrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_encrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_encrypt_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_decrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_chacha20poly1305_ietf_decrypt", sizeof("sodium_crypto_aead_chacha20poly1305_ietf_decrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_decrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_decrypt_arg3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_chacha20poly1305_ietf_encrypt", sizeof("sodium_crypto_aead_chacha20poly1305_ietf_encrypt") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_chacha20poly1305_ietf_encrypt", sizeof("sodium_crypto_aead_chacha20poly1305_ietf_encrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt_arg3);
 #if defined(crypto_aead_xchacha20poly1305_IETF_NPUBBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_xchacha20poly1305_ietf_decrypt", 3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_decrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_xchacha20poly1305_ietf_decrypt", sizeof("sodium_crypto_aead_xchacha20poly1305_ietf_decrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_decrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_decrypt_arg3);
 #endif
 #if defined(crypto_aead_xchacha20poly1305_IETF_NPUBBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_xchacha20poly1305_ietf_encrypt", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_aead_xchacha20poly1305_ietf_encrypt", 3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_xchacha20poly1305_ietf_encrypt", sizeof("sodium_crypto_aead_xchacha20poly1305_ietf_encrypt") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_xchacha20poly1305_ietf_encrypt", sizeof("sodium_crypto_aead_xchacha20poly1305_ietf_encrypt") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt_arg3);
 #endif
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_auth", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_auth_verify", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_seed_keypair", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_keypair_from_secretkey_and_publickey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_open", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_publickey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_publickey_from_secretkey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_seal", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_seal_open", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_box_secretkey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_kx_publickey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_kx_secretkey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_kx_seed_keypair", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_kx_client_session_keys", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_kx_server_session_keys", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_generichash", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_generichash_init", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_kdf_derive_from_key", 3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_auth_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_auth", sizeof("sodium_crypto_auth") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_auth_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_auth_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_auth_verify_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_auth_verify", sizeof("sodium_crypto_auth_verify") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_auth_verify_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_auth_verify_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box", sizeof("sodium_crypto_box") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box", sizeof("sodium_crypto_box") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seed_keypair_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_seed_keypair", sizeof("sodium_crypto_box_seed_keypair") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seed_keypair_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seed_keypair_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_keypair_from_secretkey_and_publickey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_keypair_from_secretkey_and_publickey", sizeof("sodium_crypto_box_keypair_from_secretkey_and_publickey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_keypair_from_secretkey_and_publickey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_keypair_from_secretkey_and_publickey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_open_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_open", sizeof("sodium_crypto_box_open") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_open_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_open_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_publickey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_publickey", sizeof("sodium_crypto_box_publickey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_publickey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_publickey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_publickey_from_secretkey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_publickey_from_secretkey", sizeof("sodium_crypto_box_publickey_from_secretkey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_publickey_from_secretkey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_publickey_from_secretkey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seal_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_seal", sizeof("sodium_crypto_box_seal") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seal_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seal_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seal_open_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_seal_open", sizeof("sodium_crypto_box_seal_open") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seal_open_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_seal_open_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_secretkey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box_secretkey", sizeof("sodium_crypto_box_secretkey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_secretkey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_box_secretkey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_publickey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kx_publickey", sizeof("sodium_crypto_kx_publickey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_publickey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_publickey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_secretkey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kx_secretkey", sizeof("sodium_crypto_kx_secretkey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_secretkey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_secretkey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_seed_keypair_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kx_seed_keypair", sizeof("sodium_crypto_kx_seed_keypair") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_seed_keypair_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_seed_keypair_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_client_session_keys_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kx_client_session_keys", sizeof("sodium_crypto_kx_client_session_keys") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_client_session_keys_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_client_session_keys_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_server_session_keys_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kx_server_session_keys", sizeof("sodium_crypto_kx_server_session_keys") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_server_session_keys_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_kx_server_session_keys_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_generichash_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_generichash", sizeof("sodium_crypto_generichash") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_generichash_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_generichash_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_generichash_init_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_generichash_init", sizeof("sodium_crypto_generichash_init") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_generichash_init_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_generichash_init_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_kdf_derive_from_key_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kdf_derive_from_key", sizeof("sodium_crypto_kdf_derive_from_key") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_kdf_derive_from_key_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_kdf_derive_from_key_arg3);
 #if defined(crypto_pwhash_SALTBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_pwhash", 1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash", sizeof("sodium_crypto_pwhash") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_arg1);
 #endif
 #if defined(crypto_pwhash_SALTBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_pwhash_str", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_str_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash_str", sizeof("sodium_crypto_pwhash_str") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_str_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_str_arg0);
 #endif
 #if defined(crypto_pwhash_SALTBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_pwhash_str_verify", 1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_str_verify_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash_str_verify", sizeof("sodium_crypto_pwhash_str_verify") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_str_verify_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_str_verify_arg1);
 #endif
 #if defined(crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256", 1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256", sizeof("sodium_crypto_pwhash_scryptsalsa208sha256") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_arg1);
 #endif
 #if defined(crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256_str", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256_str", sizeof("sodium_crypto_pwhash_scryptsalsa208sha256_str") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_arg0);
 #endif
 #if defined(crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256_str_verify", 1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_verify_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256_str_verify", sizeof("sodium_crypto_pwhash_scryptsalsa208sha256_str_verify") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_verify_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_verify_arg1);
 #endif
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_secretbox", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_secretbox", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_secretbox_open", 2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_secretbox", sizeof("sodium_crypto_secretbox") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_secretbox", sizeof("sodium_crypto_secretbox") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_open_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_secretbox_open", sizeof("sodium_crypto_secretbox_open") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_open_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretbox_open_arg2);
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_secretstream_xchacha20poly1305_init_push", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_push_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_secretstream_xchacha20poly1305_init_push", sizeof("sodium_crypto_secretstream_xchacha20poly1305_init_push") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_push_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_push_arg0);
 #endif
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_secretstream_xchacha20poly1305_push", 1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_push_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_secretstream_xchacha20poly1305_push", sizeof("sodium_crypto_secretstream_xchacha20poly1305_push") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_push_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_push_arg1);
 #endif
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_secretstream_xchacha20poly1305_init_pull", 1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_pull_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_secretstream_xchacha20poly1305_init_pull", sizeof("sodium_crypto_secretstream_xchacha20poly1305_init_pull") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_pull_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_pull_arg1);
 #endif
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_shorthash", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign_detached", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign_ed25519_sk_to_curve25519", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign_keypair_from_secretkey_and_publickey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign_publickey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign_secretkey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign_publickey_from_secretkey", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_sign_seed_keypair", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream_xor", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream_xor", 2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_shorthash_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_shorthash", sizeof("sodium_crypto_shorthash") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_shorthash_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_shorthash_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign", sizeof("sodium_crypto_sign") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_detached_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign_detached", sizeof("sodium_crypto_sign_detached") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_detached_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_detached_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_ed25519_sk_to_curve25519_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign_ed25519_sk_to_curve25519", sizeof("sodium_crypto_sign_ed25519_sk_to_curve25519") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_ed25519_sk_to_curve25519_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_ed25519_sk_to_curve25519_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_keypair_from_secretkey_and_publickey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign_keypair_from_secretkey_and_publickey", sizeof("sodium_crypto_sign_keypair_from_secretkey_and_publickey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_keypair_from_secretkey_and_publickey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_keypair_from_secretkey_and_publickey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_publickey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign_publickey", sizeof("sodium_crypto_sign_publickey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_publickey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_publickey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_secretkey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign_secretkey", sizeof("sodium_crypto_sign_secretkey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_secretkey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_secretkey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_publickey_from_secretkey_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign_publickey_from_secretkey", sizeof("sodium_crypto_sign_publickey_from_secretkey") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_publickey_from_secretkey_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_publickey_from_secretkey_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_seed_keypair_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_sign_seed_keypair", sizeof("sodium_crypto_sign_seed_keypair") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_seed_keypair_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_sign_seed_keypair_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream", sizeof("sodium_crypto_stream") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xor_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream_xor", sizeof("sodium_crypto_stream_xor") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xor_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xor_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xor_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream_xor", sizeof("sodium_crypto_stream_xor") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xor_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xor_arg2);
 #if defined(crypto_stream_xchacha20_KEYBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream_xchacha20", 2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream_xchacha20", sizeof("sodium_crypto_stream_xchacha20") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_arg2);
 #endif
 #if defined(crypto_stream_xchacha20_KEYBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream_xchacha20_xor", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream_xchacha20_xor", 2);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream_xchacha20_xor", sizeof("sodium_crypto_stream_xchacha20_xor") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream_xchacha20_xor", sizeof("sodium_crypto_stream_xchacha20_xor") - 1), 2, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_arg2);
 #endif
 #if defined(crypto_stream_xchacha20_KEYBYTES)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream_xchacha20_xor_ic", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_stream_xchacha20_xor_ic", 3);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_ic_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream_xchacha20_xor_ic", sizeof("sodium_crypto_stream_xchacha20_xor_ic") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_ic_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_ic_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_ic_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_stream_xchacha20_xor_ic", sizeof("sodium_crypto_stream_xchacha20_xor_ic") - 1), 3, attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_ic_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_stream_xchacha20_xor_ic_arg3);
 #endif
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_compare", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_compare", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_memcmp", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_memcmp", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_memzero", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_pad", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_unpad", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_bin2hex", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_hex2bin", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_compare_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_compare", sizeof("sodium_compare") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_compare_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_compare_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_compare_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_compare", sizeof("sodium_compare") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_compare_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_compare_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_memcmp_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_memcmp", sizeof("sodium_memcmp") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_memcmp_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_memcmp_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_memcmp_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_memcmp", sizeof("sodium_memcmp") - 1), 1, attribute_name_SensitiveParameter_arginfo_sodium_memcmp_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_memcmp_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_memzero_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_memzero", sizeof("sodium_memzero") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_memzero_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_memzero_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_pad_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_pad", sizeof("sodium_pad") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_pad_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_pad_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_unpad_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_unpad", sizeof("sodium_unpad") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_unpad_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_unpad_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_bin2hex_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_bin2hex", sizeof("sodium_bin2hex") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_bin2hex_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_bin2hex_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_hex2bin_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_hex2bin", sizeof("sodium_hex2bin") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_hex2bin_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_hex2bin_arg0);
 #if defined(sodium_base64_VARIANT_ORIGINAL)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_bin2base64", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_bin2base64_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_bin2base64", sizeof("sodium_bin2base64") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_bin2base64_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_bin2base64_arg0);
 #endif
 #if defined(sodium_base64_VARIANT_ORIGINAL)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_base642bin", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_base642bin_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_base642bin", sizeof("sodium_base642bin") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_base642bin_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_base642bin_arg0);
 #endif
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "sodium_crypto_scalarmult_base", 0);
+
+	zend_string *attribute_name_SensitiveParameter_arginfo_sodium_crypto_scalarmult_base_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_scalarmult_base", sizeof("sodium_crypto_scalarmult_base") - 1), 0, attribute_name_SensitiveParameter_arginfo_sodium_crypto_scalarmult_base_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_arginfo_sodium_crypto_scalarmult_base_arg0);
 }
 
 static zend_class_entry *register_class_SodiumException(zend_class_entry *class_entry_Exception)
