@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #80047 (DatePeriod doesn't warn with custom DateTimeImmutable).
     (Derick)
 
+- Fileinfo:
+  . Fixed bug #81723 (Heap buffer overflow in finfo_buffer). (CVE-2022-31627)
+    (cmb)
+
 - FPM:
   . Fixed zlog message prepend, free on incorrect address. (Heiko Weber)
 
