@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Added access.suppress_path pool option to filter access log entries.
     (Mark Gallagher)
 
+- PDO_Firebird:
+  . Fixed GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
+
 - Standard:
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
