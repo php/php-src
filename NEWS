@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed LMDB driver hanging when attempting to delete a non-existing key
     (Girgias)
 
+- Intl:
+  . Fixed build for ICU 69.x and onwards. (David Carlier)
+
 - Opcache:
   . Allocate JIT buffer close to PHP .text segemnt to allow using direct
     IP-relative calls and jumps.
