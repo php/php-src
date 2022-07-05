@@ -72,6 +72,7 @@ DBA_OPEN_FUNC(lmdb)
 
 	rc = mdb_env_open(env, info->path, flags, mode);
 	if (rc) {
+		mdb_env_close(env);
 		*error = mdb_strerror(rc);
 		return FAILURE;
 	}
