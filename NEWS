@@ -2,31 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0alpha3
 
-- Date:
-  . Fixed bug #80047 (DatePeriod doesn't warn with custom DateTimeImmutable).
-    (Derick)
-
-- Fileinfo:
-  . Fixed bug #81723 (Heap buffer overflow in finfo_buffer). (CVE-2022-31627)
-    (cmb)
-
-- FPM:
-  . Fixed zlog message prepend, free on incorrect address. (Heiko Weber)
-
-- GD:
-  . Fixed bug GH-8848 (imagecopyresized() error refers to the wrong argument).
-    (cmb)
-
-- OPcache:
-  . Fixed bug GH-8847 (PHP hanging infinitly at 100% cpu when check php
-    syntaxe of a valid file). (Dmitry)
-
-- Standard:
-  . Fixed the crypt_sha256/512 api build with clang > 12. (David Carier)
-
-07 Jul 2022, PHP 8.1.8
->>>>>>> PHP-8.1
-
 - Core:
   . Uses safe_perealloc instead of perealloc for the
     ZEND_PTR_STACK_RESIZE_IF_NEEDED to avoid possible overflows. (David Carlier)
