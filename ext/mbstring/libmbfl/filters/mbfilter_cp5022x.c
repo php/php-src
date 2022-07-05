@@ -338,7 +338,11 @@ static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter)
 	if (filter->cache) {
 		int s = mbfl_convert_kana(filter->cache, c, &consumed, NULL, mode);
 		filter->cache = consumed ? 0 : c;
+		/* Terrible hack to get CP50220 to emit error markers in the proper
+		 * position, not reordering them with subsequent characters */
+		filter->filter_function = mbfl_filt_conv_wchar_cp50221;
 		mbfl_filt_conv_wchar_cp50221(s, filter);
+		filter->filter_function = mbfl_filt_conv_wchar_cp50220;
 	} else if (c == 0) {
 		/* This case has to be handled separately, since `filter->cache == 0` means
 		 * no codepoint is cached */
