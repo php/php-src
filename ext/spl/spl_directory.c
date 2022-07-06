@@ -1958,7 +1958,11 @@ static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, c
 		ZVAL_UNDEF(&intern->u.file.current_zval);
 	}
 
-	php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf, &intern->u.file.current_zval);
+	HashTable *values = php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf);
+	if (values == NULL) {
+		BC_EMPTY_CSV_LINE_ARRAY(values);
+	}
+	ZVAL_ARR(&intern->u.file.current_zval, values);
 	if (return_value) {
 		ZVAL_COPY(return_value, &intern->u.file.current_zval);
 	}

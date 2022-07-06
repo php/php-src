@@ -2050,11 +2050,15 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf, return_value);
+	HashTable *values = php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf);
+	if (values == NULL) {
+		BC_EMPTY_CSV_LINE_ARRAY(values);
+	}
+	RETURN_ARR(values);
 }
 /* }}} */
 
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value) /* {{{ */
+PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf) /* {{{ */
 {
 	char *temp, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
@@ -2078,12 +2082,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 	temp_len = buf_len;
 	temp = emalloc(temp_len + line_end_len + 1);
 
-	/* Initialize return array */
-	array_init(return_value);
+	/* Initialize values HashTable */
+	HashTable *values = zend_new_array(0);
 
 	/* Main loop to read CSV fields */
-	/* NB this routine will return a single null entry for a blank line */
-
+	/* NB this routine will return NULL for a blank line */
 	do {
 		char *comp_end, *hunk_begin;
 		char *tptr = temp;
@@ -2100,7 +2103,8 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 		}
 
 		if (first_field && bptr == line_end) {
-			add_next_index_null(return_value);
+			zend_array_destroy(values);
+			values = NULL;
 			break;
 		}
 		first_field = false;
@@ -2298,13 +2302,18 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 
 		/* 3. Now pass our field back to php */
 		*comp_end = '\0';
-		add_next_index_stringl(return_value, temp, comp_end - temp);
+
+		zval z_tmp;
+		ZVAL_STRINGL(&z_tmp, temp, comp_end - temp);
+		zend_hash_next_index_insert(values, &z_tmp);
 	} while (inc_len > 0);
 
 	efree(temp);
 	if (stream) {
 		efree(buf);
 	}
+
+	return values;
 }
 /* }}} */
 
