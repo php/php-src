@@ -1633,6 +1633,28 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass)
 }
 /* }}} */
 
+/* {{{ Returns the called scope associated to the closure */
+ZEND_METHOD(ReflectionFunctionAbstract, getClosureCalledClass)
+{
+	reflection_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT();
+	if (!Z_ISUNDEF(intern->obj)) {
+		zend_class_entry *called_scope;
+		zend_function *closure_func;
+		zend_object *object;
+		if (Z_OBJ_HANDLER(intern->obj, get_closure)
+		 && Z_OBJ_HANDLER(intern->obj, get_closure)(Z_OBJ(intern->obj), &called_scope, &closure_func, &object, 1) == SUCCESS
+		 && closure_func && (called_scope || closure_func->common.scope)) {
+			zend_reflection_class_factory(called_scope ? (zend_class_entry *) called_scope : closure_func->common.scope, return_value);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ Returns a dynamically created closure for the function */
 ZEND_METHOD(ReflectionFunction, getClosure)
 {

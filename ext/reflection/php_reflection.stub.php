@@ -48,6 +48,9 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return ReflectionClass|null */
     public function getClosureScopeClass() {}
 
+    /** @return ReflectionClass|null */
+    public function getClosureCalledClass() {}
+
     /** @return string|false */
     public function getDocComment() {}
 
