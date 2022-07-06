@@ -2047,13 +2047,14 @@ static bool spl_filesystem_file_is_empty_line(spl_filesystem_object *intern) /* 
 }
 /* }}} */
 
-static zend_result spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern, bool silent) /* {{{ */
+/* Call to this function reads a line in a "silent" fashion and does not throw an exception */
+static zend_result spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
-	zend_result ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent);
+	zend_result ret = spl_filesystem_file_read_line_ex(this_ptr, intern, /* silent */ true);
 
 	while (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY) && ret == SUCCESS && spl_filesystem_file_is_empty_line(intern)) {
 		spl_filesystem_file_free_line(intern);
-		ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent);
+		ret = spl_filesystem_file_read_line_ex(this_ptr, intern, /* silent */ true);
 	}
 
 	return ret;
@@ -2075,7 +2076,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 	intern->u.file.current_line_num = 0;
 
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
-		spl_filesystem_file_read_line(this_ptr, intern, /* silent */ true);
+		spl_filesystem_file_read_line(this_ptr, intern);
 	}
 } /* }}} */
 
@@ -2229,7 +2230,7 @@ PHP_METHOD(SplFileObject, current)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
-		spl_filesystem_file_read_line(ZEND_THIS, intern, /* silent */ true);
+		spl_filesystem_file_read_line(ZEND_THIS, intern);
 	}
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
@@ -2251,7 +2252,7 @@ PHP_METHOD(SplFileObject, key)
 
 	/* Do not read the next line to support correct counting with fgetc()
 	if (!intern->u.file.current_line) {
-		spl_filesystem_file_read_line(ZEND_THIS, intern, silent true);
+		spl_filesystem_file_read_line(ZEND_THIS, intern);
 	} */
 	RETURN_LONG(intern->u.file.current_line_num);
 } /* }}} */
@@ -2267,7 +2268,7 @@ PHP_METHOD(SplFileObject, next)
 
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
-		spl_filesystem_file_read_line(ZEND_THIS, intern, /* silent */ true);
+		spl_filesystem_file_read_line(ZEND_THIS, intern);
 	}
 	intern->u.file.current_line_num++;
 } /* }}} */
@@ -2766,7 +2767,7 @@ PHP_METHOD(SplFileObject, seek)
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
 
 	for (i = 0; i < line_pos; i++) {
-		if (spl_filesystem_file_read_line(ZEND_THIS, intern, /* silent */ true) == FAILURE) {
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern) == FAILURE) {
 			return;
 		}
 	}
