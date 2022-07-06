@@ -21,6 +21,7 @@ string(8) "baz,bat
 "
 string(10) "more,data
 "
+string(0) ""
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/bug81477.csv');

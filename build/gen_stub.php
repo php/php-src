@@ -46,28 +46,54 @@ function processDirectory(string $dir, Context $context): array {
     return $fileInfos;
 }
 
-function processStubFile(string $stubFile, Context $context): ?FileInfo {
+function processStubFile(string $stubFile, Context $context, bool $includeOnly = false): ?FileInfo {
     try {
         if (!file_exists($stubFile)) {
             throw new Exception("File $stubFile does not exist");
         }
 
-        $stubFilenameWithoutExtension = str_replace(".stub.php", "", $stubFile);
-        $arginfoFile = "{$stubFilenameWithoutExtension}_arginfo.h";
-        $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
+        if (!$includeOnly) {
+            $stubFilenameWithoutExtension = str_replace(".stub.php", "", $stubFile);
+            $arginfoFile = "{$stubFilenameWithoutExtension}_arginfo.h";
+            $legacyFile = "{$stubFilenameWithoutExtension}_legacy_arginfo.h";
 
-        $stubCode = file_get_contents($stubFile);
-        $stubHash = computeStubHash($stubCode);
-        $oldStubHash = extractStubHash($arginfoFile);
-        if ($stubHash === $oldStubHash && !$context->forceParse) {
-            /* Stub file did not change, do not regenerate. */
-            return null;
+            $stubCode = file_get_contents($stubFile);
+            $stubHash = computeStubHash($stubCode);
+            $oldStubHash = extractStubHash($arginfoFile);
+            if ($stubHash === $oldStubHash && !$context->forceParse) {
+                /* Stub file did not change, do not regenerate. */
+                return null;
+            }
         }
 
-        initPhpParser();
-        $fileInfo = parseStubFile($stubCode);
-        $constInfos = $fileInfo->getAllConstInfos();
-        $context->allConstInfos = array_merge($context->allConstInfos, $constInfos);
+        if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
+            initPhpParser();
+            $fileInfo = parseStubFile($stubCode ?? file_get_contents($stubFile));
+            $context->parsedFiles[$stubFile] = $fileInfo;
+
+            foreach ($fileInfo->dependencies as $dependency) {
+                // TODO add header search path for extensions?
+                $prefixes = [dirname($stubFile) . "/", dirname(__DIR__) . "/"];
+                foreach ($prefixes as $prefix) {
+                    $depFile = $prefix . $dependency;
+                    if (file_exists($depFile)) {
+                        break;
+                    }
+                    $depFile = null;
+                }
+                if (!$depFile) {
+                    throw new Exception("File $stubFile includes a file $dependency which does not exist");
+                }
+                processStubFile($depFile, $context, true);
+            }
+
+            $constInfos = $fileInfo->getAllConstInfos();
+            $context->allConstInfos = array_merge($context->allConstInfos, $constInfos);
+        }
+
+        if ($includeOnly) {
+            return $fileInfo;
+        }
 
         $arginfoCode = generateArgInfoCode(
             basename($stubFilenameWithoutExtension),
@@ -131,6 +157,8 @@ class Context {
     public $forceRegeneration = false;
     /** @var iterable<ConstInfo> */
     public iterable $allConstInfos = [];
+    /** @var FileInfo[] */
+    public array $parsedFiles = [];
 }
 
 class ArrayType extends SimpleType {
@@ -1398,6 +1426,7 @@ class FuncInfo {
         foreach ($this->args as $arg) {
             $arg->type = null;
             $arg->defaultValue = null;
+            $arg->isSensitive = null;
         }
     }
 
@@ -2257,6 +2286,38 @@ class EnumCaseInfo {
     }
 }
 
+class AttributeInfo {
+    /** @var string */
+    public $class;
+    /** @var \PhpParser\Node\Arg[] */
+    public $args;
+
+    /** @param \PhpParser\Node\Arg[] $args */
+    public function __construct(string $class, array $args) {
+        $this->class = $class;
+        $this->args = $args;
+    }
+
+    /** @param iterable<ConstInfo> $allConstInfos */
+    public function generateCode(string $invocation, string $nameSuffix, iterable $allConstInfos): string {
+        $code = "\n";
+        $escapedAttributeName = strtr($this->class, '\\', '_');
+        $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
+        $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
+        $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
+        foreach ($this->args as $i => $arg) {
+            $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
+            $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
+            $code .= $value->initializeZval($zvalName, $allConstInfos);
+            $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
+            if ($arg->name) {
+                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+            }
+        }
+        return $code;
+    }
+}
+
 class ClassInfo {
     /** @var Name */
     public $name;
@@ -2272,8 +2333,8 @@ class ClassInfo {
     public $isDeprecated;
     /** @var bool */
     public $isStrictProperties;
-    /** @var bool */
-    public $allowsDynamicProperties;
+    /** @var AttributeInfo[] */
+    public $attributes;
     /** @var bool */
     public $isNotSerializable;
     /** @var Name[] */
@@ -2292,6 +2353,7 @@ class ClassInfo {
     public $cond;
 
     /**
+     * @param AttributeInfo[] $attributes
      * @param Name[] $extends
      * @param Name[] $implements
      * @param ConstInfo[] $constInfos
@@ -2307,7 +2369,7 @@ class ClassInfo {
         ?SimpleType $enumBackingType,
         bool $isDeprecated,
         bool $isStrictProperties,
-        bool $allowsDynamicProperties,
+        array $attributes,
         bool $isNotSerializable,
         array $extends,
         array $implements,
@@ -2324,7 +2386,7 @@ class ClassInfo {
         $this->enumBackingType = $enumBackingType;
         $this->isDeprecated = $isDeprecated;
         $this->isStrictProperties = $isStrictProperties;
-        $this->allowsDynamicProperties = $allowsDynamicProperties;
+        $this->attributes = $attributes;
         $this->isNotSerializable = $isNotSerializable;
         $this->extends = $extends;
         $this->implements = $implements;
@@ -2413,8 +2475,8 @@ class ClassInfo {
             $code .= $property->getDeclaration($allConstInfos);
         }
 
-        if ($this->allowsDynamicProperties) {
-            $code .= "\tzend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);\n";
+        foreach ($this->attributes as $attribute) {
+            $code .= $attribute->generateCode("zend_add_class_attribute(class_entry", "class_$escapedName", $allConstInfos);
         }
 
         if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond)) {
@@ -2460,8 +2522,10 @@ class ClassInfo {
             $flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
         }
 
-        if ($this->allowsDynamicProperties) {
-            $flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
+        foreach ($this->attributes as $attr) {
+            if ($attr->class === "AllowDynamicProperties") {
+                $flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
+            }
         }
 
         if ($this->isNotSerializable) {
@@ -2861,6 +2925,8 @@ class ClassInfo {
 }
 
 class FileInfo {
+    /** @var string[] */
+    public $dependencies = [];
     /** @var ConstInfo[] */
     public $constInfos = [];
     /** @var FuncInfo[] */
@@ -3286,6 +3352,7 @@ function parseClass(
     $isStrictProperties = false;
     $isNotSerializable = false;
     $allowsDynamicProperties = false;
+    $attributes = [];
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -3304,12 +3371,11 @@ function parseClass(
 
     foreach ($class->attrGroups as $attrGroup) {
         foreach ($attrGroup->attrs as $attr) {
-            switch ($attr->name->toCodeString()) {
-                case '\\AllowDynamicProperties':
+            $attributes[] = new AttributeInfo($attr->name->toString(), $attr->args);
+            switch ($attr->name->toString()) {
+                case 'AllowDynamicProperties':
                     $allowsDynamicProperties = true;
                     break;
-                default:
-                    throw new Exception("Unhandled attribute {$attr->name->toCodeString()}.");
             }
         }
     }
@@ -3348,7 +3414,7 @@ function parseClass(
             ? SimpleType::fromNode($class->scalarType) : null,
         $isDeprecated,
         $isStrictProperties,
-        $allowsDynamicProperties,
+        $attributes,
         $isNotSerializable,
         $extends,
         $implements,
@@ -3509,6 +3575,14 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond
             );
             continue;
+        }
+
+        if ($stmt instanceof Stmt\Expression) {
+            $expr = $stmt->expr;
+            if ($expr instanceof Expr\Include_) {
+                $fileInfo->dependencies[] = (string)EvaluatedValue::createFromExpression($expr->expr, null, null, [])->value;
+                continue;
+            }
         }
 
         throw new Exception("Unexpected node {$stmt->getType()}");

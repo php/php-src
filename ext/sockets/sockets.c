@@ -627,6 +627,9 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SKF_AD_MAX", SKF_AD_MAX, CONST_CS | CONST_PERSISTENT);
 #endif
 
+#ifdef TCP_CONGESTION
+	REGISTER_LONG_CONSTANT("TCP_CONGESTION",   TCP_CONGESTION,    CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef TCP_NODELAY
 	REGISTER_LONG_CONSTANT("TCP_NODELAY",   TCP_NODELAY,    CONST_CS | CONST_PERSISTENT);
 #endif
@@ -1883,6 +1886,26 @@ PHP_FUNCTION(socket_get_option)
 	}
 #endif
 
+	if (level == IPPROTO_TCP) {
+		switch (optname) {
+#ifdef TCP_CONGESTION
+		case TCP_CONGESTION: {
+			char name[16];
+			optlen = sizeof(name);
+			if (getsockopt(php_sock->bsd_socket, level, optname, name, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			} else {
+				array_init(return_value);
+
+				add_assoc_string(return_value, "name", name);
+				return;
+			}
+		}
+#endif
+		}
+	}
+
 	if (level == SOL_SOCKET) {
 		switch (optname) {
 			case SO_LINGER:
@@ -2039,6 +2062,28 @@ PHP_FUNCTION(socket_set_option)
 		HANDLE_SUBCALL(res);
 	}
 #endif
+
+	if (level == IPPROTO_TCP) {
+		switch (optname) {
+#ifdef TCP_CONGESTION
+		case TCP_CONGESTION: {
+			if (Z_TYPE_P(arg4) == IS_STRING) {
+				opt_ptr = Z_STRVAL_P(arg4);
+				optlen = Z_STRLEN_P(arg4);
+			} else {
+				opt_ptr = "";
+				optlen = 0;
+			}
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+		}
+	}
 
 	switch (optname) {
 		case SO_LINGER: {

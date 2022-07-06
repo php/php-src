@@ -17,15 +17,6 @@
 #include "php.h"
 #include "info.h"
 
-
-/* Encoded from (without newlines):
-<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'>
-<path style='stroke:#000;stroke-width:.5;stroke-opacity:.25' d='M 0,0 4,4 M 0,4 4,0'/>
-</svg>
- */
-#define BACKGROUND_SVG_ENCODED \
-	"%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%274%27%20height%3D%274%27%3E%3Cpath%20style%3D%27stroke%3A%23000%3Bstroke-width%3A.5%3Bstroke-opacity%3A.25%27%20d%3D%27M%200%2C0%204%2C4%20M%200%2C4%204%2C0%27%2F%3E%3C%2Fsvg%3E"
-
 PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 {
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
@@ -50,7 +41,7 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS(":root {--php-dark-grey: #333; --php-dark-blue: #4F5B93; --php-medium-blue: #8892BF; --php-light-blue: #E2E4EF; --php-accent-purple: #793862}");
 	PUTS(
 		"@media (prefers-color-scheme: dark) {\n"
-		"  body {background: var(--php-dark-grey) url('data:image/svg+xml;utf8," BACKGROUND_SVG_ENCODED "'); color: var(--php-light-blue)}\n"
+		"  body {background: var(--php-dark-grey); color: var(--php-light-blue)}\n"
 		"  .h td, td.e, th {border-color: #606A90}\n"
 		"  td {border-color: #505153}\n"
 		"  .e {background-color: #404A77}\n"

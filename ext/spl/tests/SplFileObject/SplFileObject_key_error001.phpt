@@ -18,5 +18,5 @@ var_dump($s->key());
 var_dump($s->valid());
 ?>
 --EXPECT--
-int(12)
+int(14)
 bool(false)
