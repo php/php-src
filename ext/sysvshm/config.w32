@@ -1,8 +1,0 @@
-// vim:ft=javascript
-
-ARG_ENABLE('sysvshm', 'SysV Shared Memory support', 'no');
-
-if (PHP_SYSVSHM != 'no') {
-	AC_DEFINE('HAVE_SYSVSHM', 1);
-	EXTENSION('sysvshm', 'sysvshm.c');
-}

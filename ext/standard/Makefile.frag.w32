@@ -1,9 +1,0 @@
-ext\standard\var_unserializer.c: ext\standard\var_unserializer.re
-	cd $(PHP_SRC_DIR)
-	$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o ext/standard/var_unserializer.c ext/standard/var_unserializer.re
-
-ext\standard\url_scanner_ex.c: ext\standard\url_scanner_ex.re
-	cd $(PHP_SRC_DIR)
-	$(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o ext/standard/url_scanner_ex.c ext/standard/url_scanner_ex.re
-
-$(BUILD_DIR)\ext\standard\basic_functions.obj: $(PHP_SRC_DIR)\Zend\zend_language_parser.h

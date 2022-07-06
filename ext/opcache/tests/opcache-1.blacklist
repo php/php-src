@@ -1,5 +1,0 @@
-; comments are allowed in blacklist file
-; and empty line are ignored
-
-/path/to/foo
-"/path/to/foo2"

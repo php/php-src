@@ -1,5 +1,0 @@
-quot 22
-amp 26
-apos 27
-lt 3C
-gt 3E

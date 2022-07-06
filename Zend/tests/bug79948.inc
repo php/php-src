@@ -1,2 +1,0 @@
-<?php
-exit("Exiting...\n");

@@ -1,1 +1,0 @@
-[abcde]+[0-5]*xyz[2-8]+abcde

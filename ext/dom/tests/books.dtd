@@ -1,7 +1,0 @@
-<!ENTITY entitest "entity is only for test purposes">
-<!ATTLIST title 
-  default CDATA "default title">
-  <!ELEMENT books (book*)>
-  <!ELEMENT book (title, author)>
-  <!ELEMENT title (#PCDATA)>
-  <!ELEMENT author (#PCDATA)>
