@@ -184,6 +184,9 @@ PHP 8.2 UPGRADE NOTES
 - Curl:
   . curl_upkeep() (libcurl >= 7.62.0)
 
+- mysqli:
+  . mysqli_execute_query()
+
 - Reflection:
   . ReflectionFunction::isAnonymous()
   . ReflectionMethod::hasPrototype()
