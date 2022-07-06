@@ -364,6 +364,8 @@ int mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 
 	if (c == 0) {
 		s = 0;
+	} else if (s == 0) {
+		s = -1;
 	}
 
 	if (s >= 0) {
