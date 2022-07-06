@@ -1944,7 +1944,7 @@ static inline zend_result spl_filesystem_file_read(spl_filesystem_object *intern
 static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
 	do {
-		zend_result ret = spl_filesystem_file_read(intern, 1);
+		zend_result ret = spl_filesystem_file_read(intern, /* silent */ true);
 		if (ret != SUCCESS) {
 			return ret;
 		}
@@ -2640,7 +2640,7 @@ PHP_METHOD(SplFileObject, fscanf)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	/* Get next line */
-	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
+	if (spl_filesystem_file_read(intern, /* silent */ false) == FAILURE) {
 		RETURN_THROWS();
 	}
 
