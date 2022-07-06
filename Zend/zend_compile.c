@@ -6992,7 +6992,16 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	} else if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
 	}
-	zend_compile_stmt(stmt_ast);
+
+	zend_try {
+		zend_compile_stmt(stmt_ast);
+	} zend_catch {
+		if (!is_method && toplevel) {
+			zend_hash_del(CG(function_table), CG(active_op_array)->function_name);
+		}
+
+		zend_bailout();
+	} zend_end_try();
 
 	if (is_method) {
 		CG(zend_lineno) = decl->start_lineno;
