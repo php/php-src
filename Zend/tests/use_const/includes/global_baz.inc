@@ -1,0 +1,3 @@
+<?php
+
+const baz = NULL;

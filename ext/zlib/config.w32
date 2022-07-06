@@ -1,0 +1,19 @@
+// vim:ft=javascript
+
+ARG_ENABLE("zlib", "ZLIB support", "yes");
+
+if (PHP_ZLIB == "yes") {
+	if (CHECK_LIB("zlib_a.lib;zlib.lib", "zlib", PHP_ZLIB) &&
+		CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)) {
+
+		EXTENSION("zlib", "zlib.c zlib_fopen_wrapper.c zlib_filter.c", PHP_ZLIB_SHARED, "/D ZLIB_EXPORTS /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		AC_DEFINE("HAVE_ZLIB", 1, "ZLIB support");
+
+		if (!PHP_ZLIB_SHARED) {
+			ADD_DEF_FILE("ext\\zlib\\php_zlib.def");
+		}
+	} else {
+		WARNING("zlib support can't be enabled, zlib is missing")
+		PHP_ZLIB = "no"
+	}
+}

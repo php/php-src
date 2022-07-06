@@ -1,0 +1,65 @@
+--TEST--
+var_export(): simple test with arrays and objects
+--FILE--
+<?php
+echo "\n\n-- Var export on a simple  object --\n";
+$o1 = new stdclass;
+$o1->p = '22';
+$o2 = new stdclass;
+$o2->a = 1;
+$o2->b = array('k'=>2);
+$o2->x = $o1;
+var_export($o2);
+
+echo "\n\n-- Var export on an simple array --\n";
+$a = array(1,2,3,4);
+var_export($a);
+
+echo "\n\n-- Var export on an nested array --\n";
+$a = array('one' => 'first');
+$b = array('foo' => $a, 'bar' => $o2);
+var_export($b);
+
+?>
+===DONE===
+--EXPECT--
+-- Var export on a simple  object --
+(object) array(
+   'a' => 1,
+   'b' => 
+  array (
+    'k' => 2,
+  ),
+   'x' => 
+  (object) array(
+     'p' => '22',
+  ),
+)
+
+-- Var export on an simple array --
+array (
+  0 => 1,
+  1 => 2,
+  2 => 3,
+  3 => 4,
+)
+
+-- Var export on an nested array --
+array (
+  'foo' => 
+  array (
+    'one' => 'first',
+  ),
+  'bar' => 
+  (object) array(
+     'a' => 1,
+     'b' => 
+    array (
+      'k' => 2,
+    ),
+     'x' => 
+    (object) array(
+       'p' => '22',
+    ),
+  ),
+)===DONE===

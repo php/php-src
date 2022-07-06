@@ -1,0 +1,137 @@
+// vim:ft=javascript
+// "Master" config file; think of it as a configure.ac
+// equivalent.
+
+ARG_WITH("verbosity", "Output verbosity, 0-2.", "1");
+setup_verbosity();
+
+ARG_WITH("toolset", "Toolset to use for the compilation, give: vs, clang, icc. " +
+		"The only recommended and supported toolset for production use " +
+		"is Visual Studio. Use others at your own risk.", "vs");
+toolset_option_handle()
+
+var PHP_CYGWIN="notset";
+
+toolset_setup_compiler();
+
+// do we use x64 or 80x86 version of compiler?
+X64 = toolset_is_64();
+toolset_setup_arch();
+
+toolset_setup_linker();
+toolset_setup_project_tools();
+
+// stick objects somewhere outside of the source tree
+ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
+object_out_dir_option_handle();
+
+ARG_ENABLE('debug', 'Compile with debugging symbols', PHP_DEBUG);
+ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
+if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
+	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
+}
+
+if (PHP_PREFIX == '') {
+	PHP_PREFIX = "C:\\php";
+	if (PHP_DEBUG == "yes")
+		PHP_PREFIX += "\\debug";
+}
+DEFINE('PHP_PREFIX', PHP_PREFIX);
+
+DEFINE("BASE_INCLUDES", "/I " + PHP_DIR + "/include /I " + PHP_DIR + "/include/main /I " + PHP_DIR + "/include/Zend /I " + PHP_DIR + "/include/TSRM /I " + PHP_DIR + "/include/ext ");
+
+toolset_setup_common_cflags();
+
+ARG_WITH('prefix', 'PHP installation prefix', PHP_PREFIX);
+ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
+var PHP_MP_DISABLED = true;
+if (VS_TOOLSET && PHP_MP != 'disable') {
+		// no from disable-all
+		if(PHP_MP == 'auto' || PHP_MP == 'no') {
+			 ADD_FLAG('CFLAGS', ' /MP ');
+			PHP_MP_DISABLED = false;
+		} else {
+			if(parseInt(PHP_MP) != 0) {
+				ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+				PHP_MP_DISABLED = false;
+			} else {
+				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+			}
+		}
+}
+
+/* For snapshot builders, where can we find the additional
+ * files that make up the snapshot template? */
+ARG_WITH("snapshot-template", "Path to snapshot builder template dir", "no");
+
+// General link flags
+toolset_setup_common_ldlags();
+
+// General libs
+toolset_setup_common_libs();
+
+// Set some debug/release specific options
+toolset_setup_build_mode();
+
+setup_zts_stuff();
+
+if (MODE_PHPIZE) {
+	DEFINE("PHPDLL", PHP_DLL);
+	DEFINE("PHPLIB", PHP_DLL_LIB);
+}
+
+// Find the php_build dir - it contains headers and libraries
+// that we need
+ARG_WITH('php-build', 'Path to where you extracted the development libraries (http://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
+php_build_option_handle();
+
+ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
+ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
+
+var php_usual_include_suspects = PHP_PHP_BUILD+"\\include";
+var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib";
+
+ADD_FLAG("CFLAGS", '/I "' + php_usual_include_suspects + '" ');
+ADD_FLAG("LDFLAGS", '/libpath:"\\"' + php_usual_lib_suspects + '\\"" ');
+ADD_FLAG("ARFLAGS", '/libpath:"\\"' + php_usual_lib_suspects + '\\"" ');
+
+probe_basic_headers();
+add_extra_dirs();
+
+//DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+
+STDOUT.WriteBlankLines(1);
+STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
+STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
+
+/* XXX inspect this for other toolsets */
+//AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
+
+AC_DEFINE('HAVE_STRNLEN', 1);
+
+STDOUT.WriteBlankLines(1);
+
+if (PHP_SNAPSHOT_TEMPLATE == "no") {
+	/* default is as a sibling of the php_build dir */
+	if (FSO.FolderExists(PHP_PHP_BUILD + "\\template")) {
+		PHP_SNAPSHOT_TEMPLATE = FSO.GetAbsolutePathName(PHP_PHP_BUILD + "\\template");
+	} else if (FSO.FolderExists(PHP_PHP_BUILD + "\\..\\template")) {
+		PHP_SNAPSHOT_TEMPLATE = FSO.GetAbsolutePathName(PHP_PHP_BUILD + "\\..\\template");
+	}
+}
+
+DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
+
+AC_DEFINE("PHP_DIR", PHP_DIR);
+DEFINE("PHP_DIR", PHP_DIR);
+
+ARG_WITH("codegen-arch", "Architecture for code generation", "no");
+toolset_setup_codegen_arch();
+
+ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
+	Available optimization names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
+	SSE and SSE2 are enabled by default. The best optimization specified will \
+	automatically enable all the older optimizations. Note, that the produced binary \
+	might not work properly, if the optimizations are not available on the target \
+	processor.", "no");
+toolset_setup_intrinsic_cflags();

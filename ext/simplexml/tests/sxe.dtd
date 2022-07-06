@@ -1,0 +1,34 @@
+<?xml encoding='US-ASCII'?>
+
+<!ELEMENT sxe    (elem1+, elem11, elem22*)>
+<!ATTLIST sxe    id     CDATA  #implied>
+
+<!ELEMENT elem1  elem2*>
+<!ATTLIST elem1  attr1  CDATA  #required
+                 attr2  CDATA  "default>
+
+<!ELEMENT elem2  elem3*>
+<!ATTLIST elem2  att25  CDATA  #implied
+                 att42  CDATA  #implied>
+
+<!ELEMENT elem3  elem4*>
+<!ATTLIST elem3>
+
+<!ELEMENT elem4  EMPTY>
+<!ATTLIST elem4>
+
+<!ELEMENT elem11 elem111*>
+<!ATTLIST elem11>
+
+<!ELEMNET elem111 elem1111*>
+<!ATTLIST elem111>
+
+<!ELEMENT elem1111 EMPTY>
+<!ATTLIST elem1111>
+
+<!ELEMENT elem22 elem222*>
+<!ATTLIST elem22 attr22 CDATA #implied>
+
+<!ELEMENT elem222 EMPTY>
+<!ATTLIST elem222>
+

@@ -1,0 +1,4 @@
+// vim:ft=javascript
+
+ADD_SOURCES("TSRM", "TSRM.c tsrm_win32.c");
+ADD_FLAG("CFLAGS_BD_TSRM", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");

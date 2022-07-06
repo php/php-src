@@ -1,0 +1,28 @@
+<?xml version='1.0'  encoding="iso-8859-1" ?>
+<chapter language="en">
+    <title language="en">Title</title>
+    <para language="ge">
+
+<!-- comment -->
+        <informaltable>
+            <tgroup cols="3">
+                <tbody>
+                    <row>
+                        <entry>a1</entry>
+                        <entry morerows="1">b1</entry>
+                        <entry>c1</entry>
+                    </row>
+                    <row>
+                        <entry>a2</entry>
+                        <entry>c2</entry>
+                    </row>
+                    <row>
+                        <entry>ä3</entry>
+                        <entry>b3</entry>
+                        <entry>c3</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </informaltable>
+    </para>
+</chapter>

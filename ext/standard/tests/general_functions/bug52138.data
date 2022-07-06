@@ -1,0 +1,11 @@
+[MYCONST]
+MYCONST = MYCONST
+
+[M_PI]
+FOO=M_PI " test"
+
+[foo::bar]
+A=1
+B=A "A" A
+
+[MYCONST M_PI]

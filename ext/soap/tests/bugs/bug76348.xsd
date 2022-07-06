@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+        X-road EU namespace: http://x-road.eu/xsd/x-road.xsd
+        03.04.2012: added xml:lang attributes to <xrd:title> elements
+        28.03.2013: improved language usage
+-->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xrd="http://x-road.eu/xsd/x-road.xsd" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://x-road.eu/xsd/x-road.xsd">
+  <!-- prefiks xml -->
+  <import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2009/01/xml.xsd" />
+  <!-- header elements an types -->
+  <complexType name="hdrstd">
+    <sequence>
+      <element ref="xrd:consumer" />
+      <element ref="xrd:producer" />
+      <element ref="xrd:userId" />
+      <element ref="xrd:id" />
+      <element ref="xrd:service" />
+      <element ref="xrd:issue" />
+    </sequence>
+  </complexType>
+  <element name="consumer" type="string">
+    <annotation>
+      <documentation>Service consumer code</documentation>
+    </annotation>
+  </element>
+  <element name="producer" type="string">
+    <annotation>
+      <documentation>Service producer code</documentation>
+    </annotation>
+  </element>
+  <element name="userId" type="string">
+    <annotation>
+      <documentation>Service user identification code with country code prefix (2-characters)</documentation>
+    </annotation>
+  </element>
+  <element name="id" type="string">
+    <annotation>
+      <documentation>Query id</documentation>
+    </annotation>
+  </element>
+  <element name="service" type="string">
+    <annotation>
+      <documentation>Query name</documentation>
+    </annotation>
+  </element>
+  <element name="issue" type="string">
+    <annotation>
+      <documentation>Query issue</documentation>
+    </annotation>
+  </element>
+  <element name="unit" type="string">
+    <annotation>
+      <documentation>Service user's unit code</documentation>
+    </annotation>
+  </element>
+  <element name="position" type="string">
+    <annotation>
+      <documentation>Service user postition name</documentation>
+    </annotation>
+  </element>
+  <element name="authenticator" type="string">
+    <annotation>
+      <documentation>Service user's authenticator</documentation>
+    </annotation>
+  </element>
+  <element name="userName" type="string">
+    <annotation>
+      <documentation>Service user full name</documentation>
+    </annotation>
+  </element>
+  <element name="async" type="boolean">
+    <annotation>
+      <documentation>Asynchroneous service flag</documentation>
+    </annotation>
+  </element>
+  <element name="encode" type="string">
+    <annotation>
+      <documentation>Name of encoder-db</documentation>
+    </annotation>
+  </element>
+  <!-- Elements describing other elements and operations-->
+  <element name="title">
+    <annotation>
+      <documentation>Title</documentation>
+    </annotation>
+    <complexType>
+      <simpleContent>
+        <extension base="string">
+          <attribute ref="xml:lang" default="en" />
+        </extension>
+      </simpleContent>
+    </complexType>
+  </element>
+  <element name="notes">
+    <annotation>
+      <documentation>Notes for user</documentation>
+    </annotation>
+    <complexType>
+      <simpleContent>
+        <extension base="string">
+          <attribute ref="xml:lang" default="en" />
+        </extension>
+      </simpleContent>
+    </complexType>
+  </element>
+  <element name="technotes">
+    <annotation>
+      <documentation>Notes for technical stuff</documentation>
+    </annotation>
+    <complexType>
+      <simpleContent>
+        <extension base="string">
+          <attribute ref="xml:lang" default="en" />
+        </extension>
+      </simpleContent>
+    </complexType>
+  </element>
+  <element name="ref" type="string">
+    <annotation>
+      <documentation>The element name of the element is associated</documentation>
+    </annotation>
+  </element>
+  <element name="wildcard">
+    <annotation>
+      <documentation>List of permitted wildcards</documentation>
+    </annotation>
+    <simpleType>
+      <restriction base="string">
+        <pattern value="[*?-PS]+" />
+      </restriction>
+    </simpleType>
+  </element>
+  <element name="version">
+    <annotation>
+      <documentation>Version</documentation>
+    </annotation>
+    <simpleType>
+      <restriction base="string">
+        <pattern value="v\d+" />
+      </restriction>
+    </simpleType>
+  </element>
+  <element name="nocontent" type="string">
+    <annotation>
+      <documentation>Meaning of empty fields</documentation>
+    </annotation>
+  </element>
+  <element name="requirecontent" type="string">
+    <annotation>
+      <documentation>Meaning of empty fields</documentation>
+    </annotation>
+  </element>
+  <element name="address">
+    <annotation>
+      <documentation>Port address</documentation>
+    </annotation>
+    <complexType>
+      <attribute name="producer" type="string" />
+    </complexType>
+  </element>
+  <complexType name="legacy_response">
+    <sequence>
+      <element name="url" type="xrd:url">
+        <annotation>
+          <appinfo>
+            <xrd:title xml:lang="et">Infosüsteemi sissepääsu URL</xrd:title>
+            <xrd:title xml:lang="en">URL for entering external portal</xrd:title>
+          </appinfo>
+        </annotation>
+      </element>
+    </sequence>
+  </complexType>
+  <!-- Mittetehniline veateade -->
+  <complexType name="invalidInput">
+    <sequence>
+      <element name="faultCode" type="string">
+        <annotation>
+          <appinfo>
+            <xrd:title xml:lang="et">Kood</xrd:title>
+            <xrd:title xml:lang="en">Code</xrd:title>
+          </appinfo>
+        </annotation>
+      </element>
+      <element name="faultString" type="string">
+        <annotation>
+          <appinfo>
+            <xrd:title xml:lang="et">Teade</xrd:title>
+            <xrd:title xml:lang="en">Error message</xrd:title>
+          </appinfo>
+        </annotation>
+      </element>
+    </sequence>
+  </complexType>
+  <!-- Tüübid -->
+  <simpleType name="jpg">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Pilt (JPEG)</xrd:title>
+        <xrd:title xml:lang="en">JPEG picture</xrd:title>
+      </appinfo>
+    </annotation>
+    <restriction base="base64Binary" />
+  </simpleType>
+  <simpleType name="gif">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Pilt (GIF)</xrd:title>
+        <xrd:title xml:lang="en">GIF picture</xrd:title>
+      </appinfo>
+    </annotation>
+    <restriction base="base64Binary" />
+  </simpleType>
+  <simpleType name="xml">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">XMLina kasutatav tekst</xrd:title>
+        <xrd:title xml:lang="en">Text as XML</xrd:title>
+      </appinfo>
+    </annotation>
+    <restriction base="string" />
+  </simpleType>
+  <simpleType name="txt">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Tekstifail</xrd:title>
+        <xrd:title xml:lang="en">Text file</xrd:title>
+      </appinfo>
+    </annotation>
+    <restriction base="string" />
+  </simpleType>
+  <simpleType name="csv">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">CSV-vormingus fail</xrd:title>
+        <xrd:title xml:lang="en">CSV file</xrd:title>
+      </appinfo>
+    </annotation>
+    <restriction base="string" />
+  </simpleType>
+  <simpleType name="maakond">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Maakond</xrd:title>
+        <xrd:title xml:lang="en">County</xrd:title>
+        <xrd:technotes>County code in Estonian Administrative and Settlement Classification (EHAK)</xrd:technotes>
+      </appinfo>
+    </annotation>
+    <restriction base="string">
+      <pattern value="\d{4}" />
+    </restriction>
+  </simpleType>
+  <simpleType name="vald">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Vald</xrd:title>
+        <xrd:title xml:lang="en">Parish</xrd:title>
+        <xrd:technotes>Parish code in Estonian Administrative and Settlement Classification (EHAK)</xrd:technotes>
+      </appinfo>
+    </annotation>
+    <restriction base="string">
+      <pattern value="\d{4}" />
+    </restriction>
+  </simpleType>
+  <simpleType name="asula">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Asula</xrd:title>
+        <xrd:title xml:lang="en">Village</xrd:title>
+        <xrd:technotes>Village code in Estonian Administrative and Settlement Classification (EHAK)</xrd:technotes>
+      </appinfo>
+    </annotation>
+    <restriction base="string">
+      <pattern value="\d{4}" />
+    </restriction>
+  </simpleType>
+  <simpleType name="ehak">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Haldusüksus</xrd:title>
+        <xrd:title xml:lang="en">Unit</xrd:title>
+        <xrd:technotes>Unit code in Estonian Administrative and Settlement Classification (EHAK). Could be County, Parish or Village</xrd:technotes>
+      </appinfo>
+    </annotation>
+    <restriction base="string">
+      <pattern value="\d{4}" />
+    </restriction>
+  </simpleType>
+  <simpleType name="url">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Link</xrd:title>
+        <xrd:title xml:lang="en">Link</xrd:title>
+        <xrd:technotes>WWW URL</xrd:technotes>
+      </appinfo>
+    </annotation>
+    <restriction base="anyURI" />
+  </simpleType>
+  <complexType name="ArrayOfString">
+    <sequence>
+      <element name="item" type="string" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <attribute name="sensitive" type="boolean" />
+  <!--listMethods - meta-service for db adapter: returns list of all implemented queries-->
+  <element name="listMethods" nillable="true" />
+  <element name="listMethodsResponse">
+    <complexType>
+      <sequence>
+        <element name="response">
+          <complexType>
+            <sequence>
+              <element name="item" type="string" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+  <!--testSystem - meta-service for db adapter: checks system status -->
+  <element name="testSystem" nillable="true" />
+  <element name="testSystemResponse" nillable="true" />
+  <!-- unitValid (service for xroad portal),  checks if the unit is valid at the current moment-->
+  <complexType name="unitValid">
+    <sequence>
+      <element name="request">
+        <complexType>
+          <sequence>
+            <element name="unitCode" type="string">
+              <annotation>
+                <appinfo>
+                  <xrd:title xml:lang="et">Üksuse kood</xrd:title>
+                  <xrd:title xml:lang="en">Unit code</xrd:title>
+                </appinfo>
+              </annotation>
+            </element>
+          </sequence>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  <complexType name="unitValidResponse">
+    <sequence>
+      <element name="request">
+        <complexType>
+          <sequence>
+            <element name="unitCode" type="string" />
+          </sequence>
+        </complexType>
+      </element>
+      <element name="response">
+        <complexType>
+          <all>
+            <element name="isValid" type="boolean">
+              <annotation>
+                <appinfo>
+                  <xrd:title xml:lang="et">Kas üksus kehtib</xrd:title>
+                  <xrd:title xml:lang="en">Is unit valid at the moment</xrd:title>
+                </appinfo>
+              </annotation>
+            </element>
+            <element name="name" type="string">
+              <annotation>
+                <appinfo>
+                  <xrd:title xml:lang="et">Üksuse nimi</xrd:title>
+                  <xrd:title xml:lang="en">Unit name</xrd:title>
+                </appinfo>
+              </annotation>
+            </element>
+          </all>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  <!--unitRepresent (service for xroad portal) returns units, the person is allowed to represent -->
+  <complexType name="unitRepresent">
+    <sequence>
+      <element name="request">
+        <complexType>
+          <sequence>
+            <element name="personCode" type="string">
+              <annotation>
+                <appinfo>
+                  <xrd:title xml:lang="et">Isikukood</xrd:title>
+                  <xrd:title xml:lang="en">Person SSN</xrd:title>
+                </appinfo>
+              </annotation>
+            </element>
+          </sequence>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  <complexType name="unitRepresentResponse">
+    <sequence>
+      <element name="request">
+        <complexType>
+          <sequence>
+            <element name="personCode" type="string" />
+          </sequence>
+        </complexType>
+      </element>
+      <element name="response">
+        <complexType>
+          <sequence>
+            <element name="item" minOccurs="0" maxOccurs="unbounded">
+              <complexType>
+                <all>
+                  <element name="unitCode" type="string">
+                    <annotation>
+                      <appinfo>
+                        <xrd:title xml:lang="et">Üksuse kood</xrd:title>
+                        <xrd:title xml:lang="en">Unit code</xrd:title>
+                      </appinfo>
+                    </annotation>
+                  </element>
+                  <element name="name" type="string">
+                    <annotation>
+                      <appinfo>
+                        <xrd:title xml:lang="et">Üksuse nimi</xrd:title>
+                        <xrd:title xml:lang="en">Unit name</xrd:title>
+                      </appinfo>
+                    </annotation>
+                  </element>
+                </all>
+              </complexType>
+            </element>
+          </sequence>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  <!-- query for loading classifications to X-road portal-->
+  <element name="loadClassification">
+    <complexType>
+      <sequence>
+        <element name="request" nillable="true">
+          <complexType>
+            <sequence>
+              <element name="name" type="string" nillable="true">
+                <annotation>
+                  <appinfo>
+                    <xrd:title xml:lang="et">Nimi</xrd:title>
+                    <xrd:title xml:lang="en">Name</xrd:title>
+                  </appinfo>
+                </annotation>
+              </element>
+              <element name="subset" type="string" nillable="true">
+                <annotation>
+                  <appinfo>
+                    <xrd:title xml:lang="et">Alamhulk</xrd:title>
+                    <xrd:title xml:lang="en">Subset</xrd:title>
+                  </appinfo>
+                </annotation>
+              </element>
+              <element name="from" type="date" nillable="true">
+                <annotation>
+                  <appinfo>
+                    <xrd:title xml:lang="et">Alates</xrd:title>
+                    <xrd:title xml:lang="en">From</xrd:title>
+                  </appinfo>
+                </annotation>
+              </element>
+              <element name="max" type="string" nillable="true">
+                <annotation>
+                  <appinfo>
+                    <xrd:title xml:lang="et">Maksimaalne arv</xrd:title>
+                    <xrd:title xml:lang="en">Max count</xrd:title>
+                  </appinfo>
+                </annotation>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+  <element name="loadClassificationResponse">
+    <complexType>
+      <sequence>
+        <element name="request" nillable="true">
+          <complexType>
+            <sequence>
+              <element name="name" type="string" nillable="true" />
+              <element name="subset" type="string" nillable="true" />
+              <element name="from" type="date" nillable="true" />
+              <element name="max" type="string" nillable="true" />
+            </sequence>
+          </complexType>
+        </element>
+        <element name="response">
+          <complexType>
+            <sequence>
+              <element name="classificationNames" nillable="true">
+                <complexType>
+                  <sequence>
+                    <element name="item" type="string" minOccurs="0" maxOccurs="unbounded">
+                      <annotation>
+                        <appinfo>
+                          <xrd:title xml:lang="et">Nimi</xrd:title>
+                          <xrd:title xml:lang="en">Name</xrd:title>
+                        </appinfo>
+                      </annotation>
+                    </element>
+                  </sequence>
+                </complexType>
+              </element>
+              <element name="classifications" nillable="true">
+                <complexType>
+                  <sequence>
+                    <any minOccurs="0" maxOccurs="unbounded" />
+                  </sequence>
+                </complexType>
+              </element>
+              <element name="faultCode" type="xrd:faultCode" nillable="true" />
+              <element name="faultString" type="xrd:faultString" nillable="true" />
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+  <!-- userAllowedMethods service returns user permissions from X-road portal -->
+  <element name="userAllowedMethods">
+    <complexType>
+      <sequence>
+        <element name="request">
+          <complexType>
+            <sequence>
+              <element name="personCode" type="string" nillable="true">
+                <annotation>
+                  <appinfo>
+                    <xrd:title xml:lang="et">Isikukood</xrd:title>
+                    <xrd:title xml:lang="en">Person SSN</xrd:title>
+                  </appinfo>
+                </annotation>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+  <element name="userAllowedMethodsResponse">
+    <complexType>
+      <sequence>
+        <element name="request" nillable="true">
+          <complexType>
+            <sequence>
+              <element name="personCode" type="string" nillable="true" />
+            </sequence>
+          </complexType>
+        </element>
+        <element name="response">
+          <complexType>
+            <sequence>
+              <element name="person" nillable="true" maxOccurs="unbounded">
+                <complexType>
+                  <sequence>
+                    <element name="personCode" type="string">
+                      <annotation>
+                        <appinfo>
+                          <xrd:title xml:lang="et">Isikukood</xrd:title>
+                          <xrd:title xml:lang="en">Person identification code</xrd:title>
+                        </appinfo>
+                      </annotation>
+                    </element>
+                    <element name="orgQuery" nillable="true" maxOccurs="unbounded">
+                      <complexType>
+                        <sequence>
+                          <element name="orgCode" type="string">
+                            <annotation>
+                              <appinfo>
+                                <xrd:title xml:lang="et">Asutuse kood</xrd:title>
+                                <xrd:title xml:lang="en">Organization code</xrd:title>
+                              </appinfo>
+                            </annotation>
+                          </element>
+                          <element name="orgName" type="string">
+                            <annotation>
+                              <appinfo>
+                                <xrd:title xml:lang="et">Asutuse nimi</xrd:title>
+                                <xrd:title xml:lang="en">Organization name</xrd:title>
+                              </appinfo>
+                            </annotation>
+                          </element>
+                          <element name="query" minOccurs="0" maxOccurs="unbounded">
+                            <complexType>
+                              <sequence>
+                                <element name="queryName" type="string">
+                                  <annotation>
+                                    <appinfo>
+                                      <xrd:title xml:lang="et">Päringu nimi</xrd:title>
+                                      <xrd:title xml:lang="en">Query name</xrd:title>
+                                    </appinfo>
+                                  </annotation>
+                                </element>
+                                <element name="validUntil" type="date" nillable="true">
+                                  <annotation>
+                                    <appinfo>
+                                      <xrd:title xml:lang="et">Kehtib kuupäevani</xrd:title>
+                                      <xrd:title xml:lang="en">Permission valid until date</xrd:title>
+                                    </appinfo>
+                                  </annotation>
+                                </element>
+                              </sequence>
+                            </complexType>
+                          </element>
+                        </sequence>
+                      </complexType>
+                    </element>
+                  </sequence>
+                </complexType>
+              </element>
+              <element name="faultCode" type="xrd:faultCode" nillable="true" />
+              <element name="faultString" type="xrd:faultString" nillable="true" />
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+  <!-- Non-technical error  -->
+  <simpleType name="faultCode">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Kood</xrd:title>
+        <xrd:title xml:lang="en">Code</xrd:title>
+      </appinfo>
+    </annotation>
+    <restriction base="string" />
+  </simpleType>
+  <simpleType name="faultString">
+    <annotation>
+      <appinfo>
+        <xrd:title xml:lang="et">Teade</xrd:title>
+        <xrd:title xml:lang="en">Error message</xrd:title>
+      </appinfo>
+    </annotation>
+    <restriction base="string" />
+  </simpleType>
+</schema>

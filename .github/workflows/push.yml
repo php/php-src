@@ -1,0 +1,90 @@
+name: Push
+on:
+  push:
+    paths-ignore:
+      - docs/*
+      - NEWS
+      - UPGRADING
+      - UPGRADING.INTERNALS
+      - README.md
+      - CONTRIBUTING.md
+      - CODING_STANDARDS.md
+    branches:
+      - PHP-7.4
+      - PHP-8.0
+      - PHP-8.1
+      - master
+  pull_request:
+    branches:
+      - '**'
+jobs:
+  LINUX_X64:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - debug: true
+            zts: false
+          - debug: false
+            zts: true
+    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+      - name: Create mssql container
+        uses: ./.github/actions/mssql
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        uses: ./.github/actions/setup-x64
+      - name: Test
+        uses: ./.github/actions/test-linux
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.jit_buffer_size=16M
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
+  MACOS_DEBUG_NTS:
+    runs-on: macos-10.15
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+      - name: brew
+        uses: ./.github/actions/brew
+      - name: ./configure
+        uses: ./.github/actions/configure-macos
+        with:
+          configurationParameters: --enable-debug --disable-zts
+      - name: make
+        run: |-
+          export PATH="/usr/local/opt/bison/bin:$PATH"
+          make -j$(sysctl -n hw.logicalcpu) >/dev/null
+      - name: make install
+        run: sudo make install
+      - name: Test
+        uses: ./.github/actions/test-macos
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-macos
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.protect_memory=1
+            -d opcache.jit_buffer_size=16M
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files

@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<!-- Opening and ending tag mismatch -->
+<books>
+ <book>
+  <title>The Grapes of Wrath
+  <author>John Steinbeck</author>
+ </book>
+ <book>
+  <title>The Pearl</title>
+  <author>John Steinbeck</author>
+ </book>
+</books>

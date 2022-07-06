@@ -1,0 +1,50 @@
+#!/bin/bash
+
+if [ "x$1" == "x" ]
+then
+	echo "Usage: $0 <version> [email]"
+	echo "Generate the tarball verification info suitable to put into an announcement."
+	echo
+	echo "Examples"
+	echo "	$0 7.0.0beta3"
+	exit 0
+fi
+
+RELEASE_VER=$1
+
+GPG_USER=
+if [ "x$2" != "x" ]
+then
+	GPG_USER=$2
+fi
+
+if test "x$PHPROOT" == "x"; then
+    PHPROOT=.
+fi
+
+for TARBALL in "$PHPROOT/php-$RELEASE_VER.tar.bz2" "$PHPROOT/php-$RELEASE_VER.tar.gz" "$PHPROOT/php-$RELEASE_VER.tar.xz"
+do
+	if ! [ -e $TARBALL ]
+	then
+		echo "$TARBALL doesn't exist"
+		exit 3
+	fi
+
+	if [ "x$GPG_USER" == "x" ]
+	then
+		gpg --armor --detach-sign $TARBALL
+	else
+		gpg -u $GPG_USER --armor --detach-sign $TARBALL
+	fi
+done
+
+for TARBALL in "$PHPROOT/php-$RELEASE_VER.tar.bz2" "$PHPROOT/php-$RELEASE_VER.tar.gz" "$PHPROOT/php-$RELEASE_VER.tar.xz"
+do
+	basename $TARBALL
+	echo "SHA256 hash: `sha256sum $TARBALL | cut -d' ' -f1`";
+	echo PGP signature:
+	cat $TARBALL.asc
+	echo -e "\n"
+done
+
+exit 0

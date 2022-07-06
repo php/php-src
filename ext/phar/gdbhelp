@@ -1,0 +1,122 @@
+define ___pharglobals
+	if basic_functions_module.zts
+		set $tsrm_ls = ts_resource_ex(0, 0)
+		set $pharglobals = ((zend_phar_globals) (*((void ***) $tsrm_ls))[phar_globals_id-1])
+	else
+		set $pharglobals = phar_globals
+	end
+end
+
+define ____print_pharht
+	set $ht = $arg0
+	set $p = $ht.pListHead
+
+	while $p != 0
+		set $i = $ind
+		while $i > 0
+			printf "  "
+			set $i = $i - 1
+		end
+
+		set $temp = *(phar_archive_data*)$p->pDataPtr
+		____print_str $temp.fname $temp.fname_len
+		printf " => "
+
+		if $arg1 == 0
+
+			printf "%i (alias ", $temp.refcount
+			____print_str $temp.alias $temp.alias_len
+			printf ")\n"
+		end
+
+		set $p = $p->pListNext
+	end
+end
+
+define print_phar
+	set $ind = 1
+	___pharglobals
+	printf "{"
+	____print_pharht $pharglobals.phar_fname_map 0
+	printf "}\n"
+end
+
+document display_phar_globals
+	display phar globals
+end
+
+define display_phar_globals
+	___pharglobals
+	graph display $phar_globals.$arg0
+end
+
+define print_pharfp
+	___pharglobals
+	set $ht = $pharglobals.phar_fname_map
+	set $p = $ht.pListHead
+	set $fpcount = 0
+
+	while $p != 0
+		set $pharname = (*(phar_archive_data*)$p->pDataPtr).fname
+		set $pharrefcount = (*(phar_archive_data*)$p->pDataPtr).refcount
+		if (*(phar_archive_data*)$p->pDataPtr).fp != 0
+			set $fpcount = $fpcount + 1
+			printf "phar %s is open (%i)\n", $pharname, $pharrefcount
+		end
+		set $manifest = (*(phar_archive_data*)$p->pDataPtr).manifest
+		set $m = $manifest.pListHead
+		while $m != 0
+			if (*(phar_entry_info *)$m->pData).fp
+				set $fpcount = $fpcount + 1
+				set $a = (*(phar_entry_info *)$m->pData).fp_refcount
+				printf "phar %s file %s is open (%i)\n", $pharname, (*(phar_entry_info *)$m->pData).filename, $a
+			end
+			set $m = $m->pListNext
+		end
+
+		set $p = $p->pListNext
+	end
+	printf "Open file pointers: %d\n", $fpcount
+end
+
+document print_pharfp
+	displays all open file pointers in phar, and the phars plus entries that are open with reference counts
+end
+
+define dump_entry
+	___pharglobals
+	set $ht = $pharglobals.phar_fname_map
+	set $p = $ht.pListHead
+	set $done = 0
+	while $p != 0
+		set $t = (*(phar_archive_data*)$p->pDataPtr)
+		if $t.fname[0] == $arg0[0] || $t.alias[0] == $arg0[0]
+			set $manifest = (*(phar_archive_data*)$p->pDataPtr).manifest
+			set $m = $manifest.pListHead
+			while $m != 0
+				if (*(phar_entry_info *)$m->pData).filename[0] == $arg1[0]
+					if $argc == 3
+						output *((phar_entry_info *)$m->pData)->fp
+					end
+					if $argc == 2
+						output *(phar_entry_info *)$m->pData
+					end
+					printf "\n"
+					set $done = 1
+					loop_break
+				end
+				set $m = $m->pListNext
+			end
+		end
+		if $done == 1
+			loop_break
+		end
+		set $p = $p->pListNext
+	end
+end
+
+document dump_entry
+	dump_entry "pharname"|"pharalias" "filename" [1]
+	display phar_entry_info for a file within a phar.  If the optional third param
+	is passed in, displays the php_stream that is the file's fp
+end

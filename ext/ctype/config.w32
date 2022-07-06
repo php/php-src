@@ -1,0 +1,8 @@
+// vim:ft=javascript
+
+ARG_ENABLE("ctype", "ctype", "yes");
+
+if (PHP_CTYPE == "yes") {
+	EXTENSION("ctype", "ctype.c");
+	AC_DEFINE('HAVE_CTYPE', 1, 'Have ctype');
+}

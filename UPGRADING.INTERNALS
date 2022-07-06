@@ -1,0 +1,461 @@
+PHP 8.0 INTERNALS UPGRADE NOTES
+
+1. Internal API changes
+  a. Object Handlers API
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+  c. TSRM changes
+  d. get() and set() object handlers
+  e. zend_parse_parameters 'L' specifier
+  f. Arginfo argument types
+  g. zend_free_op type and should_free argument of zend_get_zval_ptr()
+  h. zend_value_error()
+  i. get_closure() object handler
+  j. compare_objects() and compare() object handlers
+  k. The 'I' length modifier
+  l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR
+  m. All internal functions must have arginfo
+  n. zend_hash_sort compare function and zend_hash_sort signature change
+  o. cast_object() object handler is now required
+  p. ARG_COUNT() macro removed
+  q. GC_COLLECTABLE flag
+  r. Cannot implement Traversable only
+  s. zend_fcall_info no_separation flag removed
+  t. Signature changes
+  u. Error Notification callbacks to replace zend_error_cb overwrite use-cases
+  v. Removed Zend APIs
+  w. Renamed Zend APIs
+  x. ZEND_EXT_NOP no longer emitted
+
+2. Build system changes
+  a. Abstract
+  b. Unix build system changes
+  c. Windows build system changes
+
+3. Module changes
+
+========================
+1. Internal API changes
+========================
+
+  a. The Object Handlers API was changed to receive zend_object* instead of
+     zval* and zend_string* instead of zval* for property names. See also
+     section t for other similar changes.
+
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+     were removed. ZEND_INTERNAL_FUNCTION with ZEND_ACC_CALL_VIA_HANDLER and
+     defined "handler" callback should be used instead. This "handler" callback
+     should also take care about function cleanup. See ext/zend_test/test.c
+     for example.
+
+  c. The following things have been removed from TSRM:
+      - TSRMLS_DC
+      - TSRMLS_D
+      - TSRMLS_CC
+      - TSRMLS_C
+      - TSRMLS_FETCH
+      - TSRMLS_FETCH_FROM_CTX
+      - TSRMLS_SET_CTX
+      - tsrm_new_interpreter_context
+      - tsrm_set_interpreter_context
+      - tsrm_free_interpreter_context
+      - support for GNUPTH, SGI ST, and BETHREADS
+
+  d. The get() and set() object handlers have been removed. The get() handler
+     can generally be replaced with cast_object(). Some uses of set() may be
+     replaced by do_operation(). If set() was used to overload direct
+     assignments using "=", then this is no longer supported and the
+     functionality should be provided in some other way (for example, as
+     modification of an object property).
+
+  e. The zend_parse_parameters 'L' specifier and the Z_PARAM_STRICT_LONG()
+     family of macros have been removed. Use 'l' and Z_PARAM_LONG() instead,
+     which, despite the confusing name, actually have stricter input validation.
+
+  f. Arginfo argument types for internal functions are no longer checked.
+     Instead type checks should be performed using the zend_parse_parameters()
+     or ZEND_PARSE_PARAMETERS_*() APIs.
+
+  g. The zend_free_op type and the "should_free" and "type" arguments of
+     zend_get_zval_ptr() were removed. It's possible to get the old
+     "should_free" value using the following code:
+
+         zval *ret = zend_get_zval_ptr(
+             opline, opline->op1_type, &opline->op1, execute_data);
+         zval *should_free = (op_type & (IS_TMP_VAR|IS_VAR)) ? ret : NULL;
+
+  h. Added the zend_value_error() function, which is intended to be used
+     to raise ValueError when inappropriate argument values are passed
+     to functions.
+
+  i. get_closure() object handlers now accept an additional zend_bool parameter
+     `check_only`. If it is true, the handler is called to check whether the
+     object is callable; in this case the handler should not throw an exception.
+
+  j. compare_objects() handler was removed. Extensions should use compare() object
+     handler instead and check if both arguments are objects and have the same
+     compare handler, using ZEND_COMPARE_OBJECTS_FALLBACK() macro.
+
+  k. The 'I' length modifier, used to denote 32 and 64bit integer from the custom
+     snprintf and spprintf implementations has been removed.
+     Use the ZEND_LONG_FMT, ZEND_ULONG_FMT and ZEND_XLONG_FMT macros defined in
+     php-src/Zend/zend_long.h
+
+     The 'v' format from the custom snprintf and spprintf implementations has
+     been removed. Use the standard 's' format instead.
+
+  l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR.
+     Actually, all assignments (ZEND_ASSIGN, ZEND_ASSIGN_DIM, ZEND_ASSIGN_OBJ,
+     ZEND_ASSIGN_STATIC_PROP), all compound assignments (ZEND_ASSIGN_OP,
+     ZEND_ASSIGN_DIM_OP, ZEND_ASSIGN_OBJ_OP, ZEND_ASSIGN_STATIC_PROP_OP) and all
+     pre increments/decrements (ZEND_PRE_INC, ZEND_PRE_DEC, ZEND_PRE_INC_OBJ
+     ZEND_PRE_DEC_OBJ, ZEND_PRE_INC_STATIC_PROP ZEND_PRE_DEC_STATIC_PROP).
+
+  m. All internal functions and methods are now required to specify arginfo
+     information, otherwise warnings will be thrown on startup.
+
+  n. The zend_hash_sort and zend_hash_minmax APIs now accept a comparison
+     function with the following signature:
+
+         typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
+
+     Previously compare_func_t was used, which accepted void pointers.
+     Furthermore, the return type of zend_hash_sort and zend_ts_hash_sort has
+     been changed from int to void; these functions always succeed.
+
+  o. The cast_object() handler is now required, i.e. must be non-null. You can
+     indicate that casting is not supported by always returning FAILURE.
+
+  p. The ARG_COUNT() macro has been removed use ZEND_NUM_ARGS() instead.
+
+  q. GC_COLLECTABLE flag was inverted into GC_NOT_COLLECTABLE.
+     Assignments to GC_TYPE_INFO() might need to be changed to properly
+     set the value of the GC_NOT_COLLECTABLE flag.
+
+  r. Just for for userland classes, it is no longer allowed to implement only
+     the Traversable interface. Instead, it is necessary to implement either
+     Iterator or IteratorAggregate. You can do the latter by implementing
+     zend_ce_aggregate and providing the following method implementation:
+
+         ZEND_METHOD(MyClass, getIterator) {
+             ZEND_PARSE_PARAMETERS_NONE();
+             zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+         }
+
+  s. The zend_fcall_info no_separation flag has been removed, and separation is
+      never allowed. If you wish to pass (or allow passing) arguments by
+      reference, explicitly create those arguments as references using
+      ZEND_MAKE_REF. This removal also affects call_user_function_ex(), which
+      should be replaced by call_user_function().
+
+  t. The following ZEND_API function have changed signature:
+     1. Void in Zend Engine 4.0:
+        - add_assoc_*()
+        - add_index_*()
+        - add_property_*()
+        - object_init()
+        - zend_declare_class_constant*()
+        - zend_declare_property*()
+        - zend_startup_modules()
+        - zend_wrong_parameters_none_error()
+        - zend_fcall_info_argp()
+        - zend_fcall_info_argv()
+        - zend_fcall_info_argn()
+        - zend_startup()
+        - zend_set_memory_limit()
+        - pass_two()
+        - zend_startup_constants()
+        - zend_shutdown_constants()
+        - zend_startup_extensions_mechanism()
+        - zend_startup_extensions()
+        - zend_register_extension()
+        - highlight_string()
+        - zend_ini_startup()
+        - zend_ini_shutdown()
+        - zend_ini_global_shutdown()
+        - zend_ini_deactivate()
+        - zend_copy_ini_directives()
+        - zend_prepare_string_for_scanning()
+        - zend_init_rsrc_list()
+        - zend_list_close()
+        - zend_signal()
+        - zend_sigaction()
+        - zend_stack_init()
+        - zend_stack_del_top()
+        - zend_stack_destroy()
+     2. Argument int to uint32_t in Zend Engine 4.0:
+        - _zend_get_parameters_array_ex()
+        - zend_copy_parameters_array()
+        - zend_fcall_info_args_save()
+        - zend_fcall_info_args_restore()
+        - zend_fcall_info_argp()
+        - zend_fcall_info_argv()
+        - zend_fcall_info_argn()
+        - zend_wrong_parameter*()
+        - zend_wrong_callback_error()
+        - zend_parse_arg_class()
+     3. Argument int to bool in Zend Engine 4.0:
+        - add_next_index_bool()
+        - zend_register_class_alias_ex()
+        - add_assoc_bool_ex()
+        - add_index_bool()
+        - zend_fcall_info_args_clear()
+        - zend_set_local_var()
+        - zend_set_local_var_str()
+        - zend_parse_arg_*()
+        - shutdown_memory_manager()
+        - zend_memory_usage()
+        - zend_memory_peak_usage()
+        - zend_mm_shutdown()
+        - zend_eval_string*()
+        - zend_set_timeout()
+        - _zend_hash_append_ex()
+        - _zend_hash_append_ptr_ex()
+        - zend_alter_ini_entry_ex()
+        - (*zend_encoding_list_parser) typedef
+        - zend_multibyte_parse_encoding_list()
+        - zend_safe_address()
+        - zend_string_tolower_ex()
+        - zend_string_alloc()
+        - zend_string_safe_alloc()
+        - zend_string_init()
+        - zend_string_dup()
+        - zend_string_realloc()
+        - zend_string_extend()
+        - zend_string_truncate()
+        - zend_string_safe_realloc()
+        - zend_string_release_ex()
+        - zend_ts_hash_merge()
+        - zend_ts_hash_sort()
+     4. Argument int to size_t in Zend Engine 4.0:
+        - zend_set_hash_symbol()
+     5. Argument zval* to zend_object* in Zend Engine 4.0:
+        - zend_read_property()
+        - zend_update_property()
+        - zend_unset_property()
+        - zend_call_method()
+        - zend_objects_clone_obj()
+        - zend_get_closure_method_def()
+        - zend_throw_exception_hook()
+        - zend_throw_exception_internal()
+        - zend_get_exception_base()
+     6. Argument zval* to zend_long in Zend Engine 4.0:
+        - _php_math_longtobase()
+     7. Return type from int to zend_result in Zend Engine 4.0:
+        - (*stream_open_function) in _zend_utility_functions
+        - (*zend_post_startup_cb)
+        - (*zend_preload_autoload)
+        - zend_execute_scripts()
+        - zend_post_startup()
+        - _zend_get_parameters_array_ex()
+        - zend_copy_parameters_array()
+        - zend_parse_parameters()
+        - zend_parse_parameters_ex()
+        - zend_parse_method_parameters()
+        - zend_parse_method_parameters_ex()
+        - zend_parse_method_parameters()
+        - zend_register_functions()
+        - zend_startup_module()
+        - zend_startup_module_ex()
+        - zend_register_class_alias_ex()
+        - zend_disable_function()
+        - zend_disable_class()
+        - zend_update_class_constants()
+        - zend_update_static_property*()
+        - object_init_ex()
+        - object_and_properties_init()
+        - add_index_zval()
+        - add_next_index_long_*()
+        - array_set_zval_key()
+        - _call_user_function_impl()
+        - zend_fcall_info_*()
+        - zend_call_function()
+        - zend_set_hash_symbol()
+        - zend_delete_global_variable()
+        - zend_set_local_var()
+        - zend_set_local_var_str()
+        - zend_forbid_dynamic_call()
+        - zend_get_default_from_internal_arg_info()
+        - zend_try_assign_typed_ref*()
+        - zend_ast_evaluate()
+        - zend_startup_builtin_functions()
+        - do_bind_function()
+        - do_bind_class()
+        - zend_unmangle_property_name_ex()
+        - zend_register_auto_global()
+        - zend_register_constant()
+        - zend_exception_error()
+        - zend_eval_string*()
+        - zend_undefined_offset_write()
+        - zend_undefined_index_write()
+        - zval_update_constant(_ex)()
+        - zend_load_extension()
+        - zend_load_extension_handle()
+        - zend_hash_del(_ind)()
+        - zend_hash_str_del(_ind)()
+        - zend_hash_index_del()
+        - zend_hash_move_forward_ex()
+        - zend_hash_move_backward_ex()
+        - zend_hash_get_current_key_ex()
+        - zend_hash_get_current_key_type_ex()
+        - zend_symtable_del(_ind)()
+        - zend_symtable_str_del(_ind)()
+        - highlight_file()
+        - zend_do_link_class()
+        - zend_alter_ini_entry*()
+        - zend_restore_ini_entry()
+        - zend_ini_register_displayer()
+        - zend_ini_open_file_for_scanning()
+        - zend_ini_prepare_string_for_scanning()
+        - zend_user_it_valid()
+        - zend_create_internal_iterator_zval()
+        - zend_multibyte_set_filter()
+        - zend_lex_tstring()
+        - _zend_module_entry module_startup_func, module_shutdown_func,
+          request_startup_func, request_shutdown_func, and post_deactivate_func function pointers
+        - (*zend_encoding_list_parser) typedef
+        - (*zend_encoding_internal_encoding_setter) typedef
+        - zend_multibyte_set_functions()
+        - zend_multibyte_set_script_encoding_by_string()
+        - add_function()
+        - sub_function()
+        - mul_function()
+        - pow_function()
+        - div_function()
+        - mod_function()
+        - boolean_xor_function()
+        - boolean_not_function()
+        - bitwise_not_function()
+        - bitwise_or_function()
+        - bitwise_and_function()
+        - bitwise_xor_function()
+        - shift_left_function()
+        - shift_right_function()
+        - concat_function()
+        - is_equal_function(
+        - is_identical_function()
+        - is_not_identical_function()
+        - is_not_equal_function()
+        - is_smaller_function()
+        - is_smaller_or_equal_function(zv
+        - increment_function()
+        - decrement_function()
+        - zend_stream_open()
+        - zend_stream_fixup()
+        - zend_ts_hash_del()
+        - zend_ts_hash_index_del()
+     8. Return type from int to bool in Zend Engine 4.0:
+        - zend_make_printable_zval()
+        - zend_parse_arg_*()
+        - is_zend_mm()
+        - is_zend_ptr()
+        - zend_mm_is_custom_heap()
+        - (*zend_mm_chunk_truncate_t)
+        - (*zend_mm_chunk_extend_t)
+        - zend_bitset_empty()
+        - zend_is_smart_branch()
+        - zend_check_arg_send_type()
+        - zend_verify_const_access()
+        - zend_gdb_register_code()
+        - zend_gdb_present()
+        - _zend_handle_numeric_str(_ex)()
+        - zend_hash_exists_ind()
+        - zend_hash_str_exists_ind()
+        - zend_symtable_exists(_ind)()
+        - zend_symtable_str_exists()
+        - (*zend_encoding_lexer_compatibility_checker)
+        - zend_object_is_true()
+        - i_zend_is_true()
+        - zendi_smart_streq()
+        - zend_stack_is_empty()
+        - zend_ts_hash_exists()
+        - zend_ts_hash_index_exists()
+     9. Argument void to const char* in Zend Engine 4.0:
+        - zend_get_op_array_extension_handle()
+     10. Argument zend_extension to const char* in Zend Engine 4.0:
+        - zend_get_resource_handle()
+     11. Argument const char * to HMODULE in Zend Engine 4.0:
+        - php_win32_image_compatible()
+     12. const char * argument dropped in Zend Engine 4.0:
+        - php_win32_crt_compatible()
+
+  u. Instead of overwriting zend_error_cb extensions with debugging, monitoring
+     use-cases catching Errors/Exceptions are strongly encouraged to use
+	 the new error observer API instead.
+
+	 Error observering callbacks are guaranteed to be called regardless of
+	 the users error_reporting setting or userland error handler return values.
+
+     Register observer callbacks during MINIT of an extension:
+
+		void my_error_observer_cb(int type,
+			const char *error_filename,
+			uint32_t error_lineno,
+			zend_string *message) {
+		}
+		zend_observer_error_register(my_error_observer_cb);
+
+  v. The following APIs have been removed from the Zend Engine:
+     - zend_ts_hash_init_ex(), drop the last argument and use zend_ts_hash_init() instead
+     - zend_hash_init_ex(), drop the last argument and use zend_hash_init() instead
+     - zval_internal_dtor(), use zval_internal_ptr_dtor() instead
+     - zval_dtor_func(), use rc_dtor_func() instead
+     - zval_ptr_dtor_wrapper(), use zval_ptr_dtor() instead
+     - zval_internal_ptr_dtor_wrapper(), use zval_internal_ptr_dtor() instead
+
+  w. The following APIs have been renamed:
+     - _zend_ts_hash_init() to zend_ts_hash_init()
+
+  x. In COMPILE_EXTENDED_STMT mode, a ZEND_EXT_NOP opcode will no longer be
+     generated at the start of a function. Use the new observer APIs or hook
+     into zend_execute_ex instead.
+
+========================
+2. Build system changes
+========================
+
+  a. Abstract
+    1.  Symbol HAVE_HASH_EXT is removed and is no longer defined. It should be
+        considered to have hash extension always available since PHP 7.4.
+
+    2.  Symbol HAVE_PCRE is removed and is no longer defined. It should be
+        considered to have pcre extension always available since PHP 7.4.
+
+    3.  Symbol HAVE_LOCALE_H has been removed and is no longer defined.
+
+    4.  --disable-inline-optimization (which actually disabled all compiler
+        optimizations) has been removed. If you wish to build PHP on a host
+        with extremely constrained memory, and compilation fails with an "out
+        of memory" message, add "-O0" to CFLAGS.
+
+    5.  build system and provider are displayed in phpinfo from environment:
+        - PHP_BUILD_SYSTEM (default is same as PHP_UNAME)
+        - PHP_BUILD_PROVIDER (no default)
+
+  b. Unix build system changes
+
+    1.  --enable-maintainer-zts is renamed --enable-zts for parity with Windows
+        and as recognition that ZTS is not a "maintainer" or experimental
+        feature.
+
+    2.  The PHP_CHECK_GCC_ARG() m4 macro has been removed in favor of
+        AX_CHECK_COMPILE_FLAG().
+
+    3. The 6th argument of PHP_ADD_SOURCES_X has been removed.
+
+    4. The 'special-flags' (3rd) argument of PHP_ADD_SOURCES_X are
+       now appended instead of prepended to previous compiler flags.
+       This means compiler flags passed to PHP_NEW_EXTENSION and PHP_ADD_SOURCES
+       are now appended, this allows to disable compiler flags set by Zend/Zend.m4
+       (e.g. disable certain compiler flags enabled by -Wextra)
+
+  c. Windows build system changes
+
+    - The configuration option --enable-crt-debug has been removed. The VC
+      debug heap can now be enabled for debug builds by setting the environment
+      variable PHP_WIN32_DEBUG_HEAP to a non-negative number before PHP process
+      startup.
+
+========================
+3. Module changes
+========================
+

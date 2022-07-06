@@ -1,0 +1,41 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://
+schemas.xmlsoap.org/wsdl/http/"
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+xmlns:soapenc="http://schemas.xmlsoap.org/soap/e
+ncoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+xmlns:y="http://new.webservice.namespace" targetNamespace="http
+://new.webservice.namespace">
+<types>
+<xs:schema/>
+</types>
+<message name="getQuoteResponse">
+<part name="parameter" element="" type="xs:string"/>
+</message>
+<message name="getQuoteRequest">
+<part name="String" element="" type="xs:string"/>
+</message>
+<portType name="SOAPport">
+<operation name="getQuote">
+<input message="y:getQuoteRequest"/>
+<output message="y:getQuoteResponse"/>
+</operation>
+</portType>
+<binding name="bindingName" type="y:SOAPport">
+<soap:binding style="rpc"
+transport="http://schemas.xmlsoap.org/soap/http"/>
+<operation name="getQuote">
+<input>
+<soap:body use="literal"/>
+</input>
+<output>
+<soap:body use="literal"/>
+</output>
+</operation>
+</binding>
+<service name="myService">
+<port name="myPort" binding="y:bindingName">
+<soap:address location="test://"/>
+</port>
+</service>
+</definitions>

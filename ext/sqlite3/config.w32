@@ -1,0 +1,15 @@
+// vim:ft=javascript
+
+ARG_WITH("sqlite3", "SQLite 3 support", "no");
+
+if (PHP_SQLITE3 != "no") {
+	if (SETUP_SQLITE3("sqlite3", PHP_SQLITE3, PHP_SQLITE3_SHARED)) {
+		EXTENSION("sqlite3", "sqlite3.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
+		AC_DEFINE("HAVE_SQLITE3", 1, "SQLite support");
+		AC_DEFINE("HAVE_SQLITE3_ERRSTR", 1, "have sqlite3_errstr function");
+		AC_DEFINE("HAVE_SQLITE3_EXPANDED_SQL", 1, "have sqlite3_expanded_sql function");
+	} else {
+		WARNING("sqlite3 not enabled; libraries and/or headers not found");
+	}
+}

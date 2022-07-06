@@ -1,0 +1,39 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright (c) The PHP Group                                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   +----------------------------------------------------------------------+
+*/
+
+#define CONFIGURE_COMMAND "@CONFIGURE_COMMAND@"
+#define PHP_ODBC_CFLAGS	"@ODBC_CFLAGS@"
+#define PHP_ODBC_LFLAGS		"@ODBC_LFLAGS@"
+#define PHP_ODBC_LIBS		"@ODBC_LIBS@"
+#define PHP_ODBC_TYPE		"@ODBC_TYPE@"
+#define PHP_OCI8_DIR			"@OCI8_DIR@"
+#define PHP_OCI8_ORACLE_VERSION		"@OCI8_ORACLE_VERSION@"
+#define PHP_PROG_SENDMAIL	"@PROG_SENDMAIL@"
+#define PEAR_INSTALLDIR         "@EXPANDED_PEAR_INSTALLDIR@"
+#define PHP_INCLUDE_PATH	"@INCLUDE_PATH@"
+#define PHP_EXTENSION_DIR       "@EXPANDED_EXTENSION_DIR@"
+#define PHP_PREFIX              "@prefix@"
+#define PHP_BINDIR              "@EXPANDED_BINDIR@"
+#define PHP_SBINDIR             "@EXPANDED_SBINDIR@"
+#define PHP_MANDIR              "@EXPANDED_MANDIR@"
+#define PHP_LIBDIR              "@EXPANDED_LIBDIR@"
+#define PHP_DATADIR             "@EXPANDED_DATADIR@"
+#define PHP_SYSCONFDIR          "@EXPANDED_SYSCONFDIR@"
+#define PHP_LOCALSTATEDIR       "@EXPANDED_LOCALSTATEDIR@"
+#define PHP_CONFIG_FILE_PATH    "@EXPANDED_PHP_CONFIG_FILE_PATH@"
+#define PHP_CONFIG_FILE_SCAN_DIR    "@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@"
+#define PHP_SHLIB_SUFFIX        "@SHLIB_DL_SUFFIX_NAME@"
+#define PHP_SHLIB_EXT_PREFIX    ""

@@ -1,0 +1,113 @@
+diff -u magic.orig/Magdir/images magic/Magdir/images
+--- magic.orig/Magdir/images	2020-05-31 12:34:40.000000000 +0200
++++ magic/Magdir/images	2020-07-05 20:00:41.664783368 +0200
+@@ -1,6 +1,6 @@
+ 
+ #------------------------------------------------------------------------------
+-# $File: images,v 1.181 2020/05/30 23:49:03 christos Exp $
++# $File: images,v 1.183 2020/06/26 17:08:32 christos Exp $
+ # images:  file(1) magic for image formats (see also "iff", and "c-lang" for
+ # XPM bitmaps)
+ #
+@@ -32,22 +32,22 @@
+ # Prevent conflicts with CRI ADX.
+ >(2.S-2) belong	!0x28632943
+ # skip more garbage like *.iso by looking for positive image type
+->>2	ubyte			>0
++>2	ubyte			>0
+ # skip some compiled terminfo like xterm+tmux by looking for image type less equal 33
+->>>2	ubyte			<34
++>>2	ubyte			<34
+ # skip arches.3200 , Finder.Root , Slp.1 by looking for low pixel depth 1 8 15 16 24 32
+->>>>16	ubyte			1
+->>>>>0		use		tga-image
+->>>>16	ubyte			8
+->>>>>0		use		tga-image
+->>>>16	ubyte			15
+->>>>>0		use		tga-image
+->>>>16	ubyte			16
+->>>>>0		use		tga-image
+->>>>16	ubyte			24
+->>>>>0		use		tga-image
+->>>>16	ubyte			32
+->>>>>0		use		tga-image
++>>>16	ubyte			1
++>>>>0		use		tga-image
++>>>16	ubyte			8
++>>>>0		use		tga-image
++>>>16	ubyte			15
++>>>>0		use		tga-image
++>>>16	ubyte			16
++>>>>0		use		tga-image
++>>>16	ubyte			24
++>>>>0		use		tga-image
++>>>16	ubyte			32
++>>>>0		use		tga-image
+ #	display tga bitmap image information
+ 0	name				tga-image
+ >2	ubyte		<34		Targa image data
+@@ -615,7 +615,7 @@
+ 0	leshort		40
+ # skip bad samples like GAME by looking for valid number of color planes
+ >12	uleshort	1		Device independent bitmap graphic
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	dib
+ >>4	lelong		x		\b, %d x
+@@ -641,7 +641,7 @@
+ >>18	leshort		x		\b, %d x
+ >>20	leshort		x		%d
+ >14	leshort		64		PC bitmap, OS/2 2.x format
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	bmp
+ # image width and height fields are unsigned integers for OS/2
+@@ -662,7 +662,7 @@
+ #>>(10.l) ubequad		!0	\b, bits 0x%16.16llx
+ # BITMAPV2INFOHEADER	adds RGB bit masks
+ >14	leshort		52		PC bitmap, Adobe Photoshop
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	bmp
+ >>18	lelong		x		\b, %d x
+@@ -670,7 +670,7 @@
+ >>28	leshort		x		%d
+ # BITMAPV3INFOHEADER	adds alpha channel bit mask
+ >14	leshort		56		PC bitmap, Adobe Photoshop with alpha channel mask
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ !:ext	bmp
+ >>18	lelong		x		\b, %d x
+@@ -679,7 +679,7 @@
+ >14	leshort		40
+ # jump 4 bytes before end of file/header to skip fmt-116-signature-id-118.dib
+ >>(2.l-4)	ulong	x		PC bitmap, Windows 3.x format
+-!:mime	image/bmp
++!:mime	image/x-ms-bmp
+ !:apple	????BMPp
+ >>>18	lelong		x		\b, %d x
+ >>>22	lelong		x		%d
+diff -u magic.orig/Magdir/rpm magic/Magdir/rpm
+--- magic.orig/Magdir/rpm	2019-02-22 14:06:34.000000000 +0100
++++ magic/Magdir/rpm	2020-07-05 19:38:02.720419674 +0200
+@@ -29,6 +29,7 @@
+ >>8	beshort		17		SuperH
+ >>8	beshort		18		Xtensa
+ >>8	beshort		255		noarch
++>>10	string		x		%s
+ 
+ #delta RPM    Daniel Novotny (dnovotny@redhat.com)
+ 0	string		drpm		Delta RPM
+diff -u magic.orig/Magdir/securitycerts magic/Magdir/securitycerts
+--- magic.orig/Magdir/securitycerts	2019-02-22 14:06:34.000000000 +0100
++++ magic/Magdir/securitycerts	2020-07-05 19:38:02.720419674 +0200
+@@ -4,3 +4,5 @@
+ 0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
+ 0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
+ 0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
++
++0	string \0volume_key	volume_key escrow packet

@@ -1,0 +1,539 @@
+--TEST--
+Translation of HTML entities for encoding MacRoman
+--FILE--
+<?php
+$arr = array(
+0x00C4 => array(0x80, "LATIN CAPITAL LETTER A WITH DIAERESIS"),
+0x00C5 => array(0x81, "LATIN CAPITAL LETTER A WITH RING ABOVE"),
+0x00C7 => array(0x82, "LATIN CAPITAL LETTER C WITH CEDILLA"),
+0x00C9 => array(0x83, "LATIN CAPITAL LETTER E WITH ACUTE"),
+0x00D1 => array(0x84, "LATIN CAPITAL LETTER N WITH TILDE"),
+0x00D6 => array(0x85, "LATIN CAPITAL LETTER O WITH DIAERESIS"),
+0x00DC => array(0x86, "LATIN CAPITAL LETTER U WITH DIAERESIS"),
+0x00E1 => array(0x87, "LATIN SMALL LETTER A WITH ACUTE"),
+0x00E0 => array(0x88, "LATIN SMALL LETTER A WITH GRAVE"),
+0x00E2 => array(0x89, "LATIN SMALL LETTER A WITH CIRCUMFLEX"),
+0x00E4 => array(0x8A, "LATIN SMALL LETTER A WITH DIAERESIS"),
+0x00E3 => array(0x8B, "LATIN SMALL LETTER A WITH TILDE"),
+0x00E5 => array(0x8C, "LATIN SMALL LETTER A WITH RING ABOVE"),
+0x00E7 => array(0x8D, "LATIN SMALL LETTER C WITH CEDILLA"),
+0x00E9 => array(0x8E, "LATIN SMALL LETTER E WITH ACUTE"),
+0x00E8 => array(0x8F, "LATIN SMALL LETTER E WITH GRAVE"),
+0x00EA => array(0x90, "LATIN SMALL LETTER E WITH CIRCUMFLEX"),
+0x00EB => array(0x91, "LATIN SMALL LETTER E WITH DIAERESIS"),
+0x00ED => array(0x92, "LATIN SMALL LETTER I WITH ACUTE"),
+0x00EC => array(0x93, "LATIN SMALL LETTER I WITH GRAVE"),
+0x00EE => array(0x94, "LATIN SMALL LETTER I WITH CIRCUMFLEX"),
+0x00EF => array(0x95, "LATIN SMALL LETTER I WITH DIAERESIS"),
+0x00F1 => array(0x96, "LATIN SMALL LETTER N WITH TILDE"),
+0x00F3 => array(0x97, "LATIN SMALL LETTER O WITH ACUTE"),
+0x00F2 => array(0x98, "LATIN SMALL LETTER O WITH GRAVE"),
+0x00F4 => array(0x99, "LATIN SMALL LETTER O WITH CIRCUMFLEX"),
+0x00F6 => array(0x9A, "LATIN SMALL LETTER O WITH DIAERESIS"),
+0x00F5 => array(0x9B, "LATIN SMALL LETTER O WITH TILDE"),
+0x00FA => array(0x9C, "LATIN SMALL LETTER U WITH ACUTE"),
+0x00F9 => array(0x9D, "LATIN SMALL LETTER U WITH GRAVE"),
+0x00FB => array(0x9E, "LATIN SMALL LETTER U WITH CIRCUMFLEX"),
+0x00FC => array(0x9F, "LATIN SMALL LETTER U WITH DIAERESIS"),
+0x2020 => array(0xA0, "DAGGER"),
+0x00B0 => array(0xA1, "DEGREE SIGN"),
+0x00A2 => array(0xA2, "CENT SIGN"),
+0x00A3 => array(0xA3, "POUND SIGN"),
+0x00A7 => array(0xA4, "SECTION SIGN"),
+0x2022 => array(0xA5, "BULLET"),
+0x00B6 => array(0xA6, "PILCROW SIGN"),
+0x00DF => array(0xA7, "LATIN SMALL LETTER SHARP S"),
+0x00AE => array(0xA8, "REGISTERED SIGN"),
+0x00A9 => array(0xA9, "COPYRIGHT SIGN"),
+0x2122 => array(0xAA, "TRADE MARK SIGN"),
+0x00B4 => array(0xAB, "ACUTE ACCENT"),
+0x00A8 => array(0xAC, "DIAERESIS"),
+0x2260 => array(0xAD, "NOT EQUAL TO"),
+0x00C6 => array(0xAE, "LATIN CAPITAL LETTER AE"),
+0x00D8 => array(0xAF, "LATIN CAPITAL LETTER O WITH STROKE"),
+0x221E => array(0xB0, "INFINITY"),
+0x00B1 => array(0xB1, "PLUS-MINUS SIGN"),
+0x2264 => array(0xB2, "LESS-THAN OR EQUAL TO"),
+0x2265 => array(0xB3, "GREATER-THAN OR EQUAL TO"),
+0x00A5 => array(0xB4, "YEN SIGN"),
+0x00B5 => array(0xB5, "MICRO SIGN"),
+0x2202 => array(0xB6, "PARTIAL DIFFERENTIAL"),
+0x2211 => array(0xB7, "N-ARY SUMMATION"),
+0x220F => array(0xB8, "N-ARY PRODUCT"),
+0x03C0 => array(0xB9, "GREEK SMALL LETTER PI"),
+0x222B => array(0xBA, "INTEGRAL"),
+0x00AA => array(0xBB, "FEMININE ORDINAL INDICATOR"),
+0x00BA => array(0xBC, "MASCULINE ORDINAL INDICATOR"),
+0x03A9 => array(0xBD, "GREEK CAPITAL LETTER OMEGA"),
+0x00E6 => array(0xBE, "LATIN SMALL LETTER AE"),
+0x00F8 => array(0xBF, "LATIN SMALL LETTER O WITH STROKE"),
+0x00BF => array(0xC0, "INVERTED QUESTION MARK"),
+0x00A1 => array(0xC1, "INVERTED EXCLAMATION MARK"),
+0x00AC => array(0xC2, "NOT SIGN"),
+0x221A => array(0xC3, "SQUARE ROOT"),
+0x0192 => array(0xC4, "LATIN SMALL LETTER F WITH HOOK"),
+0x2248 => array(0xC5, "ALMOST EQUAL TO"),
+0x2206 => array(0xC6, "INCREMENT"),
+0x00AB => array(0xC7, "LEFT-POINTING DOUBLE ANGLE QUOTATION MARK"),
+0x00BB => array(0xC8, "RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK"),
+0x2026 => array(0xC9, "HORIZONTAL ELLIPSIS"),
+0x00A0 => array(0xCA, "NO-BREAK SPACE"),
+0x00C0 => array(0xCB, "LATIN CAPITAL LETTER A WITH GRAVE"),
+0x00C3 => array(0xCC, "LATIN CAPITAL LETTER A WITH TILDE"),
+0x00D5 => array(0xCD, "LATIN CAPITAL LETTER O WITH TILDE"),
+0x0152 => array(0xCE, "LATIN CAPITAL LIGATURE OE"),
+0x0153 => array(0xCF, "LATIN SMALL LIGATURE OE"),
+0x2013 => array(0xD0, "EN DASH"),
+0x2014 => array(0xD1, "EM DASH"),
+0x201C => array(0xD2, "LEFT DOUBLE QUOTATION MARK"),
+0x201D => array(0xD3, "RIGHT DOUBLE QUOTATION MARK"),
+0x2018 => array(0xD4, "LEFT SINGLE QUOTATION MARK"),
+0x2019 => array(0xD5, "RIGHT SINGLE QUOTATION MARK"),
+0x00F7 => array(0xD6, "DIVISION SIGN"),
+0x25CA => array(0xD7, "LOZENGE"),
+0x00FF => array(0xD8, "LATIN SMALL LETTER Y WITH DIAERESIS"),
+0x0178 => array(0xD9, "LATIN CAPITAL LETTER Y WITH DIAERESIS"),
+0x2044 => array(0xDA, "FRACTION SLASH"),
+0x20AC => array(0xDB, "EURO SIGN"),
+0x2039 => array(0xDC, "SINGLE LEFT-POINTING ANGLE QUOTATION MARK"),
+0x203A => array(0xDD, "SINGLE RIGHT-POINTING ANGLE QUOTATION MARK"),
+0xFB01 => array(0xDE, "LATIN SMALL LIGATURE FI"),
+0xFB02 => array(0xDF, "LATIN SMALL LIGATURE FL"),
+0x2021 => array(0xE0, "DOUBLE DAGGER"),
+0x00B7 => array(0xE1, "MIDDLE DOT"),
+0x201A => array(0xE2, "SINGLE LOW-9 QUOTATION MARK"),
+0x201E => array(0xE3, "DOUBLE LOW-9 QUOTATION MARK"),
+0x2030 => array(0xE4, "PER MILLE SIGN"),
+0x00C2 => array(0xE5, "LATIN CAPITAL LETTER A WITH CIRCUMFLEX"),
+0x00CA => array(0xE6, "LATIN CAPITAL LETTER E WITH CIRCUMFLEX"),
+0x00C1 => array(0xE7, "LATIN CAPITAL LETTER A WITH ACUTE"),
+0x00CB => array(0xE8, "LATIN CAPITAL LETTER E WITH DIAERESIS"),
+0x00C8 => array(0xE9, "LATIN CAPITAL LETTER E WITH GRAVE"),
+0x00CD => array(0xEA, "LATIN CAPITAL LETTER I WITH ACUTE"),
+0x00CE => array(0xEB, "LATIN CAPITAL LETTER I WITH CIRCUMFLEX"),
+0x00CF => array(0xEC, "LATIN CAPITAL LETTER I WITH DIAERESIS"),
+0x00CC => array(0xED, "LATIN CAPITAL LETTER I WITH GRAVE"),
+0x00D3 => array(0xEE, "LATIN CAPITAL LETTER O WITH ACUTE"),
+0x00D4 => array(0xEF, "LATIN CAPITAL LETTER O WITH CIRCUMFLEX"),
+0xF8FF => array(0xF0, "Apple logo"),
+0x00D2 => array(0xF1, "LATIN CAPITAL LETTER O WITH GRAVE"),
+0x00DA => array(0xF2, "LATIN CAPITAL LETTER U WITH ACUTE"),
+0x00DB => array(0xF3, "LATIN CAPITAL LETTER U WITH CIRCUMFLEX"),
+0x00D9 => array(0xF4, "LATIN CAPITAL LETTER U WITH GRAVE"),
+0x0131 => array(0xF5, "LATIN SMALL LETTER DOTLESS I"),
+0x02C6 => array(0xF6, "MODIFIER LETTER CIRCUMFLEX ACCENT"),
+0x02DC => array(0xF7, "SMALL TILDE"),
+0x00AF => array(0xF8, "MACRON"),
+0x02D8 => array(0xF9, "BREVE"),
+0x02D9 => array(0xFA, "DOT ABOVE"),
+0x02DA => array(0xFB, "RING ABOVE"),
+0x00B8 => array(0xFC, "CEDILLA"),
+0x02DD => array(0xFD, "DOUBLE ACUTE ACCENT"),
+0x02DB => array(0xFE, "OGONEK"),
+0x02C7 => array(0xFF, "CARON"),
+);
+
+$res = html_entity_decode("&#x7F;", ENT_QUOTES, 'MacRoman');
+echo "Special test for &#x7F; (shouldn't decode):\n";
+echo $res,"\n\n";
+
+foreach ($arr as $u => $v) {
+    $ent = sprintf("&#x%X;", $u);
+    $res = html_entity_decode($ent, ENT_QUOTES, 'MacRoman');
+    $d = unpack("H*", $res);
+    echo sprintf("%s: %s => %s\n", $v[1], $ent, $d[1]);
+
+    $ent = sprintf("&#x%X;", $v[0]);
+    $res = html_entity_decode($ent, ENT_QUOTES, 'MacRoman');
+    if ($res[0] != "&" || $res[1] != "#")
+        $res = unpack("H*", $res)[1];
+    echo sprintf("%s => %s\n\n", $ent, $res);
+}
+?>
+--EXPECT--
+Special test for &#x7F; (shouldn't decode):
+&#x7F;
+
+LATIN CAPITAL LETTER A WITH DIAERESIS: &#xC4; => 80
+&#x80; => &#x80;
+
+LATIN CAPITAL LETTER A WITH RING ABOVE: &#xC5; => 81
+&#x81; => &#x81;
+
+LATIN CAPITAL LETTER C WITH CEDILLA: &#xC7; => 82
+&#x82; => &#x82;
+
+LATIN CAPITAL LETTER E WITH ACUTE: &#xC9; => 83
+&#x83; => &#x83;
+
+LATIN CAPITAL LETTER N WITH TILDE: &#xD1; => 84
+&#x84; => &#x84;
+
+LATIN CAPITAL LETTER O WITH DIAERESIS: &#xD6; => 85
+&#x85; => &#x85;
+
+LATIN CAPITAL LETTER U WITH DIAERESIS: &#xDC; => 86
+&#x86; => &#x86;
+
+LATIN SMALL LETTER A WITH ACUTE: &#xE1; => 87
+&#x87; => &#x87;
+
+LATIN SMALL LETTER A WITH GRAVE: &#xE0; => 88
+&#x88; => &#x88;
+
+LATIN SMALL LETTER A WITH CIRCUMFLEX: &#xE2; => 89
+&#x89; => &#x89;
+
+LATIN SMALL LETTER A WITH DIAERESIS: &#xE4; => 8a
+&#x8A; => &#x8A;
+
+LATIN SMALL LETTER A WITH TILDE: &#xE3; => 8b
+&#x8B; => &#x8B;
+
+LATIN SMALL LETTER A WITH RING ABOVE: &#xE5; => 8c
+&#x8C; => &#x8C;
+
+LATIN SMALL LETTER C WITH CEDILLA: &#xE7; => 8d
+&#x8D; => &#x8D;
+
+LATIN SMALL LETTER E WITH ACUTE: &#xE9; => 8e
+&#x8E; => &#x8E;
+
+LATIN SMALL LETTER E WITH GRAVE: &#xE8; => 8f
+&#x8F; => &#x8F;
+
+LATIN SMALL LETTER E WITH CIRCUMFLEX: &#xEA; => 90
+&#x90; => &#x90;
+
+LATIN SMALL LETTER E WITH DIAERESIS: &#xEB; => 91
+&#x91; => &#x91;
+
+LATIN SMALL LETTER I WITH ACUTE: &#xED; => 92
+&#x92; => &#x92;
+
+LATIN SMALL LETTER I WITH GRAVE: &#xEC; => 93
+&#x93; => &#x93;
+
+LATIN SMALL LETTER I WITH CIRCUMFLEX: &#xEE; => 94
+&#x94; => &#x94;
+
+LATIN SMALL LETTER I WITH DIAERESIS: &#xEF; => 95
+&#x95; => &#x95;
+
+LATIN SMALL LETTER N WITH TILDE: &#xF1; => 96
+&#x96; => &#x96;
+
+LATIN SMALL LETTER O WITH ACUTE: &#xF3; => 97
+&#x97; => &#x97;
+
+LATIN SMALL LETTER O WITH GRAVE: &#xF2; => 98
+&#x98; => &#x98;
+
+LATIN SMALL LETTER O WITH CIRCUMFLEX: &#xF4; => 99
+&#x99; => &#x99;
+
+LATIN SMALL LETTER O WITH DIAERESIS: &#xF6; => 9a
+&#x9A; => &#x9A;
+
+LATIN SMALL LETTER O WITH TILDE: &#xF5; => 9b
+&#x9B; => &#x9B;
+
+LATIN SMALL LETTER U WITH ACUTE: &#xFA; => 9c
+&#x9C; => &#x9C;
+
+LATIN SMALL LETTER U WITH GRAVE: &#xF9; => 9d
+&#x9D; => &#x9D;
+
+LATIN SMALL LETTER U WITH CIRCUMFLEX: &#xFB; => 9e
+&#x9E; => &#x9E;
+
+LATIN SMALL LETTER U WITH DIAERESIS: &#xFC; => 9f
+&#x9F; => &#x9F;
+
+DAGGER: &#x2020; => a0
+&#xA0; => ca
+
+DEGREE SIGN: &#xB0; => a1
+&#xA1; => c1
+
+CENT SIGN: &#xA2; => a2
+&#xA2; => a2
+
+POUND SIGN: &#xA3; => a3
+&#xA3; => a3
+
+SECTION SIGN: &#xA7; => a4
+&#xA4; => &#xA4;
+
+BULLET: &#x2022; => a5
+&#xA5; => b4
+
+PILCROW SIGN: &#xB6; => a6
+&#xA6; => &#xA6;
+
+LATIN SMALL LETTER SHARP S: &#xDF; => a7
+&#xA7; => a4
+
+REGISTERED SIGN: &#xAE; => a8
+&#xA8; => ac
+
+COPYRIGHT SIGN: &#xA9; => a9
+&#xA9; => a9
+
+TRADE MARK SIGN: &#x2122; => aa
+&#xAA; => bb
+
+ACUTE ACCENT: &#xB4; => ab
+&#xAB; => c7
+
+DIAERESIS: &#xA8; => ac
+&#xAC; => c2
+
+NOT EQUAL TO: &#x2260; => ad
+&#xAD; => &#xAD;
+
+LATIN CAPITAL LETTER AE: &#xC6; => ae
+&#xAE; => a8
+
+LATIN CAPITAL LETTER O WITH STROKE: &#xD8; => af
+&#xAF; => f8
+
+INFINITY: &#x221E; => b0
+&#xB0; => a1
+
+PLUS-MINUS SIGN: &#xB1; => b1
+&#xB1; => b1
+
+LESS-THAN OR EQUAL TO: &#x2264; => b2
+&#xB2; => &#xB2;
+
+GREATER-THAN OR EQUAL TO: &#x2265; => b3
+&#xB3; => &#xB3;
+
+YEN SIGN: &#xA5; => b4
+&#xB4; => ab
+
+MICRO SIGN: &#xB5; => b5
+&#xB5; => b5
+
+PARTIAL DIFFERENTIAL: &#x2202; => b6
+&#xB6; => a6
+
+N-ARY SUMMATION: &#x2211; => b7
+&#xB7; => e1
+
+N-ARY PRODUCT: &#x220F; => b8
+&#xB8; => fc
+
+GREEK SMALL LETTER PI: &#x3C0; => b9
+&#xB9; => &#xB9;
+
+INTEGRAL: &#x222B; => ba
+&#xBA; => bc
+
+FEMININE ORDINAL INDICATOR: &#xAA; => bb
+&#xBB; => c8
+
+MASCULINE ORDINAL INDICATOR: &#xBA; => bc
+&#xBC; => &#xBC;
+
+GREEK CAPITAL LETTER OMEGA: &#x3A9; => bd
+&#xBD; => &#xBD;
+
+LATIN SMALL LETTER AE: &#xE6; => be
+&#xBE; => &#xBE;
+
+LATIN SMALL LETTER O WITH STROKE: &#xF8; => bf
+&#xBF; => c0
+
+INVERTED QUESTION MARK: &#xBF; => c0
+&#xC0; => cb
+
+INVERTED EXCLAMATION MARK: &#xA1; => c1
+&#xC1; => e7
+
+NOT SIGN: &#xAC; => c2
+&#xC2; => e5
+
+SQUARE ROOT: &#x221A; => c3
+&#xC3; => cc
+
+LATIN SMALL LETTER F WITH HOOK: &#x192; => c4
+&#xC4; => 80
+
+ALMOST EQUAL TO: &#x2248; => c5
+&#xC5; => 81
+
+INCREMENT: &#x2206; => c6
+&#xC6; => ae
+
+LEFT-POINTING DOUBLE ANGLE QUOTATION MARK: &#xAB; => c7
+&#xC7; => 82
+
+RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK: &#xBB; => c8
+&#xC8; => e9
+
+HORIZONTAL ELLIPSIS: &#x2026; => c9
+&#xC9; => 83
+
+NO-BREAK SPACE: &#xA0; => ca
+&#xCA; => e6
+
+LATIN CAPITAL LETTER A WITH GRAVE: &#xC0; => cb
+&#xCB; => e8
+
+LATIN CAPITAL LETTER A WITH TILDE: &#xC3; => cc
+&#xCC; => ed
+
+LATIN CAPITAL LETTER O WITH TILDE: &#xD5; => cd
+&#xCD; => ea
+
+LATIN CAPITAL LIGATURE OE: &#x152; => ce
+&#xCE; => eb
+
+LATIN SMALL LIGATURE OE: &#x153; => cf
+&#xCF; => ec
+
+EN DASH: &#x2013; => d0
+&#xD0; => &#xD0;
+
+EM DASH: &#x2014; => d1
+&#xD1; => 84
+
+LEFT DOUBLE QUOTATION MARK: &#x201C; => d2
+&#xD2; => f1
+
+RIGHT DOUBLE QUOTATION MARK: &#x201D; => d3
+&#xD3; => ee
+
+LEFT SINGLE QUOTATION MARK: &#x2018; => d4
+&#xD4; => ef
+
+RIGHT SINGLE QUOTATION MARK: &#x2019; => d5
+&#xD5; => cd
+
+DIVISION SIGN: &#xF7; => d6
+&#xD6; => 85
+
+LOZENGE: &#x25CA; => d7
+&#xD7; => &#xD7;
+
+LATIN SMALL LETTER Y WITH DIAERESIS: &#xFF; => d8
+&#xD8; => af
+
+LATIN CAPITAL LETTER Y WITH DIAERESIS: &#x178; => d9
+&#xD9; => f4
+
+FRACTION SLASH: &#x2044; => da
+&#xDA; => f2
+
+EURO SIGN: &#x20AC; => db
+&#xDB; => f3
+
+SINGLE LEFT-POINTING ANGLE QUOTATION MARK: &#x2039; => dc
+&#xDC; => 86
+
+SINGLE RIGHT-POINTING ANGLE QUOTATION MARK: &#x203A; => dd
+&#xDD; => &#xDD;
+
+LATIN SMALL LIGATURE FI: &#xFB01; => de
+&#xDE; => &#xDE;
+
+LATIN SMALL LIGATURE FL: &#xFB02; => df
+&#xDF; => a7
+
+DOUBLE DAGGER: &#x2021; => e0
+&#xE0; => 88
+
+MIDDLE DOT: &#xB7; => e1
+&#xE1; => 87
+
+SINGLE LOW-9 QUOTATION MARK: &#x201A; => e2
+&#xE2; => 89
+
+DOUBLE LOW-9 QUOTATION MARK: &#x201E; => e3
+&#xE3; => 8b
+
+PER MILLE SIGN: &#x2030; => e4
+&#xE4; => 8a
+
+LATIN CAPITAL LETTER A WITH CIRCUMFLEX: &#xC2; => e5
+&#xE5; => 8c
+
+LATIN CAPITAL LETTER E WITH CIRCUMFLEX: &#xCA; => e6
+&#xE6; => be
+
+LATIN CAPITAL LETTER A WITH ACUTE: &#xC1; => e7
+&#xE7; => 8d
+
+LATIN CAPITAL LETTER E WITH DIAERESIS: &#xCB; => e8
+&#xE8; => 8f
+
+LATIN CAPITAL LETTER E WITH GRAVE: &#xC8; => e9
+&#xE9; => 8e
+
+LATIN CAPITAL LETTER I WITH ACUTE: &#xCD; => ea
+&#xEA; => 90
+
+LATIN CAPITAL LETTER I WITH CIRCUMFLEX: &#xCE; => eb
+&#xEB; => 91
+
+LATIN CAPITAL LETTER I WITH DIAERESIS: &#xCF; => ec
+&#xEC; => 93
+
+LATIN CAPITAL LETTER I WITH GRAVE: &#xCC; => ed
+&#xED; => 92
+
+LATIN CAPITAL LETTER O WITH ACUTE: &#xD3; => ee
+&#xEE; => 94
+
+LATIN CAPITAL LETTER O WITH CIRCUMFLEX: &#xD4; => ef
+&#xEF; => 95
+
+Apple logo: &#xF8FF; => f0
+&#xF0; => &#xF0;
+
+LATIN CAPITAL LETTER O WITH GRAVE: &#xD2; => f1
+&#xF1; => 96
+
+LATIN CAPITAL LETTER U WITH ACUTE: &#xDA; => f2
+&#xF2; => 98
+
+LATIN CAPITAL LETTER U WITH CIRCUMFLEX: &#xDB; => f3
+&#xF3; => 97
+
+LATIN CAPITAL LETTER U WITH GRAVE: &#xD9; => f4
+&#xF4; => 99
+
+LATIN SMALL LETTER DOTLESS I: &#x131; => f5
+&#xF5; => 9b
+
+MODIFIER LETTER CIRCUMFLEX ACCENT: &#x2C6; => f6
+&#xF6; => 9a
+
+SMALL TILDE: &#x2DC; => f7
+&#xF7; => d6
+
+MACRON: &#xAF; => f8
+&#xF8; => bf
+
+BREVE: &#x2D8; => f9
+&#xF9; => 9d
+
+DOT ABOVE: &#x2D9; => fa
+&#xFA; => 9c
+
+RING ABOVE: &#x2DA; => fb
+&#xFB; => 9e
+
+CEDILLA: &#xB8; => fc
+&#xFC; => 9f
+
+DOUBLE ACUTE ACCENT: &#x2DD; => fd
+&#xFD; => &#xFD;
+
+OGONEK: &#x2DB; => fe
+&#xFE; => &#xFE;
+
+CARON: &#x2C7; => ff
+&#xFF; => d8

@@ -1,0 +1,16 @@
+bz2-1.0.6
+cclient-2007f
+freetype-2.9.1
+icu-62.1
+jpeglib-9c
+libcurl-7.59.0
+libiconv-1.15
+libmpir-3.0.0
+libpng-1.6.34
+libpq-9.6.9
+libsodium-1.0.16
+libssh2-1.8.0
+libtidy-5.4.0
+libxslt-1.1.32
+libxml-2.9.8
+openssl-1.1.0h

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="SOAPBuilders" xmlns="http://soapinterop.org/attachments/wsdl" xmlns:types="http://soapinterop.org/attachments/xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:dime="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/" xmlns:content="http://schemas.xmlsoap.org/ws/2002/04/content-type/" targetNamespace="http://soapinterop.org/attachments/wsdl">
+	<wsdl:types>
+		<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://soapinterop.org/attachments/xsd">
+			<import namespace="http://schemas.xmlsoap.org/soap/encoding/" location="http://schemas.xmlsoap.org/soap/encoding/" />
+			<import namespace="http://schemas.xmlsoap.org/ws/2002/04/content-type/"/>
+			<import namespace="http://schemas.xmlsoap.org/ws/2002/04/reference/"/>
+			<complexType name="ReferencedBinary">
+				<simpleContent>
+					<restriction base="soap-enc:base64Binary">
+						<annotation>
+							<appinfo>
+								<content:mediaType value="application/octetstream"/>
+							</appinfo>
+						</annotation>
+						<attributeGroup ref="soap-enc:commonAttributes"/>
+					</restriction>
+				</simpleContent>
+			</complexType>
+			<complexType name="ArrayOfBinary">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="types:ReferencedBinary[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
+			<complexType name="ReferencedText">
+				<simpleContent>
+					<restriction base="soap-enc:base64Binary">
+						<annotation>
+							<appinfo>
+								<content:mediaType value="text/plain"/>
+							</appinfo>
+						</annotation>
+						<attributeGroup ref="soap-enc:commonAttributes"/>
+					</restriction>
+				</simpleContent>
+			</complexType>
+		</schema>
+	</wsdl:types>
+	<wsdl:message name="EchoAttachmentIn">
+		<wsdl:part name="In" type="types:ReferencedBinary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentOut">
+		<wsdl:part name="Out" type="types:ReferencedBinary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentsIn">
+		<wsdl:part name="In" type="types:ArrayOfBinary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentsOut">
+		<wsdl:part name="Out" type="types:ArrayOfBinary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentAsBase64In">
+		<wsdl:part name="In" type="types:ReferencedBinary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentAsBase64Out">
+		<wsdl:part name="Out" type="xsd:base64Binary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoBase64AsAttachmentIn">
+		<wsdl:part name="In" type="xsd:base64Binary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoBase64AsAttachmentOut">
+		<wsdl:part name="Out" type="types:ReferencedBinary"/>
+	</wsdl:message>
+	<wsdl:message name="EchoUnrefAttachmentsIn" />
+	<wsdl:message name="EchoUnrefAttachmentsOut" />
+	<wsdl:message name="EchoAttachmentAsStringIn">
+		<wsdl:part name="In" type="types:ReferencedText"/>
+	</wsdl:message>
+	<wsdl:message name="EchoAttachmentAsStringOut">
+		<wsdl:part name="Out" type="xsd:string"/>
+	</wsdl:message>
+	
+	<wsdl:portType name="AttachmentsPortType">
+		<wsdl:operation name="EchoAttachment">
+			<wsdl:input name="EchoAttachmentInput" message="EchoAttachmentIn"/>
+			<wsdl:output name="EchoAttachmentOutput" message="EchoAttachmentOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachments">
+			<wsdl:input name="EchoAttachmentsInput" message="EchoAttachmentsIn"/>
+			<wsdl:output name="EchoAttachmentsOutput" message="EchoAttachmentsOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsBase64">
+			<wsdl:input name="EchoAttachmentAsBase64Input" message="EchoAttachmentAsBase64In"/>
+			<wsdl:output name="EchoAttachmentAsBase64Output" message="EchoAttachmentAsBase64Out"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoBase64AsAttachment">
+			<wsdl:input name="EchoBase64AsAttachmentInput" message="EchoBase64AsAttachmentIn"/>
+			<wsdl:output name="EchoBase64AsAttachmentOutput" message="EchoBase64AsAttachmentOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoUnrefAttachments">
+			<wsdl:input name="EchoUnrefAttachmentsInput" message="EchoUnrefAttachmentsIn"/>
+			<wsdl:output name="EchoUnrefAttachmentsOutput" message="EchoUnrefAttachmentsOut"/>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsString">
+			<wsdl:input  name="EchoAttachmentAsStringInput"  message="EchoAttachmentAsStringIn"/>
+			<wsdl:output name="EchoAttachmentAsStringOutput" message="EchoAttachmentAsStringOut"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="AttachmentsBinding" type="AttachmentsPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="EchoAttachment">
+			<soap:operation style="rpc" soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachments">
+			<soap:operation style="rpc" soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentsInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentsOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsBase64">
+			<soap:operation style="rpc" soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentAsBase64Input">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentAsBase64Output">
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoBase64AsAttachment">
+			<soap:operation style="rpc" soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoBase64AsAttachmentInput">
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:input>
+			<wsdl:output name="EchoBase64AsAttachmentOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoUnrefAttachments">
+			<soap:operation style="rpc" soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoUnrefAttachmentsInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/open-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:input>
+			<wsdl:output name="EchoUnrefAttachmentsOutput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/open-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="EchoAttachmentAsString">
+			<soap:operation style="rpc" soapAction="http://soapinterop.org/attachments/"/>
+			<wsdl:input name="EchoAttachmentAsStringInput">
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="true"/>
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:input>
+			<wsdl:output name="EchoAttachmentAsStringOutput">
+				<soap:body use="encoded" namespace="http://soapinterop.org/attachments/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+  <wsdl:service name="Round4DIMERPC">
+    <wsdl:port name="Round4DIMERPCTestSoap" binding="AttachmentsBinding">
+      <soap:address location="test://" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

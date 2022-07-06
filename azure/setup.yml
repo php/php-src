@@ -1,0 +1,27 @@
+steps:
+  - script: |
+      set -e
+      sudo service mysql start
+      sudo service postgresql start
+      sudo service slapd start
+      mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+      sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+      sudo -u postgres psql -c "CREATE DATABASE test;"
+    displayName: 'Setup'
+  - script: ./azure/setup-slapd.sh
+    displayName: 'Configure slapd'
+  - script: |
+      set -e
+      sudo cp ext/snmp/tests/snmpd.conf /etc/snmp
+      sudo cp ext/snmp/tests/bigtest /etc/snmp
+      sudo service snmpd restart
+    displayName: 'Configure snmpd'
+  - script: |
+      set -e
+      sudo groupadd -g 5000 vmail
+      sudo useradd -m -d /var/vmail -s /bin/false -u 5000 -g vmail vmail
+      sudo cp ext/imap/tests/setup/dovecot.conf /etc/dovecot/dovecot.conf
+      sudo cp ext/imap/tests/setup/dovecotpass /etc/dovecot/dovecotpass
+      sudo service dovecot restart
+    displayName: 'Configure IMAP'
+

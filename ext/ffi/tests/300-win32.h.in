@@ -1,0 +1,4 @@
+#define FFI_SCOPE "TEST_300_WIN32"
+#define FFI_LIB "PHP_DLL_NAME"
+
+size_t php_printf(const char *format, ...);

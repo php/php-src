@@ -1,0 +1,523 @@
+.TH PHAR 1 "2021" "The PHP Group" "User Commands"
+.SH NAME
+phar, phar.phar \- PHAR (PHP archive) command line tool
+.SH SYNOPSIS
+.B phar
+<command> [options] ...
+.LP
+.SH DESCRIPTION
+The \fBPHAR\fP file format provides a way to put entire PHP applications into a single
+file called a "phar" (PHP Archive) for easy distribution and installation.
+.P
+With the \fBphar\fP command you can create, update or extract PHP archives.
+.P
+Commands:
+add compress delete extract help help-list info list meta-del
+meta-get meta-set pack sign stub-get stub-set tree version
+
+.SH add command
+Add entries to a PHAR package.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.TP
+.PD
+.B ...
+Any number of input files and directories. If -i is in
+use then ONLY files and matching the given regular
+expression are being packed. If -x is given then files
+matching that regular expression are NOT being packed.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B \-a \fIalias\fP
+Provide an \fIalias\fP name for the phar file.
+.TP
+.PD
+.B \-c \fIalgo\fP
+Compression algorithm (see
+.SM
+.B COMPRESSION
+)
+.TP
+.PD
+.B \-i \fIregex\fP
+Specifies a regular expression for input files.
+.TP
+.PD
+.B \-l \fIlevel\fP
+Number of preceding subdirectories to strip from file entries
+.TP
+.PD
+.B \-x \fIregex\fP
+Regular expression for input files to exclude.
+
+.SH compress command
+Compress or uncompress all files or a selected entry.
+.P
+Required arguments:
+.TP 15
+.PD
+.B \-c \fIalgo\fP
+Compression algorithm (see
+.SM
+.B COMPRESSION
+)
+.TP
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B -e \fIentry\fP
+Name of \fIentry\fP to work on (must include PHAR internal
+directory name if any).
+
+.SH delete command
+Delete entry from a PHAR archive
+.P
+Required arguments:
+.TP 15
+.PD
+.B \-e \fIentry\fP
+Name of \fIentry\fP to work on (must include PHAR internal
+directory name if any).
+.TP
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+
+.SH extract command
+Extract a PHAR package to a directory.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B -i \fIregex\fP
+Specifies a regular expression for input files.
+.TP
+.PD
+.B -x \fIregex\fP
+Regular expression for input files to exclude.
+.TP
+.PD
+.B ...
+Directory to extract to (defaults to '.').
+
+
+.SH help command
+This help or help for a selected command.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B ...
+Optional command to retrieve help for.
+
+.SH help-list command
+Lists available commands.
+
+.SH info command
+Get information about a PHAR package.
+.P
+By using -k it is possible to return a single value.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B -k \fIindex\fP
+Subscription \fIindex\fP to work on.
+
+.SH list command
+List contents of a PHAR archive.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B -i \fIregex\fP
+Specifies a regular expression for input files.
+.TP
+.PD
+.B -x \fIregex\fP
+Regular expression for input files to exclude.
+
+
+.SH meta-del command
+Delete meta information of a PHAR entry or a PHAR package.
+.P
+If -k is given then the metadata is expected to be an array and the
+given index is being deleted.
+.P
+If something was deleted the return value is 0 otherwise it is 1.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B -e \fIentry\fP
+Name of \fIentry\fP to work on (must include PHAR internal
+directory name if any).
+.TP
+.PD
+.B -k \fIindex\fP
+Subscription \fIindex\fP to work on.
+
+.SH meta-get command
+Get meta information of a PHAR entry or a PHAR package in serialized from. If
+no output file is specified for meta data then stdout is being used.
+You can also specify a particular index using -k. In that case the
+metadata is expected to be an array and the value of the given index
+is returned using echo rather than using serialize. If that index does
+not exist or no meta data is present then the return value is 1.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B -e \fIentry\fP
+Name of \fIentry\fP to work on (must include PHAR internal
+directory name if any).
+.TP
+.PD
+.B -k \fIindex\fP
+Subscription \fIindex\fP to work on.
+
+.SH meta-set command
+Set meta data of a PHAR entry or a PHAR package using serialized input. If no
+input file is specified for meta data then stdin is being used. You can
+also specify a particular index using -k. In that case the metadata is
+expected to be an array and the value of the given index is being set.
+If the metadata is not present or empty a new array will be created.
+If the metadata is present and a flat value then the return value is
+1. Also using -k the input is been taken directly rather then being
+serialized.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.TP
+.PD
+.B -m \fImeta\fP
+Meta data to store with entry (serialized php data).
+.P
+Optional arguments:
+.TP 15
+.PD
+.B -e \fIentry\fP
+Name of \fIentry\fP to work on (must include PHAR internal
+directory name if any).
+.TP
+.PD
+.B -k \fIindex\fP
+Subscription \fIindex\fP to work on.
+
+.SH pack command
+Pack files into a PHAR archive.
+.P
+When using -s <stub>, then the stub file is being excluded from the
+list of input files/dirs.To create an archive that contains PEAR class
+PHP_Archive then point -p argument to PHP/Archive.php.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.TP
+.PD
+.B ...
+Any number of input files and directories. If -i is in
+use then ONLY files and matching the given regular
+expression are being packed. If -x is given then files
+matching that regular expression are NOT being packed.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B \-a \fIalias\fP
+Provide an \fIalias\fP name for the phar file.
+.TP
+.PD
+.B \-b \fIbang\fP
+Hash-bang line to start the archive (e.g. #!/usr/bin/php).
+The hash mark itself '#!' and the newline character are optional.
+.TP
+.PD
+.B \-c \fIalgo\fP
+Compression algorithm (see
+.SM
+.B COMPRESSION
+)
+.TP
+.PD
+.B \-h \fIhash\fP
+Selects the \fIhash\fP algorithm (see
+.SM
+.B HASH
+)
+.TP
+.PD
+.B \-i \fIregex\fP
+Specifies a regular expression for input files.
+.TP
+.PD
+.B \-l \fIlevel\fP
+Number of preceding subdirectories to strip from file entries
+.TP
+.PD
+.B \-p \fIloader\fP
+Location of PHP_Archive class file (pear list-files
+PHP_Archive).You can use '0' or '1' to locate it
+automatically using the mentioned pear command. When
+using '0' the command does not error out when the class
+file cannot be located. This switch also adds some code
+around the stub so that class PHP_Archive gets
+registered as phar:// stream wrapper if necessary. And
+finally this switch will add the file phar.inc from
+this package and load it to ensure class Phar is
+present.
+.TP
+.PD
+.B \-s \fIstub\fP
+Select the \fIstub\fP file.
+.TP
+.PD
+.B \-x \fIregex\fP
+Regular expression for input files to exclude.
+.TP
+.PD
+.B \-y \fIkey\fP
+Private \fIkey\fP for OpenSSL signing.
+
+.SH sign command
+Set signature hash algorithm.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.TP
+.PD
+.B \-h \fIhash\fP
+Selects the \fIhash\fP algorithm (see
+.SM
+.B HASH
+)
+.P
+Optional arguments:
+.TP 15
+.PD
+.B \-y \fIkey\fP
+Private \fIkey\fP for OpenSSL signing.
+
+.SH stub-get command
+Get the stub of a PHAR file. If no output file is specified as stub then stdout
+is being used.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B \-s \fIstub\fP
+Select the \fIstub\fP file.
+
+.SH stub-set command
+Set the stub of a PHAR file. If no input file is specified as stub then stdin
+is being used.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B \-b \fIbang\fP
+Hash-bang line to start the archive (e.g. #!/usr/bin/php).
+The hash mark itself '#!' and the newline character are optional.
+.TP
+.PD
+.B \-p \fIloader\fP
+Location of PHP_Archive class file (pear list-files
+PHP_Archive).You can use '0' or '1' to locate it
+automatically using the mentioned pear command. When
+using '0' the command does not error out when the class
+file cannot be located. This switch also adds some code
+around the stub so that class PHP_Archive gets
+registered as phar:// stream wrapper if necessary. And
+finally this switch will add the file phar.inc from
+this package and load it to ensure class Phar is
+present.
+.TP
+.PD
+.B \-s \fIstub\fP
+Select the \fIstub\fP file.
+
+
+.SH tree command
+Get a directory tree for a PHAR archive.
+.P
+Required arguments:
+.TP 15
+.PD
+.B -f \fIfile\fP
+Specifies the phar \fIfile\fP to work on.
+.P
+Optional arguments:
+.TP 15
+.PD
+.B \-i \fIregex\fP
+Specifies a regular expression for input files.
+.TP
+.PD
+.B \-x \fIregex\fP
+Regular expression for input files to exclude.
+
+.SH version command
+Get information about the PHAR environment and the tool version.
+
+
+.SH COMPRESSION
+Algorithms:
+.TP 15
+.PD
+.B 0
+No compression
+.TP
+.PD
+.B none
+No compression
+.TP
+.PD
+.B auto
+Automatically select compression algorithm
+.TP
+.PD
+.B gz
+GZip compression
+.TP
+.PD
+.B gzip
+GZip compression
+.TP
+.PD
+.B bz2
+BZip2 compression
+.TP
+.PD
+.B bzip2
+BZip2 compression
+
+.SH HASH
+Algorithms:
+.TP 15
+.PD
+.TP
+.PD
+.B md5
+MD5
+.TP
+.PD
+.B sha1
+SHA1
+.TP
+.PD
+.B sha256
+SHA256
+.TP
+.PD
+.B sha512
+SHA512
+.TP
+.PD
+.B openssl
+OpenSSL
+
+.SH SEE ALSO
+For a more or less complete description of PHAR look here:
+.PD 0
+.P
+.B http://php.net/phar
+.PD 1
+.P
+.SH BUGS
+You can view the list of known bugs or report any new bug you
+found at:
+.PD 0
+.P
+.B http://bugs.php.net
+.PD 1
+.SH AUTHORS
+The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski.
+.P
+Work for the PHP archive was done by Gregory Beaver, Marcus Boerger.
+.P
+A List of active developers can be found here:
+.PD 0
+.P
+.B http://www.php.net/credits.php
+.PD 1
+.P
+And last but not least PHP was developed with the help of a huge amount of
+contributors all around the world.
+.SH VERSION INFORMATION
+This manpage describes \fBphar\fP, version @PHP_VERSION@.
+.SH COPYRIGHT
+Copyright \(co The PHP Group
+.LP
+This source file is subject to version 3.01 of the PHP license,
+that is bundled with this package in the file LICENSE, and is
+available through the world-wide-web at the following url:
+.PD 0
+.P
+.B http://www.php.net/license/3_01.txt
+.PD 1
+.P
+If you did not receive a copy of the PHP license and are unable to
+obtain it through the world-wide-web, please send a note to
+.B license@php.net
+so we can mail you a copy immediately.

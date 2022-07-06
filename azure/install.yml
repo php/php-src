@@ -1,0 +1,11 @@
+steps:
+  - script: |
+      set -e
+      sudo make install
+      sudo mkdir     /etc/php.d
+      sudo chmod 777 /etc/php.d
+      echo mysqli.default_socket=/var/run/mysqld/mysqld.sock    > /etc/php.d/mysqli.ini
+      echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/pdo_mysql.ini
+      echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+      echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+    displayName: 'Install Build'

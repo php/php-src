@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="shoppingcart"
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:tns="urn:test.soap#" targetNamespace="urn:test.soap#"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:types="urn:test.soap.types#">
+	<!-- all datatypes will be imported to namespace types: -->
+	<types>
+		<xs:schema
+			xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			xmlns:soap = "http://schemas.xmlsoap.org/wsdl/soap/"
+			xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+			xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+			xmlns:tns="urn:test.soap.types#"
+			targetNamespace="urn:test.soap.types#">
+
+			<xs:complexType name="A1">
+				<xs:all>
+					<xs:element name="var1" type="xs:string" nillable="true"/>
+				</xs:all>
+			</xs:complexType>
+
+			<xs:complexType name="A2">
+				<xs:complexContent>
+					<xs:extension base="tns:A1">
+						<xs:all>
+							<xs:element name="var2" type="xs:string" nillable="true"/>
+						</xs:all>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+
+			 <xs:complexType name="A3">
+				<xs:complexContent>
+					<xs:extension base="tns:A2">
+						<xs:all>
+							<xs:element name="var3" type="xs:string" nillable="true"/>
+						</xs:all>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+		</xs:schema>
+	</types>
+
+	<message name="test-request">
+		<part name="a1" type="types:A1"/>
+	</message>
+	<message name="test-response">
+		<part name="result" type="types:A2"/>
+	</message>
+
+	<portType name="catalog-porttype">
+		<operation name="test" parameterOrder="a1">
+			<input name="test-request" message="tns:test-request"/>
+			<output name="test-response" message="tns:test-response"/>
+		</operation>
+	</portType>
+
+	<!-- @type doesn't like tns: -->
+	<binding name="catalog-binding" type="tns:catalog-porttype">
+		<soap:binding style="rpc"
+			transport="http://schemas.xmlsoap.org/soap/http"/>
+
+		<operation name="test">
+			<soap:operation soapAction="urn:test.soap#test"/>
+			<input>
+				<soap:body use="encoded" namespace="urn:test.soap#"
+				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</input>
+			<output>
+				<soap:body use="encoded" namespace="urn:test.soap#"
+				encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</output>
+		</operation>
+	</binding>
+
+	<service name="catalog">
+		<!-- @binding doesn't like to be tns: -->
+		<port name="catalog-port" binding="tns:catalog-binding">
+			<soap:address location="xxxxxxxx"/>
+		</port>
+	</service>
+
+</definitions>

@@ -1,0 +1,6 @@
+res_index:table(nofallback) {
+    InstalledLocales {
+es {""}
+root {""}
+    }
+}

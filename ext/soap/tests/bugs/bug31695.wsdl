@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<definitions
+    xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+    xmlns:si="http://soapinterop.org/xsd"
+    xmlns:tns="http://linuxsrv.home/~dmitry/soap/test.wsdl"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    targetNamespace="http://linuxsrv.home/~dmitry/soap/test.wsdl">
+
+  <message name="TestRequest">
+    <part name="x" type="xsd:string" />
+  </message>
+  <message name="TestResponse">
+    <part name="result" type="xsd:string" />
+  </message>
+
+  <portType name="TestServicePortType">
+    <operation name="Test">
+      <input message="tns:TestRequest" />
+      <output message="tns:TestResponse" />
+    </operation>
+  </portType>
+
+  <binding name="TestServiceBinding" type="tns:TestServicePortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="Test">
+      <soap:operation soapAction="Test" style="rpc" />
+      <input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+    </operation>
+  </binding>
+
+  <service name="TestService">
+    <port name="TestServicePort" binding="tns:TestServiceBinding">
+      <soap:address location="test://0" />
+    </port>
+  </service>
+
+</definitions>

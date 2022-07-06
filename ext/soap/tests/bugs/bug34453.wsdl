@@ -1,0 +1,42 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://test-uri" targetNamespace="http://test-uri">
+	<types>
+		<xs:schema targetNamespace="http://test-uri" elementFormDefault="qualified">
+			<import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml2.xsd" />
+			<complexType name="LocalizedString">
+				<sequence>
+					<element name="value" type="xsd:string"/>
+				</sequence>
+				<attribute ref="xml:lang" use="required"/>
+			</complexType>
+		</xs:schema>
+	</types>
+	<message name="EchoStringRequest">
+		<part name="string" type="tns:LocalizedString"/>
+	</message>
+	<message name="EchoStringResponse">
+		<part name="string" type="tns:LocalizedString"/>
+	</message>
+	<portType name="AWSProductDataPortType">
+		<operation name="EchoString">
+			<input message="tns:EchoStringRequest"/>
+			<output message="tns:EchoStringResponse"/>
+		</operation>
+	</portType>
+	<binding name="AWSProductDataBinding" type="tns:AWSProductDataPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="EchoString">
+			<soap:operation soapAction="http://test-uri"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="AWSProductData">
+		<port name="AWSProductDataPort" binding="tns:AWSProductDataBinding">
+			<soap:address location="http://aws-beta.amazon.com/onca/soap?Service=AWSProductData"/>
+		</port>
+	</service>
+</definitions>

@@ -1,0 +1,4 @@
+msgid "item"
+msgid_plural "items"
+msgstr[0] "Produkt_switched"
+msgstr[1] "Produkte_switched"

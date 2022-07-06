@@ -1,0 +1,19 @@
+# Replace $Id$ strings with 40-character hexadecimal blob object name.
+/ext/ext_skel.php               ident
+/ext/phar/phar/pharcommand.inc  ident
+/ext/dba/libinifile/inifile.c   ident
+/ext/dba/libflatfile/flatfile.c ident
+/ext/dba/libcdb/cdb_make.c      ident
+/ext/dba/libcdb/cdb.c           ident
+/run-tests.php                  ident
+
+# A custom merge driver to avoid automatic merges. These are manually merged.
+# See https://wiki.php.net/vcs/gitfaq
+/NEWS                merge=NEWS
+/UPGRADING           merge=NEWS
+/UPGRADING.INTERNALS merge=NEWS
+
+# Enable commit diffs for binary PHP test files. Some PHP test files include
+# special characters, such as ASCII control characters. Git recognizes these as
+# binary and wouldn't generate diffs.
+*.phpt diff

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://test.com/soap/v3/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="slApi" targetNamespace="http://test.com/soap/v3/">
+  <types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema"
+      targetNamespace="http://test.com/soap/v3/"
+      xmlns:tns="http://test.com/soap/v3/"
+      xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+      xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+      elementFormDefault="qualified">
+      <complexType name="Customer">
+        <complexContent>
+          <extension base="tns:Interface">
+            <sequence>
+              <element minOccurs="0" maxOccurs="1" nillable="true" name="accountId" type="int"/>
+              <element minOccurs="0" maxOccurs="1" name="parent" type="tns:Customer"/>
+            </sequence>
+          </extension>
+        </complexContent>
+      </complexType>
+      <complexType name="Interface" abstract="true"/>
+    </xsd:schema>                                                              
+  </types>
+  <message name="getObject"/>
+  <message name="getObjectResponse">
+    <part name="getObjectReturn" type="tns:Customer"/>
+  </message>
+  <portType name="CustomerPortType">
+    <operation name="getObject">
+      <input message="tns:getObject"/>
+      <output message="tns:getObjectResponse"/>
+    </operation>
+  </portType>
+  <binding name="CustomerBinding" type="tns:CustomerPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="getObject">
+      <soap:operation soapAction="http://test.com/soap/v3/CustomerAction"/>
+      <input>
+        <soap:body namespace="http://test.com/soap/v3/" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </input>
+      <output>
+        <soap:body namespace="http://test.com/soap/v3/" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="CustomerService">
+    <port name="CustomerPort" binding="tns:CustomerBinding">
+      <soap:address location="test://"/>
+    </port>
+  </service>
+</definitions>

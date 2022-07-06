@@ -1,0 +1,40 @@
+// vim:ft=javascript
+
+ARG_WITH("pdo-dblib", "freetds dblib (Sybase, MS-SQL) support for PDO", "no");
+
+if (PHP_PDO_DBLIB != "no") {
+	/* if they pointed us to a freetds dir, pick that up,
+	 * otherwise we'll poke around and look for MSSQL libs */
+
+	if (CHECK_LIB("sybdb.lib", "pdo_dblib", PHP_PDO_DBLIB) &&
+			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_PDO_DBLIB",
+				PHP_PDO_DBLIB, null, null, true))
+	{
+		EXTENSION("pdo_dblib", "pdo_dblib.c dblib_driver.c dblib_stmt.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		ADD_FLAG('CFLAGS_PDO_DBLIB', "/D PDO_DBLIB_FLAVOUR=\\\"freetds\\\"");
+		ADD_EXTENSION_DEP('pdo_dblib', 'pdo');
+	} else {
+		WARNING("pdo_dblib not enabled, libraries or headers not found")
+	}
+}
+
+ARG_WITH("pdo-mssql", "Native MS-SQL support for PDO", "no");
+
+if (PHP_PDO_MSSQL != "no") {
+	PDO_DBLIB_FLAVOUR = 0;
+
+	if (CHECK_LIB("sybdb.lib", "pdo_mssql", PHP_PDO_MSSQL) &&
+			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_PDO_MSSQL",
+			PHP_PDO_MSSQL, null, null, true)) {
+		/* smells like FreeTDS (or maybe native sybase dblib) */
+		PDO_DBLIB_FLAVOUR = "freetds";
+	}
+
+	if (PDO_DBLIB_FLAVOUR != 0) {
+		EXTENSION("pdo_mssql", "pdo_dblib.c dblib_driver.c dblib_stmt.c", null, null, null, "ext\\pdo_mssql");
+		ADD_FLAG('CFLAGS_PDO_MSSQL', "/D PDO_DBLIB_FLAVOUR=\\\"" + PDO_DBLIB_FLAVOUR + "\\\"");
+		ADD_EXTENSION_DEP('pdo_mssql', 'pdo');
+	} else {
+		WARNING("pdo_mssql not enabled, libraries or headers not found")
+	}
+}

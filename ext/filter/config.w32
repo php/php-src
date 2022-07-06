@@ -1,0 +1,8 @@
+// vim:ft=javascript
+
+ARG_ENABLE("filter", "Filter Support", "yes");
+
+if (PHP_FILTER == "yes") {
+	EXTENSION("filter", "filter.c sanitizing_filters.c logical_filters.c callback_filter.c", PHP_FILTER_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	PHP_INSTALL_HEADERS("ext/filter", "php_filter.h");
+}

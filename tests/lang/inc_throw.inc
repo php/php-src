@@ -1,0 +1,5 @@
+<?php
+
+throw new Exception();
+
+?>

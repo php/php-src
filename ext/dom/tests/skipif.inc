@@ -1,0 +1,1 @@
+<?php	if (!extension_loaded('dom')) die('skip dom extension not available');?>

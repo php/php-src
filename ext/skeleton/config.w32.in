@@ -1,0 +1,7 @@
+ARG_ENABLE('%EXTNAME%', '%EXTNAME% support', 'no');
+
+if (PHP_%EXTNAMECAPS% != 'no') {
+	AC_DEFINE('HAVE_%EXTNAMECAPS%', 1, '%EXTNAME% support enabled');
+
+	EXTENSION('%EXTNAME%', '%EXTNAME%.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+}

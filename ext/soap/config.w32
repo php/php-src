@@ -1,0 +1,21 @@
+// vim:ft=javascript
+
+ARG_ENABLE("soap", "SOAP support", "no");
+
+if (PHP_SOAP != "no") {
+	if (PHP_LIBXML == "yes" &&
+		ADD_EXTENSION_DEP('soap', 'libxml') &&
+		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_SOAP", PHP_PHP_BUILD + "\\include\\libxml2") &&
+		CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_SOAP", PHP_PHP_BUILD + "\\include\\libxml2")
+		) {
+		EXTENSION('soap', 'soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c', null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		AC_DEFINE('HAVE_PHP_SOAP', 1, "SOAP support");
+
+		if (!PHP_SOAP_SHARED) {
+			ADD_FLAG('CFLAGS_SOAP', "/D LIBXML_STATIC ");
+		}
+	} else {
+			WARNING("soap not enabled, libxml not found");
+			PHP_SOAP = "no"
+	}
+}

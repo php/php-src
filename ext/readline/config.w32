@@ -1,0 +1,15 @@
+// vim:ft=javascript
+
+ARG_WITH("readline", "Readline support", "yes");
+
+if (PHP_READLINE != "no") {
+	if (CHECK_LIB("edit_a.lib;edit.lib", "readline", PHP_READLINE) &&
+		CHECK_HEADER_ADD_INCLUDE("editline/readline.h", "CFLAGS_READLINE")) {
+		EXTENSION("readline", "readline.c readline_cli.c");
+		ADD_FLAG("CFLAGS_READLINE", "/D HAVE_LIBEDIT");
+		ADD_FLAG("CFLAGS_READLINE", "/D HAVE_RL_COMPLETION_MATCHES");
+		ADD_FLAG("CFLAGS_READLINE", "/D HAVE_HISTORY_LIST");
+	} else {
+		WARNING("readline not enabled; libraries and headers not found");
+	}
+}

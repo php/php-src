@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="WSDLInteropTestDocLitService" 
+    targetNamespace="http://soapinterop.org/" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:tns="http://soapinterop.org/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:xsd1="http://soapinterop.org/xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://soapinterop.org/ext">
+    	<ext:types/> 
+
+	<types>
+	<ext:schema targetNamespace="http://soapinterop.org/xsd"/>
+        <schema targetNamespace="http://soapinterop.org/xsd"
+            xmlns="http://www.w3.org/2001/XMLSchema" 
+            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">           
+  
+            <element name="echoStringParam" type="xsd:string"/>
+         
+            <element name="echoStringReturn" type="xsd:string"/>            
+        </schema>
+    </types>
+    <ext:message name="echoString"/>
+    <message name="echoString">
+        <part element="xsd1:echoStringParam" name="a"/>
+    </message>
+    <message name="echoStringResponse">
+        <part element="xsd1:echoStringReturn" name="result"/>
+    </message>
+
+    <ext:portType name="WSDLInteropTestDocLitPortType"/>
+
+    <portType name="WSDLInteropTestDocLitPortType">
+        <operation name="echoString">
+            <input message="tns:echoString" name="echoString"/>
+            <output message="tns:echoStringResponse" name="echoStringResponse"/>
+        </operation>
+    </portType>
+    <ext:binding name="WSDLInteropTestDocLitPortBinding"/>
+    <binding name="WSDLInteropTestDocLitPortBinding" 
+        type="tns:WSDLInteropTestDocLitPortType">
+	<ext:binding style ="chunked" wsdl:required="true"/>
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="echoString">
+	    <ext:operation style ="chunked"/>
+            <soap:operation soapAction="http://soapinterop.org/" style="document"/>
+            <input name="echoString">
+		<ext:body use ="direct"/>
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </input>
+            <output name="echoStringResponse">
+		<ext:body use ="direct"/>
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </output>
+        </operation>
+    </binding>
+    <ext:service name="WSDLInteropTestDocLitService"/>
+    <service name="WSDLInteropTestDocLitService">
+        <ext:port binding="tns:WSDLInteropTestDocLitPortBinding" 
+            name="WSDLInteropTestDocLitPort"/>
+	<port binding="tns:WSDLInteropTestDocLitPortBinding" 
+            name="WSDLInteropTestDocLitPort">
+	    <ext:address location=""/>
+            <soap:address 
+                location="round3_groupF_extreq.inc"/>
+		</port>
+	</service>
+</definitions>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://212.24.157.117:8080/axis/services/echo" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://212.24.157.117:8080/axis/services/echo" xmlns:intf="http://212.24.157.117:8080/axis/services/echo" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns1="urn:service.EchoService" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <wsdl:types>
+        <schema targetNamespace="urn:service.EchoService" xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+            <complexType name="EchoServiceException">
+                <sequence>
+                    <element name="intParameter" type="xsd:int"/>
+                    <element name="parameter" nillable="true" type="soapenc:string"/>
+                </sequence>
+            </complexType>
+            <complexType name="Person">
+                <sequence>
+                    <element name="name" nillable="true" type="soapenc:string"/>
+                </sequence>
+            </complexType>
+        </schema>
+    </wsdl:types>
+
+    <wsdl:message name="EchoServiceException">
+
+        <wsdl:part name="EchoServiceException" type="tns1:EchoServiceException"/>
+
+    </wsdl:message>
+
+    <wsdl:message name="echoPersonResponse">
+
+        <wsdl:part name="echoPersonReturn" type="tns1:Person"/>
+
+    </wsdl:message>
+
+    <wsdl:message name="echoPersonRequest">
+
+        <wsdl:part name="p" type="tns1:Person"/>
+        <wsdl:part name="p2" type="tns1:Person"/>
+
+    </wsdl:message>
+
+    <wsdl:portType name="EchoService">
+
+        <wsdl:operation name="echoPerson" parameterOrder="p">
+
+            <wsdl:input message="impl:echoPersonRequest" name="echoPersonRequest"/>
+
+            <wsdl:output message="impl:echoPersonResponse" name="echoPersonResponse"/>
+
+            <wsdl:fault message="impl:EchoServiceException" name="EchoServiceException"/>
+
+        </wsdl:operation>
+
+    </wsdl:portType>
+
+    <wsdl:binding name="echoSoapBinding" type="impl:EchoService">
+
+        <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <wsdl:operation name="echoPerson">
+
+            <wsdlsoap:operation soapAction=""/>
+
+            <wsdl:input name="echoPersonRequest">
+
+                <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service" use="encoded"/>
+
+            </wsdl:input>
+
+            <wsdl:output name="echoPersonResponse">
+
+                <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://212.24.157.117:8080/axis/services/echo" use="encoded"/>
+
+            </wsdl:output>
+
+            <wsdl:fault name="EchoServiceException">
+
+                <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="EchoServiceException" namespace="http://212.24.157.117:8080/axis/services/echo" use="encoded"/>
+
+            </wsdl:fault>
+
+        </wsdl:operation>
+
+    </wsdl:binding>
+
+    <wsdl:service name="EchoServiceService">
+
+        <wsdl:port binding="impl:echoSoapBinding" name="echo">
+
+            <wsdlsoap:address location="http://212.24.157.117:8080/axis/services/echo"/>
+
+        </wsdl:port>
+
+    </wsdl:service>
+
+</wsdl:definitions>

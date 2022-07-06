@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<definitions name="SoapInterop" targetNamespace="http://soapinterop.org/definitions/" 
+		xmlns:wsdlns="http://soapinterop.org/definitions/" 
+		xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns="http://schemas.xmlsoap.org/wsdl/">
+	<types/>
+	<message name="echoStringRequest">
+		<part name="x" type="xsd:string"/>
+	</message>
+	<message name="echoStringResponse">
+		<part name="Result" type="xsd:string"/>
+	</message>
+	<portType name="SoapInteropImport1PortType">
+		<operation name="echoString" parameterOrder="x">
+			<input message="wsdlns:echoStringRequest"/>
+			<output message="wsdlns:echoStringResponse"/>
+		</operation>
+	</portType>	
+</definitions>

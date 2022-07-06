@@ -1,0 +1,21 @@
+// vim:ft=javascript
+
+ARG_WITH("xml", "XML support", "yes");
+
+if (PHP_XML == "yes") {
+	if (PHP_LIBXML == "yes" &&
+		ADD_EXTENSION_DEP('xml', 'libxml') &&
+		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_XML", PHP_PHP_BUILD + "\\include\\libxml2") &&
+		CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_XML", PHP_PHP_BUILD + "\\include\\libxml2")
+	) {
+		EXTENSION("xml", "xml.c compat.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		AC_DEFINE("HAVE_XML", 1, "XML support");
+		if (!PHP_XML_SHARED) {
+			ADD_FLAG("CFLAGS_XML", "/D LIBXML_STATIC ");
+		}
+		PHP_INSTALL_HEADERS("", "ext/xml");
+	} else {
+		WARNING("xml support can't be enabled, libraries or headers are missing")
+		PHP_ZLIB = "no"
+	}
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<definitions
+    xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+    xmlns:si="http://soapinterop.org/xsd"
+    xmlns:tns="http://linuxsrv.home/~dmitry/soap/test.wsdl"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    targetNamespace="http://linuxsrv.home/~dmitry/soap/test.wsdl">
+
+  <types>
+    <xsd:schema targetNamespace="http://linuxsrv.home/~dmitry/soap/test.wsdl">
+      <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
+    </xsd:schema>
+  </types>
+
+  <message name="AddRequest">
+    <part name="x" type="xsd:double" />
+    <part name="y" type="xsd:double" />
+  </message>
+  <message name="AddResponse">
+    <part name="result" type="xsd:double" />
+  </message>
+
+  <portType name="TestServicePortType">
+    <operation name="Add">
+      <input message="tns:AddRequest" />
+      <output message="tns:AddResponse" />
+    </operation>
+  </portType>
+
+  <binding name="TestServiceBinding2" type="tns:TestServicePortType">
+    <operation name="Add">
+      <input/>
+      <output/>
+    </operation>
+  </binding>
+
+  <service name="TestService2">
+    <port name="TestServicePort2" binding="tns:TestServiceBinding"/>
+  </service>
+
+</definitions>

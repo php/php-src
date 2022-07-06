@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+		xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+		xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+		xmlns:s="http://www.w3.org/2001/XMLSchema"
+		xmlns:s0="http://test.pl"
+		targetNamespace="http://test.pl"
+		xmlns="http://schemas.xmlsoap.org/wsdl/">
+	<types>
+		<s:schema elementFormDefault="qualified" targetNamespace="http://test.pl">
+			<s:complexType name="Test">
+				<s:attribute use="required" name="boolA" type="s:boolean"/>
+				<s:attribute use="required" name="boolB" type="s:boolean"/>
+			</s:complexType>
+			<s:element type="s0:Test" name="Test"/>
+			<s:element type="s:int" name="Ret"/>
+		</s:schema>
+	</types>
+
+	<message name="TestSoapIn">
+		<part name="parameters" element="s0:Test"/>
+	</message>
+	<message name="TestSoapOut">
+		<part name="parameters" element="s0:Ret"/>
+	</message>
+	<portType name="TestSoap">
+		<operation name="Test">
+			<input message="s0:TestSoapIn"/>
+			<output message="s0:TestSoapOut"/>
+		</operation>
+	</portType>
+	<binding name="TestSoap" type="s0:TestSoap">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+		<operation name="Test">
+			<soap:operation soapAction="http:/Test/Test" style="document"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="Test">
+		<port name="TestSoapPort" binding="s0:TestSoap">
+			<soap:address location="http://localhost/server.php"/>
+		</port>
+	</service>
+</definitions>

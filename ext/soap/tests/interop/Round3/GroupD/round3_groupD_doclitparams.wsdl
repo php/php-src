@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="WSDLInteropTestDocLitService" 
+    targetNamespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:tns="http://soapinterop.org/WSDLInteropTestDocLit" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:xsd1="http://soapinterop.org/xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <types>
+        <schema targetNamespace="http://soapinterop.org/xsd"
+            xmlns="http://www.w3.org/2001/XMLSchema" 
+            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" elementFormDefault="qualified">
+	     <complexType name="ArrayOfstring_literal">
+                <sequence>
+                    <element maxOccurs="unbounded" minOccurs="1" name="string" type="xsd:string"/>
+                </sequence>
+            </complexType>
+	    <complexType name="SOAPStruct">
+                <all>
+                    <element name="varFloat" type="xsd:float"/>
+                    <element name="varInt" type="xsd:int"/>
+                    <element name="varString" type="xsd:string"/>
+                </all>
+            </complexType>            
+
+            <element name="echoString">
+                <complexType>
+                    <sequence>
+                        <element name="param0" type="xsd:string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="echoStringResponse">
+                <complexType>
+                    <sequence>
+                        <element name="return" type="xsd:string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="echoStringArray">
+                <complexType>
+                    <sequence>
+                        <element name="param0" type="xsd1:ArrayOfstring_literal"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="echoStringArrayResponse">
+                <complexType>
+                    <sequence>
+                        <element name="return" type="xsd1:ArrayOfstring_literal"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="echoStruct">
+                <complexType>
+                    <sequence>
+                        <element name="param0" type="xsd1:SOAPStruct"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="echoStructResponse">
+                <complexType>
+                    <sequence>
+                        <element name="return" type="xsd1:SOAPStruct"/>
+                    </sequence>
+                </complexType>
+            </element>           
+            <element name="echoVoid">
+                <complexType/>
+            </element>
+            <element name="echoVoidResponse">
+                <complexType/>
+            </element>
+        </schema>
+    </types>
+    <message name="echoString">
+        <part element="xsd1:echoString" name="parameters"/>
+    </message>
+    <message name="echoStringResponse">
+        <part element="xsd1:echoStringResponse" name="parameters"/>
+    </message>
+    <message name="echoStringArray">
+        <part element="xsd1:echoStringArray" name="parameters"/>
+    </message>
+    <message name="echoStringArrayResponse">
+        <part element="xsd1:echoStringArrayResponse" name="parameters"/>
+    </message>
+    <message name="echoStruct">
+        <part element="xsd1:echoStruct" name="parameters"/>
+    </message>
+    <message name="echoStructResponse">
+        <part element="xsd1:echoStructResponse" name="parameters"/>
+    </message>
+    <message name="echoVoid">
+        <part element="xsd1:echoVoid" name="parameters"/>
+    </message>
+    <message name="echoVoidResponse">
+        <part element="xsd1:echoVoidResponse" name="parameters"/>
+    </message>
+    <portType name="WSDLInteropTestDocLitPortType">
+        <operation name="echoString">
+            <input message="tns:echoString" name="echoString"/>
+            <output message="tns:echoStringResponse" name="echoStringResponse"/>
+        </operation>
+        <operation name="echoStringArray">
+            <input message="tns:echoStringArray" name="echoStringArray"/>
+            <output message="tns:echoStringArrayResponse" name="echoStringArrayResponse"/>
+        </operation>
+        <operation name="echoStruct">
+            <input message="tns:echoStruct" name="echoStruct"/>
+            <output message="tns:echoStructResponse" name="echoStructResponse"/>
+        </operation>
+        <operation name="echoVoid">
+            <input message="tns:echoVoid" name="echoVoid"/>
+            <output message="tns:echoVoidResponse" name="echoVoidResponse"/>
+        </operation>
+    </portType>
+    <binding name="WSDLInteropTestDocLitPortBinding" 
+        type="tns:WSDLInteropTestDocLitPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="echoString">
+            <soap:operation soapAction="http://soapinterop.org/" style="document"/>
+            <input name="echoString">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </input>
+            <output name="echoStringResponse">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </output>
+        </operation>
+        <operation name="echoStringArray">
+            <soap:operation soapAction="http://soapinterop.org/" style="document"/>
+            <input name="echoStringArray">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </input>
+            <output name="echoStringArrayResponse">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </output>
+        </operation>
+        <operation name="echoStruct">
+            <soap:operation soapAction="http://soapinterop.org/" style="document"/>
+            <input name="echoStruct">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </input>
+            <output name="echoStructResponse">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </output>
+        </operation>
+        <operation name="echoVoid">
+            <soap:operation soapAction="http://soapinterop.org/" style="document"/>
+            <input name="echoVoid">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </input>
+            <output name="echoVoidResponse">
+                <soap:body namespace="http://soapinterop.org/WSDLInteropTestDocLit" 
+                    use="literal"/>
+            </output>
+        </operation>
+    </binding>
+    <service name="WSDLInteropTestDocLitService">
+        <port binding="tns:WSDLInteropTestDocLitPortBinding" 
+            name="WSDLInteropTestDocLitPort">
+            <soap:address 
+                location="round3_groupD_doclitparams.inc"/>
+		</port>
+	</service>
+</definitions>

@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:tns="http://soapinterop.org/wsdl"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:ns2="http://soapinterop.org/types"
+	xmlns:ns3="http://soapinterop.org/types/part"
+	xmlns:ns4="http://soapinterop.org/types/requestresponse"
+	targetNamespace="http://soapinterop.org/wsdl">
+
+	<types>
+		<schema elementFormDefault="qualified"
+			xmlns="http://www.w3.org/2001/XMLSchema"
+			xmlns:tns="http://soapinterop.org/types"
+			targetNamespace="http://soapinterop.org/types">
+
+			<import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+
+			<complexType name="SOAPStruct">
+				<sequence>
+					<element name="varString" type="xsd:string"/>
+					<element name="varInt" type="xsd:int"/>
+					<element name="varFloat" type="xsd:float"/>
+				</sequence>
+			</complexType>
+
+			<complexType name="SOAPStructFault">
+				<sequence>
+					<element name="soapStruct" type="tns:SOAPStruct"/>
+				</sequence>
+			</complexType>
+
+			<complexType name="BaseStruct">
+				<sequence>
+					<element name="structMessage" type="tns:SOAPStruct"/>
+					<element name="shortMessage" type="xsd:short"/>
+				</sequence>
+			</complexType>
+
+			<complexType name="ExtendedStruct">
+				<complexContent>
+					<extension base="tns:BaseStruct">
+						<sequence>
+							<element name="stringMessage" type="xsd:string"/>
+							<element name="intMessage" type="xsd:int"/>
+							<element name="anotherIntMessage" type="xsd:int"/>
+						</sequence>
+					</extension>
+				</complexContent>
+			</complexType>
+
+			<complexType name="MoreExtendedStruct">
+				<complexContent>
+					<extension base="tns:ExtendedStruct">
+						<sequence>
+							<element name="booleanMessage" type="xsd:boolean"/>
+						</sequence>
+					</extension>
+				</complexContent>
+			</complexType>
+
+		</schema>
+
+		<schema elementFormDefault="qualified"
+			xmlns="http://www.w3.org/2001/XMLSchema"
+			xmlns:tns="http://soapinterop.org/types/part"
+			targetNamespace="http://soapinterop.org/types/part">
+
+			<element name="SOAPStructFaultPart" type="ns2:SOAPStructFault"/>
+			<element name="BaseStructPart" type="ns2:BaseStruct"/>
+			<element name="ExtendedStructPart" type="ns2:ExtendedStruct"/>
+			<element name="MoreExtendedStructPart" type="ns2:MoreExtendedStruct"/>
+
+		</schema>
+
+		<schema elementFormDefault="qualified"
+			xmlns="http://www.w3.org/2001/XMLSchema"
+			xmlns:tns="http://soapinterop.org/types/requestresponse"
+			targetNamespace="http://soapinterop.org/types/requestresponse">
+
+			<element name="echoSOAPStructFaultRequest" type="ns2:SOAPStruct"/>
+			<element name="echoSOAPStructFaultResponse">
+				<complexType/>
+			</element>
+
+			<element name="echoBaseStructFaultRequest" type="ns2:BaseStruct"/>
+			<element name="echoBaseStructFaultResponse">
+				<complexType/>
+			</element>
+
+			<element name="echoExtendedStructFaultRequest" type="ns2:ExtendedStruct"/>
+			<element name="echoExtendedStructFaultResponse">
+				<complexType/>
+			</element>
+
+			<element name="echoMultipleFaults1Request">
+				<complexType>
+					<sequence>
+						<element name="whichFault" type="xsd:int"/>
+						<element name="param1" type="ns2:SOAPStruct"/>
+						<element name="param2" type="ns2:BaseStruct"/>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="echoMultipleFaults1Response">
+				<complexType/>
+			</element>
+
+			<element name="echoMultipleFaults2Request">
+				<complexType>
+					<sequence>
+						<element name="whichFault" type="xsd:int"/>
+						<element name="param1" type="ns2:BaseStruct"/>
+						<element name="param2" type="ns2:ExtendedStruct"/>
+						<element name="param3" type="ns2:MoreExtendedStruct"/>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="echoMultipleFaults2Response">
+				<complexType/>
+			</element>
+
+		</schema>
+	</types>
+
+	<message name="echoSOAPStructFaultRequest">
+		<part name="param" element="ns4:echoSOAPStructFaultRequest"/>
+	</message>
+	<message name="echoSOAPStructFaultResponse">
+		<part name="param" element="ns4:echoSOAPStructFaultResponse"/>
+	</message>
+
+	<message name="echoBaseStructFaultRequest">
+		<part name="param" element="ns4:echoBaseStructFaultRequest"/>
+	</message>
+	<message name="echoBaseStructFaultResponse">
+		<part name="param" element="ns4:echoBaseStructFaultResponse"/>
+	</message>
+
+	<message name="echoExtendedStructFaultRequest">
+		<part name="param" element="ns4:echoExtendedStructFaultRequest"/>
+	</message>
+	<message name="echoExtendedStructFaultResponse">
+		<part name="param" element="ns4:echoExtendedStructFaultResponse"/>
+	</message>
+
+	<message name="echoMultipleFaults1Request">
+		<part name="param" element="ns4:echoMultipleFaults1Request"/>
+	</message>
+	<message name="echoMultipleFaults1Response">
+		<part name="param" element="ns4:echoMultipleFaults1Response"/>
+	</message>
+
+	<message name="echoMultipleFaults2Request">
+		<part name="param" element="ns4:echoMultipleFaults2Request"/>
+	</message>
+	<message name="echoMultipleFaults2Response">
+		<part name="param" element="ns4:echoMultipleFaults2Response"/>
+	</message>
+
+	<!-- Fault messages -->
+	<message name="SOAPStructFault">
+		<part name="part3" element="ns3:SOAPStructFaultPart"/>
+	</message>
+	<message name="BaseStructFault">
+		<part name="part1" element="ns3:BaseStructPart"/>
+	</message>
+	<message name="ExtendedStructFault">
+		<part name="part2" element="ns3:ExtendedStructPart"/>
+	</message>
+	<message name="MoreExtendedStructFault">
+		<part name="part5" element="ns3:MoreExtendedStructPart"/>
+	</message>
+
+	<portType name="ComplexDocLitPortType">
+		<!--
+			Throws a fault with an embedded SOAPStruct
+		-->
+		<operation name="echoSOAPStructFault" parameterOrder="">
+			<input message="tns:echoSOAPStructFaultRequest"/>
+			<output message="tns:echoSOAPStructFaultResponse"/>
+			<fault name="ComplexFault" message="tns:SOAPStructFault"/>
+		</operation>
+
+		<!--
+			Throws a fault with a base complex struct
+		-->
+		<operation name="echoBaseStructFault" parameterOrder="">
+			<input message="tns:echoBaseStructFaultRequest"/>
+			<output message="tns:echoBaseStructFaultResponse"/>
+			<fault name="ComplexFault" message="tns:BaseStructFault"/>
+		</operation>
+
+		<!--
+			Throws a fault with an en extended complex type
+		-->
+		<operation name="echoExtendedStructFault" parameterOrder="">
+			<input message="tns:echoExtendedStructFaultRequest"/>
+			<output message="tns:echoExtendedStructFaultResponse"/>
+			<fault name="ComplexFault" message="tns:ExtendedStructFault"/>
+		</operation>
+
+		<!--
+			Throws a fault with embedded complex type, fault with an
+			extended complex type and fault with an array of a base
+			complex type
+		-->
+		<operation name="echoMultipleFaults1" parameterOrder="param">
+			<input message="tns:echoMultipleFaults1Request"/>
+			<output message="tns:echoMultipleFaults1Response"/>
+			<fault name="ComplexFault1" message="tns:SOAPStructFault"/>
+			<fault name="ComplexFault2" message="tns:BaseStructFault"/>
+		</operation>
+
+		<!--
+			Throws a fault with an array of base complex type and
+			a fault with doubly extended complex type
+		-->
+		<operation name="echoMultipleFaults2" parameterOrder="param">
+			<input message="tns:echoMultipleFaults2Request"/>
+			<output message="tns:echoMultipleFaults2Response"/>
+			<fault name="ComplexFault1" message="tns:BaseStructFault"/>
+			<fault name="ComplexFault2" message="tns:ExtendedStructFault"/>
+			<fault name="ComplexFault3" message="tns:MoreExtendedStructFault"/>
+		</operation>
+	</portType>
+
+	<binding name="ComplexDocLitBinding" type="tns:ComplexDocLitPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+		<operation name="echoSOAPStructFault">
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+			<fault name="ComplexFault">
+				<soap:fault
+					name="ComplexFault"
+					use="literal"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoBaseStructFault">
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+			<fault name="ComplexFault">
+				<soap:fault
+					name="ComplexFault"
+					use="literal"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoExtendedStructFault">
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+			<fault name="ComplexFault">
+				<soap:fault
+					name="ComplexFault"
+					use="literal"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoMultipleFaults1">
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+			<fault name="ComplexFault1">
+				<soap:fault 
+					name="ComplexFault1"
+					use="literal"/>
+			</fault>
+			<fault name="ComplexFault2">
+				<soap:fault
+					name="ComplexFault2"
+					use="literal"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoMultipleFaults2">
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+			<fault name="ComplexFault1">
+				<soap:fault
+					name="ComplexFault1"
+					use="literal"/>
+			</fault>
+			<fault name="ComplexFault2">
+				<soap:fault 
+					name="ComplexFault2"
+					use="literal"/>
+			</fault>
+			<fault name="ComplexFault3">
+				<soap:fault 
+					name="ComplexFault3"
+					use="literal"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+	</binding>
+
+	<service name="ComplexDocLitService">
+		<port name="ComplexDocLitPort" binding="tns:ComplexDocLitBinding">
+			<soap:address
+				location="test://"/>
+		</port>
+	</service>
+</definitions>
+

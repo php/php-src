@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+<!DOCTYPE sxe SYSTEM "sxe.dtd" [
+<!ENTITY % incent SYSTEM "sxe.ent">
+%incent;
+]>
+<sxe id="123">
+ <elem1 attr1='first' attr2='second'>There is some text.<!-- comment --><elem2 att25='25' att42='42'>
+   <elem3>
+    <elem4>
+     <?test processing instruction ?>
+    </elem4>
+   </elem3>
+  </elem2>Here is some more</elem1>
+ <elem1 attr1='11' attr2='12'/>
+ <elem11><elem111><elem1111/></elem111></elem11>
+</sxe>

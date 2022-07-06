@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:tns="http://soapinterop.org/wsdl"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:ns2="http://soapinterop.org/types"
+	targetNamespace="http://soapinterop.org/wsdl">
+	<types>
+		<schema elementFormDefault="qualified"
+			xmlns="http://www.w3.org/2001/XMLSchema"
+			xmlns:tns="http://soapinterop.org/types"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+			xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+			targetNamespace="http://soapinterop.org/types">
+
+			<import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+
+			<complexType name="EmptyFault"/>
+
+			<complexType name="ArrayOfString">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="string[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
+
+			<complexType name="ArrayOfInt">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="int[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
+
+			<complexType name="ArrayOfFloat">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="float[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
+
+			<simpleType name="Enum">
+				<restriction base="int">
+					<enumeration value="1"/>
+					<enumeration value="2"/>
+				</restriction>
+			</simpleType>
+		</schema>
+	</types>
+
+	<message name="echoFaultRequest"/>
+	<message name="echoFaultResponse"/>
+	<message name="echoStringFaultRequest">
+		<part name="param" type="xsd:string"/>
+	</message>
+	<message name="echoIntArrayFaultRequest">
+		<part name="param" type="ns2:ArrayOfInt"/>
+	</message>
+	<message name="echoMultipleFaults1Request">
+		<part name="whichFault" type="xsd:int"/>
+		<part name="param1" type="xsd:string"/>
+		<part name="param2" type="ns2:ArrayOfFloat"/>
+	</message>
+	<message name="echoMultipleFaults2Request">
+		<part name="whichFault" type="xsd:int"/>
+		<part name="param1" type="xsd:string"/>
+		<part name="param2" type="xsd:float"/>
+		<part name="param3" type="ns2:ArrayOfString"/>
+	</message>
+	<message name="echoMultipleFaults3Request">
+		<part name="whichFault" type="xsd:int"/>
+		<part name="param1" type="xsd:string"/>
+		<part name="param2" type="xsd:string"/>
+	</message>
+	<message name="echoMultipleFaults4Request">
+		<part name="whichFault" type="xsd:int"/>
+		<part name="param1" type="xsd:int"/>
+		<part name="param2" type="ns2:Enum"/>
+	</message>
+
+	<!-- Fault messages -->
+	<message name="EmptyFault">
+		<part name="part1" type="ns2:EmptyFault"/>
+	</message>
+	<message name="StringFault">
+		<part name="part2" type="xsd:string"/>
+	</message>
+	<message name="IntFault">
+		<part name="part3" type="xsd:int"/>
+	</message>
+	<message name="FloatFault">
+		<part name="part4" type="xsd:float"/>
+	</message>
+	<message name="IntArrayFault">
+		<part name="part5" type="ns2:ArrayOfInt"/>
+	</message>
+	<message name="StringArrayFault">
+		<part name="part6" type="ns2:ArrayOfString"/>
+	</message>
+	<message name="FloatArrayFault">
+		<part name="part7" type="ns2:ArrayOfFloat"/>
+	</message>
+	<!--
+		Part name same as in StringFault message
+	-->
+	<message name="String2Fault">
+		<part name="part2" type="xsd:string"/>
+	</message>
+	<message name="EnumFault">
+		<part name="part9" type="ns2:Enum"/>
+	</message>
+
+	<portType name="SimpleRpcEncPortType">
+		<!--
+			Throws an empty fault
+		-->
+		<operation name="echoEmptyFault" parameterOrder="">
+			<input message="tns:echoFaultRequest"/>
+			<output message="tns:echoFaultResponse"/>
+			<fault name="SimpleFault" message="tns:EmptyFault"/>
+		</operation>
+
+		<!--
+			Throws fault with xsd:string parameter
+		-->
+		<operation name="echoStringFault" parameterOrder="param">
+			<input message="tns:echoStringFaultRequest"/>
+			<output message="tns:echoFaultResponse"/>
+			<fault name="SimpleFault" message="tns:StringFault"/>
+		</operation>
+
+		<!--
+			Throws fault with xsd:int[] parameter
+		-->
+		<operation name="echoIntArrayFault" parameterOrder="param">
+			<input message="tns:echoIntArrayFaultRequest"/>
+			<output message="tns:echoFaultResponse"/>
+			<fault name="SimpleFault" message="tns:IntArrayFault"/>
+		</operation>
+
+		<!--
+			Throws empty fault, fault with a xsd:string
+			parameter and fault with xsd:float[] parameter
+		-->
+		<operation name="echoMultipleFaults1" parameterOrder="whichFault param1 param2">
+			<input message="tns:echoMultipleFaults1Request"/>
+			<output message="tns:echoFaultResponse"/>
+			<fault name="SimpleFault1" message="tns:EmptyFault"/>
+			<fault name="SimpleFault2" message="tns:StringFault"/>
+			<fault name="SimpleFault3" message="tns:FloatArrayFault"/>
+		</operation>
+
+		<!--
+			Throws fault with xsd:string parameter, fault with
+			xsd:float parameter and fault with xsd:string[]
+			parameters
+		-->
+		<operation name="echoMultipleFaults2" parameterOrder="whichFault param1 param2 param3">
+			<input message="tns:echoMultipleFaults2Request"/>
+			<output message="tns:echoFaultResponse"/>
+			<fault name="SimpleFault1" message="tns:StringFault"/>
+			<fault name="SimpleFault2" message="tns:FloatFault"/>
+			<fault name="SimpleFault3" message="tns:StringArrayFault"/>
+		</operation>
+
+		<!--
+			Throws two faults, each with xsd:string parameters
+			and same part names. Each part name is bound to a different
+			namespace.
+		-->
+		<operation name="echoMultipleFaults3" parameterOrder="whichFault param1 param2">
+			<input message="tns:echoMultipleFaults3Request"/>
+			<output message="tns:echoFaultResponse"/>
+			<fault name="SimpleFault1" message="tns:StringFault"/>
+			<fault name="SimpleFault2" message="tns:String2Fault"/>
+		</operation>
+
+		<!--
+			Throws fault with xsd:int parameter and fault with an
+			int enumeration parameter
+		-->
+		<operation name="echoMultipleFaults4" parameterOrder="whichFault param1 param2">
+			<input message="tns:echoMultipleFaults4Request"/>
+			<output message="tns:echoFaultResponse"/>
+			<fault name="SimpleFault1" message="tns:IntFault"/>
+			<fault name="SimpleFault2" message="tns:EnumFault"/>
+		</operation>
+	</portType>
+
+	<binding name="SimpleRpcEncBinding" type="tns:SimpleRpcEncPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc"/>
+
+		<operation name="echoEmptyFault">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<fault name="SimpleFault">
+				<soap:fault
+					name="SimpleFault"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoStringFault">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<fault name="SimpleFault">
+				<soap:fault
+					name="SimpleFault"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoIntArrayFault">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<fault name="SimpleFault">
+				<soap:fault
+					name="SimpleFault"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoMultipleFaults1">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<fault name="SimpleFault1">
+				<soap:fault
+					name="SimpleFault1"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<fault name="SimpleFault2">
+				<soap:fault
+					name="SimpleFault2"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<fault name="SimpleFault3">
+				<soap:fault
+					name="SimpleFault3"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoMultipleFaults2">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<fault name="SimpleFault1">
+				<soap:fault
+					name="SimpleFault1"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<fault name="SimpleFault2">
+				<soap:fault
+					name="SimpleFault2"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<fault name="SimpleFault3">
+				<soap:fault
+					name="SimpleFault3"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoMultipleFaults3">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<fault name="SimpleFault1">
+				<soap:fault
+					name="SimpleFault1"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl/fault1"/>
+			</fault>
+			<fault name="SimpleFault2">
+				<soap:fault
+					name="SimpleFault2"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl/fault2"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoMultipleFaults4">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<fault name="SimpleFault1">
+				<soap:fault
+					name="SimpleFault1"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<fault name="SimpleFault2">
+				<soap:fault
+					name="SimpleFault2"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</fault>
+			<soap:operation soapAction=""/>
+		</operation>
+
+	</binding>
+
+	<service name="SimpleRpcEncService">
+		<port name="SimpleRpcEncPort" binding="tns:SimpleRpcEncBinding">
+			<soap:address location="test://"/>
+		</port>
+	</service>
+</definitions>
+

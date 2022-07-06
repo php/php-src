@@ -1,0 +1,60 @@
+<wsdl:definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.nothing.com" targetNamespace="http://schemas.nothing.com">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://schemas.nothing.com">
+			<xsd:complexType name="book">
+				<xsd:all>
+					<xsd:element name="a" type="xsd:string"/>
+					<xsd:element name="b" type="xsd:string"/>
+				</xsd:all>
+			</xsd:complexType>
+  </xsd:schema>
+	</wsdl:types>
+	<message name="dotestRequest">
+		<part name="dotestReturn" type="tns:book"/>
+  </message>
+	<message name="dotestResponse">
+		<part name="res" type="xsi:string"/>
+  </message>
+	<message name="dotest2Request">
+		<part name="dotest2" type="xsi:string"/>
+  </message>
+	<message name="dotest2Response">
+		<part name="res" type="tns:book"/>
+  </message>
+	<portType name="testPortType">
+		<operation name="dotest">
+			<input message="tns:dotestRequest"/>
+			<output message="tns:dotestResponse"/>
+		</operation>
+		<operation name="dotest2">
+			<input message="tns:dotest2Request"/>
+			<output message="tns:dotest2Response"/>
+		</operation>
+	</portType>
+	<binding name="testBinding" type="tns:testPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="dotest">
+			<soap:operation soapAction="http://localhost:81/test/interface.php?class=test/dotest" style="rpc"/>
+			<input>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://schemas.nothing.com"/>
+			</input>
+			<output>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://schemas.nothing.com"/>
+			</output>
+		</operation>
+		<operation name="dotest2">
+			<soap:operation soapAction="http://localhost:81/test/interface.php?class=test/dotest2" style="rpc"/>
+			<input>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://schemas.nothing.com"/>
+			</input>
+			<output>
+				<soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://schemas.nothing.com"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="test">
+		<port name="testPort" binding="tns:testBinding">
+			<soap:address location="http://localhost:81/test/interface.php?class=test"/>
+		</port>
+	</service>
+</wsdl:definitions>
