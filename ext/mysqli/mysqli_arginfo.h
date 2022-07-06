@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e528bb1e05a85d3d764272c5f3f4256d2608da6c */
+ * Stub hash: 2dae4302d825a7f5da3c4e00ce87aebc5502a8af */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -77,6 +77,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_execute, 0, 1, _IS_B
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_execute arginfo_mysqli_stmt_execute
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_execute_query, 0, 2, mysqli_result, MAY_BE_BOOL)
+	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_fetch_field, 0, 1, MAY_BE_OBJECT|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, result, mysqli_result, 0)
@@ -458,6 +464,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_get_charset, 0, 0, IS_OBJECT, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_mysqli_execute_query, 0, 1, mysqli_result, MAY_BE_BOOL)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_mysqli_get_client_info arginfo_class_mysqli_character_set_name
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_get_connection_stats, 0, 0, IS_ARRAY, 0)
@@ -713,6 +724,7 @@ ZEND_FUNCTION(mysqli_errno);
 ZEND_FUNCTION(mysqli_error);
 ZEND_FUNCTION(mysqli_error_list);
 ZEND_FUNCTION(mysqli_stmt_execute);
+ZEND_FUNCTION(mysqli_execute_query);
 ZEND_FUNCTION(mysqli_fetch_field);
 ZEND_FUNCTION(mysqli_fetch_fields);
 ZEND_FUNCTION(mysqli_fetch_field_direct);
@@ -827,6 +839,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_error_list, arginfo_mysqli_error_list)
 	ZEND_FE(mysqli_stmt_execute, arginfo_mysqli_stmt_execute)
 	ZEND_FALIAS(mysqli_execute, mysqli_stmt_execute, arginfo_mysqli_execute)
+	ZEND_FE(mysqli_execute_query, arginfo_mysqli_execute_query)
 	ZEND_FE(mysqli_fetch_field, arginfo_mysqli_fetch_field)
 	ZEND_FE(mysqli_fetch_fields, arginfo_mysqli_fetch_fields)
 	ZEND_FE(mysqli_fetch_field_direct, arginfo_mysqli_fetch_field_direct)
@@ -935,6 +948,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(dump_debug_info, mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(debug, mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_charset, mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(execute_query, mysqli_execute_query, arginfo_class_mysqli_execute_query, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_client_info, mysqli_get_client_info, arginfo_class_mysqli_get_client_info, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME_MAPPING(get_connection_stats, mysqli_get_connection_stats, arginfo_class_mysqli_get_connection_stats, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_server_info, mysqli_get_server_info, arginfo_class_mysqli_get_server_info, ZEND_ACC_PUBLIC)
