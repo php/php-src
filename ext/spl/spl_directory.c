@@ -1966,7 +1966,8 @@ static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, c
 }
 /* }}} */
 
-static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern, bool silent) /* {{{ */
+/* Call to this function reads a line in a "silent" fashion and does not throw an exception */
+static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
 	zval retval;
 
@@ -1978,9 +1979,6 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 		spl_filesystem_file_free_line(intern);
 
 		if (php_stream_eof(intern->u.file.stream)) {
-			if (!silent) {
-				zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot read from file %s", ZSTR_VAL(intern->file_name));
-			}
 			return FAILURE;
 		}
 		zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(this_ptr), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
@@ -2004,7 +2002,7 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 		zval_ptr_dtor(&retval);
 		return SUCCESS;
 	} else {
-		return spl_filesystem_file_read(intern, silent);
+		return spl_filesystem_file_read(intern, /* silent */ true);
 	}
 } /* }}} */
 
@@ -2050,11 +2048,11 @@ static bool spl_filesystem_file_is_empty_line(spl_filesystem_object *intern) /* 
 /* Call to this function reads a line in a "silent" fashion and does not throw an exception */
 static zend_result spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
-	zend_result ret = spl_filesystem_file_read_line_ex(this_ptr, intern, /* silent */ true);
+	zend_result ret = spl_filesystem_file_read_line_ex(this_ptr, intern);
 
 	while (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY) && ret == SUCCESS && spl_filesystem_file_is_empty_line(intern)) {
 		spl_filesystem_file_free_line(intern);
-		ret = spl_filesystem_file_read_line_ex(this_ptr, intern, /* silent */ true);
+		ret = spl_filesystem_file_read_line_ex(this_ptr, intern);
 	}
 
 	return ret;
