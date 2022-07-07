@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0beta1
 
+- CLI:
+   - Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
+
 - FPM:
   - Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
 
