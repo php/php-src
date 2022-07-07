@@ -596,8 +596,10 @@ PHP_METHOD(SQLite3, query)
 	result->stmt_obj->last_step_result = return_code;
 
 	switch (return_code) {
-		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
+			sqlite3_reset(result->stmt_obj->stmt);
+			ZEND_FALLTHROUGH;
+		case SQLITE_ROW: /* Valid Row */
 		{
 			php_sqlite3_free_list *free_item;
 			free_item = emalloc(sizeof(php_sqlite3_free_list));
@@ -1791,8 +1793,10 @@ PHP_METHOD(SQLite3Stmt, execute)
 	stmt_obj->last_step_result = return_code;
 
 	switch (return_code) {
-		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
+			sqlite3_reset(stmt_obj->stmt);
+			ZEND_FALLTHROUGH;
+		case SQLITE_ROW: /* Valid Row */
 		{
 			object_init_ex(return_value, php_sqlite3_result_entry);
 			result = Z_SQLITE3_RESULT_P(return_value);
@@ -2284,12 +2288,13 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 	sqlite3result_clear_column_names_cache(intern);
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
-		if (intern->stmt_obj && intern->stmt_obj->initialised) {
-			sqlite3_reset(intern->stmt_obj->stmt);
-			intern->stmt_obj->has_stepped = 0;
-		}
-
 		zval_ptr_dtor(&intern->stmt_obj_zval);
+		if (intern->stmt_obj && intern->stmt_obj->initialised) {
+			if (GC_REFCOUNT(&intern->stmt_obj->zo) == 0) {
+				sqlite3_reset(intern->stmt_obj->stmt);
+				intern->stmt_obj->has_stepped = 0;
+			}
+		}
 	}
 
 	zend_object_std_dtor(&intern->zo);

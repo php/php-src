@@ -1,5 +1,5 @@
 --TEST--
-Bug #64531 (SQLite3Result::fetchArray runs the query again) - SQLite3->query
+Bug #64531 (SQLite3Result::fetchArray runs the query again) - SQLite3Stmt->prepare
 --SKIPIF--
 <?php
 if (!extension_loaded('sqlite3')) die('skip sqlite3 extension not available');
@@ -18,7 +18,8 @@ for ($i = 1; $i <= 3; $i++) {
 }
 $conn->createFunction('testing', 'testing', 1);
 
-$res = $conn->query('SELECT * FROM foo WHERE testing(id)');
+$stmt = $conn->prepare("SELECT * FROM foo WHERE testing(id)");
+$res = $stmt->execute();
 $arr = $res->fetchArray();
 $arr = $res->fetchArray();
 $arr = $res->fetchArray();

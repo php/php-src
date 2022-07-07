@@ -1,5 +1,5 @@
 --TEST--
-Bug #64531 (SQLite3Result::fetchArray runs the query again) - SQLite3->query
+Bug #64531 (SQLite3Result::fetchArray runs the query again) - SQLite3Stmt->execute
 --SKIPIF--
 <?php
 if (!extension_loaded('sqlite3')) die('skip sqlite3 extension not available');
@@ -9,8 +9,8 @@ if (!extension_loaded('sqlite3')) die('skip sqlite3 extension not available');
 $conn = new SQLite3(':memory:');
 $conn->exec("CREATE TABLE foo (id INT)");
 
-$res = $conn->query("INSERT INTO foo VALUES (1)");
-
+$stmt = $conn->prepare("INSERT INTO foo VALUES (1)");
+$res = $stmt->execute();
 $res->fetchArray();
 $res->fetchArray();
 
