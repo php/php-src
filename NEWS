@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8847 (PHP hanging infinitly at 100% cpu when check php
     syntaxe of a valid file). (Dmitry)
 
+- Reflection:
+  . Fixed bug GH-8943 (Fixed Reflection::getModifiersNames() with readonly
+    modifier). (Pierrick)
+
 - Standard:
   . Fixed the crypt_sha256/512 api build with clang > 12. (David Carier)
 
