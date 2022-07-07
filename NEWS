@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - FPM:
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
 
+- Standard:
+  . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
+
 07 Jul 2022, PHP 8.2.0alpha3
 
 - Core:

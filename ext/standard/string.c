@@ -5885,7 +5885,11 @@ PHP_FUNCTION(str_split)
 		RETURN_THROWS();
 	}
 
-	if (0 == ZSTR_LEN(str) || (size_t)split_length >= ZSTR_LEN(str)) {
+	if ((size_t)split_length >= ZSTR_LEN(str)) {
+		if (0 == ZSTR_LEN(str)) {
+			RETURN_EMPTY_ARRAY();
+		}
+
 		array_init_size(return_value, 1);
 		add_next_index_stringl(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 		return;
