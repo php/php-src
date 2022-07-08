@@ -1032,12 +1032,10 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 		current = next;
 	}
 
-	smart_str_0(&buf);
-
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	RETURN_NEW_STR(buf.s);
+	RETURN_STR(smart_str_extract(&buf));
 } /* }}} */
 
 /* {{{ Unserializes storage */

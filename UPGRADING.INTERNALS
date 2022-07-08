@@ -39,6 +39,13 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   - zend_object_do_operation_t
 * Added a new zero_position argument to php_stream_fopen_from_fd_rel to reflect
   if this a newly created file so the current file offset needs not to be checked.
+* Added smart_str_trim_to_size(). The function trims the memory allocated for the
+  string. This can considerably reduce the memory footprint of strings smaller
+  than approximately 4096 bytes.
+* smart_str_extract() and the spprintf family of functions now use
+  smart_str_trim_to_size() before returning the string.
+* It is recommended to use smart_str_extract() or smart_str_trim_to_size() when
+  using the smart_str API.
 
 ========================
 2. Build system changes

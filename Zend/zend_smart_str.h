@@ -25,6 +25,10 @@
 	smart_str_appendl_ex((dest), (src), strlen(src), (what))
 #define smart_str_appends(dest, src) \
 	smart_str_appendl((dest), (src), strlen(src))
+#define smart_str_extract(dest) \
+	smart_str_extract_ex((dest), 0)
+#define smart_str_trim_to_size(dest) \
+	smart_str_trim_to_size_ex((dest), 0)
 #define smart_str_extend(dest, len) \
 	smart_str_extend_ex((dest), (len), 0)
 #define smart_str_appendc(dest, c) \
@@ -101,10 +105,19 @@ static zend_always_inline size_t smart_str_get_len(smart_str *str) {
 	return str->s ? ZSTR_LEN(str->s) : 0;
 }
 
-static zend_always_inline zend_string *smart_str_extract(smart_str *str) {
+static zend_always_inline void smart_str_trim_to_size_ex(smart_str *str, bool persistent)
+{
+	if (str->s && str->a > ZSTR_LEN(str->s)) {
+		str->s = zend_string_realloc(str->s, ZSTR_LEN(str->s), persistent);
+		str->a = ZSTR_LEN(str->s);
+	}
+}
+
+static zend_always_inline zend_string *smart_str_extract_ex(smart_str *str, bool persistent) {
 	if (str->s) {
 		zend_string *res;
 		smart_str_0(str);
+		smart_str_trim_to_size_ex(str, persistent);
 		res = str->s;
 		str->s = NULL;
 		return res;
