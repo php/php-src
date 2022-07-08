@@ -212,8 +212,7 @@ PHP_FUNCTION(json_encode)
 		}
 	}
 
-	smart_str_0(&buf);
-	RETURN_STR(smart_str_finalize(&buf));
+	RETURN_STR(smart_str_extract(&buf));
 }
 /* }}} */
 

@@ -1464,7 +1464,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 		smart_str_0(&var);
 		if (sid) {
 			zval_ptr_dtor_str(sid);
-			ZVAL_STR(sid, smart_str_finalize(&var));
+			ZVAL_STR(sid, smart_str_extract(&var));
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s), 0);
 			smart_str_free(&var);
@@ -2362,8 +2362,7 @@ PHP_FUNCTION(session_create_id)
 		php_error_docref(NULL, E_WARNING, "Failed to create new ID");
 		RETURN_FALSE;
 	}
-	smart_str_0(&id);
-	RETVAL_STR(smart_str_finalize(&id));
+	RETVAL_STR(smart_str_extract(&id));
 }
 /* }}} */
 

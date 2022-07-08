@@ -1845,7 +1845,7 @@ PHP_FUNCTION(iconv_substr)
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && retval.s != NULL) {
-		RETURN_STR(smart_str_finalize(&retval));
+		RETURN_STR(smart_str_extract(&retval));
 	}
 	smart_str_free(&retval);
 	RETURN_FALSE;
@@ -2038,7 +2038,7 @@ PHP_FUNCTION(iconv_mime_encode)
 	_php_iconv_show_error(err, out_charset, in_charset);
 
 	if (err == PHP_ICONV_ERR_SUCCESS) {
-		RETVAL_STR(smart_str_finalize(&retval));
+		RETVAL_STR(smart_str_extract(&retval));
 	} else {
 		smart_str_free(&retval);
 		RETVAL_FALSE;
@@ -2079,7 +2079,7 @@ PHP_FUNCTION(iconv_mime_decode)
 	_php_iconv_show_error(err, charset, "???");
 
 	if (err == PHP_ICONV_ERR_SUCCESS) {
-		RETVAL_STR(smart_str_finalize(&retval));
+		RETVAL_STR(smart_str_extract(&retval));
 	} else {
 		smart_str_free(&retval);
 		RETVAL_FALSE;

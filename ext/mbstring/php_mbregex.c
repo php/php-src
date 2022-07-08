@@ -1147,8 +1147,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		RETURN_FALSE;
 	}
 
-	smart_str_0(&out_buf);
-	RETURN_STR(smart_str_finalize(&out_buf));
+	RETURN_STR(smart_str_extract(&out_buf));
 }
 /* }}} */
 

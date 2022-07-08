@@ -27,8 +27,6 @@
 	smart_str_appendl((dest), (src), strlen(src))
 #define smart_str_trim_to_len(dest) \
 	smart_str_trim_to_len_ex((dest), 0)
-#define smart_str_finalize(dest) \
-	smart_str_finalize_ex((dest), 0)
 #define smart_str_extend(dest, len) \
 	smart_str_extend_ex((dest), (len), 0)
 #define smart_str_appendc(dest, c) \
@@ -80,29 +78,6 @@ do_smart_str_realloc:
 	return len;
 }
 
-static zend_always_inline void smart_str_trim_to_len_ex(smart_str *str, bool persistent)
-{
-	if (str->s && str->a > ZSTR_LEN(str->s)) {
-		str->s = zend_string_realloc(str->s, ZSTR_LEN(str->s), persistent);
-		str->a = ZSTR_LEN(str->s);
-	}
-}
-
-static zend_always_inline zend_string* smart_str_finalize_ex(smart_str *str, bool persistent)
-{
-	if (UNEXPECTED(!str->s)) {
-		return ZSTR_EMPTY_ALLOC();
-	}
-
-	smart_str_trim_to_len_ex(str, persistent);
-	zend_string *retval = str->s;
-
-	str->s = NULL;
-	str->a = 0;
-
-	return retval;
-}
-
 static zend_always_inline char* smart_str_extend_ex(smart_str *dest, size_t len, bool persistent) {
 	size_t new_len = smart_str_alloc(dest, len, persistent);
 	char *ret = ZSTR_VAL(dest->s) + ZSTR_LEN(dest->s);
@@ -128,10 +103,19 @@ static zend_always_inline size_t smart_str_get_len(smart_str *str) {
 	return str->s ? ZSTR_LEN(str->s) : 0;
 }
 
+static zend_always_inline void smart_str_trim_to_len_ex(smart_str *str, bool persistent)
+{
+	if (str->s && str->a > ZSTR_LEN(str->s)) {
+		str->s = zend_string_realloc(str->s, ZSTR_LEN(str->s), persistent);
+		str->a = ZSTR_LEN(str->s);
+	}
+}
+
 static zend_always_inline zend_string *smart_str_extract(smart_str *str) {
 	if (str->s) {
 		zend_string *res;
 		smart_str_0(str);
+		smart_str_trim_to_len(str);
 		res = str->s;
 		str->s = NULL;
 		return res;

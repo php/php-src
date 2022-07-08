@@ -808,7 +808,7 @@ PHP_METHOD(SplObjectStorage, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	RETURN_STR(smart_str_finalize(&buf));
+	RETURN_STR(smart_str_extract(&buf));
 } /* }}} */
 
 /* {{{ Unserializes storage */

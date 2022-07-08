@@ -645,7 +645,7 @@ PHP_FUNCTION(var_export)
 	smart_str_0 (&buf);
 
 	if (return_output) {
-		RETURN_STR(smart_str_finalize(&buf));
+		RETURN_STR(smart_str_extract(&buf));
 	} else {
 		PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 		smart_str_free(&buf);
@@ -1318,7 +1318,7 @@ PHP_FUNCTION(serialize)
 		RETURN_THROWS();
 	}
 
-	RETURN_STR(smart_str_finalize(&buf));
+	RETURN_STR(smart_str_extract(&buf));
 }
 /* }}} */
 
