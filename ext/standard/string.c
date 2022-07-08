@@ -5255,7 +5255,7 @@ PHP_FUNCTION(str_getcsv)
 
 	HashTable *values = php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str));
 	if (values == NULL) {
-		BC_EMPTY_CSV_LINE_ARRAY(values);
+		values = php_bc_fgetcsv_empty_line();
 	}
 	RETURN_ARR(values);
 }

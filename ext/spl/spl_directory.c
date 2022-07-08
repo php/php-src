@@ -1960,7 +1960,7 @@ static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, c
 
 	HashTable *values = php_fgetcsv(intern->u.file.stream, delimiter, enclosure, escape, buf_len, buf);
 	if (values == NULL) {
-		BC_EMPTY_CSV_LINE_ARRAY(values);
+		values = php_bc_fgetcsv_empty_line();
 	}
 	ZVAL_ARR(&intern->u.file.current_zval, values);
 	if (return_value) {

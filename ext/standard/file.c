@@ -2052,11 +2052,20 @@ PHP_FUNCTION(fgetcsv)
 
 	HashTable *values = php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf);
 	if (values == NULL) {
-		BC_EMPTY_CSV_LINE_ARRAY(values);
+		values = php_bc_fgetcsv_empty_line();
 	}
 	RETURN_ARR(values);
 }
 /* }}} */
+
+PHPAPI HashTable *php_bc_fgetcsv_empty_line(void)
+{
+	HashTable *values = zend_new_array(1);
+	zval tmp;
+	ZVAL_NULL(&tmp);
+	zend_hash_next_index_insert(values, &tmp);
+	return values;
+}
 
 PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf) /* {{{ */
 {
