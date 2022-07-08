@@ -354,10 +354,9 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 {
 	HashTable *ht;
 
+	ZEND_ASSERT(class_name);
 	if (!CG(current_linking_class) || ce == CG(current_linking_class)) {
 		return;
-	} else if (!class_name) {
-		class_name = ce->name;
 	} else if (zend_string_equals_literal_ci(class_name, "self")
 	        || zend_string_equals_literal_ci(class_name, "parent")) {
 		return;
@@ -465,6 +464,28 @@ static inheritance_status zend_is_class_subtype_of_type(
 	 * class is the subtype of at least one of them (union) or all of them (intersection). */
 	bool is_intersection = ZEND_TYPE_IS_INTERSECTION(proto_type);
 	ZEND_TYPE_FOREACH(proto_type, single_type) {
+		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
+			inheritance_status subtype_status = zend_is_class_subtype_of_type(
+				fe_scope, fe_class_name, proto_scope, *single_type);
+
+			switch (subtype_status) {
+				case INHERITANCE_ERROR:
+					if (is_intersection) {
+						return INHERITANCE_ERROR;
+					}
+					continue;
+				case INHERITANCE_UNRESOLVED:
+					have_unresolved = 1;
+					continue;
+				case INHERITANCE_SUCCESS:
+					if (!is_intersection) {
+						return INHERITANCE_SUCCESS;
+					}
+					continue;
+				EMPTY_SWITCH_DEFAULT_CASE();
+			}
+		}
+
 		zend_class_entry *proto_ce;
 		zend_string *proto_class_name = NULL;
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
@@ -518,11 +539,81 @@ static zend_string *get_class_from_type(zend_class_entry *scope, zend_type singl
 static void register_unresolved_classes(zend_class_entry *scope, zend_type type) {
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			register_unresolved_classes(scope, *single_type);
+			continue;
+		}
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *class_name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
 			lookup_class_ex(scope, class_name, /* register_unresolved */ true);
 		}
 	} ZEND_TYPE_FOREACH_END();
+}
+
+static inheritance_status zend_is_intersection_subtype_of_type(
+	zend_class_entry *fe_scope, zend_type fe_type,
+	zend_class_entry *proto_scope, zend_type proto_type)
+{
+	bool have_unresolved = false;
+	zend_type *single_type;
+	uint32_t proto_type_mask = ZEND_TYPE_PURE_MASK(proto_type);
+
+	/* Currently, for object type any class name would be allowed here.
+	 * We still perform a class lookup for forward-compatibility reasons,
+	 * as we may have named types in the future that are not classes
+	 * (such as typedefs). */
+	if (proto_type_mask & MAY_BE_OBJECT) {
+		ZEND_TYPE_FOREACH(fe_type, single_type) {
+			zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
+			if (!fe_class_name) {
+				continue;
+			}
+			zend_class_entry *fe_ce = lookup_class(fe_scope, fe_class_name);
+			if (fe_ce) {
+				track_class_dependency(fe_ce, fe_class_name);
+				return INHERITANCE_SUCCESS;
+			} else {
+				have_unresolved = true;
+			}
+		} ZEND_TYPE_FOREACH_END();
+	}
+
+	/* U_1&...&U_n < V_1&...&V_m if forall V_j. exists U_i. U_i < V_j.
+	 * U_1&...&U_n < V_1|...|V_m if exists V_j. exists U_i. U_i < V_j.
+	 * As such, we need to iterate over proto_type (V_j) first and use a different
+	 * quantifier depending on whether fe_type is a union or an intersection. */
+	inheritance_status early_exit_status =
+		ZEND_TYPE_IS_INTERSECTION(proto_type) ? INHERITANCE_ERROR : INHERITANCE_SUCCESS;
+	ZEND_TYPE_FOREACH(proto_type, single_type) {
+		inheritance_status status;
+
+		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
+			status = zend_is_intersection_subtype_of_type(
+				fe_scope, fe_type, proto_scope, *single_type);
+		} else {
+			zend_string *proto_class_name = get_class_from_type(proto_scope, *single_type);
+			if (!proto_class_name) {
+				continue;
+			}
+
+			zend_class_entry *proto_ce = NULL;
+			status = zend_is_intersection_subtype_of_class(
+				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce);
+		}
+
+		if (status == early_exit_status) {
+			return status;
+		}
+		if (status == INHERITANCE_UNRESOLVED) {
+			have_unresolved = true;
+		}
+	} ZEND_TYPE_FOREACH_END();
+
+	if (have_unresolved) {
+		return INHERITANCE_UNRESOLVED;
+	}
+
+	return early_exit_status == INHERITANCE_ERROR ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 }
 
 static inheritance_status zend_perform_covariant_type_check(
@@ -565,48 +656,17 @@ static inheritance_status zend_perform_covariant_type_check(
 	bool have_unresolved = false;
 
 	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
-		/* Currently, for object type any class name would be allowed here.
-		 * We still perform a class lookup for forward-compatibility reasons,
-		 * as we may have named types in the future that are not classes
-		 * (such as typedefs). */
-		if (proto_type_mask & MAY_BE_OBJECT) {
-			ZEND_TYPE_FOREACH(fe_type, single_type) {
-				zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
-				if (!fe_class_name) {
-					continue;
-				}
-				zend_class_entry *fe_ce = lookup_class(fe_scope, fe_class_name);
-				if (fe_ce) {
-					track_class_dependency(fe_ce, fe_class_name);
-					return INHERITANCE_SUCCESS;
-				} else {
-					have_unresolved = true;
-				}
-			} ZEND_TYPE_FOREACH_END();
-		}
-
-		/* U_1&...&U_n < V_1&...&V_m if forall V_j. exists U_i. U_i < V_j.
-		 * U_1&...&U_n < V_1|...|V_m if exists V_j. exists U_i. U_i < V_j.
-		 * As such, we need to iterate over proto_type (V_j) first and use a different
-		 * quantifier depending on whether fe_type is a union or an intersection. */
 		early_exit_status =
 			ZEND_TYPE_IS_INTERSECTION(proto_type) ? INHERITANCE_ERROR : INHERITANCE_SUCCESS;
-		ZEND_TYPE_FOREACH(proto_type, single_type) {
-			zend_string *proto_class_name = get_class_from_type(proto_scope, *single_type);
-			if (!proto_class_name) {
-				continue;
-			}
+		inheritance_status status = zend_is_intersection_subtype_of_type(
+			fe_scope, fe_type, proto_scope, proto_type);
 
-			zend_class_entry *proto_ce = NULL;
-			inheritance_status status = zend_is_intersection_subtype_of_class(
-				fe_scope, fe_type, proto_scope, proto_class_name, proto_ce);
-			if (status == early_exit_status) {
-				return status;
-			}
-			if (status == INHERITANCE_UNRESOLVED) {
-				have_unresolved = true;
-			}
-		} ZEND_TYPE_FOREACH_END();
+		if (status == early_exit_status) {
+			return status;
+		}
+		if (status == INHERITANCE_UNRESOLVED) {
+			have_unresolved = true;
+		}
 	} else {
 		/* U_1|...|U_n < V_1|...|V_m if forall U_i. exists V_j. U_i < V_j.
 		 * U_1|...|U_n < V_1&...&V_m if forall U_i. forall V_j. U_i < V_j.
@@ -614,13 +674,21 @@ static inheritance_status zend_perform_covariant_type_check(
 		 * whether proto_type is a union or intersection (only the inner check differs). */
 		early_exit_status = INHERITANCE_ERROR;
 		ZEND_TYPE_FOREACH(fe_type, single_type) {
-			zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
-			if (!fe_class_name) {
-				continue;
+			inheritance_status status;
+			/* Union has an intersection type as it's member */
+			if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
+				status = zend_is_intersection_subtype_of_type(
+					fe_scope, *single_type, proto_scope, proto_type);
+			} else {
+				zend_string *fe_class_name = get_class_from_type(fe_scope, *single_type);
+				if (!fe_class_name) {
+					continue;
+				}
+
+				status = zend_is_class_subtype_of_type(
+					fe_scope, fe_class_name, proto_scope, proto_type);
 			}
 
-			inheritance_status status = zend_is_class_subtype_of_type(
-				fe_scope, fe_class_name, proto_scope, proto_type);
 			if (status == early_exit_status) {
 				return status;
 			}
@@ -939,6 +1007,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 	zend_string *parent_prototype = zend_get_function_declaration(parent, parent_scope);
 	zend_string *child_prototype = zend_get_function_declaration(child, child_scope);
 	if (status == INHERITANCE_UNRESOLVED) {
+		// TODO Improve error message if first unresolved class is present in child and parent?
 		/* Fetch the first unresolved class from registered autoloads */
 		zend_string *unresolved_class = NULL;
 		ZEND_HASH_MAP_FOREACH_STR_KEY(CG(delayed_autoloads), unresolved_class) {

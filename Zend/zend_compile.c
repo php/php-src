@@ -1192,16 +1192,54 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 	return zend_string_copy(name);
 }
 
+static zend_string *add_intersection_type(zend_string *str,
+	zend_type_list *intersection_type_list, zend_class_entry *scope,
+	bool is_bracketed)
+{
+	zend_type *single_type;
+	zend_string *intersection_str = NULL;
+
+	ZEND_TYPE_LIST_FOREACH(intersection_type_list, single_type) {
+		ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*single_type));
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*single_type));
+		zend_string *name = ZEND_TYPE_NAME(*single_type);
+		zend_string *resolved = resolve_class_name(name, scope);
+		intersection_str = add_type_string(intersection_str, resolved, /* is_intersection */ true);
+		zend_string_release(resolved);
+	} ZEND_TYPE_LIST_FOREACH_END();
+
+	ZEND_ASSERT(intersection_str);
+
+	if (is_bracketed) {
+		zend_string *result = zend_string_concat3("(", 1, ZSTR_VAL(intersection_str), ZSTR_LEN(intersection_str), ")", 1);
+		zend_string_release(intersection_str);
+		intersection_str = result;
+	}
+	str = add_type_string(str, intersection_str, /* is_intersection */ false);
+	zend_string_release(intersection_str);
+	return str;
+}
+
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
 
-	if (ZEND_TYPE_HAS_LIST(type)) {
+	/* Pure intersection type */
+	if (ZEND_TYPE_IS_INTERSECTION(type)) {
+		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
+		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, /* is_bracketed */ false);
+	} else if (ZEND_TYPE_HAS_LIST(type)) {
+		/* A union type might not be a list */
 		zend_type *list_type;
-		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+				str = add_intersection_type(str, ZEND_TYPE_LIST(*list_type), scope, /* is_bracketed */ true);
+				continue;
+			}
+			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+			ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*list_type));
 			zend_string *name = ZEND_TYPE_NAME(*list_type);
 			zend_string *resolved = resolve_class_name(name, scope);
-			str = add_type_string(str, resolved, is_intersection);
+			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
@@ -1259,7 +1297,8 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 
 	if (type_mask & MAY_BE_NULL) {
 		bool is_union = !str || memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL;
-		if (!is_union) {
+		bool has_intersection = !str || memchr(ZSTR_VAL(str), '&', ZSTR_LEN(str)) != NULL;
+		if (!is_union && !has_intersection) {
 			zend_string *nullable_str = zend_string_concat2("?", 1, ZSTR_VAL(str), ZSTR_LEN(str));
 			zend_string_release(str);
 			return nullable_str;
@@ -6198,6 +6237,88 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 	}
 }
 
+static void zend_are_intersection_types_redundant(zend_type left_type, zend_type right_type)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(left_type));
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(right_type));
+	zend_type_list *l_type_list = ZEND_TYPE_LIST(left_type);
+	zend_type_list *r_type_list = ZEND_TYPE_LIST(right_type);
+	zend_type_list *smaller_type_list, *larger_type_list;
+	bool flipped = false;
+
+	if (r_type_list->num_types < l_type_list->num_types) {
+		smaller_type_list = r_type_list;
+		larger_type_list = l_type_list;
+		flipped = true;
+	} else {
+		smaller_type_list = l_type_list;
+		larger_type_list = r_type_list;
+	}
+
+	unsigned int sum = 0;
+	zend_type *outer_type;
+	ZEND_TYPE_LIST_FOREACH(smaller_type_list, outer_type)
+		zend_type *inner_type;
+		ZEND_TYPE_LIST_FOREACH(larger_type_list, inner_type)
+			if (zend_string_equals_ci(ZEND_TYPE_NAME(*inner_type), ZEND_TYPE_NAME(*outer_type))) {
+				sum++;
+				break;
+			}
+		ZEND_TYPE_LIST_FOREACH_END();
+	ZEND_TYPE_LIST_FOREACH_END();
+
+	if (sum == smaller_type_list->num_types) {
+		zend_string *smaller_type_str;
+		zend_string *larger_type_str;
+		if (flipped) {
+			smaller_type_str = zend_type_to_string(right_type);
+			larger_type_str = zend_type_to_string(left_type);
+		} else {
+			smaller_type_str = zend_type_to_string(left_type);
+			larger_type_str = zend_type_to_string(right_type);
+		}
+		if (smaller_type_list->num_types == larger_type_list->num_types) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant with type %s",
+				ZSTR_VAL(smaller_type_str), ZSTR_VAL(larger_type_str));
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant as it is more restrictive than type %s",
+				ZSTR_VAL(larger_type_str), ZSTR_VAL(smaller_type_str));
+		}
+	}
+}
+
+static void zend_is_intersection_type_redundant_by_single_type(zend_type intersection_type, zend_type single_type)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(intersection_type));
+	ZEND_ASSERT(!ZEND_TYPE_IS_INTERSECTION(single_type));
+
+	zend_type *single_intersection_type = NULL;
+	ZEND_TYPE_FOREACH(intersection_type, single_intersection_type)
+		if (zend_string_equals_ci(ZEND_TYPE_NAME(*single_intersection_type), ZEND_TYPE_NAME(single_type))) {
+			zend_string *single_type_str = zend_type_to_string(single_type);
+			zend_string *complete_type = zend_type_to_string(intersection_type);
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant as it is more restrictive than type %s",
+					ZSTR_VAL(complete_type), ZSTR_VAL(single_type_str));
+		}
+	ZEND_TYPE_FOREACH_END();
+}
+
+/* Used by both intersection and union types prior to transforming the type list to a full zend_type */
+static void zend_is_type_list_redundant_by_single_type(zend_type_list *type_list, zend_type type)
+{
+	ZEND_ASSERT(!ZEND_TYPE_IS_INTERSECTION(type));
+	for (size_t i = 0; i < type_list->num_types - 1; i++) {
+		if (ZEND_TYPE_IS_INTERSECTION(type_list->types[i])) {
+			zend_is_intersection_type_redundant_by_single_type(type_list->types[i], type);
+			continue;
+		}
+		if (zend_string_equals_ci(ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(type))) {
+			zend_string *single_type_str = zend_type_to_string(type);
+			zend_error_noreturn(E_COMPILE_ERROR, "Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
+		}
+	}
+}
+
 static zend_type zend_compile_typename(
 		zend_ast *ast, bool force_allow_null) /* {{{ */
 {
@@ -6212,6 +6333,7 @@ static zend_type zend_compile_typename(
 	if (ast->kind == ZEND_AST_TYPE_UNION) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_type_list *type_list;
+		bool is_composite = false;
 		ALLOCA_FLAG(use_heap)
 
 		type_list = do_alloca(ZEND_TYPE_LIST_SIZE(list->children), use_heap);
@@ -6219,7 +6341,37 @@ static zend_type zend_compile_typename(
 
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
-			zend_type single_type = zend_compile_single_typename(type_ast);
+			zend_type single_type;
+
+			if (type_ast->kind == ZEND_AST_TYPE_INTERSECTION) {
+				is_composite = true;
+				/* The first class type can be stored directly as the type ptr payload. */
+				if (ZEND_TYPE_IS_COMPLEX(type) && !ZEND_TYPE_HAS_LIST(type)) {
+					/* Switch from single name to name list. */
+					type_list->num_types = 1;
+					type_list->types[0] = type;
+					ZEND_TYPE_FULL_MASK(type_list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
+					ZEND_TYPE_SET_LIST(type, type_list);
+				}
+
+				single_type = zend_compile_typename(type_ast, false);
+				ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(single_type));
+
+				type_list->types[type_list->num_types++] = single_type;
+
+				/* Check for trivially redundant class types */
+				for (size_t i = 0; i < type_list->num_types - 1; i++) {
+					if (ZEND_TYPE_IS_INTERSECTION(type_list->types[i])) {
+						zend_are_intersection_types_redundant(single_type, type_list->types[i]);
+						continue;
+					}
+					/* Type from type list is a simple type */
+					zend_is_intersection_type_redundant_by_single_type(single_type, type_list->types[i]);
+				}
+				continue;
+			}
+
+			single_type = zend_compile_single_typename(type_ast);
 			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
 
 			if (single_type_mask == MAY_BE_ANY) {
@@ -6242,7 +6394,7 @@ static zend_type zend_compile_typename(
 			ZEND_TYPE_FULL_MASK(single_type) &= ~_ZEND_TYPE_MAY_BE_MASK;
 
 			if (ZEND_TYPE_IS_COMPLEX(single_type)) {
-				if (!ZEND_TYPE_IS_COMPLEX(type)) {
+				if (!ZEND_TYPE_IS_COMPLEX(type) && !is_composite) {
 					/* The first class type can be stored directly as the type ptr payload. */
 					ZEND_TYPE_SET_PTR(type, ZEND_TYPE_NAME(single_type));
 					ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_NAME_BIT;
@@ -6258,14 +6410,7 @@ static zend_type zend_compile_typename(
 					type_list->types[type_list->num_types++] = single_type;
 
 					/* Check for trivially redundant class types */
-					for (size_t i = 0; i < type_list->num_types - 1; i++) {
-						if (zend_string_equals_ci(
-								ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(single_type))) {
-							zend_string *single_type_str = zend_type_to_string(single_type);
-							zend_error_noreturn(E_COMPILE_ERROR,
-								"Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
-						}
-					}
+					zend_is_type_list_redundant_by_single_type(type_list, single_type);
 				}
 			}
 		}
@@ -6322,14 +6467,7 @@ static zend_type zend_compile_typename(
 			type_list->types[type_list->num_types++] = single_type;
 
 			/* Check for trivially redundant class types */
-			for (size_t i = 0; i < type_list->num_types - 1; i++) {
-				if (zend_string_equals_ci(
-					ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(single_type))) {
-					zend_string *single_type_str = zend_type_to_string(single_type);
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
-				}
-			}
+			zend_is_type_list_redundant_by_single_type(type_list, single_type);
 		}
 
 		ZEND_ASSERT(list->children == type_list->num_types);
@@ -6643,12 +6781,12 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			}
 
 			if (force_nullable && ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
+				/* We drop the nullable type flag to generate the correct type string */
+				ZEND_TYPE_FULL_MASK(arg_info->type) = ZEND_TYPE_FULL_MASK(arg_info->type) & ~MAY_BE_NULL;
 				zend_string *type_str = zend_type_to_string(arg_info->type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use null as default value for parameter $%s of type %s",
-					/* We move type_str pointer one char forward to skip the '?' generated by
-					 * the call to zend_compile_typename() */
-					ZSTR_VAL(name), ZSTR_VAL(type_str)+1);
+					ZSTR_VAL(name), ZSTR_VAL(type_str));
 			}
 
 			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable

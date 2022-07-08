@@ -272,8 +272,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr type_without_static
-%type <ast> identifier type_expr_without_static union_type_without_static intersection_type_without_static
-%type <ast> inline_function union_type intersection_type
+%type <ast> identifier type_expr_without_static union_type_without_static_element union_type_without_static intersection_type_without_static
+%type <ast> inline_function union_type_element union_type intersection_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
@@ -813,9 +813,16 @@ type:
 	|	T_STATIC			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_STATIC); }
 ;
 
+union_type_element:
+                type { $$ = $1; }
+        |        '(' intersection_type ')' { $$ = $2; }
+;
+
 union_type:
-		type '|' type       { $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
-	|	union_type '|' type { $$ = zend_ast_list_add($1, $3); }
+		union_type_element '|' union_type_element
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
+	|	union_type '|' union_type_element
+			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
 intersection_type:
@@ -839,10 +846,15 @@ type_without_static:
 	|	name		{ $$ = $1; }
 ;
 
+union_type_without_static_element:
+                type_without_static { $$ = $1; }
+        |        '(' intersection_type_without_static ')' { $$ = $2; }
+;
+
 union_type_without_static:
-		type_without_static '|' type_without_static
+		union_type_without_static_element '|' union_type_without_static_element
 			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
-	|	union_type_without_static '|' type_without_static
+	|	union_type_without_static '|' union_type_without_static_element
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 

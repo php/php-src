@@ -617,6 +617,21 @@ static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char 
 	return zend_string_init(str, size, permanent);
 }
 
+static inline void accel_copy_permanent_list_types(
+	zend_new_interned_string_func_t new_interned_string, zend_type type)
+{
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(*single_type));
+			accel_copy_permanent_list_types(new_interned_string, *single_type);
+		}
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			ZEND_TYPE_SET_PTR(*single_type, new_interned_string(ZEND_TYPE_NAME(*single_type)));
+		}
+	} ZEND_TYPE_FOREACH_END();
+}
+
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_interned_string)
 {
@@ -651,13 +666,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				num_args++;
 			}
 			for (i = 0 ; i < num_args; i++) {
-				zend_type *single_type;
-				ZEND_TYPE_FOREACH(arg_info[i].type, single_type) {
-					if (ZEND_TYPE_HAS_NAME(*single_type)) {
-						ZEND_TYPE_SET_PTR(*single_type,
-							new_interned_string(ZEND_TYPE_NAME(*single_type)));
-					}
-				} ZEND_TYPE_FOREACH_END();
+				accel_copy_permanent_list_types(new_interned_string, arg_info[i].type);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
