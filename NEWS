@@ -2,11 +2,16 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0beta1
 
+- Core:
+  . Reduced the memory footprint of strings returned by var_export(),
+    json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
+    http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
+
 - CLI:
-   - Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
+  . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
 
 - FPM:
-  - Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
+  . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
 
 07 Jul 2022, PHP 8.2.0alpha3
 
