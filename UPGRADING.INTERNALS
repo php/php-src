@@ -53,6 +53,11 @@ PHP 8.2 INTERNALS UPGRADE NOTES
       string_natural_case_compare_function(), and string_natural_compare_function()
       have been removed. They always returned SUCCESS and were a wrapper around
       strnatcmp_ex(). Use strnatcmp_ex() directly instead.
+    - The PHP API php_fgetcsv() now returns a HashTable* instead of having an in-out
+      zval parameter.
+      It now returns NULL on an empty line instead of [null].
+      A new function php_bc_fgetcsv_empty_line() has been added to get a HashTable* which
+      represents [null].
   b. ext/pdo
     - pdo_raise_impl_error()'s parameter sqlstate has been changed from
       const char * to pdo_error_type (aka char [6]).
