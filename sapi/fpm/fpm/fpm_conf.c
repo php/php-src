@@ -1636,7 +1636,10 @@ int fpm_conf_load_ini_file(char *filename) /* {{{ */
 		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error);
 		ini_filename = filename;
 		if (error || tmp == FAILURE) {
-			if (ini_include) free(ini_include);
+			if (ini_include) {
+				free(ini_include);
+				ini_include = NULL;
+			}
 			ini_recursion--;
 			close(fd);
 			free(buf);
