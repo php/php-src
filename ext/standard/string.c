@@ -5253,7 +5253,11 @@ PHP_FUNCTION(str_getcsv)
 		esc = esc_len ? (unsigned char) esc_str[0] : PHP_CSV_NO_ESCAPE;
 	}
 
-	php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str), return_value);
+	HashTable *values = php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str));
+	if (values == NULL) {
+		values = php_bc_fgetcsv_empty_line();
+	}
+	RETURN_ARR(values);
 }
 /* }}} */
 
