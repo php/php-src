@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2019 University of Cambridge
+          New API code Copyright (c) 2016-2022 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -230,18 +230,48 @@ for (; len > 0; len--)
 /* When there is no UTF/UCP support, the table of names does not exist. This
 function should not be called in such configurations, because a pattern that
 tries to use Unicode properties won't compile. Rather than put lots of #ifdefs
-into the main code, however, we just put one into this function. */
+into the main code, however, we just put one into this function.
+
+Now that the table contains both full names and their abbreviations, we do some
+fiddling to try to get the full name, which is either the longer of two found
+names, or a 3-character script name. */
 
 static const char *
 get_ucpname(unsigned int ptype, unsigned int pvalue)
 {
 #ifdef SUPPORT_UNICODE
-int i;
-for (i = PRIV(utt_size) - 1; i >= 0; i--)
+int count = 0;
+const char *yield = "??";
+size_t len = 0;
+unsigned int ptypex = (ptype == PT_SC)? PT_SCX : ptype;
+
+for (int i = PRIV(utt_size) - 1; i >= 0; i--)
   {
-  if (ptype == PRIV(utt)[i].type && pvalue == PRIV(utt)[i].value) break;
+  const ucp_type_table *u = PRIV(utt) + i;
+
+  if ((ptype == u->type || ptypex == u->type) && pvalue == u->value)
+    {
+    const char *s = PRIV(utt_names) + u->name_offset;
+    size_t sl = strlen(s);
+
+    if (sl == 3 && (u->type == PT_SC || u->type == PT_SCX))
+      {
+      yield = s;
+      break;
+      }
+
+    if (sl > len)
+      {
+      yield = s;
+      len = sl;
+      }
+
+    if (++count >= 2) break;
+    }
   }
-return (i >= 0)? PRIV(utt_names) + PRIV(utt)[i].name_offset : "??";
+
+return yield;
+
 #else   /* No UTF support */
 (void)ptype;
 (void)pvalue;
@@ -273,8 +303,9 @@ print_prop(FILE *f, PCRE2_SPTR code, const char *before, const char *after)
 {
 if (code[1] != PT_CLIST)
   {
-  fprintf(f, "%s%s %s%s", before, OP_names[*code], get_ucpname(code[1],
-    code[2]), after);
+  const char *sc = (code[1] == PT_SC)? "script:" : "";
+  const char *s = get_ucpname(code[1], code[2]);
+  fprintf(f, "%s%s %s%c%s%s", before, OP_names[*code], sc, toupper(s[0]), s+1, after);
   }
 else
   {
@@ -724,6 +755,7 @@ for(;;)
               {
               unsigned int ptype = *ccode++;
               unsigned int pvalue = *ccode++;
+              const char *s;
 
               switch(ptype)
                 {
@@ -740,8 +772,8 @@ for(;;)
                 break;
 
                 default:
-                fprintf(f, "\\%c{%s}", (not? 'P':'p'),
-                  get_ucpname(ptype, pvalue));
+                s = get_ucpname(ptype, pvalue);
+                fprintf(f, "\\%c{%c%s}", (not? 'P':'p'), toupper(s[0]), s+1);
                 break;
                 }
               }
