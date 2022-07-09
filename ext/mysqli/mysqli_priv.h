@@ -107,6 +107,12 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *);
 #define MYSQLI_REPORT_CLOSE			8
 #define MYSQLI_REPORT_ALL		  255
 
+#ifdef MARIADB_BASE_VERSION
+#define MYSQLI_IS_MARIADB 1
+#else
+#define MYSQLI_IS_MARIADB 0
+#endif
+
 #define MYSQLI_REPORT_MYSQL_ERROR(mysql) \
 if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_errno(mysql)) { \
 	php_mysqli_report_error(mysql_sqlstate(mysql), mysql_errno(mysql), mysql_error(mysql)); \
