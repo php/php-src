@@ -843,11 +843,11 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     $info_params = [];
     settings2array($ini_overwrites, $info_params);
     $info_params = settings2params($info_params);
-    $php_info = `$php $pass_options $info_params $no_file_cache "$info_file"`;
-    define('TESTED_PHP_VERSION', `$php -n -r "echo PHP_VERSION;"`);
+    $php_info = shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\"");
+    define('TESTED_PHP_VERSION', shell_exec("$php -n -r \"echo PHP_VERSION;\""));
 
     if ($php_cgi && $php != $php_cgi) {
-        $php_info_cgi = `$php_cgi $pass_options $info_params $no_file_cache -q "$info_file"`;
+        $php_info_cgi = shell_exec("$php_cgi $pass_options $info_params $no_file_cache -q \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
     } else {
@@ -855,7 +855,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
 
     if ($phpdbg) {
-        $phpdbg_info = `$phpdbg $pass_options $info_params $no_file_cache -qrr "$info_file"`;
+        $phpdbg_info = shell_exec("$phpdbg $pass_options $info_params $no_file_cache -qrr \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
     } else {
@@ -883,7 +883,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         }
         ?>
     PHP);
-    $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
+    $exts_to_test = explode(',', shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\""));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
         'session' => ['session.auto_start=0'],
@@ -3652,8 +3652,8 @@ class SkipCache
             return $this->extensions[$php];
         }
 
-        $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
-        $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        $extDir = shell_exec("$php -d display_errors=0 -r \"echo ini_get('extension_dir');\"");
+        $extensions = explode(",", shell_exec("$php -d display_errors=0 -r \"echo implode(',', get_loaded_extensions());\""));
         $extensions = array_map('strtolower', $extensions);
         if (in_array('zend opcache', $extensions)) {
             $extensions[] = 'opcache';
