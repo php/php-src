@@ -228,13 +228,13 @@ function main(): void
             // fail to reattach to the OpCache because it will be using the
             // wrong path.
             die("TEMP environment is NOT set");
-        } else {
-            if (count($environment) == 1) {
-                // Not having other environment variables, only having TEMP, is
-                // probably ok, but strange and may make a difference in the
-                // test pass rate, so warn the user.
-                echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" . PHP_EOL;
-            }
+        }
+
+        if (count($environment) == 1) {
+            // Not having other environment variables, only having TEMP, is
+            // probably ok, but strange and may make a difference in the
+            // test pass rate, so warn the user.
+            echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" . PHP_EOL;
         }
     }
 
@@ -436,10 +436,8 @@ function main(): void
                             $matches = [];
                             if (preg_match('/^#.*\[(.*)\]\:\s+(.*)$/', $test, $matches)) {
                                 $redir_tests[] = [$matches[1], $matches[2]];
-                            } else {
-                                if (strlen($test)) {
-                                    $test_files[] = trim($test);
-                                }
+                            } elseif (strlen($test)) {
+                                $test_files[] = trim($test);
                             }
                         }
                     }
@@ -624,27 +622,21 @@ function main(): void
             if (!$testfile && strpos($argv[$i], '*') !== false && function_exists('glob')) {
                 if (substr($argv[$i], -5) == '.phpt') {
                     $pattern_match = glob($argv[$i]);
+                } elseif (preg_match("/\*$/", $argv[$i])) {
+                    $pattern_match = glob($argv[$i] . '.phpt');
                 } else {
-                    if (preg_match("/\*$/", $argv[$i])) {
-                        $pattern_match = glob($argv[$i] . '.phpt');
-                    } else {
-                        die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
-                    }
+                    die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
                 }
 
                 if (is_array($pattern_match)) {
                     $test_files = array_merge($test_files, $pattern_match);
                 }
+            } elseif (is_dir($testfile)) {
+                find_files($testfile);
+            } elseif (substr($testfile, -5) == '.phpt') {
+                $test_files[] = $testfile;
             } else {
-                if (is_dir($testfile)) {
-                    find_files($testfile);
-                } else {
-                    if (substr($testfile, -5) == '.phpt') {
-                        $test_files[] = $testfile;
-                    } else {
-                        die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
-                    }
-                }
+                die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
             }
         }
     }
@@ -1085,9 +1077,9 @@ function test_name($name): string
 {
     if (is_array($name)) {
         return $name[0] . ':' . $name[1];
-    } else {
-        return $name;
     }
+
+    return $name;
 }
 /**
  * @param array|string $a
@@ -1105,9 +1097,9 @@ function test_sort($a, $b): int
 
     if ($ta == $tb) {
         return strcmp($a, $b);
-    } else {
-        return $tb - $ta;
     }
+
+    return $tb - $ta;
 }
 
 //
@@ -1118,10 +1110,8 @@ function save_text(string $filename, string $text, ?string $filename_copy = null
 {
     global $DETAILED;
 
-    if ($filename_copy && $filename_copy != $filename) {
-        if (file_put_contents($filename_copy, $text) === false) {
-            error("Cannot open file '" . $filename_copy . "' (save_text)");
-        }
+    if ($filename_copy && $filename_copy != $filename && file_put_contents($filename_copy, $text) === false) {
+        error("Cannot open file '" . $filename_copy . "' (save_text)");
     }
 
     if (file_put_contents($filename, $text) === false) {
@@ -1214,12 +1204,16 @@ function system_with_timeout(
 
         if ($n === false) {
             break;
-        } elseif ($n === 0) {
+        }
+
+        if ($n === 0) {
             /* timed out */
             $data .= "\n ** ERROR: process timed out **\n";
             proc_terminate($proc, 9);
             return $data;
-        } elseif ($n > 0) {
+        }
+
+        if ($n > 0) {
             if ($captureStdOut) {
                 $line = fread($pipes[1], 8192);
             } elseif ($captureStdErr) {
@@ -2201,17 +2195,17 @@ TEST $file
 
             $junit->markTestAs('PASS', $shortname, $tested);
             return 'REDIR';
-        } else {
-            $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
-            show_result("BORK", $bork_info, '', '', $temp_filenames);
-            $PHP_FAILED_TESTS['BORKED'][] = [
-                'name' => $file,
-                'test_name' => '',
-                'output' => '',
-                'diff' => '',
-                'info' => "$bork_info [$file]",
-            ];
         }
+
+        $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
+        show_result("BORK", $bork_info, '', '', $temp_filenames);
+        $PHP_FAILED_TESTS['BORKED'][] = [
+            'name' => $file,
+            'test_name' => '',
+            'output' => '',
+            'diff' => '',
+            'info' => "$bork_info [$file]",
+        ];
     }
 
     if (is_array($org_file) || $test->hasSection('REDIRECTTEST')) {
@@ -2776,9 +2770,9 @@ function comp_line(string $l1, string $l2, bool $is_reg)
 {
     if ($is_reg) {
         return preg_match('/^' . $l1 . '$/s', $l2);
-    } else {
-        return !strcmp($l1, $l2);
     }
+
+    return !strcmp($l1, $l2);
 }
 
 function count_array_diff(
@@ -2854,20 +2848,20 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
             $idx1++;
             $idx2++;
             continue;
-        } else {
-            $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1 + 1, $idx2, $cnt1, $cnt2, 10);
-            $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2 + 1, $cnt1, $cnt2, 10);
-
-            if ($c1 > $c2) {
-                $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
-            } elseif ($c2 > 0) {
-                $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
-            } else {
-                $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
-                $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
-            }
-            $last_printed_context_line = $idx1;
         }
+
+        $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1 + 1, $idx2, $cnt1, $cnt2, 10);
+        $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2 + 1, $cnt1, $cnt2, 10);
+
+        if ($c1 > $c2) {
+            $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
+        } elseif ($c2 > 0) {
+            $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
+        } else {
+            $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
+            $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
+        }
+        $last_printed_context_line = $idx1;
     }
     $mapping[$idx2] = $idx1;
 
