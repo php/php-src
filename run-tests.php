@@ -2567,21 +2567,23 @@ COMMAND $cmd
             $wanted_re = $temp;
 
             // Stick to basics
-            $wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-            $wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
-            $wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
-            $wanted_re = str_replace('%a', '.+', $wanted_re);
-            $wanted_re = str_replace('%A', '.*', $wanted_re);
-            $wanted_re = str_replace('%w', '\s*', $wanted_re);
-            $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
-            $wanted_re = str_replace('%d', '\d+', $wanted_re);
-            $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-            $wanted_re = str_replace('%f', '[+-]?(?:\d+|(?=\.\d))(?:\.\d+)?(?:[Ee][+-]?\d+)?', $wanted_re);
-            $wanted_re = str_replace('%c', '.', $wanted_re);
-            $wanted_re = str_replace('%0', '\x00', $wanted_re);
+            $wanted_re = strtr($wanted_re, [
+                '%e' => preg_quote(DIRECTORY_SEPARATOR, '/'),
+                '%s' => '[^\r\n]+',
+                '%S' => '[^\r\n]*',
+                '%a' => '.+',
+                '%A' => '.*',
+                '%w' => '\s*',
+                '%i' => '[+-]?\d+',
+                '%d' => '\d+',
+                '%x' => '[0-9a-fA-F]+',
+                '%f' => '[+-]?(?:\d+|(?=\.\d))(?:\.\d+)?(?:[Ee][+-]?\d+)?',
+                '%c' => '.',
+                '%0' => '\x00',
+            ]);
         }
 
-        if (preg_match("/^$wanted_re\$/s", $output)) {
+        if (preg_match('/^' . $wanted_re . '$/s', $output)) {
             $passed = true;
         }
     } else {
