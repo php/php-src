@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.9
 
+- CLI:
+  . Fixed GH-8952 (Intentionally closing std handles no longer possible).
+    (Arnaud, cmb)
+
 - Date:
   . Fixed bug #80047 (DatePeriod doesn't warn with custom DateTimeImmutable).
     (Derick)
