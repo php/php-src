@@ -130,6 +130,7 @@ int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 0x10;
 		} else if (c == '~' && filter->status == 2) {
 			CK((*filter->output_function)('~', filter->data));
+			filter->status -= 2;
 		} else if (c == '\n') {
 			/* "~\n" is a line continuation; no output is needed, nor should we shift modes */
 			filter->status -= 2;
