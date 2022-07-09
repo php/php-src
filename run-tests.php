@@ -1567,8 +1567,7 @@ escape:
                                 ]);
                             } else {
                                 proc_terminate($workerProcs[$i]);
-                                unset($workerProcs[$i]);
-                                unset($workerSocks[$i]);
+                                unset($workerProcs[$i], $workerSocks[$i]);
                                 goto escape;
                             }
                             break;
