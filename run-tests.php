@@ -419,7 +419,7 @@ function main(): void
             switch ($switch) {
                 case 'j':
                     $workers = substr($argv[$i], 2);
-                    if (!preg_match('/^\d+$/', $workers) || $workers == 0) {
+                    if ($workers == 0 || !preg_match('/^\d+$/', $workers)) {
                         error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
                     }
                     $workers = intval($workers, 10);
@@ -2424,7 +2424,7 @@ COMMAND $cmd
 
     // Remember CLEAN output to report borked test if it otherwise passes.
     $clean_output = null;
-    if ($test->sectionNotEmpty('CLEAN') && (!$no_clean || $cfg['keep']['clean'])) {
+    if ((!$no_clean || $cfg['keep']['clean']) && $test->sectionNotEmpty('CLEAN')) {
         show_file_block('clean', $test->getSection('CLEAN'));
         save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
 
