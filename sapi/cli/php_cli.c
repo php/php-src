@@ -526,7 +526,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(void) /* {{{ */
+static void cli_register_file_handles(bool no_close) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -954,7 +954,7 @@ do_repeat:
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
 			if (script_file) {
-				cli_register_file_handles();
+				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 			}
 
 			if (interactive) {
@@ -990,7 +990,7 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_CLI_DIRECT:
-			cli_register_file_handles();
+			cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
 			break;
 
@@ -1005,7 +1005,7 @@ do_repeat:
 					file_handle.filename = NULL;
 				}
 
-				cli_register_file_handles();
+				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
 
 				if (exec_begin) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
