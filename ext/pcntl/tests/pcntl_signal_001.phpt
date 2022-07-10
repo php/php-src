@@ -4,11 +4,13 @@ pcntl_signal() signal greater than max available.
 pcntl
 --FILE--
 <?php
-pcntl_signal(1000000, function($signo){
-    echo "signaled\n";
-});
-echo "ok\n";
+try {
+    pcntl_signal(1000000, function($signo){
+        echo "signaled\n";
+    });    
+} catch (Error $e) {
+    echo $e->getMessage();
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught ValueError: pcntl_signal(): Argument #1 ($signal) must be less than %d %s
-%A
+--EXPECT--
+pcntl_signal(): Argument #1 ($signal) must be less than 65
