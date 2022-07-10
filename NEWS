@@ -2,19 +2,21 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0beta1
 
+- CLI:
+  . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
+
 - Core:
   . Reduced the memory footprint of strings returned by var_export(),
     json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
     http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
-
-- CLI:
-  . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
 
 - FPM:
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
 
 - Standard:
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
+  . Added ini_parse_quantity function to convert ini quantities shorthand
+    notation to int. (Dennis Snell)
 
 07 Jul 2022, PHP 8.2.0alpha3
 

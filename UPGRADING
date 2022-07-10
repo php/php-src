@@ -198,6 +198,15 @@ PHP 8.2 UPGRADE NOTES
 - Standard:
   . The peak memory usage can now be reset to the current usage thanks to
     memory_reset_peak_usage().
+  . ini_parse_quantity(): Parses "shorthand bytes" quantities returned by
+    ini_get(). The function is suitable for parsing quantities whose int value
+    is in the range [PHP_INT_MIN, PHP_INT_MAX].
+    Parsing and interpretation is consistent with ini_set() (see also the
+    "Changes to INI File Handling" section).
+    Caveats: Some ini settings may apply additional constraints to the resuling
+    int value, such as a smaller range, that will not be reflected by
+    ini_parse_quantity(). The `memory_limit` setting accepts values higher than
+    PHP_INT_MAX, than can not be parsed by ini_parse_quantity().
 
 ========================================
 7. New Classes and Interfaces
