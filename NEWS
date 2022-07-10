@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Added TCP_CONGESTION socket option. (David Carlier)
+  . Added SO_ZEROCOPY/MSG_ZEROCOPY options. (David Carlier)
 
 - SPL:
   . Uses safe_erealloc instead of erealloc to handle heap growth
