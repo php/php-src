@@ -320,6 +320,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(zval *val1, zval *val2);
 ZEND_API uint32_t zend_array_count(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht);
+ZEND_API HashTable* zend_array_to_list(HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, bool always_duplicate);
