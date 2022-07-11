@@ -373,6 +373,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					Z_TYPE_FLAGS_P(arg1) = 0;
 				} else {
 					zend_string_release(pattern);
+					break;
 				}
 			}
 

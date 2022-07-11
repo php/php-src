@@ -2738,7 +2738,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 		router = argv[php_optind];
 	}
 
-	if (FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router)) {
+	if (server_bind_address && FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router)) {
 		return 1;
 	}
 	sapi_module.phpinfo_as_text = 0;

@@ -152,7 +152,7 @@ void phpdbg_list_file(zend_string *filename, uint32_t count, int offset, uint32_
 
 	phpdbg_xml("<list %r file=\"%s\">", ZSTR_VAL(filename));
 
-	for (line = offset; line < lastline;) {
+	for (line = offset; line < lastline - 1;) {
 		uint32_t linestart = data->line[line++];
 		uint32_t linelen = data->line[line] - linestart;
 		char *buffer = data->buf + linestart;

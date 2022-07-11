@@ -766,7 +766,7 @@ static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
 }
 
 #define NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, lbchars) \
-	((lb_ptr) < (lb_cnt) ? (lbchars)[(lb_ptr)] : *(ps))
+	((lbchars && (lb_ptr) < (lb_cnt)) ? (lbchars)[(lb_ptr)] : *(ps))
 
 #define CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt) \
 	if ((lb_ptr) < (lb_cnt)) { \
@@ -1076,7 +1076,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					scan_stat = 0;
 					ps++, icnt--;
 					break;
-				} else if (lb_cnt < inst->lbchars_len &&
+				} else if (inst->lbchars && lb_cnt < inst->lbchars_len &&
 							*ps == (unsigned char)inst->lbchars[lb_cnt]) {
 					lb_cnt++;
 					scan_stat = 5;
@@ -1142,7 +1142,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					lb_cnt = lb_ptr = 0;
 					scan_stat = 0;
 				} else if (icnt > 0) {
-					if (*ps == (unsigned char)inst->lbchars[lb_cnt]) {
+					if (inst->lbchars && *ps == (unsigned char)inst->lbchars[lb_cnt]) {
 						lb_cnt++;
 						ps++, icnt--;
 					} else {

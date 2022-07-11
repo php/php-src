@@ -1485,7 +1485,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 		ZEND_MAP_PTR_SET(class_type->static_members_table, emalloc(sizeof(zval) * class_type->default_static_members_count));
 		for (i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
-			if (Z_TYPE_P(p) == IS_INDIRECT) {
+			if (class_type->parent && Z_TYPE_P(p) == IS_INDIRECT) {
 				zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
 				ZVAL_DEINDIRECT(q);
 				ZVAL_INDIRECT(&CE_STATIC_MEMBERS(class_type)[i], q);

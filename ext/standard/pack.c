@@ -265,7 +265,7 @@ PHP_FUNCTION(pack)
 			else if (c >= '0' && c <= '9') {
 				arg = atoi(&format[i]);
 
-				while (format[i] >= '0' && format[i] <= '9' && i < formatlen) {
+				while (i < formatlen && format[i] >= '0' && format[i] <= '9') {
 					i++;
 				}
 			}

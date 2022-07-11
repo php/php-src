@@ -278,7 +278,7 @@ PHP_FUNCTION(stream_socket_accept)
 				&tv, &errstr
 				) && clistream) {
 
-		if (peername) {
+		if (zpeername && peername) {
 			ZEND_TRY_ASSIGN_REF_STR(zpeername, peername);
 		}
 		php_stream_to_zval(clistream, return_value);

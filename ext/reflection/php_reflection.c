@@ -5332,7 +5332,7 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 
 	ZVAL_STR_COPY(reflection_prop_name(object), name);
-	if (dynam_prop == 0) {
+	if (property_info && dynam_prop == 0) {
 		ZVAL_STR_COPY(reflection_prop_class(object), property_info->ce->name);
 	} else {
 		ZVAL_STR_COPY(reflection_prop_class(object), ce->name);
@@ -5346,7 +5346,7 @@ ZEND_METHOD(reflection_property, __construct)
 		reference->prop.ce = ce;
 		reference->prop.type = 0;
 		reference->dynamic = 1;
-	} else {
+	} else if (property_info) {
 		reference->prop = *property_info;
 		reference->dynamic = 0;
 

@@ -424,10 +424,9 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 				remove = next;
 			else break;
 		}
+			
+		stack->next = NULL;
 	}
-
-
-	stack->next = NULL;
 } /* }}} */
 
 /* {{{ */

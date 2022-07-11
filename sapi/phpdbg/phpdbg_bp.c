@@ -832,19 +832,21 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	uint32_t cops = CG(compiler_options);
 	zval pv;
 
-	switch (param->type) {
-	    case STR_PARAM:
-		case NUMERIC_FUNCTION_PARAM:
-		case METHOD_PARAM:
-		case NUMERIC_METHOD_PARAM:
-		case FILE_PARAM:
-		case ADDR_PARAM:
-		    /* do nothing */
-		break;
+	if (param) {
+		switch (param->type) {
+			case STR_PARAM:
+			case NUMERIC_FUNCTION_PARAM:
+			case METHOD_PARAM:
+			case NUMERIC_METHOD_PARAM:
+			case FILE_PARAM:
+			case ADDR_PARAM:
+				/* do nothing */
+			break;
 
-		default:
-			phpdbg_error("eval", "type=\"invalidparameter\"", "Invalid parameter type for conditional breakpoint");
-			return;
+			default:
+				phpdbg_error("eval", "type=\"invalidparameter\"", "Invalid parameter type for conditional breakpoint");
+				return;
+		}
 	}
 
 	PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_COND);

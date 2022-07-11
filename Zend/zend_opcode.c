@@ -957,7 +957,8 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				}
 				break;
 			case ZEND_GOTO:
-				zend_resolve_goto_label(op_array, opline);
+				if (op_array->literals) 
+					zend_resolve_goto_label(op_array, opline);
 				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					zend_check_finally_breakout(op_array, opline - op_array->opcodes, opline->op1.opline_num);
 				}
