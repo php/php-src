@@ -11,4 +11,4 @@ runs:
         build/gen_stub.php -f
         build/gen_stub.php --generate-optimizer-info
         ext/tokenizer/tokenizer_data_gen.php
-        git add . -Nu && git diff --exit-code
+        git add . -N && git diff --exit-code
