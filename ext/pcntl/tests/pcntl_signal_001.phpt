@@ -12,5 +12,5 @@ try {
     echo $e->getMessage();
 }
 ?>
---EXPECT--
-pcntl_signal(): Argument #1 ($signal) must be less than 65
+--EXPECTF--
+pcntl_signal(): Argument #1 ($signal) must be less than %d
