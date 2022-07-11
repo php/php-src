@@ -87,11 +87,6 @@ ZEND_API void zend_observer_activate(void)
 	current_observed_frame = NULL;
 }
 
-ZEND_API void zend_observer_deactivate(void)
-{
-	// now empty and unused, but kept for ABI compatibility
-}
-
 ZEND_API void zend_observer_shutdown(void)
 {
 	zend_llist_destroy(&zend_observers_fcall_list);
@@ -112,7 +107,7 @@ static void zend_observer_fcall_install(zend_execute_data *execute_data)
 	ZEND_ASSERT(RUN_TIME_CACHE(op_array));
 	zend_observer_fcall_begin_handler *begin_handlers = (zend_observer_fcall_begin_handler *)&ZEND_OBSERVER_DATA(op_array);
 	zend_observer_fcall_end_handler *end_handlers = (zend_observer_fcall_end_handler *)begin_handlers + list->count, *end_handlers_start = end_handlers;
-	
+
 	*begin_handlers = ZEND_OBSERVER_NOT_OBSERVED;
 	*end_handlers = ZEND_OBSERVER_NOT_OBSERVED;
 
@@ -127,13 +122,72 @@ static void zend_observer_fcall_install(zend_execute_data *execute_data)
 			*(end_handlers++) = handlers.end;
 		}
 	}
-	
+
 	// end handlers are executed in reverse order
 	for (--end_handlers; end_handlers_start < end_handlers; --end_handlers, ++end_handlers_start) {
 		zend_observer_fcall_end_handler tmp = *end_handlers;
 		*end_handlers = *end_handlers_start;
 		*end_handlers_start = tmp;
 	}
+}
+
+static bool zend_observer_remove_handler(void **first_handler, void *old_handler) {
+	size_t registered_observers = zend_observers_fcall_list.count;
+
+	void **last_handler = first_handler + registered_observers - 1;
+	for (void **cur_handler = first_handler; cur_handler <= last_handler; ++cur_handler) {
+		if (*cur_handler == old_handler) {
+			if (registered_observers == 1 || (cur_handler == first_handler && cur_handler[1] == NULL)) {
+				*cur_handler = ZEND_OBSERVER_NOT_OBSERVED;
+			} else {
+				if (cur_handler != last_handler) {
+					memmove(cur_handler, cur_handler + 1, sizeof(cur_handler) * (last_handler - cur_handler));
+				} else {
+					*last_handler = NULL;
+				}
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+ZEND_API void zend_observer_add_begin_handler(zend_op_array *op_array, zend_observer_fcall_begin_handler begin) {
+	size_t registered_observers = zend_observers_fcall_list.count;
+	zend_observer_fcall_begin_handler *first_handler = (void *)&ZEND_OBSERVER_DATA(op_array), *last_handler = first_handler + registered_observers - 1;
+	if (*first_handler == ZEND_OBSERVER_NOT_OBSERVED) {
+		*first_handler = begin;
+	} else {
+		for (zend_observer_fcall_begin_handler *cur_handler = first_handler + 1; cur_handler <= last_handler; ++cur_handler) {
+			if (*cur_handler == NULL) {
+				*cur_handler = begin;
+				return;
+			}
+		}
+		// there's no space for new handlers, then it's forbidden to call this function
+		ZEND_UNREACHABLE();
+	}
+}
+
+ZEND_API bool zend_observer_remove_begin_handler(zend_op_array *op_array, zend_observer_fcall_begin_handler begin) {
+	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(op_array), begin);
+}
+
+ZEND_API void zend_observer_add_end_handler(zend_op_array *op_array, zend_observer_fcall_end_handler end) {
+	size_t registered_observers = zend_observers_fcall_list.count;
+	zend_observer_fcall_end_handler *end_handler = (zend_observer_fcall_end_handler *)&ZEND_OBSERVER_DATA(op_array) + registered_observers;
+	// to allow to preserve the invariant that end handlers are in reverse order of begin handlers, push the new end handler in front
+	if (*end_handler != ZEND_OBSERVER_NOT_OBSERVED) {
+		// there's no space for new handlers, then it's forbidden to call this function
+		ZEND_ASSERT(end_handler[registered_observers - 1] == NULL);
+		memmove(end_handler + 1, end_handler, registered_observers - 1);
+	}
+	*end_handler = end;
+}
+
+ZEND_API bool zend_observer_remove_end_handler(zend_op_array *op_array, zend_observer_fcall_end_handler end) {
+	size_t registered_observers = zend_observers_fcall_list.count;
+	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(op_array) + registered_observers, end);
 }
 
 static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_data)
@@ -205,8 +259,7 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(zend_execute_data *execute_d
 {
 	zend_function *func = execute_data->func;
 
-	if (!ZEND_OBSERVER_ENABLED
-	 || !ZEND_OBSERVABLE_FN(func->common.fn_flags)) {
+	if (!ZEND_OBSERVER_ENABLED || !ZEND_OBSERVABLE_FN(func->common.fn_flags)) {
 		return;
 	}
 
