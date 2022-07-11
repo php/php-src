@@ -1181,6 +1181,9 @@ END_EXTERN_C()
 /* this flag is set when compiler invoked during preloading in separate process */
 #define ZEND_COMPILE_PRELOAD_IN_CHILD           (1<<17)
 
+/* ignore observer notifications, e.g. to manually notify afterwards in a post-processing step after compilation */
+#define ZEND_COMPILE_IGNORE_OBSERVER			(1<<18)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

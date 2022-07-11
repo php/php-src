@@ -1093,6 +1093,7 @@ ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname) /* {{{ 
 	if (func->common.function_name) {
 		zend_string_addref(func->common.function_name);
 	}
+	zend_observer_function_declared_notify(&func->op_array, Z_STR_P(lcname));
 	return SUCCESS;
 }
 /* }}} */
@@ -1116,12 +1117,14 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 	}
 
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		zend_observer_class_linked_notify(ce, Z_STR_P(lcname));
 		return ce;
 	}
 
 	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
 	if (ce) {
 		ZEND_ASSERT(!EG(exception));
+		zend_observer_class_linked_notify(ce, Z_STR_P(lcname));
 		return ce;
 	}
 
@@ -7245,6 +7248,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
 			do_bind_function_error(lcname, op_array, 1);
 		}
+		zend_observer_function_declared_notify(op_array, lcname);
 		zend_string_release_ex(lcname, 0);
 		return;
 	}
@@ -7877,6 +7881,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 				zend_string_release(lcname);
 				zend_build_properties_info_table(ce);
 				ce->ce_flags |= ZEND_ACC_LINKED;
+				zend_observer_class_linked_notify(ce, lcname);
 				return;
 			}
 		} else if (!extends_ast) {

@@ -1806,6 +1806,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OBSERVER;
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 		}
