@@ -259,12 +259,32 @@ static void fiber_suspend_observer(zend_fiber_context *from, zend_fiber_context 
 static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 {
 	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
-	if (*p) {
-		zend_hash_release(*p);
+	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_SHUTDOWN && (ZT_G(observer_observe_all) || !*p)) {
+		return FAILURE;
 	}
-	*p = NULL;
+
+	zend_string *funcname;
+	zend_function *func;
+	if (*p) {
+		if (EG(function_table)) {
+			ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
+				if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+					zend_observer_remove_begin_handler(&func->op_array, observer_begin);
+					zend_observer_remove_end_handler(&func->op_array, observer_end);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+		if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN) {
+			zend_hash_release(*p);
+			*p = NULL;
+		} else {
+			zend_hash_clean(*p);
+		}
+	}
 	if (new_value && ZSTR_LEN(new_value)) {
-		*p = malloc(sizeof(HashTable));
+		if (!*p) {
+			*p = malloc(sizeof(HashTable));
+		}
 		_zend_hash_init(*p, 8, ZVAL_PTR_DTOR, 1);
 		const char *start = ZSTR_VAL(new_value), *ptr;
 		while ((ptr = strchr(start, ','))) {
@@ -272,6 +292,14 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 			start = ptr + 1;
 		}
 		zend_hash_str_add_empty_element(*p, start, ZSTR_VAL(new_value) + ZSTR_LEN(new_value) - start);
+		if (EG(function_table)) {
+			ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
+				if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
+					zend_observer_add_begin_handler(&func->op_array, observer_begin);
+					zend_observer_add_end_handler(&func->op_array, observer_end);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 	return SUCCESS;
 }
@@ -282,7 +310,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_all", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_all, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_includes", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_includes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_functions", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_functions, zend_zend_test_globals, zend_test_globals)
-	STD_PHP_INI_ENTRY("zend_test.observer.observe_function_names", "", PHP_INI_SYSTEM, zend_test_observer_OnUpdateCommaList, observer_observe_function_names, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.observer.observe_function_names", "", PHP_INI_ALL, zend_test_observer_OnUpdateCommaList, observer_observe_function_names, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
