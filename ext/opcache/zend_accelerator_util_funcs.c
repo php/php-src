@@ -25,6 +25,7 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_persist.h"
 #include "zend_shared_alloc.h"
+#include "zend_observer.h"
 
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
@@ -145,6 +146,8 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	Bucket *p, *end;
 	zval *t;
 
+	bool call_observers = zend_observer_function_declared_observed;
+
 	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
 	p = source->arData;
 	end = p + source->nNumUsed;
@@ -156,6 +159,9 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 			goto failure;
 		}
 		_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+		if (UNEXPECTED(call_observers) && *ZSTR_VAL(p->key)) { // if not rtd key
+			zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
+		}
 	}
 	target->nInternalPointer = 0;
 	return;
@@ -181,6 +187,8 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 {
 	Bucket *p, *end;
 	zval *t;
+
+	bool call_observers = zend_observer_class_linked_observed;
 
 	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
 	p = source->arData;
@@ -221,6 +229,9 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 			 && ZSTR_HAS_CE_CACHE(ce->name)
 			 && ZSTR_VAL(p->key)[0]) {
 				ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
+				if (UNEXPECTED(call_observers)) {
+					zend_observer_class_linked_notify(ce, p->key);
+				}
 			}
 		}
 	}

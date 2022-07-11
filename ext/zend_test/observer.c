@@ -256,6 +256,18 @@ static void fiber_suspend_observer(zend_fiber_context *from, zend_fiber_context 
 	}
 }
 
+void declared_function_observer(zend_op_array *op_array, zend_string *name) {
+	if (ZT_G(observer_observe_declaring)) {
+		php_printf("%*s<!-- declared function '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(name));
+	}
+}
+
+void declared_class_observer(zend_class_entry *ce, zend_string *name) {
+	if (ZT_G(observer_observe_declaring)) {
+		php_printf("%*s<!-- declared class '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(name));
+	}
+}
+
 static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 {
 	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
@@ -301,6 +313,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_all", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_all, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_includes", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_includes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_functions", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_functions, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_declaring", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_declaring, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.observer.observe_function_names", "", PHP_INI_ALL, zend_test_observer_OnUpdateCommaList, observer_observe_function_names, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
@@ -334,6 +347,9 @@ void zend_test_observer_init(INIT_FUNC_ARGS)
 		zend_observer_fiber_switch_register(fiber_enter_observer);
 		zend_observer_fiber_switch_register(fiber_suspend_observer);
 		zend_observer_fiber_destroy_register(fiber_destroy_observer);
+
+		zend_observer_function_declared_register(declared_function_observer);
+		zend_observer_class_linked_register(declared_class_observer);
 	}
 }
 

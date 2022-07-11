@@ -32,12 +32,17 @@
 	(ZEND_MAP_PTR(function->common.run_time_cache) && !(function->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 
 zend_llist zend_observers_fcall_list;
+zend_llist zend_observer_function_declared_callbacks;
+zend_llist zend_observer_class_linked_callbacks;
 zend_llist zend_observer_error_callbacks;
 zend_llist zend_observer_fiber_init;
 zend_llist zend_observer_fiber_switch;
 zend_llist zend_observer_fiber_destroy;
 
 int zend_observer_fcall_op_array_extension;
+bool zend_observer_errors_observed;
+bool zend_observer_function_declared_observed;
+bool zend_observer_class_linked_observed;
 
 ZEND_TLS zend_execute_data *current_observed_frame;
 
@@ -51,6 +56,8 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init)
 ZEND_API void zend_observer_startup(void)
 {
 	zend_llist_init(&zend_observers_fcall_list, sizeof(zend_observer_fcall_init), NULL, 1);
+	zend_llist_init(&zend_observer_function_declared_callbacks, sizeof(zend_observer_function_declared_cb), NULL, 1);
+	zend_llist_init(&zend_observer_class_linked_callbacks, sizeof(zend_observer_class_linked_cb), NULL, 1);
 	zend_llist_init(&zend_observer_error_callbacks, sizeof(zend_observer_error_cb), NULL, 1);
 	zend_llist_init(&zend_observer_fiber_init, sizeof(zend_observer_fiber_init_handler), NULL, 1);
 	zend_llist_init(&zend_observer_fiber_switch, sizeof(zend_observer_fiber_switch_handler), NULL, 1);
@@ -100,6 +107,8 @@ ZEND_API void zend_observer_activate(void)
 ZEND_API void zend_observer_shutdown(void)
 {
 	zend_llist_destroy(&zend_observers_fcall_list);
+	zend_llist_destroy(&zend_observer_function_declared_callbacks);
+	zend_llist_destroy(&zend_observer_class_linked_callbacks);
 	zend_llist_destroy(&zend_observer_error_callbacks);
 	zend_llist_destroy(&zend_observer_fiber_init);
 	zend_llist_destroy(&zend_observer_fiber_switch);
@@ -286,8 +295,45 @@ ZEND_API void zend_observer_fcall_end_all(void)
 	EG(current_execute_data) = original_execute_data;
 }
 
+ZEND_API void zend_observer_function_declared_register(zend_observer_function_declared_cb cb)
+{
+	zend_observer_function_declared_observed = true;
+	zend_llist_add_element(&zend_observer_function_declared_callbacks, &cb);
+}
+
+ZEND_API void ZEND_FASTCALL zend_observer_function_declared_notify(zend_op_array *op_array, zend_string *name)
+{
+	if (CG(compiler_options) & ZEND_COMPILE_IGNORE_OBSERVER) {
+		return;
+	}
+
+	for (zend_llist_element *element = zend_observer_function_declared_callbacks.head; element; element = element->next) {
+		zend_observer_function_declared_cb callback = *(zend_observer_function_declared_cb *) (element->data);
+		callback(op_array, name);
+	}
+}
+
+ZEND_API void zend_observer_class_linked_register(zend_observer_class_linked_cb cb)
+{
+	zend_observer_class_linked_observed = true;
+	zend_llist_add_element(&zend_observer_class_linked_callbacks, &cb);
+}
+
+ZEND_API void ZEND_FASTCALL zend_observer_class_linked_notify(zend_class_entry *ce, zend_string *name)
+{
+	if (CG(compiler_options) & ZEND_COMPILE_IGNORE_OBSERVER) {
+		return;
+	}
+
+	for (zend_llist_element *element = zend_observer_class_linked_callbacks.head; element; element = element->next) {
+		zend_observer_class_linked_cb callback = *(zend_observer_class_linked_cb *) (element->data);
+		callback(ce, name);
+	}
+}
+
 ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
 {
+	zend_observer_errors_observed = true;
 	zend_llist_add_element(&zend_observer_error_callbacks, &cb);
 }
 

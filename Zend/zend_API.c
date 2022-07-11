@@ -31,6 +31,7 @@
 #include "zend_inheritance.h"
 #include "zend_ini.h"
 #include "zend_enum.h"
+#include "zend_observer.h"
 
 #include <stdarg.h>
 
@@ -3263,6 +3264,7 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 			ce->refcount++;
 		}
+		zend_observer_class_linked_notify(ce, lcname);
 		return SUCCESS;
 	}
 	return FAILURE;

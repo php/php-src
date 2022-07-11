@@ -27,6 +27,9 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API int zend_observer_fcall_op_array_extension;
+extern ZEND_API bool zend_observer_errors_observed;
+extern ZEND_API bool zend_observer_function_declared_observed;
+extern ZEND_API bool zend_observer_class_linked_observed;
 
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
@@ -79,6 +82,14 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 	zval *return_value);
 
 ZEND_API void zend_observer_fcall_end_all(void);
+
+typedef void (*zend_observer_function_declared_cb)(zend_op_array *op_array, zend_string *name);
+typedef void (*zend_observer_class_linked_cb)(zend_class_entry *ce, zend_string *name);
+
+ZEND_API void zend_observer_function_declared_register(zend_observer_function_declared_cb cb);
+ZEND_API void ZEND_FASTCALL zend_observer_function_declared_notify(zend_op_array *op_array, zend_string *name);
+ZEND_API void zend_observer_class_linked_register(zend_observer_class_linked_cb cb);
+ZEND_API void ZEND_FASTCALL zend_observer_class_linked_notify(zend_class_entry *ce, zend_string *name);
 
 typedef void (*zend_observer_error_cb)(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 
