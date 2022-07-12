@@ -505,6 +505,10 @@ static size_t mb_utf7imap_to_wchar(unsigned char **in, size_t *in_len, uint32_t 
 {
 	ZEND_ASSERT(bufsize >= 5); /* This function will infinite-loop if called with a tiny output buffer */
 
+	/* Why does this require a minimum output buffer size of 5?
+	 * See comment in mb_utf7_to_wchar; the worst case for this function is similar,
+	 * though not exactly the same. */
+
 	unsigned char *p = *in, *e = p + *in_len;
 	/* Always leave one empty space in output buffer in case the string ends while
 	 * in Base64 mode and we need to emit an error marker */

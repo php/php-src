@@ -848,14 +848,6 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 
-	if (ce->backed_enum_table) {
-		HashTable *ht;
-		SERIALIZE_PTR(ce->backed_enum_table);
-		ht = ce->backed_enum_table;
-		UNSERIALIZE_PTR(ht);
-		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
-	}
-
 	SERIALIZE_PTR(ce->constructor);
 	SERIALIZE_PTR(ce->destructor);
 	SERIALIZE_PTR(ce->clone);
@@ -1643,12 +1635,6 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 				p++;
 			}
 		}
-	}
-
-	if (ce->backed_enum_table) {
-		UNSERIALIZE_PTR(ce->backed_enum_table);
-		zend_file_cache_unserialize_hash(
-			ce->backed_enum_table, script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 	}
 
 	UNSERIALIZE_PTR(ce->constructor);

@@ -52,6 +52,23 @@ PHP_FUNCTION(dl_test_test2)
 }
 /* }}}*/
 
+/* {{{ PHP_DL_TEST_USE_REGISTER_FUNCTIONS_DIRECTLY */
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dl_test_use_register_functions_directly, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+PHP_FUNCTION(dl_test_use_register_functions_directly)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_STRING("OK");
+}
+
+static const zend_function_entry php_dl_test_use_register_functions_directly_functions[] = {
+	ZEND_FENTRY(dl_test_use_register_functions_directly, ZEND_FN(dl_test_use_register_functions_directly), arginfo_dl_test_use_register_functions_directly,  0)
+	ZEND_FE_END
+};
+/* }}} */
+
 /* {{{ INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("dl_test.long",      "0", PHP_INI_ALL, OnUpdateLong,       long_value,       zend_dl_test_globals, dl_test_globals)
@@ -67,6 +84,10 @@ PHP_MINIT_FUNCTION(dl_test)
 		zend_register_ini_entries(ini_entries, module_number);
 	} else {
 		REGISTER_INI_ENTRIES();
+	}
+
+	if (getenv("PHP_DL_TEST_USE_REGISTER_FUNCTIONS_DIRECTLY")) {
+		zend_register_functions(NULL, php_dl_test_use_register_functions_directly_functions, NULL, type);
 	}
 
 	return SUCCESS;

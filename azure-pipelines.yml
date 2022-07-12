@@ -51,11 +51,6 @@ jobs:
             --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
             CFLAGS='-fno-sanitize-recover'
         timeoutInMinutes: 90
-    - template: azure/coverage_job.yml
-      parameters:
-        configurationName: COVERAGE_DEBUG_ZTS
-        configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 90
     - template: azure/opcache_variation_job.yml
       parameters:
         configurationName: DEBUG_NTS_OPCACHE
@@ -66,6 +61,10 @@ jobs:
         configurationName: DEBUG_NTS_REPEAT
         configurationParameters: '--enable-debug --disable-zts'
         runTestsParameters: '--repeat 2'
+    - template: azure/libmysqlclient_job.yml
+      parameters:
+        configurationName: LIBMYSQLCLIENT_DEBUG_NTS
+        configurationParameters: '--enable-debug --disable-zts'
     - template: azure/job.yml
       parameters:
         configurationName: VARIATION_DEBUG_ZTS

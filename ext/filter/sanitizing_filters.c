@@ -46,9 +46,8 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 		s++;
 	}
 
-	smart_str_0(&str);
 	zval_ptr_dtor(value);
-	ZVAL_NEW_STR(value, str.s);
+	ZVAL_STR(value, smart_str_extract(&str));
 }
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";

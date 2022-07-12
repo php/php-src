@@ -29,6 +29,8 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
+#include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
@@ -292,7 +294,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 # endif
 #endif
 
-	register_basic_functions_consts(module_number);
+	register_basic_functions_symbols(module_number);
 
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
 	php_register_incomplete_class_handlers();
@@ -1098,7 +1100,7 @@ PHP_FUNCTION(getopt)
 
 		/* the first <len> slots are filled by the one short ops
 		 * we now extend our array and jump to the new added structs */
-		opts = (opt_struct *) erealloc(opts, sizeof(opt_struct) * (len + count + 1));
+		opts = (opt_struct *) safe_erealloc(opts, sizeof(opt_struct), (len + count + 1), 0);
 		orig_opts = opts;
 		opts += len;
 
@@ -1970,6 +1972,25 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
+/* {{{ Get interpreted size from the ini shorthand syntax */
+PHP_FUNCTION(ini_parse_quantity)
+{
+	zend_string *shorthand;
+	zend_string *errstr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(shorthand)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG(zend_ini_parse_quantity(shorthand, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+}
+/* }}} */
+
 /* {{{ Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
@@ -2505,8 +2526,9 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				break;
 			}
 
+			/* entry in the form x[a]=b where x might need to be an array index */
 			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
-				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_ulong key = (zend_ulong) ZEND_STRTOUL(Z_STRVAL_P(arg1), NULL, 0);
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_add_new(Z_ARRVAL_P(arr), key, &hash);

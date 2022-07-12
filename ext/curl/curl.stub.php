@@ -54,6 +54,10 @@ function curl_getinfo(CurlHandle $handle, ?int $option = null): mixed {}
 /** @refcount 1 */
 function curl_init(?string $url = null): CurlHandle|false {}
 
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+function curl_upkeep(CurlHandle $handle): bool {}
+#endif
+
 function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle): int {}
 
 function curl_multi_close(CurlMultiHandle $multi_handle): void {}

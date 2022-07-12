@@ -62,7 +62,7 @@ ZEND_INI_MH(OnUpdateScale)
 	int *p;
 	zend_long tmp;
 
-	tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (tmp < 0 || tmp > INT_MAX) {
 		return FAILURE;
 	}

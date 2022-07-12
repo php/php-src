@@ -109,7 +109,7 @@ void zend_startup_constants(void)
 
 void zend_register_standard_constants(void)
 {
-	register_zend_constants_consts(0);
+	register_zend_constants_symbols(0);
 
 	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_PROVIDE_OBJECT", DEBUG_BACKTRACE_PROVIDE_OBJECT, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_IGNORE_ARGS", DEBUG_BACKTRACE_IGNORE_ARGS, CONST_PERSISTENT | CONST_CS);

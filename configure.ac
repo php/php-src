@@ -395,6 +395,8 @@ fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
+linux/filter.h \
+linux/sock_diag.h \
 malloc.h \
 poll.h \
 pty.h \
@@ -687,7 +689,7 @@ if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 
-AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
+AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt reallocarray)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 PHP_CHECK_IN_ADDR_T
@@ -1614,7 +1616,7 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        php_ini_builder.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c php_odbc_utils.c \
+       network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c reallocarray.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
@@ -1639,7 +1641,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c \
+    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

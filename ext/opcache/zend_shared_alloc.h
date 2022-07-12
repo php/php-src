@@ -131,7 +131,6 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size);
 void zend_shared_alloc_shutdown(void);
 
 /* allocate shared memory block */
-void *zend_shared_alloc_pages(size_t requested_size);
 void *zend_shared_alloc(size_t size);
 
 /**

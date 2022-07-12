@@ -442,6 +442,9 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 		case CURLMOPT_MAX_PIPELINE_LENGTH:
 		case CURLMOPT_MAX_TOTAL_CONNECTIONS:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
+		case CURLMOPT_MAX_CONCURRENT_STREAMS:
+#endif
 		{
 			zend_long lval = zval_get_long(zvalue);
 

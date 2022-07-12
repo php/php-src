@@ -2598,7 +2598,7 @@ PHP_FUNCTION(array_fill)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (EXPECTED(num > 0)) {
-		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
+		if (sizeof(num) > 4 && UNEXPECTED(num > INT_MAX)) {
 			zend_argument_value_error(2, "is too large");
 			RETURN_THROWS();
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
@@ -4147,8 +4147,7 @@ PHP_FUNCTION(array_key_last)
 /* {{{ Return just the values from the input array */
 PHP_FUNCTION(array_values)
 {
-	zval	 *input,		/* Input array */
-			 *entry;		/* An entry in the input array */
+	zval	 *input;		/* Input array */
 	zend_array *arrval;
 	zend_long arrlen;
 
@@ -4170,20 +4169,7 @@ PHP_FUNCTION(array_values)
 		RETURN_COPY(input);
 	}
 
-	/* Initialize return array */
-	array_init_size(return_value, arrlen);
-	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-
-	/* Go through input array and add values to the return array */
-	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-		ZEND_HASH_FOREACH_VAL(arrval, entry) {
-			if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
-				entry = Z_REFVAL_P(entry);
-			}
-			Z_TRY_ADDREF_P(entry);
-			ZEND_HASH_FILL_ADD(entry);
-		} ZEND_HASH_FOREACH_END();
-	} ZEND_HASH_FILL_END();
+	RETURN_ARR(zend_array_to_list(arrval));
 }
 /* }}} */
 

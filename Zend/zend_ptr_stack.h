@@ -48,7 +48,7 @@ END_EXTERN_C()
 		do {												\
 			stack->max += PTR_STACK_BLOCK_SIZE;				\
 		} while (stack->top+count > stack->max);			\
-		stack->elements = (void **) perealloc(stack->elements, (sizeof(void *) * (stack->max)), stack->persistent);	\
+		stack->elements = (void **) safe_perealloc(stack->elements, sizeof(void *), (stack->max), 0, stack->persistent);	\
 		stack->top_element = stack->elements+stack->top;	\
 	}
 

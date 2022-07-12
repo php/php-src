@@ -31,6 +31,7 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
+#include "zend_attributes.h"
 #include "zend_smart_str.h"
 
 #ifdef HAVE_OCI8
@@ -384,6 +385,8 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_FO_TXNAL", OCI_FO_TXNAL, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("OCI_FO_RETRY", OCI_FO_RETRY, CONST_CS | CONST_PERSISTENT);
+
+	register_oci8_symbols(module_number);
 
 	return SUCCESS;
 }

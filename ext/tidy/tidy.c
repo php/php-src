@@ -149,8 +149,8 @@ static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
 static zval *tidy_instantiate(zend_class_entry *, zval *);
-static int tidy_doc_cast_handler(zend_object *, zval *, int);
-static int tidy_node_cast_handler(zend_object *, zval *, int);
+static zend_result tidy_doc_cast_handler(zend_object *, zval *, int);
+static zend_result tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
 static void tidy_add_node_default_properties(PHPTidyObj *);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
@@ -462,7 +462,7 @@ static zval *tidy_instantiate(zend_class_entry *pce, zval *object)
 	return object;
 }
 
-static int tidy_doc_cast_handler(zend_object *in, zval *out, int type)
+static zend_result tidy_doc_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer output;
 	PHPTidyObj *obj;
@@ -500,7 +500,7 @@ static int tidy_doc_cast_handler(zend_object *in, zval *out, int type)
 	return SUCCESS;
 }
 
-static int tidy_node_cast_handler(zend_object *in, zval *out, int type)
+static zend_result tidy_node_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer buf;
 	PHPTidyObj *obj;

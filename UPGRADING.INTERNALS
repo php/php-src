@@ -8,6 +8,8 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 
 4. OpCode changes
 
+5. SAPI changes
+
 ========================
 1. Internal API changes
 ========================
@@ -24,6 +26,26 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 * The main/php_stdint.h header has been removed.
   Include the standard <inttypes.h> and/or <stdint.h> headers instead.
   Replace usage of u_char by the standard C99 uint8_t type.
+* A new ZEND_THREEWAY_COMPARE() macro has been introduced which does a
+  three-way comparison of two integers and returns -1, 0 or 1 if the LHS is
+  smaller, equal or larger than the RHS
+* Deprecated zend_atoi() and zend_atol(). Use ZEND_STRTOL() for general purpose
+  string to long conversion, or a variant of zend_ini_parse_quantity() for
+  parsing ini quantities.
+* The return types of the following object handlers has changed from int to zend_result
+  - zend_object_cast_t
+  - zend_object_count_elements_t
+  - zend_object_get_closure_t
+  - zend_object_do_operation_t
+* Added a new zero_position argument to php_stream_fopen_from_fd_rel to reflect
+  if this a newly created file so the current file offset needs not to be checked.
+* Added smart_str_trim_to_size(). The function trims the memory allocated for the
+  string. This can considerably reduce the memory footprint of strings smaller
+  than approximately 4096 bytes.
+* smart_str_extract() and the spprintf family of functions now use
+  smart_str_trim_to_size() before returning the string.
+* It is recommended to use smart_str_extract() or smart_str_trim_to_size() when
+  using the smart_str API.
 
 ========================
 2. Build system changes
@@ -38,6 +60,11 @@ PHP 8.2 INTERNALS UPGRADE NOTES
       string_natural_case_compare_function(), and string_natural_compare_function()
       have been removed. They always returned SUCCESS and were a wrapper around
       strnatcmp_ex(). Use strnatcmp_ex() directly instead.
+    - The PHP API php_fgetcsv() now returns a HashTable* instead of having an in-out
+      zval parameter.
+      It now returns NULL on an empty line instead of [null].
+      A new function php_bc_fgetcsv_empty_line() has been added to get a HashTable* which
+      represents [null].
   b. ext/pdo
     - pdo_raise_impl_error()'s parameter sqlstate has been changed from
       const char * to pdo_error_type (aka char [6]).
@@ -53,3 +80,12 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   will produce ZEND_INIT_FCALL_BY_NAME opcodes instead which check for the
   existence of the function at runtime.
 
+========================
+5. SAPI changes
+========================
+
+ * The signature of php_module_startup() has changed from
+   int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
+   to
+   zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module)
+   as only one additional module was ever provided.

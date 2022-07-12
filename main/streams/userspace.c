@@ -42,6 +42,7 @@ struct php_user_stream_wrapper {
 };
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
+static int user_wrapper_close(php_stream_wrapper *wrapper, php_stream *stream);
 static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context);
@@ -53,7 +54,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 static const php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
-	NULL, /* close - the streams themselves know how */
+	user_wrapper_close,
 	NULL, /* stat - the streams themselves know how */
 	user_wrapper_stat_url,
 	user_wrapper_opendir,
@@ -297,8 +298,8 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 	}
 
 	if (context) {
-		add_property_resource(object, "context", context->res);
 		GC_ADDREF(context->res);
+		add_property_resource(object, "context", context->res);
 	} else {
 		add_property_null(object, "context");
 	}
@@ -375,6 +376,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 		/* set wrapper data to be a reference to our object */
 		ZVAL_COPY(&stream->wrapperdata, &us->object);
+
+		GC_ADDREF(us->wrapper->resource);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));
@@ -397,6 +400,14 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 	PG(in_user_include) = old_in_user_include;
 	return stream;
+}
+
+static int user_wrapper_close(php_stream_wrapper *wrapper, php_stream *stream)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	zend_list_delete(uwrap->resource);
+	// FIXME: Unused?
+	return 0;
 }
 
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
@@ -440,6 +451,8 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 		/* set wrapper data to be a reference to our object */
 		ZVAL_COPY(&stream->wrapperdata, &us->object);
+
+		GC_ADDREF(us->wrapper->resource);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_DIR_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));

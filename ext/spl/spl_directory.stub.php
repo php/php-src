@@ -97,7 +97,10 @@ class SplFileInfo implements Stringable
     /** @tentative-return-type */
     public function __debugInfo(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @deprecated
+     * @tentative-return-type
+     */
     final public function _bad_state_ex(): void {}
 }
 

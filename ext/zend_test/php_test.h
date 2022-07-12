@@ -53,6 +53,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int register_passes;
 	bool print_stderr_mshutdown;
 	zend_test_fiber *active_fiber;
+	zend_long quantity_value;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(zend_test)

@@ -144,17 +144,17 @@ typedef int (*zend_object_compare_t)(zval *object1, zval *object2);
 /* Cast an object to some other type.
  * readobj and retval must point to distinct zvals.
  */
-typedef int (*zend_object_cast_t)(zend_object *readobj, zval *retval, int type);
+typedef zend_result (*zend_object_cast_t)(zend_object *readobj, zval *retval, int type);
 
 /* updates *count to hold the number of elements present and returns SUCCESS.
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
-typedef int (*zend_object_count_elements_t)(zend_object *object, zend_long *count);
+typedef zend_result (*zend_object_count_elements_t)(zend_object *object, zend_long *count);
 
-typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
+typedef zend_result (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 
 typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, int *n);
 
-typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
+typedef zend_result (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
 
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */
@@ -209,7 +209,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
 ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
-ZEND_API int zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
+ZEND_API zend_result zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
 ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
 ZEND_API zval *zend_std_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 ZEND_API zval *zend_std_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
@@ -222,7 +222,7 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset);
 ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key);
 ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj);
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
+ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);

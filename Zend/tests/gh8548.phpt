@@ -11,19 +11,35 @@ class Wrapper
     {
         return true;
     }
+
+    public function stream_eof(): bool
+    {
+        return true;
+    }
 }
 
 function test() {
     if (!stream_wrapper_register('foo', \Wrapper::class)) {
         throw new \Exception('Could not register stream wrapper');
     }
+
+    $file = fopen('foo://bar', 'r');
+
     if (!stream_wrapper_unregister('foo')) {
         throw new \Exception('Could not unregister stream wrapper');
     }
+
+    $wrapper = stream_get_meta_data($file)['wrapper_data'];
+    if (!$wrapper instanceof Wrapper) {
+        throw new \Exception('Wrapper is not of expected type');
+    }
+
+    fclose($file);
+    unset($file);
 }
 
 // The first iterations will allocate space for things like the resource list
-for ($i = 0; $i < 5; $i++) {
+for ($i = 0; $i < 10; $i++) {
     test();
 }
 

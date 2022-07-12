@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8b5131fd7bd88d1ec0211bcfcb5a4854418aa3c8 */
+ * Stub hash: 0d28e37a0608d601bc1a79425870cff849dadc0f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -209,6 +209,40 @@ static const zend_function_entry class_HashContext_methods[] = {
 	ZEND_ME(HashContext, __unserialize, arginfo_class_HashContext___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_hash_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("HASH_HMAC", PHP_HASH_HMAC, CONST_CS | CONST_PERSISTENT);
+
+
+	zend_string *attribute_name_SensitiveParameter_hash_hmac_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_hmac", sizeof("hash_hmac") - 1), 2, attribute_name_SensitiveParameter_hash_hmac_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_hash_hmac_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_hash_hmac_file_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_hmac_file", sizeof("hash_hmac_file") - 1), 2, attribute_name_SensitiveParameter_hash_hmac_file_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_hash_hmac_file_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_hash_init_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_init", sizeof("hash_init") - 1), 2, attribute_name_SensitiveParameter_hash_init_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_hash_init_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_hash_pbkdf2_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_pbkdf2", sizeof("hash_pbkdf2") - 1), 1, attribute_name_SensitiveParameter_hash_pbkdf2_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_hash_pbkdf2_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_hash_equals_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_equals", sizeof("hash_equals") - 1), 0, attribute_name_SensitiveParameter_hash_equals_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_hash_equals_arg0);
+
+	zend_string *attribute_name_SensitiveParameter_hash_equals_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_equals", sizeof("hash_equals") - 1), 1, attribute_name_SensitiveParameter_hash_equals_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_hash_equals_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_hash_hkdf_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_hkdf", sizeof("hash_hkdf") - 1), 1, attribute_name_SensitiveParameter_hash_hkdf_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_hash_hkdf_arg1);
+}
 
 static zend_class_entry *register_class_HashContext(void)
 {

@@ -1105,9 +1105,9 @@ int php_oci_bind_post_exec(zval *data)
 	} else if ((Z_TYPE_P(zv) == IS_TRUE) || (Z_TYPE_P(zv) == IS_FALSE)) {
 		/* This convetrsion is done on purpose (ext/oci8 uses LVAL as a temporary value) */
 		if (Z_LVAL_P(zv) == 0)
-			ZVAL_BOOL(zv, FALSE);
+			ZVAL_FALSE(zv);
 		else if (Z_LVAL_P(zv) == 1)
-			ZVAL_BOOL(zv, TRUE);
+			ZVAL_TRUE(zv);
 	}
 
 	return 0;

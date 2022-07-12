@@ -294,37 +294,41 @@ function oci_close($connection): ?bool {}
  */
 function ocilogoff($connection): ?bool {}
 
-/** @return resource|false */
-function oci_new_connect(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+/**
+ * @return resource|false
+ */
+function oci_new_connect(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_new_connect
  * @deprecated
  */
-function ocinlogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function ocinlogon(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  */
-function oci_connect(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function oci_connect(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_connect
  * @deprecated
  */
-function ocilogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function ocilogon(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
-/** @return resource|false */
-function oci_pconnect(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+/**
+ * @return resource|false
+ */
+function oci_pconnect(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @return resource|false
  * @alias oci_pconnect
  * @deprecated
  */
-function ociplogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function ociplogon(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @param resource|null $connection_or_statement
@@ -550,6 +554,7 @@ function oci_register_taf_callback($connection, ?callable $callback): bool {}
 /** @param resource $connection */
 function oci_unregister_taf_callback($connection): bool {}
 
+#[\AllowDynamicProperties]
 class OCILob {
     /**
      * @alias oci_lob_save
@@ -678,6 +683,7 @@ class OCILob {
     public function free(): bool {}
 }
 
+#[\AllowDynamicProperties]
 class OCICollection {
     /**
      * @alias oci_free_collection

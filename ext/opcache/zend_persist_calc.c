@@ -187,6 +187,10 @@ static void zend_persist_type_calc(zend_type *type)
 
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(*type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			zend_persist_type_calc(single_type);
+			continue;
+		}
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *type_name = ZEND_TYPE_NAME(*single_type);
 			ADD_INTERNED_STRING(type_name);
@@ -545,27 +549,6 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 					i++;
 				}
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
-			}
-		}
-
-		if (ce->backed_enum_table) {
-			ADD_SIZE(sizeof(HashTable));
-			zend_hash_persist_calc(ce->backed_enum_table);
-			if (HT_IS_PACKED(ce->backed_enum_table)) {
-				zval *zv;
-
-				ZEND_HASH_PACKED_FOREACH_VAL(ce->backed_enum_table, zv) {
-					zend_persist_zval_calc(zv);
-				} ZEND_HASH_FOREACH_END();
-			} else {
-				Bucket *p;
-
-				ZEND_HASH_MAP_FOREACH_BUCKET(ce->backed_enum_table, p) {
-					if (p->key != NULL) {
-						ADD_INTERNED_STRING(p->key);
-					}
-					zend_persist_zval_calc(&p->val);
-				} ZEND_HASH_FOREACH_END();
 			}
 		}
 	}

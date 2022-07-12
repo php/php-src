@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4191864554b030bea40306c0d30090a8e2c76ab2 */
+ * Stub hash: 9daec020902840b7f678d787e61e91f7e16ad4da */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -568,7 +568,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionEnum_isBacked arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-#define arginfo_class_ReflectionEnum_getBackingType arginfo_class_ReflectionFunctionAbstract_getTentativeReturnType
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionEnum_getBackingType, 0, 0, ReflectionNamedType, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionEnumUnitCase___construct arginfo_class_ReflectionClassConstant___construct
 

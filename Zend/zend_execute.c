@@ -229,6 +229,15 @@ ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute
 	return EX_VAR(var);
 }
 
+ZEND_API bool zend_gcc_global_regs(void)
+{
+  #if defined(HAVE_GCC_GLOBAL_REGS)
+        return 1;
+  #else
+        return 0;
+  #endif
+}
+
 static zend_always_inline zval *_get_zval_ptr_tmp(uint32_t var EXECUTE_DATA_DC)
 {
 	zval *ret = EX_VAR(var);
@@ -844,6 +853,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(zend_property_info *info)
+{
+	zend_throw_error(NULL, "Cannot indirectly modify readonly property %s::$%s",
+		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
+}
+
 static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return self_ce;
@@ -868,20 +883,38 @@ static zend_always_inline zend_class_entry *zend_ce_from_type(
 	return resolve_single_class_type(name, info->ce);
 }
 
+static bool zend_check_intersection_for_property_class_type(zend_type_list *intersection_type_list,
+	zend_property_info *info, zend_class_entry *object_ce)
+{
+	zend_type *list_type;
+
+	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
+		ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+		zend_class_entry *ce = zend_ce_from_type(info, list_type);
+		if (!ce || !instanceof_function(object_ce, ce)) {
+			return false;
+		}
+	} ZEND_TYPE_LIST_FOREACH_END();
+	return true;
+}
+
 static bool zend_check_and_resolve_property_class_type(
 		zend_property_info *info, zend_class_entry *object_ce) {
 	if (ZEND_TYPE_HAS_LIST(info->type)) {
 		zend_type *list_type;
 		if (ZEND_TYPE_IS_INTERSECTION(info->type)) {
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
-				zend_class_entry *ce = zend_ce_from_type(info, list_type);
-				if (!ce || !instanceof_function(object_ce, ce)) {
-					return false;
-				}
-			} ZEND_TYPE_LIST_FOREACH_END();
-			return true;
+			return zend_check_intersection_for_property_class_type(
+				ZEND_TYPE_LIST(info->type), info, object_ce);
 		} else {
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
+				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+					if (zend_check_intersection_for_property_class_type(
+							ZEND_TYPE_LIST(*list_type), info, object_ce)) {
+						return true;
+                    }
+					continue;
+				}
+				ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
 				zend_class_entry *ce = zend_ce_from_type(info, list_type);
 				if (ce && instanceof_function(object_ce, ce)) {
 					return true;
@@ -909,9 +942,6 @@ static zend_always_inline bool i_zend_check_property_type(zend_property_info *in
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(info->type);
 	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
-	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(property)) {
-		return 1;
-	}
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
@@ -1000,6 +1030,22 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 	return ce;
 }
 
+static bool zend_check_intersection_type_from_cache_slot(zend_type_list *intersection_type_list,
+	zend_class_entry *arg_ce, void **cache_slot)
+{
+	zend_class_entry *ce;
+	zend_type *list_type;
+	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
+		ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
+		/* If type is not an instance of one of the types taking part in the
+		 * intersection it cannot be a valid instance of the whole intersection type. */
+		if (!ce || !instanceof_function(arg_ce, ce)) {
+			return false;
+		}
+	} ZEND_TYPE_LIST_FOREACH_END();
+	return true;
+}
+
 static zend_always_inline bool zend_check_type_slow(
 		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot,
 		bool is_return_type, bool is_internal)
@@ -1024,11 +1070,19 @@ static zend_always_inline bool zend_check_type_slow(
 				return true;
 			} else {
 				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-					ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-					/* Instance of a single type part of a union is sufficient to pass the type check */
-					if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
-						return true;
+					if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+						if (zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*list_type), Z_OBJCE_P(arg), cache_slot)) {
+							return true;
+						}
+					} else {
+						ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+						ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
+						/* Instance of a single type part of a union is sufficient to pass the type check */
+						if (ce && instanceof_function(Z_OBJCE_P(arg), ce)) {
+							return true;
+						}
 					}
+
 					if (HAVE_CACHE_SLOT) {
 						cache_slot++;
 					}
@@ -1046,9 +1100,6 @@ static zend_always_inline bool zend_check_type_slow(
 
 	type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
-		return 1;
-	}
-	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
@@ -2929,7 +2980,7 @@ static zend_always_inline bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
-	return (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) != 0;
+	return (ZEND_TYPE_FULL_MASK(type) & MAY_BE_ARRAY) != 0;
 }
 
 /* Checks whether an array can be assigned to the reference. Throws error if not assignable. */
@@ -3378,9 +3429,6 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 
 	type_mask = ZEND_TYPE_FULL_MASK(type);
 	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
-	if (type_mask & MAY_BE_ITERABLE) {
-		return zend_is_iterable(zv);
-	}
 
 	/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
 	if (strict) {
@@ -3726,13 +3774,13 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 /* }}} */
 
 #define ZEND_VM_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(EG(vm_interrupt))) { \
+		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
 			ZEND_VM_INTERRUPT(); \
 		} \
 	} while (0)
 
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(EG(vm_interrupt))) { \
+		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
 			ZEND_VM_LOOP_INTERRUPT(); \
 		} \
 	} while (0)
