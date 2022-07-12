@@ -3769,12 +3769,16 @@ function parseStubFile(string $code): FileInfo {
     return $fileInfo;
 }
 
-function funcInfoToCode(FuncInfo $funcInfo): string {
+function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
     $code = '';
     $returnType = $funcInfo->return->type;
     $isTentativeReturnType = $funcInfo->return->tentativeReturnType;
+    $php81MinimumCompatibility = $fileInfo->generateLegacyArginfoForPhpVersionId === null || $fileInfo->generateLegacyArginfoForPhpVersionId >= PHP_81_VERSION_ID;
 
     if ($returnType !== null) {
+        if ($isTentativeReturnType && !$php81MinimumCompatibility) {
+            $code .= "#if (PHP_VERSION_ID >= " . PHP_81_VERSION_ID . ")\n";
+        }
         if (null !== $simpleReturnType = $returnType->tryToSimpleType()) {
             if ($simpleReturnType->isBuiltin) {
                 $code .= sprintf(
@@ -3812,6 +3816,12 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                     $arginfoType->toTypeMask()
                 );
             }
+        }
+        if ($isTentativeReturnType && !$php81MinimumCompatibility) {
+            $code .= sprintf(
+                "#else\nZEND_BEGIN_ARG_INFO_EX(%s, 0, %d, %d)\n#endif\n",
+                $funcInfo->getArgInfoName(), $funcInfo->return->byRef, $funcInfo->numRequiredArgs
+            );
         }
     } else {
         $code .= sprintf(
@@ -3925,7 +3935,7 @@ function generateArgInfoCode(
     $generatedFuncInfos = [];
     $code .= generateCodeWithConditions(
         $fileInfo->getAllFuncInfos(), "\n",
-        static function (FuncInfo $funcInfo) use (&$generatedFuncInfos) {
+        static function (FuncInfo $funcInfo) use (&$generatedFuncInfos, $fileInfo) {
             /* If there already is an equivalent arginfo structure, only emit a #define */
             if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
                 $code = sprintf(
@@ -3933,7 +3943,7 @@ function generateArgInfoCode(
                     $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
                 );
             } else {
-                $code = funcInfoToCode($funcInfo);
+                $code = funcInfoToCode($fileInfo, $funcInfo);
             }
 
             $generatedFuncInfos[] = $funcInfo;
