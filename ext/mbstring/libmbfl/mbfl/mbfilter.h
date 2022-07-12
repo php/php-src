@@ -288,10 +288,4 @@ mbfl_mime_header_decode(
     mbfl_string *result,
     const mbfl_encoding *outcode);
 
-/*
- * convert of halfwidth and fullwidth for japanese
- */
-MBFLAPI extern mbfl_string *
-mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, int mode);
-
 #endif	/* MBFL_MBFILTER_H */
