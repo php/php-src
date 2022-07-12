@@ -224,7 +224,7 @@ static PHP_INI_MH(OnUpdate_date_timezone);
 
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdate_date_timezone, default_timezone, zend_date_globals, date_globals)
+	STD_PHP_INI_ENTRY("date.timezone", "UTC", PHP_INI_ALL, OnUpdate_date_timezone, default_timezone, zend_date_globals, date_globals)
 	PHP_INI_ENTRY("date.default_latitude",           DATE_DEFAULT_LATITUDE,        PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("date.default_longitude",          DATE_DEFAULT_LONGITUDE,       PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("date.sunset_zenith",              DATE_SUNSET_ZENITH,           PHP_INI_ALL, NULL)
@@ -342,7 +342,6 @@ static PHP_GINIT_FUNCTION(date)
 	date_globals->default_timezone = NULL;
 	date_globals->timezone = NULL;
 	date_globals->tzcache = NULL;
-	date_globals->timezone_valid = 0;
 }
 /* }}} */
 
@@ -402,8 +401,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
 PHP_MINIT_FUNCTION(date)
 {
 	REGISTER_INI_ENTRIES();
-	register_php_date_consts(module_number);
 	date_register_classes();
+	register_php_date_symbols(module_number);
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
@@ -478,19 +477,18 @@ timelib_tzinfo *php_date_parse_tzfile_wrapper(const char *formal_tzname, const t
 /* {{{ static PHP_INI_MH(OnUpdate_date_timezone) */
 static PHP_INI_MH(OnUpdate_date_timezone)
 {
-	if (OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage) == FAILURE) {
+	if (new_value && !timelib_timezone_id_is_valid(ZSTR_VAL(new_value), DATE_TIMEZONEDB)) {
+		php_error_docref(
+			NULL, E_WARNING,
+			"Invalid date.timezone value '%s', using '%s' instead",
+			ZSTR_VAL(new_value),
+			DATEG(default_timezone) ? DATEG(default_timezone) : "UTC"
+		);
 		return FAILURE;
 	}
 
-	DATEG(timezone_valid) = 0;
-	if (stage == PHP_INI_STAGE_RUNTIME) {
-		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), DATE_TIMEZONEDB)) {
-			if (DATEG(default_timezone) && *DATEG(default_timezone)) {
-				php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
-			}
-		} else {
-			DATEG(timezone_valid) = 1;
-		}
+	if (OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage) == FAILURE) {
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -500,7 +498,7 @@ static PHP_INI_MH(OnUpdate_date_timezone)
 /* {{{ Helper functions */
 static char* guess_timezone(const timelib_tzdb *tzdb)
 {
-	/* Checking configure timezone */
+	/* Checking whether timezone has been set with date_default_timezone_set() */
 	if (DATEG(timezone) && (strlen(DATEG(timezone))) > 0) {
 		return DATEG(timezone);
 	}
@@ -514,16 +512,6 @@ static char* guess_timezone(const timelib_tzdb *tzdb)
 			return Z_STRVAL_P(ztz);
 		}
 	} else if (*DATEG(default_timezone)) {
-		if (DATEG(timezone_valid) == 1) {
-			return DATEG(default_timezone);
-		}
-
-		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
-			php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
-			return "UTC";
-		}
-
-		DATEG(timezone_valid) = 1;
 		return DATEG(default_timezone);
 	}
 	/* Fallback to UTC */
@@ -4534,6 +4522,20 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 		dpobj->start_ce = date_ce_date;
 	} else {
+		/* Sanity checks */
+		if (start && Z_OBJCE_P(start) != date_ce_date && Z_OBJCE_P(start) != date_ce_immutable) {
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(zend_ce_exception, "%s(): Class of start date must be exactly DateTime or DateTimeImmutable, object of class %s provided", ZSTR_VAL(func), ZSTR_VAL(Z_OBJCE_P(start)->name));
+			zend_string_release(func);
+			RETURN_THROWS();
+		}
+		if (end && Z_OBJCE_P(end) != date_ce_date && Z_OBJCE_P(end) != date_ce_immutable) {
+			zend_string *func = get_active_function_or_method_name();
+			zend_throw_error(zend_ce_exception, "%s(): Class of end date must be exactly DateTime or DateTimeImmutable, object of class %s provided", ZSTR_VAL(func), ZSTR_VAL(Z_OBJCE_P(end)->name));
+			zend_string_release(func);
+			RETURN_THROWS();
+		}
+
 		/* init */
 		php_interval_obj *intobj = Z_PHPINTERVAL_P(interval);
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d10dbdfd55eb4a4dc779cbf4fa000cdf4fb3539 */
+ * Stub hash: 396898ebbc520f48eb80a111e19fecf6d07ce241 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -102,6 +102,11 @@ static zend_class_entry *register_class_PDO(void)
 	INIT_CLASS_ENTRY(ce, "PDO", class_PDO_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+
+	zend_string *attribute_name_SensitiveParameter_PDO___construct_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, attribute_name_SensitiveParameter_PDO___construct_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_PDO___construct_arg2);
 
 	return class_entry;
 }

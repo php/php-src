@@ -144,7 +144,8 @@ typedef struct {
 #define _ZEND_TYPE_NAME_BIT (1u << 24)
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT)
-/* TODO: bit 21 is not used */
+/* For BC behaviour with iterable type */
+#define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
 /* Whether the type list is an intersection type */
@@ -169,6 +170,9 @@ typedef struct {
 
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
+
+#define ZEND_TYPE_IS_ITERABLE_FALLBACK(t) \
+	((((t).type_mask) & _ZEND_TYPE_ITERABLE_BIT) != 0)
 
 #define ZEND_TYPE_IS_INTERSECTION(t) \
 	((((t).type_mask) & _ZEND_TYPE_INTERSECTION_BIT) != 0)
@@ -263,7 +267,7 @@ typedef struct {
 	{ NULL, (_type_mask) }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code)))) \
+	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ( (code) == IS_ITERABLE ? _ZEND_TYPE_ITERABLE_BIT : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code))))) \
 		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \

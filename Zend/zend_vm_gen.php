@@ -43,7 +43,7 @@ const HEADER_TEXT = <<< DATA
 DATA;
 
 /*
-    This script creates zend_vm_execute.h and zend_vm_opcodes.h
+    This script creates zend_vm_execute.h and zend_vm_opcodes.{h,c}
     from existing zend_vm_def.h and zend_vm_execute.skl
 */
 

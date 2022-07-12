@@ -8,7 +8,7 @@ $data = "Testing openssl_sign()";
 $privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
 $wrong = "wrong";
 
-var_dump(openssl_sign($data, $sign, $privkey));                 // no output
+var_dump(openssl_sign($data, $sign, $privkey, OPENSSL_ALGO_SHA256));                 // no output
 var_dump(openssl_sign($data, $sign, $wrong));
 ?>
 --EXPECTF--

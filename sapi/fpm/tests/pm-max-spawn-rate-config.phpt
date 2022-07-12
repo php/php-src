@@ -24,8 +24,8 @@ pm.max_spawn_rate = 64
 EOT;
 
 $tester = new FPM\Tester($cfg);
-$tester->start(['-t', '-t']);
-$tester->expectLogConfigOptions(['pm.max_spawn_rate' => 64]);
+$tester->start(['-tt']);
+$tester->expectLogConfigOptions(['pm.max_spawn_rate = 64']);
 $tester->close();
 
 ?>

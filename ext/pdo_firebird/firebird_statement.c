@@ -204,6 +204,9 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	int colname_len;
 	char *cp;
 
+	if ((var->sqltype & ~1) == SQL_TEXT) {
+		var->sqltype = SQL_VARYING | (var->sqltype & 1);
+	}
 	colname_len = (S->H->fetch_table_names && var->relname_length)
 					? (var->aliasname_length + var->relname_length + 1)
 					: (var->aliasname_length);
@@ -305,7 +308,15 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, ISC_QU
 		zend_ulong cur_len;
 		unsigned short seg_len;
 		ISC_STATUS stat;
-		zend_string *str = zend_string_alloc(len, 0);
+		zend_string *str;
+
+		/* prevent overflow */
+		if (len > ZSTR_MAX_LEN) {
+			result = 0;
+			goto fetch_blob_end;
+		}
+
+		str = zend_string_alloc(len, 0);
 
 		for (cur_len = stat = 0; (!stat || stat == isc_segment) && cur_len < len; cur_len += seg_len) {
 

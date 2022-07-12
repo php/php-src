@@ -2891,8 +2891,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 
 	if (result.s) {
 		smart_str_appendl(&result, str + old_pos, slen - old_pos);
-		smart_str_0(&result);
-		RETVAL_NEW_STR(result.s);
+		RETVAL_STR(smart_str_extract(&result));
 	} else {
 		smart_str_free(&result);
 		RETVAL_STR_COPY(input);
@@ -5253,7 +5252,11 @@ PHP_FUNCTION(str_getcsv)
 		esc = esc_len ? (unsigned char) esc_str[0] : PHP_CSV_NO_ESCAPE;
 	}
 
-	php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str), return_value);
+	HashTable *values = php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str));
+	if (values == NULL) {
+		values = php_bc_fgetcsv_empty_line();
+	}
+	RETURN_ARR(values);
 }
 /* }}} */
 
@@ -5882,7 +5885,11 @@ PHP_FUNCTION(str_split)
 		RETURN_THROWS();
 	}
 
-	if (0 == ZSTR_LEN(str) || (size_t)split_length >= ZSTR_LEN(str)) {
+	if ((size_t)split_length >= ZSTR_LEN(str)) {
+		if (0 == ZSTR_LEN(str)) {
+			RETURN_EMPTY_ARRAY();
+		}
+
 		array_init_size(return_value, 1);
 		add_next_index_stringl(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 		return;

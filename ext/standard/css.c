@@ -38,13 +38,17 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS(".v i {color: #999;}\n");
 	PUTS("img {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
-	PUTS("@media (prefers-color-scheme: dark) {\n");
-	PUTS("  body {background-color: #333; color: #ddd;}\n");
-	PUTS("  td, th {border-color: #777;}\n");
-	PUTS("  .e {background-color: #4F5B93;}\n");
-	PUTS("  .h {background-color: #5b69a6;}\n");
-	PUTS("  .v {background-color: #444;}\n");
-	PUTS("  hr {background-color: #777;}\n");
-	PUTS("}\n");
+	PUTS(":root {--php-dark-grey: #333; --php-dark-blue: #4F5B93; --php-medium-blue: #8892BF; --php-light-blue: #E2E4EF; --php-accent-purple: #793862}");
+	PUTS(
+		"@media (prefers-color-scheme: dark) {\n"
+		"  body {background: var(--php-dark-grey); color: var(--php-light-blue)}\n"
+		"  .h td, td.e, th {border-color: #606A90}\n"
+		"  td {border-color: #505153}\n"
+		"  .e {background-color: #404A77}\n"
+		"  .h {background-color: var(--php-dark-blue)}\n"
+		"  .v {background-color: var(--php-dark-grey)}\n"
+		"  hr {background-color: #505153}\n"
+		"}\n"
+	);
 }
 /* }}} */

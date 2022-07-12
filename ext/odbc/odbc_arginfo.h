@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 298e48377c2d18c532d91a9ed97886b49a64c096 */
+ * Stub hash: 35ace4a5907342f2f2c6960cc27e119d7e5fb8f3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -391,3 +391,15 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_connection_string_quote, arginfo_odbc_connection_string_quote)
 	ZEND_FE_END
 };
+
+static void register_odbc_symbols(int module_number)
+{
+
+	zend_string *attribute_name_SensitiveParameter_odbc_connect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_connect", sizeof("odbc_connect") - 1), 2, attribute_name_SensitiveParameter_odbc_connect_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_odbc_connect_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_odbc_pconnect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_pconnect", sizeof("odbc_pconnect") - 1), 2, attribute_name_SensitiveParameter_odbc_pconnect_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_odbc_pconnect_arg2);
+}

@@ -5,6 +5,9 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#if defined(__FreeBSD__)
+#include <sys/sysctl.h>
+#endif
 #include <sys/un.h>
 #include <unistd.h>
 #include <fcntl.h>

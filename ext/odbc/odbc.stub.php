@@ -69,11 +69,15 @@ function odbc_result_all($statement, string $format = ""): int|false {}
 /** @param resource $statement */
 function odbc_free_result($statement): bool {}
 
-/** @return resource|false */
-function odbc_connect(string $dsn, string $user, string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
+/**
+ * @return resource|false
+ */
+function odbc_connect(string $dsn, string $user, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
 
-/** @return resource|false */
-function odbc_pconnect(string $dsn, string $user, string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
+/**
+ * @return resource|false
+ */
+function odbc_pconnect(string $dsn, string $user, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
 
 /** @param resource $odbc */
 function odbc_close($odbc): void {}

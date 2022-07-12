@@ -238,12 +238,6 @@ PHP_FUNCTION(http_build_query)
 
 	php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type);
 
-	if (!formstr.s) {
-		RETURN_EMPTY_STRING();
-	}
-
-	smart_str_0(&formstr);
-
-	RETURN_NEW_STR(formstr.s);
+	RETURN_STR(smart_str_extract(&formstr));
 }
 /* }}} */

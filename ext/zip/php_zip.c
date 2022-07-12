@@ -26,6 +26,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_filestat.h"
+#include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "php_zip.h"
 #include "php_zip_arginfo.h"
@@ -1570,6 +1571,9 @@ PHP_METHOD(ZipArchive, close)
 		ze_obj->err_zip = 0;
 		ze_obj->err_sys = 0;
 	}
+
+	/* clear cache as empty zip are not created but deleted */
+	php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);
 
 	efree(ze_obj->filename);
 	ze_obj->filename = NULL;

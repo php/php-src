@@ -5,7 +5,7 @@
 /** @not-serializable */
 class PDO
 {
-    public function __construct(string $dsn, ?string $username = null, ?string $password = null, ?array $options = null) {}
+    public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}
 
     /** @tentative-return-type */
     public function beginTransaction(): bool {}

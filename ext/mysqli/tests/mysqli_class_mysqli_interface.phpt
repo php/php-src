@@ -29,6 +29,7 @@ require_once('skipifconnectfailure.inc');
         'connect'				=> true,
         'dump_debug_info'		=> true,
         'escape_string'			=> true,
+        'execute_query'			=> true,
         'get_charset'			=> true,
         'get_client_info'		=> true,
         'get_server_info'		=> true,

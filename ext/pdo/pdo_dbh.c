@@ -28,6 +28,7 @@
 #include "php_pdo.h"
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
@@ -1325,7 +1326,7 @@ static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 static zend_object_handlers pdo_dbh_object_handlers;
 static void pdo_dbh_free_storage(zend_object *std);
 
-void pdo_dbh_init(void)
+void pdo_dbh_init(int module_number)
 {
 	pdo_dbh_ce = register_class_PDO();
 	pdo_dbh_ce->create_object = pdo_dbh_new;

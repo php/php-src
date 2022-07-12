@@ -456,6 +456,12 @@ extern "C++" {
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
+/**
+ * Do a three-way comparison of two integers and returns -1, 0 or 1
+ * depending on whether #a is smaller, equal or larger than #b.
+ */
+#define ZEND_THREEWAY_COMPARE(a, b) ((a) == (b) ? 0 : ((a) < (b) ? -1 : 1))
+
 #define ZEND_MAX_RESERVED_RESOURCES	6
 
 /* excpt.h on Digital Unix 4.0 defines function_table */

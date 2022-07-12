@@ -1448,9 +1448,10 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				}
 
 				switch (intern->type) {
-					case SPL_FS_DIR:
-						test = spl_filesystem_object_get_path(intern, NULL);
-						fname_len = spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+					case SPL_FS_DIR: {
+						zend_string *test_str = spl_filesystem_object_get_path(intern);
+						fname_len = spprintf(&fname, 0, "%s%c%s", ZSTR_VAL(test_str), DEFAULT_SLASH, intern->u.dir.entry.d_name);
+						zend_string_release_ex(test_str, /* persistent */ false);
 						if (php_stream_stat_path(fname, &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
 							/* ignore directories */
 							efree(fname);
@@ -1470,6 +1471,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 						save = fname;
 						goto phar_spl_fileinfo;
+					}
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
 						fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);

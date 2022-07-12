@@ -48,7 +48,8 @@ PHPAPI void php_flock_common(php_stream *stream, zend_long operation, uint32_t o
 	zval *wouldblock, zval *return_value);
 
 #define PHP_CSV_NO_ESCAPE EOF
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value);
+PHPAPI HashTable *php_bc_fgetcsv_empty_line(void);
+PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf);
 PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str);
 
 #define META_DEF_BUFSIZE 8192

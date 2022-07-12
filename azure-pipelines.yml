@@ -51,11 +51,6 @@ jobs:
             --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
             CFLAGS='-fno-sanitize-recover'
         timeoutInMinutes: 90
-    - template: azure/coverage_job.yml
-      parameters:
-        configurationName: COVERAGE_DEBUG_ZTS
-        configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 90
     - template: azure/opcache_variation_job.yml
       parameters:
         configurationName: DEBUG_NTS_OPCACHE

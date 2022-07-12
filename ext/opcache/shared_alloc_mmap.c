@@ -33,11 +33,65 @@
 #include <mach/vm_statistics.h>
 #endif
 
+#include "zend_execute.h"
+
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
 #endif
 #if defined(MAP_ALIGNED_SUPER)
 # define MAP_HUGETLB MAP_ALIGNED_SUPER
+#endif
+
+#if defined(__linux__) && (defined(__x86_64__) || defined (__aarch64__))
+static void *find_prefered_mmap_base(size_t requested_size)
+{
+	FILE *f;
+	size_t huge_page_size = 2 * 1024 * 1024;
+	uintptr_t last_free_addr = 0;
+	uintptr_t last_candidate = (uintptr_t)MAP_FAILED;
+	uintptr_t start, end, text_start = 0;
+	char buffer[MAXPATHLEN];
+
+	f = fopen("/proc/self/maps", "r");
+	if (!f) {
+		return MAP_FAILED;
+	}
+
+	while (fgets(buffer, MAXPATHLEN, f) && sscanf(buffer, "%lx-%lx", &start, &end) == 2) {
+		if ((uintptr_t)execute_ex >= start) {
+			/* the current segment lays before PHP .text segment or PHP .text segment itself */
+			if (last_free_addr + requested_size <= start) {
+				last_candidate = last_free_addr;
+			}
+			if ((uintptr_t)execute_ex < end) {
+				/* the current segment is PHP .text segment itself */
+				if (last_candidate != (uintptr_t)MAP_FAILED) {
+					if (end - last_candidate < UINT32_MAX) {
+						/* we have found a big enough hole before the text segment */
+						break;
+					}
+					last_candidate = (uintptr_t)MAP_FAILED;
+				}
+				text_start = start;
+			}
+		} else {
+			/* the current segment lays after PHP .text segment */
+			if (last_free_addr + requested_size - text_start > UINT32_MAX) {
+				/* the current segment and the following segments lay too far from PHP .text segment */
+				break;
+			}
+			if (last_free_addr + requested_size <= start) {
+				last_candidate = last_free_addr;
+				break;
+			}
+		}
+		last_free_addr = ZEND_MM_ALIGNED_SIZE_EX(end, huge_page_size);
+
+	}
+	fclose(f);
+
+	return (void*)last_candidate;
+}
 #endif
 
 static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
@@ -54,6 +108,24 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #endif
 #ifdef PROT_MAX
 	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
+#endif
+#if defined(__linux__) && (defined(__x86_64__) || defined (__aarch64__))
+	void *hint = find_prefered_mmap_base(requested_size);
+	if (hint != MAP_FAILED) {
+# ifdef MAP_HUGETLB
+		size_t huge_page_size = 2 * 1024 * 1024;
+		if (requested_size >= huge_page_size && requested_size % huge_page_size == 0) {
+			p = mmap(hint, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB|MAP_FIXED, -1, 0);
+			if (p != MAP_FAILED) {
+				goto success;
+			}
+		}
+#endif
+		p = mmap(hint, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+		if (p != MAP_FAILED) {
+			goto success;
+		}
+	}
 #endif
 #ifdef MAP_HUGETLB
 	size_t huge_page_size = 2 * 1024 * 1024;

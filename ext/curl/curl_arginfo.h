@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3abf3f6d5dfb14d2e22ebf5730a869e2c17c7958 */
+ * Stub hash: 1bd8a84a4aa80912463ea76d08f64d3c2cf4c0db */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -48,6 +48,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_curl_init, 0, 0, CurlHandle, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, url, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_upkeep, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_add_handle, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
@@ -144,6 +150,9 @@ ZEND_FUNCTION(curl_exec);
 ZEND_FUNCTION(curl_file_create);
 ZEND_FUNCTION(curl_getinfo);
 ZEND_FUNCTION(curl_init);
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_FUNCTION(curl_upkeep);
+#endif
 ZEND_FUNCTION(curl_multi_add_handle);
 ZEND_FUNCTION(curl_multi_close);
 ZEND_FUNCTION(curl_multi_errno);
@@ -179,6 +188,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_file_create, arginfo_curl_file_create)
 	ZEND_FE(curl_getinfo, arginfo_curl_getinfo)
 	ZEND_FE(curl_init, arginfo_curl_init)
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+	ZEND_FE(curl_upkeep, arginfo_curl_upkeep)
+#endif
 	ZEND_FE(curl_multi_add_handle, arginfo_curl_multi_add_handle)
 	ZEND_FE(curl_multi_close, arginfo_curl_multi_close)
 	ZEND_FE(curl_multi_errno, arginfo_curl_multi_errno)

@@ -1,0 +1,2 @@
+# Collapse generated files within a pull request.
+/tokenizer_data.c linguist-generated

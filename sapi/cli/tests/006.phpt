@@ -11,7 +11,7 @@ if (PCRE_JIT_SUPPORT == false) {
 }
 ?>
 --INI--
-date.timezone=
+date.timezone=UTC
 --FILE--
 <?php
 

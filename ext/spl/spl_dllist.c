@@ -409,7 +409,7 @@ static zend_object *spl_dllist_object_clone(zend_object *old_object) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
+static zend_result spl_dllist_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
 	spl_dllist_object *intern = spl_dllist_from_obj(object);
 
@@ -1032,12 +1032,10 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 		current = next;
 	}
 
-	smart_str_0(&buf);
-
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	RETURN_NEW_STR(buf.s);
+	RETURN_STR(smart_str_extract(&buf));
 } /* }}} */
 
 /* {{{ Unserializes storage */

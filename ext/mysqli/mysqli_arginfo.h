@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a2f2992afd959a13215bfdfd00096f368b3bc392 */
+ * Stub hash: 9db7bea22e25a7f3d70a556f0945c74511866de2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -27,7 +27,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_character_set_name, 0, 1,
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_close, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_close, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
 ZEND_END_ARG_INFO()
 
@@ -53,9 +53,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_data_seek, 0, 2, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_dump_debug_info arginfo_mysqli_close
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_dump_debug_info, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_debug, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_debug, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -75,6 +77,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_execute, 0, 1, _IS_B
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_execute arginfo_mysqli_stmt_execute
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_mysqli_execute_query, 0, 2, mysqli_result, MAY_BE_BOOL)
+	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_fetch_field, 0, 1, MAY_BE_OBJECT|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, result, mysqli_result, 0)
@@ -178,14 +186,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_more_results arginfo_mysqli_close
+#define arginfo_mysqli_more_results arginfo_mysqli_dump_debug_info
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_multi_query, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_next_result arginfo_mysqli_close
+#define arginfo_mysqli_next_result arginfo_mysqli_dump_debug_info
 
 #define arginfo_mysqli_num_fields arginfo_mysqli_field_tell
 
@@ -201,7 +209,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_set_opt arginfo_mysqli_options
 
-#define arginfo_mysqli_ping arginfo_mysqli_close
+#define arginfo_mysqli_ping arginfo_mysqli_dump_debug_info
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_poll, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -295,7 +303,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_bind_result, 0, 1, _
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_close, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_close, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
 ZEND_END_ARG_INFO()
 
@@ -340,9 +348,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_stmt_insert_id arginfo_mysqli_stmt_affected_rows
 
-#define arginfo_mysqli_stmt_more_results arginfo_mysqli_stmt_close
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_more_results, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, statement, mysqli_stmt, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_close
+#define arginfo_mysqli_stmt_next_result arginfo_mysqli_stmt_more_results
 
 #define arginfo_mysqli_stmt_num_rows arginfo_mysqli_stmt_affected_rows
 
@@ -353,7 +363,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_prepare, 0, 2, _IS_B
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_stmt_reset arginfo_mysqli_stmt_close
+#define arginfo_mysqli_stmt_reset arginfo_mysqli_stmt_more_results
 
 #define arginfo_mysqli_stmt_result_metadata arginfo_mysqli_stmt_get_result
 
@@ -363,13 +373,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_stmt_send_long_data, 0, 3
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mysqli_stmt_store_result arginfo_mysqli_stmt_close
+#define arginfo_mysqli_stmt_store_result arginfo_mysqli_stmt_more_results
 
 #define arginfo_mysqli_stmt_sqlstate arginfo_mysqli_stmt_error
 
 #define arginfo_mysqli_sqlstate arginfo_mysqli_character_set_name
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_ssl_set, 0, 6, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_ssl_set, 0, 6, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 1)
@@ -452,6 +462,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_get_charset, 0, 0, IS_OBJECT, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_mysqli_execute_query, 0, 1, mysqli_result, MAY_BE_BOOL)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_get_client_info arginfo_class_mysqli_character_set_name
@@ -709,6 +724,7 @@ ZEND_FUNCTION(mysqli_errno);
 ZEND_FUNCTION(mysqli_error);
 ZEND_FUNCTION(mysqli_error_list);
 ZEND_FUNCTION(mysqli_stmt_execute);
+ZEND_FUNCTION(mysqli_execute_query);
 ZEND_FUNCTION(mysqli_fetch_field);
 ZEND_FUNCTION(mysqli_fetch_fields);
 ZEND_FUNCTION(mysqli_fetch_field_direct);
@@ -823,6 +839,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_error_list, arginfo_mysqli_error_list)
 	ZEND_FE(mysqli_stmt_execute, arginfo_mysqli_stmt_execute)
 	ZEND_FALIAS(mysqli_execute, mysqli_stmt_execute, arginfo_mysqli_execute)
+	ZEND_FE(mysqli_execute_query, arginfo_mysqli_execute_query)
 	ZEND_FE(mysqli_fetch_field, arginfo_mysqli_fetch_field)
 	ZEND_FE(mysqli_fetch_fields, arginfo_mysqli_fetch_fields)
 	ZEND_FE(mysqli_fetch_field_direct, arginfo_mysqli_fetch_field_direct)
@@ -931,6 +948,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(dump_debug_info, mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(debug, mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_charset, mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(execute_query, mysqli_execute_query, arginfo_class_mysqli_execute_query, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_client_info, mysqli_get_client_info, arginfo_class_mysqli_get_client_info, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME_MAPPING(get_connection_stats, mysqli_get_connection_stats, arginfo_class_mysqli_get_connection_stats, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_server_info, mysqli_get_server_info, arginfo_class_mysqli_get_server_info, ZEND_ACC_PUBLIC)
@@ -1024,6 +1042,22 @@ static const zend_function_entry class_mysqli_sql_exception_methods[] = {
 	ZEND_ME(mysqli_sql_exception, getSqlState, arginfo_class_mysqli_sql_exception_getSqlState, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_mysqli_symbols(int module_number)
+{
+
+	zend_string *attribute_name_SensitiveParameter_mysqli_change_user_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_change_user", sizeof("mysqli_change_user") - 1), 2, attribute_name_SensitiveParameter_mysqli_change_user_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_mysqli_change_user_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_mysqli_connect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_connect", sizeof("mysqli_connect") - 1), 2, attribute_name_SensitiveParameter_mysqli_connect_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_mysqli_connect_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_mysqli_real_connect_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_real_connect", sizeof("mysqli_real_connect") - 1), 3, attribute_name_SensitiveParameter_mysqli_real_connect_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_mysqli_real_connect_arg3);
+}
 
 static zend_class_entry *register_class_mysqli_driver(void)
 {
@@ -1174,6 +1208,23 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_string *property_warning_count_name = zend_string_init("warning_count", sizeof("warning_count") - 1, 1);
 	zend_declare_typed_property(class_entry, property_warning_count_name, &property_warning_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_warning_count_name);
+
+
+	zend_string *attribute_name_SensitiveParameter_mysqli___construct_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, attribute_name_SensitiveParameter_mysqli___construct_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_mysqli___construct_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_mysqli_change_user_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "change_user", sizeof("change_user") - 1), 1, attribute_name_SensitiveParameter_mysqli_change_user_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_mysqli_change_user_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_mysqli_connect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, attribute_name_SensitiveParameter_mysqli_connect_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_mysqli_connect_arg2);
+
+	zend_string *attribute_name_SensitiveParameter_mysqli_real_connect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, attribute_name_SensitiveParameter_mysqli_real_connect_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_mysqli_real_connect_arg2);
 
 	return class_entry;
 }

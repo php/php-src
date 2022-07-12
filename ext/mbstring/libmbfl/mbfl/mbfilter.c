@@ -447,13 +447,6 @@ const mbfl_encoding *mbfl_identify_encoding(mbfl_string *string, const mbfl_enco
 /*
  *  strlen
  */
-static int
-filter_count_output(int c, void *data)
-{
-	(*(size_t *)data)++;
-	return 0;
-}
-
 size_t mbfl_strlen(const mbfl_string *string)
 {
 	size_t len = 0;
@@ -472,7 +465,7 @@ size_t mbfl_strlen(const mbfl_string *string)
 			p += mbtab[*p];
 			len++;
 		}
-	} else if (encoding->to_wchar) {
+	} else {
 		uint32_t wchar_buf[128];
 		unsigned char *in = string->val;
 		size_t in_len = string->len;
@@ -481,14 +474,6 @@ size_t mbfl_strlen(const mbfl_string *string)
 		while (in_len) {
 			len += encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
 		}
-	} else {
-		mbfl_convert_filter *filter = mbfl_convert_filter_new(string->encoding, &mbfl_encoding_wchar, filter_count_output, 0, &len);
-		ZEND_ASSERT(filter);
-		unsigned char *p = string->val, *e = p + string->len;
-		while (p < e) {
-			(*filter->filter_function)(*p++, filter);
-		}
-		mbfl_convert_filter_delete(filter);
 	}
 
 	return len;

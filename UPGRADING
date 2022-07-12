@@ -45,6 +45,7 @@ PHP 8.2 UPGRADE NOTES
     stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
     array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
     conversion.
+  . str_split no longer returns an empty array on empty string.
 
 - SPL:
   . The following methods now enforce their signature:
@@ -71,11 +72,15 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/null-false-standalone-types
   . Added support for readonly classes.
     RFC: https://wiki.php.net/rfc/readonly_classes
+  . Added support for true type.
+    RFC: https://wiki.php.net/rfc/true-type
 
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
     HTTP method in curl_getinfo() return value.
+  . Exposed multiple new constants from libcurl 7.62 to 7.80.
+  . Added new function curl_upkeep() to perform any connection upkeep checks.
 
 - OCI8:
   . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
@@ -149,9 +154,19 @@ PHP 8.2 UPGRADE NOTES
     separate, built-in implementations of all of them; for example, UUencoded
     data can be handled using convert_uuencode/convert_uudecode.
 
+- SPL:
+  . The SplFileInfo::_bad_state_ex() internal method has been deprecated.
+
+- Standard:
+  . utf8_encode() and utf8_decode() have been deprecated.
+
 ========================================
 5. Changed Functions
 ========================================
+
+- Core
+  . str*cmp, str*pos, substr_compare functions, using binary safe string
+    comparison now return -1, 0 and 1.
 
 - DBA
   . dba_open() and dba_popen() now have the following enforced function signature
@@ -167,6 +182,12 @@ PHP 8.2 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Curl:
+  . curl_upkeep() (libcurl >= 7.62.0)
+
+- mysqli:
+  . mysqli_execute_query()
+
 - Reflection:
   . ReflectionFunction::isAnonymous()
   . ReflectionMethod::hasPrototype()
@@ -177,6 +198,15 @@ PHP 8.2 UPGRADE NOTES
 - Standard:
   . The peak memory usage can now be reset to the current usage thanks to
     memory_reset_peak_usage().
+  . ini_parse_quantity(): Parses "shorthand bytes" quantities returned by
+    ini_get(). The function is suitable for parsing quantities whose int value
+    is in the range [PHP_INT_MIN, PHP_INT_MAX].
+    Parsing and interpretation is consistent with ini_set() (see also the
+    "Changes to INI File Handling" section).
+    Caveats: Some ini settings may apply additional constraints to the resuling
+    int value, such as a smaller range, that will not be reflected by
+    ini_parse_quantity(). The `memory_limit` setting accepts values higher than
+    PHP_INT_MAX, than can not be parsed by ini_parse_quantity().
 
 ========================================
 7. New Classes and Interfaces
@@ -201,8 +231,17 @@ PHP 8.2 UPGRADE NOTES
     no longer serializable. Previously, they could be serialized, but
     unserialization yielded unusable objects or failed.
 
+- mysqli:
+  . The support for libmysql has been removed. It's no longer possible to compile
+    mysqli with libmysql and all relevant functionality has been removed.
+  . The reconnect property of mysqli_driver has been removed. It was supported only by libmysql.
+  . The INI directive mysqli.reconnect has been removed.
+
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
+
+- PCRE:
+  . NUL characters (\0) in pattern strings are now supported.
 
 - SQLite3:
   . sqlite3.defensive is now PHP_INI_USER.
@@ -225,11 +264,87 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 
 - COM_DOTNET:
+  . DISP_E_PARAMNOTFOUND
   . LOCALE_NEUTRAL
 
 - Curl:
-  . CURLOPT_XFERINFOFUNCTION
+  . CURLALTSVC_H1 (libcurl >= 7.64.1)
+  . CURLALTSVC_H2 (libcurl >= 7.64.1)
+  . CURLALTSVC_H3 (libcurl >= 7.64.1)
+  . CURLALTSVC_READONLYFILE (libcurl >= 7.64.1)
+  . CURLAUTH_AWS_SIGV4 (libcurl >= 7.75.0)
+  . CURLE_PROXY (libcurl >= 7.73.0)
+  . CURLFTPMETHOD_DEFAULT
+  . CURLHSTS_ENABLE (libcurl >= 7.74.0)
+  . CURLHSTS_READONLYFILE (libcurl >= 7.74.0)
+  . CURLINFO_PROXY_ERROR (libcurl >= 7.73.0)
+  . CURLINFO_REFERER (libcurl >= 7.76.0)
+  . CURLINFO_RETRY_AFTER (libcurl >= 7.66.0)
+  . CURLMOPT_MAX_CONCURRENT_STREAMS (libcurl >= 7.67.0)
+  . CURLOPT_ALTSVC_CTRL (libcurl >= 7.64.1)
+  . CURLOPT_ALTSVC (libcurl >= 7.64.1)
+  . CURLOPT_AWS_SIGV4 (libcurl >= 7.75.0)
+  . CURLOPT_CAINFO_BLOB (libcurl >= 7.77.0)
+  . CURLOPT_DOH_SSL_VERIFYHOST (libcurl >= 7.76.0)
+  . CURLOPT_DOH_SSL_VERIFYPEER (libcurl >= 7.76.0)
+  . CURLOPT_DOH_SSL_VERIFYSTATUS (libcurl >= 7.76.0)
+  . CURLOPT_HSTS_CTRL (libcurl >= 7.74.0)
+  . CURLOPT_HSTS (libcurl >= 7.74.0)
+  . CURLOPT_MAIL_RCPT_ALLLOWFAILS (libcurl >= 7.69.0)
+  . CURLOPT_MAXAGE_CONN (libcurl >= 7.65.0)
   . CURLOPT_MAXFILESIZE_LARGE
+  . CURLOPT_MAXLIFETIME_CONN (libcurl >= 7.80.0)
+  . CURLOPT_PROXY_CAINFO_BLOB (libcurl >= 7.77.0)
+  . CURLOPT_SASL_AUTHZID (libcurl >= 7.66.0)
+  . CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 (libcurl >= 7.80.0)
+  . CURLOPT_SSL_EC_CURVES (libcurl >= 7.73.0)
+  . CURLOPT_UPKEEP_INTERVAL_MS (libcurl >= 7.62.0)
+  . CURLOPT_UPLOAD_BUFFERSIZE (libcurl >= 7.62.0)
+  . CURLOPT_XFERINFOFUNCTION (libcurl >= 7.32.0)
+  . CURLPROTO_MQTT (libcurl >= 7.71.0)
+  . CURLPX_BAD_ADDRESS_TYPE (libcurl >= 7.73.0)
+  . CURLPX_BAD_VERSION (libcurl >= 7.73.0)
+  . CURLPX_CLOSED (libcurl >= 7.73.0)
+  . CURLPX_GSSAPI (libcurl >= 7.73.0)
+  . CURLPX_GSSAPI_PERMSG (libcurl >= 7.73.0)
+  . CURLPX_GSSAPI_PROTECTION (libcurl >= 7.73.0)
+  . CURLPX_IDENTD_DIFFER (libcurl >= 7.73.0)
+  . CURLPX_IDENTD (libcurl >= 7.73.0)
+  . CURLPX_LONG_HOSTNAME (libcurl >= 7.73.0)
+  . CURLPX_LONG_PASSWD (libcurl >= 7.73.0)
+  . CURLPX_LONG_USER (libcurl >= 7.73.0)
+  . CURLPX_NO_AUTH (libcurl >= 7.73.0)
+  . CURLPX_OK (libcurl >= 7.73.0)
+  . CURLPX_RECV_ADDRESS (libcurl >= 7.73.0)
+  . CURLPX_RECV_AUTH (libcurl >= 7.73.0)
+  . CURLPX_RECV_CONNECT (libcurl >= 7.73.0)
+  . CURLPX_RECV_REQACK (libcurl >= 7.73.0)
+  . CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED (libcurl >= 7.73.0)
+  . CURLPX_REPLY_COMMAND_NOT_SUPPORTED (libcurl >= 7.73.0)
+  . CURLPX_REPLY_CONNECTION_REFUSED (libcurl >= 7.73.0)
+  . CURLPX_REPLY_GENERAL_SERVER_FAILURE (libcurl >= 7.73.0)
+  . CURLPX_REPLY_HOST_UNREACHABLE (libcurl >= 7.73.0)
+  . CURLPX_REPLY_NETWORK_UNREACHABLE (libcurl >= 7.73.0)
+  . CURLPX_REPLY_NOT_ALLOWED (libcurl >= 7.73.0)
+  . CURLPX_REPLY_TTL_EXPIRED (libcurl >= 7.73.0)
+  . CURLPX_REPLY_UNASSIGNED (libcurl >= 7.73.0)
+  . CURLPX_REQUEST_FAILED (libcurl >= 7.73.0)
+  . CURLPX_RESOLVE_HOST (libcurl >= 7.73.0)
+  . CURLPX_SEND_AUTH (libcurl >= 7.73.0)
+  . CURLPX_SEND_CONNECT (libcurl >= 7.73.0)
+  . CURLPX_SEND_REQUEST (libcurl >= 7.73.0)
+  . CURLPX_UNKNOWN_FAIL (libcurl >= 7.73.0)
+  . CURLPX_UNKNOWN_MODE (libcurl >= 7.73.0)
+  . CURLPX_USER_REJECTED (libcurl >= 7.73.0)
+  . CURLSSLOPT_AUTO_CLIENT_CERT (libcurl >= 7.77.0)
+  . CURLSSLOPT_NATIVE_CA (libcurl >= 7.71.0)
+  . CURLSSLOPT_NO_PARTIALCHAIN (libcurl >= 7.68.0)
+  . CURLSSLOPT_REVOKE_BEST_EFFORT (libcurl >= 7.70.0)
+  . CURL_VERSION_GSASL (libcurl >= 7.76.0)
+  . CURL_VERSION_HSTS (libcurl >= 7.74.0)
+  . CURL_VERSION_HTTP3 (libcurl >= 7.66.0)
+  . CURL_VERSION_UNICODE (libcurl >= 7.72.0)
+  . CURL_VERSION_ZSTD (libcurl >= 7.72.0)
 
 - Sockets:
   . SO_INCOMING_CPU
@@ -240,10 +355,103 @@ PHP 8.2 UPGRADE NOTES
   . TCP_KEEPIDLE (Linux, others)
   . TCP_KEEPINTVL (Linux, others)
   . TCP_NOTSENT_LOWAT
+  . LOCAL_CREDS_PERSISTENT (FreeBSD)
+  . SCM_CREDS2 (FreeBSD)
+  . LOCAL_CREDS (NetBSD)
+  . SO_BPF_EXTENSIONS
+  . SO_SETFIB
+  . TCP_CONGESTION (Linux, FreeBSD)
+  . SO_ZEROCOPY (Linux)
+  . MSG_ZEROCOPY (Linux)
 
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Parsing of some ill-formatted values will now trigger a warning when this was
+  silently ignored before. Interpretation of these values is not changed, for
+  backwards compatibility. This affects the following settings:
+  . bcmath.scale
+  . com.code_page
+  . default_socket_timeout
+  . fiber.stack_size
+  . hard_timeout
+  . intl.error_level
+  . ldap.max_links
+  . max_input_nesting_level
+  . max_input_vars
+  . mbstring.regex_retry_limit
+  . mbstring.regex_stack_limit
+  . mysqli.allow_local_infile
+  . mysqli.allow_persistent
+  . mysqli.default_port
+  . mysqli.max_links
+  . mysqli.max_persistent
+  . mysqli.reconnect
+  . mysqli.rollback_on_cached_plink
+  . mysqlnd.log_mask
+  . mysqlnd.mempool_default_size
+  . mysqlnd.net_read_buffer_size
+  . mysqlnd.net_read_timeout
+  . oci8.default_prefetch
+  . oci8.max_persistent
+  . oci8.persistent_timeout
+  . oci8.ping_interval
+  . oci8.prefetch_lob_size
+  . oci8.privileged_connect
+  . oci8.statement_cache_size
+  . odbc.allow_persistent
+  . odbc.check_persistent
+  . odbc.defaultbinmode
+  . odbc.default_cursortype
+  . odbc.defaultlrl
+  . odbc.max_links
+  . odbc.max_persistent
+  . opcache.consistency_checks
+  . opcache.file_update_protection
+  . opcache.force_restart_timeout
+  . opcache.interned_strings_buffer
+  . opcache.jit_bisect_limit
+  . opcache.jit_blacklist_root_trace
+  . opcache.jit_blacklist_side_trace
+  . opcache.jit_debug
+  . opcache.jit_hot_func
+  . opcache.jit_hot_loop
+  . opcache.jit_hot_return
+  . opcache.jit_hot_side_exit
+  . opcache.jit_max_exit_counters
+  . opcache.jit_max_loop_unrolls
+  . opcache.jit_max_polymorphic_calls
+  . opcache.jit_max_recursive_calls
+  . opcache.jit_max_recursive_returns
+  . opcache.jit_max_root_traces
+  . opcache.jit_max_side_traces
+  . opcache.log_verbosity_level
+  . opcache.max_file_size
+  . opcache.opt_debug_level
+  . opcache.optimization_level
+  . opcache.revalidate_freq
+  . output_buffering
+  . pcre.backtrack_limit
+  . pcre.recursion_limit
+  . pgsql.max_links
+  . pgsql.max_persistent
+  . post_max_size
+  . realpath_cache_size
+  . realpath_cache_ttl
+  . session.cache_expire
+  . session.cookie_lifetime
+  . session.gc_divisor
+  . session.gc_maxlifetime
+  . session.gc_probability
+  . soap.wsdl_cache_limit
+  . soap.wsdl_cache_ttl
+  . unserialize_max_depth
+  . upload_max_filesize
+  . user_ini.cache_ttl
+  . xmlrpc_error_number
+  . zend.assertions
+  . zlib.output_compression_level
 
 ========================================
 12. Windows Support
@@ -259,11 +467,19 @@ PHP 8.2 UPGRADE NOTES
     --with-oci8-12c and --with-oci8-19 are still supported.
 
 - Zip:
+  . The Zip extension upgraded to version 1.21.0
   . The Zip extension is now built as shared library (DLL) by default.
 
 ========================================
 13. Other Changes
 ========================================
+
+- Core:
+  . The iterable type is now a built-in compile time alias for array|Traversable.
+    Error messages relating to iterable will therefore now use array|Traversable.
+    Type Reflection is preserved for single iterable (and ?iterable) to produce
+    a ReflectionNamedType with name iterable, however usage of iterable in
+    union types will be converted to array|Traversable
 
 ========================================
 14. Performance Improvements

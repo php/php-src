@@ -145,11 +145,7 @@ int mbfl_filt_conv_sjis_wchar(int c, mbfl_convert_filter *filter)
 
 	switch (filter->status) {
 	case 0:
-		if (c == 0x5C) {
-			CK((*filter->output_function)(0xA5, filter->data));
-		} else if (c == 0x7E) {
-			CK((*filter->output_function)(0x203E, filter->data));
-		} else if (c >= 0 && c < 0x80) { /* ASCII */
+		if (c >= 0 && c < 0x80) { /* ASCII */
 			CK((*filter->output_function)(c, filter->data));
 		} else if (c > 0xA0 && c < 0xE0) { /* Kana */
 			CK((*filter->output_function)(0xFEC0 + c, filter->data));
@@ -201,17 +197,7 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 	int c1, c2, s1, s2;
 
 	s1 = 0;
-	if (c == 0x5C) {
-		/* Unicode 0x5C is a backslash; but Shift-JIS uses 0x5C for the
-		 * Yen sign. JIS X 0208 kuten 0x2140 is a backslash. */
-		s1 = 0x2140;
-	} else if (c == 0x7E) {
-		/* Unicode 0x7E is a tilde, but Shift-JIS uses 0x7E for overline (or
-		 * macron). JIS X 0208 kuten 0x2141 is 'WAVE DASH' */
-		s1 = 0x2141;
-	} else if (c == 0xAF || c == 0x203E) { /* U+00AF is MACRON, U+203E is OVERLINE */
-		s1 = 0x7E; /* Halfwidth overline/macron */
-	} else if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
+	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s1 = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
 		s1 = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
@@ -222,7 +208,9 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 	}
 	if (s1 <= 0) {
 		if (c == 0xA5) { /* YEN SIGN */
-			s1 = 0x5C;
+			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
+		} else if (c == 0xAF || c == 0x203E) { /* U+00AF is MACRON, U+203E is OVERLINE */
+			s1 = 0x2131; /* FULLWIDTH MACRON */
 		} else if (c == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
 		} else if (c == 0x2225) { /* PARALLEL TO */
@@ -269,11 +257,7 @@ static size_t mb_sjis_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 	while (p < e && out < limit) {
 		unsigned char c = *p++;
 
-		if (c == 0x5C) {
-			*out++ = 0xA5;
-		} else if (c == 0x7E) {
-			*out++ = 0x203E;
-		} else if (c <= 0x7F) {
+		if (c <= 0x7F) {
 			*out++ = c;
 		} else if (c >= 0xA1 && c <= 0xDF) { /* Kana */
 			*out++ = 0xFEC0 + c;
@@ -314,17 +298,7 @@ static void mb_wchar_to_sjis(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 		uint32_t w = *in++;
 		unsigned int s = 0;
 
-		if (w == 0x5C) {
-			/* Unicode 0x5C is a backslash; but Shift-JIS uses 0x5C for the
-			 * Yen sign. JIS X 0208 kuten 0x2140 is a backslash. */
-			s = 0x2140;
-		} else if (w == 0x7E) {
-			/* Unicode 0x7E is a tilde, but Shift-JIS uses 0x7E for overline (or
-			 * macron). JIS X 0208 kuten 0x2141 is 'WAVE DASH' */
-			s = 0x2141;
-		} else if (w == 0xAF || w == 0x203E) { /* U+00AF is MACRON, U+203E is OVERLINE */
-			s = 0x7E; /* Halfwidth overline/macron */
-		} else if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
+		if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
 			s = ucs_a1_jis_table[w - ucs_a1_jis_table_min];
 		} else if (w >= ucs_a2_jis_table_min && w < ucs_a2_jis_table_max) {
 			s = ucs_a2_jis_table[w - ucs_a2_jis_table_min];
@@ -336,7 +310,9 @@ static void mb_wchar_to_sjis(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 
 		if (s == 0) {
 			if (w == 0xA5) { /* YEN SIGN */
-				s = 0x5C;
+				s = 0x216F; /* FULLWIDTH YEN SIGN */
+			} else if (w == 0xAF || w == 0x203E) {
+				s = 0x2131; /* FULLWIDTH MACRON */
 			} else if (w == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
 				s = 0x2140;
 			} else if (w == 0x2225) { /* PARALLEL TO */

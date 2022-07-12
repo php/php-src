@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "zend_attributes.h"
 
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
@@ -482,6 +483,8 @@ PHP_MINIT_FUNCTION(odbc)
 	/* DB2NOEXITLIST env variable prevents DB2 from invoking atexit() */
 	putenv("DB2NOEXITLIST=TRUE");
 #endif
+
+	register_odbc_symbols(module_number);
 
 	return SUCCESS;
 }
@@ -2170,7 +2173,8 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		char    *ldb = 0;
 		int		ldb_len = 0;
 
-		if (strstr((char*)db, ";")) {
+		/* a connection string may have = but not ; - i.e. "DSN=PHP" */
+		if (strstr((char*)db, "=")) {
 			direct = 1;
 			/* Force UID and PWD to be set in the DSN */
 			bool is_uid_set = uid && *uid

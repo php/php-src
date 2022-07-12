@@ -1,8 +1,12 @@
 <?php
 
-/** @generate-class-entries static */
-
+/**
+ * @generate-class-entries static
+ * @generate-legacy-arginfo 80000
+ */
 namespace {
+
+    require "Zend/zend_attributes.stub.php";
 
     interface _ZendTestInterface
     {
@@ -41,10 +45,12 @@ namespace {
         public function testMethod(): bool {}
     }
 
+    #[Attribute(Attribute::TARGET_ALL)]
     final class ZendTestAttribute {
 
     }
 
+    #[Attribute(Attribute::TARGET_PARAMETER)]
     final class ZendTestParameterAttribute {
         public string $parameter;
 
@@ -58,6 +64,11 @@ namespace {
 
     class ZendTestChildClassWithMethodWithParameterAttribute extends ZendTestClassWithMethodWithParameterAttribute {
         public function override(string $parameter): int {}
+    }
+
+    final class ZendTestForbidDynamicCall {
+        public function call(): void {}
+        public static function callStatic(): void {}
     }
 
     enum ZendTestUnitEnum {
@@ -118,12 +129,18 @@ namespace {
     function zend_test_parameter_with_attribute(string $parameter): int {}
 
     function zend_get_current_func_name(): string {}
+
+    function zend_call_method(object|string $obj_or_class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
+
+    function zend_test_zend_ini_parse_quantity(string $str): int {}
+    function zend_test_zend_ini_parse_uquantity(string $str): int {}
 }
 
 namespace ZendTestNS {
 
     class Foo {
-        public function method(): void {}
+        /** @tentative-return-type */
+        public function method(): int {}
     }
 
 }

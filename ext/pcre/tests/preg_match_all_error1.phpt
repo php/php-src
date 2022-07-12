@@ -38,7 +38,7 @@ var_dump($matches);
 
 Arg value is abcdef
 
-Warning: preg_match_all(): Delimiter must not be alphanumeric or backslash in %spreg_match_all_error1.php on line %d
+Warning: preg_match_all(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
 

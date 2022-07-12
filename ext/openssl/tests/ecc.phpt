@@ -64,7 +64,7 @@ $csr = openssl_csr_new($dn, $keyGenerate, $args);
 
 var_dump($keyGenerate);
 
-$args["digest_alg"] = "sha1";
+$args["digest_alg"] = "sha256";
 echo "Testing openssl_csr_new with existing ecc key\n";
 $csr = openssl_csr_new($dn, $key1, $args);
 var_dump($csr);

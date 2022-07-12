@@ -263,7 +263,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	size_t value;
 	if (new_value) {
-		value = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
 	} else {
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
@@ -348,15 +348,15 @@ static void php_binary_init(void)
 {
 	char *binary_location = NULL;
 #ifdef PHP_WIN32
-	binary_location = (char *)malloc(MAXPATHLEN);
-	if (binary_location && GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
-		free(binary_location);
-		PG(php_binary) = NULL;
+	binary_location = (char *)pemalloc(MAXPATHLEN, 1);
+	if (GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
+		pefree(binary_location, 1);
+		binary_location = NULL;
 	}
 #else
 	if (sapi_module.executable_location) {
-		binary_location = (char *)malloc(MAXPATHLEN);
-		if (binary_location && !strchr(sapi_module.executable_location, '/')) {
+		binary_location = (char *)pemalloc(MAXPATHLEN, 1);
+		if (!strchr(sapi_module.executable_location, '/')) {
 			char *envpath, *path;
 			bool found = false;
 
@@ -379,11 +379,11 @@ static void php_binary_init(void)
 				efree(path);
 			}
 			if (!found) {
-				free(binary_location);
+				pefree(binary_location, 1);
 				binary_location = NULL;
 			}
 		} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
-			free(binary_location);
+			pefree(binary_location, 1);
 			binary_location = NULL;
 		}
 	}
@@ -832,9 +832,10 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 #endif
 			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(error_time_str), log_message, PHP_EOL);
 #ifdef PHP_WIN32
-			php_flock(fd, 2);
+			php_flock(fd, LOCK_EX);
 			/* XXX should eventually write in a loop if len > UINT_MAX */
 			php_ignore_value(write(fd, tmp, (unsigned)len));
+			php_flock(fd, LOCK_UN);
 #else
 			php_ignore_value(write(fd, tmp, len));
 #endif

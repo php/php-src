@@ -46,6 +46,10 @@
 #undef X509_EXTENSIONS
 #endif
 
+#ifndef MSG_DONTWAIT
+# define MSG_DONTWAIT 0
+#endif
+
 /* Flags for determining allowed stream crypto methods */
 #define STREAM_CRYPTO_IS_CLIENT            (1<<0)
 #define STREAM_CRYPTO_METHOD_SSLv2         (1<<1)
@@ -707,7 +711,6 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 		SSL_EXTRA_CERT_CHAIN_POLICY_PARA ssl_policy_params = {sizeof(SSL_EXTRA_CERT_CHAIN_POLICY_PARA)};
 		CERT_CHAIN_POLICY_PARA chain_policy_params = {sizeof(CERT_CHAIN_POLICY_PARA)};
 		CERT_CHAIN_POLICY_STATUS chain_policy_status = {sizeof(CERT_CHAIN_POLICY_STATUS)};
-		LPWSTR server_name = NULL;
 		BOOL verify_result;
 
 		ssl_policy_params.dwAuthType = (sslsock->is_client) ? AUTHTYPE_SERVER : AUTHTYPE_CLIENT;
@@ -2396,7 +2399,10 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 				if (sslsock->s.socket == -1) {
 					alive = 0;
-				} else if (php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
+				} else if ((!sslsock->ssl_active && value == 0 && ((MSG_DONTWAIT != 0) || !sslsock->s.is_blocked)) ||
+					   php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
+					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
+					/* additionally, we don't use this optimization if SSL is active because in that case, we're not using MSG_DONTWAIT */
 					if (sslsock->ssl_active) {
 						int n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
 						if (n <= 0) {
@@ -2414,7 +2420,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 									alive = 0;
 							}
 						}
-					} else if (0 == recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+					} else if (0 == recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT) && php_socket_errno() != EAGAIN) {
 						alive = 0;
 					}
 				}

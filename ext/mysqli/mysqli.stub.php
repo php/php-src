@@ -129,7 +129,7 @@ class mysqli
     public function __construct(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
@@ -151,7 +151,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_change_user
      */
-    public function change_user(string $username, string $password, ?string $database): bool {}
+    public function change_user(string $username, #[\SensitiveParameter] string $password, ?string $database): bool {}
 
     /**
      * @tentative-return-type
@@ -180,7 +180,7 @@ class mysqli
     public function connect(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
@@ -204,6 +204,11 @@ class mysqli
      * @alias mysqli_get_charset
      */
     public function get_charset(): ?object {}
+
+    /**
+     * @alias mysqli_execute_query
+     */
+    public function execute_query(string $query, ?array $params = null): mysqli_result|bool {}
 
     /**
      * @tentative-return-type
@@ -292,7 +297,7 @@ class mysqli
     public function real_connect(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null,
@@ -739,21 +744,22 @@ function mysqli_autocommit(mysqli $mysql, bool $enable): bool {}
 
 function mysqli_begin_transaction(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
-function mysqli_change_user(mysqli $mysql, string $username, string $password, ?string $database): bool {}
+function mysqli_change_user(mysqli $mysql, string $username, #[\SensitiveParameter] string $password, ?string $database): bool {}
 
 /** @refcount 1 */
 function mysqli_character_set_name(mysqli $mysql): string {}
 
-/** @return true */
-function mysqli_close(mysqli $mysql): bool {} // TODO make return type void
+function mysqli_close(mysqli $mysql): true {} // TODO make return type void
 
 function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ */
 function mysqli_connect(
     ?string $hostname = null,
     ?string $username = null,
-    ?string $password = null,
+    #[\SensitiveParameter] ?string $password = null,
     ?string $database = null,
     ?int $port = null,
     ?string $socket = null
@@ -768,8 +774,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
-/** @return true */
-function mysqli_debug(string $options): bool {} // TODO make return type void
+function mysqli_debug(string $options): true {} // TODO make return type void
 
 function mysqli_errno(mysqli $mysql): int {}
 
@@ -786,6 +791,8 @@ function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): boo
 
 /** @alias mysqli_stmt_execute */
 function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
+
+function mysqli_execute_query(mysqli $mysql, string $query, ?array $params = null): mysqli_result|bool {}
 
 /** @refcount 1 */
 function mysqli_fetch_field(mysqli_result $result): object|false {}
@@ -928,6 +935,7 @@ function mysqli_real_connect(
     mysqli $mysql,
     ?string $hostname = null,
     ?string $username = null,
+    #[\SensitiveParameter]
     ?string $password = null,
     ?string $database = null,
     ?int $port = null,
@@ -967,8 +975,7 @@ function mysqli_stmt_bind_param(mysqli_stmt $statement, string $types, mixed &..
 
 function mysqli_stmt_bind_result(mysqli_stmt $statement, mixed &...$vars): bool {}
 
-/** @return true */
-function mysqli_stmt_close(mysqli_stmt $statement): bool {}
+function mysqli_stmt_close(mysqli_stmt $statement): true {}
 
 function mysqli_stmt_data_seek(mysqli_stmt $statement, int $offset): void {}
 
@@ -1027,7 +1034,6 @@ function mysqli_stmt_sqlstate(mysqli_stmt $statement): string {}
 /** @refcount 1 */
 function mysqli_sqlstate(mysqli $mysql): string {}
 
-/** @return true */
 function mysqli_ssl_set(
     mysqli $mysql,
     ?string $key,
@@ -1035,7 +1041,7 @@ function mysqli_ssl_set(
     ?string $ca_certificate,
     ?string $ca_path,
     ?string $cipher_algos
-): bool {} // TODO make return type void
+): true {} // TODO make return type void
 
 /** @refcount 1 */
 function mysqli_stat(mysqli $mysql): string|false {}

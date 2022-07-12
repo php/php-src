@@ -1,6 +1,99 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0alpha1
+?? ??? ????, PHP 8.2.0beta1
+
+- CLI:
+  . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
+
+- Core:
+  . Reduced the memory footprint of strings returned by var_export(),
+    json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
+    http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
+
+- COM:
+  . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
+
+- FPM:
+  . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
+  . Added access.suppress_path pool option to filter access log entries.
+    (Mark Gallagher)
+
+- PCRE:
+  . Updated bundled libpcre to 10.40. (cmb)
+
+- PDO_Firebird:
+  . Fixed bug GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
+
+- Standard:
+  . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
+  . Added ini_parse_quantity function to convert ini quantities shorthand
+    notation to int. (Dennis Snell)
+
+07 Jul 2022, PHP 8.2.0alpha3
+
+- Core:
+  . Uses safe_perealloc instead of perealloc for the
+    ZEND_PTR_STACK_RESIZE_IF_NEEDED to avoid possible overflows. (David Carlier)
+
+- DBA:
+  . Fixed LMDB driver hanging when attempting to delete a non-existing key
+    (Girgias)
+
+- Intl:
+  . Fixed build for ICU 69.x and onwards. (David Carlier)
+
+- Opcache:
+  . Allocate JIT buffer close to PHP .text segemnt to allow using direct
+    IP-relative calls and jumps.
+    (Su Tao, Wang Xue, Chen Hu, Lizhen Lizhen, Dmitry)
+
+- Sockets:
+  . Added TCP_CONGESTION socket option. (David Carlier)
+  . Added SO_ZEROCOPY/MSG_ZEROCOPY options. (David Carlier)
+
+- SPL:
+  . Uses safe_erealloc instead of erealloc to handle heap growth
+    for the SplHeap::insert method to avoid possible overflows. (David Carlier)
+
+- Standard:
+  . Fixed the crypt_sha256/512 api build with clang > 12. (David Carlier)
+  . Uses safe_erealloc instead of erealloc to handle options in getopt
+    to avoid possible overflows. (David Carlier)
+
+- Zip:
+
+  . Implement fseek for zip stream when possible with libzip 1.9.1. (Remi)
+
+23 Jun 2022, PHP 8.2.0alpha2
+
+- Core:
+  . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
+    references). (Nicolas Grekas)
+  . Fixed bug GH-8661 (Nullsafe in coalesce triggers undefined variable
+    warning). (ilutov)
+  . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
+    enums). (ilutov)
+  . Fixed bug GH-8810 (Incorrect lineno in backtrace of multi-line function
+    calls). (ilutov)
+  . Optimised code path for newly created file with the stream plain wrapper. (Max Kellermann)
+
+- Curl:
+  . Added new constants from cURL 7.62 to 7.80. (Pierrick)
+  . New function curl_upkeep(). (Pierrick)
+
+- OpenSSL:
+  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
+
+- PCRE:
+  . Implemented FR #77726 (Allow null character in regex patterns). (cmb)
+
+- Standard:
+  . Deprecated utf8_encode() and utf8_decode(). (Rowan Tommins)
+
+- Streams:
+  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
+
+09 Jun 2022, PHP 8.2.0alpha1
 
 - CLI:
   . Fixed bug #81496 (Server logs incorrect request method). (lauri)
@@ -55,6 +148,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
   . Added ReflectionMethod::hasPrototype(). (Ollie Read)
+  . Narrow ReflectionEnum::getBackingType() return type to ReflectionNamedType.
+    (SamMousa)
 
 - Session:
   . Fixed bug GH-7787 (Improve session write failure message for user error
@@ -67,6 +162,10 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added TCP_KEEPALIVE, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT socket
     options. (David Carlier)
+  . Added ancillary data support for FreeBSD. (David Carlier)
+  . Added ancillary data support for NetBSD. (David Carlier)
+  . Added SO_BPF_EXTENSIONS socket option. (David Carlier)
+  . Added SO_SETFIB socket option. (David Carlier)
 
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)

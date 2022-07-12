@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9db587b5d431b9dfe7178fd843ae8907db737a04 */
+ * Stub hash: e942a76bf66ad950c12f459b3f62bb6a0edf680c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -799,12 +799,45 @@ static const zend_function_entry class_OCICollection_methods[] = {
 	ZEND_FE_END
 };
 
+static void register_oci8_symbols(int module_number)
+{
+
+	zend_string *attribute_name_SensitiveParameter_oci_new_connect_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_new_connect", sizeof("oci_new_connect") - 1), 1, attribute_name_SensitiveParameter_oci_new_connect_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_oci_new_connect_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_ocinlogon_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ocinlogon", sizeof("ocinlogon") - 1), 1, attribute_name_SensitiveParameter_ocinlogon_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ocinlogon_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_oci_connect_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_connect", sizeof("oci_connect") - 1), 1, attribute_name_SensitiveParameter_oci_connect_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_oci_connect_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_ocilogon_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ocilogon", sizeof("ocilogon") - 1), 1, attribute_name_SensitiveParameter_ocilogon_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ocilogon_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_oci_pconnect_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_pconnect", sizeof("oci_pconnect") - 1), 1, attribute_name_SensitiveParameter_oci_pconnect_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_oci_pconnect_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_ociplogon_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ociplogon", sizeof("ociplogon") - 1), 1, attribute_name_SensitiveParameter_ociplogon_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ociplogon_arg1);
+}
+
 static zend_class_entry *register_class_OCILob(void)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "OCILob", class_OCILob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+
+	zend_string *attribute_name_AllowDynamicProperties_class_OCILob = zend_string_init("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCILob, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_OCILob);
 
 	return class_entry;
 }
@@ -815,6 +848,11 @@ static zend_class_entry *register_class_OCICollection(void)
 
 	INIT_CLASS_ENTRY(ce, "OCICollection", class_OCICollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+
+	zend_string *attribute_name_AllowDynamicProperties_class_OCICollection = zend_string_init("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCICollection, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_OCICollection);
 
 	return class_entry;
 }
