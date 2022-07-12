@@ -940,6 +940,17 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 				smart_str_appends(str, "protected ");
 				break;
 		}
+		switch (prop->flags & ZEND_ACC_PPP_SET_MASK) {
+			case ZEND_ACC_PRIVATE_SET:
+				smart_str_appends(str, "private(set) ");
+				break;
+			case ZEND_ACC_PROTECTED_SET:
+				smart_str_appends(str, "protected(set) ");
+				break;
+			case ZEND_ACC_PUBLIC_SET:
+				ZEND_UNREACHABLE();
+				break;
+		}
 		if (prop->flags & ZEND_ACC_STATIC) {
 			smart_str_appends(str, "static ");
 		}
@@ -5679,6 +5690,16 @@ ZEND_METHOD(ReflectionProperty, isProtected)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, isPrivateSet)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PRIVATE_SET);
+}
+
+ZEND_METHOD(ReflectionProperty, isProtectedSet)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROTECTED_SET);
+}
+
 /* {{{ Returns whether this property is static */
 ZEND_METHOD(ReflectionProperty, isStatic)
 {
@@ -5727,7 +5748,7 @@ ZEND_METHOD(ReflectionProperty, getModifiers)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY | ZEND_ACC_ABSTRACT | ZEND_ACC_VIRTUAL;
+	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY | ZEND_ACC_ABSTRACT | ZEND_ACC_VIRTUAL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();

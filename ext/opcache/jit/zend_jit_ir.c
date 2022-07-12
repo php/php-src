@@ -13933,16 +13933,37 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		 && (!ce ||	ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT)))) {
 			uint32_t flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 
+			ir_ref allowed_inputs = IR_UNUSED;
+			ir_ref forbidden_inputs = IR_UNUSED;
+
 			ir_ref prop_info_ref = ir_LOAD_A(
 				ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2));
 			ir_ref if_has_prop_info = ir_IF(prop_info_ref);
 
 			ir_IF_TRUE_cold(if_has_prop_info);
 
-			ir_ref if_readonly = ir_IF(
-				ir_AND_U32(ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, flags))),
-					ir_CONST_U32(ZEND_ACC_READONLY)));
+			ir_ref prop_flags = ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, flags)));
+			ir_ref if_readonly_or_avis = ir_IF(ir_AND_U32(prop_flags, ir_CONST_U32(ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK)));
+
+			ir_IF_FALSE(if_readonly_or_avis);
+			ir_END_list(allowed_inputs);
+
+			ir_IF_TRUE_cold(if_readonly_or_avis);
+
+			ir_ref if_readonly = ir_IF(ir_AND_U32(prop_flags, ir_CONST_U32(ZEND_ACC_READONLY)));
 			ir_IF_TRUE(if_readonly);
+			ir_END_list(forbidden_inputs);
+
+			ir_IF_FALSE(if_readonly);
+			ir_ref has_avis_access = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_asymmetric_property_has_set_access), prop_info_ref);
+			ir_ref if_avis_access = ir_IF(has_avis_access);
+			ir_IF_TRUE(if_avis_access);
+			ir_END_list(allowed_inputs);
+
+			ir_IF_FALSE(if_avis_access);
+			ir_END_list(forbidden_inputs);
+
+			ir_MERGE_list(forbidden_inputs);
 
 			ir_ref if_prop_obj = jit_if_Z_TYPE(jit, prop_addr, IS_OBJECT);
 			ir_IF_TRUE(if_prop_obj);
@@ -13955,19 +13976,27 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_IF_FALSE_cold(if_prop_obj);
 
 			jit_SET_EX_OPLINE(jit, opline);
+			if_readonly = ir_IF(ir_AND_U32(prop_flags, ir_CONST_U32(ZEND_ACC_READONLY)));
+			ir_IF_TRUE(if_readonly);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_indirect_modification_error), prop_info_ref);
 			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
 			ir_END_list(end_inputs);
 
+			ir_IF_FALSE(if_readonly);
+			ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_asymmetric_visibility_property_modification_error),
+				prop_info_ref, ir_CONST_ADDR("indirectly modify"));
+			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
+			ir_END_list(end_inputs);
+
+			ir_MERGE_list(allowed_inputs);
+
 			if (flags == ZEND_FETCH_DIM_WRITE) {
-				ir_IF_FALSE_cold(if_readonly);
 				jit_SET_EX_OPLINE(jit, opline);
 				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_array_promotion),
 					prop_ref, prop_info_ref);
 				ir_END_list(end_inputs);
 				ir_IF_FALSE(if_has_prop_info);
 			} else if (flags == ZEND_FETCH_REF) {
-				ir_IF_FALSE_cold(if_readonly);
 				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_create_typed_ref),
 					prop_ref,
 					prop_info_ref,
@@ -13976,10 +14005,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				ir_IF_FALSE(if_has_prop_info);
 			} else {
 				ZEND_ASSERT(flags == 0);
-				ir_IF_FALSE(if_has_prop_info);
-				ir_ref no_prop_info_path = ir_END();
-				ir_IF_FALSE(if_readonly);
-				ir_MERGE_WITH(no_prop_info_path);
+				ir_MERGE_WITH_EMPTY_FALSE(if_has_prop_info);
 			}
 		}
 	} else {
@@ -14005,9 +14031,6 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_IF_TRUE(if_def);
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_READONLY)) {
-			if (!prop_type_ref) {
-				prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
-			}
 			ir_ref if_prop_obj = jit_if_Z_TYPE(jit, prop_addr, IS_OBJECT);
 			ir_IF_TRUE(if_prop_obj);
 			ir_ref ref = jit_Z_PTR(jit, prop_addr);
@@ -14023,6 +14046,28 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_END_list(end_inputs);
 
 			goto result_fetched;
+		} else if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_PPP_SET_MASK)) {
+			/* Readonly properties which are also asymmetric are never mutable indirectly, which is
+			 * handled by the previous branch. */
+			ir_ref has_access = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_asymmetric_property_has_set_access), ir_CONST_ADDR(prop_info));
+
+			ir_ref if_access = ir_IF(has_access);
+			ir_IF_FALSE_cold(if_access);
+
+			ir_ref if_prop_obj = jit_if_Z_TYPE(jit, prop_addr, IS_OBJECT);
+			ir_IF_TRUE(if_prop_obj);
+			ir_ref ref = jit_Z_PTR(jit, prop_addr);
+			jit_GC_ADDREF(jit, ref);
+			jit_set_Z_PTR(jit, res_addr, ref);
+			jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
+			ir_END_list(end_inputs);
+
+			ir_IF_FALSE_cold(if_prop_obj);
+			ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_asymmetric_visibility_property_modification_error),
+				ir_CONST_ADDR(prop_info), ir_CONST_ADDR("indirectly modify"));
+			ir_END_list(end_inputs);
+
+			ir_IF_TRUE(if_access);
 		}
 
 		if (opline->opcode == ZEND_FETCH_OBJ_W

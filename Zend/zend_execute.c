@@ -915,6 +915,32 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
+	const zend_property_info *prop_info, const char *operation
+) {
+	zend_class_entry *scope;
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_called_scope(EG(current_execute_data));
+	}
+
+	const char *visibility;
+	if (prop_info->flags & ZEND_ACC_PRIVATE_SET) {
+		visibility = "private(set)";
+	} else {
+		ZEND_ASSERT(prop_info->flags & ZEND_ACC_PROTECTED_SET);
+		visibility = "protected(set)";
+	}
+
+	zend_throw_error(NULL, "Cannot %s %s property %s::$%s from %s%s",
+		operation,
+		visibility,
+		ZSTR_VAL(prop_info->ce->name),
+		ZSTR_VAL(prop_info->name),
+		scope ? "scope " : "global scope", scope ? ZSTR_VAL(scope->name) : "");
+}
+
 static const zend_class_entry *resolve_single_class_type(zend_string *name, const zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return self_ce;
@@ -1028,9 +1054,15 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 {
 	zval tmp;
 
-	if (UNEXPECTED((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(info);
-		return &EG(uninitialized_zval);
+	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+		if ((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
+			zend_readonly_property_modification_error(info);
+			return &EG(uninitialized_zval);
+		}
+		if (info->flags & ZEND_ACC_PPP_SET_MASK && !zend_asymmetric_property_has_set_access(info)) {
+			zend_asymmetric_visibility_property_modification_error(info, "modify");
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	ZVAL_DEREF(value);
@@ -3357,7 +3389,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				ZVAL_INDIRECT(result, ptr);
 				zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
 				if (prop_info) {
-					if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					if (UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))
+					 && ((prop_info->flags & ZEND_ACC_READONLY) || !zend_asymmetric_property_has_set_access(prop_info))) {
 						/* For objects, W/RW/UNSET fetch modes might not actually modify object.
 						 * Similar as with magic __get() allow them, but return the value as a copy
 						 * to make sure no actual modification is possible. */
@@ -3365,7 +3398,11 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 						if (Z_TYPE_P(ptr) == IS_OBJECT) {
 							ZVAL_COPY(result, ptr);
 						} else {
-							zend_readonly_property_indirect_modification_error(prop_info);
+							if (prop_info->flags & ZEND_ACC_READONLY) {
+								zend_readonly_property_indirect_modification_error(prop_info);
+							} else {
+								zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
+							}
 							ZVAL_ERROR(result);
 						}
 						return;

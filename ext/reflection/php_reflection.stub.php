@@ -444,6 +444,10 @@ class ReflectionProperty implements Reflector
     public const int IS_PRIVATE = UNKNOWN;
     /** @cvalue ZEND_ACC_ABSTRACT */
     public const int IS_ABSTRACT = UNKNOWN;
+    /** @cvalue ZEND_ACC_PROTECTED_SET */
+    public const int IS_PROTECTED_SET = UNKNOWN;
+    /** @cvalue ZEND_ACC_PRIVATE_SET */
+    public const int IS_PRIVATE_SET = UNKNOWN;
 
     public string $name;
     public string $class;
@@ -479,6 +483,10 @@ class ReflectionProperty implements Reflector
 
     /** @tentative-return-type */
     public function isProtected(): bool {}
+
+    public function isPrivateSet(): bool {}
+
+    public function isProtectedSet(): bool {}
 
     /** @tentative-return-type */
     public function isStatic(): bool {}
