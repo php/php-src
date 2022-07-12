@@ -1216,12 +1216,6 @@ static size_t character_width(unsigned int c)
 	return 1;
 }
 
-static int filter_count_width(int c, void* data)
-{
-	(*(size_t *)data) += character_width(c);
-	return 0;
-}
-
 size_t mbfl_strwidth(mbfl_string *string)
 {
 	if (!string->len) {
@@ -1229,34 +1223,19 @@ size_t mbfl_strwidth(mbfl_string *string)
 	}
 
 	size_t width = 0;
+	uint32_t wchar_buf[128];
+	unsigned char *in = string->val;
+	size_t in_len = string->len;
+	unsigned int state = 0;
 
-	if (string->encoding->to_wchar) {
-		uint32_t wchar_buf[128];
-		unsigned char *in = string->val;
-		size_t in_len = string->len;
-		unsigned int state = 0;
-
-		while (in_len) {
-			size_t out_len = string->encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
-			while (out_len) {
-				/* NOTE: 'bad input' marker will be counted as 1 unit of width
-				 * If text conversion is performed with an ordinary ASCII character as
-				 * the 'replacement character', this will give us the correct display width. */
-				width += character_width(wchar_buf[--out_len]);
-			}
+	while (in_len) {
+		size_t out_len = string->encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		while (out_len) {
+			/* NOTE: 'bad input' marker will be counted as 1 unit of width
+			 * If text conversion is performed with an ordinary ASCII character as
+			 * the 'replacement character', this will give us the correct display width. */
+			width += character_width(wchar_buf[--out_len]);
 		}
-	} else {
-		mbfl_convert_filter *filter = mbfl_convert_filter_new(string->encoding, &mbfl_encoding_wchar, filter_count_width, 0, &width);
-		ZEND_ASSERT(filter);
-
-		/* feed data */
-		unsigned char *p = string->val, *e = p + string->len;
-		while (p < e) {
-			(*filter->filter_function)(*p++, filter);
-		}
-
-		mbfl_convert_filter_flush(filter);
-		mbfl_convert_filter_delete(filter);
 	}
 
 	return width;
