@@ -832,33 +832,33 @@ static void register_ldap_symbols(int module_number)
 
 #if defined(HAVE_ORALDAP)
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_ldap_connect_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, attribute_name_SensitiveParameter_arginfo_ldap_connect_arg3, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_ldap_connect_arg3);
+	zend_string *attribute_name_SensitiveParameter_ldap_connect_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, attribute_name_SensitiveParameter_ldap_connect_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ldap_connect_arg3);
 #endif
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_ldap_bind_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, attribute_name_SensitiveParameter_arginfo_ldap_bind_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_ldap_bind_arg2);
+	zend_string *attribute_name_SensitiveParameter_ldap_bind_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, attribute_name_SensitiveParameter_ldap_bind_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ldap_bind_arg2);
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_ldap_bind_ext_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind_ext", sizeof("ldap_bind_ext") - 1), 2, attribute_name_SensitiveParameter_arginfo_ldap_bind_ext_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_ldap_bind_ext_arg2);
+	zend_string *attribute_name_SensitiveParameter_ldap_bind_ext_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind_ext", sizeof("ldap_bind_ext") - 1), 2, attribute_name_SensitiveParameter_ldap_bind_ext_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ldap_bind_ext_arg2);
 #if defined(HAVE_LDAP_SASL)
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_ldap_sasl_bind_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_sasl_bind", sizeof("ldap_sasl_bind") - 1), 2, attribute_name_SensitiveParameter_arginfo_ldap_sasl_bind_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_ldap_sasl_bind_arg2);
+	zend_string *attribute_name_SensitiveParameter_ldap_sasl_bind_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_sasl_bind", sizeof("ldap_sasl_bind") - 1), 2, attribute_name_SensitiveParameter_ldap_sasl_bind_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ldap_sasl_bind_arg2);
 #endif
 #if defined(HAVE_LDAP_PASSWD)
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_ldap_exop_passwd_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 2, attribute_name_SensitiveParameter_arginfo_ldap_exop_passwd_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_ldap_exop_passwd_arg2);
+	zend_string *attribute_name_SensitiveParameter_ldap_exop_passwd_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 2, attribute_name_SensitiveParameter_ldap_exop_passwd_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ldap_exop_passwd_arg2);
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_ldap_exop_passwd_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 3, attribute_name_SensitiveParameter_arginfo_ldap_exop_passwd_arg3, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_ldap_exop_passwd_arg3);
+	zend_string *attribute_name_SensitiveParameter_ldap_exop_passwd_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 3, attribute_name_SensitiveParameter_ldap_exop_passwd_arg3, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ldap_exop_passwd_arg3);
 #endif
 }
 

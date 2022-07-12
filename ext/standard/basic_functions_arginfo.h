@@ -3532,13 +3532,13 @@ static void register_basic_functions_symbols(int module_number)
 	ZEND_ASSERT(M_E == 2.7182818284590451);
 
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_password_hash_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, attribute_name_SensitiveParameter_arginfo_password_hash_arg0, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_password_hash_arg0);
+	zend_string *attribute_name_SensitiveParameter_password_hash_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, attribute_name_SensitiveParameter_password_hash_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_password_hash_arg0);
 
-	zend_string *attribute_name_SensitiveParameter_arginfo_password_verify_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_verify", sizeof("password_verify") - 1), 0, attribute_name_SensitiveParameter_arginfo_password_verify_arg0, 0);
-	zend_string_release(attribute_name_SensitiveParameter_arginfo_password_verify_arg0);
+	zend_string *attribute_name_SensitiveParameter_password_verify_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_verify", sizeof("password_verify") - 1), 0, attribute_name_SensitiveParameter_password_verify_arg0, 0);
+	zend_string_release(attribute_name_SensitiveParameter_password_verify_arg0);
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)
