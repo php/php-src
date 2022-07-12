@@ -83,10 +83,9 @@ class ZipArchive implements Countable
     public function open(string $filename, int $flags = 0): bool|int {}
 
     /**
-     * @sensitive-param $password
      * @tentative-return-type
      */
-    public function setPassword(string $password): bool {}
+    public function setPassword(#[\SensitiveParameter] string $password): bool {}
 
     /** @tentative-return-type */
     public function close(): bool {}
@@ -227,16 +226,14 @@ class ZipArchive implements Countable
 
 #ifdef HAVE_ENCRYPTION
     /**
-     * @sensitive-param $password
      * @tentative-return-type
      */
-    public function setEncryptionName(string $name, int $method, ?string $password = null): bool {}
+    public function setEncryptionName(string $name, int $method, #[\SensitiveParameter] ?string $password = null): bool {}
 
     /**
-     * @sensitive-param $password
      * @tentative-return-type
      */
-    public function setEncryptionIndex(int $index, int $method, ?string $password = null): bool {}
+    public function setEncryptionIndex(int $index, int $method, #[\SensitiveParameter] ?string $password = null): bool {}
 #endif
 
 #ifdef HAVE_PROGRESS_CALLBACK

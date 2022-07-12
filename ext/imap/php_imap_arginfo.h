@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f1acb4f23b4c82e58aac65af39ce29029e203e5 */
+ * Stub hash: 822fbcdcfe25192fe22bea50766cf798aee76865 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -595,7 +595,10 @@ static void register_php_imap_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IMAP_GC_ENV", GC_ENV, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAP_GC_TEXTS", GC_TEXTS, CONST_CS | CONST_PERSISTENT);
 
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "imap_open", 2);
+
+	zend_string *attribute_name_SensitiveParameter_imap_open_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "imap_open", sizeof("imap_open") - 1), 2, attribute_name_SensitiveParameter_imap_open_arg2, 0);
+	zend_string_release(attribute_name_SensitiveParameter_imap_open_arg2);
 }
 
 static zend_class_entry *register_class_IMAP_Connection(void)

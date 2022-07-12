@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 592fbc9718ff272e1cb182025963683541a7a646 */
+ * Stub hash: e942a76bf66ad950c12f459b3f62bb6a0edf680c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -801,12 +801,30 @@ static const zend_function_entry class_OCICollection_methods[] = {
 
 static void register_oci8_symbols(int module_number)
 {
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_new_connect", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ocinlogon", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_connect", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ocilogon", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_pconnect", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ociplogon", 1);
+
+	zend_string *attribute_name_SensitiveParameter_oci_new_connect_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_new_connect", sizeof("oci_new_connect") - 1), 1, attribute_name_SensitiveParameter_oci_new_connect_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_oci_new_connect_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_ocinlogon_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ocinlogon", sizeof("ocinlogon") - 1), 1, attribute_name_SensitiveParameter_ocinlogon_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ocinlogon_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_oci_connect_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_connect", sizeof("oci_connect") - 1), 1, attribute_name_SensitiveParameter_oci_connect_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_oci_connect_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_ocilogon_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ocilogon", sizeof("ocilogon") - 1), 1, attribute_name_SensitiveParameter_ocilogon_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ocilogon_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_oci_pconnect_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_pconnect", sizeof("oci_pconnect") - 1), 1, attribute_name_SensitiveParameter_oci_pconnect_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_oci_pconnect_arg1);
+
+	zend_string *attribute_name_SensitiveParameter_ociplogon_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ociplogon", sizeof("ociplogon") - 1), 1, attribute_name_SensitiveParameter_ociplogon_arg1, 0);
+	zend_string_release(attribute_name_SensitiveParameter_ociplogon_arg1);
 }
 
 static zend_class_entry *register_class_OCILob(void)

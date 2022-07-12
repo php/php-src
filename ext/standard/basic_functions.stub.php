@@ -1623,15 +1623,13 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
 function password_get_info(string $hash): array {}
 
 /**
- * @sensitive-param $password
  * @refcount 1
  */
-function password_hash(string $password, string|int|null $algo, array $options = []): string {}
+function password_hash(#[\SensitiveParameter] string $password, string|int|null $algo, array $options = []): string {}
 
 function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
 
-/** @sensitive-param $password */
-function password_verify(string $password, string $hash): bool {}
+function password_verify(#[\SensitiveParameter] string $password, string $hash): bool {}
 
 function password_algos(): array {}
 
