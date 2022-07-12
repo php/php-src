@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Updated bundled libpcre to 10.40. (cmb)
 
 - PDO_Firebird:
-  . Fixed GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
+  . Fixed bug GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
 
 - Standard:
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
