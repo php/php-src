@@ -40,8 +40,8 @@
 #include "libmbfl/filters/mbfilter_uuencode.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
-#include "libmbfl/filters/mbfilter_tl_jisx0201_jisx0208.h"
 #include "libmbfl/filters/mbfilter_singlebyte.h"
+#include "libmbfl/filters/translit_kana_jisx0201_jisx0208.h"
 
 #include "php_variables.h"
 #include "php_globals.h"
@@ -2838,29 +2838,283 @@ PHP_FUNCTION(mb_decode_mimeheader)
 }
 /* }}} */
 
+/* Apply various transforms to input codepoint, such as converting halfwidth katakana
+ * to fullwidth katakana. `mode` is a bitfield which controls which transforms are
+ * actually performed. The bit values are defined in translit_kana_jisx0201_jisx0208.h.
+ * `mode` must not call for transforms which are inverses (i.e. which would cancel
+ * each other out).
+ *
+ * In some cases, successive input codepoints may be merged into one output codepoint.
+ * (That is the purpose of the `next` parameter.) If the `next` codepoint is consumed
+ * and should be skipped over, `*consumed` will be set to true. Otherwise, `*consumed`
+ * will not be modified. If there is no following codepoint, `next` should be zero.
+ *
+ * Again, in some cases, one input codepoint may convert to two output codepoints.
+ * If so, the second output codepoint will be stored in `*second`.
+ *
+ * Return the resulting codepoint. If none of the requested transforms apply, return
+ * the input codepoint unchanged.
+ */
+uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, unsigned int mode)
+{
+	if ((mode & MBFL_HAN2ZEN_ALL) && c >= 0x21 && c <= 0x7D && c != '"' && c != '\'' && c != '\\') {
+		return c + 0xFEE0;
+	}
+	if ((mode & MBFL_HAN2ZEN_ALPHA) && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))) {
+		return c + 0xFEE0;
+	}
+	if ((mode & MBFL_HAN2ZEN_NUMERIC) && c >= '0' && c <= '9') {
+		return c + 0xFEE0;
+	}
+	if ((mode & MBFL_HAN2ZEN_SPACE) && c == ' ') {
+		return 0x3000;
+	}
+
+	if (mode & (MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_HIRAGANA)) {
+		/* Convert Hankaku kana to Zenkaku kana
+		 * Either all Hankaku kana (including katakana and hiragana) will be converted
+		 * to Zenkaku katakana, or to Zenkaku hiragana */
+		if ((mode & MBFL_HAN2ZEN_KATAKANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
+			if (c >= 0xFF61 && c <= 0xFF9F) {
+				int n = c - 0xFF60;
+
+				if (next >= 0xFF61 && next <= 0xFF9F) {
+					if (next == 0xFF9E && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
+						*consumed = true;
+						return 0x3001 + hankana2zenkana_table[n];
+					}
+					if (next == 0xFF9E && n == 19) {
+						*consumed = true;
+						return 0x30F4;
+					}
+					if (next == 0xFF9F && n >= 42 && n <= 46) {
+						*consumed = true;
+						return 0x3002 + hankana2zenkana_table[n];
+					}
+				}
+
+				return 0x3000 + hankana2zenkana_table[n];
+			}
+		}
+		if ((mode & MBFL_HAN2ZEN_HIRAGANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
+			if (c >= 0xFF61 && c <= 0xFF9F) {
+				int n = c - 0xFF60;
+
+				if (next >= 0xFF61 && next <= 0xFF9F) {
+					if (next == 0xFF9E && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
+						*consumed = true;
+						return 0x3001 + hankana2zenhira_table[n];
+					}
+					if (next == 0xFF9F && n >= 42 && n <= 46) {
+						*consumed = true;
+						return 0x3002 + hankana2zenhira_table[n];
+					}
+				}
+
+				return 0x3000 + hankana2zenhira_table[n];
+			}
+		}
+		if ((mode & MBFL_HAN2ZEN_KATAKANA) && c >= 0xFF61 && c <= 0xFF9F) {
+			return 0x3000 + hankana2zenkana_table[c - 0xFF60];
+		}
+		if ((mode & MBFL_HAN2ZEN_HIRAGANA) && c >= 0xFF61 && c <= 0xFF9F) {
+			return 0x3000 + hankana2zenhira_table[c - 0xFF60];
+		}
+	}
+
+	if (mode & MBFL_HAN2ZEN_SPECIAL) { /* special ascii to symbol */
+		if (c == '\\' || c == 0xA5) { /* YEN SIGN */
+			return 0xFFE5; /* FULLWIDTH YEN SIGN */
+		}
+		if (c == 0x7E || c == 0x203E) {
+			return 0xFFE3; /* FULLWIDTH MACRON */
+		}
+		if (c == '\'') {
+			return 0x2019; /* RIGHT SINGLE QUOTATION MARK */
+		}
+		if (c == '"') {
+			return 0x201D; /* RIGHT DOUBLE QUOTATION MARK */
+		}
+	}
+
+	if (mode & (MBFL_ZEN2HAN_ALL | MBFL_ZEN2HAN_ALPHA | MBFL_ZEN2HAN_NUMERIC | MBFL_ZEN2HAN_SPACE)) {
+		/* Zenkaku to Hankaku */
+		if ((mode & MBFL_ZEN2HAN_ALL) && c >= 0xFF01 && c <= 0xFF5D && c != 0xFF02 && c != 0xFF07 && c != 0xFF3C) {
+			/* all except " ' \ ~ */
+			return c - 0xFEE0;
+		}
+		if ((mode & MBFL_ZEN2HAN_ALPHA) && ((c >= 0xFF21 && c <= 0xFF3A) || (c >= 0xFF41 && c <= 0xFF5A))) {
+			return c - 0xFEE0;
+		}
+		if ((mode & MBFL_ZEN2HAN_NUMERIC) && (c >= 0xFF10 && c <= 0xFF19)) {
+			return c - 0xFEE0;
+		}
+		if ((mode & MBFL_ZEN2HAN_SPACE) && (c == 0x3000)) {
+			return ' ';
+		}
+		if ((mode & MBFL_ZEN2HAN_ALL) && (c == 0x2212)) { /* MINUS SIGN */
+			return '-';
+		}
+	}
+
+	if (mode & (MBFL_ZEN2HAN_KATAKANA | MBFL_ZEN2HAN_HIRAGANA)) {
+		/* Zenkaku kana to hankaku kana */
+		if ((mode & MBFL_ZEN2HAN_KATAKANA) && c >= 0x30A1 && c <= 0x30F4) {
+			/* Zenkaku katakana to hankaku kana */
+			int n = c - 0x30A1;
+			if (zenkana2hankana_table[n][1]) {
+				*second = 0xFF00 + zenkana2hankana_table[n][1];
+			}
+			return 0xFF00 + zenkana2hankana_table[n][0];
+		}
+		if ((mode & MBFL_ZEN2HAN_HIRAGANA) && c >= 0x3041 && c <= 0x3093) {
+			/* Zenkaku hiragana to hankaku kana */
+			int n = c - 0x3041;
+			if (zenkana2hankana_table[n][1]) {
+				*second = 0xFF00 + zenkana2hankana_table[n][1];
+			}
+			return 0xFF00 + zenkana2hankana_table[n][0];
+		}
+		if (c == 0x3001) {
+			return 0xFF64; /* HALFWIDTH IDEOGRAPHIC COMMA */
+		}
+		if (c == 0x3002) {
+			return 0xFF61; /* HALFWIDTH IDEOGRAPHIC FULL STOP */
+		}
+		if (c == 0x300C) {
+			return 0xFF62; /* HALFWIDTH LEFT CORNER BRACKET */
+		}
+		if (c == 0x300D) {
+			return 0xFF63; /* HALFWIDTH RIGHT CORNER BRACKET */
+		}
+		if (c == 0x309B) {
+			return 0xFF9E; /* HALFWIDTH KATAKANA VOICED SOUND MARK */
+		}
+		if (c == 0x309C) {
+			return 0xff9f; /* HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK */
+		}
+		if (c == 0x30FC) {
+			return 0xFF70; /* HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK */
+		}
+		if (c == 0x30FB) {
+			return 0xFF65; /* HALFWIDTH KATAKANA MIDDLE DOT */
+		}
+	}
+
+	if (mode & (MBFL_ZENKAKU_HIRA2KATA | MBFL_ZENKAKU_KATA2HIRA)) {
+		if ((mode & MBFL_ZENKAKU_HIRA2KATA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309D || c == 0x309E)) {
+			/* Zenkaku hiragana to Zenkaku katakana */
+			return c + 0x60;
+		}
+		if ((mode & MBFL_ZENKAKU_KATA2HIRA) && ((c >= 0x30A1 && c <= 0x30F3) || c == 0x30FD || c == 0x30FE)) {
+			/* Zenkaku katakana to Zenkaku hiragana */
+			return c - 0x60;
+		}
+	}
+
+	if (mode & MBFL_ZEN2HAN_SPECIAL) { /* special symbol to ascii */
+		if (c == 0xFFE5 || c == 0xFF3C) { /* FULLWIDTH YEN SIGN/FULLWIDTH REVERSE SOLIDUS */
+			return '\\';
+		}
+		if (c == 0xFFE3 || c == 0x203E) { /* FULLWIDTH MACRON/OVERLINE */
+			return '~';
+		}
+		if (c == 0x2018 || c == 0x2019) { /* LEFT/RIGHT SINGLE QUOTATION MARK*/
+			return '\'';
+		}
+		if (c == 0x201C || c == 0x201D) { /* LEFT/RIGHT DOUBLE QUOTATION MARK */
+			return '"';
+		}
+	}
+
+	return c;
+}
+
+static zend_string* jp_kana_convert(zend_string *input, const mbfl_encoding *encoding, unsigned int mode)
+{
+	/* Each wchar may potentially expand to 2 when we perform kana conversion...
+	 * if we are converting zenkaku kana to hankaku kana
+	 * Make the buffer for converted kana big enough that we never need to
+	 * perform bounds checks */
+	uint32_t wchar_buf[64], converted_buf[64 * 2];
+	unsigned int buf_offset = 0;
+	unsigned int state = 0;
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, in_len, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+	while (in_len) {
+		uint32_t *converted = converted_buf;
+		/* If one codepoint has been left in wchar_buf[0] to be reprocessed from the
+		 * previous iteration, don't overwrite it */
+		size_t out_len = encoding->to_wchar(&in, &in_len, wchar_buf + buf_offset, 64 - buf_offset, &state);
+		out_len += buf_offset;
+		ZEND_ASSERT(out_len <= 64);
+
+		if (!out_len) {
+			continue;
+		}
+
+		for (int i = 0; i < out_len-1; i++) {
+			uint32_t second = 0;
+			bool consumed = false;
+			*converted++ = mb_convert_kana_codepoint(wchar_buf[i], wchar_buf[i+1], &consumed, &second, mode);
+			if (second) {
+				*converted++ = second;
+			}
+			if (consumed) {
+				i++;
+				if (i == out_len-1) {
+					/* We consumed two codepoints at the very end of the wchar buffer
+					 * So there is nothing remaining to reprocess on the next iteration */
+					buf_offset = 0;
+					goto emit_converted_kana;
+				}
+			}
+		}
+
+		if (!in_len) {
+			/* This is the last iteration, so we need to process the final codepoint now */
+			uint32_t second = 0;
+			*converted++ = mb_convert_kana_codepoint(wchar_buf[out_len-1], 0, NULL, &second, mode);
+			if (second) {
+				*converted++ = second;
+			}
+		} else {
+			/* Reprocess the last codepoint on the next iteration */
+			wchar_buf[0] = wchar_buf[out_len-1];
+			buf_offset = 1;
+		}
+
+emit_converted_kana:
+		encoding->from_wchar(converted_buf, converted - converted_buf, &buf, !in_len);
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
 char mb_convert_kana_flags[17] = {
 	'A', 'R', 'N', 'S', 'K', 'H', 'M', 'C',
 	'a', 'r', 'n', 's', 'k', 'h', 'm', 'c',
 	'V'
 };
 
-/* {{{ Conversion between full-width character and half-width character (Japanese) */
+/* Conversion between full-width characters and half-width characters (Japanese) */
 PHP_FUNCTION(mb_convert_kana)
 {
-	int opt;
-	mbfl_string string, result, *ret;
-	char *optstr = NULL, *string_val;
+	unsigned int opt;
+	char *optstr = NULL;
 	size_t optstr_len;
-	zend_string *encname = NULL;
+	zend_string *encname = NULL, *str;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(string_val, string.len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(optstr, optstr_len)
 		Z_PARAM_STR_OR_NULL(encname)
 	ZEND_PARSE_PARAMETERS_END();
-
-	string.val = (unsigned char*)string_val;
 
 	if (optstr != NULL) {
 		char *p = optstr, *e = p + optstr_len;
@@ -2868,7 +3122,7 @@ PHP_FUNCTION(mb_convert_kana)
 next_option:
 		while (p < e) {
 			/* Walk through option string and convert to bit vector
-			 * See mbfilter_tl_jisx0201_jisx0208.h for the values used */
+			 * See translit_kana_jisx0201_jisx0208.h for the values used */
 			char c = *p++;
 			if (c == 'A') {
 				opt |= MBFL_HAN2ZEN_ALL | MBFL_HAN2ZEN_ALPHA | MBFL_HAN2ZEN_NUMERIC;
@@ -2936,19 +3190,13 @@ next_option:
 		opt = MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE;
 	}
 
-	/* encoding */
-	string.encoding = php_mb_get_encoding(encname, 3);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(encname, 3);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	ret = mbfl_ja_jp_hantozen(&string, &result, opt);
-	ZEND_ASSERT(ret != NULL);
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len);		/* the string is already strdup()'ed */
-	efree(ret->val);
+	RETVAL_STR(jp_kana_convert(str, enc, opt));
 }
-/* }}} */
 
 static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zval *var, int *recursion_error) /* {{{ */
 {

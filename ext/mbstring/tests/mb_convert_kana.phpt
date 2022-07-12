@@ -132,6 +132,17 @@ try {
   echo $e->getMessage() . "\n";
 }
 
+// Regression test: Two codepoints collapsed into one, just one position
+// before the end of the string
+$converted = mb_convert_kana("\xb9\xde\xde", 'HV', 'JIS');
+if ($converted !== "\x1b\$B\$2!+\x1b(B")
+  echo "Failed! Expected " . bin2hex("\x1b\$B\$2!+\x1b(B") . ", got: " . bin2hex($converted) . "\n";
+
+// Regression test: the old implementation of mb_convert_kana would swallow
+// zero bytes in some cases
+if (mb_convert_kana("abc\x00abc", 'c', 'ASCII') !== "abc\x00abc")
+  echo "mb_convert_kana is swallowing zero bytes!\n";
+
 ?>
 --EXPECT--
 'A': ァアィイゥウェエォオカガキギク => ァアィイゥウェエォオカガキギク

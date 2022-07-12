@@ -118,7 +118,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/filters/mbfilter_sjis_mobile.c
     libmbfl/filters/mbfilter_sjis_mac.c
     libmbfl/filters/mbfilter_sjis_2004.c
-    libmbfl/filters/mbfilter_tl_jisx0201_jisx0208.c
     libmbfl/filters/mbfilter_ucs2.c
     libmbfl/filters/mbfilter_ucs4.c
     libmbfl/filters/mbfilter_uhc.c

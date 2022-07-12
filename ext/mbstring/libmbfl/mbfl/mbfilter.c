@@ -91,7 +91,6 @@
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_singlebyte.h"
-#include "filters/mbfilter_tl_jisx0201_jisx0208.h"
 #include "filters/mbfilter_utf8.h"
 
 #include "eaw_table.h"
@@ -1387,86 +1386,6 @@ mbfl_strimwidth(
 	mbfl_convert_filter_delete(encoder);
 	mbfl_convert_filter_delete(pc.decoder);
 	mbfl_convert_filter_delete(pc.decoder_backup);
-
-	return result;
-}
-
-mbfl_string *
-mbfl_ja_jp_hantozen(
-    mbfl_string *string,
-    mbfl_string *result,
-    int mode)
-{
-	size_t n;
-	unsigned char *p;
-	mbfl_memory_device device;
-	mbfl_convert_filter *decoder = NULL;
-	mbfl_convert_filter *encoder = NULL;
-	mbfl_convert_filter *tl_filter = NULL;
-	mbfl_convert_filter *next_filter = NULL;
-
-	mbfl_memory_device_init(&device, string->len, 0);
-	mbfl_string_init(result);
-
-	result->encoding = string->encoding;
-
-	decoder = mbfl_convert_filter_new(
-		&mbfl_encoding_wchar,
-		string->encoding,
-		mbfl_memory_device_output, 0, &device);
-	if (decoder == NULL) {
-		goto out;
-	}
-	next_filter = decoder;
-
-	tl_filter = mbfl_convert_filter_new2(
-		&vtbl_tl_jisx0201_jisx0208,
-		(int(*)(int, void*))next_filter->filter_function,
-		(flush_function_t)next_filter->filter_flush,
-		next_filter);
-	if (tl_filter == NULL) {
-		goto out;
-	}
-
-	tl_filter->opaque = (void*)((intptr_t)mode);
-	next_filter = tl_filter;
-
-	encoder = mbfl_convert_filter_new(
-		string->encoding,
-		&mbfl_encoding_wchar,
-		(int(*)(int, void*))next_filter->filter_function,
-		(flush_function_t)next_filter->filter_flush,
-		next_filter);
-	if (encoder == NULL) {
-		goto out;
-	}
-
-	/* feed data */
-	p = string->val;
-	n = string->len;
-	if (p != NULL) {
-		while (n > 0) {
-			if ((*encoder->filter_function)(*p++, encoder) < 0) {
-				break;
-			}
-			n--;
-		}
-	}
-
-	mbfl_convert_filter_flush(encoder);
-	result = mbfl_memory_device_result(&device, result);
-out:
-	if (tl_filter != NULL) {
-		mbfl_convert_filter_delete(tl_filter);
-	}
-
-	if (decoder != NULL) {
-		mbfl_convert_filter_delete(decoder);
-	}
-
-	if (encoder != NULL) {
-		mbfl_convert_filter_delete(encoder);
-	}
 
 	return result;
 }
