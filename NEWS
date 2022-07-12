@@ -32,6 +32,8 @@ PHP                                                                        NEWS
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
     notation to int. (Dennis Snell)
+  . Enable arc4random_buf for Linux glibc 2.36 and onwards
+    for the random_bytes. (Cristian Rodriguez)
 
 07 Jul 2022, PHP 8.2.0alpha3
 
