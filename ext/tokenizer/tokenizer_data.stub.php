@@ -334,6 +334,16 @@ const T_PRIVATE = UNKNOWN;
 const T_PROTECTED = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_PRIVATE_SET
+ */
+const T_PRIVATE_SET = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_PROTECTED_SET
+ */
+const T_PROTECTED_SET = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_PUBLIC
  */
 const T_PUBLIC = UNKNOWN;

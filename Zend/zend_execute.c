@@ -879,6 +879,32 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modificati
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(
+	zend_property_info *prop_info, const char *operation
+) {
+	zend_class_entry *scope;
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_called_scope(EG(current_execute_data));
+	}
+
+	const char *visibility;
+	if (prop_info->flags & ZEND_ACC_PRIVATE_SET) {
+		visibility = "private(set)";
+	} else {
+		ZEND_ASSERT(prop_info->flags & ZEND_ACC_PROTECTED_SET);
+		visibility = "protected(set)";
+	}
+
+	zend_throw_error(NULL, "Cannot %s %s property %s::$%s from %s%s",
+		operation,
+		visibility,
+		ZSTR_VAL(prop_info->ce->name),
+		ZSTR_VAL(prop_info->name),
+		scope ? "scope " : "global scope", scope ? ZSTR_VAL(scope->name) : "");
+}
+
 static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return self_ce;
@@ -3130,6 +3156,18 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 							ZVAL_ERROR(result);
 						}
 						return;
+					}
+
+					if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK)) {
+						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
+						if (!zend_asymmetric_property_has_set_access(prop_info, zobj->ce)) {
+							if (Z_TYPE_P(ptr) == IS_OBJECT) {
+								ZVAL_COPY(result, ptr);
+							} else {
+								zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
+							}
+							return;
+						}
 					}
 					flags &= ZEND_FETCH_OBJ_FLAGS;
 					if (flags) {

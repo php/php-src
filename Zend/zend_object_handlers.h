@@ -247,6 +247,8 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
  * consumers of the get_properties_for API. */
 ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose);
 
+ZEND_API int zend_is_protected_compatible_scope(zend_class_entry *ce, zend_class_entry *scope);
+
 #define zend_release_properties(ht) do { \
 	if ((ht) && !(GC_FLAGS(ht) & GC_IMMUTABLE) && !GC_DELREF(ht)) { \
 		zend_array_destroy(ht); \
