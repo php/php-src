@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Added access.suppress_path pool option to filter access log entries.
     (Mark Gallagher)
 
+- PCRE:
+  . Updated bundled libpcre to 10.40. (cmb)
+
 - PDO_Firebird:
   . Fixed GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
 
