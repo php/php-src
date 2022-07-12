@@ -1,7 +1,9 @@
 <?php
 
-/** @generate-class-entries static */
-
+/**
+ * @generate-class-entries static
+ * @generate-legacy-arginfo 80000
+ */
 namespace {
 
     require "Zend/zend_attributes.stub.php";
@@ -137,7 +139,8 @@ namespace {
 namespace ZendTestNS {
 
     class Foo {
-        public function method(): void {}
+        /** @tentative-return-type */
+        public function method(): int {}
     }
 
 }
