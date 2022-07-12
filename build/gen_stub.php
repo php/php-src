@@ -2572,7 +2572,7 @@ class ClassInfo {
             }
         }
 
-        if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond, $allConstInfos)) {
+        if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $allConstInfos, $this->cond)) {
             if (!$php82MinimumCompatibility) {
                 $code .= "#if (PHP_VERSION_ID >= " . PHP_82_VERSION_ID . ")\n";
             }
@@ -3968,7 +3968,7 @@ function generateArgInfoCode(
     }
 
     if ($fileInfo->generateClassEntries) {
-        $attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, null, $allConstInfos);
+        $attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, $allConstInfos, null);
 
         if ($attributeInitializationCode !== "" || !empty($fileInfo->constInfos)) {
             $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
@@ -4035,7 +4035,7 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
 /**
  * @param iterable<FuncInfo> $funcInfos
  */
-function generateAttributeInitialization(iterable $funcInfos, ?string $parentCond = null, iterable $allConstInfos): string {
+function generateAttributeInitialization(iterable $funcInfos, iterable $allConstInfos, ?string $parentCond = null): string {
     return generateCodeWithConditions(
         $funcInfos,
         "",
