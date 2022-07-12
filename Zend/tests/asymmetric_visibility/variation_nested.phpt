@@ -1,5 +1,5 @@
 --TEST--
-Readonly nested variations
+Asymmetric visibility nested variations
 --FILE--
 <?php
 
@@ -9,7 +9,7 @@ class Inner {
 }
 
 class Test {
-    public readonly Inner $prop;
+    public private(set) Inner $prop;
 
     public function init() {
         $this->prop = new Inner();
@@ -76,9 +76,9 @@ Init: 1, op: is: 1
 Init: 1, op: us: done
 Init: 1, op: us_dim: done
 Init: 0, op: r: Typed property Test::$prop must not be accessed before initialization
-Init: 0, op: w: Cannot indirectly modify readonly property Test::$prop
+Init: 0, op: w: Cannot indirectly modify private(set) property Test::$prop from global scope
 Init: 0, op: rw: Typed property Test::$prop must not be accessed before initialization
-Init: 0, op: im: Cannot indirectly modify readonly property Test::$prop
+Init: 0, op: im: Cannot indirectly modify private(set) property Test::$prop from global scope
 Init: 0, op: is: 0
 Init: 0, op: us: done
 Init: 0, op: us_dim: done

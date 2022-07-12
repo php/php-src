@@ -212,6 +212,18 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
+char *zend_asymmetric_visibility_string(uint32_t fn_flags) /* {{{ */
+{
+	if (fn_flags & ZEND_ACC_PRIVATE_SET) {
+		return "private(set)";
+	} else if (fn_flags & ZEND_ACC_PROTECTED_SET) {
+		return "protected(set)";
+	} else {
+		ZEND_ASSERT(!(fn_flags & ZEND_ACC_PPP_SET_MASK));
+		return "omitted";
+	}
+}
+
 static zend_string *resolve_class_name(zend_class_entry *scope, zend_string *name) {
 	ZEND_ASSERT(scope);
 	if (zend_string_equals_literal_ci(name, "parent") && scope->parent) {
@@ -1440,6 +1452,27 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 						ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key),
 						child_info->flags & ZEND_ACC_READONLY ? "readonly" : "non-readonly",
 						ZSTR_VAL(ce->name), ZSTR_VAL(key));
+				}
+			}
+			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_SET_MASK))
+			 /* Get-only virtual properties have no set visibility, so any child visibility is fine. */
+			 && (!parent_info->hooks
+			  || !(parent_info->flags & ZEND_ACC_VIRTUAL)
+			  || parent_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
+				uint32_t parent_set_mask = parent_info->flags & ZEND_ACC_PPP_SET_MASK;
+				/* Adding set protection is fine if it's the same or weaker than
+				 * the parents full property visibility. */
+				if (!parent_set_mask && (parent_info->flags & ZEND_ACC_PROTECTED)) {
+					parent_set_mask = ZEND_ACC_PROTECTED_SET;
+				}
+				uint32_t child_set_mask = child_info->flags & ZEND_ACC_PPP_SET_MASK;
+				if (child_set_mask > parent_set_mask) {
+					zend_error_noreturn(
+						E_COMPILE_ERROR,
+						"Set access level of %s::$%s must be %s (as in class %s)%s",
+						ZSTR_VAL(ce->name), ZSTR_VAL(key),
+						zend_asymmetric_visibility_string(parent_info->flags), ZSTR_VAL(parent_info->ce->name),
+						!(parent_info->flags & ZEND_ACC_PPP_SET_MASK) ? "" : " or weaker");
 				}
 			}
 
