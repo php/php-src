@@ -1,5 +1,5 @@
 --TEST--
-pcntl_getpriority() - Wrong mode passed
+pcntl_getpriority() - Wrong mode passed and also for non existing process id provided
 --EXTENSIONS--
 pcntl
 --SKIPIF--
@@ -18,6 +18,10 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+pcntl_getpriority(-123);
+
 ?>
---EXPECT--
+--EXPECTF--
 pcntl_getpriority(): Argument #2 ($mode) must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS
+
+Warning: pcntl_getpriority(): Error 3: No process was located using the given parameters in %s
