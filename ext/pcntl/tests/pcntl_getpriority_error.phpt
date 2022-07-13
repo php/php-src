@@ -1,5 +1,5 @@
 --TEST--
-pcntl_getpriority() - Wrong process identifier
+pcntl_getpriority() - Wrong mode passed
 --EXTENSIONS--
 pcntl
 --SKIPIF--
@@ -13,7 +13,7 @@ if (!function_exists('pcntl_getpriority')) {
 <?php
 
 try {
-    pcntl_getpriority(null, 42);
+    pcntl_getpriority(null, (PRIO_PGRP - PRIO_USER - PRIO_PROCESS));
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
