@@ -2335,7 +2335,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 					  !WIFSIGNALED(php_cli_server_worker_status));
 		}
 
-		free(php_cli_server_workers);
+		pefree(php_cli_server_workers, 1);
 	}
 #endif
 } /* }}} */
@@ -2421,12 +2421,8 @@ static void php_cli_server_startup_workers(void) {
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;
 
-		php_cli_server_workers = calloc(
-			php_cli_server_workers_max, sizeof(pid_t));
-		if (!php_cli_server_workers) {
-			php_cli_server_workers_max = 1;
-			return;
-		}
+		php_cli_server_workers = pecalloc(
+			php_cli_server_workers_max, sizeof(pid_t), 1);
 
 		php_cli_server_master = getpid();
 
