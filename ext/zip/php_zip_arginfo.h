@@ -531,20 +531,14 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string_release(property_comment_name);
 
 
-	zend_string *attribute_name_SensitiveParameter_ZipArchive_setPassword_arg0 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setpassword", sizeof("setpassword") - 1), 0, attribute_name_SensitiveParameter_ZipArchive_setPassword_arg0, 0);
-	zend_string_release(attribute_name_SensitiveParameter_ZipArchive_setPassword_arg0);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setpassword", sizeof("setpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #if defined(HAVE_ENCRYPTION)
 
-	zend_string *attribute_name_SensitiveParameter_ZipArchive_setEncryptionName_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setencryptionname", sizeof("setencryptionname") - 1), 2, attribute_name_SensitiveParameter_ZipArchive_setEncryptionName_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_ZipArchive_setEncryptionName_arg2);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setencryptionname", sizeof("setencryptionname") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_ENCRYPTION)
 
-	zend_string *attribute_name_SensitiveParameter_ZipArchive_setEncryptionIndex_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setencryptionindex", sizeof("setencryptionindex") - 1), 2, attribute_name_SensitiveParameter_ZipArchive_setEncryptionIndex_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_ZipArchive_setEncryptionIndex_arg2);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setencryptionindex", sizeof("setencryptionindex") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 
 	return class_entry;

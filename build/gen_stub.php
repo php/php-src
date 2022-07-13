@@ -2373,11 +2373,19 @@ class AttributeInfo {
 
     /** @param iterable<ConstInfo> $allConstInfos */
     public function generateCode(string $invocation, string $nameSuffix, iterable $allConstInfos): string {
+        /* see ZEND_KNOWN_STRINGS in Zend/strings.h */
+        static $knowns = [
+            "SensitiveParameter" => "ZEND_STR_SENSITIVEPARAMETER",
+        ];
         $code = "\n";
         $escapedAttributeName = strtr($this->class, '\\', '_');
-        $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
-        $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
-        $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
+        if (isset($knowns[$escapedAttributeName])) {
+            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, ZSTR_KNOWN({$knowns[$escapedAttributeName]}), " . count($this->args) . ");\n";
+        } else {
+            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
+            $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
+            $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
+        }
         foreach ($this->args as $i => $arg) {
             $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
             $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";

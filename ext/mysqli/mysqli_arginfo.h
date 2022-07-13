@@ -1046,17 +1046,11 @@ static const zend_function_entry class_mysqli_sql_exception_methods[] = {
 static void register_mysqli_symbols(int module_number)
 {
 
-	zend_string *attribute_name_SensitiveParameter_mysqli_change_user_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_change_user", sizeof("mysqli_change_user") - 1), 2, attribute_name_SensitiveParameter_mysqli_change_user_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_mysqli_change_user_arg2);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_change_user", sizeof("mysqli_change_user") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_string *attribute_name_SensitiveParameter_mysqli_connect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_connect", sizeof("mysqli_connect") - 1), 2, attribute_name_SensitiveParameter_mysqli_connect_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_mysqli_connect_arg2);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_connect", sizeof("mysqli_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_string *attribute_name_SensitiveParameter_mysqli_real_connect_arg3 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_real_connect", sizeof("mysqli_real_connect") - 1), 3, attribute_name_SensitiveParameter_mysqli_real_connect_arg3, 0);
-	zend_string_release(attribute_name_SensitiveParameter_mysqli_real_connect_arg3);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_real_connect", sizeof("mysqli_real_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 }
 
 static zend_class_entry *register_class_mysqli_driver(void)
@@ -1210,21 +1204,13 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_string_release(property_warning_count_name);
 
 
-	zend_string *attribute_name_SensitiveParameter_mysqli___construct_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, attribute_name_SensitiveParameter_mysqli___construct_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_mysqli___construct_arg2);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_string *attribute_name_SensitiveParameter_mysqli_change_user_arg1 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "change_user", sizeof("change_user") - 1), 1, attribute_name_SensitiveParameter_mysqli_change_user_arg1, 0);
-	zend_string_release(attribute_name_SensitiveParameter_mysqli_change_user_arg1);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "change_user", sizeof("change_user") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_string *attribute_name_SensitiveParameter_mysqli_connect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, attribute_name_SensitiveParameter_mysqli_connect_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_mysqli_connect_arg2);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
-	zend_string *attribute_name_SensitiveParameter_mysqli_real_connect_arg2 = zend_string_init("SensitiveParameter", sizeof("SensitiveParameter") - 1, 1);
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, attribute_name_SensitiveParameter_mysqli_real_connect_arg2, 0);
-	zend_string_release(attribute_name_SensitiveParameter_mysqli_real_connect_arg2);
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }
