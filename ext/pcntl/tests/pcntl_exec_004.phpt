@@ -19,10 +19,7 @@ try {
 } catch (Error $error) {
     echo $error->getMessage() . "\n";
 }
-
-echo "ok\n";
 ?>
 --EXPECT--
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
-ok
