@@ -22,7 +22,7 @@ var_dump($result);
 foreach ([CLONE_NEWNS, CLONE_NEWIPC , CLONE_NEWUTS , CLONE_NEWNET, CLONE_NEWPID ,CLONE_NEWUSER, CLONE_NEWCGROUP] as $flag) {
     $result = @pcntl_unshare($flag);
     var_dump($result);
-    $result = NULL;
+    $result = null;
 }
 
 ?>
