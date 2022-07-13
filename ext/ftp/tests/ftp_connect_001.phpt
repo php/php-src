@@ -2,11 +2,9 @@
 ftp_connect - return FALSE if connection fails and Waning is generated
 --EXTENSIONS--
 ftp
---INI--
-max_execution_time=2
 --FILE--
 <?php
-$ftp = ftp_connect('dummy-host-name', 21);
+$ftp = ftp_connect('dummy-host-name', 21, 5);
 var_dump($ftp);
 ?>
 --EXPECTF--
