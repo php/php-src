@@ -1,0 +1,14 @@
+--TEST--
+ftp_connect - return FALSE if connection fails and Waning is generated
+--EXTENSIONS--
+ftp
+--INI--
+max_execution_time=2
+--FILE--
+<?php
+$ftp = ftp_connect('dummy-host-name', 21);
+var_dump($ftp);
+?>
+--EXPECTF--
+Warning: ftp_connect(): php_network_getaddresses: getaddrinfo for dummy-host-name failed: Temporary failure in name resolution %s
+bool(false)
