@@ -1,5 +1,5 @@
 --TEST--
-pcntl_setpriority() - Wrong process identifier
+pcntl_setpriority() - check for errors
 --EXTENSIONS--
 pcntl
 --SKIPIF--
@@ -12,12 +12,22 @@ if (!function_exists('pcntl_setpriority')) {
 --FILE--
 <?php
 
+$result = true;
 try {
-    pcntl_setpriority(0, null, 42);
+    $result = pcntl_setpriority(0, null, (PRIO_PGRP - PRIO_USER - PRIO_PROCESS));
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
+var_dump($result);
 
+pcntl_setpriority(0, -123);
+
+pcntl_setpriority(0, 1);
 ?>
---EXPECT--
+--EXPECTF--
 pcntl_setpriority(): Argument #3 ($mode) must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS
+bool(true)
+
+Warning: pcntl_setpriority(): Error 3: No process was located using the given parameters in %s
+
+Warning: pcntl_setpriority(): Error 1: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller in %s
