@@ -6,7 +6,7 @@ pcntl
 <?php
 
 try {
-    pcntl_signal(SIGTERM, (SIG_DFL - SIG_IGN - 1));
+    pcntl_signal(SIGTERM, 0);
 } catch (Error $error) {
     echo $error->getMessage();
 }
