@@ -511,14 +511,14 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 static void dom_copy_prop_handler(zval *zv) /* {{{ */
 {
 	dom_prop_handler *hnd = Z_PTR_P(zv);
-	Z_PTR_P(zv) = malloc(sizeof(dom_prop_handler));
+	Z_PTR_P(zv) = pemalloc(sizeof(dom_prop_handler), 1);
 	memcpy(Z_PTR_P(zv), hnd, sizeof(dom_prop_handler));
 }
 /* }}} */
 
 static void dom_dtor_prop_handler(zval *zv) /* {{{ */
 {
-	free(Z_PTR_P(zv));
+	pefree(Z_PTR_P(zv), 1);
 }
 
 static const zend_module_dep dom_deps[] = {
