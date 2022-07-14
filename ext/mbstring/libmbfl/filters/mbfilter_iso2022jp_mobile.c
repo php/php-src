@@ -29,7 +29,6 @@
 
 #include "mbfilter.h"
 #include "mbfilter_iso2022jp_mobile.h"
-#include "mbfilter_sjis_mobile.h"
 
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
@@ -39,10 +38,26 @@
 static size_t mb_iso2022jp_kddi_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_iso2022jp_kddi(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
+static int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter);
+static int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_2022jp_mobile_wchar_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_wchar_2022jp_mobile_flush(mbfl_convert_filter *filter);
 
 extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
+
+/* Regional Indicator Unicode codepoints are from 0x1F1E6-0x1F1FF
+ * These correspond to the letters A-Z
+ * To display the flag emoji for a country, two unicode codepoints are combined,
+ * which correspond to the two-letter code for that country
+ * This macro converts uppercase ASCII values to Regional Indicator codepoints */
+#define NFLAGS(c) (0x1F1A5+((unsigned int)(c)))
+
+static const char nflags_s[10][2] = {
+	"CN","DE","ES","FR","GB","IT","JP","KR","RU","US"
+};
+static const int nflags_code_kddi[10] = {
+	0x2549, 0x2546, 0x24C0, 0x2545, 0x2548, 0x2547, 0x2750, 0x254A, 0x24C1, 0x27F7
+};
 
 static const char *mbfl_encoding_2022jp_kddi_aliases[] = {"ISO-2022-JP-KDDI", NULL};
 
@@ -125,7 +140,53 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jp_kddi = {
 #define JISX0201_KANA  0x20
 #define JISX0208_KANJI 0x80
 
-int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
+#define EMIT_KEYPAD_EMOJI(c) do { *snd = (c); return 0x20E3; } while(0)
+#define EMIT_FLAG_EMOJI(country) do { *snd = NFLAGS((country)[0]); return NFLAGS((country)[1]); } while(0)
+
+static const char nflags_kddi[6][2] = {"FR", "DE", "IT", "GB", "CN", "KR"};
+
+static inline int convert_emoji_cp(int cp)
+{
+	if (cp > 0xF000)
+		return cp + 0x10000;
+	if (cp > 0xE000)
+		return cp + 0xF0000;
+	return cp;
+}
+
+static int mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
+{
+	if (s >= mb_tbl_code2uni_kddi1_min && s <= mb_tbl_code2uni_kddi1_max) {
+		if (s == 0x24C0) { /* Spain */
+			EMIT_FLAG_EMOJI("ES");
+		} else if (s == 0x24C1) { /* Russia */
+			EMIT_FLAG_EMOJI("RU");
+		} else if (s >= 0x2545 && s <= 0x254A) {
+			EMIT_FLAG_EMOJI(nflags_kddi[s - 0x2545]);
+		} else if (s == 0x25BC) {
+			EMIT_KEYPAD_EMOJI('#');
+		} else {
+			*snd = 0;
+			return convert_emoji_cp(mb_tbl_code2uni_kddi1[s - mb_tbl_code2uni_kddi1_min]);
+		}
+	} else if (s >= mb_tbl_code2uni_kddi2_min && s <= mb_tbl_code2uni_kddi2_max) {
+		if (s == 0x2750) { /* Japan */
+			EMIT_FLAG_EMOJI("JP");
+		} else if (s >= 0x27A6 && s <= 0x27AE) {
+			EMIT_KEYPAD_EMOJI(s - 0x27A6 + '1');
+		} else if (s == 0x27F7) { /* United States */
+			EMIT_FLAG_EMOJI("US");
+		} else if (s == 0x2830) {
+			EMIT_KEYPAD_EMOJI('0');
+		} else {
+			*snd = 0;
+			return convert_emoji_cp(mb_tbl_code2uni_kddi2[s - mb_tbl_code2uni_kddi2_min]);
+		}
+	}
+	return 0;
+}
+
+static int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
 	int c1, s, w, snd = 0;
 
@@ -260,7 +321,67 @@ static int mbfl_filt_conv_2022jp_mobile_wchar_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
+static int mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter)
+{
+	if ((filter->status & 0xF) == 1) {
+		int c1 = filter->cache;
+		filter->cache = 0;
+		filter->status &= ~0xFF;
+		if (c == 0x20E3) {
+			if (c1 == '#') {
+				*s1 = 0x25BC;
+			} else if (c1 == '0') {
+				*s1 = 0x2830;
+			} else { /* Previous character was '1'-'9' */
+				*s1 = 0x27A6 + (c1 - '1');
+			}
+			return 1;
+		} else {
+			if (filter->status & 0xFF00) {
+				CK((*filter->output_function)(0x1B, filter->data)); /* ESC */
+				CK((*filter->output_function)('(', filter->data));
+				CK((*filter->output_function)('B', filter->data));
+			}
+			CK((*filter->output_function)(c1, filter->data));
+			filter->status = 0;
+		}
+	}
+
+	if (c == '#' || (c >= '0' && c <= '9')) {
+		filter->status |= 1;
+		filter->cache = c;
+		return 0;
+	}
+
+	if (c == 0xA9) { /* Copyright sign */
+		*s1 = 0x27DC;
+		return 1;
+	} else if (c == 0xAE) { /* Registered sign */
+		*s1 = 0x27DD;
+		return 1;
+	} else if (c >= mb_tbl_uni_kddi2code2_min && c <= mb_tbl_uni_kddi2code2_max) {
+		int i = mbfl_bisec_srch2(c, mb_tbl_uni_kddi2code2_key, mb_tbl_uni_kddi2code2_len);
+		if (i >= 0) {
+			*s1 = mb_tbl_uni_kddi2code2_value[i];
+			return 1;
+		}
+	} else if (c >= mb_tbl_uni_kddi2code3_min && c <= mb_tbl_uni_kddi2code3_max) {
+		int i = mbfl_bisec_srch2(c - 0x10000, mb_tbl_uni_kddi2code3_key, mb_tbl_uni_kddi2code3_len);
+		if (i >= 0) {
+			*s1 = mb_tbl_uni_kddi2code3_value[i];
+			return 1;
+		}
+	} else if (c >= mb_tbl_uni_kddi2code5_min && c <= mb_tbl_uni_kddi2code5_max) {
+		int i = mbfl_bisec_srch2(c - 0xF0000, mb_tbl_uni_kddi2code5_key, mb_tbl_uni_kddi2code5_len);
+		if (i >= 0) {
+			*s1 = mb_tbl_uni_kddi2code5_val[i];
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 {
 	int c1, c2, s1 = 0, s2 = 0;
 
@@ -293,11 +414,10 @@ int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 	}
 
 	if (mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter)) {
+		/* A KDDI emoji was detected and stored in s1 */
 		CODE2JIS(c1,c2,s1,s2);
 		s1 -= 0x1600;
-	}
-
-	if (filter->status == 1 && filter->cache) {
+	} else if ((filter->status & 0xFF) == 1 && filter->cache) {
 		/* We are just processing one of KDDI's special emoji for a phone keypad button */
 		return 0;
 	}
@@ -360,7 +480,7 @@ static int mbfl_filt_conv_wchar_2022jp_mobile_flush(mbfl_convert_filter *filter)
 	}
 
 	int c1 = filter->cache;
-	if (filter->status == 1 && (c1 == '#' || (c1 >= '0' && c1 <= '9'))) {
+	if ((filter->status & 0xFF) == 1 && (c1 == '#' || (c1 >= '0' && c1 <= '9'))) {
 		(*filter->output_function)(c1, filter->data);
 	}
 
@@ -483,20 +603,6 @@ static size_t mb_iso2022jp_kddi_to_wchar(unsigned char **in, size_t *in_len, uin
 	*in = p;
 	return out - buf;
 }
-
-/* Regional Indicator Unicode codepoints are from 0x1F1E6-0x1F1FF
- * These correspond to the letters A-Z
- * To display the flag emoji for a country, two unicode codepoints are combined,
- * which correspond to the two-letter code for that country
- * This macro converts uppercase ASCII values to Regional Indicator codepoints */
-#define NFLAGS(c) (0x1F1A5+((unsigned int)(c)))
-
-static const char nflags_s[10][2] = {
-	"CN","DE","ES","FR","GB","IT","JP","KR","RU","US"
-};
-static const int nflags_code_kddi[10] = {
-	0x2549, 0x2546, 0x24C0, 0x2545, 0x2548, 0x2547, 0x2750, 0x254A, 0x24C1, 0x27F7
-};
 
 static void mb_wchar_to_iso2022jp_kddi(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
 {
