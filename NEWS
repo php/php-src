@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.9
 
+- CLI:
+  . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
+    environment variable. (yiyuaner)
+
 - Core:
   . Fixed bug GH-8923 (error_log on Windows can hold the file write lock). (cmb)
 
