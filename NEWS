@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - CLI:
   . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
+  . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
+    environment variable. (yiyuaner)
 
 - Core:
   . Reduced the memory footprint of strings returned by var_export(),
