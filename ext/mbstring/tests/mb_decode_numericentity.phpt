@@ -93,33 +93,28 @@ test("More than 8 digits for hex entity", "&#x000000141;", "&#x000000141;", [0, 
 
 test("Single &", "&", "&", [0, 0xFFFF, 0, 0xFFFF], "ASCII");
 
-// We don't allow an entity to come right after a preceding ampersand
-// (This is for compatibility with the legacy behavior of mb_decode_numericentity)
-test("Successive &", "&&#2,", "&&#2,", [0xffe9ade7, 0x6237b6ff, 0xaa597469, 0x612800], 'ASCII');
+// An entity can come right after a preceding ampersand
+test("Successive &", "&&#65,", "&A,", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
-// We don't allow an entity to come right after a preceding &#
-// (Also for compatibility with the legacy behavior of mb_decode_numericentity)
-test("Successive &#", "&#&#x32;", "&#&#x32;", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
-test("Successive &#x", "&#x&#x32;", "&#x&#x32;", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
+// An entity can come right after a preceding &#
+test("Successive &#", "&#&#x32;", "&#2", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
+test("Successive &#x", "&#x&#x32;", "&#x2", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
-// Don't allow the starting & of an entity to terminate a preceding entity
-// (Also for compatibility with the legacy behavior of mb_decode_numericentity)
-test("Successive &#65", "&#65&#65;", "A&#65;", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
+// The starting & of an entity can terminate a preceding entity
+test("Successive &#65", "&#65&#65;", "AA", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
+test("Successive hex entities", "&#x32&#x32;", "22", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
-// An entity CAN come right after an entity which is invalid because of being too long
+// An entity can come right after an entity which is invalid because of being too long
 test("Starting entity immediately after decimal entity which is too long", "&#10000000000&#65;", "&#10000000000A", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 test("Starting entity immediately after hex entity which is too long", "&#x111111111&#65;", "&#x111111111A", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
-// The second entity is not accepted here, because it terminates a preceding entity
-// (To test entities which are as large as possible without being too large, we need to use UCS-4;
-// any other encoding would not allow codepoints that large)
 $ucs4_test1 = mb_convert_encoding("&#1000000000&#65;", 'UCS-4BE', 'ASCII');
-testNonAscii("Starting entity immediately after valid decimal entity which is just within maximum length", $ucs4_test1, "\x3B\x9A\xCA\x00\x00\x00\x00&\x00\x00\x00#\x00\x00\x006\x00\x00\x005\x00\x00\x00;", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'UCS-4BE');
+testNonAscii("Starting entity immediately after valid decimal entity which is just within maximum length", $ucs4_test1, "\x3B\x9A\xCA\x00\x00\x00\x00A", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'UCS-4BE');
 $ucs4_test2 = mb_convert_encoding("&#x11111111&#65;", 'UCS-4BE', 'ASCII');
-testNonAscii("Starting entity immediately after valid hex entity which is just within maximum length",  $ucs4_test2, "\x11\x11\x11\x11\x00\x00\x00&\x00\x00\x00#\x00\x00\x006\x00\x00\x005\x00\x00\x00;", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'UCS-4BE');
+testNonAscii("Starting entity immediately after valid hex entity which is just within maximum length",  $ucs4_test2, "\x11\x11\x11\x11\x00\x00\x00A", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'UCS-4BE');
 
-test("Starting entity immediately after invalid decimal entity", "&#0&#65;", "&#0&#65;", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
-test("Starting entity immediately after invalid hex entity", "&#x0&#65;", "&#x0&#65;", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
+test("Starting entity immediately after invalid decimal entity", "&#0&#65;", "&#0A", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
+test("Starting entity immediately after invalid hex entity", "&#x0&#65;", "&#x0A", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
 test("Starting entity immediately after too-big decimal entity", "&#7001492542&#65;", "&#7001492542A", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'ASCII');
 
@@ -166,16 +161,17 @@ More than 10 digits for decimal entity: string(14) "&#00000000165;" => string(14
 8 digits for hex entity: string(12) "&#x00000041;" => string(1) "A" (Good)
 More than 8 digits for hex entity: string(13) "&#x000000141;" => string(13) "&#x000000141;" (Good)
 Single &: string(1) "&" => string(1) "&" (Good)
-Successive &: string(5) "&&#2," => string(5) "&&#2," (Good)
-Successive &#: string(8) "&#&#x32;" => string(8) "&#&#x32;" (Good)
-Successive &#x: string(9) "&#x&#x32;" => string(9) "&#x&#x32;" (Good)
-Successive &#65: string(9) "&#65&#65;" => string(6) "A&#65;" (Good)
+Successive &: string(6) "&&#65," => string(3) "&A," (Good)
+Successive &#: string(8) "&#&#x32;" => string(3) "&#2" (Good)
+Successive &#x: string(9) "&#x&#x32;" => string(4) "&#x2" (Good)
+Successive &#65: string(9) "&#65&#65;" => string(2) "AA" (Good)
+Successive hex entities: string(11) "&#x32&#x32;" => string(2) "22" (Good)
 Starting entity immediately after decimal entity which is too long: string(18) "&#10000000000&#65;" => string(14) "&#10000000000A" (Good)
 Starting entity immediately after hex entity which is too long: string(17) "&#x111111111&#65;" => string(13) "&#x111111111A" (Good)
-Starting entity immediately after valid decimal entity which is just within maximum length: 000000260000002300000031000000300000003000000030000000300000003000000030000000300000003000000030000000260000002300000036000000350000003b => 3b9aca00000000260000002300000036000000350000003b (Good)
-Starting entity immediately after valid hex entity which is just within maximum length: 0000002600000023000000780000003100000031000000310000003100000031000000310000003100000031000000260000002300000036000000350000003b => 11111111000000260000002300000036000000350000003b (Good)
-Starting entity immediately after invalid decimal entity: string(8) "&#0&#65;" => string(8) "&#0&#65;" (Good)
-Starting entity immediately after invalid hex entity: string(9) "&#x0&#65;" => string(9) "&#x0&#65;" (Good)
+Starting entity immediately after valid decimal entity which is just within maximum length: 000000260000002300000031000000300000003000000030000000300000003000000030000000300000003000000030000000260000002300000036000000350000003b => 3b9aca0000000041 (Good)
+Starting entity immediately after valid hex entity which is just within maximum length: 0000002600000023000000780000003100000031000000310000003100000031000000310000003100000031000000260000002300000036000000350000003b => 1111111100000041 (Good)
+Starting entity immediately after invalid decimal entity: string(8) "&#0&#65;" => string(4) "&#0A" (Good)
+Starting entity immediately after invalid hex entity: string(9) "&#x0&#65;" => string(5) "&#x0A" (Good)
 Starting entity immediately after too-big decimal entity: string(17) "&#7001492542&#65;" => string(13) "&#7001492542A" (Good)
 Regression test (entity which decodes to 0xFFFFFFFF): string(5) "&#xe;" => string(1) "?" (Good)
 Regression test (truncation of successive & with JIS encoding): string(3) "&&&" => string(3) "&&&" (Good)

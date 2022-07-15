@@ -3407,11 +3407,6 @@ found_ampersand:
 					/* Invalid entity */
 					memcpy(converted, p, (p2 - p) * 4);
 					converted += p2 - p;
-					if ((p2 - p) == 3) {
-						/* For compatibility with legacy behavior; if &#x is followed
-						 * by another entity, we don't convert the 2nd entity */
-						*converted++ = *p2++;
-					}
 				} else {
 					/* Valid hexadecimal entity */
 					uint32_t value = 0;
@@ -3429,16 +3424,12 @@ found_ampersand:
 					uint32_t original;
 					if (html_numeric_entity_deconvert(value, convmap, mapsize, &original)) {
 						*converted++ = original;
-						if (*p2 != ';')
-							*converted++ = *p2;
+						if (*p2 == ';')
+							p2++;
 					} else {
-						memcpy(converted, p, (p2 - p + 1) * 4);
-						converted += p2 - p + 1;
+						memcpy(converted, p, (p2 - p) * 4);
+						converted += p2 - p;
 					}
-					/* For compatibility with legacy behavior:
-					 * We don't consider & as starting a new entity if it
-					 * terminates a preceding entity */
-					p2++;
 				}
 			} else if (p2 == wchar_buf + out_len && in_len) {
 				wchar_buf[0] = '&';
@@ -3468,11 +3459,6 @@ found_ampersand:
 					/* Invalid entity */
 					memcpy(converted, p, (p2 - p) * 4);
 					converted += p2 - p;
-					if ((p2 - p) == 2) {
-						/* For compatibility with legacy behavior; if &# is followed
-						 * by another entity, we don't convert the 2nd entity */
-						*converted++ = *p2++;
-					}
 				} else {
 					/* Valid decimal entity */
 					uint32_t value = 0;
@@ -3491,16 +3477,12 @@ found_ampersand:
 					uint32_t original;
 					if (html_numeric_entity_deconvert(value, convmap, mapsize, &original)) {
 						*converted++ = original;
-						if (*p2 != ';')
-							*converted++ = *p2;
+						if (*p2 == ';')
+							p2++;
 					} else {
-						memcpy(converted, p, (p2 - p + 1) * 4);
-						converted += p2 - p + 1;
+						memcpy(converted, p, (p2 - p) * 4);
+						converted += p2 - p;
 					}
-					/* For compatibility with legacy behavior:
-					 * We don't consider & as starting a new entity if it
-					 * terminates a preceding entity */
-					p2++;
 				}
 			}
 		} else if (p2 == wchar_buf + out_len) {
@@ -3515,17 +3497,6 @@ found_ampersand:
 			}
 		} else {
 			*converted++ = '&';
-			if (*p2 == '&') {
-				/* Two successive ampersands convert to a single one,
-				 * and we do NOT allow the second one to start an entity
-				 * Duplicating the legacy behavior of mb_decode_numericentity here */
-				*converted++ = '&';
-				p2++;
-				if (p2 == wchar_buf + out_len) {
-					/* Corner case: two &'s at end of buffer */
-					goto process_converted_wchars_no_offset;
-				}
-			}
 		}
 decimal_entity_too_big:
 
