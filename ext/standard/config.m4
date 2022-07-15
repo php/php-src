@@ -407,6 +407,12 @@ dnl
 AC_CHECK_DECLS([arc4random_buf])
 
 dnl
+dnl Check for CCRandomGenerateBytes
+dnl header absent in previous macOs releases
+dnl
+AC_CHECK_HEADERS([CommonCrypto/CommonRandom.h])
+
+dnl
 dnl Check for argon2
 dnl
 PHP_ARG_WITH([password-argon2],
