@@ -161,6 +161,9 @@ namespace {
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
     function zend_test_zend_ini_str(): string {}
+
+    function zend_test_zend_call_stack_get(): ?array {}
+    function zend_test_zend_call_stack_use_all(): int {}
 }
 
 namespace ZendTestNS {

@@ -37,6 +37,7 @@
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
 #include "zend_observer.h"
+#include "zend_call_stack.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -170,6 +171,32 @@ void init_executor(void) /* {{{ */
 	EG(full_tables_cleanup) = 0;
 	ZEND_ATOMIC_BOOL_INIT(&EG(vm_interrupt), false);
 	ZEND_ATOMIC_BOOL_INIT(&EG(timed_out), false);
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (EXPECTED(EG(max_allowed_stack_size) == ZEND_MAX_ALLOWED_STACK_USAGE_DETECT)) {
+		void *base = EG(call_stack).base;
+		size_t size = EG(call_stack).max_size;
+		if (UNEXPECTED(base == (void*)0)) {
+			base = zend_call_stack_position();
+			size = zend_call_stack_default_size();
+			/* base is not the actual stack base */
+			size -= 32 * 1024;
+		}
+		EG(stack_base) = base;
+		EG(stack_limit) = zend_call_stack_limit(base, size, EG(reserved_stack_size));
+	} else if (EG(max_allowed_stack_size) == ZEND_MAX_ALLOWED_STACK_USAGE_UNCHECKED) {
+		EG(stack_base) = (void*)0;
+		EG(stack_limit) = (void*)0;
+	} else {
+		ZEND_ASSERT(EG(max_allowed_stack_size) > 0);
+		void *base = EG(call_stack).base;
+		if (UNEXPECTED(base == (void*)0)) {
+			base = zend_call_stack_position();
+		}
+		EG(stack_base) = base;
+		EG(stack_limit) = zend_call_stack_limit(base, EG(max_allowed_stack_size), EG(reserved_stack_size));
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
 
 	EG(exception) = NULL;
 	EG(prev_exception) = NULL;

@@ -1,0 +1,388 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
+   +----------------------------------------------------------------------+
+*/
+
+/* Inspired from Chromium's stack_util.cc */
+
+#include "zend.h"
+#include "zend_portability.h"
+#include "zend_call_stack.h"
+#include <stdint.h>
+#ifdef ZEND_WIN32
+# include <winnt.h>
+# include <memoryapi.h>
+#else /* ZEND_WIN32 */
+# include <sys/resource.h>
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+# ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+# endif
+#endif /* ZEND_WIN32 */
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
+# include <pthread.h>
+#endif
+#ifdef __FreeBSD__
+# include <pthread_np.h>
+# include <sys/mman.h>
+# include <sys/sysctl.h>
+# include <sys/user.h>
+#endif
+#ifdef __linux__
+#include <sys/syscall.h>
+#endif
+
+
+#ifdef __linux__
+static bool zend_call_stack_is_main_thread(void) {
+# ifdef HAVE_GETTID
+	return getpid() == gettid();
+# else
+	return getpid() == syscall(SYS_gettid);
+# endif
+}
+
+# ifdef HAVE_PTHREAD_GETATTR_NP
+static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
+{
+	pthread_attr_t attr;
+	int error;
+	void *addr;
+	size_t max_size;
+
+	/* pthread_getattr_np() will return bogus values for the main thread with
+	 * musl or with some old glibc versions */
+	ZEND_ASSERT(!zend_call_stack_is_main_thread());
+
+	error = pthread_getattr_np(pthread_self(), &attr);
+	if (error) {
+		return false;
+	}
+
+	error = pthread_attr_getstack(&attr, &addr, &max_size);
+	if (error) {
+		return false;
+	}
+
+#  if defined(__GLIBC__) && (__GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))
+	{
+		size_t guard_size;
+		/* In glibc prior to 2.8, addr and size include the guard pages */
+		error = pthread_attr_getguardsize(&attr, &guard_size);
+		if (error) {
+			return false;
+		}
+
+		addr = (int8_t*)addr + guard_size;
+		max_size -= guard_size;
+	}
+#  endif /* glibc < 2.8 */
+
+	stack->base = (int8_t*)addr + max_size;
+	stack->max_size = max_size;
+
+	return true;
+}
+# else /* HAVE_PTHREAD_GETATTR_NP */
+static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
+{
+	return false;
+}
+# endif /* HAVE_PTHREAD_GETATTR_NP */
+
+static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
+{
+	FILE *f;
+	char buffer[4096];
+	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t start, end, prev_end = 0;
+	size_t max_size;
+	bool found = false;
+	struct rlimit rlim;
+	int error;
+
+	/* This method is relevant only for the main thread */
+	ZEND_ASSERT(zend_call_stack_is_main_thread());
+
+	/* Scan the process memory mappings to find the one containing the stack.
+	 *
+	 * The end of the stack mapping is the base of the stack. The start is
+	 * adjusted by the kernel as the stack grows. The maximum stack size is
+	 * determined by RLIMIT_STACK and the previous mapping.
+	 *
+	 *
+	 *                   ^ Higher addresses  ^
+	 *                   :                   :
+	 *                   :                   :
+	 *   Mapping end --> |-------------------| <-- Stack base (stack start)
+	 *                   |                   |   ^
+	 *                   | Stack Mapping     |   | Stack size
+	 *                   |                   |   v
+	 * Mapping start --> |-------------------| <-- Current stack end
+	 * (adjusted         :                   :
+	 *  downwards as the .                   .
+	 *  stack grows)     :                   :
+	 *                   |-------------------|
+	 *                   | Some Mapping      | The previous mapping may prevent
+	 *                   |-------------------| stack growth
+	 *                   :                   :
+	 *                   :                   :
+	 *                   v Lower addresses   v
+	 */
+
+	f = fopen("/proc/self/maps", "r");
+	if (!f) {
+		return false;
+	}
+
+	while (fgets(buffer, sizeof(buffer), f) && sscanf(buffer, "%" SCNxPTR "-%" SCNxPTR, &start, &end) == 2) {
+		if (start <= addr_on_stack && end >= addr_on_stack) {
+			found = true;
+			break;
+		}
+		prev_end = end;
+	}
+
+	fclose(f);
+
+	if (!found) {
+		return false;
+	}
+
+	error = getrlimit(RLIMIT_STACK, &rlim);
+	if (error || rlim.rlim_cur == RLIM_INFINITY) {
+		return false;
+	}
+
+	max_size = rlim.rlim_cur;
+
+	/* Previous mapping may prevent the stack from growing */
+	if (end - max_size < prev_end) {
+		max_size = prev_end - end;
+	}
+
+	stack->base = (void*)end;
+	stack->max_size = max_size;
+
+	return true;
+}
+
+static bool zend_call_stack_get_linux(zend_call_stack *stack)
+{
+	if (zend_call_stack_is_main_thread()) {
+		return zend_call_stack_get_linux_proc_maps(stack);
+	}
+
+	return zend_call_stack_get_linux_pthread(stack);
+}
+#else /* __linux__ */
+static bool zend_call_stack_get_linux(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* __linux__ */
+
+#ifdef __FreeBSD__
+static bool zend_call_stack_is_main_thread(void)
+{
+	int is_main = pthread_main_np();
+	return is_main == -1 || is_main == 1;
+}
+
+# if defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GET_STACK)
+static bool zend_call_stack_get_freebsd_pthread(zend_call_stack *stack)
+{
+	pthread_attr_t attr;
+	int error;
+	void *addr;
+	size_t max_size;
+	size_t guard_size;
+
+	/* pthread will return bogus values for the main thread */
+	ZEND_ASSERT(!zend_call_stack_is_main_thread());
+
+	pthread_attr_init(&attr);
+
+	error = pthread_attr_get_np(pthread_self(), &attr);
+	if (error) {
+		goto fail;
+	}
+
+	error = pthread_attr_getstack(&attr, &addr, &max_size);
+	if (error) {
+		goto fail;
+	}
+
+	stack->base = (int8_t*)addr + max_size;
+	stack->max_size = max_size;
+
+	pthread_attr_destroy(&attr);
+	return true;
+
+fail:
+	pthread_attr_destroy(&attr);
+	return false;
+}
+# else /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GET_STACK) */
+static bool zend_call_stack_get_freebsd_pthread(zend_call_stack *stack)
+{
+	return false;
+}
+# endif /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GET_STACK) */
+
+static bool zend_call_stack_get_freebsd_sysctl(zend_call_stack *stack)
+{
+	void *stack_base;
+	int mib[2] = {CTL_KERN, KERN_USRSTACK};
+	size_t len = sizeof(stack_base);
+	struct rlimit rlim;
+
+	/* This method is relevant only for the main thread */
+	ZEND_ASSERT(zend_call_stack_is_main_thread());
+
+	if (sysctl(mib, sizeof(mib)/sizeof(*mib), &stack_base, &len, NULL, 0) != 0) {
+		return false;
+	}
+
+	if (getrlimit(RLIMIT_STACK, &rlim) != 0) {
+		return false;
+	}
+
+	if (rlim.rlim_cur == RLIM_INFINITY) {
+		return false;
+	}
+
+	size_t guard_size = getpagesize();
+
+	stack->base = stack_base;
+	stack->max_size = rlim.rlim_cur - guard_size;
+
+	return true;
+}
+
+static bool zend_call_stack_get_freebsd(zend_call_stack *stack)
+{
+	if (zend_call_stack_is_main_thread()) {
+		return zend_call_stack_get_freebsd_sysctl(stack);
+	}
+
+	return zend_call_stack_get_freebsd_pthread(stack);
+}
+#else
+static bool zend_call_stack_get_freebsd(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* __FreeBSD__ */
+
+#ifdef ZEND_WIN32
+static bool zend_call_stack_get_win32(zend_call_stack *stack)
+{
+	MEMORY_BASIC_INFORMATION stack_info;
+	int8_t *base;
+
+#ifdef _M_ARM64
+	return false;
+#endif
+
+#ifdef _M_X64
+	base = (void*)((NT_TIB64*)NtCurrentTeb())->StackBase;
+#else
+	base = (void*)((NT_TIB*)NtCurrentTeb())->StackBase;
+#endif
+
+	memset(&stack_info, 0, sizeof(MEMORY_BASIC_INFORMATION));
+	size_t result_size = VirtualQuery(&stack_info, &stack_info, sizeof(MEMORY_BASIC_INFORMATION));
+	ZEND_ASSERT(result_size >= sizeof(MEMORY_BASIC_INFORMATION));
+
+	int8_t* end = (int8_t*)stack_info.AllocationBase;
+	ZEND_ASSERT(base > end);
+
+	size_t max_size = (size_t)(base - end);
+
+	// Last pages are not usable
+	// http://blogs.msdn.com/b/satyem/archive/2012/08/13/thread-s-stack-memory-management.aspx
+	ZEND_ASSERT(max_size > 4*4096);
+	max_size -= 4*4096;
+
+	stack->base = base;
+	stack->max_size = max_size;
+
+	return true;
+}
+#else /* ZEND_WIN32 */
+static bool zend_call_stack_get_win32(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* ZEND_WIN32 */
+
+#if defined(__APPLE__) && defined(HAVE_PTHREAD_GET_STACKADDR_NP)
+static bool zend_call_stack_get_macos(zend_call_stack *stack)
+{
+	void *base = pthread_get_stackaddr_np(pthread_self());
+	size_t max_size;
+
+	if (pthread_main_np()) {
+		/* pthread_get_stacksize_np() returns a too low value for the main
+		 * thread in OSX 10.9, 10.10:
+		 * https://mail.openjdk.org/pipermail/hotspot-dev/2013-October/011353.html
+		 * https://github.com/rust-lang/rust/issues/43347
+		 */
+
+		/* Stack size is 8MiB by default for main threads
+		 * https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/CreatingThreads/CreatingThreads.html */
+		max_size = 8 * 1024 * 1024;
+	} else {
+		max_size = pthread_get_stacksize_np(pthread_self());
+	}
+
+	stack->base = base;
+	stack->max_size = max_size;
+
+	return true;
+}
+#else /* defined(__APPLE__) && defined(HAVE_PTHREAD_GET_STACKADDR_NP) */
+static bool zend_call_stack_get_macos(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(__APPLE__) && defined(HAVE_PTHREAD_GET_STACKADDR_NP) */
+
+/** Get the stack information for the calling thread */
+ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
+{
+	if (zend_call_stack_get_linux(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_freebsd(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_win32(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_macos(stack)) {
+		return true;
+	}
+
+	return false;
+}
+
