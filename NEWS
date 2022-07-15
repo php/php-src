@@ -34,6 +34,7 @@ PHP                                                                        NEWS
     notation to int. (Dennis Snell)
   . Enable arc4random_buf for Linux glibc 2.36 and onwards
     for the random_bytes. (Cristian Rodriguez)
+  . Uses CCRandomGenerateBytes instead of arc4random_buf on macOs. (David Carlier).
 
 07 Jul 2022, PHP 8.2.0alpha3
 
