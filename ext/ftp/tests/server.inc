@@ -454,7 +454,7 @@ if ($pid) {
                 }
             } else {
                 fputs($s, "125 Data connection already open; transfer starting.\r\n");
-                $fs=$pasvs;
+                $fs = $pasvs;
             }
 
 
