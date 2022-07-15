@@ -1,5 +1,7 @@
 --TEST--
 Testing ftp_rawlist basic functionality
+--CREDITS--
+Gabriel Caruso (carusogabriel34@gmail.com)
 --EXTENSIONS--
 ftp
 pcntl
