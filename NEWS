@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-8923 (error_log on Windows can hold the file write lock). (cmb)
+  . Fixed bug GH-8995 (WeakMap object reference offset causing TypeError).
+    (Tobias Bachert)
 
 - CLI:
   . Fixed GH-8952 (Intentionally closing std handles no longer possible).
