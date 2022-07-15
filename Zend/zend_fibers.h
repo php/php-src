@@ -22,6 +22,9 @@
 
 #include "zend_API.h"
 #include "zend_types.h"
+#ifdef ZEND_CHECK_STACK_LIMIT
+# include "zend_call_stack.h"
+#endif
 
 #define ZEND_FIBER_GUARD_PAGES 1
 
@@ -140,6 +143,10 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
 ZEND_API void zend_fiber_switch_block(void);
 ZEND_API void zend_fiber_switch_unblock(void);
 ZEND_API bool zend_fiber_switch_blocked(void);
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+ZEND_API void zend_fiber_stack_get_layout(zend_call_stack *layout, zend_fiber_stack *stack);
+#endif
 
 END_EXTERN_C()
 

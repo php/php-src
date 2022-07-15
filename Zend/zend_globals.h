@@ -37,6 +37,7 @@
 #include "zend_multibyte.h"
 #include "zend_multiply.h"
 #include "zend_arena.h"
+#include "zend_call_stack.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -53,7 +54,6 @@ END_EXTERN_C()
 #endif
 
 #define SYMTABLE_CACHE_SIZE 32
-
 
 #include "zend_compile.h"
 
@@ -140,7 +140,6 @@ struct _zend_compiler_globals {
 
 	zend_stack short_circuiting_opnums;
 };
-
 
 struct _zend_executor_globals {
 	zval uninitialized_zval;
@@ -270,6 +269,16 @@ struct _zend_executor_globals {
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
 	zend_long lineno_override;
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	/* The thread call stack */
+	zend_call_stack call_stack;
+	/* The thread alternative call stack for signal handling */
+	stack_t alt_stack;
+	bool stack_overflow;
+	bool stack_overflow_in_compilation;
+	zend_execute_data *stack_overflow_execute_data;
+#endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

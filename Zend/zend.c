@@ -35,6 +35,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_fibers.h"
+#include "zend_call_stack.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -203,7 +204,6 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.exception_string_param_max_len",	"15",	ZEND_INI_ALL,	OnSetExceptionStringParamMaxLen,	exception_string_param_max_len,		zend_executor_globals,	executor_globals)
 	STD_ZEND_INI_ENTRY("fiber.stack_size",		NULL,			ZEND_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
-
 ZEND_INI_END()
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
@@ -795,11 +795,19 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->record_errors = false;
 	executor_globals->num_errors = 0;
 	executor_globals->errors = NULL;
+
+#if ZEND_CHECK_STACK_LIMIT
+	zend_stack_overflow_handler_thread_startup();
+#endif
 }
 /* }}} */
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
 {
+# if ZEND_CHECK_STACK_LIMIT
+	zend_stack_overflow_handler_thread_shutdown();
+#endif
+
 	zend_ini_dtor(executor_globals->ini_directives);
 
 	if (&executor_globals->persistent_list != global_persistent_list) {
@@ -981,7 +989,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	CG(map_ptr_size) = 0;
 	CG(map_ptr_last) = 0;
-#endif
+#endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
 	zend_interned_strings_init();
@@ -1074,6 +1082,13 @@ zend_result zend_post_startup(void) /* {{{ */
 	zend_copy_ini_directives();
 #else
 	global_map_ptr_last = CG(map_ptr_last);
+# if ZEND_CHECK_STACK_LIMIT
+	zend_stack_overflow_handler_thread_startup();
+# endif
+#endif
+
+#if ZEND_CHECK_STACK_LIMIT
+	zend_stack_overflow_handler_startup();
 #endif
 
 	return SUCCESS;
@@ -1082,6 +1097,10 @@ zend_result zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
+#if ZEND_CHECK_STACK_LIMIT
+	zend_stack_overflow_handler_shutdown();
+#endif
+
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
@@ -1116,6 +1135,10 @@ void zend_shutdown(void) /* {{{ */
 	ts_free_id(executor_globals_id);
 	ts_free_id(compiler_globals_id);
 #else
+# if ZEND_CHECK_STACK_LIMIT
+	zend_stack_overflow_handler_thread_shutdown();
+# endif
+
 	if (CG(map_ptr_real_base)) {
 		free(CG(map_ptr_real_base));
 		CG(map_ptr_real_base) = NULL;
@@ -1157,7 +1180,6 @@ ZEND_COLD void zenderror(const char *error) /* {{{ */
 
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
 {
-
 	if (!EG(bailout)) {
 		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", filename, lineno);
 		exit(-1);

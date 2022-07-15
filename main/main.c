@@ -1796,6 +1796,10 @@ void php_request_shutdown(void *dummy)
 
 	EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
 
+	if (EG(stack_overflow)) {
+		zend_handle_stack_overflow();
+	}
+
 	report_memleaks = PG(report_memleaks);
 
 	/* EG(current_execute_data) points into nirvana and therefore cannot be safely accessed
@@ -1813,6 +1817,10 @@ void php_request_shutdown(void *dummy)
 	/* 1. Call all possible shutdown functions registered with register_shutdown_function() */
 	if (PG(modules_activated)) {
 		php_call_shutdown_functions();
+
+		if (EG(stack_overflow)) {
+			zend_handle_stack_overflow();
+		}
 	}
 
 	/* 2. Call all possible __destruct() functions */

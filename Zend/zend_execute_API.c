@@ -37,6 +37,7 @@
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
 #include "zend_observer.h"
+#include "zend_call_stack.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif

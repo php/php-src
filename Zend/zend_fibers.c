@@ -25,6 +25,9 @@
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
 #include "zend_mmap.h"
+#ifdef ZEND_CHECK_STACK_LIMIT
+# include "zend_call_stack.h"
+#endif
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -259,6 +262,20 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 
 	efree(stack);
 }
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+ZEND_API void zend_fiber_stack_get_layout(zend_call_stack *layout, zend_fiber_stack *stack)
+{
+	const size_t page_size = zend_fiber_get_page_size();
+
+	void *pointer = (void *) ((uintptr_t) stack->pointer - ZEND_FIBER_GUARD_PAGES * page_size);
+
+	layout->base = (void*) ((uintptr_t) pointer + stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
+	layout->max_useable_size = stack->size;
+	layout->max_size = stack->size + ZEND_FIBER_GUARD_PAGES * page_size;
+}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 #ifdef ZEND_FIBER_UCONTEXT
 static ZEND_NORETURN void zend_fiber_trampoline(void)
 #else

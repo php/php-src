@@ -30,6 +30,7 @@
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
+#include "zend_call_stack.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -453,6 +454,63 @@ static ZEND_FUNCTION(zend_test_parameter_with_attribute)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(1);
+}
+
+static ZEND_FUNCTION(zend_test_zend_call_stack_get)
+{
+	zend_call_stack stack;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (zend_call_stack_get(&stack)) {
+		zend_string *str;
+
+		array_init(return_value);
+
+		str = strpprintf(0, "%p", stack.base);
+		add_assoc_str(return_value, "base", str);
+
+		str = strpprintf(0, "0x%zx", stack.max_useable_size);
+		add_assoc_str(return_value, "max_useable_size", str);
+
+		str = strpprintf(0, "0x%zx", stack.max_size);
+		add_assoc_str(return_value, "max_size", str);
+
+		str = strpprintf(0, "%p", zend_call_stack_position());
+		add_assoc_str(return_value, "position", str);
+
+		return;
+	}
+
+	RETURN_NULL();
+}
+
+zend_long (*volatile zend_call_stack_use_all_fun)(void *limit);
+
+static zend_long zend_call_stack_use_all(void *limit)
+{
+	if (zend_call_stack_overflowed(limit)) {
+		return 1;
+	}
+
+	return 1 + zend_call_stack_use_all_fun(limit);
+}
+
+static ZEND_FUNCTION(zend_test_zend_call_stack_use_all)
+{
+	zend_call_stack stack;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (!zend_call_stack_get(&stack)) {
+		return;
+	}
+
+	zend_call_stack_use_all_fun = zend_call_stack_use_all;
+
+	void *limit = zend_call_stack_limit(stack.base, stack.max_useable_size, 4096);
+
+	RETURN_LONG(zend_call_stack_use_all(limit));
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)

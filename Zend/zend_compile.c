@@ -34,6 +34,7 @@
 #include "zend_vm.h"
 #include "zend_enum.h"
 #include "zend_observer.h"
+#include "zend_call_stack.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -8084,7 +8085,7 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 
 		/* Check that we are not attempting to alias a built-in type */
 		if (type == ZEND_SYMBOL_CLASS && zend_is_reserved_class_name(old_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, 
+			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot alias '%s' as it is a built-in type", ZSTR_VAL(old_name));
 		}
 
