@@ -3412,7 +3412,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		if (!scope) {
 			if (error) *error = estrdup("cannot access \"self\" when no class scope is active");
 		} else {
-			if (error && !suppress_deprecation) {
+			if (!suppress_deprecation) {
 				zend_error(E_DEPRECATED, "Use of \"self\" in callables is deprecated");
 			}
 			fcc->called_scope = zend_get_called_scope(frame);
@@ -3431,7 +3431,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		} else if (!scope->parent) {
 			if (error) *error = estrdup("cannot access \"parent\" when current class scope has no parent");
 		} else {
-			if (error && !suppress_deprecation) {
+			if (!suppress_deprecation) {
 				zend_error(E_DEPRECATED, "Use of \"parent\" in callables is deprecated");
 			}
 			fcc->called_scope = zend_get_called_scope(frame);
@@ -3451,7 +3451,7 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		if (!called_scope) {
 			if (error) *error = estrdup("cannot access \"static\" when no class scope is active");
 		} else {
-			if (error && !suppress_deprecation) {
+			if (!suppress_deprecation) {
 				zend_error(E_DEPRECATED, "Use of \"static\" in callables is deprecated");
 			}
 			fcc->called_scope = called_scope;
@@ -3500,7 +3500,7 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	}
 }
 
-static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error) /* {{{ */
+static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = 0;
@@ -3586,7 +3586,7 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 				fcc->called_scope = fcc->object ? fcc->object->ce : fcc->calling_scope;
 			}
 			strict_class = 1;
-		} else if (!zend_is_callable_check_class(cname, scope, frame, fcc, &strict_class, error, ce_org != NULL)) {
+		} else if (!zend_is_callable_check_class(cname, scope, frame, fcc, &strict_class, error, suppress_deprecation || ce_org != NULL)) {
 			zend_string_release_ex(cname, 0);
 			return 0;
 		}
@@ -3597,7 +3597,7 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 			if (error) zend_spprintf(error, 0, "class %s is not a subclass of %s", ZSTR_VAL(ce_org->name), ZSTR_VAL(fcc->calling_scope->name));
 			return 0;
 		}
-		if (ce_org && error) {
+		if (ce_org && !suppress_deprecation) {
 			zend_error(E_DEPRECATED,
 				"Callables of the form [\"%s\", \"%s\"] are deprecated",
 				ZSTR_VAL(ce_org->name), Z_STRVAL_P(callable));
@@ -3838,7 +3838,7 @@ again:
 			}
 
 check_func:
-			ret = zend_is_callable_check_func(callable, frame, fcc, strict_class, error);
+			ret = zend_is_callable_check_func(callable, frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
 			if (fcc == &fcc_local) {
 				zend_release_fcall_info_cache(fcc);
 			}
@@ -3875,7 +3875,7 @@ check_func:
 						return 1;
 					}
 
-					if (!zend_is_callable_check_class(Z_STR_P(obj), get_scope(frame), frame, fcc, &strict_class, error, false)) {
+					if (!zend_is_callable_check_class(Z_STR_P(obj), get_scope(frame), frame, fcc, &strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS)) {
 						return 0;
 					}
 				} else {
@@ -3938,7 +3938,7 @@ ZEND_API bool zend_make_callable(zval *callable, zend_string **callable_name) /*
 {
 	zend_fcall_info_cache fcc;
 
-	if (zend_is_callable_ex(callable, NULL, 0, callable_name, &fcc, NULL)) {
+	if (zend_is_callable_ex(callable, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, callable_name, &fcc, NULL)) {
 		if (Z_TYPE_P(callable) == IS_STRING && fcc.calling_scope) {
 			zval_ptr_dtor_str(callable);
 			array_init(callable);

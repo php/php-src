@@ -1297,7 +1297,6 @@ PHP_FUNCTION(mb_http_input)
 			entry = MBSTRG(http_input_list);
 			n = MBSTRG(http_input_list_size);
 			if (n == 0) {
-				// TODO should return empty string?
 				RETURN_FALSE;
 			}
 			// TODO Use smart_str instead.
