@@ -28,6 +28,12 @@ if (mb_language("korean")) {
     mb_send_mail($to, "테스트 ".mb_language(), "테스트");
     readfile(__DIR__ . "/mb_send_mail07.eml");
 }
+
+/* Note: The subject line below, "=?ISO-2022-KR?B?GyQpQw5FVz06Ri4PIEtvcmVhbg==?=",
+ * used to be "=?ISO-2022-KR?B?GyQpQw5FVz06Ri4PIEtvcmVhbg8=?=". That was because
+ * the Base64-encoded ISO-2022-KR string contained an extraneous 0xF ('shift out')
+ * byte. 'Shift out' is only needed to return to ASCII mode, but the string
+ * contained one despite already being in ASCII mode. */
 ?>
 --CLEAN--
 <?php
@@ -42,7 +48,7 @@ Content-Transfer-Encoding: %s
 
 %s
 To: example@example.com
-Subject: =?ISO-2022-KR?B?GyQpQw5FVz06Ri4PIEtvcmVhbg8=?=
+Subject: =?ISO-2022-KR?B?GyQpQw5FVz06Ri4PIEtvcmVhbg==?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=ISO-2022-KR
 Content-Transfer-Encoding: 7bit
