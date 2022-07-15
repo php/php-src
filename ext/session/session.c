@@ -2098,7 +2098,7 @@ PHP_FUNCTION(session_set_save_handler)
 
 	/* At this point argc can only be between 6 and PS_NUM_APIS */
 	for (i = 0; i < argc; i++) {
-		if (!zend_is_callable(&args[i], 0, NULL)) {
+		if (!zend_is_callable(&args[i], IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL)) {
 			zend_string *name = zend_get_callable_name(&args[i]);
 			zend_argument_type_error(i + 1, "must be a valid callback, function \"%s\" not found or invalid function name", ZSTR_VAL(name));
 			zend_string_release(name);

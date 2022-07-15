@@ -635,7 +635,7 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 			smart_str_append_escaped(&chr, str_end-1, 1);
 			smart_str_0(&chr);
 
-			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": unknown multipler \"%s\", interpreting as \"%s\" for backwards compatibility",
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": unknown multiplier \"%s\", interpreting as \"%s\" for backwards compatibility",
 						ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s), ZSTR_VAL(interpreted.s));
 
 			smart_str_free(&invalid);

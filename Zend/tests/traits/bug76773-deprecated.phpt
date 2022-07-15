@@ -1,5 +1,5 @@
 --TEST--
-Bug #76773 (Traits used on the parent are ignored for child classes)
+Bug #76773 (Traits used on the parent are ignored for child classes) [original test with deprecated syntax]
 --FILE--
 <?php
 
@@ -9,7 +9,7 @@ trait MyTrait
     {
         echo __CLASS__, "\n";
 
-        if (get_parent_class(__CLASS__) !== false) {
+        if (\is_callable(array('parent', __FUNCTION__))) {
             parent::hello();
         }
     }
@@ -28,6 +28,8 @@ class ChildClass extends ParentClass
 $c = new ChildClass();
 $c->hello();
 ?>
---EXPECT--
+--EXPECTF--
 ChildClass
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 ParentClass

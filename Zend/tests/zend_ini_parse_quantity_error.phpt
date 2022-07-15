@@ -40,7 +40,7 @@ int(1048576)
 
 # "1X"
 
-Warning: Invalid quantity "1X": unknown multipler "X", interpreting as "1" for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+Warning: Invalid quantity "1X": unknown multiplier "X", interpreting as "1" for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
 int(1)
 
 # "1.0K"
@@ -70,10 +70,10 @@ int(125952)
 
 # " 123K\000"
 
-Warning: Invalid quantity " 123K\x00": unknown multipler "\x00", interpreting as " 123" for backwards compatibility in %s on line %d
+Warning: Invalid quantity " 123K\x00": unknown multiplier "\x00", interpreting as " 123" for backwards compatibility in %s on line %d
 int(123)
 
 # " 123\000"
 
-Warning: Invalid quantity " 123\x00": unknown multipler "\x00", interpreting as " 123" for backwards compatibility in %s on line %d
+Warning: Invalid quantity " 123\x00": unknown multiplier "\x00", interpreting as " 123" for backwards compatibility in %s on line %d
 int(123)

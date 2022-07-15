@@ -1000,7 +1000,6 @@ function str_word_count(string $string, int $format = 0, ?string $characters = n
 
 /**
  * @return array<int, string>
- * @refcount 1
  * @compile-time-eval
  */
 function str_split(string $string, int $length = 1): array {}

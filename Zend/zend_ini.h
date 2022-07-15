@@ -95,7 +95,7 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str);
  *
  * The value parameter must be a string in the form
  *
- *     sign? digits ws* multipler?
+ *     sign? digits ws* multiplier?
  *
  * with
  *
@@ -103,7 +103,7 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str);
  *     digit: [0-9]
  *     digits: digit+
  *     ws: [ \t\n\r\v\f]
- *     multipler: [KMG]
+ *     multiplier: [KMG]
  *
  * Leading and trailing whitespaces are ignored.
  *

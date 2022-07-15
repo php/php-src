@@ -1,12 +1,12 @@
 --TEST--
-is_callable() with trampoline should not caused UAF
+is_callable() with trampoline should not caused UAF [original test with deprecated syntax]
 --FILE--
 <?php
 
 class B {}
 class A extends B {
     public function bar($func) {
-        var_dump(is_callable(array('B', 'foo')));
+        var_dump(is_callable(array('parent', 'foo')));
     }
 
     public function __call($func, $args) {
@@ -23,5 +23,6 @@ $a = new A();
 X::foo($a->bar('foo'));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 bool(false)

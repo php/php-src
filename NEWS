@@ -4,11 +4,15 @@ PHP                                                                        NEWS
 
 - CLI:
   . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
+  . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
+    environment variable. (yiyuaner)
 
 - Core:
   . Reduced the memory footprint of strings returned by var_export(),
     json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
     http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
+  . Fixed bug GH-8995 (WeakMap object reference offset causing TypeError).
+    (Tobias Bachert)
 
 - COM:
   . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
@@ -17,6 +21,10 @@ PHP                                                                        NEWS
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
   . Added access.suppress_path pool option to filter access log entries.
     (Mark Gallagher)
+
+- Opcache:
+  . Added initial support for JIT performance profiling generation
+    for macOs Instrument. (David Carlier)
 
 - PCRE:
   . Updated bundled libpcre to 10.40. (cmb)
@@ -28,6 +36,9 @@ PHP                                                                        NEWS
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
     notation to int. (Dennis Snell)
+  . Enable arc4random_buf for Linux glibc 2.36 and onwards
+    for the random_bytes. (Cristian Rodriguez)
+  . Uses CCRandomGenerateBytes instead of arc4random_buf on macOs. (David Carlier).
 
 07 Jul 2022, PHP 8.2.0alpha3
 
