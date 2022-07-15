@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Reduced the memory footprint of strings returned by var_export(),
     json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
     http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
+  . Fixed bug GH-8995 (WeakMap object reference offset causing TypeError).
+    (Tobias Bachert)
 
 - COM:
   . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
