@@ -571,7 +571,7 @@ static const func_info_t func_infos[] = {
 	F1("str_rot13", MAY_BE_STRING),
 	F1("str_shuffle", MAY_BE_STRING),
 	F1("str_word_count", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_LONG),
-	F1("str_split", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	FN("str_split", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("strpbrk", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("utf8_encode", MAY_BE_STRING),
 	F1("utf8_decode", MAY_BE_STRING),
