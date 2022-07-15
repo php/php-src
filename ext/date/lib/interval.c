@@ -26,10 +26,37 @@
 #include "timelib_private.h"
 #include <math.h>
 
-static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_time *rt)
+static void swap_times(timelib_time **one, timelib_time **two, timelib_rel_time *rt)
 {
 	timelib_time *swp;
 
+	swp = *two;
+	*two = *one;
+	*one = swp;
+	rt->invert = 1;
+}
+
+static void swap_if_negative(timelib_rel_time *rt)
+{
+	if (rt->y == 0 && rt->m == 0 && rt->d == 0 && rt->h == 0 && rt->i == 0 && rt->s == 0 && rt->us == 0) {
+		return;
+	}
+	if (rt->y >= 0 && rt->m >= 0 && rt->d >= 0 && rt->h >= 0 && rt->i >= 0 && rt->s >= 0 && rt->us >= 0) {
+		return;
+	}
+
+	rt->invert = 1 - rt->invert;
+	rt->y = 0 - rt->y;
+	rt->m = 0 - rt->m;
+	rt->d = 0 - rt->d;
+	rt->h = 0 - rt->h;
+	rt->i = 0 - rt->i;
+	rt->s = 0 - rt->s;
+	rt->us = 0 - rt->us;
+}
+
+static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_time *rt)
+{
 	/* Check whether date/times need to be inverted. If both times are
 	 * TIMELIB_ZONETYPE_ID times with the same TZID, we use the y-s + us fields. */
 	if (
@@ -46,10 +73,7 @@ static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_
 			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i == (*two)->i && (*one)->s > (*two)->s) ||
 			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i == (*two)->i && (*one)->s == (*two)->s && (*one)->us > (*two)->us)
 		) {
-			swp = *two;
-			*two = *one;
-			*one = swp;
-			rt->invert = 1;
+			swap_times(one, two, rt);
 		}
 		return;
 	}
@@ -59,14 +83,11 @@ static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_
 		((*one)->sse > (*two)->sse) ||
 		((*one)->sse == (*two)->sse && (*one)->us > (*two)->us)
 	) {
-		swp = *two;
-		*two = *one;
-		*one = swp;
-		rt->invert = 1;
+		swap_times(one, two, rt);
 	}
 }
 
-timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
+static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time *two)
 {
 	timelib_rel_time *rt;
 	timelib_sll dst_corr = 0, dst_h_corr = 0, dst_m_corr = 0;
@@ -98,7 +119,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID) {
 			trans = timelib_get_time_zone_info(two->sse, two->tz_info);
 			if (trans) {
-				if (one->sse >= trans->transition_time + dst_corr && one->sse < trans->transition_time) {
+				if (one->sse < trans->transition_time && one->sse >= trans->transition_time + dst_corr) {
 					timelib_sll flipped = SECS_PER_HOUR + (rt->i * 60) + (rt->s);
 					rt->h = flipped / SECS_PER_HOUR;
 					rt->i = (flipped - rt->h * SECS_PER_HOUR) / 60;
@@ -160,18 +181,10 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 			}
 		}
 	} else {
-		/* Then for all the others */
-		if (
-			(one->zone_type == 3 && two->zone_type == 3) ||
-			(one->zone_type != 3 && two->zone_type == 3 && one->z == two->z) ||
-			(one->zone_type == 3 && two->zone_type != 3 && one->z == two->z)
-		) {
-			rt->h -= dst_h_corr;
-		} else {
-			rt->h -= dst_h_corr + (two->dst - one->dst);
-		}
-
+		rt->h -= dst_h_corr;
 		rt->i -= dst_m_corr;
+
+		swap_if_negative(rt);
 
 		timelib_do_rel_normalize(rt->invert ? one : two, rt);
 	}
@@ -179,6 +192,40 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	if (trans) {
 		timelib_time_offset_dtor(trans);
 	}
+
+	return rt;
+}
+
+timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
+{
+	timelib_rel_time *rt;
+
+	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID) {
+		return timelib_diff_with_tzid(one, two);
+	}
+
+	rt = timelib_rel_time_ctor();
+	rt->invert = 0;
+
+	sort_old_to_new(&one, &two, rt);
+
+	rt->y = two->y - one->y;
+	rt->m = two->m - one->m;
+	rt->d = two->d - one->d;
+	rt->h = two->h - one->h;
+	if (one->zone_type != TIMELIB_ZONETYPE_ID) {
+		rt->h = rt->h + one->dst;
+	}
+	if (two->zone_type != TIMELIB_ZONETYPE_ID) {
+		rt->h = rt->h - two->dst;
+	}
+	rt->i = two->i - one->i;
+	rt->s = two->s - one->s - two->z + one->z;
+	rt->us = two->us - one->us;
+
+	rt->days = timelib_diff_days(one, two);
+
+	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
 	return rt;
 }
