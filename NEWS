@@ -23,7 +23,7 @@ PHP                                                                        NEWS
     (Mark Gallagher)
 
 - Opcache:
-  . Added initial support for JIT performance profiling generatio
+  . Added initial support for JIT performance profiling generation
     for macOs Instrument. (David Carlier)
 
 - PCRE:
