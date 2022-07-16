@@ -2996,7 +2996,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TICKS_SPEC_HANDLER(ZEND_OPCODE
 		EG(ticks_count) = 0;
 		if (zend_ticks_function) {
 			SAVE_OPLINE();
+			zend_fiber_switch_block();
 			zend_ticks_function(opline->extended_value);
+			zend_fiber_switch_unblock();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
 	}

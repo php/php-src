@@ -34,6 +34,7 @@
 #include "pcntl_arginfo.h"
 #include "php_signal.h"
 #include "php_ticks.h"
+#include "zend_fibers.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
 #include <sys/wait.h>
@@ -1410,6 +1411,9 @@ void pcntl_signal_dispatch()
 		return;
 	}
 
+	/* Prevent switching fibers when handling signals */
+	zend_fiber_switch_block();
+
 	/* Prevent reentrant handler calls */
 	PCNTL_G(processing_signal_queue) = 1;
 
@@ -1449,6 +1453,9 @@ void pcntl_signal_dispatch()
 
 	/* Re-enable queue */
 	PCNTL_G(processing_signal_queue) = 0;
+
+	/* Re-enable fiber switching */
+	zend_fiber_switch_unblock();
 
 	/* return signal mask to previous state */
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
