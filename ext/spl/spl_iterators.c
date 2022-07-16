@@ -3213,7 +3213,7 @@ PHP_FUNCTION(iterator_count)
 		count =  zend_hash_num_elements(Z_ARRVAL_P(obj));
 	} else {
 		if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
