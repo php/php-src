@@ -234,7 +234,7 @@ function main(): void
             // Not having other environment variables, only having TEMP, is
             // probably ok, but strange and may make a difference in the
             // test pass rate, so warn the user.
-            echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" . PHP_EOL;
+            echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" , PHP_EOL;
         }
     }
 
