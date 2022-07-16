@@ -1,5 +1,5 @@
 --TEST--
-Prevent switchcing fibers when async signals are enabled
+Prevent switching fibers when async signals are enabled
 --EXTENSIONS--
 pcntl
 posix

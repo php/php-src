@@ -1,5 +1,5 @@
 --TEST--
-Prevent switchcing fibers when dispatching pending signals
+Prevent switching fibers when dispatching pending signals
 --EXTENSIONS--
 pcntl
 posix

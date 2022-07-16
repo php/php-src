@@ -1,5 +1,5 @@
 --TEST--
-Prevent switchcing fibers in tick function
+Prevent switching fibers in tick function
 --FILE--
 <?php
 
