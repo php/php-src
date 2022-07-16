@@ -74,6 +74,8 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/readonly_classes
   . Added support for true type.
     RFC: https://wiki.php.net/rfc/true-type
+  . Added support for Disjoint Normal Form (DNF) types.
+    RFC: https://wiki.php.net/rfc/dnf_types
 
 
 - Curl:
