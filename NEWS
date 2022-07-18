@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug GH-8847 (PHP hanging infinitly at 100% cpu when check php
     syntaxe of a valid file). (Dmitry)
+  . Fixed bug GH-8030 (Segfault with JIT and large match/switch statements).
+    (Arnaud)
 
 - Reflection:
   . Fixed bug GH-8943 (Fixed Reflection::getModifiersNames() with readonly
