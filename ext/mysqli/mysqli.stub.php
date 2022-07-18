@@ -610,11 +610,8 @@ const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
  */
 const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
 
-/**
- * @var bool
- * @cname MYSQLI_IS_MARIADB
- */
-const MYSQLI_IS_MARIADB = UNKNOWN;
+/** @var bool */
+const MYSQLI_IS_MARIADB = false;
 
 final class mysqli_driver
 {
