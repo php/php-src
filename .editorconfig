@@ -9,7 +9,7 @@ end_of_line              = lf
 charset                  = utf-8
 tab_width                = 4
 
-[{*.{awk,bat,c,cpp,d,h,l,re,skl,w32,y},Makefile*}]
+[{*.{awk,bat,c,cpp,d,dasc,h,l,re,skl,w32,y},Makefile*}]
 indent_size              = 4
 indent_style             = tab
 
