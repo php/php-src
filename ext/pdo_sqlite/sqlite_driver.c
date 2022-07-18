@@ -715,6 +715,9 @@ static const struct pdo_dbh_methods sqlite_methods = {
 
 static char *make_filename_safe(const char *filename)
 {
+	if (!filename) {
+		return NULL;
+	}
 	if (*filename && memcmp(filename, ":memory:", sizeof(":memory:"))) {
 		char *fullpath = expand_filepath(filename, NULL);
 
@@ -737,7 +740,7 @@ static int authorizer(void *autharg, int access_type, const char *arg3, const ch
 	char *filename;
 	switch (access_type) {
 		case SQLITE_COPY: {
-					filename = make_filename_safe(arg4);
+			filename = make_filename_safe(arg4);
 			if (!filename) {
 				return SQLITE_DENY;
 			}
@@ -746,7 +749,7 @@ static int authorizer(void *autharg, int access_type, const char *arg3, const ch
 		}
 
 		case SQLITE_ATTACH: {
-					filename = make_filename_safe(arg3);
+			filename = make_filename_safe(arg3);
 			if (!filename) {
 				return SQLITE_DENY;
 			}
