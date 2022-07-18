@@ -3320,6 +3320,11 @@ static bool html_numeric_entity_deconvert(uint32_t number, uint32_t *convmap, in
 	return false;
 }
 
+#define DEC_ENTITY_MINLEN 3  /* For "&#" and 1 decimal digit */
+#define HEX_ENTITY_MINLEN 4  /* For "&#x" and 1 hexadecimal digit */
+#define DEC_ENTITY_MAXLEN 12 /* For "&#" and 10 decimal digits */
+#define HEX_ENTITY_MAXLEN 11 /* For "&#x" and 8 hexadecimal digits */
+
 static zend_string* html_numeric_entity_decode(zend_string *input, const mbfl_encoding *encoding, uint32_t *convmap, int mapsize)
 {
 	uint32_t wchar_buf[128], converted_buf[128];
@@ -3390,28 +3395,20 @@ found_ampersand:
 				uint32_t w = *++p2;
 				while ((w >= '0' && w <= '9') || (w >= 'A' && w <= 'F') || (w >= 'a' && w <= 'f'))
 					w = *++p2;
-				if (p2 == wchar_buf + out_len) {
-					/* We hit the end of the buffer while still reading digits */
-					if ((p2 - p) <= 11 && in_len) {
-						/* The number of digits was legal (1-8 hex digits)
-						 * We need to process this identity again on the next iteration of the main loop */
-						memmove(wchar_buf, p, (p2 - p) * 4);
-						wchar_buf_offset = p2 - p;
-						goto process_converted_wchars;
-					} else {
-						/* Invalid entity */
-						memcpy(converted, p, (p2 - p) * 4);
-						converted += p2 - p;
-						goto process_converted_wchars_no_offset;
-					}
-				} else if ((p2 - p) == 3 || (p2 - p) > 11) {
-					/* Invalid entity */
+				if ((p2 == wchar_buf + out_len) && in_len && (p2 - p) <= HEX_ENTITY_MAXLEN) {
+					/* We hit the end of the buffer while reading digits, and
+					 * more wchars are still coming in the next buffer
+					 * Reprocess this identity on next iteration */
+					memmove(wchar_buf, p, (p2 - p) * 4);
+					wchar_buf_offset = p2 - p;
+					goto process_converted_wchars;
+				} else if ((p2 - p) < HEX_ENTITY_MINLEN || (p2 - p) > HEX_ENTITY_MAXLEN) {
+					/* Invalid entity (too long or "&#x" only) */
 					memcpy(converted, p, (p2 - p) * 4);
 					converted += p2 - p;
 				} else {
 					/* Valid hexadecimal entity */
-					uint32_t value = 0;
-					uint32_t *p3 = p + 3;
+					uint32_t value = 0, *p3 = p + 3;
 					while (p3 < p2) {
 						w = *p3++;
 						if (w <= '9') {
@@ -3422,9 +3419,8 @@ found_ampersand:
 							value = (value * 16) + 10 + (w - 'A');
 						}
 					}
-					uint32_t original;
-					if (html_numeric_entity_deconvert(value, convmap, mapsize, &original)) {
-						*converted++ = original;
+					if (html_numeric_entity_deconvert(value, convmap, mapsize, converted)) {
+						converted++;
 						if (*p2 == ';')
 							p2++;
 					} else {
@@ -3432,38 +3428,24 @@ found_ampersand:
 						converted += p2 - p;
 					}
 				}
-			} else if (p2 == wchar_buf + out_len && in_len) {
-				wchar_buf[0] = '&';
-				wchar_buf[1] = '#';
-				wchar_buf_offset = 2;
-				goto process_converted_wchars;
 			} else {
 				/* Possible decimal entity */
 				uint32_t w = *p2;
 				while (w >= '0' && w <= '9')
 					w = *++p2;
-				if (p2 == wchar_buf + out_len) {
-					if ((p2 - p) <= 12 && in_len) {
-						/* The number of digits was legal (1-10 decimal digits)
-						 * We need to process this identity again on next iteration of main loop */
-						memmove(wchar_buf, p, (p2 - p) * 4);
-						wchar_buf_offset = p2 - p;
-						goto process_converted_wchars;
-					} else {
-						/* Invalid entity */
-						memcpy(converted, p, (p2 - p) * 4);
-						converted += p2 - p;
-						wchar_buf_offset = 0;
-						goto process_converted_wchars_no_offset;
-					}
-				} else if ((p2 - p) == 2 || (p2 - p) > 12) {
-					/* Invalid entity */
+				if ((p2 == wchar_buf + out_len) && in_len && (p2 - p) <= DEC_ENTITY_MAXLEN) {
+					/* The number of digits was legal (no more than 10 decimal digits)
+					 * Reprocess this identity on next iteration of main loop */
+					memmove(wchar_buf, p, (p2 - p) * 4);
+					wchar_buf_offset = p2 - p;
+					goto process_converted_wchars;
+				} else if ((p2 - p) < DEC_ENTITY_MINLEN || (p2 - p) > DEC_ENTITY_MAXLEN) {
+					/* Invalid entity (too long or "&#" only) */
 					memcpy(converted, p, (p2 - p) * 4);
 					converted += p2 - p;
 				} else {
 					/* Valid decimal entity */
-					uint32_t value = 0;
-					uint32_t *p3 = p + 2;
+					uint32_t value = 0, *p3 = p + 2;
 					while (p3 < p2) {
 						/* If unsigned integer overflow would occur in the below
 						 * multiplication by 10, this entity is no good
@@ -3475,9 +3457,8 @@ found_ampersand:
 						}
 						value = (value * 10) + (*p3++ - '0');
 					}
-					uint32_t original;
-					if (html_numeric_entity_deconvert(value, convmap, mapsize, &original)) {
-						*converted++ = original;
+					if (html_numeric_entity_deconvert(value, convmap, mapsize, converted)) {
+						converted++;
 						if (*p2 == ';')
 							p2++;
 					} else {
@@ -3486,16 +3467,11 @@ found_ampersand:
 					}
 				}
 			}
-		} else if (p2 == wchar_buf + out_len) {
+		} else if ((p2 == wchar_buf + out_len) && in_len) {
 			/* Corner case: & at end of buffer */
-			if (in_len) {
-				wchar_buf[0] = '&';
-				wchar_buf_offset = 1;
-				goto process_converted_wchars;
-			} else {
-				*converted++ = '&';
-				goto process_converted_wchars_no_offset;
-			}
+			wchar_buf[0] = '&';
+			wchar_buf_offset = 1;
+			goto process_converted_wchars;
 		} else {
 			*converted++ = '&';
 		}
@@ -3516,7 +3492,6 @@ decimal_entity_too_big:
 		if (p < wchar_buf + out_len)
 			goto found_ampersand;
 
-process_converted_wchars_no_offset:
 		/* We do not have any wchars remaining at the end of this buffer which
 		 * we need to reprocess on the next call */
 		wchar_buf_offset = 0;
