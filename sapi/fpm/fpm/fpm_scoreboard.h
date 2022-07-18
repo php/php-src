@@ -70,14 +70,14 @@ struct fpm_scoreboard_s {
 	struct fpm_scoreboard_proc_s procs[];
 };
 
-int fpm_scoreboard_init_main();
+int fpm_scoreboard_init_main(void);
 int fpm_scoreboard_init_child(struct fpm_worker_pool_s *wp);
 
 void fpm_scoreboard_update_begin(struct fpm_scoreboard_s *scoreboard);
 void fpm_scoreboard_update_commit(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard);
 void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard);
 
-struct fpm_scoreboard_s *fpm_scoreboard_get();
+struct fpm_scoreboard_s *fpm_scoreboard_get(void);
 struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get(struct fpm_scoreboard_s *scoreboard, int child_index);
 struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get_from_child(struct fpm_child_s *child);
 
@@ -97,7 +97,7 @@ struct fpm_scoreboard_s *fpm_scoreboard_copy(struct fpm_scoreboard_s *scoreboard
 void fpm_scoreboard_free_copy(struct fpm_scoreboard_s *scoreboard);
 
 #ifdef HAVE_TIMES
-float fpm_scoreboard_get_tick();
+float fpm_scoreboard_get_tick(void);
 #endif
 
 #endif

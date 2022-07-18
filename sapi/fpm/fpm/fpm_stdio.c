@@ -22,7 +22,7 @@
 static int fd_stdout[2];
 static int fd_stderr[2];
 
-int fpm_stdio_init_main() /* {{{ */
+int fpm_stdio_init_main(void)
 {
 	int fd = open("/dev/null", O_RDWR);
 
@@ -39,9 +39,8 @@ int fpm_stdio_init_main() /* {{{ */
 	close(fd);
 	return 0;
 }
-/* }}} */
 
-static inline int fpm_use_error_log() {  /* {{{ */
+static inline int fpm_use_error_log(void) {
 	/*
 	 * the error_log is NOT used when running in foreground
 	 * and from a tty (user looking at output).
@@ -59,8 +58,7 @@ static inline int fpm_use_error_log() {  /* {{{ */
 	return 0;
 }
 
-/* }}} */
-int fpm_stdio_init_final() /* {{{ */
+int fpm_stdio_init_final(void)
 {
 	if (fpm_use_error_log()) {
 		/* prevent duping if logging to syslog */
@@ -82,7 +80,6 @@ int fpm_stdio_init_final() /* {{{ */
 	zlog_set_launched();
 	return 0;
 }
-/* }}} */
 
 int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
@@ -108,11 +105,10 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 #define FPM_STDIO_CMD_FLUSH "\0fscf"
 
-int fpm_stdio_flush_child() /* {{{ */
+int fpm_stdio_flush_child(void)
 {
 	return write(STDERR_FILENO, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH));
 }
-/* }}} */
 
 static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
