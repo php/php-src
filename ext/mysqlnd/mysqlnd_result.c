@@ -1021,7 +1021,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 static MYSQLND_ROW_C
 MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 {
-	bool fetched_anything;
+	bool fetched_anything = false;
 	zval *row_data;
 	MYSQLND_ROW_C ret = NULL;
 	DBG_ENTER("mysqlnd_res::fetch_row_c");

@@ -35,11 +35,11 @@ typedef enum {
 	X86_CRC32_MAX,
 } X86_CRC32_TYPE;
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
+#ifdef ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
 PHP_MINIT_FUNCTION(crc32_x86_intrin);
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 /* Return the size processed by SIMD routine */
 size_t crc32_x86_simd_update(X86_CRC32_TYPE type, uint32_t *crc, const unsigned char *p, size_t nr);
 #else

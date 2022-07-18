@@ -54,14 +54,14 @@ static int _php_mcast_source_op(php_socket *sock, int level, struct sockaddr *gr
 
 #ifdef RFC3678_API
 static int _php_source_op_to_rfc3678_op(enum source_op sop);
-#elif HAS_MCAST_EXT
+#elif defined(HAS_MCAST_EXT)
 static const char *_php_source_op_to_string(enum source_op sop);
 static int _php_source_op_to_ipv4_op(enum source_op sop);
 #endif
 
 int php_string_to_if_index(const char *val, unsigned *out)
 {
-#if HAVE_IF_NAMETOINDEX
+#ifdef HAVE_IF_NAMETOINDEX
 	unsigned int ind;
 
 	ind = if_nametoindex(val);
@@ -475,7 +475,7 @@ static int _php_mcast_join_leave(
 				join ? IP_ADD_MEMBERSHIP : IP_DROP_MEMBERSHIP, (char*)&mreq,
 				sizeof(mreq));
 	}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	else if (sock->type == AF_INET6) {
 		struct ipv6_mreq mreq;
 		memset(&mreq, 0, sizeof(struct ipv6_mreq));
@@ -543,7 +543,7 @@ static int _php_mcast_source_op(
 		return setsockopt(sock->bsd_socket, level,
 				_php_source_op_to_ipv4_op(sop), (char*)&mreqs, sizeof(mreqs));
 	}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	else if (sock->type == AF_INET6) {
 		php_error_docref(NULL, E_WARNING,
 			"This platform does not support %s for IPv6 sockets",
@@ -560,7 +560,7 @@ static int _php_mcast_source_op(
 #endif
 }
 
-#if RFC3678_API
+#ifdef RFC3678_API
 static int _php_source_op_to_rfc3678_op(enum source_op sop)
 {
 	switch (sop) {
@@ -722,7 +722,7 @@ int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_add
 #define ifr_ifindex ifr_index
 #endif
 
-#if defined(SIOCGIFNAME)
+#ifdef SIOCGIFNAME
 	if_req.ifr_ifindex = if_index;
 	if (ioctl(php_sock->bsd_socket, SIOCGIFNAME, &if_req) == -1) {
 #elif defined(HAVE_IF_INDEXTONAME)
@@ -801,7 +801,7 @@ int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *i
 		if ((((struct sockaddr*)&cur_req.ifr_addr)->sa_family == AF_INET) &&
 				(((struct sockaddr_in*)&cur_req.ifr_addr)->sin_addr.s_addr ==
 					addr->s_addr)) {
-#if defined(SIOCGIFINDEX)
+#ifdef SIOCGIFINDEX
 			if (ioctl(php_sock->bsd_socket, SIOCGIFINDEX, (char*)&cur_req)
 					== -1) {
 #elif defined(HAVE_IF_NAMETOINDEX)
@@ -815,7 +815,7 @@ int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *i
 					errno);
 				goto err;
 			} else {
-#if defined(SIOCGIFINDEX)
+#ifdef SIOCGIFINDEX
 				*if_index = cur_req.ifr_ifindex;
 #else
 				*if_index = index_tmp;

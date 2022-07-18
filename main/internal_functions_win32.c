@@ -58,39 +58,39 @@
 #endif
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
-#if HAVE_UODBC
+#ifdef HAVE_UODBC
 #include "ext/odbc/php_odbc.h"
 #endif
-#if HAVE_PHP_SESSION
+#ifdef HAVE_PHP_SESSION
 #include "ext/session/php_session.h"
 #endif
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 #include "ext/mbstring/mbstring.h"
 #endif
-#if HAVE_TOKENIZER
+#ifdef HAVE_TOKENIZER
 #include "ext/tokenizer/php_tokenizer.h"
 #endif
-#if HAVE_ZLIB
+#ifdef HAVE_ZLIB
 #include "ext/zlib/php_zlib.h"
 #endif
-#if HAVE_LIBXML
+#ifdef HAVE_LIBXML
 #include "ext/libxml/php_libxml.h"
-#if HAVE_DOM
+#ifdef HAVE_DOM
 #include "ext/dom/php_dom.h"
 #endif
-#if HAVE_SIMPLEXML
+#ifdef HAVE_SIMPLEXML
 #include "ext/simplexml/php_simplexml.h"
 #endif
 #endif
-#if HAVE_XML
+#ifdef HAVE_XML
 #include "ext/xml/php_xml.h"
 #endif
 #include "ext/com_dotnet/php_com_dotnet.h"
 #include "ext/spl/php_spl.h"
-#if HAVE_XML && HAVE_XMLREADER
+#if defined(HAVE_XML) && defined(HAVE_XMLREADER)
 #include "ext/xmlreader/php_xmlreader.h"
 #endif
-#if HAVE_XML && HAVE_XMLWRITER
+#if defined(HAVE_XML) && defined(HAVE_XMLWRITER)
 #include "ext/xmlwriter/php_xmlwriter.h"
 #endif
 /* }}} */
@@ -98,58 +98,58 @@
 /* {{{ php_builtin_extensions[] */
 static zend_module_entry * const php_builtin_extensions[] = {
 	phpext_standard_ptr
-#if HAVE_BCMATH
+#ifdef HAVE_BCMATH
 	,phpext_bcmath_ptr
 #endif
-#if HAVE_CALENDAR
+#ifdef HAVE_CALENDAR
 	,phpext_calendar_ptr
 #endif
 	,phpext_com_dotnet_ptr
-#if HAVE_CTYPE
+#ifdef HAVE_CTYPE
 	,phpext_ctype_ptr
 #endif
 	,phpext_date_ptr
-#if HAVE_FTP
+#ifdef HAVE_FTP
 	,phpext_ftp_ptr
 #endif
 	,phpext_hash_ptr
-#if HAVE_ICONV
+#ifdef HAVE_ICONV
 	,phpext_iconv_ptr
 #endif
-#if HAVE_MBSTRING
+#ifdef HAVE_MBSTRING
 	,phpext_mbstring_ptr
 #endif
-#if HAVE_UODBC
+#ifdef HAVE_UODBC
 	,phpext_odbc_ptr
 #endif
 	,phpext_pcre_ptr
 	,phpext_reflection_ptr
-#if HAVE_PHP_SESSION
+#ifdef HAVE_PHP_SESSION
 	,phpext_session_ptr
 #endif
-#if HAVE_TOKENIZER
+#ifdef HAVE_TOKENIZER
 	,phpext_tokenizer_ptr
 #endif
-#if HAVE_ZLIB
+#ifdef HAVE_ZLIB
 	,phpext_zlib_ptr
 #endif
-#if HAVE_LIBXML
+#ifdef HAVE_LIBXML
 	,phpext_libxml_ptr
-#if HAVE_DOM
+#ifdef HAVE_DOM
 	,phpext_dom_ptr
 #endif
-#if HAVE_SIMPLEXML
+#ifdef HAVE_SIMPLEXML
 	,phpext_simplexml_ptr
 #endif
 #endif
-#if HAVE_XML
+#ifdef HAVE_XML
 	,phpext_xml_ptr
 #endif
 	,phpext_spl_ptr
-#if HAVE_XML && HAVE_XMLREADER
+#if defined(HAVE_XML) && defined(HAVE_XMLREADER)
 	,phpext_xmlreader_ptr
 #endif
-#if HAVE_XML && HAVE_XMLWRITER
+#if defined(HAVE_XML) && defined(HAVE_XMLWRITER)
 	,phpext_xmlwriter_ptr
 #endif
 };

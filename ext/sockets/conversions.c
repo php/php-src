@@ -589,7 +589,7 @@ static void to_zval_read_sockaddr_in(const char *data, zval *zv, res_context *ct
 {
 	to_zval_read_aggregation(data, zv, descriptors_sockaddr_in, ctx);
 }
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_context *ctx)
 {
 	int					res;
@@ -740,7 +740,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 		}
 		break;
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 		if (ctx->sock->type != AF_INET6) {
 			do_from_zval_err(ctx, "the specified family (AF_INET6) is not "
@@ -804,7 +804,7 @@ static void to_zval_read_sockaddr_aux(const char *sockaddr_c, zval *zv, res_cont
 		to_zval_read_sockaddr_in(sockaddr_c, zv, ctx);
 		break;
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 		to_zval_read_sockaddr_in6(sockaddr_c, zv, ctx);
 		break;
@@ -1245,7 +1245,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 
 		str = zval_get_tmp_string((zval *) zv, &tmp_str);
 
-#if HAVE_IF_NAMETOINDEX
+#ifdef HAVE_IF_NAMETOINDEX
 		ret = if_nametoindex(ZSTR_VAL(str));
 		if (ret == 0) {
 			do_from_zval_err(ctx, "no interface with name \"%s\" could be found", ZSTR_VAL(str));
