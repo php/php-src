@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed LMDB driver memory leak on DB creation failure (Girgias)
 
+- OPcache:
+  . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
+    (cmb)
+
 - Standard:
   . Fixed bug GH-9017 (php_stream_sock_open_from_socket could return NULL).
     (Heiko Weber)
