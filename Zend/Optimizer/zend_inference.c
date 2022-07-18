@@ -1961,6 +1961,9 @@ static uint32_t assign_dim_array_result_type(
 			value_type |= MAY_BE_NULL;
 		}
 		if (dim_op_type == IS_UNUSED) {
+			if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
+				tmp |= MAY_BE_ARRAY_PACKED;
+			}
 			tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 		} else {
 			if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
