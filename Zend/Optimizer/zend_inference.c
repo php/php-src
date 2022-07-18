@@ -3377,7 +3377,12 @@ static zend_always_inline zend_result _zend_update_type_info(
 						ZEND_ASSERT(j < 0 && "There should only be one use");
 					}
 				}
-				if (((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY)) || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG) {
+				if (((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY))
+				 || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+				 || opline->opcode == ZEND_FETCH_DIM_R
+				 || opline->opcode == ZEND_FETCH_DIM_IS
+				 || opline->opcode == ZEND_FETCH_DIM_UNSET
+				 || opline->opcode == ZEND_FETCH_LIST_R) {
 					UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 				} else {
 					/* invalid key type */
