@@ -1436,6 +1436,7 @@ class FuncInfo {
         foreach ($this->args as $arg) {
             $arg->type = null;
             $arg->defaultValue = null;
+            $arg->attributes = [];
         }
     }
 
