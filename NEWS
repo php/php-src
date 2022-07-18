@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Added initial support for JIT performance profiling generation
     for macOs Instrument. (David Carlier)
+  . Fixed bug GH-8030 (Segfault with JIT and large match/switch statements).
+    (Arnaud)
 
 - PCRE:
   . Updated bundled libpcre to 10.40. (cmb)
