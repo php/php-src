@@ -41,19 +41,19 @@ echo "2: " . mb_decode_numericentity($str2, $convmap, "UTF-8") . "\n";
 echo "3: " . mb_decode_numericentity($str3, $convmap, "UTF-8") . "\n";
 
 // Numeric entities which are truncated at end of string
-// We do NOT decode such entities; they can be terminated by any non-digit character, but not by the end of the string
-echo "4: " . mb_decode_numericentity('&#1000000000', $convmap), "\n";
-echo "5: " . mb_decode_numericentity('&#9000000000', $convmap), "\n";
-echo "6: " . mb_decode_numericentity('&#10000000000', $convmap), "\n";
-echo "7: " . mb_decode_numericentity('&#100000000000', $convmap), "\n";
-echo "8: " . mb_decode_numericentity('&#000000000000', $convmap), "\n";
-echo "9: " . mb_decode_numericentity('&#00000000000', $convmap), "\n";
-echo "10: " . mb_decode_numericentity('&#0000000000', $convmap), "\n";
-echo "11: " . mb_decode_numericentity('&#000000000', $convmap), "\n";
+echo "4: " . mb_decode_numericentity('&#1000000000', $convmap), "\n"; // Entity is too big
+echo "5: " . mb_decode_numericentity('&#9000000000', $convmap), "\n"; // Entity is too big
+echo "6: " . mb_decode_numericentity('&#10000000000', $convmap), "\n"; // Too many digits
+echo "7: " . mb_decode_numericentity('&#100000000000', $convmap), "\n"; // Too many digits
+echo "8: " . mb_decode_numericentity('&#000000000000', $convmap), "\n"; // Too many digits
+echo "9: " . mb_decode_numericentity('&#00000000000', $convmap), "\n"; // Too many digits
+echo "10: " . bin2hex(mb_decode_numericentity('&#0000000000', $convmap)), "\n"; // OK
+echo "11: " . bin2hex(mb_decode_numericentity('&#000000000', $convmap)), "\n"; // OK
 // Try with hex, not just decimal entities
-echo "11b: " . mb_decode_numericentity('&#x0000000', $convmap), "\n";
-echo "11c: " . mb_decode_numericentity('&#x00000000', $convmap), "\n";
-echo "11d: " . mb_decode_numericentity('&#x10000', $convmap), "\n";
+echo "11b: " . bin2hex(mb_decode_numericentity('&#x0000000', $convmap)), "\n"; // OK
+echo "11c: " . bin2hex(mb_decode_numericentity('&#x00000000', $convmap)), "\n"; // OK
+echo "11d: " . bin2hex(mb_decode_numericentity('&#x10000', $convmap)), "\n"; // OK
+echo "11e: " . mb_decode_numericentity('&#x000000000', $convmap), "\n"; // Too many digits
 
 // Large decimal entity, converting from non-ASCII input encoding
 echo "12: " . bin2hex(mb_decode_numericentity(mb_convert_encoding('&#12345678;', 'UCS-4', 'ASCII'), [0, 0x7FFFFFFF, 0, 0x7FFFFFFF], 'UCS-4')), "\n";
@@ -100,6 +100,8 @@ test("Successive &", "&&#65,", "&A,", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 test("Successive &#", "&#&#x32;", "&#2", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 test("Successive &#x", "&#x&#x32;", "&#x2", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
+test("&#x only", "&#x;", "&#x;", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
+
 // The starting & of an entity can terminate a preceding entity
 test("Successive &#65", "&#65&#65;", "AA", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 test("Successive hex entities", "&#x32&#x32;", "22", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
@@ -131,6 +133,36 @@ test("Regression test (truncation of successive & with JIS encoding)", "&&&", "&
 // Previously, signed arithmetic was used on convmap entries
 test("Regression test (convmap entries are now treated as unsigned)", "&#7,", "?,", [0x22FFFF11, 0xBF111189, 0x67726511, 0x1161E719], "ASCII");
 
+// Try with '&', '&#', or '&#' at the end of a buffer of wchars, with more input
+// still left to process in the next buffer
+// (mb_decode_numericentity splits its input into 'chunks' and processes it one
+// chunk at a time)
+$convmap = [0, 0xFFFF, 0, 0xFFFF];
+for ($i = 0; $i < 256; $i++) {
+    $padding = str_repeat("a", $i);
+    // First try invalid decimal/hex entities
+    if (mb_decode_numericentity($padding . "&#ZZZ", $convmap, 'UTF-8') !== $padding . "&#ZZZ")
+        die("&#ZZZ is broken when it spans two buffers!");
+    if (mb_decode_numericentity($padding . "&#xZZZ", $convmap, 'UTF-8') !== $padding . "&#xZZZ")
+        die("&#xZZZ is broken when it spans two buffers!");
+    // Now try valid decimal/hex entities
+    if (mb_decode_numericentity($padding . "&#65", $convmap, 'UTF-8') !== $padding . "A")
+        die("&#65 is broken when it spans two buffers!");
+    if (mb_decode_numericentity($padding . "&#x41", $convmap, 'UTF-8') !== $padding . "A")
+        die("&#x41 is broken when it spans two buffers!");
+}
+
+// Try huge entities, big enough to fill an entire buffer
+for ($i = 12; $i < 256; $i++) {
+    $str = "&#" . str_repeat("0", $i) . "65";
+    if (mb_decode_numericentity($str, $convmap, 'UTF-8') !== $str)
+        die("Decimal entity with huge number of digits broken");
+
+    $str = "&#x" . str_repeat("0", $i) . "41";
+    if (mb_decode_numericentity($str, $convmap, 'UTF-8') !== $str)
+        die("Hexadecimal entity with huge number of digits broken");
+}
+
 ?>
 --EXPECT--
 1: ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ
@@ -142,11 +174,12 @@ test("Regression test (convmap entries are now treated as unsigned)", "&#7,", "?
 7: &#100000000000
 8: &#000000000000
 9: &#00000000000
-10: &#0000000000
-11: &#000000000
-11b: &#x0000000
-11c: &#x00000000
-11d: &#x10000
+10: 00
+11: 00
+11b: 00
+11c: 00
+11d: f0908080
+11e: &#x000000000
 12: 00bc614e
 13: f&ouml;o
 14: mb_decode_numericentity(): Argument #2 ($map) must have a multiple of 4 elements
@@ -164,6 +197,7 @@ Single &: string(1) "&" => string(1) "&" (Good)
 Successive &: string(6) "&&#65," => string(3) "&A," (Good)
 Successive &#: string(8) "&#&#x32;" => string(3) "&#2" (Good)
 Successive &#x: string(9) "&#x&#x32;" => string(4) "&#x2" (Good)
+&#x only: string(4) "&#x;" => string(4) "&#x;" (Good)
 Successive &#65: string(9) "&#65&#65;" => string(2) "AA" (Good)
 Successive hex entities: string(11) "&#x32&#x32;" => string(2) "22" (Good)
 Starting entity immediately after decimal entity which is too long: string(18) "&#10000000000&#65;" => string(14) "&#10000000000A" (Good)
