@@ -38,7 +38,7 @@ static void fpm_children_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-static struct fpm_child_s *fpm_child_alloc() /* {{{ */
+static struct fpm_child_s *fpm_child_alloc(void)
 {
 	struct fpm_child_s *ret;
 
@@ -52,7 +52,6 @@ static struct fpm_child_s *fpm_child_alloc() /* {{{ */
 	ret->scoreboard_i = -1;
 	return ret;
 }
-/* }}} */
 
 static void fpm_child_free(struct fpm_child_s *child) /* {{{ */
 {
@@ -177,7 +176,7 @@ int fpm_children_free(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-void fpm_children_bury() /* {{{ */
+void fpm_children_bury(void)
 {
 	int status;
 	pid_t pid;
@@ -303,7 +302,6 @@ void fpm_children_bury() /* {{{ */
 		}
 	}
 }
-/* }}} */
 
 static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /* {{{ */
 {
@@ -472,7 +470,7 @@ int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_children_init_main() /* {{{ */
+int fpm_children_init_main(void)
 {
 	if (fpm_global_config.emergency_restart_threshold &&
 		fpm_global_config.emergency_restart_interval) {
@@ -492,4 +490,3 @@ int fpm_children_init_main() /* {{{ */
 
 	return 0;
 }
-/* }}} */

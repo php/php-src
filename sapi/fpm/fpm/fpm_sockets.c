@@ -386,7 +386,7 @@ static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* 
 }
 /* }}} */
 
-int fpm_sockets_init_main() /* {{{ */
+int fpm_sockets_init_main(void)
 {
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
@@ -485,7 +485,6 @@ int fpm_sockets_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 #if HAVE_FPM_LQ
 

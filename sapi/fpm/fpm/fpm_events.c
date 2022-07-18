@@ -304,19 +304,17 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 }
 /* }}} */
 
-const char *fpm_event_machanism_name() /* {{{ */
+const char *fpm_event_machanism_name(void)
 {
 	return module ? module->name : NULL;
 }
-/* }}} */
 
-int fpm_event_support_edge_trigger() /* {{{ */
+int fpm_event_support_edge_trigger(void)
 {
 	return module ? module->support_edge_trigger : 0;
 }
-/* }}} */
 
-int fpm_event_init_main() /* {{{ */
+int fpm_event_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 	int max;
@@ -352,7 +350,6 @@ int fpm_event_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 void fpm_event_loop(int err) /* {{{ */
 {

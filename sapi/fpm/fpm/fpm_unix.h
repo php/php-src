@@ -10,7 +10,7 @@ int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *pa
 int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp);
 
 int fpm_unix_init_child(struct fpm_worker_pool_s *wp);
-int fpm_unix_init_main();
+int fpm_unix_init_main(void);
 
 extern size_t fpm_pagesize;
 
