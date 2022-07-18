@@ -6972,6 +6972,9 @@ ZEND_METHOD(ReflectionEnumBackedCase, getBackingValue)
 
 	if (Z_TYPE(ref->value) == IS_CONSTANT_AST) {
 		zval_update_constant_ex(&ref->value, ref->ce);
+		if (EG(exception)) {
+			return;
+		}
 	}
 
 	ZEND_ASSERT(intern->ce->enum_backing_type != IS_UNDEF);
