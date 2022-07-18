@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
   . Added access.suppress_path pool option to filter access log entries.
     (Mark Gallagher)
+  . Fixed on fpm scoreboard occasional warning on acquisition failure.
+    (Felix Wiedemann)
 
 - Opcache:
   . Added initial support for JIT performance profiling generation
