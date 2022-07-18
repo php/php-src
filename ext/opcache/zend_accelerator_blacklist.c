@@ -276,12 +276,12 @@ static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filena
 		}
 
 		/* strip \" */
-		if (pbuf[0] == '\"' && pbuf[path_length - 1]== '\"') {
+		if (path_length > 0 && pbuf[0] == '\"' && pbuf[path_length - 1]== '\"') {
 			*pbuf++ = 0;
 			path_length -= 2;
 		}
 
-		if (path_length == 0) {
+		if (path_length <= 0) {
 			continue;
 		}
 
