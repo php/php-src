@@ -431,6 +431,7 @@ PRIMARY MAINTAINER   Go Kudo <zeriyoshi@gmail.com> (2022 - 2022)
                      Tim Düsterhus <timwolla@php.net> (2022 - 2022)
 MAINTENANCE:         Maintained
 STATUS:              Working
+SINCE:               8.2.0
 -------------------------------------------------------------------------------
 EXTENSION:           readline
 PRIMARY MAINTAINER:  Unknown
