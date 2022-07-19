@@ -108,6 +108,12 @@ PHP 8.2 UPGRADE NOTES
     possible to use numbered subpattern references, and the matches array will
     still contain numbered results.
 
+- Random:
+  . New extension that organizes and consolidates existing implementations
+    related to random number generators. New, higher quality RNGs are available
+    and scope issues are eliminated.
+
+
 ========================================
 3. Changes in SAPI modules
 ========================================
