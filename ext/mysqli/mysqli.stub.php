@@ -5,454 +5,454 @@
 /* mysqli_options */
 /**
  * @var int
- * @cname MYSQL_READ_DEFAULT_GROUP
+ * @cvalue MYSQL_READ_DEFAULT_GROUP
  */
 const MYSQLI_READ_DEFAULT_GROUP = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_READ_DEFAULT_FILE
+ * @cvalue MYSQL_READ_DEFAULT_FILE
  */
 const MYSQLI_READ_DEFAULT_FILE = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_OPT_CONNECT_TIMEOUT
+ * @cvalue MYSQL_OPT_CONNECT_TIMEOUT
  */
 const MYSQLI_OPT_CONNECT_TIMEOUT = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_OPT_LOCAL_INFILE
+ * @cvalue MYSQL_OPT_LOCAL_INFILE
  */
 const MYSQLI_OPT_LOCAL_INFILE = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_OPT_LOAD_DATA_LOCAL_DIR
+ * @cvalue MYSQL_OPT_LOAD_DATA_LOCAL_DIR
  */
 const MYSQLI_OPT_LOAD_DATA_LOCAL_DIR = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_INIT_COMMAND
+ * @cvalue MYSQL_INIT_COMMAND
  */
 const MYSQLI_INIT_COMMAND = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_OPT_READ_TIMEOUT
+ * @cvalue MYSQL_OPT_READ_TIMEOUT
  */
 const MYSQLI_OPT_READ_TIMEOUT = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLND_OPT_NET_CMD_BUFFER_SIZE
+ * @cvalue MYSQLND_OPT_NET_CMD_BUFFER_SIZE
  */
 const MYSQLI_OPT_NET_CMD_BUFFER_SIZE = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLND_OPT_NET_READ_BUFFER_SIZE
+ * @cvalue MYSQLND_OPT_NET_READ_BUFFER_SIZE
  */
 const MYSQLI_OPT_NET_READ_BUFFER_SIZE = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLND_OPT_INT_AND_FLOAT_NATIVE
+ * @cvalue MYSQLND_OPT_INT_AND_FLOAT_NATIVE
  */
 const MYSQLI_OPT_INT_AND_FLOAT_NATIVE = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_OPT_SSL_VERIFY_SERVER_CERT
+ * @cvalue MYSQL_OPT_SSL_VERIFY_SERVER_CERT
  */
 const MYSQLI_OPT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
 
 /**
  * @var int
- * @cname MYSQL_SERVER_PUBLIC_KEY
+ * @cvalue MYSQL_SERVER_PUBLIC_KEY
  */
 const MYSQLI_SERVER_PUBLIC_KEY = UNKNOWN;
 
 /* mysqli_real_connect flags */
 /**
  * @var int
- * @cname CLIENT_SSL
+ * @cvalue CLIENT_SSL
  */
 const MYSQLI_CLIENT_SSL = UNKNOWN;
 /**
  * @var int
- * @cname CLIENT_COMPRESS
+ * @cvalue CLIENT_COMPRESS
  */
 const MYSQLI_CLIENT_COMPRESS = UNKNOWN;
 /**
  * @var int
- * @cname CLIENT_INTERACTIVE
+ * @cvalue CLIENT_INTERACTIVE
  */
 const MYSQLI_CLIENT_INTERACTIVE = UNKNOWN;
 /**
  * @var int
- * @cname CLIENT_IGNORE_SPACE
+ * @cvalue CLIENT_IGNORE_SPACE
  */
 const MYSQLI_CLIENT_IGNORE_SPACE = UNKNOWN;
 /**
  * @var int
- * @cname CLIENT_NO_SCHEMA
+ * @cvalue CLIENT_NO_SCHEMA
  */
 const MYSQLI_CLIENT_NO_SCHEMA = UNKNOWN;
 /**
  * @var int
- * @cname CLIENT_FOUND_ROWS
+ * @cvalue CLIENT_FOUND_ROWS
  */
 const MYSQLI_CLIENT_FOUND_ROWS = UNKNOWN;
 #ifdef CLIENT_SSL_VERIFY_SERVER_CERT
 /**
  * @var int
- * @cname CLIENT_SSL_VERIFY_SERVER_CERT
+ * @cvalue CLIENT_SSL_VERIFY_SERVER_CERT
  */
 const MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
 /**
  * @var int
- * @cname CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+ * @cvalue CLIENT_SSL_DONT_VERIFY_SERVER_CERT
  */
 const MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT = UNKNOWN;
 #endif
 /**
  * @var int
- * @cname CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS
+ * @cvalue CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS
  */
 const MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS
+ * @cvalue MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS
  */
 const MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS = UNKNOWN;
 
 /* for mysqli_query */
 /**
  * @var int
- * @cname MYSQLI_STORE_RESULT
+ * @cvalue MYSQLI_STORE_RESULT
  */
 const MYSQLI_STORE_RESULT = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_USE_RESULT
+ * @cvalue MYSQLI_USE_RESULT
  */
 const MYSQLI_USE_RESULT = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_ASYNC
+ * @cvalue MYSQLI_ASYNC
  */
 const MYSQLI_ASYNC = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_STORE_RESULT_COPY_DATA
+ * @cvalue MYSQLI_STORE_RESULT_COPY_DATA
  */
 const MYSQLI_STORE_RESULT_COPY_DATA = UNKNOWN;
 
 /* for mysqli_fetch_assoc */
 /**
  * @var int
- * @cname MYSQLI_ASSOC
+ * @cvalue MYSQLI_ASSOC
  */
 const MYSQLI_ASSOC = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_NUM
+ * @cvalue MYSQLI_NUM
  */
 const MYSQLI_NUM = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_BOTH
+ * @cvalue MYSQLI_BOTH
  */
 const MYSQLI_BOTH = UNKNOWN;
 
 /* for mysqli_stmt_set_attr */
 /**
  * @var int
- * @cname STMT_ATTR_UPDATE_MAX_LENGTH
+ * @cvalue STMT_ATTR_UPDATE_MAX_LENGTH
  */
 const MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH = UNKNOWN;
 
 /**
  * @var int
- * @cname STMT_ATTR_CURSOR_TYPE
+ * @cvalue STMT_ATTR_CURSOR_TYPE
  */
 const MYSQLI_STMT_ATTR_CURSOR_TYPE = UNKNOWN;
 /**
  * @var int
- * @cname CURSOR_TYPE_NO_CURSOR
+ * @cvalue CURSOR_TYPE_NO_CURSOR
  */
 const MYSQLI_CURSOR_TYPE_NO_CURSOR = UNKNOWN;
 /**
  * @var int
- * @cname CURSOR_TYPE_READ_ONLY
+ * @cvalue CURSOR_TYPE_READ_ONLY
  */
 const MYSQLI_CURSOR_TYPE_READ_ONLY = UNKNOWN;
 /**
  * @var int
- * @cname CURSOR_TYPE_FOR_UPDATE
+ * @cvalue CURSOR_TYPE_FOR_UPDATE
  */
 const MYSQLI_CURSOR_TYPE_FOR_UPDATE = UNKNOWN;
 /**
  * @var int
- * @cname CURSOR_TYPE_SCROLLABLE
+ * @cvalue CURSOR_TYPE_SCROLLABLE
  */
 const MYSQLI_CURSOR_TYPE_SCROLLABLE = UNKNOWN;
 /**
  * @var int
- * @cname STMT_ATTR_PREFETCH_ROWS
+ * @cvalue STMT_ATTR_PREFETCH_ROWS
  */
 const MYSQLI_STMT_ATTR_PREFETCH_ROWS = UNKNOWN;
 
 /* column information */
 /**
  * @var int
- * @cname NOT_NULL_FLAG
+ * @cvalue NOT_NULL_FLAG
  */
 const MYSQLI_NOT_NULL_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname PRI_KEY_FLAG
+ * @cvalue PRI_KEY_FLAG
  */
 const MYSQLI_PRI_KEY_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname UNIQUE_KEY_FLAG
+ * @cvalue UNIQUE_KEY_FLAG
  */
 const MYSQLI_UNIQUE_KEY_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname MULTIPLE_KEY_FLAG
+ * @cvalue MULTIPLE_KEY_FLAG
  */
 const MYSQLI_MULTIPLE_KEY_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname BLOB_FLAG
+ * @cvalue BLOB_FLAG
  */
 const MYSQLI_BLOB_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname UNSIGNED_FLAG
+ * @cvalue UNSIGNED_FLAG
  */
 const MYSQLI_UNSIGNED_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname ZEROFILL_FLAG
+ * @cvalue ZEROFILL_FLAG
  */
 const MYSQLI_ZEROFILL_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname AUTO_INCREMENT_FLAG
+ * @cvalue AUTO_INCREMENT_FLAG
  */
 const MYSQLI_AUTO_INCREMENT_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname TIMESTAMP_FLAG
+ * @cvalue TIMESTAMP_FLAG
  */
 const MYSQLI_TIMESTAMP_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname SET_FLAG
+ * @cvalue SET_FLAG
  */
 const MYSQLI_SET_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname NUM_FLAG
+ * @cvalue NUM_FLAG
  */
 const MYSQLI_NUM_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname PART_KEY_FLAG
+ * @cvalue PART_KEY_FLAG
  */
 const MYSQLI_PART_KEY_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname GROUP_FLAG
+ * @cvalue GROUP_FLAG
  */
 const MYSQLI_GROUP_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname ENUM_FLAG
+ * @cvalue ENUM_FLAG
  */
 const MYSQLI_ENUM_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname BINARY_FLAG
+ * @cvalue BINARY_FLAG
  */
 const MYSQLI_BINARY_FLAG = UNKNOWN;
 /**
  * @var int
- * @cname NO_DEFAULT_VALUE_FLAG
+ * @cvalue NO_DEFAULT_VALUE_FLAG
  */
 const MYSQLI_NO_DEFAULT_VALUE_FLAG = UNKNOWN;
 
 /**
  * @var int
- * @cname ON_UPDATE_NOW_FLAG
+ * @cvalue ON_UPDATE_NOW_FLAG
  */
 const MYSQLI_ON_UPDATE_NOW_FLAG = UNKNOWN;
 
 /**
  * @var int
- * @cname FIELD_TYPE_DECIMAL
+ * @cvalue FIELD_TYPE_DECIMAL
  */
 const MYSQLI_TYPE_DECIMAL = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_TINY
+ * @cvalue FIELD_TYPE_TINY
  */
 const MYSQLI_TYPE_TINY = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_SHORT
+ * @cvalue FIELD_TYPE_SHORT
  */
 const MYSQLI_TYPE_SHORT = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_LONG
+ * @cvalue FIELD_TYPE_LONG
  */
 const MYSQLI_TYPE_LONG = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_FLOAT
+ * @cvalue FIELD_TYPE_FLOAT
  */
 const MYSQLI_TYPE_FLOAT = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_DOUBLE
+ * @cvalue FIELD_TYPE_DOUBLE
  */
 const MYSQLI_TYPE_DOUBLE = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_NULL
+ * @cvalue FIELD_TYPE_NULL
  */
 const MYSQLI_TYPE_NULL = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_TIMESTAMP
+ * @cvalue FIELD_TYPE_TIMESTAMP
  */
 const MYSQLI_TYPE_TIMESTAMP = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_LONGLONG
+ * @cvalue FIELD_TYPE_LONGLONG
  */
 const MYSQLI_TYPE_LONGLONG = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_INT24
+ * @cvalue FIELD_TYPE_INT24
  */
 const MYSQLI_TYPE_INT24 = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_DATE
+ * @cvalue FIELD_TYPE_DATE
  */
 const MYSQLI_TYPE_DATE = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_TIME
+ * @cvalue FIELD_TYPE_TIME
  */
 const MYSQLI_TYPE_TIME = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_DATETIME
+ * @cvalue FIELD_TYPE_DATETIME
  */
 const MYSQLI_TYPE_DATETIME = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_YEAR
+ * @cvalue FIELD_TYPE_YEAR
  */
 const MYSQLI_TYPE_YEAR = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_NEWDATE
+ * @cvalue FIELD_TYPE_NEWDATE
  */
 const MYSQLI_TYPE_NEWDATE = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_ENUM
+ * @cvalue FIELD_TYPE_ENUM
  */
 const MYSQLI_TYPE_ENUM = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_SET
+ * @cvalue FIELD_TYPE_SET
  */
 const MYSQLI_TYPE_SET = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_TINY_BLOB
+ * @cvalue FIELD_TYPE_TINY_BLOB
  */
 const MYSQLI_TYPE_TINY_BLOB = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_MEDIUM_BLOB
+ * @cvalue FIELD_TYPE_MEDIUM_BLOB
  */
 const MYSQLI_TYPE_MEDIUM_BLOB = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_LONG_BLOB
+ * @cvalue FIELD_TYPE_LONG_BLOB
  */
 const MYSQLI_TYPE_LONG_BLOB = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_BLOB
+ * @cvalue FIELD_TYPE_BLOB
  */
 const MYSQLI_TYPE_BLOB = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_VAR_STRING
+ * @cvalue FIELD_TYPE_VAR_STRING
  */
 const MYSQLI_TYPE_VAR_STRING = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_STRING
+ * @cvalue FIELD_TYPE_STRING
  */
 const MYSQLI_TYPE_STRING = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_CHAR
+ * @cvalue FIELD_TYPE_CHAR
  */
 const MYSQLI_TYPE_CHAR = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_INTERVAL
+ * @cvalue FIELD_TYPE_INTERVAL
  */
 const MYSQLI_TYPE_INTERVAL = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_GEOMETRY
+ * @cvalue FIELD_TYPE_GEOMETRY
  */
 const MYSQLI_TYPE_GEOMETRY = UNKNOWN;
 #ifdef FIELD_TYPE_JSON
 /**
  * @var int
- * @cname FIELD_TYPE_JSON
+ * @cvalue FIELD_TYPE_JSON
  */
 const MYSQLI_TYPE_JSON = UNKNOWN;
 #endif
 /**
  * @var int
- * @cname FIELD_TYPE_NEWDECIMAL
+ * @cvalue FIELD_TYPE_NEWDECIMAL
  */
 const MYSQLI_TYPE_NEWDECIMAL = UNKNOWN;
 /**
  * @var int
- * @cname FIELD_TYPE_BIT
+ * @cvalue FIELD_TYPE_BIT
  */
 const MYSQLI_TYPE_BIT = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_SET_CHARSET_NAME
+ * @cvalue MYSQL_SET_CHARSET_NAME
  */
 const MYSQLI_SET_CHARSET_NAME = UNKNOWN;
 /**
  * @var int
- * @cname MYSQL_SET_CHARSET_DIR
+ * @cvalue MYSQL_SET_CHARSET_DIR
  */
 const MYSQLI_SET_CHARSET_DIR = UNKNOWN;
 
 /* bind support */
 /**
  * @var int
- * @cname MYSQL_NO_DATA
+ * @cvalue MYSQL_NO_DATA
  * @deprecated
  */
 const MYSQLI_NO_DATA = UNKNOWN;
 #ifdef MYSQL_DATA_TRUNCATED
 /**
  * @var int
- * @cname MYSQL_DATA_TRUNCATED
+ * @cvalue MYSQL_DATA_TRUNCATED
  * @deprecated
  */
 const MYSQLI_DATA_TRUNCATED = UNKNOWN;
@@ -461,52 +461,52 @@ const MYSQLI_DATA_TRUNCATED = UNKNOWN;
 /* reporting */
 /**
  * @var int
- * @cname MYSQLI_REPORT_INDEX
+ * @cvalue MYSQLI_REPORT_INDEX
  */
 const MYSQLI_REPORT_INDEX = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_REPORT_ERROR
+ * @cvalue MYSQLI_REPORT_ERROR
  */
 const MYSQLI_REPORT_ERROR = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_REPORT_STRICT
+ * @cvalue MYSQLI_REPORT_STRICT
  */
 const MYSQLI_REPORT_STRICT = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_REPORT_ALL
+ * @cvalue MYSQLI_REPORT_ALL
  */
 const MYSQLI_REPORT_ALL = UNKNOWN;
 /**
  * @var int
- * @cname MYSQLI_REPORT_OFF
+ * @cvalue MYSQLI_REPORT_OFF
  */
 const MYSQLI_REPORT_OFF = UNKNOWN;
 
 /**
  * @var int
- * @cname MYSQLND_DBG_ENABLED
+ * @cvalue MYSQLND_DBG_ENABLED
  */
 const MYSQLI_DEBUG_TRACE_ENABLED = UNKNOWN;
 
 /**
  * @var int
- * @cname SERVER_QUERY_NO_GOOD_INDEX_USED
+ * @cvalue SERVER_QUERY_NO_GOOD_INDEX_USED
  * @deprecated
  */
 const MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED = UNKNOWN;
 /**
  * @var int
- * @cname SERVER_QUERY_NO_INDEX_USED
+ * @cvalue SERVER_QUERY_NO_INDEX_USED
  * @deprecated
  */
 const MYSQLI_SERVER_QUERY_NO_INDEX_USED = UNKNOWN;
 #ifdef SERVER_QUERY_WAS_SLOW
 /**
  * @var int
- * @cname SERVER_QUERY_WAS_SLOW
+ * @cvalue SERVER_QUERY_WAS_SLOW
  * @deprecated
  */
 const MYSQLI_SERVER_QUERY_WAS_SLOW = UNKNOWN;
@@ -514,7 +514,7 @@ const MYSQLI_SERVER_QUERY_WAS_SLOW = UNKNOWN;
 #ifdef SERVER_PS_OUT_PARAMS
 /**
  * @var int
- * @cname SERVER_PS_OUT_PARAMS
+ * @cvalue SERVER_PS_OUT_PARAMS
  * @deprecated
  */
 const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
@@ -522,91 +522,91 @@ const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
 
 /**
  * @var int
- * @cname REFRESH_GRANT
+ * @cvalue REFRESH_GRANT
  */
 const MYSQLI_REFRESH_GRANT = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_LOG
+ * @cvalue REFRESH_LOG
  */
 const MYSQLI_REFRESH_LOG = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_TABLES
+ * @cvalue REFRESH_TABLES
  */
 const MYSQLI_REFRESH_TABLES = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_HOSTS
+ * @cvalue REFRESH_HOSTS
  */
 const MYSQLI_REFRESH_HOSTS = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_STATUS
+ * @cvalue REFRESH_STATUS
  */
 const MYSQLI_REFRESH_STATUS = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_THREADS
+ * @cvalue REFRESH_THREADS
  */
 const MYSQLI_REFRESH_THREADS = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_SLAVE
+ * @cvalue REFRESH_SLAVE
  */
 const MYSQLI_REFRESH_REPLICA = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_SLAVE
+ * @cvalue REFRESH_SLAVE
  */
 const MYSQLI_REFRESH_SLAVE = UNKNOWN;
 /**
  * @var int
- * @cname REFRESH_MASTER
+ * @cvalue REFRESH_MASTER
  */
 const MYSQLI_REFRESH_MASTER = UNKNOWN;
 #ifdef REFRESH_BACKUP_LOG
 /**
  * @var int
- * @cname REFRESH_BACKUP_LOG
+ * @cvalue REFRESH_BACKUP_LOG
  */
 const MYSQLI_REFRESH_BACKUP_LOG = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cname TRANS_START_WITH_CONSISTENT_SNAPSHOT
+ * @cvalue TRANS_START_WITH_CONSISTENT_SNAPSHOT
  */
 const MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT = UNKNOWN;
 /**
  * @var int
- * @cname TRANS_START_READ_WRITE
+ * @cvalue TRANS_START_READ_WRITE
  */
 const MYSQLI_TRANS_START_READ_WRITE = UNKNOWN;
 /**
  * @var int
- * @cname TRANS_START_READ_ONLY
+ * @cvalue TRANS_START_READ_ONLY
  */
 const MYSQLI_TRANS_START_READ_ONLY = UNKNOWN;
 
 /**
  * @var int
- * @cname TRANS_COR_AND_CHAIN
+ * @cvalue TRANS_COR_AND_CHAIN
  */
 const MYSQLI_TRANS_COR_AND_CHAIN = UNKNOWN;
 /**
  * @var int
- * @cname TRANS_COR_AND_NO_CHAIN
+ * @cvalue TRANS_COR_AND_NO_CHAIN
  */
 const MYSQLI_TRANS_COR_AND_NO_CHAIN = UNKNOWN;
 /**
  * @var int
- * @cname TRANS_COR_RELEASE
+ * @cvalue TRANS_COR_RELEASE
  */
 const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
 /**
  * @var int
- * @cname TRANS_COR_NO_RELEASE
+ * @cvalue TRANS_COR_NO_RELEASE
  */
 const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
 

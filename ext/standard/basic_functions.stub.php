@@ -4,7 +4,7 @@
 
 /**
  * @var float
- * @cname M_E
+ * @cvalue M_E
  */
 const M_E = 2.7182818284590452354;
 

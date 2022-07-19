@@ -4,7 +4,7 @@
 
 /**
  * @var int
- * @cname PHP_HASH_HMAC
+ * @cvalue PHP_HASH_HMAC
  */
 const HASH_HMAC = UNKNOWN;
 

@@ -4,22 +4,22 @@
 
 /**
  * @var string
- * @cname PHP_ICONV_IMPL_VALUE
+ * @cvalue PHP_ICONV_IMPL_VALUE
  */
 const ICONV_IMPL = UNKNOWN;
 /**
  * @var string
- * @cname get_iconv_version()
+ * @cvalue get_iconv_version()
  */
 const ICONV_VERSION = UNKNOWN;
 /**
  * @var int
- * @cname PHP_ICONV_MIME_DECODE_STRICT
+ * @cvalue PHP_ICONV_MIME_DECODE_STRICT
  */
 const ICONV_MIME_DECODE_STRICT = UNKNOWN;
 /**
  * @var int
- * @cname PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR
+ * @cvalue PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR
  */
 const ICONV_MIME_DECODE_CONTINUE_ON_ERROR = UNKNOWN;
 
