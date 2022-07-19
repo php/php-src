@@ -112,6 +112,8 @@ PHP 8.2 UPGRADE NOTES
   . New extension that organizes and consolidates existing implementations
     related to random number generators. New, higher quality RNGs are available
     and scope issues are eliminated.
+    RFC: https://wiki.php.net/rfc/rng_extension
+    RFC: https://wiki.php.net/rfc/random_extension_improvement
 
 
 ========================================
