@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0beta1
+21 Jul 2022, PHP 8.2.0beta1
 
 - CLI:
   . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
