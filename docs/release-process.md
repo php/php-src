@@ -121,15 +121,15 @@ slightly different steps. We'll call attention where the steps differ.
 3. Check out the *release branch* for this release from the *version branch*.
 
    > 🔶 **Non-stable version branches: pre-GA** \
-   > There is no *version branch* for alpha releases. Instead, treat the main
-   > branch as the version branch. You will create a local-only release branch
-   > from the main branch. Do not push it!
+   > There is no *version branch* for alpha or beta releases. Instead, treat the
+   > main branch as the version branch. You will create a local-only release
+   > branch from the main branch. Do not push it!
    >
    > ```shell
    > git checkout -b php-X.Y.0alpha1-local-release-branch upstream/master
    > ```
    >
-   > During the first beta release, you will create (and push!) the version
+   > During the first RC release, you will create (and push!) the version
    > branch for the pre-GA release, e.g., `PHP-8.2`. See
    > "[Forking a new version branch](#forking-a-new-version-branch)" below.
    > From this point forward, all pre-GA release branches will be created from
@@ -845,16 +845,15 @@ recommendation and the intervals may vary based on work load.
 
 ## Forking a new version branch
 
-When the new version has reached the feature freeze point during its pre-release
-cycle, it is time to create a new version branch. This frees up the main branch
-(i.e., `master`) for any new feature development that cannot go into the new
-version.
+When the new version has reached the first RC, it is time to create a new
+version branch. This frees up the main branch (i.e., `master`) for any new
+feature development that cannot go into the new version.
 
-1. One week prior to tagging `X.Y.0beta1`, warn internals@ that your version's
+1. One week prior to tagging `X.Y.0RC1`, warn internals@ that your version's
    branch is about to be created. Be specific about when the branch creation
    will occur. For example: https://news-web.php.net/php.internals/99864
 
-2. Just prior to tagging `X.Y.0beta1`, create the new version branch locally,
+2. Just prior to tagging `X.Y.0RC1`, create the new version branch locally,
    i.e. `PHP-X.Y`.
 
 3. Add a commit on the main branch (i.e., `master`) after the branch point.
@@ -884,6 +883,13 @@ version.
 
    * [Add PHP-8.1 to the Git steps page][]
    * [Changes to the wiki][]
+
+> 💬 **Hint** \
+> We create the new version branch at the first release candidate rather than at
+> feature freeze to allow a period of time where the focus is on making the new
+> version ready for RC and GA. During this time, the main branch is *only* for
+> minor improvements and bug fixes. All major improvements and new features must
+> wait.
 
 
 ## Preparing for the initial stable version (PHP X.Y.0)
