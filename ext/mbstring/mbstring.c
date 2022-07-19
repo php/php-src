@@ -1817,26 +1817,54 @@ PHP_FUNCTION(mb_str_split)
 }
 /* }}} */
 
+static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
+{
+	size_t len = 0;
+
+	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+		return ZSTR_LEN(string);
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
+		return ZSTR_LEN(string) / 2;
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
+		return ZSTR_LEN(string) / 4;
+	} else if (encoding->mblen_table) {
+		const unsigned char *mbtab = encoding->mblen_table;
+		unsigned char *p = (unsigned char*)ZSTR_VAL(string), *e = p + ZSTR_LEN(string);
+		while (p < e) {
+			p += mbtab[*p];
+			len++;
+		}
+	} else {
+		uint32_t wchar_buf[128];
+		unsigned char *in = (unsigned char*)ZSTR_VAL(string);
+		size_t in_len = ZSTR_LEN(string);
+		unsigned int state = 0;
+
+		while (in_len) {
+			len += encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		}
+	}
+
+	return len;
+}
+
 /* {{{ Get character numbers of a string */
 PHP_FUNCTION(mb_strlen)
 {
-	mbfl_string string;
-	char *str;
-	zend_string *enc_name = NULL;
+	zend_string *string, *enc_name = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, string.len)
+		Z_PARAM_STR(string)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.val = (unsigned char*)str;
-	string.encoding = php_mb_get_encoding(enc_name, 2);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 2);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	RETVAL_LONG(mbfl_strlen(&string));
+	RETVAL_LONG(mb_get_strlen(string, enc));
 }
 /* }}} */
 
