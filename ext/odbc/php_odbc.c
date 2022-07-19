@@ -43,14 +43,6 @@
 #include "ext/standard/head.h"
 #include "php_ini.h"
 
-#ifdef PHP_WIN32
-#include <winsock2.h>
-
-#define ODBC_TYPE "Win32"
-#define PHP_ODBC_TYPE ODBC_TYPE
-
-#endif
-
 #define PHP_ODBC_BINMODE_PASSTHRU 0
 #define PHP_ODBC_BINMODE_RETURN 1
 #define PHP_ODBC_BINMODE_CONVERT 2
