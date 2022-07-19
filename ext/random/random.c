@@ -93,7 +93,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	if (status->last_unsafe) {
 		return 0;
 	}
-	if (total_size < sizeof(uint32_t)) {
+	while (total_size < sizeof(uint32_t)) {
 		r = algo->generate(status);
 		result = (result << (8 * status->last_generated_size)) | r;
 		total_size += status->last_generated_size;
@@ -155,7 +155,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 	if (status->last_unsafe) {
 		return 0;
 	}
-	if (total_size < sizeof(uint64_t)) {
+	while (total_size < sizeof(uint64_t)) {
 		r = algo->generate(status);
 		result = (result << (8 * status->last_generated_size)) | r;
 		total_size += status->last_generated_size;

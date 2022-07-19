@@ -8,7 +8,7 @@ $randomizer = new \Random\Randomizer (
     {
         public function generate(): string
         {
-            return "\x01\x01\x01\x01";
+            return "\x01";
         }
     }
 );
