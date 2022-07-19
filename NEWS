@@ -43,6 +43,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed the crypt_sha256/512 api build with clang > 12. (David Carlier)
   . Uses CCRandomGenerateBytes instead of arc4random_buf on macOs. (David Carlier).
+  . Fixed bug GH-9017 (php_stream_sock_open_from_socket could return NULL).
+    (Heiko Weber)
 
 07 Jul 2022, PHP 8.1.8
 
