@@ -51,6 +51,14 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   are deprecated (see main UPGRADING notes). To suppress the notice, e.g. to
   avoid duplicates when processing the same value multiple times, pass or add
   IS_CALLABLE_SUPPRESS_DEPRECATIONS to the check_flags parameter.
+* php_lcg.h, php_rand.h, php_mt_rand.h and php_random.h has already removed in 
+  ext/standard, They have been merged into a single ext/random/php_random.h 
+  header file. If you are using them in an extension, change the headers to read as follows
+  #if PHP_VERSION_ID < 80200
+  # include "ext/standard/php_XYZ.h"
+  #else
+  # include "ext/random/php_random.h"
+  #endif
 
 ========================
 2. Build system changes
