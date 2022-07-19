@@ -208,7 +208,7 @@ static void sapi_read_post_data(void)
 		/* fallback */
 		SG(request_info).post_entry = NULL;
 		if (!sapi_module.default_post_reader) {
-			/* no default reader ? */
+			/* no default reader? */
 			SG(request_info).content_type_dup = NULL;
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
 			return;
@@ -357,7 +357,7 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
  * there is not already a charset option in there.
  *
  * If "mimetype" is non-NULL, it should point to a pointer allocated
- * with emalloc().  If a charset is added, the string will be
+ * with emalloc(). If a charset is added, the string will be
  * re-allocated and the new length is returned.  If mimetype is
  * unchanged, 0 is returned.
  *
@@ -786,7 +786,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 			} else if (!strcasecmp(header_line, "Content-Length")) {
 				/* Script is setting Content-length. The script cannot reasonably
 				 * know the size of the message body after compression, so it's best
-				 * do disable compression altogether. This contributes to making scripts
+				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
 				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
@@ -834,7 +834,7 @@ SAPI_API int sapi_send_headers(void)
 		return SUCCESS;
 	}
 
-	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
+	/* Success-oriented. We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
