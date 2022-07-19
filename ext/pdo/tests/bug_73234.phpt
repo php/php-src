@@ -7,6 +7,11 @@ $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
+
+$db = PDOTest::factory();
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
+    die("xfail PDO::PARAM_NULL is not honored by OCI driver, related with bug #81586");
+}
 ?>
 --FILE--
 <?php
