@@ -36,7 +36,7 @@
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "ext/standard/php_mt_rand.h"
+#include "ext/random/php_random.h"
 #include "main/snprintf.h"
 
 #ifdef COMPILE_DL_SPL
@@ -521,7 +521,7 @@ PHP_FUNCTION(spl_autoload_register)
 			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
 			 * with it outselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
 		}
 
 		if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&

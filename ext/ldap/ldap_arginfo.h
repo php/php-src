@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 67b3287b7dfa9beec9d9981214de8099f8224fe2 */
+ * Stub hash: d13eb65a462e331f393657ce748e29f0c582b993 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -831,16 +831,22 @@ static void register_ldap_symbols(int module_number)
 #endif
 
 #if defined(HAVE_ORALDAP)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_connect", 3);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_bind", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_bind_ext", 2);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind_ext", sizeof("ldap_bind_ext") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #if defined(HAVE_LDAP_SASL)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_sasl_bind", 2);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_sasl_bind", sizeof("ldap_sasl_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_LDAP_PASSWD)
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_exop_passwd", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_exop_passwd", 3);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_exop_passwd", sizeof("ldap_exop_passwd") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 }
 

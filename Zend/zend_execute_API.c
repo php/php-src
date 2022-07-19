@@ -1050,7 +1050,7 @@ ZEND_API zend_result zend_call_method_if_exists(
 	fci.named_params = NULL;
 
 	zend_fcall_info_cache fcc;
-	if (!zend_is_callable_ex(&fci.function_name, fci.object, 0, NULL, &fcc, NULL)) {
+	if (!zend_is_callable_ex(&fci.function_name, fci.object, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL)) {
 		ZVAL_UNDEF(retval);
 		return FAILURE;
 	}

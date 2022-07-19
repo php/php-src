@@ -531,6 +531,8 @@ static ZEND_METHOD(_ZendTestTrait, testMethod)
 static ZEND_METHOD(ZendTestNS_Foo, method)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(0);
 }
 
 static ZEND_METHOD(ZendTestNS2_Foo, method)

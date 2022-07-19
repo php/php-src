@@ -2,6 +2,8 @@
 
 /** @generate-class-entries */
 
+require "zend_constants.stub.php";
+
 interface Throwable extends Stringable
 {
     public function getMessage(): string;

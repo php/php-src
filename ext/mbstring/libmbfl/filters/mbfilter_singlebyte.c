@@ -24,8 +24,10 @@ static inline uint32_t coalesce(uint32_t a, uint32_t b)
 /* Helper for single-byte encodings which use a conversion table */
 static int mbfl_conv_singlebyte_table(int c, mbfl_convert_filter *filter, int tbl_min, const unsigned short tbl[])
 {
-	if (c < tbl_min) {
+	if (c >= 0 && c < tbl_min) {
 		CK((*filter->output_function)(c, filter->data));
+	} else if (c < 0) {
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	} else {
 		CK((*filter->output_function)(coalesce(tbl[c - tbl_min], MBFL_BAD_INPUT), filter->data));
 	}
@@ -34,10 +36,10 @@ static int mbfl_conv_singlebyte_table(int c, mbfl_convert_filter *filter, int tb
 
 static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int tbl_min, const unsigned short tbl[])
 {
-	if (c == MBFL_BAD_INPUT) {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if (c < tbl_min) {
+	if (c >= 0 && c < tbl_min) {
 		CK((*filter->output_function)(c, filter->data));
+	} else if (c < 0 || c == MBFL_BAD_INPUT) {
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	} else {
 		for (int i = 0; i < 256 - tbl_min; i++) {
 			if (c == tbl[i]) {
@@ -144,7 +146,7 @@ static int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 {
-	if (c < 0x80 && c != MBFL_BAD_INPUT) {
+	if (c >= 0 && c < 0x80 && c != MBFL_BAD_INPUT) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
@@ -198,7 +200,7 @@ static int mbfl_filt_conv_8859_1_wchar(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_8859_1(int c, mbfl_convert_filter *filter)
 {
-	if (c < 0x100 && c != MBFL_BAD_INPUT) {
+	if (c >= 0 && c < 0x100 && c != MBFL_BAD_INPUT) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
@@ -492,7 +494,9 @@ DEF_SB(cp1252, "Windows-1252", "Windows-1252", cp1252_aliases);
 
 static int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 {
-	if (c >= 0x100) {
+	if (c < 0 || c == MBFL_BAD_INPUT) {
+		CK(mbfl_filt_conv_illegal_output(c, filter));
+	} else if (c >= 0x100) {
 		for (int n = 0; n < 32; n++) {
 			if (c == cp1252_ucs_table[n]) {
 				CK((*filter->output_function)(0x80 + n, filter->data));
@@ -500,7 +504,7 @@ static int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 			}
 		}
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if ((c <= 0x7F || c >= 0xA0) && c != MBFL_BAD_INPUT) {
+	} else if (c <= 0x7F || c >= 0xA0) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
@@ -705,7 +709,7 @@ static int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0x28 && c <= 0x2F) {
 		CK((*filter->output_function)(ucs_armscii8_table[c - 0x28], filter->data));
-	} else if (c == MBFL_BAD_INPUT) {
+	} else if (c < 0 || c == MBFL_BAD_INPUT) {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	} else if (c < 0xA0) {
 		CK((*filter->output_function)(c, filter->data));

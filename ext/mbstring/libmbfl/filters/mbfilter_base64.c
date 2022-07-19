@@ -145,6 +145,11 @@ int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
 		}
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -170,6 +175,9 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 		n = 62;
 	} else if (c == 0x2f) {			/* '/' */
 		n = 63;
+	} else {
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+		return 0;
 	}
 	n &= 0x3f;
 
@@ -213,6 +221,11 @@ int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 			CK((*filter->output_function)((cache >> 8) & 0xff, filter->data));
 		}
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 

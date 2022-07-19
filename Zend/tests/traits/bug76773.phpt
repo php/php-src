@@ -9,7 +9,7 @@ trait MyTrait
     {
         echo __CLASS__, "\n";
 
-        if (\is_callable(array('parent', __FUNCTION__))) {
+        if (get_parent_class(__CLASS__) !== false) {
             parent::hello();
         }
     }

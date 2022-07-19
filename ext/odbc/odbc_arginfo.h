@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 66b702c6f84c0ae63c8aa53c8a667324a71651a0 */
+ * Stub hash: 35ace4a5907342f2f2c6960cc27e119d7e5fb8f3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -394,6 +394,8 @@ static const zend_function_entry ext_functions[] = {
 
 static void register_odbc_symbols(int module_number)
 {
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_connect", 2);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_pconnect", 2);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_connect", sizeof("odbc_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_pconnect", sizeof("odbc_pconnect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 }

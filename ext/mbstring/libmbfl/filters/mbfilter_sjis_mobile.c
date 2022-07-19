@@ -929,7 +929,7 @@ static void mb_wchar_to_sjis_docomo(uint32_t *in, size_t len, mb_convert_buf *bu
 {
 	unsigned char *out, *limit;
 	MB_CONVERT_BUF_LOAD(buf, out, limit);
-	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len + (buf->state ? 1 : 0));
 
 	uint32_t w;
 	unsigned int s = 0;
@@ -939,7 +939,7 @@ static void mb_wchar_to_sjis_docomo(uint32_t *in, size_t len, mb_convert_buf *bu
 		w = buf->state;
 		buf->state = 0;
 		if (len) {
-			goto process_possible_keypad;
+			goto reprocess_wchar;
 		} else {
 			goto emit_output;
 		}
@@ -947,6 +947,7 @@ static void mb_wchar_to_sjis_docomo(uint32_t *in, size_t len, mb_convert_buf *bu
 
 	while (len--) {
 		w = *in++;
+reprocess_wchar:
 		s = 0;
 
 		if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
@@ -1018,7 +1019,6 @@ process_emoji:
 					break;
 				}
 			}
-process_possible_keypad: ;
 			uint32_t w2 = *in++; len--;
 			if (w2 == 0x20E3) {
 				if (w == '#') {
@@ -1160,7 +1160,7 @@ static void mb_wchar_to_sjis_kddi(uint32_t *in, size_t len, mb_convert_buf *buf,
 {
 	unsigned char *out, *limit;
 	MB_CONVERT_BUF_LOAD(buf, out, limit);
-	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len + (buf->state ? 1 : 0));
 
 	uint32_t w;
 	unsigned int s = 0;
@@ -1169,11 +1169,7 @@ static void mb_wchar_to_sjis_kddi(uint32_t *in, size_t len, mb_convert_buf *buf,
 		w = buf->state;
 		buf->state = 0;
 		if (len) {
-			if (w >= NFLAGS('A')) {
-				goto process_possible_flag;
-			} else {
-				goto process_possible_keypad;
-			}
+			goto reprocess_wchar;
 		} else {
 			goto emit_output;
 		}
@@ -1181,6 +1177,7 @@ static void mb_wchar_to_sjis_kddi(uint32_t *in, size_t len, mb_convert_buf *buf,
 
 	while (len--) {
 		w = *in++;
+reprocess_wchar:
 		s = 0;
 
 		if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
@@ -1246,7 +1243,6 @@ process_emoji:
 					break;
 				}
 			}
-process_possible_keypad: ;
 			uint32_t w2 = *in++; len--;
 			if (w2 == 0x20E3) {
 				if (w == '#') {
@@ -1271,7 +1267,6 @@ process_possible_keypad: ;
 				}
 				break;
 			}
-process_possible_flag: ;
 			uint32_t w2 = *in++; len--;
 			if (w2 >= NFLAGS('B') && w2 <= NFLAGS('U')) { /* B for GB, U for RU */
 				for (int i = 0; i < 10; i++) {
@@ -1472,7 +1467,7 @@ static void mb_wchar_to_sjis_sb(uint32_t *in, size_t len, mb_convert_buf *buf, b
 {
 	unsigned char *out, *limit;
 	MB_CONVERT_BUF_LOAD(buf, out, limit);
-	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len + (buf->state ? 1 : 0));
 
 	uint32_t w;
 	unsigned int s = 0;
@@ -1481,11 +1476,7 @@ static void mb_wchar_to_sjis_sb(uint32_t *in, size_t len, mb_convert_buf *buf, b
 		w = buf->state;
 		buf->state = 0;
 		if (len) {
-			if (w >= NFLAGS('A')) {
-				goto process_possible_flag;
-			} else {
-				goto process_possible_keypad;
-			}
+			goto reprocess_wchar;
 		} else {
 			goto emit_output;
 		}
@@ -1493,6 +1484,7 @@ static void mb_wchar_to_sjis_sb(uint32_t *in, size_t len, mb_convert_buf *buf, b
 
 	while (len--) {
 		w = *in++;
+reprocess_wchar:
 		s = 0;
 
 		if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
@@ -1558,7 +1550,6 @@ process_emoji:
 					break;
 				}
 			}
-process_possible_keypad: ;
 			uint32_t w2 = *in++; len--;
 			if (w2 == 0x20E3) {
 				if (w == '#') {
@@ -1577,13 +1568,12 @@ process_possible_keypad: ;
 				if (end) {
 					MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_sjis_sb);
 				} else {
-					/* Reprocess `w` when this function is called again with another buffer
-					 * of wchars */
+					/* Reprocess `w` when this function is called again with
+					 * another buffer of wchars */
 					buf->state = w;
 				}
 				break;
 			}
-process_possible_flag: ;
 			uint32_t w2 = *in++; len--;
 			if (w2 >= NFLAGS('B') && w2 <= NFLAGS('U')) { /* B for GB, U for RU */
 				for (int i = 0; i < 10; i++) {

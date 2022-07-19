@@ -4,21 +4,55 @@ PHP                                                                        NEWS
 
 - CLI:
   . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
+  . Fixed potential overflow for the builtin server via the
+    PHP_CLI_SERVER_WORKERS environment variable. (yiyuaner)
+  . Fixed GH-8575 by changing STDOUT, STDERR and STDIN to not close on resource
+    destruction. (Jakub Zelenka)
 
 - Core:
   . Reduced the memory footprint of strings returned by var_export(),
     json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
     http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
+  . Fixed bug GH-8995 (WeakMap object reference offset causing TypeError).
+    (Tobias Bachert)
+  . Added error_log_mode ini setting. (Mikhail Galanin)
+  . Updated request startup messages. (Eric Norris)
+
+- COM:
+  . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
+
+- Filter:
+  . Added FILTER_FLAG_GLOBAL_RANGE to filter Global IPs. (vnsavage)
 
 - FPM:
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
   . Added access.suppress_path pool option to filter access log entries.
     (Mark Gallagher)
+  . Fixed on fpm scoreboard occasional warning on acquisition failure.
+    (Felix Wiedemann)
+
+- Opcache:
+  . Added initial support for JIT performance profiling generation
+    for macOs Instrument. (David Carlier)
+  . Fixed bug GH-8030 (Segfault with JIT and large match/switch statements).
+    (Arnaud)
+
+- PCRE:
+  . Updated bundled libpcre to 10.40. (cmb)
+
+- PDO_Firebird:
+  . Fixed bug GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
+
+- Random:
+  . Added new random extension. (Go Kudo)
 
 - Standard:
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
     notation to int. (Dennis Snell)
+  . Enable arc4random_buf for Linux glibc 2.36 and onwards
+    for the random_bytes. (Cristian Rodriguez)
+  . Uses CCRandomGenerateBytes instead of arc4random_buf on macOs. (David Carlier).
 
 07 Jul 2022, PHP 8.2.0alpha3
 

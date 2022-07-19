@@ -375,6 +375,21 @@ $converted = mb_convert_encoding("ab\x00", 'UTF-16BE', 'CP50220');
 if ($converted !== "\x00a\x00b\x00\x00")
   die("Bad handling of trailing null byte (got " . bin2hex($converted) . ")");
 
+// Previously, the CP50220 implementation would reorder error markers with
+// subsequent characters
+mb_substitute_character(0x3F);
+$converted = mb_convert_encoding("\xff\xff\x00&", 'CP50220', 'UTF-16BE');
+if ($converted !== '?&')
+  die("Bad handling of erroneous codepoint followed by good one (got " . bin2hex($converted) . ")");
+
+// In CP50220, two codepoints can be collapsed into a single kuten code in some cases
+// This should work even on a boundary between separately processed buffers
+$shouldCollapse = "\xFF\x76\xFF\x9E";
+$expected = "\x1B\$B%,\x1B(B";
+for ($i = 0; $i < 256; $i++) {
+  convertValidString(str_repeat("\x00a", $i) . $shouldCollapse, str_repeat('a', $i) . $expected, 'UTF-16BE', 'CP50220', false);
+}
+
 ?>
 --EXPECT--
 ASCII support OK

@@ -46,6 +46,11 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   smart_str_trim_to_size() before returning the string.
 * It is recommended to use smart_str_extract() or smart_str_trim_to_size() when
   using the smart_str API.
+* zend_is_callable_ex, and functions which call it such as zend_is_callable and
+  zend_fcall_info_init, will issue deprecation notices if passed values which
+  are deprecated (see main UPGRADING notes). To suppress the notice, e.g. to
+  avoid duplicates when processing the same value multiple times, pass or add
+  IS_CALLABLE_SUPPRESS_DEPRECATIONS to the check_flags parameter.
 
 ========================
 2. Build system changes

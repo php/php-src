@@ -17,7 +17,7 @@ class Abc {
     public static function run() {
         $method = "foobar";
         getMethodName($method);
-        var_dump(is_callable("self::$method"));
+        var_dump(is_callable("Abc::$method"));
         self::$method();
     }
 }

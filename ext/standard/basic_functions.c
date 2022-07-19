@@ -34,7 +34,6 @@
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
-#include "ext/standard/php_mt_rand.h"
 #include "ext/standard/crc32_x86.h"
 
 #ifdef PHP_WIN32
@@ -205,11 +204,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(mt_rand_is_seeded) = 0;
-	BG(mt_rand_mode) = MT_RAND_MT19937;
 	BG(umask) = -1;
-	BG(next) = NULL;
-	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
 	BG(serialize_lock) = 0;
@@ -365,7 +360,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
-	BASIC_MINIT_SUBMODULE(mt_rand)
 
 #ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
@@ -388,7 +382,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 
 	BASIC_MINIT_SUBMODULE(crypt)
-	BASIC_MINIT_SUBMODULE(lcg)
 
 	BASIC_MINIT_SUBMODULE(dir)
 #ifdef HAVE_SYSLOG_H
@@ -419,8 +412,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(dns)
 # endif
 #endif
-
-	BASIC_MINIT_SUBMODULE(random)
 
 	BASIC_MINIT_SUBMODULE(hrtime)
 
@@ -459,7 +450,6 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
-	BASIC_MSHUTDOWN_SUBMODULE(random)
 	BASIC_MSHUTDOWN_SUBMODULE(password)
 
 	return SUCCESS;
@@ -520,8 +510,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	zend_hash_destroy(&BG(putenv_ht));
 	tsrm_env_unlock();
 #endif
-
-	BG(mt_rand_is_seeded) = 0;
 
 	if (BG(umask) != -1) {
 		umask(BG(umask));

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f8ec36ea62bfbdb74cfa6472227e08d9282413a2 */
+ * Stub hash: 9c44d8bcf6b97804d539a9dd566d5faca60074ba */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -530,12 +530,15 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_declare_typed_property(class_entry, property_comment_name, &property_comment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_comment_name);
 
-	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setpassword", 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setpassword", sizeof("setpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #if defined(HAVE_ENCRYPTION)
-	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setencryptionname", 2);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setencryptionname", sizeof("setencryptionname") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 #if defined(HAVE_ENCRYPTION)
-	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setencryptionindex", 2);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setencryptionindex", sizeof("setencryptionindex") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 
 	return class_entry;

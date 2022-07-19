@@ -592,6 +592,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
 	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
 	_(ZEND_STR_COUNT,                  "count") \
+	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 
 
 typedef enum _zend_known_string_id {

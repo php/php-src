@@ -74,6 +74,12 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/readonly_classes
   . Added support for true type.
     RFC: https://wiki.php.net/rfc/true-type
+  . Added support for Disjoint Normal Form (DNF) types.
+    RFC: https://wiki.php.net/rfc/dnf_types
+  . Added error_log_mode ini setting that allows setting of permissions for
+    error log file.
+  . Added support for fetching properties of enums in constant expressions.
+    RFC: https://wiki.php.net/rfc/fetch_property_in_const_expressions
 
 
 - Curl:
@@ -101,6 +107,12 @@ PHP 8.2 UPGRADE NOTES
     capturing. This only affects which groups are capturing, it is still
     possible to use numbered subpattern references, and the matches array will
     still contain numbered results.
+
+- Random:
+  . New extension that organizes and consolidates existing implementations
+    related to random number generators. New, higher quality RNGs are available
+    and scope issues are eliminated.
+
 
 ========================================
 3. Changes in SAPI modules
@@ -134,11 +146,10 @@ PHP 8.2 UPGRADE NOTES
         [new Foo, "Bar::method"]
 
     This does not affect normal method callables like "A::method" or
-    ["A", "method"]. A deprecation notice is only emitted on call. Both
-    is_callable() and the callable type will silently accept these callables
-    until support for them is removed entirely.
+    ["A", "method"].
 
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+    RFC: https://wiki.php.net/rfc/partially-supported-callables-expand-deprecation-notices
 
   . The "${var}" and "${expr}" style string interpolations are deprecated and
     will be removed in PHP 9. Use "$var"/"{$var}" or "{${expr}}", respectively.
@@ -236,6 +247,7 @@ PHP 8.2 UPGRADE NOTES
     mysqli with libmysql and all relevant functionality has been removed.
   . The reconnect property of mysqli_driver has been removed. It was supported only by libmysql.
   . The INI directive mysqli.reconnect has been removed.
+  . The constant MYSQLI_IS_MARIADB has been deprecated.
 
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
@@ -264,6 +276,7 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 
 - COM_DOTNET:
+  . DISP_E_PARAMNOTFOUND
   . LOCALE_NEUTRAL
 
 - Curl:
@@ -344,6 +357,9 @@ PHP 8.2 UPGRADE NOTES
   . CURL_VERSION_HTTP3 (libcurl >= 7.66.0)
   . CURL_VERSION_UNICODE (libcurl >= 7.72.0)
   . CURL_VERSION_ZSTD (libcurl >= 7.72.0)
+
+- Filter
+  . FILTER_FLAG_GLOBAL_RANGE
 
 - Sockets:
   . SO_INCOMING_CPU
@@ -472,6 +488,11 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- CLI:
+  . The STDOUT, STDERR and STDIN are no longer closed on resource destruction
+    which is mostly when the CLI finishes. It is however still possible to
+    explicitly close those streams using fclose and similar.
 
 - Core:
   . The iterable type is now a built-in compile time alias for array|Traversable.
