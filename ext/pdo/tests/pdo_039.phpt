@@ -8,6 +8,11 @@ $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
+
+$db = PDOTest::factory();
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
+    die("xfail OCI driver errorInfo is inconsistent with other PDO drivers");
+}
 ?>
 --FILE--
 <?php
@@ -29,6 +34,9 @@ if ($pass === false) $pass = NULL;
 $conn = new PDO($dsn, $user, $pass, $attr);
 
 $query = 'SELECT 1';
+if ($conn->getAttribute(PDO::ATTR_DRIVER_NAME) === 'oci') {
+    $query .= ' FROM DUAL';
+}
 
 var_dump($conn->errorCode());
 $stmt = $conn->prepare($query);
