@@ -3,6 +3,356 @@
 /** @generate-class-entries */
 
 /**
+ * @var string
+ * @cvalue OPENSSL_VERSION_TEXT
+ */
+const OPENSSL_VERSION_TEXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_VERSION_NUMBER
+ */
+const OPENSSL_VERSION_NUMBER = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_SSL_CLIENT
+ */
+const X509_PURPOSE_SSL_CLIENT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_SSL_SERVER
+ */
+const X509_PURPOSE_SSL_SERVER = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_NS_SSL_SERVER
+ */
+const X509_PURPOSE_NS_SSL_SERVER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_SMIME_SIGN
+ */
+const X509_PURPOSE_SMIME_SIGN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_SMIME_ENCRYPT
+ */
+const X509_PURPOSE_SMIME_ENCRYPT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_CRL_SIGN
+ */
+const X509_PURPOSE_CRL_SIGN = UNKNOWN;
+#ifdef X509_PURPOSE_ANY
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_ANY
+ */
+const X509_PURPOSE_ANY = UNKNOWN;
+#endif
+
+/* digest algorithm constants */
+
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_SHA1
+ */
+const OPENSSL_ALGO_SHA1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_MD5
+ */
+const OPENSSL_ALGO_MD5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_MD4
+ */
+const OPENSSL_ALGO_MD4 = UNKNOWN;
+#ifdef HAVE_OPENSSL_MD2_H
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_MD2
+ */
+const OPENSSL_ALGO_MD2 = UNKNOWN;
+#endif
+#if PHP_OPENSSL_API_VERSION < 0x10100
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_DSS1
+ */
+const OPENSSL_ALGO_DSS1 = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_SHA224
+ */
+const OPENSSL_ALGO_SHA224 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_SHA256
+ */
+const OPENSSL_ALGO_SHA256 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_SHA384
+ */
+const OPENSSL_ALGO_SHA384 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_SHA512
+ */
+const OPENSSL_ALGO_SHA512 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_ALGO_RMD160
+ */
+const OPENSSL_ALGO_RMD160 = UNKNOWN;
+
+/* flags for S/MIME */
+
+/**
+ * @var int
+ * @cvalue PKCS7_DETACHED
+ */
+const PKCS7_DETACHED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_TEXT
+ */
+const PKCS7_TEXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOINTERN
+ */
+const PKCS7_NOINTERN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOVERIFY
+ */
+const PKCS7_NOVERIFY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOCHAIN
+ */
+const PKCS7_NOCHAIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOCERTS
+ */
+const PKCS7_NOCERTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOATTR
+ */
+const PKCS7_NOATTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_BINARY
+ */
+const PKCS7_BINARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOSIGS
+ */
+const PKCS7_NOSIGS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_DETACHED
+ */
+const OPENSSL_CMS_DETACHED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_TEXT
+ */
+const OPENSSL_CMS_TEXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_NOINTERN
+ */
+const OPENSSL_CMS_NOINTERN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_NOVERIFY
+ */
+const OPENSSL_CMS_NOVERIFY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_NOCERTS
+ */
+const OPENSSL_CMS_NOCERTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_NOATTR
+ */
+const OPENSSL_CMS_NOATTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_BINARY
+ */
+const OPENSSL_CMS_BINARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CMS_NOSIGS
+ */
+const OPENSSL_CMS_NOSIGS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue OPENSSL_PKCS1_PADDING
+ */
+const OPENSSL_PKCS1_PADDING = UNKNOWN;
+#ifdef RSA_SSLV23_PADDING
+/**
+ * @var int
+ * @cvalue OPENSSL_SSLV23_PADDING
+ */
+const OPENSSL_SSLV23_PADDING = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue OPENSSL_NO_PADDING
+ */
+const OPENSSL_NO_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_PKCS1_OAEP_PADDING
+ */
+const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
+
+/* Informational stream wrapper constants */
+
+/**
+ * @var string
+ * @cvalue OPENSSL_DEFAULT_STREAM_CIPHERS
+ */
+const OPENSSL_DEFAULT_STREAM_CIPHERS = UNKNOWN;
+
+/* Ciphers */
+
+#ifndef OPENSSL_NO_RC2
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_RC2_40
+ */
+const OPENSSL_CIPHER_RC2_40 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_RC2_128
+ */
+const OPENSSL_CIPHER_RC2_128 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_RC2_64
+ */
+const OPENSSL_CIPHER_RC2_64 = UNKNOWN;
+#endif
+
+#ifndef OPENSSL_NO_DES
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_DES
+ */
+const OPENSSL_CIPHER_DES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_3DES
+ */
+const OPENSSL_CIPHER_3DES = UNKNOWN;
+#endif
+
+#ifndef OPENSSL_NO_AES
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_AES_128_CBC
+ */
+const OPENSSL_CIPHER_AES_128_CBC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_AES_192_CBC
+ */
+const OPENSSL_CIPHER_AES_192_CBC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_CIPHER_AES_256_CBC
+ */
+const OPENSSL_CIPHER_AES_256_CBC = UNKNOWN;
+#endif
+
+/* Values for key types */
+
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_RSA
+ */
+const OPENSSL_KEYTYPE_RSA = UNKNOWN;
+#ifndef NO_DSA
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_DSA
+ */
+const OPENSSL_KEYTYPE_DSA = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_DH
+ */
+const OPENSSL_KEYTYPE_DH = UNKNOWN;
+#ifdef HAVE_EVP_PKEY_EC
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_EC
+ */
+const OPENSSL_KEYTYPE_EC = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue OPENSSL_RAW_DATA
+ */
+const OPENSSL_RAW_DATA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_ZERO_PADDING
+ */
+const OPENSSL_ZERO_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_DONT_ZERO_PAD_KEY
+ */
+const OPENSSL_DONT_ZERO_PAD_KEY = UNKNOWN;
+
+#ifndef OPENSSL_NO_TLSEXT
+/**
+ * @var int
+ */
+const OPENSSL_TLSEXT_SERVER_NAME = 1;
+#endif
+
+/* Register encodings */
+
+/**
+ * @var int
+ * @cvalue ENCODING_DER
+ */
+const OPENSSL_ENCODING_DER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ENCODING_SMIME
+ */
+const OPENSSL_ENCODING_SMIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ENCODING_PEM
+ */
+const OPENSSL_ENCODING_PEM = UNKNOWN;
+
+
+/**
  * @strict-properties
  * @not-serializable
  */
