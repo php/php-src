@@ -34,6 +34,7 @@
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "libmbfl/mbfl/mbfilter_wchar.h"
+#include "libmbfl/mbfl/eaw_table.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_qprint.h"
 #include "libmbfl/filters/mbfilter_htmlent.h"
@@ -2277,91 +2278,267 @@ PHP_FUNCTION(mb_strcut)
 }
 /* }}} */
 
-/* {{{ Gets terminal width of a string */
+/* Some East Asian characters, when printed at a terminal (or the like), require double
+ * the usual amount of horizontal space. We call these "fullwidth" characters. */
+static size_t character_width(uint32_t c)
+{
+	if (c < FIRST_DOUBLEWIDTH_CODEPOINT) {
+		return 1;
+	}
+
+	/* Do a binary search to see if we fall in any of the fullwidth ranges */
+	int lo = 0, hi = sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]);
+	while (lo < hi) {
+		int probe = (lo + hi) / 2;
+		if (c < mbfl_eaw_table[probe].begin) {
+			hi = probe;
+		} else if (c > mbfl_eaw_table[probe].end) {
+			lo = probe + 1;
+		} else {
+			return 2;
+		}
+	}
+
+	return 1;
+}
+
+static size_t mb_get_strwidth(zend_string *string, const mbfl_encoding *enc)
+{
+	size_t width = 0;
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(string);
+	size_t in_len = ZSTR_LEN(string);
+	unsigned int state = 0;
+
+	while (in_len) {
+		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		while (out_len) {
+			/* NOTE: 'bad input' marker will be counted as 1 unit of width
+			 * If text conversion is performed with an ordinary ASCII character as
+			 * the 'replacement character', this will give us the correct display width. */
+			width += character_width(wchar_buf[--out_len]);
+		}
+	}
+
+	return width;
+}
+
+/* Gets terminal width of a string */
 PHP_FUNCTION(mb_strwidth)
 {
-	char *string_val;
-	mbfl_string string;
-	zend_string *enc_name = NULL;
+	zend_string *string, *enc_name = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(string_val, string.len)
+		Z_PARAM_STR(string)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.val = (unsigned char*)string_val;
-	string.encoding = php_mb_get_encoding(enc_name, 2);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 2);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	RETVAL_LONG(mbfl_strwidth(&string));
+	RETVAL_LONG(mb_get_strwidth(string, enc));
 }
-/* }}} */
 
-/* {{{ Trim the string in terminal width */
+/* Cut 'n' codepoints from beginning of string
+ * Remove this once mb_substr is implemented using the new conversion filters */
+static zend_string* mb_drop_chars(zend_string *input, const mbfl_encoding *enc, size_t n)
+{
+	if (n >= ZSTR_LEN(input)) {
+		/* No supported text encoding decodes to more than one codepoint per byte
+		 * So if the number of codepoints to drop >= number of input bytes,
+		 * then definitely the output should be empty
+		 * This also guards `ZSTR_LEN(input) - n` (below) from underflow */
+		return zend_empty_string;
+	}
+
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+	unsigned int state = 0;
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, ZSTR_LEN(input) - n, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+	while (in_len) {
+		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		if (n >= out_len) {
+			n -= out_len;
+		} else {
+			enc->from_wchar(wchar_buf + n, out_len - n, &buf, !in_len);
+			n = 0;
+		}
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
+/* Pick 'n' codepoints from beginning of string
+ * Remove this once mb_substr is implemented using the new conversion filters */
+static zend_string* mb_pick_chars(zend_string *input, const mbfl_encoding *enc, size_t n)
+{
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+	unsigned int state = 0;
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, n, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+	while (in_len && n) {
+		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		enc->from_wchar(wchar_buf, MIN(out_len, n), &buf, !in_len || out_len >= n);
+		n -= MIN(out_len, n);
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
+static zend_string* mb_trim_string(zend_string *input, zend_string *marker, const mbfl_encoding *enc, unsigned int from, int width)
+{
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+	unsigned int state = 0;
+	int remaining_width = width;
+	unsigned int to_skip = from;
+	size_t out_len = 0;
+	bool first_call = true;
+	mb_convert_buf buf;
+
+	while (in_len) {
+		out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		if (out_len <= to_skip) {
+			to_skip -= out_len;
+		} else {
+			for (int i = to_skip; i < out_len; i++) {
+				remaining_width -= character_width(wchar_buf[i]);
+				if (remaining_width < 0) {
+					/* We need to truncate string and append trim marker */
+					width -= mb_get_strwidth(marker, enc);
+					/* 'width' is now the amount we want to take from 'input' */
+					if (width <= 0) {
+						return zend_string_copy(marker);
+					}
+					mb_convert_buf_init(&buf, width, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+					if (first_call) {
+						/* We can use the buffer of wchars which we have right now;
+						 * no need to convert again */
+						goto dont_restart_conversion;
+					} else {
+						goto restart_conversion;
+					}
+				}
+			}
+			to_skip = 0;
+		}
+		first_call = false;
+	}
+
+	/* The input string is fine; we don't need to append the trim marker */
+	if (from == 0) {
+		return zend_string_copy(input);
+	}
+	return mb_drop_chars(input, enc, from);
+
+	/* The input string is too wide; we need to build a new string which
+	 * includes some portion of the input string, with the trim marker
+	 * concatenated onto it */
+restart_conversion:
+	in = (unsigned char*)ZSTR_VAL(input);
+	in_len = ZSTR_LEN(input);
+	state = 0;
+
+	while (true) {
+		out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+dont_restart_conversion:
+		if (out_len <= from) {
+			from -= out_len;
+		} else {
+			for (int i = from; i < out_len; i++) {
+				width -= character_width(wchar_buf[i]);
+				if (width < 0) {
+					enc->from_wchar(wchar_buf + from, i - from, &buf, true);
+					goto append_trim_marker;
+				}
+			}
+			ZEND_ASSERT(in_len > 0);
+			enc->from_wchar(wchar_buf + from, out_len - from, &buf, false);
+			from = 0;
+		}
+	}
+
+append_trim_marker:
+	if (ZSTR_LEN(marker) > 0) {
+		MB_CONVERT_BUF_ENSURE((&buf), buf.out, buf.limit, ZSTR_LEN(marker));
+		memcpy(buf.out, ZSTR_VAL(marker), ZSTR_LEN(marker));
+		buf.out += ZSTR_LEN(marker);
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
+/* Trim the string to terminal width; optional, add a 'trim marker' if it was truncated */
 PHP_FUNCTION(mb_strimwidth)
 {
-	char *str, *trimmarker = NULL;
-	zend_string *encoding = NULL;
-	zend_long from, width, swidth = 0;
-	size_t str_len, trimmarker_len;
-	mbfl_string string, result, marker, *ret;
+	zend_string *str, *trimmarker, *encoding = NULL;
+	zend_long from, width;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(from)
 		Z_PARAM_LONG(width)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(trimmarker, trimmarker_len)
+		Z_PARAM_STR(trimmarker)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.encoding = marker.encoding = php_mb_get_encoding(encoding, 5);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 5);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	string.val = (unsigned char *)str;
-	string.len = str_len;
-	marker.val = NULL;
-	marker.len = 0;
-
-	if ((from < 0) || (width < 0)) {
-		swidth = mbfl_strwidth(&string);
-	}
-
-	if (from < 0) {
-		from += swidth;
-	}
-
-	if (from < 0 || (size_t)from > str_len) {
-		zend_argument_value_error(2, "is out of range");
-		RETURN_THROWS();
+	if (from != 0) {
+		size_t str_len = mb_get_strlen(str, enc);
+		if (from < 0) {
+			from += str_len;
+		}
+		if (from < 0 || from > str_len) {
+			zend_argument_value_error(2, "is out of range");
+			RETURN_THROWS();
+		}
 	}
 
 	if (width < 0) {
-		width = swidth + width - from;
+		width += mb_get_strwidth(str, enc);
+
+		if (from > 0) {
+			zend_string *trimmed = mb_pick_chars(str, enc, from);
+			width -= mb_get_strwidth(trimmed, enc);
+			zend_string_free(trimmed);
+		}
+
+		if (width < 0) {
+			zend_argument_value_error(3, "is out of range");
+			RETURN_THROWS();
+		}
 	}
 
-	if (width < 0) {
-		zend_argument_value_error(3, "is out of range");
-		RETURN_THROWS();
-	}
-
-	if (trimmarker) {
-		marker.val = (unsigned char *)trimmarker;
-		marker.len = trimmarker_len;
-	}
-
-	ret = mbfl_strimwidth(&string, &marker, &result, from, width);
-	ZEND_ASSERT(ret != NULL);
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
-	efree(ret->val);
+	RETVAL_STR(mb_trim_string(str, trimmarker, enc, from, width));
 }
-/* }}} */
 
 
 /* See mbfl_no_encoding definition for list of unsupported encodings */
