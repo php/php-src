@@ -694,14 +694,20 @@ class DatePeriod implements IteratorAggregate
      */
     public const INCLUDE_END_DATE = UNKNOWN;
 
-    public readonly ?DateTimeInterface $start;
+    /** @readonly */
+    public ?DateTimeInterface $start;
     /** @readonly */
     public ?DateTimeInterface $current;
-    public readonly ?DateTimeInterface $end;
-    public readonly ?DateInterval $interval;
-    public readonly int $recurrences;
-    public readonly bool $include_start_date;
-    public readonly bool $include_end_date;
+    /** @readonly */
+    public ?DateTimeInterface $end;
+    /** @readonly */
+    public ?DateInterval $interval;
+    /** @readonly */
+    public int $recurrences;
+    /** @readonly */
+    public bool $include_start_date;
+    /** @readonly */
+    public bool $include_end_date;
 
     /**
      * @param DateTimeInterface|string $start
