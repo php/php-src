@@ -46,6 +46,10 @@ PHP                                                                        NEWS
 - Random:
   . Added new random extension. (Go Kudo)
 
+- SPL:
+  . Widen iterator_to_array() and iterator_count()'s $iterator parameter to
+    iterable. (timwolla)
+
 - Standard:
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
