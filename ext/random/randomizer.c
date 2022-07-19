@@ -86,26 +86,34 @@ PHP_METHOD(Random_Randomizer, __construct)
 }
 /* }}} */
 
+/* {{{ Generate random number */
+PHP_METHOD(Random_Randomizer, nextInt)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	uint64_t result;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	result = randomizer->algo->generate(randomizer->status);
+	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
+			zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
+			RETURN_THROWS();
+	}
+	if (randomizer->status->last_unsafe) {
+		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG((zend_long) (result >> 1));
+}
+/* }}} */
+
 /* {{{ Generate random number in range */
 PHP_METHOD(Random_Randomizer, getInt)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	uint64_t result;
 	zend_long min, max;
-	int argc = ZEND_NUM_ARGS();
-
-	if (argc == 0) {
-		result = randomizer->algo->generate(randomizer->status);
-		if (randomizer->status->last_generated_size > sizeof(zend_long)) {
-			zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
-			RETURN_THROWS();
-		}
-		if (randomizer->status->last_unsafe) {
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
-			RETURN_THROWS();
-		}
-		RETURN_LONG((zend_long) (result >> 1));
-	}
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(min)

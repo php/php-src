@@ -27,6 +27,13 @@ $engines[] = new UserEngine();
 foreach ($engines as $engine) {
     $randomizer = new Random\Randomizer($engine);
 
+    // nextInt
+    for ($i = 0; $i < 1000; $i++) {
+        if (!\is_int($randomizer->nextInt())) {
+            die($engine::class . ': nextInt: failure');
+        }
+    }
+
     // getInt
     for ($i = 0; $i < 1000; $i++) {
         $result = $randomizer->getInt(-50, 50);
