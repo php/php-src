@@ -146,6 +146,9 @@
 "Extension: pspell":
 - ext/pspell/**/*
 
+"Extension: random":
+- ext/random/**/*
+
 "Extension: readline":
 - ext/readline/**/*
 
