@@ -416,6 +416,7 @@ static const func_info_t func_infos[] = {
 	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
 	F1("pspell_suggest", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+	F1("random_bytes", MAY_BE_STRING),
 #if defined(HAVE_HISTORY_LIST)
 	F1("readline_list_history", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #endif
@@ -651,7 +652,6 @@ static const func_info_t func_infos[] = {
 #endif
 	F1("quoted_printable_decode", MAY_BE_STRING),
 	F1("quoted_printable_encode", MAY_BE_STRING),
-	F1("random_bytes", MAY_BE_STRING),
 	F1("soundex", MAY_BE_STRING),
 	F1("stream_context_create", MAY_BE_RESOURCE),
 	F1("stream_context_get_params", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),

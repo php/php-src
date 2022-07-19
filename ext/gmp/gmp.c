@@ -30,8 +30,7 @@
 #include <gmp.h>
 
 /* Needed for gmp_random() */
-#include "ext/standard/php_rand.h"
-#include "ext/standard/php_lcg.h"
+#include "ext/random/php_random.h"
 
 #define GMP_ROUND_ZERO      0
 #define GMP_ROUND_PLUSINF   1

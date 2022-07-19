@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "php_rand.h"
 #include "php_string.h"
 #include "php_variables.h"
 #include <locale.h>
@@ -45,6 +44,7 @@
 #include "ext/standard/file.h"
 /* For php_next_utf8_char() */
 #include "ext/standard/html.h"
+#include "ext/random/php_random.h"
 
 #ifdef __SSE2__
 #include <emmintrin.h>
@@ -5737,28 +5737,35 @@ PHP_FUNCTION(str_rot13)
 }
 /* }}} */
 
-static void php_string_shuffle(char *str, size_t len) /* {{{ */
+/* {{{ php_binary_string_shuffle */
+PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_status *status, char *str, zend_long len) /* {{{ */
 {
-	zend_long n_elems, rnd_idx, n_left;
+	int64_t n_elems, rnd_idx, n_left;
 	char temp;
+
 	/* The implementation is stolen from array_data_shuffle       */
 	/* Thus the characteristics of the randomization are the same */
 	n_elems = len;
 
 	if (n_elems <= 1) {
-		return;
+		return true;
 	}
 
 	n_left = n_elems;
 
 	while (--n_left) {
-		rnd_idx = php_mt_rand_range(0, n_left);
+		rnd_idx = algo->range(status, 0, n_left);
+		if (status->last_unsafe) {
+			return false;
+		}
 		if (rnd_idx != n_left) {
 			temp = str[n_left];
 			str[n_left] = str[rnd_idx];
 			str[rnd_idx] = temp;
 		}
 	}
+
+	return true;
 }
 /* }}} */
 
@@ -5773,7 +5780,12 @@ PHP_FUNCTION(str_shuffle)
 
 	RETVAL_STRINGL(ZSTR_VAL(arg), ZSTR_LEN(arg));
 	if (Z_STRLEN_P(return_value) > 1) {
-		php_string_shuffle(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
+		php_binary_string_shuffle(
+			php_random_default_algo(),
+			php_random_default_status(),
+			Z_STRVAL_P(return_value),
+			Z_STRLEN_P(return_value)
+		);
 	}
 }
 /* }}} */

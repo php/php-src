@@ -22,7 +22,7 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
-#include "ext/standard/php_rand.h"
+#include "ext/random/php_random.h"
 #include "php_dom.h"
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"

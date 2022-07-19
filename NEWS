@@ -43,6 +43,11 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fixed bug GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
 
+- Random:
+  . Add new random extension. (Go Kudo), This extension organizes and
+    consolidates existing implementations related to random number generators. 
+    New, higher quality RNGs are available and scope issues are eliminated. (Go Kudo)
+
 - Standard:
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
