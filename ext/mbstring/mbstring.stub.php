@@ -5,49 +5,49 @@
 #ifdef HAVE_MBREGEX
 /**
  * @var string
- * @cname php_mb_oniguruma_version
+ * @cvalue php_mb_oniguruma_version
  */
 const MB_ONIGURUMA_VERSION = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_UPPER
+ * @cvalue PHP_UNICODE_CASE_UPPER
  */
 const MB_CASE_UPPER = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_LOWER
+ * @cvalue PHP_UNICODE_CASE_LOWER
  */
 const MB_CASE_LOWER = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_TITLE
+ * @cvalue PHP_UNICODE_CASE_TITLE
  */
 const MB_CASE_TITLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_FOLD
+ * @cvalue PHP_UNICODE_CASE_FOLD
  */
 const MB_CASE_FOLD = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_UPPER_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_UPPER_SIMPLE
  */
 const MB_CASE_UPPER_SIMPLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_LOWER_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_LOWER_SIMPLE
  */
 const MB_CASE_LOWER_SIMPLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_TITLE_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_TITLE_SIMPLE
  */
 const MB_CASE_TITLE_SIMPLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_FOLD_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_FOLD_SIMPLE
  */
 const MB_CASE_FOLD_SIMPLE = UNKNOWN;
 

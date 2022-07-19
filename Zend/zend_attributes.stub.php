@@ -7,42 +7,42 @@ final class Attribute
 {
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_TARGET_CLASS
+     * @cvalue ZEND_ATTRIBUTE_TARGET_CLASS
      */
     const TARGET_CLASS = UNKNOWN;
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_TARGET_FUNCTION
+     * @cvalue ZEND_ATTRIBUTE_TARGET_FUNCTION
      */
     const TARGET_FUNCTION = UNKNOWN;
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_TARGET_METHOD
+     * @cvalue ZEND_ATTRIBUTE_TARGET_METHOD
      */
     const TARGET_METHOD = UNKNOWN;
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_TARGET_PROPERTY
+     * @cvalue ZEND_ATTRIBUTE_TARGET_PROPERTY
      */
     const TARGET_PROPERTY = UNKNOWN;
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_TARGET_CLASS_CONST
+     * @cvalue ZEND_ATTRIBUTE_TARGET_CLASS_CONST
      */
     const TARGET_CLASS_CONSTANT = UNKNOWN;
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_TARGET_PARAMETER
+     * @cvalue ZEND_ATTRIBUTE_TARGET_PARAMETER
      */
     const TARGET_PARAMETER = UNKNOWN;
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_TARGET_ALL
+     * @cvalue ZEND_ATTRIBUTE_TARGET_ALL
      */
     const TARGET_ALL = UNKNOWN;
     /**
      * @var int
-     * @cname ZEND_ATTRIBUTE_IS_REPEATABLE
+     * @cvalue ZEND_ATTRIBUTE_IS_REPEATABLE
      */
     const IS_REPEATABLE = UNKNOWN;
 

@@ -4,20 +4,20 @@
 
 /**
  * @var int
- * @cname PHP_ENCHANT_MYSPELL
+ * @cvalue PHP_ENCHANT_MYSPELL
  * @deprecated
  */
 const ENCHANT_MYSPELL = UNKNOWN;
 /**
  * @var int
- * @cname PHP_ENCHANT_ISPELL
+ * @cvalue PHP_ENCHANT_ISPELL
  * @deprecated
  */
 const ENCHANT_ISPELL = UNKNOWN;
 #ifdef HAVE_ENCHANT_GET_VERSION
 /**
  * @var string
- * @cname PHP_ENCHANT_GET_VERSION
+ * @cvalue PHP_ENCHANT_GET_VERSION
  */
 const LIBENCHANT_VERSION = UNKNOWN;
 #endif

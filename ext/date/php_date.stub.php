@@ -4,67 +4,67 @@
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC3339
+ * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_ATOM = "Y-m-d\\TH:i:sP";
 
 /**
  * @var string
- * @cname DATE_FORMAT_COOKIE
+ * @cvalue DATE_FORMAT_COOKIE
  */
 const DATE_COOKIE = "l, d-M-Y H:i:s T";
 
 /**
  * @var string
- * @cname DATE_FORMAT_ISO8601
+ * @cvalue DATE_FORMAT_ISO8601
  */
 const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC822
+ * @cvalue DATE_FORMAT_RFC822
  */
 const DATE_RFC822 = "D, d M y H:i:s O";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC850
+ * @cvalue DATE_FORMAT_RFC850
  */
 const DATE_RFC850 = "l, d-M-y H:i:s T";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC1036
+ * @cvalue DATE_FORMAT_RFC1036
  */
 const DATE_RFC1036 = "D, d M y H:i:s O";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC1123
+ * @cvalue DATE_FORMAT_RFC1123
  */
 const DATE_RFC1123 = "D, d M Y H:i:s O";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC7231
+ * @cvalue DATE_FORMAT_RFC7231
  */
 const DATE_RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC2822
+ * @cvalue DATE_FORMAT_RFC2822
  */
 const DATE_RFC2822 = "D, d M Y H:i:s O";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC3339
+ * @cvalue DATE_FORMAT_RFC3339
  */
 const DATE_RFC3339 = "Y-m-d\\TH:i:sP";
 
 /**
  * @var string
- * @cname DATE_FORMAT_RFC3339_EXTENDED
+ * @cvalue DATE_FORMAT_RFC3339_EXTENDED
  */
 const DATE_RFC3339_EXTENDED = "Y-m-d\\TH:i:s.vP";
 
@@ -76,19 +76,19 @@ const DATE_W3C = DATE_RFC3339;
 
 /**
  * @var int
- * @cname SUNFUNCS_RET_TIMESTAMP
+ * @cvalue SUNFUNCS_RET_TIMESTAMP
  */
 const SUNFUNCS_RET_TIMESTAMP = UNKNOWN;
 
 /**
  * @var int
- * @cname SUNFUNCS_RET_STRING
+ * @cvalue SUNFUNCS_RET_STRING
  */
 const SUNFUNCS_RET_STRING = UNKNOWN;
 
 /**
  * @var int
- * @cname SUNFUNCS_RET_DOUBLE
+ * @cvalue SUNFUNCS_RET_DOUBLE
  */
 const SUNFUNCS_RET_DOUBLE = UNKNOWN;
 
@@ -532,72 +532,72 @@ class DateTimeZone
 {
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_AFRICA
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_AFRICA
      */
     public const AFRICA = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_AMERICA
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_AMERICA
      */
     public const AMERICA = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_ANTARCTICA
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ANTARCTICA
      */
     public const ANTARCTICA = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_ARCTIC
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ARCTIC
      */
     public const ARCTIC = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_ASIA
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ASIA
      */
     public const ASIA = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_ATLANTIC
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ATLANTIC
      */
     public const ATLANTIC = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_AUSTRALIA
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_AUSTRALIA
      */
     public const AUSTRALIA = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_EUROPE
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_EUROPE
      */
     public const EUROPE = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_INDIAN
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_INDIAN
      */
     public const INDIAN = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_PACIFIC
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_PACIFIC
      */
     public const PACIFIC = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_UTC
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_UTC
      */
     public const UTC = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_ALL
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL
      */
     public const ALL = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_GROUP_ALL_W_BC
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL_W_BC
      */
     public const ALL_WITH_BC = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_TIMEZONE_PER_COUNTRY
+     * @cvalue PHP_DATE_TIMEZONE_PER_COUNTRY
      */
     public const PER_COUNTRY = UNKNOWN;
 
@@ -685,12 +685,12 @@ class DatePeriod implements IteratorAggregate
 {
     /**
      * @var int
-     * @cname PHP_DATE_PERIOD_EXCLUDE_START_DATE
+     * @cvalue PHP_DATE_PERIOD_EXCLUDE_START_DATE
      */
     public const EXCLUDE_START_DATE = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_DATE_PERIOD_INCLUDE_END_DATE
+     * @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE
      */
     public const INCLUDE_END_DATE = UNKNOWN;
 

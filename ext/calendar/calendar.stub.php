@@ -4,111 +4,111 @@
 
 /**
  * @var int
- * @cname CAL_GREGORIAN
+ * @cvalue CAL_GREGORIAN
  */
 const CAL_GREGORIAN = UNKNOWN;
 /**
  * @var int
- * @cname CAL_JULIAN
+ * @cvalue CAL_JULIAN
  */
 const CAL_JULIAN = UNKNOWN;
 /**
  * @var int
- * @cname CAL_JEWISH
+ * @cvalue CAL_JEWISH
  */
 const CAL_JEWISH = UNKNOWN;
 /**
  * @var int
- * @cname CAL_FRENCH
+ * @cvalue CAL_FRENCH
  */
 const CAL_FRENCH = UNKNOWN;
 /**
  * @var int
- * @cname CAL_NUM_CALS
+ * @cvalue CAL_NUM_CALS
  */
 const CAL_NUM_CALS = UNKNOWN;
 
 /**
  * @var int
- * @cname CAL_DOW_DAYNO
+ * @cvalue CAL_DOW_DAYNO
  */
 const CAL_DOW_DAYNO = UNKNOWN;
 /**
  * @var int
- * @cname CAL_DOW_SHORT
+ * @cvalue CAL_DOW_SHORT
  */
 const CAL_DOW_SHORT = UNKNOWN;
 /**
  * @var int
- * @cname CAL_DOW_LONG
+ * @cvalue CAL_DOW_LONG
  */
 const CAL_DOW_LONG = UNKNOWN;
 
 /**
  * @var int
- * @cname CAL_MONTH_GREGORIAN_SHORT
+ * @cvalue CAL_MONTH_GREGORIAN_SHORT
  */
 const CAL_MONTH_GREGORIAN_SHORT = UNKNOWN;
 /**
  * @var int
- * @cname CAL_MONTH_GREGORIAN_LONG
+ * @cvalue CAL_MONTH_GREGORIAN_LONG
  */
 const CAL_MONTH_GREGORIAN_LONG = UNKNOWN;
 /**
  * @var int
- * @cname CAL_MONTH_JULIAN_SHORT
+ * @cvalue CAL_MONTH_JULIAN_SHORT
  */
 const CAL_MONTH_JULIAN_SHORT = UNKNOWN;
 /**
  * @var int
- * @cname CAL_MONTH_JULIAN_LONG
+ * @cvalue CAL_MONTH_JULIAN_LONG
  */
 const CAL_MONTH_JULIAN_LONG = UNKNOWN;
 /**
  * @var int
- * @cname CAL_MONTH_JEWISH
+ * @cvalue CAL_MONTH_JEWISH
  */
 const CAL_MONTH_JEWISH = UNKNOWN;
 /**
  * @var int
- * @cname CAL_MONTH_FRENCH
+ * @cvalue CAL_MONTH_FRENCH
  */
 const CAL_MONTH_FRENCH = UNKNOWN;
 
 /**
  * @var int
- * @cname CAL_EASTER_DEFAULT
+ * @cvalue CAL_EASTER_DEFAULT
  */
 const CAL_EASTER_DEFAULT = UNKNOWN;
 /**
  * @var int
- * @cname CAL_EASTER_ROMAN
+ * @cvalue CAL_EASTER_ROMAN
  */
 const CAL_EASTER_ROMAN = UNKNOWN;
 /**
  * @var int
- * @cname CAL_EASTER_ALWAYS_GREGORIAN
+ * @cvalue CAL_EASTER_ALWAYS_GREGORIAN
  */
 const CAL_EASTER_ALWAYS_GREGORIAN = UNKNOWN;
 /**
  * @var int
- * @cname CAL_EASTER_ALWAYS_JULIAN
+ * @cvalue CAL_EASTER_ALWAYS_JULIAN
  */
 const CAL_EASTER_ALWAYS_JULIAN = UNKNOWN;
 
 /**
  * @var int
- * @cname CAL_JEWISH_ADD_ALAFIM_GERESH
+ * @cvalue CAL_JEWISH_ADD_ALAFIM_GERESH
  */
 const CAL_JEWISH_ADD_ALAFIM_GERESH = UNKNOWN;
 /**
  * @var int
- * @cname CAL_JEWISH_ADD_ALAFIM
+ * @cvalue CAL_JEWISH_ADD_ALAFIM
  */
 const CAL_JEWISH_ADD_ALAFIM = UNKNOWN;
 /**
  * @var int
- * @cname CAL_JEWISH_ADD_GERESHAYIM
+ * @cvalue CAL_JEWISH_ADD_GERESHAYIM
  */
 const CAL_JEWISH_ADD_GERESHAYIM = UNKNOWN;
 

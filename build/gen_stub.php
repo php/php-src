@@ -1594,7 +1594,7 @@ class EvaluatedValue
     public $type;
 
     /** @var string|null */
-    public $cConstName;
+    public $cConstValue;
 
     /** @var bool */
     public $isUnknownConstValue;
@@ -1671,7 +1671,7 @@ class EvaluatedValue
     {
         $this->value = $value;
         $this->type = $type;
-        $this->cConstName = $cConstName;
+        $this->cConstValue = $cConstName;
         $this->originatingConst = $originatingConst;
         $this->isUnknownConstValue = $isUnknownConstValue;
     }
@@ -1719,8 +1719,8 @@ class EvaluatedValue
      */
     public function getCConstValue(iterable $allConstInfos): ?string
     {
-        if ($this->cConstName) {
-            return $this->cConstName;
+        if ($this->cConstValue) {
+            return $this->cConstValue;
         }
 
         if ($this->originatingConst) {
@@ -1872,7 +1872,7 @@ class ConstInfo extends VariableLike
     /** @var string|null */
     public $cond;
     /** @var string|null */
-    public $cname;
+    public $cValue;
 
     public function __construct(
         ConstOrClassConstName $name,
@@ -1882,7 +1882,7 @@ class ConstInfo extends VariableLike
         ?Type $phpDocType,
         bool $isDeprecated,
         ?string $cond,
-        ?string $cname,
+        ?string $cValue,
         ?string $link,
         ?int $phpVersionIdMinimumCompatibility
     ) {
@@ -1891,7 +1891,7 @@ class ConstInfo extends VariableLike
         $this->valueString = $valueString;
         $this->isDeprecated = $isDeprecated;
         $this->cond = $cond;
-        $this->cname = $cname;
+        $this->cValue = $cValue;
         parent::__construct($flags, $phpDocType, $link, $phpVersionIdMinimumCompatibility);
     }
 
@@ -1903,7 +1903,7 @@ class ConstInfo extends VariableLike
         return EvaluatedValue::createFromExpression(
             $this->value,
             $this->phpDocType->tryToSimpleType(),
-            $this->cname,
+            $this->cValue,
             $allConstInfos
         );
     }
@@ -1948,7 +1948,7 @@ class ConstInfo extends VariableLike
      */
     protected function getFieldSynopsisValueString(iterable $allConstInfos): ?string
     {
-        $value = EvaluatedValue::createFromExpression($this->value, null, $this->cname, $allConstInfos);
+        $value = EvaluatedValue::createFromExpression($this->value, null, $this->cValue, $allConstInfos);
         if ($value->originatingConst) {
             return $value->originatingConst->getFieldSynopsisValueString($allConstInfos);
         }
@@ -1971,9 +1971,9 @@ class ConstInfo extends VariableLike
             throw new Exception("Constant " . $this->name->__toString() . " must have a simple built-in type");
         }
 
-        $value = EvaluatedValue::createFromExpression($this->value, $type, $this->cname, $allConstInfos);
-        if ($value->isUnknownConstValue && !$value->cConstName) {
-            throw new Exception("Constant " . $this->name->__toString() . " must have a @cname annotation");
+        $value = EvaluatedValue::createFromExpression($this->value, $type, $this->cValue, $allConstInfos);
+        if ($value->isUnknownConstValue && !$value->cConstValue) {
+            throw new Exception("Constant " . $this->name->__toString() . " must have a @cvalue annotation");
         }
 
         $code = "";
@@ -2059,35 +2059,35 @@ class ConstInfo extends VariableLike
 
     private function getValueAssertion(EvaluatedValue $value): string
     {
-        if ($value->isUnknownConstValue || $value->originatingConst || $value->cConstName === null) {
+        if ($value->isUnknownConstValue || $value->originatingConst || $value->cConstValue === null) {
             return "";
         }
 
-        $cName = $value->cConstName;
+        $cConstValue = $value->cConstValue;
         $constValue = $value->value;
 
         if ($value->type->isNull()) {
-            return "\tZEND_ASSERT($cName == NULL);\n";
+            return "\tZEND_ASSERT($cConstValue == NULL);\n";
         }
 
         if ($value->type->isBool()) {
             $cValue = $constValue ? "true" : "false";
-            return "\tZEND_ASSERT($cName == $cValue);\n";
+            return "\tZEND_ASSERT($cConstValue == $cValue);\n";
         }
 
         if ($value->type->isInt()) {
             $cValue = (int) $constValue;
-            return "\tZEND_ASSERT($cName == $cValue);\n";
+            return "\tZEND_ASSERT($cConstValue == $cValue);\n";
         }
 
         if ($value->type->isFloat()) {
             $cValue = (float) $constValue;
-            return "\tZEND_ASSERT($cName == $cValue);\n";
+            return "\tZEND_ASSERT($cConstValue == $cValue);\n";
         }
 
         if ($value->type->isString()) {
             $cValue = '"' . addslashes($constValue) . '"';
-            return "\tZEND_ASSERT(strcmp($cName, $cValue) == 0);\n";
+            return "\tZEND_ASSERT(strcmp($cConstValue, $cValue) == 0);\n";
         }
 
         throw new Exception("Unimplemented constant type");
@@ -3376,7 +3376,7 @@ function parseConstLike(
 ): ConstInfo {
     $phpDocType = null;
     $deprecated = false;
-    $cname = null;
+    $cValue = null;
     $link = null;
     if ($docComment) {
         $tags = parseDocComment($docComment);
@@ -3385,8 +3385,8 @@ function parseConstLike(
                 $phpDocType = $tag->getType();
             } elseif ($tag->name === 'deprecated') {
                 $deprecated = true;
-            } elseif ($tag->name === 'cname') {
-                $cname = $tag->value;
+            } elseif ($tag->name === 'cvalue') {
+                $cValue = $tag->value;
             } elseif ($tag->name === 'link') {
                 $link = $tag->value;
             }
@@ -3405,7 +3405,7 @@ function parseConstLike(
         Type::fromString($phpDocType),
         $deprecated,
         $cond,
-        $cname,
+        $cValue,
         $link,
         $phpVersionIdMinimumCompatibility
     );
