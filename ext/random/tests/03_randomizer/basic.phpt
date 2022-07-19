@@ -27,6 +27,18 @@ $engines[] = new UserEngine();
 foreach ($engines as $engine) {
     $randomizer = new Random\Randomizer($engine);
 
+    // nextInt
+    for ($i = 0; $i < 1000; $i++) {
+        try {
+            $randomizer->nextInt();
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() !== 'Generated value exceeds size of int') {
+                die($engine::class . ': nextInt: failure: {$e->getMesasge()}');
+                throw $e;
+            }
+        }
+    }
+
     // getInt
     for ($i = 0; $i < 1000; $i++) {
         $result = $randomizer->getInt(-50, 50);
