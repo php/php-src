@@ -91,8 +91,6 @@
 #define HAVE_EVP_PKEY_EC 1
 #endif
 
-#include "openssl_arginfo.h"
-
 ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 /* FIXME: Use the openssl constants instead of
@@ -132,6 +130,8 @@ enum php_openssl_encoding {
 	ENCODING_SMIME,
 	ENCODING_PEM,
 };
+
+#include "openssl_arginfo.h"
 
 /* OpenSSLCertificate class */
 
@@ -1294,8 +1294,6 @@ PHP_MINIT_FUNCTION(openssl)
 	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
 
 	REGISTER_INI_ENTRIES();
-
-	register_openssl_symbols(module_number);
 
 	return SUCCESS;
 }

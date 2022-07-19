@@ -160,66 +160,66 @@ const PKCS7_NOSIGS = UNKNOWN;
 
 /**
  * @var int
- * @cvalue OPENSSL_CMS_DETACHED
+ * @cvalue CMS_DETACHED
  */
 const OPENSSL_CMS_DETACHED = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CMS_TEXT
+ * @cvalue CMS_TEXT
  */
 const OPENSSL_CMS_TEXT = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CMS_NOINTERN
+ * @cvalue CMS_NOINTERN
  */
 const OPENSSL_CMS_NOINTERN = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CMS_NOVERIFY
+ * @cvalue CMS_NOVERIFY
  */
 const OPENSSL_CMS_NOVERIFY = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CMS_NOCERTS
+ * @cvalue CMS_NOCERTS
  */
 const OPENSSL_CMS_NOCERTS = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CMS_NOATTR
+ * @cvalue CMS_NOATTR
  */
 const OPENSSL_CMS_NOATTR = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CMS_BINARY
+ * @cvalue CMS_BINARY
  */
 const OPENSSL_CMS_BINARY = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CMS_NOSIGS
+ * @cvalue CMS_NOSIGS
  */
 const OPENSSL_CMS_NOSIGS = UNKNOWN;
 
 /**
  * @var int
- * @cvalue OPENSSL_PKCS1_PADDING
+ * @cvalue RSA_PKCS1_PADDING
  */
 const OPENSSL_PKCS1_PADDING = UNKNOWN;
 #ifdef RSA_SSLV23_PADDING
 /**
  * @var int
- * @cvalue OPENSSL_SSLV23_PADDING
+ * @cvalue RSA_SSLV23_PADDING
  */
 const OPENSSL_SSLV23_PADDING = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cvalue OPENSSL_NO_PADDING
+ * @cvalue RSA_NO_PADDING
  */
 const OPENSSL_NO_PADDING = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_PKCS1_OAEP_PADDING
+ * @cvalue RSA_PKCS1_OAEP_PADDING
  */
 const OPENSSL_PKCS1_OAEP_PADDING = UNKNOWN;
 
@@ -236,17 +236,17 @@ const OPENSSL_DEFAULT_STREAM_CIPHERS = UNKNOWN;
 #ifndef OPENSSL_NO_RC2
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_RC2_40
+ * @cvalue PHP_OPENSSL_CIPHER_RC2_40
  */
 const OPENSSL_CIPHER_RC2_40 = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_RC2_128
+ * @cvalue PHP_OPENSSL_CIPHER_RC2_128
  */
 const OPENSSL_CIPHER_RC2_128 = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_RC2_64
+ * @cvalue PHP_OPENSSL_CIPHER_RC2_64
  */
 const OPENSSL_CIPHER_RC2_64 = UNKNOWN;
 #endif
@@ -254,12 +254,12 @@ const OPENSSL_CIPHER_RC2_64 = UNKNOWN;
 #ifndef OPENSSL_NO_DES
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_DES
+ * @cvalue PHP_OPENSSL_CIPHER_DES
  */
 const OPENSSL_CIPHER_DES = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_3DES
+ * @cvalue PHP_OPENSSL_CIPHER_3DES
  */
 const OPENSSL_CIPHER_3DES = UNKNOWN;
 #endif
@@ -267,17 +267,17 @@ const OPENSSL_CIPHER_3DES = UNKNOWN;
 #ifndef OPENSSL_NO_AES
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_AES_128_CBC
+ * @cvalue PHP_OPENSSL_CIPHER_AES_128_CBC
  */
 const OPENSSL_CIPHER_AES_128_CBC = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_AES_192_CBC
+ * @cvalue PHP_OPENSSL_CIPHER_AES_192_CBC
  */
 const OPENSSL_CIPHER_AES_192_CBC = UNKNOWN;
 /**
  * @var int
- * @cvalue OPENSSL_CIPHER_AES_256_CBC
+ * @cvalue PHP_OPENSSL_CIPHER_AES_256_CBC
  */
 const OPENSSL_CIPHER_AES_256_CBC = UNKNOWN;
 #endif
@@ -327,9 +327,7 @@ const OPENSSL_ZERO_PADDING = UNKNOWN;
 const OPENSSL_DONT_ZERO_PAD_KEY = UNKNOWN;
 
 #ifndef OPENSSL_NO_TLSEXT
-/**
- * @var int
- */
+/** @var int */
 const OPENSSL_TLSEXT_SERVER_NAME = 1;
 #endif
 
