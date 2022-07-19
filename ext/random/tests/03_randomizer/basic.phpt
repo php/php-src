@@ -29,8 +29,14 @@ foreach ($engines as $engine) {
 
     // nextInt
     for ($i = 0; $i < 1000; $i++) {
-        if (!\is_int($randomizer->nextInt())) {
-            die($engine::class . ': nextInt: failure');
+        try {
+            if (!\is_int($randomizer->nextInt())) {
+                die($engine::class . ': nextInt: failure');
+            }
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() !== 'Generated value exceeds size of int') {
+                throw $e;
+            }
         }
     }
 
