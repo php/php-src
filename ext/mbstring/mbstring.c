@@ -2694,10 +2694,10 @@ PHP_FUNCTION(mb_strtolower)
 }
 /* }}} */
 
-static mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
+static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
 {
-	mbfl_encoding **new_elist = safe_emalloc(size, sizeof(mbfl_encoding*), 0);
-	memcpy(new_elist, elist, size * sizeof(mbfl_encoding*));
+	const mbfl_encoding **new_elist = safe_emalloc(size, sizeof(mbfl_encoding*), 0);
+	memcpy(ZEND_VOIDP(new_elist), elist, size * sizeof(mbfl_encoding*));
 	return new_elist;
 }
 
