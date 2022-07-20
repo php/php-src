@@ -19,11 +19,14 @@ foo();
 echo 'You should not see this.';
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_error_%d.php' -->
-<file '%s%eobserver_error_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
   <!-- init foo() -->
   <foo>
+    <!-- init str_repeat() -->
+    <str_repeat>
 
 Fatal error: Allowed memory size of 2097152 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+    </str_repeat:NULL>
   </foo:NULL>
 </file '%s%eobserver_error_%d.php'>

@@ -34,6 +34,7 @@ Foo
 </foo>
 <!-- init bar() -->
 Bar
+<!-- init ini_set() -->
 Foo
 <bar>
 Bar

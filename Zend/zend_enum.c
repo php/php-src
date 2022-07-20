@@ -22,6 +22,7 @@
 #include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
 #include "zend_enum.h"
+#include "zend_extensions.h"
 
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
@@ -401,59 +402,48 @@ static ZEND_NAMED_FUNCTION(zend_enum_try_from_func)
 	zend_enum_from_base(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
+static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id name_id, zend_internal_function *zif) {
+	zend_string *name = ZSTR_KNOWN(name_id);
+	zif->type = ZEND_INTERNAL_FUNCTION;
+	zif->module = EG(current_module);
+	zif->scope = ce;
+	ZEND_MAP_PTR_NEW(zif->run_time_cache);
+	ZEND_MAP_PTR_SET(zif->run_time_cache, zend_arena_alloc(&CG(arena), zend_internal_run_time_cache_reserved_size()));
+
+	if (!zend_hash_add_ptr(&ce->function_table, name, zif)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	}
+}
+
 void zend_enum_register_funcs(zend_class_entry *ce)
 {
 	const uint32_t fn_flags =
 		ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_ARENA_ALLOCATED;
-	zend_internal_function *cases_function =
-		zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
-	memset(cases_function, 0, sizeof(zend_internal_function));
-	cases_function->type = ZEND_INTERNAL_FUNCTION;
-	cases_function->module = EG(current_module);
+	zend_internal_function *cases_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
 	cases_function->handler = zend_enum_cases_func;
 	cases_function->function_name = ZSTR_KNOWN(ZEND_STR_CASES);
-	cases_function->scope = ce;
 	cases_function->fn_flags = fn_flags;
 	cases_function->arg_info = (zend_internal_arg_info *) (arginfo_class_UnitEnum_cases + 1);
-	if (!zend_hash_add_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_CASES), cases_function)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::cases()", ZSTR_VAL(ce->name));
-	}
+	zend_enum_register_func(ce, ZEND_STR_CASES, cases_function);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
-		zend_internal_function *from_function =
-			zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
-		memset(from_function, 0, sizeof(zend_internal_function));
-		from_function->type = ZEND_INTERNAL_FUNCTION;
-		from_function->module = EG(current_module);
+		zend_internal_function *from_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
 		from_function->handler = zend_enum_from_func;
 		from_function->function_name = ZSTR_KNOWN(ZEND_STR_FROM);
-		from_function->scope = ce;
 		from_function->fn_flags = fn_flags;
 		from_function->num_args = 1;
 		from_function->required_num_args = 1;
 		from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_from + 1);
-		if (!zend_hash_add_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_FROM), from_function)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot redeclare %s::from()", ZSTR_VAL(ce->name));
-		}
+		zend_enum_register_func(ce, ZEND_STR_FROM, from_function);
 
-		zend_internal_function *try_from_function =
-			zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
-		memset(try_from_function, 0, sizeof(zend_internal_function));
-		try_from_function->type = ZEND_INTERNAL_FUNCTION;
-		try_from_function->module = EG(current_module);
+		zend_internal_function *try_from_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
 		try_from_function->handler = zend_enum_try_from_func;
 		try_from_function->function_name = ZSTR_KNOWN(ZEND_STR_TRYFROM);
-		try_from_function->scope = ce;
 		try_from_function->fn_flags = fn_flags;
 		try_from_function->num_args = 1;
 		try_from_function->required_num_args = 1;
 		try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_tryFrom + 1);
-		if (!zend_hash_add_ptr(
-				&ce->function_table, ZSTR_KNOWN(ZEND_STR_TRYFROM_LOWERCASE), try_from_function)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot redeclare %s::tryFrom()", ZSTR_VAL(ce->name));
-		}
+		zend_enum_register_func(ce, ZEND_STR_TRYFROM_LOWERCASE, try_from_function);
 	}
 }
 
