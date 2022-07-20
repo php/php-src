@@ -2694,6 +2694,13 @@ PHP_FUNCTION(mb_strtolower)
 }
 /* }}} */
 
+static mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
+{
+	mbfl_encoding **new_elist = safe_emalloc(size, sizeof(mbfl_encoding*), 0);
+	memcpy(new_elist, elist, size * sizeof(mbfl_encoding*));
+	return new_elist;
+}
+
 /* {{{ Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
@@ -2707,7 +2714,6 @@ PHP_FUNCTION(mb_detect_encoding)
 	const mbfl_encoding *ret;
 	const mbfl_encoding **elist;
 	size_t size;
-	bool free_elist;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STRING(str, str_len)
@@ -2721,16 +2727,13 @@ PHP_FUNCTION(mb_detect_encoding)
 		if (FAILURE == php_mb_parse_encoding_array(encoding_ht, &elist, &size, 2)) {
 			RETURN_THROWS();
 		}
-		free_elist = 1;
 	} else if (encoding_str) {
 		if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str), &elist, &size, /* persistent */ 0, /* arg_num */ 2, /* allow_pass_encoding */ 0)) {
 			RETURN_THROWS();
 		}
-		free_elist = 1;
 	} else {
-		elist = MBSTRG(current_detect_order_list);
+		elist = duplicate_elist(MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size));
 		size = MBSTRG(current_detect_order_list_size);
-		free_elist = 0;
 	}
 
 	if (size == 0) {
@@ -2739,12 +2742,10 @@ PHP_FUNCTION(mb_detect_encoding)
 		RETURN_THROWS();
 	}
 
-	if (free_elist) {
-		remove_non_encodings_from_elist(elist, &size);
-		if (size == 0) {
-			efree(ZEND_VOIDP(elist));
-			RETURN_FALSE;
-		}
+	remove_non_encodings_from_elist(elist, &size);
+	if (size == 0) {
+		efree(ZEND_VOIDP(elist));
+		RETURN_FALSE;
 	}
 
 	if (ZEND_NUM_ARGS() < 3) {
@@ -2761,9 +2762,7 @@ PHP_FUNCTION(mb_detect_encoding)
 		ret = mbfl_identify_encoding(&string, elist, size, strict);
 	}
 
-	if (free_elist) {
-		efree(ZEND_VOIDP(elist));
-	}
+	efree(ZEND_VOIDP(elist));
 
 	if (ret == NULL) {
 		RETURN_FALSE;
