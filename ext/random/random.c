@@ -88,19 +88,16 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	size_t total_size = 0;
 	uint32_t count = 0;
 
-	result = algo->generate(status);
-	total_size = status->last_generated_size;
-	if (status->last_unsafe) {
-		return 0;
-	}
-	if (total_size < sizeof(uint32_t)) {
+	result = 0;
+	total_size = 0;
+	do {
 		r = algo->generate(status);
-		result = (result << status->last_generated_size) | r;
+		result = (result << (8 * status->last_generated_size)) | r;
 		total_size += status->last_generated_size;
 		if (status->last_unsafe) {
 			return 0;
 		}
-	}
+	} while (total_size < sizeof(uint32_t));
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == UINT32_MAX)) {
@@ -126,19 +123,16 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 			return 0;
 		}
 
-		result = algo->generate(status);
-		total_size = status->last_generated_size;
-		if (status->last_unsafe) {
-			return 0;
-		}
-		while (total_size < sizeof(uint32_t)) {
+		result = 0;
+		total_size = 0;
+		do {
 			r = algo->generate(status);
-			result = (result << status->last_generated_size) | r;
+			result = (result << (8 * status->last_generated_size)) | r;
 			total_size += status->last_generated_size;
 			if (status->last_unsafe) {
 				return 0;
 			}
-		}
+		} while (total_size < sizeof(uint32_t));
 	}
 
 	return result % umax;
@@ -150,19 +144,16 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 	size_t total_size = 0;
 	uint32_t count = 0;
 
-	result = algo->generate(status);
-	total_size = status->last_generated_size;
-	if (status->last_unsafe) {
-		return 0;
-	}
-	if (total_size < sizeof(uint64_t)) {
+	result = 0;
+	total_size = 0;
+	do {
 		r = algo->generate(status);
-		result = (result << status->last_generated_size) | r;
+		result = (result << (8 * status->last_generated_size)) | r;
 		total_size += status->last_generated_size;
 		if (status->last_unsafe) {
 			return 0;
 		}
-	}
+	} while (total_size < sizeof(uint64_t));
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == UINT64_MAX)) {
@@ -188,19 +179,16 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 			return 0;
 		}
 
-		result = algo->generate(status);
-		total_size = status->last_generated_size;
-		if (status->last_unsafe) {
-			return 0;
-		}
-		while (total_size < sizeof(uint64_t)) {
+		result = 0;
+		total_size = 0;
+		do {
 			r = algo->generate(status);
-			result = (result << status->last_generated_size) | r;
+			result = (result << (8 * status->last_generated_size)) | r;
 			total_size += status->last_generated_size;
 			if (status->last_unsafe) {
 				return 0;
 			}
-		}
+		} while (total_size < sizeof(uint64_t));
 	}
 
 	return result % umax;
