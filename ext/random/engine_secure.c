@@ -38,9 +38,9 @@ static uint64_t generate(php_random_status *status)
 
 static zend_long range(php_random_status *status, zend_long min, zend_long max)
 {
-	zend_long result;
+	zend_long result = 0;
 
-	if (php_random_int_silent(min, max, &result) == FAILURE) {
+	if (php_random_int_throw(min, max, &result) == FAILURE) {
 		status->last_unsafe = true;
 	}
 
