@@ -29,7 +29,7 @@ static uint64_t generate(php_random_status *status)
 {
 	zend_ulong r = 0;
 
-	if (php_random_bytes_silent(&r, sizeof(zend_ulong)) == FAILURE) {
+	if (php_random_bytes_throw(&r, sizeof(zend_ulong)) == FAILURE) {
 		status->last_unsafe = true;
 	}
 
