@@ -12,40 +12,6 @@ final class EmptyStringEngine implements \Random\Engine {
     }
 }
 
-try {
-    var_dump((new Randomizer(new EmptyStringEngine()))->getInt(0, 123));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
-}
-
-echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
-
-try {
-    var_dump(bin2hex((new Randomizer(new EmptyStringEngine()))->getBytes(1)));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
-}
-
-echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
-
-try {
-    var_dump((new Randomizer(new EmptyStringEngine()))->shuffleArray(\range(1, 10)));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
-}
-
-echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
-
-try {
-    var_dump((new Randomizer(new EmptyStringEngine()))->shuffleBytes('foobar'));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
-}
-
-echo PHP_EOL, "=======", PHP_EOL, PHP_EOL;
-
-// Infinite loop
-
 final class HeavilyBiasedEngine implements \Random\Engine {
     public function generate(): string
     {
@@ -53,38 +19,53 @@ final class HeavilyBiasedEngine implements \Random\Engine {
     }
 }
 
-try {
-    var_dump((new Randomizer(new HeavilyBiasedEngine()))->getInt(0, 123));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
-}
+echo "=====================", PHP_EOL;
 
-echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
+foreach ([
+    EmptyStringEngine::class,
+    HeavilyBiasedEngine::class,
+] as $engine) {
+    echo $engine, PHP_EOL, "=====================", PHP_EOL, PHP_EOL;
 
-try {
-    var_dump(bin2hex((new Randomizer(new HeavilyBiasedEngine()))->getBytes(1)));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
-}
+    try {
+        var_dump((new Randomizer(new $engine()))->getInt(0, 123));
+    } catch (\RuntimeException $e) {
+        echo $e, PHP_EOL;
+    }
+    
+    echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
+    
+    try {
+        var_dump(bin2hex((new Randomizer(new $engine()))->getBytes(1)));
+    } catch (\RuntimeException $e) {
+        echo $e, PHP_EOL;
+    }
+    
+    echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
+    
+    try {
+        var_dump((new Randomizer(new $engine()))->shuffleArray(\range(1, 10)));
+    } catch (\RuntimeException $e) {
+        echo $e, PHP_EOL;
+    }
+    
+    echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
+    
+    try {
+        var_dump((new Randomizer(new $engine()))->shuffleBytes('foobar'));
+    } catch (\RuntimeException $e) {
+        echo $e, PHP_EOL;
+    }
 
-echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
-
-try {
-    var_dump((new Randomizer(new HeavilyBiasedEngine()))->shuffleArray(\range(1, 10)));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
-}
-
-echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
-
-try {
-    var_dump((new Randomizer(new HeavilyBiasedEngine()))->shuffleBytes('foobar'));
-} catch (\RuntimeException $e) {
-    echo $e, PHP_EOL;
+    echo PHP_EOL, "=====================", PHP_EOL;
 }
 
 ?>
 --EXPECTF--
+=====================
+EmptyStringEngine
+=====================
+
 DomainException: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getInt(0, 123)
@@ -131,7 +112,9 @@ Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}
 
-=======
+=====================
+HeavilyBiasedEngine
+=====================
 
 RuntimeException: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
@@ -170,3 +153,5 @@ Next RuntimeException: Random number generation failed in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}
+
+=====================
