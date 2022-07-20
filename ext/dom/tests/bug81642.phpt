@@ -6,13 +6,27 @@ Bug #81642 DOMChildNode::replaceWith() bug when replacing a node with itself.
 <?php
 require_once("dom_test.inc");
 
-$dom = new DOMDocument;
-$dom->loadXML('<test><mark>first</mark><mark>second</mark></test>');
-$element = $dom->documentElement->firstChild;
-$element->replaceWith($element);
+$doc = new DOMDocument;
+$headNode = $doc->createElement("head");
+$doc->appendChild($headNode);
+$titleNode = $doc->createElement("title");
+$headNode->appendChild($titleNode);
+$titleNode->replaceWith($titleNode);
+echo $doc->saveXML().PHP_EOL;
 
-print_node_list_compact($dom->documentElement->childNodes);
+$doc = new DOMDocument;
+$headNode = $doc->createElement("head");
+$doc->appendChild($headNode);
+$titleNode = $doc->createElement("title");
+$headNode->appendChild($titleNode);
+$titleNode->replaceWith($titleNode, 'foo');
+echo $doc->saveXML().PHP_EOL;
+
 ?>
 --EXPECT--
-<test><mark>first</mark><mark>second</mark></test>
+<?xml version="1.0"?>
+<head><title/></head>
+
+<?xml version="1.0"?>
+<head><title/>foo</head>
 
