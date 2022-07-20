@@ -1253,7 +1253,7 @@ PHP_METHOD(DOMElement, replaceWith)
 	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
 
 	dom_parent_node_after(intern, args, argc);
-	if (!dom_node_is_argument (intern, args, argc)) {
+	if (!dom_node_is_argument(intern, args, argc)) {
 		dom_child_node_remove(intern);
 	}
 }
