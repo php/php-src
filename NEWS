@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.9
+?? ??? ????, PHP 8.1.10
+
+
+04 Aug 2022, PHP 8.1.9
 
 - CLI:
   . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
