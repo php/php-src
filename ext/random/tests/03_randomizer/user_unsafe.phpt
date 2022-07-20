@@ -14,7 +14,7 @@ $randomizer = (new \Random\Randomizer(
 ));
 
 try {
-    var_dump($randomizer->getInt(\PHP_INT_MIN, \PHP_INT_MAX));
+    var_dump($randomizer->getInt(0, 123));
 } catch (\RuntimeException $e) {
     echo $e, PHP_EOL;
 }
@@ -56,7 +56,7 @@ $randomizer = (new \Random\Randomizer(
 ));
 
 try {
-    var_dump($randomizer->getInt(\PHP_INT_MIN, \PHP_INT_MAX));
+    var_dump($randomizer->getInt(0, 123));
 } catch (\RuntimeException $e) {
     echo $e, PHP_EOL;
 }
@@ -89,12 +89,12 @@ try {
 --EXPECTF--
 DomainException: A random engine must return a non-empty string in %s:%d
 Stack trace:
-#0 %s(%d): Random\Randomizer->getInt(%d, %d)
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
 
 Next RuntimeException: Random number generation failed in %s:%d
 Stack trace:
-#0 %s(%d): Random\Randomizer->getInt(%d, %d)
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
 
 -------
@@ -135,20 +135,26 @@ Stack trace:
 
 =======
 
-int(%d)
-
--------
-
-string(2) "ff"
-
--------
-
 RuntimeException: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
-#0 %s(%d): Random\Randomizer->shuffleArray(Array)
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
 
 Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
+#1 {main}
+
+-------
+
+RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getBytes(1)
+#1 {main}
+
+-------
+
+RuntimeException: Random number generation failed in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}
