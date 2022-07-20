@@ -3895,7 +3895,7 @@ class TestFile
 
     public function isCGI(): bool
     {
-        return $this->sectionNotEmpty('CGI')
+        return $this->hasSection('CGI')
             || $this->sectionNotEmpty('GET')
             || $this->sectionNotEmpty('POST')
             || $this->sectionNotEmpty('GZIP_POST')
