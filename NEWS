@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed --CGI-- support of run-tests.php. (cmb)
 
+- MBString:
+  . Fix bug GH-9008 (mb_detect_encoding(): wrong results with null $encodings).
+    (cmb)
+
 04 Aug 2022, PHP 8.1.9
 
 - CLI:
