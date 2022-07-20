@@ -62,6 +62,9 @@
 
 #include "zend_multibyte.h"
 #include "mbstring_arginfo.h"
+
+#include "rare_cp_bitvec.h"
+
 /* }}} */
 
 /* {{{ prototypes */
@@ -83,6 +86,8 @@ static inline bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_en
 static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 
 static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding);
+
+static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict);
 
 /* See mbfilter_cp5022x.c */
 uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, int mode);
@@ -437,17 +442,12 @@ static bool php_mb_zend_encoding_lexer_compatibility_checker(const zend_encoding
 
 static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *arg_string, size_t arg_length, const zend_encoding **list, size_t list_size)
 {
-	mbfl_string string;
-
 	if (!list) {
-		list = (const zend_encoding **)MBSTRG(current_detect_order_list);
+		list = (const zend_encoding**)MBSTRG(current_detect_order_list);
 		list_size = MBSTRG(current_detect_order_list_size);
 	}
 
-	mbfl_string_init(&string);
-	string.val = (unsigned char *)arg_string;
-	string.len = arg_length;
-	return (const zend_encoding *) mbfl_identify_encoding(&string, (const mbfl_encoding **)list, list_size, 0);
+	return (const zend_encoding*)mb_guess_encoding((unsigned char*)arg_string, arg_length, (const mbfl_encoding **)list, list_size, false);
 }
 
 static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from)
@@ -2602,12 +2602,7 @@ MBSTRING_API zend_string* php_mb_convert_encoding(const char *input, size_t leng
 		from_encoding = *from_encodings;
 	} else {
 		/* auto detect */
-		mbfl_string string;
-		mbfl_string_init(&string);
-		string.val = (unsigned char *)input;
-		string.len = length;
-		from_encoding = mbfl_identify_encoding(
-			&string, from_encodings, num_from_encodings, MBSTRG(strict_detection));
+		from_encoding = mb_guess_encoding((unsigned char*)input, length, from_encodings, num_from_encodings, MBSTRG(strict_detection));
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect character encoding");
 			return NULL;
@@ -2712,7 +2707,7 @@ PHP_FUNCTION(mb_convert_encoding)
 	HashTable *input_ht, *from_encodings_ht = NULL;
 	const mbfl_encoding **from_encodings;
 	size_t num_from_encodings;
-	bool free_from_encodings;
+	bool free_from_encodings = false;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_HT_OR_STR(input_ht, input_str)
@@ -2730,18 +2725,17 @@ PHP_FUNCTION(mb_convert_encoding)
 		if (php_mb_parse_encoding_array(from_encodings_ht, &from_encodings, &num_from_encodings, 3) == FAILURE) {
 			RETURN_THROWS();
 		}
-		free_from_encodings = 1;
+		free_from_encodings = true;
 	} else if (from_encodings_str) {
 		if (php_mb_parse_encoding_list(ZSTR_VAL(from_encodings_str), ZSTR_LEN(from_encodings_str),
 				&from_encodings, &num_from_encodings,
 				/* persistent */ 0, /* arg_num */ 3, /* allow_pass_encoding */ 0) == FAILURE) {
 			RETURN_THROWS();
 		}
-		free_from_encodings = 1;
+		free_from_encodings = true;
 	} else {
 		from_encodings = &MBSTRG(current_internal_encoding);
 		num_from_encodings = 1;
-		free_from_encodings = 0;
 	}
 
 	if (num_from_encodings > 1) {
@@ -2847,16 +2841,163 @@ static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t
 	return new_elist;
 }
 
+static unsigned int mb_estimate_encoding_demerits(uint32_t w)
+{
+	/* Receive wchars decoded from input string using candidate encoding.
+	 * Give the candidate many 'demerits' for each 'rare' codepoint found,
+	 * a smaller number for each ASCII punctuation character, and 1 for
+	 * all other codepoints.
+	 *
+	 * The 'common' codepoints should cover the vast majority of
+	 * codepoints we are likely to see in practice, while only covering
+	 * a small minority of the entire Unicode encoding space. Why?
+	 * Well, if the test string happens to be valid in an incorrect
+	 * candidate encoding, the bogus codepoints which it decodes to will
+	 * be more or less random. By treating the majority of codepoints as
+	 * 'rare', we ensure that in almost all such cases, the bogus
+	 * codepoints will include plenty of 'rares', thus giving the
+	 * incorrect candidate encoding lots of demerits. See
+	 * common_codepoints.txt for the actual list used.
+	 *
+	 * So, why give extra demerits for ASCII punctuation characters? It's
+	 * because there are some text encodings, like UTF-7, HZ, and ISO-2022,
+	 * which deliberately only use bytes in the ASCII range. When
+	 * misinterpreted as ASCII/UTF-8, strings in these encodings will
+	 * have an unusually high number of ASCII punctuation characters.
+	 * So giving extra demerits for such characters will improve
+	 * detection accuracy for UTF-7 and similar encodings.
+	 *
+	 * Finally, why 1 demerit for all other characters? That penalizes
+	 * long strings, meaning we will tend to choose a candidate encoding
+	 * in which the test string decodes to a smaller number of
+	 * codepoints. That prevents single-byte encodings in which almost
+	 * every possible input byte decodes to a 'common' codepoint from
+	 * being favored too much. */
+	if (w > 0xFFFF) {
+		return 40;
+	} else if (w >= 0x21 && w <= 0x2F) {
+		return 6;
+	} else if ((rare_codepoint_bitvec[w >> 5] >> (w & 0x1F)) & 1) {
+		return 30;
+	} else {
+		return 1;
+	}
+	return 0;
+}
+
+/* When doing 'strict' detection, any string which is invalid in the candidate encoding
+ * is rejected. With non-strict detection, we just continue, but apply demerits for
+ * each invalid byte sequence */
+static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict)
+{
+	if (elist_size == 0) {
+		return NULL;
+	}
+	if (elist_size == 1) {
+		if (strict) {
+			return php_mb_check_encoding((const char*)in, in_len, *elist) ? *elist : NULL;
+		} else {
+			return *elist;
+		}
+	}
+	if (in_len == 0) {
+		return *elist;
+	}
+
+	uint32_t wchar_buf[128];
+	struct conversion_data {
+		const mbfl_encoding *enc;
+		unsigned char *in;
+		size_t in_len;
+		uint64_t demerits; /* Wide bit size to prevent overflow */
+		unsigned int state;
+	};
+	/* Allocate on stack; when we return, this array is automatically freed */
+	struct conversion_data *data = alloca(elist_size * sizeof(struct conversion_data));
+
+	for (unsigned int i = 0; i < elist_size; i++) {
+		data[i].enc = elist[i];
+		data[i].in = in;
+		data[i].in_len = in_len;
+		data[i].state = 0;
+		data[i].demerits = 0;
+	}
+
+	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
+	while (elist_size > 1 && finished < elist_size) {
+		unsigned int i = 0;
+try_next_encoding:
+		while (i < elist_size) {
+			/* Do we still have more input to process for this candidate encoding? */
+			if (data[i].in_len) {
+				const mbfl_encoding *enc = data[i].enc;
+				size_t out_len = enc->to_wchar(&data[i].in, &data[i].in_len, wchar_buf, 128, &data[i].state);
+				ZEND_ASSERT(out_len <= 128);
+				/* Check this batch of decoded codepoints; are there any error markers?
+				 * Also sum up the number of demerits */
+				while (out_len) {
+					uint32_t w = wchar_buf[--out_len];
+					if (w == MBFL_BAD_INPUT) {
+						if (strict) {
+							/* This candidate encoding is not valid, eliminate it from consideration */
+							elist_size--;
+							memmove(&data[i], &data[i+1], (elist_size - i) * sizeof(struct conversion_data));
+							goto try_next_encoding;
+						} else {
+							data[i].demerits += 1000;
+						}
+					} else {
+						data[i].demerits += mb_estimate_encoding_demerits(w);
+					}
+				}
+				if (data[i].in_len == 0) {
+					finished++;
+				}
+			}
+			i++;
+		}
+	}
+
+	if (strict) {
+		if (elist_size == 0) {
+			/* All candidates were eliminated */
+			return NULL;
+		}
+		/* The above loop might have broken because there was only 1 candidate encoding left
+		 * If in strict mode, we still need to process any remaining input for that candidate */
+		if (elist_size == 1 && data[0].in_len) {
+			const mbfl_encoding *enc = data[0].enc;
+			unsigned char *in = data[0].in;
+			size_t in_len = data[0].in_len;
+			unsigned int state = data[0].state;
+			while (in_len) {
+				size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+				while (out_len) {
+					if (wchar_buf[--out_len] == MBFL_BAD_INPUT) {
+						return NULL;
+					}
+				}
+			}
+		}
+	}
+
+	/* See which remaining candidate encoding has the least demerits */
+	unsigned int best = 0;
+	for (unsigned int i = 1; i < elist_size; i++) {
+		if (data[i].demerits < data[best].demerits) {
+			best = i;
+		}
+	}
+	return data[best].enc;
+}
+
 /* {{{ Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
 	zend_string *str, *encoding_str = NULL;
 	HashTable *encoding_ht = NULL;
 	bool strict = false;
-
-	mbfl_string string;
-	const mbfl_encoding *ret;
-	const mbfl_encoding **elist;
+	const mbfl_encoding *ret, **elist;
 	size_t size;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -2896,14 +3037,10 @@ PHP_FUNCTION(mb_detect_encoding)
 		strict = MBSTRG(strict_detection);
 	}
 
-	if (strict && size == 1) {
-		/* If there is only a single candidate encoding, mb_check_encoding is faster */
-		ret = (mb_check_str_encoding(str, *elist)) ? *elist : NULL;
+	if (size == 1 && *elist == &mbfl_encoding_utf8 && (GC_FLAGS(str) & IS_STR_VALID_UTF8)) {
+		ret = &mbfl_encoding_utf8;
 	} else {
-		mbfl_string_init(&string);
-		string.val = (unsigned char*)ZSTR_VAL(str);
-		string.len = ZSTR_LEN(str);
-		ret = mbfl_identify_encoding(&string, elist, size, strict);
+		ret = mb_guess_encoding((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), elist, size, strict);
 	}
 
 	efree(ZEND_VOIDP(elist));
@@ -4086,9 +4223,8 @@ PHP_FUNCTION(mb_send_mail)
 	orig_str.val = (unsigned char *)subject;
 	orig_str.len = subject_len;
 	orig_str.encoding = MBSTRG(current_internal_encoding);
-	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
-			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
-		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid || orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
+		orig_str.encoding = mb_guess_encoding((unsigned char*)subject, subject_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
 	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, CRLF, sizeof("Subject: [PHP-jp nnnnnnnn]" CRLF) - 1);
 	if (pstr != NULL) {
@@ -4100,9 +4236,8 @@ PHP_FUNCTION(mb_send_mail)
 	orig_str.len = message_len;
 	orig_str.encoding = MBSTRG(current_internal_encoding);
 
-	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
-			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
-		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid || orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
+		orig_str.encoding = mb_guess_encoding((unsigned char*)message, message_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
 
 	pstr = NULL;

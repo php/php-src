@@ -291,21 +291,6 @@ mbfl_convert_encoding(
 }
 
 /*
- * identify encoding
- */
-const mbfl_encoding *mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int elistsz, int strict)
-{
-	if (!elistsz) {
-		return NULL;
-	}
-	mbfl_encoding_detector *identd = mbfl_encoding_detector_new(elist, elistsz, strict);
-	mbfl_encoding_detector_feed(identd, string);
-	const mbfl_encoding *enc = mbfl_encoding_detector_judge(identd);
-	mbfl_encoding_detector_delete(identd);
-	return enc;
-}
-
-/*
  *  strcut
  */
 mbfl_string *
