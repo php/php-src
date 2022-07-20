@@ -51,6 +51,7 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   are deprecated (see main UPGRADING notes). To suppress the notice, e.g. to
   avoid duplicates when processing the same value multiple times, pass or add
   IS_CALLABLE_SUPPRESS_DEPRECATIONS to the check_flags parameter.
+* Registered zend_observer_fcall_init handlers are now also called for internal functions.
 
 ========================
 2. Build system changes
