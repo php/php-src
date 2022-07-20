@@ -65,7 +65,7 @@
 #else
 # define MSAN_UNPOISON(ptr, size)
 #endif
-#if __has_feature(undefined_behavior_sanitizer) || ZEND_GCC_VERSION >= 4900
+#if __has_feature(undefined_behavior_sanitizer) || ZEND_GCC_VERSION >= 8000
 # define UBSAN_SUPPRESS_SIGNED_INTEGER_OVERFLOW __attribute__((no_sanitize("signed-integer-overflow")))
 #else
 # define UBSAN_SUPPRESS_SIGNED_INTEGER_OVERFLOW
