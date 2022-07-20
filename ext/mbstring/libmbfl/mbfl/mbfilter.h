@@ -155,12 +155,6 @@ MBFLAPI extern mbfl_string *
 mbfl_convert_encoding(mbfl_string *string, mbfl_string *result, const mbfl_encoding *toenc);
 
 
-/*
- * identify encoding
- */
-MBFLAPI extern const mbfl_encoding *
-mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int elistsz, int strict);
-
 /* Lengths -1 through -16 are reserved for error return values */
 static inline int mbfl_is_error(size_t len) {
 	return len >= (size_t) -16;
