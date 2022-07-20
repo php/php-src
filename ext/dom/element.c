@@ -20,6 +20,7 @@
 #endif
 
 #include "php.h"
+
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 
@@ -74,14 +75,14 @@ PHP_METHOD(DOMElement, __construct)
 			RETURN_THROWS();
 		}
 	} else {
-	    /* If you don't pass a namespace uri, then you can't set a prefix */
-	    localname = (char *) xmlSplitQName2((xmlChar *) name, (xmlChar **) &prefix);
-	    if (prefix != NULL) {
+		/* If you don't pass a namespace uri, then you can't set a prefix */
+		localname = (char *) xmlSplitQName2((xmlChar *) name, (xmlChar **) &prefix);
+		if (prefix != NULL) {
 			xmlFree(localname);
 			xmlFree(prefix);
-	        php_dom_throw_error(NAMESPACE_ERR, 1);
-	        RETURN_THROWS();
-	    }
+			php_dom_throw_error(NAMESPACE_ERR, 1);
+			RETURN_THROWS();
+		}
 		nodep = xmlNewNode(NULL, (xmlChar *) name);
 	}
 
@@ -152,8 +153,8 @@ int dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 
 static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ */
 {
-    int len;
-    const xmlChar *nqname;
+	int len;
+	const xmlChar *nqname;
 
 	nqname = xmlSplitQName3(name, &len);
 	if (nqname != NULL) {
@@ -570,9 +571,9 @@ PHP_METHOD(DOMElement, getAttributeNS)
 
 static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /* {{{ */
 {
-    xmlNsPtr def;
-    xmlChar prefix[50];
-    int counter = 1;
+	xmlNsPtr def;
+	xmlChar prefix[50];
+	int counter = 1;
 
 	if ((tree == NULL) || (ns == NULL) || (ns->type != XML_NAMESPACE_DECL)) {
 		return NULL;
@@ -883,12 +884,12 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 		RETURN_FALSE;
 	}
 
-    nsp = attrp->ns;
-    if (nsp != NULL) {
-        existattrp = xmlHasNsProp(nodep, nsp->href, attrp->name);
-    } else {
-        existattrp = xmlHasProp(nodep, attrp->name);
-    }
+	nsp = attrp->ns;
+	if (nsp != NULL) {
+		existattrp = xmlHasNsProp(nodep, nsp->href, attrp->name);
+	} else {
+		existattrp = xmlHasProp(nodep, attrp->name);
+	}
 
 	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
 		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
@@ -1252,7 +1253,9 @@ PHP_METHOD(DOMElement, replaceWith)
 	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
 
 	dom_parent_node_after(intern, args, argc);
-	dom_child_node_remove(intern);
+	if (!dom_node_is_argument (intern, args, argc)) {
+		dom_child_node_remove(intern);
+	}
 }
 /* }}} end DOMElement::prepend */
 
