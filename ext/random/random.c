@@ -61,6 +61,14 @@
 
 #if __has_feature(memory_sanitizer)
 # include <sanitizer/msan_interface.h>
+# define MSAN_UNPOISON(ptr, size) __msan_unpoison((ptr), (size));
+#else
+# define MSAN_UNPOISON(ptr, size)
+#endif
+#if __has_feature(undefined_behavior_sanitizer) || ZEND_GCC_VERSION >= 4900
+# define UBSAN_SUPPRESS_SIGNED_INTEGER_OVERFLOW __attribute__((no_sanitize("signed-integer-overflow")))
+#else
+# define UBSAN_SUPPRESS_SIGNED_INTEGER_OVERFLOW
 #endif
 
 #include "random_arginfo.h"
@@ -317,7 +325,7 @@ PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object)
 }
 
 /* {{{ php_random_range */
-PHPAPI zend_long php_random_range(const php_random_algo *algo, php_random_status *status, zend_long min, zend_long max)
+UBSAN_SUPPRESS_SIGNED_INTEGER_OVERFLOW PHPAPI zend_long php_random_range(const php_random_algo *algo, php_random_status *status, zend_long min, zend_long max)
 {
 	zend_ulong umax = max - min;
 
@@ -539,10 +547,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 			}
 		}
 
-#  if __has_feature(memory_sanitizer)
 		/* MSan does not instrument manual syscall invocations. */
-		__msan_unpoison(bytes + read_bytes, n);
-#  endif
+		MSAN_UNPOISON(bytes + read_bytes, n);
 		read_bytes += (size_t) n;
 	}
 # endif
