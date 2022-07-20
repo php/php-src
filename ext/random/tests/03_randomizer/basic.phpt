@@ -33,8 +33,7 @@ foreach ($engines as $engine) {
             $randomizer->nextInt();
         } catch (\RuntimeException $e) {
             if ($e->getMessage() !== 'Generated value exceeds size of int') {
-                die($engine::class . ': nextInt: failure: {$e->getMesasge()}');
-                throw $e;
+                die($engine::class . ": nextInt: failure: {$e->getMessage()}");
             }
         }
     }
@@ -51,7 +50,7 @@ foreach ($engines as $engine) {
     for ($i = 0; $i < 1000; $i++) {
         $length = \random_int(1, 1024);
         if (\strlen($randomizer->getBytes($length)) !== $length) {
-            die($engine::class . ': getBytes: failure.');
+            die($engine::class . ': getBytes: failure');
         }
     }
 
@@ -65,14 +64,14 @@ foreach ($engines as $engine) {
             }
         }
 
-        die($engine::class . ': shuffleArray: failure.');
+        die($engine::class . ': shuffleArray: failure');
     })();
 
     // shuffleBytes
     $string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
     $shuffled_string = $randomizer->shuffleBytes($string);
     if ($string === $shuffled_string) {
-        die($engine::class . ': shuffleBytes: failure.');
+        die($engine::class . ': shuffleBytes: failure');
     }
 }
 
