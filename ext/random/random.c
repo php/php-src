@@ -119,6 +119,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > 50) {
+			zend_throw_exception(spl_ce_RuntimeException, "Failed to generate an acceptable random number in 50 attempts", 0);
 			status->last_unsafe = true;
 			return 0;
 		}
@@ -175,6 +176,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > 50) {
+			zend_throw_exception(spl_ce_RuntimeException, "Failed to generate an acceptable random number in 50 attempts", 0);
 			status->last_unsafe = true;
 			return 0;
 		}

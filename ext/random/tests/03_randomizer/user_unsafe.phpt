@@ -143,7 +143,12 @@ string(2) "ff"
 
 -------
 
-RuntimeException: Random number generation failed in %s:%d
+RuntimeException: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleArray(Array)
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}
