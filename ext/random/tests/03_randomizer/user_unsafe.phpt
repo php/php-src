@@ -29,7 +29,7 @@ foreach ([
 
     try {
         var_dump((new Randomizer(new $engine()))->getInt(0, 123));
-    } catch (\RuntimeException $e) {
+    } catch (Throwable $e) {
         echo $e, PHP_EOL;
     }
     
@@ -37,7 +37,7 @@ foreach ([
     
     try {
         var_dump(bin2hex((new Randomizer(new $engine()))->getBytes(1)));
-    } catch (\RuntimeException $e) {
+    } catch (Throwable $e) {
         echo $e, PHP_EOL;
     }
     
@@ -45,7 +45,7 @@ foreach ([
     
     try {
         var_dump((new Randomizer(new $engine()))->shuffleArray(\range(1, 10)));
-    } catch (\RuntimeException $e) {
+    } catch (Throwable $e) {
         echo $e, PHP_EOL;
     }
     
@@ -53,7 +53,7 @@ foreach ([
     
     try {
         var_dump((new Randomizer(new $engine()))->shuffleBytes('foobar'));
-    } catch (\RuntimeException $e) {
+    } catch (Throwable $e) {
         echo $e, PHP_EOL;
     }
 
