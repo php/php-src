@@ -779,10 +779,6 @@ PHP_FUNCTION(random_int)
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(random)
 {
-#if defined(ZTS) && defined(COMPILE_DL_RANDOM)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
-
 	random_globals->random_fd = -1;
 
 	random_globals->combined_lcg = php_random_status_alloc(&php_random_algo_combinedlcg, true);
