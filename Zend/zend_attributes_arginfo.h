@@ -125,7 +125,7 @@ static zend_class_entry *register_class_Attribute(void)
 	zend_declare_typed_property(class_entry, property_flags_name, &property_flags_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_flags_name);
 
-	zend_string *attribute_name_Attribute_class_Attribute = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_Attribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Attribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Attribute, 1);
 	zend_string_release(attribute_name_Attribute_class_Attribute);
 	zval attribute_Attribute_class_Attribute_arg0;
@@ -143,7 +143,7 @@ static zend_class_entry *register_class_ReturnTypeWillChange(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
-	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange, 1);
 	zend_string_release(attribute_name_Attribute_class_ReturnTypeWillChange);
 	zval attribute_Attribute_class_ReturnTypeWillChange_arg0;
@@ -161,7 +161,7 @@ static zend_class_entry *register_class_AllowDynamicProperties(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
-	zend_string *attribute_name_Attribute_class_AllowDynamicProperties = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_AllowDynamicProperties = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_AllowDynamicProperties = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_AllowDynamicProperties, 1);
 	zend_string_release(attribute_name_Attribute_class_AllowDynamicProperties);
 	zval attribute_Attribute_class_AllowDynamicProperties_arg0;
@@ -179,7 +179,7 @@ static zend_class_entry *register_class_SensitiveParameter(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_Attribute_class_SensitiveParameter = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_SensitiveParameter = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_SensitiveParameter = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_SensitiveParameter, 1);
 	zend_string_release(attribute_name_Attribute_class_SensitiveParameter);
 	zval attribute_Attribute_class_SensitiveParameter_arg0;

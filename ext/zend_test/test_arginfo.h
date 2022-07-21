@@ -401,7 +401,7 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 #if (PHP_VERSION_ID >= 80200)
-	zend_string *attribute_name_Attribute_class_ZendTestAttribute = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ZendTestAttribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ZendTestAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttribute, 1);
 	zend_string_release(attribute_name_Attribute_class_ZendTestAttribute);
 	zval attribute_Attribute_class_ZendTestAttribute_arg0;
@@ -427,7 +427,7 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 	zend_string_release(property_parameter_name);
 
 #if (PHP_VERSION_ID >= 80200)
-	zend_string *attribute_name_Attribute_class_ZendTestParameterAttribute = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_string *attribute_name_Attribute_class_ZendTestParameterAttribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ZendTestParameterAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestParameterAttribute, 1);
 	zend_string_release(attribute_name_Attribute_class_ZendTestParameterAttribute);
 	zval attribute_Attribute_class_ZendTestParameterAttribute_arg0;
