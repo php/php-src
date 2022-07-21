@@ -4334,7 +4334,7 @@ static int accel_preload(const char *config, bool in_child)
 
 	orig_map_ptr_last = CG(map_ptr_last);
 
-	/* Compile and execute proloading script */
+	/* Compile and execute preloading script */
 	zend_stream_init_filename(&file_handle, (char *) config);
 
 	preload_scripts = emalloc(sizeof(HashTable));
