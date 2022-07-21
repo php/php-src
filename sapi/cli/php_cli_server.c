@@ -108,6 +108,8 @@ static pid_t	*php_cli_server_workers;
 static zend_long php_cli_server_workers_max;
 #endif
 
+static zend_string* cli_concat_persistent_zstr_with_char(zend_string *old_str, const char *at, size_t length);
+
 typedef struct php_cli_server_poller {
 	fd_set rfds, wfds;
 	struct {
@@ -119,8 +121,7 @@ typedef struct php_cli_server_poller {
 typedef struct php_cli_server_request {
 	enum php_http_method request_method;
 	int protocol_version;
-	char *request_uri;
-	size_t request_uri_len;
+	zend_string *request_uri;
 	char *vpath;
 	size_t vpath_len;
 	char *path_translated;
@@ -702,8 +703,8 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 		zend_string_release_ex(tmp, /* persistent */ false);
 	}
 
-	sapi_cli_server_register_known_var_char(track_vars_array,
-		"REQUEST_URI", strlen("REQUEST_URI"), client->request.request_uri, client->request.request_uri_len);
+	sapi_cli_server_register_known_var_str(track_vars_array,
+		"REQUEST_URI", strlen("REQUEST_URI"), client->request.request_uri);
 	sapi_cli_server_register_known_var_char(track_vars_array,
 		"REQUEST_METHOD", strlen("REQUEST_METHOD"),
 		SG(request_info).request_method, strlen(SG(request_info).request_method));
@@ -1191,7 +1192,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 
 	/* basic */
 	spprintf(&basic_buf, 0, "%s [%d]: %s %s", ZSTR_VAL(client->addr_str), status,
-		php_http_method_str(client->request.request_method), client->request.request_uri);
+		php_http_method_str(client->request.request_method), ZSTR_VAL(client->request.request_uri));
 	if (!basic_buf) {
 		return;
 	}
@@ -1369,7 +1370,6 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 {
 	req->protocol_version = 0;
 	req->request_uri = NULL;
-	req->request_uri_len = 0;
 	req->vpath = NULL;
 	req->vpath_len = 0;
 	req->path_translated = NULL;
@@ -1390,7 +1390,7 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 {
 	if (req->request_uri) {
-		pefree(req->request_uri, 1);
+		zend_string_release_ex(req->request_uri, /* persistent */ true);
 	}
 	if (req->vpath) {
 		pefree(req->vpath, 1);
@@ -1642,15 +1642,13 @@ static int php_cli_server_client_read_request_on_url(php_http_parser *parser, co
 	php_cli_server_client *client = parser->data;
 	if (EXPECTED(client->request.request_uri == NULL)) {
 		client->request.request_method = parser->method;
-		client->request.request_uri = pestrndup(at, length, 1);
-		client->request.request_uri_len = length;
+		client->request.request_uri = zend_string_init(at, length, /* persistent */ true);
+        GC_MAKE_PERSISTENT_LOCAL(client->request.request_uri);
 	} else {
 		ZEND_ASSERT(client->request.request_method == parser->method);
 		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
-		client->request.request_uri = perealloc(client->request.request_uri, client->request.request_uri_len + length + 1, 1);
-		memcpy(client->request.request_uri + client->request.request_uri_len, at, length);
-		client->request.request_uri_len += length;
-		client->request.request_uri[client->request.request_uri_len] = '\0';
+		/* Extend URI, append content to it */
+        client->request.request_uri = cli_concat_persistent_zstr_with_char(client->request.request_uri, at, length);
 	}
 	return 0;
 }
@@ -1901,7 +1899,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 
 	request_info->request_method = php_http_method_str(client->request.request_method);
 	request_info->proto_num = client->request.protocol_version;
-	request_info->request_uri = client->request.request_uri;
+	request_info->request_uri = ZSTR_VAL(client->request.request_uri);
 	request_info->path_translated = client->request.path_translated;
 	request_info->query_string = client->request.query_string;
 	request_info->content_length = client->request.content_len;
@@ -1982,7 +1980,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 	php_cli_server_content_sender_ctor(&client->content_sender);
 	client->content_sender_initialized = true;
 
-	escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) client->request.request_uri, client->request.request_uri_len, 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
+	escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
 	{
 		static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
