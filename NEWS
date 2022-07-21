@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     different type). (Derick)
   . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
 
+- DBA:
+  . Fixed LMDB driver memory leak on DB creation failure (Girgias)
+
 - Random:
   . Fixed bug GH-9067 (random extension is not thread safe). (cmb)
 
