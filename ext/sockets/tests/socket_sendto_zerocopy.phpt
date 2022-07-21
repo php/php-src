@@ -4,8 +4,12 @@ Test socket_sendto with MSG_ZEROCOPY
 sockets
 --SKIPIF--
 <?php
+$arch = php_uname('m');
 if (!defined("SO_ZEROCOPY")) {
     die('skip SO_ZEROCOPY');
+}
+if (strpos($arch, 'ppc') !== false || strpos($arch, 'powerpc') !== false) {
+    die('skip not for powerpc arch');
 }
 --FILE--
 <?php
