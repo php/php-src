@@ -1401,13 +1401,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_ATTRIBUTE);
 }
 
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
+<ST_IN_SCRIPTING>("entrega"{WHITESPACE}"desde"|"yield"{WHITESPACE}"from")[^a-zA-Z0-9_\x80-\xff] {
 	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN_WITH_IDENT(T_YIELD_FROM);
 }
 
-<ST_IN_SCRIPTING>"yield" {
+<ST_IN_SCRIPTING>("entrega"|"yield") {
 	RETURN_TOKEN_WITH_IDENT(T_YIELD);
 }
 
@@ -1479,7 +1479,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_ENDDECLARE);
 }
 
-<ST_IN_SCRIPTING>"instanceof" {
+<ST_IN_SCRIPTING>("es"{TABS_AND_SPACES}"instancia"{TABS_AND_SPACES}"de"|"instanceof") {
 	RETURN_TOKEN_WITH_IDENT(T_INSTANCEOF);
 }
 
@@ -1523,7 +1523,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_ECHO);
 }
 
-<ST_IN_SCRIPTING>"print" {
+<ST_IN_SCRIPTING>("muestra"|"print") {
 	RETURN_TOKEN_WITH_IDENT(T_PRINT);
 }
 
@@ -1605,11 +1605,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_COALESCE);
 }
 
-<ST_IN_SCRIPTING>"new" {
+<ST_IN_SCRIPTING>("construye"|"nuevo"|"nueva"|"new") {
 	RETURN_TOKEN_WITH_IDENT(T_NEW);
 }
 
-<ST_IN_SCRIPTING>"clone" {
+<ST_IN_SCRIPTING>("clona"|"clone") {
 	RETURN_TOKEN_WITH_IDENT(T_CLONE);
 }
 
@@ -1653,23 +1653,23 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_UNSET_CAST);
 }
 
-<ST_IN_SCRIPTING>"eval" {
+<ST_IN_SCRIPTING>("evalúa"|"eval") {
 	RETURN_TOKEN_WITH_IDENT(T_EVAL);
 }
 
-<ST_IN_SCRIPTING>"include" {
+<ST_IN_SCRIPTING>("incluye"|"include") {
 	RETURN_TOKEN_WITH_IDENT(T_INCLUDE);
 }
 
-<ST_IN_SCRIPTING>"include_once" {
+<ST_IN_SCRIPTING>("incluye"{TABS_AND_SPACES}"una"{TABS_AND_SPACES}"vez"|"include_once") {
 	RETURN_TOKEN_WITH_IDENT(T_INCLUDE_ONCE);
 }
 
-<ST_IN_SCRIPTING>"require" {
+<ST_IN_SCRIPTING>("necesito"|"require") {
 	RETURN_TOKEN_WITH_IDENT(T_REQUIRE);
 }
 
-<ST_IN_SCRIPTING>"require_once" {
+<ST_IN_SCRIPTING>("necesito"{TABS_AND_SPACES}"una"{TABS_AND_SPACES}"vez"|"require_once") {
 	RETURN_TOKEN_WITH_IDENT(T_REQUIRE_ONCE);
 }
 
@@ -1855,15 +1855,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_BOOLEAN_AND);
 }
 
-<ST_IN_SCRIPTING>"OR" {
+<ST_IN_SCRIPTING>("O"|"OR") {
 	RETURN_TOKEN_WITH_IDENT(T_LOGICAL_OR);
 }
 
-<ST_IN_SCRIPTING>"AND" {
+<ST_IN_SCRIPTING>("Y"|"AND") {
 	RETURN_TOKEN_WITH_IDENT(T_LOGICAL_AND);
 }
 
-<ST_IN_SCRIPTING>"XOR" {
+<ST_IN_SCRIPTING>("O"{TABS_AND_SPACES}"EXCLUSIVAMENTE"|"XOR") {
 	RETURN_TOKEN_WITH_IDENT(T_LOGICAL_XOR);
 }
 
