@@ -14,7 +14,7 @@
    |          Zeev Suraski <zeev@php.net>                                 |
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
-   |          Go Kudo <g-kudo@colopl.co.jp>                               |
+   |          Go Kudo <zeriyoshi@php.net>                                 |
    |                                                                      |
    | Based on code from: Richard J. Wagner <rjwagner@writeme.com>         |
    |                     Makoto Matsumoto <matumoto@math.keio.ac.jp>      |

@@ -16,7 +16,7 @@
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
    |          Sammy Kaye Powers <me@sammyk.me>                            |
-   |          Go Kudo <g-kudo@colopl.co.jp>                               |
+   |          Go Kudo <zeriyoshi@php.net>                                 |
    |                                                                      |
    | Based on code from: Richard J. Wagner <rjwagner@writeme.com>         |
    |                     Makoto Matsumoto <matumoto@math.keio.ac.jp>      |
