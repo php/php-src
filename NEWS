@@ -5,8 +5,13 @@ PHP                                                                        NEWS
 - Core:
   . Fixed --CGI-- support of run-tests.php. (cmb)
 
+- Date:
+  . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of
+    different type). (Derick)
+  . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
+
 - MBString:
-  . Fix bug GH-9008 (mb_detect_encoding(): wrong results with null $encodings).
+  . Fixed bug GH-9008 (mb_detect_encoding(): wrong results with null $encodings).
     (cmb)
 
 04 Aug 2022, PHP 8.1.9
