@@ -321,7 +321,7 @@ PHPAPI zend_long php_random_range(const php_random_algo *algo, php_random_status
 {
 	zend_ulong umax = (zend_ulong) max - (zend_ulong) min;
 
-	if (PHP_RANDOM_ALGO_IS_DYNAMIC(algo) || algo->generate_size > sizeof(uint32_t) || umax > UINT32_MAX) {
+	if (algo->generate_size == 0 || algo->generate_size > sizeof(uint32_t) || umax > UINT32_MAX) {
 		return (zend_long) (rand_range64(algo, status, umax) + min);
 	}
 

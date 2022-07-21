@@ -245,8 +245,6 @@ extern PHPAPI const php_random_algo php_random_algo_xoshiro256starstar;
 extern PHPAPI const php_random_algo php_random_algo_secure;
 extern PHPAPI const php_random_algo php_random_algo_user;
 
-# define PHP_RANDOM_ALGO_IS_DYNAMIC(algo)	((algo)->generate_size == 0)
-
 typedef struct _php_random_engine {
 	const php_random_algo *algo;
 	php_random_status *status;
