@@ -85,14 +85,18 @@ static zend_object_handlers random_randomizer_object_handlers;
 static inline uint32_t rand_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax)
 {
 	uint32_t result, limit, r;
-	size_t total_size = 0;
+	size_t total_size = 0, shift_size = 0;
 	uint32_t count = 0;
 
 	result = 0;
 	total_size = 0;
 	do {
 		r = algo->generate(status);
-		result = (result << (8 * status->last_generated_size)) | r;
+		shift_size = (8 * status->last_generated_size);
+		if ((8 * sizeof(uint32_t)) < shift_size) {
+			shift_size = 0;
+		}
+		result = (result << shift_size) | r;
 		total_size += status->last_generated_size;
 		if (status->last_unsafe) {
 			return 0;
@@ -127,7 +131,11 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 		total_size = 0;
 		do {
 			r = algo->generate(status);
-			result = (result << (8 * status->last_generated_size)) | r;
+			shift_size = (8 * status->last_generated_size);
+			if ((8 * sizeof(uint32_t)) < shift_size) {
+				shift_size = 0;
+			}
+			result = (result << shift_size) | r;
 			total_size += status->last_generated_size;
 			if (status->last_unsafe) {
 				return 0;
