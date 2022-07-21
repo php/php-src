@@ -22,7 +22,7 @@ require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $db_name = 'dba_gdbm.db';
 cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
 === RUNNING WITH FILE LOCK ===
 
 Notice: dba_open(): Handler gdbm does locking internally in %s on line %d
