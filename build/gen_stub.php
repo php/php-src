@@ -2382,7 +2382,7 @@ class AttributeInfo {
         if (isset($knowns[$escapedAttributeName])) {
             $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, ZSTR_KNOWN({$knowns[$escapedAttributeName]}), " . count($this->args) . ");\n";
         } else {
-            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
+            $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init_interned(\"" . addcslashes($this->class, "\\") . "\", sizeof(\"" . addcslashes($this->class, "\\") . "\") - 1, 1);\n";
             $code .= "\t" . ($this->args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($this->args) . ");\n";
             $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
         }
