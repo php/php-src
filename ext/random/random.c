@@ -776,6 +776,35 @@ PHP_FUNCTION(random_int)
 }
 /* }}} */
 
+/* {{{ PHP_GINIT_FUNCTION */
+static PHP_GINIT_FUNCTION(random)
+{
+	random_globals->random_fd = -1;
+
+	random_globals->combined_lcg = php_random_status_alloc(&php_random_algo_combinedlcg, true);
+	random_globals->combined_lcg_seeded = false;
+
+	random_globals->mt19937 = php_random_status_alloc(&php_random_algo_mt19937, true);
+	random_globals->mt19937_seeded = false;
+}
+/* }}} */
+
+/* {{{ PHP_GSHUTDOWN_FUNCTION */
+static PHP_GSHUTDOWN_FUNCTION(random)
+{
+	if (random_globals->random_fd > 0) {
+		close(random_globals->random_fd);
+		random_globals->random_fd = -1;
+	}
+
+	php_random_status_free(random_globals->combined_lcg, true);
+	random_globals->combined_lcg = NULL;
+
+	php_random_status_free(random_globals->mt19937, true);
+	random_globals->mt19937 = NULL;
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(random)
 {
@@ -828,32 +857,6 @@ PHP_MINIT_FUNCTION(random)
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MT_RAND_PHP",     MT_RAND_PHP, CONST_CS | CONST_PERSISTENT);
 
-	RANDOM_G(random_fd) = -1;
-
-	RANDOM_G(combined_lcg) = php_random_status_alloc(&php_random_algo_combinedlcg, true);
-	RANDOM_G(combined_lcg_seeded) = false;
-
-	RANDOM_G(mt19937) = php_random_status_alloc(&php_random_algo_mt19937, true);
-	RANDOM_G(mt19937_seeded) = false;
-
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION */
-PHP_MSHUTDOWN_FUNCTION(random)
-{
-	if (RANDOM_G(random_fd) > 0) {
-		close(RANDOM_G(random_fd));
-		RANDOM_G(random_fd) = -1;
-	}
-
-	php_random_status_free(RANDOM_G(combined_lcg), true);
-	RANDOM_G(combined_lcg) = NULL;
-
-	php_random_status_free(RANDOM_G(mt19937), true);
-	RANDOM_G(mt19937) = NULL;
-
 	return SUCCESS;
 }
 /* }}} */
@@ -861,10 +864,6 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(random)
 {
-#if defined(ZTS) && defined(COMPILE_DL_RANDOM)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
-
 	RANDOM_G(combined_lcg_seeded) = false;
 	RANDOM_G(mt19937_seeded) = false;
 
@@ -878,14 +877,14 @@ zend_module_entry random_module_entry = {
 	"random",					/* Extension name */
 	ext_functions,				/* zend_function_entry */
 	PHP_MINIT(random),			/* PHP_MINIT - Module initialization */
-	PHP_MSHUTDOWN(random),		/* PHP_MSHUTDOWN - Module shutdown */
+	NULL,						/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(random),			/* PHP_RINIT - Request initialization */
 	NULL,						/* PHP_RSHUTDOWN - Request shutdown */
 	NULL,						/* PHP_MINFO - Module info */
 	PHP_VERSION,				/* Version */
 	PHP_MODULE_GLOBALS(random),	/* ZTS Module globals */
-	NULL,						/* PHP_GINIT - Global initialization */
-	NULL,						/* PHP_GSHUTDOWN - Global shutdown */
+	PHP_GINIT(random),			/* PHP_GINIT - Global initialization */
+	PHP_GSHUTDOWN(random),		/* PHP_GSHUTDOWN - Global shutdown */
 	NULL,						/* Post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
