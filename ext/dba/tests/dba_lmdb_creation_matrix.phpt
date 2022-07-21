@@ -2,8 +2,6 @@
 DBA LMDB opening matrix of combination
 --EXTENSIONS--
 dba
---XFAIL--
-Memory leak present
 --SKIPIF--
 <?php
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
