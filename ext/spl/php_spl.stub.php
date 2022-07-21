@@ -50,5 +50,4 @@ function iterator_apply(Traversable $iterator, callable $callback, ?array $args 
 
 function iterator_count(iterable $iterator): int {}
 
-/** @refcount 1 */
 function iterator_to_array(iterable $iterator, bool $preserve_keys = true): array {}
