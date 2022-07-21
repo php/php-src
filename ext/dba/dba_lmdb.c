@@ -62,6 +62,8 @@ DBA_OPEN_FUNC(lmdb)
 
 	rc = mdb_env_open(env, info->path, flags, mode);
 	if (rc) {
+		/* If this function [mdb_env_open()] fails, mdb_env_close() must be called to discard the MDB_env handle.
+		 * http://www.lmdb.tech/doc/group__mdb.html#ga32a193c6bf4d7d5c5d579e71f22e9340 */
 		mdb_env_close(env);
 		*error = mdb_strerror(rc);
 		return FAILURE;
