@@ -10,6 +10,9 @@ PHP                                                                        NEWS
     different type). (Derick)
   . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
 
+- DBA:
+  . Fixed LMDB driver memory leak on DB creation failure (Girgias)
+
 - MBString:
   . Fixed bug GH-9008 (mb_detect_encoding(): wrong results with null $encodings).
     (cmb)
