@@ -26,25 +26,77 @@
 #include "timelib_private.h"
 #include <math.h>
 
-timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
+static void swap_times(timelib_time **one, timelib_time **two, timelib_rel_time *rt)
+{
+	timelib_time *swp;
+
+	swp = *two;
+	*two = *one;
+	*one = swp;
+	rt->invert = 1;
+}
+
+static void swap_if_negative(timelib_rel_time *rt)
+{
+	if (rt->y == 0 && rt->m == 0 && rt->d == 0 && rt->h == 0 && rt->i == 0 && rt->s == 0 && rt->us == 0) {
+		return;
+	}
+	if (rt->y >= 0 && rt->m >= 0 && rt->d >= 0 && rt->h >= 0 && rt->i >= 0 && rt->s >= 0 && rt->us >= 0) {
+		return;
+	}
+
+	rt->invert = 1 - rt->invert;
+	rt->y = 0 - rt->y;
+	rt->m = 0 - rt->m;
+	rt->d = 0 - rt->d;
+	rt->h = 0 - rt->h;
+	rt->i = 0 - rt->i;
+	rt->s = 0 - rt->s;
+	rt->us = 0 - rt->us;
+}
+
+static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_time *rt)
+{
+	/* Check whether date/times need to be inverted. If both times are
+	 * TIMELIB_ZONETYPE_ID times with the same TZID, we use the y-s + us fields. */
+	if (
+		(*one)->zone_type == TIMELIB_ZONETYPE_ID &&
+		(*two)->zone_type == TIMELIB_ZONETYPE_ID &&
+		(strcmp((*one)->tz_info->name, (*two)->tz_info->name) != 0)
+	) {
+		if (
+			((*one)->y > (*two)->y) ||
+			((*one)->y == (*two)->y && (*one)->m > (*two)->m) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d > (*two)->d) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h > (*two)->h) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i > (*two)->i) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i == (*two)->i && (*one)->s > (*two)->s) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i == (*two)->i && (*one)->s == (*two)->s && (*one)->us > (*two)->us)
+		) {
+			swap_times(one, two, rt);
+		}
+		return;
+	}
+
+	/* Fall back to using the SSE instead to rearrange */
+	if (
+		((*one)->sse > (*two)->sse) ||
+		((*one)->sse == (*two)->sse && (*one)->us > (*two)->us)
+	) {
+		swap_times(one, two, rt);
+	}
+}
+
+static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time *two)
 {
 	timelib_rel_time *rt;
-	timelib_time *swp;
 	timelib_sll dst_corr = 0, dst_h_corr = 0, dst_m_corr = 0;
 	timelib_time_offset *trans = NULL;
 
-
 	rt = timelib_rel_time_ctor();
 	rt->invert = 0;
-	if (
-		(one->sse > two->sse) ||
-		(one->sse == two->sse && one->us > two->us)
-	) {
-		swp = two;
-		two = one;
-		one = swp;
-		rt->invert = 1;
-	}
+
+	sort_old_to_new(&one, &two, rt);
 
 	/* Calculate correction for UTC offset changes between first and second SSE */
 	dst_corr = two->z - one->z;
@@ -64,10 +116,10 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	/* Fall Back: Cater for transition period, where rt->invert is 0, but there are negative numbers */
 	if (one->dst == 1 && two->dst == 0) {
 		/* First for two "Type 3" times */
-		if (one->zone_type == 3 && two->zone_type == 3) {
+		if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID) {
 			trans = timelib_get_time_zone_info(two->sse, two->tz_info);
 			if (trans) {
-				if (one->sse >= trans->transition_time + dst_corr && one->sse < trans->transition_time) {
+				if (one->sse < trans->transition_time && one->sse >= trans->transition_time + dst_corr) {
 					timelib_sll flipped = SECS_PER_HOUR + (rt->i * 60) + (rt->s);
 					rt->h = flipped / SECS_PER_HOUR;
 					rt->i = (flipped - rt->h * SECS_PER_HOUR) / 60;
@@ -89,8 +141,8 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
-	/* Do corrections for "Type 3" times */
-	if (one->zone_type == 3 && two->zone_type == 3 && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
+	/* Do corrections for "Type 3" times with the same TZID */
+	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
 		if (one->dst == 1 && two->dst == 0) { /* Fall Back */
 			if (two->tz_info) {
 				trans = timelib_get_time_zone_info(two->sse, two->tz_info);
@@ -129,13 +181,10 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 			}
 		}
 	} else {
-		/* Then for all the others */
-		if (one->zone_type == 3 && two->zone_type == 3) {
-			rt->h -= dst_h_corr;
-		} else {
-			rt->h -= dst_h_corr + (two->dst - one->dst);
-		}
+		rt->h -= dst_h_corr;
 		rt->i -= dst_m_corr;
+
+		swap_if_negative(rt);
 
 		timelib_do_rel_normalize(rt->invert ? one : two, rt);
 	}
@@ -143,6 +192,40 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	if (trans) {
 		timelib_time_offset_dtor(trans);
 	}
+
+	return rt;
+}
+
+timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
+{
+	timelib_rel_time *rt;
+
+	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID) {
+		return timelib_diff_with_tzid(one, two);
+	}
+
+	rt = timelib_rel_time_ctor();
+	rt->invert = 0;
+
+	sort_old_to_new(&one, &two, rt);
+
+	rt->y = two->y - one->y;
+	rt->m = two->m - one->m;
+	rt->d = two->d - one->d;
+	rt->h = two->h - one->h;
+	if (one->zone_type != TIMELIB_ZONETYPE_ID) {
+		rt->h = rt->h + one->dst;
+	}
+	if (two->zone_type != TIMELIB_ZONETYPE_ID) {
+		rt->h = rt->h - two->dst;
+	}
+	rt->i = two->i - one->i;
+	rt->s = two->s - one->s - two->z + one->z;
+	rt->us = two->us - one->us;
+
+	rt->days = timelib_diff_days(one, two);
+
+	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
 	return rt;
 }

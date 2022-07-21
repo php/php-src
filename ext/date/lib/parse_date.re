@@ -909,6 +909,7 @@ timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int
 		offset = timelib_lookup_abbr(ptr, dst, &tz_abbr, &found);
 		if (found) {
 			t->zone_type = TIMELIB_ZONETYPE_ABBR;
+			t->dst = *dst;
 			timelib_time_tz_abbr_update(t, tz_abbr);
 		}
 
