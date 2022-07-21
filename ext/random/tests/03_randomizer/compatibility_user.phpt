@@ -43,9 +43,6 @@ try {
         }
     }
 } catch (\RuntimeException $e) {
-    if (\PHP_INT_SIZE >= 8) {
-        throw $e;
-    }
     if ($e->getMessage() !== 'Generated value exceeds size of int') {
         throw $e;
     }
