@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Random:
   . Fixed bug GH-9067 (random extension is not thread safe). (cmb)
   . Fixed bug GH-9055 (segmentation fault if user engine throws). (timwolla)
+  . Fixed bug GH-9066 (signed integer overflow). (zeriyoshi)
 
 21 Jul 2022, PHP 8.2.0beta1
 
@@ -62,7 +63,6 @@ PHP                                                                        NEWS
 
 - Random:
   . Added new random extension. (Go Kudo)
-  . Fixed bug GH-9066 (signed integer overflow). (zeriyoshi)
 
 - SPL:
   . Widen iterator_to_array() and iterator_count()'s $iterator parameter to
