@@ -10,7 +10,7 @@ check_skip('inifile');
 --FILE--
 <?php
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
-$name = 'array_keys_inifle.db';
+$name = __DIR__ . '/array_keys_basic.db';
 
 $db = dba_open($name, 'c', 'inifile');
 
@@ -28,7 +28,7 @@ dba_close($db);
 --CLEAN--
 <?php
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
-$db_name = 'array_keys_basic.db';
+$db_name = __DIR__ . '/array_keys_basic.db';
 cleanup_standard_db($db_name);
 ?>
 --EXPECTF--

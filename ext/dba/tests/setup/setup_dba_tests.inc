@@ -43,8 +43,6 @@ enum LockFlag: string {
     case NoLock = '-';
 }
 
-// TODO Test which opens a NON DB file to check for memory leaks (at least LMDB has)
-
 function set_up_db_ex(string $handler, string $name, LockFlag $lock, bool $persistent = false) {
     $lock_flag = $lock->value;
     // Open file in creation/truncation mode
