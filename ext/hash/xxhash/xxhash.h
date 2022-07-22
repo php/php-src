@@ -2934,6 +2934,7 @@ enum XXH_VECTOR_TYPE /* fake enum */ {
   && defined(__OPTIMIZE__) && !defined(__OPTIMIZE_SIZE__) /* respect -O0 and -Os */
 #  pragma GCC push_options
 #  pragma GCC optimize("-O2")
+#  pragma GCC optimize("no-reorder-blocks-and-partition")
 #endif
 
 
