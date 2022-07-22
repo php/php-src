@@ -134,6 +134,7 @@ PHPAPI time_t php_time(void)
  *  zone            =       (( "+" / "-" ) 4DIGIT)
  */
 #define DATE_FORMAT_RFC2822  "D, d M Y H:i:s O"
+
 /*
  * RFC3339, Section 5.6: http://www.ietf.org/rfc/rfc3339.txt
  *  date-fullyear   = 4DIGIT
@@ -156,7 +157,41 @@ PHPAPI time_t php_time(void)
  */
 #define DATE_FORMAT_RFC3339  "Y-m-d\\TH:i:sP"
 
+/*
+ * This format does not technically match the ISO 8601 standard, as it does not
+ * use : in the UTC offset format specifier. This is kept for BC reasons. The
+ * DATE_FORMAT_ISO8601_EXPANDED format does correct this, as well as adding
+ * support for years out side of the traditional 0000-9999 range.
+ */
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
+
+/* ISO 8601:2004(E)
+ *
+ * Section 3.5 Expansion:
+ * By mutual agreement of the partners in information interchange, it is
+ * permitted to expand the component identifying the calendar year, which is
+ * otherwise limited to four digits. This enables reference to dates and times
+ * in calendar years outside the range supported by complete representations,
+ * i.e. before the start of the year [0000] or after the end of the year
+ * [9999]."
+ *
+ * Section 4.1.2.4 Expanded representations:
+ * If, by agreement, expanded representations are used, the formats shall be as
+ * specified below. The interchange parties shall agree the additional number of
+ * digits in the time element year. In the examples below it has been agreed to
+ * expand the time element year with two digits.
+ * Extended format: ±YYYYY-MM-DD
+ * Example: +001985-04-12
+ *
+ * PHP's year expansion digits are variable.
+ */
+#define DATE_FORMAT_ISO8601_EXPANDED    "X-m-d\\TH:i:sP"
+
+/* Internal Only
+ * This format only extends the year when needed, keeping the 'P' format with
+ * colon for UTC offsets
+ */
+#define DATE_FORMAT_ISO8601_LARGE_YEAR  "x-m-d\\TH:i:sP"
 
 /*
  * RFC3339, Appendix A: http://www.ietf.org/rfc/rfc3339.txt
@@ -659,6 +694,8 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 			case 'L': length = slprintf(buffer, sizeof(buffer), "%d", timelib_is_leap((int) t->y)); break;
 			case 'y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) (t->y % 100)); break;
 			case 'Y': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
+			case 'x': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : (t->y >= 10000 ? "+" : ""), php_date_llabs((timelib_sll) t->y)); break;
+			case 'X': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "+", php_date_llabs((timelib_sll) t->y)); break;
 
 			/* time */
 			case 'a': length = slprintf(buffer, sizeof(buffer), "%s", t->h >= 12 ? "pm" : "am"); break;
@@ -1810,7 +1847,7 @@ static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 	zval zv;
 
 	/* first we add the date and time in ISO format */
-	ZVAL_STR(&zv, date_format("Y-m-d H:i:s.u", sizeof("Y-m-d H:i:s.u")-1, dateobj->time, 1));
+	ZVAL_STR(&zv, date_format("x-m-d H:i:s.u", sizeof("x-m-d H:i:s.u")-1, dateobj->time, 1));
 	zend_hash_str_update(props, "date", sizeof("date")-1, &zv);
 
 	/* then we add the timezone name (or similar) */
@@ -3800,7 +3837,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_nominal() \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     timestamp_begin); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, timestamp_begin, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[0].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx]); \
@@ -3809,7 +3846,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add(i,ts) \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
@@ -3818,7 +3855,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_by_index(i,ts) \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[i].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
@@ -3827,7 +3864,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_from_tto(to,ts) \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", (to)->offset); \
 		add_assoc_bool(&element, "isdst",  (to)->is_dst); \
 		add_assoc_string(&element, "abbr", (to)->abbr); \

@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     different type). (Derick)
   . Fixed bug GH-8964 (DateTime object comparison after applying delta less
     than 1 second). (Derick)
+  . Fixed bug #75035 (Datetime fails to unserialize "extreme" dates).
+    (Derick)
+  . Fixed bug #80483 (DateTime Object with 5-digit year can't unserialized).
+    (Derick)
   . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
 
 - DBA:
