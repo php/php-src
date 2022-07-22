@@ -42,6 +42,7 @@ enum pdo_param_type {
 	PDO_PARAM_INT = 1,
 	PDO_PARAM_STR = 2,
 	PDO_PARAM_LOB = 3,
+	PDO_PARAM_AUTO = 6,
 
 	/* get_col: Not supported (yet?) */
 	PDO_PARAM_STMT = 4, /* hierarchical result set */
@@ -58,9 +59,10 @@ enum pdo_param_type {
 	PDO_PARAM_STR_CHAR = 0x20000000,
 };
 
-#define PDO_PARAM_FLAGS			0xFFFF0000
+#define PDO_PARAM_FLAGS				0xFFFF0000
 
-#define PDO_PARAM_TYPE(x)		((x) & ~PDO_PARAM_FLAGS)
+#define PDO_PARAM_TYPE(x)			((x) & ~PDO_PARAM_FLAGS)
+#define PDO_PARAM_MAGIC_FLAGS(x)	((x) & ~0x0000FFFF)
 
 enum pdo_fetch_type {
 	PDO_FETCH_USE_DEFAULT,

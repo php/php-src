@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7dcba884671fd90b891fab7e3f0d4cc9a4ac76a1 */
+ * Stub hash: 660bd25c42e1cad1a2276b59888f75243c7f6391 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -144,6 +144,13 @@ static zend_class_entry *register_class_PDO(void)
 	zend_declare_class_constant_ex(class_entry, const_PARAM_STMT_name, &const_PARAM_STMT_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_PARAM_STMT_name);
 	ZEND_ASSERT(LONG_CONST(PDO_PARAM_STMT) == 4);
+
+	zval const_PARAM_AUTO_value;
+	ZVAL_LONG(&const_PARAM_AUTO_value, LONG_CONST(PDO_PARAM_AUTO));
+	zend_string *const_PARAM_AUTO_name = zend_string_init_interned("PARAM_AUTO", sizeof("PARAM_AUTO") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PARAM_AUTO_name, &const_PARAM_AUTO_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PARAM_AUTO_name);
+	ZEND_ASSERT(LONG_CONST(PDO_PARAM_AUTO) == 6);
 
 	zval const_PARAM_INPUT_OUTPUT_value;
 	ZVAL_LONG(&const_PARAM_INPUT_OUTPUT_value, LONG_CONST(PDO_PARAM_INPUT_OUTPUT));

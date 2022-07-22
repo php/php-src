@@ -37,6 +37,11 @@ class PDO
     public const PARAM_STMT = 4;
     /**
      * @var int
+     * @cvalue LONG_CONST(PDO_PARAM_AUTO)
+     */
+    public const PARAM_AUTO = 6;
+    /**
+     * @var int
      * @cvalue LONG_CONST(PDO_PARAM_INPUT_OUTPUT)
      */
     public const PARAM_INPUT_OUTPUT = UNKNOWN;

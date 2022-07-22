@@ -275,6 +275,20 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 		parameter = Z_REFVAL(param->parameter);
 	}
 
+	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_AUTO) {
+		if (Z_TYPE_P(parameter) == IS_NULL) {
+			param->param_type = PDO_PARAM_NULL | PDO_PARAM_MAGIC_FLAGS(param->param_type);
+		} else if (Z_TYPE_P(parameter) == IS_TRUE || Z_TYPE_P(parameter) == IS_FALSE) {
+			param->param_type = PDO_PARAM_BOOL | PDO_PARAM_MAGIC_FLAGS(param->param_type);
+		} else if(Z_TYPE_P(parameter) == IS_LONG) {
+			param->param_type = PDO_PARAM_INT | PDO_PARAM_MAGIC_FLAGS(param->param_type);
+		} else if(Z_TYPE_P(parameter) == IS_RESOURCE) {
+			param->param_type = PDO_PARAM_LOB | PDO_PARAM_MAGIC_FLAGS(param->param_type);
+		} else {
+			param->param_type = PDO_PARAM_STR | PDO_PARAM_MAGIC_FLAGS(param->param_type);
+		}
+	}
+
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !Z_ISNULL_P(parameter)) {
 		if (!try_convert_to_string(parameter)) {
 			return 0;
