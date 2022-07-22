@@ -63,7 +63,7 @@ PHP                                                                        NEWS
 - Random:
   . Added new random extension. (Go Kudo)
   . Fixed bug GH-9066 (signed integer overflow). (zeriyoshi)
-  . Fixed bug GH-9089 ()Memory leak when calling Randomizer::__construct() on an existing object). (zeriyoshi)
+  . Fixed bug GH-9089 (Memory leak when calling Randomizer::__construct() on an existing object). (zeriyoshi)
 
 - SPL:
   . Widen iterator_to_array() and iterator_count()'s $iterator parameter to
