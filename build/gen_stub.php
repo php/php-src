@@ -548,15 +548,17 @@ class SimpleType {
 class Type {
     /** @var SimpleType[] */
     public $types;
+    /** @var bool */
+    public $isIntersection = false;
 
     public static function fromNode(Node $node): Type {
-        if ($node instanceof Node\UnionType) {
+        if ($node instanceof Node\UnionType || $node instanceof Node\IntersectionType) {
             $nestedTypeObjects = array_map(['Type', 'fromNode'], $node->types);
             $types = [];
             foreach ($nestedTypeObjects as $typeObject) {
                 array_push($types, ...$typeObject->types);
             }
-            return new Type($types);
+            return new Type($types, ($node instanceof Node\IntersectionType));
         }
 
         if ($node instanceof Node\NullableType) {
@@ -564,7 +566,8 @@ class Type {
                 [
                     ...Type::fromNode($node->type)->types,
                     SimpleType::null(),
-                ]
+                ],
+                false
             );
         }
 
@@ -573,11 +576,12 @@ class Type {
                 [
                     SimpleType::fromString("Traversable"),
                     ArrayType::createGenericArray(),
-                ]
+                ],
+                false
             );
         }
 
-        return new Type([SimpleType::fromNode($node)]);
+        return new Type([SimpleType::fromNode($node)], false);
     }
 
     public static function fromString(string $typeString): self {
@@ -585,6 +589,7 @@ class Type {
         $simpleTypes = [];
         $simpleTypeOffset = 0;
         $inArray = false;
+        $isIntersection = false;
 
         $typeStringLength = strlen($typeString);
         for ($i = 0; $i < $typeStringLength; $i++) {
@@ -604,7 +609,8 @@ class Type {
                 continue;
             }
 
-            if ($char === "|") {
+            if ($char === "|" || $char === "&") {
+                $isIntersection = ($char === "&");
                 $simpleTypeName = trim(substr($typeString, $simpleTypeOffset, $i - $simpleTypeOffset));
 
                 $simpleTypes[] = SimpleType::fromString($simpleTypeName);
@@ -613,14 +619,15 @@ class Type {
             }
         }
 
-        return new Type($simpleTypes);
+        return new Type($simpleTypes, $isIntersection);
     }
 
     /**
      * @param SimpleType[] $types
      */
-    private function __construct(array $types) {
+    private function __construct(array $types, bool $isIntersection) {
         $this->types = $types;
+        $this->isIntersection = $isIntersection;
     }
 
     public function isScalar(): bool {
@@ -650,7 +657,8 @@ class Type {
                 function(SimpleType $type) {
                     return !$type->isNull();
                 }
-            )
+            ),
+            false
         );
     }
 
@@ -683,6 +691,7 @@ class Type {
         $optimizerTypes = [];
 
         foreach ($this->types as $type) {
+            // TODO Support for toOptimizerMask for intersection
             $optimizerTypes[] = $type->toOptimizerTypeMask();
         }
 
@@ -711,8 +720,9 @@ class Type {
 
     public function getTypeForDoc(DOMDocument $doc): DOMElement {
         if (count($this->types) > 1) {
+            $typeSort = $this->isIntersection ? "intersection" : "union";
             $typeElement = $doc->createElement('type');
-            $typeElement->setAttribute("class", "union");
+            $typeElement->setAttribute("class", $typeSort);
 
             foreach ($this->types as $type) {
                 $unionTypeElement = $doc->createElement('type', $type->name);
@@ -755,7 +765,8 @@ class Type {
             return 'mixed';
         }
 
-        return implode('|', array_map(
+        $char = $this->isIntersection ? '&' : '|';
+        return implode($char, array_map(
             function ($type) { return $type->name; },
             $this->types)
         );
@@ -2237,7 +2248,11 @@ class PropertyInfo extends VariableLike
 
                     $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
 
-                    $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_UNION(property_{$propertyName}_type_list, $typeMaskCode);\n";
+                    if ($this->type->isIntersection) {
+                        $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_INTERSECTION(property_{$propertyName}_type_list, $typeMaskCode);\n";
+                    } else {
+                        $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_UNION(property_{$propertyName}_type_list, $typeMaskCode);\n";
+                    }
                     $typeCode = "property_{$propertyName}_type";
                 } else {
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
