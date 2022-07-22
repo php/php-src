@@ -1265,7 +1265,8 @@ PHP_FUNCTION(pcntl_getpriority)
 	/* needs to be cleared, since any returned value is valid */
 	errno = 0;
 
-	pri = getpriority(who, pid_is_null ? getpid() : pid);
+	pid = pid_is_null ? getpid() : pid;
+	pri = getpriority(who, pid);
 
 	if (errno) {
 		PCNTL_G(last_error) = errno;
@@ -1274,8 +1275,22 @@ PHP_FUNCTION(pcntl_getpriority)
 				php_error_docref(NULL, E_WARNING, "Error %d: No process was located using the given parameters", errno);
 				break;
 			case EINVAL:
+#ifdef PRIO_DARWIN_BG
+				if (who != PRIO_PGRP && who != PRIO_USER && who != PRIO_PROCESS && who != PRIO_DARWIN_THREAD) {
+					zend_argument_value_error(2, "must be one of PRIO_PGRP, PRIO_USER, PRIO_PROCESS or PRIO_DARWIN_THREAD");
+					RETURN_THROWS();
+				} else if (who == PRIO_DARWIN_THREAD && pid != 0) {
+					zend_argument_value_error(1, "must be 0 (zero) if PRIO_DARWIN_THREAD is provided as second parameter");
+					RETURN_THROWS();
+				} else {
+					zend_argument_value_error(1, "is not a valid process, process group, or user ID");
+					RETURN_THROWS();
+				}
+#else
 				zend_argument_value_error(2, "must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS");
 				RETURN_THROWS();
+#endif
+
 			default:
 				php_error_docref(NULL, E_WARNING, "Unknown error %d has occurred", errno);
 				break;
@@ -1304,15 +1319,33 @@ PHP_FUNCTION(pcntl_setpriority)
 		Z_PARAM_LONG(who)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (setpriority(who, pid_is_null ? getpid() : pid, pri)) {
+	pid = pid_is_null ? getpid() : pid;
+
+	if (setpriority(who, pid, pri)) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case ESRCH:
 				php_error_docref(NULL, E_WARNING, "Error %d: No process was located using the given parameters", errno);
 				break;
 			case EINVAL:
+#ifdef PRIO_DARWIN_BG
+				if (who != PRIO_PGRP && who != PRIO_USER && who != PRIO_PROCESS && who != PRIO_DARWIN_THREAD) {
+					zend_argument_value_error(3, "must be one of PRIO_PGRP, PRIO_USER, PRIO_PROCESS or PRIO_DARWIN_THREAD");
+					RETURN_THROWS();
+				} else if (who == PRIO_DARWIN_THREAD && pid != 0) {
+					zend_argument_value_error(2, "must be 0 (zero) if PRIO_DARWIN_THREAD is provided as second parameter");
+					RETURN_THROWS();
+				} else if (who == PRIO_DARWIN_THREAD && pid == 0 && (pri != 0 && pri != PRIO_DARWIN_BG)) {
+					zend_argument_value_error(1, "must be either 0 (zero) or PRIO_DARWIN_BG, for mode PRIO_DARWIN_THREAD");
+					RETURN_THROWS();
+				} else {
+					zend_argument_value_error(2, "is not a valid process, process group, or user ID");
+					RETURN_THROWS();
+				}
+#else
 				zend_argument_value_error(3, "must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS");
 				RETURN_THROWS();
+#endif
 			case EPERM:
 				php_error_docref(NULL, E_WARNING, "Error %d: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller", errno);
 				break;

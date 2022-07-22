@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9090 (Support assigning function pointers in FFI). (Adam
     Saponara)
 
+- PCNTL:
+  . Fixed pcntl_(get|set)priority error handling for MacOS. (Juan Morales)
+
 - Random:
   . Fixed bug GH-9067 (random extension is not thread safe). (cmb)
   . Fixed bug GH-9055 (segmentation fault if user engine throws). (timwolla)
