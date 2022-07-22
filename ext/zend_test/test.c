@@ -847,3 +847,30 @@ PHP_ZEND_TEST_API bug80847_02 ffi_bug80847(bug80847_02 s) {
 	s.a.c -= 10.0;
 	return s;
 }
+
+PHP_ZEND_TEST_API void (*bug_gh9090_void_none_ptr)(void) = NULL;
+PHP_ZEND_TEST_API void (*bug_gh9090_void_int_char_ptr)(int, char *) = NULL;
+PHP_ZEND_TEST_API void (*bug_gh9090_void_int_char_var_ptr)(int, char *, ...) = NULL;
+PHP_ZEND_TEST_API void (*bug_gh9090_void_char_int_ptr)(char *, int) = NULL;
+PHP_ZEND_TEST_API int (*bug_gh9090_int_int_char_ptr)(int, char *) = NULL;
+
+PHP_ZEND_TEST_API void bug_gh9090_void_none(void) {
+    php_printf("bug_gh9090_none\n");
+}
+
+PHP_ZEND_TEST_API void bug_gh9090_void_int_char(int i, char *s) {
+    php_printf("bug_gh9090_int_char %d %s\n", i, s);
+}
+
+PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
+    va_list args;
+    char *buffer;
+
+    va_start(args, fmt);
+
+    zend_vspprintf(&buffer, 0, fmt, args);
+    php_printf("bug_gh9090_void_int_char_var %s\n", buffer);
+    efree(buffer);
+
+    va_end(args);
+}
