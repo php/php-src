@@ -279,7 +279,7 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 	}
 	object_properties_load(&randomizer->std, Z_ARRVAL_P(members_zv));
 
-	zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", strlen("engine"), 0, NULL);
+	zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", sizeof("engine") - 1, 0, NULL);
 	if (Z_TYPE_P(zengine) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zengine), random_ce_Random_Engine)) {
 		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
 		RETURN_THROWS();
