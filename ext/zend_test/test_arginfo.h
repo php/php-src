@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2c654cefda278094fa4cdc25b83ced269e83cadf */
+ * Stub hash: d6cd51d7ba5e8055e29b6b914f5a5b8e45237869 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -50,6 +50,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_string_or_stdclass_or_null, 0, 1, stdClass, MAY_BE_STRING|MAY_BE_NULL)
 	ZEND_ARG_INFO(0, param)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_intersection_type, 0, 1, Traversable&Countable, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, v, Traversable&Countable, 0, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_intersection_type_return, 0, 1, Traversable&Countable, 0)
+	ZEND_ARG_TYPE_INFO(0, v, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable, 0, 1, IS_VOID, 0)
@@ -152,6 +160,8 @@ static ZEND_FUNCTION(zend_string_or_object);
 static ZEND_FUNCTION(zend_string_or_object_or_null);
 static ZEND_FUNCTION(zend_string_or_stdclass);
 static ZEND_FUNCTION(zend_string_or_stdclass_or_null);
+static ZEND_FUNCTION(zend_intersection_type);
+static ZEND_FUNCTION(zend_intersection_type_return);
 static ZEND_FUNCTION(zend_iterable);
 static ZEND_FUNCTION(zend_weakmap_attach);
 static ZEND_FUNCTION(zend_weakmap_remove);
@@ -195,6 +205,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null)
 	ZEND_FE(zend_string_or_stdclass, arginfo_zend_string_or_stdclass)
 	ZEND_FE(zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null)
+	ZEND_FE(zend_intersection_type, arginfo_zend_intersection_type)
+	ZEND_FE(zend_intersection_type_return, arginfo_zend_intersection_type_return)
 	ZEND_FE(zend_iterable, arginfo_zend_iterable)
 	ZEND_FE(zend_weakmap_attach, arginfo_zend_weakmap_attach)
 	ZEND_FE(zend_weakmap_remove, arginfo_zend_weakmap_remove)
