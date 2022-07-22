@@ -1291,7 +1291,8 @@ static zend_function *dbh_method_get(zend_object **object, zend_string *method_n
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);
 	zend_string *lc_method_name;
 
-	if ((fbc = zend_std_get_method(object, method_name, key)) == NULL) {
+	fbc = zend_std_get_method(object, method_name, key);
+	if (fbc == NULL || (fbc->type == ZEND_USER_FUNCTION && ((zend_op_array *)fbc)->opcodes == &EG(call_trampoline_op))) {
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH]) {
@@ -1303,8 +1304,16 @@ static zend_function *dbh_method_get(zend_object **object, zend_string *method_n
 		}
 
 		lc_method_name = zend_string_tolower(method_name);
-		fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], lc_method_name);
+		zend_function *driver_fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], lc_method_name);
 		zend_string_release_ex(lc_method_name, 0);
+
+		if (driver_fbc) {
+			if (fbc) {
+				zend_string_release(fbc->common.function_name);
+				zend_free_trampoline(fbc);
+			}
+			fbc = driver_fbc;
+		}
 	}
 
 out:
