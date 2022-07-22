@@ -87,7 +87,7 @@ var_dump(null === $row['f_null']);
 var_dump('blob content' === $row['f_lob']);
 var_dump('test1' === $row['f_str']);
 
-fseek($fp, 0);
+rewind($fp);
 $stmt->bindValue(1, 456, PDO::PARAM_AUTO);
 $stmt->bindValue(2, false, PDO::PARAM_AUTO);
 $stmt->bindValue(3, 789, PDO::PARAM_AUTO);
@@ -112,7 +112,7 @@ fclose($fp);
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE test');
 @unlink(PDOTest::get_temp_dir() . DIRECTORY_SEPARATOR . 'pdoblob.tst');
 ?>
 --EXPECT--
