@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of
     different type). (Derick)
+  . Fixed bug GH-8964 (DateTime object comparison after applying delta less
+    than 1 second). (Derick)
   . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
 
 - DBA:
