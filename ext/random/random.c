@@ -307,13 +307,13 @@ PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object)
 /* {{{ php_random_range */
 PHPAPI zend_long php_random_range(const php_random_algo *algo, php_random_status *status, zend_long min, zend_long max)
 {
-	zend_ulong umax = max - min;
+	zend_ulong umax = (zend_ulong) max - (zend_ulong) min;
 
-	if (PHP_RANDOM_ALGO_IS_DYNAMIC(algo) || algo->generate_size > sizeof(uint32_t) || umax > UINT32_MAX) {
-		return (zend_long) rand_range64(algo, status, umax) + min;
+	if (algo->generate_size == 0 || algo->generate_size > sizeof(uint32_t) || umax > UINT32_MAX) {
+		return (zend_long) (rand_range64(algo, status, umax) + min);
 	}
 
-	return (zend_long) rand_range32(algo, status, umax) + min;
+	return (zend_long) (rand_range32(algo, status, umax) + min);
 }
 /* }}} */
 

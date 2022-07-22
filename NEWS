@@ -62,6 +62,7 @@ PHP                                                                        NEWS
 
 - Random:
   . Added new random extension. (Go Kudo)
+  . Fixed bug GH-9066 (signed integer overflow). (zeriyoshi)
 
 - SPL:
   . Widen iterator_to_array() and iterator_count()'s $iterator parameter to
