@@ -782,6 +782,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_xpath_class_entry = register_class_DOMXPath();
 	dom_xpath_class_entry->create_object = dom_xpath_objects_new;
+	dom_xpath_class_entry->default_object_handlers = &dom_xpath_object_handlers;
 
 	zend_hash_init(&dom_xpath_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_xpath_prop_handlers, "document", sizeof("document")-1, dom_xpath_document_read, NULL);
@@ -989,7 +990,6 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 	intern->register_node_ns = 1;
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
-	intern->dom.std.handlers = &dom_xpath_object_handlers;
 
 	zend_object_std_init(&intern->dom.std, class_type);
 	object_properties_init(&intern->dom.std, class_type);

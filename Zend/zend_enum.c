@@ -47,8 +47,6 @@ zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case
 		ZVAL_COPY(OBJ_PROP_NUM(zobj, 1), backing_value_zv);
 	}
 
-	zobj->handlers = &enum_handlers;
-
 	return zobj;
 }
 
@@ -184,6 +182,8 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
 		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);	
 	}
+
+	ce->default_object_handlers = &enum_handlers;
 }
 
 zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
