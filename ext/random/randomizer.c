@@ -42,7 +42,7 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 		zend_string *mname;
 		zend_function *generate_method;
 
-		mname = zend_string_init("generate", strlen("generate"), 0);
+		mname = zend_string_init("generate", sizeof("generate") - 1, 0);
 		generate_method = zend_hash_find_ptr(&engine_object->ce->function_table, mname);
 		zend_string_release(mname);
 
@@ -70,6 +70,11 @@ PHP_METHOD(Random_Randomizer, __construct)
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(engine_object, random_ce_Random_Engine);
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (randomizer->algo) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot call constructor twice");
+		RETURN_THROWS();
+	}
+
 	/* Create default RNG instance */
 	if (!engine_object) {
 		engine_object = random_ce_Random_Engine_Secure->create_object(random_ce_Random_Engine_Secure);
@@ -80,7 +85,7 @@ PHP_METHOD(Random_Randomizer, __construct)
 
 	ZVAL_OBJ(&zengine_object, engine_object);
 
-	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", strlen("engine"), &zengine_object);
+	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", sizeof("engine") - 1, &zengine_object);
 
 	randomizer_common_init(randomizer, engine_object);
 }
