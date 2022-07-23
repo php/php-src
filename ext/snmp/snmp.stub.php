@@ -2,6 +2,114 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue LONG_CONST(NETSNMP_OID_OUTPUT_SUFFIX)
+ */
+const SNMP_OID_OUTPUT_SUFFIX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(NETSNMP_OID_OUTPUT_MODULE)
+ */
+const SNMP_OID_OUTPUT_MODULE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(NETSNMP_OID_OUTPUT_FULL)
+ */
+const SNMP_OID_OUTPUT_FULL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(NETSNMP_OID_OUTPUT_NUMERIC)
+ */
+const SNMP_OID_OUTPUT_NUMERIC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(NETSNMP_OID_OUTPUT_UCD)
+ */
+const SNMP_OID_OUTPUT_UCD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(NETSNMP_OID_OUTPUT_NONE)
+ */
+const SNMP_OID_OUTPUT_NONE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue LONG_CONST(SNMP_VALUE_LIBRARY)
+ */
+const SNMP_VALUE_LIBRARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(SNMP_VALUE_PLAIN)
+ */
+const SNMP_VALUE_PLAIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(SNMP_VALUE_OBJECT)
+ */
+const SNMP_VALUE_OBJECT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_BIT_STR)
+ */
+const SNMP_BIT_STR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_OCTET_STRLONG_CONST)
+ */
+const SNMP_OCTET_STR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_OPAQUE)
+ */
+const SNMP_OPAQUE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_NULL)
+ */
+const SNMP_NULL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_OBJECT_ID)
+ */
+const SNMP_OBJECT_ID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_IPADDRESS)
+ */
+const SNMP_IPADDRESS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_GAUGE)
+ */
+const SNMP_COUNTER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_UNSIGNED)
+ */
+const SNMP_UNSIGNED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_TIMETICKS)
+ */
+const SNMP_TIMETICKS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_UINTEGER)
+ */
+const SNMP_UINTEGER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_INTEGER)
+ */
+const SNMP_INTEGER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(ASN_COUNTER64)
+ */
+const SNMP_COUNTER64 = UNKNOWN;
+
 function snmpget(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
 function snmpgetnext(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
@@ -75,6 +183,68 @@ function snmp_read_mib(string $filename): bool {}
 
 class SNMP
 {
+    /**
+     * @var int
+     * @cvalue LONG_CONST(SNMP_VERSION_1)
+     */
+    public const VERSION_1 = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(SNMP_VERSION_2c)
+     */
+    public const VERSION_2c = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(SNMP_VERSION_2c)
+     */
+    public const VERSION_2C = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(SNMP_VERSION_3)
+     */
+    public const VERSION_3 = UNKNOWN;
+
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_NOERROR)
+     */
+    public const ERRNO_NOERROR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_ANY)
+     */
+    public const ERRNO_ANY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_GENERIC)
+     */
+    public const ERRNO_GENERIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_TIMEOUT)
+     */
+    public const ERRNO_TIMEOUT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_ERROR_IN_REPLY)
+     */
+    public const ERRNO_ERROR_IN_REPLY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_OID_NOT_INCREASING)
+     */
+    public const ERRNO_OID_NOT_INCREASING = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_OID_PARSING_ERROR)
+     */
+    public const ERRNO_OID_PARSING_ERROR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LONG_CONST(PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES)
+     */
+    public const ERRNO_MULTIPLE_SET_QUERIES = UNKNOWN;
+
     /** @readonly */
     public array $info;
     public ?int $max_oids;

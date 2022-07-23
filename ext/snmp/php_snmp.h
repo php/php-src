@@ -92,8 +92,7 @@ ZEND_END_MODULE_GLOBALS(snmp)
 #define SNMP_G(v) (snmp_globals.v)
 #endif
 
-#define REGISTER_SNMP_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(php_snmp_ce, const_name, sizeof(const_name)-1, (zend_long)value);
+#define LONG_CONST(c) (zend_long) c;
 
 #else
 
