@@ -91,7 +91,7 @@ PHP_METHOD(Random_Randomizer, __construct)
 }
 /* }}} */
 
-/* {{{ Generate random number */
+/* {{{ Generate positive random number */
 PHP_METHOD(Random_Randomizer, nextInt)
 {	
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
