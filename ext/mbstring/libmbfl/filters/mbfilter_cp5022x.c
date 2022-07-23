@@ -346,6 +346,9 @@ static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter)
 		filter->filter_function = mbfl_filt_conv_wchar_cp50221;
 		mbfl_filt_conv_wchar_cp50221(s, filter);
 		filter->filter_function = mbfl_filt_conv_wchar_cp50220;
+		if (c == 0 && !consumed) {
+			(*filter->output_function)(0, filter->data);
+		}
 	} else if (c == 0) {
 		/* This case has to be handled separately, since `filter->cache == 0` means
 		 * no codepoint is cached */
