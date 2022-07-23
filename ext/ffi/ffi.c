@@ -2335,7 +2335,7 @@ static void zend_ffi_scope_hash_dtor(zval *zv) /* {{{ */
 		zend_hash_destroy(scope->tags);
 		free(scope->tags);
 	}
-	free(scope);
+	pefree(scope, 1);
 }
 /* }}} */
 
@@ -5215,7 +5215,7 @@ static ZEND_GSHUTDOWN_FUNCTION(ffi)
 {
 	if (ffi_globals->scopes) {
 		zend_hash_destroy(ffi_globals->scopes);
-		free(ffi_globals->scopes);
+		pefree(ffi_globals->scopes, 1);
 	}
 	zend_hash_destroy(&ffi_globals->types);
 }
