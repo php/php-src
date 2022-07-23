@@ -85,7 +85,7 @@ PHP_METHOD(Random_Randomizer, __construct)
 
 	ZVAL_OBJ(&zengine_object, engine_object);
 
-	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", sizeof("engine") - 1, &zengine_object);
+	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", strlen("engine"), &zengine_object);
 
 	randomizer_common_init(randomizer, engine_object);
 }
