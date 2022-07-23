@@ -320,6 +320,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					 * so we need to guess */
 					switch (PDO_PARAM_TYPE(param->param_type)) {
 						case PDO_PARAM_INT:
+						case PDO_PARAM_BOOL:
 							sqltype = SQL_INTEGER;
 							break;
 						case PDO_PARAM_LOB:
