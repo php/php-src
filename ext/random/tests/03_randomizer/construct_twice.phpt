@@ -1,5 +1,5 @@
 --TEST--
-Random: Randomizer: __construct() twice
+Random: Randomizer: Disallow manually calling __construct
 --FILE--
 <?php
 try {
