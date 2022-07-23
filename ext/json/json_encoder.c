@@ -71,7 +71,14 @@ static inline void php_json_pretty_print_indent(smart_str *buf, int options, php
 
 /* }}} */
 
-static inline bool php_json_is_valid_double(double d) /* {{{ */
+static
+#if defined(_MSC_VER) && defined(_M_ARM64)
+// MSVC bug: https://developercommunity.visualstudio.com/t/corrupt-optimization-on-arm64-with-Ox-/10102551
+zend_never_inline
+#else
+inline
+#endif
+bool php_json_is_valid_double(double d) /* {{{ */
 {
 	return !zend_isinf(d) && !zend_isnan(d);
 }
