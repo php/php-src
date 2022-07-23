@@ -22,6 +22,12 @@ const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
 
 /**
  * @var string
+ * @cvalue DATE_FORMAT_ISO8601_EXPANDED
+ */
+const DATE_ISO8601_EXPANDED = "X-m-d\\TH:i:sP";
+
+/**
+ * @var string
  * @cvalue DATE_FORMAT_RFC822
  */
 const DATE_RFC822 = "D, d M y H:i:s O";
@@ -284,6 +290,8 @@ interface DateTimeInterface
     public const COOKIE = DATE_COOKIE;
     /** @var string */
     public const ISO8601 = DATE_ISO8601;
+    /** @var string */
+    public const ISO8601_EXPANDED = DATE_ISO8601_EXPANDED;
     /** @var string */
     public const RFC822 = DATE_RFC822;
     /** @var string */

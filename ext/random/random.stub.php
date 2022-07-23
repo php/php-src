@@ -3,6 +3,17 @@
 /** @generate-class-entries */
 
 namespace {
+    /**
+     * @var int
+     * @cvalue MT_RAND_MT19937
+     */
+    const MT_RAND_MT19937 = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue MT_RAND_PHP
+     */
+    const MT_RAND_PHP = UNKNOWN;
+
     function lcg_value(): float {}
 
     function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
@@ -54,7 +65,7 @@ namespace Random\Engine
         public function generate(): string {}
 
         public function jump(int $advance): void {}
-        
+
         /** @implementation-alias Random\Engine\Mt19937::__serialize */
         public function __serialize(): array {}
 
@@ -74,17 +85,17 @@ namespace Random\Engine
 
         /** @implementation-alias Random\Engine\Mt19937::generate */
         public function generate(): string {}
-        
+
         public function jump(): void {}
-        
+
         public function jumpLong(): void {}
-        
+
         /** @implementation-alias Random\Engine\Mt19937::__serialize */
         public function __serialize(): array {}
-        
+
         /** @implementation-alias Random\Engine\Mt19937::__unserialize */
         public function __unserialize(array $data): void {}
-        
+
         /** @implementation-alias Random\Engine\Mt19937::__debugInfo */
         public function __debugInfo(): array {}
     }

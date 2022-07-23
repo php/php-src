@@ -92,7 +92,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	total_size = 0;
 	do {
 		r = algo->generate(status);
-		result = (result << (8 * status->last_generated_size)) | r;
+		result = result | (r << (total_size * 8));
 		total_size += status->last_generated_size;
 		if (status->last_unsafe) {
 			return 0;
@@ -127,7 +127,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 		total_size = 0;
 		do {
 			r = algo->generate(status);
-			result = (result << (8 * status->last_generated_size)) | r;
+			result = result | (r << (total_size * 8));
 			total_size += status->last_generated_size;
 			if (status->last_unsafe) {
 				return 0;
@@ -148,7 +148,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 	total_size = 0;
 	do {
 		r = algo->generate(status);
-		result = (result << (8 * status->last_generated_size)) | r;
+		result = result | (r << (total_size * 8));
 		total_size += status->last_generated_size;
 		if (status->last_unsafe) {
 			return 0;
@@ -183,7 +183,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 		total_size = 0;
 		do {
 			r = algo->generate(status);
-			result = (result << (8 * status->last_generated_size)) | r;
+			result = result | (r << (total_size * 8));
 			total_size += status->last_generated_size;
 			if (status->last_unsafe) {
 				return 0;
@@ -854,8 +854,7 @@ PHP_MINIT_FUNCTION(random)
 	random_randomizer_object_handlers.free_obj = randomizer_free_obj;
 	random_randomizer_object_handlers.clone_obj = NULL;
 
-	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MT_RAND_PHP",     MT_RAND_PHP, CONST_CS | CONST_PERSISTENT);
+	register_random_symbols(module_number);
 
 	return SUCCESS;
 }
@@ -889,10 +888,3 @@ zend_module_entry random_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-#ifdef COMPILE_DL_RANDOM
-# ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-# endif
-ZEND_GET_MODULE(random)
-#endif

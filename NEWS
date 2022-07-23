@@ -5,6 +5,12 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of
     different type). (Derick)
+  . Fixed bug GH-8964 (DateTime object comparison after applying delta less
+    than 1 second). (Derick)
+  . Fixed bug #75035 (Datetime fails to unserialize "extreme" dates).
+    (Derick)
+  . Fixed bug #80483 (DateTime Object with 5-digit year can't unserialized).
+    (Derick)
   . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
 
 - DBA:
@@ -14,6 +20,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9067 (random extension is not thread safe). (cmb)
   . Fixed bug GH-9055 (segmentation fault if user engine throws). (timwolla)
   . Fixed bug GH-9066 (signed integer overflow). (zeriyoshi)
+  . Fixed bug GH-9083 (undefined behavior during shifting). (timwolla)
+  . Fixed bug GH-9088, GH-9056 (incorrect expansion of bytes when
+    generating uniform integers within a given range). (timwolla)
 
 21 Jul 2022, PHP 8.2.0beta1
 

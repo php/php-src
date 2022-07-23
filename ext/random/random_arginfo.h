@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 995783f78e8fc6071f5b2ca2690c16a1eafe584d */
+ * Stub hash: c072111a2483473d47d7d77d7d80aea84c663c7a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -215,6 +215,12 @@ static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, __unserialize, arginfo_class_Random_Randomizer___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_random_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_CS | CONST_PERSISTENT);
+}
 
 static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *class_entry_Random_Engine)
 {

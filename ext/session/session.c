@@ -2825,9 +2825,7 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	/* Register base class */
 	php_session_class_entry = register_class_SessionHandler(php_session_iface_entry, php_session_id_iface_entry);
 
-	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_ACTIVE", php_session_active, CONST_CS | CONST_PERSISTENT);
+	register_session_symbols(module_number);
 
 	return SUCCESS;
 }

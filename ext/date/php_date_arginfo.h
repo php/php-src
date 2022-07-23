@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5ccde6eb3c96eda925633f50091c7019050846be */
+ * Stub hash: 6949e2c795288f9615222b1fd496768ab20eb7c5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -756,6 +756,8 @@ static void register_php_date_symbols(int module_number)
 	ZEND_ASSERT(strcmp(DATE_FORMAT_COOKIE, "l, d-M-Y H:i:s T") == 0);
 	REGISTER_STRING_CONSTANT("DATE_ISO8601", DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_ISO8601, "Y-m-d\\TH:i:sO") == 0);
+	REGISTER_STRING_CONSTANT("DATE_ISO8601_EXPANDED", DATE_FORMAT_ISO8601_EXPANDED, CONST_CS | CONST_PERSISTENT);
+	ZEND_ASSERT(strcmp(DATE_FORMAT_ISO8601_EXPANDED, "X-m-d\\TH:i:sP") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RFC822", DATE_FORMAT_RFC822, CONST_CS | CONST_PERSISTENT);
 	ZEND_ASSERT(strcmp(DATE_FORMAT_RFC822, "D, d M y H:i:s O") == 0);
 	REGISTER_STRING_CONSTANT("DATE_RFC850", DATE_FORMAT_RFC850, CONST_CS | CONST_PERSISTENT);
@@ -806,6 +808,13 @@ static zend_class_entry *register_class_DateTimeInterface(void)
 	zend_string *const_ISO8601_name = zend_string_init_interned("ISO8601", sizeof("ISO8601") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_ISO8601_name, &const_ISO8601_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_ISO8601_name);
+
+	zval const_ISO8601_EXPANDED_value;
+	zend_string *const_ISO8601_EXPANDED_value_str = zend_string_init(DATE_FORMAT_ISO8601_EXPANDED, sizeof(DATE_FORMAT_ISO8601_EXPANDED) - 1, 1);
+	ZVAL_STR(&const_ISO8601_EXPANDED_value, const_ISO8601_EXPANDED_value_str);
+	zend_string *const_ISO8601_EXPANDED_name = zend_string_init_interned("ISO8601_EXPANDED", sizeof("ISO8601_EXPANDED") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ISO8601_EXPANDED_name, &const_ISO8601_EXPANDED_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ISO8601_EXPANDED_name);
 
 	zval const_RFC822_value;
 	zend_string *const_RFC822_value_str = zend_string_init(DATE_FORMAT_RFC822, sizeof(DATE_FORMAT_RFC822) - 1, 1);

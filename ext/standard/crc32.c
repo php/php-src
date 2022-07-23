@@ -64,9 +64,13 @@ static inline int has_crc32_insn() {
 # endif
 }
 
-# if defined(__GNUC__) && !defined(__clang__)
-#  pragma GCC push_options
-#  pragma GCC target ("+nothing+crc")
+# if defined(__GNUC__)
+#  if!defined(__clang__)
+#   pragma GCC push_options
+#   pragma GCC target ("+nothing+crc")
+#  else
+#   pragma clang attribute push(__attribute__((target("+nothing+crc"))), apply_to=function)
+#  endif
 # endif
 static uint32_t crc32_aarch64(uint32_t crc, const char *p, size_t nr) {
 	while (nr >= sizeof(uint64_t)) {
@@ -89,8 +93,12 @@ static uint32_t crc32_aarch64(uint32_t crc, const char *p, size_t nr) {
 	}
 	return crc;
 }
-# if defined(__GNUC__) && !defined(__clang__)
-#  pragma GCC pop_options
+# if defined(__GNUC__)
+#  if !defined(__clang__)
+#   pragma GCC pop_options
+#  else
+#   pragma clang attribute pop
+#  endif
 # endif
 #endif
 

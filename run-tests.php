@@ -228,13 +228,13 @@ function main(): void
             // fail to reattach to the OpCache because it will be using the
             // wrong path.
             die("TEMP environment is NOT set");
-        } else {
-            if (count($environment) == 1) {
-                // Not having other environment variables, only having TEMP, is
-                // probably ok, but strange and may make a difference in the
-                // test pass rate, so warn the user.
-                echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" . PHP_EOL;
-            }
+        }
+
+        if (count($environment) == 1) {
+            // Not having other environment variables, only having TEMP, is
+            // probably ok, but strange and may make a difference in the
+            // test pass rate, so warn the user.
+            echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" , PHP_EOL;
         }
     }
 
@@ -419,7 +419,7 @@ function main(): void
             switch ($switch) {
                 case 'j':
                     $workers = substr($argv[$i], 2);
-                    if (!preg_match('/^\d+$/', $workers) || $workers == 0) {
+                    if ($workers == 0 || !preg_match('/^\d+$/', $workers)) {
                         error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
                     }
                     $workers = intval($workers, 10);
@@ -436,10 +436,8 @@ function main(): void
                             $matches = [];
                             if (preg_match('/^#.*\[(.*)\]\:\s+(.*)$/', $test, $matches)) {
                                 $redir_tests[] = [$matches[1], $matches[2]];
-                            } else {
-                                if (strlen($test)) {
-                                    $test_files[] = trim($test);
-                                }
+                            } elseif (strlen($test)) {
+                                $test_files[] = trim($test);
                             }
                         }
                     }
@@ -624,27 +622,21 @@ function main(): void
             if (!$testfile && strpos($argv[$i], '*') !== false && function_exists('glob')) {
                 if (substr($argv[$i], -5) == '.phpt') {
                     $pattern_match = glob($argv[$i]);
+                } elseif (preg_match("/\*$/", $argv[$i])) {
+                    $pattern_match = glob($argv[$i] . '.phpt');
                 } else {
-                    if (preg_match("/\*$/", $argv[$i])) {
-                        $pattern_match = glob($argv[$i] . '.phpt');
-                    } else {
-                        die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
-                    }
+                    die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
                 }
 
                 if (is_array($pattern_match)) {
                     $test_files = array_merge($test_files, $pattern_match);
                 }
+            } elseif (is_dir($testfile)) {
+                find_files($testfile);
+            } elseif (substr($testfile, -5) == '.phpt') {
+                $test_files[] = $testfile;
             } else {
-                if (is_dir($testfile)) {
-                    find_files($testfile);
-                } else {
-                    if (substr($testfile, -5) == '.phpt') {
-                        $test_files[] = $testfile;
-                    } else {
-                        die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
-                    }
-                }
+                die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
             }
         }
     }
@@ -851,11 +843,11 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     $info_params = [];
     settings2array($ini_overwrites, $info_params);
     $info_params = settings2params($info_params);
-    $php_info = `$php $pass_options $info_params $no_file_cache "$info_file"`;
-    define('TESTED_PHP_VERSION', `$php -n -r "echo PHP_VERSION;"`);
+    $php_info = shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\"");
+    define('TESTED_PHP_VERSION', shell_exec("$php -n -r \"echo PHP_VERSION;\""));
 
     if ($php_cgi && $php != $php_cgi) {
-        $php_info_cgi = `$php_cgi $pass_options $info_params $no_file_cache -q "$info_file"`;
+        $php_info_cgi = shell_exec("$php_cgi $pass_options $info_params $no_file_cache -q \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
     } else {
@@ -863,7 +855,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
 
     if ($phpdbg) {
-        $phpdbg_info = `$phpdbg $pass_options $info_params $no_file_cache -qrr "$info_file"`;
+        $phpdbg_info = shell_exec("$phpdbg $pass_options $info_params $no_file_cache -qrr \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
     } else {
@@ -891,7 +883,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         }
         ?>
     PHP);
-    $exts_to_test = explode(',', `$php $pass_options $info_params $no_file_cache "$info_file"`);
+    $exts_to_test = explode(',', shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\""));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
         'session' => ['session.auto_start=0'],
@@ -1085,9 +1077,9 @@ function test_name($name): string
 {
     if (is_array($name)) {
         return $name[0] . ':' . $name[1];
-    } else {
-        return $name;
     }
+
+    return $name;
 }
 /**
  * @param array|string $a
@@ -1105,9 +1097,9 @@ function test_sort($a, $b): int
 
     if ($ta == $tb) {
         return strcmp($a, $b);
-    } else {
-        return $tb - $ta;
     }
+
+    return $tb - $ta;
 }
 
 //
@@ -1118,10 +1110,8 @@ function save_text(string $filename, string $text, ?string $filename_copy = null
 {
     global $DETAILED;
 
-    if ($filename_copy && $filename_copy != $filename) {
-        if (file_put_contents($filename_copy, $text) === false) {
-            error("Cannot open file '" . $filename_copy . "' (save_text)");
-        }
+    if ($filename_copy && $filename_copy != $filename && file_put_contents($filename_copy, $text) === false) {
+        error("Cannot open file '" . $filename_copy . "' (save_text)");
     }
 
     if (file_put_contents($filename, $text) === false) {
@@ -1214,12 +1204,16 @@ function system_with_timeout(
 
         if ($n === false) {
             break;
-        } elseif ($n === 0) {
+        }
+
+        if ($n === 0) {
             /* timed out */
             $data .= "\n ** ERROR: process timed out **\n";
             proc_terminate($proc, 9);
             return $data;
-        } elseif ($n > 0) {
+        }
+
+        if ($n > 0) {
             if ($captureStdOut) {
                 $line = fread($pipes[1], 8192);
             } elseif ($captureStdErr) {
@@ -1573,8 +1567,7 @@ escape:
                                 ]);
                             } else {
                                 proc_terminate($workerProcs[$i]);
-                                unset($workerProcs[$i]);
-                                unset($workerSocks[$i]);
+                                unset($workerProcs[$i], $workerSocks[$i]);
                                 goto escape;
                             }
                             break;
@@ -2201,17 +2194,17 @@ TEST $file
 
             $junit->markTestAs('PASS', $shortname, $tested);
             return 'REDIR';
-        } else {
-            $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
-            show_result("BORK", $bork_info, '', '', $temp_filenames);
-            $PHP_FAILED_TESTS['BORKED'][] = [
-                'name' => $file,
-                'test_name' => '',
-                'output' => '',
-                'diff' => '',
-                'info' => "$bork_info [$file]",
-            ];
         }
+
+        $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
+        show_result("BORK", $bork_info, '', '', $temp_filenames);
+        $PHP_FAILED_TESTS['BORKED'][] = [
+            'name' => $file,
+            'test_name' => '',
+            'output' => '',
+            'diff' => '',
+            'info' => "$bork_info [$file]",
+        ];
     }
 
     if (is_array($org_file) || $test->hasSection('REDIRECTTEST')) {
@@ -2430,7 +2423,7 @@ COMMAND $cmd
 
     // Remember CLEAN output to report borked test if it otherwise passes.
     $clean_output = null;
-    if ($test->sectionNotEmpty('CLEAN') && (!$no_clean || $cfg['keep']['clean'])) {
+    if ((!$no_clean || $cfg['keep']['clean']) && $test->sectionNotEmpty('CLEAN')) {
         show_file_block('clean', $test->getSection('CLEAN'));
         save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
 
@@ -2574,21 +2567,23 @@ COMMAND $cmd
             $wanted_re = $temp;
 
             // Stick to basics
-            $wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-            $wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
-            $wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
-            $wanted_re = str_replace('%a', '.+', $wanted_re);
-            $wanted_re = str_replace('%A', '.*', $wanted_re);
-            $wanted_re = str_replace('%w', '\s*', $wanted_re);
-            $wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
-            $wanted_re = str_replace('%d', '\d+', $wanted_re);
-            $wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-            $wanted_re = str_replace('%f', '[+-]?(?:\d+|(?=\.\d))(?:\.\d+)?(?:[Ee][+-]?\d+)?', $wanted_re);
-            $wanted_re = str_replace('%c', '.', $wanted_re);
-            $wanted_re = str_replace('%0', '\x00', $wanted_re);
+            $wanted_re = strtr($wanted_re, [
+                '%e' => preg_quote(DIRECTORY_SEPARATOR, '/'),
+                '%s' => '[^\r\n]+',
+                '%S' => '[^\r\n]*',
+                '%a' => '.+',
+                '%A' => '.*',
+                '%w' => '\s*',
+                '%i' => '[+-]?\d+',
+                '%d' => '\d+',
+                '%x' => '[0-9a-fA-F]+',
+                '%f' => '[+-]?(?:\d+|(?=\.\d))(?:\.\d+)?(?:[Ee][+-]?\d+)?',
+                '%c' => '.',
+                '%0' => '\x00',
+            ]);
         }
 
-        if (preg_match("/^$wanted_re\$/s", $output)) {
+        if (preg_match('/^' . $wanted_re . '$/s', $output)) {
             $passed = true;
         }
     } else {
@@ -2776,9 +2771,9 @@ function comp_line(string $l1, string $l2, bool $is_reg)
 {
     if ($is_reg) {
         return preg_match('/^' . $l1 . '$/s', $l2);
-    } else {
-        return !strcmp($l1, $l2);
     }
+
+    return !strcmp($l1, $l2);
 }
 
 function count_array_diff(
@@ -2854,20 +2849,20 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
             $idx1++;
             $idx2++;
             continue;
-        } else {
-            $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1 + 1, $idx2, $cnt1, $cnt2, 10);
-            $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2 + 1, $cnt1, $cnt2, 10);
-
-            if ($c1 > $c2) {
-                $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
-            } elseif ($c2 > 0) {
-                $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
-            } else {
-                $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
-                $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
-            }
-            $last_printed_context_line = $idx1;
         }
+
+        $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1 + 1, $idx2, $cnt1, $cnt2, 10);
+        $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2 + 1, $cnt1, $cnt2, 10);
+
+        if ($c1 > $c2) {
+            $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
+        } elseif ($c2 > 0) {
+            $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
+        } else {
+            $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
+            $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
+        }
+        $last_printed_context_line = $idx1;
     }
     $mapping[$idx2] = $idx1;
 
@@ -3659,8 +3654,8 @@ class SkipCache
             return $this->extensions[$php];
         }
 
-        $extDir = `$php -d display_errors=0 -r "echo ini_get('extension_dir');"`;
-        $extensions = explode(",", `$php -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
+        $extDir = shell_exec("$php -d display_errors=0 -r \"echo ini_get('extension_dir');\"");
+        $extensions = explode(",", shell_exec("$php -d display_errors=0 -r \"echo implode(',', get_loaded_extensions());\""));
         $extensions = array_map('strtolower', $extensions);
         if (in_array('zend opcache', $extensions)) {
             $extensions[] = 'opcache';

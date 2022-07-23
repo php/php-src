@@ -405,12 +405,21 @@ timelib_time *timelib_sub_wall(timelib_time *old_time, timelib_rel_time *interva
 			timelib_update_ts(t, NULL);
 		}
 
-		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
-		t->sse -= bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
-		timelib_update_from_sse(t);
-		t->us -= interval->us * bias;
-		if (bias == -1 && interval->us > 0) {
-			t->sse++;
+		if (interval->us == 0) {
+			t->sse -= bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
+			timelib_update_from_sse(t);
+		} else {
+			timelib_rel_time *temp_interval = timelib_rel_time_clone(interval);
+
+			do_range_limit(0, 1000000, 1000000, &temp_interval->us, &temp_interval->s);
+			t->sse -= bias * timelib_hms_to_seconds(temp_interval->h, temp_interval->i, temp_interval->s);
+			timelib_update_from_sse(t);
+			t->us -= temp_interval->us * bias;
+
+			timelib_do_normalize(t);
+			timelib_update_ts(t, NULL);
+
+			timelib_rel_time_dtor(temp_interval);
 		}
 		timelib_do_normalize(t);
 	}
