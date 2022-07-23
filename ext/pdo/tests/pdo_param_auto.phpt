@@ -90,7 +90,6 @@ var_dump('blob content' === $row['f_lob']);
 var_dump('test1' === $row['f_str']);
 
 rewind($fp);
-$stmt = $db->prepare('INSERT INTO test VALUES(?,?,?,?,?)');
 $stmt->bindValue(1, 456, PDO::PARAM_AUTO);
 $stmt->bindValue(2, false, PDO::PARAM_AUTO);
 $stmt->bindValue(3, 789, PDO::PARAM_AUTO);

@@ -320,8 +320,10 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					 * so we need to guess */
 					switch (PDO_PARAM_TYPE(param->param_type)) {
 						case PDO_PARAM_INT:
-						case PDO_PARAM_BOOL:
 							sqltype = SQL_INTEGER;
+							break;
+						case PDO_PARAM_BOOL:
+							sqltype = SQL_BIT;
 							break;
 						case PDO_PARAM_LOB:
 							sqltype = SQL_LONGVARBINARY;
@@ -457,6 +459,20 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					}
 				} else if (Z_TYPE_P(parameter) == IS_NULL || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
 					P->len = SQL_NULL_DATA;
+				} else if (Z_TYPE_P(parameter) == IS_TRUE) {
+					if (P->outbuf) {
+						P->len = sizeof(int);
+						P->outbuf[0] = 1;
+					} else {
+						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+					}
+				} else if (Z_TYPE_P(parameter) == IS_FALSE) {
+					if (P->outbuf) {
+						P->len = sizeof(int);
+						P->outbuf[0] = 0;
+					} else {
+						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+					}
 				} else {
 					convert_to_string(parameter);
 					if (P->outbuf) {
