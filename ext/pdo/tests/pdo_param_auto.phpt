@@ -35,7 +35,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$null = 'NULL';
+$null = '';
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
     case 'mysql':
         $bitType = 'bit';
@@ -45,7 +45,10 @@ switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
         break;
     case 'firebird':
         $bitType = 'boolean';
-        $null = '';
+        break;
+    case 'dblib':
+        $null = 'NULL';
+        $bitType = 'bit';
         break;
     default:
         $bitType = 'int';
@@ -106,14 +109,6 @@ var_dump('blob content' === $row['f_lob']);
 var_dump('test2' === $row['f_str']);
 
 fclose($fp);
-?>
---CLEAN--
-<?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
-require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
-$db = PDOTest::factory();
-$db->exec('DROP TABLE test');
-@unlink(PDOTest::get_temp_dir() . DIRECTORY_SEPARATOR . 'pdoblob.tst');
 ?>
 --EXPECT--
 bool(true)
