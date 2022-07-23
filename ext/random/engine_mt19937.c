@@ -394,7 +394,7 @@ PHP_METHOD(Random_Engine_Mt19937, __debugInfo)
 			zend_throw_exception(NULL, "Engine serialize failed", 0);
 			RETURN_THROWS();
 		}
-		zend_hash_str_add(Z_ARR_P(return_value), "__states", sizeof("__states") - 1, &t);
+		zend_hash_str_add(Z_ARR_P(return_value), "__states", strlen("__states"), &t);
 	}
 }
 /* }}} */
