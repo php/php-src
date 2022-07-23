@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-9083 (undefined behavior during shifting). (timwolla)
   . Fixed bug GH-9088, GH-9056 (incorrect expansion of bytes when
     generating uniform integers within a given range). (timwolla)
+  . Fixed bug GH-9089 (Fix memory leak on Randomizer::__construct()
+    call twice) (zeriyoshi)
 
 21 Jul 2022, PHP 8.2.0beta1
 
