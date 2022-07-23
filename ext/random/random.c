@@ -888,10 +888,3 @@ zend_module_entry random_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-#ifdef COMPILE_DL_RANDOM
-# ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-# endif
-ZEND_GET_MODULE(random)
-#endif
