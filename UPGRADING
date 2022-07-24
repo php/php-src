@@ -61,6 +61,9 @@ PHP 8.2 UPGRADE NOTES
     previously it was bool
   . SplFileObject::getChildren() now has a tentative return type of null,
     previously it was ?RecursiveIterator
+  . GlogIterator returns empty array if all paths are restricted by
+    open_basedir. Previously the error was returned but that behavior was not
+    consistent and did not work correctly.
 
 ========================================
 2. New Features

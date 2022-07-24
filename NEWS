@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #69181 (READ_CSV|DROP_NEW_LINE drops newlines within fields).
     (cmb)
+  . Fixed bug #65069 (GlobIterator incorrect handling of open_basedir check).
+    (Jakub Zelenka)
 
 21 Jul 2022, PHP 8.2.0beta1
 
