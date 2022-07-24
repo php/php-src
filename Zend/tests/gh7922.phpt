@@ -10,46 +10,31 @@ class A
     }
 }
 
-try {
-    $a = new A();
-    print_r($a);
-} catch (\Throwable $e) {
-    echo (string) $e . "\n";
-}
+echo "Exception in __debugInfo:\n";
 
 try {
-    $a = new class() extends A {
+    print_r(new A());
+} catch (\Throwable $e) {
+    echo $e . "\n";
+}
+
+echo "\nException in __debugInfo in anonymous class:\n";
+
+try {
+    print_r(new class() extends A {
         public function __debugInfo(): array
         {
             throw new \Exception('y');
         }
-    };
-    print_r($a, true);
+    });
 } catch (\Throwable $e) {
-    echo (string) $e . "\n";
+    echo $e . "\n";
 }
 
-try {
-    $a = new class() extends A {
-        public function __debugInfo(): array
-        {
-            new class() {
-                public function __destruct()
-                {
-                    throw new \Exception('z_wo_assign');
-                }
-            };
-
-            return ['foo' => 2];
-        }
-    };
-    print_r($a);
-} catch (\Throwable $e) {
-    echo (string) $e . "\n";
-}
+echo "\nException in __destruct of __debugInfo in anonymous class:\n";
 
 try {
-    $a = new class() extends A {
+    print_r(new class() extends A {
         public function __debugInfo(): array
         {
             $o = new class() {
@@ -61,33 +46,54 @@ try {
 
             return ['foo' => 2];
         }
-    };
-    print_r($a);
+    });
 } catch (\Throwable $e) {
-    echo (string) $e . "\n";
+    echo $e . "\n";
 }
+
+echo "\nException occuring later on:\n";
+
+try {
+    print_r(['foo' => 'bar', 'baz' => new A()]);
+} catch (\Throwable $e) {
+    echo $e . "\n";
+}
+
 ?>
 --EXPECTF--
-Error: x in %s:6
+Exception in __debugInfo:
+A Object
+Error: x in %s:%d
 Stack trace:
 #0 [internal function]: A->__debugInfo()
-#1 %s(12): print_r(Object(A))
+#1 %s(%d): print_r(Object(A))
 #2 {main}
 
-Exception: y in %s:21
+Exception in __debugInfo in anonymous class:
+A@anonymous Object
+Exception: y in %s:%d
 Stack trace:
 #0 [internal function]: A@anonymous->__debugInfo()
-#1 %s(24): print_r(Object(A@anonymous), true)
+#1 %s(%d): print_r(Object(A@anonymous))
 #2 {main}
 
-Exception: z_wo_assign in %s:35
+Exception in __destruct of __debugInfo in anonymous class:
+A@anonymous Object
+Exception: z_w_assign in %s:%d
 Stack trace:
-#0 [internal function]: A@anonymous->__destruct()
-#1 %s(42): print_r(Object(A@anonymous))
+#0 [internal function]: class@anonymous->__destruct()
+#1 %s(%d): print_r(Object(A@anonymous))
 #2 {main}
 
-Exception: z_w_assign in %s:54
+Exception occuring later on:
+Array
+(
+    [foo] => bar
+    [baz] => A Object
+
+)
+Error: x in %s:%d
 Stack trace:
-#0 [internal function]: A@anonymous->__destruct()
-#1 %s(61): print_r(Object(A@anonymous))
+#0 [internal function]: A->__debugInfo()
+#1 %s(%d): print_r(Array)
 #2 {main}
