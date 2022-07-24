@@ -116,7 +116,7 @@ Stack trace:
 HeavilyBiasedEngine
 =====================
 
-RuntimeException: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
@@ -132,7 +132,7 @@ string(2) "ff"
 
 -------
 
-RuntimeException: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}
@@ -144,7 +144,7 @@ Stack trace:
 
 -------
 
-RuntimeException: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}
