@@ -21,9 +21,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
-#include "Zend/zend_exceptions.h"
-
 static uint64_t generate(php_random_status *status)
 {
 	php_random_status_state_user *s = status->state;
@@ -53,7 +50,7 @@ static uint64_t generate(php_random_status *status)
 			result += ((uint64_t) (unsigned char) Z_STRVAL(retval)[i]) << (8 * i);
 		}
 	} else {
-		zend_throw_exception(spl_ce_DomainException, "A random engine must return a non-empty string", 0);
+		zend_throw_error(NULL, "A random engine must return a non-empty string");
 		status->last_unsafe = true;
 		return 0;
 	}

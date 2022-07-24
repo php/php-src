@@ -66,7 +66,7 @@ foreach ([
 EmptyStringEngine
 =====================
 
-DomainException: A random engine must return a non-empty string in %s:%d
+Error: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
@@ -78,7 +78,7 @@ Stack trace:
 
 -------
 
-DomainException: A random engine must return a non-empty string in %s:%d
+Error: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getBytes(1)
 #1 {main}
@@ -90,7 +90,7 @@ Stack trace:
 
 -------
 
-DomainException: A random engine must return a non-empty string in %s:%d
+Error: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}
@@ -102,7 +102,7 @@ Stack trace:
 
 -------
 
-DomainException: A random engine must return a non-empty string in %s:%d
+Error: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}
