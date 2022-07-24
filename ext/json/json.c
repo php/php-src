@@ -157,7 +157,8 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 }
 /* }}} */
 
-PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
+/* {{{ */
+PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth)
 {
 	php_json_parser parser;
 
@@ -171,6 +172,30 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(error_code), error_code);
 		}
 		RETVAL_NULL();
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ */
+PHP_JSON_API zend_result php_is_json_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth)
+{
+	php_json_parser parser;
+
+	options |= PHP_JSON_VALIDATE_ONLY;
+	
+	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth);
+
+	if (php_json_yyparse(&parser)) {
+		php_json_error_code error_code = php_json_parser_error_code(&parser);
+		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+			JSON_G(error_code) = error_code;
+		} else {
+			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(error_code), error_code);
+		}
+		RETVAL_FALSE;
 		return FAILURE;
 	}
 
@@ -213,6 +238,57 @@ PHP_FUNCTION(json_encode)
 	}
 
 	RETURN_STR(smart_str_extract(&buf));
+}
+/* }}} */
+
+/* {{{ Validates if an string contains a valid json */
+PHP_FUNCTION(is_json)
+{
+	char *str;
+	size_t str_len;
+	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
+	zend_long options = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(depth)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if ((options != 0) 
+		&& (!(options & PHP_JSON_THROW_ON_ERROR) && !(options & PHP_JSON_INVALID_UTF8_IGNORE))) {
+		zend_argument_value_error(3, "must be a valid flag (JSON_THROW_ON_ERROR, JSON_INVALID_UTF8_IGNORE)");
+		RETURN_THROWS();
+	}
+
+	if (!str_len) {
+		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+			JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		}
+ 
+		RETURN_FALSE;
+	}
+
+	if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+		JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	}
+
+	if (depth <= 0) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (depth > INT_MAX) {
+		zend_argument_value_error(2, "must be less than %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	if (php_is_json_ex(return_value, str, str_len, options, depth) == SUCCESS) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 

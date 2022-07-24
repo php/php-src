@@ -79,7 +79,14 @@ start:
 		value PHP_JSON_T_EOI
 			{
 				ZVAL_COPY_VALUE(&$$, &$1);
-				ZVAL_COPY_VALUE(parser->return_value, &$1);
+
+				if (parser->scanner.options & PHP_JSON_VALIDATE_ONLY) {
+					zval_ptr_dtor(parser->return_value);
+					ZVAL_BOOL(parser->return_value, true);
+				} else {
+					ZVAL_COPY_VALUE(parser->return_value, &$1);
+				}
+
 				YYACCEPT;
 			}
 ;
@@ -213,18 +220,30 @@ value:
 
 static int php_json_parser_array_create(php_json_parser *parser, zval *array)
 {
+	if (parser->scanner.options & PHP_JSON_VALIDATE_ONLY) {
+		return SUCCESS;
+	}
+
 	array_init(array);
 	return SUCCESS;
 }
 
 static int php_json_parser_array_append(php_json_parser *parser, zval *array, zval *zvalue)
 {
+	if (parser->scanner.options & PHP_JSON_VALIDATE_ONLY) {
+		return SUCCESS;
+	}
+
 	zend_hash_next_index_insert(Z_ARRVAL_P(array), zvalue);
 	return SUCCESS;
 }
 
 static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
+	if (parser->scanner.options & PHP_JSON_VALIDATE_ONLY) {
+		return SUCCESS;
+	}
+
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
 		array_init(object);
 	} else {
@@ -235,6 +254,10 @@ static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 
 static int php_json_parser_object_update(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
 {
+	if (parser->scanner.options & PHP_JSON_VALIDATE_ONLY) {
+		return SUCCESS;
+	}
+
 	/* if JSON_OBJECT_AS_ARRAY is set */
 	if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
@@ -258,6 +281,11 @@ static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
 	int token = php_json_scan(&parser->scanner);
 	value->value = parser->scanner.value;
+	
+	if (parser->scanner.options & PHP_JSON_VALIDATE_ONLY) {
+		zval_ptr_dtor_str(&(parser->scanner.value));
+	}
+
 	return token;
 }
 
