@@ -2,6 +2,7 @@
 Changing LC_CTYPE back to C
 --SKIPIF--
 <?php
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (!setlocale(LC_CTYPE, "de_DE", "de-DE")) die("skip requires de_DE locale");
 ?>
 --FILE--
