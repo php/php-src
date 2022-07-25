@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://localhost/" xmlns:ns1="http://localhost/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://localhost/" elementFormDefault="qualified" attributeFormDefault="qualified">
+			<xsd:complexType name="TestFunctionRequestType">
+				<xsd:sequence>
+					<xsd:element name="Param1" type="xsd:string" />
+					<xsd:element name="Param2" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:complexType name="TestFunctionResponseType">
+				<xsd:sequence>
+					<xsd:element name="Param1" type="xsd:string" />
+					<xsd:element name="Param2" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="testFunctionIn" type="ns1:TestFunctionRequestType"/>
+			<xsd:element name="testFunctionOut" type="ns1:TestFunctionResponseType"/>
+		</xsd:schema>
+	</wsdl:types>	
+	<wsdl:message name="testFunctionRequest">
+		<wsdl:part element="ns1:testFunctionIn" name="testFunctionIn"/>
+	</wsdl:message>
+	<wsdl:message name="testFunctionResponse">
+		<wsdl:part element="ns1:testFunctionOut" name="testFunctionOut"/>
+	</wsdl:message>
+	<wsdl:portType name="TestServicePortType">
+		<wsdl:operation name="testFunction">
+			<wsdl:input message="ns1:testFunctionRequest" name="testFunctionRequest"/>
+			<wsdl:output message="ns1:testFunctionResponse" name="testFunctionResponse"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="TestServiceHttpBinding" type="ns1:TestServicePortType">
+		<wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="testFunction">
+			<wsdlsoap:operation soapAction=""/>
+			<wsdl:input name="testFunctionRequest">
+				<wsdlsoap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="testFunctionResponse">
+				<wsdlsoap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="TestService">
+		<wsdl:port binding="ns1:TestServiceHttpBinding" name="TestServiceHttpPort">
+			<wsdlsoap:address location="http://localhost"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
