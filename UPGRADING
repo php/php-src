@@ -45,7 +45,9 @@ PHP 8.2 UPGRADE NOTES
     stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
     array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
     conversion.
-  . str_split returns an empty array on empty string.
+  . str_split() returns an empty array for an empty string now. Previously it
+    returned an array with a single empty string entry. mb_str_split() is not
+    affected by this change since it was already behaving like that.
 
 - SPL:
   . The following methods now enforce their signature:
