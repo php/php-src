@@ -82,6 +82,8 @@ static zend_object_handlers random_engine_xoshiro256starstar_object_handlers;
 static zend_object_handlers random_engine_secure_object_handlers;
 static zend_object_handlers random_randomizer_object_handlers;
 
+#define RANDOM_RANGE_ATTEMPTS (50)
+
 static inline uint32_t rand_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax)
 {
 	uint32_t result, limit, r;
@@ -118,7 +120,8 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
-		if (++count > 50) {
+		if (++count > RANDOM_RANGE_ATTEMPTS) {
+			zend_throw_error(NULL, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
 			status->last_unsafe = true;
 			return 0;
 		}
@@ -174,7 +177,8 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
-		if (++count > 50) {
+		if (++count > RANDOM_RANGE_ATTEMPTS) {
+			zend_throw_error(NULL, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
 			status->last_unsafe = true;
 			return 0;
 		}

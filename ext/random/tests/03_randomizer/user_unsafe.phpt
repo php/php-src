@@ -3,81 +3,155 @@ Random: Randomizer: User: Engine unsafe
 --FILE--
 <?php
 
-// Empty generator
-$randomizer = (new \Random\Randomizer(
-    new class () implements \Random\Engine {
-        public function generate(): string
-        {
-            return '';
-        }
+use Random\Randomizer;
+
+final class EmptyStringEngine implements \Random\Engine {
+    public function generate(): string
+    {
+        return '';
     }
-));
-
-try {
-    var_dump($randomizer->getInt(\PHP_INT_MIN, \PHP_INT_MAX));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
 }
 
-try {
-    var_dump(bin2hex($randomizer->getBytes(1)));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
-}
-
-try {
-    var_dump($randomizer->shuffleArray(\range(1, 10)));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
-}
-
-try {
-    var_dump($randomizer->shuffleBytes('foobar'));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
-}
-
-// Infinite loop
-$randomizer = (new \Random\Randomizer(
-    new class () implements \Random\Engine {
-        public function generate(): string
-        {
-            return "\xff\xff\xff\xff\xff\xff\xff\xff";
-        }
+final class HeavilyBiasedEngine implements \Random\Engine {
+    public function generate(): string
+    {
+        return "\xff\xff\xff\xff\xff\xff\xff\xff";
     }
-));
-
-try {
-    var_dump($randomizer->getInt(\PHP_INT_MIN, \PHP_INT_MAX));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
 }
 
-try {
-    var_dump(bin2hex($randomizer->getBytes(1)));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
-}
+echo "=====================", PHP_EOL;
 
-try {
-    var_dump($randomizer->shuffleArray(\range(1, 10)));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
-}
+foreach ([
+    EmptyStringEngine::class,
+    HeavilyBiasedEngine::class,
+] as $engine) {
+    echo $engine, PHP_EOL, "=====================", PHP_EOL, PHP_EOL;
 
-try {
-    var_dump($randomizer->shuffleBytes('foobar'));
-} catch (\RuntimeException $e) {
-    echo $e->getMessage() . PHP_EOL;
+    try {
+        var_dump((new Randomizer(new $engine()))->getInt(0, 123));
+    } catch (Throwable $e) {
+        echo $e, PHP_EOL;
+    }
+    
+    echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
+    
+    try {
+        var_dump(bin2hex((new Randomizer(new $engine()))->getBytes(1)));
+    } catch (Throwable $e) {
+        echo $e, PHP_EOL;
+    }
+    
+    echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
+    
+    try {
+        var_dump((new Randomizer(new $engine()))->shuffleArray(\range(1, 10)));
+    } catch (Throwable $e) {
+        echo $e, PHP_EOL;
+    }
+    
+    echo PHP_EOL, "-------", PHP_EOL, PHP_EOL;
+    
+    try {
+        var_dump((new Randomizer(new $engine()))->shuffleBytes('foobar'));
+    } catch (Throwable $e) {
+        echo $e, PHP_EOL;
+    }
+
+    echo PHP_EOL, "=====================", PHP_EOL;
 }
 
 ?>
 --EXPECTF--
-Random number generation failed
-Random number generation failed
-Random number generation failed
-Random number generation failed
-int(%d)
+=====================
+EmptyStringEngine
+=====================
+
+Error: A random engine must return a non-empty string in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
+#1 {main}
+
+-------
+
+Error: A random engine must return a non-empty string in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getBytes(1)
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getBytes(1)
+#1 {main}
+
+-------
+
+Error: A random engine must return a non-empty string in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleArray(Array)
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleArray(Array)
+#1 {main}
+
+-------
+
+Error: A random engine must return a non-empty string in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
+#1 {main}
+
+=====================
+HeavilyBiasedEngine
+=====================
+
+Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->getInt(0, 123)
+#1 {main}
+
+-------
+
 string(2) "ff"
-Random number generation failed
-Random number generation failed
+
+-------
+
+Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleArray(Array)
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleArray(Array)
+#1 {main}
+
+-------
+
+Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
+#1 {main}
+
+Next RuntimeException: Random number generation failed in %s:%d
+Stack trace:
+#0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
+#1 {main}
+
+=====================
