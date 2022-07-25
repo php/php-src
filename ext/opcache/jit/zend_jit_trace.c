@@ -4230,6 +4230,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			bool op1_indirect;
 			zend_class_entry *op1_ce = NULL;
 			zend_class_entry *op2_ce = NULL;
+			bool gen_handler;
 
 			opline = p->opline;
 			if (op1_type & (IS_TRACE_REFERENCE|IS_TRACE_INDIRECT)) {
@@ -4273,6 +4274,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 
 			if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_INLINE) {
+				gen_handler = 0;
 				switch (opline->opcode) {
 					case ZEND_PRE_INC:
 					case ZEND_PRE_DEC:
@@ -6141,6 +6143,7 @@ generic_dynamic_call:
 			}
 
 			if (opline->opcode != ZEND_NOP && opline->opcode != ZEND_JMP) {
+				gen_handler = 1;
 				op1_info = OP1_INFO();
 				op2_info = OP2_INFO();
 				if (op1_info & MAY_BE_GUARD) {
@@ -6229,7 +6232,7 @@ done:
 						}
 					} else {
 						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type,
-							(type == IS_UNKNOWN || !ra || !ra[ssa_op->result_def]));
+							(gen_handler || type == IS_UNKNOWN || !ra || !ra[ssa_op->result_def]));
 						if (ssa->var_info[ssa_op->result_def].type & MAY_BE_INDIRECT) {
 							RESET_STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var));
 						}
@@ -6284,7 +6287,7 @@ done:
 						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
-						(type == IS_UNKNOWN || !ra ||
+						(gen_handler || type == IS_UNKNOWN || !ra ||
 							(!ra[ssa_op->op1_def] &&
 								(opline->opcode == ZEND_ASSIGN || !ssa->vars[ssa_op->op1_def].no_val))));
 					if (type != IS_UNKNOWN) {
@@ -6331,7 +6334,7 @@ done:
 						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var));
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), type,
-						(type == IS_UNKNOWN || !ra ||
+						(gen_handler || type == IS_UNKNOWN || !ra ||
 							(!ra[ssa_op->op2_def] && !ssa->vars[ssa_op->op2_def].no_val)));
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
@@ -6384,7 +6387,7 @@ done:
 								type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
 							}
 							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
-								(type == IS_UNKNOWN || !ra || !ra[ssa_op->op1_def]));
+								(gen_handler || type == IS_UNKNOWN || !ra || !ra[ssa_op->op1_def]));
 							if (type != IS_UNKNOWN) {
 								ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 								if (ra && ra[ssa_op->op1_def]) {
@@ -6415,7 +6418,7 @@ done:
 									type = concrete_type(ssa->var_info[ssa_op->result_def].type);
 								}
 								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type,
-									(!ra || !ra[ssa_op->result_def]));
+									(gen_handler || !ra || !ra[ssa_op->result_def]));
 								if (ra && ra[ssa_op->result_def]) {
 									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def]->reg,
 										ra[ssa_op->result_def]->flags & ZREG_STORE);
@@ -6437,7 +6440,7 @@ done:
 									type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
 								}
 								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
-									(!ra || !ra[ssa_op->op1_def]));
+									(gen_handler || !ra || !ra[ssa_op->op1_def]));
 								if (ra && ra[ssa_op->op1_def]) {
 									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
 										ra[ssa_op->op1_def]->flags & ZREG_STORE);
