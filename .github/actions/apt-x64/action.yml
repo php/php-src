@@ -17,6 +17,8 @@ runs:
                 pkgconf \
                 mysql-client \
                 aspell-dev \
+                hunspell-dev \
+                hunspell-en \
                 bzip2-dev \
                 curl-dev \
                 freetype-dev \
