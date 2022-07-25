@@ -62,6 +62,8 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
+#include "snmp_arginfo.h"
+
 /* For net-snmp prior to 5.4 */
 #ifndef HAVE_SHUTDOWN_SNMP_LOGGING
 extern netsnmp_log_handler *logh_head;
@@ -72,12 +74,6 @@ extern netsnmp_log_handler *logh_head;
 			netsnmp_remove_loghandler( logh_head ); \
 	}
 #endif
-
-#define SNMP_VALUE_LIBRARY	(0 << 0)
-#define SNMP_VALUE_PLAIN	(1 << 0)
-#define SNMP_VALUE_OBJECT	(1 << 1)
-
-#include "snmp_arginfo.h"
 
 typedef struct snmp_session php_snmp_session;
 
@@ -90,23 +86,6 @@ typedef struct snmp_session php_snmp_session;
 		i++; \
 	} \
 }
-
-#define PHP_SNMP_ERRNO_NOERROR			0
-#define PHP_SNMP_ERRNO_GENERIC			(1 << 1)
-#define PHP_SNMP_ERRNO_TIMEOUT			(1 << 2)
-#define PHP_SNMP_ERRNO_ERROR_IN_REPLY		(1 << 3)
-#define PHP_SNMP_ERRNO_OID_NOT_INCREASING	(1 << 4)
-#define PHP_SNMP_ERRNO_OID_PARSING_ERROR	(1 << 5)
-#define PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES	(1 << 6)
-#define PHP_SNMP_ERRNO_ANY	( \
-		PHP_SNMP_ERRNO_GENERIC | \
-		PHP_SNMP_ERRNO_TIMEOUT | \
-		PHP_SNMP_ERRNO_ERROR_IN_REPLY | \
-		PHP_SNMP_ERRNO_OID_NOT_INCREASING | \
-		PHP_SNMP_ERRNO_OID_PARSING_ERROR | \
-		PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES | \
-		PHP_SNMP_ERRNO_NOERROR \
-	)
 
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);

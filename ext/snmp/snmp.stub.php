@@ -56,7 +56,7 @@ const SNMP_VALUE_OBJECT = UNKNOWN;
 const SNMP_BIT_STR = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(ASN_OCTET_STRLONG_CONST)
+ * @cvalue LONG_CONST(ASN_OCTET_STR)
  */
 const SNMP_OCTET_STR = UNKNOWN;
 /**
