@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3855d7a038193445e6d881b157ac902deedf3676 */
+ * Stub hash: 64a10ff1af71cb2f9024f73ddaa34a924b85b968 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -294,6 +294,11 @@ static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
 	ZEND_ME(ZendTestNS2_ZendSubNS_Foo, method, arginfo_class_ZendTestNS2_ZendSubNS_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_test_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
+}
 
 static zend_class_entry *register_class__ZendTestInterface(void)
 {

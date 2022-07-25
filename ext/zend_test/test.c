@@ -632,7 +632,7 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_trait = register_class__ZendTestTrait();
 
-	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
+	register_test_symbols(module_number);
 
 	zend_test_attribute = register_class_ZendTestAttribute();
 	{

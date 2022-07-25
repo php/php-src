@@ -6,6 +6,12 @@
  */
 namespace {
 
+    /**
+     * @var int
+     * @deprecated
+     */
+    const ZEND_TEST_DEPRECATED = 42;
+
     require "Zend/zend_attributes.stub.php";
 
     interface _ZendTestInterface
