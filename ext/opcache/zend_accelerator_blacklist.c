@@ -241,7 +241,7 @@ static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filena
 {
 	char buf[MAXPATHLEN + 1], real_path[MAXPATHLEN + 1], *blacklist_path = NULL;
 	FILE *fp;
-	int path_length, blacklist_path_length = NULL;
+	int path_length, blacklist_path_length = 0;
 
 	if ((fp = fopen(filename, "r")) == NULL) {
 		zend_accel_error(ACCEL_LOG_WARNING, "Cannot load blacklist file: %s\n", filename);
