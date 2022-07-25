@@ -81,8 +81,8 @@ PHP                                                                        NEWS
     iterable. (timwolla)
 
 - Standard:
-    . Implemented FR GH-8924 (str_split should return empty array for empty
-      string). (Michael Vorisek)
+  . Implemented FR GH-8924 (str_split should return empty array for empty
+    string). (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
     notation to int. (Dennis Snell)
   . Enable arc4random_buf for Linux glibc 2.36 and onwards
