@@ -31,7 +31,6 @@ static uint64_t generate(php_random_status *status)
 	zend_call_known_instance_method_with_0_params(s->generate_method, s->object, &retval);
 
 	if (EG(exception)) {
-		status->last_unsafe = true;
 		return 0;
 	}
 
@@ -51,7 +50,6 @@ static uint64_t generate(php_random_status *status)
 		}
 	} else {
 		zend_throw_error(NULL, "A random engine must return a non-empty string");
-		status->last_unsafe = true;
 		return 0;
 	}
 

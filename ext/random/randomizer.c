@@ -105,7 +105,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 			zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
 			RETURN_THROWS();
 		}
-		if (randomizer->status->last_unsafe) {
+		if (EG(exception)) {
 			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 			RETURN_THROWS();
 		}
@@ -123,7 +123,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 	}
 
 	result = randomizer->algo->range(randomizer->status, min, max);
-	if (randomizer->status->last_unsafe) {
+	if (EG(exception)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
@@ -155,7 +155,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 
 	while (total_size < required_size) {
 		result = randomizer->algo->generate(randomizer->status);
-		if (randomizer->status->last_unsafe) {
+		if (EG(exception)) {
 			zend_string_free(retval);
 			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 			RETURN_THROWS();

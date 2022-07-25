@@ -96,7 +96,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 		r = algo->generate(status);
 		result = result | (r << (total_size * 8));
 		total_size += status->last_generated_size;
-		if (status->last_unsafe) {
+		if (EG(exception)) {
 			return 0;
 		}
 	} while (total_size < sizeof(uint32_t));
@@ -122,7 +122,6 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > RANDOM_RANGE_ATTEMPTS) {
 			zend_throw_error(NULL, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
-			status->last_unsafe = true;
 			return 0;
 		}
 
@@ -132,7 +131,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 			r = algo->generate(status);
 			result = result | (r << (total_size * 8));
 			total_size += status->last_generated_size;
-			if (status->last_unsafe) {
+			if (EG(exception)) {
 				return 0;
 			}
 		} while (total_size < sizeof(uint32_t));
@@ -153,7 +152,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 		r = algo->generate(status);
 		result = result | (r << (total_size * 8));
 		total_size += status->last_generated_size;
-		if (status->last_unsafe) {
+		if (EG(exception)) {
 			return 0;
 		}
 	} while (total_size < sizeof(uint64_t));
@@ -179,7 +178,6 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > RANDOM_RANGE_ATTEMPTS) {
 			zend_throw_error(NULL, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
-			status->last_unsafe = true;
 			return 0;
 		}
 
@@ -189,7 +187,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 			r = algo->generate(status);
 			result = result | (r << (total_size * 8));
 			total_size += status->last_generated_size;
-			if (status->last_unsafe) {
+			if (EG(exception)) {
 				return 0;
 			}
 		} while (total_size < sizeof(uint64_t));
@@ -245,7 +243,6 @@ PHPAPI php_random_status *php_random_status_alloc(const php_random_algo *algo, c
 	php_random_status *status = pecalloc(1, sizeof(php_random_status), persistent);
 
 	status->last_generated_size = algo->generate_size;
-	status->last_unsafe = false;
 	status->state = algo->state_size > 0 ? pecalloc(1, algo->state_size, persistent) : NULL;
 
 	return status;
@@ -254,7 +251,6 @@ PHPAPI php_random_status *php_random_status_alloc(const php_random_algo *algo, c
 PHPAPI php_random_status *php_random_status_copy(const php_random_algo *algo, php_random_status *old_status, php_random_status *new_status)
 {
 	new_status->last_generated_size = old_status->last_generated_size;
-	new_status->last_unsafe = old_status->last_unsafe;
 	new_status->state = memcpy(new_status->state, old_status->state, algo->state_size);
 
 	return new_status;

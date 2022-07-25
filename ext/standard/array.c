@@ -2936,7 +2936,7 @@ PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_statu
 		}
 		while (--n_left) {
 			rnd_idx = algo->range(status, 0, n_left);
-			if (status->last_unsafe) {
+			if (EG(exception)) {
 				return false;
 			}
 			if (rnd_idx != n_left) {
@@ -2964,7 +2964,7 @@ PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_statu
 		}
 		while (--n_left) {
 			rnd_idx = algo->range(status, 0, n_left);
-			if (status->last_unsafe) {
+			if (EG(exception)) {
 				return false;
 			}
 			if (rnd_idx != n_left) {
