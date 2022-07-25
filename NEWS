@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9008 (mb_detect_encoding(): wrong results with null $encodings).
     (cmb)
 
+- OPcache:
+  . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
+    (cmb)
+
 04 Aug 2022, PHP 8.1.9
 
 - CLI:
