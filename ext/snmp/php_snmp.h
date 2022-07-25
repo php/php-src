@@ -92,8 +92,6 @@ ZEND_END_MODULE_GLOBALS(snmp)
 #define SNMP_G(v) (snmp_globals.v)
 #endif
 
-#define LONG_CONST(c) (zend_long) c
-
 #define SNMP_VALUE_LIBRARY	(0 << 0)
 #define SNMP_VALUE_PLAIN	(1 << 0)
 #define SNMP_VALUE_OBJECT	(1 << 1)
