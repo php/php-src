@@ -125,7 +125,7 @@ dba_open(): Argument #2 ($mode) first character must be one of "r", "w", "c", or
 dba_open(): Argument #2 ($mode) second character must be one of "d", "l", "-", or "t"
 dba_open(): Argument #2 ($mode) third character must be "t"
 dba_open(): Argument #2 ($mode) cannot combine mode "-" (no lock) and "t" (test lock)
-dba_open(): Argument #5 ($map_size) must be greater or equal than 0
+dba_open(): Argument #5 ($map_size) must be greater than or equal to 0
 === Invalid arguments dba_popen() ===
 
 Warning: dba_popen(): Handler "bogus" is not available in %sdba011.php on line %d
@@ -137,4 +137,4 @@ dba_popen(): Argument #2 ($mode) first character must be one of "r", "w", "c", o
 dba_popen(): Argument #2 ($mode) second character must be one of "d", "l", "-", or "t"
 dba_popen(): Argument #2 ($mode) third character must be "t"
 dba_popen(): Argument #2 ($mode) cannot combine mode "-" (no lock) and "t" (test lock)
-dba_popen(): Argument #5 ($map_size) must be greater or equal than 0
+dba_popen(): Argument #5 ($map_size) must be greater than or equal to 0

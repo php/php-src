@@ -502,12 +502,12 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	}
 	// TODO Check Value for permission
 	if (map_size < 0) {
-		zend_argument_value_error(5, "must be greater or equal than 0");
+		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
 	if (!is_flags_null && driver_flags < 0) {
-		zend_argument_value_error(6, "must be greater or equal than 0");
+		zend_argument_value_error(6, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 

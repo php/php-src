@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-dba_open(): Argument #6 ($flags) must be greater or equal than 0
+dba_open(): Argument #6 ($flags) must be greater than or equal to 0
