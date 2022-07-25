@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.1.11
 
 - Core:
+  . Fixed bug #81726: phar wrapper: DOS when using quine gzip file.
+    (CVE-2022-31628). (cmb)
   . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
     (Tim Starling)
   . Fixed bug GH-9361 (Segmentation fault on script exit #9379). (cmb,
