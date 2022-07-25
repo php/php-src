@@ -5423,6 +5423,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
+		if (op1_addr == res_addr && (op2_info & MAY_BE_RCN)) {
+			/* compound assignment may decrement "op2" refcount */
+			op2_info |= MAY_BE_RC1;
+		}
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL
 		|	FREE_OP op2_type, op2, op2_info, 0, NULL
 		if (may_throw) {

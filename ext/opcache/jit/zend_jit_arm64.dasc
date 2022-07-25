@@ -4928,6 +4928,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		} else {
 			ZEND_UNREACHABLE();
 		}
+		if (op1_addr == res_addr && (op2_info & MAY_BE_RCN)) {
+			/* compound assignment may decrement "op2" refcount */
+			op2_info |= MAY_BE_RC1;
+		}
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
 		|	FREE_OP op2_type, op2, op2_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
 		if (may_throw) {
