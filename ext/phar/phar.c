@@ -1635,7 +1635,8 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 	const char zip_magic[] = "PK\x03\x04";
 	const char gz_magic[] = "\x1f\x8b\x08";
 	const char bz_magic[] = "BZh";
-	char *pos, test = '\0';
+	char *pos;
+	int recursion_count = 3; // arbitrary limit to avoid too deep or even infinite recursion
 	const int window_size = 1024;
 	char buffer[1024 + sizeof(token)]; /* a 1024 byte window + the size of the halt_compiler token (moving window) */
 	const zend_long readsize = sizeof(buffer) - sizeof(token);
@@ -1663,8 +1664,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated entry)")
 		}
 
-		if (!test) {
-			test = '\1';
+		if (recursion_count) {
 			pos = buffer+tokenlen;
 			if (!memcmp(pos, gz_magic, 3)) {
 				char err = 0;
@@ -1724,7 +1724,10 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 				compression = PHAR_FILE_COMPRESSED_GZ;
 
 				/* now, start over */
-				test = '\0';
+				if (!--recursion_count) {
+					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\"");
+					break;
+				}
 				continue;
 			} else if (!memcmp(pos, bz_magic, 3)) {
 				php_stream_filter *filter;
@@ -1762,7 +1765,10 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 				compression = PHAR_FILE_COMPRESSED_BZ2;
 
 				/* now, start over */
-				test = '\0';
+				if (!--recursion_count) {
+					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\"");
+					break;
+				}
 				continue;
 			}
 
