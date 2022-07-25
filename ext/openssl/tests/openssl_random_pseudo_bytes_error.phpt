@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-openssl_random_pseudo_bytes(): Argument #1 ($length) must be greater than 0
+openssl_random_pseudo_bytes(): Argument #1 ($length) must be greater than 0 and less than 2147483648
