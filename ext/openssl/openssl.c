@@ -7642,8 +7642,12 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_length)
 {
 	zend_string *buffer = NULL;
-	if (buffer_length <= 0 || ZEND_LONG_INT_OVFL(buffer_length)) {
-		zend_argument_value_error(1, "must be greater than 0 and less than 2147483648");
+	if (buffer_length <= 0) {
+		zend_argument_value_error(1, "must be greater than 0");
+		return NULL;
+	}
+	if (ZEND_LONG_INT_OVFL(buffer_length)) {
+		zend_argument_value_error(1, "must be less than 2147483648");
 		return NULL;
 	}
 	buffer = zend_string_alloc(buffer_length, 0);
