@@ -151,7 +151,7 @@ function main(): void
     global $DETAILED, $PHP_FAILED_TESTS, $SHOW_ONLY_GROUPS, $argc, $argv, $cfg,
            $cfgfiles, $cfgtypes, $conf_passed, $end_time, $environment,
            $exts_skipped, $exts_tested, $exts_to_test, $failed_tests_file,
-           $ignored_by_ext, $ini_overwrites, $is_switch, $colorize,
+           $ignored_by_ext, $ini_overwrites, $is_switch, $colorize, $github_actions,
            $log_format, $matches, $no_clean, $no_file_cache,
            $optionals, $pass_option_n, $pass_options,
            $pattern_match, $php, $php_cgi, $phpdbg, $preload, $redir_tests,
@@ -350,6 +350,10 @@ function main(): void
     }
     if (array_key_exists('NO_COLOR', $environment)) {
         $colorize = false;
+    }
+    $github_actions = false;
+    if (array_key_exists('CI', $environment) && array_key_exists('GITHUB_ACTIONS', $environment)) {
+        $github_actions = true;
     }
     $selected_tests = false;
     $slow_min_ms = INF;
@@ -2117,9 +2121,9 @@ TEST $file
 
         if (!strncasecmp('skip', $output, 4)) {
             if (preg_match('/^skip\s*(.+)/i', $output, $m)) {
-                show_result('SKIP', $tested, $tested_file, "reason: $m[1]", $temp_filenames);
+                show_result('SKIP', $tested, $tested_file, "reason: $m[1]");
             } else {
-                show_result('SKIP', $tested, $tested_file, '', $temp_filenames);
+                show_result('SKIP', $tested, $tested_file, '');
             }
 
             $message = !empty($m[1]) ? $m[1] : '';
@@ -2137,7 +2141,7 @@ TEST $file
             // Pretend we have an XFAIL section
             $test->setSection('XFAIL', ltrim(substr($output, 5)));
         } elseif ($output !== '') {
-            show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
+            show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF');
             $PHP_FAILED_TESTS['BORKED'][] = [
                 'name' => $file,
                 'test_name' => '',
@@ -2153,7 +2157,7 @@ TEST $file
 
     if (!extension_loaded("zlib") && $test->hasAnySections("GZIP_POST", "DEFLATE_POST")) {
         $message = "ext/zlib required";
-        show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
+        show_result('SKIP', $tested, $tested_file, "reason: $message");
         $junit->markTestAs('SKIP', $shortname, $tested, null, $message);
         return 'SKIPPED';
     }
@@ -2200,7 +2204,7 @@ TEST $file
         }
 
         $bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
-        show_result("BORK", $bork_info, '', '', $temp_filenames);
+        show_result("BORK", $bork_info, '', '');
         $PHP_FAILED_TESTS['BORKED'][] = [
             'name' => $file,
             'test_name' => '',
@@ -2216,7 +2220,7 @@ TEST $file
         }
 
         $bork_info = "Redirected test did not contain redirection info";
-        show_result("BORK", $bork_info, '', '', $temp_filenames);
+        show_result("BORK", $bork_info, '', '');
         $PHP_FAILED_TESTS['BORKED'][] = [
             'name' => $file,
             'test_name' => '',
@@ -2612,7 +2616,7 @@ COMMAND $cmd
         if (!$leaked && !$failed_headers) {
             // If the test passed and CLEAN produced output, report test as borked.
             if ($clean_output) {
-                show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
+                show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN');
                     $PHP_FAILED_TESTS['BORKED'][] = [
                     'name' => $file,
                     'test_name' => '',
@@ -2632,7 +2636,7 @@ COMMAND $cmd
                 $warn = true;
                 $info = " (warn: XLEAK section but test passes)";
             } else {
-                show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+                show_result("PASS", $tested, $tested_file, '');
                 $junit->markTestAs('PASS', $shortname, $tested);
                 return 'PASSED';
             }
@@ -2750,7 +2754,9 @@ SH;
         show_file_block('mem', file_get_contents($memcheck_filename));
     }
 
-    show_result(implode('&', $restype), $tested, $tested_file, $info, $temp_filenames);
+    $diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
+
+    show_result(implode('&', $restype), $tested, $tested_file, $info, $diff);
 
     foreach ($restype as $type) {
         $PHP_FAILED_TESTS[$type . 'ED'][] = [
@@ -2761,8 +2767,6 @@ SH;
             'info' => $info,
         ];
     }
-
-    $diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
     $junit->markTestAs($restype, $shortname, $tested, null, $info, $diff);
 
@@ -3278,9 +3282,9 @@ function show_result(
     string $tested,
     string $tested_file,
     string $extra = '',
-    ?array $temp_filenames = null
+    string $diff = ''
 ): void {
-    global $SHOW_ONLY_GROUPS, $colorize;
+    global $SHOW_ONLY_GROUPS, $colorize, $github_actions;
 
     if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
         if ($colorize) {
@@ -3301,6 +3305,54 @@ function show_result(
             echo "$color $tested [$tested_file] $extra\n";
         } else {
             echo "$result $tested [$tested_file] $extra\n";
+        }
+
+        if ($github_actions) {
+            $title = $tested;
+            $message = '';
+
+            $type = null;
+            switch ( $result ) {
+                case 'FAIL':
+                    $type = 'error';
+                    $message = "Test failed" . ($extra ? " - {$extra}" : '');
+                    break;
+                case 'BORK':
+                    $type = 'error';
+                    $message = "Test borked" . ($extra ? " - {$extra}" : '');
+                    break;
+                case 'LEAK':
+                    $type = 'error';
+                    $message = "Test leaked" . ($extra ? " - {$extra}" : '');
+                    break;
+                case 'LEAK&FAIL':
+                    $type = 'error';
+                    $message = "Test failed and leaked" . ($extra ? " - {$extra}" : '');
+                    break;
+                case 'WARN':
+                    $type = 'warning';
+                    $message = "Test warned" . ($extra ? " - {$extra}" : '');
+                    break;
+            }
+
+            $message .= "\n\n{$diff}";
+
+            if ($type !== null) {
+                $title = strtr($title, [
+                    "%" => '%25',
+                    "\r" => '%0D',
+                    "\n" => '%0A',
+                    ":" => '%3A',
+                    "," => '%2C',
+                ]);
+                $message = strtr($message, [
+                    "%" => '%25',
+                    "\r" => '%0D',
+                    "\n" => '%0A',
+                ]);
+
+                echo "::{$type} file={$tested_file},title={$title}::{$message}\n";
+            }
         }
     } elseif (!$SHOW_ONLY_GROUPS) {
         clear_show_test();
