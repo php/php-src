@@ -860,11 +860,10 @@ restart:
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #elif defined(PHP_WIN32)
 			} else if (modenr == DBA_CREAT && need_creation && !restarted) {
-				zend_bool close_both;
-
-				close_both = (info->fp != info->lock.fp);
-				php_stream_free(info->lock.fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
-				if (close_both) {
+				if (info->lock.fp != NULL) {
+					php_stream_free(info->lock.fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
+				}
+				if (info->fp != info->lock.fp) {
 					php_stream_free(info->fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
 				}
 				info->fp = NULL;

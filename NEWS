@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - DBA:
   . Fixed LMDB driver memory leak on DB creation failure (Girgias)
+  . Fixed bug GH-9155 (dba_open("non-existing", "c-", "flatfile") segfaults).
+    (cmb)
 
 - OPcache:
   . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
