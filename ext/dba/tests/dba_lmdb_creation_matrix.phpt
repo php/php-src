@@ -27,20 +27,20 @@ Mode parameter is "rl":
 
 Notice: dba_open(): Handler lmdb does locking internally in %s on line %d
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
-Insertion failed
+Warning: dba_open(): Driver initialization failed for handler: lmdb: No such file or directory in %s on line %d
+Opening DB failed
 Mode parameter is "rd":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
-Insertion failed
+Warning: dba_open(): Driver initialization failed for handler: lmdb: No such file or directory in %s on line %d
+Opening DB failed
 Mode parameter is "r-":
 
 Warning: dba_open(): Locking cannot be disabled for handler lmdb in %s on line %d
 Opening DB failed
 Mode parameter is "r":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
-Insertion failed
+Warning: dba_open(): Driver initialization failed for handler: lmdb: No such file or directory in %s on line %d
+Opening DB failed
 Mode parameter is "wl":
 
 Notice: dba_open(): Handler lmdb does locking internally in %s on line %d
@@ -82,11 +82,11 @@ Mode parameter is "rl":
 
 Notice: dba_open(): Handler lmdb does locking internally in %s on line %d
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
+Warning: dba_insert(): Cannot perform a modification on a readonly database in %s on line %d
 Insertion failed
 Mode parameter is "rd":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
+Warning: dba_insert(): Cannot perform a modification on a readonly database in %s on line %d
 Insertion failed
 Mode parameter is "r-":
 
@@ -94,7 +94,7 @@ Warning: dba_open(): Locking cannot be disabled for handler lmdb in %s on line %
 Opening DB failed
 Mode parameter is "r":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
+Warning: dba_insert(): Cannot perform a modification on a readonly database in %s on line %d
 Insertion failed
 Mode parameter is "wl":
 

@@ -74,19 +74,19 @@ This is a test insert
 === OPENING EXISTING DB FILE ===
 Mode parameter is "rl":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
+Warning: dba_insert(): Cannot perform a modification on a readonly database in %s on line %d
 Insertion failed
 Mode parameter is "rd":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
+Warning: dba_insert(): Cannot perform a modification on a readonly database in %s on line %d
 Insertion failed
 Mode parameter is "r-":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
+Warning: dba_insert(): Cannot perform a modification on a readonly database in %s on line %d
 Insertion failed
 Mode parameter is "r":
 
-Warning: dba_insert(): You cannot perform a modification to a database without proper access in %s on line %d
+Warning: dba_insert(): Cannot perform a modification on a readonly database in %s on line %d
 Insertion failed
 Mode parameter is "wl":
 This is a test insert
