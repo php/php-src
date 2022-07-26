@@ -301,7 +301,7 @@ PHP_METHOD(Random_Engine_Mt19937, generate)
 
 	generated = engine->algo->generate(engine->status);
 	size = engine->status->last_generated_size;
-	if (engine->status->last_unsafe) {
+	if (EG(exception)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
