@@ -15,6 +15,8 @@ $file = new SplFileObject($filename);
 $file->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_CSV);
 var_dump(iterator_to_array($file));
 
+echo "\n====\n\n";
+
 $file->rewind();
 while (($record = $file->fgetcsv())) {
   var_dump($record);
@@ -42,6 +44,9 @@ baz"
     string(3) "qux"
   }
 }
+
+====
+
 array(2) {
   [0]=>
   string(12) "foo
