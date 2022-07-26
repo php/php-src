@@ -2690,7 +2690,9 @@ COMMAND $cmd
             $orig_shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
             $diff = "# original source file: $orig_shortname\n" . $diff;
         }
-        show_file_block('diff', $diff);
+        if (!$SHOW_ONLY_GROUPS || array_intersect($restype, $SHOW_ONLY_GROUPS)) {
+            show_file_block('diff', $diff);
+        }
         if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, $diff) === false) {
             error("Cannot create test diff - $diff_filename");
         }
