@@ -40,9 +40,6 @@ static void mb_wchar_to_cp50220(uint32_t *in, size_t len, mb_convert_buf *buf, b
 static void mb_wchar_to_cp50221(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 static void mb_wchar_to_cp50222(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
-/* See mbstring.c */
-uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, int mode);
-
 /* Previously, a dubious 'encoding' called 'cp50220raw' was supported
  * This was just CP50220, but the implementation was less strict regarding
  * invalid characters; it would silently pass some through
@@ -331,6 +328,198 @@ static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+/* Apply various transforms to input codepoint, such as converting halfwidth katakana
+ * to fullwidth katakana. `mode` is a bitfield which controls which transforms are
+ * actually performed. The bit values are defined in translit_kana_jisx0201_jisx0208.h.
+ * `mode` must not call for transforms which are inverses (i.e. which would cancel
+ * each other out).
+ *
+ * In some cases, successive input codepoints may be merged into one output codepoint.
+ * (That is the purpose of the `next` parameter.) If the `next` codepoint is consumed
+ * and should be skipped over, `*consumed` will be set to true. Otherwise, `*consumed`
+ * will not be modified. If there is no following codepoint, `next` should be zero.
+ *
+ * Again, in some cases, one input codepoint may convert to two output codepoints.
+ * If so, the second output codepoint will be stored in `*second`.
+ *
+ * Return the resulting codepoint. If none of the requested transforms apply, return
+ * the input codepoint unchanged.
+ */
+uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, unsigned int mode)
+{
+	if ((mode & MBFL_HAN2ZEN_ALL) && c >= 0x21 && c <= 0x7D && c != '"' && c != '\'' && c != '\\') {
+		return c + 0xFEE0;
+	}
+	if ((mode & MBFL_HAN2ZEN_ALPHA) && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))) {
+		return c + 0xFEE0;
+	}
+	if ((mode & MBFL_HAN2ZEN_NUMERIC) && c >= '0' && c <= '9') {
+		return c + 0xFEE0;
+	}
+	if ((mode & MBFL_HAN2ZEN_SPACE) && c == ' ') {
+		return 0x3000;
+	}
+
+	if (mode & (MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_HIRAGANA)) {
+		/* Convert Hankaku kana to Zenkaku kana
+		 * Either all Hankaku kana (including katakana and hiragana) will be converted
+		 * to Zenkaku katakana, or to Zenkaku hiragana */
+		if ((mode & MBFL_HAN2ZEN_KATAKANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
+			if (c >= 0xFF61 && c <= 0xFF9F) {
+				int n = c - 0xFF60;
+
+				if (next >= 0xFF61 && next <= 0xFF9F) {
+					if (next == 0xFF9E && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
+						*consumed = true;
+						return 0x3001 + hankana2zenkana_table[n];
+					}
+					if (next == 0xFF9E && n == 19) {
+						*consumed = true;
+						return 0x30F4;
+					}
+					if (next == 0xFF9F && n >= 42 && n <= 46) {
+						*consumed = true;
+						return 0x3002 + hankana2zenkana_table[n];
+					}
+				}
+
+				return 0x3000 + hankana2zenkana_table[n];
+			}
+		}
+		if ((mode & MBFL_HAN2ZEN_HIRAGANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
+			if (c >= 0xFF61 && c <= 0xFF9F) {
+				int n = c - 0xFF60;
+
+				if (next >= 0xFF61 && next <= 0xFF9F) {
+					if (next == 0xFF9E && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
+						*consumed = true;
+						return 0x3001 + hankana2zenhira_table[n];
+					}
+					if (next == 0xFF9F && n >= 42 && n <= 46) {
+						*consumed = true;
+						return 0x3002 + hankana2zenhira_table[n];
+					}
+				}
+
+				return 0x3000 + hankana2zenhira_table[n];
+			}
+		}
+		if ((mode & MBFL_HAN2ZEN_KATAKANA) && c >= 0xFF61 && c <= 0xFF9F) {
+			return 0x3000 + hankana2zenkana_table[c - 0xFF60];
+		}
+		if ((mode & MBFL_HAN2ZEN_HIRAGANA) && c >= 0xFF61 && c <= 0xFF9F) {
+			return 0x3000 + hankana2zenhira_table[c - 0xFF60];
+		}
+	}
+
+	if (mode & MBFL_HAN2ZEN_SPECIAL) { /* special ascii to symbol */
+		if (c == '\\' || c == 0xA5) { /* YEN SIGN */
+			return 0xFFE5; /* FULLWIDTH YEN SIGN */
+		}
+		if (c == 0x7E || c == 0x203E) {
+			return 0xFFE3; /* FULLWIDTH MACRON */
+		}
+		if (c == '\'') {
+			return 0x2019; /* RIGHT SINGLE QUOTATION MARK */
+		}
+		if (c == '"') {
+			return 0x201D; /* RIGHT DOUBLE QUOTATION MARK */
+		}
+	}
+
+	if (mode & (MBFL_ZEN2HAN_ALL | MBFL_ZEN2HAN_ALPHA | MBFL_ZEN2HAN_NUMERIC | MBFL_ZEN2HAN_SPACE)) {
+		/* Zenkaku to Hankaku */
+		if ((mode & MBFL_ZEN2HAN_ALL) && c >= 0xFF01 && c <= 0xFF5D && c != 0xFF02 && c != 0xFF07 && c != 0xFF3C) {
+			/* all except " ' \ ~ */
+			return c - 0xFEE0;
+		}
+		if ((mode & MBFL_ZEN2HAN_ALPHA) && ((c >= 0xFF21 && c <= 0xFF3A) || (c >= 0xFF41 && c <= 0xFF5A))) {
+			return c - 0xFEE0;
+		}
+		if ((mode & MBFL_ZEN2HAN_NUMERIC) && (c >= 0xFF10 && c <= 0xFF19)) {
+			return c - 0xFEE0;
+		}
+		if ((mode & MBFL_ZEN2HAN_SPACE) && (c == 0x3000)) {
+			return ' ';
+		}
+		if ((mode & MBFL_ZEN2HAN_ALL) && (c == 0x2212)) { /* MINUS SIGN */
+			return '-';
+		}
+	}
+
+	if (mode & (MBFL_ZEN2HAN_KATAKANA | MBFL_ZEN2HAN_HIRAGANA)) {
+		/* Zenkaku kana to hankaku kana */
+		if ((mode & MBFL_ZEN2HAN_KATAKANA) && c >= 0x30A1 && c <= 0x30F4) {
+			/* Zenkaku katakana to hankaku kana */
+			int n = c - 0x30A1;
+			if (zenkana2hankana_table[n][1]) {
+				*second = 0xFF00 + zenkana2hankana_table[n][1];
+			}
+			return 0xFF00 + zenkana2hankana_table[n][0];
+		}
+		if ((mode & MBFL_ZEN2HAN_HIRAGANA) && c >= 0x3041 && c <= 0x3093) {
+			/* Zenkaku hiragana to hankaku kana */
+			int n = c - 0x3041;
+			if (zenkana2hankana_table[n][1]) {
+				*second = 0xFF00 + zenkana2hankana_table[n][1];
+			}
+			return 0xFF00 + zenkana2hankana_table[n][0];
+		}
+		if (c == 0x3001) {
+			return 0xFF64; /* HALFWIDTH IDEOGRAPHIC COMMA */
+		}
+		if (c == 0x3002) {
+			return 0xFF61; /* HALFWIDTH IDEOGRAPHIC FULL STOP */
+		}
+		if (c == 0x300C) {
+			return 0xFF62; /* HALFWIDTH LEFT CORNER BRACKET */
+		}
+		if (c == 0x300D) {
+			return 0xFF63; /* HALFWIDTH RIGHT CORNER BRACKET */
+		}
+		if (c == 0x309B) {
+			return 0xFF9E; /* HALFWIDTH KATAKANA VOICED SOUND MARK */
+		}
+		if (c == 0x309C) {
+			return 0xff9f; /* HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK */
+		}
+		if (c == 0x30FC) {
+			return 0xFF70; /* HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK */
+		}
+		if (c == 0x30FB) {
+			return 0xFF65; /* HALFWIDTH KATAKANA MIDDLE DOT */
+		}
+	}
+
+	if (mode & (MBFL_ZENKAKU_HIRA2KATA | MBFL_ZENKAKU_KATA2HIRA)) {
+		if ((mode & MBFL_ZENKAKU_HIRA2KATA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309D || c == 0x309E)) {
+			/* Zenkaku hiragana to Zenkaku katakana */
+			return c + 0x60;
+		}
+		if ((mode & MBFL_ZENKAKU_KATA2HIRA) && ((c >= 0x30A1 && c <= 0x30F3) || c == 0x30FD || c == 0x30FE)) {
+			/* Zenkaku katakana to Zenkaku hiragana */
+			return c - 0x60;
+		}
+	}
+
+	if (mode & MBFL_ZEN2HAN_SPECIAL) { /* special symbol to ascii */
+		if (c == 0xFFE5 || c == 0xFF3C) { /* FULLWIDTH YEN SIGN/FULLWIDTH REVERSE SOLIDUS */
+			return '\\';
+		}
+		if (c == 0xFFE3 || c == 0x203E) { /* FULLWIDTH MACRON/OVERLINE */
+			return '~';
+		}
+		if (c == 0x2018 || c == 0x2019) { /* LEFT/RIGHT SINGLE QUOTATION MARK*/
+			return '\'';
+		}
+		if (c == 0x201C || c == 0x201D) { /* LEFT/RIGHT DOUBLE QUOTATION MARK */
+			return '"';
+		}
+	}
+
+	return c;
 }
 
 static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter)
