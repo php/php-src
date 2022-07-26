@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   . Fix GH-9649: Signal handlers now do a no-op instead of crashing when
     executed on threads not managed by TSRM. (Kévin Dunglas)
   . Fixed potential NULL pointer dereference Windows shm*() functions. (cmb)
+  . Added shadow stack support for fibers. (Chen Hu)
 
 - Fileinfo:
   . Upgrade bundled libmagic to 5.43. (Anatol)
