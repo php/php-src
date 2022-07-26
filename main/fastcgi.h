@@ -93,7 +93,7 @@ void fcgi_terminate(void);
 int fcgi_listen(const char *path, int backlog);
 fcgi_request* fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)());
 void fcgi_destroy_request(fcgi_request *req);
-void fcgi_set_allowed_clients(char *ip);
+void fcgi_set_allowed_clients(const char *ip);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 const char *fcgi_get_last_client_ip();

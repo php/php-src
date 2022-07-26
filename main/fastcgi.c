@@ -255,10 +255,10 @@ static void fcgi_hash_init(fcgi_hash *h)
 {
 	memset(h->hash_table, 0, sizeof(h->hash_table));
 	h->list = NULL;
-	h->buckets = (fcgi_hash_buckets*)malloc(sizeof(fcgi_hash_buckets));
+	h->buckets = (fcgi_hash_buckets*)pemalloc(sizeof(fcgi_hash_buckets), 1);
 	h->buckets->idx = 0;
 	h->buckets->next = NULL;
-	h->data = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) - 1 + FCGI_HASH_SEG_SIZE);
+	h->data = (fcgi_data_seg*)pemalloc(sizeof(fcgi_data_seg) - 1 + FCGI_HASH_SEG_SIZE, 1);
 	h->data->pos = h->data->data;
 	h->data->end = h->data->pos + FCGI_HASH_SEG_SIZE;
 	h->data->next = NULL;
@@ -273,13 +273,13 @@ static void fcgi_hash_destroy(fcgi_hash *h)
 	while (b) {
 		fcgi_hash_buckets *q = b;
 		b = b->next;
-		free(q);
+		pefree(q, 1);
 	}
 	p = h->data;
 	while (p) {
 		fcgi_data_seg *q = p;
 		p = p->next;
-		free(q);
+		pefree(q, 1);
 	}
 }
 
@@ -292,7 +292,7 @@ static void fcgi_hash_clean(fcgi_hash *h)
 		fcgi_hash_buckets *q = h->buckets;
 
 		h->buckets = h->buckets->next;
-		free(q);
+		pefree(q, 1);
 	}
 	h->buckets->idx = 0;
 	/* delete all data segments except the first one */
@@ -300,7 +300,7 @@ static void fcgi_hash_clean(fcgi_hash *h)
 		fcgi_data_seg *q = h->data;
 
 		h->data = h->data->next;
-		free(q);
+		pefree(q, 1);
 	}
 	h->data->pos = h->data->data;
 }
@@ -311,7 +311,7 @@ static inline char* fcgi_hash_strndup(fcgi_hash *h, char *str, unsigned int str_
 
 	if (UNEXPECTED(h->data->pos + str_len + 1 >= h->data->end)) {
 		unsigned int seg_size = (str_len + 1 > FCGI_HASH_SEG_SIZE) ? str_len + 1 : FCGI_HASH_SEG_SIZE;
-		fcgi_data_seg *p = (fcgi_data_seg*)malloc(sizeof(fcgi_data_seg) - 1 + seg_size);
+		fcgi_data_seg *p = (fcgi_data_seg*)pemalloc(sizeof(fcgi_data_seg) - 1 + seg_size, 1);
 
 		p->pos = p->data;
 		p->end = p->pos + seg_size;
@@ -343,7 +343,7 @@ static char* fcgi_hash_set(fcgi_hash *h, unsigned int hash_value, char *var, uns
 	}
 
 	if (UNEXPECTED(h->buckets->idx >= FCGI_HASH_TABLE_SIZE)) {
-		fcgi_hash_buckets *b = (fcgi_hash_buckets*)malloc(sizeof(fcgi_hash_buckets));
+		fcgi_hash_buckets *b = (fcgi_hash_buckets*)pemalloc(sizeof(fcgi_hash_buckets), 1);
 		b->idx = 0;
 		b->next = h->buckets;
 		h->buckets = b;
@@ -561,7 +561,8 @@ void fcgi_shutdown(void)
 	}
 	is_fastcgi = 0;
 	if (allowed_clients) {
-		free(allowed_clients);
+        pefree(allowed_clients, 1);
+        allowed_clients = NULL;
 	}
 }
 
@@ -769,45 +770,9 @@ int fcgi_listen(const char *path, int backlog)
 		chmod(path, 0777);
 	} else {
 		char *ip = getenv("FCGI_WEB_SERVER_ADDRS");
-		char *cur, *end;
-		int n;
 
 		if (ip) {
-			ip = strdup(ip);
-			cur = ip;
-			n = 0;
-			while (*cur) {
-				if (*cur == ',') n++;
-				cur++;
-			}
-			allowed_clients = malloc(sizeof(sa_t) * (n+2));
-			n = 0;
-			cur = ip;
-			while (cur) {
-				end = strchr(cur, ',');
-				if (end) {
-					*end = 0;
-					end++;
-				}
-				if (inet_pton(AF_INET, cur, &allowed_clients[n].sa_inet.sin_addr)>0) {
-					allowed_clients[n].sa.sa_family = AF_INET;
-					n++;
-#ifdef HAVE_IPV6
-				} else if (inet_pton(AF_INET6, cur, &allowed_clients[n].sa_inet6.sin6_addr)>0) {
-					allowed_clients[n].sa.sa_family = AF_INET6;
-					n++;
-#endif
-				} else {
-					fcgi_log(FCGI_ERROR, "Wrong IP address '%s' in listen.allowed_clients", cur);
-				}
-				cur = end;
-			}
-			allowed_clients[n].sa.sa_family = 0;
-			free(ip);
-			if (!n) {
-				fcgi_log(FCGI_ERROR, "There are no allowed addresses");
-				/* don't clear allowed_clients as it will create an "open for all" security issue */
-			}
+			fcgi_set_allowed_clients(ip);
 		}
 	}
 
@@ -826,23 +791,23 @@ int fcgi_listen(const char *path, int backlog)
 	return listen_socket;
 }
 
-void fcgi_set_allowed_clients(char *ip)
+void fcgi_set_allowed_clients(const char *ip)
 {
 	char *cur, *end;
 	int n;
 
 	if (ip) {
-		ip = strdup(ip);
-		cur = ip;
+		char *dup_ip = estrdup(ip);
+		cur = dup_ip;
 		n = 0;
 		while (*cur) {
 			if (*cur == ',') n++;
 			cur++;
 		}
-		if (allowed_clients) free(allowed_clients);
-		allowed_clients = malloc(sizeof(sa_t) * (n+2));
+		if (allowed_clients) pefree(allowed_clients, 1);
+		allowed_clients = safe_pemalloc(sizeof(sa_t), n+2, 0, 1);
 		n = 0;
-		cur = ip;
+		cur = dup_ip;
 		while (cur) {
 			end = strchr(cur, ',');
 			if (end) {
@@ -863,7 +828,7 @@ void fcgi_set_allowed_clients(char *ip)
 			cur = end;
 		}
 		allowed_clients[n].sa.sa_family = 0;
-		free(ip);
+		efree(dup_ip);
 		if (!n) {
 			fcgi_log(FCGI_ERROR, "There are no allowed addresses");
 			/* don't clear allowed_clients as it will create an "open for all" security issue */
@@ -877,7 +842,7 @@ static void fcgi_hook_dummy() {
 
 fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)())
 {
-	fcgi_request *req = calloc(1, sizeof(fcgi_request));
+	fcgi_request *req = pecalloc(1, sizeof(fcgi_request), 1);
 	req->listen_socket = listen_socket;
 	req->fd = -1;
 	req->id = -1;
@@ -912,7 +877,7 @@ fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_
 
 void fcgi_destroy_request(fcgi_request *req) {
 	fcgi_hash_destroy(&req->env);
-	free(req);
+	pefree(req, 1);
 }
 
 static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t count)
