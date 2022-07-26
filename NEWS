@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Added SOL_FILTER socket option for Solaris. (David Carlier)
 
+- SPL:
+  . Fixed bug #69181 (READ_CSV|DROP_NEW_LINE drops newlines within fields).
+    (cmb)
+
 21 Jul 2022, PHP 8.2.0beta1
 
 - CLI:

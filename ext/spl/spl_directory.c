@@ -1887,7 +1887,7 @@ static zend_result spl_filesystem_object_cast(zend_object *readobj, zval *writeo
 }
 /* }}} */
 
-static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bool silent, zend_long line_add) /* {{{ */
+static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bool silent, zend_long line_add, bool csv) /* {{{ */
 {
 	char *buf;
 	size_t line_len = 0;
@@ -1917,7 +1917,7 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 		intern->u.file.current_line = estrdup("");
 		intern->u.file.current_line_len = 0;
 	} else {
-		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
+		if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
 			if (line_len > 0 && buf[line_len - 1] == '\n') {
 				line_len--;
 				if (line_len > 0 && buf[line_len - 1] == '\r') {
@@ -1935,20 +1935,30 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 	return SUCCESS;
 } /* }}} */
 
-static inline zend_result spl_filesystem_file_read(spl_filesystem_object *intern, bool silent)
+static inline zend_result spl_filesystem_file_read(spl_filesystem_object *intern, bool silent, bool csv)
 {
 	zend_long line_add = (intern->u.file.current_line) ? 1 : 0;
-	return spl_filesystem_file_read_ex(intern, silent, line_add);
+	return spl_filesystem_file_read_ex(intern, silent, line_add, csv);
+}
+
+static bool is_line_empty(spl_filesystem_object *intern)
+{
+	char *current_line = intern->u.file.current_line;
+	size_t current_line_len = intern->u.file.current_line_len;
+	return current_line_len == 0
+		|| ((SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)
+			&& ((current_line_len == 1 && current_line[0] == '\n')
+				|| (current_line_len == 2 && current_line[0] == '\r' && current_line[1] == '\n'))));
 }
 
 static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
 	do {
-		zend_result ret = spl_filesystem_file_read(intern, /* silent */ true);
+		zend_result ret = spl_filesystem_file_read(intern, /* silent */ true, /* csv */ true);
 		if (ret != SUCCESS) {
 			return ret;
 		}
-	} while (!intern->u.file.current_line_len && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY));
+	} while (is_line_empty(intern) && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY));
 
 	size_t buf_len = intern->u.file.current_line_len;
 	char *buf = estrndup(intern->u.file.current_line, buf_len);
@@ -2006,7 +2016,7 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 		zval_ptr_dtor(&retval);
 		return SUCCESS;
 	} else {
-		return spl_filesystem_file_read(intern, /* silent */ true);
+		return spl_filesystem_file_read(intern, /* silent */ true, /* csv */ false);
 	}
 } /* }}} */
 
@@ -2214,7 +2224,7 @@ PHP_METHOD(SplFileObject, fgets)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1) == FAILURE) {
+	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
 		RETURN_THROWS();
 	}
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
@@ -2644,7 +2654,7 @@ PHP_METHOD(SplFileObject, fscanf)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	/* Get next line */
-	if (spl_filesystem_file_read(intern, /* silent */ false) == FAILURE) {
+	if (spl_filesystem_file_read(intern, /* silent */ false, /* csv */ false) == FAILURE) {
 		RETURN_THROWS();
 	}
 
