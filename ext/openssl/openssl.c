@@ -7652,15 +7652,6 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 	}
 	buffer = zend_string_alloc(buffer_length, 0);
 
-#ifdef PHP_WIN32
-	/* random/urandom equivalent on Windows */
-	if (php_win32_get_random_bytes((unsigned char*)(buffer)->val, (size_t) buffer_length) == FAILURE){
-		zend_string_release_ex(buffer, 0);
-		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
-		return NULL;
-	}
-#else
-
 	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(buffer_length, length);
 	PHP_OPENSSL_RAND_ADD_TIME();
 	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
@@ -7670,7 +7661,7 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 	} else {
 		php_openssl_store_errors();
 	}
-#endif
+
 	return buffer;
 }
 
