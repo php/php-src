@@ -533,7 +533,12 @@ class SimpleType {
     }
 
     public function toEscapedName(): string {
-        return str_replace('\\', '\\\\', $this->name);
+        // Escape \u and \U to avoid compilation errors in generated macros
+        return str_replace(
+            ['\\', '\u', '\U'],
+            ['\\\\', '\\\\165', '\\\\125'],
+            $this->name
+        );
     }
 
     public function toVarEscapedName(): string {
