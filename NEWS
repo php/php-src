@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     generating uniform integers within a given range). (timwolla)
   . Fixed bug GH-9089 (Fix memory leak on Randomizer::__construct()
     call twice) (zeriyoshi)
+  . Change Mt19937 to throw a ValueError instead of InvalidArgumentException
+    for invalid $mode. (timwolla)
 
 - Sockets:
   . Added SOL_FILTER socket option for Solaris. (David Carlier)
