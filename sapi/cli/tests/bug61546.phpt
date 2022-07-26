@@ -15,7 +15,8 @@ $php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
 $test_code = <<<PHP
 <?php
 chdir('..');
-var_dump(get_current_user() != "");
+var_dump(getmyinode() !== false);
+var_dump(getlastmod() != false);
 chdir('..');
 var_dump(getmyinode() !== false);
 var_dump(getlastmod() != false);
@@ -26,6 +27,7 @@ system($php . ' -n bug61546_sub.php');
 unlink("bug61546_sub.php");
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
 bool(true)
