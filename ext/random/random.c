@@ -496,6 +496,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
 	while (read_bytes < size) {
+		errno = 0;
+
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
 
 		   bytes   read_bytes  size
@@ -553,6 +555,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 				}
 				return FAILURE;
 			}
+
+			errno = 0;
 			/* Does the file exist and is it a character device? */
 			if (fstat(fd, &st) != 0 ||
 # ifdef S_ISNAM
@@ -563,7 +567,11 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 			) {
 				close(fd);
 				if (should_throw) {
-					zend_throw_exception(zend_ce_exception, "Error reading from /dev/urandom", 0);
+					if (errno != 0) {
+						zend_throw_exception_ex(zend_ce_exception, 0, "Error reading from /dev/urandom: %s", strerror(errno));
+					} else {
+						zend_throw_exception_ex(zend_ce_exception, 0, "Error reading from /dev/urandom");
+					}
 				}
 				return FAILURE;
 			}
