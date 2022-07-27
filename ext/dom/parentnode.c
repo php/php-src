@@ -341,12 +341,15 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 
 		if (prevsib) {
 			fragment->last->next = prevsib->next;
+			if (prevsib->next) {
+				prevsib->next->prev = fragment->last;
+			}
 			prevsib->next = newchild;
 		} else {
 			parentNode->children = newchild;
 			if (nextsib) {
-				newchild->next = nextsib;
-				nextsib->prev = newchild;
+				fragment->last->next = nextsib;
+				nextsib->prev = fragment->last;
 			}
 		}
 
