@@ -5,8 +5,8 @@ Random: Engine: Mt19937: error pattern
 
 try {
     new \Random\Engine\Mt19937(1234, 2);
-} catch (\InvalidArgumentException $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\ValueError $e) {
+    echo $e->getMessage(), PHP_EOL;
 }
 
 ?>
