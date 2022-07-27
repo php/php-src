@@ -25,6 +25,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
     (cmb)
 
+- PDO_SQLite:
+  . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
+
+- SQLite3:
+  . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
+
 04 Aug 2022, PHP 8.1.9
 
 - CLI:
