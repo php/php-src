@@ -2588,22 +2588,29 @@ PHP_FUNCTION(mb_convert_case)
 /* {{{ Returns a upper cased version of source_string */
 PHP_FUNCTION(mb_strtoupper)
 {
+	zend_string *str;
 	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len, ret_len;
+	const mbfl_encoding *enc;
+	char *newstr;
+	size_t ret_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
+	enc = php_mb_get_encoding(from_encoding, 2);
 	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	char *newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
+	// optimize performance for UTF-8 encoding and input string consisting of lower/7-bit ASCII characters only
+	if (enc == &mbfl_encoding_utf8 && zend_str_is_utf8_pure_ascii(ZSTR_VAL(str), ZSTR_LEN(str))) {
+		RETURN_STR(zend_string_toupper(str));
+	}
+
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, ZSTR_VAL(str), ZSTR_LEN(str), &ret_len, enc);
 	/* If newstr is NULL something went wrong in mbfl and this is a bug */
 	ZEND_ASSERT(newstr != NULL);
 
@@ -2616,15 +2623,14 @@ PHP_FUNCTION(mb_strtoupper)
 /* {{{ Returns a lower cased version of source_string */
 PHP_FUNCTION(mb_strtolower)
 {
+	zend_string *str;
 	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len;
+	const mbfl_encoding *enc;
 	char *newstr;
 	size_t ret_len;
-	const mbfl_encoding *enc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2634,7 +2640,12 @@ PHP_FUNCTION(mb_strtolower)
 		RETURN_THROWS();
 	}
 
-	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
+	// optimize performance for UTF-8 encoding and input string consisting of lower/7-bit ASCII characters only
+	if (enc == &mbfl_encoding_utf8 && zend_str_is_utf8_pure_ascii(ZSTR_VAL(str), ZSTR_LEN(str))) {
+		RETURN_STR(zend_string_tolower(str));
+	}
+
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, ZSTR_VAL(str), ZSTR_LEN(str), &ret_len, enc);
 	/* If newstr is NULL something went wrong in mbfl and this is a bug */
 	ZEND_ASSERT(newstr != NULL);
 

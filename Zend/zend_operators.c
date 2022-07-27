@@ -2952,6 +2952,34 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, boo
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_str_is_utf8_pure_ascii(const char *str, size_t length) /* {{{ */
+{
+	unsigned char *p = (unsigned char *) str;
+	unsigned char *end = p + length;
+
+#ifdef HAVE_BLOCKCONV
+	__m128i blconv_80 = _mm_set1_epi8(0x80), blconv_operand, blconv_mingle;
+	while (p + BLOCKCONV_STRIDE <= end) {
+		blconv_operand = _mm_loadu_si128((__m128i*)(p));
+		blconv_mingle = _mm_cmpeq_epi8(_mm_max_epu8(blconv_operand, blconv_80), blconv_operand);
+		if (BLOCKCONV_FOUND()) {
+			return false;
+		}
+		p += BLOCKCONV_STRIDE;
+	}
+#endif
+
+	while (p < end) {
+		if (*p >= 0x80) {
+			return false;
+		}
+		p++;
+	}
+
+	return true;
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2) /* {{{ */
 {
 	int retval;
