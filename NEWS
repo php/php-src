@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9090 (Support assigning function pointers in FFI). (Adam
     Saponara)
 
+- Intl:
+  . Declared Transliterator::$id as readonly to unlock subclassing it. (Nicolas
+    Grekas)
+
 - PCNTL:
   . Fixed pcntl_(get|set)priority error handling for MacOS. (Juan Morales)
 
