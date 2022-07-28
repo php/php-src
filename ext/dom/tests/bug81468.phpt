@@ -37,6 +37,7 @@ $xpath = new \DOMXPath($dom);
 $xpath->registerNamespace('n', 'some:namespace');
 $xpath->registerNamespace('m', 'some:namespace_test');
 echo count($xpath->query('/n:foo/bar')) . " should be 0\n";
+echo count($xpath->query('/n:foo/n:bar')) . " should be 0\n";
 echo count($xpath->query('/n:foo/m:bar')) . " should be 1\n\n";
 
 $dom = new \DOMDocument();
@@ -47,6 +48,7 @@ $xpath = new \DOMXPath($dom);
 $xpath->registerNamespace('n', 'some:namespace');
 $xpath->registerNamespace('m', 'some:namespace_test');
 echo count($xpath->query('/n:foo/bar')) . " should be 0\n";
+echo count($xpath->query('/n:foo/n:bar')) . " should be 0\n";
 echo count($xpath->query('/n:foo/m:bar')) . " should be 1\n\n";
 
 $dom = new \DOMDocument();
@@ -75,10 +77,12 @@ echo count($xpath->query('/bar/foo')) . " should be 0\n\n";
 <?xml version="1.0"?>
 <foo xmlns="some:namespace"><bar xmlns="some:namespace_test"/></foo>
 0 should be 0
+0 should be 0
 1 should be 1
 
 <?xml version="1.0"?>
 <foo xmlns="some:namespace"><bar xmlns="some:namespace_test"/></foo>
+0 should be 0
 0 should be 0
 1 should be 1
 
