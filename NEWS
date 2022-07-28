@@ -62,6 +62,8 @@ PHP                                                                        NEWS
     (Tobias Bachert)
   . Added error_log_mode ini setting. (Mikhail Galanin)
   . Updated request startup messages. (Eric Norris)
+  . Fixed GH-9136 and GH-9138 (Fixed fetching property of magic constant in
+    constant expressions). (ilutov)
 
 - COM:
   . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
