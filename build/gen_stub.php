@@ -2981,7 +2981,7 @@ class ClassInfo {
             $parentInfo->collectInheritedMembers(
                 $parentsWithInheritedConstants,
                 $unusedParentsWithInheritedProperties,
-                $parentsWithInheritedMethods,
+                $unusedParentsWithInheritedMethods,
                 $classMap
             );
         }
