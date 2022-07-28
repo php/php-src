@@ -540,9 +540,7 @@ static ZEND_METHOD(ZendTestNS_UnlikelyCompileError, method)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	return_value = ZEND_THIS;
-
-   return return_value;
+	RETURN_NULL();
 }
 
 static ZEND_METHOD(ZendTestNS2_Foo, method)
