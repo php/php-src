@@ -470,7 +470,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		if (should_throw) {
-			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+			zend_throw_exception(zend_ce_exception, "Failed to retrieve randomness from the operating system (BCryptGenRandom)", 0);
 		}
 		return FAILURE;
 	}
@@ -483,7 +483,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	 */
 	if (CCRandomGenerateBytes(bytes, size) != kCCSuccess) {
 		if (should_throw) {
-			zend_throw_exception(zend_ce_exception, "Error generating bytes", 0);
+			zend_throw_exception(zend_ce_exception, "Failed to retrieve randomness from the operating system (CCRandomGenerateBytes)", 0);
 		}
 		return FAILURE;
 	}
@@ -496,6 +496,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
 	while (read_bytes < size) {
+		errno = 0;
+
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
 
 		   bytes   read_bytes  size
@@ -522,7 +524,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 				/* Try again */
 				continue;
 			} else {
-			    /* If the syscall fails, fall back to reading from /dev/urandom */
+				/* If the syscall fails, fall back to reading from /dev/urandom */
 				break;
 			}
 		}
@@ -539,15 +541,22 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		struct stat st;
 
 		if (fd < 0) {
+			errno = 0;
 # if HAVE_DEV_URANDOM
 			fd = open("/dev/urandom", O_RDONLY);
 # endif
 			if (fd < 0) {
 				if (should_throw) {
-					zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
+					if (errno != 0) {
+						zend_throw_exception_ex(zend_ce_exception, 0, "Cannot open /dev/urandom: %s", strerror(errno));
+					} else {
+						zend_throw_exception_ex(zend_ce_exception, 0, "Cannot open /dev/urandom");
+					}
 				}
 				return FAILURE;
 			}
+
+			errno = 0;
 			/* Does the file exist and is it a character device? */
 			if (fstat(fd, &st) != 0 ||
 # ifdef S_ISNAM
@@ -558,7 +567,11 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 			) {
 				close(fd);
 				if (should_throw) {
-					zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+					if (errno != 0) {
+						zend_throw_exception_ex(zend_ce_exception, 0, "Error reading from /dev/urandom: %s", strerror(errno));
+					} else {
+						zend_throw_exception_ex(zend_ce_exception, 0, "Error reading from /dev/urandom");
+					}
 				}
 				return FAILURE;
 			}
@@ -566,6 +579,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		}
 
 		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
+			errno = 0;
 			n = read(fd, bytes + read_bytes, size - read_bytes);
 			if (n <= 0) {
 				break;
@@ -574,7 +588,11 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 
 		if (read_bytes < size) {
 			if (should_throw) {
-				zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+				if (errno != 0) {
+					zend_throw_exception_ex(zend_ce_exception, 0, "Could not gather sufficient random data: %s", strerror(errno));
+				} else {
+					zend_throw_exception_ex(zend_ce_exception, 0, "Could not gather sufficient random data");
+				}
 			}
 			return FAILURE;
 		}
