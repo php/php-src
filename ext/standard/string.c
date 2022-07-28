@@ -4386,7 +4386,7 @@ PHP_FUNCTION(hebrev)
 {
 	char *str, *heb_str, *target;
 	const char *tmp;
-	size_t block_start, block_end, block_type, block_length, i;
+	size_t block_start, block_end, block_type, i;
 	zend_long max_chars=0, char_count;
 	size_t begin, end, orig_begin;
 	size_t str_len;
@@ -4410,8 +4410,6 @@ PHP_FUNCTION(hebrev)
 	*target = 0;
 	target--;
 
-	block_length=0;
-
 	if (isheb(*tmp)) {
 		block_type = _HEB_BLOCK_TYPE_HEB;
 	} else {
@@ -4423,7 +4421,6 @@ PHP_FUNCTION(hebrev)
 			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<str_len-1) {
 				tmp++;
 				block_end++;
-				block_length++;
 			}
 			for (i = block_start+1; i<= block_end+1; i++) {
 				*target = str[i-1];
@@ -4468,7 +4465,6 @@ PHP_FUNCTION(hebrev)
 			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < str_len-1) {
 				tmp++;
 				block_end++;
-				block_length++;
 			}
 			while ((_isblank((int)*tmp) || ispunct((int)*tmp)) && *tmp!='/' && *tmp!='-' && block_end > block_start) {
 				tmp--;
