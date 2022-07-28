@@ -292,7 +292,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %% /* Rules */
 
 start:
-	top_statement_list	{ CG(ast) = $1; }
+	top_statement_list	{ CG(ast) = $1; (void) zendnerrs; }
 ;
 
 reserved_non_modifiers:
