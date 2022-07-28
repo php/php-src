@@ -4238,20 +4238,6 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 		dpobj->start_ce = date_ce_date;
 	} else {
-		/* Sanity checks */
-		if (start && Z_OBJCE_P(start) != date_ce_date && Z_OBJCE_P(start) != date_ce_immutable) {
-			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): Class of start date must be exactly DateTime or DateTimeImmutable, object of class %s provided", ZSTR_VAL(func), ZSTR_VAL(Z_OBJCE_P(start)->name));
-			zend_string_release(func);
-			RETURN_THROWS();
-		}
-		if (end && Z_OBJCE_P(end) != date_ce_date && Z_OBJCE_P(end) != date_ce_immutable) {
-			zend_string *func = get_active_function_or_method_name();
-			zend_throw_error(zend_ce_exception, "%s(): Class of end date must be exactly DateTime or DateTimeImmutable, object of class %s provided", ZSTR_VAL(func), ZSTR_VAL(Z_OBJCE_P(end)->name));
-			zend_string_release(func);
-			RETURN_THROWS();
-		}
-
 		/* init */
 		php_interval_obj *intobj = Z_PHPINTERVAL_P(interval);
 
