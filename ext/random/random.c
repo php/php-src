@@ -470,7 +470,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		if (should_throw) {
-			zend_throw_exception(zend_ce_exception, "BCryptGenRandom failed", 0);
+			zend_throw_exception(zend_ce_exception, "Failed to retrieve randomness from the operating system (BCryptGenRandom)", 0);
 		}
 		return FAILURE;
 	}
@@ -483,7 +483,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	 */
 	if (CCRandomGenerateBytes(bytes, size) != kCCSuccess) {
 		if (should_throw) {
-			zend_throw_exception(zend_ce_exception, "CCRandomGenerateBytes failed", 0);
+			zend_throw_exception(zend_ce_exception, "Failed to retrieve randomness from the operating system (CCRandomGenerateBytes)", 0);
 		}
 		return FAILURE;
 	}
