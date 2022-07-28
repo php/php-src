@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     different type). (Derick)
   . Fixed bug GH-8964 (DateTime object comparison after applying delta less
     than 1 second). (Derick)
+  . Fixed bug GH-9106: (DateInterval 1.5s added to DateTimeInterface is rounded
+    down since PHP 8.1.0). (Derick)
   . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
 
 - DBA:
