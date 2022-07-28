@@ -1220,6 +1220,9 @@ PHP_METHOD(DOMNode, appendChild)
 	}
 
 	if (new_child == NULL) {
+		if (!child->ns && nodep->nsDef) {
+			child->ns = nodep->ns;
+		}
 		new_child = xmlAddChild(nodep, child);
 		if (new_child == NULL) {
 			// TODO Convert to Error?
