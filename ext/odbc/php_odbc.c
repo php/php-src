@@ -1681,7 +1681,7 @@ PHP_FUNCTION(odbc_result)
 		RETURN_THROWS();
 	}
 
-	if ((result->numcols == 0)) {
+	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
