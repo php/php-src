@@ -1372,7 +1372,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
-<ST_IN_SCRIPTING>"exit" {
+<ST_IN_SCRIPTING>("sal"|"exit") {
 	RETURN_TOKEN_WITH_IDENT(T_EXIT);
 }
 
@@ -1427,19 +1427,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_THROW);
 }
 
-<ST_IN_SCRIPTING>"if" {
+<ST_IN_SCRIPTING>("si"|"if") {
 	RETURN_TOKEN_WITH_IDENT(T_IF);
 }
 
-<ST_IN_SCRIPTING>"elseif" {
+<ST_IN_SCRIPTING>("si"{TABS_AND_SPACES}"no,"{TABS_AND_SPACES}"si"|"elseif") {
 	RETURN_TOKEN_WITH_IDENT(T_ELSEIF);
 }
 
-<ST_IN_SCRIPTING>"endif" {
+<ST_IN_SCRIPTING>("fin"{TABS_AND_SPACES}"de"{TABS_AND_SPACES}"condicion"|"endif") {
 	RETURN_TOKEN_WITH_IDENT(T_ENDIF);
 }
 
-<ST_IN_SCRIPTING>"else" {
+<ST_IN_SCRIPTING>("si"{TABS_AND_SPACES}"no"|"else") {
 	RETURN_TOKEN_WITH_IDENT(T_ELSE);
 }
 
