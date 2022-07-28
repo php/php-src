@@ -72,6 +72,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-8943 (Fixed Reflection::getModifiersNames() with readonly
     modifier). (Pierrick)
+  . Fixed bug GH-8982 (Attribute with TARGET_METHOD is rejected on fake
+    closure of method). (ilutov)
 
 - Standard:
   . Fixed the crypt_sha256/512 api build with clang > 12. (David Carlier)
