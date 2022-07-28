@@ -116,7 +116,7 @@ database handler: flatfile
 resource(%d) of type (dba)
 === Invalid arguments dba_open() ===
 
-Warning: dba_open(): Handler "bogus" is not available in %sdba011.php on line %d
+Warning: dba_open(): Handler "bogus" is not available in %s on line %d
 bool(false)
 dba_open(): Argument #1 ($path) cannot be empty
 dba_open(): Argument #2 ($mode) cannot be empty
@@ -128,7 +128,7 @@ dba_open(): Argument #2 ($mode) cannot combine mode "-" (no lock) and "t" (test 
 dba_open(): Argument #5 ($map_size) must be greater than or equal to 0
 === Invalid arguments dba_popen() ===
 
-Warning: dba_popen(): Handler "bogus" is not available in %sdba011.php on line %d
+Warning: dba_popen(): Handler "bogus" is not available in %s on line %d
 bool(false)
 dba_popen(): Argument #1 ($path) cannot be empty
 dba_popen(): Argument #2 ($mode) cannot be empty
