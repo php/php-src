@@ -1534,7 +1534,7 @@ void zend_unset_timeout(void) /* {{{ */
 }
 /* }}} */
 
-static ZEND_COLD void report_class_fetch_error(zend_string *class_name, int fetch_type)
+static ZEND_COLD void report_class_fetch_error(zend_string *class_name, uint32_t fetch_type)
 {
 	if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 		return;
@@ -1556,10 +1556,10 @@ static ZEND_COLD void report_class_fetch_error(zend_string *class_name, int fetc
 	}
 }
 
-zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type) /* {{{ */
+zend_class_entry *zend_fetch_class(zend_string *class_name, uint32_t fetch_type) /* {{{ */
 {
 	zend_class_entry *ce, *scope;
-	int fetch_sub_type = fetch_type & ZEND_FETCH_CLASS_MASK;
+	uint32_t fetch_sub_type = fetch_type & ZEND_FETCH_CLASS_MASK;
 
 check_fetch_type:
 	switch (fetch_sub_type) {
@@ -1605,7 +1605,7 @@ check_fetch_type:
 /* }}} */
 
 zend_class_entry *zend_fetch_class_with_scope(
-		zend_string *class_name, int fetch_type, zend_class_entry *scope)
+		zend_string *class_name, uint32_t fetch_type, zend_class_entry *scope)
 {
 	zend_class_entry *ce;
 	switch (fetch_type & ZEND_FETCH_CLASS_MASK) {
@@ -1637,7 +1637,7 @@ zend_class_entry *zend_fetch_class_with_scope(
 	return ce;
 }
 
-zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, int fetch_type) /* {{{ */
+zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, uint32_t fetch_type) /* {{{ */
 {
 	zend_class_entry *ce = zend_lookup_class_ex(class_name, key, fetch_type);
 	if (!ce) {
