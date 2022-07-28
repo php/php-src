@@ -1475,6 +1475,17 @@ static int date_period_it_has_more(zend_object_iterator *iter)
 }
 /* }}} */
 
+static zend_class_entry *get_base_date_class(zend_class_entry *start_ce)
+{
+	zend_class_entry *tmp = start_ce;
+
+	while (tmp != date_ce_date && tmp != date_ce_immutable && tmp->parent) {
+		tmp = tmp->parent;
+	}
+
+	return tmp;
+}
+
 /* {{{ date_period_it_current_data */
 static zval *date_period_it_current_data(zend_object_iterator *iter)
 {
@@ -1484,7 +1495,7 @@ static zval *date_period_it_current_data(zend_object_iterator *iter)
 	php_date_obj   *newdateobj;
 
 	/* Create new object */
-	php_date_instantiate(object->start_ce, &iterator->current);
+	php_date_instantiate(get_base_date_class(object->start_ce), &iterator->current);
 	newdateobj = Z_PHPDATE_P(&iterator->current);
 	newdateobj->time = timelib_time_ctor();
 	*newdateobj->time = *it_time;
