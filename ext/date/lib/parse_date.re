@@ -520,7 +520,6 @@ static timelib_sll timelib_get_frac_nr(const char **ptr)
 	const char *begin, *end;
 	char *str;
 	double tmp_nr = TIMELIB_UNSET;
-	int len = 0;
 
 	while ((**ptr != '.') && (**ptr != ':') && ((**ptr < '0') || (**ptr > '9'))) {
 		if (**ptr == '\0') {
@@ -531,7 +530,6 @@ static timelib_sll timelib_get_frac_nr(const char **ptr)
 	begin = *ptr;
 	while ((**ptr == '.') || (**ptr == ':') || ((**ptr >= '0') && (**ptr <= '9'))) {
 		++*ptr;
-		++len;
 	}
 	end = *ptr;
 	str = timelib_calloc(1, end - begin);
