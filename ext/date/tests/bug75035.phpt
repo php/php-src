@@ -8,7 +8,7 @@ var_dump('PHP version', PHP_VERSION);
 
 foreach ([PHP_INT_MIN, PHP_INT_MAX] as $extreme) {
     $i = 64;
-    while ($i --> 0) {
+    while ($i-- > 1) {
         $d = new DateTime('@' . ($extreme >> $i));
         $s = serialize($d);
         try {
