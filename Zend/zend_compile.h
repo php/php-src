@@ -448,12 +448,12 @@ struct _zend_op_array {
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
 	HashTable *attributes;
+	uint32_t T;         /* number of temporary variables */
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	/* END of common elements */
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
 	int last_var;       /* number of CV variables */
-	uint32_t T;         /* number of temporary variables */
 	uint32_t last;      /* number of opcodes */
 
 	zend_op *opcodes;
@@ -503,6 +503,7 @@ typedef struct _zend_internal_function {
 	uint32_t required_num_args;
 	zend_internal_arg_info *arg_info;
 	HashTable *attributes;
+	uint32_t T;         /* number of temporary variables */
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	/* END of common elements */
 
@@ -528,6 +529,7 @@ union _zend_function {
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 		HashTable   *attributes;
+		uint32_t T;         /* number of temporary variables */
 		ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	} common;
 

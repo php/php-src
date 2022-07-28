@@ -23,6 +23,7 @@
 #include "zend_interfaces.h"
 #include "zend_enum.h"
 #include "zend_extensions.h"
+#include "zend_observer.h"
 
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
@@ -407,6 +408,7 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
 	zif->type = ZEND_INTERNAL_FUNCTION;
 	zif->module = EG(current_module);
 	zif->scope = ce;
+	zif->T = ZEND_OBSERVER_ENABLED;
 	ZEND_MAP_PTR_NEW(zif->run_time_cache);
 	ZEND_MAP_PTR_SET(zif->run_time_cache, zend_arena_alloc(&CG(arena), zend_internal_run_time_cache_reserved_size()));
 

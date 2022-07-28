@@ -8407,7 +8407,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			stack_check = 0;
 		}
 	} else {
-		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value) * sizeof(zval);
+		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value + ZEND_OBSERVER_ENABLED) * sizeof(zval);
 
 		|	// if (EXPECTED(ZEND_USER_CODE(func->type))) {
 		if (!is_closure) {

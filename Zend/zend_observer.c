@@ -78,6 +78,18 @@ ZEND_API void zend_observer_post_startup(void)
 		ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
 		ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op) + 1);
 		ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op) + 2);
+
+		// Add an observer temporary to store previous observed frames
+		zend_internal_function *zif;
+		ZEND_HASH_FOREACH_PTR(CG(function_table), zif) {
+			++zif->T;
+		} ZEND_HASH_FOREACH_END();
+		zend_class_entry *ce;
+		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zif) {
+				++zif->T;
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 
@@ -187,6 +199,11 @@ ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_obs
 	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function) + registered_observers, end);
 }
 
+static inline zend_execute_data **prev_observed_frame(zend_execute_data *execute_data) {
+	zend_function *func = EX(func);
+	return (zend_execute_data **)&Z_PTR_P(EX_VAR_NUM((ZEND_USER_CODE(func->type) ? func->op_array.last_var : ZEND_CALL_NUM_ARGS(execute_data)) + func->common.T - 1));
+}
+
 static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_data)
 {
 	if (!ZEND_OBSERVER_ENABLED) {
@@ -208,9 +225,7 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 
 	zend_observer_fcall_end_handler *end_handler = (zend_observer_fcall_end_handler *)possible_handlers_end;
 	if (*end_handler != ZEND_OBSERVER_NOT_OBSERVED) {
-		if (first_observed_frame == NULL) {
-			first_observed_frame = execute_data;
-		}
+		*prev_observed_frame(execute_data) = current_observed_frame;
 		current_observed_frame = execute_data;
 	}
 
@@ -236,28 +251,8 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute
 	}
 }
 
-static inline bool zend_observer_is_skipped_frame(zend_execute_data *execute_data) {
+static inline void call_end_observers(zend_execute_data *execute_data, zval *return_value) {
 	zend_function *func = execute_data->func;
-
-	if (!func || !ZEND_OBSERVABLE_FN(func)) {
-		return true;
-	}
-
-	zend_observer_fcall_end_handler end_handler = (&ZEND_OBSERVER_DATA(func))[zend_observers_fcall_list.count];
-	if (end_handler == NULL || end_handler == ZEND_OBSERVER_NOT_OBSERVED) {
-		return true;
-	}
-
-	return false;
-}
-
-ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(zend_execute_data *execute_data, zval *return_value)
-{
-	zend_function *func = execute_data->func;
-
-	if (!ZEND_OBSERVER_ENABLED || !ZEND_OBSERVABLE_FN(func)) {
-		return;
-	}
 
 	zend_observer_fcall_end_handler *handler = (zend_observer_fcall_end_handler *)&ZEND_OBSERVER_DATA(func) + zend_observers_fcall_list.count;
 	// TODO: Fix exceptions from generators
@@ -270,28 +265,27 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(zend_execute_data *execute_d
 	do {
 		(*handler)(execute_data, return_value);
 	} while (++handler != possible_handlers_end && *handler != NULL);
+}
 
-	if (first_observed_frame == execute_data) {
-		first_observed_frame = NULL;
-		current_observed_frame = NULL;
-	} else {
-		zend_execute_data *ex = execute_data->prev_execute_data;
-		while (ex && zend_observer_is_skipped_frame(ex)) {
-			ex = ex->prev_execute_data;
-		}
-		current_observed_frame = ex;
+ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(zend_execute_data *execute_data, zval *return_value)
+{
+	if (execute_data != current_observed_frame) {
+		return;
 	}
+	call_end_observers(execute_data, return_value);
+	current_observed_frame = *prev_observed_frame(execute_data);
 }
 
 ZEND_API void zend_observer_fcall_end_all(void)
 {
-	zend_execute_data *ex = current_observed_frame;
-	while (ex != NULL) {
-		if (ex->func) {
-			zend_observer_fcall_end(ex, NULL);
-		}
-		ex = ex->prev_execute_data;
+	zend_execute_data *execute_data = current_observed_frame, *original_execute_data = EG(current_execute_data);
+	current_observed_frame = NULL;
+	while (execute_data) {
+		EG(current_execute_data) = execute_data;
+		call_end_observers(execute_data, NULL);
+		execute_data = *prev_observed_frame(execute_data);
 	}
+	EG(current_execute_data) = original_execute_data;
 }
 
 ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
