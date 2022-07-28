@@ -2025,34 +2025,30 @@ static bool spl_filesystem_file_is_empty_line(spl_filesystem_object *intern) /* 
 	if (intern->u.file.current_line) {
 		return intern->u.file.current_line_len == 0;
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
-		switch(Z_TYPE(intern->u.file.current_zval)) {
-			case IS_STRING:
-				return Z_STRLEN(intern->u.file.current_zval) == 0;
-			case IS_ARRAY:
-				if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
-						&& zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 1) {
-					uint32_t idx = 0;
-					zval *first;
+		ZEND_ASSERT(Z_TYPE(intern->u.file.current_zval) == IS_ARRAY);
+		/* TODO Figure out when this branch can happen... */
+		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
+				&& zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 1) {
+			ZEND_ASSERT(false && "Can this happen?");
+			uint32_t idx = 0;
+			zval *first;
 
-					if (HT_IS_PACKED(Z_ARRVAL(intern->u.file.current_zval))) {
-						while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx])) {
-							idx++;
-						}
-						first = &Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx];
-					} else {
-						while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
-							idx++;
-						}
-						first = &Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val;
-					}
-					return Z_TYPE_P(first) == IS_STRING && Z_STRLEN_P(first) == 0;
+			if (HT_IS_PACKED(Z_ARRVAL(intern->u.file.current_zval))) {
+				while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx])) {
+					idx++;
 				}
-				return zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 0;
-			case IS_NULL:
-				return 1;
-			default:
-				return 0;
+				first = &Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx];
+				ZEND_ASSERT(Z_TYPE_P(first) == IS_STRING);
+			} else {
+				while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
+					idx++;
+				}
+				first = &Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val;
+				ZEND_ASSERT(Z_TYPE_P(first) == IS_STRING);
+			}
+			return Z_STRLEN_P(first) == 0;
 		}
+		return zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 0;
 	} else {
 		return 1;
 	}
@@ -2248,6 +2244,7 @@ PHP_METHOD(SplFileObject, current)
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 		ZEND_ASSERT(!Z_ISREF(intern->u.file.current_zval));
+		ZEND_ASSERT(Z_TYPE(intern->u.file.current_zval) == IS_ARRAY);
 		RETURN_COPY(&intern->u.file.current_zval);
 	}
 	RETURN_FALSE;
