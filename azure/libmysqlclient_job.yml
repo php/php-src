@@ -32,6 +32,6 @@ jobs:
         libmysql: mysql-5.7.38-linux-glibc2.12-x86_64.tar.gz
     - template: libmysqlclient_test.yml
       parameters:
-        configurationName: ${{ parameters.configurationName }} - MySQL 8.0.27
-        libmysql: mysql-8.0.27-linux-glibc2.12-x86_64.tar.xz
+        configurationName: ${{ parameters.configurationName }} - MySQL 8.0.30
+        libmysql: mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz
         configurationParameters: ${{ parameters.configurationParameters }} --enable-werror
