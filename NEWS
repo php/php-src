@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Random:
   . Fixed bug GH-9235 (non-existant $sequence parameter in stub for
     PcgOneseq128XslRr64::__construct()). (timwolla)
+  . Fixed bug GH-9190, GH-9191 (undefined behavior for MT_RAND_PHP when
+    handling large ranges). (timwolla)
   . Removed redundant RuntimeExceptions from Randomizer methods. The
     exceptions thrown by the engines will be exposed directly. (timwolla)
   . Added extension specific Exceptions/Errors (RandomException, RandomError,
