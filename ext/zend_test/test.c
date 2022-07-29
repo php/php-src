@@ -756,6 +756,7 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 PHP_RINIT_FUNCTION(zend_test)
 {
 	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
+	ZT_G(observer_nesting_depth) = 0;
 	return SUCCESS;
 }
 

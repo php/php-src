@@ -88,6 +88,9 @@ struct _zend_fiber_context {
 	/* Fiber status. */
 	zend_fiber_status status;
 
+	/* Observer state */
+	zend_execute_data *top_observed_frame;
+
 	/* Reserved for extensions */
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
