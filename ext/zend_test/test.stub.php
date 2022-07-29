@@ -125,6 +125,10 @@ namespace {
     /** @param stdClass|string|null $param */
     function zend_string_or_stdclass_or_null($param): stdClass|string|null {}
 
+    function zend_intersection_type(Traversable&Countable $v): Traversable&Countable {}
+
+    function zend_intersection_type_return(object $v): Traversable&Countable {}
+
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
 
     function zend_weakmap_attach(object $object, mixed $value): bool {}

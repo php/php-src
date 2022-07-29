@@ -207,6 +207,51 @@ static ZEND_FUNCTION(zend_string_or_stdclass)
 	}
 }
 
+/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
+static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(object, zend_standard_class_def, str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_NULL();
+	}
+}
+
+static ZEND_FUNCTION(zend_intersection_type)
+{
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ(object)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!(instanceof_function(object->ce, zend_ce_countable) && instanceof_function(object->ce, zend_ce_traversable))) {
+		zend_argument_type_error(1, "must be of type Traversable&Countable, %s given", ZSTR_VAL(object->ce->name));
+	}
+
+	RETURN_OBJ_COPY(object);
+}
+
+static ZEND_FUNCTION(zend_intersection_type_return)
+{
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ(object)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_OBJ_COPY(object);
+}
+
 static ZEND_FUNCTION(zend_test_compile_string)
 {
 	zend_string *source_string = NULL;
@@ -240,25 +285,6 @@ static ZEND_FUNCTION(zend_test_compile_string)
 	}
 
 	return;
-}
-
-/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
-static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
-{
-	zend_string *str;
-	zend_object *object;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(object, zend_standard_class_def, str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (str) {
-		RETURN_STR_COPY(str);
-	} else if (object) {
-		RETURN_OBJ_COPY(object);
-	} else {
-		RETURN_NULL();
-	}
 }
 
 static ZEND_FUNCTION(zend_weakmap_attach)

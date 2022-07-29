@@ -689,7 +689,7 @@ class Type {
                 $classTypes[] = $type;
             }
         }
-        return new ArginfoType($classTypes, $builtinTypes);
+        return new ArginfoType($classTypes, $builtinTypes, $this->isIntersection);
     }
 
     public function toOptimizerTypeMask(): string {
@@ -784,14 +784,16 @@ class ArginfoType {
 
     /** @var SimpleType[] $builtinTypes */
     private $builtinTypes;
+    private bool $isIntersection;
 
     /**
      * @param SimpleType[] $classTypes
      * @param SimpleType[] $builtinTypes
      */
-    public function __construct(array $classTypes, array $builtinTypes) {
+    public function __construct(array $classTypes, array $builtinTypes, bool $isIntersection) {
         $this->classTypes = $classTypes;
         $this->builtinTypes = $builtinTypes;
+        $this->isIntersection = $isIntersection;
     }
 
     public function hasClassType(): bool {
@@ -799,7 +801,8 @@ class ArginfoType {
     }
 
     public function toClassTypeString(): string {
-        return implode('|', array_map(function(SimpleType $type) {
+        $separator = $this->isIntersection ? '&' : '|';
+        return implode($separator, array_map(function(SimpleType $type) {
             return $type->toEscapedName();
         }, $this->classTypes));
     }
@@ -808,6 +811,7 @@ class ArginfoType {
         if (empty($this->builtinTypes)) {
             return '0';
         }
+        /* Intersection types cannot happen with built-in types */
         return implode('|', array_map(function(SimpleType $type) {
             return $type->toTypeMask();
         }, $this->builtinTypes));
