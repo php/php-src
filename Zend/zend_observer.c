@@ -39,7 +39,6 @@ zend_llist zend_observer_fiber_destroy;
 
 int zend_observer_fcall_op_array_extension;
 
-ZEND_TLS zend_execute_data *first_observed_frame;
 ZEND_TLS zend_execute_data *current_observed_frame;
 
 // Call during minit/startup ONLY
@@ -95,7 +94,6 @@ ZEND_API void zend_observer_post_startup(void)
 
 ZEND_API void zend_observer_activate(void)
 {
-	first_observed_frame = NULL;
 	current_observed_frame = NULL;
 }
 
@@ -321,6 +319,8 @@ ZEND_API void ZEND_FASTCALL zend_observer_fiber_init_notify(zend_fiber_context *
 	zend_llist_element *element;
 	zend_observer_fiber_init_handler callback;
 
+	initializing->top_observed_frame = NULL;
+
 	for (element = zend_observer_fiber_init.head; element; element = element->next) {
 		callback = *(zend_observer_fiber_init_handler *) element->data;
 		callback(initializing);
@@ -332,10 +332,17 @@ ZEND_API void ZEND_FASTCALL zend_observer_fiber_switch_notify(zend_fiber_context
 	zend_llist_element *element;
 	zend_observer_fiber_switch_handler callback;
 
+	if (from->status == ZEND_FIBER_STATUS_DEAD) {
+		zend_observer_fcall_end_all(); // fiber is either finished (call will do nothing) or has bailed out
+	}
+
 	for (element = zend_observer_fiber_switch.head; element; element = element->next) {
 		callback = *(zend_observer_fiber_switch_handler *) element->data;
 		callback(from, to);
 	}
+
+	from->top_observed_frame = current_observed_frame;
+	current_observed_frame = to->top_observed_frame;
 }
 
 ZEND_API void ZEND_FASTCALL zend_observer_fiber_destroy_notify(zend_fiber_context *destroying)
