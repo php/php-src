@@ -4077,9 +4077,31 @@ static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DAT
 }
 /* }}} */
 
+/* TODO Can this be done using find_live_range? */
+static bool is_in_silence_live_range(const zend_op_array op_array, uint32_t op_num) {
+	for (int i = 0; i < op_array.last_live_range; i++) {
+		zend_live_range range = op_array.live_range[i];
+		if (op_num >= range.start && op_num < range.end
+				&& (range.var & ZEND_LIVE_MASK) == ZEND_LIVE_SILENCE) {
+			return true;
+		}
+	}
+	return false;
+}
+
 static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t op_num) /* {{{ */
 {
 	if (UNEXPECTED(EX(call))) {
+		/* Do not cleanup unfinished calls for SILENCE live range as it might still get executed
+		 * However, this can only happen if the exception is an instance of Exception
+		 * (Error never gets suppressed) */
+		/*
+		if (UNEXPECTED(is_in_silence_live_range(EX(func)->op_array, op_num)
+				&& instanceof_function(zend_ce_exception, EG(exception)->ce))) {
+			return;
+		}
+		*/
+		bool is_silence = is_in_silence_live_range(EX(func)->op_array, op_num) && instanceof_function(zend_ce_exception, EG(exception)->ce);
 		zend_execute_data *call = EX(call);
 		zend_op *opline = EX(func)->op_array.opcodes + op_num;
 		int level;
@@ -4151,8 +4173,13 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 						}
 						break;
 				}
+
 				if (!do_exit) {
 					opline--;
+				}
+				/* If this a silence range we should only release the last arg */
+				if (is_silence) {
+					return;
 				}
 			} while (!do_exit);
 			if (call->prev_execute_data) {

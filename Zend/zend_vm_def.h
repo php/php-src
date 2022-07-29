@@ -7434,6 +7434,11 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 
 	ZVAL_LONG(EX_VAR(opline->result.var), EG(error_reporting));
 
+	/* Do not suppress diagnostics when a class list is passed to @ */
+	if (opline->extended_value == 1) {
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	if (!E_HAS_ONLY_FATAL_ERRORS(EG(error_reporting))) {
 		do {
 			/* Do not silence fatal errors */
@@ -7470,6 +7475,65 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 			&& !E_HAS_ONLY_FATAL_ERRORS(Z_LVAL_P(EX_VAR(opline->op1.var)))) {
 		EG(error_reporting) = Z_LVAL_P(EX_VAR(opline->op1.var));
 	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(203, ZEND_SILENCE_CATCH, ANY, ANY)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+
+	/* Came from class list virtual catch blocks */
+	if (opline->extended_value == 2) {
+		if (EG(exception) != NULL) {
+			zend_rethrow_exception(execute_data);
+			HANDLE_EXCEPTION();
+		}
+		/* Result is UNDEF means an exception has been caught */
+		if (opline->result_type & (IS_VAR | IS_TMP_VAR)
+				&& Z_TYPE_P(EX_VAR(opline->result.var)) == IS_UNDEF) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+        }
+	} else if (EG(exception) && opline->extended_value != 2) {
+		ZEND_ASSERT(EG(exception)->ce);
+		/* Only suppress Exception or a subclass of, and NOT Error throwable errors */
+		if (!instanceof_function(zend_ce_exception, EG(exception)->ce)) {
+			zend_rethrow_exception(execute_data);
+			HANDLE_EXCEPTION();
+		}
+
+#ifdef HAVE_DTRACE
+		if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
+			DTRACE_EXCEPTION_CAUGHT((char *)EG(exception)->ce->name);
+		}
+#endif /* HAVE_DTRACE */
+		zend_clear_exception();
+
+		/* Free object (needed to not leak memory on @new) */
+		if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_OBJECT) {
+			//OBJ_RELEASE(Z_OBJ_P(EX_VAR(opline->result.var)));
+		}
+
+		/* Set value to NULL */
+		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+			/* Make internal functions which set a return value early return false */
+			/*
+			if (UNEXPECTED(Z_TYPE_P(EX_VAR(opline->result.var)) != IS_UNDEF
+					&& Z_TYPE_P(EX_VAR(opline->result.var)) <= IS_TRUE)) {
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			} else {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			*/
+
+			/* Set return value to null, except when an internal function has set a return value */
+			if (EXPECTED(Z_TYPE_P(EX_VAR(opline->result.var)) == IS_UNDEF)) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+		}
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 

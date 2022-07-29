@@ -141,6 +141,10 @@ namespace {
 
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
+
+    function zend_suppress_exception_internal_return_false(): bool {}
+    function zend_suppress_exception_internal_return_true(): bool {}
+    function zend_suppress_exception_internal_return_int(): int {}
 }
 
 namespace ZendTestNS {

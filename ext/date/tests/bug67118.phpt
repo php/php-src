@@ -12,7 +12,7 @@ class mydt extends datetime
             $tz = new DateTimeZone($tz);
         }
         try {
-            @parent::__construct($time, $tz);
+            parent::__construct($time, $tz);
         } catch (Exception $e) {
             echo "Bad date" . $this->format("Y") . "\n";
         }

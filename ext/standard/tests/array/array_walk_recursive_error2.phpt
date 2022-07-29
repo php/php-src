@@ -16,7 +16,6 @@ function callback2($value, $key, $user_data1, $user_data2) {
 }
 echo "*** Testing array_walk_recursive() : error conditions - callback parameters ***\n";
 
-// expected: Missing argument Warning
 try {
     var_dump( array_walk_recursive($input, "callback1") );
 } catch (Throwable $e) {
@@ -24,18 +23,6 @@ try {
 }
 try {
     var_dump( array_walk_recursive($input, "callback2", 4) );
-} catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
-}
-
-// expected: Warning is suppressed
-try {
-    var_dump( @array_walk_recursive($input, "callback1") );
-} catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
-}
-try {
-    var_dump( @array_walk_recursive($input, "callback2", 4) );
 } catch (Throwable $e) {
     echo "Exception: " . $e->getMessage() . "\n";
 }
@@ -51,8 +38,6 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing array_walk_recursive() : error conditions - callback parameters ***
-Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
-Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected
 Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
 Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected
 -- Testing array_walk_recursive() function with too many callback parameters --
