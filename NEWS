@@ -41,6 +41,8 @@ PHP                                                                        NEWS
     call twice) (zeriyoshi)
   . Change Mt19937 to throw a ValueError instead of InvalidArgumentException
     for invalid $mode. (timwolla)
+  . Splitted Random\Randomizer::getInt() (without arguments) to 
+    Random\Randomizer::nextInt(). (zeriyoshi)
 
 - Sockets:
   . Added SOL_FILTER socket option for Solaris. (David Carlier)
