@@ -148,8 +148,8 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (seed_is_null) {
-		if (php_random_bytes_silent(&state->state, sizeof(php_random_uint128_t)) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+		if (php_random_bytes_throw(&state->state, sizeof(php_random_uint128_t)) == FAILURE) {
+			zend_throw_exception(spl_ce_RuntimeException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	} else {

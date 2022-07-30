@@ -279,8 +279,8 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 
 	if (seed_is_null) {
 		/* MT19937 has a very large state, uses CSPRNG for seeding only */
-		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+		if (php_random_bytes_throw(&seed, sizeof(zend_long)) == FAILURE) {
+			zend_throw_exception(spl_ce_RuntimeException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	}
