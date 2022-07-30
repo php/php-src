@@ -126,7 +126,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > RANDOM_RANGE_ATTEMPTS) {
-			zend_throw_error(NULL, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
+			zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
 			return 0;
 		}
 
@@ -182,7 +182,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > RANDOM_RANGE_ATTEMPTS) {
-			zend_throw_error(NULL, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
+			zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
 			return 0;
 		}
 

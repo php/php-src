@@ -49,7 +49,7 @@ static uint64_t generate(php_random_status *status)
 			result += ((uint64_t) (unsigned char) Z_STRVAL(retval)[i]) << (8 * i);
 		}
 	} else {
-		zend_throw_error(NULL, "A random engine must return a non-empty string");
+		zend_throw_error(random_ce_Random_BrokenRandomEngineError, "A random engine must return a non-empty string");
 		return 0;
 	}
 

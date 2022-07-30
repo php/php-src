@@ -74,35 +74,35 @@ foreach ([
 EmptyStringEngine
 =====================
 
-Error: A random engine must return a non-empty string in %s:%d
+Random\BrokenRandomEngineError: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
 
 -------
 
-Error: A random engine must return a non-empty string in %s:%d
+Random\BrokenRandomEngineError: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->nextInt()
 #1 {main}
 
 -------
 
-Error: A random engine must return a non-empty string in %s:%d
+Random\BrokenRandomEngineError: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getBytes(1)
 #1 {main}
 
 -------
 
-Error: A random engine must return a non-empty string in %s:%d
+Random\BrokenRandomEngineError: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}
 
 -------
 
-Error: A random engine must return a non-empty string in %s:%d
+Random\BrokenRandomEngineError: A random engine must return a non-empty string in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}
@@ -111,7 +111,7 @@ Stack trace:
 HeavilyBiasedEngine
 =====================
 
-Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Random\BrokenRandomEngineError: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
@@ -126,14 +126,14 @@ string(2) "ff"
 
 -------
 
-Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Random\BrokenRandomEngineError: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}
 
 -------
 
-Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
+Random\BrokenRandomEngineError: Failed to generate an acceptable random number in 50 attempts in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}
