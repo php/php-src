@@ -775,6 +775,13 @@ static PHP_GINIT_FUNCTION(zend_test)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(zend_test_globals, 0, sizeof(*zend_test_globals));
+
+	zend_test_observer_ginit(zend_test_globals);
+}
+
+static PHP_GSHUTDOWN_FUNCTION(zend_test)
+{
+	zend_test_observer_gshutdown(zend_test_globals);
 }
 
 PHP_MINFO_FUNCTION(zend_test)
@@ -798,7 +805,7 @@ zend_module_entry zend_test_module_entry = {
 	PHP_ZEND_TEST_VERSION,
 	PHP_MODULE_GLOBALS(zend_test),
 	PHP_GINIT(zend_test),
-	NULL,
+	PHP_GSHUTDOWN(zend_test),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
