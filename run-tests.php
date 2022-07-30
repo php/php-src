@@ -2056,6 +2056,9 @@ TEST $file
         // Make sure warnings still show up on the second run.
         $ini_settings['opcache.record_warnings'] = '1';
     }
+    if (extension_loaded('posix') && posix_getuid() === 0) {
+        $ini_settings['opcache.preload_user'] = 'root';
+    }
 
     // Any special ini settings
     // these may overwrite the test defaults...
