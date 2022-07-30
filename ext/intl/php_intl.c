@@ -175,9 +175,6 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'Locale' PHP class */
 	locale_register_Locale_class(  );
 
-	/* Expose Locale constants to PHP scripts */
-	locale_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	msgformat_register_class();
 
 	grapheme_register_constants( INIT_FUNC_ARGS_PASSTHRU );
