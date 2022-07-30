@@ -17,7 +17,7 @@ jobs:
           only-issue-labels: "Status: Requires RFC,Feature"
           # Hack to skip PRs, unfortunately there's no option to disable PRs
           only-pr-labels: inexistent-label
-          stale-pr-message: >-
+          stale-issue-message: >-
             There has not been any recent activity in this feature request. It will automatically be closed in 7 days
             if no further action is taken. Please see https://github.com/probot/stale#is-closing-stale-issues-really-a-good-idea
             to understand why we auto-close stale feature requests.
