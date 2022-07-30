@@ -39,6 +39,9 @@ PHP 8.2 UPGRADE NOTES
     further details.
 
 - Standard:
+  . glob() returns empty array if all paths are restricted by open_basedir.
+    Previously the error was returned but that behavior was not consistent and
+    did not work correctly for all patterns.
   . strtolower() and strtoupper() are no longer locale-sensitive. They now
     perform ASCII case conversion, as if the locale were "C". Use
     mb_strtolower() if you want localized case conversion. Similarly, stristr,

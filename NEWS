@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Removed redundant RuntimeExceptions from Randomizer methods. The
     exceptions thrown by the engines will be exposed directly. (timwolla)
 
+- Standard:
+  . Fixed bug #65489 (glob() basedir check is inconsistent). (Jakub Zelenka)
+
 04 Aug 2022, PHP 8.2.0beta2
 
 - Core:
