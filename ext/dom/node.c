@@ -1065,7 +1065,7 @@ PHP_METHOD(DOMNode, replaceChild)
 			}
 		} else if (oldchild != newchild) {
 			xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
-			replacedoctype = (intSubset == oldchild);
+			replacedoctype = (intSubset == (xmlDtd *) oldchild);
 
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				xmlSetTreeDoc(newchild, nodep->doc);
