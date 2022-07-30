@@ -30,7 +30,7 @@ for ($i = 0; $i < 1000; $i++) {
 ?>
 --EXPECTF--
 Random\Engine\PcgOneseq128XslRr64::__construct(): Argument #1 ($seed) must be of type string|int|null, float given
-Random\Engine\PcgOneseq128XslRr64::__construct(): Argument #1 ($seed) state strings must be 16 bytes
+Random\Engine\PcgOneseq128XslRr64::__construct(): Argument #1 ($seed) must be a 16 byte (128 bit) string
 object(Random\Engine\PcgOneseq128XslRr64)#%d (%d) {
   ["__states"]=>
   array(2) {

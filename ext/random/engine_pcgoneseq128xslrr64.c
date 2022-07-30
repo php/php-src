@@ -165,7 +165,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 				}
 				seed128(engine->status, php_random_uint128_constant(t[0], t[1]));
 			} else {
-				zend_argument_value_error(1, "state strings must be 16 bytes");
+				zend_argument_value_error(1, "must be a 16 byte (128 bit) string");
 				RETURN_THROWS();
 			}
 		} else {
