@@ -192,8 +192,7 @@ testStrimwidth("\x00\x00\x00\x00+\x00\x00\x00\x00k\x00'\x11Yz", 1, 0, 'greek');
 // sometimes not skip over characters at beginning of string when requested to
 testStrimwidthWithMarker(str_repeat("a", 268), '', 12, 255, 'ASCII');
 
-// Try invalid string; as long as it fits in the specified width, where each
-// invalid character is counted as having width 1, pass it through
+// Try invalid string; invalid sequences will be converted to error markers
 testStrimwidth("\x80\x80\x80", 0, 10, 'UTF-8');
 
 // Try invalid marker
@@ -254,7 +253,7 @@ mb_strimwidth(): Argument #3 ($width) is out of range
 == Other ==
 start=1 width=0 result=[2e 2e 2e] length=3 width=3
 start=12 width=255 result=[61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61] length=255 width=255
-start=0 width=10 result=[80 80 80] length=3 width=3
+start=0 width=10 result=[3f 3f 3f] length=3 width=3
 start=0 width=10 result=[61 62 63 64 65 66 67 80 80 80] length=10 width=10
 start=0 width=1 result=[61 62 63 64 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70] length=16 width=16
 start=-3 width=10 result=[61 62 63] length=3 width=3
