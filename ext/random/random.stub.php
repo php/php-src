@@ -147,4 +147,25 @@ namespace Random
 
         public function __unserialize(array $data): void {}
     }
+
+    /**
+     * @strict-properties
+     */
+    class RandomError extends \Error
+    {
+    }
+
+    /**
+     * @strict-properties
+     */
+    class BrokenRandomEngineError extends RandomError
+    {
+    }
+
+    /**
+     * @strict-properties
+     */
+    class RandomException extends \Exception
+    {
+    }
 }

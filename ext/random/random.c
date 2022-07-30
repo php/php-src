@@ -74,7 +74,12 @@ PHPAPI zend_class_entry *random_ce_Random_Engine_Mt19937;
 PHPAPI zend_class_entry *random_ce_Random_Engine_PcgOneseq128XslRr64;
 PHPAPI zend_class_entry *random_ce_Random_Engine_Xoshiro256StarStar;
 PHPAPI zend_class_entry *random_ce_Random_Engine_Secure;
+
 PHPAPI zend_class_entry *random_ce_Random_Randomizer;
+
+PHPAPI zend_class_entry *random_ce_Random_RandomError;
+PHPAPI zend_class_entry *random_ce_Random_BrokenRandomEngineError;
+PHPAPI zend_class_entry *random_ce_Random_RandomException;
 
 static zend_object_handlers random_engine_mt19937_object_handlers;
 static zend_object_handlers random_engine_pcgoneseq128xslrr64_object_handlers;
@@ -831,6 +836,15 @@ PHP_MINIT_FUNCTION(random)
 
 	/* Random\CryptoSafeEngine */
 	random_ce_Random_CryptoSafeEngine = register_class_Random_CryptoSafeEngine(random_ce_Random_Engine);
+
+	/* Random\RandomError */
+	random_ce_Random_RandomError = register_class_Random_RandomError(zend_ce_error);
+
+	/* Random\BrokenRandomEngineError */
+	random_ce_Random_BrokenRandomEngineError = register_class_Random_BrokenRandomEngineError(random_ce_Random_RandomError);
+
+	/* Random\RandomException */
+	random_ce_Random_RandomException = register_class_Random_RandomException(zend_ce_exception);
 
 	/* Random\Engine\Mt19937 */
 	random_ce_Random_Engine_Mt19937 = register_class_Random_Engine_Mt19937(random_ce_Random_Engine);
