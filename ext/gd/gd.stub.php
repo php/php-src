@@ -170,9 +170,9 @@ const IMG_EFFECT_OVERLAY = UNKNOWN;
 #ifdef gdEffectMultiply
 /**
  * @var int
- * @cvalue gdEffectOverlay
+ * @cvalue gdEffectMultiply
  */
-const IMG_EFFECT_OVERLAY = UNKNOWN;
+const IMG_EFFECT_MULTIPLY = UNKNOWN;
 #endif
 
 /**
