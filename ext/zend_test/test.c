@@ -627,7 +627,6 @@ static void custom_zend_execute_ex(zend_execute_data *execute_data)
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_test_interface = register_class__ZendTestInterface();
-	zend_declare_class_constant_long(zend_test_interface, ZEND_STRL("DUMMY"), 0);
 
 	zend_test_class = register_class__ZendTestClass(zend_test_interface);
 	zend_test_class->create_object = zend_test_class_new;

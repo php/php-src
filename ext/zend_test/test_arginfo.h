@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2c654cefda278094fa4cdc25b83ced269e83cadf */
+ * Stub hash: daa7be53e9009c66c814fb5b0407a6dfbe09679a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -316,6 +316,12 @@ static zend_class_entry *register_class__ZendTestInterface(void)
 
 	INIT_CLASS_ENTRY(ce, "_ZendTestInterface", class__ZendTestInterface_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zval const_DUMMY_value;
+	ZVAL_LONG(&const_DUMMY_value, 0);
+	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DUMMY_name);
 
 	return class_entry;
 }

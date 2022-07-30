@@ -16,6 +16,8 @@ namespace {
 
     interface _ZendTestInterface
     {
+        /** @var int */
+        public const DUMMY = 0;
     }
 
     /** @alias _ZendTestClassAlias */
