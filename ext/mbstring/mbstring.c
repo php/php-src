@@ -2414,7 +2414,7 @@ static zend_string* mb_trim_string(zend_string *input, zend_string *marker, cons
 	int remaining_width = width;
 	unsigned int to_skip = from;
 	size_t out_len = 0;
-	bool first_call = true;
+	bool first_call = true, input_err = false;
 	mb_convert_buf buf;
 
 	while (in_len) {
@@ -2425,7 +2425,9 @@ static zend_string* mb_trim_string(zend_string *input, zend_string *marker, cons
 			to_skip -= out_len;
 		} else {
 			for (int i = to_skip; i < out_len; i++) {
-				remaining_width -= character_width(wchar_buf[i]);
+				uint32_t w = wchar_buf[i];
+				input_err |= (w == MBFL_BAD_INPUT);
+				remaining_width -= character_width(w);
 				if (remaining_width < 0) {
 					/* We need to truncate string and append trim marker */
 					width -= mb_get_strwidth(marker, enc);
@@ -2449,8 +2451,11 @@ static zend_string* mb_trim_string(zend_string *input, zend_string *marker, cons
 		first_call = false;
 	}
 
-	/* The input string is fine; we don't need to append the trim marker */
-	if (from == 0) {
+	/* The input string fits in the requested width; we don't need to append the trim marker
+	 * However, if the string contains erroneous byte sequences, those should be converted
+	 * to error markers */
+	if (from == 0 && !input_err) {
+		/* This just increments the string's refcount; it doesn't really 'copy' it */
 		return zend_string_copy(input);
 	}
 	return mb_drop_chars(input, enc, from);
