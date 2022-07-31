@@ -225,7 +225,7 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 				}
 				seed256(engine->status, t[0], t[1], t[2], t[3]);
 			} else {
-				zend_argument_value_error(1, "state strings must be 32 bytes");
+				zend_argument_value_error(1, "must be a 32 byte (256 bit) string");
 				RETURN_THROWS();
 			}
 		} else {
