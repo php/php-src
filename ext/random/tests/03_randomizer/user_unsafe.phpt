@@ -71,11 +71,6 @@ Stack trace:
 #0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}
 
-Next RuntimeException: Random number generation failed in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->getInt(0, 123)
-#1 {main}
-
 -------
 
 Error: A random engine must return a non-empty string in %s:%d
@@ -107,11 +102,6 @@ HeavilyBiasedEngine
 =====================
 
 Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->getInt(0, 123)
-#1 {main}
-
-Next RuntimeException: Random number generation failed in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->getInt(0, 123)
 #1 {main}

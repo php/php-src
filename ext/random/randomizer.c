@@ -132,7 +132,6 @@ PHP_METHOD(Random_Randomizer, getInt)
 
 	result = randomizer->algo->range(randomizer->status, min, max);
 	if (EG(exception)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 
