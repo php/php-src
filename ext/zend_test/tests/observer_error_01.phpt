@@ -7,6 +7,10 @@ zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 memory_limit=2M
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") === "0") die("skip requires zmm");
+?>
 --FILE--
 <?php
 function foo()

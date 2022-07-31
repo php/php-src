@@ -61,7 +61,7 @@ static void observer_set_user_opcode_handler(const char *opcode_names, user_opco
 
 static void observer_show_opcode(zend_execute_data *execute_data)
 {
-	if (!ZT_G(observer_show_opcode)) {
+	if (!ZT_G(observer_show_opcode) || !ZEND_USER_CODE(EX(func)->type)) {
 		return;
 	}
 	php_printf("%*s<!-- opcode: '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", zend_get_opcode_name(EX(opline)->opcode));

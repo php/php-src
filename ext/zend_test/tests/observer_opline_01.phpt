@@ -45,10 +45,7 @@ foo_observer_test
     <!-- opcode: 'ZEND_RETURN' -->
   </file '%s'>
   <!-- init array_sum() -->
-  <!-- opcode: 'ZEND_RETURN' -->
   <array_sum>
-    <!-- opcode: 'ZEND_RETURN' -->
-    <!-- opcode: 'ZEND_RETURN' -->
   </array_sum>
 6
   <foo>
