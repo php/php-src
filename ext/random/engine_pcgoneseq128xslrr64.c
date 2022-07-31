@@ -186,6 +186,10 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, jump)
 		Z_PARAM_LONG(advance);
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (UNEXPECTED(advance < 0)) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+	}
+
 	php_random_pcgoneseq128xslrr64_advance(state, advance);
 }
 /* }}} */
