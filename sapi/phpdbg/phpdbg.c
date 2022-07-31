@@ -1076,7 +1076,7 @@ void phpdbg_sighup_handler(int sig) /* {{{ */
 } /* }}} */
 #endif
 
-void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1) void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
 	return _zend_mm_alloc(zend_mm_get_heap(), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
