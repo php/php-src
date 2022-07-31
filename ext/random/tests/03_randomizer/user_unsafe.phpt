@@ -93,11 +93,6 @@ Stack trace:
 #0 %s(%d): Random\Randomizer->getBytes(1)
 #1 {main}
 
-Next RuntimeException: Random number generation failed in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->getBytes(1)
-#1 {main}
-
 -------
 
 Error: A random engine must return a non-empty string in %s:%d
