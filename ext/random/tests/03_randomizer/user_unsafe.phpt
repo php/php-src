@@ -95,11 +95,6 @@ Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}
 
-Next RuntimeException: Random number generation failed in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->shuffleArray(Array)
-#1 {main}
-
 -------
 
 Error: A random engine must return a non-empty string in %s:%d
@@ -128,11 +123,6 @@ string(2) "ff"
 -------
 
 Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->shuffleArray(Array)
-#1 {main}
-
-Next RuntimeException: Random number generation failed in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleArray(Array)
 #1 {main}

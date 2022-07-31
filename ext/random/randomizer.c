@@ -193,7 +193,6 @@ PHP_METHOD(Random_Randomizer, shuffleArray)
 
 	ZVAL_DUP(return_value, array);
 	if (!php_array_data_shuffle(randomizer->algo, randomizer->status, return_value)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 }
