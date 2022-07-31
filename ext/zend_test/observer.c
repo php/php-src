@@ -273,10 +273,16 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	if (new_value && ZSTR_LEN(new_value)) {
 		const char *start = ZSTR_VAL(new_value), *ptr;
 		while ((ptr = strchr(start, ','))) {
-			zend_hash_str_add_empty_element(*p, start, ptr - start);
+			zend_string *str = zend_string_init(start, ptr - start, 1);
+			GC_MAKE_PERSISTENT_LOCAL(str);
+			zend_hash_add_empty_element(*p, str);
+			zend_string_release(str);
 			start = ptr + 1;
 		}
-		zend_hash_str_add_empty_element(*p, start, ZSTR_VAL(new_value) + ZSTR_LEN(new_value) - start);
+		zend_string *str = zend_string_init(start, ZSTR_VAL(new_value) + ZSTR_LEN(new_value) - start, 1);
+		GC_MAKE_PERSISTENT_LOCAL(str);
+		zend_hash_add_empty_element(*p, str);
+		zend_string_release(str);
 		if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 			ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
 				if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
@@ -341,6 +347,7 @@ void zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS)
 void zend_test_observer_ginit(zend_zend_test_globals *zend_test_globals) {
 	zend_test_globals->observer_observe_function_names = malloc(sizeof(HashTable));
 	_zend_hash_init(zend_test_globals->observer_observe_function_names, 8, ZVAL_PTR_DTOR, 1);
+	GC_MAKE_PERSISTENT_LOCAL(zend_test_globals->observer_observe_function_names);
 }
 
 void zend_test_observer_gshutdown(zend_zend_test_globals *zend_test_globals) {
