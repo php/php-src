@@ -107,11 +107,6 @@ Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}
 
-Next RuntimeException: Random number generation failed in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
-#1 {main}
-
 =====================
 HeavilyBiasedEngine
 =====================
@@ -145,11 +140,6 @@ Stack trace:
 -------
 
 Error: Failed to generate an acceptable random number in 50 attempts in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
-#1 {main}
-
-Next RuntimeException: Random number generation failed in %s:%d
 Stack trace:
 #0 %s(%d): Random\Randomizer->shuffleBytes('foobar')
 #1 {main}

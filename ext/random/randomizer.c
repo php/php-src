@@ -215,7 +215,6 @@ PHP_METHOD(Random_Randomizer, shuffleBytes)
 
 	RETVAL_STRINGL(ZSTR_VAL(bytes), ZSTR_LEN(bytes));
 	if (!php_binary_string_shuffle(randomizer->algo, randomizer->status, Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value))) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 }
