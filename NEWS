@@ -49,6 +49,8 @@ PHP                                                                        NEWS
     for invalid $mode. (timwolla)
   . Splitted Random\Randomizer::getInt() (without arguments) to 
     Random\Randomizer::nextInt(). (zeriyoshi)
+  . Removed redundant RuntimeExceptions from Randomizer methods. The
+    exceptions thrown by the engines will be exposed directly. (timwolla)
 
 - Sockets:
   . Added SOL_FILTER socket option for Solaris. (David Carlier)
