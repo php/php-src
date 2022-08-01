@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0beta2
 
+- Core:
+  . Fixed bug GH-7900 (Arrow function with never return type compile-time
+    errors). (ilutov)
+
 - Date:
   . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of
     different type). (Derick)
@@ -54,10 +58,6 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #65069 (GlobIterator incorrect handling of open_basedir check).
     (Jakub Zelenka)
-
-- Core:
-  . Fixed bug GH-7900 (Arrow function with never return type compile-time
-    errors). (ilutov)
 
 21 Jul 2022, PHP 8.2.0beta1
 
