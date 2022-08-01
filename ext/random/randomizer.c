@@ -100,12 +100,11 @@ PHP_METHOD(Random_Randomizer, nextInt)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	result = randomizer->algo->generate(randomizer->status);
-	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
+	if (EG(exception)) {
 		RETURN_THROWS();
 	}
-	if (EG(exception)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
+		zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
 		RETURN_THROWS();
 	}
 	
