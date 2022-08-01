@@ -17,6 +17,7 @@ if ($engine->generate() !== $referenceEngine->generate()) {
 }
 
 die('success');
+?>
 --EXPECT--
 Random\Engine\PcgOneseq128XslRr64::jump(): Argument #1 ($advance) must be greater than or equal to 0
 success
