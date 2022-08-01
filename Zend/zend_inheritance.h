@@ -27,7 +27,7 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);
 ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *parent_ce, bool checked);
 
-static inline void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) {
+static zend_always_inline void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce) {
 	zend_do_inheritance_ex(ce, parent_ce, 0);
 }
 

@@ -334,7 +334,6 @@ ZEND_API zend_result zend_get_parameters_array_ex(uint32_t param_count, zval *ar
 /* internal function to efficiently copy parameters when executing __call() */
 ZEND_API zend_result zend_copy_parameters_array(uint32_t param_count, zval *argument_array);
 
-// TODO Replace _ex version with zend_get_parameters_array()
 #define zend_get_parameters_array(ht, param_count, argument_array) \
 	zend_get_parameters_array_ex(param_count, argument_array)
 #define zend_parse_parameters_none() \
@@ -381,7 +380,7 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_inter
 
 ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, bool persistent);
 
-static inline zend_result zend_register_class_alias(const char *name, zend_class_entry *ce) {
+static zend_always_inline zend_result zend_register_class_alias(const char *name, zend_class_entry *ce) {
 	return zend_register_class_alias_ex(name, strlen(name), ce, 1);
 }
 #define zend_register_ns_class_alias(ns, name, ce) \
@@ -540,40 +539,40 @@ ZEND_API void add_assoc_object_ex(zval *arg, const char *key, size_t key_len, ze
 ZEND_API void add_assoc_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref);
 ZEND_API void add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
-static inline void add_assoc_long(zval *arg, const char *key, zend_long n) {
+static zend_always_inline void add_assoc_long(zval *arg, const char *key, zend_long n) {
 	add_assoc_long_ex(arg, key, strlen(key), n);
 }
-static inline void add_assoc_null(zval *arg, const char *key) {
+static zend_always_inline void add_assoc_null(zval *arg, const char *key) {
 	add_assoc_null_ex(arg, key, strlen(key));
 }
-static inline void add_assoc_bool(zval *arg, const char *key, bool b) {
+static zend_always_inline void add_assoc_bool(zval *arg, const char *key, bool b) {
 	add_assoc_bool_ex(arg, key, strlen(key), b);
 }
-static inline void add_assoc_resource(zval *arg, const char *key, zend_resource *r) {
+static zend_always_inline void add_assoc_resource(zval *arg, const char *key, zend_resource *r) {
 	add_assoc_resource_ex(arg, key, strlen(key), r);
 }
-static inline void add_assoc_double(zval *arg, const char *key, double d) {
+static zend_always_inline void add_assoc_double(zval *arg, const char *key, double d) {
 	add_assoc_double_ex(arg, key, strlen(key), d);
 }
-static inline void add_assoc_str(zval *arg, const char *key, zend_string *str) {
+static zend_always_inline void add_assoc_str(zval *arg, const char *key, zend_string *str) {
 	add_assoc_str_ex(arg, key, strlen(key), str);
 }
-static inline void add_assoc_string(zval *arg, const char *key, const char *str) {
+static zend_always_inline void add_assoc_string(zval *arg, const char *key, const char *str) {
 	add_assoc_string_ex(arg, key, strlen(key), str);
 }
-static inline void add_assoc_stringl(zval *arg, const char *key, const char *str, size_t length) {
+static zend_always_inline void add_assoc_stringl(zval *arg, const char *key, const char *str, size_t length) {
 	add_assoc_stringl_ex(arg, key, strlen(key), str, length);
 }
-static inline void add_assoc_array(zval *arg, const char *key, zend_array *arr) {
+static zend_always_inline void add_assoc_array(zval *arg, const char *key, zend_array *arr) {
 	add_assoc_array_ex(arg, key, strlen(key), arr);
 }
-static inline void add_assoc_object(zval *arg, const char *key, zend_object *obj) {
+static zend_always_inline void add_assoc_object(zval *arg, const char *key, zend_object *obj) {
 	add_assoc_object_ex(arg, key, strlen(key), obj);
 }
-static inline void add_assoc_reference(zval *arg, const char *key, zend_reference *ref) {
+static zend_always_inline void add_assoc_reference(zval *arg, const char *key, zend_reference *ref) {
 	add_assoc_reference_ex(arg, key, strlen(key), ref);
 }
-static inline void add_assoc_zval(zval *arg, const char *key, zval *value) {
+static zend_always_inline void add_assoc_zval(zval *arg, const char *key, zval *value) {
 	add_assoc_zval_ex(arg, key, strlen(key), value);
 }
 
@@ -626,44 +625,43 @@ ZEND_API void add_property_object_ex(zval *arg, const char *key, size_t key_len,
 ZEND_API void add_property_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref);
 ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, zval *value);
 
-static inline void add_property_long(zval *arg, const char *key, zend_long n) {
+static zend_always_inline void add_property_long(zval *arg, const char *key, zend_long n) {
 	add_property_long_ex(arg, key, strlen(key), n);
 }
-static inline void add_property_null(zval *arg, const char *key) {
+static zend_always_inline void add_property_null(zval *arg, const char *key) {
 	add_property_null_ex(arg, key, strlen(key));
 }
-static inline void add_property_bool(zval *arg, const char *key, bool b) {
+static zend_always_inline void add_property_bool(zval *arg, const char *key, bool b) {
 	add_property_bool_ex(arg, key, strlen(key), b);
 }
-static inline void add_property_resource(zval *arg, const char *key, zend_resource *r) {
+static zend_always_inline void add_property_resource(zval *arg, const char *key, zend_resource *r) {
 	add_property_resource_ex(arg, key, strlen(key), r);
 }
-static inline void add_property_double(zval *arg, const char *key, double d) {
+static zend_always_inline void add_property_double(zval *arg, const char *key, double d) {
 	add_property_double_ex(arg, key, strlen(key), d);
 }
-static inline void add_property_str(zval *arg, const char *key, zend_string *str) {
+static zend_always_inline void add_property_str(zval *arg, const char *key, zend_string *str) {
 	add_property_str_ex(arg, key, strlen(key), str);
 }
-static inline void add_property_string(zval *arg, const char *key, const char *str) {
+static zend_always_inline void add_property_string(zval *arg, const char *key, const char *str) {
 	add_property_string_ex(arg, key, strlen(key), str);
 }
-static inline void add_property_stringl(zval *arg, const char *key, const char *str, size_t length) {
+static zend_always_inline void add_property_stringl(zval *arg, const char *key, const char *str, size_t length) {
 	add_property_stringl_ex(arg, key, strlen(key), str, length);
 }
-static inline void add_property_array(zval *arg, const char *key, zend_array *arr) {
+static zend_always_inline void add_property_array(zval *arg, const char *key, zend_array *arr) {
 	add_property_array_ex(arg, key, strlen(key), arr);
 }
-static inline void add_property_object(zval *arg, const char *key, zend_object *obj) {
+static zend_always_inline void add_property_object(zval *arg, const char *key, zend_object *obj) {
 	add_property_object_ex(arg, key, strlen(key), obj);
 }
-static inline void add_property_reference(zval *arg, const char *key, zend_reference *ref) {
+static zend_always_inline void add_property_reference(zval *arg, const char *key, zend_reference *ref) {
 	add_property_reference_ex(arg, key, strlen(key), ref);
 }
-static inline void add_property_zval(zval *arg, const char *key, zval *value) {
+static zend_always_inline void add_property_zval(zval *arg, const char *key, zval *value) {
 	add_property_zval_ex(arg, key, strlen(key), value);
 }
 
-// TODO Drop function_table argument?
 ZEND_API zend_result _call_user_function_impl(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], HashTable *named_params);
 
 #define call_user_function(function_table, object, function_name, retval_ptr, param_count, params) \

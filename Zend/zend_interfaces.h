@@ -40,19 +40,19 @@ typedef struct _zend_user_iterator {
 
 ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval, uint32_t param_count, zval* arg1, zval* arg2);
 
-static inline zval* zend_call_method_with_0_params(zend_object *object, zend_class_entry *obj_ce,
+static zend_always_inline zval* zend_call_method_with_0_params(zend_object *object, zend_class_entry *obj_ce,
 		zend_function **fn_proxy, const char *function_name, zval *retval)
 {
 	return zend_call_method(object, obj_ce, fn_proxy, function_name, strlen(function_name), retval, 0, NULL, NULL);
 }
 
-static inline zval* zend_call_method_with_1_params(zend_object *object, zend_class_entry *obj_ce,
+static zend_always_inline zval* zend_call_method_with_1_params(zend_object *object, zend_class_entry *obj_ce,
 		zend_function **fn_proxy, const char *function_name, zval *retval, zval* arg1)
 {
 	return zend_call_method(object, obj_ce, fn_proxy, function_name, strlen(function_name), retval, 1, arg1, NULL);
 }
 
-static inline zval* zend_call_method_with_2_params(zend_object *object, zend_class_entry *obj_ce,
+static zend_always_inline zval* zend_call_method_with_2_params(zend_object *object, zend_class_entry *obj_ce,
 		zend_function **fn_proxy, const char *function_name, zval *retval, zval* arg1, zval* arg2)
 {
 	return zend_call_method(object, obj_ce, fn_proxy, function_name, strlen(function_name), retval, 2, arg1, arg2);

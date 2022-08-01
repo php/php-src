@@ -257,31 +257,31 @@ ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Ha
 static zend_always_inline zend_result zend_hash_has_more_elements_ex(HashTable *ht, HashPosition *pos) {
 	return (zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS);
 }
-static inline zend_result zend_hash_has_more_elements(HashTable *ht) {
+static zend_always_inline zend_result zend_hash_has_more_elements(HashTable *ht) {
 	return zend_hash_has_more_elements_ex(ht, &ht->nInternalPointer);
 }
-static inline zend_result zend_hash_move_forward(HashTable *ht) {
+static zend_always_inline zend_result zend_hash_move_forward(HashTable *ht) {
 	return zend_hash_move_forward_ex(ht, &ht->nInternalPointer);
 }
-static inline zend_result zend_hash_move_backwards(HashTable *ht) {
+static zend_always_inline zend_result zend_hash_move_backwards(HashTable *ht) {
 	return zend_hash_move_backwards_ex(ht, &ht->nInternalPointer);
 }
-static inline int zend_hash_get_current_key(const HashTable *ht, zend_string **str_index, zend_ulong *num_index) {
+static zend_always_inline int zend_hash_get_current_key(const HashTable *ht, zend_string **str_index, zend_ulong *num_index) {
 	return zend_hash_get_current_key_ex(ht, str_index, num_index, &ht->nInternalPointer);
 }
-static inline void zend_hash_get_current_key_zval(const HashTable *ht, zval *key) {
+static zend_always_inline void zend_hash_get_current_key_zval(const HashTable *ht, zval *key) {
 	zend_hash_get_current_key_zval_ex(ht, key, &ht->nInternalPointer);
 }
-static inline int zend_hash_get_current_key_type(HashTable *ht) {
+static zend_always_inline int zend_hash_get_current_key_type(HashTable *ht) {
 	return zend_hash_get_current_key_type_ex(ht, &ht->nInternalPointer);
 }
-static inline zval* zend_hash_get_current_data(HashTable *ht) {
+static zend_always_inline zval* zend_hash_get_current_data(HashTable *ht) {
 	return zend_hash_get_current_data_ex(ht, &ht->nInternalPointer);
 }
-static inline void zend_hash_internal_pointer_reset(HashTable *ht) {
+static zend_always_inline void zend_hash_internal_pointer_reset(HashTable *ht) {
 	zend_hash_internal_pointer_reset_ex(ht, &ht->nInternalPointer);
 }
-static inline void zend_hash_internal_pointer_end(HashTable *ht) {
+static zend_always_inline void zend_hash_internal_pointer_end(HashTable *ht) {
 	zend_hash_internal_pointer_end_ex(ht, &ht->nInternalPointer);
 }
 
@@ -298,15 +298,15 @@ ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t 
 ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 
-static inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, zend_bool renumber) {
+static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, zend_bool renumber) {
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
 }
 
-static inline uint32_t zend_hash_num_elements(const HashTable *ht) {
+static zend_always_inline uint32_t zend_hash_num_elements(const HashTable *ht) {
 	return ht->nNumOfElements;
 }
 
-static inline zend_long zend_hash_next_free_element(const HashTable *ht) {
+static zend_always_inline zend_long zend_hash_next_free_element(const HashTable *ht) {
 	return ht->nNextFreeElement;
 }
 

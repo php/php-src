@@ -450,10 +450,10 @@ ZEND_API char*        ZEND_FASTCALL zend_str_toupper_dup_ex(const char *source, 
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent);
 ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, bool persistent);
 
-static inline zend_string* zend_string_tolower(zend_string *str) {
+static zend_always_inline zend_string* zend_string_tolower(zend_string *str) {
 	return zend_string_tolower_ex(str, false);
 }
-static inline zend_string* zend_string_toupper(zend_string *str) {
+static zend_always_inline zend_string* zend_string_toupper(zend_string *str) {
 	return zend_string_toupper_ex(str, false);
 }
 
