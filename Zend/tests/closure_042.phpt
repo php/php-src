@@ -1,5 +1,5 @@
 --TEST--
-Closure 042: Binding an instance to a non-scoped non-static closures gives it a dummy scope
+Closure 042: Binding an instance to non-scoped non-static closures
 --FILE--
 <?php
 
@@ -20,8 +20,8 @@ echo "Done.\n";
 --EXPECTF--
 object(stdClass)#%d (0) {
 }
-string(7) "Closure"
+string(8) "stdClass"
 object(stdClass)#%d (0) {
 }
-string(7) "Closure"
+string(8) "stdClass"
 Done.
