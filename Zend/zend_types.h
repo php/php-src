@@ -724,6 +724,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define ZSTR_SET_CE_CACHE_EX(s, ce, validate) do { \
 		if (!(validate) || ZSTR_VALID_CE_CACHE(s)) { \
+			ZEND_ASSERT((validate) || ZSTR_VALID_CE_CACHE(s)); \
 			SET_CE_CACHE(GC_REFCOUNT(s), ce); \
 		} \
 	} while (0)
