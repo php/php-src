@@ -188,6 +188,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, jump)
 
 	if (UNEXPECTED(advance < 0)) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	php_random_pcgoneseq128xslrr64_advance(state, advance);
