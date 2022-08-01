@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
     (cmb)
+  . Fixed bug GH-9164 (Segfault in zend_accel_class_hash_copy).
+    (Arnaud, Sergei Turchanov)
 
 - PDO_SQLite:
   . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
