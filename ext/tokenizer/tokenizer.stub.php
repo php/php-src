@@ -2,6 +2,12 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue TOKEN_PARSE
+ */
+const TOKEN_PARSE = UNKNOWN;
+
 function token_get_all(string $code, int $flags = 0): array {}
 
 function token_name(int $id): string {}
