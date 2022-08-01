@@ -62,32 +62,30 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 PHP_METHOD(Random_Randomizer, __construct)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	zend_object *engine_object = NULL;
-	zval zengine_object;
+	zval engine;
+	zval *param_engine = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(engine_object, random_ce_Random_Engine);
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(param_engine, random_ce_Random_Engine);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (randomizer->algo) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot call constructor twice");
+	if (param_engine != NULL) {
+		ZVAL_COPY(&engine, param_engine);
+	} else {
+		/* Create default RNG instance */
+		object_init_ex(&engine, random_ce_Random_Engine_Secure);
+	}
+
+	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", strlen("engine"), &engine);
+
+	OBJ_RELEASE(Z_OBJ_P(&engine));
+
+	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
-	/* Create default RNG instance */
-	if (!engine_object) {
-		engine_object = random_ce_Random_Engine_Secure->create_object(random_ce_Random_Engine_Secure);
-
-		/* No need self-refcount */
-		GC_DELREF(engine_object);
-	}
-
-	ZVAL_OBJ(&zengine_object, engine_object);
-
-	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", strlen("engine"), &zengine_object);
-
-	randomizer_common_init(randomizer, engine_object);
+	randomizer_common_init(randomizer, Z_OBJ_P(&engine));
 }
 /* }}} */
 

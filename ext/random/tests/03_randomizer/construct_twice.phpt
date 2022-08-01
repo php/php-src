@@ -13,28 +13,28 @@ final class UserEngine implements \Random\Engine
 
 try {
     (new \Random\Randomizer())->__construct();
-} catch (\BadMethodCallException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     $r = new \Random\Randomizer(new \Random\Engine\Xoshiro256StarStar());
     $r->__construct(new \Random\Engine\PcgOneseq128XslRr64());
-} catch (\BadMethodCallException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     $r = new \Random\Randomizer(new \UserEngine());
     $r->__construct(new \UserEngine());
-} catch (\BadMethodCallException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 try {
     $r = new \Random\Randomizer(new \Random\Engine\Xoshiro256StarStar());
     $r->__construct(new \UserEngine());
-} catch (\BadMethodCallException $e) {
+} catch (\Error $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 
@@ -43,9 +43,9 @@ var_dump($r->engine::class);
 die('success');
 ?>
 --EXPECT--
-Cannot call constructor twice
-Cannot call constructor twice
-Cannot call constructor twice
-Cannot call constructor twice
+Cannot modify readonly property Random\Randomizer::$engine
+Cannot modify readonly property Random\Randomizer::$engine
+Cannot modify readonly property Random\Randomizer::$engine
+Cannot modify readonly property Random\Randomizer::$engine
 string(32) "Random\Engine\Xoshiro256StarStar"
 success
