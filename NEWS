@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Declared Transliterator::$id as readonly to unlock subclassing it. (Nicolas
     Grekas)
 
+- OPcache:
+  . Fixed bug GH-9164 (Segfault in zend_accel_class_hash_copy).
+    (Arnaud, Sergei Turchanov)
+
 - PCNTL:
   . Fixed pcntl_(get|set)priority error handling for MacOS. (Juan Morales)
 
