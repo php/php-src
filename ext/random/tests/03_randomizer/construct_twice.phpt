@@ -31,10 +31,21 @@ try {
     echo $e->getMessage() . PHP_EOL;
 }
 
+try {
+    $r = new \Random\Randomizer(new \Random\Engine\Xoshiro256StarStar());
+    $r->__construct(new \UserEngine());
+} catch (\BadMethodCallException $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+var_dump($r->engine::class);
+
 die('success');
 ?>
 --EXPECT--
 Cannot call constructor twice
 Cannot call constructor twice
 Cannot call constructor twice
+Cannot call constructor twice
+string(32) "Random\Engine\Xoshiro256StarStar"
 success
