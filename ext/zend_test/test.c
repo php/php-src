@@ -611,6 +611,73 @@ static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
 	zend_forbid_dynamic_call();
 }
 
+// TODO HERE
+/* ncm refers to non commutative multiplication */
+static zend_class_entry *ncm_ce;
+static zend_object_handlers ncm_object_handlers;
+
+static zend_object* ncm_object_create_ex(zend_class_entry* ce, zend_long l) {
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &ncm_object_handlers;
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 0), l);
+	return obj;
+}
+static zend_object *ncm_object_create(zend_class_entry *ce) /* {{{ */
+{
+	return ncm_object_create_ex(ce, 0);
+}
+/* }}} */
+
+static inline void ncm_create(zval *target, zend_long l) /* {{{ */
+{
+	ZVAL_OBJ(target, ncm_object_create_ex(ncm_ce, l));
+}
+
+#define IS_NCM(zval) \
+	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), ncm_ce))
+
+static void ncm_subtraction(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1;
+	zend_long val_2;
+	if (IS_NCM(op1)) {
+		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
+	} else {
+		val_1 = zval_get_long(op1);
+	}
+	if (IS_NCM(op2)) {
+		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
+	} else {
+		val_2 = zval_get_long(op2);
+	}
+
+	ncm_create(result, val_1 - val_2);
+}
+
+static zend_result ncm_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2)
+{
+	switch (opcode) {
+	case ZEND_MUL:
+		ncm_subtraction(result, op1, op2);
+		if (UNEXPECTED(EG(exception))) { return FAILURE; }
+		return SUCCESS;
+	default:
+		return FAILURE;
+	}
+}
+
+PHP_METHOD(NonCommutativeMultiplication, __construct)
+{
+	zend_long l;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), l);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -712,6 +779,12 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
+
+	/* Non commutative multiplication class */
+	ncm_ce = register_class_NonCommutativeMultiplication();
+	ncm_ce->create_object = ncm_object_create;
+	memcpy(&ncm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	ncm_object_handlers.do_operation = ncm_do_operation;
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 

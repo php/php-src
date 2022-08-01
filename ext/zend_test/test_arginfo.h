@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: daa7be53e9009c66c814fb5b0407a6dfbe09679a */
+ * Stub hash: 7662c2669de871d0be3a472c24da4ade0ee1dbe6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -124,6 +124,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_void_return
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NonCommutativeMultiplication___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, val, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZendTestNS_Foo_method, 0, 0, IS_LONG, 0)
 #else
@@ -175,6 +179,7 @@ static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestForbidDynamicCall, call);
 static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic);
+static ZEND_METHOD(NonCommutativeMultiplication, __construct);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS_UnlikelyCompileError, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
@@ -278,6 +283,12 @@ static const zend_function_entry class_ZendTestStringEnum_methods[] = {
 
 
 static const zend_function_entry class_ZendTestIntEnum_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_NonCommutativeMultiplication_methods[] = {
+	ZEND_ME(NonCommutativeMultiplication, __construct, arginfo_class_NonCommutativeMultiplication___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -565,6 +576,23 @@ static zend_class_entry *register_class_ZendTestIntEnum(void)
 	return class_entry;
 }
 #endif
+
+static zend_class_entry *register_class_NonCommutativeMultiplication(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "NonCommutativeMultiplication", class_NonCommutativeMultiplication_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_val_default_value;
+	ZVAL_UNDEF(&property_val_default_value);
+	zend_string *property_val_name = zend_string_init("val", sizeof("val") - 1, 1);
+	zend_declare_typed_property(class_entry, property_val_name, &property_val_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_val_name);
+
+	return class_entry;
+}
 
 static zend_class_entry *register_class_ZendTestNS_Foo(void)
 {
