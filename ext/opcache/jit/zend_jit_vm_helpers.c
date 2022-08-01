@@ -649,6 +649,20 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)
 		 && opline->opcode != ZEND_INSTANCEOF
 		 && opline->opcode != ZEND_UNSET_STATIC_PROP
+		 && opline->opcode != ZEND_ISSET_ISEMPTY_STATIC_PROP
+		 && opline->opcode != ZEND_ASSIGN_STATIC_PROP
+		 && opline->opcode != ZEND_ASSIGN_STATIC_PROP_REF
+		 && opline->opcode != ZEND_ASSIGN_STATIC_PROP_OP
+		 && opline->opcode != ZEND_PRE_INC_STATIC_PROP
+		 && opline->opcode != ZEND_POST_INC_STATIC_PROP
+		 && opline->opcode != ZEND_PRE_DEC_STATIC_PROP
+		 && opline->opcode != ZEND_POST_DEC_STATIC_PROP
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_R
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_W
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_RW
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_IS
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_UNSET
 		 && (opline->op2_type == IS_CV
 		  || (opline->opcode != ZEND_FE_FETCH_R
 		   && opline->opcode != ZEND_FE_FETCH_RW))) {
