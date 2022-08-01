@@ -458,14 +458,6 @@ ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj) /* {
 }
 /* }}} */
 
-ZEND_API const zend_class_entry *zend_get_closure_called_scope(zend_object *obj) /* {{{ */
-{
-	zend_closure *closure = (zend_closure *) obj;
-	return closure->called_scope;
-
-}
-/* }}} */
-
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);

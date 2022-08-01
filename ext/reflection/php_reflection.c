@@ -1686,17 +1686,18 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis)
 ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass)
 {
 	reflection_object *intern;
-	const zend_function *closure_func;
-	const zend_class_entry *called_scope;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
-		closure_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
-		called_scope = zend_get_closure_called_scope(Z_OBJ(intern->obj));
-		if (closure_func && (called_scope || closure_func->common.scope)) {
+		zend_class_entry *called_scope;
+		zend_function *closure_func;
+		zend_object *object;
+		if (Z_OBJ_HANDLER(intern->obj, get_closure)
+		 && Z_OBJ_HANDLER(intern->obj, get_closure)(Z_OBJ(intern->obj), &called_scope, &closure_func, &object, 1) == SUCCESS
+		 && closure_func && (called_scope || closure_func->common.scope)) {
 			zend_reflection_class_factory(called_scope ? (zend_class_entry *) called_scope : closure_func->common.scope, return_value);
 		}
 	}
