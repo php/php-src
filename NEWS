@@ -38,8 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9088, GH-9056 (incorrect expansion of bytes when
     generating uniform integers within a given range). (timwolla)
   . Fixed bug GH-9089 (Fix memory leak on Randomizer::__construct()
-    call twice) (zeriyoshi)
-  . Change Mt19937 to throw a ValueError instead of InvalidArgumentException
+    call twice). (zeriyoshi)
+  . Fixed bug GH-9212 (PcgOneseq128XslRr64::jump() should not allow negative
+    $advance). (Anton Smirnov)
+  . Changed Mt19937 to throw a ValueError instead of InvalidArgumentException
     for invalid $mode. (timwolla)
   . Splitted Random\Randomizer::getInt() (without arguments) to 
     Random\Randomizer::nextInt(). (zeriyoshi)
