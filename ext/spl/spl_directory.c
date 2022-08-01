@@ -2020,47 +2020,12 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 	}
 } /* }}} */
 
-static bool spl_filesystem_file_is_empty_line(spl_filesystem_object *intern) /* {{{ */
-{
-	if (intern->u.file.current_line) {
-		return intern->u.file.current_line_len == 0;
-	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
-		ZEND_ASSERT(Z_TYPE(intern->u.file.current_zval) == IS_ARRAY);
-		/* TODO Figure out when this branch can happen... */
-		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
-				&& zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 1) {
-			ZEND_ASSERT(false && "Can this happen?");
-			uint32_t idx = 0;
-			zval *first;
-
-			if (HT_IS_PACKED(Z_ARRVAL(intern->u.file.current_zval))) {
-				while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx])) {
-					idx++;
-				}
-				first = &Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx];
-				ZEND_ASSERT(Z_TYPE_P(first) == IS_STRING);
-			} else {
-				while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
-					idx++;
-				}
-				first = &Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val;
-				ZEND_ASSERT(Z_TYPE_P(first) == IS_STRING);
-			}
-			return Z_STRLEN_P(first) == 0;
-		}
-		return zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 0;
-	} else {
-		return 1;
-	}
-}
-/* }}} */
-
 /* Call to this function reads a line in a "silent" fashion and does not throw an exception */
 static zend_result spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
 	zend_result ret = spl_filesystem_file_read_line_ex(this_ptr, intern);
 
-	while (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY) && ret == SUCCESS && spl_filesystem_file_is_empty_line(intern)) {
+	while (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY) && ret == SUCCESS && is_line_empty(intern)) {
 		spl_filesystem_file_free_line(intern);
 		ret = spl_filesystem_file_read_line_ex(this_ptr, intern);
 	}
