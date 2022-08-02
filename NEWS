@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.2.0beta3
 
 - Random:
+  . Fixed bug GH-9235 (non-existant $sequence parameter in stub for
+    PcgOneseq128XslRr64::__construct()). (timwolla)
   . Removed redundant RuntimeExceptions from Randomizer methods. The
     exceptions thrown by the engines will be exposed directly. (timwolla)
 
