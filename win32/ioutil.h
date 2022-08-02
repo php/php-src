@@ -153,13 +153,15 @@ typedef enum {
 	pathw = php_win32_ioutil_any_to_w(path); \
 } while (0);
 
-#define PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, len) \
-	(!((len) >= 1 && L' ' == pathw[(len)-1] || \
-	(len) > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[(len)-2]) && L'.' != pathw[(len)-2] && L'.' == pathw[(len)-1]))
+__forceinline static bool php_win32_ioutil_path_is_ok_w(const wchar_t *pathw, size_t len)
+{
+	return (len < 1 || L' ' != pathw[len-1]) &&
+		(len <= 1 || PHP_WIN32_IOUTIL_IS_SLASHW(pathw[len-2]) || L'.' == pathw[len-2] || L'.' != pathw[len-1]);
+}
 
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret, dealloc) do { \
 		size_t _len = wcslen(pathw); \
-		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, _len)) { \
+		if (!php_win32_ioutil_path_is_ok_w(pathw, _len)) { \
 			if (dealloc) { \
 				free((void *)pathw); \
 			} \
@@ -439,7 +441,7 @@ __forceinline static int php_win32_ioutil_rename(const char *oldnamea, const cha
 		return -1;
 	} else {
 		size_t newnamew_len = wcslen(newnamew);
-		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(newnamew, newnamew_len)) {
+		if (!php_win32_ioutil_path_is_ok_w(newnamew, newnamew_len)) {
 			free(oldnamew);
 			free(newnamew);
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED);
