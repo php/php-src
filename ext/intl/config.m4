@@ -21,7 +21,6 @@ if test "$PHP_INTL" != "no"; then
     collator/collator_error.c \
     common/common_error.c \
     converter/converter.c \
-    formatter/formatter.c \
     formatter/formatter_main.c \
     formatter/formatter_class.c \
     formatter/formatter_attr.c \
