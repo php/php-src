@@ -603,6 +603,7 @@ retry_reparse_point:
 			if (!pathw) {
 				return (size_t)-1;
 			}
+			PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, (size_t)-1, 1);
 			hFind = FindFirstFileExW(pathw, FindExInfoBasic, &dataw, FindExSearchNameMatch, NULL, 0);
 			if (INVALID_HANDLE_VALUE == hFind) {
 				if (use_realpath == CWD_REALPATH) {
