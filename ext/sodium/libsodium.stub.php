@@ -2,6 +2,501 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var string
+ * @cvalue SODIUM_LIBRARY_VERSION()
+ */
+const SODIUM_LIBRARY_VERSION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue sodium_library_version_major()
+ */
+const SODIUM_LIBRARY_MAJOR_VERSION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue sodium_library_version_minor()
+ */
+const SODIUM_LIBRARY_MINOR_VERSION = UNKNOWN;
+#ifdef HAVE_AESGCM
+/**
+ * @var int
+ * @cvalue crypto_aead_aes256gcm_KEYBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AES256GCM_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aes256gcm_NSECBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AES256GCM_NSECBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aes256gcm_NPUBBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AES256GCM_NPUBBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aes256gcm_ABYTES
+ */
+const SODIUM_CRYPTO_AEAD_AES256GCM_ABYTES = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_KEYBYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_NSECBYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NSECBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_NPUBBYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NPUBBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_ABYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_ABYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_IETF_KEYBYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_IETF_NSECBYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NSECBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_IETF_NPUBBYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_NPUBBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_chacha20poly1305_IETF_ABYTES
+ */
+const SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_IETF_ABYTES = UNKNOWN;
+#ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
+/**
+ * @var int
+ * @cvalue crypto_aead_xchacha20poly1305_IETF_KEYBYTES
+ */
+const SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_xchacha20poly1305_IETF_NSECBYTES
+ */
+const SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NSECBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
+ */
+const SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_NPUBBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_xchacha20poly1305_IETF_ABYTES
+ */
+const SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_ABYTES = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue crypto_auth_BYTES
+ */
+const SODIUM_CRYPTO_AUTH_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_auth_KEYBYTES
+ */
+const SODIUM_CRYPTO_AUTH_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_box_SEALBYTES
+ */
+const SODIUM_CRYPTO_BOX_SEALBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_box_SECRETKEYBYTES
+ */
+const SODIUM_CRYPTO_BOX_SECRETKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_box_PUBLICKEYBYTES
+ */
+const SODIUM_CRYPTO_BOX_PUBLICKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SODIUM_CRYPTO_BOX_KEYPAIRBYTES()
+ */
+const SODIUM_CRYPTO_BOX_KEYPAIRBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_box_MACBYTES
+ */
+const SODIUM_CRYPTO_BOX_MACBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_box_NONCEBYTES
+ */
+const SODIUM_CRYPTO_BOX_NONCEBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_box_SEEDBYTES
+ */
+const SODIUM_CRYPTO_BOX_SEEDBYTES = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue crypto_kdf_BYTES_MIN
+ */
+const SODIUM_CRYPTO_KDF_BYTES_MIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kdf_BYTES_MAX
+ */
+const SODIUM_CRYPTO_KDF_BYTES_MAX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kdf_CONTEXTBYTES
+ */
+const SODIUM_CRYPTO_KDF_CONTEXTBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kdf_KEYBYTES
+ */
+const SODIUM_CRYPTO_KDF_KEYBYTES = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue crypto_kx_SEEDBYTES
+ */
+const SODIUM_CRYPTO_KX_SEEDBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kx_SESSIONKEYBYTES
+ */
+const SODIUM_CRYPTO_KX_SESSIONKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kx_PUBLICKEYBYTES
+ */
+const SODIUM_CRYPTO_KX_PUBLICKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kx_SECRETKEYBYTES
+ */
+const SODIUM_CRYPTO_KX_SECRETKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SODIUM_CRYPTO_KX_KEYPAIRBYTES()
+ */
+const SODIUM_CRYPTO_KX_KEYPAIRBYTES = UNKNOWN;
+#ifdef crypto_secretstream_xchacha20poly1305_ABYTES
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_ABYTES
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_HEADERBYTES
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_KEYBYTES
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_TAG_PUSH
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_PUSH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_TAG_REKEY
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_REKEY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretstream_xchacha20poly1305_TAG_FINAL
+ */
+const SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue crypto_generichash_BYTES
+ */
+const SODIUM_CRYPTO_GENERICHASH_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_generichash_BYTES_MIN
+ */
+const SODIUM_CRYPTO_GENERICHASH_BYTES_MIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_generichash_BYTES_MAX
+ */
+const SODIUM_CRYPTO_GENERICHASH_BYTES_MAX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_generichash_KEYBYTES
+ */
+const SODIUM_CRYPTO_GENERICHASH_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_generichash_KEYBYTES_MIN
+ */
+const SODIUM_CRYPTO_GENERICHASH_KEYBYTES_MIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_generichash_KEYBYTES_MAX
+ */
+const SODIUM_CRYPTO_GENERICHASH_KEYBYTES_MAX = UNKNOWN;
+#ifdef crypto_pwhash_SALTBYTES
+/**
+ * @var int
+ * @cvalue crypto_pwhash_ALG_ARGON2I13
+ */
+const SODIUM_CRYPTO_PWHASH_ALG_ARGON2I13 = UNKNOWN;
+# ifdef crypto_pwhash_ALG_ARGON2ID13
+/**
+ * @var int
+ * @cvalue crypto_pwhash_ALG_ARGON2ID13
+ */
+const SODIUM_CRYPTO_PWHASH_ALG_ARGON2ID13 = UNKNOWN;
+# endif
+/**
+ * @var int
+ * @cvalue crypto_pwhash_ALG_DEFAULT
+ */
+const SODIUM_CRYPTO_PWHASH_ALG_DEFAULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_SALTBYTES
+ */
+const SODIUM_CRYPTO_PWHASH_SALTBYTES = UNKNOWN;
+/**
+ * @var string
+ * @cvalue crypto_pwhash_STRPREFIX
+ */
+const SODIUM_CRYPTO_PWHASH_STRPREFIX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_opslimit_interactive()
+ */
+const SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_memlimit_interactive()
+ */
+const SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_opslimit_moderate()
+ */
+const SODIUM_CRYPTO_PWHASH_OPSLIMIT_MODERATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_memlimit_moderate()
+ */
+const SODIUM_CRYPTO_PWHASH_MEMLIMIT_MODERATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_opslimit_sensitive()
+ */
+const SODIUM_CRYPTO_PWHASH_OPSLIMIT_SENSITIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_memlimit_sensitive()
+ */
+const SODIUM_CRYPTO_PWHASH_MEMLIMIT_SENSITIVE = UNKNOWN;
+#endif
+#ifdef crypto_pwhash_scryptsalsa208sha256_SALTBYTES
+/**
+ * @var int
+ * @cvalue crypto_pwhash_scryptsalsa208sha256_SALTBYTES
+ */
+const SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES = UNKNOWN;
+/**
+ * @var string
+ * @cvalue crypto_pwhash_scryptsalsa208sha256_STRPREFIX
+ */
+const SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()
+ */
+const SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()
+ */
+const SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive()
+ */
+const SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_SENSITIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive()
+ */
+const SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_SENSITIVE = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue crypto_scalarmult_BYTES
+ */
+const SODIUM_CRYPTO_SCALARMULT_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_scalarmult_SCALARBYTES
+ */
+const SODIUM_CRYPTO_SCALARMULT_SCALARBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_shorthash_BYTES
+ */
+const SODIUM_CRYPTO_SHORTHASH_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_shorthash_KEYBYTES
+ */
+const SODIUM_CRYPTO_SHORTHASH_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretbox_KEYBYTES
+ */
+const SODIUM_CRYPTO_SECRETBOX_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretbox_MACBYTES
+ */
+const SODIUM_CRYPTO_SECRETBOX_MACBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_secretbox_NONCEBYTES
+ */
+const SODIUM_CRYPTO_SECRETBOX_NONCEBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_sign_BYTES
+ */
+const SODIUM_CRYPTO_SIGN_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_sign_SEEDBYTES
+ */
+const SODIUM_CRYPTO_SIGN_SEEDBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_sign_PUBLICKEYBYTES
+ */
+const SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_sign_SECRETKEYBYTES
+ */
+const SODIUM_CRYPTO_SIGN_SECRETKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SODIUM_CRYPTO_SIGN_KEYPAIRBYTES()
+ */
+const SODIUM_CRYPTO_SIGN_KEYPAIRBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_stream_NONCEBYTES
+ */
+const SODIUM_CRYPTO_STREAM_NONCEBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_stream_KEYBYTES
+ */
+const SODIUM_CRYPTO_STREAM_KEYBYTES = UNKNOWN;
+
+#ifdef crypto_stream_xchacha20_KEYBYTES
+/**
+ * @var int
+ * @cvalue crypto_stream_xchacha20_NONCEBYTES
+ */
+const SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_stream_xchacha20_KEYBYTES
+ */
+const SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES = UNKNOWN;
+#endif
+#ifdef sodium_base64_VARIANT_ORIGINAL
+/**
+ * @var int
+ * @cvalue sodium_base64_VARIANT_ORIGINAL
+ */
+const SODIUM_BASE64_VARIANT_ORIGINAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue sodium_base64_VARIANT_ORIGINAL_NO_PADDING
+ */
+const SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue sodium_base64_VARIANT_URLSAFE
+ */
+const SODIUM_BASE64_VARIANT_URLSAFE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue sodium_base64_VARIANT_URLSAFE_NO_PADDING
+ */
+const SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING = UNKNOWN;
+#endif
+#ifdef crypto_core_ristretto255_HASHBYTES
+/**
+ * @var int
+ * @cvalue crypto_scalarmult_ristretto255_BYTES
+ */
+const SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_scalarmult_ristretto255_SCALARBYTES
+ */
+const SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_core_ristretto255_BYTES
+ */
+const SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_core_ristretto255_HASHBYTES
+ */
+const SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_core_ristretto255_SCALARBYTES
+ */
+const SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_core_ristretto255_NONREDUCEDSCALARBYTES
+ */
+const SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES = UNKNOWN;
+#endif
+
 function sodium_crypto_aead_aes256gcm_is_available(): bool {}
 
 #ifdef HAVE_AESGCM
