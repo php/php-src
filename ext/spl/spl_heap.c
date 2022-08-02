@@ -33,11 +33,6 @@
 
 #define SPL_HEAP_CORRUPTED       0x00000001
 
-#define SPL_PQUEUE_EXTR_MASK     0x00000003
-#define SPL_PQUEUE_EXTR_BOTH     0x00000003
-#define SPL_PQUEUE_EXTR_DATA     0x00000001
-#define SPL_PQUEUE_EXTR_PRIORITY 0x00000002
-
 zend_object_handlers spl_handler_SplHeap;
 zend_object_handlers spl_handler_SplPriorityQueue;
 
@@ -1163,10 +1158,6 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;
 	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
-
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_BOTH",      SPL_PQUEUE_EXTR_BOTH);
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_PRIORITY",  SPL_PQUEUE_EXTR_PRIORITY);
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_DATA",      SPL_PQUEUE_EXTR_DATA);
 
 	return SUCCESS;
 }
