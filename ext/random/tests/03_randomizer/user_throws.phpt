@@ -21,9 +21,4 @@ Stack trace:
 #0 [internal function]: Random\Engine@anonymous->generate()
 #1 %s(%d): Random\Randomizer->getBytes(1)
 #2 {main}
-
-Next RuntimeException: Random number generation failed in %s:%d
-Stack trace:
-#0 %s(%d): Random\Randomizer->getBytes(1)
-#1 {main}
   thrown in %s on line %d

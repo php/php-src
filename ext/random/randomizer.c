@@ -100,12 +100,11 @@ PHP_METHOD(Random_Randomizer, nextInt)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	result = randomizer->algo->generate(randomizer->status);
-	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
+	if (EG(exception)) {
 		RETURN_THROWS();
 	}
-	if (EG(exception)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
+		zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
 		RETURN_THROWS();
 	}
 	
@@ -132,7 +131,6 @@ PHP_METHOD(Random_Randomizer, getInt)
 
 	result = randomizer->algo->range(randomizer->status, min, max);
 	if (EG(exception)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 
@@ -165,7 +163,6 @@ PHP_METHOD(Random_Randomizer, getBytes)
 		result = randomizer->algo->generate(randomizer->status);
 		if (EG(exception)) {
 			zend_string_free(retval);
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 			RETURN_THROWS();
 		}
 		for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
@@ -193,7 +190,6 @@ PHP_METHOD(Random_Randomizer, shuffleArray)
 
 	ZVAL_DUP(return_value, array);
 	if (!php_array_data_shuffle(randomizer->algo, randomizer->status, return_value)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 }
@@ -215,7 +211,6 @@ PHP_METHOD(Random_Randomizer, shuffleBytes)
 
 	RETVAL_STRINGL(ZSTR_VAL(bytes), ZSTR_LEN(bytes));
 	if (!php_binary_string_shuffle(randomizer->algo, randomizer->status, Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value))) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 }
