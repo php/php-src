@@ -7,10 +7,10 @@ var_dump($ao->getFlags());
 
 $ao2 = new ArrayObject($ao);
 var_dump($ao2->getFlags());
-var_dump($ao2->getIterator()->getFlags());
+@var_dump($ao2->getIterator()->getFlags());
 
 $ai = new ArrayIterator($ao);
-var_dump($ai->getFlags());
+@var_dump($ai->getFlags());
 
 $ao2 = new ArrayObject($ao, 0);
 var_dump($ao2->getFlags());

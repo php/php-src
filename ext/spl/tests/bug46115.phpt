@@ -7,5 +7,6 @@ $x = new reflectionmethod('RecursiveArrayIterator', 'asort');
 $z = $x->invoke($h);
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Method ArrayIterator::asort() is deprecated in %s on line %d
 DONE

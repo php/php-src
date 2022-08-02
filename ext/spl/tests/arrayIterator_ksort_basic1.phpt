@@ -9,9 +9,10 @@ var_dump($arrIter->ksort());
 var_dump($arrIter);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method ArrayIterator::ksort() is deprecated in %s on line %d
 bool(true)
-object(ArrayIterator)#1 (1) {
+object(ArrayIterator)#%d (1) {
   ["storage":"ArrayIterator":private]=>
   array(3) {
     [1]=>

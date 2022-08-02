@@ -20,15 +20,17 @@ class ArrayIteratorEx extends ArrayIterator
     function dump()
     {
         echo __METHOD__ . "()\n";
-        var_dump(array('Flags'=>$this->getFlags()
-                      ,'OVars'=>get_object_vars($this)
-                      ,'$this'=>$this));
+        var_dump([
+            'Flags' => @$this->getFlags(),
+            'OVars' => get_object_vars($this),
+            '$this' => $this,
+        ]);
     }
 
     function setFlags($flags): void
     {
         echo __METHOD__ . "($flags)\n";
-        ArrayIterator::setFlags($flags);
+        @ArrayIterator::setFlags($flags);
     }
 }
 
