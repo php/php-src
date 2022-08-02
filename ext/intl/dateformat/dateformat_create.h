@@ -16,6 +16,4 @@
 
 #include <php.h>
 
-void dateformat_register_constants( INIT_FUNC_ARGS );
-
 #endif // DATE_FORMATTER_H

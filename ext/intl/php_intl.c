@@ -176,9 +176,6 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'DateFormat' PHP class */
 	dateformat_register_IntlDateFormatter_class(  );
 
-	/* Expose DateFormat constants to PHP scripts */
-	dateformat_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	/* Register 'IntlDateTimeFormatter' PHP class */
 	dateformat_register_IntlDatePatternGenerator_class(  );
 
