@@ -51,11 +51,6 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 #define SPL_LLIST_ADDREF(elem) SPL_LLIST_RC(elem)++
 #define SPL_LLIST_CHECK_ADDREF(elem) if (elem) SPL_LLIST_RC(elem)++
 
-#define SPL_DLLIST_IT_DELETE 0x00000001 /* Delete flag makes the iterator delete the current element on next */
-#define SPL_DLLIST_IT_LIFO   0x00000002 /* LIFO flag makes the iterator traverse the structure as a LastInFirstOut */
-#define SPL_DLLIST_IT_MASK   0x00000003 /* Mask to isolate flags related to iterators */
-#define SPL_DLLIST_IT_FIX    0x00000004 /* Backward/Forward bit is fixed */
-
 #ifdef accept
 #undef accept
 #endif
@@ -1271,11 +1266,6 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_handler_SplDoublyLinkedList.count_elements = spl_dllist_object_count_elements;
 	spl_handler_SplDoublyLinkedList.get_gc = spl_dllist_object_get_gc;
 	spl_handler_SplDoublyLinkedList.free_obj = spl_dllist_object_free_storage;
-
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_LIFO",  SPL_DLLIST_IT_LIFO);
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_FIFO",  0);
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_DELETE",SPL_DLLIST_IT_DELETE);
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_KEEP",  0);
 
 	spl_ce_SplQueue = register_class_SplQueue(spl_ce_SplDoublyLinkedList);
 	spl_ce_SplQueue->create_object = spl_dllist_object_new;
