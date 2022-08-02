@@ -204,6 +204,10 @@ PHP 8.2 UPGRADE NOTES
     dba_fetch(string|array $key, $skip, $dba): string|false
     is still accepted, but it is recommended to use the new standard variant.
 
+- Random
+  . random_bytes() and random_int() now throw \Random\RandomException on CSPRNG failure.
+    Previously a plain \Exception was thrown.
+
 - SPL
   . The $iterator parameter of iterator_to_array() and iterator_count() is
     widened to iterable from Iterator, allowing arrays to be passed.

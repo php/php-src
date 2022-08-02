@@ -30,7 +30,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 /*
@@ -280,7 +279,7 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 	if (seed_is_null) {
 		/* MT19937 has a very large state, uses CSPRNG for seeding only */
 		if (php_random_bytes_throw(&seed, sizeof(zend_long)) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Failed to generate a random seed", 0);
+			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	}

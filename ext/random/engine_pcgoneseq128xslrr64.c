@@ -23,7 +23,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 static inline void step(php_random_status_state_pcgoneseq128xslrr64 *s)
@@ -149,7 +148,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 
 	if (seed_is_null) {
 		if (php_random_bytes_throw(&state->state, sizeof(php_random_uint128_t)) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Failed to generate a random seed", 0);
+			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	} else {

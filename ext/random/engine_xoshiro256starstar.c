@@ -24,7 +24,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 static inline uint64_t splitmix64(uint64_t *seed)
@@ -207,7 +206,7 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 
 	if (seed_is_null) {
 		if (php_random_bytes_throw(&state->state, 32) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Failed to generate a random seed", 0);
+			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	} else {
