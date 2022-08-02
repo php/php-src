@@ -62,7 +62,7 @@ ValueError: Path cannot be empty
 
 -- Filename: " " --
 
-Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents( ): Failed to open stream: Permission denied in %s on line %d
 bool(false)
 
 -- Filename: \0 --

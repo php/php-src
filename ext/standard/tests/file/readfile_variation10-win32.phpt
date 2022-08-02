@@ -58,7 +58,7 @@ ValueError: Path cannot be empty
 
 -- Filename: " " --
 
-Warning: readfile( ): Failed to open stream: No such file or directory in %s on line %d
+Warning: readfile( ): Failed to open stream: Permission denied in %s on line %d
 
 -- Filename: \0 --
 ValueError: readfile(): Argument #1 ($filename) must not contain any null bytes
