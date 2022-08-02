@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0beta2
+04 Aug 2022, PHP 8.2.0beta2
 
 - Core:
   . Fixed bug GH-7900 (Arrow function with never return type compile-time
