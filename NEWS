@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.23
 
-- Date:
-  . Fixed bug #80047 (DatePeriod doesn't warn with custom DateTimeImmutable).
-    (Derick)
-
 - DBA:
   . Fixed LMDB driver memory leak on DB creation failure (Girgias)
   . Fixed bug GH-9155 (dba_open("non-existing", "c-", "flatfile") segfaults).
