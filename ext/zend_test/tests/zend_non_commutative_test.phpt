@@ -2,8 +2,6 @@
 Zend: test non commutative multiplication object handler
 --EXTENSIONS--
 zend_test
---XFAIL--
-Broken non commutative multiplication with more than 2 ops
 --FILE--
 <?php
 
