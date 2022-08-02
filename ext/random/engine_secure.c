@@ -22,7 +22,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 static uint64_t generate(php_random_status *status)
