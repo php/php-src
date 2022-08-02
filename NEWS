@@ -1,19 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.9
+04 Aug 2022, PHP 8.1.9
 
 - CLI:
   . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
     environment variable. (yiyuaner)
+  . Fixed GH-8952 (Intentionally closing std handles no longer possible).
+    (Arnaud, cmb)
 
 - Core:
   . Fixed bug GH-8923 (error_log on Windows can hold the file write lock). (cmb)
   . Fixed bug GH-8995 (WeakMap object reference offset causing TypeError).
     (Tobias Bachert)
-
-- CLI:
-  . Fixed GH-8952 (Intentionally closing std handles no longer possible).
-    (Arnaud, cmb)
 
 - Date:
   . Fixed bug #80047 (DatePeriod doesn't warn with custom DateTimeImmutable).
