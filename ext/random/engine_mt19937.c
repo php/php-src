@@ -357,7 +357,7 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 	/* members */
 	t = zend_hash_index_find(d, 0);
 	if (!t || Z_TYPE_P(t) != IS_ARRAY) {
-		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
 	object_properties_load(&engine->std, Z_ARRVAL_P(t));
@@ -365,11 +365,11 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 	/* state */
 	t = zend_hash_index_find(d, 1);
 	if (!t || Z_TYPE_P(t) != IS_ARRAY) {
-		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
 	if (!engine->algo->unserialize(engine->status, Z_ARRVAL_P(t))) {
-		zend_throw_exception(NULL, "Engine unserialize failed", 0);
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
 }
