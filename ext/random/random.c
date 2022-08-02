@@ -26,7 +26,6 @@
 
 #include "php.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 #include "php_random.h"
