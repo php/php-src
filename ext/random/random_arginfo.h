@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9727755f39598fe1fbc16b501063cd3c30279ff9 */
+ * Stub hash: 82403b033dfd476695c4e11e0b01a3c984896f62 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -51,7 +51,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_Engine_PcgOneseq128XslRr64___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, seed, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
-	ZEND_ARG_TYPE_MASK(0, sequence, MAY_BE_STRING|MAY_BE_LONG, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Engine_PcgOneseq128XslRr64_generate arginfo_class_Random_Engine_Mt19937_generate
@@ -66,9 +65,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Engine_PcgOneseq128XslRr64___debugInfo arginfo_class_Random_Engine_Mt19937___serialize
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_Engine_Xoshiro256StarStar___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, seed, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_Random_Engine_Xoshiro256StarStar___construct arginfo_class_Random_Engine_PcgOneseq128XslRr64___construct
 
 #define arginfo_class_Random_Engine_Xoshiro256StarStar_generate arginfo_class_Random_Engine_Mt19937_generate
 
