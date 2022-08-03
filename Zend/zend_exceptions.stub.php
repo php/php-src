@@ -2,12 +2,14 @@
 
 /** @generate-class-entries */
 
+require "zend_constants.stub.php";
+
 interface Throwable extends Stringable
 {
     public function getMessage(): string;
 
     /** @return int */
-    public function getCode();
+    public function getCode(); // TODO add proper type (i.e. int|string)
 
     public function getFile(): string;
 
@@ -32,7 +34,7 @@ class Exception implements Throwable
      * Intentionally left untyped for BC reasons
      * @var int
      */
-    protected $code = 0;
+    protected $code = 0;  // TODO add proper type (i.e. int|string)
     protected string $file = "";
     protected int $line = 0;
     private array $trace = [];
@@ -48,7 +50,7 @@ class Exception implements Throwable
     final public function getMessage(): string {}
 
     /** @return int */
-    final public function getCode() {}
+    final public function getCode() {} // TODO add proper type (i.e. int|string)
 
     final public function getFile(): string {}
 
@@ -91,7 +93,7 @@ class Error implements Throwable
      * Intentionally left untyped for BC reasons
      * @var int
      */
-    protected $code = 0;
+    protected $code = 0; // TODO add proper type (i.e. int|string)
     protected string $file = "";
     protected int $line;
     private array $trace = [];

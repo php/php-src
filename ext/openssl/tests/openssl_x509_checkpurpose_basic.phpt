@@ -9,10 +9,14 @@ openssl
 ?>
 --FILE--
 <?php
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveCaCert(__DIR__ . "/san-cert.pem");
+
 $cert = "file://" . __DIR__ . "/cert.crt";
 $bert = "file://" . __DIR__ . "/bug41033.pem";
 $sert = "file://" . __DIR__ . "/san-cert.pem";
-$cpca = __DIR__ . "/san-ca.pem";
+$cpca = __DIR__ . "/san-cert.pem";
 $utfl = __DIR__ . "/sni_server_uk.pem";
 $rcrt = openssl_x509_read($cert);
 
@@ -84,6 +88,10 @@ var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_SIGN, array($cpca),
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_SMIME_ENCRYPT, array($cpca), $utfl));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_CRL_SIGN, array($cpca), $utfl));
 var_dump(openssl_x509_checkpurpose($sert, X509_PURPOSE_ANY, array($cpca), $utfl));
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . "/san-cert.pem");
 ?>
 --EXPECT--
 bool(false)

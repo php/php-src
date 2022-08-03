@@ -17,8 +17,6 @@
 
 #include <php.h>
 
-void locale_register_constants( INIT_FUNC_ARGS );
-
 #define OPTION_DEFAULT NULL
 #define LOC_LANG_TAG "language"
 #define LOC_SCRIPT_TAG "script"

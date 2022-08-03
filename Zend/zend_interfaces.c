@@ -181,6 +181,14 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 }
 /* }}} */
 
+ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n)
+{
+	zend_user_iterator *iter = (zend_user_iterator*)_iter;
+	*table = &iter->it.data;
+	*n = 1;
+	return NULL;
+}
+
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
 	zend_user_it_valid,
@@ -189,7 +197,7 @@ static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator =
 	zend_user_it_move_forward,
 	zend_user_it_rewind,
 	zend_user_it_invalidate_current,
-	NULL, /* get_gc */
+	zend_user_it_get_gc,
 };
 
 /* {{{ zend_user_it_get_iterator */
@@ -258,7 +266,8 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 			}
 		}
 	}
-	zend_error_noreturn(E_CORE_ERROR, "Class %s must implement interface %s as part of either %s or %s",
+	zend_error_noreturn(E_CORE_ERROR, "%s %s must implement interface %s as part of either %s or %s",
+		zend_get_object_type_uc(class_type),
 		ZSTR_VAL(class_type->name),
 		ZSTR_VAL(zend_ce_traversable->name),
 		ZSTR_VAL(zend_ce_iterator->name),
@@ -355,6 +364,28 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 	}
 
 	class_type->get_iterator = zend_user_it_get_iterator;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ zend_implement_arrayaccess */
+static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	ZEND_ASSERT(!class_type->arrayaccess_funcs_ptr && "ArrayAccess funcs already set?");
+	zend_class_arrayaccess_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
+		? pemalloc(sizeof(zend_class_arrayaccess_funcs), 1)
+		: zend_arena_alloc(&CG(arena), sizeof(zend_class_arrayaccess_funcs));
+	class_type->arrayaccess_funcs_ptr = funcs_ptr;
+
+	funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(
+		&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
+	funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(
+		&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
+	funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(
+		&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
+	funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(
+		&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -616,6 +647,7 @@ ZEND_API void zend_register_interfaces(void)
 	zend_ce_serializable->interface_gets_implemented = zend_implement_serializable;
 
 	zend_ce_arrayaccess = register_class_ArrayAccess();
+	zend_ce_arrayaccess->interface_gets_implemented = zend_implement_arrayaccess;
 
 	zend_ce_countable = register_class_Countable();
 

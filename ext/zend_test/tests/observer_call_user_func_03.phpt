@@ -26,14 +26,19 @@ namespace Test {
 }
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_call_user_func_%d.php' -->
-<file '%s%eobserver_call_user_func_%d.php'>
-  <!-- init Test\MyClass::myMethod() -->
-  <Test\MyClass::myMethod>
+<!-- init '%s' -->
+<file '%s'>
+  <!-- init call_user_func() -->
+  <call_user_func>
+    <!-- init Test\MyClass::myMethod() -->
+    <Test\MyClass::myMethod>
 MyClass::myMethod called
-  </Test\MyClass::myMethod>
-  <!-- init Test\my_function() -->
-  <Test\my_function>
+    </Test\MyClass::myMethod>
+  </call_user_func>
+  <call_user_func>
+    <!-- init Test\my_function() -->
+    <Test\my_function>
 my_function called
-  </Test\my_function>
-</file '%s%eobserver_call_user_func_%d.php'>
+    </Test\my_function>
+  </call_user_func>
+</file '%s'>

@@ -14,5 +14,6 @@ try {
   echo $e->getMessage();
 }
 ?>
---EXPECT--
-IntlDateFormatter::__construct(): Invalid date.timezone value 'Mars/Utopia_Planitia', we selected the timezone 'UTC' for now.
+--EXPECTF--
+Warning: PHP Startup: Invalid date.timezone value 'Mars/Utopia_Planitia', using 'UTC' instead in %s on line %d
+Wat?

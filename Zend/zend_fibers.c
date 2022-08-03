@@ -24,12 +24,17 @@
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
+#include "zend_mmap.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
 
 #ifdef HAVE_VALGRIND
 # include <valgrind/valgrind.h>
+#endif
+
+#ifdef ZEND_FIBER_UCONTEXT
+# include <ucontext.h>
 #endif
 
 #ifndef ZEND_WIN32
@@ -118,7 +123,6 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 }
 
 #ifdef ZEND_FIBER_UCONTEXT
-# include <ucontext.h>
 ZEND_TLS zend_fiber_transfer *transfer_data;
 #else
 /* boost_context_data is our customized definition of struct transfer_t as
@@ -138,7 +142,7 @@ typedef struct {
 
 /* These functions are defined in assembler files provided by boost.context (located in "Zend/asm"). */
 extern void *make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
-extern boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
+extern ZEND_INDIRECT_RETURN boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
 #endif
 
 ZEND_API zend_class_entry *zend_ce_fiber;
@@ -207,6 +211,8 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 		zend_throw_exception_ex(NULL, 0, "Fiber stack allocate failed: mmap failed: %s (%d)", strerror(errno), errno);
 		return NULL;
 	}
+
+	zend_mmap_set_name(pointer, alloc_size, "zend_fiber_stack");
 
 # if ZEND_FIBER_GUARD_PAGES
 	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {
@@ -641,11 +647,22 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 
 ZEND_METHOD(Fiber, __construct)
 {
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(fiber->fci, fiber->fci_cache)
+		Z_PARAM_FUNC(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
+
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
+
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_INIT || Z_TYPE(fiber->fci.function_name) != IS_UNDEF)) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot call constructor twice");
+		RETURN_THROWS();
+	}
+
+	fiber->fci = fci;
+	fiber->fci_cache = fcc;
 
 	// Keep a reference to closures or callable objects while the fiber is running.
 	Z_TRY_ADDREF(fiber->fci.function_name);

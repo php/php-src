@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+#[\AllowDynamicProperties]
 class stdClass
 {
 }
@@ -18,12 +19,16 @@ function func_get_args(): array {}
 
 function strlen(string $string): int {}
 
+/** @compile-time-eval */
 function strcmp(string $string1, string $string2): int {}
 
+/** @compile-time-eval */
 function strncmp(string $string1, string $string2, int $length): int {}
 
+/** @compile-time-eval */
 function strcasecmp(string $string1, string $string2): int {}
 
+/** @compile-time-eval */
 function strncasecmp(string $string1, string $string2, int $length): int {}
 
 function error_reporting(?int $error_level = null): int {}
@@ -98,14 +103,12 @@ function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
 /** @return callable|null */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
-/** @return true */
-function restore_error_handler(): bool {}
+function restore_error_handler(): true {}
 
 /** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
-/** @return true */
-function restore_exception_handler(): bool {}
+function restore_exception_handler(): true {}
 
 /**
  * @return array<int, string>

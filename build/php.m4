@@ -279,25 +279,25 @@ dnl
 dnl Checks for -R, etc. switch.
 dnl
 AC_DEFUN([PHP_RUNPATH_SWITCH],[
-AC_MSG_CHECKING([if compiler supports -R])
-AC_CACHE_VAL(php_cv_cc_dashr,[
+AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
+AC_CACHE_VAL(php_cv_cc_rpath,[
   SAVE_LIBS=$LIBS
-  LIBS="-R /usr/$PHP_LIBDIR $LIBS"
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_dashr=yes],[php_cv_cc_dashr=no])
+  LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_rpath=yes],[php_cv_cc_rpath=no])
   LIBS=$SAVE_LIBS])
-AC_MSG_RESULT([$php_cv_cc_dashr])
-if test $php_cv_cc_dashr = "yes"; then
-  ld_runpath_switch=-R
+AC_MSG_RESULT([$php_cv_cc_rpath])
+if test $php_cv_cc_rpath = "yes"; then
+  ld_runpath_switch=-Wl,-rpath,
 else
-  AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
-  AC_CACHE_VAL(php_cv_cc_rpath,[
+  AC_MSG_CHECKING([if compiler supports -R])
+  AC_CACHE_VAL(php_cv_cc_dashr,[
     SAVE_LIBS=$LIBS
-    LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_rpath=yes],[php_cv_cc_rpath=no])
+    LIBS="-R /usr/$PHP_LIBDIR $LIBS"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_dashr=yes],[php_cv_cc_dashr=no])
     LIBS=$SAVE_LIBS])
-  AC_MSG_RESULT([$php_cv_cc_rpath])
-  if test $php_cv_cc_rpath = "yes"; then
-    ld_runpath_switch=-Wl,-rpath,
+  AC_MSG_RESULT([$php_cv_cc_dashr])
+  if test $php_cv_cc_dashr = "yes"; then
+    ld_runpath_switch=-R
   else
     dnl Something innocuous.
     ld_runpath_switch=-L
@@ -2030,7 +2030,7 @@ ifelse([$3],[],,[else $3])
 ])
 
 dnl
-dnl PHP_SETUP_LIBXML(shared-add [, action-found [, action-not-found]])
+dnl PHP_SETUP_LIBXML(shared-add [, action-found])
 dnl
 dnl Common setup macro for libxml.
 dnl
@@ -2152,7 +2152,7 @@ EOF
    else
     break
    fi
-   $as_echo "$CURRENT_ARG \\" >>$1
+   AS_ECHO(["$CURRENT_ARG \\"]) >>$1
    CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS $CURRENT_ARG"
   done
   echo '"[$]@"' >> $1

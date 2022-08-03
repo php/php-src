@@ -14,6 +14,10 @@
    +----------------------------------------------------------------------+
  */
 
+#ifdef __sun
+/* to enable 'new' ancillary data layout instead */
+# define _XPG4_2
+#endif
 #include <php.h>
 #include "php_sockets.h"
 #include "sendrecvmsg.h"
@@ -68,7 +72,7 @@ inline ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)
 
 #define LONG_CHECK_VALID_INT(l, arg_pos) \
 	do { \
-		if ((l) < INT_MIN && (l) > INT_MAX) { \
+		if ((l) < INT_MIN || (l) > INT_MAX) { \
 			zend_argument_value_error((arg_pos), "must be between %d and %d", INT_MIN, INT_MAX); \
 			RETURN_THROWS(); \
 		} \
@@ -121,8 +125,21 @@ static void init_ancillary_registry(void)
 #endif
 
 #ifdef SO_PASSCRED
+#ifdef ANC_CREDS_UCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
+#else
+	PUT_ENTRY(sizeof(struct cmsgcred), 0, 0, from_zval_write_ucred,
+			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS);
+#endif
+#endif
+
+#if defined(LOCAL_CREDS_PERSISTENT)
+	PUT_ENTRY(SOCKCRED2SIZE(1), 1, 0, from_zval_write_ucred,
+			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS2);
+#elif defined(LOCAL_CREDS)
+	PUT_ENTRY(SOCKCREDSIZE(1), 1, 0, from_zval_write_ucred,
+			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS);
 #endif
 
 #ifdef SCM_RIGHTS
@@ -436,8 +453,19 @@ void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SCM_RIGHTS",			SCM_RIGHTS,			CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef SO_PASSCRED
+#ifdef SCM_CREDENTIALS
 	REGISTER_LONG_CONSTANT("SCM_CREDENTIALS",		SCM_CREDENTIALS,	CONST_CS | CONST_PERSISTENT);
+#else
+	REGISTER_LONG_CONSTANT("SCM_CREDS",		SCM_CREDS,	CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SO_PASSCRED",			SO_PASSCRED,		CONST_CS | CONST_PERSISTENT);
+#endif
+#if defined(LOCAL_CREDS_PERSISTENT)
+	REGISTER_LONG_CONSTANT("SCM_CREDS2",			SCM_CREDS2,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCAL_CREDS_PERSISTENT",	LOCAL_CREDS_PERSISTENT,	CONST_CS | CONST_PERSISTENT);
+#elif defined(LOCAL_CREDS)
+	REGISTER_LONG_CONSTANT("SCM_CREDS",			SCM_CREDS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCAL_CREDS",			LOCAL_CREDS,	        CONST_CS | CONST_PERSISTENT);
 #endif
 
 #ifdef ZTS

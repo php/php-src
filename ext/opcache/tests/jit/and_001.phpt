@@ -1,5 +1,5 @@
 --TEST--
-JIT BW_AND: 001 (emty string)
+JIT BW_AND: 001 (empty string)
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

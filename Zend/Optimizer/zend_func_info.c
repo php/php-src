@@ -75,8 +75,8 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 				|| (t3 & (MAY_BE_DOUBLE|MAY_BE_STRING))) {
 			tmp |= MAY_BE_ARRAY_OF_DOUBLE;
 		}
-		if ((t1 & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_STRING|MAY_BE_DOUBLE)))
-				&& (t2 & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_STRING|MAY_BE_DOUBLE)))) {
+		if ((t1 & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_DOUBLE))
+				&& (t2 & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_DOUBLE))) {
 			if ((t3 & MAY_BE_ANY) != MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_ARRAY_OF_LONG;
 			}
@@ -186,6 +186,7 @@ ZEND_API uint32_t zend_get_func_info(
 			/* It's allowed to override a method that return non-reference with a method that returns a reference */
 			if (call_info->is_prototype && (ret & ~MAY_BE_REF)) {
 				ret |= MAY_BE_REF;
+				*ce = NULL;
 			}
 		}
 	}

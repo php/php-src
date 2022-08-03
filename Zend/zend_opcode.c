@@ -26,6 +26,7 @@
 #include "zend_extensions.h"
 #include "zend_API.h"
 #include "zend_sort.h"
+#include "zend_constants.h"
 
 #include "zend_vm.h"
 
@@ -156,6 +157,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 		/* For methods this will be called explicitly. */
 		if (!function->common.scope) {
 			zend_free_internal_arg_info(&function->internal_function);
+
+			if (function->common.attributes) {
+				zend_hash_release(function->common.attributes);
+				function->common.attributes = NULL;
+			}
 		}
 
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
@@ -250,7 +256,7 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 			zend_class_constant *c;
 
 			ZEND_HASH_MAP_FOREACH_PTR(constants_table, c) {
-				if (c->ce == ce) {
+				if (c->ce == ce || (Z_CONSTANT_FLAGS(c->value) & CONST_OWNED)) {
 					zval_ptr_dtor_nogc(&c->value);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -267,6 +273,11 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 				p++;
 			}
 			mutable_data->default_properties_table = NULL;
+		}
+
+		if (mutable_data->backed_enum_table) {
+			zend_hash_release(mutable_data->backed_enum_table);
+			mutable_data->backed_enum_table = NULL;
 		}
 
 		ZEND_MAP_PTR_SET_IMM(ce->mutable_data, NULL);
@@ -324,9 +335,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (ce->attributes) {
 					zend_hash_release(ce->attributes);
 				}
-				if (ce->backed_enum_table) {
-					zend_hash_release(ce->backed_enum_table);
-				}
 
 				if (ce->num_interfaces > 0 && !(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 					uint32_t i;
@@ -382,7 +390,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_class_constant *c;
 
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
-					if (c->ce == ce) {
+					if (c->ce == ce || (Z_CONSTANT_FLAGS(c->value) & CONST_OWNED)) {
 						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
 							zend_string_release_ex(c->doc_comment, 0);
@@ -396,6 +404,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && (ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 				efree(ce->interfaces);
+			}
+			if (ce->backed_enum_table) {
+				zend_hash_release(ce->backed_enum_table);
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
@@ -433,11 +444,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
 
-			/* TODO: eliminate this loop for classes without functions with arg_info */
+			/* TODO: eliminate this loop for classes without functions with arg_info / attributes */
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
-				if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-				    fn->common.scope == ce) {
-					zend_free_internal_arg_info(&fn->internal_function);
+				if (fn->common.scope == ce) {
+					if (fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) {
+						zend_free_internal_arg_info(&fn->internal_function);
+					}
+
+					if (fn->common.attributes) {
+						zend_hash_release(fn->common.attributes);
+						fn->common.attributes = NULL;
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 
@@ -468,6 +485,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->iterator_funcs_ptr) {
 				free(ce->iterator_funcs_ptr);
+			}
+			if (ce->arrayaccess_funcs_ptr) {
+				free(ce->arrayaccess_funcs_ptr);
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
@@ -737,31 +757,29 @@ static void emit_live_range(
 			while (def_opline + 1 < use_opline) {
 				def_opline++;
 				start++;
-				if (def_opline->opcode == ZEND_DO_FCALL) {
-					if (level == 0) {
+				switch (def_opline->opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_NEW:
+						level++;
 						break;
-					}
-					level--;
-				} else {
-					switch (def_opline->opcode) {
-						case ZEND_INIT_FCALL:
-						case ZEND_INIT_FCALL_BY_NAME:
-						case ZEND_INIT_NS_FCALL_BY_NAME:
-						case ZEND_INIT_DYNAMIC_CALL:
-						case ZEND_INIT_USER_CALL:
-						case ZEND_INIT_METHOD_CALL:
-						case ZEND_INIT_STATIC_METHOD_CALL:
-						case ZEND_NEW:
-							level++;
-							break;
-						case ZEND_DO_ICALL:
-						case ZEND_DO_UCALL:
-						case ZEND_DO_FCALL_BY_NAME:
-							level--;
-							break;
-					}
+					case ZEND_DO_FCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+						if (level == 0) {
+							goto done;
+						}
+						level--;
+						break;
 				}
 			}
+done:
 			emit_live_range_raw(op_array, var_num, ZEND_LIVE_NEW, orig_start + 1, start + 1);
 			if (start + 1 == end) {
 				/* Trivial live-range, no need to store it. */
@@ -813,6 +831,8 @@ static void emit_live_range(
 				/* The use might have been optimized away, in which case we will hit the def
 				 * instead. */
 				if (use_opline->opcode == ZEND_COPY_TMP && use_opline->result.var == rt_var_num) {
+					start = def_opline + 1 - op_array->opcodes;
+					emit_live_range_raw(op_array, var_num, kind, start, end);
 					return;
 				}
 			} while (!(
@@ -1074,10 +1094,6 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_JMP:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				break;
-			case ZEND_JMPZNZ:
-				/* absolute index to relative offset */
-				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				ZEND_FALLTHROUGH;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:

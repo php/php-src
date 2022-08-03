@@ -27,12 +27,8 @@
 # define PHPDBG_API
 #endif
 
-#ifndef PHP_WIN32
-#	include <stdint.h>
-#	include <stddef.h>
-#else
-#	include "main/php_stdint.h"
-#endif
+#include <stdint.h>
+#include <stddef.h>
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"

@@ -8,6 +8,8 @@ $handler = "flatfile";
 require_once(__DIR__ .'/skipif.inc');
 die("info $HND handler used");
 ?>
+--CONFLICTS--
+dba
 --FILE--
 <?php
 

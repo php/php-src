@@ -2,9 +2,10 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class Transliterator
 {
-    public string $id;
+    public readonly string $id;
 
     final private function __construct() {}
 

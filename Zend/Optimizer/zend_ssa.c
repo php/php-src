@@ -257,7 +257,6 @@ static void place_essa_pis(
 		 */
 		switch (opline->opcode) {
 			case ZEND_JMPZ:
-			case ZEND_JMPZNZ:
 				bf = blocks[j].successors[0];
 				bt = blocks[j].successors[1];
 				break;
@@ -334,10 +333,6 @@ static void place_essa_pis(
 
 					if (Z_TYPE_P(zv) == IS_LONG) {
 						add_val2 = Z_LVAL_P(zv);
-					} else if (Z_TYPE_P(zv) == IS_FALSE) {
-						add_val2 = 0;
-					} else if (Z_TYPE_P(zv) == IS_TRUE) {
-						add_val2 = 1;
 					} else {
 						var1 = -1;
 					}
@@ -355,10 +350,6 @@ static void place_essa_pis(
 					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1);
 					if (Z_TYPE_P(zv) == IS_LONG) {
 						add_val1 = Z_LVAL_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1));
-					} else if (Z_TYPE_P(zv) == IS_FALSE) {
-						add_val1 = 0;
-					} else if (Z_TYPE_P(zv) == IS_TRUE) {
-						add_val1 = 1;
 					} else {
 						var2 = -1;
 					}
@@ -535,7 +526,7 @@ static void place_essa_pis(
 				   (opline-1)->op2_type == IS_CONST) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 			zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2) + 1);
-			zend_class_entry *ce = zend_optimizer_get_class_entry(script, lcname);
+			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
 			if (!ce) {
 				continue;
 			}
@@ -1210,6 +1201,46 @@ void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 			}
 		} else {
 			break;
+		}
+	}
+	/* something wrong */
+	ZEND_UNREACHABLE();
+}
+/* }}} */
+
+void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var) /* {{{ */
+{
+	if (ssa->vars[var].use_chain == op) {
+		ssa->vars[var].use_chain = new_op;
+		return;
+	} else {
+		int use = ssa->vars[var].use_chain;
+
+		while (use >= 0) {
+			if (ssa->ops[use].result_use == var) {
+				if (ssa->ops[use].res_use_chain == op) {
+					ssa->ops[use].res_use_chain = new_op;
+					return;
+				} else {
+					use = ssa->ops[use].res_use_chain;
+				}
+			} else if (ssa->ops[use].op1_use == var) {
+				if (ssa->ops[use].op1_use_chain == op) {
+					ssa->ops[use].op1_use_chain = new_op;
+					return;
+				} else {
+					use = ssa->ops[use].op1_use_chain;
+				}
+			} else if (ssa->ops[use].op2_use == var) {
+				if (ssa->ops[use].op2_use_chain == op) {
+					ssa->ops[use].op2_use_chain = new_op;
+					return;
+				} else {
+					use = ssa->ops[use].op2_use_chain;
+				}
+			} else {
+				break;
+			}
 		}
 	}
 	/* something wrong */

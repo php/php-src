@@ -41,6 +41,9 @@ typedef struct {
 	size_t   path_len;
 	char     *pattern;
 	size_t   pattern_len;
+	size_t   *open_basedir_indexmap;
+	size_t   open_basedir_indexmap_size;
+	bool     open_basedir_used;
 } glob_s_t;
 
 PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */
@@ -79,6 +82,11 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, size_t *plen STREA
 }
 /* }}} */
 
+static inline int php_glob_stream_get_result_count(glob_s_t *pglob)
+{
+	return pglob->open_basedir_used ? (int) pglob->open_basedir_indexmap_size : pglob->glob.gl_pathc;
+}
+
 PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
@@ -87,7 +95,7 @@ PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC
 		if (pflags) {
 			*pflags = pglob->flags;
 		}
-		return pglob->glob.gl_pathc;
+		return php_glob_stream_get_result_count(pglob);
 	} else {
 		if (pflags) {
 			*pflags = 0;
@@ -130,15 +138,21 @@ static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count)
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
 	const char *path;
+	int glob_result_count;
+	size_t index;
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count == sizeof(php_stream_dirent) && pglob) {
-		if (pglob->index < (size_t)pglob->glob.gl_pathc) {
-			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[pglob->index++], pglob->flags & GLOB_APPEND, &path);
+		glob_result_count = php_glob_stream_get_result_count(pglob);
+		if (pglob->index < (size_t) glob_result_count) {
+			index = pglob->open_basedir_used && pglob->open_basedir_indexmap ?
+					pglob->open_basedir_indexmap[pglob->index] : pglob->index;
+			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[index], pglob->flags & GLOB_APPEND, &path);
+			++pglob->index;
 			PHP_STRLCPY(ent->d_name, path, sizeof(ent->d_name), strlen(path));
 			return sizeof(php_stream_dirent);
 		}
-		pglob->index = pglob->glob.gl_pathc;
+		pglob->index = glob_result_count;
 		if (pglob->path) {
 			efree(pglob->path);
 			pglob->path = NULL;
@@ -161,6 +175,9 @@ static int php_glob_stream_close(php_stream *stream, int close_handle)  /* {{{ *
 		}
 		if (pglob->pattern) {
 			efree(pglob->pattern);
+		}
+		if (pglob->open_basedir_indexmap) {
+			efree(pglob->open_basedir_indexmap);
 		}
 	}
 	efree(stream->abstract);
@@ -198,7 +215,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	glob_s_t *pglob;
-	int ret;
+	int ret, i;
 	const char *tmp, *pos;
 
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
@@ -206,10 +223,6 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 		if (opened_path) {
 			*opened_path = zend_string_init(path, strlen(path), 0);
 		}
-	}
-
-	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path)) {
-		return NULL;
 	}
 
 	pglob = ecalloc(sizeof(*pglob), 1);
@@ -221,6 +234,20 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 		{
 			efree(pglob);
 			return NULL;
+		}
+	}
+
+	/* if open_basedir in use, check and filter restricted paths */
+	if ((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {
+		pglob->open_basedir_used = true;
+		for (i = 0; i < pglob->glob.gl_pathc; i++) {
+			if (!php_check_open_basedir_ex(pglob->glob.gl_pathv[i], 0)) {
+				if (!pglob->open_basedir_indexmap) {
+					pglob->open_basedir_indexmap = (size_t *) safe_emalloc(
+							pglob->glob.gl_pathc, sizeof(size_t), 0);
+				}
+				pglob->open_basedir_indexmap[pglob->open_basedir_indexmap_size++] = i;
+			}
 		}
 	}
 

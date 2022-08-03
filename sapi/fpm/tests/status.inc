@@ -241,7 +241,8 @@ class Status
             "phpfpm_max_children_reached " . $fields['max children reached'] . "\n" .
             "# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value\.\n" .
             "# TYPE phpfpm_slow_requests counter\n" .
-            "phpfpm_slow_requests " . $fields['slow requests'] . ")";
+            "phpfpm_slow_requests " . $fields['slow requests'] . "\n" .
+            "# EOF)\n";
 
         if (!preg_match($pattern, $body)) {
             echo "ERROR: Expected body does not match pattern\n";

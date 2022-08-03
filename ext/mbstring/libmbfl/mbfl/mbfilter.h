@@ -232,18 +232,6 @@ MBFLAPI extern mbfl_string *
 mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
 /*
- *  strwidth
- */
-MBFLAPI extern size_t
-mbfl_strwidth(mbfl_string *string);
-
-/*
- *  strimwidth
- */
-MBFLAPI extern mbfl_string *
-mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t from, size_t width);
-
-/*
  * MIME header encode
  */
 struct mime_header_encoder_data;	/* forward declaration */
@@ -287,17 +275,5 @@ mbfl_mime_header_decode(
     mbfl_string *string,
     mbfl_string *result,
     const mbfl_encoding *outcode);
-
-/*
- * convert HTML numeric entity
- */
-MBFLAPI extern mbfl_string *
-mbfl_html_numeric_entity(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize, int type);
-
-/*
- * convert of halfwidth and fullwidth for japanese
- */
-MBFLAPI extern mbfl_string *
-mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, int mode);
 
 #endif	/* MBFL_MBFILTER_H */

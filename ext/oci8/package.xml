@@ -10,7 +10,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <description>
 The OCI8 extension lets you access Oracle Database.
 
-Use 'pecl install oci8' to install for PHP 8.
+Use 'pecl install oci8' to install for PHP 8.1.
+
+Use 'pecl install oci8-3.0.1' to install for PHP 8.0.
 
 Use 'pecl install oci8-2.2.0' to install for PHP 7.
 
@@ -18,9 +20,9 @@ Use 'pecl install oci8-2.0.12' to install for PHP 5.2 - PHP 5.6.
 
 Use 'pecl install oci8-1.4.10' to install for PHP 4.3.9 - PHP 5.1.
 
-The OCI8 extension can be linked with Oracle client libraries from Oracle Database 10.2 or later.  These libraries are found in your database installation, or in the free Oracle Instant Client from https://www.oracle.com/database/technologies/instant-client.html.
+The current OCI8 extension can be linked with Oracle Client libraries from Oracle Database 11.2 or later.  (OCI8 3.0 and earlier can be linked with 10g or later).  The Oracle Client libraries are in the free Oracle Instant Client from https://www.oracle.com/database/technologies/instant-client.html.  They are also included in your database installation.
 
-Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 linked with Instant Client 19c can connect to Oracle Database 11.2 onward.  See Oracle's note "Oracle Client / Server Interoperability Support" (ID 207303.1) for details.
+Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 linked with Oracle Client 19c can connect to Oracle Database 11.2 onward.  See Oracle's note "Oracle Client / Server Interoperability Support" (ID 207303.1) for details.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -53,12 +55,12 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <active>no</active>
  </lead>
 
- <date>2021-11-15</date>
+ <date>2021-12-12</date>
  <time>12:00:00</time>
 
   <version>
-   <release>3.2.0</release>
-   <api>3.2.0</api>
+   <release>3.2.1</release>
+   <api>3.2.1</api>
   </version>
   <stability>
    <release>stable</release>
@@ -66,9 +68,9 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    This version is for PHP 8 only.
+    This version is for PHP 8.1 only.
 
-    Added oci8.prefetch_lob_size directive to improve LOB query performance.
+    Requires Oracle Client libraries from 11.2 or later.
   </notes>
  <contents>
   <dir name="/">
@@ -373,6 +375,8 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="lob_044.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
+    <file name="lob_prefetch.phpt" role="test" />
+    <file name="lob_prefetch_ini.phpt" role="test" />
     <file name="lob_temp.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
     <file name="lob_temp2.phpt" role="test" />
@@ -435,7 +439,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
  <dependencies>
   <required>
    <php>
-    <min>8.0.0</min>
+    <min>8.1.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -450,6 +454,23 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
 
 <release>
   <version>
+   <release>3.2.0</release>
+   <api>3.2.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8.1 only.
+
+    Added oci8.prefetch_lob_size directive and oci_set_prefetch_lob() function to improve LOB query performance.
+  </notes>
+</release>
+   
+<release>
+  <version>
    <release>3.1.0</release>
    <api>3.1.0</api>
   </version>
@@ -459,7 +480,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    This version is for PHP 8 only.
+    This version is for PHP 8.0 only.
 
     Deprecated directive oci8.old_oci_close_semantics
   </notes>
@@ -476,12 +497,37 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    This version is for PHP 8 only.
+    This version is for PHP 8.0 only.
 
     Updated Windows build environment to build with newer Oracle Client libraries. (cmb)
   </notes>
 </release>
    
+<release>
+  <version>
+   <release>3.0.0</release>
+   <api>3.0.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8.0 only.
+
+    Deprecated old OCI8 function aliases. (Jens de Nies)
+
+    Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
+
+    The OCI-Lob class is now called OCILob for standards compliance.
+
+    The OCI-Collection class is now called OCICollection for standards compliance.
+
+    Generate arginfo from function stubs. (Jens de Nies)
+  </notes>
+</release>
+
 <release>
   <version>
    <release>2.2.0</release>
@@ -499,31 +545,6 @@ Added oci_set_db_operation() for the Oracle Database 'DBOP' end-to-end-tracing a
 Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
 Fixed installation on PHP 7.3.
 Internal change: Convert some parameter parsing to the Fast Parameter Parsing API.
-  </notes>
-</release>
-
-<release>
-  <version>
-   <release>3.0.0</release>
-   <api>3.0.0</api>
-  </version>
-  <stability>
-   <release>stable</release>
-   <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">PHP</license>
-  <notes>
-    This version is for PHP 8 only.
-
-    Deprecated old OCI8 function aliases. (Jens de Nies)
-
-    Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
-
-    The OCI-Lob class is now called OCILob for standards compliance.
-
-    The OCI-Collection class is now called OCICollection for standards compliance.
-
-    Generate arginfo from function stubs. (Jens de Nies)
   </notes>
 </release>
 

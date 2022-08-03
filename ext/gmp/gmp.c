@@ -28,11 +28,26 @@
 #include "zend_exceptions.h"
 
 #include <gmp.h>
-#include "gmp_arginfo.h"
 
 /* Needed for gmp_random() */
-#include "ext/standard/php_rand.h"
-#include "ext/standard/php_lcg.h"
+#include "ext/random/php_random.h"
+
+#define GMP_ROUND_ZERO      0
+#define GMP_ROUND_PLUSINF   1
+#define GMP_ROUND_MINUSINF  2
+
+#ifdef mpir_version
+#define GMP_MPIR_VERSION_STRING ((char *) mpir_version)
+#endif
+#define GMP_VERSION_STRING ((char *) gmp_version)
+
+#define GMP_MSW_FIRST     (1 << 0)
+#define GMP_LSW_FIRST     (1 << 1)
+#define GMP_LITTLE_ENDIAN (1 << 2)
+#define GMP_BIG_ENDIAN    (1 << 3)
+#define GMP_NATIVE_ENDIAN (1 << 4)
+
+#include "gmp_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(gmp)
 static ZEND_GINIT_FUNCTION(gmp);
@@ -74,16 +89,6 @@ typedef struct _gmp_temp {
 	mpz_t num;
 	bool is_used;
 } gmp_temp_t;
-
-#define GMP_ROUND_ZERO      0
-#define GMP_ROUND_PLUSINF   1
-#define GMP_ROUND_MINUSINF  2
-
-#define GMP_MSW_FIRST     (1 << 0)
-#define GMP_LSW_FIRST     (1 << 1)
-#define GMP_LITTLE_ENDIAN (1 << 2)
-#define GMP_BIG_ENDIAN    (1 << 3)
-#define GMP_NATIVE_ENDIAN (1 << 4)
 
 #define GMP_MAX_BASE 62
 
@@ -270,7 +275,7 @@ static inline void gmp_create(zval *target, mpz_ptr *gmpnum_target) /* {{{ */
 }
 /* }}} */
 
-static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
+static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	mpz_ptr gmpnum;
 	switch (type) {
@@ -366,7 +371,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	}                                   \
 	return SUCCESS;
 
-static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_result gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	switch (opcode) {
 	case ZEND_ADD:
@@ -403,7 +408,7 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 }
 /* }}} */
 
-static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_result gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy;
 	int retval;
@@ -540,19 +545,7 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_object_handlers.do_operation = gmp_do_operation;
 	gmp_object_handlers.compare = gmp_compare;
 
-	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_ROUND_MINUSINF", GMP_ROUND_MINUSINF, CONST_CS | CONST_PERSISTENT);
-#ifdef mpir_version
-	REGISTER_STRING_CONSTANT("GMP_MPIR_VERSION", (char *)mpir_version, CONST_CS | CONST_PERSISTENT);
-#endif
-	REGISTER_STRING_CONSTANT("GMP_VERSION", (char *)gmp_version, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("GMP_MSW_FIRST", GMP_MSW_FIRST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_LSW_FIRST", GMP_LSW_FIRST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_LITTLE_ENDIAN", GMP_LITTLE_ENDIAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_BIG_ENDIAN", GMP_BIG_ENDIAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GMP_NATIVE_ENDIAN", GMP_NATIVE_ENDIAN, CONST_CS | CONST_PERSISTENT);
+	register_gmp_symbols(module_number);
 
 	return SUCCESS;
 }

@@ -575,6 +575,7 @@ again:
 			if (ce == zend_standard_class_def) {
 				smart_str_appendl(buf, "(object) array(\n", 16);
 			} else {
+				smart_str_appendc(buf, '\\');
 				smart_str_append(buf, ce->name);
 				if (is_enum) {
 					zend_object *zobj = Z_OBJ_P(struc);
@@ -644,7 +645,7 @@ PHP_FUNCTION(var_export)
 	smart_str_0 (&buf);
 
 	if (return_output) {
-		RETURN_NEW_STR(buf.s);
+		RETURN_STR(smart_str_extract(&buf));
 	} else {
 		PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 		smart_str_free(&buf);
@@ -662,7 +663,11 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 
 	data->n += 1;
 
-	if (!is_ref && (Z_TYPE_P(var) != IS_OBJECT || Z_REFCOUNT_P(var) == 1)) {
+	if (is_ref) {
+		/* pass */
+	} else if (Z_TYPE_P(var) != IS_OBJECT) {
+		return 0;
+	} else if (Z_REFCOUNT_P(var) == 1 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)) {
 		return 0;
 	}
 
@@ -1313,11 +1318,7 @@ PHP_FUNCTION(serialize)
 		RETURN_THROWS();
 	}
 
-	if (buf.s) {
-		RETURN_NEW_STR(buf.s);
-	} else {
-		RETURN_EMPTY_STRING();
-	}
+	RETURN_STR(smart_str_extract(&buf));
 }
 /* }}} */
 
@@ -1471,6 +1472,14 @@ PHP_FUNCTION(memory_get_peak_usage) {
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(zend_memory_peak_usage(real_usage));
+}
+/* }}} */
+
+/* {{{ Resets the peak PHP memory usage */
+PHP_FUNCTION(memory_reset_peak_usage) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_memory_reset_peak_usage();
 }
 /* }}} */
 

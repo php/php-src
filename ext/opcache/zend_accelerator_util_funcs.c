@@ -347,15 +347,11 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 	op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	*op_array = persistent_script->script.main_op_array;
 
-	if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
-		zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
-	}
-
-	if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
-		zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table);
-	}
-
 	if (EXPECTED(from_shared_memory)) {
+		if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
+			zend_map_ptr_extend(ZCSG(map_ptr_last));
+		}
+
 		/* Register __COMPILER_HALT_OFFSET__ constant */
 		if (persistent_script->compiler_halt_offset != 0 &&
 		    persistent_script->script.filename) {
@@ -368,10 +364,14 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			}
 			zend_string_release_ex(name, 0);
 		}
+	}
 
-		if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
-			zend_map_ptr_extend(ZCSG(map_ptr_last));
-		}
+	if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
+		zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
+	}
+
+	if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
+		zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table);
 	}
 
 	if (persistent_script->num_early_bindings) {

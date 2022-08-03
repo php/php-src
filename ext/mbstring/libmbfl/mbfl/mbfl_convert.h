@@ -81,4 +81,7 @@ MBFLAPI extern int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter);
 MBFLAPI extern void mbfl_convert_filter_devcat(mbfl_convert_filter *filter, mbfl_memory_device *src);
 MBFLAPI extern int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char *p);
 
+MBFLAPI extern zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encoding *from, const mbfl_encoding *to, uint32_t replacement_char, unsigned int error_mode, unsigned int *num_errors);
+MBFLAPI extern void mb_illegal_output(uint32_t bad_cp, mb_from_wchar_fn fn, mb_convert_buf* buf);
+
 #endif /* MBFL_CONVERT_H */

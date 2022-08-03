@@ -108,17 +108,6 @@ if (MYSQLI_REPORT_ERROR !== $driver->report_mode) {
 
 $driver->report_mode = $report_mode;
 
-$reconnect = $driver->reconnect;
-if (!is_bool($reconnect)) {
-    printf("[019] Expecting boolean/any, got %s/%s\n",
-    gettype($reconnect), $reconnect);
-}
-
-/* pointless, but I need more documentation */
-$driver->reconnect = true;
-$driver->reconnect = false;
-$driver->reconnect = $reconnect;
-
 print "done!";
 ?>
 --EXPECTF--

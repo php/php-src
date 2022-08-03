@@ -1,4 +1,4 @@
-.TH @program_prefix@phpdbg 1 "2021" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpdbg 1 "2022" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@phpdbg \- The interactive PHP debugger
 .SH SYNOPSIS
@@ -105,7 +105,7 @@ You can view the list of known bugs or report any new bug you
 found at
 .PD 0
 .P
-.B http://bugs.php.net/
+.B https://github.com/php/php-src/issues
 .PD 1
 .SH AUTHORS
 Written by Felipe Pena, Joe Watkins and Bob Weinand, formatted by Ondřej Surý for Debian project.

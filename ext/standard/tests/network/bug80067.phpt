@@ -7,7 +7,10 @@ if (!in_array('https', stream_get_wrappers())) die('skip: https wrapper is requi
 ?>
 --FILE--
 <?php
-$context = stream_context_create(['socket' => ['bindto' => '0']]);
+$context = stream_context_create([
+    'socket' => ['bindto' => '0'],
+    'ssl' => ['verify_peer' => false]
+]);
 var_dump(file_get_contents('https://httpbin.org/get', false, $context) !== false);
 ?>
 --EXPECT--

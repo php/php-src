@@ -62,7 +62,6 @@ typedef struct _zend_basic_block {
 |JMP         |ADR|   |   |OP1| - |
 |JMPZ        |   |ADR|   |OP2|FOL|
 |JMPNZ       |   |ADR|   |OP2|FOL|
-|JMPZNZ      |   |ADR|ADR|OP2|EXT|
 |JMPZ_EX     |   |ADR|   |OP2|FOL|
 |JMPNZ_EX    |   |ADR|   |OP2|FOL|
 |JMP_SET     |   |ADR|   |OP2|FOL|

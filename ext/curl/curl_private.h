@@ -73,9 +73,10 @@ typedef struct {
 	php_curl_read     *read;
 	zval               std_err;
 	php_curl_callback *progress;
-#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
-	php_curl_callback  *fnmatch;
+#if LIBCURL_VERSION_NUM >= 0x072000
+	php_curl_callback  *xferinfo;
 #endif
+	php_curl_callback  *fnmatch;
 } php_curl_handlers;
 
 struct _php_curl_error  {
@@ -158,6 +159,6 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 void curl_multi_register_handlers(void);
 void curl_share_register_handlers(void);
 void curlfile_register_class(void);
-int curl_cast_object(zend_object *obj, zval *result, int type);
+zend_result curl_cast_object(zend_object *obj, zval *result, int type);
 
 #endif  /* _PHP_CURL_PRIVATE_H */

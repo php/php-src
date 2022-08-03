@@ -176,6 +176,9 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 		if ((type & MAY_BE_ARRAY_OF_ANY) && !(type & MAY_BE_ARRAY_KEY_ANY)) {
 			FAIL("var " VARFMT " has array value type but not key type\n", VAR(i));
 		}
+		if ((type & MAY_BE_REF) && ssa->var_info[i].ce) {
+			FAIL("var " VARFMT " may be ref but has ce\n", VAR(i));
+		}
 	}
 
 	/* Instructions */

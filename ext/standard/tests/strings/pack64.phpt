@@ -31,6 +31,11 @@ print_r(unpack("q", pack("q", 0)));
 print_r(unpack("q", pack("q", 0x8000000000000002)));
 print_r(unpack("q", pack("q", -1)));
 print_r(unpack("q", pack("q", 0x8000000000000000)));
+
+print_r(unpack("i", pack("i",  2147483647))); // Max int32
+print_r(unpack("i", pack("i", -2147483647)));
+print_r(unpack("i", pack("i", -2147483648))); // Min int32
+print_r(unpack("I", pack("I",  4294967295))); // Max uint32
 ?>
 --EXPECT--
 Array
@@ -112,4 +117,20 @@ Array
 Array
 (
     [1] => -9223372036854775808
+)
+Array
+(
+    [1] => 2147483647
+)
+Array
+(
+    [1] => -2147483647
+)
+Array
+(
+    [1] => -2147483648
+)
+Array
+(
+    [1] => 4294967295
 )

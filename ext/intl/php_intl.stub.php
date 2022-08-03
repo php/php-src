@@ -2,6 +2,24 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue INTL_MAX_LOCALE_LEN
+ */
+const INTL_MAX_LOCALE_LEN = UNKNOWN;
+/**
+ * @var string
+ * @cvalue U_ICU_VERSION
+ */
+const INTL_ICU_VERSION = UNKNOWN;
+#ifdef U_ICU_DATA_VERSION
+/**
+ * @var string
+ * @cvalue U_ICU_DATA_VERSION
+ */
+const INTL_ICU_DATA_VERSION = UNKNOWN;
+#endif
+
 class IntlException extends Exception
 {
 }

@@ -1,11 +1,23 @@
 <?php
 
-/** @generate-class-entries static */
-
+/**
+ * @generate-class-entries static
+ * @generate-legacy-arginfo 80000
+ */
 namespace {
+
+    /**
+     * @var int
+     * @deprecated
+     */
+    const ZEND_TEST_DEPRECATED = 42;
+
+    require "Zend/zend_attributes.stub.php";
 
     interface _ZendTestInterface
     {
+        /** @var int */
+        public const DUMMY = 0;
     }
 
     /** @alias _ZendTestClassAlias */
@@ -17,6 +29,7 @@ namespace {
         public int $intProp = 123;
         public ?stdClass $classProp = null;
         public stdClass|Iterator|null $classUnionProp = null;
+        public Traversable&Countable $classIntersectionProp;
         public readonly int $readonlyProp;
 
         public static function is_object(): int {}
@@ -41,8 +54,30 @@ namespace {
         public function testMethod(): bool {}
     }
 
+    #[Attribute(Attribute::TARGET_ALL)]
     final class ZendTestAttribute {
 
+    }
+
+    #[Attribute(Attribute::TARGET_PARAMETER)]
+    final class ZendTestParameterAttribute {
+        public string $parameter;
+
+        public function __construct(string $parameter) {}
+    }
+
+    class ZendTestClassWithMethodWithParameterAttribute {
+        final public function no_override(string $parameter): int {}
+        public function override(string $parameter): int {}
+    }
+
+    class ZendTestChildClassWithMethodWithParameterAttribute extends ZendTestClassWithMethodWithParameterAttribute {
+        public function override(string $parameter): int {}
+    }
+
+    final class ZendTestForbidDynamicCall {
+        public function call(): void {}
+        public static function callStatic(): void {}
     }
 
     enum ZendTestUnitEnum {
@@ -54,6 +89,13 @@ namespace {
         case Foo = "Test1";
         case Bar = "Test2";
         case Baz = "Test2\\a";
+        case FortyTwo = "42";
+    }
+
+    enum ZendTestIntEnum: int {
+        case Foo = 1;
+        case Bar = 3;
+        case Baz = -1;
     }
 
     function zend_test_array_return(): array {}
@@ -92,12 +134,28 @@ namespace {
     function zend_weakmap_dump(): array {}
 
     function zend_get_unit_enum(): ZendTestUnitEnum {}
+
+    function zend_test_parameter_with_attribute(string $parameter): int {}
+
+    function zend_get_current_func_name(): string {}
+
+    function zend_call_method(object|string $obj_or_class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
+
+    function zend_test_zend_ini_parse_quantity(string $str): int {}
+    function zend_test_zend_ini_parse_uquantity(string $str): int {}
 }
 
 namespace ZendTestNS {
 
     class Foo {
-        public function method(): void {}
+        /** @tentative-return-type */
+        public function method(): int {}
+    }
+
+    class UnlikelyCompileError {
+        /* This method signature would create a compile error due to the string
+         * "ZendTestNS\UnlikelyCompileError" in the generated macro call */
+        public function method(): ?UnlikelyCompileError {}
     }
 
 }

@@ -412,6 +412,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
 #define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
 #define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
+#define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -562,6 +563,9 @@ typedef union _zend_jit_trace_stack {
 		(_stack)[_slot].reg = _reg; \
 		(_stack)[_slot].flags = _flags; \
 	} while (0)
+#define RESET_STACK_MEM_TYPE(_stack, _slot) do { \
+		(_stack)[_slot].mem_type = IS_UNKNOWN; \
+	} while (0)
 
 /* trace info flags */
 #define ZEND_JIT_TRACE_CHECK_INTERRUPT (1<<0)
@@ -581,6 +585,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  flags;         /* See ZEND_JIT_TRACE_... defines above */
 	uint32_t                  polymorphism;  /* Counter of polymorphic calls */
 	uint32_t                  jmp_table_size;/* number of jmp_table slots */
+	const zend_op_array      *op_array;      /* function */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */
@@ -724,6 +729,26 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	}
 	*exit_if_true = 0;
 	return NULL;
+}
+
+static inline bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
+{
+	if (func->type == ZEND_INTERNAL_FUNCTION) {
+#ifdef _WIN32
+		/* ASLR */
+		return 1;
+#else
+		return 0;
+#endif
+	} else if (func->type == ZEND_USER_FUNCTION) {
+		if (func->common.fn_flags & ZEND_ACC_PRELOADED) {
+			return 0;
+		}
+		if (func->op_array.filename == called_from->filename && !func->op_array.scope) {
+			return 0;
+		}
+	}
+	return 1;
 }
 
 static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *opline)

@@ -101,6 +101,7 @@ var_dump(ucfirst(ucfirst("hello")));
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Using ${var} in strings is deprecated, use {$var} instead in %s on line %d
 #### Basic and Various operations ####
 string(16) "Testing ucfirst."
 string(17) "1.testing ucfirst"

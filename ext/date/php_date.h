@@ -72,6 +72,8 @@ static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
 struct _php_interval_obj {
 	timelib_rel_time *diff;
 	int               civil_or_wall;
+	bool              from_string;
+	zend_string      *date_string;
 	bool              initialized;
 	zend_object       std;
 };
@@ -91,6 +93,7 @@ struct _php_period_obj {
 	int               recurrences;
 	bool              initialized;
 	bool              include_start_date;
+	bool              include_end_date;
 	zend_object       std;
 };
 
@@ -105,7 +108,6 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 	char                    *timezone;
 	HashTable               *tzcache;
 	timelib_error_container *last_errors;
-	int                     timezone_valid;
 ZEND_END_MODULE_GLOBALS(date)
 
 #define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)

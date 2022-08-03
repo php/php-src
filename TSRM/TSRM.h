@@ -20,7 +20,8 @@
 # include "main/php_config.h"
 #endif
 
-#include "main/php_stdint.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS
@@ -79,7 +80,7 @@ extern "C" {
 #endif
 
 /* startup/shutdown */
-TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, const char *debug_filename);
+TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int debug_level, const char *debug_filename);
 TSRM_API void tsrm_shutdown(void);
 
 /* environ lock API */
@@ -133,8 +134,8 @@ TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
 
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
-TSRM_API uint8_t tsrm_is_main_thread(void);
-TSRM_API uint8_t tsrm_is_shutdown(void);
+TSRM_API bool tsrm_is_main_thread(void);
+TSRM_API bool tsrm_is_shutdown(void);
 TSRM_API const char *tsrm_api_name(void);
 
 #ifdef TSRM_WIN32
@@ -147,7 +148,7 @@ TSRM_API const char *tsrm_api_name(void);
 # define __has_attribute(x) 0
 #endif
 
-#if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__MUSL__)
+#if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__MUSL__) || defined(__HAIKU__)
 # define TSRM_TLS_MODEL_ATTR
 #elif __PIC__
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))

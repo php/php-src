@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.2.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
+AC_INIT([PHP],[8.2.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -260,7 +260,7 @@ AC_MSG_CHECKING([whether we are using musl libc])
 if command -v ldd >/dev/null && ldd --version 2>&1 | grep -q ^musl
 then
   AC_MSG_RESULT(yes)
-  CPPFLAGS="$CPPFLAGS -D__MUSL__"
+  AC_DEFINE([__MUSL__], [1], [Define when using musl libc])
 else
   AC_MSG_RESULT(no)
 fi
@@ -364,6 +364,7 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
+PHP_CHECK_FUNC(copy_file_range)
 PHP_CHECK_FUNC(dlopen, dl, root)
 PHP_CHECK_FUNC(dlsym, dl, root)
 if test "$ac_cv_func_dlopen" = "yes"; then
@@ -394,7 +395,10 @@ fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
+linux/filter.h \
+linux/sock_diag.h \
 malloc.h \
+os/signpost.h \
 poll.h \
 pty.h \
 pwd.h \
@@ -587,12 +591,14 @@ inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
+memcntl \
 memmove \
 mkstemp \
 mmap \
 nice \
 nl_langinfo \
 poll \
+pthread_jit_write_protect_np \
 putenv \
 scandir \
 setitimer \
@@ -685,7 +691,7 @@ if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 
-AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
+AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt reallocarray)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 PHP_CHECK_IN_ADDR_T
@@ -1208,6 +1214,7 @@ AS_CASE([$host_cpu],
   [arm*], [fiber_cpu="arm32"],
   [ppc64*|powerpc64*], [fiber_cpu="ppc64"],
   [ppc*|powerpc*], [fiber_cpu="ppc32"],
+  [riscv64*], [fiber_cpu="riscv64"],
   [s390x*], [fiber_cpu="s390x"],
   [mips64*], [fiber_cpu="mips64"],
   [mips*], [fiber_cpu="mips32"],
@@ -1227,6 +1234,7 @@ AS_CASE([$fiber_cpu],
   [arm32], [fiber_asm_file_prefix="arm_aapcs"],
   [ppc64], [fiber_asm_file_prefix="ppc64_sysv"],
   [ppc32], [fiber_asm_file_prefix="ppc32_sysv"],
+  [riscv64], [fiber_asm_file_prefix="riscv64_sysv"],
   [s390x], [fiber_asm_file_prefix="s390x_sysv"],
   [mips64], [fiber_asm_file_prefix="mips64_n64"],
   [mips32], [fiber_asm_file_prefix="mips32_o32"],
@@ -1606,10 +1614,11 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
-       fopen_wrappers.c alloca.c  php_scandir.c \
+       fopen_wrappers.c php_scandir.c \
+       php_ini_builder.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c \
+       network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c reallocarray.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
@@ -1634,7 +1643,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c \
+    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

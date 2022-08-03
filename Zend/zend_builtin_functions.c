@@ -24,6 +24,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
+#include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "zend_closures.h"
@@ -37,8 +38,6 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_register_default_classes();
 
 	zend_standard_class_def = register_class_stdClass();
-	zend_add_class_attribute(zend_standard_class_def, zend_ce_allow_dynamic_properties->name, 0);
-	zend_standard_class_def->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
 	return SUCCESS;
 }
@@ -1557,27 +1556,66 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					 */
 					while (i < first_extra_arg) {
 						zend_string *arg_name = call->func->op_array.vars[i];
+						zval original_arg;
 						zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
+						zend_attribute *attribute = zend_get_parameter_attribute_str(
+							call->func->common.attributes,
+							"sensitiveparameter",
+							sizeof("sensitiveparameter") - 1,
+							i
+						);
+
+						bool is_sensitive = attribute != NULL;
+
 						if (arg) {
 							ZVAL_DEREF(arg);
-							Z_TRY_ADDREF_P(arg);
-							ZEND_HASH_FILL_SET(arg);
+							ZVAL_COPY_VALUE(&original_arg, arg);
 						} else {
-							ZEND_HASH_FILL_SET_NULL();
+							ZVAL_NULL(&original_arg);
 						}
+
+						if (is_sensitive) {
+							zval redacted_arg;
+							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
+							zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+							ZEND_HASH_FILL_SET(&redacted_arg);
+						} else {
+							Z_TRY_ADDREF_P(&original_arg);
+							ZEND_HASH_FILL_SET(&original_arg);
+						}
+
 						ZEND_HASH_FILL_NEXT();
 						i++;
 					}
 				} else {
 					while (i < first_extra_arg) {
+						zval original_arg;
+						zend_attribute *attribute = zend_get_parameter_attribute_str(
+							call->func->common.attributes,
+							"sensitiveparameter",
+							sizeof("sensitiveparameter") - 1,
+							i
+						);
+						bool is_sensitive = attribute != NULL;
+
 						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 							zval *arg = p;
 							ZVAL_DEREF(arg);
-							Z_TRY_ADDREF_P(arg);
-							ZEND_HASH_FILL_SET(arg);
+							ZVAL_COPY_VALUE(&original_arg, arg);
 						} else {
-							ZEND_HASH_FILL_SET_NULL();
+							ZVAL_NULL(&original_arg);
 						}
+
+						if (is_sensitive) {
+							zval redacted_arg;
+							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
+							zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+							ZEND_HASH_FILL_SET(&redacted_arg);
+						} else {
+							Z_TRY_ADDREF_P(&original_arg);
+							ZEND_HASH_FILL_SET(&original_arg);
+						}
+
 						ZEND_HASH_FILL_NEXT();
 						p++;
 						i++;
@@ -1587,14 +1625,37 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 			}
 
 			while (i < num_args) {
+				zval original_arg;
+				bool is_sensitive = 0;
+
+				if (i < call->func->common.num_args || call->func->common.fn_flags & ZEND_ACC_VARIADIC) {
+					zend_attribute *attribute = zend_get_parameter_attribute_str(
+						call->func->common.attributes,
+						"sensitiveparameter",
+						sizeof("sensitiveparameter") - 1,
+						MIN(i, call->func->common.num_args)
+					);
+					is_sensitive = attribute != NULL;
+				}
+
 				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 					zval *arg = p;
 					ZVAL_DEREF(arg);
-					Z_TRY_ADDREF_P(arg);
-					ZEND_HASH_FILL_SET(arg);
+					ZVAL_COPY_VALUE(&original_arg, arg);
 				} else {
-					ZEND_HASH_FILL_SET_NULL();
+					ZVAL_NULL(&original_arg);
 				}
+
+				if (is_sensitive) {
+					zval redacted_arg;
+					object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
+					zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+					ZEND_HASH_FILL_SET(&redacted_arg);
+				} else {
+					Z_TRY_ADDREF_P(&original_arg);
+					ZEND_HASH_FILL_SET(&original_arg);
+				}
+
 				ZEND_HASH_FILL_NEXT();
 				p++;
 				i++;

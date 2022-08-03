@@ -450,14 +450,9 @@ can be built that way. \
 	}
 
 	var snapshot_build_exclusions = new Array(
-		'debug', 'lzf-better-compression',
-		 'php-build', 'snapshot-template', 'ereg',
-		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
-		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
-		 'zend-multibyte', 'fd-setsize', 'memory-manager',
-		 'pgi', 'pgo', 'all-shared', 'config-profile',
-		 'sanitizer'
-		);
+		'debug', 'lzf-better-compression', 'php-build', 'snapshot-template', 'zts',
+		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer'
+	);
 	var force;
 
 	// Now set any defaults we might have missed out earlier
@@ -1077,7 +1072,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	var thanks = "";
 	var logo = "";
 	var debug = "";
-	var project_url = "http://www.php.net";
+	var project_url = "https://www.php.net";
 	var project_header = creditspath + "/php_" + basename + ".h";
 	var versioning = "";
 
@@ -1098,14 +1093,14 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 		if (thanks == null) {
 			thanks = "";
 		} else {
-			thanks = "Thanks to " + thanks;
+			thanks = "Thanks to " + thanks.replace(/([<>&|%])/g, "^$1").replace(/"/g, '\\"\\"');
 		}
 		credits.Close();
 	}
 
 	if (creditspath.match(new RegExp("pecl"))) {
 		/* PECL project url - this will eventually work correctly for all */
-		project_url = "http://pecl.php.net/" + basename;
+		project_url = "https://pecl.php.net/" + basename;
 
 		/* keep independent versioning PECL-specific for now */
 		if (FSO.FileExists(project_header)) {
@@ -3101,9 +3096,11 @@ function toolset_get_compiler_name(short)
 
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
-		if (version >= 1930) {
+		if (version >= 1940) {
 			return name;
-		} if (version >= 1920) {
+		} else if (version >= 1930) {
+			name = short ? "VS17" : "Visual C++ 2022";
+		} else if (version >= 1920) {
 			/* NOTE - VS is intentional. Due to changes in recent Visual Studio
 						versioning scheme referring to the exact VC++ version is
 						hardly predictable. From this version on, it refers to

@@ -179,6 +179,18 @@ END_EXTERN_C()
 #define explicit_bzero php_explicit_bzero
 #endif
 
+#ifndef HAVE_REALLOCARRAY
+BEGIN_EXTERN_C()
+PHPAPI void* php_reallocarray(void *p, size_t nmb, size_t siz);
+END_EXTERN_C()
+#undef reallocarray
+#define reallocarray php_reallocarray
+#endif
+
+BEGIN_EXTERN_C()
+PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b);
+END_EXTERN_C()
+
 #ifndef HAVE_STRTOK_R
 BEGIN_EXTERN_C()
 char *strtok_r(char *s, const char *delim, char **last);
@@ -210,8 +222,6 @@ typedef unsigned int socklen_t;
 #endif
 
 #include <stdarg.h>
-
-#include "php_stdint.h"
 
 #include "zend_hash.h"
 #include "zend_alloc.h"
@@ -297,9 +307,9 @@ void phperror(char *error);
 PHPAPI size_t php_write(void *buf, size_t size);
 PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 PHPAPI size_t php_printf_unchecked(const char *format, ...);
-PHPAPI int php_during_module_startup(void);
-PHPAPI int php_during_module_shutdown(void);
-PHPAPI int php_get_module_initialized(void);
+PHPAPI bool php_during_module_startup(void);
+PHPAPI bool php_during_module_shutdown(void);
+PHPAPI bool php_get_module_initialized(void);
 #ifdef HAVE_SYSLOG_H
 #include "php_syslog.h"
 #define php_log_err(msg) php_log_err_with_severity(msg, LOG_NOTICE)
@@ -344,6 +354,7 @@ END_EXTERN_C()
 #define phpin zendin
 
 #define php_memnstr zend_memnstr
+#define php_memnistr zend_memnistr
 
 /* functions */
 BEGIN_EXTERN_C()

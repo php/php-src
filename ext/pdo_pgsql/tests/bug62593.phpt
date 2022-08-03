@@ -54,7 +54,7 @@ $expect = 'No errors found';
 
 foreach ($errors as $error)
 {
-  if (strpos('Invalid text representation', $error[2]) !== false)
+  if (null !== $error[2] && strpos('Invalid text representation', $error[2]) !== false)
   {
     $expect = 'Invalid boolean found';
   }

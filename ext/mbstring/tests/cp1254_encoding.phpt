@@ -16,6 +16,10 @@ mb_substitute_character("long");
 convertInvalidString("\x81", "%", "CP1254", "UTF-8");
 convertInvalidString("\x9E", "%", "CP1254", "UTF-8");
 
+// Test replacement character which cannot be encoded in CP1254
+mb_substitute_character(0x1234);
+convertInvalidString("\x23\x45", '?', 'UTF-16BE', 'CP1254');
+
 echo "Done!\n";
 ?>
 --EXPECT--

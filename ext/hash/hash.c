@@ -26,8 +26,9 @@
 #include "ext/standard/php_var.h"
 #include "ext/spl/spl_exceptions.h"
 
-#include "zend_interfaces.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 
 #include "hash_arginfo.h"
@@ -234,6 +235,9 @@ PHP_HASH_API int php_hash_serialize_spec(const php_hashcontext_object *hash, zva
 	size_t pos = 0, max_alignment = 1;
 	unsigned char *buf = (unsigned char *) hash->context;
 	zval tmp;
+	if (buf == NULL) {
+		return FAILURE;
+	}
 	array_init(zv);
 	while (*spec != '\0' && *spec != '.') {
 		char spec_ch = *spec;
@@ -1107,9 +1111,7 @@ PHP_FUNCTION(hash_pbkdf2)
 PHP_FUNCTION(hash_equals)
 {
 	zval *known_zval, *user_zval;
-	char *known_str, *user_str;
 	int result = 0;
-	size_t j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
 		RETURN_THROWS();
@@ -1126,17 +1128,8 @@ PHP_FUNCTION(hash_equals)
 		RETURN_THROWS();
 	}
 
-	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
-		RETURN_FALSE;
-	}
-
-	known_str = Z_STRVAL_P(known_zval);
-	user_str = Z_STRVAL_P(user_zval);
-
 	/* This is security sensitive code. Do not optimize this for speed. */
-	for (j = 0; j < Z_STRLEN_P(known_zval); j++) {
-		result |= known_str[j] ^ user_str[j];
-	}
+	result = php_safe_bcmp(Z_STR_P(known_zval), Z_STR_P(user_zval));
 
 	RETURN_BOOL(0 == result);
 }
@@ -1628,7 +1621,7 @@ PHP_MINIT_FUNCTION(hash)
 	PHP_HASH_HAVAL_REGISTER(5,224);
 	PHP_HASH_HAVAL_REGISTER(5,256);
 
-	REGISTER_LONG_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
+	register_hash_symbols(module_number);
 
 	php_hashcontext_ce = register_class_HashContext();
 	php_hashcontext_ce->create_object = php_hashcontext_create;

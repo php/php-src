@@ -11,6 +11,9 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 include('encoding_tests.inc');
 testEncodingFromUTF16ConversionTable(__DIR__ . '/data/CP949.txt', 'UHC');
 
+// Regression test
+convertInvalidString("\xE4\xA4\xB4<", "\x75\x1A\x00%", "UHC", "UTF-16BE");
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\x80", "%", "UHC", "UTF-8");

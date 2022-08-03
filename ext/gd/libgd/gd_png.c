@@ -336,6 +336,11 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 			break;
 	}
 
+	/* enable the interlace transform if supported */
+#ifdef PNG_READ_INTERLACING_SUPPORTED
+	(void)png_set_interlace_handling(png_ptr);
+#endif
+
 	png_read_update_info(png_ptr, info_ptr);
 
 	/* allocate space for the PNG image data */

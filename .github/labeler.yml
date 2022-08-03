@@ -1,0 +1,243 @@
+"Category: Engine":
+- Zend/*
+
+"Category: Optimizer":
+- Zend/Optimizer/**/*
+
+"Category: Build System":
+- build/*
+- scripts/**/*
+
+"Extension: bcmath":
+- ext/bcmath/**/*
+
+"Extension: bz2":
+- ext/bz2/**/*
+
+"Extension: calendar":
+- ext/calendar/**/*
+
+"Extension: com_dotnet":
+- ext/com_dotnet/**/*
+
+"Extension: ctype":
+- ext/ctype/**/*
+
+"Extension: curl":
+- ext/curl/**/*
+
+"Extension: date":
+- ext/date/**/*
+
+"Extension: dba":
+- ext/dba/**/*
+
+"Extension: dom":
+- ext/dom/**/*
+
+"Extension: enchant":
+- ext/enchant/**/*
+
+"Extension: exif":
+- ext/exif/**/*
+
+"Extension: ffi":
+- ext/ffi/**/*
+
+"Extension: fileinfo":
+- ext/fileinfo/**/*
+
+"Extension: filter":
+- ext/filter/**/*
+
+"Extension: ftp":
+- ext/ftp/**/*
+
+"Extension: gd":
+- ext/gd/**/*
+
+"Extension: gettext":
+- ext/gettext/**/*
+
+"Extension: gmp":
+- ext/gmp/**/*
+
+"Extension: hash":
+- ext/hash/**/*
+
+"Extension: iconv":
+- ext/iconv/**/*
+
+"Extension: imap":
+- ext/imap/**/*
+
+"Extension: intl":
+- ext/intl/**/*
+
+"Extension: json":
+- ext/json/**/*
+
+"Extension: ldap":
+- ext/ldap/**/*
+
+"Extension: libxml":
+- ext/libxml/**/*
+
+"Extension: mbstring":
+- ext/mbstring/**/*
+
+"Extension: mysqli":
+- ext/mysqli/**/*
+
+"Extension: mysqlnd":
+- ext/mysqlnd/**/*
+
+"Extension: oci8":
+- ext/oci8/**/*
+
+"Extension: odbc":
+- ext/odbc/**/*
+
+"Extension: opcache":
+- ext/opcache/**/*
+
+"Extension: openssl":
+- ext/openssl/**/*
+
+"Extension: pcntl":
+- ext/pcntl/**/*
+
+"Extension: pcre":
+- ext/pcre/**/*
+
+"Extension: pdo (core)":
+- ext/pdo/**/*
+
+"Extension: pdo_dblib":
+- ext/pdo_dblib/**/*
+
+"Extension: pdo_firebird":
+- ext/pdo_firebird/**/*
+
+"Extension: pdo_mysql":
+- ext/pdo_mysql/**/*
+
+"Extension: pdo_oci":
+- ext/pdo_oci/**/*
+
+"Extension: pdo_odbc":
+- ext/pdo_odbc/**/*
+
+"Extension: pdo_pgsql":
+- ext/pdo_pgsql/**/*
+
+"Extension: pdo_sqlite":
+- ext/pdo_sqlite/**/*
+
+"Extension: pgsql":
+- ext/pgsql/**/*
+
+"Extension: phar":
+- ext/phar/**/*
+
+"Extension: posix":
+- ext/posix/**/*
+
+"Extension: pspell":
+- ext/pspell/**/*
+
+"Extension: random":
+- ext/random/**/*
+
+"Extension: readline":
+- ext/readline/**/*
+
+"Extension: reflection":
+- ext/reflection/**/*
+
+"Extension: session":
+- ext/session/**/*
+
+"Extension: shmop":
+- ext/shmop/**/*
+
+"Extension: simplexml":
+- ext/simplexml/**/*
+
+"Extension: snmp":
+- ext/snmp/**/*
+
+"Extension: soap":
+- ext/soap/**/*
+
+"Extension: sockets":
+- ext/sockets/**/*
+
+"Extension: sodium":
+- ext/sodium/**/*
+
+"Extension: spl":
+- ext/spl/**/*
+
+"Extension: sqlite3":
+- ext/sqlite3/**/*
+
+"Extension: standard":
+- ext/standard/**/*
+
+"Extension: sysvmsg":
+- ext/sysvmsg/**/*
+
+"Extension: sysvsem":
+- ext/sysvsem/**/*
+
+"Extension: sysvshm":
+- ext/sysvshm/**/*
+
+"Extension: tidy":
+- ext/tidy/**/*
+
+"Extension: tokenizer":
+- ext/tokenizer/**/*
+
+"Extension: xml":
+- ext/xml/**/*
+
+"Extension: xmlreader":
+- ext/xmlreader/**/*
+
+"Extension: xmlwriter":
+- ext/xmlwriter/**/*
+
+"Extension: xsl":
+- ext/xsl/**/*
+
+"Extension: zend_test":
+- ext/zend_test/**/*
+
+"Extension: zip":
+- ext/zip/**/*
+
+"Extension: zlib":
+- ext/zlib/**/*
+
+"SAPI: apache2handler":
+- sapi/apache2handler/**/*
+
+"SAPI: cgi":
+- sapi/cgi/**/*
+
+"SAPI: cli":
+- sapi/cli/**/*
+
+"SAPI: fpm":
+- sapi/fpm/**/*
+
+"SAPI: fuzzer":
+- sapi/fuzzer/**/*
+
+"SAPI: litespeed":
+- sapi/litespeed/**/*
+
+"SAPI: phpdbg":
+- sapi/phpdbg/**/*

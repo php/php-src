@@ -26,20 +26,8 @@
 #undef LIST
 #endif
 
-#ifdef MYSQLI_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd.h"
 #include "mysqli_mysqlnd.h"
-#else
-
-#include <mysql.h>
-#if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
-typedef _Bool		my_bool;
-#endif
-#include <errmsg.h>
-#include <mysqld_error.h>
-#include "mysqli_libmysql.h"
-
-#endif /* MYSQLI_USE_MYSQLND */
 
 
 #define MYSQLI_VERSION_ID		101009
@@ -69,10 +57,6 @@ typedef struct {
 	BIND_BUFFER	param;
 	BIND_BUFFER	result;
 	char		*query;
-#ifndef MYSQLI_USE_MYSQLND
-	/* used to manage refcount with libmysql (already implement in mysqlnd) */
-	zval		link_handle;
-#endif
 } MY_STMT;
 
 typedef struct {
@@ -82,9 +66,7 @@ typedef struct {
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	bool		persistent;
-#ifdef MYSQLI_USE_MYSQLND
 	int				async_result_fetch_type;
-#endif
 } MY_MYSQL;
 
 typedef struct {
@@ -127,8 +109,6 @@ typedef struct {
 
 #ifdef PHP_WIN32
 #define PHP_MYSQLI_API __declspec(dllexport)
-#define MYSQLI_LLU_SPEC "%I64u"
-#define MYSQLI_LL_SPEC "%I64d"
 #ifndef L64
 #define L64(x) x##i64
 #endif
@@ -139,15 +119,16 @@ typedef __int64 my_longlong;
 # else
 #  define PHP_MYSQLI_API
 # endif
-/* we need this for PRIu64 and PRId64 */
-#include <inttypes.h>
-#define MYSQLI_LLU_SPEC "%" PRIu64
-#define MYSQLI_LL_SPEC "%" PRId64
 #ifndef L64
 #define L64(x) x##LL
 #endif
 typedef int64_t my_longlong;
 #endif
+
+/* we need this for PRIu64 and PRId64 */
+#include <inttypes.h>
+#define MYSQLI_LLU_SPEC "%" PRIu64
+#define MYSQLI_LL_SPEC "%" PRId64
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -266,7 +247,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char				*default_user;
 	char				*default_pw;
 	char				*default_socket;
-	zend_long			reconnect;
 	zend_long			allow_local_infile;
 	char				*local_infile_directory;
 	zend_long			error_no;

@@ -8,6 +8,8 @@ dba
     if (!function_exists('dba_list')) die('skip dba_list() not available');
     die("info $HND handler used");
 ?>
+--CONFLICTS--
+dba
 --FILE--
 <?php
     require_once(__DIR__ .'/test.inc');

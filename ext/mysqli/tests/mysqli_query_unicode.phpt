@@ -4,9 +4,8 @@ mysqli_query() - unicode (cyrillic)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-require_once('table.inc');
+require_once 'skipifconnectfailure.inc';
+require_once 'table.inc';
 if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'utf8'"))
     die("skip UTF8 chatset seems not available");
 mysqli_free_result($res);
@@ -14,9 +13,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-    include_once("connect.inc");
-
-    require_once('table.inc');
+    require_once 'table.inc';
 
     if (TRUE !== ($tmp = @mysqli_query($link, "set names utf8")))
         printf("[002.5] Expecting TRUE, got %s/%s\n", gettype($tmp), $tmp);

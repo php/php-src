@@ -146,7 +146,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
@@ -176,7 +176,7 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		EG(fiber_stack_size) = zend_ini_parse_quantity_warn(new_value, entry->name);
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
@@ -272,8 +272,7 @@ ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_li
 		ZSTR_LEN(buf.s) = max_len;
 	}
 
-	smart_str_0(&buf);
-	return buf.s;
+	return smart_str_extract(&buf);
 }
 /* }}} */
 
@@ -665,6 +664,22 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 		}
 		func->common.arg_info = new_arg_info + 1;
 	}
+	if (old_func->common.attributes) {
+		zend_attribute *old_attr;
+
+		func->common.attributes = NULL;
+
+		ZEND_HASH_PACKED_FOREACH_PTR(old_func->common.attributes, old_attr) {
+			uint32_t i;
+			zend_attribute *attr;
+
+			attr = zend_add_attribute(&func->common.attributes, old_attr->name, old_attr->argc, old_attr->flags, old_attr->offset, old_attr->lineno);
+
+			for (i = 0 ; i < old_attr->argc; i++) {
+				ZVAL_DUP(&attr->args[i].value, &old_attr->args[i].value);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
@@ -825,9 +840,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 static void module_destructor_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);
-
 	module_destructor(module);
-	free(module);
 }
 /* }}} */
 
@@ -1000,9 +1013,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 void zend_register_standard_ini_entries(void) /* {{{ */
 {
-	int module_number = 0;
-
-	REGISTER_INI_ENTRIES();
+	zend_register_ini_entries_ex(ini_entries, 0, MODULE_PERSISTENT);
 }
 /* }}} */
 
@@ -1215,6 +1226,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 	if (CG(map_ptr_last)) {
 		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
 	}
+	zend_init_internal_run_time_cache();
 	zend_observer_activate();
 }
 /* }}} */
@@ -1231,8 +1243,6 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 {
 	/* we're no longer executing anything */
 	EG(current_execute_data) = NULL;
-
-	zend_observer_deactivate();
 
 	zend_try {
 		shutdown_scanner();
@@ -1312,6 +1322,10 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
+	bool orig_record_errors;
+	uint32_t orig_num_errors;
+	zend_error_info **orig_errors;
+	zend_result res;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
 	 * but don't perform any other error handling. */
@@ -1331,7 +1345,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		/* This is very inefficient for a large number of errors.
 		 * Use pow2 realloc if it becomes a problem. */
 		EG(num_errors)++;
-		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info) * EG(num_errors));
+		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info*) * EG(num_errors));
 		EG(errors)[EG(num_errors)-1] = info;
 	}
 
@@ -1405,7 +1419,20 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 				CG(in_compilation) = 0;
 			}
 
-			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
+			orig_record_errors = EG(record_errors);
+			orig_num_errors = EG(num_errors);
+			orig_errors = EG(errors);
+			EG(record_errors) = false;
+			EG(num_errors) = 0;
+			EG(errors) = NULL;
+
+			res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
+
+			EG(record_errors) = orig_record_errors;
+			EG(num_errors) = orig_num_errors;
+			EG(errors) = orig_errors;
+
+			if (res == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(orig_type, error_filename, error_lineno, message);
@@ -1575,7 +1602,7 @@ ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
 
 ZEND_API void zend_begin_record_errors(void)
 {
-	ZEND_ASSERT(!EG(record_errors) && "Error recoreding already enabled");
+	ZEND_ASSERT(!EG(record_errors) && "Error recording already enabled");
 	EG(record_errors) = true;
 	EG(num_errors) = 0;
 	EG(errors) = NULL;

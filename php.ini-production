@@ -1273,7 +1273,7 @@ mysqlnd.collect_memory_statistics = Off
 ; https://php.net/oci8.statement-cache-size
 ;oci8.statement_cache_size = 20
 
-; Tuning: Enables statement prefetching and sets the default number of
+; Tuning: Enables row prefetching and sets the default number of
 ; rows that will be fetched automatically after statement execution.
 ; https://php.net/oci8.default-prefetch
 ;oci8.default_prefetch = 100

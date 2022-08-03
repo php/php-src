@@ -82,8 +82,10 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
 
-    /** @tentative-return-type */
-    public function setPassword(string $password): bool {}
+    /**
+     * @tentative-return-type
+     */
+    public function setPassword(#[\SensitiveParameter] string $password): bool {}
 
     /** @tentative-return-type */
     public function close(): bool {}
@@ -106,7 +108,7 @@ class ZipArchive implements Countable
     public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = 0, int $flags = ZipArchive::FL_OVERWRITE): bool {}
 
     /** @tentative-return-type */
-    public function replaceFile(string $filepath, string $index, int $start = 0, int $length = 0, int $flags = 0): bool {}
+    public function replaceFile(string $filepath, int $index, int $start = 0, int $length = 0, int $flags = 0): bool {}
 
     /** @tentative-return-type */
     public function addGlob(string $pattern, int $flags = 0, array $options = []): array|false {}
@@ -223,11 +225,15 @@ class ZipArchive implements Countable
     public function setCompressionIndex(int $index, int $method, int $compflags = 0): bool {}
 
 #ifdef HAVE_ENCRYPTION
-    /** @tentative-return-type */
-    public function setEncryptionName(string $name, int $method, ?string $password = null): bool {}
+    /**
+     * @tentative-return-type
+     */
+    public function setEncryptionName(string $name, int $method, #[\SensitiveParameter] ?string $password = null): bool {}
 
-    /** @tentative-return-type */
-    public function setEncryptionIndex(int $index, int $method, ?string $password = null): bool {}
+    /**
+     * @tentative-return-type
+     */
+    public function setEncryptionIndex(int $index, int $method, #[\SensitiveParameter] ?string $password = null): bool {}
 #endif
 
 #ifdef HAVE_PROGRESS_CALLBACK

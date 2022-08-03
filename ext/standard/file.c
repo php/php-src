@@ -65,7 +65,7 @@
 #include "php_string.h"
 #include "file.h"
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 # ifdef PHP_WIN32
 #  include "win32/pwd.h"
 # else
@@ -246,7 +246,7 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET", AF_INET, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 # ifdef PF_INET6
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", PF_INET6, CONST_CS|CONST_PERSISTENT);
 # elif defined(AF_INET6)
@@ -564,6 +564,12 @@ PHP_FUNCTION(file_get_contents)
 				NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
+	}
+
+	/* disabling the read buffer allows doing the whole transfer
+	   in just one read() system call */
+	if (php_stream_is(stream, PHP_STREAM_IS_STDIO)) {
+		php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
 	}
 
 	if (offset != 0 && php_stream_seek(stream, offset, ((offset > 0) ? SEEK_SET : SEEK_END)) < 0) {
@@ -2044,11 +2050,24 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf, return_value);
+	HashTable *values = php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf);
+	if (values == NULL) {
+		values = php_bc_fgetcsv_empty_line();
+	}
+	RETURN_ARR(values);
 }
 /* }}} */
 
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value) /* {{{ */
+PHPAPI HashTable *php_bc_fgetcsv_empty_line(void)
+{
+	HashTable *values = zend_new_array(1);
+	zval tmp;
+	ZVAL_NULL(&tmp);
+	zend_hash_next_index_insert(values, &tmp);
+	return values;
+}
+
+PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf) /* {{{ */
 {
 	char *temp, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
@@ -2072,12 +2091,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 	temp_len = buf_len;
 	temp = emalloc(temp_len + line_end_len + 1);
 
-	/* Initialize return array */
-	array_init(return_value);
+	/* Initialize values HashTable */
+	HashTable *values = zend_new_array(0);
 
 	/* Main loop to read CSV fields */
-	/* NB this routine will return a single null entry for a blank line */
-
+	/* NB this routine will return NULL for a blank line */
 	do {
 		char *comp_end, *hunk_begin;
 		char *tptr = temp;
@@ -2094,7 +2112,8 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 		}
 
 		if (first_field && bptr == line_end) {
-			add_next_index_null(return_value);
+			zend_array_destroy(values);
+			values = NULL;
 			break;
 		}
 		first_field = false;
@@ -2292,13 +2311,18 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 
 		/* 3. Now pass our field back to php */
 		*comp_end = '\0';
-		add_next_index_stringl(return_value, temp, comp_end - temp);
+
+		zval z_tmp;
+		ZVAL_STRINGL(&z_tmp, temp, comp_end - temp);
+		zend_hash_next_index_insert(values, &z_tmp);
 	} while (inc_len > 0);
 
 	efree(temp);
 	if (stream) {
 		efree(buf);
 	}
+
+	return values;
 }
 /* }}} */
 

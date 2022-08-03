@@ -181,7 +181,8 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 	}
 
 #if ZEND_DEBUG
-	ZEND_ASSERT(zend_is_identical(value, new));
+	ZEND_ASSERT(zend_is_identical(value, new) ||
+		(Z_TYPE_P(value) == IS_DOUBLE && Z_TYPE_P(new) == IS_DOUBLE && isnan(Z_DVAL_P(value)) && isnan(Z_DVAL_P(new))));
 #endif
 }
 
@@ -294,45 +295,8 @@ static bool try_replace_op1(
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
-		} else {
-			// TODO: check the following special cases ???
-			switch (opline->opcode) {
-				case ZEND_CASE:
-					opline->opcode = ZEND_IS_EQUAL;
-					goto replace_op1_simple;
-				case ZEND_CASE_STRICT:
-					opline->opcode = ZEND_IS_IDENTICAL;
-					goto replace_op1_simple;
-				case ZEND_FETCH_LIST_R:
-				case ZEND_SWITCH_STRING:
-				case ZEND_SWITCH_LONG:
-				case ZEND_MATCH:
-replace_op1_simple:
-					if (Z_TYPE(zv) == IS_STRING) {
-						zend_string_hash_val(Z_STR(zv));
-					}
-					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
-					opline->op1_type = IS_CONST;
-					return 1;
-				case ZEND_INSTANCEOF:
-					zval_ptr_dtor_nogc(&zv);
-					ZVAL_FALSE(&zv);
-					opline->opcode = ZEND_QM_ASSIGN;
-					opline->op1_type = IS_CONST;
-					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
-					opline->op2_type = IS_UNUSED;
-					if (ssa_op->op2_use >= 0) {
-						ZEND_ASSERT(ssa_op->op2_def == -1);
-						zend_ssa_unlink_use_chain(ctx->scdf.ssa, ssa_op - ctx->scdf.ssa->ops, ssa_op->op2_use);
-						ssa_op->op2_use = -1;
-						ssa_op->op2_use_chain = -1;
-					}
-					return 1;
-				default:
-					break;
-			}
-			zval_ptr_dtor_nogc(&zv);
 		}
+		zval_ptr_dtor_nogc(&zv);
 	}
 	return 0;
 }
@@ -344,27 +308,8 @@ static bool try_replace_op2(
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
-		} else {
-			switch (opline->opcode) {
-				case ZEND_FETCH_CLASS:
-					if (Z_TYPE(zv) == IS_STRING) {
-						ZEND_ASSERT((opline + 1)->opcode == ZEND_INSTANCEOF);
-						ZEND_ASSERT(ssa_op->result_def == (ssa_op + 1)->op2_use);
-						if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline + 1, &zv)) {
-							zend_ssa_op *next_op = ssa_op + 1;
-							zend_ssa_unlink_use_chain(ctx->scdf.ssa, next_op - ctx->scdf.ssa->ops, next_op->op2_use);
-							next_op->op2_use = -1;
-							next_op->op2_use_chain = -1;
-							zend_ssa_remove_result_def(ctx->scdf.ssa, ssa_op);
-							MAKE_NOP(opline);
-							return 1;
-						}
-					}
-				default:
-					break;
-			}
-			zval_ptr_dtor_nogc(&zv);
 		}
+		zval_ptr_dtor_nogc(&zv);
 	}
 	return 0;
 }
@@ -799,59 +744,21 @@ static inline zend_result ct_eval_array_key_exists(zval *result, zval *op1, zval
 	return SUCCESS;
 }
 
-static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **args) {
-	/* Functions in this list must always produce the same result for the same arguments,
+static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32_t num_args, zval **args) {
+	/* Precondition: func->type == ZEND_INTERNAL_FUNCTION, this is a global function */
+	/* Functions setting ZEND_ACC_COMPILE_TIME_EVAL (@compile-time-eval) must always produce the same result for the same arguments,
 	 * and have no dependence on global state (such as locales). It is okay if they throw
 	 * or warn on invalid arguments, as we detect this and will discard the evaluation result. */
-	if (false
-		|| zend_string_equals_literal(name, "array_diff")
-		|| zend_string_equals_literal(name, "array_diff_assoc")
-		|| zend_string_equals_literal(name, "array_diff_key")
-		|| zend_string_equals_literal(name, "array_flip")
-		|| zend_string_equals_literal(name, "array_is_list")
-		|| zend_string_equals_literal(name, "array_key_exists")
-		|| zend_string_equals_literal(name, "array_keys")
-		|| zend_string_equals_literal(name, "array_merge")
-		|| zend_string_equals_literal(name, "array_merge_recursive")
-		|| zend_string_equals_literal(name, "array_replace")
-		|| zend_string_equals_literal(name, "array_replace_recursive")
-		|| zend_string_equals_literal(name, "array_unique")
-		|| zend_string_equals_literal(name, "array_values")
-		|| zend_string_equals_literal(name, "base64_decode")
-		|| zend_string_equals_literal(name, "base64_encode")
-#ifndef ZEND_WIN32
-		/* On Windows this function may be code page dependent. */
-		|| zend_string_equals_literal(name, "dirname")
-#endif
-		|| zend_string_equals_literal(name, "explode")
-		|| zend_string_equals_literal(name, "imagetypes")
-		|| zend_string_equals_literal(name, "in_array")
-		|| zend_string_equals_literal(name, "implode")
-		|| zend_string_equals_literal(name, "ltrim")
-		|| zend_string_equals_literal(name, "php_sapi_name")
-		|| zend_string_equals_literal(name, "php_uname")
-		|| zend_string_equals_literal(name, "phpversion")
-		|| zend_string_equals_literal(name, "pow")
-		|| zend_string_equals_literal(name, "preg_quote")
-		|| zend_string_equals_literal(name, "rawurldecode")
-		|| zend_string_equals_literal(name, "rawurlencode")
-		|| zend_string_equals_literal(name, "rtrim")
-		|| zend_string_equals_literal(name, "serialize")
-		|| zend_string_equals_literal(name, "str_contains")
-		|| zend_string_equals_literal(name, "str_ends_with")
-		|| zend_string_equals_literal(name, "str_replace")
-		|| zend_string_equals_literal(name, "str_split")
-		|| zend_string_equals_literal(name, "str_starts_with")
-		|| zend_string_equals_literal(name, "strpos")
-		|| zend_string_equals_literal(name, "strstr")
-		|| zend_string_equals_literal(name, "substr")
-		|| zend_string_equals_literal(name, "trim")
-		|| zend_string_equals_literal(name, "urldecode")
-		|| zend_string_equals_literal(name, "urlencode")
-		|| zend_string_equals_literal(name, "version_compare")
-	) {
+	if (func->common.fn_flags & ZEND_ACC_COMPILE_TIME_EVAL) {
+		/* This has @compile-time-eval in stub info and uses a macro such as ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE */
 		return true;
 	}
+#ifndef ZEND_WIN32
+	/* On Windows this function may be code page dependent. */
+	if (zend_string_equals_literal(name, "dirname")) {
+		return true;
+	}
+#endif
 
 	if (num_args == 2) {
 		if (zend_string_equals_literal(name, "str_repeat")) {
@@ -879,46 +786,12 @@ static inline zend_result ct_eval_func_call(
 		return FAILURE;
 	}
 
-	if (num_args == 1) {
-		/* Handle a few functions for which we manually implement evaluation here. */
-		if (zend_string_equals_literal(name, "chr")) {
-			zend_long c;
-			if (Z_TYPE_P(args[0]) != IS_LONG) {
-				return FAILURE;
-			}
-
-			c = Z_LVAL_P(args[0]) & 0xff;
-			ZVAL_CHAR(result, c);
-			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "count")) {
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return FAILURE;
-			}
-
-			ZVAL_LONG(result, zend_hash_num_elements(Z_ARRVAL_P(args[0])));
-			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "ini_get")) {
-			zend_ini_entry *ini_entry;
-
-			if (Z_TYPE_P(args[0]) != IS_STRING) {
-				return FAILURE;
-			}
-
-			ini_entry = zend_hash_find_ptr(EG(ini_directives), Z_STR_P(args[0]));
-			if (!ini_entry) {
-				ZVAL_FALSE(result);
-			} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
-				return FAILURE;
-			} else if (ini_entry->value) {
-				ZVAL_STR_COPY(result, ini_entry->value);
-			} else {
-				ZVAL_EMPTY_STRING(result);
-			}
-			return SUCCESS;
-		}
+	if (num_args == 1 && Z_TYPE_P(args[0]) == IS_STRING &&
+			zend_optimizer_eval_special_func_call(result, name, Z_STR_P(args[0])) == SUCCESS) {
+		return SUCCESS;
 	}
 
-	if (!can_ct_eval_func_call(name, num_args, args)) {
+	if (!can_ct_eval_func_call(func, name, num_args, args)) {
 		return FAILURE;
 	}
 
@@ -1506,12 +1379,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 						dup_partial_object(&zv, op1);
 						ct_eval_assign_obj(&zv, &tmp2, op2);
-						if (opline->opcode == ZEND_PRE_INC_OBJ
-								|| opline->opcode == ZEND_PRE_DEC_OBJ) {
+						if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
 							SET_RESULT(result, &tmp2);
 						} else {
 							SET_RESULT(result, &tmp1);
 						}
+						zval_ptr_dtor_nogc(&tmp1);
+						zval_ptr_dtor_nogc(&tmp2);
 						SET_RESULT(op1, &zv);
 						zval_ptr_dtor_nogc(&zv);
 						break;
@@ -1689,7 +1563,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SET_RESULT(result, op1);
 			break;
 		case ZEND_JMP_NULL:
-			switch (opline->extended_value) {
+			switch (opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK) {
 				case ZEND_SHORT_CIRCUITING_CHAIN_EXPR:
 					ZVAL_NULL(&zv);
 					break;
@@ -1703,15 +1577,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT(result, &zv);
 			break;
-#if 0
 		case ZEND_FETCH_CLASS:
-			if (!op1) {
-				SET_RESULT_BOT(result);
-				break;
-			}
-			SET_RESULT(result, op1);
+			SET_RESULT(result, op2);
 			break;
-#endif
 		case ZEND_ISSET_ISEMPTY_CV:
 			SKIP_IF_TOP(op1);
 			if (ct_eval_isset_isempty(&zv, opline->extended_value, op1) == SUCCESS) {
@@ -1853,14 +1721,26 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	}
 
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_NULL))) {
+		if (ssa->vars[var_num].definition >= 0
+		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
+			return NULL;
+		}
 		ZVAL_NULL(tmp);
 		return tmp;
 	}
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_FALSE))) {
+		if (ssa->vars[var_num].definition >= 0
+		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
+			return NULL;
+		}
 		ZVAL_FALSE(tmp);
 		return tmp;
 	}
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_TRUE))) {
+		if (ssa->vars[var_num].definition >= 0
+		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
+			return NULL;
+		}
 		ZVAL_TRUE(tmp);
 		return tmp;
 	}
@@ -1918,7 +1798,6 @@ static void sccp_mark_feasible_successors(
 
 	switch (opline->opcode) {
 		case ZEND_JMPZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		{
 			if (ct_eval_bool_cast(&zv, op1) == FAILURE) {
@@ -2196,8 +2075,39 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				}
 				return 0;
 			}
-			if (ssa_op->op1_def >= 0
-					|| ssa_op->op2_def >= 0) {
+			if (ssa_op->op1_def >= 0 || ssa_op->op2_def >= 0) {
+				if (var->use_chain < 0 && var->phi_use_chain == NULL) {
+					switch (opline->opcode) {
+						case ZEND_ASSIGN:
+						case ZEND_ASSIGN_REF:
+						case ZEND_ASSIGN_DIM:
+						case ZEND_ASSIGN_OBJ:
+						case ZEND_ASSIGN_OBJ_REF:
+						case ZEND_ASSIGN_STATIC_PROP:
+						case ZEND_ASSIGN_STATIC_PROP_REF:
+						case ZEND_ASSIGN_OP:
+						case ZEND_ASSIGN_DIM_OP:
+						case ZEND_ASSIGN_OBJ_OP:
+						case ZEND_ASSIGN_STATIC_PROP_OP:
+						case ZEND_PRE_INC:
+						case ZEND_PRE_DEC:
+						case ZEND_PRE_INC_OBJ:
+						case ZEND_PRE_DEC_OBJ:
+						case ZEND_DO_ICALL:
+						case ZEND_DO_UCALL:
+						case ZEND_DO_FCALL_BY_NAME:
+						case ZEND_DO_FCALL:
+						case ZEND_INCLUDE_OR_EVAL:
+						case ZEND_YIELD:
+						case ZEND_YIELD_FROM:
+						case ZEND_ASSERT_CHECK:
+							opline->result_type = IS_UNUSED;
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							break;
+						default:
+							break;
+					}	
+				}
 				/* we cannot remove instruction that defines other variables */
 				return 0;
 			} else if (opline->opcode == ZEND_JMPZ_EX
@@ -2217,6 +2127,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				if (value
 						&& (opline->result_type & (IS_VAR|IS_TMP_VAR))
 						&& opline->opcode != ZEND_QM_ASSIGN
+						&& opline->opcode != ZEND_FETCH_CLASS
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
 						&& opline->opcode != ZEND_INIT_ARRAY
@@ -2240,6 +2151,27 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, value);
 				}
 				return 0;
+			} else if ((opline->op2_type & (IS_VAR|IS_TMP_VAR))
+					&& (!value_known(&ctx->values[ssa_op->op2_use])
+						|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op2_use])
+						|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op2_use]))) {
+				return 0;
+			} else if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+					&& (!value_known(&ctx->values[ssa_op->op1_use])
+						|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op1_use])
+						|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op1_use]))) {
+				if (opline->opcode == ZEND_TYPE_CHECK
+				 || opline->opcode == ZEND_BOOL) {
+					zend_ssa_remove_result_def(ssa, ssa_op);
+					/* For TYPE_CHECK we may compute the result value without knowing the
+					 * operand, based on type inference information. Make sure the operand is
+					 * freed and leave further cleanup to DCE. */
+					opline->opcode = ZEND_FREE;
+					opline->result_type = IS_UNUSED;
+					removed_ops++;
+				} else {
+					return 0;
+				}
 			} else {
 				zend_ssa_remove_result_def(ssa, ssa_op);
 				if (opline->opcode == ZEND_DO_ICALL) {

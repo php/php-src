@@ -14,7 +14,8 @@ web development. Fast, flexible and pragmatic, PHP powers everything from your
 blog to the most popular websites in the world. PHP is distributed under the
 [PHP License v3.01](LICENSE).
 
-[![Build status](https://travis-ci.com/php/php-src.svg?branch=master)](https://travis-ci.com/php/php-src)
+[![Push](https://github.com/php/php-src/actions/workflows/push.yml/badge.svg)](https://github.com/php/php-src/actions/workflows/push.yml)
+[![Build status](https://travis-ci.com/php/php-src.svg?branch=master)](https://travis-ci.com/github/php/php-src)
 [![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy/branch/master?svg=true)](https://ci.appveyor.com/project/php/php-src)
 [![Build Status](https://dev.azure.com/phpazuredevops/php/_apis/build/status/php.php-src?branchName=master)](https://dev.azure.com/phpazuredevops/php/_build/latest?definitionId=1&branchName=master)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:php)
@@ -103,8 +104,9 @@ Extension Community Library - [PECL](https://pecl.php.net).
 
 ## Contributing
 
-Contributions are most welcome by forking the
-[GitHub repository](https://github.com/php/php-src) and sending a pull request.
+The PHP source code is located in the Git repository at
+[github.com/php/php-src](https://github.com/php/php-src). Contributions are most
+welcome by forking the repository and sending a pull request.
 
 Discussions are done on GitHub, but depending on the topic can also be relayed
 to the official PHP developer mailing list internals@lists.php.net.
@@ -114,19 +116,15 @@ New features require an RFC and must be accepted by the developers. See
 [Voting on PHP features](https://wiki.php.net/rfc/voting) for more information
 on the process.
 
-Bug fixes **do not** require an RFC but require a bug tracker ticket. Open a
-ticket at [bugs.php.net](https://bugs.php.net) and reference the bug id using
-`#NNNNNN`.
+Bug fixes don't require an RFC. If the bug has a GitHub issue, reference it in
+the commit message using `GH-NNNNNN`. Use `#NNNNNN` for tickets in the old
+[bugs.php.net](https://bugs.php.net) bug tracker.
 
+    Fix GH-7815: php_uname doesn't recognise latest Windows versions
     Fix #55371: get_magic_quotes_gpc() throws deprecation warning
 
-    After removing magic quotes, the get_magic_quotes_gpc function caused a
-    deprecated warning. get_magic_quotes_gpc can be used to detect the
-    magic_quotes behavior and therefore should not raise a warning at any time.
-    The patch removes this warning.
-
-See [Git workflow](https://wiki.php.net/vcs/gitworkflow) for more details on the
-pull request workflow.
+See [Git workflow](https://wiki.php.net/vcs/gitworkflow) for details on how pull
+requests are merged.
 
 ### Guidelines for contributors
 

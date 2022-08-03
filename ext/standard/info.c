@@ -137,7 +137,7 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name));
 
 			zend_str_tolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
-			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), zend_module->name);
+			php_info_printf("<h2><a name=\"module_%s\" href=\"#module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), ZSTR_VAL(url_name), zend_module->name);
 
 			efree(url_name);
 		} else {
@@ -270,11 +270,34 @@ char* php_get_windows_name()
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 10) {
 		if (osvi.dwMajorVersion == 10) {
-			if( osvi.dwMinorVersion == 0 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION ) {
-					major = "Windows 10";
+			if (osvi.dwMinorVersion == 0) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
+					if (osvi.dwBuildNumber >= 22000) {
+						major = "Windows 11";
+					} else {
+						major = "Windows 10";
+					}
 				} else {
-					major = "Windows Server 2016";
+					if (osvi.dwBuildNumber >= 20348) {
+						major = "Windows Server 2022";
+					} else if (osvi.dwBuildNumber >= 19042) {
+						major = "Windows Server, version 20H2";
+					} else if (osvi.dwBuildNumber >= 19041) {
+						major = "Windows Server, version 2004";
+					} else if (osvi.dwBuildNumber >= 18363) {
+						major = "Windows Server, version 1909";
+					} else if (osvi.dwBuildNumber >= 18362) {
+						major = "Windows Server, version 1903";
+					} else if (osvi.dwBuildNumber >= 17763) {
+						// could also be Windows Server, version 1809, but there's no easy way to tell
+						major = "Windows Server 2019";
+					} else if (osvi.dwBuildNumber >= 17134) {
+						major = "Windows Server, version 1803";
+					} else if (osvi.dwBuildNumber >= 16299) {
+						major = "Windows Server, version 1709";
+					} else {
+						major = "Windows Server 2016";
+					}
 				}
 			}
 		}
@@ -625,6 +648,11 @@ void php_get_windows_cpu(char *buf, int bufsize)
 			snprintf(buf, bufsize, "AMD64");
 			break;
 #endif
+#if defined(PROCESSOR_ARCHITECTURE_ARM64)
+		case PROCESSOR_ARCHITECTURE_ARM64 :
+			snprintf(buf, bufsize, "ARM64");
+			break;
+#endif
 		case PROCESSOR_ARCHITECTURE_UNKNOWN :
 		default:
 			snprintf(buf, bufsize, "Unknown");
@@ -870,13 +898,13 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			efree(descr);
 		}
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );
 #else
 		php_info_print_table_row(2, "IPv6 Support", "disabled" );
 #endif
 
-#if HAVE_DTRACE
+#ifdef HAVE_DTRACE
 		php_info_print_table_row(2, "DTrace Support", (zend_dtrace_enabled ? "enabled" : "available, disabled"));
 #else
 		php_info_print_table_row(2, "DTrace Support", "disabled" );

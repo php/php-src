@@ -1,7 +1,7 @@
 Fuzzing SAPI for PHP
 --------------------
 
-The following `./configure` options can be used to enable the fuzzing SAPI, as well as all availablefuzzers. If you don't build the exif/json/mbstring extensions, fuzzers for these extensions will not be built.
+The following `./configure` options can be used to enable the fuzzing SAPI, as well as all available fuzzers. If you don't build the exif/json/mbstring extensions, fuzzers for these extensions will not be built.
 
 ```sh
 CC=clang CXX=clang++ \
@@ -28,7 +28,8 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-unserializehash`: Fuzzing unserialize() for HashContext objects
 * `php-fuzz-json`: Fuzzing JSON parser (requires --enable-json)
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
-* `php-fuzz-mbstring`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
+* `php-fuzz-mbstring`: Fuzzing `mb_convert_encoding()` (requires `--enable-mbstring`)
+* `php-fuzz-mbregex`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
 * `php-fuzz-execute`: Fuzzing the executor
 * `php-fuzz-function-jit`: Fuzzing the function JIT (requires --enable-opcache)
 * `php-fuzz-tracing-jit`: Fuzzing the tracing JIT (requires --enable-opcache)
@@ -72,7 +73,14 @@ sapi/cli/php sapi/fuzzer/generate_execute_corpus.php ./execute-corpus Zend/tests
 sapi/fuzzer/php-fuzzer-function-jit ./execute-corpus
 ```
 
-For the mbstring fuzzer, you may want to build the libonig dependency with instrumentation. At this time, libonig is not clean under ubsan, so only the fuzzer and address sanitizers may be used.
+For the mbstring fuzzer, a dictionary of encodings should be generated first:
+
+```sh
+sapi/cli/php sapi/fuzzer/generate_mbstring_dict.php
+sapi/fuzzer/php-fuzz-mbstring -dict=$PWD/sapi/fuzzer/dict/mbstring ./my-mbstring-corpus
+```
+
+For the mbregex fuzzer, you may want to build the libonig dependency with instrumentation. At this time, libonig is not clean under ubsan, so only the fuzzer and address sanitizers may be used.
 
 ```sh
 git clone https://github.com/kkos/oniguruma.git

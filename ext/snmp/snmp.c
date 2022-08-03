@@ -31,9 +31,8 @@
 #include "zend_exceptions.h"
 #include "zend_smart_string.h"
 #include "ext/spl/spl_exceptions.h"
-#include "snmp_arginfo.h"
 
-#if HAVE_SNMP
+#ifdef HAVE_SNMP
 
 #include <sys/types.h>
 #include <errno.h>
@@ -63,6 +62,8 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
+#include "snmp_arginfo.h"
+
 /* For net-snmp prior to 5.4 */
 #ifndef HAVE_SHUTDOWN_SNMP_LOGGING
 extern netsnmp_log_handler *logh_head;
@@ -73,10 +74,6 @@ extern netsnmp_log_handler *logh_head;
 			netsnmp_remove_loghandler( logh_head ); \
 	}
 #endif
-
-#define SNMP_VALUE_LIBRARY	(0 << 0)
-#define SNMP_VALUE_PLAIN	(1 << 0)
-#define SNMP_VALUE_OBJECT	(1 << 1)
 
 typedef struct snmp_session php_snmp_session;
 
@@ -89,23 +86,6 @@ typedef struct snmp_session php_snmp_session;
 		i++; \
 	} \
 }
-
-#define PHP_SNMP_ERRNO_NOERROR			0
-#define PHP_SNMP_ERRNO_GENERIC			(1 << 1)
-#define PHP_SNMP_ERRNO_TIMEOUT			(1 << 2)
-#define PHP_SNMP_ERRNO_ERROR_IN_REPLY		(1 << 3)
-#define PHP_SNMP_ERRNO_OID_NOT_INCREASING	(1 << 4)
-#define PHP_SNMP_ERRNO_OID_PARSING_ERROR	(1 << 5)
-#define PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES	(1 << 6)
-#define PHP_SNMP_ERRNO_ANY	( \
-		PHP_SNMP_ERRNO_GENERIC | \
-		PHP_SNMP_ERRNO_TIMEOUT | \
-		PHP_SNMP_ERRNO_ERROR_IN_REPLY | \
-		PHP_SNMP_ERRNO_OID_NOT_INCREASING | \
-		PHP_SNMP_ERRNO_OID_PARSING_ERROR | \
-		PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES | \
-		PHP_SNMP_ERRNO_NOERROR \
-	)
 
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
@@ -865,7 +845,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
-#if HAVE_GETADDRINFO && HAVE_IPV6 && HAVE_INET_NTOP
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6) && defined(HAVE_INET_NTOP)
 		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
 			res++;
 			continue;
@@ -913,7 +893,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		session->securityNameLen = ZSTR_LEN(community);
 	} else {
 		session->authenticator = NULL;
-		session->community = (u_char *)estrdup(ZSTR_VAL(community));
+		session->community = (uint8_t *)estrdup(ZSTR_VAL(community));
 		session->community_len = ZSTR_LEN(community);
 	}
 
@@ -1035,7 +1015,7 @@ static bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pa
 	int snmp_errno;
 	s->securityAuthKeyLen = USM_AUTH_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
-			(u_char *) ZSTR_VAL(pass), ZSTR_LEN(pass),
+			(uint8_t *) ZSTR_VAL(pass), ZSTR_LEN(pass),
 			s->securityAuthKey, &(s->securityAuthKeyLen)))) {
 		php_error_docref(NULL, E_WARNING, "Error generating a key for authentication pass phrase '%s': %s", ZSTR_VAL(pass), snmp_api_errstring(snmp_errno));
 		return false;
@@ -1051,7 +1031,7 @@ static bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pas
 
 	s->securityPrivKeyLen = USM_PRIV_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
-			(u_char *)ZSTR_VAL(pass), ZSTR_LEN(pass),
+			(uint8_t *)ZSTR_VAL(pass), ZSTR_LEN(pass),
 			s->securityPrivKey, &(s->securityPrivKeyLen)))) {
 		php_error_docref(NULL, E_WARNING, "Error generating a key for privacy pass phrase '%s': %s", ZSTR_VAL(pass), snmp_api_errstring(snmp_errno));
 		return false;
@@ -1064,7 +1044,7 @@ static bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pas
 static bool netsnmp_session_set_contextEngineID(struct snmp_session *s, zend_string * contextEngineID)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
-	u_char	*ebuf = (u_char *) emalloc(ebuf_len);
+	uint8_t	*ebuf = (uint8_t *) emalloc(ebuf_len);
 
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, ZSTR_VAL(contextEngineID))) {
 		// TODO Promote to Error?
@@ -2019,7 +1999,7 @@ PHP_MINIT_FUNCTION(snmp)
 
 	init_snmp("snmpapp");
 	/* net-snmp corrupts the CTYPE locale during initialization. */
-	setlocale(LC_CTYPE, "C");
+	zend_reset_lc_ctype_locale();
 
 #ifdef NETSNMP_DS_LIB_DONT_PERSIST_STATE
 	/* Prevent update of the snmpapp.conf file */
@@ -2052,46 +2032,10 @@ PHP_MINIT_FUNCTION(snmp)
 	zend_hash_init(&php_snmp_properties, 0, NULL, free_php_snmp_properties, 1);
 	PHP_SNMP_ADD_PROPERTIES(&php_snmp_properties, php_snmp_property_entries);
 
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_SUFFIX",	NETSNMP_OID_OUTPUT_SUFFIX,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_MODULE",	NETSNMP_OID_OUTPUT_MODULE,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_FULL",		NETSNMP_OID_OUTPUT_FULL,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NUMERIC",	NETSNMP_OID_OUTPUT_NUMERIC,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_UCD",		NETSNMP_OID_OUTPUT_UCD,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OID_OUTPUT_NONE",		NETSNMP_OID_OUTPUT_NONE,	CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("SNMP_VALUE_LIBRARY",	SNMP_VALUE_LIBRARY,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_VALUE_PLAIN",	SNMP_VALUE_PLAIN,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_VALUE_OBJECT",	SNMP_VALUE_OBJECT,	CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("SNMP_BIT_STR",		ASN_BIT_STR,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OCTET_STR",	ASN_OCTET_STR,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OPAQUE",		ASN_OPAQUE,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_NULL",		ASN_NULL,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_OBJECT_ID",	ASN_OBJECT_ID,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_IPADDRESS",	ASN_IPADDRESS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_COUNTER",		ASN_GAUGE,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_UNSIGNED",		ASN_UNSIGNED,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_TIMETICKS",	ASN_TIMETICKS,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_UINTEGER",		ASN_UINTEGER,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_INTEGER",		ASN_INTEGER,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SNMP_COUNTER64",	ASN_COUNTER64,	CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_1",			SNMP_VERSION_1);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2c",			SNMP_VERSION_2c);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_2C",			SNMP_VERSION_2c);
-	REGISTER_SNMP_CLASS_CONST_LONG("VERSION_3",			SNMP_VERSION_3);
-
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_NOERROR",			PHP_SNMP_ERRNO_NOERROR);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ANY",			PHP_SNMP_ERRNO_ANY);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_GENERIC",			PHP_SNMP_ERRNO_GENERIC);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_TIMEOUT",			PHP_SNMP_ERRNO_TIMEOUT);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_ERROR_IN_REPLY",		PHP_SNMP_ERRNO_ERROR_IN_REPLY);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_NOT_INCREASING",	PHP_SNMP_ERRNO_OID_NOT_INCREASING);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_OID_PARSING_ERROR",	PHP_SNMP_ERRNO_OID_PARSING_ERROR);
-	REGISTER_SNMP_CLASS_CONST_LONG("ERRNO_MULTIPLE_SET_QUERIES",	PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES);
-
 	/* Register SNMPException class */
 	php_snmp_exception_ce = register_class_SNMPException(spl_ce_RuntimeException);
+
+	register_snmp_symbols(module_number);
 
 	return SUCCESS;
 }

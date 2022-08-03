@@ -468,8 +468,11 @@ ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable 
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
 ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 
-ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
-ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
+/** Deprecatd in favor of ZEND_STRTOL() */
+ZEND_ATTRIBUTE_DEPRECATED ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
+
+/** Deprecatd in favor of ZEND_STRTOL() */
+ZEND_ATTRIBUTE_DEPRECATED ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
 #define convert_to_null_ex(zv) convert_to_null(zv)
 #define convert_to_boolean_ex(zv) convert_to_boolean(zv)
@@ -481,6 +484,8 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 #define convert_scalar_to_number_ex(zv) convert_scalar_to_number(zv)
 
 ZEND_API void zend_update_current_locale(void);
+
+ZEND_API void zend_reset_lc_ctype_locale(void);
 
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\
@@ -916,6 +921,67 @@ static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
 	}
 }
 /* }}} */
+
+static zend_always_inline bool zend_strnieq(const char *ptr1, const char *ptr2, size_t num)
+{
+	const char *end = ptr1 + num;
+	while (ptr1 < end) {
+		if (zend_tolower_ascii(*ptr1++) != zend_tolower_ascii(*ptr2++)) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static zend_always_inline const char *
+zend_memnistr(const char *haystack, const char *needle, size_t needle_len, const char *end)
+{
+	ZEND_ASSERT(end >= haystack);
+
+	if (UNEXPECTED(needle_len == 0)) {
+		return haystack;
+	}
+
+	if (UNEXPECTED(needle_len > (size_t)(end - haystack))) {
+		return NULL;
+	}
+
+	const char first_lower = zend_tolower_ascii(*needle);
+	const char first_upper = zend_toupper_ascii(*needle);
+	const char *p_lower = (const char *)memchr(haystack, first_lower, end - haystack);
+	const char *p_upper = NULL;
+	if (first_lower != first_upper) {
+		// If the needle length is 1 we don't need to look beyond p_lower as it is a guaranteed match
+		size_t upper_search_length = end - (needle_len == 1 && p_lower != NULL ? p_lower : haystack);
+		p_upper = (const char *)memchr(haystack, first_upper, upper_search_length);
+	}
+	const char *p = !p_upper || (p_lower && p_lower < p_upper) ? p_lower : p_upper;
+
+	if (needle_len == 1) {
+		return p;
+	}
+
+	const char needle_end_lower = zend_tolower_ascii(needle[needle_len - 1]);
+	const char needle_end_upper = zend_toupper_ascii(needle[needle_len - 1]);
+	end -= needle_len;
+
+	while (p && p <= end) {
+		if (needle_end_lower == p[needle_len - 1] || needle_end_upper == p[needle_len - 1]) {
+			if (zend_strnieq(needle + 1, p + 1, needle_len - 2)) {
+				return p;
+			}
+		}
+		if (p_lower == p) {
+			p_lower = (const char *)memchr(p_lower + 1, first_lower, end - p_lower);
+		}
+		if (p_upper == p) {
+			p_upper = (const char *)memchr(p_upper + 1, first_upper, end - p_upper);
+		}
+		p = !p_upper || (p_lower && p_lower < p_upper) ? p_lower : p_upper;
+	}
+
+	return NULL;
+}
 
 
 END_EXTERN_C()

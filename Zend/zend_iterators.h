@@ -72,6 +72,13 @@ typedef struct _zend_class_iterator_funcs {
 	zend_function *zf_rewind;
 } zend_class_iterator_funcs;
 
+typedef struct _zend_class_arrayaccess_funcs {
+	zend_function *zf_offsetget;
+	zend_function *zf_offsetexists;
+	zend_function *zf_offsetset;
+	zend_function *zf_offsetunset;
+} zend_class_arrayaccess_funcs;
+
 BEGIN_EXTERN_C()
 /* given a zval, returns stuff that can be used to iterate it. */
 ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr);

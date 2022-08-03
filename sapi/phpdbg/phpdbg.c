@@ -29,6 +29,7 @@
 #include "phpdbg_help.h"
 #include "phpdbg_arginfo.h"
 #include "zend_vm.h"
+#include "php_ini_builder.h"
 
 #include "ext/standard/basic_functions.h"
 
@@ -267,7 +268,7 @@ PHP_FUNCTION(phpdbg_exec)
 	}
 
 	{
-		zend_stat_t sb;
+		zend_stat_t sb = {0};
 		bool result = 1;
 
 		if (VCWD_STAT(ZSTR_VAL(exec), &sb) != FAILURE) {
@@ -705,7 +706,7 @@ static zend_module_entry sapi_phpdbg_module_entry = {
 
 static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */
 {
-	if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
+	if (php_module_startup(module, &sapi_phpdbg_module_entry) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -863,7 +864,10 @@ static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t c
 	while (data->fd >= 0) {
 		struct stat stat[3];
 		memset(stat, 0, sizeof(stat));
-		if (((fstat(fileno(stderr), &stat[2]) < 0) & (fstat(fileno(stdout), &stat[0]) < 0)) | (fstat(data->fd, &stat[1]) < 0)) {
+		int stat_stderr = fstat(fileno(stderr), &stat[2]);
+		int stat_stdout = fstat(fileno(stdout), &stat[0]);
+		int stat_datafd = fstat(data->fd, &stat[1]);
+		if ((stat_stderr < 0 && stat_stdout < 0) || stat_datafd < 0) {
 			break;
 		}
 
@@ -995,7 +999,7 @@ const char phpdbg_ini_hardcoded[] =
 "max_execution_time=0\n"
 "max_input_time=-1\n"
 "error_log=\n"
-"output_buffering=off\n\0";
+"output_buffering=off\n";
 
 static void phpdbg_welcome(bool cleaning) /* {{{ */
 {
@@ -1072,7 +1076,7 @@ void phpdbg_sighup_handler(int sig) /* {{{ */
 } /* }}} */
 #endif
 
-void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1) void *phpdbg_malloc_wrapper(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
 	return _zend_mm_alloc(zend_mm_get_heap(), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
@@ -1122,8 +1126,7 @@ int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *sapi_name;
-	char *ini_entries;
-	int   ini_entries_len;
+	struct php_ini_builder ini_builder;
 	char **zend_extensions = NULL;
 	zend_ulong zend_extensions_len = 0L;
 	bool ini_ignore;
@@ -1174,8 +1177,7 @@ phpdbg_main:
 
 	zend_signal_startup();
 
-	ini_entries = NULL;
-	ini_entries_len = 0;
+	php_ini_builder_init(&ini_builder);
 	ini_ignore = 0;
 	ini_override = NULL;
 	zend_extensions = NULL;
@@ -1210,35 +1212,10 @@ phpdbg_main:
 				}
 				ini_override = strdup(php_optarg);
 				break;
-			case 'd': {
-				int len = strlen(php_optarg);
-				char *val;
-
-				if ((val = strchr(php_optarg, '='))) {
-				  val++;
-				  if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
-					  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
-					  memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
-					  ini_entries_len += (val - php_optarg);
-					  memcpy(ini_entries + ini_entries_len, "\"", 1);
-					  ini_entries_len++;
-					  memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
-					  ini_entries_len += len - (val - php_optarg);
-					  memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
-					  ini_entries_len += sizeof("\n\0\"") - 2;
-				  } else {
-					  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
-					  memcpy(ini_entries + ini_entries_len, php_optarg, len);
-					  memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
-					  ini_entries_len += len + sizeof("\n\0") - 2;
-				  }
-				} else {
-				  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
-				  memcpy(ini_entries + ini_entries_len, php_optarg, len);
-				  memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
-				  ini_entries_len += len + sizeof("=1\n\0") - 2;
-				}
-			} break;
+			case 'd':
+				/* define ini entries on command line */
+				php_ini_builder_define(&ini_builder, php_optarg);
+				break;
 
 			case 'z':
 				zend_extensions_len++;
@@ -1339,15 +1316,7 @@ phpdbg_main:
 	phpdbg->php_ini_ignore = ini_ignore;
 	phpdbg->php_ini_path_override = ini_override;
 
-	if (ini_entries) {
-		ini_entries = realloc(ini_entries, ini_entries_len + sizeof(phpdbg_ini_hardcoded));
-		memmove(ini_entries + sizeof(phpdbg_ini_hardcoded) - 2, ini_entries, ini_entries_len + 1);
-		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded) - 2);
-	} else {
-		ini_entries = malloc(sizeof(phpdbg_ini_hardcoded));
-		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded));
-	}
-	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
+	php_ini_builder_prepend_literal(&ini_builder, phpdbg_ini_hardcoded);
 
 	if (zend_extensions_len) {
 		zend_ulong zend_extension = 0L;
@@ -1356,13 +1325,7 @@ phpdbg_main:
 			const char *ze = zend_extensions[zend_extension];
 			size_t ze_len = strlen(ze);
 
-			ini_entries = realloc(
-				ini_entries, ini_entries_len + (ze_len + (sizeof("zend_extension=\n"))));
-			memcpy(&ini_entries[ini_entries_len], "zend_extension=", (sizeof("zend_extension=\n")-1));
-			ini_entries_len += (sizeof("zend_extension=")-1);
-			memcpy(&ini_entries[ini_entries_len], ze, ze_len);
-			ini_entries_len += ze_len;
-			memcpy(&ini_entries[ini_entries_len], "\n", (sizeof("\n") - 1));
+			php_ini_builder_unquoted(&ini_builder, "zend_extension", strlen("zend_extension"), ze, ze_len);
 
 			free(zend_extensions[zend_extension]);
 			zend_extension++;
@@ -1371,7 +1334,7 @@ phpdbg_main:
 		free(zend_extensions);
 	}
 
-	phpdbg->ini_entries = ini_entries;
+	phpdbg->ini_entries = php_ini_builder_finish(&ini_builder);
 
 	ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
 
@@ -1421,9 +1384,7 @@ phpdbg_main:
 			}
 			sapi_deactivate();
 			sapi_shutdown();
-			if (ini_entries) {
-				free(ini_entries);
-			}
+			php_ini_builder_deinit(&ini_builder);
 			if (ini_override) {
 				free(ini_override);
 			}
@@ -1698,9 +1659,7 @@ phpdbg_out:
 			efree(SG(request_info).argv);
 		}
 
-		if (ini_entries) {
-			free(ini_entries);
-		}
+		php_ini_builder_deinit(&ini_builder);
 
 		if (ini_override) {
 			free(ini_override);

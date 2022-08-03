@@ -240,7 +240,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 16,21,30,31)                      |     |     |     */
+/* Class Flags (unused: 21,30,31)                         |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -273,6 +273,9 @@ typedef struct _zend_oparray_context {
 /* without triggering a deprecation warning               |     |     |     */
 #define ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES (1 << 15) /* X  |     |     |     */
 /*                                                        |     |     |     */
+/* Readonly class                                         |     |     |     */
+#define ZEND_ACC_READONLY_CLASS          (1 << 16) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Parent class is resolved (CE).                         |     |     |     */
 #define ZEND_ACC_RESOLVED_PARENT         (1 << 17) /*  X  |     |     |     */
 /*                                                        |     |     |     */
@@ -301,7 +304,7 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 27-30)                         |     |     |     */
+/* Function Flags (unused: 28-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -357,6 +360,9 @@ typedef struct _zend_oparray_context {
 /* method flag used by Closure::__invoke() (int only)     |     |     |     */
 #define ZEND_ACC_USER_ARG_INFO           (1 << 26) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* supports opcache compile-time evaluation (funcs)       |     |     |     */
+#define ZEND_ACC_COMPILE_TIME_EVAL       (1 << 27) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
@@ -366,9 +372,13 @@ typedef struct _zend_oparray_context {
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
+#define ZEND_SHORT_CIRCUITING_CHAIN_MASK 0x3
 #define ZEND_SHORT_CIRCUITING_CHAIN_EXPR 0
 #define ZEND_SHORT_CIRCUITING_CHAIN_ISSET 1
 #define ZEND_SHORT_CIRCUITING_CHAIN_EMPTY 2
+
+// Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
+#define ZEND_JMP_NULL_BP_VAR_IS 4
 
 char *zend_visibility_string(uint32_t fn_flags);
 
@@ -438,6 +448,7 @@ struct _zend_op_array {
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
 	HashTable *attributes;
+	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	/* END of common elements */
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
@@ -446,7 +457,6 @@ struct _zend_op_array {
 	uint32_t last;      /* number of opcodes */
 
 	zend_op *opcodes;
-	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	ZEND_MAP_PTR_DEF(HashTable *, static_variables_ptr);
 	HashTable *static_variables;
 	zend_string **vars; /* names of CV variables */
@@ -493,6 +503,7 @@ typedef struct _zend_internal_function {
 	uint32_t required_num_args;
 	zend_internal_arg_info *arg_info;
 	HashTable *attributes;
+	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	/* END of common elements */
 
 	zif_handler handler;
@@ -517,6 +528,7 @@ union _zend_function {
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 		HashTable   *attributes;
+		ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	} common;
 
 	zend_op_array op_array;
@@ -556,6 +568,7 @@ struct _zend_execute_data {
                                                /* to prevent optimization in RETURN handler and    */
                                                /* keep all local variables for "fcall_end" handler */
 #define ZEND_CALL_JIT_RESERVED       (1 << 29) /* reserved for tracing JIT */
+#define ZEND_CALL_NEEDS_REATTACH     (1 << 30)
 #define ZEND_CALL_SEND_ARG_BY_REF    (1u << 31)
 
 #define ZEND_CALL_NESTED_FUNCTION    (ZEND_CALL_FUNCTION | ZEND_CALL_NESTED)
@@ -1072,6 +1085,10 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 
 /* Attribute for ternary inside parentheses */
 #define ZEND_PARENTHESIZED_CONDITIONAL 1
+
+/* Attributes for ${} encaps var in strings */
+#define ZEND_ENCAPS_VAR_DOLLAR_CURLY (1<<0)
+#define ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR (1<<1)
 
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)

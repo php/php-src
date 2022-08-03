@@ -1695,7 +1695,7 @@ ZEND_API void zend_get_gc_buffer_grow(zend_get_gc_buffer *gc_buffer) {
 	gc_buffer->cur = gc_buffer->start + old_capacity;
 }
 
-static void zend_get_gc_buffer_release() {
+static void zend_get_gc_buffer_release(void) {
 	zend_get_gc_buffer *gc_buffer = &EG(get_gc_buffer);
 	efree(gc_buffer->start);
 	gc_buffer->start = gc_buffer->end = gc_buffer->cur = NULL;

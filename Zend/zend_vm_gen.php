@@ -43,7 +43,7 @@ const HEADER_TEXT = <<< DATA
 DATA;
 
 /*
-    This script creates zend_vm_execute.h and zend_vm_opcodes.h
+    This script creates zend_vm_execute.h and zend_vm_opcodes.{h,c}
     from existing zend_vm_def.h and zend_vm_execute.skl
 */
 
@@ -1525,7 +1525,9 @@ function gen_specs($f, $prolog, $specs) {
         $last = $num;
         out($f, "$prolog$def,\n");
     }
-    out($f, "$prolog$lastdef\n");
+    while ($last++ < 255) {
+        out($f, "$prolog$lastdef,\n");
+    }
 }
 
 // Generates handler for undefined opcodes (CALL threading model)
@@ -2651,7 +2653,8 @@ function gen_vm($def, $skel) {
     fputs($f, "ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length) {\n");
     fputs($f, "\tzend_uchar opcode;\n");
     fputs($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
-    fputs($f, "\t\tif (strncmp(zend_vm_opcodes_names[opcode], name, length) == 0) {\n");
+    fputs($f, "\t\tconst char *opcode_name = zend_vm_opcodes_names[opcode];\n");
+    fputs($f, "\t\tif (opcode_name && strncmp(opcode_name, name, length) == 0) {\n");
     fputs($f, "\t\t\treturn opcode;\n");
     fputs($f, "\t\t}\n");
     fputs($f, "\t}\n");
@@ -2864,7 +2867,7 @@ function gen_vm($def, $skel) {
                             out($f, "\t\t\t\t\tbreak;\n");
                             out($f, "\t\t\t\t}\n");
                         }
-                        out($f, "\t\t\t\tspec = ${spec_dsc['spec_code']};\n");
+                        out($f, "\t\t\t\tspec = {$spec_dsc['spec_code']};\n");
                         if (isset($spec_dsc["spec"]["COMMUTATIVE"]) && !isset($dsc["spec"]["COMMUTATIVE"])) {
                             out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
                             out($f, "\t\t\t\t\tzend_swap_operands(op);\n");

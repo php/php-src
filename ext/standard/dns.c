@@ -20,7 +20,7 @@
 #include "php.h"
 #include "php_network.h"
 
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -31,7 +31,7 @@
 # include <Ws2tcpip.h>
 #else
 #include <netinet/in.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #include <netdb.h>
@@ -39,13 +39,13 @@
 #undef STATUS
 #undef T_UNSPEC
 #endif
-#if HAVE_ARPA_NAMESER_H
+#ifdef HAVE_ARPA_NAMESER_H
 #ifdef DARWIN
 # define BIND_8_COMPAT 1
 #endif
 #include <arpa/nameser.h>
 #endif
-#if HAVE_RESOLV_H
+#ifdef HAVE_RESOLV_H
 #include <resolv.h>
 #if defined(__HAIKU__)
 extern void __res_ndestroy(res_state statp);
@@ -157,7 +157,7 @@ PHP_FUNCTION(gethostbyaddr)
 	hostname = php_gethostbyaddr(addr);
 
 	if (hostname == NULL) {
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
 		php_error_docref(NULL, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
 #else
 		php_error_docref(NULL, E_WARNING, "Address is not in a.b.c.d form");
@@ -172,7 +172,7 @@ PHP_FUNCTION(gethostbyaddr)
 /* {{{ php_gethostbyaddr */
 static zend_string *php_gethostbyaddr(char *ip)
 {
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
 	struct sockaddr_in sa4;
 	struct sockaddr_in6 sa6;
 	char out[NI_MAXHOST];
@@ -182,14 +182,14 @@ static zend_string *php_gethostbyaddr(char *ip)
 	if (inet_pton(AF_INET6, ip, &sa6.sin6_addr)) {
 		sa6.sin6_family = AF_INET6;
 
-		if (getnameinfo((struct sockaddr *)&sa6, sizeof(sa6), out, sizeof(out), NULL, 0, NI_NAMEREQD) < 0) {
+		if (getnameinfo((struct sockaddr *)&sa6, sizeof(sa6), out, sizeof(out), NULL, 0, NI_NAMEREQD) != 0) {
 			return zend_string_init(ip, strlen(ip), 0);
 		}
 		return zend_string_init(out, strlen(out), 0);
 	} else if (inet_pton(AF_INET, ip, &sa4.sin_addr)) {
 		sa4.sin_family = AF_INET;
 
-		if (getnameinfo((struct sockaddr *)&sa4, sizeof(sa4), out, sizeof(out), NULL, 0, NI_NAMEREQD) < 0) {
+		if (getnameinfo((struct sockaddr *)&sa4, sizeof(sa4), out, sizeof(out), NULL, 0, NI_NAMEREQD) != 0) {
 			return zend_string_init(ip, strlen(ip), 0);
 		}
 		return zend_string_init(out, strlen(out), 0);
@@ -316,7 +316,7 @@ static zend_string *php_gethostbyname(char *name)
 }
 /* }}} */
 
-#if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
+#if defined(HAVE_FULL_DNS_FUNCS) || defined(PHP_WIN32)
 # define PHP_DNS_NUM_TYPES	13	/* Number of DNS Types Supported by PHP currently */
 
 # define PHP_DNS_A      0x00000001
@@ -337,7 +337,7 @@ static zend_string *php_gethostbyname(char *name)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC
+#if !defined(PHP_WIN32) && defined(HAVE_DNS_SEARCH_FUNC)
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -356,7 +356,7 @@ static zend_string *php_gethostbyname(char *name)
 
 typedef union {
 	HEADER qb1;
-	u_char qb2[65536];
+	uint8_t qb2[65536];
 } querybuf;
 
 /* just a hack to free resources allocated by glibc in __res_nsend()
@@ -384,7 +384,7 @@ static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
 PHP_FUNCTION(dns_check_record)
 {
 	HEADER *hp;
-	querybuf answer;
+	querybuf answer = {0};
 	char *hostname;
 	size_t hostname_len;
 	zend_string *rectype = NULL;
@@ -454,7 +454,7 @@ PHP_FUNCTION(dns_check_record)
 }
 /* }}} */
 
-#if HAVE_FULL_DNS_FUNCS
+#ifdef HAVE_FULL_DNS_FUNCS
 
 #define CHECKCP(n) do { \
 	if (cp + n > end) { \
@@ -463,14 +463,14 @@ PHP_FUNCTION(dns_check_record)
 } while (0)
 
 /* {{{ php_parserr */
-static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_to_fetch, int store, int raw, zval *subarray)
+static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int type_to_fetch, int store, bool raw, zval *subarray)
 {
 	u_short type, class, dlen;
 	u_long ttl;
 	long n, i;
 	u_short s;
-	u_char *tp, *p;
-	char name[MAXHOSTNAMELEN];
+	uint8_t *tp, *p;
+	char name[MAXHOSTNAMELEN] = {0};
 	int have_v6_break = 0, in_v6_break = 0;
 
 	ZVAL_UNDEF(subarray);
@@ -648,12 +648,12 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			add_assoc_long(subarray, "minimum-ttl", n);
 			break;
 		case DNS_T_AAAA:
-			tp = (u_char*)name;
+			tp = (uint8_t*)name;
 			CHECKCP(8*2);
 			for(i=0; i < 8; i++) {
 				GETSHORT(s, cp);
 				if (s != 0) {
-					if (tp > (u_char *)name) {
+					if (tp > (uint8_t *)name) {
 						in_v6_break = 0;
 						tp[0] = ':';
 						tp++;
@@ -688,7 +688,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			n = ((int)cp[0]) & 0xFF;
 			cp++;
 			add_assoc_long(subarray, "masklen", n);
-			tp = (u_char*)name;
+			tp = (uint8_t*)name;
 			if (n > 15) {
 				have_v6_break = 1;
 				in_v6_break = 1;
@@ -698,7 +698,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			if (n % 16 > 8) {
 				/* Partial short */
 				if (cp[0] != 0) {
-					if (tp > (u_char *)name) {
+					if (tp > (uint8_t *)name) {
 						in_v6_break = 0;
 						tp[0] = ':';
 						tp++;
@@ -723,7 +723,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 				CHECKCP(2);
 				GETSHORT(s, cp);
 				if (s != 0) {
-					if (tp > (u_char *)name) {
+					if (tp > (uint8_t *)name) {
 						in_v6_break = 0;
 						tp[0] = ':';
 						tp++;
@@ -839,8 +839,8 @@ PHP_FUNCTION(dns_get_record)
 	struct __res_state *handle = &state;
 #endif
 	HEADER *hp;
-	querybuf answer;
-	u_char *cp = NULL, *end = NULL;
+	querybuf answer = {0};
+	uint8_t *cp = NULL, *end = NULL;
 	int n, qd, an, ns = 0, ar = 0;
 	int type, first_query = 1, store_results = 1;
 	bool raw = 0;
@@ -1069,10 +1069,10 @@ PHP_FUNCTION(dns_get_mx)
 	zval *mx_list, *weight_list = NULL;
 	int count, qdc;
 	u_short type, weight;
-	querybuf answer;
-	char buf[MAXHOSTNAMELEN];
+	querybuf answer = {0};
+	char buf[MAXHOSTNAMELEN] = {0};
 	HEADER *hp;
-	u_char *cp, *end;
+	uint8_t *cp, *end;
 	int i;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
@@ -1116,7 +1116,7 @@ PHP_FUNCTION(dns_get_mx)
 	res_init();
 #endif
 
-	i = php_dns_search(handle, hostname, C_IN, DNS_T_MX, answer.qb2, sizeof answer);
+	i = php_dns_search(handle, hostname, C_IN, DNS_T_MX, answer.qb2, sizeof(answer));
 	if (i < 0) {
 		php_dns_free_handle(handle);
 		RETURN_FALSE;
@@ -1162,7 +1162,7 @@ PHP_FUNCTION(dns_get_mx)
 #endif /* HAVE_FULL_DNS_FUNCS */
 #endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
 
-#if HAVE_FULL_DNS_FUNCS && !defined(PHP_WIN32)
+#if defined(HAVE_FULL_DNS_FUNCS) && !defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);

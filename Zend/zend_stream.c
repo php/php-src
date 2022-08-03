@@ -39,7 +39,7 @@ static void zend_stream_stdio_closer(void *handle) /* {{{ */
 
 static size_t zend_stream_stdio_fsizer(void *handle) /* {{{ */
 {
-	zend_stat_t buf;
+	zend_stat_t buf = {0};
 	if (handle && zend_fstat(fileno((FILE*)handle), &buf) == 0) {
 #ifdef S_ISREG
 		if (!S_ISREG(buf.st_mode)) {
@@ -214,7 +214,10 @@ static void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 {
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
-			fclose(fh->handle.fp);
+			if (fh->handle.fp) {
+				fclose(fh->handle.fp);
+				fh->handle.fp = NULL;
+			}
 			break;
 		case ZEND_HANDLE_STREAM:
 			if (fh->handle.stream.closer && fh->handle.stream.handle) {

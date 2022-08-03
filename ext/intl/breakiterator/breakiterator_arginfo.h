@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1979da7ee2fa55b27f1c91bb4e0ddc37e8505b08 */
+ * Stub hash: 724e0c36ee113b67906cc9a8cea23781f0a961bf */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlBreakIterator_createCharacterInstance, 0, 0, IntlBreakIterator, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
@@ -161,6 +161,7 @@ static zend_class_entry *register_class_IntlBreakIterator(zend_class_entry *clas
 
 	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", class_IntlBreakIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	return class_entry;
@@ -172,6 +173,7 @@ static zend_class_entry *register_class_IntlRuleBasedBreakIterator(zend_class_en
 
 	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator", class_IntlRuleBasedBreakIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -182,6 +184,7 @@ static zend_class_entry *register_class_IntlCodePointBreakIterator(zend_class_en
 
 	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator", class_IntlCodePointBreakIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlBreakIterator);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

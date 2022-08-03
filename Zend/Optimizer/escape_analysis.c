@@ -156,23 +156,22 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 		switch (opline->opcode) {
 			case ZEND_INIT_ARRAY:
 				return 1;
-			case ZEND_NEW:
+			case ZEND_NEW: {
 			    /* objects with destructors should escape */
-				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = zend_optimizer_get_class_entry(
-						script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
-					uint32_t forbidden_flags =
-						/* These flags will always cause an exception */
-						ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
-						| ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
-					if (ce && !ce->parent && !ce->create_object && !ce->constructor &&
-					    !ce->destructor && !ce->__get && !ce->__set &&
-					    !(ce->ce_flags & forbidden_flags) &&
-						(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-						return 1;
-					}
+				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
+					script, op_array, opline);
+				uint32_t forbidden_flags =
+					/* These flags will always cause an exception */
+					ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
+					| ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
+				if (ce && !ce->parent && !ce->create_object && !ce->constructor &&
+					!ce->destructor && !ce->__get && !ce->__set &&
+					!(ce->ce_flags & forbidden_flags) &&
+					(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+					return 1;
 				}
 				break;
+			}
 			case ZEND_QM_ASSIGN:
 				if (opline->op1_type == IS_CONST
 				 && Z_TYPE_P(CRT_CONSTANT(opline->op1)) == IS_ARRAY) {
@@ -224,17 +223,16 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 			case ZEND_QM_ASSIGN:
 			case ZEND_ASSIGN:
 				return 1;
-			case ZEND_NEW:
+			case ZEND_NEW: {
 				/* objects with destructors should escape */
-				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = zend_optimizer_get_class_entry(
-						script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
-					if (ce && !ce->create_object && !ce->constructor &&
-					    !ce->destructor && !ce->__get && !ce->__set && !ce->parent) {
-						return 1;
-					}
+				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
+					script, op_array, opline);
+				if (ce && !ce->create_object && !ce->constructor &&
+					!ce->destructor && !ce->__get && !ce->__set && !ce->parent) {
+					return 1;
 				}
 				break;
+			}
 		}
 	} else if (op->op1_def == var) {
 		switch (opline->opcode) {

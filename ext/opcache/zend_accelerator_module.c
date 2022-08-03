@@ -134,7 +134,7 @@ static ZEND_INI_MH(OnUpdateFileCache)
 		if (!ZSTR_LEN(new_value)) {
 			new_value = NULL;
 		} else {
-			zend_stat_t buf;
+			zend_stat_t buf = {0};
 
 		    if (!IS_ABSOLUTE_PATH(ZSTR_VAL(new_value), ZSTR_LEN(new_value)) ||
 			    zend_stat(ZSTR_VAL(new_value), &buf) != 0 ||
@@ -165,7 +165,7 @@ static ZEND_INI_MH(OnUpdateJit)
 static ZEND_INI_MH(OnUpdateJitDebug)
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (zend_jit_debug_config(*p, val, stage) == SUCCESS) {
 		*p = val;
@@ -176,19 +176,19 @@ static ZEND_INI_MH(OnUpdateJitDebug)
 
 static ZEND_INI_MH(OnUpdateCounter)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val >= 0 && val < 256) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
 		return SUCCESS;
 	}
-	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be between 0 and 256", ZSTR_VAL(entry->name));
+	zend_error(E_WARNING, "Invalid \"%s\" setting; using default value instead. Should be between 0 and 255", ZSTR_VAL(entry->name));
 	return FAILURE;
 }
 
 static ZEND_INI_MH(OnUpdateUnrollC)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -201,7 +201,7 @@ static ZEND_INI_MH(OnUpdateUnrollC)
 
 static ZEND_INI_MH(OnUpdateUnrollR)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val >= 0 && val < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -214,7 +214,7 @@ static ZEND_INI_MH(OnUpdateUnrollR)
 
 static ZEND_INI_MH(OnUpdateUnrollL)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_LOOPS_UNROLL) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;

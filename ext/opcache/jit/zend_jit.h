@@ -75,7 +75,7 @@
 #define ZEND_JIT_DEBUG_TRACE_TSSA      (1<<19)
 #define ZEND_JIT_DEBUG_TRACE_EXIT_INFO (1<<20)
 
-#define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debbuger flags can't be changed at run-time */
+#define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debugger flags can't be changed at run-time */
 
 #define ZEND_JIT_TRACE_MAX_LENGTH        1024 /* max length of single trace */
 #define ZEND_JIT_TRACE_MAX_EXITS          512 /* max number of side exits per trace */

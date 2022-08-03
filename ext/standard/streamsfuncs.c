@@ -26,7 +26,7 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -46,7 +46,7 @@ static php_stream_context *decode_context_param(zval *contextresource);
 
 /* Streams based network functions */
 
-#if HAVE_SOCKETPAIR
+#ifdef HAVE_SOCKETPAIR
 /* {{{ Creates a pair of connected, indistinguishable socket streams */
 PHP_FUNCTION(stream_socket_pair)
 {
@@ -67,10 +67,22 @@ PHP_FUNCTION(stream_socket_pair)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+    s1 = php_stream_sock_open_from_socket(pair[0], 0);
+    if (s1 == NULL) {
+        close(pair[0]);
+        close(pair[1]);
+        php_error_docref(NULL, E_WARNING, "Failed to open stream from socketpair");
+        RETURN_FALSE;        
+    }
+    s2 = php_stream_sock_open_from_socket(pair[1], 0);
+    if (s2 == NULL) {
+        php_stream_free(s1, PHP_STREAM_FREE_CLOSE);
+        close(pair[1]);
+        php_error_docref(NULL, E_WARNING, "Failed to open stream from socketpair");
+        RETURN_FALSE;        
+    }
 
-	s1 = php_stream_sock_open_from_socket(pair[0], 0);
-	s2 = php_stream_sock_open_from_socket(pair[1], 0);
+    array_init(return_value);
 
 	/* set the __exposed flag.
 	 * php_stream_to_zval() does, add_next_index_resource() does not */
@@ -1343,7 +1355,7 @@ PHP_FUNCTION(stream_set_blocking)
 /* }}} */
 
 /* {{{ Set timeout on stream read to seconds + microseonds */
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 PHP_FUNCTION(stream_set_timeout)
 {
 	zval *socket;

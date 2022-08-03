@@ -115,6 +115,7 @@ typedef struct _zend_class_mutable_data {
 	zval      *default_properties_table;
 	HashTable *constants_table;
 	uint32_t   ce_flags;
+	HashTable *backed_enum_table;
 } zend_class_mutable_data;
 
 typedef struct _zend_class_dependency {
@@ -183,6 +184,8 @@ struct _zend_class_entry {
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
+	/* allocated only if class implements ArrayAccess interface */
+	zend_class_arrayaccess_funcs *arrayaccess_funcs_ptr;
 
 	/* handlers */
 	union {

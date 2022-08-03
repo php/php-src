@@ -72,7 +72,9 @@ ZEND_API void zend_copy_ini_directives(void);
 ZEND_API void zend_ini_sort_entries(void);
 
 ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number);
+ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, int module_type);
 ZEND_API void zend_unregister_ini_entries(int module_number);
+ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type);
 ZEND_API void zend_ini_refresh_caches(int stage);
 ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage);
 ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change);
@@ -87,6 +89,52 @@ ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig);
 ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
 ZEND_API bool zend_ini_parse_bool(zend_string *str);
+
+/**
+ * Parses an ini quantity
+ *
+ * The value parameter must be a string in the form
+ *
+ *     sign? digits ws* multiplier?
+ *
+ * with
+ *
+ *     sign: [+-]
+ *     digit: [0-9]
+ *     digits: digit+
+ *     ws: [ \t\n\r\v\f]
+ *     multiplier: [KMG]
+ *
+ * Leading and trailing whitespaces are ignored.
+ *
+ * If the string is empty or consists only of only whitespaces, 0 is returned.
+ *
+ * Digits is parsed as decimal unless the first digit is '0', in which case
+ * digits is parsed as octal.
+ *
+ * The multiplier is case-insensitive. K, M, and G multiply the quantity by
+ * 2**10, 2**20, and 2**30, respectively.
+ *
+ * For backwards compatibility, ill-formatted values are handled as follows:
+ * - No leading digits: value is treated as '0'
+ * - Invalid multiplier: multiplier is ignored
+ * - Invalid characters between digits and multiplier: invalid characters are
+ *   ignored
+ * - Integer overflow: The result of the overflow is returned
+ *
+ * In any of these cases an error string is stored in *errstr (caller must
+ * release it), otherwise *errstr is set to NULL.
+ */
+ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr);
+
+/**
+ * Unsigned variant of zend_ini_parse_quantity
+ */
+ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr);
+
+ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string *setting);
+
+ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting);
 
 ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
@@ -148,8 +196,8 @@ END_EXTERN_C()
 #define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
 #define INI_ORIG_BOOL(name) ((bool) INI_ORIG_INT(name))
 
-#define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number)
-#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number)
+#define REGISTER_INI_ENTRIES() zend_register_ini_entries_ex(ini_entries, module_number, type)
+#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries_ex(module_number, type)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
 #define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), strlen(name), displayer)

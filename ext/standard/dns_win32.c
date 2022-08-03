@@ -141,7 +141,7 @@ PHP_FUNCTION(dns_check_record)
 /* }}} */
 
 /* {{{ php_parserr */
-static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw, zval *subarray)
+static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw, zval *subarray)
 {
 	int type;
 	u_long ttl;
@@ -271,7 +271,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 				for(i=0; i < 8; i++) {
 					if (out[i] != 0) {
-						if (tp > (u_char *)buf) {
+						if (tp > (uint8_t *)buf) {
 							in_v6_break = 0;
 							tp[0] = ':';
 							tp++;

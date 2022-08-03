@@ -55,6 +55,16 @@
 # if HAVE_IF_NAMETOINDEX
 #  include <net/if.h>
 # endif
+# if defined(HAVE_LINUX_SOCK_DIAG_H)
+#  include <linux/sock_diag.h>
+# else
+#  undef SO_MEMINFO
+# endif
+# if defined(HAVE_LINUX_FILTER_H)
+#  include <linux/filter.h>
+# else
+#  undef SO_BPF_EXTENSIONS
+# endif
 #endif
 
 #include <stddef.h>
@@ -463,7 +473,9 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SOCK_DGRAM",	SOCK_DGRAM,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_RAW",		SOCK_RAW,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_SEQPACKET",SOCK_SEQPACKET, CONST_CS | CONST_PERSISTENT);
+#ifdef SOCK_RDM
 	REGISTER_LONG_CONSTANT("SOCK_RDM",		SOCK_RDM,		CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("MSG_OOB",		MSG_OOB,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MSG_WAITALL",	MSG_WAITALL,	CONST_CS | CONST_PERSISTENT);
@@ -499,6 +511,9 @@ static PHP_MINIT_FUNCTION(sockets)
 #ifdef MSG_CMSG_CLOEXEC
 	REGISTER_LONG_CONSTANT("MSG_CMSG_CLOEXEC",MSG_CMSG_CLOEXEC,CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef MSG_ZEROCOPY
+	REGISTER_LONG_CONSTANT("MSG_ZEROCOPY",  MSG_ZEROCOPY,   CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("SO_DEBUG",		SO_DEBUG,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_REUSEADDR",	SO_REUSEADDR,	CONST_CS | CONST_PERSISTENT);
@@ -531,8 +546,16 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_LISTENQLEN",       SO_LISTENQLEN,        CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_USER_COOKIE",       SO_USER_COOKIE,        CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef SO_SETFIB
+	REGISTER_LONG_CONSTANT("SO_SETFIB",       SO_SETFIB,        CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef SO_ACCEPTFILTER
 	REGISTER_LONG_CONSTANT("SO_ACCEPTFILTER",       SO_ACCEPTFILTER,        CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SOL_FILTER
+	REGISTER_LONG_CONSTANT("SOL_FILTER",     SOL_FILTER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FIL_ATTACH",     FIL_ATTACH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FIL_DETACH",     FIL_DETACH, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef SO_DONTTRUNC
 	REGISTER_LONG_CONSTANT("SO_DONTTRUNC",       SO_DONTTRUNC,        CONST_CS | CONST_PERSISTENT);
@@ -545,11 +568,95 @@ static PHP_MINIT_FUNCTION(sockets)
 #ifdef SO_MARK
 	REGISTER_LONG_CONSTANT("SO_MARK",   SO_MARK,    CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef SO_RTABLE
+	REGISTER_LONG_CONSTANT("SO_RTABLE",   SO_RTABLE,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_INCOMING_CPU
+	REGISTER_LONG_CONSTANT("SO_INCOMING_CPU",   SO_INCOMING_CPU,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_MEMINFO
+	REGISTER_LONG_CONSTANT("SO_MEMINFO", SO_MEMINFO,        CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_BPF_EXTENSIONS
+	REGISTER_LONG_CONSTANT("SO_BPF_EXTENSIONS", SO_BPF_EXTENSIONS, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_OFF
+	REGISTER_LONG_CONSTANT("SKF_AD_OFF", SKF_AD_OFF, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_PROTOCOL
+	REGISTER_LONG_CONSTANT("SKF_AD_PROTOCOL", SKF_AD_PROTOCOL, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_PKTTYPE
+	REGISTER_LONG_CONSTANT("SKF_AD_PKTTYPE", SKF_AD_PKTTYPE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_IFINDEX
+	REGISTER_LONG_CONSTANT("SKF_AD_IFINDEX", SKF_AD_IFINDEX, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_NLATTR
+	REGISTER_LONG_CONSTANT("SKF_AD_NLATTR", SKF_AD_NLATTR, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_NLATTR_NEST
+	REGISTER_LONG_CONSTANT("SKF_AD_NLATTR_NEST", SKF_AD_NLATTR_NEST, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_MARK
+	REGISTER_LONG_CONSTANT("SKF_AD_MARK", SKF_AD_MARK, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_QUEUE
+	REGISTER_LONG_CONSTANT("SKF_AD_QUEUE", SKF_AD_QUEUE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_HATYPE
+	REGISTER_LONG_CONSTANT("SKF_AD_HATYPE", SKF_AD_HATYPE, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_RXHASH
+	REGISTER_LONG_CONSTANT("SKF_AD_RXHASH", SKF_AD_RXHASH, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_CPU
+	REGISTER_LONG_CONSTANT("SKF_AD_CPU", SKF_AD_CPU, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_ALU_XOR_X
+	REGISTER_LONG_CONSTANT("SKF_AD_ALU_XOR_X", SKF_AD_ALU_XOR_X, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_VLAN_TAG
+	REGISTER_LONG_CONSTANT("SKF_AD_VLAN_TAG", SKF_AD_VLAN_TAG, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_VLAN_TAG_PRESENT
+	REGISTER_LONG_CONSTANT("SKF_AD_VLAN_TAG_PRESENT", SKF_AD_VLAN_TAG_PRESENT, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_PAY_OFFSET
+	REGISTER_LONG_CONSTANT("SKF_AD_PAY_OFFSET", SKF_AD_PAY_OFFSET, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_RANDOM
+	REGISTER_LONG_CONSTANT("SKF_AD_RANDOM", SKF_AD_RANDOM, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_VLAN_TPID
+	REGISTER_LONG_CONSTANT("SKF_AD_VLAN_TPID", SKF_AD_VLAN_TPID, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SKF_AD_MAX
+	REGISTER_LONG_CONSTANT("SKF_AD_MAX", SKF_AD_MAX, CONST_CS | CONST_PERSISTENT);
+#endif
+
+#ifdef TCP_CONGESTION
+	REGISTER_LONG_CONSTANT("TCP_CONGESTION",   TCP_CONGESTION,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_ZEROCOPY
+	REGISTER_LONG_CONSTANT("SO_ZEROCOPY", SO_ZEROCOPY,  CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef TCP_NODELAY
 	REGISTER_LONG_CONSTANT("TCP_NODELAY",   TCP_NODELAY,    CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef TCP_NOTSENT_LOWAT
+	REGISTER_LONG_CONSTANT("TCP_NOTSENT_LOWAT",  TCP_NOTSENT_LOWAT,   CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef TCP_DEFER_ACCEPT
 	REGISTER_LONG_CONSTANT("TCP_DEFER_ACCEPT",   TCP_DEFER_ACCEPT,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef TCP_KEEPALIVE
+	REGISTER_LONG_CONSTANT("TCP_KEEPALIVE",   TCP_KEEPALIVE,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef TCP_KEEPIDLE
+	REGISTER_LONG_CONSTANT("TCP_KEEPIDLE",    TCP_KEEPIDLE,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("TCP_KEEPINTVL",   TCP_KEEPINTVL,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("TCP_KEEPCNT",     TCP_KEEPCNT,      CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("PHP_NORMAL_READ", PHP_NORMAL_READ, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_BINARY_READ", PHP_BINARY_READ, CONST_CS | CONST_PERSISTENT);
@@ -610,6 +717,9 @@ static PHP_MINIT_FUNCTION(sockets)
 #endif
 #ifdef AI_NUMERICSERV
 	REGISTER_LONG_CONSTANT("AI_NUMERICSERV",	AI_NUMERICSERV,		CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SOL_LOCAL
+	REGISTER_LONG_CONSTANT("SOL_LOCAL",	        SOL_LOCAL,		CONST_CS | CONST_PERSISTENT);
 #endif
 
 	php_socket_sendrecvmsg_init(INIT_FUNC_ARGS_PASSTHRU);
@@ -1787,6 +1897,26 @@ PHP_FUNCTION(socket_get_option)
 	}
 #endif
 
+	if (level == IPPROTO_TCP) {
+		switch (optname) {
+#ifdef TCP_CONGESTION
+		case TCP_CONGESTION: {
+			char name[16];
+			optlen = sizeof(name);
+			if (getsockopt(php_sock->bsd_socket, level, optname, name, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			} else {
+				array_init(return_value);
+
+				add_assoc_string(return_value, "name", name);
+				return;
+			}
+		}
+#endif
+		}
+	}
+
 	if (level == SOL_SOCKET) {
 		switch (optname) {
 			case SO_LINGER:
@@ -1828,6 +1958,37 @@ PHP_FUNCTION(socket_get_option)
 				add_assoc_long(return_value, "sec", tv.tv_sec);
 				add_assoc_long(return_value, "usec", tv.tv_usec);
 				return;
+#ifdef SO_MEMINFO
+			case SO_MEMINFO: {
+				uint32_t minfo[SK_MEMINFO_VARS];
+				optlen = sizeof(minfo);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)minfo, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				if (UNEXPECTED(optlen != sizeof(minfo))) {
+					// unlikely since the kernel fills up the whole array if getsockopt succeeded
+					// but just an extra precaution in case.
+					php_error_docref(NULL, E_WARNING, "Unable to retrieve all socket meminfo data");
+					RETURN_FALSE;
+				}
+
+				array_init(return_value);
+
+				add_assoc_long(return_value, "rmem_alloc", minfo[SK_MEMINFO_RMEM_ALLOC]);
+				add_assoc_long(return_value, "rcvbuf", minfo[SK_MEMINFO_RCVBUF]);
+				add_assoc_long(return_value, "wmem_alloc", minfo[SK_MEMINFO_WMEM_ALLOC]);
+				add_assoc_long(return_value, "sndbuf", minfo[SK_MEMINFO_SNDBUF]);
+				add_assoc_long(return_value, "fwd_alloc", minfo[SK_MEMINFO_FWD_ALLOC]);
+				add_assoc_long(return_value, "wmem_queued", minfo[SK_MEMINFO_WMEM_QUEUED]);
+				add_assoc_long(return_value, "optmem", minfo[SK_MEMINFO_OPTMEM]);
+				add_assoc_long(return_value, "backlog", minfo[SK_MEMINFO_BACKLOG]);
+				add_assoc_long(return_value, "drops", minfo[SK_MEMINFO_DROPS]);
+				return;
+			}
+#endif
 #ifdef SO_ACCEPTFILTER
 			case SO_ACCEPTFILTER: {
 
@@ -1847,6 +2008,32 @@ PHP_FUNCTION(socket_get_option)
 #endif
 		}
 	}
+
+#ifdef SOL_FILTER
+	if (level == SOL_FILTER) {
+		switch (optname) {
+
+			case FIL_LIST: {
+				size_t i;
+				struct fil_info fi[32] = {{0}};
+				optlen = sizeof(fi);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)fi, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				array_init(return_value);
+
+				for (i = 0; i < optlen / sizeof(struct fil_info); i++) {
+					add_index_string(return_value, i, fi[i].fi_name);
+				}
+
+				return;
+			}
+		}
+	}
+#endif
 
 	optlen = sizeof(other_val);
 
@@ -1912,6 +2099,28 @@ PHP_FUNCTION(socket_set_option)
 		HANDLE_SUBCALL(res);
 	}
 #endif
+
+	if (level == IPPROTO_TCP) {
+		switch (optname) {
+#ifdef TCP_CONGESTION
+		case TCP_CONGESTION: {
+			if (Z_TYPE_P(arg4) == IS_STRING) {
+				opt_ptr = Z_STRVAL_P(arg4);
+				optlen = Z_STRLEN_P(arg4);
+			} else {
+				opt_ptr = "";
+				optlen = 0;
+			}
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+		}
+	}
 
 	switch (optname) {
 		case SO_LINGER: {
@@ -1995,6 +2204,23 @@ PHP_FUNCTION(socket_set_option)
 			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
 			opt_ptr = &af;
 			optlen = sizeof(af);
+			break;
+		}
+#endif
+
+#ifdef FIL_ATTACH
+		case FIL_ATTACH:
+		case FIL_DETACH: {
+			if (level != SOL_FILTER) {
+				php_error_docref(NULL, E_WARNING, "Invalid level");
+				RETURN_FALSE;
+			}
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
+				RETURN_FALSE;
+			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			break;
 		}
 #endif

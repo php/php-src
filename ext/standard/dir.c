@@ -25,7 +25,7 @@
 #include "basic_functions.h"
 #include "dir_arginfo.h"
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -268,7 +268,7 @@ PHP_FUNCTION(closedir)
 }
 /* }}} */
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 /* {{{ Change root directory */
 PHP_FUNCTION(chroot)
 {
@@ -342,9 +342,9 @@ PHP_FUNCTION(getcwd)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 	ret = VCWD_GETCWD(path, MAXPATHLEN);
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 	ret = VCWD_GETWD(path);
 #endif
 
@@ -472,18 +472,6 @@ PHP_FUNCTION(glob)
 #ifdef GLOB_NOMATCH
 no_results:
 #endif
-#ifndef PHP_WIN32
-		/* Paths containing '*', '?' and some other chars are
-		illegal on Windows but legit on other platforms. For
-		this reason the direct basedir check against the glob
-		query is senseless on windows. For instance while *.txt
-		is a pretty valid filename on EXT3, it's invalid on NTFS. */
-		if (PG(open_basedir) && *PG(open_basedir)) {
-			if (php_check_open_basedir_ex(pattern, 0)) {
-				RETURN_FALSE;
-			}
-		}
-#endif
 		array_init(return_value);
 		return;
 	}
@@ -505,7 +493,7 @@ no_results:
 		 * able to filter directories out.
 		 */
 		if (flags & GLOB_ONLYDIR) {
-			zend_stat_t s;
+			zend_stat_t s = {0};
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
 				continue;

@@ -57,6 +57,13 @@ $iso2022jp = "\x1B\$B\x21\x21!r\x1B(BABC";
 echo "11: " . mb_encode_numericentity($iso2022jp, $convmap, "ISO-2022-JP") . "\n";
 echo "11 (hex): " . mb_encode_numericentity($iso2022jp, $convmap, "ISO-2022-JP", true) . "\n";
 
+// Regression test; the old implementation could only emit decimal entities with about 7 digits
+$convmap = [0x2b, 0x2d4, 0x75656500, 0x656d2c53];
+echo "12: " . mb_encode_numericentity("m", $convmap, "ASCII") . "\n";
+
+// Regression test; the old implementation could only emit hexadecimal entities with about 5 digits
+$convmap = [0xffffffff, 0xffffffff, 0x540a0af7, 0x5a485054];
+echo "13: " . mb_encode_numericentity("\xFF", $convmap, "ASCII", true) . "\n";
 
 ?>
 --EXPECT--
@@ -78,3 +85,5 @@ echo "11 (hex): " . mb_encode_numericentity($iso2022jp, $convmap, "ISO-2022-JP",
 10 (hex): &#x22;&#x22;&#x23;
 11: &#12288;&#163;&#65;&#66;&#67;
 11 (hex): &#x3000;&#xA3;&#x41;&#x42;&#x43;
+12: &#1701127233;
+13: &#x50080054;

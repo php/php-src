@@ -162,6 +162,13 @@
 #include <sqlext.h>
 #endif
 
+#ifdef PHP_WIN32
+#include <winsock2.h>
+
+#define ODBC_TYPE "Win32"
+#define PHP_ODBC_TYPE ODBC_TYPE
+
+#endif
 
 /* Common defines */
 

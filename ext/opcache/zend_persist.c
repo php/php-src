@@ -336,39 +336,10 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name)
 	return 0;
 }
 
-static HashTable *zend_persist_backed_enum_table(HashTable *backed_enum_table)
-{
-	HashTable *ptr;
-	zend_hash_persist(backed_enum_table);
-
-	if (HT_IS_PACKED(backed_enum_table)) {
-		zval *zv;
-
-		ZEND_HASH_PACKED_FOREACH_VAL(backed_enum_table, zv) {
-			zend_persist_zval(zv);
-		} ZEND_HASH_FOREACH_END();
-	} else {
-		Bucket *p;
-
-		ZEND_HASH_MAP_FOREACH_BUCKET(backed_enum_table, p) {
-			if (p->key != NULL) {
-				zend_accel_store_interned_string(p->key);
-			}
-			zend_persist_zval(&p->val);
-		} ZEND_HASH_FOREACH_END();
-	}
-
-	ptr = zend_shared_memdup_free(backed_enum_table, sizeof(HashTable));
-	GC_SET_REFCOUNT(ptr, 2);
-	GC_TYPE_INFO(ptr) = GC_ARRAY | ((IS_ARRAY_IMMUTABLE|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
-
-	return ptr;
-}
-
 static void zend_persist_type(zend_type *type) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
-		if (ZEND_TYPE_USES_ARENA(*type)) {
+		if (ZEND_TYPE_USES_ARENA(*type) || zend_accel_in_shm(list)) {
 			list = zend_shared_memdup_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
 			ZEND_TYPE_FULL_MASK(*type) &= ~_ZEND_TYPE_ARENA_BIT;
 		} else {
@@ -379,6 +350,10 @@ static void zend_persist_type(zend_type *type) {
 
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(*type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			zend_persist_type(single_type);
+			continue;
+		}
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *type_name = ZEND_TYPE_NAME(*single_type);
 			zend_accel_store_interned_string(type_name);
@@ -590,9 +565,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_FAST_CALL:
 						opline->op1.jmp_addr = &new_opcodes[opline->op1.jmp_addr - op_array->opcodes];
 						break;
-					case ZEND_JMPZNZ:
-						/* relative extended_value don't have to be changed */
-						/* break omitted intentionally */
 					case ZEND_JMPZ:
 					case ZEND_JMPNZ:
 					case ZEND_JMPZ_EX:
@@ -985,6 +957,9 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		if (ce->iterator_funcs_ptr) {
 			ce->iterator_funcs_ptr = zend_shared_memdup(ce->iterator_funcs_ptr, sizeof(zend_class_iterator_funcs));
 		}
+		if (ce->arrayaccess_funcs_ptr) {
+			ce->arrayaccess_funcs_ptr = zend_shared_memdup(ce->arrayaccess_funcs_ptr, sizeof(zend_class_arrayaccess_funcs));
+		}
 
 		if (ce->ce_flags & ZEND_ACC_CACHED) {
 			return ce;
@@ -1072,9 +1047,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			}
 		}
 
-		if (ce->backed_enum_table) {
-			ce->backed_enum_table = zend_persist_backed_enum_table(ce->backed_enum_table);
-		}
+		ZEND_ASSERT(ce->backed_enum_table == NULL);
 	}
 
 	return ce;
@@ -1134,6 +1107,14 @@ void zend_update_parent_ce(zend_class_entry *ce)
 				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
 				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
 			}
+		}
+
+		if (ce->arrayaccess_funcs_ptr) {
+			ZEND_ASSERT(zend_class_implements_interface(ce, zend_ce_arrayaccess));
+			ce->arrayaccess_funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(&ce->function_table, "offsetget", sizeof("offsetget") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(&ce->function_table, "offsetexists", sizeof("offsetexists") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(&ce->function_table, "offsetset", sizeof("offsetset") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(&ce->function_table, "offsetunset", sizeof("offsetunset") - 1);
 		}
 	}
 
@@ -1251,6 +1232,7 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 					if (op_array->type == ZEND_USER_FUNCTION) {
 						if (op_array->scope == ce
+						 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)
 						 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 							zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 							for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
@@ -1265,7 +1247,8 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 				ce = Z_PTR(p->val);
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
-					if (op_array->type == ZEND_USER_FUNCTION) {
+					if (op_array->type == ZEND_USER_FUNCTION
+					 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)) {
 						if ((op_array->scope != ce
 						 || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))
 						  && (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC
@@ -1321,12 +1304,12 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 
 	script = zend_shared_memdup_free(script, sizeof(zend_persistent_script));
-	script->corrupted = 0;
+	script->corrupted = false;
 	ZCG(current_persistent_script) = script;
 
 	if (!for_shm) {
 		/* script is not going to be saved in SHM */
-		script->corrupted = 1;
+		script->corrupted = true;
 	}
 
 	zend_accel_store_interned_string(script->script.filename);
@@ -1382,7 +1365,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 #endif
 
-	script->corrupted = 0;
+	script->corrupted = false;
 	ZCG(current_persistent_script) = NULL;
 
 	return script;

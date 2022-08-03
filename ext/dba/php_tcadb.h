@@ -17,7 +17,7 @@
 #ifndef PHP_TCADB_H
 #define PHP_TCADB_H
 
-#if DBA_TCADB
+#ifdef DBA_TCADB
 
 #include "php_dba.h"
 

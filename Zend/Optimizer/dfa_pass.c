@@ -265,6 +265,32 @@ static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 	return instanceof_function(ce1, ce2);
 }
 
+static inline bool can_elide_list_type(
+	const zend_script *script, const zend_op_array *op_array,
+	const zend_ssa_var_info *use_info, zend_type type)
+{
+	zend_type *single_type;
+	/* For intersection: result==false is failure, default is success.
+	 * For union: result==true is success, default is failure. */
+	bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			ZEND_ASSERT(!is_intersection);
+			return can_elide_list_type(script, op_array, use_info, *single_type);
+		}
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
+			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
+			zend_string_release(lcname);
+			bool result = ce && safe_instanceof(use_info->ce, ce);
+			if (result == !is_intersection) {
+				return result;
+			}
+		}
+	} ZEND_TYPE_FOREACH_END();
+	return is_intersection;
+}
+
 static inline bool can_elide_return_type_check(
 		const zend_script *script, zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
 	zend_arg_info *arg_info = &op_array->arg_info[-1];
@@ -286,29 +312,14 @@ static inline bool can_elide_return_type_check(
 	}
 
 	if (disallowed_types == MAY_BE_OBJECT && use_info->ce && ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
-		zend_type *single_type;
-		/* For intersection: result==false is failure, default is success.
-		 * For union: result==true is success, default is failure. */
-		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(arg_info->type);
-		ZEND_TYPE_FOREACH(arg_info->type, single_type) {
-			if (ZEND_TYPE_HAS_NAME(*single_type)) {
-				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
-				zend_class_entry *ce = zend_optimizer_get_class_entry(script, lcname);
-				zend_string_release(lcname);
-				bool result = ce && safe_instanceof(use_info->ce, ce);
-				if (result == !is_intersection) {
-					return result;
-				}
-			}
-		} ZEND_TYPE_FOREACH_END();
-		return is_intersection;
+		return can_elide_list_type(script, op_array, use_info, arg_info->type);
 	}
 
 	return false;
 }
 
 static bool opline_supports_assign_contraction(
-		zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
+		zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
 	if (opline->opcode == ZEND_NEW) {
 		/* see Zend/tests/generators/aborted_yield_during_new.phpt */
 		return 0;
@@ -340,6 +351,13 @@ static bool opline_supports_assign_contraction(
 		/* CAST to array/object may initialize the result to an empty array/object before
 		 * reading the expression. */
 		return opline->op1_type != IS_CV || opline->op1.var != cv_var;
+	}
+
+	if (opline->opcode == ZEND_ASSIGN_OP
+	 && opline->op1_type == IS_CV
+	 && opline->op1.var == cv_var
+	 && zend_may_throw(opline, &ssa->ops[ssa->vars[src_var].definition], op_array, ssa)) {
+		return 0;
 	}
 
 	return 1;
@@ -620,11 +638,6 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 				ZEND_ASSERT(ZEND_OP1_JMP_ADDR(opline) == op_array->opcodes + old->start);
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + dst->start);
 				break;
-			case ZEND_JMPZNZ:
-				if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
-					opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
-				}
-				ZEND_FALLTHROUGH;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -678,13 +691,32 @@ static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_b
 {
 	if (block->predecessors_count == 1 && ssa->blocks[block_num].phis == NULL) {
 		int *predecessors, i;
+		zend_basic_block *fe_fetch_block = NULL;
 
 		ZEND_ASSERT(block->successors_count == 1);
 		predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
+		if (block->predecessors_count == 1 && (block->flags & ZEND_BB_FOLLOW)) {
+			zend_basic_block *pred_block = &ssa->cfg.blocks[predecessors[0]];
+
+			if (pred_block->len > 0 && (pred_block->flags & ZEND_BB_REACHABLE)) {
+				if ((op_array->opcodes[pred_block->start + pred_block->len - 1].opcode == ZEND_FE_FETCH_R
+				 || op_array->opcodes[pred_block->start + pred_block->len - 1].opcode == ZEND_FE_FETCH_RW)
+				  && op_array->opcodes[pred_block->start + pred_block->len - 1].op2_type == IS_CV) {
+					fe_fetch_block = pred_block;
+			    }
+			}
+		}
 		for (i = 0; i < block->predecessors_count; i++) {
 			zend_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
 		}
 		zend_ssa_remove_block(op_array, ssa, block_num);
+		if (fe_fetch_block && fe_fetch_block->successors[0] == fe_fetch_block->successors[1]) {
+			/* The body of "foreach" loop was removed */
+			int ssa_var = ssa->ops[fe_fetch_block->start + fe_fetch_block->len - 1].op2_def;
+			if (ssa_var >= 0) {
+				zend_ssa_remove_uses_of_var(ssa, ssa_var);
+			}
+		}
 	}
 }
 
@@ -716,9 +748,13 @@ static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 		uint32_t op_num;
 		zend_op *opline;
 		zend_ssa_op *ssa_op;
+		bool can_follow = 1;
 
 		while (next_block_num < ssa->cfg.blocks_count
 			&& !(ssa->cfg.blocks[next_block_num].flags & ZEND_BB_REACHABLE)) {
+			if (ssa->cfg.blocks[next_block_num].flags & ZEND_BB_UNREACHABLE_FREE) {
+				can_follow = 0;
+			}
 			next_block_num++;
 		}
 
@@ -730,7 +766,7 @@ static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 			switch (opline->opcode) {
 				case ZEND_JMP:
 optimize_jmp:
-					if (block->successors[0] == next_block_num) {
+					if (block->successors[0] == next_block_num && can_follow) {
 						MAKE_NOP(opline);
 						removed_ops++;
 						goto optimize_nop;
@@ -751,7 +787,7 @@ optimize_jmpz:
 							goto optimize_jmp;
 						}
 					} else {
-						if (block->successors[0] == next_block_num) {
+						if (block->successors[0] == next_block_num && can_follow) {
 							take_successor_0(ssa, block_num, block);
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
 								opline->opcode = ZEND_CHECK_VAR;
@@ -782,7 +818,7 @@ optimize_jmpnz:
 							goto optimize_nop;
 						}
 					} else if (block->successors_count == 2) {
-						if (block->successors[0] == next_block_num) {
+						if (block->successors[0] == next_block_num && can_follow) {
 							take_successor_0(ssa, block_num, block);
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
 								opline->opcode = ZEND_CHECK_VAR;
@@ -794,49 +830,6 @@ optimize_jmpnz:
 							} else {
 								opline->opcode = ZEND_FREE;
 								opline->op2.num = 0;
-							}
-						}
-					}
-					break;
-				case ZEND_JMPZNZ:
-					if (opline->op1_type == IS_CONST) {
-						if (zend_is_true(CT_CONSTANT_EX(op_array, opline->op1.constant))) {
-							zend_op *target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
-							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-							take_successor_1(ssa, block_num, block);
-						} else {
-							zend_op *target_opline = ZEND_OP2_JMP_ADDR(opline);
-							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-							take_successor_0(ssa, block_num, block);
-						}
-						opline->op1_type = IS_UNUSED;
-						opline->extended_value = 0;
-						opline->opcode = ZEND_JMP;
-						goto optimize_jmp;
-					} else if (block->successors_count == 2) {
-						if (block->successors[0] == block->successors[1]) {
-							take_successor_0(ssa, block_num, block);
-							if (block->successors[0] == next_block_num) {
-								if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
-									opline->opcode = ZEND_CHECK_VAR;
-									opline->op2.num = 0;
-								} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
-									zend_ssa_remove_instr(ssa, opline, ssa_op);
-									removed_ops++;
-									goto optimize_nop;
-								} else {
-									opline->opcode = ZEND_FREE;
-									opline->op2.num = 0;
-								}
-							} else if ((opline->op1_type == IS_CV && !(OP1_INFO() & MAY_BE_UNDEF)) || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
-								ZEND_ASSERT(ssa_op->op1_use >= 0);
-								zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);
-								ssa_op->op1_use = -1;
-								ssa_op->op1_use_chain = -1;
-								opline->opcode = ZEND_JMP;
-								opline->op1_type = IS_UNUSED;
-								opline->op1.num = opline->op2.num;
-								goto optimize_jmp;
 							}
 						}
 					}
@@ -1113,7 +1106,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		}
 
 		if (ZEND_OPTIMIZER_PASS_14 & ctx->optimization_level) {
-			if (dce_optimize_op_array(op_array, ssa, 0)) {
+			if (dce_optimize_op_array(op_array, ctx, ssa, 0)) {
 				remove_nops = 1;
 			}
 			if (zend_dfa_optimize_jmps(op_array, ssa)) {
@@ -1282,30 +1275,52 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				} else if (opline->opcode == ZEND_VERIFY_RETURN_TYPE
 				 && opline->op1_type != IS_CONST
 				 && ssa->ops[op_1].op1_def == v
-				 && ssa->ops[op_1].op1_use >= 0
-				 && ssa->ops[op_1].op1_use_chain == -1
-				 && can_elide_return_type_check(ctx->script, op_array, ssa, &ssa->ops[op_1])) {
+				 && ssa->ops[op_1].op1_use >= 0) {
+					int orig_var = ssa->ops[op_1].op1_use;
+					int ret = ssa->vars[v].use_chain;
+
+					if (ssa->ops[op_1].op1_use_chain == -1
+					 && can_elide_return_type_check(ctx->script, op_array, ssa, &ssa->ops[op_1])) {
 
 // op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
 
-					int orig_var = ssa->ops[op_1].op1_use;
-					zend_ssa_unlink_use_chain(ssa, op_1, orig_var);
+						zend_ssa_unlink_use_chain(ssa, op_1, orig_var);
 
-					int ret = ssa->vars[v].use_chain;
-					if (ret >= 0) {
+						if (ret >= 0) {
+							ssa->ops[ret].op1_use = orig_var;
+							ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
+							ssa->vars[orig_var].use_chain = ret;
+						}
+
+						ssa->vars[v].definition = -1;
+						ssa->vars[v].use_chain = -1;
+
+						ssa->ops[op_1].op1_def = -1;
+						ssa->ops[op_1].op1_use = -1;
+
+						MAKE_NOP(opline);
+						remove_nops = 1;
+					} else if (ret >= 0
+					 && ssa->ops[ret].op1_use == v
+					 && ssa->ops[ret].op1_use_chain == -1
+					 && can_elide_return_type_check(ctx->script, op_array, ssa, &ssa->ops[op_1])) {
+
+// op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
+
+						zend_ssa_replace_use_chain(ssa, op_1, ret, orig_var);
+
 						ssa->ops[ret].op1_use = orig_var;
-						ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
-						ssa->vars[orig_var].use_chain = ret;
+						ssa->ops[ret].op1_use_chain = ssa->ops[op_1].op1_use_chain;
+
+						ssa->vars[v].definition = -1;
+						ssa->vars[v].use_chain = -1;
+
+						ssa->ops[op_1].op1_def = -1;
+						ssa->ops[op_1].op1_use = -1;
+
+						MAKE_NOP(opline);
+						remove_nops = 1;
 					}
-
-					ssa->vars[v].definition = -1;
-					ssa->vars[v].use_chain = -1;
-
-					ssa->ops[op_1].op1_def = -1;
-					ssa->ops[op_1].op1_use = -1;
-
-					MAKE_NOP(opline);
-					remove_nops = 1;
 				}
 			}
 
@@ -1319,6 +1334,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 				if (src_var >= 0
 				 && !(ssa->var_info[src_var].type & MAY_BE_REF)
+				 && (ssa->var_info[src_var].type & (MAY_BE_UNDEF|MAY_BE_ANY))
 				 && ssa->vars[src_var].definition >= 0
 				 && ssa->ops[ssa->vars[src_var].definition].result_def == src_var
 				 && ssa->ops[ssa->vars[src_var].definition].result_use < 0
@@ -1327,7 +1343,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				 && !ssa->vars[src_var].phi_use_chain
 				 && !ssa->vars[src_var].sym_use_chain
 				 && opline_supports_assign_contraction(
-					 ssa, &op_array->opcodes[ssa->vars[src_var].definition],
+					 op_array, ssa, &op_array->opcodes[ssa->vars[src_var].definition],
 					 src_var, opline->result.var)
 				 && !variable_defined_or_used_in_range(ssa, EX_VAR_TO_NUM(opline->result.var),
 						ssa->vars[src_var].definition+1, op_1)
@@ -1478,6 +1494,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
 					 && src_var >= 0
 					 && !(ssa->var_info[src_var].type & MAY_BE_REF)
+					 && (ssa->var_info[src_var].type & (MAY_BE_UNDEF|MAY_BE_ANY))
 					 && ssa->vars[src_var].definition >= 0
 					 && ssa->ops[ssa->vars[src_var].definition].result_def == src_var
 					 && ssa->ops[ssa->vars[src_var].definition].result_use < 0
@@ -1486,7 +1503,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && !ssa->vars[src_var].phi_use_chain
 					 && !ssa->vars[src_var].sym_use_chain
 					 && opline_supports_assign_contraction(
-						 ssa, &op_array->opcodes[ssa->vars[src_var].definition],
+						 op_array, ssa, &op_array->opcodes[ssa->vars[src_var].definition],
 						 src_var, opline->op1.var)
 					 && !variable_defined_or_used_in_range(ssa, EX_VAR_TO_NUM(opline->op1.var),
 							ssa->vars[src_var].definition+1, op_1)

@@ -29,10 +29,11 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
+#include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
-#include "ext/standard/php_mt_rand.h"
 #include "ext/standard/crc32_x86.h"
 
 #ifdef PHP_WIN32
@@ -67,22 +68,22 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "win32/inet.h"
 #endif
 
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
 #include <string.h>
 #include <locale.h>
 
-#if HAVE_SYS_MMAN_H
+#ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
 #endif
 
-#if HAVE_SYS_LOADAVG_H
+#ifdef HAVE_SYS_LOADAVG_H
 # include <sys/loadavg.h>
 #endif
 
@@ -91,7 +92,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #ifndef INADDR_NONE
-#define INADDR_NONE ((zend_ulong) -1)
+# define INADDR_NONE ((zend_ulong) -1)
 #endif
 
 #include "zend_globals.h"
@@ -149,13 +150,13 @@ zend_module_entry basic_functions_module = { /* {{{ */
 };
 /* }}} */
 
-#if defined(HAVE_PUTENV)
+#ifdef HAVE_PUTENV
 static void php_putenv_destructor(zval *zv) /* {{{ */
 {
 	putenv_entry *pe = Z_PTR_P(zv);
 
 	if (pe->previous_value) {
-# if defined(PHP_WIN32)
+# ifdef PHP_WIN32
 		/* MSVCRT has a bug in putenv() when setting a variable that
 		 * is already set; if the SetEnvironmentVariable() API call
 		 * fails, the Crt will double free() a string.
@@ -163,11 +164,11 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 		SetEnvironmentVariable(ZSTR_VAL(pe->key), "bugbug");
 # endif
 		putenv(pe->previous_value);
-# if defined(PHP_WIN32)
+# ifdef PHP_WIN32
 		efree(pe->previous_value);
 # endif
 	} else {
-# if HAVE_UNSETENV
+# ifdef HAVE_UNSETENV
 		unsetenv(ZSTR_VAL(pe->key));
 # elif defined(PHP_WIN32)
 		SetEnvironmentVariable(ZSTR_VAL(pe->key), NULL);
@@ -203,11 +204,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(mt_rand_is_seeded) = 0;
-	BG(mt_rand_mode) = MT_RAND_MT19937;
 	BG(umask) = -1;
-	BG(next) = NULL;
-	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
 	BG(serialize_lock) = 0;
@@ -282,15 +279,17 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 {
 #ifdef ZTS
 	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
-#ifdef PHP_WIN32
+# ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor );
-#endif
+# endif
 #else
 	basic_globals_ctor(&basic_globals);
-#ifdef PHP_WIN32
+# ifdef PHP_WIN32
 	php_win32_core_globals_ctor(&the_php_win32_core_globals);
+# endif
 #endif
-#endif
+
+	register_basic_functions_symbols(module_number);
 
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
 	php_register_incomplete_class_handlers();
@@ -322,7 +321,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC3986", PHP_QUERY_RFC3986, CONST_CS | CONST_PERSISTENT);
 
 #define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
-	REGISTER_MATH_CONSTANT(M_E);
 	REGISTER_MATH_CONSTANT(M_LOG2E);
 	REGISTER_MATH_CONSTANT(M_LOG10E);
 	REGISTER_MATH_CONSTANT(M_LN2);
@@ -347,7 +345,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_CS | CONST_PERSISTENT);
 
-#if ENABLE_TEST_CLASS
+#ifdef ENABLE_TEST_CLASS
 	test_class_startup();
 #endif
 
@@ -362,30 +360,28 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
-	BASIC_MINIT_SUBMODULE(mt_rand)
 
-#if defined(ZTS)
+#ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
 #endif
 
-#if defined(HAVE_NL_LANGINFO)
+#ifdef HAVE_NL_LANGINFO
 	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
-#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+#ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
 	BASIC_MINIT_SUBMODULE(string_intrin)
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
+#ifdef ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
 	BASIC_MINIT_SUBMODULE(crc32_x86_intrin)
 #endif
 
-#if ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR
+#if defined(ZEND_INTRIN_AVX2_FUNC_PTR) || defined(ZEND_INTRIN_SSSE3_FUNC_PTR)
 	BASIC_MINIT_SUBMODULE(base64_intrin)
 #endif
 
 	BASIC_MINIT_SUBMODULE(crypt)
-	BASIC_MINIT_SUBMODULE(lcg)
 
 	BASIC_MINIT_SUBMODULE(dir)
 #ifdef HAVE_SYSLOG_H
@@ -411,13 +407,11 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+# if defined(PHP_WIN32) || defined(HAVE_FULL_DNS_FUNCS)
 	BASIC_MINIT_SUBMODULE(dns)
 # endif
 #endif
-
-	BASIC_MINIT_SUBMODULE(random)
 
 	BASIC_MINIT_SUBMODULE(hrtime)
 
@@ -452,11 +446,10 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(url_scanner_ex)
 	BASIC_MSHUTDOWN_SUBMODULE(file)
 	BASIC_MSHUTDOWN_SUBMODULE(standard_filters)
-#if defined(ZTS)
+#ifdef ZTS
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
-	BASIC_MSHUTDOWN_SUBMODULE(random)
 	BASIC_MSHUTDOWN_SUBMODULE(password)
 
 	return SUCCESS;
@@ -518,8 +511,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	tsrm_env_unlock();
 #endif
 
-	BG(mt_rand_is_seeded) = 0;
-
 	if (BG(umask) != -1) {
 		umask(BG(umask));
 	}
@@ -528,6 +519,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	 * to the value in startup environment */
 	if (BG(locale_changed)) {
 		setlocale(LC_ALL, "C");
+		zend_reset_lc_ctype_locale();
 		zend_update_current_locale();
 		if (BG(ctype_string)) {
 			zend_string_release_ex(BG(ctype_string), 0);
@@ -875,7 +867,7 @@ PHP_FUNCTION(putenv)
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		if (!strncmp(*env, ZSTR_VAL(pe.key), ZSTR_LEN(pe.key))
 				&& (*env)[ZSTR_LEN(pe.key)] == '=') {	/* found it */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 			/* must copy previous value because MSVCRT's putenv can free the string without notice */
 			pe.previous_value = estrdup(*env);
 #else
@@ -885,7 +877,7 @@ PHP_FUNCTION(putenv)
 		}
 	}
 
-#if HAVE_UNSETENV
+#ifdef HAVE_UNSETENV
 	if (!p) { /* no '=' means we want to unset it */
 		unsetenv(pe.putenv_string);
 	}
@@ -931,7 +923,7 @@ PHP_FUNCTION(putenv)
 		}
 #endif
 		tsrm_env_unlock();
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		free(keyw);
 		free(valw);
 #endif
@@ -939,7 +931,7 @@ PHP_FUNCTION(putenv)
 	} else {
 		free(pe.putenv_string);
 		zend_string_release(pe.key);
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		free(keyw);
 		free(valw);
 #endif
@@ -1096,7 +1088,7 @@ PHP_FUNCTION(getopt)
 
 		/* the first <len> slots are filled by the one short ops
 		 * we now extend our array and jump to the new added structs */
-		opts = (opt_struct *) erealloc(opts, sizeof(opt_struct) * (len + count + 1));
+		opts = (opt_struct *) safe_erealloc(opts, sizeof(opt_struct), (len + count + 1), 0);
 		orig_opts = opts;
 		opts += len;
 
@@ -1244,13 +1236,13 @@ PHP_FUNCTION(usleep)
 		RETURN_THROWS();
 	}
 
-#if HAVE_USLEEP
+#ifdef HAVE_USLEEP
 	usleep((unsigned int)num);
 #endif
 }
 /* }}} */
 
-#if HAVE_NANOSLEEP
+#ifdef HAVE_NANOSLEEP
 /* {{{ Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
@@ -1968,6 +1960,25 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
+/* {{{ Get interpreted size from the ini shorthand syntax */
+PHP_FUNCTION(ini_parse_quantity)
+{
+	zend_string *shorthand;
+	zend_string *errstr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(shorthand)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG(zend_ini_parse_quantity(shorthand, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+}
+/* }}} */
+
 /* {{{ Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
@@ -2244,7 +2255,7 @@ PHP_FUNCTION(ignore_user_abort)
 }
 /* }}} */
 
-#if HAVE_GETSERVBYNAME
+#ifdef HAVE_GETSERVBYNAME
 /* {{{ Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
@@ -2269,7 +2280,7 @@ PHP_FUNCTION(getservbyname)
 
 	serv = getservbyname(ZSTR_VAL(name), proto);
 
-#if defined(_AIX)
+#ifdef _AIX
 	/*
         On AIX, imap is only known as imap2 in /etc/services, while on Linux imap is an alias for imap2.
         If a request for imap gives no result, we try again with imap2.
@@ -2287,7 +2298,7 @@ PHP_FUNCTION(getservbyname)
 /* }}} */
 #endif
 
-#if HAVE_GETSERVBYPORT
+#ifdef HAVE_GETSERVBYPORT
 /* {{{ Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
@@ -2312,7 +2323,7 @@ PHP_FUNCTION(getservbyport)
 /* }}} */
 #endif
 
-#if HAVE_GETPROTOBYNAME
+#ifdef HAVE_GETPROTOBYNAME
 /* {{{ Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
@@ -2335,7 +2346,7 @@ PHP_FUNCTION(getprotobyname)
 /* }}} */
 #endif
 
-#if HAVE_GETPROTOBYNUMBER
+#ifdef HAVE_GETPROTOBYNUMBER
 /* {{{ Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
@@ -2503,8 +2514,9 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				break;
 			}
 
+			/* entry in the form x[a]=b where x might need to be an array index */
 			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
-				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_ulong key = (zend_ulong) ZEND_STRTOUL(Z_STRVAL_P(arg1), NULL, 0);
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_add_new(Z_ARRVAL_P(arr), key, &hash);

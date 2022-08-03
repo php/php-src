@@ -74,18 +74,39 @@ int fpm_scoreboard_init_main() /* {{{ */
 }
 /* }}} */
 
-void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+static struct fpm_scoreboard_s *fpm_scoreboard_get_for_update(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 {
 	if (!scoreboard) {
 		scoreboard = fpm_scoreboard;
 	}
 	if (!scoreboard) {
 		zlog(ZLOG_WARNING, "Unable to update scoreboard: the SHM has not been found");
+	}
+
+	return scoreboard;
+}
+/* }}} */
+
+void fpm_scoreboard_update_begin(struct fpm_scoreboard_s *scoreboard) /* {{{ */
+{
+	scoreboard = fpm_scoreboard_get_for_update(scoreboard);
+	if (!scoreboard) {
 		return;
 	}
 
-
 	fpm_spinlock(&scoreboard->lock, 0);
+}
+/* }}} */
+
+void fpm_scoreboard_update_commit(
+		int idle, int active, int lq, int lq_len, int requests, int max_children_reached,
+		int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+{
+	scoreboard = fpm_scoreboard_get_for_update(scoreboard);
+	if (!scoreboard) {
+		return;
+	}
+
 	if (action == FPM_SCOREBOARD_ACTION_SET) {
 		if (idle >= 0) {
 			scoreboard->idle = idle;
@@ -151,6 +172,17 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 	}
 
 	fpm_unlock(scoreboard->lock);
+}
+/* }}} */
+
+
+void fpm_scoreboard_update(
+		int idle, int active, int lq, int lq_len, int requests, int max_children_reached,
+		int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+{
+	fpm_scoreboard_update_begin(scoreboard);
+	fpm_scoreboard_update_commit(
+			idle, active, lq, lq_len, requests, max_children_reached, slow_rq, action, scoreboard);
 }
 /* }}} */
 
@@ -224,6 +256,63 @@ void fpm_scoreboard_release(struct fpm_scoreboard_s *scoreboard) {
 	}
 
 	scoreboard->lock = 0;
+}
+
+struct fpm_scoreboard_s *fpm_scoreboard_copy(struct fpm_scoreboard_s *scoreboard, int copy_procs)
+{
+	struct fpm_scoreboard_s *scoreboard_copy;
+	struct fpm_scoreboard_proc_s *scoreboard_proc_p;
+	size_t scoreboard_size, scoreboard_nprocs_size;
+	int i;
+	void *mem;
+
+	if (!scoreboard) {
+		scoreboard = fpm_scoreboard_get();
+	}
+
+	if (copy_procs) {
+		scoreboard_size = sizeof(struct fpm_scoreboard_s);
+		scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * scoreboard->nprocs;
+
+		mem = malloc(scoreboard_size + scoreboard_nprocs_size);
+	} else {
+		mem = malloc(sizeof(struct fpm_scoreboard_s));
+	}
+
+	if (!mem) {
+		zlog(ZLOG_ERROR, "scoreboard: failed to allocate memory for copy");
+		return NULL;
+	}
+
+	scoreboard_copy = mem;
+
+	scoreboard = fpm_scoreboard_acquire(scoreboard, FPM_SCOREBOARD_LOCK_NOHANG);
+	if (!scoreboard) {
+		free(mem);
+		zlog(ZLOG_ERROR, "scoreboard: failed to lock (already locked)");
+		return NULL;
+	}
+
+	*scoreboard_copy = *scoreboard;
+
+	if (copy_procs) {
+		mem += scoreboard_size;
+
+		for (i = 0; i < scoreboard->nprocs; i++, mem += sizeof(struct fpm_scoreboard_proc_s)) {
+			scoreboard_proc_p = fpm_scoreboard_proc_acquire(scoreboard, i, FPM_SCOREBOARD_LOCK_HANG);
+			scoreboard_copy->procs[i] = *scoreboard_proc_p;
+			fpm_scoreboard_proc_release(scoreboard_proc_p);
+		}
+	}
+
+	fpm_scoreboard_release(scoreboard);
+
+	return scoreboard_copy;
+}
+
+void fpm_scoreboard_free_copy(struct fpm_scoreboard_s *scoreboard)
+{
+	free(scoreboard);
 }
 
 struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_acquire(struct fpm_scoreboard_s *scoreboard, int child_index, int nohang) /* {{{ */

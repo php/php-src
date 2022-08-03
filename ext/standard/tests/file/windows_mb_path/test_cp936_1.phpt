@@ -25,9 +25,9 @@ include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "úy‘á∂‡◊÷πù¬∑èΩ"; // cp936 string
 $prefix = create_data("dir_cp936", $item . "5", 936);
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}5";
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}5";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));

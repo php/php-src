@@ -56,9 +56,16 @@ typedef zend_observer_fcall_handlers (*zend_observer_fcall_init)(zend_execute_da
 // Call during minit/startup ONLY
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init);
 
+// Call during runtime, but only if you have used zend_observer_fcall_register.
+// You must not have more than one begin and one end handler active at the same time. Remove the old one first, if there is an existing one.
+ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin);
+ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin);
+ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observer_fcall_end_handler end);
+ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end);
+
 ZEND_API void zend_observer_startup(void); // Called by engine before MINITs
+ZEND_API void zend_observer_post_startup(void); // Called by engine after MINITs
 ZEND_API void zend_observer_activate(void);
-ZEND_API void zend_observer_deactivate(void);
 ZEND_API void zend_observer_shutdown(void);
 
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(

@@ -115,6 +115,7 @@ extern ZEND_API int zend_op_array_extension_handles;
 
 ZEND_API int zend_get_resource_handle(const char *module_name);
 ZEND_API int zend_get_op_array_extension_handle(const char *module_name);
+ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int handles);
 ZEND_API void zend_extension_dispatch_message(int message, void *arg);
 END_EXTERN_C()
 
@@ -143,6 +144,9 @@ ZEND_API void zend_append_version_info(const zend_extension *extension);
 void zend_startup_extensions_mechanism(void);
 void zend_startup_extensions(void);
 void zend_shutdown_extensions(void);
+
+ZEND_API size_t zend_internal_run_time_cache_reserved_size(void);
+ZEND_API void zend_init_internal_run_time_cache(void);
 
 BEGIN_EXTERN_C()
 ZEND_API zend_result zend_load_extension(const char *path);

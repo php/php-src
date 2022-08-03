@@ -18,7 +18,7 @@ steps:
       rm -rf junit.xml | true
       sapi/cli/php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
-          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          -g FAIL,BORK,LEAK,XLEAK \
           --offline \
           --show-diff \
           --show-slow 1000 \

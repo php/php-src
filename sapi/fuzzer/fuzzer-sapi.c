@@ -62,10 +62,7 @@ const char HARDCODED_INI[] =
 
 static int startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
-		return FAILURE;
-	}
-	return SUCCESS;
+	return php_module_startup(sapi_module, NULL);
 }
 
 static size_t ub_write(const char *str, size_t str_length)

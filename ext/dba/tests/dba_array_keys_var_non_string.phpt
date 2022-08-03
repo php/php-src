@@ -4,34 +4,35 @@ DBA check behaviour of key as an array with non string elements
 dba
 --SKIPIF--
 <?php
-    require_once(__DIR__ .'/skipif.inc');
-    die("info $HND handler used");
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+check_skip_any();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ .'/test.inc');
-$db_file = dba_open($db_file, "n", $handler);
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+$name = 'array_keys_non_string.db';
 
-if ($db_file === false) {
-    die('Error creating database');
-}
+$db = get_any_db($name);
 
 $key = [5, 5.21];
 
 var_dump($key);
-var_dump(dba_insert($key, 'Test', $db_file));
+var_dump(dba_insert($key, 'Test', $db));
 var_dump($key);
-var_dump(dba_fetch($key, $db_file));
+var_dump(dba_fetch($key, $db));
 var_dump($key);
 
-dba_close($db_file);
+dba_close($db);
 
 ?>
 --CLEAN--
 <?php
-    require(__DIR__ .'/clean.inc');
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+$db_name = 'array_keys_non_string.db';
+cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
+Using handler: "%s"
 array(2) {
   [0]=>
   int(5)
