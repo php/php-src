@@ -13,8 +13,6 @@ fclose($fp);
 
 $fo = new SplFileObject('SplFileObject__fgetcsv1.csv');
 var_dump($fo->fgetcsv());
-var_dump($fo->fgetcsv());
-var_dump($fo->fgetcsv());
 ?>
 --CLEAN--
 <?php
@@ -31,8 +29,3 @@ array(4) {
   [3]=>
   string(1) "5"
 }
-array(1) {
-  [0]=>
-  NULL
-}
-bool(false)

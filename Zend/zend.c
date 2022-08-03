@@ -146,7 +146,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
@@ -176,7 +176,7 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		EG(fiber_stack_size) = zend_ini_parse_quantity_warn(new_value, entry->name);
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
@@ -272,8 +272,7 @@ ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_li
 		ZSTR_LEN(buf.s) = max_len;
 	}
 
-	smart_str_0(&buf);
-	return buf.s;
+	return smart_str_extract(&buf);
 }
 /* }}} */
 
@@ -1227,6 +1226,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 	if (CG(map_ptr_last)) {
 		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
 	}
+	zend_init_internal_run_time_cache();
 	zend_observer_activate();
 }
 /* }}} */

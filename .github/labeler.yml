@@ -146,6 +146,9 @@
 "Extension: pspell":
 - ext/pspell/**/*
 
+"Extension: random":
+- ext/random/**/*
+
 "Extension: readline":
 - ext/readline/**/*
 
@@ -219,22 +222,22 @@
 - ext/zlib/**/*
 
 "SAPI: apache2handler":
-- ext/sapi/apache2handler/**/*
+- sapi/apache2handler/**/*
 
 "SAPI: cgi":
-- ext/sapi/cgi/**/*
+- sapi/cgi/**/*
 
 "SAPI: cli":
-- ext/sapi/cli/**/*
+- sapi/cli/**/*
 
 "SAPI: fpm":
-- ext/sapi/fpm/**/*
+- sapi/fpm/**/*
 
 "SAPI: fuzzer":
-- ext/sapi/fuzzer/**/*
+- sapi/fuzzer/**/*
 
 "SAPI: litespeed":
-- ext/sapi/litespeed/**/*
+- sapi/litespeed/**/*
 
 "SAPI: phpdbg":
-- ext/sapi/phpdbg/**/*
+- sapi/phpdbg/**/*

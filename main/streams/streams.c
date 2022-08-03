@@ -383,7 +383,8 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 
 	context = PHP_STREAM_CONTEXT(stream);
 
-	if (stream->flags & PHP_STREAM_FLAG_NO_CLOSE) {
+	if ((stream->flags & PHP_STREAM_FLAG_NO_CLOSE) ||
+			((stream->flags & PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE) && (close_options & PHP_STREAM_FREE_RSRC_DTOR))) {
 		preserve_handle = 1;
 	}
 

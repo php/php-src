@@ -125,8 +125,11 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 				}
 			} else {
 				w = (c1 - 0x47)*94 + c - 0x21;
-				ZEND_ASSERT(w < uhc3_ucs_table_size);
-				w = uhc3_ucs_table[w];
+				if (w < uhc3_ucs_table_size) {
+					w = uhc3_ucs_table[w];
+				} else {
+					w = MBFL_BAD_INPUT;
+				}
 			}
 
 			if (w <= 0) {
@@ -187,6 +190,14 @@ int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 {
 	int c1, c2, s = 0;
 
+	if ((filter->status & 0x100) == 0) {
+		CK((*filter->output_function)(0x1b, filter->data)); /* ESC */
+		CK((*filter->output_function)('$', filter->data));
+		CK((*filter->output_function)(')', filter->data));
+		CK((*filter->output_function)('C', filter->data));
+		filter->status |= 0x100;
+	}
+
 	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
 		s = ucs_a1_uhc_table[c - ucs_a1_uhc_table_min];
 	} else if (c >= ucs_a2_uhc_table_min && c < ucs_a2_uhc_table_max) {
@@ -208,9 +219,7 @@ int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 	/* exclude UHC extension area */
 	if (c1 < 0xa1 || c2 < 0xa1) {
 		s = c;
-	}
-
-	if (s & 0x8000) {
+	} else if (s & 0x8000) {
 		s -= 0x8080;
 	}
 
@@ -232,13 +241,6 @@ int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 			}
 			CK((*filter->output_function)(s, filter->data));
 		} else {
-			if ((filter->status & 0x100) == 0) {
-				CK((*filter->output_function)(0x1b, filter->data)); /* ESC */
-				CK((*filter->output_function)('$', filter->data));
-				CK((*filter->output_function)(')', filter->data));
-				CK((*filter->output_function)('C', filter->data));
-				filter->status |= 0x100;
-			}
 			if ((filter->status & 0x10) == 0) {
 				CK((*filter->output_function)(0x0e, filter->data)); /* shift out */
 				filter->status |= 0x10;
@@ -256,7 +258,7 @@ int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 static int mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)
 {
 	/* back to ascii */
-	if (filter->status & 0xff00) {
+	if (filter->status & 0x10) {
 		CK((*filter->output_function)(0x0f, filter->data)); /* shift in */
 	}
 

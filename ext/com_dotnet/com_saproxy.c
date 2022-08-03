@@ -332,12 +332,12 @@ static int saproxy_objects_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-static int saproxy_object_cast(zend_object *readobj, zval *writeobj, int type)
+static zend_result saproxy_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zend_object *object, zend_long *count)
+static zend_result saproxy_count_elements(zend_object *object, zend_long *count)
 {
 	php_com_saproxy *proxy = (php_com_saproxy*) object;
 	LONG ubound, lbound;

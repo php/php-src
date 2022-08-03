@@ -4,7 +4,7 @@
 
 /**
  * @var int
- * @cname PHP_HASH_HMAC
+ * @cvalue PHP_HASH_HMAC
  */
 const HASH_HMAC = UNKNOWN;
 
@@ -15,22 +15,19 @@ function hash(string $algo, string $data, bool $binary = false, array $options =
 function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
 
 /**
- * @sensitive-param $key
  * @refcount 1
  */
-function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string {}
+function hash_hmac(string $algo, string $data, #[\SensitiveParameter] string $key, bool $binary = false): string {}
 
 /**
- * @sensitive-param $key
  * @refcount 1
  */
-function hash_hmac_file(string $algo, string $filename, string $key, bool $binary = false): string|false {}
+function hash_hmac_file(string $algo, string $filename, #[\SensitiveParameter] string $key, bool $binary = false): string|false {}
 
 /**
- * @sensitive-param $key
  * @refcount 1
  */
-function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
+function hash_init(string $algo, int $flags = 0, #[\SensitiveParameter] string $key = "", array $options = []): HashContext {}
 
 function hash_update(HashContext $context, string $data): bool {}
 
@@ -59,22 +56,16 @@ function hash_algos(): array {}
 function hash_hmac_algos(): array {}
 
 /**
- * @sensitive-param $password
  * @refcount 1
  */
-function hash_pbkdf2(string $algo, string $password, string $salt, int $iterations, int $length = 0, bool $binary = false): string {}
+function hash_pbkdf2(string $algo, #[\SensitiveParameter] string $password, string $salt, int $iterations, int $length = 0, bool $binary = false): string {}
+
+function hash_equals(#[\SensitiveParameter] string $known_string, #[\SensitiveParameter] string $user_string): bool {}
 
 /**
- * @sensitive-param $known_string
- * @sensitive-param $user_string
- */
-function hash_equals(string $known_string, string $user_string): bool {}
-
-/**
- * @sensitive-param $key
  * @refcount 1
  */
-function hash_hkdf(string $algo, string $key, int $length = 0, string $info = "", string $salt = ""): string {}
+function hash_hkdf(string $algo, #[\SensitiveParameter] string $key, int $length = 0, string $info = "", string $salt = ""): string {}
 
 #ifdef PHP_MHASH_BC
 /** @deprecated */

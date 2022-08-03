@@ -145,6 +145,9 @@ void zend_startup_extensions_mechanism(void);
 void zend_startup_extensions(void);
 void zend_shutdown_extensions(void);
 
+ZEND_API size_t zend_internal_run_time_cache_reserved_size(void);
+ZEND_API void zend_init_internal_run_time_cache(void);
+
 BEGIN_EXTERN_C()
 ZEND_API zend_result zend_load_extension(const char *path);
 ZEND_API zend_result zend_load_extension_handle(DL_HANDLE handle, const char *path);

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3ce386bb8ab215ad532826e053b8487fd3fd5582 */
+ * Stub hash: 2615114ae250af0329b861d82f4100c2757457da */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -74,7 +74,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_push, 0, 1, IS_LONG, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_krsort, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_krsort, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SORT_REGULAR")
 ZEND_END_ARG_INFO()
@@ -100,9 +100,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sort arginfo_krsort
 
-#define arginfo_rsort arginfo_krsort
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rsort, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SORT_REGULAR")
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_usort, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_usort, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
@@ -138,7 +141,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_max arginfo_min
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_MASK(1, array, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, arg, IS_MIXED, 0)
@@ -186,7 +189,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_range, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_MASK(0, step, MAY_BE_LONG|MAY_BE_DOUBLE, "1")
 ZEND_END_ARG_INFO()
 
-#define arginfo_shuffle arginfo_natsort
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shuffle, 0, 1, IS_TRUE, 0)
+	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_pop, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
@@ -500,6 +505,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ini_restore, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ini_parse_quantity, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, shorthand, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_set_include_path, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, include_path, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -672,9 +681,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_hrtime, 0, 0, MAY_BE_ARRAY|MAY_B
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, as_number, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_md5, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, binary, _IS_BOOL, 0, "false")
@@ -708,12 +714,12 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_SYSLOG_H)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_closelog, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_closelog, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_SYSLOG_H)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_syslog, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_syslog, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, priority, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -1527,7 +1533,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getimagesizefromstring, 0, 1, MA
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, image_info, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpinfo, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpinfo, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "INFO_ALL")
 ZEND_END_ARG_INFO()
 
@@ -1535,7 +1541,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_phpversion, 0, 0, MAY_BE_STRING|
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extension, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpcredits, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpcredits, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "CREDITS_ALL")
 ZEND_END_ARG_INFO()
 
@@ -1649,7 +1655,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_log1p arginfo_sin
 
-#define arginfo_pi arginfo_lcg_value
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pi, 0, 0, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_finite, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_DOUBLE, 0)
@@ -1811,33 +1818,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_quoted_printable_decode arginfo_base64_encode
 
 #define arginfo_quoted_printable_encode arginfo_base64_encode
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_srand, 0, 0, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seed, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "MT_RAND_MT19937")
-ZEND_END_ARG_INFO()
-
-#define arginfo_srand arginfo_mt_srand
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rand, 0, 0, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_mt_rand arginfo_rand
-
-#define arginfo_mt_getrandmax arginfo_ob_get_level
-
-#define arginfo_getrandmax arginfo_ob_get_level
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_random_bytes, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_random_int, 0, 2, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
-ZEND_END_ARG_INFO()
 
 #define arginfo_soundex arginfo_base64_encode
 
@@ -2357,6 +2337,7 @@ ZEND_FUNCTION(ini_get);
 ZEND_FUNCTION(ini_get_all);
 ZEND_FUNCTION(ini_set);
 ZEND_FUNCTION(ini_restore);
+ZEND_FUNCTION(ini_parse_quantity);
 ZEND_FUNCTION(set_include_path);
 ZEND_FUNCTION(get_include_path);
 ZEND_FUNCTION(print_r);
@@ -2415,7 +2396,6 @@ ZEND_FUNCTION(net_get_interfaces);
 ZEND_FUNCTION(ftok);
 #endif
 ZEND_FUNCTION(hrtime);
-ZEND_FUNCTION(lcg_value);
 ZEND_FUNCTION(md5);
 ZEND_FUNCTION(md5_file);
 ZEND_FUNCTION(getmyuid);
@@ -2731,12 +2711,6 @@ ZEND_FUNCTION(proc_get_status);
 #endif
 ZEND_FUNCTION(quoted_printable_decode);
 ZEND_FUNCTION(quoted_printable_encode);
-ZEND_FUNCTION(mt_srand);
-ZEND_FUNCTION(rand);
-ZEND_FUNCTION(mt_rand);
-ZEND_FUNCTION(mt_getrandmax);
-ZEND_FUNCTION(random_bytes);
-ZEND_FUNCTION(random_int);
 ZEND_FUNCTION(soundex);
 ZEND_FUNCTION(stream_select);
 ZEND_FUNCTION(stream_context_create);
@@ -2989,6 +2963,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ini_set, arginfo_ini_set)
 	ZEND_FALIAS(ini_alter, ini_set, arginfo_ini_alter)
 	ZEND_FE(ini_restore, arginfo_ini_restore)
+	ZEND_FE(ini_parse_quantity, arginfo_ini_parse_quantity)
 	ZEND_FE(set_include_path, arginfo_set_include_path)
 	ZEND_FE(get_include_path, arginfo_get_include_path)
 	ZEND_FE(print_r, arginfo_print_r)
@@ -3053,7 +3028,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftok, arginfo_ftok)
 #endif
 	ZEND_FE(hrtime, arginfo_hrtime)
-	ZEND_FE(lcg_value, arginfo_lcg_value)
 	ZEND_FE(md5, arginfo_md5)
 	ZEND_FE(md5_file, arginfo_md5_file)
 	ZEND_FE(getmyuid, arginfo_getmyuid)
@@ -3375,14 +3349,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(quoted_printable_decode, arginfo_quoted_printable_decode)
 	ZEND_FE(quoted_printable_encode, arginfo_quoted_printable_encode)
-	ZEND_FE(mt_srand, arginfo_mt_srand)
-	ZEND_FALIAS(srand, mt_srand, arginfo_srand)
-	ZEND_FE(rand, arginfo_rand)
-	ZEND_FE(mt_rand, arginfo_mt_rand)
-	ZEND_FE(mt_getrandmax, arginfo_mt_getrandmax)
-	ZEND_FALIAS(getrandmax, mt_getrandmax, arginfo_getrandmax)
-	ZEND_FE(random_bytes, arginfo_random_bytes)
-	ZEND_FE(random_int, arginfo_random_int)
 	ZEND_FE(soundex, arginfo_soundex)
 	ZEND_FE(stream_select, arginfo_stream_select)
 	ZEND_FE(stream_context_create, arginfo_stream_context_create)
@@ -3518,10 +3484,12 @@ static const zend_function_entry class_AssertionError_methods[] = {
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_DOUBLE_CONSTANT("M_E", M_E, CONST_CS | CONST_PERSISTENT);
-	ZEND_ASSERT(M_E == 2.7182818284590451);
+	ZEND_ASSERT(M_E == 2.718281828459045);
 
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "password_hash", 0);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "password_verify", 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_verify", sizeof("password_verify") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)

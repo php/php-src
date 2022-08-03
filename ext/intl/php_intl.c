@@ -21,7 +21,6 @@
 
 
 #include "php_intl.h"
-#include "php_intl_arginfo.h"
 #include "intl_error.h"
 #include "collator/collator_class.h"
 #include "collator/collator.h"
@@ -75,6 +74,8 @@
 #include <ext/standard/info.h>
 
 #include "php_ini.h"
+
+#include "php_intl_arginfo.h"
 
 /*
  * locale_get_default has a conflict since ICU also has
@@ -148,17 +149,10 @@ PHP_MINIT_FUNCTION( intl )
 	/* For the default locale php.ini setting */
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("INTL_MAX_LOCALE_LEN", INTL_MAX_LOCALE_LEN, CONST_PERSISTENT | CONST_CS);
-	REGISTER_STRING_CONSTANT("INTL_ICU_VERSION", U_ICU_VERSION, CONST_PERSISTENT | CONST_CS);
-#ifdef U_ICU_DATA_VERSION
-	REGISTER_STRING_CONSTANT("INTL_ICU_DATA_VERSION", U_ICU_DATA_VERSION, CONST_PERSISTENT | CONST_CS);
-#endif
+	register_php_intl_symbols(module_number);
 
-	/* Register 'Collator' PHP class */
-	collator_register_Collator_class(  );
-
-	/* Expose Collator constants to PHP scripts */
-	collator_register_constants( INIT_FUNC_ARGS_PASSTHRU );
+	/* Register collator symbols and classes */
+	collator_register_Collator_symbols(module_number);
 
 	/* Register 'NumberFormatter' PHP class */
 	formatter_register_class(  );
@@ -174,9 +168,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'Locale' PHP class */
 	locale_register_Locale_class(  );
-
-	/* Expose Locale constants to PHP scripts */
-	locale_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	msgformat_register_class();
 

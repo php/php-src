@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "php_rand.h"
 #include "php_string.h"
 #include "php_variables.h"
 #include <locale.h>
@@ -45,6 +44,7 @@
 #include "ext/standard/file.h"
 /* For php_next_utf8_char() */
 #include "ext/standard/html.h"
+#include "ext/random/php_random.h"
 
 #ifdef __SSE2__
 #include <emmintrin.h>
@@ -2891,8 +2891,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 
 	if (result.s) {
 		smart_str_appendl(&result, str + old_pos, slen - old_pos);
-		smart_str_0(&result);
-		RETVAL_NEW_STR(result.s);
+		RETVAL_STR(smart_str_extract(&result));
 	} else {
 		smart_str_free(&result);
 		RETVAL_STR_COPY(input);
@@ -4387,7 +4386,7 @@ PHP_FUNCTION(hebrev)
 {
 	char *str, *heb_str, *target;
 	const char *tmp;
-	size_t block_start, block_end, block_type, block_length, i;
+	size_t block_start, block_end, block_type, i;
 	zend_long max_chars=0, char_count;
 	size_t begin, end, orig_begin;
 	size_t str_len;
@@ -4411,8 +4410,6 @@ PHP_FUNCTION(hebrev)
 	*target = 0;
 	target--;
 
-	block_length=0;
-
 	if (isheb(*tmp)) {
 		block_type = _HEB_BLOCK_TYPE_HEB;
 	} else {
@@ -4424,7 +4421,6 @@ PHP_FUNCTION(hebrev)
 			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<str_len-1) {
 				tmp++;
 				block_end++;
-				block_length++;
 			}
 			for (i = block_start+1; i<= block_end+1; i++) {
 				*target = str[i-1];
@@ -4469,7 +4465,6 @@ PHP_FUNCTION(hebrev)
 			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < str_len-1) {
 				tmp++;
 				block_end++;
-				block_length++;
 			}
 			while ((_isblank((int)*tmp) || ispunct((int)*tmp)) && *tmp!='/' && *tmp!='-' && block_end > block_start) {
 				tmp--;
@@ -5253,7 +5248,11 @@ PHP_FUNCTION(str_getcsv)
 		esc = esc_len ? (unsigned char) esc_str[0] : PHP_CSV_NO_ESCAPE;
 	}
 
-	php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str), return_value);
+	HashTable *values = php_fgetcsv(NULL, delim, enc, esc, ZSTR_LEN(str), ZSTR_VAL(str));
+	if (values == NULL) {
+		values = php_bc_fgetcsv_empty_line();
+	}
+	RETURN_ARR(values);
 }
 /* }}} */
 
@@ -5734,28 +5733,35 @@ PHP_FUNCTION(str_rot13)
 }
 /* }}} */
 
-static void php_string_shuffle(char *str, size_t len) /* {{{ */
+/* {{{ php_binary_string_shuffle */
+PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_status *status, char *str, zend_long len) /* {{{ */
 {
-	zend_long n_elems, rnd_idx, n_left;
+	int64_t n_elems, rnd_idx, n_left;
 	char temp;
+
 	/* The implementation is stolen from array_data_shuffle       */
 	/* Thus the characteristics of the randomization are the same */
 	n_elems = len;
 
 	if (n_elems <= 1) {
-		return;
+		return true;
 	}
 
 	n_left = n_elems;
 
 	while (--n_left) {
-		rnd_idx = php_mt_rand_range(0, n_left);
+		rnd_idx = algo->range(status, 0, n_left);
+		if (EG(exception)) {
+			return false;
+		}
 		if (rnd_idx != n_left) {
 			temp = str[n_left];
 			str[n_left] = str[rnd_idx];
 			str[rnd_idx] = temp;
 		}
 	}
+
+	return true;
 }
 /* }}} */
 
@@ -5770,7 +5776,12 @@ PHP_FUNCTION(str_shuffle)
 
 	RETVAL_STRINGL(ZSTR_VAL(arg), ZSTR_LEN(arg));
 	if (Z_STRLEN_P(return_value) > 1) {
-		php_string_shuffle(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
+		php_binary_string_shuffle(
+			php_random_default_algo(),
+			php_random_default_status(),
+			Z_STRVAL_P(return_value),
+			Z_STRLEN_P(return_value)
+		);
 	}
 }
 /* }}} */
@@ -5882,7 +5893,11 @@ PHP_FUNCTION(str_split)
 		RETURN_THROWS();
 	}
 
-	if (0 == ZSTR_LEN(str) || (size_t)split_length >= ZSTR_LEN(str)) {
+	if ((size_t)split_length >= ZSTR_LEN(str)) {
+		if (0 == ZSTR_LEN(str)) {
+			RETURN_EMPTY_ARRAY();
+		}
+
 		array_init_size(return_value, 1);
 		add_next_index_stringl(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 		return;

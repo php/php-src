@@ -281,6 +281,7 @@ tmp-php.ini
 # GitHub actions cache
 # ------------------------------------------------------------------------------
 /branch-commit-cache.json
+/junit.out.xml
 
 # ------------------------------------------------------------------------------
 # Special cases to invert previous ignore patterns

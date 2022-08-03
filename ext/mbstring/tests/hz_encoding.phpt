@@ -33,6 +33,7 @@ testValidString('~~', '~', 'HZ', 'ASCII');
 testValidString("~\n", '', 'HZ', 'ASCII', false);
 testValidString('~{~}', '', 'HZ', 'ASCII', false);
 testValidString("~{~\n~}", '', 'HZ', 'ASCII', false);
+testValidString('~~?', '~?', 'HZ', 'ASCII');
 echo "Tested valid ~ escapes\n";
 
 for ($i = 0; $i < 0xFF; $i++) {

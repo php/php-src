@@ -275,6 +275,11 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 			mutable_data->default_properties_table = NULL;
 		}
 
+		if (mutable_data->backed_enum_table) {
+			zend_hash_release(mutable_data->backed_enum_table);
+			mutable_data->backed_enum_table = NULL;
+		}
+
 		ZEND_MAP_PTR_SET_IMM(ce->mutable_data, NULL);
 	}
 }

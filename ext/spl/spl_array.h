@@ -21,6 +21,18 @@
 #include "php_spl.h"
 #include "spl_iterators.h"
 
+#define SPL_ARRAY_STD_PROP_LIST      0x00000001
+#define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
+#define SPL_ARRAY_CHILD_ARRAYS_ONLY  0x00000004
+#define SPL_ARRAY_IS_SELF            0x01000000
+#define SPL_ARRAY_USE_OTHER          0x02000000
+#define SPL_ARRAY_INT_MASK           0xFFFF0000
+#define SPL_ARRAY_CLONE_MASK         0x0100FFFF
+
+#define SPL_ARRAY_METHOD_NO_ARG				0
+#define SPL_ARRAY_METHOD_CALLBACK_ARG  		1
+#define SPL_ARRAY_METHOD_SORT_FLAGS_ARG 	2
+
 extern PHPAPI zend_class_entry *spl_ce_ArrayObject;
 extern PHPAPI zend_class_entry *spl_ce_ArrayIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveArrayIterator;

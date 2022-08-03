@@ -6,9 +6,10 @@ runs:
       run: |
         set -x
         [[ "$OSTYPE" == "darwin"* ]] && export PATH="/usr/local/opt/bison/bin:$PATH"
+        scripts/dev/credits
         scripts/dev/genfiles
         Zend/zend_vm_gen.php
+        ext/tokenizer/tokenizer_data_gen.php
         build/gen_stub.php -f
         build/gen_stub.php --generate-optimizer-info
-        ext/tokenizer/tokenizer_data_gen.php
-        git add . -Nu && git diff --exit-code
+        git add . -N && git diff --exit-code

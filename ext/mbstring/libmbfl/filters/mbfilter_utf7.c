@@ -290,7 +290,7 @@ int mbfl_filt_conv_wchar_utf7(int c, mbfl_convert_filter *filter)
 		}
 	} else if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
 		;
-	} else if (c >= MBFL_WCSPLANE_SUPMIN && c < MBFL_WCSPLANE_SUPMAX) {
+	} else if (c >= MBFL_WCSPLANE_SUPMIN && c < MBFL_WCSPLANE_UTF32MAX) {
 		CK((*filter->filter_function)(((c >> 10) - 0x40) | 0xd800, filter));
 		CK((*filter->filter_function)((c & 0x3ff) | 0xdc00, filter));
 		return 0;

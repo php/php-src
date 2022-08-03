@@ -89,4 +89,4 @@ bool(true)
 session_set_save_handler(): Argument #1 ($open) must be of type SessionHandlerInterface, MySession2 given
 good handler writing
 
-Deprecated: Unknown: Session callback must have a return value of type bool, int returned in Unknown on line 0
+Deprecated: PHP Request Shutdown: Session callback must have a return value of type bool, int returned in Unknown on line 0

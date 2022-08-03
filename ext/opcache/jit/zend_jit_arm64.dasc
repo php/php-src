@@ -3655,6 +3655,16 @@ static int zend_jit_update_regs(dasm_State **Dst, uint32_t var, zend_jit_addr sr
 		} else {
 			ZEND_UNREACHABLE();
 		}
+	} else if (Z_MODE(dst) == IS_REG && Z_STORE(dst)) {
+		dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
+		if (!zend_jit_spill_store(Dst, src, dst, info,
+				JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+				JIT_G(current_frame) == NULL ||
+				STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var)) == IS_UNKNOWN ||
+				(1 << STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var))) != (info & MAY_BE_ANY)
+		)) {
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -4917,6 +4927,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			|	EXT_CALL mod_function, REG0
 		} else {
 			ZEND_UNREACHABLE();
+		}
+		if (op1_addr == res_addr && (op2_info & MAY_BE_RCN)) {
+			/* compound assignment may decrement "op2" refcount */
+			op2_info |= MAY_BE_RC1;
 		}
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
 		|	FREE_OP op2_type, op2, op2_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
@@ -9513,12 +9527,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 		}
 
+		|	// EG(current_execute_data) = execute_data;
+		|	MEM_STORE_64_ZTS str, RX, executor_globals, current_execute_data, REG1
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	mov FCARG1x, RX
+			|	EXT_CALL zend_observer_fcall_begin, REG0
+			|	ldr REG0, EX:RX->func // reload
+		}
+
 		|	// ZVAL_NULL(EX_VAR(opline->result.var));
 		|	LOAD_ZVAL_ADDR FCARG2x, res_addr
 		|	SET_Z_TYPE_INFO FCARG2x, IS_NULL, TMP1w
-
-		|	// EG(current_execute_data) = execute_data;
-		|	MEM_STORE_64_ZTS str, RX, executor_globals, current_execute_data, REG1
 
 		zend_jit_reset_last_valid_opline();
 
@@ -9529,6 +9549,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		} else {
 			|	ldr TMP1, [REG0, #offsetof(zend_internal_function, handler)]
 			|	blr TMP1
+		}
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	LOAD_ZVAL_ADDR FCARG2x, res_addr
+			|	mov FCARG1x, RX
+			|	EXT_CALL zend_observer_fcall_end, REG0
 		}
 
 		|	// EG(current_execute_data) = execute_data;
@@ -13843,6 +13869,9 @@ static int zend_jit_hash_jmp(dasm_State **Dst, const zend_op *opline, const zend
 			} else {
 				exit_point = zend_jit_trace_get_exit_point(target, 0);
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
 				|	.addr &exit_addr
 			}
 		}
@@ -14008,6 +14037,9 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 							} else {
 								exit_point = zend_jit_trace_get_exit_point(target, 0);
 								exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+								if (!exit_addr) {
+									return 0;
+								}
 								|	.addr &exit_addr
 							}
 						}

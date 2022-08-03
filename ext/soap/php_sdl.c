@@ -3261,8 +3261,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
 			smart_str_appends(&proxy,":");
 			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
-			smart_str_0(&proxy);
-			ZVAL_NEW_STR(&str_proxy, proxy.s);
+			ZVAL_STR(&str_proxy, smart_str_extract(&proxy));
 
 			if (!context) {
 				context = php_stream_context_alloc();
@@ -3304,8 +3303,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			http_context_headers(context, has_authorization, has_proxy_authorization, 0, &headers);
 		}
 
-		smart_str_0(&headers);
-		ZVAL_NEW_STR(&str_headers, headers.s);
+		ZVAL_STR(&str_headers, smart_str_extract(&headers));
 		php_stream_context_set_option(context, "http", "header", &str_headers);
 		zval_ptr_dtor(&str_headers);
 	}

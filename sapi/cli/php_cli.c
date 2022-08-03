@@ -526,7 +526,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(void) /* {{{ */
+static void cli_register_file_handles(void)
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -540,9 +540,9 @@ static void cli_register_file_handles(void) /* {{{ */
 	 * extensions which write to stderr or company during mshutdown/gshutdown
 	 * won't have the expected functionality.
 	 */
-	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
+	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
+	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
 
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		if (s_in) php_stream_close(s_in);
@@ -569,7 +569,6 @@ static void cli_register_file_handles(void) /* {{{ */
 	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	zend_register_constant(&ec);
 }
-/* }}} */
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 

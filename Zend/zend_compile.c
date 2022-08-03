@@ -33,6 +33,7 @@
 #include "zend_inheritance.h"
 #include "zend_vm.h"
 #include "zend_enum.h"
+#include "zend_observer.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -1192,16 +1193,54 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 	return zend_string_copy(name);
 }
 
+static zend_string *add_intersection_type(zend_string *str,
+	zend_type_list *intersection_type_list, zend_class_entry *scope,
+	bool is_bracketed)
+{
+	zend_type *single_type;
+	zend_string *intersection_str = NULL;
+
+	ZEND_TYPE_LIST_FOREACH(intersection_type_list, single_type) {
+		ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*single_type));
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*single_type));
+		zend_string *name = ZEND_TYPE_NAME(*single_type);
+		zend_string *resolved = resolve_class_name(name, scope);
+		intersection_str = add_type_string(intersection_str, resolved, /* is_intersection */ true);
+		zend_string_release(resolved);
+	} ZEND_TYPE_LIST_FOREACH_END();
+
+	ZEND_ASSERT(intersection_str);
+
+	if (is_bracketed) {
+		zend_string *result = zend_string_concat3("(", 1, ZSTR_VAL(intersection_str), ZSTR_LEN(intersection_str), ")", 1);
+		zend_string_release(intersection_str);
+		intersection_str = result;
+	}
+	str = add_type_string(str, intersection_str, /* is_intersection */ false);
+	zend_string_release(intersection_str);
+	return str;
+}
+
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
 
-	if (ZEND_TYPE_HAS_LIST(type)) {
+	/* Pure intersection type */
+	if (ZEND_TYPE_IS_INTERSECTION(type)) {
+		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
+		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, /* is_bracketed */ false);
+	} else if (ZEND_TYPE_HAS_LIST(type)) {
+		/* A union type might not be a list */
 		zend_type *list_type;
-		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+				str = add_intersection_type(str, ZEND_TYPE_LIST(*list_type), scope, /* is_bracketed */ true);
+				continue;
+			}
+			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+			ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*list_type));
 			zend_string *name = ZEND_TYPE_NAME(*list_type);
 			zend_string *resolved = resolve_class_name(name, scope);
-			str = add_type_string(str, resolved, is_intersection);
+			str = add_type_string(str, resolved, /* is_intersection */ false);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
@@ -1259,7 +1298,8 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 
 	if (type_mask & MAY_BE_NULL) {
 		bool is_union = !str || memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL;
-		if (!is_union) {
+		bool has_intersection = !str || memchr(ZSTR_VAL(str), '&', ZSTR_LEN(str)) != NULL;
+		if (!is_union && !has_intersection) {
 			zend_string *nullable_str = zend_string_concat2("?", 1, ZSTR_VAL(str), ZSTR_LEN(str));
 			zend_string_release(str);
 			return nullable_str;
@@ -3623,7 +3663,7 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 }
 /* }}} */
 
-static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
+static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc, uint32_t lineno) /* {{{ */
 {
 	zend_op *opline;
 	uint32_t opnum_init = get_next_op_number() - 1;
@@ -3660,6 +3700,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 	if (may_have_extra_named_args) {
 		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	}
+	opline->lineno = lineno;
 	zend_do_extended_fcall_end();
 	return false;
 }
@@ -3678,7 +3719,7 @@ static bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* 
 }
 /* }}} */
 
-static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
+static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno) /* {{{ */
 {
 	zend_op *opline = get_next_op();
 	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
@@ -3687,11 +3728,11 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 		Z_STR(name_node->u.constant));
 	opline->result.num = zend_alloc_cache_slot();
 
-	zend_compile_call_common(result, args_ast, NULL);
+	zend_compile_call_common(result, args_ast, NULL, lineno);
 }
 /* }}} */
 
-static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
+static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno) /* {{{ */
 {
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
 		const char *colon;
@@ -3721,7 +3762,7 @@ static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast 
 		zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, name_node);
 	}
 
-	zend_compile_call_common(result, args_ast, NULL);
+	zend_compile_call_common(result, args_ast, NULL, lineno);
 }
 /* }}} */
 
@@ -4015,7 +4056,7 @@ static zend_result zend_compile_func_cuf(znode *result, zend_ast_list *args, zen
 }
 /* }}} */
 
-static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc) /* {{{ */
+static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc, uint32_t lineno) /* {{{ */
 {
 	if (EG(assertions) >= 0) {
 		znode name_node;
@@ -4050,7 +4091,7 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 			zend_ast_list_add((zend_ast *) args, arg);
 		}
 
-		zend_compile_call_common(result, (zend_ast*)args, fbc);
+		zend_compile_call_common(result, (zend_ast*)args, fbc, lineno);
 
 		opline = &CG(active_op_array)->opcodes[check_op_number];
 		opline->op2.opline_num = get_next_op_number();
@@ -4377,7 +4418,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast);
-		zend_compile_dynamic_call(result, &name_node, args_ast);
+		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno);
 		return;
 	}
 
@@ -4386,9 +4427,9 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		if (runtime_resolution) {
 			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")
 					&& !is_callable_convert) {
-				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL);
+				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
 			} else {
-				zend_compile_ns_call(result, &name_node, args_ast);
+				zend_compile_ns_call(result, &name_node, args_ast, ast->lineno);
 			}
 			return;
 		}
@@ -4405,7 +4446,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
-			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc);
+			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
 			return;
@@ -4417,7 +4458,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
 		) {
 			zend_string_release_ex(lcname, 0);
-			zend_compile_dynamic_call(result, &name_node, args_ast);
+			zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno);
 			return;
 		}
 
@@ -4436,7 +4477,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		opline->result.num = zend_alloc_cache_slot();
 
-		zend_compile_call_common(result, args_ast, fbc);
+		zend_compile_call_common(result, args_ast, fbc, ast->lineno);
 	}
 }
 /* }}} */
@@ -4500,7 +4541,7 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 		}
 	}
 
-	if (zend_compile_call_common(result, args_ast, fbc)) {
+	if (zend_compile_call_common(result, args_ast, fbc, zend_ast_get_lineno(method_ast))) {
 		if (short_circuiting_checkpoint != zend_short_circuiting_checkpoint()) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot combine nullsafe operator with Closure creation");
@@ -4597,7 +4638,7 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		}
 	}
 
-	zend_compile_call_common(result, args_ast, fbc);
+	zend_compile_call_common(result, args_ast, fbc, zend_ast_get_lineno(method_ast));
 }
 /* }}} */
 
@@ -4629,7 +4670,7 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		SET_NODE(opline->op1, &class_node);
 	}
 
-	zend_compile_call_common(&ctor_result, args_ast, NULL);
+	zend_compile_call_common(&ctor_result, args_ast, NULL, ast->lineno);
 	zend_do_free(&ctor_result);
 }
 /* }}} */
@@ -6197,6 +6238,88 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 	}
 }
 
+static void zend_are_intersection_types_redundant(zend_type left_type, zend_type right_type)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(left_type));
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(right_type));
+	zend_type_list *l_type_list = ZEND_TYPE_LIST(left_type);
+	zend_type_list *r_type_list = ZEND_TYPE_LIST(right_type);
+	zend_type_list *smaller_type_list, *larger_type_list;
+	bool flipped = false;
+
+	if (r_type_list->num_types < l_type_list->num_types) {
+		smaller_type_list = r_type_list;
+		larger_type_list = l_type_list;
+		flipped = true;
+	} else {
+		smaller_type_list = l_type_list;
+		larger_type_list = r_type_list;
+	}
+
+	unsigned int sum = 0;
+	zend_type *outer_type;
+	ZEND_TYPE_LIST_FOREACH(smaller_type_list, outer_type)
+		zend_type *inner_type;
+		ZEND_TYPE_LIST_FOREACH(larger_type_list, inner_type)
+			if (zend_string_equals_ci(ZEND_TYPE_NAME(*inner_type), ZEND_TYPE_NAME(*outer_type))) {
+				sum++;
+				break;
+			}
+		ZEND_TYPE_LIST_FOREACH_END();
+	ZEND_TYPE_LIST_FOREACH_END();
+
+	if (sum == smaller_type_list->num_types) {
+		zend_string *smaller_type_str;
+		zend_string *larger_type_str;
+		if (flipped) {
+			smaller_type_str = zend_type_to_string(right_type);
+			larger_type_str = zend_type_to_string(left_type);
+		} else {
+			smaller_type_str = zend_type_to_string(left_type);
+			larger_type_str = zend_type_to_string(right_type);
+		}
+		if (smaller_type_list->num_types == larger_type_list->num_types) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant with type %s",
+				ZSTR_VAL(smaller_type_str), ZSTR_VAL(larger_type_str));
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant as it is more restrictive than type %s",
+				ZSTR_VAL(larger_type_str), ZSTR_VAL(smaller_type_str));
+		}
+	}
+}
+
+static void zend_is_intersection_type_redundant_by_single_type(zend_type intersection_type, zend_type single_type)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(intersection_type));
+	ZEND_ASSERT(!ZEND_TYPE_IS_INTERSECTION(single_type));
+
+	zend_type *single_intersection_type = NULL;
+	ZEND_TYPE_FOREACH(intersection_type, single_intersection_type)
+		if (zend_string_equals_ci(ZEND_TYPE_NAME(*single_intersection_type), ZEND_TYPE_NAME(single_type))) {
+			zend_string *single_type_str = zend_type_to_string(single_type);
+			zend_string *complete_type = zend_type_to_string(intersection_type);
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant as it is more restrictive than type %s",
+					ZSTR_VAL(complete_type), ZSTR_VAL(single_type_str));
+		}
+	ZEND_TYPE_FOREACH_END();
+}
+
+/* Used by both intersection and union types prior to transforming the type list to a full zend_type */
+static void zend_is_type_list_redundant_by_single_type(zend_type_list *type_list, zend_type type)
+{
+	ZEND_ASSERT(!ZEND_TYPE_IS_INTERSECTION(type));
+	for (size_t i = 0; i < type_list->num_types - 1; i++) {
+		if (ZEND_TYPE_IS_INTERSECTION(type_list->types[i])) {
+			zend_is_intersection_type_redundant_by_single_type(type_list->types[i], type);
+			continue;
+		}
+		if (zend_string_equals_ci(ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(type))) {
+			zend_string *single_type_str = zend_type_to_string(type);
+			zend_error_noreturn(E_COMPILE_ERROR, "Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
+		}
+	}
+}
+
 static zend_type zend_compile_typename(
 		zend_ast *ast, bool force_allow_null) /* {{{ */
 {
@@ -6211,6 +6334,7 @@ static zend_type zend_compile_typename(
 	if (ast->kind == ZEND_AST_TYPE_UNION) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_type_list *type_list;
+		bool is_composite = false;
 		ALLOCA_FLAG(use_heap)
 
 		type_list = do_alloca(ZEND_TYPE_LIST_SIZE(list->children), use_heap);
@@ -6218,7 +6342,37 @@ static zend_type zend_compile_typename(
 
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
-			zend_type single_type = zend_compile_single_typename(type_ast);
+			zend_type single_type;
+
+			if (type_ast->kind == ZEND_AST_TYPE_INTERSECTION) {
+				is_composite = true;
+				/* The first class type can be stored directly as the type ptr payload. */
+				if (ZEND_TYPE_IS_COMPLEX(type) && !ZEND_TYPE_HAS_LIST(type)) {
+					/* Switch from single name to name list. */
+					type_list->num_types = 1;
+					type_list->types[0] = type;
+					ZEND_TYPE_FULL_MASK(type_list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
+					ZEND_TYPE_SET_LIST(type, type_list);
+				}
+
+				single_type = zend_compile_typename(type_ast, false);
+				ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(single_type));
+
+				type_list->types[type_list->num_types++] = single_type;
+
+				/* Check for trivially redundant class types */
+				for (size_t i = 0; i < type_list->num_types - 1; i++) {
+					if (ZEND_TYPE_IS_INTERSECTION(type_list->types[i])) {
+						zend_are_intersection_types_redundant(single_type, type_list->types[i]);
+						continue;
+					}
+					/* Type from type list is a simple type */
+					zend_is_intersection_type_redundant_by_single_type(single_type, type_list->types[i]);
+				}
+				continue;
+			}
+
+			single_type = zend_compile_single_typename(type_ast);
 			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
 
 			if (single_type_mask == MAY_BE_ANY) {
@@ -6241,7 +6395,7 @@ static zend_type zend_compile_typename(
 			ZEND_TYPE_FULL_MASK(single_type) &= ~_ZEND_TYPE_MAY_BE_MASK;
 
 			if (ZEND_TYPE_IS_COMPLEX(single_type)) {
-				if (!ZEND_TYPE_IS_COMPLEX(type)) {
+				if (!ZEND_TYPE_IS_COMPLEX(type) && !is_composite) {
 					/* The first class type can be stored directly as the type ptr payload. */
 					ZEND_TYPE_SET_PTR(type, ZEND_TYPE_NAME(single_type));
 					ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_NAME_BIT;
@@ -6257,14 +6411,7 @@ static zend_type zend_compile_typename(
 					type_list->types[type_list->num_types++] = single_type;
 
 					/* Check for trivially redundant class types */
-					for (size_t i = 0; i < type_list->num_types - 1; i++) {
-						if (zend_string_equals_ci(
-								ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(single_type))) {
-							zend_string *single_type_str = zend_type_to_string(single_type);
-							zend_error_noreturn(E_COMPILE_ERROR,
-								"Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
-						}
-					}
+					zend_is_type_list_redundant_by_single_type(type_list, single_type);
 				}
 			}
 		}
@@ -6321,14 +6468,7 @@ static zend_type zend_compile_typename(
 			type_list->types[type_list->num_types++] = single_type;
 
 			/* Check for trivially redundant class types */
-			for (size_t i = 0; i < type_list->num_types - 1; i++) {
-				if (zend_string_equals_ci(
-					ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(single_type))) {
-					zend_string *single_type_str = zend_type_to_string(single_type);
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
-				}
-			}
+			zend_is_type_list_redundant_by_single_type(type_list, single_type);
 		}
 
 		ZEND_ASSERT(list->children == type_list->num_types);
@@ -6642,12 +6782,12 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			}
 
 			if (force_nullable && ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
+				/* We drop the nullable type flag to generate the correct type string */
+				ZEND_TYPE_FULL_MASK(arg_info->type) = ZEND_TYPE_FULL_MASK(arg_info->type) & ~MAY_BE_NULL;
 				zend_string *type_str = zend_type_to_string(arg_info->type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot use null as default value for parameter $%s of type %s",
-					/* We move type_str pointer one char forward to skip the '?' generated by
-					 * the call to zend_compile_typename() */
-					ZSTR_VAL(name), ZSTR_VAL(type_str)+1);
+					ZSTR_VAL(name), ZSTR_VAL(type_str));
 			}
 
 			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable
@@ -7210,6 +7350,19 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	} else if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
 	}
+
+	if (ast->kind == ZEND_AST_ARROW_FUNC) {
+		bool needs_return = true;
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
+			needs_return = !ZEND_TYPE_CONTAINS_CODE(return_info->type, IS_NEVER);
+		}
+		if (needs_return) {
+			stmt_ast = zend_ast_create(ZEND_AST_RETURN, stmt_ast);
+			decl->child[2] = stmt_ast;
+		}
+	}
+
 	zend_compile_stmt(stmt_ast);
 
 	if (is_method) {
@@ -9612,7 +9765,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_MAGIC_CONST || kind == ZEND_AST_COALESCE
 		|| kind == ZEND_AST_CONST_ENUM_INIT
 		|| kind == ZEND_AST_NEW || kind == ZEND_AST_ARG_LIST
-		|| kind == ZEND_AST_NAMED_ARG;
+		|| kind == ZEND_AST_NAMED_ARG
+		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP;
 }
 /* }}} */
 
@@ -10471,6 +10625,13 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_eval_const_expr(&ast->child[1]);
 			return;
 		case ZEND_AST_NAMED_ARG:
+			zend_eval_const_expr(&ast->child[1]);
+			return;
+		case ZEND_AST_CONST_ENUM_INIT:
+			zend_eval_const_expr(&ast->child[2]);
+			return;
+		case ZEND_AST_PROP:
+			zend_eval_const_expr(&ast->child[0]);
 			zend_eval_const_expr(&ast->child[1]);
 			return;
 		default:

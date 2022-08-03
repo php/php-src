@@ -137,7 +137,7 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name));
 
 			zend_str_tolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
-			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), zend_module->name);
+			php_info_printf("<h2><a name=\"module_%s\" href=\"#module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), ZSTR_VAL(url_name), zend_module->name);
 
 			efree(url_name);
 		} else {
@@ -646,6 +646,11 @@ void php_get_windows_cpu(char *buf, int bufsize)
 #if defined(PROCESSOR_ARCHITECTURE_AMD64)
 		case PROCESSOR_ARCHITECTURE_AMD64 :
 			snprintf(buf, bufsize, "AMD64");
+			break;
+#endif
+#if defined(PROCESSOR_ARCHITECTURE_ARM64)
+		case PROCESSOR_ARCHITECTURE_ARM64 :
+			snprintf(buf, bufsize, "ARM64");
 			break;
 #endif
 		case PROCESSOR_ARCHITECTURE_UNKNOWN :

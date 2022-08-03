@@ -55,6 +55,35 @@
 #define PHP_IMG_TGA  128
 #define PHP_IMG_AVIF 256
 
+/* Section Filters Declarations */
+/* IMPORTANT NOTE FOR NEW FILTER
+ * Do not forget to update:
+ * IMAGE_FILTER_MAX: define the last filter index
+ * IMAGE_FILTER_MAX_ARGS: define the biggest amount of arguments
+ * image_filter array in PHP_FUNCTION(imagefilter)
+ * */
+#define IMAGE_FILTER_NEGATE         0
+#define IMAGE_FILTER_GRAYSCALE      1
+#define IMAGE_FILTER_BRIGHTNESS     2
+#define IMAGE_FILTER_CONTRAST       3
+#define IMAGE_FILTER_COLORIZE       4
+#define IMAGE_FILTER_EDGEDETECT     5
+#define IMAGE_FILTER_EMBOSS         6
+#define IMAGE_FILTER_GAUSSIAN_BLUR  7
+#define IMAGE_FILTER_SELECTIVE_BLUR 8
+#define IMAGE_FILTER_MEAN_REMOVAL   9
+#define IMAGE_FILTER_SMOOTH         10
+#define IMAGE_FILTER_PIXELATE       11
+#define IMAGE_FILTER_SCATTER		12
+#define IMAGE_FILTER_MAX            12
+#define IMAGE_FILTER_MAX_ARGS       6
+
+#ifdef HAVE_GD_BUNDLED
+#define GD_BUNDLED 1
+#else
+#define GD_BUNDLED 0
+#endif
+
 #ifdef PHP_WIN32
 #	ifdef PHP_GD_EXPORTS
 #		define PHP_GD_API __declspec(dllexport)

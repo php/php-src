@@ -2396,6 +2396,26 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	return target;
 }
 
+ZEND_API HashTable* zend_array_to_list(HashTable *source)
+{
+	HashTable *result = _zend_new_array(zend_hash_num_elements(source));
+	zend_hash_real_init_packed(result);
+
+	ZEND_HASH_FILL_PACKED(result) {
+		zval *entry;
+
+		ZEND_HASH_FOREACH_VAL(source, entry) {
+			if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
+				entry = Z_REFVAL_P(entry);
+			}
+			Z_TRY_ADDREF_P(entry);
+			ZEND_HASH_FILL_ADD(entry);
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FILL_END();
+
+	return result;
+}
+
 
 ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite)
 {

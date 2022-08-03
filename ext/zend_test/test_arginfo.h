@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 71d8e1e6e5a997e9b443fbce4136d0025b67830b */
+ * Stub hash: daa7be53e9009c66c814fb5b0407a6dfbe09679a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -85,6 +85,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_call_method, 0, 2, IS_MIXED
 	ZEND_ARG_TYPE_INFO(0, arg2, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_ini_parse_quantity, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_test_zend_ini_parse_quantity
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -114,7 +120,19 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
 
-#define arginfo_class_ZendTestNS_Foo_method arginfo_zend_test_void_return
+#define arginfo_class_ZendTestForbidDynamicCall_call arginfo_zend_test_void_return
+
+#define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_void_return
+
+#if (PHP_VERSION_ID >= 80100)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZendTestNS_Foo_method, 0, 0, IS_LONG, 0)
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestNS_Foo_method, 0, 0, 0)
+#endif
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ZendTestNS_UnlikelyCompileError_method, 0, 0, ZendTestNS\\\125nlikelyCompileError, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
 
@@ -142,6 +160,8 @@ static ZEND_FUNCTION(zend_get_unit_enum);
 static ZEND_FUNCTION(zend_test_parameter_with_attribute);
 static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
+static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
+static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -153,7 +173,10 @@ static ZEND_METHOD(ZendTestParameterAttribute, __construct);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override);
+static ZEND_METHOD(ZendTestForbidDynamicCall, call);
+static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic);
 static ZEND_METHOD(ZendTestNS_Foo, method);
+static ZEND_METHOD(ZendTestNS_UnlikelyCompileError, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
@@ -180,6 +203,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute)
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
+	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
+	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
@@ -235,6 +260,13 @@ static const zend_function_entry class_ZendTestChildClassWithMethodWithParameter
 };
 
 
+static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
+	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_ZendTestUnitEnum_methods[] = {
 	ZEND_FE_END
 };
@@ -256,6 +288,12 @@ static const zend_function_entry class_ZendTestNS_Foo_methods[] = {
 };
 
 
+static const zend_function_entry class_ZendTestNS_UnlikelyCompileError_methods[] = {
+	ZEND_ME(ZendTestNS_UnlikelyCompileError, method, arginfo_class_ZendTestNS_UnlikelyCompileError_method, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_ZendTestNS2_Foo_methods[] = {
 	ZEND_ME(ZendTestNS2_Foo, method, arginfo_class_ZendTestNS2_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -267,12 +305,23 @@ static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
 	ZEND_FE_END
 };
 
+static void register_test_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
+}
+
 static zend_class_entry *register_class__ZendTestInterface(void)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "_ZendTestInterface", class__ZendTestInterface_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	zval const_DUMMY_value;
+	ZVAL_LONG(&const_DUMMY_value, 0);
+	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DUMMY_name);
 
 	return class_entry;
 }
@@ -324,10 +373,27 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zend_declare_typed_property(class_entry, property_classUnionProp_name, &property_classUnionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classUnionProp_type);
 	zend_string_release(property_classUnionProp_name);
 
+	zend_string *property_classIntersectionProp_class_Traversable = zend_string_init("Traversable", sizeof("Traversable") - 1, 1);
+	zend_string *property_classIntersectionProp_class_Countable = zend_string_init("Countable", sizeof("Countable") - 1, 1);
+	zend_type_list *property_classIntersectionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	property_classIntersectionProp_type_list->num_types = 2;
+	property_classIntersectionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classIntersectionProp_class_Traversable, 0, 0);
+	property_classIntersectionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classIntersectionProp_class_Countable, 0, 0);
+	zend_type property_classIntersectionProp_type = ZEND_TYPE_INIT_INTERSECTION(property_classIntersectionProp_type_list, 0);
+	zval property_classIntersectionProp_default_value;
+	ZVAL_UNDEF(&property_classIntersectionProp_default_value);
+	zend_string *property_classIntersectionProp_name = zend_string_init("classIntersectionProp", sizeof("classIntersectionProp") - 1, 1);
+	zend_declare_typed_property(class_entry, property_classIntersectionProp_name, &property_classIntersectionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classIntersectionProp_type);
+	zend_string_release(property_classIntersectionProp_name);
+
 	zval property_readonlyProp_default_value;
 	ZVAL_UNDEF(&property_readonlyProp_default_value);
 	zend_string *property_readonlyProp_name = zend_string_init("readonlyProp", sizeof("readonlyProp") - 1, 1);
+#if (PHP_VERSION_ID >= 80100)
 	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#elif (PHP_VERSION_ID >= 80000)
+	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#endif
 	zend_string_release(property_readonlyProp_name);
 
 	return class_entry;
@@ -368,6 +434,15 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
+#if (PHP_VERSION_ID >= 80200)
+	zend_string *attribute_name_Attribute_class_ZendTestAttribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ZendTestAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttribute, 1);
+	zend_string_release(attribute_name_Attribute_class_ZendTestAttribute);
+	zval attribute_Attribute_class_ZendTestAttribute_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttribute_arg0, ZEND_ATTRIBUTE_TARGET_ALL);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestAttribute->args[0].value, &attribute_Attribute_class_ZendTestAttribute_arg0);
+#endif
+
 	return class_entry;
 }
 
@@ -384,6 +459,15 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_parameter_name);
+
+#if (PHP_VERSION_ID >= 80200)
+	zend_string *attribute_name_Attribute_class_ZendTestParameterAttribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ZendTestParameterAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestParameterAttribute, 1);
+	zend_string_release(attribute_name_Attribute_class_ZendTestParameterAttribute);
+	zval attribute_Attribute_class_ZendTestParameterAttribute_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestParameterAttribute_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestParameterAttribute->args[0].value, &attribute_Attribute_class_ZendTestParameterAttribute_arg0);
+#endif
 
 	return class_entry;
 }
@@ -408,6 +492,18 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 	return class_entry;
 }
 
+static zend_class_entry *register_class_ZendTestForbidDynamicCall(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestForbidDynamicCall", class_ZendTestForbidDynamicCall_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+#if (PHP_VERSION_ID >= 80100)
 static zend_class_entry *register_class_ZendTestUnitEnum(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, class_ZendTestUnitEnum_methods);
@@ -418,7 +514,9 @@ static zend_class_entry *register_class_ZendTestUnitEnum(void)
 
 	return class_entry;
 }
+#endif
 
+#if (PHP_VERSION_ID >= 80100)
 static zend_class_entry *register_class_ZendTestStringEnum(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, class_ZendTestStringEnum_methods);
@@ -445,7 +543,9 @@ static zend_class_entry *register_class_ZendTestStringEnum(void)
 
 	return class_entry;
 }
+#endif
 
+#if (PHP_VERSION_ID >= 80100)
 static zend_class_entry *register_class_ZendTestIntEnum(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestIntEnum", IS_LONG, class_ZendTestIntEnum_methods);
@@ -464,12 +564,23 @@ static zend_class_entry *register_class_ZendTestIntEnum(void)
 
 	return class_entry;
 }
+#endif
 
 static zend_class_entry *register_class_ZendTestNS_Foo(void)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS", "Foo", class_ZendTestNS_Foo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestNS_UnlikelyCompileError(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS", "UnlikelyCompileError", class_ZendTestNS_UnlikelyCompileError_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	return class_entry;

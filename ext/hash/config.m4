@@ -13,7 +13,7 @@ fi
 
 if test $ac_cv_c_bigendian_php = yes; then
   EXT_HASH_SHA3_SOURCES="hash_sha3.c"
-  AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define is hash3 algo is available])
+  AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define if hash3 algo is available])
   AC_MSG_WARN("Use SHA3 slow implementation on bigendian")
 else
   AC_CHECK_SIZEOF([long])

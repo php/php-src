@@ -510,7 +510,7 @@ static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset
 	return spl_fixedarray_object_has_dimension_helper(intern, offset, check_empty);
 }
 
-static int spl_fixedarray_object_count_elements(zend_object *object, zend_long *count)
+static zend_result spl_fixedarray_object_count_elements(zend_object *object, zend_long *count)
 {
 	spl_fixedarray_object *intern;
 

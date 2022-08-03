@@ -44,17 +44,18 @@ jobs:
       parameters:
         configurationName: I386_RELEASE_ZTS
         configurationParameters: '--disable-debug --enable-zts'
+    - template: azure/msan_job.yml
+      parameters:
+        configurationName: DEBUG_ZTS_MSAN
+        configurationParameters: '--enable-debug --enable-zts'
+        runTestsParameters: --msan
+        timeoutInMinutes: 90
     - template: azure/community_job.yml
       parameters:
         configurationName: COMMUNITY
         configurationParameters: >-
             --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
             CFLAGS='-fno-sanitize-recover'
-        timeoutInMinutes: 90
-    - template: azure/coverage_job.yml
-      parameters:
-        configurationName: COVERAGE_DEBUG_ZTS
-        configurationParameters: '--enable-debug --disable-zts'
         timeoutInMinutes: 90
     - template: azure/opcache_variation_job.yml
       parameters:

@@ -280,6 +280,9 @@ typedef struct {
 #define ZEND_TYPE_INIT_UNION(ptr, extra_flags) \
 	{ (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_UNION_BIT) | (extra_flags) }
 
+#define ZEND_TYPE_INIT_INTERSECTION(ptr, extra_flags) \
+	{ (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_INTERSECTION_BIT) | (extra_flags) }
+
 #define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
 
@@ -740,6 +743,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define ZSTR_SET_CE_CACHE_EX(s, ce, validate) do { \
 		if (!(validate) || ZSTR_VALID_CE_CACHE(s)) { \
+			ZEND_ASSERT((validate) || ZSTR_VALID_CE_CACHE(s)); \
 			SET_CE_CACHE(GC_REFCOUNT(s), ce); \
 		} \
 	} while (0)

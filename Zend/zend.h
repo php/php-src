@@ -115,6 +115,7 @@ typedef struct _zend_class_mutable_data {
 	zval      *default_properties_table;
 	HashTable *constants_table;
 	uint32_t   ce_flags;
+	HashTable *backed_enum_table;
 } zend_class_mutable_data;
 
 typedef struct _zend_class_dependency {

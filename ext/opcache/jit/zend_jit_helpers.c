@@ -811,7 +811,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 				opline = EX(opline);
 				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
 				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
-					if (GC_REFCOUNT(ht)) {
+					if (!GC_REFCOUNT(ht)) {
 						zend_array_destroy(ht);
 					}
 					if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
@@ -841,7 +841,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			opline = EX(opline);
 			zend_use_resource_as_offset(dim);
 			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
-				if (GC_REFCOUNT(ht)) {
+				if (!GC_REFCOUNT(ht)) {
 					zend_array_destroy(ht);
 				}
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
@@ -2557,6 +2557,11 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval z_copy;
+
+	if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+		zend_readonly_property_modification_error(prop_info);
+		return;
+	}
 
 	ZVAL_DEREF(zptr);
 	/* Make sure that in-place concatenation is used if the LHS is a string. */

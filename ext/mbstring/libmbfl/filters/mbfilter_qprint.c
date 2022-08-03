@@ -153,6 +153,11 @@ int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
 	(*filter->filter_function)('\0', filter);
 	filter->status &= ~0xffff;
 	filter->cache = 0;
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -243,6 +248,10 @@ int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(cache, filter->data));
 	}
 
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -309,6 +318,20 @@ static void mb_wchar_to_qprint(uint32_t *in, size_t len, mb_convert_buf *buf, bo
 		 * but raw bytes from 0x00-0xFF */
 		uint32_t w = *in++;
 
+		if (!w) {
+			out = mb_convert_buf_add(out, '\0');
+			chars_output = 0;
+			continue;
+		} else if (w == '\n') {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+			out = mb_convert_buf_add2(out, '\r', '\n');
+			chars_output = 0;
+			continue;
+		} else if (w == '\r') {
+			/* No output */
+			continue;
+		}
+
 		/* QPrint actually mandates that line length should not be more than 76 characters,
 		 * but mbstring stops slightly short of that */
 		if (chars_output >= 72) {
@@ -317,16 +340,7 @@ static void mb_wchar_to_qprint(uint32_t *in, size_t len, mb_convert_buf *buf, bo
 			chars_output = 0;
 		}
 
-		if (!w) {
-			out = mb_convert_buf_add(out, '\0');
-			chars_output = 0;
-		} else if (w == '\n') {
-			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
-			out = mb_convert_buf_add2(out, '\r', '\n');
-			chars_output = 0;
-		} else if (w == '\r') {
-			/* No output */
-		} else if (w >= 0x80 || w == '=') {
+		if (w >= 0x80 || w == '=') {
 			/* Not ASCII */
 			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 3);
 			out = mb_convert_buf_add3(out, '=', qprint_enc_nibble((w >> 4) & 0xF), qprint_enc_nibble(w & 0xF));

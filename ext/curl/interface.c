@@ -1443,7 +1443,7 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 	return zend_std_get_properties(object);
 }
 
-int curl_cast_object(zend_object *obj, zval *result, int type)
+zend_result curl_cast_object(zend_object *obj, zval *result, int type)
 {
 	if (type == IS_LONG) {
 		/* For better backward compatibility, make (int) $curl_handle return the object ID,
@@ -2612,7 +2612,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_RTSP_REQUEST:
 		case CURLOPT_RTSP_SERVER_CSEQ:
 		case CURLOPT_WILDCARDMATCH:
-		case CURLOPT_TLSAUTH_TYPE:
 		case CURLOPT_GSSAPI_DELEGATION:
 		case CURLOPT_ACCEPTTIMEOUT_MS:
 		case CURLOPT_SSL_OPTIONS:
@@ -2755,6 +2754,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_MAIL_FROM:
 		case CURLOPT_RTSP_STREAM_URI:
 		case CURLOPT_RTSP_TRANSPORT:
+		case CURLOPT_TLSAUTH_TYPE:
 		case CURLOPT_TLSAUTH_PASSWORD:
 		case CURLOPT_TLSAUTH_USERNAME:
 		case CURLOPT_ACCEPT_ENCODING:

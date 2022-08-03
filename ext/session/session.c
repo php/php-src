@@ -37,16 +37,15 @@
 #include "php_variables.h"
 #include "php_session.h"
 #include "session_arginfo.h"
-#include "ext/standard/php_random.h"
 #include "ext/standard/php_var.h"
 #include "ext/date/php_date.h"
-#include "ext/standard/php_lcg.h"
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
+#include "ext/random/php_random.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
@@ -1464,7 +1463,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 		smart_str_0(&var);
 		if (sid) {
 			zval_ptr_dtor_str(sid);
-			ZVAL_NEW_STR(sid, var.s);
+			ZVAL_STR(sid, smart_str_extract(&var));
 		} else {
 			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s), 0);
 			smart_str_free(&var);
@@ -2098,7 +2097,7 @@ PHP_FUNCTION(session_set_save_handler)
 
 	/* At this point argc can only be between 6 and PS_NUM_APIS */
 	for (i = 0; i < argc; i++) {
-		if (!zend_is_callable(&args[i], 0, NULL)) {
+		if (!zend_is_callable(&args[i], IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL)) {
 			zend_string *name = zend_get_callable_name(&args[i]);
 			zend_argument_type_error(i + 1, "must be a valid callback, function \"%s\" not found or invalid function name", ZSTR_VAL(name));
 			zend_string_release(name);
@@ -2362,8 +2361,7 @@ PHP_FUNCTION(session_create_id)
 		php_error_docref(NULL, E_WARNING, "Failed to create new ID");
 		RETURN_FALSE;
 	}
-	smart_str_0(&id);
-	RETVAL_NEW_STR(id.s);
+	RETVAL_STR(smart_str_extract(&id));
 }
 /* }}} */
 
@@ -2827,9 +2825,7 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	/* Register base class */
 	php_session_class_entry = register_class_SessionHandler(php_session_iface_entry, php_session_id_iface_entry);
 
-	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_ACTIVE", php_session_active, CONST_CS | CONST_PERSISTENT);
+	register_session_symbols(module_number);
 
 	return SUCCESS;
 }

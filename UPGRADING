@@ -39,12 +39,18 @@ PHP 8.2 UPGRADE NOTES
     further details.
 
 - Standard:
+  . glob() returns empty array if all paths are restricted by open_basedir.
+    Previously the error was returned but that behavior was not consistent and
+    did not work correctly for all patterns.
   . strtolower() and strtoupper() are no longer locale-sensitive. They now
     perform ASCII case conversion, as if the locale were "C". Use
     mb_strtolower() if you want localized case conversion. Similarly, stristr,
     stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
     array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
     conversion.
+  . str_split() returns an empty array for an empty string now. Previously it
+    returned an array with a single empty string entry. mb_str_split() is not
+    affected by this change since it was already behaving like that.
 
 - SPL:
   . The following methods now enforce their signature:
@@ -58,6 +64,9 @@ PHP 8.2 UPGRADE NOTES
     previously it was bool
   . SplFileObject::getChildren() now has a tentative return type of null,
     previously it was ?RecursiveIterator
+  . GlogIterator returns empty array if all paths are restricted by
+    open_basedir. Previously the error was returned but that behavior was not
+    consistent and did not work correctly.
 
 ========================================
 2. New Features
@@ -71,6 +80,14 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/null-false-standalone-types
   . Added support for readonly classes.
     RFC: https://wiki.php.net/rfc/readonly_classes
+  . Added support for true type.
+    RFC: https://wiki.php.net/rfc/true-type
+  . Added support for Disjoint Normal Form (DNF) types.
+    RFC: https://wiki.php.net/rfc/dnf_types
+  . Added error_log_mode ini setting that allows setting of permissions for
+    error log file.
+  . Added support for fetching properties of enums in constant expressions.
+    RFC: https://wiki.php.net/rfc/fetch_property_in_const_expressions
 
 
 - Curl:
@@ -78,6 +95,11 @@ PHP 8.2 UPGRADE NOTES
     HTTP method in curl_getinfo() return value.
   . Exposed multiple new constants from libcurl 7.62 to 7.80.
   . Added new function curl_upkeep() to perform any connection upkeep checks.
+
+- DBA:
+  . The LMDB Driver now accepts the DBA_LMDB_USE_SUB_DIR or DBA_LMDB_NO_SUB_DIR
+    flags to determine if it should create a sub directory or not when creating
+    a database file.
 
 - OCI8:
   . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
@@ -98,6 +120,14 @@ PHP 8.2 UPGRADE NOTES
     capturing. This only affects which groups are capturing, it is still
     possible to use numbered subpattern references, and the matches array will
     still contain numbered results.
+
+- Random:
+  . New extension that organizes and consolidates existing implementations
+    related to random number generators. New, higher quality RNGs are available
+    and scope issues are eliminated.
+    RFC: https://wiki.php.net/rfc/rng_extension
+    RFC: https://wiki.php.net/rfc/random_extension_improvement
+
 
 ========================================
 3. Changes in SAPI modules
@@ -131,11 +161,10 @@ PHP 8.2 UPGRADE NOTES
         [new Foo, "Bar::method"]
 
     This does not affect normal method callables like "A::method" or
-    ["A", "method"]. A deprecation notice is only emitted on call. Both
-    is_callable() and the callable type will silently accept these callables
-    until support for them is removed entirely.
+    ["A", "method"].
 
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+    RFC: https://wiki.php.net/rfc/partially-supported-callables-expand-deprecation-notices
 
   . The "${var}" and "${expr}" style string interpolations are deprecated and
     will be removed in PHP 9. Use "$var"/"{$var}" or "{${expr}}", respectively.
@@ -161,9 +190,13 @@ PHP 8.2 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Core
+  . str*cmp, str*pos, substr_compare functions, using binary safe string
+    comparison now return -1, 0 and 1.
+
 - DBA
   . dba_open() and dba_popen() now have the following enforced function signature
-    dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0)
+    dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null)
   . dba_fetch()'s optional skip argument is now at the end in line with
     PHP userland semantics its signature now is:
     dba_fetch(string|array $key, $dba, int $skip = 0): string|false
@@ -171,12 +204,24 @@ PHP 8.2 UPGRADE NOTES
     dba_fetch(string|array $key, $skip, $dba): string|false
     is still accepted, but it is recommended to use the new standard variant.
 
+- Random
+  . random_bytes() and random_int() now throw \Random\RandomException on CSPRNG failure.
+    Previously a plain \Exception was thrown.
+
+- SPL
+  . The $iterator parameter of iterator_to_array() and iterator_count() is
+    widened to iterable from Iterator, allowing arrays to be passed.
+    RFC: https://wiki.php.net/rfc/iterator_xyz_accept_array
+
 ========================================
 6. New Functions
 ========================================
 
 - Curl:
   . curl_upkeep() (libcurl >= 7.62.0)
+
+- mysqli:
+  . mysqli_execute_query()
 
 - Reflection:
   . ReflectionFunction::isAnonymous()
@@ -188,6 +233,15 @@ PHP 8.2 UPGRADE NOTES
 - Standard:
   . The peak memory usage can now be reset to the current usage thanks to
     memory_reset_peak_usage().
+  . ini_parse_quantity(): Parses "shorthand bytes" quantities returned by
+    ini_get(). The function is suitable for parsing quantities whose int value
+    is in the range [PHP_INT_MIN, PHP_INT_MAX].
+    Parsing and interpretation is consistent with ini_set() (see also the
+    "Changes to INI File Handling" section).
+    Caveats: Some ini settings may apply additional constraints to the resuling
+    int value, such as a smaller range, that will not be reflected by
+    ini_parse_quantity(). The `memory_limit` setting accepts values higher than
+    PHP_INT_MAX, than can not be parsed by ini_parse_quantity().
 
 ========================================
 7. New Classes and Interfaces
@@ -217,9 +271,13 @@ PHP 8.2 UPGRADE NOTES
     mysqli with libmysql and all relevant functionality has been removed.
   . The reconnect property of mysqli_driver has been removed. It was supported only by libmysql.
   . The INI directive mysqli.reconnect has been removed.
+  . The constant MYSQLI_IS_MARIADB has been deprecated.
 
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
+
+- PCRE:
+  . NUL characters (\0) in pattern strings are now supported.
 
 - SQLite3:
   . sqlite3.defensive is now PHP_INI_USER.
@@ -242,6 +300,7 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 
 - COM_DOTNET:
+  . DISP_E_PARAMNOTFOUND
   . LOCALE_NEUTRAL
 
 - Curl:
@@ -323,6 +382,9 @@ PHP 8.2 UPGRADE NOTES
   . CURL_VERSION_UNICODE (libcurl >= 7.72.0)
   . CURL_VERSION_ZSTD (libcurl >= 7.72.0)
 
+- Filter
+  . FILTER_FLAG_GLOBAL_RANGE
+
 - Sockets:
   . SO_INCOMING_CPU
   . SO_MEMINFO
@@ -337,10 +399,98 @@ PHP 8.2 UPGRADE NOTES
   . LOCAL_CREDS (NetBSD)
   . SO_BPF_EXTENSIONS
   . SO_SETFIB
+  . TCP_CONGESTION (Linux, FreeBSD)
+  . SO_ZEROCOPY (Linux)
+  . MSG_ZEROCOPY (Linux)
 
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Parsing of some ill-formatted values will now trigger a warning when this was
+  silently ignored before. Interpretation of these values is not changed, for
+  backwards compatibility. This affects the following settings:
+  . bcmath.scale
+  . com.code_page
+  . default_socket_timeout
+  . fiber.stack_size
+  . hard_timeout
+  . intl.error_level
+  . ldap.max_links
+  . max_input_nesting_level
+  . max_input_vars
+  . mbstring.regex_retry_limit
+  . mbstring.regex_stack_limit
+  . mysqli.allow_local_infile
+  . mysqli.allow_persistent
+  . mysqli.default_port
+  . mysqli.max_links
+  . mysqli.max_persistent
+  . mysqli.reconnect
+  . mysqli.rollback_on_cached_plink
+  . mysqlnd.log_mask
+  . mysqlnd.mempool_default_size
+  . mysqlnd.net_read_buffer_size
+  . mysqlnd.net_read_timeout
+  . oci8.default_prefetch
+  . oci8.max_persistent
+  . oci8.persistent_timeout
+  . oci8.ping_interval
+  . oci8.prefetch_lob_size
+  . oci8.privileged_connect
+  . oci8.statement_cache_size
+  . odbc.allow_persistent
+  . odbc.check_persistent
+  . odbc.defaultbinmode
+  . odbc.default_cursortype
+  . odbc.defaultlrl
+  . odbc.max_links
+  . odbc.max_persistent
+  . opcache.consistency_checks
+  . opcache.file_update_protection
+  . opcache.force_restart_timeout
+  . opcache.interned_strings_buffer
+  . opcache.jit_bisect_limit
+  . opcache.jit_blacklist_root_trace
+  . opcache.jit_blacklist_side_trace
+  . opcache.jit_debug
+  . opcache.jit_hot_func
+  . opcache.jit_hot_loop
+  . opcache.jit_hot_return
+  . opcache.jit_hot_side_exit
+  . opcache.jit_max_exit_counters
+  . opcache.jit_max_loop_unrolls
+  . opcache.jit_max_polymorphic_calls
+  . opcache.jit_max_recursive_calls
+  . opcache.jit_max_recursive_returns
+  . opcache.jit_max_root_traces
+  . opcache.jit_max_side_traces
+  . opcache.log_verbosity_level
+  . opcache.max_file_size
+  . opcache.opt_debug_level
+  . opcache.optimization_level
+  . opcache.revalidate_freq
+  . output_buffering
+  . pcre.backtrack_limit
+  . pcre.recursion_limit
+  . pgsql.max_links
+  . pgsql.max_persistent
+  . post_max_size
+  . realpath_cache_size
+  . realpath_cache_ttl
+  . session.cache_expire
+  . session.cookie_lifetime
+  . session.gc_divisor
+  . session.gc_maxlifetime
+  . session.gc_probability
+  . soap.wsdl_cache_limit
+  . soap.wsdl_cache_ttl
+  . unserialize_max_depth
+  . upload_max_filesize
+  . user_ini.cache_ttl
+  . xmlrpc_error_number
+  . zend.assertions
+  . zlib.output_compression_level
 
 ========================================
 12. Windows Support
@@ -349,6 +499,8 @@ PHP 8.2 UPGRADE NOTES
 - Core:
   . Windows specific error messages are no longer localized, but instead in
     English to better match PHP error messages.
+  . Preliminary and highly experimental support for building on ARM64 has been
+    added.
 
 - OCI8:
   . Since building against Oracle Client 10g is no longer supported anyway,
@@ -356,11 +508,17 @@ PHP 8.2 UPGRADE NOTES
     --with-oci8-12c and --with-oci8-19 are still supported.
 
 - Zip:
+  . The Zip extension upgraded to version 1.21.0
   . The Zip extension is now built as shared library (DLL) by default.
 
 ========================================
 13. Other Changes
 ========================================
+
+- CLI:
+  . The STDOUT, STDERR and STDIN are no longer closed on resource destruction
+    which is mostly when the CLI finishes. It is however still possible to
+    explicitly close those streams using fclose and similar.
 
 - Core:
   . The iterable type is now a built-in compile time alias for array|Traversable.

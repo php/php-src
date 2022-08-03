@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f417ea0f3a43036f0abc87856c83f4c93395405a */
+ * Stub hash: 50b960193f55c7b09316355a0c0ae1d572ca9694 */
 
 
 

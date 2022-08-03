@@ -498,10 +498,11 @@ zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
 	return zend_fetch_class_with_scope(zend_ast_get_str(ast), ast->attr | ZEND_FETCH_CLASS_EXCEPTION, scope);
 }
 
-ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
+static zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *ast, zend_class_entry *scope, bool *short_circuited_ptr)
 {
 	zval op1, op2;
 	zend_result ret = SUCCESS;
+	*short_circuited_ptr = false;
 
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
@@ -733,9 +734,15 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
 			}
 
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
+			bool short_circuited;
+			if (UNEXPECTED(zend_ast_evaluate_ex(&op1, ast->child[0], scope, &short_circuited) != SUCCESS)) {
 				ret = FAILURE;
 				break;
+			}
+			if (short_circuited) {
+				*short_circuited_ptr = true;
+				ZVAL_NULL(result);
+				return SUCCESS;
 			}
 
 			// DIM on objects is disallowed because it allows executing arbitrary expressions
@@ -907,11 +914,79 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 			}
 			return SUCCESS;
 		}
+		case ZEND_AST_PROP:
+		case ZEND_AST_NULLSAFE_PROP:
+		{
+			bool short_circuited;
+			if (UNEXPECTED(zend_ast_evaluate_ex(&op1, ast->child[0], scope, &short_circuited) != SUCCESS)) {
+				return FAILURE;
+			}
+			if (short_circuited) {
+				*short_circuited_ptr = true;
+				ZVAL_NULL(result);
+				return SUCCESS;
+			}
+			if (ast->kind == ZEND_AST_NULLSAFE_PROP && Z_TYPE(op1) == IS_NULL) {
+				*short_circuited_ptr = true;
+				ZVAL_NULL(result);
+				return SUCCESS;
+			}
+
+			if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
+				zval_ptr_dtor_nogc(&op1);
+				return FAILURE;
+			}
+
+			if (!try_convert_to_string(&op2)) {
+				zval_ptr_dtor_nogc(&op1);
+				zval_ptr_dtor_nogc(&op2);
+				return FAILURE;
+			}
+
+			if (Z_TYPE(op1) != IS_OBJECT) {
+				zend_wrong_property_read(&op1, &op2);
+
+				zval_ptr_dtor_nogc(&op1);
+				zval_ptr_dtor_nogc(&op2);
+
+				ZVAL_NULL(result);
+				return SUCCESS;
+			}
+
+			zend_object *zobj = Z_OBJ(op1);
+			if (!(zobj->ce->ce_flags & ZEND_ACC_ENUM)) {
+				zend_throw_error(NULL, "Fetching properties on non-enums in constant expressions is not allowed");
+				zval_ptr_dtor_nogc(&op1);
+				zval_ptr_dtor_nogc(&op2);
+				return FAILURE;
+			}
+
+			zend_string *name = Z_STR(op2);
+			zval *property_result = zend_read_property_ex(scope, zobj, name, 0, result);
+			if (EG(exception)) {
+				zval_ptr_dtor_nogc(&op1);
+				zval_ptr_dtor_nogc(&op2);
+				return FAILURE;
+			}
+
+			if (result != property_result) {
+				ZVAL_COPY(result, property_result);
+			}
+			zval_ptr_dtor_nogc(&op1);
+			zval_ptr_dtor_nogc(&op2);
+			return SUCCESS;
+		}
 		default:
 			zend_throw_error(NULL, "Unsupported constant expression");
 			ret = FAILURE;
 	}
 	return ret;
+}
+
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
+{
+	bool short_circuited;
+	return zend_ast_evaluate_ex(result, ast, scope, &short_circuited);
 }
 
 static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
@@ -1686,9 +1761,12 @@ tail_call:
 			}
 			if (decl->child[2]) {
 				if (decl->kind == ZEND_AST_ARROW_FUNC) {
-					ZEND_ASSERT(decl->child[2]->kind == ZEND_AST_RETURN);
+					zend_ast *body = decl->child[2];
+					if (body->kind == ZEND_AST_RETURN) {
+						body = body->child[0];
+					}
 					smart_str_appends(str, " => ");
-					zend_ast_export_ex(str, decl->child[2]->child[0], 0, indent);
+					zend_ast_export_ex(str, body, 0, indent);
 					break;
 				}
 

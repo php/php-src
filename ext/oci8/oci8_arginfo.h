@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: db170b61403c53d4d420d0095031944f3d036508 */
+ * Stub hash: e942a76bf66ad950c12f459b3f62bb6a0edf680c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -801,12 +801,18 @@ static const zend_function_entry class_OCICollection_methods[] = {
 
 static void register_oci8_symbols(int module_number)
 {
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_new_connect", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ocinlogon", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_connect", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ocilogon", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_pconnect", 1);
-	zend_mark_function_parameter_as_sensitive(CG(function_table), "ociplogon", 1);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_new_connect", sizeof("oci_new_connect") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ocinlogon", sizeof("ocinlogon") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_connect", sizeof("oci_connect") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ocilogon", sizeof("ocilogon") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "oci_pconnect", sizeof("oci_pconnect") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ociplogon", sizeof("ociplogon") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 }
 
 static zend_class_entry *register_class_OCILob(void)
@@ -815,6 +821,11 @@ static zend_class_entry *register_class_OCILob(void)
 
 	INIT_CLASS_ENTRY(ce, "OCILob", class_OCILob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+
+	zend_string *attribute_name_AllowDynamicProperties_class_OCILob = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCILob, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_OCILob);
 
 	return class_entry;
 }
@@ -825,6 +836,11 @@ static zend_class_entry *register_class_OCICollection(void)
 
 	INIT_CLASS_ENTRY(ce, "OCICollection", class_OCICollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+
+	zend_string *attribute_name_AllowDynamicProperties_class_OCICollection = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCICollection, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_OCICollection);
 
 	return class_entry;
 }

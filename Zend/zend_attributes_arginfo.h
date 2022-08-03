@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5d9a092c1f0da5f32d9a161cc5166ed794ffe8e9 */
+ * Stub hash: afb6a3f1d14099066d028b1579fff074359da293 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -71,11 +71,66 @@ static zend_class_entry *register_class_Attribute(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
+	zval const_TARGET_CLASS_value;
+	ZVAL_LONG(&const_TARGET_CLASS_value, ZEND_ATTRIBUTE_TARGET_CLASS);
+	zend_string *const_TARGET_CLASS_name = zend_string_init_interned("TARGET_CLASS", sizeof("TARGET_CLASS") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TARGET_CLASS_name, &const_TARGET_CLASS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TARGET_CLASS_name);
+
+	zval const_TARGET_FUNCTION_value;
+	ZVAL_LONG(&const_TARGET_FUNCTION_value, ZEND_ATTRIBUTE_TARGET_FUNCTION);
+	zend_string *const_TARGET_FUNCTION_name = zend_string_init_interned("TARGET_FUNCTION", sizeof("TARGET_FUNCTION") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TARGET_FUNCTION_name, &const_TARGET_FUNCTION_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TARGET_FUNCTION_name);
+
+	zval const_TARGET_METHOD_value;
+	ZVAL_LONG(&const_TARGET_METHOD_value, ZEND_ATTRIBUTE_TARGET_METHOD);
+	zend_string *const_TARGET_METHOD_name = zend_string_init_interned("TARGET_METHOD", sizeof("TARGET_METHOD") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TARGET_METHOD_name, &const_TARGET_METHOD_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TARGET_METHOD_name);
+
+	zval const_TARGET_PROPERTY_value;
+	ZVAL_LONG(&const_TARGET_PROPERTY_value, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+	zend_string *const_TARGET_PROPERTY_name = zend_string_init_interned("TARGET_PROPERTY", sizeof("TARGET_PROPERTY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TARGET_PROPERTY_name, &const_TARGET_PROPERTY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TARGET_PROPERTY_name);
+
+	zval const_TARGET_CLASS_CONSTANT_value;
+	ZVAL_LONG(&const_TARGET_CLASS_CONSTANT_value, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
+	zend_string *const_TARGET_CLASS_CONSTANT_name = zend_string_init_interned("TARGET_CLASS_CONSTANT", sizeof("TARGET_CLASS_CONSTANT") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TARGET_CLASS_CONSTANT_name, &const_TARGET_CLASS_CONSTANT_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TARGET_CLASS_CONSTANT_name);
+
+	zval const_TARGET_PARAMETER_value;
+	ZVAL_LONG(&const_TARGET_PARAMETER_value, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	zend_string *const_TARGET_PARAMETER_name = zend_string_init_interned("TARGET_PARAMETER", sizeof("TARGET_PARAMETER") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TARGET_PARAMETER_name, &const_TARGET_PARAMETER_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TARGET_PARAMETER_name);
+
+	zval const_TARGET_ALL_value;
+	ZVAL_LONG(&const_TARGET_ALL_value, ZEND_ATTRIBUTE_TARGET_ALL);
+	zend_string *const_TARGET_ALL_name = zend_string_init_interned("TARGET_ALL", sizeof("TARGET_ALL") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TARGET_ALL_name, &const_TARGET_ALL_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TARGET_ALL_name);
+
+	zval const_IS_REPEATABLE_value;
+	ZVAL_LONG(&const_IS_REPEATABLE_value, ZEND_ATTRIBUTE_IS_REPEATABLE);
+	zend_string *const_IS_REPEATABLE_name = zend_string_init_interned("IS_REPEATABLE", sizeof("IS_REPEATABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_IS_REPEATABLE_name, &const_IS_REPEATABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_IS_REPEATABLE_name);
+
 	zval property_flags_default_value;
 	ZVAL_UNDEF(&property_flags_default_value);
 	zend_string *property_flags_name = zend_string_init("flags", sizeof("flags") - 1, 1);
 	zend_declare_typed_property(class_entry, property_flags_name, &property_flags_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_flags_name);
+
+	zend_string *attribute_name_Attribute_class_Attribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_Attribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Attribute, 1);
+	zend_string_release(attribute_name_Attribute_class_Attribute);
+	zval attribute_Attribute_class_Attribute_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_Attribute_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_Attribute->args[0].value, &attribute_Attribute_class_Attribute_arg0);
 
 	return class_entry;
 }
@@ -88,6 +143,13 @@ static zend_class_entry *register_class_ReturnTypeWillChange(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
+	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange, 1);
+	zend_string_release(attribute_name_Attribute_class_ReturnTypeWillChange);
+	zval attribute_Attribute_class_ReturnTypeWillChange_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ReturnTypeWillChange_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ReturnTypeWillChange->args[0].value, &attribute_Attribute_class_ReturnTypeWillChange_arg0);
+
 	return class_entry;
 }
 
@@ -99,6 +161,13 @@ static zend_class_entry *register_class_AllowDynamicProperties(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
+	zend_string *attribute_name_Attribute_class_AllowDynamicProperties = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_AllowDynamicProperties = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_AllowDynamicProperties, 1);
+	zend_string_release(attribute_name_Attribute_class_AllowDynamicProperties);
+	zval attribute_Attribute_class_AllowDynamicProperties_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_AllowDynamicProperties_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_AllowDynamicProperties->args[0].value, &attribute_Attribute_class_AllowDynamicProperties_arg0);
+
 	return class_entry;
 }
 
@@ -109,6 +178,13 @@ static zend_class_entry *register_class_SensitiveParameter(void)
 	INIT_CLASS_ENTRY(ce, "SensitiveParameter", class_SensitiveParameter_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	zend_string *attribute_name_Attribute_class_SensitiveParameter = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_SensitiveParameter = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_SensitiveParameter, 1);
+	zend_string_release(attribute_name_Attribute_class_SensitiveParameter);
+	zval attribute_Attribute_class_SensitiveParameter_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_SensitiveParameter_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_SensitiveParameter->args[0].value, &attribute_Attribute_class_SensitiveParameter_arg0);
 
 	return class_entry;
 }

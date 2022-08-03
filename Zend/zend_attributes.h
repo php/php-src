@@ -77,6 +77,7 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, u
 ZEND_API zend_string *zend_get_attribute_target_names(uint32_t targets);
 ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr);
 
+ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry *ce);
 ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags);
 ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname);
 
@@ -114,19 +115,6 @@ static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend
 {
 	uint32_t flags = ce->type != ZEND_USER_CLASS ? ZEND_ATTRIBUTE_PERSISTENT : 0;
 	return zend_add_attribute(&c->attributes, name, argc, flags, 0, 0);
-}
-
-static zend_always_inline zend_attribute *zend_mark_function_parameter_as_sensitive(const HashTable *table, const char *func_name, uint32_t parameter)
-{
-	zend_function *func = zend_hash_str_find_ptr(table, func_name, strlen(func_name));
-	ZEND_ASSERT(func != NULL);
-
-	return zend_add_parameter_attribute(
-		func,
-		parameter,
-		zend_ce_sensitive_parameter->name,
-		0
-	);
 }
 
 void zend_register_attribute_ce(void);

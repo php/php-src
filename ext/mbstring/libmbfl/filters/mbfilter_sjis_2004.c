@@ -491,6 +491,11 @@ int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
 	if (filter->status & 0xF) {
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+
+	if (filter->flush_function) {
+		return (*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -625,10 +630,12 @@ retry:
 			filter->status = 0;
 			CK((*filter->output_function)(s1, filter->data));
 		} else if (s1 < 0x100) { /* latin or kana */
-			if  (filter->to->no_encoding == mbfl_no_encoding_eucjp2004) {
+			if (filter->to->no_encoding == mbfl_no_encoding_eucjp2004) {
 				CK((*filter->output_function)(0x8e, filter->data));
+				CK((*filter->output_function)(s1, filter->data));
+			} else {
+				CK(mbfl_filt_conv_illegal_output(c, filter));
 			}
-			CK((*filter->output_function)(s1, filter->data));
 		} else if (s1 < 0x7f00) { /* X 0213 plane 1 */
 			if (filter->to->no_encoding == mbfl_no_encoding_sjis2004) {
 				c1 = (s1 >> 8) & 0xff;

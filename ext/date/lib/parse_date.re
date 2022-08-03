@@ -520,7 +520,6 @@ static timelib_sll timelib_get_frac_nr(const char **ptr)
 	const char *begin, *end;
 	char *str;
 	double tmp_nr = TIMELIB_UNSET;
-	int len = 0;
 
 	while ((**ptr != '.') && (**ptr != ':') && ((**ptr < '0') || (**ptr > '9'))) {
 		if (**ptr == '\0') {
@@ -531,7 +530,6 @@ static timelib_sll timelib_get_frac_nr(const char **ptr)
 	begin = *ptr;
 	while ((**ptr == '.') || (**ptr == ':') || ((**ptr >= '0') && (**ptr <= '9'))) {
 		++*ptr;
-		++len;
 	}
 	end = *ptr;
 	str = timelib_calloc(1, end - begin);
@@ -909,6 +907,7 @@ timelib_long timelib_parse_zone(const char **ptr, int *dst, timelib_time *t, int
 		offset = timelib_lookup_abbr(ptr, dst, &tz_abbr, &found);
 		if (found) {
 			t->zone_type = TIMELIB_ZONETYPE_ABBR;
+			t->dst = *dst;
 			timelib_time_tz_abbr_update(t, tz_abbr);
 		}
 
@@ -2005,7 +2004,7 @@ timelib_time *timelib_strtotime(const char *s, size_t len, timelib_error_contain
 			add_pbf_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Unexpected data found.", string, begin); \
 		}
 #define TIMELIB_CHECK_SIGNED_NUMBER                                    \
-		if (strchr("-0123456789", *ptr) == NULL)                       \
+		if (strchr("+-0123456789", *ptr) == NULL)                      \
 		{                                                              \
 			add_pbf_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Unexpected data found.", string, begin); \
 		}
@@ -2080,6 +2079,8 @@ static const timelib_format_specifier default_format_map[] = {
 	{' ', TIMELIB_FORMAT_WHITESPACE},
 	{'y', TIMELIB_FORMAT_YEAR_TWO_DIGIT},
 	{'Y', TIMELIB_FORMAT_YEAR_FOUR_DIGIT},
+	{'x', TIMELIB_FORMAT_YEAR_EXPANDED},
+	{'X', TIMELIB_FORMAT_YEAR_EXPANDED},
 	{'\0', TIMELIB_FORMAT_END}
 };
 
@@ -2263,6 +2264,15 @@ timelib_time *timelib_parse_from_format_with_map(const char *format, const char 
 				TIMELIB_CHECK_NUMBER;
 				if ((s->time->y = timelib_get_nr(&ptr, 4)) == TIMELIB_UNSET) {
 					add_pbf_error(s, TIMELIB_ERR_NO_FOUR_DIGIT_YEAR, "A four digit year could not be found", string, begin);
+					break;
+				}
+
+				s->time->have_date = 1;
+				break;
+			case TIMELIB_FORMAT_YEAR_EXPANDED: /* optional symbol, followed by up to 19 digits */
+				TIMELIB_CHECK_SIGNED_NUMBER;
+				if ((s->time->y = timelib_get_signed_nr(s, &ptr, 19)) == TIMELIB_UNSET) {
+					add_pbf_error(s, TIMELIB_ERR_NO_FOUR_DIGIT_YEAR, "An expanded digit year could not be found", string, begin);
 					break;
 				}
 

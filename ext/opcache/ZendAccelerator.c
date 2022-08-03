@@ -34,6 +34,7 @@
 #include "zend_vm.h"
 #include "zend_inheritance.h"
 #include "zend_exceptions.h"
+#include "zend_mmap.h"
 #include "main/php_main.h"
 #include "main/SAPI.h"
 #include "main/php_streams.h"
@@ -616,6 +617,21 @@ static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char 
 	return zend_string_init(str, size, permanent);
 }
 
+static inline void accel_copy_permanent_list_types(
+	zend_new_interned_string_func_t new_interned_string, zend_type type)
+{
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(*single_type));
+			accel_copy_permanent_list_types(new_interned_string, *single_type);
+		}
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			ZEND_TYPE_SET_PTR(*single_type, new_interned_string(ZEND_TYPE_NAME(*single_type)));
+		}
+	} ZEND_TYPE_FOREACH_END();
+}
+
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_interned_string)
 {
@@ -650,13 +666,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				num_args++;
 			}
 			for (i = 0 ; i < num_args; i++) {
-				zend_type *single_type;
-				ZEND_TYPE_FOREACH(arg_info[i].type, single_type) {
-					if (ZEND_TYPE_HAS_NAME(*single_type)) {
-						ZEND_TYPE_SET_PTR(*single_type,
-							new_interned_string(ZEND_TYPE_NAME(*single_type)));
-					}
-				} ZEND_TYPE_FOREACH_END();
+				accel_copy_permanent_list_types(new_interned_string, arg_info[i].type);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2936,7 +2946,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 # endif
 
 # if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
-static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
+static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
 {
 	void *ret = MAP_FAILED;
 	void *mem;
@@ -2949,7 +2959,7 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap failed: %s (%d)",
 			strerror(errno), errno);
-		return -1;
+		return FAILURE;
 	}
 	memcpy(mem, start, real_size);
 
@@ -2974,7 +2984,7 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 			zend_error(E_WARNING,
 				ACCELERATOR_PRODUCT_NAME " huge_code_pages: madvise(HUGEPAGE) failed: %s (%d)",
 				strerror(errno), errno);
-			return -1;
+			return FAILURE;
 		}
 #  else
 		memcpy(start, mem, real_size);
@@ -2983,17 +2993,19 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
 			strerror(errno), errno);
-		return -1;
+		return FAILURE;
 #  endif
 	}
 
-	if (ret == start) {
-		memcpy(start, mem, real_size);
-		mprotect(start, size, PROT_READ | PROT_EXEC);
-	}
+	// Given the MAP_FIXED flag the address can never diverge
+	ZEND_ASSERT(ret == start);
+	zend_mmap_set_name(start, size, "zend_huge_code_pages");
+	memcpy(start, mem, real_size);
+	mprotect(start, size, PROT_READ | PROT_EXEC);
+
 	munmap(mem, size);
 
-	return (ret == start) ? 0 : -1;
+	return SUCCESS;
 }
 
 static void accel_move_code_to_huge_pages(void)
@@ -4322,7 +4334,7 @@ static int accel_preload(const char *config, bool in_child)
 
 	orig_map_ptr_last = CG(map_ptr_last);
 
-	/* Compile and execute proloading script */
+	/* Compile and execute preloading script */
 	zend_stream_init_filename(&file_handle, (char *) config);
 
 	preload_scripts = emalloc(sizeof(HashTable));

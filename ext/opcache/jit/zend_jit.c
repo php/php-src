@@ -47,6 +47,10 @@
 
 #include "jit/zend_jit_internal.h"
 
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+#include <pthread.h>
+#endif
+
 #ifdef ZTS
 int jit_globals_id;
 #else
@@ -106,6 +110,9 @@ int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
 const zend_op *zend_jit_halt_op = NULL;
 static int zend_jit_vm_kind = 0;
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+static int zend_write_protect = 1;
+#endif
 
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
@@ -1656,21 +1663,17 @@ static void zend_jit_add_hint(zend_lifetime_interval **intervals, int dst, int s
 		src = dst;
 		dst = tmp;
 	}
-	while (1) {
-		if (intervals[dst]->hint) {
-			if (intervals[dst]->hint->range.start < intervals[src]->range.start) {
-				int tmp = src;
-				src = intervals[dst]->hint->ssa_var;
-				dst = tmp;
-			} else {
-				dst = intervals[dst]->hint->ssa_var;
-			}
+	while (dst != src && intervals[dst]->hint) {
+		if (intervals[dst]->hint->range.start < intervals[src]->range.start) {
+			int tmp = src;
+			src = intervals[dst]->hint->ssa_var;
+			dst = tmp;
 		} else {
-			if (dst != src) {
-				intervals[dst]->hint = intervals[src];
-			}
-			return;
+			dst = intervals[dst]->hint->ssa_var;
 		}
+	}
+	if (dst != src) {
+		intervals[dst]->hint = intervals[src];
 	}
 }
 
@@ -4605,12 +4608,13 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		int opts = PROT_READ | PROT_WRITE;
 #ifdef ZTS
-  /* TODO: EXEC+WRITE is not supported in macOS. Removing EXEC is still buggy as
-   * other threads, which are executing the JITed code, would crash anyway. */
-# ifndef __APPLE__
-		/* Another thread may be executing JITed code. */
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+		if (zend_write_protect) {
+			pthread_jit_write_protect_np(0);
+			return;
+		}
+#endif
 		opts |= PROT_EXEC;
-# endif
 #endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
@@ -4638,6 +4642,12 @@ ZEND_EXT_API void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+		if (zend_write_protect) {
+			pthread_jit_write_protect_np(1);
+			return;
+		}
+#endif
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
@@ -4893,11 +4903,19 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 		}
 	}
 #endif
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+	zend_write_protect = pthread_jit_write_protect_supported_np();
+#endif
 
 	dasm_buf = buf;
 	dasm_size = size;
 
 #ifdef HAVE_MPROTECT
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+	if (zend_write_protect) {
+		pthread_jit_write_protect_np(1);
+	}
+#endif
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));

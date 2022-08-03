@@ -67,11 +67,13 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-linux
         with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
@@ -80,6 +82,7 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
@@ -87,6 +90,7 @@ jobs:
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
         with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
@@ -127,9 +131,12 @@ jobs:
         run: sudo make install
       - name: Test
         uses: ./.github/actions/test-macos
+        with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
@@ -138,6 +145,7 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
@@ -145,6 +153,7 @@ jobs:
       - name: Test Function JIT
         uses: ./.github/actions/test-macos
         with:
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
@@ -153,3 +162,34 @@ jobs:
             -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  COVERAGE_DEBUG_NTS:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+      - name: Create mssql container
+        uses: ./.github/actions/mssql
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: Install gcovr
+        run: sudo -H pip install gcovr
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: --enable-debug --disable-zts --enable-gcov
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        uses: ./.github/actions/setup-x64
+      # We only test with OpCache, the difference in coverage is negligible
+      - name: Test OpCache
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Upload Test Coverage to Codecov.io
+        if: always()
+        run: bash <(curl -s https://codecov.io/bash)

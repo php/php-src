@@ -71,6 +71,18 @@ PHPAPI void php_syslog_str(int priority, const zend_string* message)
 	smart_string_free(&sbuf);
 }
 
+void php_openlog(const char *ident, int option, int facility)
+{
+	openlog(ident, option, facility);
+	PG(have_called_openlog) = 1;
+}
+
+void php_closelog(void)
+{
+	closelog();
+	PG(have_called_openlog) = 0;
+}
+
 #ifdef PHP_WIN32
 PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 {

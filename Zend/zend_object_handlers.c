@@ -622,6 +622,17 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 				}
 			}
 			goto exit;
+		} else {
+			if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+				if (type == BP_VAR_W || type == BP_VAR_RW) {
+					zend_readonly_property_indirect_modification_error(prop_info);
+					retval = &EG(uninitialized_zval);
+					goto exit;
+				} else if (type == BP_VAR_UNSET) {
+					retval = &EG(uninitialized_zval);
+					goto exit;
+				}
+			}
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
 			/* Skip __get() for uninitialized typed properties */
@@ -1051,9 +1062,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 						ZVAL_NULL(retval);
 						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 					}
-				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
-					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize")) {
-					retval = &EG(error_zval);
+				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					/* Readonly property, delegate to read_property + write_property. */
+					retval = NULL;
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */
@@ -1841,7 +1852,7 @@ ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj, int type) /* {{{ */
+ZEND_API zend_result zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	switch (type) {
 		case IS_STRING: {
@@ -1871,7 +1882,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 }
 /* }}} */
 
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
+ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
 {
 	zend_class_entry *ce = obj->ce;
 	zval *func = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));

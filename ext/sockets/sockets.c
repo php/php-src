@@ -511,6 +511,9 @@ static PHP_MINIT_FUNCTION(sockets)
 #ifdef MSG_CMSG_CLOEXEC
 	REGISTER_LONG_CONSTANT("MSG_CMSG_CLOEXEC",MSG_CMSG_CLOEXEC,CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef MSG_ZEROCOPY
+	REGISTER_LONG_CONSTANT("MSG_ZEROCOPY",  MSG_ZEROCOPY,   CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("SO_DEBUG",		SO_DEBUG,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_REUSEADDR",	SO_REUSEADDR,	CONST_CS | CONST_PERSISTENT);
@@ -548,6 +551,11 @@ static PHP_MINIT_FUNCTION(sockets)
 #endif
 #ifdef SO_ACCEPTFILTER
 	REGISTER_LONG_CONSTANT("SO_ACCEPTFILTER",       SO_ACCEPTFILTER,        CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SOL_FILTER
+	REGISTER_LONG_CONSTANT("SOL_FILTER",     SOL_FILTER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FIL_ATTACH",     FIL_ATTACH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FIL_DETACH",     FIL_DETACH, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef SO_DONTTRUNC
 	REGISTER_LONG_CONSTANT("SO_DONTTRUNC",       SO_DONTTRUNC,        CONST_CS | CONST_PERSISTENT);
@@ -627,6 +635,12 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SKF_AD_MAX", SKF_AD_MAX, CONST_CS | CONST_PERSISTENT);
 #endif
 
+#ifdef TCP_CONGESTION
+	REGISTER_LONG_CONSTANT("TCP_CONGESTION",   TCP_CONGESTION,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_ZEROCOPY
+	REGISTER_LONG_CONSTANT("SO_ZEROCOPY", SO_ZEROCOPY,  CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef TCP_NODELAY
 	REGISTER_LONG_CONSTANT("TCP_NODELAY",   TCP_NODELAY,    CONST_CS | CONST_PERSISTENT);
 #endif
@@ -1883,6 +1897,26 @@ PHP_FUNCTION(socket_get_option)
 	}
 #endif
 
+	if (level == IPPROTO_TCP) {
+		switch (optname) {
+#ifdef TCP_CONGESTION
+		case TCP_CONGESTION: {
+			char name[16];
+			optlen = sizeof(name);
+			if (getsockopt(php_sock->bsd_socket, level, optname, name, &optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+				RETURN_FALSE;
+			} else {
+				array_init(return_value);
+
+				add_assoc_string(return_value, "name", name);
+				return;
+			}
+		}
+#endif
+		}
+	}
+
 	if (level == SOL_SOCKET) {
 		switch (optname) {
 			case SO_LINGER:
@@ -1975,6 +2009,32 @@ PHP_FUNCTION(socket_get_option)
 		}
 	}
 
+#ifdef SOL_FILTER
+	if (level == SOL_FILTER) {
+		switch (optname) {
+
+			case FIL_LIST: {
+				size_t i;
+				struct fil_info fi[32] = {{0}};
+				optlen = sizeof(fi);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)fi, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				array_init(return_value);
+
+				for (i = 0; i < optlen / sizeof(struct fil_info); i++) {
+					add_index_string(return_value, i, fi[i].fi_name);
+				}
+
+				return;
+			}
+		}
+	}
+#endif
+
 	optlen = sizeof(other_val);
 
 	if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
@@ -2039,6 +2099,28 @@ PHP_FUNCTION(socket_set_option)
 		HANDLE_SUBCALL(res);
 	}
 #endif
+
+	if (level == IPPROTO_TCP) {
+		switch (optname) {
+#ifdef TCP_CONGESTION
+		case TCP_CONGESTION: {
+			if (Z_TYPE_P(arg4) == IS_STRING) {
+				opt_ptr = Z_STRVAL_P(arg4);
+				optlen = Z_STRLEN_P(arg4);
+			} else {
+				opt_ptr = "";
+				optlen = 0;
+			}
+			if (setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen) != 0) {
+				PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
+				RETURN_FALSE;
+			}
+
+			RETURN_TRUE;
+		}
+#endif
+		}
+	}
 
 	switch (optname) {
 		case SO_LINGER: {
@@ -2122,6 +2204,23 @@ PHP_FUNCTION(socket_set_option)
 			strlcpy(af.af_name, Z_STRVAL_P(arg4), sizeof(af.af_name));
 			opt_ptr = &af;
 			optlen = sizeof(af);
+			break;
+		}
+#endif
+
+#ifdef FIL_ATTACH
+		case FIL_ATTACH:
+		case FIL_DETACH: {
+			if (level != SOL_FILTER) {
+				php_error_docref(NULL, E_WARNING, "Invalid level");
+				RETURN_FALSE;
+			}
+			if (Z_TYPE_P(arg4) != IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Invalid filter argument type");
+				RETURN_FALSE;
+			}
+			opt_ptr = Z_STRVAL_P(arg4);
+			optlen = Z_STRLEN_P(arg4);
 			break;
 		}
 #endif

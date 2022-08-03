@@ -808,7 +808,7 @@ PHP_METHOD(SplObjectStorage, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	RETURN_NEW_STR(buf.s);
+	RETURN_STR(smart_str_extract(&buf));
 } /* }}} */
 
 /* {{{ Unserializes storage */
@@ -1014,13 +1014,6 @@ PHP_METHOD(SplObjectStorage, __debugInfo)
 	RETURN_ARR(spl_object_storage_debug_info(Z_OBJ_P(ZEND_THIS)));
 }
 /* }}} */
-
-typedef enum {
-	MIT_NEED_ANY     = 0,
-	MIT_NEED_ALL     = 1,
-	MIT_KEYS_NUMERIC = 0,
-	MIT_KEYS_ASSOC   = 2
-} MultipleIteratorFlags;
 
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT   1
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_KEY       2
@@ -1351,11 +1344,6 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
 	spl_ce_MultipleIterator->create_object = spl_SplObjectStorage_new;
-
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ANY",     MIT_NEED_ANY);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ALL",     MIT_NEED_ALL);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_NUMERIC", MIT_KEYS_NUMERIC);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_ASSOC",   MIT_KEYS_ASSOC);
 
 	return SUCCESS;
 }

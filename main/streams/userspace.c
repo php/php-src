@@ -298,8 +298,8 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 	}
 
 	if (context) {
-		add_property_resource(object, "context", context->res);
 		GC_ADDREF(context->res);
+		add_property_resource(object, "context", context->res);
 	} else {
 		add_property_null(object, "context");
 	}
@@ -953,7 +953,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 
 		switch (value) {
 		case PHP_STREAM_TRUNCATE_SUPPORTED:
-			if (zend_is_callable_ex(&func_name, Z_OBJ(us->object), 0, NULL, NULL, NULL))
+			if (zend_is_callable_ex(&func_name, Z_OBJ(us->object), IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, NULL, NULL))
 				ret = PHP_STREAM_OPTION_RETURN_OK;
 			else
 				ret = PHP_STREAM_OPTION_RETURN_ERR;

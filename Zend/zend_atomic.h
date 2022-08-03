@@ -150,7 +150,7 @@ static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *
 
 static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
 	bool prev = obj->value;
-	obj->value = true;
+	obj->value = desired;
 	return prev;
 }
 

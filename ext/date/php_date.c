@@ -134,6 +134,7 @@ PHPAPI time_t php_time(void)
  *  zone            =       (( "+" / "-" ) 4DIGIT)
  */
 #define DATE_FORMAT_RFC2822  "D, d M Y H:i:s O"
+
 /*
  * RFC3339, Section 5.6: http://www.ietf.org/rfc/rfc3339.txt
  *  date-fullyear   = 4DIGIT
@@ -156,7 +157,41 @@ PHPAPI time_t php_time(void)
  */
 #define DATE_FORMAT_RFC3339  "Y-m-d\\TH:i:sP"
 
+/*
+ * This format does not technically match the ISO 8601 standard, as it does not
+ * use : in the UTC offset format specifier. This is kept for BC reasons. The
+ * DATE_FORMAT_ISO8601_EXPANDED format does correct this, as well as adding
+ * support for years out side of the traditional 0000-9999 range.
+ */
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
+
+/* ISO 8601:2004(E)
+ *
+ * Section 3.5 Expansion:
+ * By mutual agreement of the partners in information interchange, it is
+ * permitted to expand the component identifying the calendar year, which is
+ * otherwise limited to four digits. This enables reference to dates and times
+ * in calendar years outside the range supported by complete representations,
+ * i.e. before the start of the year [0000] or after the end of the year
+ * [9999]."
+ *
+ * Section 4.1.2.4 Expanded representations:
+ * If, by agreement, expanded representations are used, the formats shall be as
+ * specified below. The interchange parties shall agree the additional number of
+ * digits in the time element year. In the examples below it has been agreed to
+ * expand the time element year with two digits.
+ * Extended format: ±YYYYY-MM-DD
+ * Example: +001985-04-12
+ *
+ * PHP's year expansion digits are variable.
+ */
+#define DATE_FORMAT_ISO8601_EXPANDED    "X-m-d\\TH:i:sP"
+
+/* Internal Only
+ * This format only extends the year when needed, keeping the 'P' format with
+ * colon for UTC offsets
+ */
+#define DATE_FORMAT_ISO8601_LARGE_YEAR  "x-m-d\\TH:i:sP"
 
 /*
  * RFC3339, Appendix A: http://www.ietf.org/rfc/rfc3339.txt
@@ -659,6 +694,8 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 			case 'L': length = slprintf(buffer, sizeof(buffer), "%d", timelib_is_leap((int) t->y)); break;
 			case 'y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) (t->y % 100)); break;
 			case 'Y': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
+			case 'x': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : (t->y >= 10000 ? "+" : ""), php_date_llabs((timelib_sll) t->y)); break;
+			case 'X': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "+", php_date_llabs((timelib_sll) t->y)); break;
 
 			/* time */
 			case 'a': length = slprintf(buffer, sizeof(buffer), "%s", t->h >= 12 ? "pm" : "am"); break;
@@ -1410,35 +1447,44 @@ static void create_date_period_interval(timelib_rel_time *interval, zval *zv)
 	}
 }
 
+static void write_date_period_property(zend_object *obj, const char *name, const size_t name_len, zval *zv)
+{
+	zend_string *property_name = zend_string_init(name, name_len, 0);
+
+	zend_std_write_property(obj, property_name, zv, NULL);
+
+	zval_ptr_dtor(zv);
+	zend_string_release(property_name);
+}
+
 static void initialize_date_period_properties(php_period_obj *period_obj)
 {
-	zval start_zv, current_zv, end_zv, interval_zv;
+	zval zv;
 
 	if (UNEXPECTED(!period_obj->std.properties)) {
 		rebuild_object_properties(&period_obj->std);
 	}
 
-	create_date_period_datetime(period_obj->start, period_obj->start_ce, &start_zv);
-	zend_update_property(date_ce_period, &period_obj->std, "start", sizeof("start") - 1, &start_zv);
-	zval_ptr_dtor(&start_zv);
+	create_date_period_datetime(period_obj->start, period_obj->start_ce, &zv);
+	write_date_period_property(&period_obj->std, "start", sizeof("start") - 1, &zv);
 
-	create_date_period_datetime(period_obj->current, period_obj->start_ce, &current_zv);
-	zend_string *property_name = zend_string_init("current", sizeof("current") - 1, 0);
-	zend_std_write_property(&period_obj->std, property_name, &current_zv, NULL);
-	zval_ptr_dtor(&current_zv);
-	zend_string_release(property_name);
+	create_date_period_datetime(period_obj->current, period_obj->start_ce, &zv);
+	write_date_period_property(&period_obj->std, "current", sizeof("current") - 1, &zv);
 
-	create_date_period_datetime(period_obj->end, period_obj->start_ce, &end_zv);
-	zend_update_property(date_ce_period, &period_obj->std, "end", sizeof("end") - 1, &end_zv);
-	zval_ptr_dtor(&end_zv);
+	create_date_period_datetime(period_obj->end, period_obj->start_ce, &zv);
+	write_date_period_property(&period_obj->std, "end", sizeof("end") - 1, &zv);
 
-	create_date_period_interval(period_obj->interval, &interval_zv);
-	zend_update_property(date_ce_period, &period_obj->std, "interval", sizeof("interval") - 1, &interval_zv);
-	zval_ptr_dtor(&interval_zv);
+	create_date_period_interval(period_obj->interval, &zv);
+	write_date_period_property(&period_obj->std, "interval", sizeof("interval") - 1, &zv);
 
-	zend_update_property_long(date_ce_period, &period_obj->std, "recurrences", sizeof("recurrences") - 1, (zend_long) period_obj->recurrences);
-	zend_update_property_bool(date_ce_period, &period_obj->std, "include_start_date", sizeof("include_start_date") - 1, period_obj->include_start_date);
-	zend_update_property_bool(date_ce_period, &period_obj->std, "include_end_date", sizeof("include_end_date") - 1, period_obj->include_end_date);
+	ZVAL_LONG(&zv, (zend_long) period_obj->recurrences);
+	write_date_period_property(&period_obj->std, "recurrences", sizeof("recurrences") - 1, &zv);
+
+	ZVAL_BOOL(&zv, period_obj->include_start_date);
+	write_date_period_property(&period_obj->std, "include_start_date", sizeof("include_start_date") - 1, &zv);
+
+	ZVAL_BOOL(&zv, period_obj->include_end_date);
+	write_date_period_property(&period_obj->std, "include_end_date", sizeof("include_end_date") - 1, &zv);
 }
 
 /* define an overloaded iterator structure */
@@ -1490,6 +1536,17 @@ static int date_period_it_has_more(zend_object_iterator *iter)
 }
 /* }}} */
 
+static zend_class_entry *get_base_date_class(zend_class_entry *start_ce)
+{
+	zend_class_entry *tmp = start_ce;
+
+	while (tmp != date_ce_date && tmp != date_ce_immutable && tmp->parent) {
+		tmp = tmp->parent;
+	}
+
+	return tmp;
+}
+
 /* {{{ date_period_it_current_data */
 static zval *date_period_it_current_data(zend_object_iterator *iter)
 {
@@ -1499,7 +1556,7 @@ static zval *date_period_it_current_data(zend_object_iterator *iter)
 	php_date_obj   *newdateobj;
 
 	/* Create new object */
-	php_date_instantiate(object->start_ce, &iterator->current);
+	php_date_instantiate(get_base_date_class(object->start_ce), &iterator->current);
 	newdateobj = Z_PHPDATE_P(&iterator->current);
 	newdateobj->time = timelib_time_ctor();
 	*newdateobj->time = *it_time;
@@ -1801,7 +1858,7 @@ static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 	zval zv;
 
 	/* first we add the date and time in ISO format */
-	ZVAL_STR(&zv, date_format("Y-m-d H:i:s.u", sizeof("Y-m-d H:i:s.u")-1, dateobj->time, 1));
+	ZVAL_STR(&zv, date_format("x-m-d H:i:s.u", sizeof("x-m-d H:i:s.u")-1, dateobj->time, 1));
 	zend_hash_str_update(props, "date", sizeof("date")-1, &zv);
 
 	/* then we add the timezone name (or similar) */
@@ -3791,7 +3848,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_nominal() \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     timestamp_begin); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, timestamp_begin, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[0].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx]); \
@@ -3800,7 +3857,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add(i,ts) \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
@@ -3809,7 +3866,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_by_index(i,ts) \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[i].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
@@ -3818,7 +3875,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_from_tto(to,ts) \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601_LARGE_YEAR, 13, ts, 0)); \
 		add_assoc_long(&element, "offset", (to)->offset); \
 		add_assoc_bool(&element, "isdst",  (to)->is_dst); \
 		add_assoc_string(&element, "abbr", (to)->abbr); \
@@ -5063,6 +5120,9 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && instanceof_function(Z_OBJCE_P(ht_entry), date_ce_interface)) {
 			php_date_obj *date_obj;
 			date_obj = Z_PHPDATE_P(ht_entry);
+			if (period_obj->start != NULL) {
+				timelib_time_dtor(period_obj->start);
+			}
 			period_obj->start = timelib_time_clone(date_obj->time);
 			period_obj->start_ce = Z_OBJCE_P(ht_entry);
 		} else if (Z_TYPE_P(ht_entry) != IS_NULL) {
@@ -5077,6 +5137,9 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && instanceof_function(Z_OBJCE_P(ht_entry), date_ce_interface)) {
 			php_date_obj *date_obj;
 			date_obj = Z_PHPDATE_P(ht_entry);
+			if (period_obj->end != NULL) {
+				timelib_time_dtor(period_obj->end);
+			}
 			period_obj->end = timelib_time_clone(date_obj->time);
 		} else if (Z_TYPE_P(ht_entry) != IS_NULL) {
 			return 0;
@@ -5090,6 +5153,9 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && instanceof_function(Z_OBJCE_P(ht_entry), date_ce_interface)) {
 			php_date_obj *date_obj;
 			date_obj = Z_PHPDATE_P(ht_entry);
+			if (period_obj->current != NULL) {
+				timelib_time_dtor(period_obj->current);
+			}
 			period_obj->current = timelib_time_clone(date_obj->time);
 		} else if (Z_TYPE_P(ht_entry) != IS_NULL)  {
 			return 0;
@@ -5103,6 +5169,9 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && Z_OBJCE_P(ht_entry) == date_ce_interval) {
 			php_interval_obj *interval_obj;
 			interval_obj = Z_PHPINTERVAL_P(ht_entry);
+			if (period_obj->interval != NULL) {
+				timelib_rel_time_dtor(period_obj->interval);
+			}
 			period_obj->interval = timelib_rel_time_clone(interval_obj->diff);
 		} else { /* interval is required */
 			return 0;
@@ -5257,7 +5326,7 @@ static zval *date_period_read_property(zend_object *object, zend_string *name, i
 
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	if (zend_string_equals_literal(name, "current")) {
+	if (date_period_is_internal_property(name)) {
 		zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
 		return value;
 	}
@@ -5267,7 +5336,7 @@ static zval *date_period_write_property(zend_object *object, zend_string *name, 
 
 static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
-	if (zend_string_equals_literal(name, "current")) {
+	if (date_period_is_internal_property(name)) {
 		zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
 		return &EG(error_zval);
 	}
