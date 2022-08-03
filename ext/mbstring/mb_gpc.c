@@ -132,12 +132,10 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 
 	info.data_type              = arg;
 	info.separator              = separator;
-	info.report_errors          = 0;
+	info.report_errors          = false;
 	info.to_encoding            = MBSTRG(internal_encoding);
-	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
-	info.from_language          = MBSTRG(language);
 
 	MBSTRG(illegalchars) = 0;
 
@@ -318,12 +316,10 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 
 	info.data_type              = PARSE_POST;
 	info.separator              = "&";
-	info.report_errors          = 0;
+	info.report_errors          = false;
 	info.to_encoding            = MBSTRG(internal_encoding);
-	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
-	info.from_language          = MBSTRG(language);
 
 	php_stream_rewind(SG(request_info).request_body);
 	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
