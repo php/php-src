@@ -496,7 +496,38 @@ zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
 	return zend_fetch_class_with_scope(zend_ast_get_str(ast), (ast->attr >> ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT) | ZEND_FETCH_CLASS_EXCEPTION, scope);
 }
 
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
+	zval *result,
+	zend_ast *ast,
+	zend_class_entry *scope,
+	bool *short_circuited_ptr,
+	zend_ast_evaluate_ctx *ctx
+);
+
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
+	zval *result,
+	zend_ast *ast,
+	zend_class_entry *scope,
+	bool *short_circuited_ptr,
+	zend_ast_evaluate_ctx *ctx
+) {
+	zend_string *previous_filename;
+	zend_long previous_lineno;
+	if (scope) {
+		previous_filename = EG(filename_override);
+		previous_lineno = EG(lineno_override);
+		EG(filename_override) = scope->info.user.filename;
+		EG(lineno_override) = zend_ast_get_lineno(ast);
+	}
+	zend_result r = zend_ast_evaluate_inner(result, ast, scope, short_circuited_ptr, ctx);
+	if (scope) {
+		EG(filename_override) = previous_filename;
+		EG(lineno_override) = previous_lineno;
+	}
+	return r;
+}
+
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
 	zend_class_entry *scope,
@@ -1023,11 +1054,13 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->attr = ast->attr;
 		ZVAL_COPY(&new->val, zend_ast_get_zval(ast));
 		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
+		// Lineno gets copied with ZVAL_COPY
 	} else if (ast->kind == ZEND_AST_CONSTANT) {
 		zend_ast_zval *new = (zend_ast_zval*)buf;
 		new->kind = ZEND_AST_CONSTANT;
 		new->attr = ast->attr;
 		ZVAL_STR_COPY(&new->val, zend_ast_get_constant_name(ast));
+		Z_LINENO(new->val) = zend_ast_get_lineno(ast);
 		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -1036,6 +1069,7 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = list->kind;
 		new->attr = list->attr;
 		new->children = list->children;
+		new->lineno = list->lineno;
 		buf = (void*)((char*)buf + zend_ast_list_size(list->children));
 		for (i = 0; i < list->children; i++) {
 			if (list->child[i]) {
