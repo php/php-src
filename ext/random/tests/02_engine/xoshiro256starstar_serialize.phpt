@@ -1,9 +1,11 @@
 --TEST--
-Random: Engine: Xoshiro256StarStar: serialize
+Random: Engine: Xoshiro256StarStar: The serialization output must be stable
 --FILE--
 <?php
 
-echo serialize(new \Random\Engine\Xoshiro256StarStar(1234));
+use Random\Engine\Xoshiro256StarStar;
+
+echo serialize(new Xoshiro256StarStar(1234));
 
 ?>
 --EXPECT--
