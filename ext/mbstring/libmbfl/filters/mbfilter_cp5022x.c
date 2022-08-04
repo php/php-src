@@ -555,7 +555,9 @@ static int mbfl_filt_conv_wchar_cp50220_flush(mbfl_convert_filter *filter)
 
 	if (filter->cache) {
 		int s = mb_convert_kana_codepoint(filter->cache, 0, NULL, NULL, mode);
+		filter->filter_function = mbfl_filt_conv_wchar_cp50221;
 		mbfl_filt_conv_wchar_cp50221(s, filter);
+		filter->filter_function = mbfl_filt_conv_wchar_cp50220;
 		filter->cache = 0;
 	}
 
