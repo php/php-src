@@ -99,16 +99,6 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 #	define ZEND_DOUBLE_FITS_LONG(d) (!((d) >= (double)ZEND_LONG_MAX || (d) < (double)ZEND_LONG_MIN))
 #endif
 
-#ifdef ZEND_DVAL_TO_LVAL_CAST_OK
-static zend_always_inline zend_long zend_dval_to_lval(double d)
-{
-    if (EXPECTED(zend_finite(d)) && EXPECTED(!zend_isnan(d))) {
-        return (zend_long)d;
-    } else {
-        return 0;
-    }
-}
-#else
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d);
 
 static zend_always_inline zend_long zend_dval_to_lval(double d)
@@ -120,7 +110,6 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 	}
 	return (zend_long)d;
 }
-#endif
 
 static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 {

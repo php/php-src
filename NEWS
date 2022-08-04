@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-9017 (php_stream_sock_open_from_socket could return NULL).
     (Heiko Weber)
+  . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
 
 04 Aug 2022, PHP 8.0.22
 
