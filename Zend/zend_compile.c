@@ -1594,7 +1594,12 @@ static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *c
 /* We don't use zend_verify_const_access because we need to deal with unlinked classes. */
 static bool zend_verify_ct_const_access(zend_class_constant *c, zend_class_entry *scope)
 {
-	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
+	if (c->ce->ce_flags & ZEND_ACC_TRAIT) {
+		/* This condition is only met on directly accessing trait constants,
+		 * because the ce is replaced to the class entry of the composing class
+		 * on binding. */
+		return 0;
+	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
 		return 1;
 	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PRIVATE) {
 		return c->ce == scope;
@@ -7531,11 +7536,6 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
-
-	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
-		return;
-	}
 
 	for (i = 0; i < children; ++i) {
 		zend_class_constant *c;
