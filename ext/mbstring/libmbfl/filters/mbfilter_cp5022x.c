@@ -322,6 +322,7 @@ static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
 		 * escape sequence was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
@@ -824,7 +825,7 @@ static int mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
 		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
 	}
-	filter->status &= 0xff;
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
