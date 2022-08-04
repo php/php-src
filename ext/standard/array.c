@@ -5791,6 +5791,8 @@ PHP_FUNCTION(array_multisort)
 			}
 			if (repack) {
 				zend_hash_to_packed(hash);
+			} else {
+				zend_hash_rehash(hash);
 			}
 		}
 	}
