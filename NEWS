@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     effects). (ilutov)
   . Implement GH-10217 (Use strlen() for determining the class_name length).
     (Dennis Buteyn)
+  . Fix bug GH-8821 (Improve line numbers for errors in constant expressions).
+    (ilutov)
 
 - Exif:
   . Removed unneeded codepaths in exif_process_TIFF_in_JPEG(). (nielsdos)

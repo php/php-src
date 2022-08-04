@@ -352,6 +352,9 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
 		return Z_LINENO_P(zv);
+	} else if (ast->kind == ZEND_AST_CONSTANT) {
+		zval *zv = &((zend_ast_zval *) ast)->val;
+		return Z_LINENO_P(zv);
 	} else {
 		return ast->lineno;
 	}
