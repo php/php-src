@@ -1041,7 +1041,6 @@ static void mb_wchar_to_cp50220(uint32_t *in, size_t len, mb_convert_buf *buf, b
 	MB_CONVERT_BUF_LOAD(buf, out, limit);
 	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
 
-	bool consumed = false;
 	uint32_t w;
 
 	if (buf->state & 0xFFFF00) {
@@ -1060,10 +1059,10 @@ reprocess_codepoint:
 			 * but the 'next one' will come in a separate buffer */
 			buf->state |= w << 8;
 			break;
-		} else {
-			w = mb_convert_kana_codepoint(w, len ? *in : 0, &consumed, NULL, MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE);
 		}
 
+		bool consumed = false;
+		w = mb_convert_kana_codepoint(w, len ? *in : 0, &consumed, NULL, MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE);
 		if (consumed) {
 			/* Two successive codepoints were converted into one */
 			in++; len--; consumed = false;
