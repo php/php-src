@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #65489 (glob() basedir check is inconsistent). (Jakub Zelenka)
+  . Fixed GH-9244 (Segfault with array_multisort + array_shift). (cmb)
 
 04 Aug 2022, PHP 8.2.0beta2
 
