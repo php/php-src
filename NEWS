@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed --CGI-- support of run-tests.php. (cmb)
+  . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
 
 - Date:
   . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of

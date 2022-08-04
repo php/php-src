@@ -3396,8 +3396,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 }
 /* }}} */
 
-#ifndef ZEND_DVAL_TO_LVAL_CAST_OK
-# if SIZEOF_ZEND_LONG == 4
+#if SIZEOF_ZEND_LONG == 4
 ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d) /* {{{ */
 {
 	double	two_pow_32 = pow(2., 32.),
@@ -3426,5 +3425,4 @@ ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d)
 	return (zend_long)(zend_ulong)dmod;
 }
 /* }}} */
-#endif
 #endif
