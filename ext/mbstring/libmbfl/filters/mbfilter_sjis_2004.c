@@ -427,6 +427,12 @@ int mbfl_filt_conv_jis2004_wchar_flush(mbfl_convert_filter *filter)
 	if (filter->status & 0xF) {
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
+
+	if (filter->flush_function) {
+		return (*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 

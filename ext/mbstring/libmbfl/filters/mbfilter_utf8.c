@@ -176,6 +176,7 @@ int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
+		filter->status = 0;
 	}
 
 	if (filter->flush_function) {

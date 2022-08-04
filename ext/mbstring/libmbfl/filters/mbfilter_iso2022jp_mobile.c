@@ -243,6 +243,7 @@ static int mbfl_filt_conv_2022jp_mobile_wchar_flush(mbfl_convert_filter *filter)
 	if (filter->status & 0xF) {
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
@@ -358,6 +359,7 @@ static int mbfl_filt_conv_wchar_2022jp_mobile_flush(mbfl_convert_filter *filter)
 	if (filter->status == 1 && (c1 == '#' || (c1 >= '0' && c1 <= '9'))) {
 		(*filter->output_function)(c1, filter->data);
 	}
+	filter->status = filter->cache = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);

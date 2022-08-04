@@ -265,6 +265,12 @@ static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
 		/* 2-byte (JIS X 0208 or 0212) character was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -449,7 +455,7 @@ mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
 		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
 	}
-	filter->status &= 0xff;
+	filter->status = 0;
 
 	if (filter->flush_function != NULL) {
 		return (*filter->flush_function)(filter->data);

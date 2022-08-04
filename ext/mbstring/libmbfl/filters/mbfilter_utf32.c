@@ -222,6 +222,7 @@ static int mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
 		/* Input string was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->cache = filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);

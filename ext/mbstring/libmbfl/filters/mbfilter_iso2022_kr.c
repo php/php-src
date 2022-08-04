@@ -176,6 +176,7 @@ static int mbfl_filt_conv_2022kr_wchar_flush(mbfl_convert_filter *filter)
 		/* 2-byte character was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);

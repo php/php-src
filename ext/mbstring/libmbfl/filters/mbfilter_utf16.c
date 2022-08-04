@@ -313,6 +313,7 @@ static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		/* Input string was truncated */
+		filter->status = 0;
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 

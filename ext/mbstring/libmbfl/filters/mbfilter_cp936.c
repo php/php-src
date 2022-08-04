@@ -169,6 +169,7 @@ static int mbfl_filt_conv_cp936_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		/* 2-byte character was truncated */
+		filter->status = 0;
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 

@@ -283,6 +283,7 @@ static int mbfl_filt_conv_utf7imap_wchar_flush(mbfl_convert_filter *filter)
 		/* It is illegal for a UTF-7 IMAP string to end in a Base-64 encoded
 		 * section. It should always change back to ASCII before the end. */
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
+		filter->status = 0;
 	}
 
 	if (filter->flush_function) {

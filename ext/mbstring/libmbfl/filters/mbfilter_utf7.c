@@ -277,6 +277,7 @@ static int mbfl_filt_conv_utf7_wchar_flush(mbfl_convert_filter *filter)
 	if (filter->cache) {
 		/* Either we were expecting the 2nd half of a surrogate pair which
 		 * never came, or else the last Base64 data was not padded with zeroes */
+		filter->cache = 0;
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
@@ -385,6 +386,7 @@ int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 {
 	int status = filter->status;
 	int cache = filter->cache;
+	filter->status = filter->cache = 0;
 
 	/* flush fragments */
 	switch (status) {

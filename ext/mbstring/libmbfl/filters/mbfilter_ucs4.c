@@ -289,6 +289,7 @@ static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter)
 		/* Input string was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);

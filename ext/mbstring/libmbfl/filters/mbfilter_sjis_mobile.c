@@ -717,6 +717,7 @@ static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter)
 	if (filter->status && filter->status != 4) {
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
@@ -831,6 +832,7 @@ int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 {
 	int c1 = filter->cache;
 	if (filter->status == 1 && (c1 == '#' || (c1 >= '0' && c1 <= '9'))) {
+		filter->cache = filter->status = 0;
 		CK((*filter->output_function)(c1, filter->data));
 	} else if (filter->status == 2) {
 		/* First of a pair of Regional Indicator codepoints came at the end of a string */
