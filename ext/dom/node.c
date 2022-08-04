@@ -1001,7 +1001,8 @@ PHP_METHOD(DOMNode, replaceChild)
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr children, newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
-	int foundoldchild = 0, stricterror, replacedoctype = 0;
+	int foundoldchild = 0, stricterror;
+	bool replacedoctype = false;
 
 	int ret;
 
