@@ -205,10 +205,12 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (seed_is_null) {
-		if (php_random_bytes_throw(&state->state, 32) == FAILURE) {
-			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
-			RETURN_THROWS();
-		}
+		do {
+			if (php_random_bytes_throw(&state->state, 32) == FAILURE) {
+				zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
+				RETURN_THROWS();
+			}
+		} while (UNEXPECTED(state->state[0] == 0 && state->state[1] == 0 && state->state[2] == 0 && state->state[3] == 0));
 	} else {
 		if (str_seed) {
 			/* char (byte: 8 bit) * 32 = 256 bits */
@@ -222,6 +224,12 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 						t[i] += ((uint64_t) (unsigned char) ZSTR_VAL(str_seed)[(i * 8) + j]) << (j * 8);
 					}
 				}
+
+				if (UNEXPECTED(t[0] == 0 && t[1] == 0 && t[2] == 0 && t[3] == 0)) {
+					zend_argument_value_error(1, "must not consist entirely of NUL bytes");
+					RETURN_THROWS();
+				}
+
 				seed256(engine->status, t[0], t[1], t[2], t[3]);
 			} else {
 				zend_argument_value_error(1, "must be a 32 byte (256 bit) string");
