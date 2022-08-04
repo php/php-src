@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0beta3
 
+- Core:
+  . Fixed --CGI-- support of run-tests.php. (cmb)
+  . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
+
 - Random:
   . Fixed bug GH-9235 (non-existant $sequence parameter in stub for
     PcgOneseq128XslRr64::__construct()). (timwolla)
