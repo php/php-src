@@ -5718,7 +5718,7 @@ PHP_FUNCTION(array_multisort)
 
 	/* Make sure the arrays are of the same size. */
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
-	for (i = 0; i < num_arrays; i++) {
+	for (i = 1; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_P(arrays[i])) != (uint32_t)array_size) {
 			zend_value_error("Array sizes are inconsistent");
 			MULTISORT_ABORT;
