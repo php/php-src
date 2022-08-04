@@ -20,6 +20,7 @@
 #endif
 
 #include "php.h"
+
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 
@@ -1001,6 +1002,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	xmlNodePtr children, newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
 	int foundoldchild = 0, stricterror;
+	bool replacedoctype = false;
 
 	int ret;
 
@@ -1063,13 +1065,21 @@ PHP_METHOD(DOMNode, replaceChild)
 				dom_reconcile_ns(nodep->doc, newchild);
 			}
 		} else if (oldchild != newchild) {
+			xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
+			replacedoctype = (intSubset == (xmlDtd *) oldchild);
+
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				xmlSetTreeDoc(newchild, nodep->doc);
 				newchildobj->document = intern->document;
 				php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
 			}
+
 			xmlReplaceNode(oldchild, newchild);
 			dom_reconcile_ns(nodep->doc, newchild);
+
+			if (replacedoctype) {
+				nodep->doc->intSubset = (xmlDtd *) newchild;
+			}
 		}
 		DOM_RET_OBJ(oldchild, &ret, intern);
 		return;
