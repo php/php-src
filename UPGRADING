@@ -88,7 +88,8 @@ PHP 8.2 UPGRADE NOTES
     error log file.
   . Added support for fetching properties of enums in constant expressions.
     RFC: https://wiki.php.net/rfc/fetch_property_in_const_expressions
-
+  . Added support for defining constants in traits.
+    RFC: https://wiki.php.net/rfc/constants_in_traits
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
