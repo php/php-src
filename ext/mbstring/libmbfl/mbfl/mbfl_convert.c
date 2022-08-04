@@ -353,6 +353,12 @@ zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encodi
 	uint32_t wchar_buf[128];
 	unsigned int state = 0;
 
+	if (to == &mbfl_encoding_base64 || to == &mbfl_encoding_qprint || to == &mbfl_encoding_7bit) {
+		from = &mbfl_encoding_8bit;
+	} else if (from == &mbfl_encoding_base64 || from == &mbfl_encoding_qprint || from == &mbfl_encoding_uuencode || from == &mbfl_encoding_7bit) {
+		to = &mbfl_encoding_8bit;
+	}
+
 	mb_convert_buf buf;
 	mb_convert_buf_init(&buf, in_len, replacement_char, error_mode);
 
