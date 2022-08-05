@@ -951,6 +951,7 @@ default_socket_timeout = 60
 ;extension=sqlite3
 ;extension=tidy
 ;extension=xsl
+;extension=zip
 
 ;zend_extension=opcache
 
