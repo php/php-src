@@ -3,7 +3,6 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.2.0beta3
 
 - Core:
-  . Fixed --CGI-- support of run-tests.php. (cmb)
   . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
   . Added support for defining constants in traits. (sj-i)
 
