@@ -1,0 +1,33 @@
+--TEST--
+File cache error 001
+--EXTENSIONS--
+opcache
+posix
+--INI--
+opcache.enable_cli=1
+opcache.file_cache={TMP}
+opcache.log_verbosity_level=2
+--SKIPIF--
+<?php posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1) || die('skip Test requires setrlimit(RLIMIT_FSIZE) to work'); ?>
+--FILE--
+<?php
+
+// Create new file to ensure that it's not cached accross test runs
+$file = tempnam(sys_get_temp_dir(), 'file_cache_error');
+register_shutdown_function(function () use ($file) {
+    unlink($file);
+});
+file_put_contents($file, '<?php echo "OK";');
+touch($file, time() - 3600);
+
+// Should cause writing to cache file to fail
+var_dump(posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1));
+
+// Will attempt to write to cache file, and fail
+require $file;
+?>
+--EXPECTF--
+bool(true)
+%sWarning opcache cannot write to file %s: %s
+
+OK
