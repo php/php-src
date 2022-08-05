@@ -19,6 +19,7 @@ steps:
       sapi/cli/php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
           -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress \
           --offline \
           --show-diff \
           --show-slow 1000 \
