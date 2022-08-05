@@ -222,7 +222,6 @@ static const func_info_t func_infos[] = {
 	F1("mb_strrichr", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mb_substr", MAY_BE_STRING),
 	F1("mb_strcut", MAY_BE_STRING),
-	F1("mb_strimwidth", MAY_BE_STRING),
 	F1("mb_convert_encoding", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mb_convert_case", MAY_BE_STRING),
 	F1("mb_strtoupper", MAY_BE_STRING),
