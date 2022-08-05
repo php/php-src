@@ -9,8 +9,8 @@
 ; PHP attempts to find and load this configuration from a number of locations.
 ; The following is a summary of its search order:
 ; 1. SAPI module specific location.
-; 2. The PHPRC environment variable. (As of PHP 5.2.0)
-; 3. A number of predefined registry keys on Windows (As of PHP 5.2.0)
+; 2. The PHPRC environment variable.
+; 3. A number of predefined registry keys on Windows
 ; 4. Current working directory (except CLI)
 ; 5. The web server's directory (for SAPI modules), or directory of PHP
 ; (otherwise in Windows)
@@ -447,7 +447,7 @@ memory_limit = 128M
 ; development and early testing.
 ;
 ; Error Level Constants:
-; E_ALL             - All errors and warnings (includes E_STRICT as of PHP 5.4.0)
+; E_ALL             - All errors and warnings
 ; E_ERROR           - fatal run-time errors
 ; E_RECOVERABLE_ERROR  - almost fatal run-time errors
 ; E_WARNING         - run-time warnings (non-fatal errors)
@@ -908,8 +908,8 @@ default_socket_timeout = 60
 ;
 ; Notes for Windows environments :
 ;
-; - Many DLL files are located in the extensions/ (PHP 4) or ext/ (PHP 5+)
-;   extension folders as well as the separate PECL DLL download (PHP 5+).
+; - Many DLL files are located in the ext/
+;   extension folders as well as the separate PECL DLL download.
 ;   Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=bz2
