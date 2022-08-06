@@ -28,7 +28,7 @@ string(3) "ABC"
 string(1) "%"
 string(3) "ABC"
 bool(false)
-string(2) "%%"
+string(1) "%"
 7bit done
 string(1) "%"
 8bit done
