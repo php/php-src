@@ -85,7 +85,7 @@ static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (size < 0) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer must be higher than or equal to 0, " ZEND_LONG_FMT " given.\n", size);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer must be greater than or equal to 0, " ZEND_LONG_FMT " given.\n", size);
 		return FAILURE;
 	}
 	if (size > MAX_INTERNED_STRINGS_BUFFER_SIZE) {
