@@ -3,6 +3,7 @@ File cache error 001
 --EXTENSIONS--
 opcache
 posix
+pcntl
 --INI--
 opcache.enable_cli=1
 opcache.file_cache={TMP}
@@ -22,6 +23,11 @@ register_shutdown_function(function () use ($file) {
 });
 file_put_contents($file, '<?php echo "OK";');
 touch($file, time() - 3600);
+
+// Some systems will raise SIGXFSZ when RLIMIT_FSIZE is exceeded
+if (defined('SIGXFSZ')) {
+    pcntl_signal(SIGXFSZ, SIG_IGN);
+}
 
 // Should cause writing to cache file to fail
 var_dump(posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1));
