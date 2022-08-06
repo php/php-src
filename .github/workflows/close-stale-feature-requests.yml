@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/stale@v4
         with:
-          days-before-close: 7
+          days-before-close: 14
           days-before-stale: 90
           exempt-all-assignees: true
           only-issue-labels: "Status: Requires RFC,Feature"
