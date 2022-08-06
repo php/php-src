@@ -10,8 +10,8 @@ opcache.file_cache={TMP}
 opcache.log_verbosity_level=2
 --SKIPIF--
 <?php
-posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1) || die('skip Test requires setrlimit(RLIMIT_FSIZE) to work');
-ini_parse_quantity(ini_get('opcache.jit_buffer_size')) === 0 || die('skip File cache is disabled when JIT is on');
+if (!posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1)) die('skip Test requires setrlimit(RLIMIT_FSIZE) to work');
+if (ini_parse_quantity(ini_get('opcache.jit_buffer_size')) !== 0) die('skip File cache is disabled when JIT is on');
 ?>
 --FILE--
 <?php
