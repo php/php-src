@@ -480,6 +480,8 @@ static size_t mb_iso2022jp_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 			/* ESC seen; this is an escape sequence */
 			if ((e - p) < 2) {
 				*out++ = MBFL_BAD_INPUT;
+				if (p != e && (*p == '$' || *p == '('))
+					p++;
 				continue;
 			}
 
