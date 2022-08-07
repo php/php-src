@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
   . Added support for defining constants in traits. (sj-i)
+  . Stop incorrectly emitting false positive deprecation notice alongside
+    unsupported syntax fatal error for `"{$g{'h'}}"`. (TysonAndre)
 
 - Random:
   . Fixed bug GH-9235 (non-existant $sequence parameter in stub for
@@ -73,7 +75,7 @@ PHP                                                                        NEWS
     $advance). (Anton Smirnov)
   . Changed Mt19937 to throw a ValueError instead of InvalidArgumentException
     for invalid $mode. (timwolla)
-  . Splitted Random\Randomizer::getInt() (without arguments) to 
+  . Splitted Random\Randomizer::getInt() (without arguments) to
     Random\Randomizer::nextInt(). (zeriyoshi)
 
 - Sockets:
