@@ -36,6 +36,10 @@ PHP                                                                        NEWS
 - SQLite3:
   . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
 
+- Streams:
+  . Fixed bug GH-8472 (The resource returned by stream_socket_accept may have
+    incorrect metadata). (Jakub Zelenka)
+
 04 Aug 2022, PHP 8.1.9
 
 - CLI:
