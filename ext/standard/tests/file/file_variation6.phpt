@@ -236,12 +236,21 @@ array(3) {
   [2]=>
   string(6) "Line 3"
 }
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
+PHP Warning:  file(): '24' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '25' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '26' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '27' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '28' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '29' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '30' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '31' flag is not supported in %s on line %d
+bool(false)
+PHP Warning:  file(): '32' flag is not supported in %s on line %d
+bool(false)
