@@ -188,8 +188,5 @@ void transliterator_register_Transliterator_class( void )
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
-
-	/* constants are declared in transliterator_register_constants, called from MINIT */
-
 }
 /* }}} */
