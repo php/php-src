@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #77780 ("Headers already sent..." when previous connection was
     aborted). (Jakub Zelenka)
 
+- PCRE:
+  . Fixed pcre.jit on Apple Silicon. (Niklas Keller)
+
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
     (cmb, timwolla)

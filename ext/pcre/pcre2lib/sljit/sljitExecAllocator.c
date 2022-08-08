@@ -187,10 +187,13 @@ static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 	if (retval == MAP_FAILED)
 		return NULL;
 
+#ifdef __FreeBSD__
+	/* HardenedBSD's mmap lies, so check permissions again */
 	if (mprotect(retval, size, PROT_READ | PROT_WRITE | PROT_EXEC) < 0) {
 		munmap(retval, size);
 		return NULL;
 	}
+#endif /* FreeBSD */
 
 	SLJIT_UPDATE_WX_FLAGS(retval, (uint8_t *)retval + size, 0);
 
