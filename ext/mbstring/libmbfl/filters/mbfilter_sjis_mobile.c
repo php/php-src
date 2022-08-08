@@ -1343,7 +1343,7 @@ static size_t mb_sjis_sb_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 				continue;
 			}
 			unsigned char c2 = *p++;
-			if (((c2 < 'E' || c2 > 'G') && (c2 < 'O' || c2 > 'Q')) || p == e) {
+			if ((c2 < 'E' || c2 > 'G') && (c2 < 'O' || c2 > 'Q')) {
 				*out++ = MBFL_BAD_INPUT;
 				continue;
 			}
