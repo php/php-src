@@ -36,7 +36,6 @@
 
 #include "msgformat/msgformat_class.h"
 
-#include "normalizer/normalizer.h"
 #include "normalizer/normalizer_class.h"
 
 #include "locale/locale.h"
@@ -158,9 +157,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
-
-	/* Expose Normalizer constants to PHP scripts */
-	normalizer_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'Locale' PHP class */
 	locale_register_Locale_class(  );

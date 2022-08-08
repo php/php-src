@@ -27,7 +27,6 @@ if test "$PHP_INTL" != "no"; then
     formatter/formatter_data.c \
     formatter/formatter_format.c \
     formatter/formatter_parse.c \
-    normalizer/normalizer.c \
     normalizer/normalizer_class.c \
     normalizer/normalizer_normalize.c \
     locale/locale.c \
