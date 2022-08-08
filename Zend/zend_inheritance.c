@@ -2256,7 +2256,7 @@ static bool do_trait_constant_check(zend_class_entry *ce, zend_class_constant *t
 }
 /* }}} */
 
-static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
+static void zend_do_bind_trait_constants(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
 {
 	size_t i;
 
@@ -2426,9 +2426,10 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 		efree(exclude_tables);
 	}
 
-	/* then flatten the constants and properties into it, to, mostly to notify developer about problems */
-	zend_do_traits_constant_binding(ce, traits);
+	/* then flatten the properties into it, to, mostly to notify developer about problems */
 	zend_do_traits_property_binding(ce, traits);
+
+	/* trait constants are flattened after inheriting interfaces to handle conflicts with constants from interfaces */
 }
 /* }}} */
 
@@ -2982,6 +2983,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_do_implement_interfaces(ce, interfaces);
 		} else if (parent && parent->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent);
+		}
+		if (ce->num_traits) {
+			/* trait constants are bound after processing interfaces to handle conflicts with constants from interfaces */
+			zend_do_bind_trait_constants(ce, traits_and_interfaces);
 		}
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT))
 			&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
