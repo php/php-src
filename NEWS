@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
   . Added support for defining constants in traits. (sj-i)
 
+- MBString:
+  . Fixed bug GH-9248 (Segmentation fault in mb_strimwidth()). (cmb)
+
 - Random:
   . Fixed bug GH-9235 (non-existant $sequence parameter in stub for
     PcgOneseq128XslRr64::__construct()). (timwolla)

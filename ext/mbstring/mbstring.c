@@ -2502,7 +2502,7 @@ append_trim_marker:
 /* Trim the string to terminal width; optional, add a 'trim marker' if it was truncated */
 PHP_FUNCTION(mb_strimwidth)
 {
-	zend_string *str, *trimmarker, *encoding = NULL;
+	zend_string *str, *trimmarker = zend_empty_string, *encoding = NULL;
 	zend_long from, width;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
