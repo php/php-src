@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed --CGI-- support of run-tests.php. (cmb)
   . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
+  . Fixed bug GH-9266 (GC root buffer keeps growing when dtors are present).
+    (Michael Olšavský)
 
 - Date:
   . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of
