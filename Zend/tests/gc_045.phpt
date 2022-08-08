@@ -44,7 +44,6 @@ for ($j = 0; $j < 10; $j++) {
 }
 
 var_dump(gc_status());
-echo 'ok';
 ?>
 --EXPECT--
 array(4) {
@@ -57,4 +56,3 @@ array(4) {
   ["roots"]=>
   int(10000)
 }
-ok
