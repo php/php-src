@@ -53,7 +53,6 @@ if (PHP_INTL != "no") {
                                 grapheme_string.c grapheme_util.c  \
                                 ", "intl");
 		ADD_SOURCES(configure_module_dirname + "/normalizer", "\
-				normalizer.c \
 				normalizer_class.c \
 				normalizer_normalize.c \
 				", "intl");
