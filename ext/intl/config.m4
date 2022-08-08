@@ -55,7 +55,6 @@ if test "$PHP_INTL" != "no"; then
     uchar/uchar.c \
     idn/idn.c \
     spoofchecker/spoofchecker_class.c \
-    spoofchecker/spoofchecker.c\
     spoofchecker/spoofchecker_create.c\
     spoofchecker/spoofchecker_main.c, $ext_shared,,$INTL_COMMON_FLAGS,cxx)
 

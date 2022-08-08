@@ -62,7 +62,6 @@
 #include "uchar/uchar.h"
 
 # include "spoofchecker/spoofchecker_class.h"
-# include "spoofchecker/spoofchecker.h"
 
 #include "common/common_error.h"
 #include "common/common_enum.h"
@@ -194,9 +193,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class(  );
-
-	/* Expose Spoofchecker constants to PHP scripts */
-	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'IntlException' PHP class */
 	IntlException_ce_ptr = register_class_IntlException(zend_ce_exception);

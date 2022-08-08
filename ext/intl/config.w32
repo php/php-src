@@ -84,7 +84,6 @@ if (PHP_INTL != "no") {
 
 		if (CHECK_HEADER_ADD_INCLUDE("unicode/uspoof.h", "CFLAGS_INTL")) {
 			ADD_SOURCES(configure_module_dirname + "/spoofchecker", "\
-					spoofchecker.c \
 					spoofchecker_class.c \
 					spoofchecker_create.c \
 					spoofchecker_main.c",
