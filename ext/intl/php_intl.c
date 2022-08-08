@@ -29,7 +29,6 @@
 
 #include "converter/converter.h"
 
-#include "formatter/formatter.h"
 #include "formatter/formatter_class.h"
 #include "formatter/formatter_format.h"
 
@@ -156,9 +155,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'NumberFormatter' PHP class */
 	formatter_register_class(  );
-
-	/* Expose NumberFormatter constants to PHP scripts */
-	formatter_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
