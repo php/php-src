@@ -176,9 +176,6 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'Transliterator' PHP class */
 	transliterator_register_Transliterator_class(  );
 
-	/* Register Transliterator constants */
-	transliterator_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	/* Register 'IntlTimeZone' PHP class */
 	timezone_register_IntlTimeZone_class(  );
 

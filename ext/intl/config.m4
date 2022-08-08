@@ -49,7 +49,6 @@ if test "$PHP_INTL" != "no"; then
     resourcebundle/resourcebundle.c \
     resourcebundle/resourcebundle_class.c \
     resourcebundle/resourcebundle_iterator.c \
-    transliterator/transliterator.c \
     transliterator/transliterator_class.c \
     transliterator/transliterator_methods.c \
     uchar/uchar.c \
