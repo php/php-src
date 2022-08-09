@@ -1,10 +1,11 @@
 #include "uchar.h"
 #include "intl_data.h"
 #include "intl_convert.h"
-#include "uchar_arginfo.h"
 
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
+
+#include "uchar_arginfo.h"
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
@@ -612,45 +613,7 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 /* }}} */
 
 int php_uchar_minit(INIT_FUNC_ARGS) {
-	zend_class_entry *ce;
-
-	ce = register_class_IntlChar();
-
-#define IC_CONSTL(name, val) \
-	zend_declare_class_constant_long(ce, name, strlen(name), val);
-
-	zend_declare_class_constant_string(ce, "UNICODE_VERSION", sizeof("UNICODE_VERISON")-1, U_UNICODE_VERSION);
-	IC_CONSTL("CODEPOINT_MIN", UCHAR_MIN_VALUE)
-	IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
-	zend_declare_class_constant_double(ce, "NO_NUMERIC_VALUE", sizeof("NO_NUMERIC_VALUE")-1, U_NO_NUMERIC_VALUE);
-
-	/* All enums used by the uchar APIs.  There are a LOT of them,
-	 * so they're separated out into include files,
-	 * leaving this source file for actual implementation.
-	 */
-#define UPROPERTY(name) IC_CONSTL("PROPERTY_" #name, UCHAR_##name)
-#include "uproperty-enum.h"
-#undef UPROPERTY
-
-#define UCHARCATEGORY(name) IC_CONSTL("CHAR_CATEGORY_" #name, U_##name)
-#include "ucharcategory-enum.h"
-#undef UCHARCATEGORY
-
-#define UCHARDIRECTION(name) IC_CONSTL("CHAR_DIRECTION_" #name, U_##name)
-#include "uchardirection-enum.h"
-#undef UCHARDIRECTION
-
-#define UBLOCKCODE(name) IC_CONSTL("BLOCK_CODE_" #name, UBLOCK_##name)
-#include "ublockcode-enum.h"
-#undef UBLOCKCODE
-
-	/* Smaller, self-destribing enums */
-#define UOTHER(name) IC_CONSTL(#name, U_##name)
-#include "uother-enum.h"
-#undef UOTHER
-
-#undef IC_CONSTL
-#undef IC_CONSTS
+	register_class_IntlChar();
 
 	return SUCCESS;
 }
