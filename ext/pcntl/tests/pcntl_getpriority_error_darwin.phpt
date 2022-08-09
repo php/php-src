@@ -2,8 +2,11 @@
 pcntl_getpriority() - Wrong mode passed and also for non existing process id provided
 --EXTENSIONS--
 pcntl
+posix
 --SKIPIF--
 <?php
+
+require_once("pcntl_skipif_user_env_rules.inc");
 
 if (!function_exists('pcntl_getpriority')) {
     die('skip pcntl_getpriority doesn\'t exist');
