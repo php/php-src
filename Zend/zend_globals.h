@@ -261,8 +261,10 @@ struct _zend_executor_globals {
 	zend_long fiber_stack_size;
 
 	/* If record_errors is enabled, all emitted diagnostics will be recorded,
-	 * in addition to being processed as usual. */
+	 * in addition to being processed as usual unless record_errors_without_emitting
+	 * is enabled which supresses processing when the errors are recorded. */
 	bool record_errors;
+	bool record_errors_without_emitting;
 	uint32_t num_errors;
 	zend_error_info **errors;
 

@@ -131,6 +131,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			(char*)name, namelen, persistent_id, options, flags, timeout,
 			context STREAMS_REL_CC);
 
+	zend_begin_record_errors_without_emitting();
+
 	if (stream) {
 		php_stream_context_set(stream, context);
 
@@ -180,6 +182,9 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		}
 		stream = NULL;
 	}
+
+	zend_emit_recorded_errors();
+	zend_free_recorded_errors();
 
 	return stream;
 }
