@@ -2,8 +2,11 @@
 pcntl_setpriority() - Check for errors
 --EXTENSIONS--
 pcntl
+posix
 --SKIPIF--
 <?php
+
+require_once("pcntl_skipif_user_env_rules.inc");
 
 if (!function_exists('pcntl_setpriority')) {
     die('skip pcntl_setpriority doesn\'t exist');
