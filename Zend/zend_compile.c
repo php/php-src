@@ -7649,10 +7649,10 @@ static void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 	for (i = 0; i < traits->children; ++i) {
 		zend_ast *trait_ast = traits->child[i];
 
-		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_READONLY_CLASS)) {
 			zend_string *name = zend_ast_get_str(trait_ast);
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use traits inside of interfaces. "
-				"%s is used in %s", ZSTR_VAL(name), ZSTR_VAL(ce->name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use traits inside of %s. "
+				"%s is used in %s", (ce->ce_flags & ZEND_ACC_INTERFACE) ? "interfaces" : "readonly classes", ZSTR_VAL(name), ZSTR_VAL(ce->name));
 		}
 
 		ce->trait_names[ce->num_traits].name =
