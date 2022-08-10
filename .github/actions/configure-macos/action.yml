@@ -38,7 +38,7 @@ runs:
           --enable-soap \
           --enable-xmlreader \
           --with-xsl \
-          --with-tidy=/usr/local/opt/tidyp \
+          --with-tidy=/usr/local/opt/tidy-html5 \
           --with-libxml \
           --enable-sysvsem \
           --enable-sysvshm \
