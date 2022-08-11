@@ -568,6 +568,22 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 
 	debug_info = zend_new_array(8);
 
+	if (closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
+		if (closure->func.common.scope) {
+			zend_string *class_name = closure->func.common.scope->name;
+			zend_string *func_name = closure->func.common.function_name;
+			zend_string *combined = zend_string_concat3(
+				ZSTR_VAL(class_name), ZSTR_LEN(class_name),
+				"::", strlen("::"),
+				ZSTR_VAL(func_name), ZSTR_LEN(func_name)
+			);
+			ZVAL_STR(&val, combined);
+		} else {
+			ZVAL_STR_COPY(&val, closure->func.common.function_name);
+		}
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_FUNCTION), &val);
+	}
+
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 		zval *var;
 		zend_string *key;
