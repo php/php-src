@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Added extension specific Exceptions/Errors (RandomException, RandomError,
     BrokenRandomEngineError). (timwolla)
 
+- Session:
+  . Fixed GH-9200 (setcookie has an obsolete expires date format). (timwolla)
+
 - Standard:
   . Fixed bug #65489 (glob() basedir check is inconsistent). (Jakub Zelenka)
   . Fixed GH-9200 (setcookie has an obsolete expires date format). (Derick)
