@@ -18,6 +18,7 @@ runs:
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -j$(sysctl -n hw.ncpu) \
           -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress \
           --offline \
           --show-diff \
           --show-slow 1000 \

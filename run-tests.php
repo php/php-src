@@ -127,6 +127,9 @@ Options:
     --color
     --no-color  Do/Don't colorize the result type in the test result.
 
+    --progress
+    --no-progress  Do/Don't show the current progress.
+
     --repeat [n]
                 Run the tests multiple times in the same process and check the
                 output of the last execution (CLI SAPI only).
@@ -159,7 +162,7 @@ function main(): void
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
            $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats,
-           $bless;
+           $bless, $show_progress;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -360,6 +363,7 @@ function main(): void
     $workers = null;
     $context_line_count = 3;
     $num_repeats = 1;
+    $show_progress = true;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -599,6 +603,12 @@ function main(): void
                     if ($switch != '-') {
                         $repeat = true;
                     }
+                    break;
+                case '--progress':
+                    $show_progress = true;
+                    break;
+                case '--no-progress':
+                    $show_progress = false;
                     break;
                 case '--version':
                     echo '$Id$' . "\n";
@@ -1331,7 +1341,7 @@ function run_all_tests(array $test_files, array $env, $redir_tested = null): voi
  */
 function run_all_tests_parallel(array $test_files, array $env, $redir_tested): void
 {
-    global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
+    global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind, $show_progress;
 
     global $junit;
 
@@ -1578,13 +1588,13 @@ escape:
                             }
                             $test_idx++;
 
-                            if (!$SHOW_ONLY_GROUPS) {
+                            if ($show_progress) {
                                 clear_show_test();
                             }
 
                             echo $resultText;
 
-                            if (!$SHOW_ONLY_GROUPS) {
+                            if ($show_progress) {
                                 show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
                             }
 
@@ -1634,7 +1644,7 @@ escape:
         }
     }
 
-    if (!$SHOW_ONLY_GROUPS) {
+    if ($show_progress) {
         clear_show_test();
     }
 
@@ -3223,22 +3233,22 @@ function show_summary(): void
 
 function show_redirect_start(string $tests, string $tested, string $tested_file): void
 {
-    global $SHOW_ONLY_GROUPS;
+    global $SHOW_ONLY_GROUPS, $show_progress;
 
     if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
         echo "REDIRECT $tests ($tested [$tested_file]) begin\n";
-    } else {
+    } elseif ($show_progress) {
         clear_show_test();
     }
 }
 
 function show_redirect_ends(string $tests, string $tested, string $tested_file): void
 {
-    global $SHOW_ONLY_GROUPS;
+    global $SHOW_ONLY_GROUPS, $show_progress;
 
     if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
         echo "REDIRECT $tests ($tested [$tested_file]) done\n";
-    } else {
+    } elseif ($show_progress) {
         clear_show_test();
     }
 }
@@ -3280,7 +3290,7 @@ function show_result(
     string $extra = '',
     ?array $temp_filenames = null
 ): void {
-    global $SHOW_ONLY_GROUPS, $colorize;
+    global $SHOW_ONLY_GROUPS, $colorize, $show_progress;
 
     if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
         if ($colorize) {
@@ -3302,10 +3312,9 @@ function show_result(
         } else {
             echo "$result $tested [$tested_file] $extra\n";
         }
-    } elseif (!$SHOW_ONLY_GROUPS) {
+    } elseif ($show_progress) {
         clear_show_test();
     }
-
 }
 
 class BorkageException extends Exception
