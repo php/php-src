@@ -366,6 +366,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					case ZEND_DECLARE_ANON_CLASS:
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
+					case ZEND_BIND_INIT_STATIC_OR_JMP:
 						return 1;
 					case ZEND_DO_ICALL:
 					case ZEND_DO_UCALL:
@@ -448,6 +449,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 					return 1;
 				case ZEND_DO_ICALL:
 				case ZEND_DO_UCALL:
@@ -4049,6 +4051,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_ASSERT_CHECK:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 					if (!zend_jit_handler(&dasm_state, opline,
 							zend_may_throw(opline, ssa_op, op_array, ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {

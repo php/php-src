@@ -2944,6 +2944,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			break;
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
+			tmp = MAY_BE_UNDEF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_REF;
+			UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
+			break;
 		case ZEND_SEND_VAR:
 			if (ssa_op->op1_def >= 0) {
 				tmp = t1;
@@ -4363,6 +4367,7 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_FUNC_ARG:
+					case ZEND_BIND_INIT_STATIC_OR_JMP:
 						break;
 					case ZEND_INIT_ARRAY:
 					case ZEND_ADD_ARRAY_ELEMENT:
@@ -4518,6 +4523,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				case ZEND_ASSIGN_REF:
 				case ZEND_BIND_GLOBAL:
 				case ZEND_BIND_STATIC:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_FETCH_OBJ_IS:
 				case ZEND_SEND_REF:
@@ -4755,14 +4761,12 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_UNSET_VAR:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 			if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
 				/* Destructor may throw. */
 				return 1;
-			} else {
-				zval *value = (zval*)((char*)op_array->static_variables->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
-				/* May throw if initializer is CONSTANT_AST. */
-				return Z_TYPE_P(value) == IS_CONSTANT_AST;
 			}
+			return 0;
 		case ZEND_ASSIGN_DIM:
 			if ((opline+1)->op1_type == IS_CV) {
 				if (_ssa_op1_info(op_array, ssa, opline+1, ssa_op+1) & MAY_BE_UNDEF) {

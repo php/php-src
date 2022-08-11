@@ -1,10 +1,13 @@
 --TEST--
-Multiple declarations of the same static variable
+Static variable can't override bound closure variables
 --FILE--
 <?php
 
-static $a = 10;
-static $a = 11;
+$a = null;
+
+function () use (&$a) {
+    static $a;
+};
 
 ?>
 --EXPECTF--

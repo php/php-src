@@ -1949,7 +1949,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables)
 {
 	reflection_object *intern;
 	zend_function *fptr;
-	zval *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1966,11 +1965,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables)
 			ht = zend_array_dup(fptr->op_array.static_variables);
 			ZEND_MAP_PTR_SET(fptr->op_array.static_variables_ptr, ht);
 		}
-		ZEND_HASH_MAP_FOREACH_VAL(ht, val) {
-			if (UNEXPECTED(zval_update_constant_ex(val, fptr->common.scope) != SUCCESS)) {
-				RETURN_THROWS();
-			}
-		} ZEND_HASH_FOREACH_END();
 		zend_hash_copy(Z_ARRVAL_P(return_value), ht, zval_add_ref);
 	} else {
 		RETURN_EMPTY_ARRAY();

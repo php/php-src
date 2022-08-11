@@ -41,6 +41,8 @@ PHP 8.3 UPGRADE NOTES
     property to the class directly without traits.
   . Assigning a negative index n to an empty array will now make sure that the
     next index is n+1 instead of 0.
+  . Static variable initializers can now contain arbitrary expressions.
+    RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
 
 - FFI:
   . C functions that have a return type of void now return null instead of

@@ -1122,6 +1122,7 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:

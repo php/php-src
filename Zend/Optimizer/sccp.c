@@ -249,6 +249,7 @@ static bool can_replace_op1(
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_MAKE_REF:
 		case ZEND_UNSET_CV:
@@ -1773,6 +1774,7 @@ static void sccp_mark_feasible_successors(
 		case ZEND_CATCH:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 			scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);
 			scdf_mark_edge_feasible(scdf, block_num, block->successors[1]);
 			return;
