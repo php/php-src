@@ -7125,6 +7125,74 @@ exit:
 	return ret;
 }
 
+/* Set counting handler back to original VM handler. */
+static void zend_jit_stop_hot_trace_counters(zend_op_array *op_array)
+{
+	zend_jit_op_array_trace_extension *jit_extension;
+	uint32_t i;
+
+	jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+	zend_shared_alloc_lock();
+	SHM_UNPROTECT();
+	for (i = 0; i < op_array->last; i++) {
+		/* Opline with Jit-ed code handler is skipped. */
+        if (jit_extension->trace_info[i].trace_flags &
+            (ZEND_JIT_TRACE_JITED|ZEND_JIT_TRACE_BLACKLISTED)) {
+            continue;
+        }
+        if (jit_extension->trace_info[i].trace_flags &
+            (ZEND_JIT_TRACE_START_LOOP | ZEND_JIT_TRACE_START_ENTER | ZEND_JIT_TRACE_START_RETURN)) {
+			op_array->opcodes[i].handler = jit_extension->trace_info[i].orig_handler;
+        }
+    }
+	SHM_PROTECT();
+	zend_shared_alloc_unlock();
+}
+
+/* Get the tracing op_array. */
+static void zend_jit_stop_persistent_op_array(zend_op_array *op_array) {
+    zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+    if (!func_info) {
+		return;
+	}
+    if (func_info->flags & ZEND_FUNC_JIT_ON_HOT_TRACE) {
+        zend_jit_stop_hot_trace_counters(op_array);
+    }
+}
+
+/* Get all op_arrays with counter handler. */
+static void zend_jit_stop_persistent_script(zend_persistent_script *script) {
+	zend_class_entry *ce;
+	zend_op_array *op_array;
+
+	zend_jit_stop_persistent_op_array(&script->script.main_op_array);
+
+	ZEND_HASH_FOREACH_PTR(&script->script.function_table, op_array) {
+		zend_jit_stop_persistent_op_array(op_array);
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+			if (op_array->type == ZEND_USER_FUNCTION) {
+				zend_jit_stop_persistent_op_array(op_array);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
+}
+
+/* Get all scripts which are accelerated by JIT */
+static void zend_jit_stop_counter_handlers() {
+	for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
+		zend_accel_hash_entry *cache_entry;
+		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
+			zend_persistent_script *script;
+			if (cache_entry->indirect) continue;
+			script = (zend_persistent_script *)cache_entry->data;
+			zend_jit_stop_persistent_script(script);
+		}
+	}
+}
+
 static void zend_jit_blacklist_root_trace(const zend_op *opline, size_t offset)
 {
 	zend_shared_alloc_lock();
@@ -7505,6 +7573,7 @@ repeat:
 
 	if (ZEND_JIT_TRACE_NUM >= JIT_G(max_root_traces)) {
 		stop = ZEND_JIT_TRACE_STOP_TOO_MANY_TRACES;
+		zend_jit_stop_counter_handlers();
 		goto abort;
 	}
 
