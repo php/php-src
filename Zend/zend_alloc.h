@@ -182,6 +182,7 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *, size_t size);
 ZEND_API ZEND_ATTRIBUTE_MALLOC void * __zend_malloc(size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(1);
 ZEND_API ZEND_ATTRIBUTE_MALLOC void * __zend_calloc(size_t nmemb, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
 ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
+ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent) ((persistent)?__zend_malloc(size):emalloc(size))
@@ -201,7 +202,7 @@ ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2)
 #define safe_perealloc(ptr, nmemb, size, offset, persistent)	((persistent)?_safe_realloc((ptr), (nmemb), (size), (offset)):safe_erealloc((ptr), (nmemb), (size), (offset)))
 #define perealloc_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
 #define perealloc2_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc2_recoverable((ptr), (size), (copy_size)))
-#define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
+#define pestrdup(s, persistent) ((persistent)?__zend_strdup(s):estrdup(s))
 #define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 
 #define pemalloc_rel(size, persistent) ((persistent)?__zend_malloc(size):emalloc_rel(size))
