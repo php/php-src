@@ -42,7 +42,7 @@ try {
             die("failure PcgOneseq128XslRr64 i: {$i} native: {$native} user: {$user}");
         }
     }
-} catch (\RuntimeException $e) {
+} catch (\Random\RandomException $e) {
     if ($e->getMessage() !== 'Generated value exceeds size of int') {
         throw $e;
     }
@@ -68,7 +68,7 @@ try {
             die("failure Xoshiro256StarStar i: {$i} native: {$native} user: {$user}");
         }
     }
-} catch (\RuntimeException $e) {
+} catch (\Random\RandomException $e) {
     if ($e->getMessage() !== 'Generated value exceeds size of int') {
         throw $e;
     }

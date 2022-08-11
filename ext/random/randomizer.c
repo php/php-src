@@ -24,7 +24,6 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_string.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
@@ -102,7 +101,7 @@ PHP_METHOD(Random_Randomizer, nextInt)
 		RETURN_THROWS();
 	}
 	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
+		zend_throw_exception(random_ce_Random_RandomException, "Generated value exceeds size of int", 0);
 		RETURN_THROWS();
 	}
 	
