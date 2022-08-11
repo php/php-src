@@ -110,6 +110,14 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			get_active_function_name());
 		return FAILURE;
 	}
+#ifdef ZEND_ENABLE_ZVAL_LONG64
+	if (expires >= 253402300800) {
+		zend_value_error("%s(): \"expires\" option cannot have a year greater than 9999",
+			get_active_function_name());
+		return FAILURE;
+	}
+#endif
+
 	/* Should check value of SameSite? */
 
 	if (value == NULL || ZSTR_LEN(value) == 0) {
@@ -136,19 +144,12 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		} else {
 			smart_str_append(&buf, value);
 		}
+
 		if (expires > 0) {
 			double diff;
 
 			smart_str_appends(&buf, COOKIE_EXPIRES);
 			dt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, expires, 0);
-			/* check to make sure that the year does not exceed 4 digits in length */
-			if (php_idate('Y', expires, 0) > 9999) {
-				zend_string_free(dt);
-				smart_str_free(&buf);
-				zend_value_error("%s(): \"expires\" option cannot have a year greater than 9999",
-					get_active_function_name());
-				return FAILURE;
-			}
 
 			smart_str_append(&buf, dt);
 			zend_string_free(dt);
