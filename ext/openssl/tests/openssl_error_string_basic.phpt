@@ -73,6 +73,9 @@ $private_key_file_with_pass = "file://" .__DIR__ . "/private_rsa_2048_pass_php.k
 $data = "test";
 $method = "AES-128-ECB";
 $enc_key = str_repeat('x', 40);
+// Suppress passphrase truncation deprecation
+$error_reporting = error_reporting();
+error_reporting($error_reporting ^ E_DEPRECATED);
 // error because password is longer then key length and
 // EVP_CIPHER_CTX_set_key_length fails for AES
 openssl_encrypt($data, $method, $enc_key);
@@ -84,6 +87,7 @@ var_dump(openssl_error_string());
 for ($i = 0; $i < 20; $i++) {
     openssl_encrypt($data, $method, $enc_key);
 }
+error_reporting($error_reporting);
 $error_queue_size = 0;
 while (($enc_error_new = openssl_error_string()) !== false) {
     if ($enc_error_new !== $enc_error) {

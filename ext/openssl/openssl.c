@@ -7324,6 +7324,10 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 	} else {
 		if (password_len > key_len && !EVP_CIPHER_CTX_set_key_length(cipher_ctx, password_len)) {
 			php_openssl_store_errors();
+			php_error_docref(NULL, E_DEPRECATED, "Passphrase is too long and will be truncated to %d characters", key_len);
+			if (EG(exception)) {
+				return FAILURE;
+			}
 		}
 		key = (unsigned char*)*ppassword;
 	}
