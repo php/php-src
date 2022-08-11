@@ -169,6 +169,11 @@ static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket
     zval first;
     zval second;
 
+    if (f->key == NULL && s->key == NULL) {
+        return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
+    } else if (f->key && s->key) {
+        return zendi_smart_strcmp(f->key, s->key);
+    }
     if (f->key) {
         ZVAL_STR(&first, f->key);
     } else {
