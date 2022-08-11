@@ -597,14 +597,10 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(static_variables, key, var) {
 			zval copy;
 
-			if (Z_TYPE_P(var) == IS_CONSTANT_AST) {
-				ZVAL_STRING(&copy, "<constant ast>");
-			} else {
-				if (Z_ISREF_P(var) && Z_REFCOUNT_P(var) == 1) {
-					var = Z_REFVAL_P(var);
-				}
-				ZVAL_COPY(&copy, var);
+			if (Z_ISREF_P(var) && Z_REFCOUNT_P(var) == 1) {
+				var = Z_REFVAL_P(var);
 			}
+			ZVAL_COPY(&copy, var);
 
 			zend_hash_add_new(Z_ARRVAL(val), key, &copy);
 		} ZEND_HASH_FOREACH_END();
