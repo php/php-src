@@ -47,7 +47,7 @@ var_dump($_SESSION["upload_progress_" . basename(__FILE__)]);
 session_destroy();
 ?>
 --EXPECTF--
-string(%d) "rfc1867-sid-post"
+string(16) "rfc1867-sid-post"
 bool(true)
 array(2) {
   ["file1"]=>

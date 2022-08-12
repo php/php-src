@@ -141,7 +141,7 @@ typedef struct _php_session_rfc1867_progress {
 
 typedef struct _php_ps_globals {
 	char *save_path;
-	char *session_name;
+	zend_string *session_name;
 	zend_string *id;
 	zend_string *extern_referer_chk;
 	zend_string *cache_limiter;
