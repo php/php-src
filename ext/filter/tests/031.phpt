@@ -40,6 +40,23 @@ foreach ($floats as $float => $dec) {
     }
 }
 
+$floats = array(
+'1.234   ',
+'   1.234',
+'1.234'	,
+'1.2e3',
+'7E3',
+'7E3     ',
+'  7E3     ',
+'  7E-3     '
+);
+
+echo "\nno scientific:\n";
+foreach ($floats as $float) {
+    $out = filter_var($float, FILTER_VALIDATE_FLOAT, FILTER_FLAG_NO_SCIENTIFIC);
+    var_dump($out);
+}
+
 ?>
 --EXPECT--
 float(1.234)
@@ -56,4 +73,14 @@ bool(false)
 float(1.234)
 float(1.234)
 filter_var(): "decimal" option must be one character long
+bool(false)
+
+no scientific:
+float(1.234)
+float(1.234)
+float(1.234)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)

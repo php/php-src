@@ -417,6 +417,9 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 				}
 			}
 			if (*str == 'e' || *str == 'E') {
+				if (flags & FILTER_FLAG_NO_SCIENTIFIC) {
+					goto error;
+				}
 				*p++ = *str++;
 				if (str < end && (*str == '+' || *str == '-')) {
 					*p++ = *str++;
