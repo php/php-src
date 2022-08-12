@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9371 (Crash with JIT on mac arm64)
     (jdp1024/David Carlier)
 
+- OpenSSL:
+  . Fixed bug GH-9310 (SSL local_cert and local_pk do not respect
+    open_basedir). (Jakub Zelenka)
+
 - Random:
   . Fixed bug GH-9415 (Randomizer::getInt(0, 2**32 - 1) with Mt19937
     always returns 1). (timwolla)
