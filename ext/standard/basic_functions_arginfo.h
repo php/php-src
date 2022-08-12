@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2615114ae250af0329b861d82f4100c2757457da */
+ * Stub hash: a4c98e83e51a9546a89797b80bdd8771ef0075f9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -706,7 +706,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_sha1_file arginfo_md5_file
 
 #if defined(HAVE_SYSLOG_H)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openlog, 0, 3, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openlog, 0, 3, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, facility, IS_LONG, 0)
