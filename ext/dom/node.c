@@ -20,6 +20,7 @@
 #endif
 
 #include "php.h"
+
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 
@@ -976,6 +977,9 @@ PHP_METHOD(DOMNode, insertBefore)
 			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern, childobj);
 		}
 		if (new_child == NULL) {
+			if (!child->ns && parentp->parent) {
+				xmlSetNs(child, parentp->ns);
+			}
 			new_child = xmlAddChild(parentp, child);
 		}
 	}
@@ -1220,7 +1224,7 @@ PHP_METHOD(DOMNode, appendChild)
 	}
 
 	if (new_child == NULL) {
-		if (!child->ns && nodep->nsDef) {
+		if (!child->ns && nodep->parent) {
 			xmlSetNs(child, nodep->ns);
 		}
 		new_child = xmlAddChild(nodep, child);
@@ -1671,7 +1675,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		buf = xmlAllocOutputBuffer(NULL);
 	}
 
-    if (buf != NULL) {
+	if (buf != NULL) {
 		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
 			with_comments, buf);
 	}
@@ -1686,9 +1690,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		xmlXPathFreeContext(ctxp);
 	}
 
-    if (buf == NULL || ret < 0) {
-        RETVAL_FALSE;
-    } else {
+	if (buf == NULL || ret < 0) {
+		RETVAL_FALSE;
+	} else {
 		if (mode == 0) {
 #ifdef LIBXML2_NEW_BUFFER
 			ret = xmlOutputBufferGetSize(buf);
@@ -1705,7 +1709,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				RETVAL_EMPTY_STRING();
 			}
 		}
-    }
+	}
 
 	if (buf) {
 		int bytes;

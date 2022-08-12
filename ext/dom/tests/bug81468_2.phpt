@@ -8,8 +8,8 @@ require_once('skipif.inc');
 <?php
 $dom = new \DOMDocument();
 $dom
-  ->appendChild($dom->createElementNS('some:namespace', 'foo'))
-  ->appendChild($dom->createElement('bar'));
+  ->insertBefore($dom->createElementNS('some:namespace', 'foo'))
+  ->insertBefore($dom->createElement('bar'));
 echo ($xml = $dom->saveXML());
 
 $xpath = new \DOMXPath($dom);
@@ -29,8 +29,8 @@ echo count($xpath->query('/n:foo/n:bar')) . " should be 1\n\n";
 
 $dom = new \DOMDocument();
 $dom
-  ->appendChild($dom->createElementNS('some:namespace', 'foo'))
-  ->appendChild($dom->createElementNS('some:namespace_test', 'bar'));
+  ->insertBefore($dom->createElementNS('some:namespace', 'foo'))
+  ->insertBefore($dom->createElementNS('some:namespace_test', 'bar'));
 echo ($xml = $dom->saveXML());
 
 $xpath = new \DOMXPath($dom);
@@ -53,8 +53,8 @@ echo count($xpath->query('/n:foo/m:bar')) . " should be 1\n\n";
 
 $dom = new \DOMDocument();
 $dom
-  ->appendChild($dom->createElement('bar'))
-  ->appendChild($dom->createElementNS('some:namespace', 'foo'));
+  ->insertBefore($dom->createElement('bar'))
+  ->insertBefore($dom->createElementNS('some:namespace', 'foo'));
 echo ($xml = $dom->saveXML());
 
 $xpath = new \DOMXPath($dom);
@@ -66,9 +66,9 @@ echo count($xpath->query('/bar/foo')) . " should be 0\n\n";
 
 $dom = new \DOMDocument();
 $dom
-  ->appendChild($dom->createElementNS('some:namespace', 'foo'))
-  ->appendChild($dom->createElement('bar'))
-  ->appendChild($dom->createElement('baz'));
+  ->insertBefore($dom->createElementNS('some:namespace', 'foo'))
+  ->insertBefore($dom->createElement('bar'))
+  ->insertBefore($dom->createElement('baz'));
 echo ($xml = $dom->saveXML());
 
 $xpath = new \DOMXPath($dom);
