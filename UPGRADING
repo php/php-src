@@ -280,6 +280,11 @@ PHP 8.2 UPGRADE NOTES
 - PCRE:
   . NUL characters (\0) in pattern strings are now supported.
 
+- Session:
+  . Trying to change the SameSite cookie INI setting while the session is
+    active or output has already been sent will now fail and emit a warning.
+    This aligns the behaviour with all other session INI settings.
+
 - SQLite3:
   . sqlite3.defensive is now PHP_INI_USER.
 
