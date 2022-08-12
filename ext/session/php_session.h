@@ -174,8 +174,8 @@ typedef struct _php_ps_globals {
 			zval ps_update_timestamp;
 		} name;
 	} mod_user_names;
-	int mod_user_implemented;
-	int mod_user_is_open;
+	bool mod_user_implemented;
+	bool mod_user_is_open;
 	zend_string *mod_user_class_name;
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
@@ -186,8 +186,8 @@ typedef struct _php_ps_globals {
 
 	zend_long sid_length;
 	zend_long sid_bits_per_character;
-	int send_cookie;
-	int define_sid;
+	bool send_cookie;
+	bool define_sid;
 
 	php_session_rfc1867_progress *rfc1867_progress;
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
