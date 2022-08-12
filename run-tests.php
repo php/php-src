@@ -1790,6 +1790,7 @@ function run_test(string $php, $file, array $env): string
     global $num_repeats;
     // Parallel testing
     global $workerID;
+    global $show_progress;
 
     // Temporary
     /** @var JUnit */
@@ -1901,7 +1902,7 @@ TEST $file
         }
     }
 
-    if (!$SHOW_ONLY_GROUPS && !$workerID) {
+    if ($show_progress && !$workerID) {
         show_test($test_idx, $shortname);
     }
 
