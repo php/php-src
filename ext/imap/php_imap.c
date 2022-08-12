@@ -198,7 +198,7 @@ static void imap_object_destroy(zend_object *zobj) {
 
 #define GET_IMAP_STREAM(imap_conn_struct, zval_imap_obj) \
 	imap_conn_struct = imap_object_from_zend_object(Z_OBJ_P(zval_imap_obj)); \
-	if (!imap_conn_struct) { \
+	if (imap_conn_struct->imap_stream == NULL) { \
 		zend_throw_exception(zend_ce_value_error, "IMAP\\Connection is already closed", 0); \
 		RETURN_THROWS(); \
 	}
