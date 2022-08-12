@@ -89,6 +89,34 @@ echo count($xpath->query('/n:foo/n:bar')) . " should be 1\n";
 echo count($xpath->query('/n:foo/n:bar/baz')) . " should be 0\n";
 echo count($xpath->query('/n:foo/n:bar/n:baz')) . " should be 1\n\n";
 
+
+$dom = new \DOMDocument();
+$dom
+  ->insertBefore($dom->createElementNS('some:namespace', 'foo'))
+  ->insertBefore($dom->createElementNS('some:namespace_test', 'bar'))
+  ->insertBefore($dom->createElement('baz'));
+echo ($xml = $dom->saveXML());
+
+$xpath = new \DOMXPath($dom);
+$xpath->registerNamespace('n', 'some:namespace');
+$xpath->registerNamespace('m', 'some:namespace_test');
+echo count($xpath->query('/n:foo/bar')) . " should be 0\n";
+echo count($xpath->query('/n:foo/m:bar')) . " should be 1\n";
+echo count($xpath->query('/n:foo/m:bar/baz')) . " should be 0\n";
+echo count($xpath->query('/n:foo/m:bar/m:baz')) . " should be 1\n\n";
+
+$dom = new \DOMDocument();
+$dom->loadXml($xml);
+echo ($xml = $dom->saveXML());
+
+$xpath = new \DOMXPath($dom);
+$xpath->registerNamespace('n', 'some:namespace');
+$xpath->registerNamespace('m', 'some:namespace_test');
+echo count($xpath->query('/n:foo/bar')) . " should be 0\n";
+echo count($xpath->query('/n:foo/m:bar')) . " should be 1\n";
+echo count($xpath->query('/n:foo/m:bar/baz')) . " should be 0\n";
+echo count($xpath->query('/n:foo/m:bar/m:baz')) . " should be 1\n\n";
+
 ?>
 --EXPECT--
 <?xml version="1.0"?>
@@ -127,6 +155,20 @@ echo count($xpath->query('/n:foo/n:bar/n:baz')) . " should be 1\n\n";
 
 <?xml version="1.0"?>
 <foo xmlns="some:namespace"><bar><baz/></bar></foo>
+0 should be 0
+1 should be 1
+0 should be 0
+1 should be 1
+
+<?xml version="1.0"?>
+<foo xmlns="some:namespace"><bar xmlns="some:namespace_test"><baz/></bar></foo>
+0 should be 0
+1 should be 1
+0 should be 0
+1 should be 1
+
+<?xml version="1.0"?>
+<foo xmlns="some:namespace"><bar xmlns="some:namespace_test"><baz/></bar></foo>
 0 should be 0
 1 should be 1
 0 should be 0
