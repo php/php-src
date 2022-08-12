@@ -489,7 +489,7 @@ static void php_openssl_check_path_error(uint32_t arg_num, int type, const char 
 }
 
 /* openssl file path check extended */
-static bool php_openssl_check_path_ex(
+bool php_openssl_check_path_ex(
 		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num,
 		bool contains_file_protocol, bool is_from_array, const char *option_name)
 {
@@ -544,31 +544,6 @@ static bool php_openssl_check_path_ex(
 	}
 
 	return false;
-}
-
-/* openssl file path check */
-static inline bool php_openssl_check_path(
-		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num)
-{
-	return php_openssl_check_path_ex(
-			file_path, file_path_len, real_path, arg_num, false, false, NULL);
-}
-
-/* openssl file path extra check with zend string */
-static inline bool php_openssl_check_path_str_ex(
-		zend_string *file_path, char *real_path, uint32_t arg_num,
-		bool contains_file_protocol, bool is_from_array, const char *option_name)
-{
-	return php_openssl_check_path_ex(
-			ZSTR_VAL(file_path), ZSTR_LEN(file_path), real_path, arg_num, contains_file_protocol,
-			is_from_array, option_name);
-}
-
-/* openssl file path check with zend string */
-static inline bool php_openssl_check_path_str(
-		zend_string *file_path, char *real_path, uint32_t arg_num)
-{
-	return php_openssl_check_path_str_ex(file_path, real_path, arg_num, true, false, NULL);
 }
 
 static int ssl_stream_data_index;

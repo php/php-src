@@ -85,8 +85,8 @@ class CertificateGenerator
         openssl_x509_export_to_file($this->ca, $file);
     }
 
-    public function saveNewCertAsFileWithKey(
-        $commonNameForCert, $file, $keyLength = null, $subjectAltName = null
+    public function saveNewCertAndKey(
+        $commonNameForCert, $certFile, $keyFile, $keyLength = null, $subjectAltName = null
     ) {
         $dn = [
             'countryName' => 'BY',
@@ -117,7 +117,7 @@ $subjectAltNameConfig
 basicConstraints = CA:FALSE
 $subjectAltNameConfig
 CONFIG;
-        $configFile = $file . '.cnf';
+        $configFile = $certFile . '.cnf';
         file_put_contents($configFile, $configCode);
 
         try {
@@ -146,10 +146,22 @@ CONFIG;
             $keyText = '';
             openssl_pkey_export($this->lastKey, $keyText, null, $config);
 
-            file_put_contents($file, $certText . PHP_EOL . $keyText);
+            if ($certFile === $keyFile) {
+                file_put_contents($certFile, $certText . PHP_EOL . $keyText);
+            } else {
+                file_put_contents($certFile, $certText);
+                file_put_contents($keyFile, $keyText);
+            }
         } finally {
             unlink($configFile);
         }
+    }
+
+
+    public function saveNewCertAsFileWithKey(
+        $commonNameForCert, $file, $keyLength = null, $subjectAltName = null
+    ) {
+        $this->saveNewCertAndKey($commonNameForCert, $file, $file, $keyLength, $subjectAltName);
     }
 
     public function getCertDigest($algo)
