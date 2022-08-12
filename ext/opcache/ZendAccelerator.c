@@ -3931,12 +3931,7 @@ static void preload_link(void)
 
 				/* Inheritance successful, print out any warnings. */
 				zend_error_cb = orig_error_cb;
-				EG(record_errors) = false;
-				for (uint32_t i = 0; i < EG(num_errors); i++) {
-					zend_error_info *error = EG(errors)[i];
-					zend_error_zstr_at(
-						error->type, error->filename, error->lineno, error->message);
-				}
+				zend_emit_recorded_errors();
 			} zend_catch {
 				/* Clear variance obligations that were left behind on bailout. */
 				if (CG(delayed_variance_obligations)) {
