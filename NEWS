@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9155 (dba_open("non-existing", "c-", "flatfile") segfaults)
     (cmb)
 
+- IMAP:
+  . Fixed bug GH-9309 (Segfault when connection is used after imap_close()).
+    (cmb)
+
 - MBString:
   . Fixed bug GH-9008 (mb_detect_encoding(): wrong results with null $encodings).
     (cmb)
