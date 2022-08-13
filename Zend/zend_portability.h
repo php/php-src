@@ -223,9 +223,11 @@ char *alloca();
 #if ZEND_GCC_VERSION >= 4003 || __has_attribute(alloc_size)
 # define ZEND_ATTRIBUTE_ALLOC_SIZE(X) __attribute__ ((alloc_size(X)))
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y) __attribute__ ((alloc_size(X,Y)))
+# define ZEND_ATTRIBUTE_CONST __attribute__((const))
 #else
 # define ZEND_ATTRIBUTE_ALLOC_SIZE(X)
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
+# define ZEND_ATTRIBUTE_CONST
 #endif
 
 #if ZEND_GCC_VERSION >= 2007 || __has_attribute(format)
