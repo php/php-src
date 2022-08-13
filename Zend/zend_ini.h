@@ -209,8 +209,12 @@ ZEND_API ZEND_INI_MH(OnUpdateBool);
 ZEND_API ZEND_INI_MH(OnUpdateLong);
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero);
 ZEND_API ZEND_INI_MH(OnUpdateReal);
+/* char* versions */
 ZEND_API ZEND_INI_MH(OnUpdateString);
 ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);
+/* zend_string* versions */
+ZEND_API ZEND_INI_MH(OnUpdateStr);
+ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty);
 END_EXTERN_C()
 
 #define ZEND_INI_DISPLAY_ORIG	1
