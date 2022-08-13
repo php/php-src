@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: daa7be53e9009c66c814fb5b0407a6dfbe09679a */
+ * Stub hash: 09e36fb87531b6ac8261c9ed0faa755a1c144638 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -91,6 +91,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_test_zend_ini_parse_quantity
 
+#define arginfo_zend_test_zend_ini_str arginfo_zend_get_current_func_name
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -162,6 +164,7 @@ static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
+static ZEND_FUNCTION(zend_test_zend_ini_str);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -205,6 +208,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
+	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
