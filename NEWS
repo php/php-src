@@ -29,6 +29,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-8472 (The resource returned by stream_socket_accept may have
     incorrect metadata). (Jakub Zelenka)
+  . Fixed bug GH-8409 (SSL handshake timeout leaves persistent connections
+    hanging). (Jakub Zelenka, Twosee)
 
 04 Aug 2022, PHP 8.0.22
 
