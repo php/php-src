@@ -1367,8 +1367,8 @@ PHP_FUNCTION(stream_set_timeout)
 	t.tv_sec = (long)seconds;
 
 	if (argc == 3) {
-		t.tv_usec = (long)(microseconds % 1000000);
-		t.tv_sec +=(long)(microseconds / 1000000);
+		t.tv_usec = (long)((microseconds % 1000) * 1000);
+		t.tv_sec +=(long)(microseconds / 1000);
 	} else {
 		t.tv_usec = 0;
 	}
@@ -1376,8 +1376,8 @@ PHP_FUNCTION(stream_set_timeout)
 	t.tv_sec = seconds;
 
 	if (argc == 3) {
-		t.tv_usec = microseconds % 1000000;
-		t.tv_sec += microseconds / 1000000;
+		t.tv_usec = (microseconds % 1000) * 1000;
+		t.tv_sec += microseconds / 1000;
 	} else {
 		t.tv_usec = 0;
 	}
