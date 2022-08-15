@@ -13,23 +13,39 @@ gc_collect_cycles();
 var_dump(gc_status());
 ?>
 --EXPECT--
-array(4) {
+array(8) {
+  ["running"]=>
+  bool(false)
+  ["protected"]=>
+  bool(false)
+  ["full"]=>
+  bool(false)
   ["runs"]=>
   int(0)
   ["collected"]=>
   int(0)
   ["threshold"]=>
   int(10001)
+  ["buffer_size"]=>
+  int(16384)
   ["roots"]=>
   int(1)
 }
-array(4) {
+array(8) {
+  ["running"]=>
+  bool(false)
+  ["protected"]=>
+  bool(false)
+  ["full"]=>
+  bool(false)
   ["runs"]=>
   int(1)
   ["collected"]=>
   int(1)
   ["threshold"]=>
   int(10001)
+  ["buffer_size"]=>
+  int(16384)
   ["roots"]=>
   int(0)
 }
