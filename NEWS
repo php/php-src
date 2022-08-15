@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Added support for defining constants in traits. (sj-i)
   . Stop incorrectly emitting false positive deprecation notice alongside
     unsupported syntax fatal error for `"{$g{'h'}}"`. (TysonAndre)
+  . Fix unexpected deprecated dynamic property warning, which occurred when
+    exit() in finally block after an exception was thrown without catching.
+    (Twosee)
 
 - MBString:
   . Fixed bug GH-9248 (Segmentation fault in mb_strimwidth()). (cmb)
