@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
     (cmb)
 
+- OpenSSL:
+  . Fixed bug GH-9339 (OpenSSL oid_file path check warning contains
+    uninitialized path). (Jakub Zelenka)
+
 - PDO_SQLite:
   . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
 
