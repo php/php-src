@@ -176,7 +176,7 @@ class IntlDateFormatter
     public function format($datetime): string|false {}
 
     /**
-     * @param IntlCalendar|DateTime $datetime
+     * @param IntlCalendar|DateTimeInterface $datetime
      * @param array|int|string|null $format
      * @tentative-return-type
      * @alias datefmt_format_object
