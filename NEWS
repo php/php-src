@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9155 (dba_open("non-existing", "c-", "flatfile") segfaults).
     (cmb)
 
+- Intl:
+  . Fixed IntlDateFormatter::formatObject() parameter type. (Gert de Pagter)
+
 - OPcache:
   . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
     (cmb)

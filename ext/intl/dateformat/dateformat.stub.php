@@ -104,7 +104,7 @@ class IntlDateFormatter
     public function format($datetime) {}
 
     /**
-     * @param IntlCalendar|DateTime $datetime
+     * @param IntlCalendar|DateTimeInterface $datetime
      * @param array|int|string|null $format
      * @return string|false
      * @alias datefmt_format_object
