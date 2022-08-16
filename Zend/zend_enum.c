@@ -67,7 +67,7 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 			continue;
 		}
 		// FIXME: File/line number for traits?
-		zend_error_noreturn(E_COMPILE_ERROR, "Enum \"%s\" may not include properties",
+		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s may not include properties",
 			ZSTR_VAL(ce->name));
 	} ZEND_HASH_FOREACH_END();
 }
