@@ -1141,9 +1141,12 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	if (path_length == (size_t)-1) {
 #ifdef ZEND_WIN32
-		if (errno != EACCES)
-#endif
+		if (errno != EACCES) {
+			errno = ENOENT;
+		}
+#else
 		errno = ENOENT;
+#endif
 		return 1;
 	}
 
