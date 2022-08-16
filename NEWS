@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0beta3
+18 Aug 2022, PHP 8.2.0beta3
 
 - Core:
   . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
