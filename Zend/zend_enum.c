@@ -28,7 +28,7 @@
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum may not include %s", methodName); \
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum may not include magic method %s", methodName); \
 		} \
 	} while (0);
 
