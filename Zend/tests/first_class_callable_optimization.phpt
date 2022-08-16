@@ -11,7 +11,11 @@ var_dump(test2(...));
 
 ?>
 --EXPECT--
-object(Closure)#1 (0) {
+object(Closure)#1 (1) {
+  ["function"]=>
+  string(5) "test1"
 }
-object(Closure)#1 (0) {
+object(Closure)#1 (1) {
+  ["function"]=>
+  string(5) "test2"
 }

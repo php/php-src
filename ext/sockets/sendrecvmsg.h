@@ -6,6 +6,11 @@
 
 /* for sockets.c */
 
+#ifdef PHP_WIN32
+#define IPV6_RECVPKTINFO	IPV6_PKTINFO
+#define IPV6_RECVHOPLIMIT	IPV6_HOPLIMIT
+#endif
+
 void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS);
 void php_socket_sendrecvmsg_shutdown(SHUTDOWN_FUNC_ARGS);
 

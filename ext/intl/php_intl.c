@@ -29,7 +29,6 @@
 
 #include "converter/converter.h"
 
-#include "formatter/formatter.h"
 #include "formatter/formatter_class.h"
 #include "formatter/formatter_format.h"
 
@@ -37,7 +36,6 @@
 
 #include "msgformat/msgformat_class.h"
 
-#include "normalizer/normalizer.h"
 #include "normalizer/normalizer_class.h"
 
 #include "locale/locale.h"
@@ -64,7 +62,6 @@
 #include "uchar/uchar.h"
 
 # include "spoofchecker/spoofchecker_class.h"
-# include "spoofchecker/spoofchecker.h"
 
 #include "common/common_error.h"
 #include "common/common_enum.h"
@@ -157,14 +154,8 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'NumberFormatter' PHP class */
 	formatter_register_class(  );
 
-	/* Expose NumberFormatter constants to PHP scripts */
-	formatter_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
-
-	/* Expose Normalizer constants to PHP scripts */
-	normalizer_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'Locale' PHP class */
 	locale_register_Locale_class(  );
@@ -176,9 +167,6 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'DateFormat' PHP class */
 	dateformat_register_IntlDateFormatter_class(  );
 
-	/* Expose DateFormat constants to PHP scripts */
-	dateformat_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	/* Register 'IntlDateTimeFormatter' PHP class */
 	dateformat_register_IntlDatePatternGenerator_class(  );
 
@@ -187,9 +175,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'Transliterator' PHP class */
 	transliterator_register_Transliterator_class(  );
-
-	/* Register Transliterator constants */
-	transliterator_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'IntlTimeZone' PHP class */
 	timezone_register_IntlTimeZone_class(  );
@@ -205,9 +190,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class(  );
-
-	/* Expose Spoofchecker constants to PHP scripts */
-	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'IntlException' PHP class */
 	IntlException_ce_ptr = register_class_IntlException(zend_ce_exception);

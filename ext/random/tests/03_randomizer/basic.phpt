@@ -31,7 +31,7 @@ foreach ($engines as $engine) {
     for ($i = 0; $i < 1000; $i++) {
         try {
             $randomizer->nextInt();
-        } catch (\RuntimeException $e) {
+        } catch (\Random\RandomException $e) {
             if ($e->getMessage() !== 'Generated value exceeds size of int') {
                 die($engine::class . ": nextInt: failure: {$e->getMessage()}");
             }

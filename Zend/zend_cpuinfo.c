@@ -28,15 +28,15 @@ typedef struct _zend_cpu_info {
 
 static zend_cpu_info cpuinfo = {0};
 
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-# if defined(HAVE_CPUID_H) && defined(HAVE_CPUID_COUNT)
-# include <cpuid.h>
+#if (defined(__GNUC__) || defined(__clang__)) && (defined(__i386__) || defined(__x86_64__))
+# if defined(HAVE_CPUID_H) && defined(HAVE_CPUID_COUNT) /* use cpuid.h functions */
+#  include <cpuid.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	__cpuid_count(func, subfunc, cpuinfo->eax, cpuinfo->ebx, cpuinfo->ecx, cpuinfo->edx);
 }
-# else
+# else /* use inline asm */
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
-#if defined(__i386__) && (defined(__pic__) || defined(__PIC__))
+#  if defined(__i386__) && (defined(__pic__) || defined(__PIC__))
 	/* PIC on i386 uses %ebx, so preserve it. */
 	__asm__ __volatile__ (
 		"pushl  %%ebx\n"
@@ -46,16 +46,16 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 		: "=a"(cpuinfo->eax), "=r"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
 		: "a"(func), "c"(subfunc)
 	);
-#else
+#  else
 	__asm__ __volatile__ (
 		"cpuid"
 		: "=a"(cpuinfo->eax), "=b"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
 		: "a"(func), "c"(subfunc)
 	);
-#endif
+#  endif
 }
 # endif
-#elif defined(ZEND_WIN32) && !defined(__clang__)
+#elif defined(_MSC_VER) && !defined(__clang__) && (defined(_M_X64) || defined(_M_IX86)) /* use MSVC __cpuidex intrin */
 # include <intrin.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	int regs[4];
@@ -67,7 +67,7 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 	cpuinfo->ecx = regs[2];
 	cpuinfo->edx = regs[3];
 }
-#else
+#else /* fall back to zero */
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	cpuinfo->eax = 0;
 }

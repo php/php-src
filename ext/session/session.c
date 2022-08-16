@@ -1345,7 +1345,7 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 		t = tv.tv_sec + PS(cookie_lifetime);
 
 		if (t > 0) {
-			date_fmt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0);
+			date_fmt = php_format_date("D, d M Y H:i:s \\G\\M\\T", sizeof("D, d M Y H:i:s \\G\\M\\T")-1, t, 0);
 			smart_str_appends(&ncookie, COOKIE_EXPIRES);
 			smart_str_appendl(&ncookie, ZSTR_VAL(date_fmt), ZSTR_LEN(date_fmt));
 			zend_string_release_ex(date_fmt, 0);

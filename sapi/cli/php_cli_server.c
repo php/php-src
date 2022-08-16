@@ -2490,10 +2490,6 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	{
 		size_t document_root_len = strlen(document_root);
 		_document_root = pestrndup(document_root, document_root_len, 1);
-		if (!_document_root) {
-			retval = FAILURE;
-			goto out;
-		}
 		server->document_root = _document_root;
 		server->document_root_len = document_root_len;
 	}
@@ -2501,10 +2497,6 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	if (router) {
 		size_t router_len = strlen(router);
 		_router = pestrndup(router, router_len, 1);
-		if (!_router) {
-			retval = FAILURE;
-			goto out;
-		}
 		server->router = _router;
 		server->router_len = router_len;
 	} else {
