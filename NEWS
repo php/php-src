@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
     (Tim Starling)
+  . Fixed bug GH-9227 (Trailing dots and spaces in filenames are ignored).
+    (cmb)
 
 - DOM:
   . Fixed bug  #79451 (Using DOMDocument->replaceChild on doctype causes
