@@ -210,7 +210,7 @@ ZEND_API zend_result zend_stream_fixup(zend_file_handle *file_handle, char **buf
 	return SUCCESS;
 } /* }}} */
 
-static void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
+ZEND_API void zend_stream_close(zend_file_handle *fh) /* {{{ */
 {
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
@@ -231,6 +231,11 @@ static void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 			 */
 			break;
 	}
+} /* }}} */
+
+static void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
+{
+	zend_stream_close(fh);
 	if (fh->opened_path) {
 		zend_string_release_ex(fh->opened_path, 0);
 		fh->opened_path = NULL;

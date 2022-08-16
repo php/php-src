@@ -1795,6 +1795,7 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 		if (file_handle->opened_path) {
 			zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
 		}
+		zend_stream_close(file_handle);
 		if (op_array) {
 			zend_execute(op_array, retval);
 			zend_exception_restore();
