@@ -365,6 +365,9 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 		RETURN_THROWS();
 	}
 	object_properties_load(&engine->std, Z_ARRVAL_P(t));
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
 
 	/* state */
 	t = zend_hash_index_find(d, 1);

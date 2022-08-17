@@ -343,6 +343,7 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
 
+#[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
 {
 }

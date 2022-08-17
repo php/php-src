@@ -638,6 +638,15 @@ declared_property:
 					}
 				}
 			} else {
+				if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+					zend_forbidden_dynamic_property(obj->ce, Z_STR_P(&key));
+					goto failure;
+				} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
+					if (!zend_deprecated_dynamic_property(obj, Z_STR_P(&key))) {
+						goto failure;
+					}
+				}
+
 				int ret = is_property_visibility_changed(obj->ce, &key);
 
 				if (EXPECTED(!ret)) {
