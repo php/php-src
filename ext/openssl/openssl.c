@@ -519,15 +519,15 @@ static bool php_openssl_check_path_ex(
 		error_msg = "must not contain any null bytes";
 		error_type = E_ERROR;
 	} else if (expand_filepath(fs_file_path, real_path) == NULL) {
-		error_msg = "The argument must be a valid file path";
+		error_msg = "must be a valid file path";
 	}
 
 	if (error_msg != NULL) {
 		if (arg_num == 0) {
 			const char *option_title = option_name ? option_name : "unknown";
 			const char *option_label = is_from_array ? "array item" : "option";
-			php_error_docref(NULL, E_WARNING, "Path '%s' for %s %s %s",
-				real_path, option_title, option_label, error_msg);
+			php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
+					option_title, option_label, error_msg);
 		} else if (is_from_array && option_name != NULL) {
 			php_openssl_check_path_error(
 					arg_num, error_type, "option %s array item %s", option_name, error_msg);
