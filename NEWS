@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.24
 
+- Streams:
+  . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
+    (cmb, timwolla)
 
 01 Sep 2022, PHP 8.0.23
 
