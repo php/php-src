@@ -32,7 +32,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  string(12) "HTTP/1.1 200"
+  string(13) "HTTP/1.1 200 "
   [1]=>
   string(12) "Good: Header"
 }
