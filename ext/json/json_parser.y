@@ -87,6 +87,7 @@ start:
 					ZVAL_COPY_VALUE(parser->return_value, &$1);
 				}
 
+				(void) php_json_yynerrs;
 				YYACCEPT;
 			}
 ;
