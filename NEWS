@@ -43,6 +43,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9164 (Segfault in zend_accel_class_hash_copy).
     (Arnaud, Sergei Turchanov)
 
+- OpenSSL:
+  . Fixed bug GH-9339 (OpenSSL oid_file path check warning contains
+    uninitialized path). (Jakub Zelenka)
+
 - PDO_SQLite:
   . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
 
