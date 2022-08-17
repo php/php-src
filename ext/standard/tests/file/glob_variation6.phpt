@@ -1,7 +1,7 @@
 --TEST--
 Test glob() function: ensure no platform difference, variation 4
 --SKIPIF--
-<?php if( substr(PHP_OS, 0, 3) != "WIN" ) {die('skip only valid on Windows');} ?>
+<?php if( substr(PHP_OS, 0, 3) != "WIN" ) die('skip only valid directory on Windows'); ?>
 --FILE--
 <?php
 $path = __DIR__;

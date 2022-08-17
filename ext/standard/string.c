@@ -3338,7 +3338,7 @@ PHP_FUNCTION(strtr)
 /* {{{ Reverse a string */
 #ifdef ZEND_INTRIN_SSSE3_NATIVE
 #include <tmmintrin.h>
-#elif defined(__aarch64__)
+#elif defined(__aarch64__) || defined(_M_ARM64)
 #include <arm_neon.h>
 #endif
 PHP_FUNCTION(strrev)
@@ -3380,6 +3380,19 @@ PHP_FUNCTION(strrev)
 			const uint8x16_t rev = vrev64q_u8(str);
 			const uint8x16_t ext = (uint8x16_t)
 				vextq_u64((uint64x2_t)rev, (uint64x2_t)rev, 1);
+			vst1q_u8((uint8_t *)p, ext);
+			p += 16;
+			e -= 16;
+		} while (e - s > 15);
+	}
+#elif defined(_M_ARM64)
+	if (e - s > 15) {
+		do {
+			const __n128 str = vld1q_u8((uint8_t *)(e - 15));
+			/* Synthesize rev128 with a rev64 + ext. */
+			/* strange force cast limit on windows: you cannot convert anything */
+			const __n128 rev = vrev64q_u8(str);
+			const __n128 ext = vextq_u64(rev, rev, 1);
 			vst1q_u8((uint8_t *)p, ext);
 			p += 16;
 			e -= 16;
@@ -3864,7 +3877,7 @@ do_escape:
 /* }}} */
 #endif
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 typedef union {
 	uint8_t mem[16];
 	uint64_t dw[2];
@@ -3899,7 +3912,7 @@ static zend_always_inline char *aarch64_add_slashes(quad_word res, const char *s
 	}
 	return target;
 }
-#endif /* __aarch64__ */
+#endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 #ifndef ZEND_INTRIN_SSE4_2_NATIVE
 # ifdef ZEND_INTRIN_SSE4_2_RESOLVER
@@ -3921,7 +3934,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str)
 	source = ZSTR_VAL(str);
 	end = source + ZSTR_LEN(str);
 
-# ifdef __aarch64__
+# if defined(__aarch64__) || defined(_M_ARM64)
 	quad_word res = {0};
 	if (ZSTR_LEN(str) > 15) {
 		do {
@@ -3932,7 +3945,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str)
 		} while ((end - source) > 15);
 	}
 	/* Finish the last 15 bytes or less with the scalar loop. */
-# endif /* __aarch64__ */
+# endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 	while (source < end) {
 		switch (*source) {
@@ -3955,7 +3968,7 @@ do_escape:
 	memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), offset);
 	target = ZSTR_VAL(new_str) + offset;
 
-# ifdef __aarch64__
+# if defined(__aarch64__) || defined(_M_ARM64)
 	if (res.dw[0] | res.dw[1]) {
 		target = aarch64_add_slashes(res, source, target);
 		source += 16;
@@ -3971,7 +3984,7 @@ do_escape:
 		}
 	}
 	/* Finish the last 15 bytes or less with the scalar loop. */
-# endif /* __aarch64__ */
+# endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 	while (source < end) {
 		switch (*source) {
@@ -4010,7 +4023,7 @@ do_escape:
  * be careful, this edits the string in-place */
 static zend_always_inline char *php_stripslashes_impl(const char *str, char *out, size_t len)
 {
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 	while (len > 15) {
 		uint8x16_t x = vld1q_u8((uint8_t *)str);
 		quad_word q;
@@ -4040,7 +4053,7 @@ static zend_always_inline char *php_stripslashes_impl(const char *str, char *out
 		}
 	}
 	/* Finish the last 15 bytes or less with the scalar loop. */
-#endif /* __aarch64__ */
+#endif /* defined(__aarch64__) || defined(_M_ARM64) */
 	while (len > 0) {
 		if (*str == '\\') {
 			str++;				/* skip the slash */
@@ -4386,7 +4399,7 @@ PHP_FUNCTION(hebrev)
 {
 	char *str, *heb_str, *target;
 	const char *tmp;
-	size_t block_start, block_end, block_type, block_length, i;
+	size_t block_start, block_end, block_type, i;
 	zend_long max_chars=0, char_count;
 	size_t begin, end, orig_begin;
 	size_t str_len;
@@ -4410,8 +4423,6 @@ PHP_FUNCTION(hebrev)
 	*target = 0;
 	target--;
 
-	block_length=0;
-
 	if (isheb(*tmp)) {
 		block_type = _HEB_BLOCK_TYPE_HEB;
 	} else {
@@ -4423,7 +4434,6 @@ PHP_FUNCTION(hebrev)
 			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<str_len-1) {
 				tmp++;
 				block_end++;
-				block_length++;
 			}
 			for (i = block_start+1; i<= block_end+1; i++) {
 				*target = str[i-1];
@@ -4468,7 +4478,6 @@ PHP_FUNCTION(hebrev)
 			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < str_len-1) {
 				tmp++;
 				block_end++;
-				block_length++;
 			}
 			while ((_isblank((int)*tmp) || ispunct((int)*tmp)) && *tmp!='/' && *tmp!='-' && block_end > block_start) {
 				tmp--;
@@ -5755,7 +5764,7 @@ PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_st
 
 	while (--n_left) {
 		rnd_idx = algo->range(status, 0, n_left);
-		if (status->last_unsafe) {
+		if (EG(exception)) {
 			return false;
 		}
 		if (rnd_idx != n_left) {

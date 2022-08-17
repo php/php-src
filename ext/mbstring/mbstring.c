@@ -34,6 +34,7 @@
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "libmbfl/mbfl/mbfilter_wchar.h"
+#include "libmbfl/mbfl/eaw_table.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_qprint.h"
 #include "libmbfl/filters/mbfilter_htmlent.h"
@@ -78,6 +79,9 @@ static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding);
 static inline bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc);
 
 static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
+
+/* See mbfilter_cp5022x.c */
+uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, int mode);
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -1527,12 +1531,10 @@ PHP_FUNCTION(mb_parse_str)
 
 	info.data_type              = PARSE_STRING;
 	info.separator              = PG(arg_separator).input;
-	info.report_errors          = 1;
+	info.report_errors          = true;
 	info.to_encoding            = MBSTRG(current_internal_encoding);
-	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
-	info.from_language          = MBSTRG(language);
 
 	detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
 
@@ -1817,26 +1819,54 @@ PHP_FUNCTION(mb_str_split)
 }
 /* }}} */
 
+static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
+{
+	size_t len = 0;
+
+	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
+		return ZSTR_LEN(string);
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
+		return ZSTR_LEN(string) / 2;
+	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
+		return ZSTR_LEN(string) / 4;
+	} else if (encoding->mblen_table) {
+		const unsigned char *mbtab = encoding->mblen_table;
+		unsigned char *p = (unsigned char*)ZSTR_VAL(string), *e = p + ZSTR_LEN(string);
+		while (p < e) {
+			p += mbtab[*p];
+			len++;
+		}
+	} else {
+		uint32_t wchar_buf[128];
+		unsigned char *in = (unsigned char*)ZSTR_VAL(string);
+		size_t in_len = ZSTR_LEN(string);
+		unsigned int state = 0;
+
+		while (in_len) {
+			len += encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		}
+	}
+
+	return len;
+}
+
 /* {{{ Get character numbers of a string */
 PHP_FUNCTION(mb_strlen)
 {
-	mbfl_string string;
-	char *str;
-	zend_string *enc_name = NULL;
+	zend_string *string, *enc_name = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, string.len)
+		Z_PARAM_STR(string)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.val = (unsigned char*)str;
-	string.encoding = php_mb_get_encoding(enc_name, 2);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 2);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	RETVAL_LONG(mbfl_strlen(&string));
+	RETVAL_LONG(mb_get_strlen(string, enc));
 }
 /* }}} */
 
@@ -2249,91 +2279,272 @@ PHP_FUNCTION(mb_strcut)
 }
 /* }}} */
 
-/* {{{ Gets terminal width of a string */
+/* Some East Asian characters, when printed at a terminal (or the like), require double
+ * the usual amount of horizontal space. We call these "fullwidth" characters. */
+static size_t character_width(uint32_t c)
+{
+	if (c < FIRST_DOUBLEWIDTH_CODEPOINT) {
+		return 1;
+	}
+
+	/* Do a binary search to see if we fall in any of the fullwidth ranges */
+	int lo = 0, hi = sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]);
+	while (lo < hi) {
+		int probe = (lo + hi) / 2;
+		if (c < mbfl_eaw_table[probe].begin) {
+			hi = probe;
+		} else if (c > mbfl_eaw_table[probe].end) {
+			lo = probe + 1;
+		} else {
+			return 2;
+		}
+	}
+
+	return 1;
+}
+
+static size_t mb_get_strwidth(zend_string *string, const mbfl_encoding *enc)
+{
+	size_t width = 0;
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(string);
+	size_t in_len = ZSTR_LEN(string);
+	unsigned int state = 0;
+
+	while (in_len) {
+		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		while (out_len) {
+			/* NOTE: 'bad input' marker will be counted as 1 unit of width
+			 * If text conversion is performed with an ordinary ASCII character as
+			 * the 'replacement character', this will give us the correct display width. */
+			width += character_width(wchar_buf[--out_len]);
+		}
+	}
+
+	return width;
+}
+
+/* Gets terminal width of a string */
 PHP_FUNCTION(mb_strwidth)
 {
-	char *string_val;
-	mbfl_string string;
-	zend_string *enc_name = NULL;
+	zend_string *string, *enc_name = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(string_val, string.len)
+		Z_PARAM_STR(string)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.val = (unsigned char*)string_val;
-	string.encoding = php_mb_get_encoding(enc_name, 2);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 2);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	RETVAL_LONG(mbfl_strwidth(&string));
+	RETVAL_LONG(mb_get_strwidth(string, enc));
 }
-/* }}} */
 
-/* {{{ Trim the string in terminal width */
+/* Cut 'n' codepoints from beginning of string
+ * Remove this once mb_substr is implemented using the new conversion filters */
+static zend_string* mb_drop_chars(zend_string *input, const mbfl_encoding *enc, size_t n)
+{
+	if (n >= ZSTR_LEN(input)) {
+		/* No supported text encoding decodes to more than one codepoint per byte
+		 * So if the number of codepoints to drop >= number of input bytes,
+		 * then definitely the output should be empty
+		 * This also guards `ZSTR_LEN(input) - n` (below) from underflow */
+		return zend_empty_string;
+	}
+
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+	unsigned int state = 0;
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, ZSTR_LEN(input) - n, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+	while (in_len) {
+		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		if (n >= out_len) {
+			n -= out_len;
+		} else {
+			enc->from_wchar(wchar_buf + n, out_len - n, &buf, !in_len);
+			n = 0;
+		}
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
+/* Pick 'n' codepoints from beginning of string
+ * Remove this once mb_substr is implemented using the new conversion filters */
+static zend_string* mb_pick_chars(zend_string *input, const mbfl_encoding *enc, size_t n)
+{
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+	unsigned int state = 0;
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, n, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+	while (in_len && n) {
+		size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		enc->from_wchar(wchar_buf, MIN(out_len, n), &buf, !in_len || out_len >= n);
+		n -= MIN(out_len, n);
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
+static zend_string* mb_trim_string(zend_string *input, zend_string *marker, const mbfl_encoding *enc, unsigned int from, int width)
+{
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+	unsigned int state = 0;
+	int remaining_width = width;
+	unsigned int to_skip = from;
+	size_t out_len = 0;
+	bool first_call = true, input_err = false;
+	mb_convert_buf buf;
+
+	while (in_len) {
+		out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+		if (out_len <= to_skip) {
+			to_skip -= out_len;
+		} else {
+			for (int i = to_skip; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				input_err |= (w == MBFL_BAD_INPUT);
+				remaining_width -= character_width(w);
+				if (remaining_width < 0) {
+					/* We need to truncate string and append trim marker */
+					width -= mb_get_strwidth(marker, enc);
+					/* 'width' is now the amount we want to take from 'input' */
+					if (width <= 0) {
+						return zend_string_copy(marker);
+					}
+					mb_convert_buf_init(&buf, width, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+					if (first_call) {
+						/* We can use the buffer of wchars which we have right now;
+						 * no need to convert again */
+						goto dont_restart_conversion;
+					} else {
+						goto restart_conversion;
+					}
+				}
+			}
+			to_skip = 0;
+		}
+		first_call = false;
+	}
+
+	/* The input string fits in the requested width; we don't need to append the trim marker
+	 * However, if the string contains erroneous byte sequences, those should be converted
+	 * to error markers */
+	if (from == 0 && !input_err) {
+		/* This just increments the string's refcount; it doesn't really 'copy' it */
+		return zend_string_copy(input);
+	}
+	return mb_drop_chars(input, enc, from);
+
+	/* The input string is too wide; we need to build a new string which
+	 * includes some portion of the input string, with the trim marker
+	 * concatenated onto it */
+restart_conversion:
+	in = (unsigned char*)ZSTR_VAL(input);
+	in_len = ZSTR_LEN(input);
+	state = 0;
+
+	while (true) {
+		out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+
+dont_restart_conversion:
+		if (out_len <= from) {
+			from -= out_len;
+		} else {
+			for (int i = from; i < out_len; i++) {
+				width -= character_width(wchar_buf[i]);
+				if (width < 0) {
+					enc->from_wchar(wchar_buf + from, i - from, &buf, true);
+					goto append_trim_marker;
+				}
+			}
+			ZEND_ASSERT(in_len > 0);
+			enc->from_wchar(wchar_buf + from, out_len - from, &buf, false);
+			from = 0;
+		}
+	}
+
+append_trim_marker:
+	if (ZSTR_LEN(marker) > 0) {
+		MB_CONVERT_BUF_ENSURE((&buf), buf.out, buf.limit, ZSTR_LEN(marker));
+		memcpy(buf.out, ZSTR_VAL(marker), ZSTR_LEN(marker));
+		buf.out += ZSTR_LEN(marker);
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
+/* Trim the string to terminal width; optional, add a 'trim marker' if it was truncated */
 PHP_FUNCTION(mb_strimwidth)
 {
-	char *str, *trimmarker = NULL;
-	zend_string *encoding = NULL;
-	zend_long from, width, swidth = 0;
-	size_t str_len, trimmarker_len;
-	mbfl_string string, result, marker, *ret;
+	zend_string *str, *trimmarker = zend_empty_string, *encoding = NULL;
+	zend_long from, width;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(from)
 		Z_PARAM_LONG(width)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(trimmarker, trimmarker_len)
+		Z_PARAM_STR(trimmarker)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.encoding = marker.encoding = php_mb_get_encoding(encoding, 5);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 5);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	string.val = (unsigned char *)str;
-	string.len = str_len;
-	marker.val = NULL;
-	marker.len = 0;
-
-	if ((from < 0) || (width < 0)) {
-		swidth = mbfl_strwidth(&string);
-	}
-
-	if (from < 0) {
-		from += swidth;
-	}
-
-	if (from < 0 || (size_t)from > str_len) {
-		zend_argument_value_error(2, "is out of range");
-		RETURN_THROWS();
+	if (from != 0) {
+		size_t str_len = mb_get_strlen(str, enc);
+		if (from < 0) {
+			from += str_len;
+		}
+		if (from < 0 || from > str_len) {
+			zend_argument_value_error(2, "is out of range");
+			RETURN_THROWS();
+		}
 	}
 
 	if (width < 0) {
-		width = swidth + width - from;
+		width += mb_get_strwidth(str, enc);
+
+		if (from > 0) {
+			zend_string *trimmed = mb_pick_chars(str, enc, from);
+			width -= mb_get_strwidth(trimmed, enc);
+			zend_string_free(trimmed);
+		}
+
+		if (width < 0) {
+			zend_argument_value_error(3, "is out of range");
+			RETURN_THROWS();
+		}
 	}
 
-	if (width < 0) {
-		zend_argument_value_error(3, "is out of range");
-		RETURN_THROWS();
-	}
-
-	if (trimmarker) {
-		marker.val = (unsigned char *)trimmarker;
-		marker.len = trimmarker_len;
-	}
-
-	ret = mbfl_strimwidth(&string, &marker, &result, from, width);
-	ZEND_ASSERT(ret != NULL);
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
-	efree(ret->val);
+	RETVAL_STR(mb_trim_string(str, trimmarker, enc, from, width));
 }
-/* }}} */
 
 
 /* See mbfl_no_encoding definition for list of unsupported encodings */
@@ -2836,198 +3047,6 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	efree(ret->val);
 }
 /* }}} */
-
-/* Apply various transforms to input codepoint, such as converting halfwidth katakana
- * to fullwidth katakana. `mode` is a bitfield which controls which transforms are
- * actually performed. The bit values are defined in translit_kana_jisx0201_jisx0208.h.
- * `mode` must not call for transforms which are inverses (i.e. which would cancel
- * each other out).
- *
- * In some cases, successive input codepoints may be merged into one output codepoint.
- * (That is the purpose of the `next` parameter.) If the `next` codepoint is consumed
- * and should be skipped over, `*consumed` will be set to true. Otherwise, `*consumed`
- * will not be modified. If there is no following codepoint, `next` should be zero.
- *
- * Again, in some cases, one input codepoint may convert to two output codepoints.
- * If so, the second output codepoint will be stored in `*second`.
- *
- * Return the resulting codepoint. If none of the requested transforms apply, return
- * the input codepoint unchanged.
- */
-uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, unsigned int mode)
-{
-	if ((mode & MBFL_HAN2ZEN_ALL) && c >= 0x21 && c <= 0x7D && c != '"' && c != '\'' && c != '\\') {
-		return c + 0xFEE0;
-	}
-	if ((mode & MBFL_HAN2ZEN_ALPHA) && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))) {
-		return c + 0xFEE0;
-	}
-	if ((mode & MBFL_HAN2ZEN_NUMERIC) && c >= '0' && c <= '9') {
-		return c + 0xFEE0;
-	}
-	if ((mode & MBFL_HAN2ZEN_SPACE) && c == ' ') {
-		return 0x3000;
-	}
-
-	if (mode & (MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_HIRAGANA)) {
-		/* Convert Hankaku kana to Zenkaku kana
-		 * Either all Hankaku kana (including katakana and hiragana) will be converted
-		 * to Zenkaku katakana, or to Zenkaku hiragana */
-		if ((mode & MBFL_HAN2ZEN_KATAKANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
-			if (c >= 0xFF61 && c <= 0xFF9F) {
-				int n = c - 0xFF60;
-
-				if (next >= 0xFF61 && next <= 0xFF9F) {
-					if (next == 0xFF9E && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
-						*consumed = true;
-						return 0x3001 + hankana2zenkana_table[n];
-					}
-					if (next == 0xFF9E && n == 19) {
-						*consumed = true;
-						return 0x30F4;
-					}
-					if (next == 0xFF9F && n >= 42 && n <= 46) {
-						*consumed = true;
-						return 0x3002 + hankana2zenkana_table[n];
-					}
-				}
-
-				return 0x3000 + hankana2zenkana_table[n];
-			}
-		}
-		if ((mode & MBFL_HAN2ZEN_HIRAGANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
-			if (c >= 0xFF61 && c <= 0xFF9F) {
-				int n = c - 0xFF60;
-
-				if (next >= 0xFF61 && next <= 0xFF9F) {
-					if (next == 0xFF9E && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
-						*consumed = true;
-						return 0x3001 + hankana2zenhira_table[n];
-					}
-					if (next == 0xFF9F && n >= 42 && n <= 46) {
-						*consumed = true;
-						return 0x3002 + hankana2zenhira_table[n];
-					}
-				}
-
-				return 0x3000 + hankana2zenhira_table[n];
-			}
-		}
-		if ((mode & MBFL_HAN2ZEN_KATAKANA) && c >= 0xFF61 && c <= 0xFF9F) {
-			return 0x3000 + hankana2zenkana_table[c - 0xFF60];
-		}
-		if ((mode & MBFL_HAN2ZEN_HIRAGANA) && c >= 0xFF61 && c <= 0xFF9F) {
-			return 0x3000 + hankana2zenhira_table[c - 0xFF60];
-		}
-	}
-
-	if (mode & MBFL_HAN2ZEN_SPECIAL) { /* special ascii to symbol */
-		if (c == '\\' || c == 0xA5) { /* YEN SIGN */
-			return 0xFFE5; /* FULLWIDTH YEN SIGN */
-		}
-		if (c == 0x7E || c == 0x203E) {
-			return 0xFFE3; /* FULLWIDTH MACRON */
-		}
-		if (c == '\'') {
-			return 0x2019; /* RIGHT SINGLE QUOTATION MARK */
-		}
-		if (c == '"') {
-			return 0x201D; /* RIGHT DOUBLE QUOTATION MARK */
-		}
-	}
-
-	if (mode & (MBFL_ZEN2HAN_ALL | MBFL_ZEN2HAN_ALPHA | MBFL_ZEN2HAN_NUMERIC | MBFL_ZEN2HAN_SPACE)) {
-		/* Zenkaku to Hankaku */
-		if ((mode & MBFL_ZEN2HAN_ALL) && c >= 0xFF01 && c <= 0xFF5D && c != 0xFF02 && c != 0xFF07 && c != 0xFF3C) {
-			/* all except " ' \ ~ */
-			return c - 0xFEE0;
-		}
-		if ((mode & MBFL_ZEN2HAN_ALPHA) && ((c >= 0xFF21 && c <= 0xFF3A) || (c >= 0xFF41 && c <= 0xFF5A))) {
-			return c - 0xFEE0;
-		}
-		if ((mode & MBFL_ZEN2HAN_NUMERIC) && (c >= 0xFF10 && c <= 0xFF19)) {
-			return c - 0xFEE0;
-		}
-		if ((mode & MBFL_ZEN2HAN_SPACE) && (c == 0x3000)) {
-			return ' ';
-		}
-		if ((mode & MBFL_ZEN2HAN_ALL) && (c == 0x2212)) { /* MINUS SIGN */
-			return '-';
-		}
-	}
-
-	if (mode & (MBFL_ZEN2HAN_KATAKANA | MBFL_ZEN2HAN_HIRAGANA)) {
-		/* Zenkaku kana to hankaku kana */
-		if ((mode & MBFL_ZEN2HAN_KATAKANA) && c >= 0x30A1 && c <= 0x30F4) {
-			/* Zenkaku katakana to hankaku kana */
-			int n = c - 0x30A1;
-			if (zenkana2hankana_table[n][1]) {
-				*second = 0xFF00 + zenkana2hankana_table[n][1];
-			}
-			return 0xFF00 + zenkana2hankana_table[n][0];
-		}
-		if ((mode & MBFL_ZEN2HAN_HIRAGANA) && c >= 0x3041 && c <= 0x3093) {
-			/* Zenkaku hiragana to hankaku kana */
-			int n = c - 0x3041;
-			if (zenkana2hankana_table[n][1]) {
-				*second = 0xFF00 + zenkana2hankana_table[n][1];
-			}
-			return 0xFF00 + zenkana2hankana_table[n][0];
-		}
-		if (c == 0x3001) {
-			return 0xFF64; /* HALFWIDTH IDEOGRAPHIC COMMA */
-		}
-		if (c == 0x3002) {
-			return 0xFF61; /* HALFWIDTH IDEOGRAPHIC FULL STOP */
-		}
-		if (c == 0x300C) {
-			return 0xFF62; /* HALFWIDTH LEFT CORNER BRACKET */
-		}
-		if (c == 0x300D) {
-			return 0xFF63; /* HALFWIDTH RIGHT CORNER BRACKET */
-		}
-		if (c == 0x309B) {
-			return 0xFF9E; /* HALFWIDTH KATAKANA VOICED SOUND MARK */
-		}
-		if (c == 0x309C) {
-			return 0xff9f; /* HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK */
-		}
-		if (c == 0x30FC) {
-			return 0xFF70; /* HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK */
-		}
-		if (c == 0x30FB) {
-			return 0xFF65; /* HALFWIDTH KATAKANA MIDDLE DOT */
-		}
-	}
-
-	if (mode & (MBFL_ZENKAKU_HIRA2KATA | MBFL_ZENKAKU_KATA2HIRA)) {
-		if ((mode & MBFL_ZENKAKU_HIRA2KATA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309D || c == 0x309E)) {
-			/* Zenkaku hiragana to Zenkaku katakana */
-			return c + 0x60;
-		}
-		if ((mode & MBFL_ZENKAKU_KATA2HIRA) && ((c >= 0x30A1 && c <= 0x30F3) || c == 0x30FD || c == 0x30FE)) {
-			/* Zenkaku katakana to Zenkaku hiragana */
-			return c - 0x60;
-		}
-	}
-
-	if (mode & MBFL_ZEN2HAN_SPECIAL) { /* special symbol to ascii */
-		if (c == 0xFFE5 || c == 0xFF3C) { /* FULLWIDTH YEN SIGN/FULLWIDTH REVERSE SOLIDUS */
-			return '\\';
-		}
-		if (c == 0xFFE3 || c == 0x203E) { /* FULLWIDTH MACRON/OVERLINE */
-			return '~';
-		}
-		if (c == 0x2018 || c == 0x2019) { /* LEFT/RIGHT SINGLE QUOTATION MARK*/
-			return '\'';
-		}
-		if (c == 0x201C || c == 0x201D) { /* LEFT/RIGHT DOUBLE QUOTATION MARK */
-			return '"';
-		}
-	}
-
-	return c;
-}
 
 static zend_string* jp_kana_convert(zend_string *input, const mbfl_encoding *encoding, unsigned int mode)
 {

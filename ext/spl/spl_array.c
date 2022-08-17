@@ -27,11 +27,11 @@
 #include "zend_exceptions.h"
 
 #include "php_spl.h"
-#include "spl_array_arginfo.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_array.h"
+#include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
 
 zend_object_handlers spl_handler_ArrayObject;
@@ -40,18 +40,6 @@ PHPAPI zend_class_entry  *spl_ce_ArrayObject;
 zend_object_handlers spl_handler_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
-
-#define SPL_ARRAY_STD_PROP_LIST      0x00000001
-#define SPL_ARRAY_ARRAY_AS_PROPS     0x00000002
-#define SPL_ARRAY_CHILD_ARRAYS_ONLY  0x00000004
-#define SPL_ARRAY_IS_SELF            0x01000000
-#define SPL_ARRAY_USE_OTHER          0x02000000
-#define SPL_ARRAY_INT_MASK           0xFFFF0000
-#define SPL_ARRAY_CLONE_MASK         0x0100FFFF
-
-#define SPL_ARRAY_METHOD_NO_ARG				0
-#define SPL_ARRAY_METHOD_CALLBACK_ARG  		1
-#define SPL_ARRAY_METHOD_SORT_FLAGS_ARG 	2
 
 typedef struct _spl_array_object {
 	zval              array;
@@ -1819,17 +1807,9 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
-
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
-	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
-
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
-
-	REGISTER_SPL_CLASS_CONST_LONG(RecursiveArrayIterator, "CHILD_ARRAYS_ONLY", SPL_ARRAY_CHILD_ARRAYS_ONLY);
 
 	return SUCCESS;
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 09aa0aa66c78b86c0e6e0e554c3ebe205a0e5f59 */
+ * Stub hash: 00c129ef1fe3ff8227fd6926f8702e05582a33a8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -1170,6 +1170,15 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_IntlException_methods[] = {
 	ZEND_FE_END
 };
+
+static void register_php_intl_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("INTL_MAX_LOCALE_LEN", INTL_MAX_LOCALE_LEN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("INTL_ICU_VERSION", U_ICU_VERSION, CONST_CS | CONST_PERSISTENT);
+#if defined(U_ICU_DATA_VERSION)
+	REGISTER_STRING_CONSTANT("INTL_ICU_DATA_VERSION", U_ICU_DATA_VERSION, CONST_CS | CONST_PERSISTENT);
+#endif
+}
 
 static zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exception)
 {

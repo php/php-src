@@ -28,8 +28,8 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_generator_%d.php' -->
-<file '%s%eobserver_generator_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
   <!-- init doSomething() -->
   <doSomething>
     <!-- init getResults() -->
@@ -44,7 +44,10 @@ echo doSomething() . PHP_EOL;
 12
     <getResults>
     </getResults:1337>
+    <!-- init Generator::getReturn() -->
+    <Generator::getReturn>
+    </Generator::getReturn:1337>
 1337
   </doSomething:'Done'>
 Done
-</file '%s%eobserver_generator_%d.php'>
+</file '%s'>

@@ -214,6 +214,8 @@ char *alloca();
 
 #if ZEND_GCC_VERSION >= 2096 || __has_attribute(__malloc__)
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
+#elif defined(ZEND_WIN32)
+# define ZEND_ATTRIBUTE_MALLOC __declspec(allocator) __declspec(restrict)
 #else
 # define ZEND_ATTRIBUTE_MALLOC
 #endif
@@ -224,6 +226,12 @@ char *alloca();
 #else
 # define ZEND_ATTRIBUTE_ALLOC_SIZE(X)
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
+#endif
+
+#if ZEND_GCC_VERSION >= 3000
+# define ZEND_ATTRIBUTE_CONST __attribute__((const))
+#else
+# define ZEND_ATTRIBUTE_CONST
 #endif
 
 #if ZEND_GCC_VERSION >= 2007 || __has_attribute(format)

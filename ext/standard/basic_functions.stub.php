@@ -682,7 +682,7 @@ function sha1_file(string $filename, bool $binary = false): string|false {}
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
-function openlog(string $prefix, int $flags, int $facility): bool {}
+function openlog(string $prefix, int $flags, int $facility): true {}
 
 function closelog(): true {}
 

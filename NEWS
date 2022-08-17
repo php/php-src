@@ -1,12 +1,55 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0beta2
+?? ??? ????, PHP 8.2.0RC1
+
+
+18 Aug 2022, PHP 8.2.0beta3
+
+- Core:
+  . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
+  . Added support for defining constants in traits. (sj-i)
+  . Stop incorrectly emitting false positive deprecation notice alongside
+    unsupported syntax fatal error for `"{$g{'h'}}"`. (TysonAndre)
+  . Fix unexpected deprecated dynamic property warning, which occurred when
+    exit() in finally block after an exception was thrown without catching.
+    (Twosee)
+
+- MBString:
+  . Fixed bug GH-9248 (Segmentation fault in mb_strimwidth()). (cmb)
+
+- Random:
+  . Fixed bug GH-9235 (non-existant $sequence parameter in stub for
+    PcgOneseq128XslRr64::__construct()). (timwolla)
+  . Fixed bug GH-9190, GH-9191 (undefined behavior for MT_RAND_PHP when
+    handling large ranges). (timwolla)
+  . Fixed bug GH-9249 (Xoshiro256StarStar does not reject the invalid
+    all-zero state). (timwolla)
+  . Removed redundant RuntimeExceptions from Randomizer methods. The
+    exceptions thrown by the engines will be exposed directly. (timwolla)
+  . Added extension specific Exceptions/Errors (RandomException, RandomError,
+    BrokenRandomEngineError). (timwolla)
+
+- Session:
+  . Fixed GH-9200 (setcookie has an obsolete expires date format). (timwolla)
+
+- Standard:
+  . Fixed bug #65489 (glob() basedir check is inconsistent). (Jakub Zelenka)
+  . Fixed GH-9200 (setcookie has an obsolete expires date format). (Derick)
+  . Fixed GH-9244 (Segfault with array_multisort + array_shift). (cmb)
+
+04 Aug 2022, PHP 8.2.0beta2
+
+- Core:
+  . Fixed bug GH-7900 (Arrow function with never return type compile-time
+    errors). (ilutov)
 
 - Date:
   . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of
     different type). (Derick)
   . Fixed bug GH-8964 (DateTime object comparison after applying delta less
     than 1 second). (Derick)
+  . Fixed bug GH-9106: (DateInterval 1.5s added to DateTimeInterface is rounded
+    down since PHP 8.1.0). (Derick)
   . Fixed bug #75035 (Datetime fails to unserialize "extreme" dates).
     (Derick)
   . Fixed bug #80483 (DateTime Object with 5-digit year can't unserialized).
@@ -17,6 +60,21 @@ PHP                                                                        NEWS
   . Fixed LMDB driver memory leak on DB creation failure (Girgias)
   . Fixed GH-8856 (dba: lmdb: allow to override the MDB_NOSUBDIR flag). (Girgias)
 
+- FFI:
+  . Fixed bug GH-9090 (Support assigning function pointers in FFI). (Adam
+    Saponara)
+
+- Intl:
+  . Declared Transliterator::$id as readonly to unlock subclassing it. (Nicolas
+    Grekas)
+
+- OPcache:
+  . Fixed bug GH-9164 (Segfault in zend_accel_class_hash_copy).
+    (Arnaud, Sergei Turchanov)
+
+- PCNTL:
+  . Fixed pcntl_(get|set)priority error handling for MacOS. (Juan Morales)
+
 - Random:
   . Fixed bug GH-9067 (random extension is not thread safe). (cmb)
   . Fixed bug GH-9055 (segmentation fault if user engine throws). (timwolla)
@@ -25,7 +83,22 @@ PHP                                                                        NEWS
   . Fixed bug GH-9088, GH-9056 (incorrect expansion of bytes when
     generating uniform integers within a given range). (timwolla)
   . Fixed bug GH-9089 (Fix memory leak on Randomizer::__construct()
-    call twice) (zeriyoshi)
+    call twice). (zeriyoshi)
+  . Fixed bug GH-9212 (PcgOneseq128XslRr64::jump() should not allow negative
+    $advance). (Anton Smirnov)
+  . Changed Mt19937 to throw a ValueError instead of InvalidArgumentException
+    for invalid $mode. (timwolla)
+  . Splitted Random\Randomizer::getInt() (without arguments) to
+    Random\Randomizer::nextInt(). (zeriyoshi)
+
+- Sockets:
+  . Added SOL_FILTER socket option for Solaris. (David Carlier)
+
+- SPL:
+  . Fixed bug #69181 (READ_CSV|DROP_NEW_LINE drops newlines within fields).
+    (cmb)
+  . Fixed bug #65069 (GlobIterator incorrect handling of open_basedir check).
+    (Jakub Zelenka)
 
 21 Jul 2022, PHP 8.2.0beta1
 
@@ -81,7 +154,8 @@ PHP                                                                        NEWS
     iterable. (timwolla)
 
 - Standard:
-  . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
+  . Implemented FR GH-8924 (str_split should return empty array for empty
+    string). (Michael Vorisek)
   . Added ini_parse_quantity function to convert ini quantities shorthand
     notation to int. (Dennis Snell)
   . Enable arc4random_buf for Linux glibc 2.36 and onwards

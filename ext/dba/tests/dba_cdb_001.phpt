@@ -8,6 +8,8 @@ $handler = 'cdb';
 require_once(__DIR__ .'/skipif.inc');
 die('info CDB does not support replace or delete');
 ?>
+--CONFLICTS--
+dba
 --FILE--
 <?php
 

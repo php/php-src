@@ -214,6 +214,7 @@ static ZEND_FUNCTION(ffi_trampoline);
 static ZEND_COLD void zend_ffi_return_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_pass_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *type);
+static bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *src_type);
 
 #if FFI_CLOSURES
 static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value);
@@ -255,6 +256,49 @@ static zend_object *zend_ffi_cdata_new(zend_class_entry *class_type) /* {{{ */
 }
 /* }}} */
 
+static bool zend_ffi_func_ptr_are_compatible(zend_ffi_type *dst_type, zend_ffi_type *src_type) /* {{{ */
+{
+	uint32_t dst_argc, src_argc, i;
+	zend_ffi_type *dst_arg, *src_arg;
+
+	ZEND_ASSERT(dst_type->kind == ZEND_FFI_TYPE_FUNC);
+	ZEND_ASSERT(src_type->kind == ZEND_FFI_TYPE_FUNC);
+
+	/* Ensure calling convention matches */
+	if (dst_type->func.abi != src_type->func.abi) {
+		return 0;
+	}
+
+	/* Ensure variadic attr matches */
+	if ((dst_type->attr & ZEND_FFI_ATTR_VARIADIC) != (src_type->attr & ZEND_FFI_ATTR_VARIADIC)) {
+		return 0;
+	}
+
+	/* Ensure same arg count */
+	dst_argc = dst_type->func.args ? zend_hash_num_elements(dst_type->func.args) : 0;
+	src_argc = src_type->func.args ? zend_hash_num_elements(src_type->func.args) : 0;
+	if (dst_argc != src_argc) {
+		return 0;
+	}
+
+	/* Ensure compatible ret_type */
+	if (!zend_ffi_is_compatible_type(dst_type->func.ret_type, src_type->func.ret_type)) {
+		return 0;
+	}
+
+	/* Ensure compatible args */
+	for (i = 0; i < dst_argc; i++) {
+		dst_arg = zend_hash_index_find_ptr(dst_type->func.args, i);
+		src_arg = zend_hash_index_find_ptr(src_type->func.args, i);
+		if (!zend_ffi_is_compatible_type(ZEND_FFI_TYPE(dst_arg), ZEND_FFI_TYPE(src_arg))) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+/* }}} */
+
 static bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *src_type) /* {{{ */
 {
 	while (1) {
@@ -269,6 +313,9 @@ static bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *
 				if (dst_type->kind == ZEND_FFI_TYPE_VOID ||
 				    src_type->kind == ZEND_FFI_TYPE_VOID) {
 				    return 1;
+				} else if (dst_type->kind == ZEND_FFI_TYPE_FUNC &&
+				           src_type->kind == ZEND_FFI_TYPE_FUNC) {
+				    return zend_ffi_func_ptr_are_compatible(dst_type, src_type);
 				}
 			} else if (dst_type->kind == ZEND_FFI_TYPE_ARRAY &&
 			           (dst_type->array.length == src_type->array.length ||
@@ -1168,20 +1215,10 @@ static zval *zend_ffi_cdata_read_field(zend_object *obj, zend_string *field_name
 	if (cache_slot && *cache_slot == type) {
 		field = *(cache_slot + 1);
 	} else {
+		if (type->kind == ZEND_FFI_TYPE_POINTER) {
+			type = ZEND_FFI_TYPE(type->pointer.type);
+		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (type->kind == ZEND_FFI_TYPE_POINTER) {
-				/* transparently dereference the pointer */
-				if (UNEXPECTED(!ptr)) {
-					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					return &EG(uninitialized_zval);
-				}
-				ptr = (void*)(*(char**)ptr);
-				if (UNEXPECTED(!ptr)) {
-					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					return &EG(uninitialized_zval);
-				}
-				type = ZEND_FFI_TYPE(type->pointer.type);
-			}
 			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
 				zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
 				return &EG(uninitialized_zval);
@@ -1198,6 +1235,20 @@ static zval *zend_ffi_cdata_read_field(zend_object *obj, zend_string *field_name
 			*cache_slot = type;
 			*(cache_slot + 1) = field;
 		}
+	}
+
+	if (ZEND_FFI_TYPE(cdata->type)->kind == ZEND_FFI_TYPE_POINTER) {
+		/* transparently dereference the pointer */
+		if (UNEXPECTED(!ptr)) {
+			zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
+			return &EG(uninitialized_zval);
+		}
+		ptr = (void*)(*(char**)ptr);
+		if (UNEXPECTED(!ptr)) {
+			zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
+			return &EG(uninitialized_zval);
+		}
+		type = ZEND_FFI_TYPE(type->pointer.type);
 	}
 
 #if 0
@@ -1237,20 +1288,10 @@ static zval *zend_ffi_cdata_write_field(zend_object *obj, zend_string *field_nam
 	if (cache_slot && *cache_slot == type) {
 		field = *(cache_slot + 1);
 	} else {
+		if (type->kind == ZEND_FFI_TYPE_POINTER) {
+			type = ZEND_FFI_TYPE(type->pointer.type);
+		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (type->kind == ZEND_FFI_TYPE_POINTER) {
-				/* transparently dereference the pointer */
-				if (UNEXPECTED(!ptr)) {
-					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					return value;
-				}
-				ptr = (void*)(*(char**)ptr);
-				if (UNEXPECTED(!ptr)) {
-					zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-					return value;
-				}
-				type = ZEND_FFI_TYPE(type->pointer.type);
-			}
 			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
 				zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
 				return value;
@@ -1266,6 +1307,19 @@ static zval *zend_ffi_cdata_write_field(zend_object *obj, zend_string *field_nam
 		if (cache_slot) {
 			*cache_slot = type;
 			*(cache_slot + 1) = field;
+		}
+	}
+
+	if (ZEND_FFI_TYPE(cdata->type)->kind == ZEND_FFI_TYPE_POINTER) {
+		/* transparently dereference the pointer */
+		if (UNEXPECTED(!ptr)) {
+			zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
+			return value;
+		}
+		ptr = (void*)(*(char**)ptr);
+		if (UNEXPECTED(!ptr)) {
+			zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
+			return value;
 		}
 	}
 

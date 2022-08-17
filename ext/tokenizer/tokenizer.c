@@ -22,7 +22,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_tokenizer.h"
-#include "tokenizer_arginfo.h"
 
 #include "zend.h"
 #include "zend_exceptions.h"
@@ -31,18 +30,15 @@
 #include <zend_language_parser.h>
 #include "zend_interfaces.h"
 
+#include "tokenizer_data_arginfo.h"
+#include "tokenizer_arginfo.h"
+
 #define zendtext   LANG_SCNG(yy_text)
 #define zendleng   LANG_SCNG(yy_leng)
 #define zendcursor LANG_SCNG(yy_cursor)
 #define zendlimit  LANG_SCNG(yy_limit)
 
-#define TOKEN_PARSE (1 << 0)
-
 zend_class_entry *php_token_ce;
-
-void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
-	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS|CONST_PERSISTENT);
-}
 
 /* {{{ tokenizer_module_entry */
 zend_module_entry tokenizer_module_entry = {
@@ -251,8 +247,8 @@ PHP_METHOD(PhpToken, __toString)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(tokenizer)
 {
-	tokenizer_register_constants(INIT_FUNC_ARGS_PASSTHRU);
-	tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS_PASSTHRU);
+	register_tokenizer_data_symbols(module_number);
+	register_tokenizer_symbols(module_number);
 	php_token_ce = register_class_PhpToken(zend_ce_stringable);
 
 	return SUCCESS;

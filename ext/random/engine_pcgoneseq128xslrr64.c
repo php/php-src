@@ -23,7 +23,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 static inline void step(php_random_status_state_pcgoneseq128xslrr64 *s)
@@ -148,8 +147,8 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (seed_is_null) {
-		if (php_random_bytes_silent(&state->state, sizeof(php_random_uint128_t)) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+		if (php_random_bytes_throw(&state->state, sizeof(php_random_uint128_t)) == FAILURE) {
+			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	} else {
@@ -165,7 +164,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 				}
 				seed128(engine->status, php_random_uint128_constant(t[0], t[1]));
 			} else {
-				zend_argument_value_error(1, "state strings must be 16 bytes");
+				zend_argument_value_error(1, "must be a 16 byte (128 bit) string");
 				RETURN_THROWS();
 			}
 		} else {
@@ -185,6 +184,11 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, jump)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(advance);
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(advance < 0)) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
 
 	php_random_pcgoneseq128xslrr64_advance(state, advance);
 }

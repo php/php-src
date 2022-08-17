@@ -30,7 +30,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 /*
@@ -169,11 +168,17 @@ static zend_long range(php_random_status *status, zend_long min, zend_long max)
 		return php_random_range(&php_random_algo_mt19937, status, min, max);
 	}
 
-	uint64_t r = php_random_algo_mt19937.generate(status) >> 1;
 	/* Legacy mode deliberately not inside php_mt_rand_range()
 	 * to prevent other functions being affected */
-	RAND_RANGE_BADSCALING(r, min, max, PHP_MT_RAND_MAX);
-	return (zend_long) r;
+
+	uint64_t r = php_random_algo_mt19937.generate(status) >> 1;
+
+	/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
+	 * (max - min) > ZEND_LONG_MAX.
+	 */
+	zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
+
+	return (zend_long) (offset + min);
 }
 
 static bool serialize(php_random_status *status, HashTable *data)
@@ -273,14 +278,14 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 			state->mode = MT_RAND_PHP;
 			break;
 		default:
-			zend_argument_error(spl_ce_InvalidArgumentException, 2, "mode must be MT_RAND_MT19937 or MT_RAND_PHP");
+			zend_argument_value_error(2, "must be either MT_RAND_MT19937 or MT_RAND_PHP");
 			RETURN_THROWS();
 	}
 
 	if (seed_is_null) {
 		/* MT19937 has a very large state, uses CSPRNG for seeding only */
-		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+		if (php_random_bytes_throw(&seed, sizeof(zend_long)) == FAILURE) {
+			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	}
@@ -301,8 +306,7 @@ PHP_METHOD(Random_Engine_Mt19937, generate)
 
 	generated = engine->algo->generate(engine->status);
 	size = engine->status->last_generated_size;
-	if (engine->status->last_unsafe) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
@@ -357,7 +361,7 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 	/* members */
 	t = zend_hash_index_find(d, 0);
 	if (!t || Z_TYPE_P(t) != IS_ARRAY) {
-		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
 	object_properties_load(&engine->std, Z_ARRVAL_P(t));
@@ -365,11 +369,11 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 	/* state */
 	t = zend_hash_index_find(d, 1);
 	if (!t || Z_TYPE_P(t) != IS_ARRAY) {
-		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
 	if (!engine->algo->unserialize(engine->status, Z_ARRVAL_P(t))) {
-		zend_throw_exception(NULL, "Engine unserialize failed", 0);
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
 }

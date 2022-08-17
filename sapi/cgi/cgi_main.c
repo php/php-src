@@ -2271,6 +2271,7 @@ parent_loop_end:
 
 						case 'a':	/* interactive mode */
 							printf("Interactive mode enabled\n\n");
+							fflush(stdout);
 							break;
 
 						case 'C': /* don't chdir to the script directory */

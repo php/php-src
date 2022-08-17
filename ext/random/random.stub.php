@@ -59,7 +59,7 @@ namespace Random\Engine
      */
     final class PcgOneseq128XslRr64 implements \Random\Engine
     {
-        public function __construct(string|int|null $seed = null, string|int $sequence = 0) {}
+        public function __construct(string|int|null $seed = null) {}
 
         /** @implementation-alias Random\Engine\Mt19937::generate */
         public function generate(): string {}
@@ -131,7 +131,9 @@ namespace Random
 
         public function __construct(?Engine $engine = null) {}
 
-        public function getInt(int $min = UNKNOWN, int $max = UNKNOWN): int {}
+        public function nextInt(): int {}
+
+        public function getInt(int $min, int $max): int {}
 
         public function getBytes(int $length): string {}
 
@@ -144,5 +146,26 @@ namespace Random
         public function __serialize(): array {}
 
         public function __unserialize(array $data): void {}
+    }
+
+    /**
+     * @strict-properties
+     */
+    class RandomError extends \Error
+    {
+    }
+
+    /**
+     * @strict-properties
+     */
+    class BrokenRandomEngineError extends RandomError
+    {
+    }
+
+    /**
+     * @strict-properties
+     */
+    class RandomException extends \Exception
+    {
     }
 }

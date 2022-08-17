@@ -140,16 +140,18 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		if (n < 0 || n > 63) {
 			if (c == '-') {
 				if (filter->status == 1) { /* "&-" -> "&" */
+					filter->cache = filter->status = 0;
 					CK((*filter->output_function)('&', filter->data));
 				} else if (filter->cache) {
 					/* Base64-encoded section ended abruptly, with partially encoded characters,
 					 * or it could be that it ended on the first half of a surrogate pair */
+					filter->cache = filter->status = 0;
 					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 				}
 			} else { /* illegal character */
+				filter->cache = filter->status = 0;
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			}
-			filter->cache = filter->status = 0;
 			return 0;
 		}
 	}
@@ -285,6 +287,7 @@ static int mbfl_filt_conv_utf7imap_wchar_flush(mbfl_convert_filter *filter)
 		/* It is illegal for a UTF-7 IMAP string to end in a Base-64 encoded
 		 * section. It should always change back to ASCII before the end. */
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
+		filter->status = 0;
 	}
 
 	if (filter->flush_function) {

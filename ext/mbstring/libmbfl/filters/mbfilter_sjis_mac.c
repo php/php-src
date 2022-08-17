@@ -266,6 +266,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 static int mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status == 1) {
+		filter->status = 0;
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 

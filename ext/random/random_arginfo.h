@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c072111a2483473d47d7d77d7d80aea84c663c7a */
+ * Stub hash: 6cc9022516ce23c2e95af30606db43e9fc28e38a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -51,7 +51,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_Engine_PcgOneseq128XslRr64___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, seed, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
-	ZEND_ARG_TYPE_MASK(0, sequence, MAY_BE_STRING|MAY_BE_LONG, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Engine_PcgOneseq128XslRr64_generate arginfo_class_Random_Engine_Mt19937_generate
@@ -66,9 +65,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Engine_PcgOneseq128XslRr64___debugInfo arginfo_class_Random_Engine_Mt19937___serialize
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_Engine_Xoshiro256StarStar___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, seed, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL, "null")
-ZEND_END_ARG_INFO()
+#define arginfo_class_Random_Engine_Xoshiro256StarStar___construct arginfo_class_Random_Engine_PcgOneseq128XslRr64___construct
 
 #define arginfo_class_Random_Engine_Xoshiro256StarStar_generate arginfo_class_Random_Engine_Mt19937_generate
 
@@ -91,7 +88,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Random_Randomizer___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, engine, Random\\Engine, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Random_Randomizer_getInt arginfo_rand
+#define arginfo_class_Random_Randomizer_nextInt arginfo_mt_getrandmax
+
+#define arginfo_class_Random_Randomizer_getInt arginfo_random_int
 
 #define arginfo_class_Random_Randomizer_getBytes arginfo_random_bytes
 
@@ -131,6 +130,7 @@ ZEND_METHOD(Random_Engine_Xoshiro256StarStar, __construct);
 ZEND_METHOD(Random_Engine_Xoshiro256StarStar, jump);
 ZEND_METHOD(Random_Engine_Xoshiro256StarStar, jumpLong);
 ZEND_METHOD(Random_Randomizer, __construct);
+ZEND_METHOD(Random_Randomizer, nextInt);
 ZEND_METHOD(Random_Randomizer, getInt);
 ZEND_METHOD(Random_Randomizer, getBytes);
 ZEND_METHOD(Random_Randomizer, shuffleArray);
@@ -206,6 +206,7 @@ static const zend_function_entry class_Random_CryptoSafeEngine_methods[] = {
 
 static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, __construct, arginfo_class_Random_Randomizer___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Random_Randomizer, nextInt, arginfo_class_Random_Randomizer_nextInt, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, getInt, arginfo_class_Random_Randomizer_getInt, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, getBytes, arginfo_class_Random_Randomizer_getBytes, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, shuffleArray, arginfo_class_Random_Randomizer_shuffleArray, ZEND_ACC_PUBLIC)
@@ -213,6 +214,21 @@ static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, pickArrayKeys, arginfo_class_Random_Randomizer_pickArrayKeys, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, __serialize, arginfo_class_Random_Randomizer___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, __unserialize, arginfo_class_Random_Randomizer___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Random_RandomError_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Random_BrokenRandomEngineError_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Random_RandomException_methods[] = {
 	ZEND_FE_END
 };
 
@@ -305,6 +321,39 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 	zend_string *property_engine_name = zend_string_init("engine", sizeof("engine") - 1, 1);
 	zend_declare_typed_property(class_entry, property_engine_name, &property_engine_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_engine_class_Random_Engine, 0, 0));
 	zend_string_release(property_engine_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Random_RandomError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", class_Random_RandomError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Random_BrokenRandomEngineError(zend_class_entry *class_entry_Random_RandomError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", class_Random_BrokenRandomEngineError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Random_RandomError);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Random_RandomException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", class_Random_RandomException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
 }

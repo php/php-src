@@ -24,7 +24,6 @@
 #include "php.h"
 #include "php_random.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 static inline uint64_t splitmix64(uint64_t *seed)
@@ -37,7 +36,7 @@ static inline uint64_t splitmix64(uint64_t *seed)
 	return (r ^ (r >> 31));
 }
 
-static inline uint64_t rotl(const uint64_t x, int k)
+ZEND_ATTRIBUTE_CONST static inline uint64_t rotl(const uint64_t x, int k)
 {
 	return (x << k) | (x >> (64 - k));
 }
@@ -206,10 +205,12 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (seed_is_null) {
-		if (php_random_bytes_silent(&state->state, 32) == FAILURE) {
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
-			RETURN_THROWS();
-		}
+		do {
+			if (php_random_bytes_throw(&state->state, 32) == FAILURE) {
+				zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
+				RETURN_THROWS();
+			}
+		} while (UNEXPECTED(state->state[0] == 0 && state->state[1] == 0 && state->state[2] == 0 && state->state[3] == 0));
 	} else {
 		if (str_seed) {
 			/* char (byte: 8 bit) * 32 = 256 bits */
@@ -223,9 +224,15 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 						t[i] += ((uint64_t) (unsigned char) ZSTR_VAL(str_seed)[(i * 8) + j]) << (j * 8);
 					}
 				}
+
+				if (UNEXPECTED(t[0] == 0 && t[1] == 0 && t[2] == 0 && t[3] == 0)) {
+					zend_argument_value_error(1, "must not consist entirely of NUL bytes");
+					RETURN_THROWS();
+				}
+
 				seed256(engine->status, t[0], t[1], t[2], t[3]);
 			} else {
-				zend_argument_value_error(1, "state strings must be 32 bytes");
+				zend_argument_value_error(1, "must be a 32 byte (256 bit) string");
 				RETURN_THROWS();
 			}
 		} else {

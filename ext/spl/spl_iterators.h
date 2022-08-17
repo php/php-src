@@ -43,6 +43,20 @@ extern PHPAPI zend_class_entry *spl_ce_SeekableIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
+
+typedef enum {
+	RIT_LEAVES_ONLY = 0,
+	RIT_SELF_FIRST  = 1,
+	RIT_CHILD_FIRST = 2
+} RecursiveIteratorMode;
+
+#define RIT_CATCH_GET_CHILD CIT_CATCH_GET_CHILD
+
+typedef enum {
+	RTIT_BYPASS_CURRENT = 4,
+	RTIT_BYPASS_KEY	    = 8
+} RecursiveTreeIteratorFlags;
+
 typedef enum {
 	DIT_Default = 0,
 	DIT_FilterIterator = DIT_Default,

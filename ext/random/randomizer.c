@@ -24,7 +24,6 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_string.h"
 
-#include "ext/spl/spl_exceptions.h"
 #include "Zend/zend_exceptions.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
@@ -62,32 +61,51 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 PHP_METHOD(Random_Randomizer, __construct)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	zend_object *engine_object = NULL;
-	zval zengine_object;
+	zval engine;
+	zval *param_engine = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(engine_object, random_ce_Random_Engine);
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(param_engine, random_ce_Random_Engine);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (randomizer->algo) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot call constructor twice");
+	if (param_engine != NULL) {
+		ZVAL_COPY(&engine, param_engine);
+	} else {
+		/* Create default RNG instance */
+		object_init_ex(&engine, random_ce_Random_Engine_Secure);
+	}
+
+	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", strlen("engine"), &engine);
+
+	OBJ_RELEASE(Z_OBJ_P(&engine));
+
+	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
-	/* Create default RNG instance */
-	if (!engine_object) {
-		engine_object = random_ce_Random_Engine_Secure->create_object(random_ce_Random_Engine_Secure);
+	randomizer_common_init(randomizer, Z_OBJ_P(&engine));
+}
+/* }}} */
 
-		/* No need self-refcount */
-		GC_DELREF(engine_object);
+/* {{{ Generate positive random number */
+PHP_METHOD(Random_Randomizer, nextInt)
+{	
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	uint64_t result;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	result = randomizer->algo->generate(randomizer->status);
+	if (EG(exception)) {
+		RETURN_THROWS();
 	}
-
-	ZVAL_OBJ(&zengine_object, engine_object);
-
-	zend_update_property(random_ce_Random_Randomizer, Z_OBJ_P(ZEND_THIS), "engine", strlen("engine"), &zengine_object);
-
-	randomizer_common_init(randomizer, engine_object);
+	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
+		zend_throw_exception(random_ce_Random_RandomException, "Generated value exceeds size of int", 0);
+		RETURN_THROWS();
+	}
+	
+	RETURN_LONG((zend_long) (result >> 1));
 }
 /* }}} */
 
@@ -97,20 +115,6 @@ PHP_METHOD(Random_Randomizer, getInt)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	uint64_t result;
 	zend_long min, max;
-	int argc = ZEND_NUM_ARGS();
-
-	if (argc == 0) {
-		result = randomizer->algo->generate(randomizer->status);
-		if (randomizer->status->last_generated_size > sizeof(zend_long)) {
-			zend_throw_exception(spl_ce_RuntimeException, "Generated value exceeds size of int", 0);
-			RETURN_THROWS();
-		}
-		if (randomizer->status->last_unsafe) {
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
-			RETURN_THROWS();
-		}
-		RETURN_LONG((zend_long) (result >> 1));
-	}
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(min)
@@ -123,8 +127,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 	}
 
 	result = randomizer->algo->range(randomizer->status, min, max);
-	if (randomizer->status->last_unsafe) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
+	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
@@ -155,9 +158,8 @@ PHP_METHOD(Random_Randomizer, getBytes)
 
 	while (total_size < required_size) {
 		result = randomizer->algo->generate(randomizer->status);
-		if (randomizer->status->last_unsafe) {
+		if (EG(exception)) {
 			zend_string_free(retval);
-			zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 			RETURN_THROWS();
 		}
 		for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
@@ -185,7 +187,6 @@ PHP_METHOD(Random_Randomizer, shuffleArray)
 
 	ZVAL_DUP(return_value, array);
 	if (!php_array_data_shuffle(randomizer->algo, randomizer->status, return_value)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 }
@@ -207,7 +208,6 @@ PHP_METHOD(Random_Randomizer, shuffleBytes)
 
 	RETVAL_STRINGL(ZSTR_VAL(bytes), ZSTR_LEN(bytes));
 	if (!php_binary_string_shuffle(randomizer->algo, randomizer->status, Z_STRVAL_P(return_value), (zend_long) Z_STRLEN_P(return_value))) {
-		zend_throw_exception(spl_ce_RuntimeException, "Random number generation failed", 0);
 		RETURN_THROWS();
 	}
 }
@@ -274,14 +274,14 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 
 	members_zv = zend_hash_index_find(d, 0);
 	if (!members_zv || Z_TYPE_P(members_zv) != IS_ARRAY) {
-		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
+		zend_throw_exception(NULL, "Invalid serialization data for Random\\Randomizer object", 0);
 		RETURN_THROWS();
 	}
 	object_properties_load(&randomizer->std, Z_ARRVAL_P(members_zv));
 
-	zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", strlen("engine"), 0, NULL);
+	zengine = zend_read_property(randomizer->std.ce, &randomizer->std, "engine", strlen("engine"), 1, NULL);
 	if (Z_TYPE_P(zengine) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zengine), random_ce_Random_Engine)) {
-		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
+		zend_throw_exception(NULL, "Invalid serialization data for Random\\Randomizer object", 0);
 		RETURN_THROWS();
 	}
 

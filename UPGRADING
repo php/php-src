@@ -39,13 +39,18 @@ PHP 8.2 UPGRADE NOTES
     further details.
 
 - Standard:
+  . glob() returns empty array if all paths are restricted by open_basedir.
+    Previously the error was returned but that behavior was not consistent and
+    did not work correctly for all patterns.
   . strtolower() and strtoupper() are no longer locale-sensitive. They now
     perform ASCII case conversion, as if the locale were "C". Use
     mb_strtolower() if you want localized case conversion. Similarly, stristr,
     stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
     array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
     conversion.
-  . str_split no longer returns an empty array on empty string.
+  . str_split() returns an empty array for an empty string now. Previously it
+    returned an array with a single empty string entry. mb_str_split() is not
+    affected by this change since it was already behaving like that.
 
 - SPL:
   . The following methods now enforce their signature:
@@ -59,6 +64,9 @@ PHP 8.2 UPGRADE NOTES
     previously it was bool
   . SplFileObject::getChildren() now has a tentative return type of null,
     previously it was ?RecursiveIterator
+  . GlogIterator returns empty array if all paths are restricted by
+    open_basedir. Previously the error was returned but that behavior was not
+    consistent and did not work correctly.
 
 ========================================
 2. New Features
@@ -80,7 +88,8 @@ PHP 8.2 UPGRADE NOTES
     error log file.
   . Added support for fetching properties of enums in constant expressions.
     RFC: https://wiki.php.net/rfc/fetch_property_in_const_expressions
-
+  . Added support for defining constants in traits.
+    RFC: https://wiki.php.net/rfc/constants_in_traits
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
@@ -195,6 +204,10 @@ PHP 8.2 UPGRADE NOTES
     The overloaded signature
     dba_fetch(string|array $key, $skip, $dba): string|false
     is still accepted, but it is recommended to use the new standard variant.
+
+- Random
+  . random_bytes() and random_int() now throw \Random\RandomException on CSPRNG failure.
+    Previously a plain \Exception was thrown.
 
 - SPL
   . The $iterator parameter of iterator_to_array() and iterator_count() is

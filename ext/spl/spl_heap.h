@@ -20,6 +20,11 @@
 #include "php.h"
 #include "php_spl.h"
 
+#define SPL_PQUEUE_EXTR_MASK     0x00000003
+#define SPL_PQUEUE_EXTR_BOTH     0x00000003
+#define SPL_PQUEUE_EXTR_DATA     0x00000001
+#define SPL_PQUEUE_EXTR_PRIORITY 0x00000002
+
 extern PHPAPI zend_class_entry *spl_ce_SplHeap;
 extern PHPAPI zend_class_entry *spl_ce_SplMinHeap;
 extern PHPAPI zend_class_entry *spl_ce_SplMaxHeap;

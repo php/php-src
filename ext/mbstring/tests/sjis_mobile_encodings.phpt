@@ -300,6 +300,15 @@ testSJISVariant($docomo,   $nonInvertibleDocomo,   'SJIS-Mobile#DOCOMO');
 testSJISVariant($kddi,     $nonInvertible,         'SJIS-Mobile#KDDI');
 testSJISVariant($softbank, $nonInvertibleSoftbank, 'SJIS-Mobile#SOFTBANK');
 
+// Special Softbank escape sequences can appear at end of string
+convertValidString("\x1B\$O", "", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+convertValidString("\x1B\$P", "", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+convertValidString("\x1B\$Q", "", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+// Try invalid escape sequence
+convertInvalidString("\x1B\$X", "%", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+// Try truncated escape sequence
+convertInvalidString("\x1B\$", "%", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+
 // Regression test for problem with not allocating enough space in output buffer
 // This occurred when the input string was shorter than the output
 convertValidString("\xA9\xA9\xA9\xA9", "\xF9\xD6\xF9\xD6\xF9\xD6\xF9\xD6", '8bit', 'SJIS-Mobile#DOCOMO');

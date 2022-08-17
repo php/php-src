@@ -1761,9 +1761,12 @@ tail_call:
 			}
 			if (decl->child[2]) {
 				if (decl->kind == ZEND_AST_ARROW_FUNC) {
-					ZEND_ASSERT(decl->child[2]->kind == ZEND_AST_RETURN);
+					zend_ast *body = decl->child[2];
+					if (body->kind == ZEND_AST_RETURN) {
+						body = body->child[0];
+					}
 					smart_str_appends(str, " => ");
-					zend_ast_export_ex(str, decl->child[2]->child[0], 0, indent);
+					zend_ast_export_ex(str, body, 0, indent);
 					break;
 				}
 

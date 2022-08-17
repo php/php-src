@@ -43,6 +43,7 @@ static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_forbid_dynamic_call;
 static zend_class_entry *zend_test_ns_foo_class;
+static zend_class_entry *zend_test_ns_unlikely_compile_error_class;
 static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_class_entry *zend_test_unit_enum;
@@ -535,6 +536,13 @@ static ZEND_METHOD(ZendTestNS_Foo, method)
 	RETURN_LONG(0);
 }
 
+static ZEND_METHOD(ZendTestNS_UnlikelyCompileError, method)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_NULL();
+}
+
 static ZEND_METHOD(ZendTestNS2_Foo, method)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -619,7 +627,6 @@ static void custom_zend_execute_ex(zend_execute_data *execute_data)
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_test_interface = register_class__ZendTestInterface();
-	zend_declare_class_constant_long(zend_test_interface, ZEND_STRL("DUMMY"), 0);
 
 	zend_test_class = register_class__ZendTestClass(zend_test_interface);
 	zend_test_class->create_object = zend_test_class_new;
@@ -632,7 +639,7 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_trait = register_class__ZendTestTrait();
 
-	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
+	register_test_symbols(module_number);
 
 	zend_test_attribute = register_class_ZendTestAttribute();
 	{
@@ -698,6 +705,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_forbid_dynamic_call = register_class_ZendTestForbidDynamicCall();
 
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
+	zend_test_ns_unlikely_compile_error_class = register_class_ZendTestNS_UnlikelyCompileError();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
@@ -748,6 +756,7 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 PHP_RINIT_FUNCTION(zend_test)
 {
 	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
+	ZT_G(observer_nesting_depth) = 0;
 	return SUCCESS;
 }
 
@@ -767,6 +776,13 @@ static PHP_GINIT_FUNCTION(zend_test)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(zend_test_globals, 0, sizeof(*zend_test_globals));
+
+	zend_test_observer_ginit(zend_test_globals);
+}
+
+static PHP_GSHUTDOWN_FUNCTION(zend_test)
+{
+	zend_test_observer_gshutdown(zend_test_globals);
 }
 
 PHP_MINFO_FUNCTION(zend_test)
@@ -790,7 +806,7 @@ zend_module_entry zend_test_module_entry = {
 	PHP_ZEND_TEST_VERSION,
 	PHP_MODULE_GLOBALS(zend_test),
 	PHP_GINIT(zend_test),
-	NULL,
+	PHP_GSHUTDOWN(zend_test),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
@@ -846,4 +862,31 @@ PHP_ZEND_TEST_API bug80847_02 ffi_bug80847(bug80847_02 s) {
 	s.a.b += 10;
 	s.a.c -= 10.0;
 	return s;
+}
+
+PHP_ZEND_TEST_API void (*bug_gh9090_void_none_ptr)(void) = NULL;
+PHP_ZEND_TEST_API void (*bug_gh9090_void_int_char_ptr)(int, char *) = NULL;
+PHP_ZEND_TEST_API void (*bug_gh9090_void_int_char_var_ptr)(int, char *, ...) = NULL;
+PHP_ZEND_TEST_API void (*bug_gh9090_void_char_int_ptr)(char *, int) = NULL;
+PHP_ZEND_TEST_API int (*bug_gh9090_int_int_char_ptr)(int, char *) = NULL;
+
+PHP_ZEND_TEST_API void bug_gh9090_void_none(void) {
+    php_printf("bug_gh9090_none\n");
+}
+
+PHP_ZEND_TEST_API void bug_gh9090_void_int_char(int i, char *s) {
+    php_printf("bug_gh9090_int_char %d %s\n", i, s);
+}
+
+PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
+    va_list args;
+    char *buffer;
+
+    va_start(args, fmt);
+
+    zend_vspprintf(&buffer, 0, fmt, args);
+    php_printf("bug_gh9090_void_int_char_var %s\n", buffer);
+    efree(buffer);
+
+    va_end(args);
 }

@@ -201,7 +201,6 @@ PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool 
 
 typedef struct _php_random_status_ {
 	size_t last_generated_size;
-	bool last_unsafe;
 	void *state;
 } php_random_status;
 
@@ -260,6 +259,10 @@ typedef struct _php_random_randomizer {
 
 extern PHPAPI zend_class_entry *random_ce_Random_Engine;
 extern PHPAPI zend_class_entry *random_ce_Random_CryptoSafeEngine;
+
+extern PHPAPI zend_class_entry *random_ce_Random_RandomError;
+extern PHPAPI zend_class_entry *random_ce_Random_BrokenRandomEngineError;
+extern PHPAPI zend_class_entry *random_ce_Random_RandomException;
 
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_PcgOneseq128XslRr64;
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_Mt19937;

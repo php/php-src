@@ -20,6 +20,13 @@
 #include "php.h"
 #include "php_spl.h"
 
+typedef enum {
+	MIT_NEED_ANY     = 0,
+	MIT_NEED_ALL     = 1,
+	MIT_KEYS_NUMERIC = 0,
+	MIT_KEYS_ASSOC   = 2
+} MultipleIteratorFlags;
+
 extern PHPAPI zend_class_entry *spl_ce_SplObserver;
 extern PHPAPI zend_class_entry *spl_ce_SplSubject;
 extern PHPAPI zend_class_entry *spl_ce_SplObjectStorage;

@@ -65,13 +65,13 @@ try {
 ?>
 --EXPECT--
 Random\Engine\Mt19937
-Engine unserialize failed
-Engine unserialize failed
-Engine unserialize failed
-Engine unserialize failed
+Invalid serialization data for Random\Engine\Mt19937 object
+Invalid serialization data for Random\Engine\Mt19937 object
+Invalid serialization data for Random\Engine\Mt19937 object
+Invalid serialization data for Random\Engine\Mt19937 object
 Random\Engine\PcgOneseq128XslRr64
-Engine unserialize failed
-Engine unserialize failed
+Invalid serialization data for Random\Engine\PcgOneseq128XslRr64 object
+Invalid serialization data for Random\Engine\PcgOneseq128XslRr64 object
 Random\Engine\Xoshiro256StarStar
-Engine unserialize failed
-Engine unserialize failed
+Invalid serialization data for Random\Engine\Xoshiro256StarStar object
+Invalid serialization data for Random\Engine\Xoshiro256StarStar object

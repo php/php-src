@@ -5423,6 +5423,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
+		if (op1_addr == res_addr && (op2_info & MAY_BE_RCN)) {
+			/* compound assignment may decrement "op2" refcount */
+			op2_info |= MAY_BE_RC1;
+		}
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL
 		|	FREE_OP op2_type, op2, op2_info, 0, NULL
 		if (may_throw) {
@@ -9006,7 +9010,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			stack_check = 0;
 		}
 	} else {
-		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value) * sizeof(zval);
+		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value + ZEND_OBSERVER_ENABLED) * sizeof(zval);
 
 		|	// if (EXPECTED(ZEND_USER_CODE(func->type))) {
 		if (!is_closure) {
@@ -10227,12 +10231,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 		}
 
+		|	// EG(current_execute_data) = execute_data;
+		|	MEM_STORE_ZTS aword, executor_globals, current_execute_data, RX, r1
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	mov FCARG1a, RX
+			|	EXT_CALL zend_observer_fcall_begin, r0
+			|	mov r0, EX:RX->func // reload
+		}
+
 		|	// ZVAL_NULL(EX_VAR(opline->result.var));
 		|	LOAD_ZVAL_ADDR FCARG2a, res_addr
 		|	SET_Z_TYPE_INFO FCARG2a, IS_NULL
-
-		|	// EG(current_execute_data) = execute_data;
-		|	MEM_STORE_ZTS aword, executor_globals, current_execute_data, RX, r1
 
 		zend_jit_reset_last_valid_opline();
 
@@ -10242,6 +10252,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	EXT_CALL func->internal_function.handler, r0
 		} else {
 			|	call aword [r0 + offsetof(zend_internal_function, handler)]
+		}
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	LOAD_ZVAL_ADDR FCARG2a, res_addr
+			|	mov FCARG1a, RX
+			|	EXT_CALL zend_observer_fcall_end, r0
 		}
 
 		|	// EG(current_execute_data) = execute_data;

@@ -15,8 +15,8 @@ $user_randomizer = new \Random\Randomizer(new class () implements \Random\Engine
     }
 });
 for ($i = 0; $i < 1000; $i++) {
-    $native = $native_randomizer->getInt();
-    $user = $user_randomizer->getInt();
+    $native = $native_randomizer->nextInt();
+    $user = $user_randomizer->nextInt();
     if ($native !== $user) {
         die("failure Mt19937 i: {$i} native: {$native} user: {$user}");
     }
@@ -36,16 +36,13 @@ try {
     });
     
     for ($i = 0; $i < 1000; $i++) {
-        $native = $native_randomizer->getInt();
-        $user = $user_randomizer->getInt();
+        $native = $native_randomizer->nextInt();
+        $user = $user_randomizer->nextInt();
         if ($native !== $user) {
             die("failure PcgOneseq128XslRr64 i: {$i} native: {$native} user: {$user}");
         }
     }
-} catch (\RuntimeException $e) {
-    if (\PHP_INT_SIZE >= 8) {
-        throw $e;
-    }
+} catch (\Random\RandomException $e) {
     if ($e->getMessage() !== 'Generated value exceeds size of int') {
         throw $e;
     }
@@ -65,16 +62,13 @@ try {
     });
     
     for ($i = 0; $i < 1000; $i++) {
-        $native = $native_randomizer->getInt();
-        $user = $user_randomizer->getInt();
+        $native = $native_randomizer->nextInt();
+        $user = $user_randomizer->nextInt();
         if ($native !== $user) {
             die("failure Xoshiro256StarStar i: {$i} native: {$native} user: {$user}");
         }
     }
-} catch (\RuntimeException $e) {
-    if (\PHP_INT_SIZE >= 8) {
-        throw $e;
-    }
+} catch (\Random\RandomException $e) {
     if ($e->getMessage() !== 'Generated value exceeds size of int') {
         throw $e;
     }

@@ -22,12 +22,17 @@ try {
 
 ?>
 --EXPECTF--
-<!-- init '%sobserver_fiber_06.php' -->
+<!-- init '%s' -->
+<!-- init Fiber::__construct() -->
+<!-- init Fiber::start() -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
 <!-- init {closure}() -->
+<!-- init Fiber::suspend() -->
 <!-- switching from fiber %s to %s -->
 <suspend '%s'>
+<!-- init Exception::__construct() -->
+<!-- init Fiber::throw() -->
 <!-- switching from fiber %s to %s -->
 <resume '%s'>
 <!-- switching from fiber %s to %s -->

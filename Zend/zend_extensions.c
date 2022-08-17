@@ -280,6 +280,40 @@ ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int ha
 	return handle;
 }
 
+ZEND_API size_t zend_internal_run_time_cache_reserved_size() {
+	return zend_op_array_extension_handles * sizeof(void *);
+}
+
+ZEND_API void zend_init_internal_run_time_cache() {
+	size_t rt_size = zend_internal_run_time_cache_reserved_size();
+	if (rt_size) {
+		size_t functions = zend_hash_num_elements(CG(function_table));
+		zend_class_entry *ce;
+		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+			functions += zend_hash_num_elements(&ce->function_table);
+		} ZEND_HASH_FOREACH_END();
+
+		char *ptr = zend_arena_calloc(&CG(arena), functions, rt_size);
+		zend_internal_function *zif;
+		ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
+			if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
+			{
+				ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
+				ptr += rt_size;
+			}
+		} ZEND_HASH_FOREACH_END();
+		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zif) {
+				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
+				{
+					ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
+					ptr += rt_size;
+				}
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+
 ZEND_API zend_extension *zend_get_extension(const char *extension_name)
 {
 	zend_llist_element *element;

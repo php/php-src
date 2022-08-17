@@ -4928,6 +4928,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		} else {
 			ZEND_UNREACHABLE();
 		}
+		if (op1_addr == res_addr && (op2_info & MAY_BE_RCN)) {
+			/* compound assignment may decrement "op2" refcount */
+			op2_info |= MAY_BE_RC1;
+		}
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
 		|	FREE_OP op2_type, op2, op2_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
 		if (may_throw) {
@@ -8403,7 +8407,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			stack_check = 0;
 		}
 	} else {
-		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value) * sizeof(zval);
+		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value + ZEND_OBSERVER_ENABLED) * sizeof(zval);
 
 		|	// if (EXPECTED(ZEND_USER_CODE(func->type))) {
 		if (!is_closure) {
@@ -9523,12 +9527,18 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 		}
 
+		|	// EG(current_execute_data) = execute_data;
+		|	MEM_STORE_64_ZTS str, RX, executor_globals, current_execute_data, REG1
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	mov FCARG1x, RX
+			|	EXT_CALL zend_observer_fcall_begin, REG0
+			|	ldr REG0, EX:RX->func // reload
+		}
+
 		|	// ZVAL_NULL(EX_VAR(opline->result.var));
 		|	LOAD_ZVAL_ADDR FCARG2x, res_addr
 		|	SET_Z_TYPE_INFO FCARG2x, IS_NULL, TMP1w
-
-		|	// EG(current_execute_data) = execute_data;
-		|	MEM_STORE_64_ZTS str, RX, executor_globals, current_execute_data, REG1
 
 		zend_jit_reset_last_valid_opline();
 
@@ -9539,6 +9549,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		} else {
 			|	ldr TMP1, [REG0, #offsetof(zend_internal_function, handler)]
 			|	blr TMP1
+		}
+
+		if (ZEND_OBSERVER_ENABLED) {
+			|	LOAD_ZVAL_ADDR FCARG2x, res_addr
+			|	mov FCARG1x, RX
+			|	EXT_CALL zend_observer_fcall_end, REG0
 		}
 
 		|	// EG(current_execute_data) = execute_data;

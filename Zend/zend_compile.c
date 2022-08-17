@@ -33,6 +33,7 @@
 #include "zend_inheritance.h"
 #include "zend_vm.h"
 #include "zend_enum.h"
+#include "zend_observer.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -1593,7 +1594,12 @@ static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *c
 /* We don't use zend_verify_const_access because we need to deal with unlinked classes. */
 static bool zend_verify_ct_const_access(zend_class_constant *c, zend_class_entry *scope)
 {
-	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
+	if (c->ce->ce_flags & ZEND_ACC_TRAIT) {
+		/* This condition is only met on directly accessing trait constants,
+		 * because the ce is replaced to the class entry of the composing class
+		 * on binding. */
+		return 0;
+	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
 		return 1;
 	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PRIVATE) {
 		return c->ce == scope;
@@ -7349,6 +7355,19 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	} else if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
 	}
+
+	if (ast->kind == ZEND_AST_ARROW_FUNC) {
+		bool needs_return = true;
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
+			needs_return = !ZEND_TYPE_CONTAINS_CODE(return_info->type, IS_NEVER);
+		}
+		if (needs_return) {
+			stmt_ast = zend_ast_create(ZEND_AST_RETURN, stmt_ast);
+			decl->child[2] = stmt_ast;
+		}
+	}
+
 	zend_compile_stmt(stmt_ast);
 
 	if (is_method) {
@@ -7517,11 +7536,6 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
-
-	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
-		return;
-	}
 
 	for (i = 0; i < children; ++i) {
 		zend_class_constant *c;
@@ -9609,11 +9623,12 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 	last_const_node.op_type = IS_UNUSED;
 	for (i = 0; i < list->children; i++) {
 		zend_ast *encaps_var = list->child[i];
+
 		if (encaps_var->attr & (ZEND_ENCAPS_VAR_DOLLAR_CURLY|ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR)) {
-			if (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR) {
-				zend_error(E_DEPRECATED, "Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead");
-			} else {
+			if ((encaps_var->kind == ZEND_AST_VAR || encaps_var->kind == ZEND_AST_DIM) && (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY)) {
 				zend_error(E_DEPRECATED, "Using ${var} in strings is deprecated, use {$var} instead");
+			} else if (encaps_var->kind == ZEND_AST_VAR && (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR)) {
+				zend_error(E_DEPRECATED, "Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead");
 			}
 		}
 
@@ -10530,7 +10545,7 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				c = (zend_uchar) Z_STRVAL_P(container)[offset];
 				ZVAL_CHAR(&result, c);
 			} else if (Z_TYPE_P(container) <= IS_FALSE) {
-				ZVAL_NULL(&result);
+				return; /* warning... handle at runtime */
 			} else {
 				return;
 			}
@@ -10615,6 +10630,11 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			return;
 		case ZEND_AST_CONST_ENUM_INIT:
 			zend_eval_const_expr(&ast->child[2]);
+			return;
+		case ZEND_AST_PROP:
+		case ZEND_AST_NULLSAFE_PROP:
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
 			return;
 		default:
 			return;

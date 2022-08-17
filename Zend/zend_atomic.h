@@ -57,6 +57,13 @@ BEGIN_EXTERN_C()
 
 #if ZEND_WIN32
 
+#ifndef InterlockedExchange8
+#define InterlockedExchange8 _InterlockedExchange8
+#endif
+#ifndef InterlockedOr8
+#define InterlockedOr8 _InterlockedOr8
+#endif
+
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
 static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {

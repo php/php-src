@@ -34,7 +34,8 @@ steps:
       export REPORT_EXIT_STATUS=no
       rm -rf junit.xml | true
       sapi/cli/php run-tests.php -P -q \
-          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress \
           --offline --show-diff --show-slow 1000 --set-timeout 120 \
           ext/pdo_mysql
     displayName: 'Test ${{ parameters.configurationName }}'

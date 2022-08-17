@@ -533,7 +533,12 @@ class SimpleType {
     }
 
     public function toEscapedName(): string {
-        return str_replace('\\', '\\\\', $this->name);
+        // Escape backslashes, and also encode \u and \U to avoid compilation errors in generated macros
+        return str_replace(
+            ['\\', '\\u', '\\U'],
+            ['\\\\', '\\\\165', '\\\\125'],
+            $this->name
+        );
     }
 
     public function toVarEscapedName(): string {
@@ -912,10 +917,6 @@ class ArgInfo {
 
     private function setTypes(?Type $type, ?Type $phpDocType): void
     {
-        if ($phpDocType !== null && Type::equals($type, $phpDocType)) {
-            throw new Exception('PHPDoc param type "' . $phpDocType->__toString() . '" is unnecessary');
-        }
-
         $this->type = $type;
         $this->phpDocType = $phpDocType;
     }
@@ -1161,10 +1162,6 @@ class ReturnInfo {
 
     private function setTypes(?Type $type, ?Type $phpDocType, bool $tentativeReturnType): void
     {
-        if ($phpDocType !== null && Type::equals($type, $phpDocType)) {
-            throw new Exception('PHPDoc return type "' . $phpDocType->__toString() . '" is unnecessary');
-        }
-
         $this->type = $type;
         $this->phpDocType = $phpDocType;
         $this->tentativeReturnType = $tentativeReturnType;
@@ -2976,7 +2973,7 @@ class ClassInfo {
             $parentInfo->collectInheritedMembers(
                 $parentsWithInheritedConstants,
                 $unusedParentsWithInheritedProperties,
-                $parentsWithInheritedMethods,
+                $unusedParentsWithInheritedMethods,
                 $classMap
             );
         }

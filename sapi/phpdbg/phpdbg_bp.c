@@ -315,7 +315,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, ze
 			ZEND_HASH_MAP_FOREACH_STR_KEY(&PHPDBG_G(file_sources), file) {
 				HashTable *fileht;
 
-				phpdbg_debug("Compare against loaded %s\n", file);
+				phpdbg_debug("Compare against loaded %s\n", ZSTR_VAL(file));
 
 				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(ZSTR_VAL(file), ZSTR_LEN(file), path_str, broken)) == NULL))) {
 					new_break = *(phpdbg_breakfile_t *) zend_hash_index_find_ptr(fileht, line_num);
@@ -378,7 +378,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 			PHPDBG_G(flags) &= ~PHPDBG_HAS_PENDING_FILE_BP;
 		}
 
-		phpdbg_debug("compiled file: %s, cur bp file: %s\n", file, cur);
+		phpdbg_debug("compiled file: %s, cur bp file: %s\n", file, ZSTR_VAL(cur));
 
 		return master;
 	}
@@ -395,7 +395,7 @@ PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file) /* {{{ */
 	phpdbg_debug("was compiled: %s\n", file);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], cur, fileht) {
-		phpdbg_debug("check bp: %s\n", cur);
+		phpdbg_debug("check bp: %s\n", ZSTR_VAL(cur));
 
 		phpdbg_resolve_pending_file_break_ex(file, filelen, cur, fileht);
 	} ZEND_HASH_FOREACH_END();

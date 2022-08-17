@@ -166,40 +166,25 @@ static zend_never_inline ZEND_COLD int stable_sort_fallback(Bucket *a, Bucket *b
 
 static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
-	zend_uchar t;
-	zend_long l1, l2;
-	double d;
+    zval first;
+    zval second;
 
-	if (f->key == NULL) {
-		if (s->key == NULL) {
-			return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
-		} else {
-			l1 = (zend_long)f->h;
-			t = is_numeric_string(s->key->val, s->key->len, &l2, &d, 1);
-			if (t == IS_LONG) {
-				/* pass */
-			} else if (t == IS_DOUBLE) {
-				return ZEND_NORMALIZE_BOOL((double)l1 - d);
-			} else {
-				l2 = 0;
-			}
-		}
-	} else {
-		if (s->key) {
-			return zendi_smart_strcmp(f->key, s->key);
-		} else {
-			l2 = (zend_long)s->h;
-			t = is_numeric_string(f->key->val, f->key->len, &l1, &d, 1);
-			if (t == IS_LONG) {
-				/* pass */
-			} else if (t == IS_DOUBLE) {
-				return ZEND_NORMALIZE_BOOL(d - (double)l2);
-			} else {
-				l1 = 0;
-			}
-		}
-	}
-	return ZEND_NORMALIZE_BOOL(l1 - l2);
+    if (f->key == NULL && s->key == NULL) {
+        return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
+    } else if (f->key && s->key) {
+        return zendi_smart_strcmp(f->key, s->key);
+    }
+    if (f->key) {
+        ZVAL_STR(&first, f->key);
+    } else {
+        ZVAL_LONG(&first, f->h);
+    }
+    if (s->key) {
+        ZVAL_STR(&second, s->key);
+    } else {
+        ZVAL_LONG(&second, s->h);
+    }
+    return zend_compare(&first, &second);
 }
 /* }}} */
 
@@ -2936,7 +2921,7 @@ PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_statu
 		}
 		while (--n_left) {
 			rnd_idx = algo->range(status, 0, n_left);
-			if (status->last_unsafe) {
+			if (EG(exception)) {
 				return false;
 			}
 			if (rnd_idx != n_left) {
@@ -2964,7 +2949,7 @@ PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_statu
 		}
 		while (--n_left) {
 			rnd_idx = algo->range(status, 0, n_left);
-			if (status->last_unsafe) {
+			if (EG(exception)) {
 				return false;
 			}
 			if (rnd_idx != n_left) {
@@ -5718,7 +5703,7 @@ PHP_FUNCTION(array_multisort)
 
 	/* Make sure the arrays are of the same size. */
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
-	for (i = 0; i < num_arrays; i++) {
+	for (i = 1; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_P(arrays[i])) != (uint32_t)array_size) {
 			zend_value_error("Array sizes are inconsistent");
 			MULTISORT_ABORT;
@@ -5791,6 +5776,8 @@ PHP_FUNCTION(array_multisort)
 			}
 			if (repack) {
 				zend_hash_to_packed(hash);
+			} else {
+				zend_hash_rehash(hash);
 			}
 		}
 	}

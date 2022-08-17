@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if !defined(__APPLE__)
+#if !defined(HAVE_OS_SIGNPOST_H)
 #if defined(__linux__)
 #include <sys/syscall.h>
 #elif defined(__darwin__)
