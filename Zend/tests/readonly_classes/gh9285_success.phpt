@@ -1,5 +1,5 @@
 --TEST--
-Bug GH-9285: PHP 8.2 readonly classes allow inheriting mutable properties from traits - sucess
+Bug GH-9285: PHP 8.2 readonly classes allow inheriting mutable properties from traits - success
 --FILE--
 <?php
 
