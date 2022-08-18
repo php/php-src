@@ -3997,8 +3997,14 @@ function generateArgInfoCode(
         }
     }
 
+    $php82MinimumCompatibility = $fileInfo->generateLegacyArginfoForPhpVersionId === null || $fileInfo->generateLegacyArginfoForPhpVersionId >= PHP_82_VERSION_ID;
+
     if ($fileInfo->generateClassEntries) {
-        $attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, $allConstInfos, null);
+        if ($attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, $allConstInfos, null)) {
+            if (!$php82MinimumCompatibility) {
+                $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_82_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
+            }
+        }
 
         if ($attributeInitializationCode !== "" || !empty($fileInfo->constInfos)) {
             $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
