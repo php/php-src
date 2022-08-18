@@ -2192,10 +2192,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 #else
 #if ZEND_ENABLE_ZVAL_LONG64
 		InterlockedIncrement64(&ZCSG(hits));
+		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #else
 		InterlockedIncrement(&ZCSG(hits));
+		InterlockedIncrement(&persistent_script->dynamic_members.hits);
 #endif
-		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
 		/* see bug #15471 (old BTS) */

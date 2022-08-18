@@ -545,7 +545,7 @@ static int accelerator_get_scripts(zval *return_value)
 
 			array_init(&persistent_script_report);
 			add_assoc_str(&persistent_script_report, "full_path", zend_string_dup(script->script.filename, 0));
-			add_assoc_long(&persistent_script_report, "hits", (zend_long)script->dynamic_members.hits);
+			add_assoc_long(&persistent_script_report, "hits", script->dynamic_members.hits);
 			add_assoc_long(&persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
 			ta = localtime(&script->dynamic_members.last_used);
 			str = asctime(ta);
