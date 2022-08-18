@@ -93,6 +93,7 @@ php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 void php_openssl_store_errors(void);
 
 PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method);
+PHP_OPENSSL_API zend_long php_openssl_cipher_key_length(const char *method);
 PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long length);
 PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	const char *data, size_t data_len,

@@ -610,6 +610,8 @@ function openssl_decrypt(string $data, string $cipher_algo, #[\SensitiveParamete
 
 function openssl_cipher_iv_length(string $cipher_algo): int|false {}
 
+function openssl_cipher_key_length(string $cipher_algo): int|false {}
+
 function openssl_dh_compute_key(string $public_key, #[\SensitiveParameter] OpenSSLAsymmetricKey $private_key): string|false {}
 
 /**
