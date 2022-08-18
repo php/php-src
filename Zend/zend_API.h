@@ -522,8 +522,6 @@ ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *ce);
 ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties);
 ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);
 ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties);
-ZEND_API zend_never_inline void zend_forbidden_dynamic_property(zend_class_entry *ce, zend_string *member);
-ZEND_API zend_never_inline bool zend_deprecated_dynamic_property(zend_object *obj, zend_string *member);
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties);
 
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties);

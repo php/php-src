@@ -13,7 +13,7 @@ STR;
 var_dump(unserialize($str));
 ?>
 --EXPECTF--
-Deprecated: Creation of dynamic property Test::$ is deprecated in %s on line %d
+Deprecated: Creation of dynamic property Test::$x is deprecated in %s on line %d
 object(Test)#1 (2) {
   ["foo"]=>
   NULL

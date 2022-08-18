@@ -34,7 +34,7 @@ $class = unserialize(base64_decode($serialized));
 var_dump($class);
 ?>
 --EXPECTF--
-Deprecated: Creation of dynamic property Foo::$ is deprecated in %s on line %d
+Deprecated: Creation of dynamic property Foo::$protected is deprecated in %s on line %d
 
 Deprecated: Creation of dynamic property Foo::$public is deprecated in %s on line %d
 

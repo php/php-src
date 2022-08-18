@@ -16,6 +16,7 @@ error_reporting(E_ALL);
 
 class foo {
     public $bar = "ok";
+    public $yes;
     function method() { $this->yes++; }
 }
 

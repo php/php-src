@@ -4,6 +4,8 @@ Bug #70388 (SOAP serialize_function_call() type confusion / RCE)
 soap
 --FILE--
 <?php
+
+#[AllowDynamicProperties]
 class MySoapClient extends SoapClient {
     public function __doRequest($request, $location, $action, $version, $one_way = 0): string {
         echo $request, "\n";
