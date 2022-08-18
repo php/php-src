@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9285 (Traits cannot be used in readonly classes).
     (kocsismate)
 
+- Opcache:
+  . Fixed bug GH-9371 (Crash with JIT on mac arm64)
+    (jdp1024/David Carlier)
+
 - Random:
   . Fixed bug GH-9415 (Randomizer::getInt(0, 2**32 - 1) with Mt19937
     always returns 1). (timwolla)
