@@ -7590,44 +7590,76 @@ PHP_FUNCTION(openssl_decrypt)
 }
 /* }}} */
 
-PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
+static inline const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method)
 {
 	const EVP_CIPHER *cipher_type;
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		return -1;
+		return NULL;
 	}
 
-	return EVP_CIPHER_iv_length(cipher_type);
+	return cipher_type;
 }
 
-/* {{{ */
+PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
+{
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+
+	return cipher_type == NULL ? -1 : EVP_CIPHER_iv_length(cipher_type);
+}
+
 PHP_FUNCTION(openssl_cipher_iv_length)
 {
-	char *method;
-	size_t method_len;
+	zend_string *method;
 	zend_long ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &method, &method_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &method) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!method_len) {
+	if (ZSTR_LEN(method) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 
 	/* Warning is emitted in php_openssl_cipher_iv_length */
-	if ((ret = php_openssl_cipher_iv_length(method)) == -1) {
+	if ((ret = php_openssl_cipher_iv_length(ZSTR_VAL(method))) == -1) {
 		RETURN_FALSE;
 	}
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
+PHP_OPENSSL_API zend_long php_openssl_cipher_key_length(const char *method)
+{
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+
+	return cipher_type == NULL ? -1 : EVP_CIPHER_key_length(cipher_type);
+}
+
+PHP_FUNCTION(openssl_cipher_key_length)
+{
+	zend_string *method;
+	zend_long ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &method) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(method) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	/* Warning is emitted in php_openssl_cipher_key_length */
+	if ((ret = php_openssl_cipher_key_length(ZSTR_VAL(method))) == -1) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
+}
 
 PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_length)
 {

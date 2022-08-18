@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4ceb7805924cd343a223d60383892c49c90a104d */
+ * Stub hash: 02ee3cc08e7bda875321cb63e879deed48d7a389 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -350,6 +350,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_cipher_iv_length, 0, 1, 
 	ZEND_ARG_TYPE_INFO(0, cipher_algo, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_openssl_cipher_key_length arginfo_openssl_cipher_iv_length
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_dh_compute_key, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, public_key, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, private_key, OpenSSLAsymmetricKey, 0)
@@ -440,6 +442,7 @@ ZEND_FUNCTION(openssl_digest);
 ZEND_FUNCTION(openssl_encrypt);
 ZEND_FUNCTION(openssl_decrypt);
 ZEND_FUNCTION(openssl_cipher_iv_length);
+ZEND_FUNCTION(openssl_cipher_key_length);
 ZEND_FUNCTION(openssl_dh_compute_key);
 ZEND_FUNCTION(openssl_pkey_derive);
 ZEND_FUNCTION(openssl_random_pseudo_bytes);
@@ -508,6 +511,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_encrypt, arginfo_openssl_encrypt)
 	ZEND_FE(openssl_decrypt, arginfo_openssl_decrypt)
 	ZEND_FE(openssl_cipher_iv_length, arginfo_openssl_cipher_iv_length)
+	ZEND_FE(openssl_cipher_key_length, arginfo_openssl_cipher_key_length)
 	ZEND_FE(openssl_dh_compute_key, arginfo_openssl_dh_compute_key)
 	ZEND_FE(openssl_pkey_derive, arginfo_openssl_pkey_derive)
 	ZEND_FE(openssl_random_pseudo_bytes, arginfo_openssl_random_pseudo_bytes)

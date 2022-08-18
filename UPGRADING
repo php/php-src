@@ -227,6 +227,10 @@ PHP 8.2 UPGRADE NOTES
 - mysqli:
   . mysqli_execute_query()
 
+- OpenSSL:
+  . openssl_cipher_key_length(): Returns a key length for the supplied
+    cipher.  
+
 - Reflection:
   . ReflectionFunction::isAnonymous()
   . ReflectionMethod::hasPrototype()
