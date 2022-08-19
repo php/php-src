@@ -79,7 +79,7 @@
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 # define FMT64 "I64"
 #else
-# if defined(__APPLE__)
+# if defined(__APPLE__) || defined(__OpenBSD__)
 #  define FMT64 "ll"
 # elif defined(__amd64__) || defined(__x86_64__)
 #  define FMT64 "l"
