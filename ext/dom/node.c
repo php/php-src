@@ -20,7 +20,6 @@
 #endif
 
 #include "php.h"
-
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 
@@ -1002,7 +1001,6 @@ PHP_METHOD(DOMNode, replaceChild)
 	xmlNodePtr children, newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
 	int foundoldchild = 0, stricterror;
-	bool replacedoctype = false;
 
 	int ret;
 
@@ -1065,21 +1063,13 @@ PHP_METHOD(DOMNode, replaceChild)
 				dom_reconcile_ns(nodep->doc, newchild);
 			}
 		} else if (oldchild != newchild) {
-			xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
-			replacedoctype = (intSubset == (xmlDtd *) oldchild);
-
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				xmlSetTreeDoc(newchild, nodep->doc);
 				newchildobj->document = intern->document;
 				php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
 			}
-
 			xmlReplaceNode(oldchild, newchild);
 			dom_reconcile_ns(nodep->doc, newchild);
-
-			if (replacedoctype) {
-				nodep->doc->intSubset = (xmlDtd *) newchild;
-			}
 		}
 		DOM_RET_OBJ(oldchild, &ret, intern);
 		return;
@@ -1678,7 +1668,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		buf = xmlAllocOutputBuffer(NULL);
 	}
 
-	if (buf != NULL) {
+    if (buf != NULL) {
 		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
 			with_comments, buf);
 	}
@@ -1693,9 +1683,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		xmlXPathFreeContext(ctxp);
 	}
 
-	if (buf == NULL || ret < 0) {
-		RETVAL_FALSE;
-	} else {
+    if (buf == NULL || ret < 0) {
+        RETVAL_FALSE;
+    } else {
 		if (mode == 0) {
 #ifdef LIBXML2_NEW_BUFFER
 			ret = xmlOutputBufferGetSize(buf);
@@ -1712,7 +1702,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				RETVAL_EMPTY_STRING();
 			}
 		}
-	}
+    }
 
 	if (buf) {
 		int bytes;
