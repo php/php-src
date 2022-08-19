@@ -676,11 +676,13 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 		}
 		return FAILURE;
 	}
-	/* Numeric session.name won't work at all */
+	/* Numeric session.name won't work at all
+	 * See https://bugs.php.net/bug.php?id=35703
+	 (TL;DR: name is stored in HashTable so numeric string is converted to int key, but lookup looks for string key). */
 	if (is_numeric_str_function(new_value, NULL, NULL)) {
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" cannot be numeric or empty", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "session.name \"%s\" cannot be numeric", ZSTR_VAL(new_value));
 		}
 		return FAILURE;
 	}

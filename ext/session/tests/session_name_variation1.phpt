@@ -21,6 +21,18 @@ var_dump(session_name());
 var_dump(session_destroy());
 var_dump(session_name());
 
+var_dump(session_name("15"));
+var_dump(session_start());
+var_dump(session_name());
+var_dump(session_destroy());
+var_dump(session_name());
+
+var_dump(session_name("10.25"));
+var_dump(session_start());
+var_dump(session_name());
+var_dump(session_destroy());
+var_dump(session_name());
+
 var_dump(session_name("\t"));
 var_dump(session_start());
 var_dump(session_name());
@@ -39,7 +51,21 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_name() : variation ***
 
-Warning: session_name(): session.name "" cannot contain nul bytes in %s on line %d
+Warning: session_name(): session.name "" cannot contain NUL bytes in %s on line %d
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+
+Warning: session_name(): session.name "15" cannot be numeric in %s on line %d
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+
+Warning: session_name(): session.name "10.25" cannot be numeric in %s on line %d
 string(9) "PHPSESSID"
 bool(true)
 string(9) "PHPSESSID"
