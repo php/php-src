@@ -2,6 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.11
 
+- Core:
+  . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
+    (Tim Starling)
+
+- DOM:
+  . Fixed bug  #79451 (Using DOMDocument->replaceChild on doctype causes
+     double free) (NathanFreeman)
+
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
     (cmb, timwolla)

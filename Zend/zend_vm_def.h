@@ -4329,6 +4329,7 @@ ZEND_VM_INLINE_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER))
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -8365,8 +8366,8 @@ ZEND_VM_C_LABEL(check_indirect):
 		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
 
 		ZVAL_REF(variable_ptr, ref);
+		SAVE_OPLINE();
 		if (GC_DELREF(garbage) == 0) {
-			SAVE_OPLINE();
 			rc_dtor_func(garbage);
 			if (UNEXPECTED(EG(exception))) {
 				ZVAL_NULL(variable_ptr);
