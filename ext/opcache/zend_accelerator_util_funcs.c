@@ -353,6 +353,18 @@ unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_scrip
 		mem  += (unsigned char*)persistent_script - mem;
 	}
 
+	// zend_class_entry.inheritance_cache is mutated, so we need to reset it before
+	HashTable inheritance_cache_backup;
+	zend_hash_init(&inheritance_cache_backup, zend_hash_num_elements(&persistent_script->script.class_table), NULL, NULL, 0);
+	zend_class_entry *class;
+	ZEND_HASH_FOREACH_PTR(&persistent_script->script.class_table, class) {
+		if (!class->inheritance_cache) {
+			continue;
+		}
+		zend_hash_add_ptr(&inheritance_cache_backup, class->name, class->inheritance_cache);
+		class->inheritance_cache = NULL;
+	} ZEND_HASH_FOREACH_END();
+
 	zend_adler32(checksum, mem, persistent_script_check_block_size);
 	mem  += sizeof(*persistent_script);
 	size -= sizeof(*persistent_script);
@@ -360,5 +372,12 @@ unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_scrip
 	if (size > 0) {
 		checksum = zend_adler32(checksum, mem, size);
 	}
+
+	// Restore the zend_class_entry.inheritance_cache
+	ZEND_HASH_FOREACH_PTR(&persistent_script->script.class_table, class) {
+		class->inheritance_cache = zend_hash_find_ptr(&inheritance_cache_backup, class->name);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&inheritance_cache_backup);
+
 	return checksum;
 }
