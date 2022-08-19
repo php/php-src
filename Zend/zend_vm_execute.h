@@ -4273,6 +4273,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -4350,6 +4351,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_OBSER
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -18906,6 +18908,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HA
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -21559,6 +21562,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HA
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -38523,6 +38527,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HAN
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -43328,8 +43333,8 @@ check_indirect:
 		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
 
 		ZVAL_REF(variable_ptr, ref);
+		SAVE_OPLINE();
 		if (GC_DELREF(garbage) == 0) {
-			SAVE_OPLINE();
 			rc_dtor_func(garbage);
 			if (UNEXPECTED(EG(exception))) {
 				ZVAL_NULL(variable_ptr);
@@ -56243,6 +56248,7 @@ zend_leave_helper_SPEC_LABEL:
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -56321,6 +56327,7 @@ zend_leave_helper_SPEC_LABEL:
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -57850,6 +57857,7 @@ zend_leave_helper_SPEC_LABEL:
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -58155,6 +58163,7 @@ zend_leave_helper_SPEC_LABEL:
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
@@ -59284,6 +59293,7 @@ zend_leave_helper_SPEC_LABEL:
 							zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 							ZVAL_COPY_VALUE(return_value, retval_ptr);
 							if (GC_MAY_LEAK(ref)) {
+								SAVE_OPLINE();
 								gc_possible_root(ref);
 							}
 							ZVAL_NULL(retval_ptr);
