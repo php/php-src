@@ -20,7 +20,6 @@
 #endif
 
 #include "php.h"
-
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 
@@ -1004,7 +1003,6 @@ PHP_METHOD(DOMNode, replaceChild)
 	xmlNodePtr newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
 	int stricterror;
-	bool replacedoctype = false;
 
 	int ret;
 
