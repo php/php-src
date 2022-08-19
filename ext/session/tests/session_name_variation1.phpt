@@ -67,19 +67,22 @@ string(9) "PHPSESSID"
 
 Warning: session_name(): session.name "10.25" cannot be numeric in %s on line %d
 string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
+bool(true)
+string(9) "PHPSESSID"
 
-Warning: session_start(): session.name cannot contain any of the following '=,;.[ \t\r\n\013\014' in %s on line %d
+Warning: session_name(): session.name "	" cannot contain any of the following '=,; \t\r\n\013\014' in %s on line %d
+string(9) "PHPSESSID"
 bool(true)
-string(1) "	"
+string(9) "PHPSESSID"
 bool(true)
-string(1) "	"
+string(9) "PHPSESSID"
 
 Warning: session_name(): session.name "" cannot be empty in %s on line %d
-string(1) "	"
-
-Warning: session_start(): session.name cannot contain any of the following '=,;.[ \t\r\n\013\014' in %s on line %d
+string(9) "PHPSESSID"
 bool(true)
-string(1) "	"
+string(9) "PHPSESSID"
 bool(true)
-string(1) "	"
+string(9) "PHPSESSID"
 Done
