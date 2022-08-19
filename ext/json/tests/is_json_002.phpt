@@ -55,6 +55,8 @@ try {
   );
 }
 
+echo "Testing Invalid UTF-8".PHP_EOL;
+
 var_dump(
   is_json("\"a\xb0b\""),
   is_json("\"a\xd0\xf2b\""),
