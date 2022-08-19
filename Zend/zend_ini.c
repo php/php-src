@@ -892,7 +892,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty) /* {{{ */
 	}
 
 	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
-	*p = new_value ? new_value : NULL;
+	*p = new_value;
 	return SUCCESS;
 }
 /* }}} */
