@@ -162,7 +162,7 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 {
 	php_json_parser parser;
 
-	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth);
+	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth, NULL);
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
@@ -183,10 +183,11 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 PHP_JSON_API zend_result php_is_json_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth)
 {
 	php_json_parser parser;
-
-	options |= PHP_JSON_VALIDATE_ONLY;
 	
-	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth);
+
+	static const php_json_parser_methods parser_methods = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
+	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth, &parser_methods);
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);

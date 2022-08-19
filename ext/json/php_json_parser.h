@@ -73,7 +73,8 @@ PHP_JSON_API void php_json_parser_init(
 		const char *str,
 		size_t str_len,
 		int options,
-		int max_depth);
+		int max_depth,
+		const php_json_parser_methods *parser_methods);
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser);
 
