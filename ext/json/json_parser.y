@@ -202,8 +202,8 @@ element:
 			{
 				if (parser->methods.array_append) {
 					parser->methods.array_append(parser, &$1, &$3);
-					ZVAL_COPY_VALUE(&$$, &$1);
 				}
+				ZVAL_COPY_VALUE(&$$, &$1);
 			}
 ;
 
