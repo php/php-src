@@ -609,22 +609,6 @@ static PHP_INI_MH(OnUpdateSerializer) /* {{{ */
 }
 /* }}} */
 
-static PHP_INI_MH(OnUpdateTransSid) /* {{{ */
-{
-	SESSION_CHECK_ACTIVE_STATE;
-	SESSION_CHECK_OUTPUT_STATE;
-
-	if (zend_string_equals_literal_ci(new_value, "on")) {
-		PS(use_trans_sid) = (bool) 1;
-	} else {
-		PS(use_trans_sid) = (bool) atoi(ZSTR_VAL(new_value));
-	}
-
-	return SUCCESS;
-}
-/* }}} */
-
-
 static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 {
 	SESSION_CHECK_ACTIVE_STATE;
@@ -807,7 +791,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateSessionString, extern_referer_chk, php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateSessionString, cache_limiter,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateSessionLong,   cache_expire,       php_ps_globals,    ps_globals)
-	PHP_INI_ENTRY("session.use_trans_sid",          "0",         PHP_INI_ALL, OnUpdateTransSid)
+	STD_PHP_INI_BOOLEAN("session.use_trans_sid",    "0",         PHP_INI_ALL, OnUpdateSessionBool,   use_trans_sid,      php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.sid_length",             "32",        PHP_INI_ALL, OnUpdateSidLength)
 	PHP_INI_ENTRY("session.sid_bits_per_character", "4",         PHP_INI_ALL, OnUpdateSidBits)
 	STD_PHP_INI_BOOLEAN("session.lazy_write",       "1",         PHP_INI_ALL, OnUpdateSessionBool,    lazy_write,         php_ps_globals,    ps_globals)
