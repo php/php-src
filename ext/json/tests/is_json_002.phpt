@@ -55,7 +55,7 @@ try {
   );
 }
 
-echo PHP_EOL . "Testing Invalid UTF-8" . PHP_EOL;
+echo PHP_EOL . "Testing Invalid UTF-8-" . PHP_EOL;
 
 /*var_dump(
   is_json("\"a\xb0b\""),
@@ -100,4 +100,4 @@ Syntax error
 int(0)
 string(8) "No error"
 
-Testing Invalid UTF-8
+Testing Invalid UTF-8-
