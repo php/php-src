@@ -282,10 +282,7 @@ PHP_METHOD(IntlIterator, valid)
 	RETURN_BOOL(ii->iterator->funcs->valid(ii->iterator) == SUCCESS);
 }
 
-/* {{{ intl_register_IntlIterator_class
- * Initialize 'IntlIterator' class
- */
-U_CFUNC void intl_register_IntlIterator_class(void)
+U_CFUNC void intl_register_common_symbols(int module_number)
 {
 	/* Create and register 'IntlIterator' class. */
 	IntlIterator_ce_ptr = register_class_IntlIterator(zend_ce_iterator);
@@ -298,4 +295,5 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 	IntlIterator_handlers.clone_obj = NULL;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;
 
+	register_common_symbols(module_number);
 }
