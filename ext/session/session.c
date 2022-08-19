@@ -668,11 +668,11 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 		}
 		return FAILURE;
 	}
-	/* Nul bytes are not allowed */
+	/* NUL bytes are not allowed */
 	if (ZSTR_LEN(new_value) != strlen(ZSTR_VAL(new_value))) {
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" cannot contain nul bytes", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "session.name \"%s\" cannot contain NUL bytes", ZSTR_VAL(new_value));
 		}
 		return FAILURE;
 	}
