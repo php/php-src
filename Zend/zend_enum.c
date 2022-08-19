@@ -307,7 +307,7 @@ not_found:
 		}
 
 		if (ce->enum_backing_type == IS_LONG) {
-			zend_value_error("\"" ZEND_LONG_FMT "\" is not a valid backing value for enum %s", long_key, ZSTR_VAL(ce->name));
+			zend_value_error(ZEND_LONG_FMT " is not a valid backing value for enum %s", long_key, ZSTR_VAL(ce->name));
 		} else {
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
 			zend_value_error("\"%s\" is not a valid backing value for enum %s", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
