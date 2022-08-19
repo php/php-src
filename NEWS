@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
     (Tim Starling)
+  . Fixed bug GH-9361 (Segmentation fault on script exit #9379). (cmb,
+    Christian Schneider)
 
 - DOM:
   . Fixed bug #79451 (DOMDocument->replaceChild on doctype causes double free).
