@@ -55,7 +55,7 @@ try {
   );
 }
 
-echo "Testing Invalid UTF-8".PHP_EOL;
+echo PHP_EOL . "Testing Invalid UTF-8" . PHP_EOL;
 
 var_dump(
   is_json("\"a\xb0b\""),
@@ -71,7 +71,7 @@ var_dump(
 ?>
 
 --EXPECTF--
-Deprecated: is_json(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
+Deprecated: is_json(): Passing null to parameter #1 ($json) of type string is deprecated in /home/jumorales/dev/php-src/ext/json/tests/is_json_002.php on line 3
 bool(false)
 int(4)
 string(12) "Syntax error"
@@ -84,7 +84,7 @@ string(12) "Syntax error"
 is_json(): Argument #2 ($depth) must be greater than 0
 int(0)
 string(8) "No error"
-is_json(): Argument #2 ($depth) must be less than %d
+is_json(): Argument #2 ($depth) must be less than 2147483647
 int(0)
 string(8) "No error"
 bool(false)
@@ -99,6 +99,8 @@ string(8) "No error"
 Syntax error
 int(0)
 string(8) "No error"
+
+Testing Invalid UTF-8
 bool(false)
 bool(false)
 bool(false)
