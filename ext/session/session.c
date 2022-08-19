@@ -647,6 +647,41 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 }
 /* }}} */
 
+/* If diagnostic_type is 0 then no diagnostic will be emitted */
+static bool is_session_name_valid(const zend_string *name, int diagnostic_type)
+{
+	if (ZSTR_LEN(name) == 0) {
+		if (diagnostic_type) {
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot be empty", ZSTR_VAL(name));
+		}
+		return false;
+	}
+	/* NUL bytes are not allowed */
+	if (ZSTR_LEN(name) != strlen(ZSTR_VAL(name))) {
+		if (diagnostic_type) {
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot contain NUL bytes", ZSTR_VAL(name));
+		}
+		return false;
+	}
+	/* Numeric session.name won't work at all
+	 * See https://bugs.php.net/bug.php?id=35703
+	 (TL;DR: name is stored in HashTable so numeric string is converted to int key, but lookup looks for string key). */
+	if (is_numeric_str_function(name, NULL, NULL)) {
+		if (diagnostic_type) {
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot be numeric", ZSTR_VAL(name));
+		}
+		return false;
+	}
+	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
+	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
+		if (diagnostic_type) {
+			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot contain any of the following "
+				"'=,; \\t\\r\\n\\013\\014'", ZSTR_VAL(name));
+		}
+		return false;
+	}
+	return true;
+}
 
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
@@ -657,33 +692,14 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 	if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
 		err_type = E_WARNING;
+	} else if (stage == ZEND_INI_STAGE_DEACTIVATE) {
+		/* Do not output error when restoring ini options. */
+		err_type = 0;
 	} else {
 		err_type = E_ERROR;
 	}
 
-	if (ZSTR_LEN(new_value) == 0) {
-		/* Do not output error when restoring ini options. */
-		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" cannot be empty", ZSTR_VAL(new_value));
-		}
-		return FAILURE;
-	}
-	/* NUL bytes are not allowed */
-	if (ZSTR_LEN(new_value) != strlen(ZSTR_VAL(new_value))) {
-		/* Do not output error when restoring ini options. */
-		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" cannot contain NUL bytes", ZSTR_VAL(new_value));
-		}
-		return FAILURE;
-	}
-	/* Numeric session.name won't work at all
-	 * See https://bugs.php.net/bug.php?id=35703
-	 (TL;DR: name is stored in HashTable so numeric string is converted to int key, but lookup looks for string key). */
-	if (is_numeric_str_function(new_value, NULL, NULL)) {
-		/* Do not output error when restoring ini options. */
-		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" cannot be numeric", ZSTR_VAL(new_value));
-		}
+	if (!is_session_name_valid(new_value, err_type)) {
 		return FAILURE;
 	}
 
@@ -1277,7 +1293,7 @@ static void php_session_remove_cookie(void) {
 	size_t session_cookie_len;
 	size_t len = sizeof("Set-Cookie")-1;
 
-	ZEND_ASSERT(strpbrk(ZSTR_VAL(PS(session_name)), "=,; \t\r\n\013\014") == NULL);
+	ZEND_ASSERT(is_session_name_valid(PS(session_name), 0));
 	spprintf(&session_cookie, 0, "Set-Cookie: %s=", ZSTR_VAL(PS(session_name)));
 
 	// TODO Manually compute from known information?
@@ -1325,10 +1341,8 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 		return FAILURE;
 	}
 
-	// TODO need to Check for nul byte?
 	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
-	if (strpbrk(ZSTR_VAL(PS(session_name)), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
-		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,; \\t\\r\\n\\013\\014'");
+	if (!is_session_name_valid(PS(session_name), E_WARNING)) {
 		return FAILURE;
 	}
 
