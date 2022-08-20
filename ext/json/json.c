@@ -257,15 +257,18 @@ PHP_FUNCTION(is_json)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((options != 0) 
-		&& (!(options & PHP_JSON_THROW_ON_ERROR) && !(options & PHP_JSON_INVALID_UTF8_IGNORE))) {
-		zend_argument_value_error(3, "must be a valid flag (JSON_THROW_ON_ERROR, JSON_INVALID_UTF8_IGNORE)");
-		RETURN_THROWS();
+	if (options != 0) {
+		if (!(options &= (PHP_JSON_THROW_ON_ERROR | PHP_JSON_INVALID_UTF8_IGNORE))) {
+			zend_argument_value_error(3, "must be a valid flag (JSON_THROW_ON_ERROR, JSON_INVALID_UTF8_IGNORE)");
+			RETURN_THROWS();
+		}
 	}
 
 	if (!str_len) {
 		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
 			JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		} else {
+			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(PHP_JSON_ERROR_SYNTAX), PHP_JSON_ERROR_SYNTAX);
 		}
  
 		RETURN_FALSE;
