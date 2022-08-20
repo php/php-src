@@ -47,7 +47,17 @@ try {
 
 try {
   is_json("-", 512, JSON_THROW_ON_ERROR);
-} catch (Exception $exception) {
+} catch (JsonException $exception) {
+  echo $exception->getMessage() . PHP_EOL;
+  var_dump(
+    json_last_error(),
+    json_last_error_msg()
+  );
+}
+
+try {
+  is_json("-", 512, JSON_THROW_ON_ERROR);
+} catch (JsonException $exception) {
   echo $exception->getMessage() . PHP_EOL;
   var_dump(
     json_last_error(),
@@ -56,7 +66,9 @@ try {
 }
 
 echo PHP_EOL . "Testing Invalid UTF-8" . PHP_EOL;
-
+var_dump(
+  is_json("\"a\xb0b\"")
+);
 /*var_dump(
   is_json("\"a\xb0b\""),
   is_json("\"a\xd0\xf2b\""),
@@ -99,5 +111,9 @@ string(8) "No error"
 Syntax error
 int(0)
 string(8) "No error"
+Syntax error
+int(0)
+string(8) "No error"
 
 Testing Invalid UTF-8
+bool(false)
