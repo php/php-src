@@ -121,6 +121,8 @@ members:
 					} else {
 						parser->methods.object_create(parser, &$$);
 					}
+				} else {
+					ZVAL_EMPTY_ARRAY(&$$);
 				}
 			}
 	|	member
@@ -182,6 +184,8 @@ elements:
 					} else {
 						parser->methods.array_create(parser, &$$);
 					}
+				} else {
+					ZVAL_EMPTY_ARRAY(&$$);
 				}
 			}
 	|	element
