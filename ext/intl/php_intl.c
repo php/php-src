@@ -58,6 +58,7 @@
 #include "breakiterator/breakiterator_class.h"
 #include "breakiterator/breakiterator_iterators.h"
 
+#include <unicode/uidna.h>
 #include "idn/idn.h"
 #include "uchar/uchar.h"
 
@@ -161,8 +162,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	msgformat_register_class();
 
-	grapheme_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	/* Register 'DateFormat' PHP class */
 	dateformat_register_IntlDateFormatter_class(  );
 
@@ -180,9 +179,6 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'IntlCalendar' PHP class */
 	calendar_register_IntlCalendar_class(  );
-
-	/* Expose IDN constants to PHP scripts. */
-	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class(  );
