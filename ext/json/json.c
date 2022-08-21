@@ -257,10 +257,16 @@ PHP_FUNCTION(is_json)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
+
 	if (options != 0) {
-		if (!(options &= (PHP_JSON_THROW_ON_ERROR | PHP_JSON_INVALID_UTF8_IGNORE))) {
-			zend_argument_value_error(3, "must be a valid flag (JSON_THROW_ON_ERROR, JSON_INVALID_UTF8_IGNORE)");
-			RETURN_THROWS();
+		zend_long tmp_options = options;
+		tmp_options ^= (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_THROW_ON_ERROR);
+
+		if (tmp_options != 0) {
+			if (!((tmp_options == PHP_JSON_INVALID_UTF8_IGNORE) || (tmp_options == PHP_JSON_THROW_ON_ERROR))) {
+				zend_argument_value_error(3, "must be a valid flag (JSON_THROW_ON_ERROR, JSON_INVALID_UTF8_IGNORE)");
+				RETURN_THROWS();
+			}
 		}
 	}
 
