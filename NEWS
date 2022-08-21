@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Tim Starling)
   . Fixed bug GH-9227 (Trailing dots and spaces in filenames are ignored).
     (cmb)
+  . Fixed bug GH-9285 (Traits cannot be used in readonly classes).
+    (kocsismate)
 
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).

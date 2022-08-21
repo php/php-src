@@ -2368,7 +2368,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 					if (!is_compatible) {
 						zend_error_noreturn(E_COMPILE_ERROR,
-							   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
+								"%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
 								ZSTR_VAL(find_first_property_definition(ce, traits, i, prop_name, colliding_prop->ce)->name),
 								ZSTR_VAL(property_info->ce->name),
 								ZSTR_VAL(prop_name),
@@ -2376,6 +2376,15 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					}
 					continue;
 				}
+			}
+
+			if ((ce->ce_flags & ZEND_ACC_READONLY_CLASS) && !(property_info->flags & ZEND_ACC_READONLY)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Readonly class %s cannot use trait with a non-readonly property %s::$%s",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(property_info->ce->name),
+					ZSTR_VAL(prop_name)
+				);
 			}
 
 			/* property not found, so lets add it */
