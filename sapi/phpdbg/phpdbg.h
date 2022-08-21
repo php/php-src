@@ -87,6 +87,10 @@
 # endif
 #endif
 
+#ifdef __APPLE__
+#	include <mach/mach.h>
+#endif
+
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
@@ -245,7 +249,12 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #endif
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
     int watch_userfaultfd;                       /* userfaultfd(2) handler, 0 if unused */
-    pthread_t watch_userfault_thread;            /* thread for watch fault handling */
+#elif defined(__APPLE__)
+	mach_port_t watch_exception_thread;
+	mach_port_t watch_exception_port;
+#endif
+#if defined(HAVE_USERFAULTFD_WRITEFAULT) || defined(__APPLE__)
+	pthread_t watchpoint_thread;            /* thread for watch fault handling */
 #endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
@@ -255,8 +264,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable watch_free;                        /* pointers to watch for being freed */
 	HashTable *watchlist_mem;                    /* triggered watchpoints */
 	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
+	int watch_element_count;                     /* total number of active elements */
 	bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
+	void *(*original_realloc_function)(void *, size_t); /* the original AG(mm_heap)->_realloc function */
 	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
 	char *exec;                                  /* file to execute */

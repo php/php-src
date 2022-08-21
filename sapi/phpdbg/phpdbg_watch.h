@@ -56,6 +56,7 @@ typedef enum {
 #define PHPDBG_WATCH_NORMAL     (PHPDBG_WATCH_SIMPLE | PHPDBG_WATCH_RECURSIVE)
 #define PHPDBG_WATCH_IMPLICIT   0x10
 #define PHPDBG_WATCH_RECURSIVE_ROOT 0x20
+#define PHPDBG_WATCH_HASH_ELEMENT 0x40
 
 typedef struct _phpdbg_watch_collision phpdbg_watch_collision;
 
@@ -101,6 +102,8 @@ typedef struct _phpdbg_watch_element {
 		zend_refcounted ref;
 		HashTable ht;
 	} backup; /* backup for when watchpoint gets dissociated */
+	zend_fcall_info_cache fcc;
+	zval call_name;
 } phpdbg_watch_element;
 
 typedef struct {
@@ -128,14 +131,24 @@ int phpdbg_watchpoint_segfault_handler(void *addr);
 void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch);
 void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch);
 
+typedef struct {
+	zval *base;
+	zval *call_name;
+	zend_fcall_info_cache *fcc;
+	bool quiet;
+} phpdbg_watch_creation_options;
+
 int phpdbg_delete_var_watchpoint(char *input, size_t len);
+void phpdbg_remove_watch_element(phpdbg_watch_element *element);
+int phpdbg_create_watchpoint(char *input, size_t len, int type, phpdbg_watch_creation_options *options);
 int phpdbg_create_var_watchpoint(char *input, size_t len);
 
-int phpdbg_print_changed_zvals(void);
+int phpdbg_diff_changed_zvals(void);
 
 void phpdbg_list_watchpoints(void);
 
 void phpdbg_watch_efree(void *ptr);
+void *phpdbg_watch_erealloc(void *ptr, size_t size);
 
 
 static long phpdbg_pagesize;

@@ -925,6 +925,10 @@ out:
 int phpdbg_output_ev_variable(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv) /* {{{ */ {
 	phpdbg_notice("Printing variable %.*s", (int) len, name);
 
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+	}
+
 	zend_print_zval_r(zv, 0);
 
 	phpdbg_out("\n");
@@ -1598,7 +1602,7 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 
 	PHPDBG_G(flags) &= ~PHPDBG_IS_INTERACTIVE;
 
-	phpdbg_print_changed_zvals();
+	phpdbg_diff_changed_zvals();
 
 	return ret;
 } /* }}} */
@@ -1675,6 +1679,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 
 		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
 			phpdbg_print_opline(execute_data, 0);
+			phpdbg_diff_changed_zvals(); /* ensure callback based watches are checked */
 			goto next;
 		}
 
@@ -1780,7 +1785,7 @@ stepping:
 
 		/* check if some watchpoint was hit */
 		{
-			if (phpdbg_print_changed_zvals() == SUCCESS) {
+			if (phpdbg_diff_changed_zvals() == SUCCESS) {
 				DO_INTERACTIVE(1);
 			}
 		}

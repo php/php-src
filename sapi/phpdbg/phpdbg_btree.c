@@ -119,24 +119,24 @@ phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong id
 	return &branch->result;
 }
 
-phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong higher_idx) {
+phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong exclusive_upper_bound) {
 	phpdbg_btree_position pos;
 
 	pos.tree = tree;
 	pos.end = lower_idx;
-	pos.cur = higher_idx;
+	pos.cur = exclusive_upper_bound;
 
 	return pos;
 }
 
 phpdbg_btree_result *phpdbg_btree_next(phpdbg_btree_position *pos) {
-	phpdbg_btree_result *result = phpdbg_btree_find_closest(pos->tree, pos->cur);
+	phpdbg_btree_result *result = phpdbg_btree_find_closest(pos->tree, pos->cur - 1);
 
 	if (result == NULL || result->idx < pos->end) {
 		return NULL;
 	}
 
-	pos->cur = result->idx - 1;
+	pos->cur = result->idx;
 
 	return result;
 }
@@ -158,21 +158,28 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 		}
 
 		{
-			phpdbg_btree_branch *memory = *branch = pemalloc((i + 2) * sizeof(phpdbg_btree_branch), tree->persistent);
+			// only assign as very last instruction to prevent inconsistent state of the tree during update
+			phpdbg_btree_branch **target_branch = branch, *start_branch, *new_branchptr, **new_branch = &new_branchptr;
+			phpdbg_btree_branch *memory = new_branchptr = start_branch = pemalloc((i + 2) * sizeof(phpdbg_btree_branch), tree->persistent);
 			do {
-				(*branch)->branches[!((idx >> i) % 2)] = NULL;
-				branch = &(*branch)->branches[(idx >> i) % 2];
-				*branch = ++memory;
+				(*new_branch)->branches[!((idx >> i) % 2)] = NULL;
+				new_branch = &(*new_branch)->branches[(idx >> i) % 2];
+				*new_branch = ++memory;
 			} while (i--);
+			
+			(*new_branch)->result.idx = idx;
+			(*new_branch)->result.ptr = ptr;
+
 			tree->count++;
+			*target_branch = start_branch;
 		}
 	} else if (!(flags & PHPDBG_BTREE_UPDATE)) {
 		return FAILURE;
+	} else {
+		(*branch)->result.idx = idx;
+		(*branch)->result.ptr = ptr;
 	}
-
-	(*branch)->result.idx = idx;
-	(*branch)->result.ptr = ptr;
-
+	
 	return SUCCESS;
 }
 
@@ -198,16 +205,18 @@ check_branch_existence:
 	} while (i--);
 
 	tree->count--;
+	
+	void *garbage;
 
 	if (i_last_dual_branch == -1) {
-		pefree(tree->branch, tree->persistent);
+		garbage = tree->branch;
 		tree->branch = NULL;
 	} else {
 		if (last_dual_branch->branches[last_dual_branch_branch] == last_dual_branch + 1) {
 			phpdbg_btree_branch *original_branch = last_dual_branch->branches[!last_dual_branch_branch];
 
 			memcpy(last_dual_branch + 1, last_dual_branch->branches[!last_dual_branch_branch], (i_last_dual_branch + 1) * sizeof(phpdbg_btree_branch));
-			pefree(last_dual_branch->branches[!last_dual_branch_branch], tree->persistent);
+			garbage = last_dual_branch->branches[!last_dual_branch_branch];
 			last_dual_branch->branches[!last_dual_branch_branch] = last_dual_branch + 1;
 
 			branch = last_dual_branch->branches[!last_dual_branch_branch];
@@ -215,12 +224,14 @@ check_branch_existence:
 				branch = (branch->branches[branch->branches[1] == ++original_branch] = last_dual_branch + i_last_dual_branch - i + 1);
 			}
 		} else {
-			pefree(last_dual_branch->branches[last_dual_branch_branch], tree->persistent);
+			garbage = last_dual_branch->branches[last_dual_branch_branch];
 		}
 
 		last_dual_branch->branches[last_dual_branch_branch] = NULL;
 	}
-
+	
+	/* delay freeing as to ensure consistency during tree freeing */
+	pefree(garbage, tree->persistent);
 	return SUCCESS;
 }
 

@@ -487,7 +487,8 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 		if (new_index && index_len == 0) {
 			zend_ulong numkey;
 			zend_string *strkey;
-			ZEND_HASH_FOREACH_KEY_VAL_IND(parent, numkey, strkey, zv) {
+			ZEND_HASH_FOREACH_KEY_VAL(parent, numkey, strkey, zv) {
+				zval *maybe_indirect_zv = zv;
 				if (i == len || (i == len - 1 && input[len - 1] == ']')) {
 					char *key, *propkey;
 					size_t namelen, keylen;
@@ -512,7 +513,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 						char *name = estrndup(input, i);
 						char *keyname = estrndup(last_index, index_len);
 
-						ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+						ret = step_cb(name, i, keyname, index_len, parent, maybe_indirect_zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 					}
 
 					phpdbg_parse_variable_with_arg(input, len, Z_OBJPROP_P(zv), i, callback, step_cb, silent, arg);
@@ -521,16 +522,18 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 						char *name = estrndup(input, i);
 						char *keyname = estrndup(last_index, index_len);
 
-						ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+						ret = step_cb(name, i, keyname, index_len, parent, maybe_indirect_zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 					}
 
 					phpdbg_parse_variable_with_arg(input, len, Z_ARRVAL_P(zv), i, callback, step_cb, silent, arg);
+				} else if (Z_TYPE_P(zv) == IS_INDIRECT) {
+					zv = Z_INDIRECT_P(zv);
 				} else if (Z_ISREF_P(zv)) {
 					if (step_cb) {
 						char *name = estrndup(input, i);
 						char *keyname = estrndup(last_index, index_len);
 
-						ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+						ret = step_cb(name, i, keyname, index_len, parent, maybe_indirect_zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 					}
 
 					ZVAL_DEREF(zv);
@@ -541,30 +544,29 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			} ZEND_HASH_FOREACH_END();
 			return ret;
 		} else if (new_index) {
-			char last_chr = last_index[index_len];
-			last_index[index_len] = 0;
 			if (!(zv = zend_symtable_str_find(parent, last_index, index_len))) {
 				if (!silent) {
 					phpdbg_error("%.*s is undefined", (int) (input[i] == ']' ? i + 1 : i), input);
 				}
 				return FAILURE;
 			}
+
+			zval *maybe_indirect_zv = zv;
 			while (Z_TYPE_P(zv) == IS_INDIRECT) {
 				zv = Z_INDIRECT_P(zv);
 			}
 
-			last_index[index_len] = last_chr;
 			if (i == len) {
 				char *name = estrndup(input, i);
 				char *keyname = estrndup(last_index, index_len);
 
-				ret = callback(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+				ret = callback(name, i, keyname, index_len, parent, maybe_indirect_zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 			} else retry_ref_end: if (Z_TYPE_P(zv) == IS_OBJECT) {
 				if (step_cb) {
 					char *name = estrndup(input, i);
 					char *keyname = estrndup(last_index, index_len);
 
-					ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+					ret = step_cb(name, i, keyname, index_len, parent, maybe_indirect_zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 				}
 
 				parent = Z_OBJPROP_P(zv);
@@ -573,7 +575,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 					char *name = estrndup(input, i);
 					char *keyname = estrndup(last_index, index_len);
 
-					ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+					ret = step_cb(name, i, keyname, index_len, parent, maybe_indirect_zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 				}
 
 				parent = Z_ARRVAL_P(zv);
@@ -582,7 +584,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 					char *name = estrndup(input, i);
 					char *keyname = estrndup(last_index, index_len);
 
-					ret = step_cb(name, i, keyname, index_len, parent, zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+					ret = step_cb(name, i, keyname, index_len, parent, maybe_indirect_zv, arg) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 				}
 
 				ZVAL_DEREF(zv);

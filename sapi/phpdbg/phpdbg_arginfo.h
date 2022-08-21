@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dc2e5420ea396c6235429c9606875ad2332811cb */
+ * Stub hash: ec2f6f7c9f7cf3e1dd74bbdc0500020cd9dca186 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_break_next, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -16,6 +16,18 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_break_function, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, function, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_watch, 0, 1, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, base, MAY_BE_NULL|MAY_BE_ARRAY|MAY_BE_OBJECT, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_phpdbg_watch_recursive arginfo_phpdbg_watch
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_unwatch, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, watcher_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_color, 0, 2, IS_VOID, 0)
@@ -48,6 +60,9 @@ ZEND_FUNCTION(phpdbg_break_next);
 ZEND_FUNCTION(phpdbg_break_file);
 ZEND_FUNCTION(phpdbg_break_method);
 ZEND_FUNCTION(phpdbg_break_function);
+ZEND_FUNCTION(phpdbg_watch);
+ZEND_FUNCTION(phpdbg_watch_recursive);
+ZEND_FUNCTION(phpdbg_unwatch);
 ZEND_FUNCTION(phpdbg_color);
 ZEND_FUNCTION(phpdbg_prompt);
 ZEND_FUNCTION(phpdbg_exec);
@@ -62,6 +77,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(phpdbg_break_file, arginfo_phpdbg_break_file)
 	ZEND_FE(phpdbg_break_method, arginfo_phpdbg_break_method)
 	ZEND_FE(phpdbg_break_function, arginfo_phpdbg_break_function)
+	ZEND_FE(phpdbg_watch, arginfo_phpdbg_watch)
+	ZEND_FE(phpdbg_watch_recursive, arginfo_phpdbg_watch_recursive)
+	ZEND_FE(phpdbg_unwatch, arginfo_phpdbg_unwatch)
 	ZEND_FE(phpdbg_color, arginfo_phpdbg_color)
 	ZEND_FE(phpdbg_prompt, arginfo_phpdbg_prompt)
 	ZEND_FE(phpdbg_exec, arginfo_phpdbg_exec)
@@ -71,3 +89,23 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(phpdbg_get_executable, arginfo_phpdbg_get_executable)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_PhpdbgWatchModification_methods[] = {
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_PhpdbgWatchModification(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("PhpdbgWatchModification", IS_UNDEF, class_PhpdbgWatchModification_methods);
+
+	zend_enum_add_case_cstr(class_entry, "ADDED", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "UPDATED", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "REFCOUNT", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "REMOVED", NULL);
+
+	return class_entry;
+}

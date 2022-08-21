@@ -27,6 +27,7 @@
 #include "zend_alloc.h"
 #include "phpdbg_print.h"
 #include "phpdbg_help.h"
+#include "zend_enum.h"
 #include "phpdbg_arginfo.h"
 #include "zend_vm.h"
 #include "php_ini_builder.h"
@@ -47,6 +48,8 @@ int phpdbg_startup_run = 0;
 static bool phpdbg_booted = 0;
 static bool phpdbg_fully_started = 0;
 bool use_mm_wrappers = 1;
+
+zend_class_entry *phpdbg_watch_modification_ce;
 
 static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
@@ -142,9 +145,16 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->cur_command = NULL;
 	pg->last_line = 0;
 
+	pg->watchpoint_hit = 0;
+	pg->watch_element_count = 0;
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	pg->watch_userfaultfd = 0;
-	pg->watch_userfault_thread = 0;
+#endif
+#ifdef __APPLE__
+	pg->watch_exception_port = -1;
+#endif
+#if defined(HAVE_USERFAULTFD_WRITEFAULT) || defined(__APPLE__)
+	pg->watchpoint_thread = 0;
 #endif
 } /* }}} */
 
@@ -175,6 +185,8 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_PROMPT", PHPDBG_COLOR_PROMPT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_NOTICE", PHPDBG_COLOR_NOTICE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_ERROR",  PHPDBG_COLOR_ERROR, CONST_CS|CONST_PERSISTENT);
+
+	phpdbg_watch_modification_ce = register_class_PhpdbgWatchModification();
 
 	return SUCCESS;
 } /* }}} */
@@ -375,6 +387,82 @@ PHP_FUNCTION(phpdbg_clear)
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 } /* }}} */
+
+static void phpdbg_watch_func(int type, INTERNAL_FUNCTION_PARAMETERS) {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc = {0};
+
+	zend_string *watchstr;
+	zval *target = NULL, dummy_target;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zf", &watchstr, &target, &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	HashPosition pos;
+	zend_hash_internal_pointer_end_ex(&PHPDBG_G(watch_elements), &pos);
+	phpdbg_watch_element *last_watch = zend_hash_get_current_data_ptr_ex(&PHPDBG_G(watch_elements), &pos);
+
+	if (Z_ISNULL_P(target)) {
+		target = NULL;
+	}
+	
+	if (target == NULL) {
+		target = &dummy_target;
+		ZVAL_ARR(target, zend_rebuild_symbol_table());
+		if (!Z_ARR_P(target)) {
+			RETURN_NULL();
+		}
+	}
+
+	if (fcc.function_handler) {
+		Z_TRY_ADDREF(fci.function_name);
+		if (fcc.object) {
+			GC_ADDREF(fcc.object);
+		}
+	}
+
+	phpdbg_watch_creation_options options = {
+		.fcc = &fcc,
+		.call_name = &fci.function_name,
+		.quiet = true,
+		.base = target,
+	};
+
+	phpdbg_create_watchpoint(ZSTR_VAL(watchstr), ZSTR_LEN(watchstr), type, &options);
+
+	phpdbg_watch_element *element;
+	ZEND_HASH_REVERSE_FOREACH_PTR(&PHPDBG_G(watch_elements), element) {
+		if (element == last_watch) {
+			break;
+		}
+		RETURN_LONG(element->id);
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_FUNCTION(phpdbg_watch)
+{
+	phpdbg_watch_func(PHPDBG_WATCH_SIMPLE, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_FUNCTION(phpdbg_watch_recursive)
+{
+	phpdbg_watch_func(PHPDBG_WATCH_RECURSIVE, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_FUNCTION(phpdbg_unwatch)
+{
+	zend_long watch_id;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &watch_id) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	phpdbg_watch_element *element;
+	if ((element = zend_hash_index_find_ptr(&PHPDBG_G(watch_elements), watch_id))) {
+		phpdbg_remove_watch_element(element);
+	}
+}
 
 /* {{{ */
 PHP_FUNCTION(phpdbg_color)
@@ -1096,6 +1184,7 @@ void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{
 
 void *phpdbg_realloc_wrapper(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
+	phpdbg_watch_erealloc(ptr, size);
 	return _zend_mm_realloc(zend_mm_get_heap(), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
@@ -1413,6 +1502,9 @@ phpdbg_main:
 		PHPDBG_G(original_free_function) = _free;
 		_free = phpdbg_watch_efree;
 
+		PHPDBG_G(original_realloc_function) = _realloc;
+		_realloc = phpdbg_watch_erealloc;
+
 		if (use_mm_wrappers) {
 #if ZEND_DEBUG
 			zend_mm_set_custom_debug_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
@@ -1424,6 +1516,7 @@ phpdbg_main:
 		}
 
 		_free = PHPDBG_G(original_free_function);
+		_realloc = PHPDBG_G(original_realloc_function);
 
 
 		phpdbg_init_list();

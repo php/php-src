@@ -49,7 +49,7 @@ void phpdbg_btree_init(phpdbg_btree *tree, zend_ulong depth);
 void phpdbg_btree_clean(phpdbg_btree *tree);
 phpdbg_btree_result *phpdbg_btree_find(phpdbg_btree *tree, zend_ulong idx);
 phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong idx);
-phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong higher_idx);
+phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong exclusive_upper_bound);
 phpdbg_btree_result *phpdbg_btree_next(phpdbg_btree_position *pos);
 int phpdbg_btree_delete(phpdbg_btree *tree, zend_ulong idx);
 
