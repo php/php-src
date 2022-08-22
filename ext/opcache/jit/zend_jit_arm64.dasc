@@ -8233,7 +8233,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 		}
 	}
 
-	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+	if ((op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) == MAY_BE_DOUBLE) {
 	    |2:
 		|	fmov FPR0, xzr  // TODO: "movi d0, #0" is not recognized by DynASM/arm64
 		|	DOUBLE_CMP ZREG_FPR0, op1_addr, ZREG_TMP1, ZREG_FPTMP
