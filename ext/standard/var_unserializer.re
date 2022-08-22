@@ -645,6 +645,9 @@ declared_property:
 				} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
 						ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+					if (EG(exception)) {
+						goto failure;
+					}
 				}
 
 				int ret = is_property_visibility_changed(obj->ce, &key);

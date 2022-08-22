@@ -279,6 +279,7 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 	}
 	object_properties_load(&randomizer->std, Z_ARRVAL_P(members_zv));
 	if (EG(exception)) {
+		zend_throw_exception(NULL, "Invalid serialization data for Random\\Randomizer object", 0);
 		RETURN_THROWS();
 	}
 
