@@ -1085,6 +1085,9 @@ static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, u
 					 && (tssa->var_info[tssa->ops[idx].op1_use].type & MAY_BE_STRING)) {
 						return 0;
 					}
+					if (!(tssa->var_info[tssa->ops[idx].op1_use].type & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+						return 0;
+					}
 					return 1;
 				} else if (opline->opcode == ZEND_ASSIGN_OP
 				 && (opline->extended_value == ZEND_ADD
@@ -1113,11 +1116,7 @@ static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, u
 				const zend_op *opline = ssa_opcodes[idx];
 				if (opline->opcode == ZEND_ADD
 				 || opline->opcode == ZEND_SUB
-				 || opline->opcode == ZEND_MUL
-				 || opline->opcode == ZEND_PRE_DEC
-				 || opline->opcode == ZEND_PRE_INC
-				 || opline->opcode == ZEND_POST_DEC
-				 || opline->opcode == ZEND_POST_INC) {
+				 || opline->opcode == ZEND_MUL) {
 					if ((opline->op1_type & (IS_VAR|IS_CV))
 					  && tssa->ops[idx].op1_use >= 0
 					  && (tssa->var_info[tssa->ops[idx].op1_use].type & MAY_BE_REF)) {
@@ -1126,6 +1125,34 @@ static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, u
 					if ((opline->op2_type & (IS_VAR|IS_CV))
 					  && tssa->ops[idx].op2_use >= 0
 					  && (tssa->var_info[tssa->ops[idx].op2_use].type & MAY_BE_REF)) {
+						return 0;
+					}
+					if (opline->op1_type == IS_CONST) {
+						zval *zv = RT_CONSTANT(opline, opline->op1);
+						if (Z_TYPE_P(zv) != IS_LONG && Z_TYPE_P(zv) != IS_DOUBLE) {
+							return 0;
+						}
+					} else if (!(tssa->var_info[tssa->ops[idx].op1_use].type & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+						return 0;
+					}
+					if (opline->op2_type == IS_CONST) {
+						zval *zv = RT_CONSTANT(opline, opline->op2);
+						if (Z_TYPE_P(zv) != IS_LONG && Z_TYPE_P(zv) != IS_DOUBLE) {
+							return 0;
+						}
+					} else if (!(tssa->var_info[tssa->ops[idx].op2_use].type & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+						return 0;
+					}
+				} else if (opline->opcode == ZEND_PRE_DEC
+				 || opline->opcode == ZEND_PRE_INC
+				 || opline->opcode == ZEND_POST_DEC
+				 || opline->opcode == ZEND_POST_INC) {
+					if ((opline->op1_type & (IS_VAR|IS_CV))
+					  && tssa->ops[idx].op1_use >= 0
+					  && (tssa->var_info[tssa->ops[idx].op1_use].type & MAY_BE_REF)) {
+						return 0;
+					}
+					if (!(tssa->var_info[tssa->ops[idx].op1_use].type & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 						return 0;
 					}
 					return 1;
