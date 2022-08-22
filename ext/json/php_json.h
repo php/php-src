@@ -72,10 +72,12 @@ typedef enum {
 #define PHP_JSON_PRESERVE_ZERO_FRACTION     (1<<10)
 #define PHP_JSON_UNESCAPED_LINE_TERMINATORS (1<<11)
 
-/* json_decode() and json_encode() common options */
+/* json_validate(), json_decode() and json_encode() common options */
 #define PHP_JSON_INVALID_UTF8_IGNORE        (1<<20)
-#define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
 #define PHP_JSON_THROW_ON_ERROR             (1<<22)
+
+/* json_decode() and json_encode() common options */
+#define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
 
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0

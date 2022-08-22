@@ -212,15 +212,32 @@ value:
 
 %% /* Functions */
 
+static int php_json_parser_array_create_validate(php_json_parser *parser, zval *array)
+{
+	ZVAL_EMPTY_ARRAY(array);
+	return SUCCESS;
+}
+
 static int php_json_parser_array_create(php_json_parser *parser, zval *array)
 {
 	array_init(array);
 	return SUCCESS;
 }
 
+static int php_json_parser_array_append_validate(php_json_parser *parser, zval *array, zval *zvalue)
+{
+	return SUCCESS;
+}
+
 static int php_json_parser_array_append(php_json_parser *parser, zval *array, zval *zvalue)
 {
 	zend_hash_next_index_insert(Z_ARRVAL_P(array), zvalue);
+	return SUCCESS;
+}
+
+static int php_json_parser_object_create_validate(php_json_parser *parser, zval *object)
+{
+	ZVAL_EMPTY_ARRAY(object);
 	return SUCCESS;
 }
 
@@ -231,6 +248,11 @@ static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 	} else {
 		object_init(object);
 	}
+	return SUCCESS;
+}
+
+static int php_json_parser_object_update_validate(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
+{
 	return SUCCESS;
 }
 
@@ -259,6 +281,14 @@ static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
 	int token = php_json_scan(&parser->scanner);
 	value->value = parser->scanner.value;
+
+	if (parser->methods.array_create == php_json_parser_array_create_validate
+		&& parser->methods.array_append == php_json_parser_array_append_validate
+		&& parser->methods.object_create == php_json_parser_object_create_validate
+		&& parser->methods.object_update == php_json_parser_object_update_validate) {
+		zval_ptr_dtor_str(&(parser->scanner.value));
+	}
+
 	return token;
 }
 
@@ -286,6 +316,18 @@ static const php_json_parser_methods default_parser_methods =
 	NULL,
 };
 
+static const php_json_parser_methods validate_parser_methods =
+{
+	php_json_parser_array_create_validate,
+	php_json_parser_array_append_validate,
+	NULL,
+	NULL,
+	php_json_parser_object_create_validate,
+	php_json_parser_object_update_validate,
+	NULL,
+	NULL,
+};
+
 PHP_JSON_API void php_json_parser_init_ex(php_json_parser *parser,
 		zval *return_value,
 		const char *str,
@@ -307,7 +349,8 @@ PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 		const char *str,
 		size_t str_len,
 		int options,
-		int max_depth)
+		int max_depth,
+		bool validate_only)
 {
 	php_json_parser_init_ex(
 			parser,
@@ -316,7 +359,7 @@ PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 			str_len,
 			options,
 			max_depth,
-			&default_parser_methods);
+			(validate_only ? &validate_parser_methods : &default_parser_methods));
 }
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser)
