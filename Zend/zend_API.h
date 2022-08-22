@@ -823,8 +823,18 @@ END_EXTERN_C()
 #define CHECK_ZVAL_STRING(z)
 #endif
 
-#define CHECK_ZVAL_NULL_PATH(p) (Z_STRLEN_P(p) != strlen(Z_STRVAL_P(p)))
-#define CHECK_NULL_PATH(p, l) (strlen(p) != (size_t)(l))
+static zend_always_inline bool zend_str_has_nul_byte(const zend_string *str)
+{
+	return ZSTR_LEN(str) != strlen(ZSTR_VAL(str));
+}
+static zend_always_inline bool zend_char_has_nul_byte(const char *s, size_t known_length)
+{
+	return known_length != strlen(s);
+}
+
+/* Compatibility with PHP 8.1 and below */
+#define CHECK_ZVAL_NULL_PATH(p) zend_str_has_nul_byte(Z_STR_P(p))
+#define CHECK_NULL_PATH(p, l) zend_char_has_nul_byte(p, l)
 
 #define ZVAL_STRINGL(z, s, l) do {				\
 		ZVAL_NEW_STR(z, zend_string_init(s, l, 0));		\
