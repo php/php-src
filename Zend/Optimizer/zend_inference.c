@@ -1951,6 +1951,9 @@ static uint32_t assign_dim_array_result_type(
 				tmp |= MAY_BE_ARRAY_KEY_STRING;
 				if (dim_op_type != IS_CONST) {
 					// FIXME: numeric string
+					if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
+						tmp |= MAY_BE_ARRAY_PACKED;
+					}
 					tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
 				}
 			}
