@@ -13,4 +13,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Enum cannot include magic method __isset in %s on line %d
+Fatal error: Enum Foo cannot include magic method __isset in %s on line %d
