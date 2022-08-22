@@ -811,7 +811,9 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
-				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+				if (UNEXPECTED(Z_PROPERTY_GUARD_P(variable_ptr) & IS_PROP_REINIT)) {
+					Z_PROPERTY_GUARD_P(variable_ptr) &= ~IS_PROP_REINIT;
+				} else if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
 					Z_TRY_DELREF_P(value);
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
@@ -1126,7 +1128,9 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		zval *slot = OBJ_PROP(zobj, property_offset);
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
-			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY))) {
+			if (UNEXPECTED(Z_PROPERTY_GUARD_P(slot) & IS_PROP_REINIT)) {
+				Z_PROPERTY_GUARD_P(slot) &= ~IS_PROP_REINIT;
+			} else if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY))) {
 				zend_readonly_property_unset_error(prop_info->ce, name);
 				return;
 			}

@@ -192,10 +192,13 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 
 ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
 {
+	zval *src, *dst, *end, *slot;
+	zend_property_info *prop_info;
+
 	if (old_object->ce->default_properties_count) {
-		zval *src = old_object->properties_table;
-		zval *dst = new_object->properties_table;
-		zval *end = src + old_object->ce->default_properties_count;
+		src = old_object->properties_table;
+		dst = new_object->properties_table;
+		end = src + old_object->ce->default_properties_count;
 
 		do {
 			i_zval_ptr_dtor(dst);
@@ -203,9 +206,15 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			zval_add_ref(dst);
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
-				zend_property_info *prop_info = zend_get_property_info_for_slot(new_object, dst);
+				prop_info = zend_get_property_info_for_slot(new_object, dst);
 				if (ZEND_TYPE_IS_SET(prop_info->type)) {
 					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(dst), prop_info);
+				}
+			} else if (UNEXPECTED(old_object->ce->clone)) {
+				prop_info = zend_get_property_info_for_slot(new_object, dst);
+				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					slot = OBJ_PROP(new_object, prop_info->offset);
+					Z_TYPE_INFO_P(slot) |= IN_CLONE;
 				}
 			}
 			src++;
@@ -256,6 +265,20 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	if (old_object->ce->clone) {
 		GC_ADDREF(new_object);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
+		if (new_object->ce->default_properties_count) {
+			dst = new_object->properties_table;
+			end = dst + new_object->ce->default_properties_count;
+			do {
+				prop_info = zend_get_property_info_for_slot(new_object, dst);
+				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					slot = OBJ_PROP(new_object, prop_info->offset);
+					if (Z_PROPERTY_GUARD_P(slot) & IN_CLONE) {
+						Z_PROPERTY_GUARD_P(slot) &= ~IN_CLONE;
+					}
+				}
+				dst++;
+			} while (dst != end);
+		}
 		OBJ_RELEASE(new_object);
 	}
 }

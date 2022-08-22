@@ -965,7 +965,9 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 {
 	zval tmp;
 
-	if (UNEXPECTED(info->flags & ZEND_ACC_READONLY)) {
+	if (UNEXPECTED(Z_PROPERTY_GUARD_P(property_val) & IS_PROP_REINIT)) {
+		Z_PROPERTY_GUARD_P(property_val) &= ~IS_PROP_REINIT;
+	} else if (UNEXPECTED(info->flags & ZEND_ACC_READONLY)) {
 		zend_readonly_property_modification_error(info);
 		return &EG(uninitialized_zval);
 	}
@@ -3094,7 +3096,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				ZVAL_INDIRECT(result, ptr);
 				zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
 				if (prop_info) {
-					if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					if (UNEXPECTED(Z_PROPERTY_GUARD_P(ptr) & IS_PROP_REINIT)) {
+						Z_PROPERTY_GUARD_P(ptr) &= ~IS_PROP_REINIT;
+					} else if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
 						/* For objects, W/RW/UNSET fetch modes might not actually modify object.
 						 * Similar as with magic __get() allow them, but return the value as a copy
 						 * to make sure no actual modification is possible. */
