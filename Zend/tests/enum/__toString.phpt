@@ -13,4 +13,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Enum may not include magic method __toString in %s on line %d
+Fatal error: Enum cannot include magic method __toString in %s on line %d

@@ -9,4 +9,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Enum may not include magic method __construct in %s on line %d
+Fatal error: Enum cannot include magic method __construct in %s on line %d
