@@ -8,7 +8,6 @@ enum Foo {
 
     public function __set(string $name, mixed $value)
     {
-        return '__set';
     }
 }
 
