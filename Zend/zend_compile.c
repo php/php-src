@@ -7405,7 +7405,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 	}
 
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Enums may not include properties");
+		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s may not include properties", ZSTR_VAL(ce->name));
 	}
 
 	if (flags & ZEND_ACC_ABSTRACT) {
