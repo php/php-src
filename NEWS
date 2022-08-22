@@ -1,6 +1,79 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.9
+?? ??? ????, PHP 8.1.11
+
+- Core:
+  . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
+    (Tim Starling)
+
+- DOM:
+  . Fixed bug #79451 (DOMDocument->replaceChild on doctype causes double free).
+    (Nathan Freeman)
+
+- Streams:
+  . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
+    (cmb, timwolla)
+
+01 Sep 2022, PHP 8.1.10
+
+- Core:
+  . Fixed --CGI-- support of run-tests.php. (cmb)
+  . Fixed incorrect double to long casting in latest clang. (zeriyoshi)
+  . Fixed bug GH-9266 (GC root buffer keeps growing when dtors are present).
+    (Michael Olšavský)
+
+- Date:
+  . Fixed bug GH-8730 (DateTime::diff miscalculation is same time zone of
+    different type). (Derick)
+  . Fixed bug GH-8964 (DateTime object comparison after applying delta less
+    than 1 second). (Derick)
+  . Fixed bug GH-9106: (DateInterval 1.5s added to DateTimeInterface is rounded
+    down since PHP 8.1.0). (Derick)
+  . Fixed bug #81263 (Wrong result from DateTimeImmutable::diff). (Derick)
+
+- DBA:
+  . Fixed LMDB driver memory leak on DB creation failure (Girgias)
+  . Fixed bug GH-9155 (dba_open("non-existing", "c-", "flatfile") segfaults)
+    (cmb)
+
+- IMAP:
+  . Fixed bug GH-9309 (Segfault when connection is used after imap_close()).
+    (cmb)
+
+- Intl:
+  . Fixed IntlDateFormatter::formatObject() parameter type. (Gert de Pagter)
+
+- MBString:
+  . Fixed bug GH-9008 (mb_detect_encoding(): wrong results with null $encodings).
+    (cmb)
+
+- OPcache:
+  . Fixed bug GH-9033 (Loading blacklist file can fail due to negative length).
+    (cmb)
+  . Fixed bug GH-9164 (Segfault in zend_accel_class_hash_copy).
+    (Arnaud, Sergei Turchanov)
+
+- OpenSSL:
+  . Fixed bug GH-9339 (OpenSSL oid_file path check warning contains
+    uninitialized path). (Jakub Zelenka)
+
+- PDO_SQLite:
+  . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
+
+- SQLite3:
+  . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
+
+- Standard:
+  . Fixed bug GH-9296 (`ksort` behaves incorrectly on arrays with mixed keys).
+    (Denis Vaksman)
+
+- Streams:
+  . Fixed bug GH-8472 (The resource returned by stream_socket_accept may have
+    incorrect metadata). (Jakub Zelenka)
+  . Fixed bug GH-8409 (SSL handshake timeout leaves persistent connections
+    hanging). (Jakub Zelenka, Twosee)
+
+04 Aug 2022, PHP 8.1.9
 
 - CLI:
   . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
@@ -39,6 +112,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-8943 (Fixed Reflection::getModifiersNames() with readonly
     modifier). (Pierrick)
+  . Fixed bug GH-8982 (Attribute with TARGET_METHOD is rejected on fake
+    closure of method). (ilutov)
 
 - Standard:
   . Fixed the crypt_sha256/512 api build with clang > 12. (David Carlier)

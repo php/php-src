@@ -27,8 +27,9 @@ runs:
           gd \
           libzip \
           gmp \
-          tidyp \
+          tidy-html5 \
           libxml2 \
+          libjpeg \
           libxslt \
           postgresql
         brew link icu4c gettext --force

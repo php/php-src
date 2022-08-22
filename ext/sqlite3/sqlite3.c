@@ -2034,6 +2034,9 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 	/* Check open_basedir restrictions first */
 	if (PG(open_basedir) && *PG(open_basedir)) {
 		if (action == SQLITE_ATTACH) {
+			if (!arg1) {
+				return SQLITE_DENY;
+			}
 			if (memcmp(arg1, ":memory:", sizeof(":memory:")) && *arg1) {
 				if (strncmp(arg1, "file:", 5) == 0) {
 					/* starts with "file:" */

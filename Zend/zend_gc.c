@@ -1439,12 +1439,13 @@ static void zend_gc_root_tmpvars(void);
 
 ZEND_API int zend_gc_collect_cycles(void)
 {
-	int count = 0;
+	int total_count = 0;
 	bool should_rerun_gc = 0;
 	bool did_rerun_gc = 0;
 
 rerun_gc:
 	if (GC_G(num_roots)) {
+		int count;
 		gc_root_buffer *current, *last;
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
@@ -1622,6 +1623,7 @@ rerun_gc:
 
 		GC_TRACE("Collection finished");
 		GC_G(collected) += count;
+		total_count += count;
 		GC_G(gc_active) = 0;
 	}
 
@@ -1638,7 +1640,7 @@ rerun_gc:
 finish:
 	zend_get_gc_buffer_release();
 	zend_gc_root_tmpvars();
-	return count;
+	return total_count;
 }
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status)

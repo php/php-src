@@ -105,7 +105,7 @@ jobs:
         debug: [true, false]
         zts: [true, false]
     name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - name: git checkout
         uses: actions/checkout@v2

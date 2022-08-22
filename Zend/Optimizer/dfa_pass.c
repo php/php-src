@@ -710,13 +710,32 @@ static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_b
 {
 	if (block->predecessors_count == 1 && ssa->blocks[block_num].phis == NULL) {
 		int *predecessors, i;
+		zend_basic_block *fe_fetch_block = NULL;
 
 		ZEND_ASSERT(block->successors_count == 1);
 		predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
+		if (block->predecessors_count == 1 && (block->flags & ZEND_BB_FOLLOW)) {
+			zend_basic_block *pred_block = &ssa->cfg.blocks[predecessors[0]];
+
+			if (pred_block->len > 0 && (pred_block->flags & ZEND_BB_REACHABLE)) {
+				if ((op_array->opcodes[pred_block->start + pred_block->len - 1].opcode == ZEND_FE_FETCH_R
+				 || op_array->opcodes[pred_block->start + pred_block->len - 1].opcode == ZEND_FE_FETCH_RW)
+				  && op_array->opcodes[pred_block->start + pred_block->len - 1].op2_type == IS_CV) {
+					fe_fetch_block = pred_block;
+			    }
+			}
+		}
 		for (i = 0; i < block->predecessors_count; i++) {
 			zend_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
 		}
 		zend_ssa_remove_block(op_array, ssa, block_num);
+		if (fe_fetch_block && fe_fetch_block->successors[0] == fe_fetch_block->successors[1]) {
+			/* The body of "foreach" loop was removed */
+			int ssa_var = ssa->ops[fe_fetch_block->start + fe_fetch_block->len - 1].op2_def;
+			if (ssa_var >= 0) {
+				zend_ssa_remove_uses_of_var(ssa, ssa_var);
+			}
+		}
 	}
 }
 

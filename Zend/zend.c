@@ -1621,10 +1621,19 @@ ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
 
 ZEND_API void zend_begin_record_errors(void)
 {
-	ZEND_ASSERT(!EG(record_errors) && "Error recoreding already enabled");
+	ZEND_ASSERT(!EG(record_errors) && "Error recording already enabled");
 	EG(record_errors) = true;
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
+}
+
+ZEND_API void zend_emit_recorded_errors(void)
+{
+	EG(record_errors) = false;
+	for (uint32_t i = 0; i < EG(num_errors); i++) {
+		zend_error_info *error = EG(errors)[i];
+		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
+	}
 }
 
 ZEND_API void zend_free_recorded_errors(void)
