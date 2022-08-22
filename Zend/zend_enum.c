@@ -28,7 +28,7 @@
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum cannot include magic method %s", methodName); \
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), methodName); \
 		} \
 	} while (0);
 
@@ -99,7 +99,7 @@ static void zend_verify_enum_magic_methods(zend_class_entry *ce)
 		const char *forbidden_method = forbidden_methods[i];
 
 		if (zend_hash_str_exists(&ce->function_table, forbidden_method, strlen(forbidden_method))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum cannot include magic method %s", forbidden_method);
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), forbidden_method);
 		}
 	}
 }
@@ -108,7 +108,7 @@ static void zend_verify_enum_interfaces(zend_class_entry *ce)
 {
 	if (zend_class_implements_interface(ce, zend_ce_serializable)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Enums cannot implement the Serializable interface");
+			"Enums %s cannot implement the Serializable interface", ZSTR_VAL(ce->name));
 	}
 }
 
