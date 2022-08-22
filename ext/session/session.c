@@ -657,7 +657,7 @@ static bool is_session_name_valid(const zend_string *name, int diagnostic_type)
 		return false;
 	}
 	/* NUL bytes are not allowed */
-	if (ZSTR_LEN(name) != strlen(ZSTR_VAL(name))) {
+	if (zend_str_has_nul_byte(name)) {
 		if (diagnostic_type) {
 			php_error_docref(NULL, diagnostic_type, "session.name \"%s\" cannot contain NUL bytes", ZSTR_VAL(name));
 		}
