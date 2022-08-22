@@ -400,7 +400,7 @@ static zend_result odbc_handle_check_liveness(pdo_dbh_t *dbh)
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 
 	ret = SQLGetConnectAttr(H->dbc, SQL_ATTR_CONNECTION_DEAD, &dead, 0, NULL);
-	if (dead == SQL_CD_TRUE) {
+	if (ret == SQL_SUCCESS && dead == SQL_CD_TRUE) {
 		/* Bail early here, since we know it's gone */
 		return FAILURE;
 	}

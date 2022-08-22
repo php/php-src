@@ -2251,7 +2251,7 @@ try_and_get_another_connection:
 				ret = SQLGetConnectAttr(db_conn->hdbc,
 					SQL_ATTR_CONNECTION_DEAD,
 					&dead, 0, NULL);
-				if (dead == SQL_CD_TRUE) {
+				if (ret == SQL_SUCCESS && dead == SQL_CD_TRUE) {
 					/* Bail early here, since we know it's gone */
 					zend_hash_str_del(&EG(persistent_list), hashed_details, hashed_len);
 					goto try_and_get_another_connection;
