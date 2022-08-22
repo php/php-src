@@ -108,7 +108,7 @@ static void zend_verify_enum_interfaces(zend_class_entry *ce)
 {
 	if (zend_class_implements_interface(ce, zend_ce_serializable)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Enums %s cannot implement the Serializable interface", ZSTR_VAL(ce->name));
+			"Enum %s cannot implement the Serializable interface", ZSTR_VAL(ce->name));
 	}
 }
 
