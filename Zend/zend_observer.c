@@ -301,7 +301,7 @@ ZEND_API void zend_observer_function_declared_register(zend_observer_function_de
 	zend_llist_add_element(&zend_observer_function_declared_callbacks, &cb);
 }
 
-ZEND_API void ZEND_FASTCALL zend_observer_function_declared_notify(zend_op_array *op_array, zend_string *name)
+ZEND_API void ZEND_FASTCALL _zend_observer_function_declared_notify(zend_op_array *op_array, zend_string *name)
 {
 	if (CG(compiler_options) & ZEND_COMPILE_IGNORE_OBSERVER) {
 		return;
@@ -319,7 +319,7 @@ ZEND_API void zend_observer_class_linked_register(zend_observer_class_linked_cb 
 	zend_llist_add_element(&zend_observer_class_linked_callbacks, &cb);
 }
 
-ZEND_API void ZEND_FASTCALL zend_observer_class_linked_notify(zend_class_entry *ce, zend_string *name)
+ZEND_API void ZEND_FASTCALL _zend_observer_class_linked_notify(zend_class_entry *ce, zend_string *name)
 {
 	if (CG(compiler_options) & ZEND_COMPILE_IGNORE_OBSERVER) {
 		return;
@@ -337,7 +337,7 @@ ZEND_API void zend_observer_error_register(zend_observer_error_cb cb)
 	zend_llist_add_element(&zend_observer_error_callbacks, &cb);
 }
 
-void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
+ZEND_API void _zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	for (zend_llist_element *element = zend_observer_error_callbacks.head; element; element = element->next) {
 		zend_observer_error_cb callback = *(zend_observer_error_cb *) (element->data);
