@@ -2256,7 +2256,10 @@ try_and_get_another_connection:
 					zend_hash_str_del(&EG(persistent_list), hashed_details, hashed_len);
 					goto try_and_get_another_connection;
 				}
-				/* If the driver doesn't support it, fall back to old heuristic */
+				/* If the driver doesn't support it, or returns
+				 * false (could be a false positive), fall back
+				 * to the old heuristic.
+				 */
 				ret = SQLGetInfo(db_conn->hdbc,
 					SQL_DATA_SOURCE_READ_ONLY,
 					d_name, sizeof(d_name), &len);

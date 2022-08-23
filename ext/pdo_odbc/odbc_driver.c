@@ -405,7 +405,8 @@ static zend_result odbc_handle_check_liveness(pdo_dbh_t *dbh)
 		return FAILURE;
 	}
 	/*
-	 * If the driver doesn't support SQL_ATTR_CONNECTION_DEAD, fall back
+	 * If the driver doesn't support SQL_ATTR_CONNECTION_DEAD, or if
+	 * it returns false (which could be a false positive), fall back
 	 * to using SQL_DATA_SOURCE_READ_ONLY, which isn't semantically
 	 * correct, but works with many drivers.
 	 */
