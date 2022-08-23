@@ -160,7 +160,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 		}
 		_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
 		if (UNEXPECTED(call_observers) && *ZSTR_VAL(p->key)) { // if not rtd key
-			zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
+			_zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
 		}
 	}
 	target->nInternalPointer = 0;
@@ -224,19 +224,18 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 			}
 		} else {
 			zend_class_entry *ce = Z_PTR(p->val);
-			t = _zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+			_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
 			if ((ce->ce_flags & ZEND_ACC_LINKED)
 			 && ZSTR_HAS_CE_CACHE(ce->name)
 			 && ZSTR_VAL(p->key)[0]) {
 				ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
 				if (UNEXPECTED(call_observers)) {
-					zend_observer_class_linked_notify(ce, p->key);
+					_zend_observer_class_linked_notify(ce, p->key);
 				}
 			}
 		}
 	}
 	target->nInternalPointer = 0;
-	return;
 }
 
 void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persistent_script)
