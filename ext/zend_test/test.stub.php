@@ -177,6 +177,20 @@ namespace ZendTestNS2 {
         public function method(): void {}
     }
 
+    function namespaced_func(): bool {}
+
+    /** @deprecated */
+    function namespaced_deprecated_func(): void {}
+
+    /** @alias namespaced_alias_func */
+    function namespaced_aliased_func(): void {}
+
+    /**
+      * @deprecated
+      * @alias namespaced_deprecated_alias_func
+      */
+    function namespaced_deprecated_aliased_func(): void {}
+
 }
 
 namespace ZendTestNS2\ZendSubNS {

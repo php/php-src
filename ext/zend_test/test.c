@@ -425,13 +425,24 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
 	}
 }
 
-static ZEND_FUNCTION(namespaced_func)
+static ZEND_FUNCTION(ZendTestNS2_namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
 }
 
-static ZEND_FUNCTION(namespaced_deprecated_func)
+static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_TRUE;
+}
+
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
