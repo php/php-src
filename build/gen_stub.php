@@ -1037,6 +1037,10 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getDeclarationName(): string {
+        return implode('_', $this->name->parts);
+    }
+
+    public function getFunctionName(): string {
         return $this->name->getLast();
     }
 
@@ -1380,39 +1384,42 @@ class FuncInfo {
             }
         } else if ($this->name instanceof FunctionName) {
             $namespace = $this->name->getNamespace();
-            $declarationName = $this->name->getDeclarationName();
+            $functionName = $this->name->getFunctionName();
+            $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
 
-            if ($this->alias && $this->isDeprecated) {
+            if ($namespace) {
+                // Namespaced functions are always declared as aliases to avoid name conflicts when two functions with
+                // the same name exist in separate namespaces
+                $macro = $this->isDeprecated ? 'ZEND_NS_DEP_FALIAS' : 'ZEND_NS_FALIAS';
+
+                // Render A\B as "A\\B" in C strings for namespaces
                 return sprintf(
-                    "\tZEND_DEP_FALIAS(%s, %s, %s)\n",
-                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    "\t%s(\"%s\", %s, %s, %s)\n",
+                    $macro, addslashes($namespace), $this->name->getFunctionName(), $declarationName, $this->getArgInfoName()
                 );
             }
 
             if ($this->alias) {
+                $macro = $this->isDeprecated ? 'ZEND_DEP_FALIAS' : 'ZEND_FALIAS';
+
                 return sprintf(
-                    "\tZEND_FALIAS(%s, %s, %s)\n",
-                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    "\t%s(%s, %s, %s)\n",
+                    $macro, $functionName, $declarationName, $this->getArgInfoName()
                 );
             }
 
-            if ($this->isDeprecated) {
-                return sprintf(
-                    "\tZEND_DEP_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
+            switch (true) {
+                case $this->isDeprecated:
+                    $macro = 'ZEND_DEP_FE';
+                    break;
+                case $this->supportsCompileTimeEval:
+                    $macro = 'ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE';
+                    break;
+                default:
+                    $macro = 'ZEND_FE';
             }
 
-            if ($namespace) {
-                // Render A\B as "A\\B" in C strings for namespaces
-                return sprintf(
-                    "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    addslashes($namespace), $declarationName, $this->getArgInfoName());
-            } else {
-                if ($this->supportsCompileTimeEval) {
-                    return sprintf(
-                        "\tZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
-                }
-                return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
-            }
+            return sprintf("\t%s(%s, %s)\n", $macro, $functionName, $this->getArgInfoName());
         } else {
             throw new Error("Cannot happen");
         }

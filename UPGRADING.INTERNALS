@@ -63,6 +63,11 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 ========================
 
 * Unsupported libxml2 2.10.0 symbols are no longer exported on Windows.
+* Identifier names for namespaced functions generated from stub files through
+  gen_stub.php have been changed. This requires that namespaced functions
+  should be declared via the PHP_FUNCTION macro by using the fully qualified
+  function name (whereas each part is separated by "_") instead of just the
+  function name itself.
 
 ========================
 3. Module changes

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: daa7be53e9009c66c814fb5b0407a6dfbe09679a */
+ * Stub hash: 0c3e4da20bf5b32e289a795e0beac649294e83f3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -19,6 +19,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_deprecated, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_aliased arginfo_zend_test_void_return
+
+#define arginfo_zend_test_deprecated_aliased arginfo_zend_test_void_return
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_create_unterminated_string, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
@@ -91,8 +95,22 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_zend_test_zend_ini_parse_uquantity arginfo_zend_test_zend_ini_parse_quantity
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
+
+#define arginfo_ZendTestNS2_namespaced_aliased_func arginfo_zend_test_void_return
+
+#define arginfo_ZendTestNS2_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
+
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_func arginfo_ZendTestNS2_namespaced_func
+
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func arginfo_zend_test_void_return
+
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func arginfo_zend_test_void_return
+
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_is_object, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -108,7 +126,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class__ZendTestChildClass_returnsThrowable, 0, 0, Exception, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class__ZendTestTrait_testMethod arginfo_ZendTestNS2_ZendSubNS_namespaced_func
+#define arginfo_class__ZendTestTrait_testMethod arginfo_ZendTestNS2_namespaced_func
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestParameterAttribute___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
@@ -144,6 +162,8 @@ static ZEND_FUNCTION(zend_test_nullable_array_return);
 static ZEND_FUNCTION(zend_test_void_return);
 static ZEND_FUNCTION(zend_test_compile_string);
 static ZEND_FUNCTION(zend_test_deprecated);
+static ZEND_FUNCTION(zend_test_alias);
+static ZEND_FUNCTION(zend_test_deprecated_alias);
 static ZEND_FUNCTION(zend_create_unterminated_string);
 static ZEND_FUNCTION(zend_terminate_string);
 static ZEND_FUNCTION(zend_leak_variable);
@@ -162,7 +182,12 @@ static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
-static ZEND_FUNCTION(namespaced_func);
+static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
+static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
+static ZEND_FUNCTION(namespaced_alias_func);
+static ZEND_FUNCTION(namespaced_deprecated_alias_func);
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
 static ZEND_METHOD(_ZendTestClass, returnsStatic);
@@ -187,6 +212,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
 	ZEND_FE(zend_test_compile_string, arginfo_zend_test_compile_string)
 	ZEND_DEP_FE(zend_test_deprecated, arginfo_zend_test_deprecated)
+	ZEND_FALIAS(zend_test_aliased, zend_test_alias, arginfo_zend_test_aliased)
+	ZEND_DEP_FALIAS(zend_test_deprecated_aliased, zend_test_deprecated_alias, arginfo_zend_test_deprecated_aliased)
 	ZEND_FE(zend_create_unterminated_string, arginfo_zend_create_unterminated_string)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
@@ -205,7 +232,14 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
-	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
+	ZEND_NS_FALIAS("ZendTestNS2", namespaced_func, ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func)
+	ZEND_NS_DEP_FALIAS("ZendTestNS2", namespaced_deprecated_func, ZendTestNS2_namespaced_deprecated_func, arginfo_ZendTestNS2_namespaced_deprecated_func)
+	ZEND_NS_FALIAS("ZendTestNS2", namespaced_aliased_func, namespaced_alias_func, arginfo_ZendTestNS2_namespaced_aliased_func)
+	ZEND_NS_DEP_FALIAS("ZendTestNS2", namespaced_deprecated_aliased_func, namespaced_deprecated_alias_func, arginfo_ZendTestNS2_namespaced_deprecated_aliased_func)
+	ZEND_NS_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_func, ZendTestNS2_ZendSubNS_namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
+	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_func, ZendTestNS2_ZendSubNS_namespaced_deprecated_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func)
+	ZEND_NS_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_aliased_func, namespaced_alias_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func)
+	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_aliased_func, namespaced_deprecated_alias_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func)
 	ZEND_FE_END
 };
 
