@@ -1017,15 +1017,6 @@ static bool zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *s
 		}
 		return (tmp->min <= tmp->max);
 	} else if (ssa->vars[var].definition < 0) {
-		if (var < op_array->last_var &&
-		    op_array->function_name) {
-
-			tmp->min = 0;
-			tmp->max = 0;
-			tmp->underflow = 0;
-			tmp->overflow = 0;
-			return 1;
-		}
 		return 0;
 	}
 	line = ssa->vars[var].definition;
@@ -4199,52 +4190,7 @@ static void zend_func_return_info(const zend_op_array   *op_array,
 				if (opline->op1_type == IS_CONST) {
 					zval *zv = CRT_CONSTANT(opline->op1);
 
-					if (Z_TYPE_P(zv) == IS_NULL) {
-						if (tmp_has_range < 0) {
-							tmp_has_range = 1;
-							tmp_range.underflow = 0;
-							tmp_range.min = 0;
-							tmp_range.max = 0;
-							tmp_range.overflow = 0;
-						} else if (tmp_has_range) {
-							if (!tmp_range.underflow) {
-								tmp_range.min = MIN(tmp_range.min, 0);
-							}
-							if (!tmp_range.overflow) {
-								tmp_range.max = MAX(tmp_range.max, 0);
-							}
-						}
-					} else if (Z_TYPE_P(zv) == IS_FALSE) {
-						if (tmp_has_range < 0) {
-							tmp_has_range = 1;
-							tmp_range.underflow = 0;
-							tmp_range.min = 0;
-							tmp_range.max = 0;
-							tmp_range.overflow = 0;
-						} else if (tmp_has_range) {
-							if (!tmp_range.underflow) {
-								tmp_range.min = MIN(tmp_range.min, 0);
-							}
-							if (!tmp_range.overflow) {
-								tmp_range.max = MAX(tmp_range.max, 0);
-							}
-						}
-					} else if (Z_TYPE_P(zv) == IS_TRUE) {
-						if (tmp_has_range < 0) {
-							tmp_has_range = 1;
-							tmp_range.underflow = 0;
-							tmp_range.min = 1;
-							tmp_range.max = 1;
-							tmp_range.overflow = 0;
-						} else if (tmp_has_range) {
-							if (!tmp_range.underflow) {
-								tmp_range.min = MIN(tmp_range.min, 1);
-							}
-							if (!tmp_range.overflow) {
-								tmp_range.max = MAX(tmp_range.max, 1);
-							}
-						}
-					} else if (Z_TYPE_P(zv) == IS_LONG) {
+					if (Z_TYPE_P(zv) == IS_LONG) {
 						if (tmp_has_range < 0) {
 							tmp_has_range = 1;
 							tmp_range.underflow = 0;
