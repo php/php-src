@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 80355bb52d643177e3a661a515d9ea915bd1e2fc */
+ * Stub hash: 7b548f713f2250c5af982305c869d43376663b3a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -78,6 +78,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_object_vars, 0, 1, IS_ARRAY,
 ZEND_END_ARG_INFO()
 
 #define arginfo_get_mangled_object_vars arginfo_get_object_vars
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_load_mangled_object_vars, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+	ZEND_ARG_TYPE_INFO(0, vars, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class_methods, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_MASK(0, object_or_class, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
@@ -238,6 +243,7 @@ ZEND_FUNCTION(is_a);
 ZEND_FUNCTION(get_class_vars);
 ZEND_FUNCTION(get_object_vars);
 ZEND_FUNCTION(get_mangled_object_vars);
+ZEND_FUNCTION(load_mangled_object_vars);
 ZEND_FUNCTION(get_class_methods);
 ZEND_FUNCTION(method_exists);
 ZEND_FUNCTION(property_exists);
@@ -299,6 +305,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_class_vars, arginfo_get_class_vars)
 	ZEND_FE(get_object_vars, arginfo_get_object_vars)
 	ZEND_FE(get_mangled_object_vars, arginfo_get_mangled_object_vars)
+	ZEND_FE(load_mangled_object_vars, arginfo_load_mangled_object_vars)
 	ZEND_FE(get_class_methods, arginfo_get_class_methods)
 	ZEND_FE(method_exists, arginfo_method_exists)
 	ZEND_FE(property_exists, arginfo_property_exists)

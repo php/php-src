@@ -59,6 +59,8 @@ function get_object_vars(object $object): array {}
 
 function get_mangled_object_vars(object $object): array {}
 
+function load_mangled_object_vars(object $object, array $vars): void {}
+
 /**
  * @return array<int, string>
  * @refcount 1
