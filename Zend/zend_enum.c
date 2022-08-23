@@ -28,7 +28,7 @@
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum may not include %s", methodName); \
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), methodName); \
 		} \
 	} while (0);
 
@@ -67,7 +67,7 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 			continue;
 		}
 		// FIXME: File/line number for traits?
-		zend_error_noreturn(E_COMPILE_ERROR, "Enum \"%s\" may not include properties",
+		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include properties",
 			ZSTR_VAL(ce->name));
 	} ZEND_HASH_FOREACH_END();
 }
@@ -99,7 +99,7 @@ static void zend_verify_enum_magic_methods(zend_class_entry *ce)
 		const char *forbidden_method = forbidden_methods[i];
 
 		if (zend_hash_str_exists(&ce->function_table, forbidden_method, strlen(forbidden_method))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum may not include magic method %s", forbidden_method);
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), forbidden_method);
 		}
 	}
 }
@@ -108,7 +108,7 @@ static void zend_verify_enum_interfaces(zend_class_entry *ce)
 {
 	if (zend_class_implements_interface(ce, zend_ce_serializable)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Enums may not implement the Serializable interface");
+			"Enum %s cannot implement the Serializable interface", ZSTR_VAL(ce->name));
 	}
 }
 
@@ -307,10 +307,10 @@ not_found:
 		}
 
 		if (ce->enum_backing_type == IS_LONG) {
-			zend_value_error(ZEND_LONG_FMT " is not a valid backing value for enum \"%s\"", long_key, ZSTR_VAL(ce->name));
+			zend_value_error(ZEND_LONG_FMT " is not a valid backing value for enum %s", long_key, ZSTR_VAL(ce->name));
 		} else {
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
-			zend_value_error("\"%s\" is not a valid backing value for enum \"%s\"", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
+			zend_value_error("\"%s\" is not a valid backing value for enum %s", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
 		}
 		return FAILURE;
 	}
