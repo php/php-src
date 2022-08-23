@@ -95,6 +95,16 @@ static ZEND_FUNCTION(zend_test_deprecated)
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1);
 }
 
+static ZEND_FUNCTION(zend_test_alias)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(zend_test_deprecated_alias)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
 /* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
@@ -419,6 +429,21 @@ static ZEND_FUNCTION(namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
+}
+
+static ZEND_FUNCTION(namespaced_deprecated_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(namespaced_alias_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(namespaced_deprecated_alias_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 static ZEND_FUNCTION(zend_test_parameter_with_attribute)

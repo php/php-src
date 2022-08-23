@@ -1383,22 +1383,42 @@ class FuncInfo {
             $declarationName = $this->name->getDeclarationName();
 
             if ($this->alias && $this->isDeprecated) {
-                return sprintf(
-                    "\tZEND_DEP_FALIAS(%s, %s, %s)\n",
-                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
-                );
+                if ($namespace) {
+                    return sprintf(
+                        "\tZEND_NS_DEP_FALIAS(\"%s\", %s, %s, %s)\n",
+                        addslashes($namespace), $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    );
+                } else {
+                    return sprintf(
+                        "\tZEND_DEP_FALIAS(%s, %s, %s)\n",
+                        $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    );
+                }
             }
 
             if ($this->alias) {
-                return sprintf(
-                    "\tZEND_FALIAS(%s, %s, %s)\n",
-                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
-                );
+                if ($namespace) {
+                    return sprintf(
+                        "\tZEND_NS_FALIAS(\"%s\", %s, %s, %s)\n",
+                        addslashes($namespace), $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    );
+                } else {
+                    return sprintf(
+                        "\tZEND_FALIAS(%s, %s, %s)\n",
+                        $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    );
+                }
             }
 
             if ($this->isDeprecated) {
-                return sprintf(
-                    "\tZEND_DEP_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
+                if ($namespace) {
+                    return sprintf(
+                        "\tZEND_NS_DEP_FE(\"%s\", %s, %s)\n",
+                        addslashes($namespace), $declarationName, $this->getArgInfoName());
+                } else {
+                    return sprintf(
+                        "\tZEND_DEP_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
+                }
             }
 
             if ($namespace) {
