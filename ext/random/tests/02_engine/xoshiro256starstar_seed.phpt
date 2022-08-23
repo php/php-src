@@ -6,17 +6,17 @@ Random: Engine: Xoshiro256StarStar: The seed parameter must work as expected
 use Random\Engine\Xoshiro256StarStar;
 
 echo "Random integer seed", PHP_EOL;
-$engine = new Xoshiro256StarStar(\random_int(\PHP_INT_MIN, \PHP_INT_MAX));
+$engine = new Xoshiro256StarStar(random_int(PHP_INT_MIN, PHP_INT_MAX));
 echo PHP_EOL, PHP_EOL;
 
 echo "Random string seed", PHP_EOL;
-$engine = new Xoshiro256StarStar(\random_bytes(32));
+$engine = new Xoshiro256StarStar(random_bytes(32));
 echo PHP_EOL, PHP_EOL;
 
 echo "Invalid data type", PHP_EOL;
 try {
     $engine = new Xoshiro256StarStar(1.0);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
@@ -24,15 +24,15 @@ echo PHP_EOL, PHP_EOL;
 echo "Invalid string seed length", PHP_EOL;
 try {
     $engine = new Xoshiro256StarStar('foobar');
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
 
 echo "Null seed", PHP_EOL;
 try {
-    $engine = new Random\Engine\Xoshiro256StarStar(\str_repeat("\x00", 32));
-} catch (\Throwable $e) {
+    $engine = new Xoshiro256StarStar(str_repeat("\x00", 32));
+} catch (Throwable $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
