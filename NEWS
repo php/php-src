@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9431 (DateTime::getLastErrors() not returning false when no
     errors/warnings). (Derick)
 
+- ODBC:
+  . Fixed bug GH-9347 (Current ODBC liveness checks may be inadequate). (Calvin
+    Buckley)
+
 - Opcache:
   . Fixed bug GH-9371 (Crash with JIT on mac arm64)
     (jdp1024/David Carlier)
@@ -31,6 +35,10 @@ PHP                                                                        NEWS
   . Implement FR #76935 ("chacha20-poly1305" is an AEAD but does not work like
     AEAD). (Jakub Zelenka)
   . Added openssl_cipher_key_length function. (Jakub Zelenka)
+
+- PDO_ODBC:
+  . Fixed bug GH-9347 (Current ODBC liveness checks may be inadequate). (Calvin
+    Buckley)
 
 - Random:
   . Fixed bug GH-9415 (Randomizer::getInt(0, 2**32 - 1) with Mt19937
