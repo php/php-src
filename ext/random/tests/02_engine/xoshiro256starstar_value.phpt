@@ -1,18 +1,21 @@
 --TEST--
-Random: Engine: Xoshiro256StarStar: value
+Random: Engine: Xoshiro256StarStar: For a reference seed a fixed reference value must be generated
 --FILE--
 <?php
 
-$engine = new \Random\Engine\Xoshiro256StarStar(1234);
+use Random\Engine\Xoshiro256StarStar;
 
-for ($i = 0; $i < 10000; $i++) {
+$engine = new Xoshiro256StarStar(1234);
+
+for ($i = 0; $i < 10_000; $i++) {
     $engine->generate();
 }
 
 $engine->jump();
 $engine->jumpLong();
 
-echo \bin2hex($engine->generate());
+var_dump(bin2hex($engine->generate()));
+
 ?>
 --EXPECT--
-1f197e9ca7969123
+string(16) "1f197e9ca7969123"

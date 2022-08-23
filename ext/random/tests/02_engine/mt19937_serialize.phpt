@@ -1,9 +1,11 @@
 --TEST--
-Random: Engine: Mt19937: serialize
+Random: Engine: Mt19937: The serialization output must be stable
 --FILE--
 <?php
 
-echo serialize(new \Random\Engine\Mt19937(1234));
+use Random\Engine\Mt19937;
+
+echo serialize(new Mt19937(1234));
 
 ?>
 --EXPECT--

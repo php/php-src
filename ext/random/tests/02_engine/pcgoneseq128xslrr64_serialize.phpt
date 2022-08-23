@@ -1,9 +1,11 @@
 --TEST--
-Random: Engine: PcgOneseq128XslRr64: serialize
+Random: Engine: PcgOneseq128XslRr64: The serialization output must be stable
 --FILE--
 <?php
 
-echo serialize(new \Random\Engine\PcgOneseq128XslRr64(1234));
+use Random\Engine\PcgOneseq128XslRr64;
+
+echo serialize(new PcgOneseq128XslRr64(1234));
 
 ?>
 --EXPECT--

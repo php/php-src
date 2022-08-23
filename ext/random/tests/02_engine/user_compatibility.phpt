@@ -1,63 +1,44 @@
 --TEST--
-Random: Engine: User: compatibility
+Random: Engine: Native engines can be wrapped without changing their sequence
 --FILE--
 <?php
 
-$native_engine = new \Random\Engine\Mt19937(1234);
-$user_engine = new class () implements \Random\Engine {
-    public function __construct(private $engine = new \Random\Engine\Mt19937(1234))
+use Random\Engine;
+use Random\Engine\Mt19937;
+use Random\Engine\PcgOneseq128XslRr64;
+use Random\Engine\Xoshiro256StarStar;
+
+class WrapperEngine implements Engine
+{
+    public function __construct(private readonly Engine $engine)
     {
     }
 
     public function generate(): string
     {
         return $this->engine->generate();
-    }
-};
-
-for ($i = 0; $i < 1000; $i++) {
-    if ($native_engine->generate() !== $user_engine->generate()) {
-        die('failure Mt19937');
     }
 }
 
-$native_engine = new \Random\Engine\PcgOneseq128XslRr64(1234);
-$user_engine = new class () implements \Random\Engine {
-    public function __construct(private $engine = new \Random\Engine\PcgOneseq128XslRr64(1234))
-    {
-    }
+$engines = [];
+$engines[] = new Mt19937(1234);
+$engines[] = new PcgOneseq128XslRr64(1234);
+$engines[] = new Xoshiro256StarStar(1234);
 
-    public function generate(): string
-    {
-        return $this->engine->generate();
-    }
-};
+foreach ($engines as $engine) {
+    $native_engine = clone $engine;
+    $user_engine = new WrapperEngine(clone $engine);
 
-for ($i = 0; $i < 1000; $i++) {
-    if ($native_engine->generate() !== $user_engine->generate()) {
-        die('failure PcgOneseq128XslRr64');
-    }
-}
-
-$native_engine = new \Random\Engine\Xoshiro256StarStar(1234);
-$user_engine = new class () implements \Random\Engine {
-    public function __construct(private $engine = new \Random\Engine\Xoshiro256StarStar(1234))
-    {
-    }
-
-    public function generate(): string
-    {
-        return $this->engine->generate();
-    }
-};
-
-for ($i = 0; $i < 1000; $i++) {
-    if ($native_engine->generate() !== $user_engine->generate()) {
-        die('failure Xoshiro256StarStar');
+    for ($i = 0; $i < 10_000; $i++) {
+        if ($native_engine->generate() !== $user_engine->generate()) {
+            $className = $engine::class;
+            die("failure: {$className} at {$i}");
+        }
     }
 }
 
 die('success');
+
 ?>
 --EXPECT--
 success
