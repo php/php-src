@@ -140,7 +140,7 @@ void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *s
 	src->pDestructor = orig_dtor;
 }
 
-static zend_never_inline void zend_accel_functions_declared_nitify(HashTable *ht)
+static zend_never_inline void zend_accel_functions_declared_notify(HashTable *ht)
 {
 	Bucket *p, *end;
 
@@ -174,7 +174,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	target->nInternalPointer = 0;
 
 	if (zend_observer_function_declared_observed) {
-		zend_accel_functions_declared_nitify(source);
+		zend_accel_functions_declared_notify(source);
 	}
 
 	return;
