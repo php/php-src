@@ -199,7 +199,6 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type)
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &spl_filesystem_object_handlers;
 
 	return &intern->std;
 }
@@ -210,15 +209,6 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type)
 static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 {
 	return spl_filesystem_object_new_ex(class_type);
-}
-/* }}} */
-
-/* {{{ spl_filesystem_object_new_check */
-static zend_object *spl_filesystem_object_new_check(zend_class_entry *class_type)
-{
-	spl_filesystem_object *ret = spl_filesystem_from_obj(spl_filesystem_object_new_ex(class_type));
-	ret->std.handlers = &spl_filesystem_object_check_handlers;
-	return &ret->std;
 }
 /* }}} */
 
@@ -2756,6 +2746,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 {
 	spl_ce_SplFileInfo = register_class_SplFileInfo(zend_ce_stringable);
 	spl_ce_SplFileInfo->create_object = spl_filesystem_object_new;
+	spl_ce_SplFileInfo->default_object_handlers = &spl_filesystem_object_handlers;
 
 	memcpy(&spl_filesystem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
@@ -2781,14 +2772,16 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 #ifdef HAVE_GLOB
 	spl_ce_GlobIterator = register_class_GlobIterator(spl_ce_FilesystemIterator, zend_ce_countable);
-	spl_ce_GlobIterator->create_object = spl_filesystem_object_new_check;
+	spl_ce_GlobIterator->create_object = spl_filesystem_object_new;
+	spl_ce_GlobIterator->default_object_handlers = &spl_filesystem_object_check_handlers;
 #endif
 
 	spl_ce_SplFileObject = register_class_SplFileObject(spl_ce_SplFileInfo, spl_ce_RecursiveIterator, spl_ce_SeekableIterator);
-	spl_ce_SplFileObject->create_object = spl_filesystem_object_new_check;
+	spl_ce_SplFileObject->default_object_handlers = &spl_filesystem_object_check_handlers;
+	spl_ce_SplFileObject->create_object = spl_filesystem_object_new;
 
 	spl_ce_SplTempFileObject = register_class_SplTempFileObject(spl_ce_SplFileObject);
-	spl_ce_SplTempFileObject->create_object = spl_filesystem_object_new_check;
+	spl_ce_SplTempFileObject->create_object = spl_filesystem_object_new;
 
 	return SUCCESS;
 }

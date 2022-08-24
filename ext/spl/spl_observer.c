@@ -265,8 +265,6 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 
 	zend_hash_init(&intern->storage, 0, NULL, spl_object_storage_dtor, 0);
 
-	intern->std.handlers = &spl_handler_SplObjectStorage;
-
 	while (parent) {
 		if (parent == spl_ce_SplObjectStorage) {
 			/* Possible optimization: Cache these results with a map from class entry to IS_NULL/IS_PTR.
@@ -1329,6 +1327,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_arrayaccess);
 	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
+	spl_ce_SplObjectStorage->default_object_handlers = &spl_handler_SplObjectStorage;
 
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
@@ -1344,6 +1343,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
 	spl_ce_MultipleIterator->create_object = spl_SplObjectStorage_new;
+	spl_ce_MultipleIterator->default_object_handlers = &spl_handler_SplObjectStorage;
 
 	return SUCCESS;
 }

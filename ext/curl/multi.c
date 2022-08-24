@@ -512,14 +512,11 @@ PHP_FUNCTION(curl_multi_setopt)
 
 /* CurlMultiHandle class */
 
-static zend_object_handlers curl_multi_handlers;
-
 static zend_object *curl_multi_create_object(zend_class_entry *class_type) {
 	php_curlm *intern = zend_object_alloc(sizeof(php_curlm), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &curl_multi_handlers;
 
 	return &intern->std;
 }
@@ -582,8 +579,11 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 	return zend_std_get_properties(object);
 }
 
+static zend_object_handlers curl_multi_handlers;
+
 void curl_multi_register_handlers(void) {
 	curl_multi_ce->create_object = curl_multi_create_object;
+	curl_multi_ce->default_object_handlers = &curl_multi_handlers;
 
 	memcpy(&curl_multi_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_multi_handlers.offset = XtOffsetOf(php_curlm, std);

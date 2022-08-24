@@ -627,7 +627,6 @@ zend_object* php_com_object_new(zend_class_entry *ce)
 	obj->ce = ce;
 
 	zend_object_std_init(&obj->zo, ce);
-	obj->zo.handlers = &php_com_object_handlers;
 
 	obj->typeinfo = NULL;
 
