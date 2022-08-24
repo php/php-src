@@ -45,6 +45,7 @@ typedef struct {
 	zend_bool		emulate_prepares;
 	zend_bool		disable_native_prepares; /* deprecated since 5.6 */
 	zend_bool		disable_prepares;
+	unsigned int	trans_counter;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -95,6 +96,7 @@ struct pdo_pgsql_lob_self {
 	PGconn *conn;
 	int lfd;
 	Oid oid;
+	unsigned int trans_counter_value;
 };
 
 enum pdo_pgsql_specific_constants {

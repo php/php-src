@@ -35,6 +35,8 @@
 #include "zend_exceptions.h"
 #include "pgsql_driver_arginfo.h"
 
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh);
+
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
 	register int i = strlen(message)-1;
@@ -141,8 +143,10 @@ static ssize_t pgsql_lob_read(php_stream *stream, char *buf, size_t count)
 static int pgsql_lob_close(php_stream *stream, int close_handle)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)Z_PDO_DBH_P(&self->dbh);
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(&self->dbh);
 
-	if (close_handle) {
+	if (close_handle && pgsql_handle_in_transaction(dbh) && self->trans_counter_value == H->trans_counter) {
 		lo_close(self->conn, self->lfd);
 	}
 	zval_ptr_dtor(&self->dbh);
@@ -190,6 +194,7 @@ php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
 	self->lfd = lfd;
 	self->oid = oid;
 	self->conn = H->server;
+	self->trans_counter_value = H->trans_counter;
 
 	stm = php_stream_alloc(&pdo_pgsql_lob_stream_ops, self, 0, "r+b");
 
@@ -298,6 +303,8 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 	zend_long ret = 1;
 	ExecStatusType qs;
 
+	bool in_trans = pgsql_handle_in_transaction(dbh);
+
 	if (!(res = PQexec(H->server, sql))) {
 		/* fatal error */
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
@@ -316,6 +323,9 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 		ret = Z_L(0);
 	}
 	PQclear(res);
+	if (!in_trans && pgsql_handle_in_transaction(dbh)) {
+		++H->trans_counter;
+	}
 
 	return ret;
 }
@@ -501,9 +511,7 @@ static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 
 static int pgsql_handle_in_transaction(pdo_dbh_t *dbh)
 {
-	pdo_pgsql_db_handle *H;
-
-	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	return PQtransactionStatus(H->server) > PQTRANS_IDLE;
 }
@@ -527,7 +535,13 @@ static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 
 static int pgsql_handle_begin(pdo_dbh_t *dbh)
 {
-	return pdo_pgsql_transaction_cmd("BEGIN", dbh);
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	bool in_trans = pgsql_handle_in_transaction(dbh);
+	int result = pdo_pgsql_transaction_cmd("BEGIN", dbh);
+	if (!in_trans && pgsql_handle_in_transaction(dbh)) {
+		++H->trans_counter;
+	}
+	return result;
 }
 
 static int pgsql_handle_commit(pdo_dbh_t *dbh)
