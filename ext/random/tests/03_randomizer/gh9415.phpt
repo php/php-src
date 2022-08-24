@@ -7,12 +7,13 @@ use Random\Randomizer;
 use Random\Engine\Mt19937;
 
 $randomizer = new Randomizer(new Mt19937(1234));
-var_dump($randomizer->getInt(0, 2**32 - 1));
+// Parameters shifted by -2147483648 to be compatible with 32-bit.
+var_dump($randomizer->getInt(-2147483648, 2147483647));
 
 $randomizer = new Randomizer(new Mt19937(4321));
-var_dump($randomizer->getInt(0, 2**32 - 1));
+var_dump($randomizer->getInt(-2147483648, 2147483647));
 
 ?>
 --EXPECT--
-int(822569775)
-int(304096061)
+int(-1324913873)
+int(-1843387587)
