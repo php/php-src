@@ -377,8 +377,6 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce)
     object_properties_init(&intern->zo, ce);
 	TimeZone_object_init(intern);
 
-	intern->zo.handlers = &TimeZone_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -391,6 +389,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	/* Create and register 'IntlTimeZone' class. */
 	TimeZone_ce_ptr = register_class_IntlTimeZone();
 	TimeZone_ce_ptr->create_object = TimeZone_object_create;
+	TimeZone_ce_ptr->default_object_handlers = &TimeZone_handlers;
 
 	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);

@@ -2298,8 +2298,6 @@ static zend_object *php_sqlite3_object_new(zend_class_entry *class_type) /* {{{ 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
 
-	intern->zo.handlers = &sqlite3_object_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -2314,8 +2312,6 @@ static zend_object *php_sqlite3_stmt_object_new(zend_class_entry *class_type) /*
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
 
-	intern->zo.handlers = &sqlite3_stmt_object_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -2329,8 +2325,6 @@ static zend_object *php_sqlite3_result_object_new(zend_class_entry *class_type) 
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
-
-	intern->zo.handlers = &sqlite3_result_object_handlers;
 
 	return &intern->zo;
 }
@@ -2373,6 +2367,7 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_object_handlers.free_obj = php_sqlite3_object_free_storage;
 	php_sqlite3_sc_entry = register_class_SQLite3();
 	php_sqlite3_sc_entry->create_object = php_sqlite3_object_new;
+	php_sqlite3_sc_entry->default_object_handlers = &sqlite3_object_handlers;
 
 	/* Register SQLite 3 Prepared Statement Class */
 	sqlite3_stmt_object_handlers.offset = XtOffsetOf(php_sqlite3_stmt, zo);
@@ -2380,6 +2375,7 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_stmt_object_handlers.free_obj = php_sqlite3_stmt_object_free_storage;
 	php_sqlite3_stmt_entry = register_class_SQLite3Stmt();
 	php_sqlite3_stmt_entry->create_object = php_sqlite3_stmt_object_new;
+	php_sqlite3_stmt_entry->default_object_handlers = &sqlite3_stmt_object_handlers;
 
 	/* Register SQLite 3 Result Class */
 	sqlite3_result_object_handlers.offset = XtOffsetOf(php_sqlite3_result, zo);
@@ -2387,6 +2383,7 @@ PHP_MINIT_FUNCTION(sqlite3)
 	sqlite3_result_object_handlers.free_obj = php_sqlite3_result_object_free_storage;
 	php_sqlite3_result_entry = register_class_SQLite3Result();
 	php_sqlite3_result_entry->create_object = php_sqlite3_result_object_new;
+	php_sqlite3_result_entry->default_object_handlers = &sqlite3_result_object_handlers;
 
 	REGISTER_INI_ENTRIES();
 

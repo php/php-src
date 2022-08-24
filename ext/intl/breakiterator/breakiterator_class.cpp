@@ -209,8 +209,6 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
 	object_properties_init(&intern->zo, ce);
 	breakiterator_object_init(intern);
 
-	intern->zo.handlers = &BreakIterator_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -224,6 +222,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 
 	BreakIterator_ce_ptr = register_class_IntlBreakIterator(zend_ce_aggregate);
 	BreakIterator_ce_ptr->create_object = BreakIterator_object_create;
+	BreakIterator_ce_ptr->default_object_handlers = &BreakIterator_handlers;
 	BreakIterator_ce_ptr->get_iterator = _breakiterator_get_iterator;
 
 	memcpy(&BreakIterator_handlers, &std_object_handlers,

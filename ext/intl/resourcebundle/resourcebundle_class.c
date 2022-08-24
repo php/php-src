@@ -67,8 +67,6 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 	rb->me = NULL;
 	rb->child = NULL;
 
-	rb->zend.handlers = &ResourceBundle_object_handlers;
-
 	return &rb->zend;
 }
 /* }}} */
@@ -375,6 +373,7 @@ void resourcebundle_register_class( void )
 {
 	ResourceBundle_ce_ptr = register_class_ResourceBundle(zend_ce_aggregate, zend_ce_countable);
 	ResourceBundle_ce_ptr->create_object = ResourceBundle_object_create;
+	ResourceBundle_ce_ptr->default_object_handlers = &ResourceBundle_object_handlers;
 	ResourceBundle_ce_ptr->get_iterator = resourcebundle_get_iterator;
 
 	ResourceBundle_object_handlers = std_object_handlers;

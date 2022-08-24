@@ -184,18 +184,22 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	php_com_saproxy_class_entry = register_class_com_safearray_proxy();
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
+	php_com_saproxy_class_entry->default_object_handlers = &php_com_saproxy_handlers;
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 
 	php_com_variant_class_entry = register_class_variant();
+	php_com_variant_class_entry->default_object_handlers = &php_com_object_handlers;
 	php_com_variant_class_entry->create_object = php_com_object_new;
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 
 	tmp = register_class_com(php_com_variant_class_entry);
+	tmp->default_object_handlers = &php_com_object_handlers;
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 
 #if HAVE_MSCOREE_H
 	tmp = register_class_dotnet(php_com_variant_class_entry);
+	tmp->default_object_handlers = &php_com_object_handlers;
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 #endif
