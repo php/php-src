@@ -775,7 +775,7 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 PHP_LIBXML_API void php_libxml_shutdown(void)
 {
 	if (_php_libxml_initialized) {
-#ifdef LIBXML_SCHEMAS_ENABLED
+#if defined(LIBXML_SCHEMAS_ENABLED) && LIBXML_VERSION < 21000
 		xmlRelaxNGCleanupTypes();
 #endif
 		/* xmlCleanupParser(); */
