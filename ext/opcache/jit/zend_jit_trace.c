@@ -7163,32 +7163,34 @@ static void zend_jit_stop_hot_trace_counters(zend_op_array *op_array)
 	SHM_UNPROTECT();
 	for (i = 0; i < op_array->last; i++) {
 		/* Opline with Jit-ed code handler is skipped. */
-        if (jit_extension->trace_info[i].trace_flags &
-            (ZEND_JIT_TRACE_JITED|ZEND_JIT_TRACE_BLACKLISTED)) {
-            continue;
-        }
-        if (jit_extension->trace_info[i].trace_flags &
-            (ZEND_JIT_TRACE_START_LOOP | ZEND_JIT_TRACE_START_ENTER | ZEND_JIT_TRACE_START_RETURN)) {
+		if (jit_extension->trace_info[i].trace_flags &
+				(ZEND_JIT_TRACE_JITED|ZEND_JIT_TRACE_BLACKLISTED)) {
+			continue;
+		}
+		if (jit_extension->trace_info[i].trace_flags &
+				(ZEND_JIT_TRACE_START_LOOP | ZEND_JIT_TRACE_START_ENTER | ZEND_JIT_TRACE_START_RETURN)) {
 			op_array->opcodes[i].handler = jit_extension->trace_info[i].orig_handler;
-        }
-    }
+		}
+	}
 	SHM_PROTECT();
 	zend_shared_alloc_unlock();
 }
 
 /* Get the tracing op_array. */
-static void zend_jit_stop_persistent_op_array(zend_op_array *op_array) {
-    zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-    if (!func_info) {
+static void zend_jit_stop_persistent_op_array(zend_op_array *op_array)
+{
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	if (!func_info) {
 		return;
 	}
-    if (func_info->flags & ZEND_FUNC_JIT_ON_HOT_TRACE) {
-        zend_jit_stop_hot_trace_counters(op_array);
-    }
+	if (func_info->flags & ZEND_FUNC_JIT_ON_HOT_TRACE) {
+		zend_jit_stop_hot_trace_counters(op_array);
+	}
 }
 
 /* Get all op_arrays with counter handler. */
-static void zend_jit_stop_persistent_script(zend_persistent_script *script) {
+static void zend_jit_stop_persistent_script(zend_persistent_script *script)
+{
 	zend_class_entry *ce;
 	zend_op_array *op_array;
 
@@ -7208,7 +7210,8 @@ static void zend_jit_stop_persistent_script(zend_persistent_script *script) {
 }
 
 /* Get all scripts which are accelerated by JIT */
-static void zend_jit_stop_counter_handlers() {
+static void zend_jit_stop_counter_handlers()
+{
 	for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
 		zend_accel_hash_entry *cache_entry;
 		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
