@@ -20,6 +20,12 @@ runs:
         export PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"
         export PDO_DBLIB_TEST_USER="pdo_test"
         export PDO_DBLIB_TEST_PASS="password"
+        export PHP_OCI8_TEST_USER="system"
+        export PHP_OCI8_TEST_PASS="pass"
+        export PHP_OCI8_TEST_DB="localhost/XEPDB1"
+        export PDO_OCI_TEST_USER="system"
+        export PDO_OCI_TEST_PASS="pass"
+        export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export SKIP_IO_CAPTURE_TESTS=1
         export TEST_PHP_JUNIT=junit.out.xml
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \

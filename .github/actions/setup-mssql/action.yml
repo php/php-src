@@ -1,4 +1,4 @@
-name: Create mssql container
+name: Create MSSQL container
 runs:
   using: composite
   steps:
