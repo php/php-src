@@ -9,7 +9,7 @@ use Random\Engine\PcgOneseq128XslRr64;
 use Random\Engine\Test\TestWrapperEngine;
 use Random\Engine\Xoshiro256StarStar;
 
-include __DIR__ . "/../engines.inc";
+require __DIR__ . "/../engines.inc";
 
 $engines = [];
 $engines[] = new Mt19937(1234);
