@@ -2,7 +2,6 @@
 
 /** @generate-class-entries */
 
-
 /**
  * @var int
  * @cvalue OCI_DEFAULT
