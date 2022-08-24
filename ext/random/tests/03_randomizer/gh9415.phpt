@@ -9,10 +9,10 @@ use Random\Engine\Mt19937;
 $randomizer = new Randomizer(new Mt19937(1234));
 var_dump($randomizer->getInt(0, 2**32 - 1));
 
-$randomizer = new Randomizer(new Mt19937());
-var_dump($randomizer->getInt(0, 2**32 - 1) !== 1 || $randomizer->getInt(0, 2**32 - 1) !== $randomizer->getInt(0, 2**32 - 1));
+$randomizer = new Randomizer(new Mt19937(4321));
+var_dump($randomizer->getInt(0, 2**32 - 1));
 
 ?>
 --EXPECT--
 int(822569775)
-bool(true)
+int(304096061)
