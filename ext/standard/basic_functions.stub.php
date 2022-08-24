@@ -2,6 +2,126 @@
 
 /** @generate-class-entries */
 
+/* array.c */
+
+/**
+ * @var int
+ * @cvalue PHP_EXTR_OVERWRITE
+ */
+const EXTR_OVERWRITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_SKIP
+ */
+const EXTR_SKIP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_SAME
+ */
+const EXTR_PREFIX_SAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_ALL
+ */
+const EXTR_PREFIX_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_INVALID
+ */
+const EXTR_PREFIX_INVALID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_IF_EXISTS
+ */
+const EXTR_PREFIX_IF_EXISTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_IF_EXISTS
+ */
+const EXTR_IF_EXISTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_REFS
+ */
+const EXTR_REFS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_SORT_ASC
+ */
+const SORT_ASC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_DESC
+ */
+const SORT_DESC = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_SORT_REGULAR
+ */
+const SORT_REGULAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_NUMERIC
+ */
+const SORT_NUMERIC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_STRING
+ */
+const SORT_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_LOCALE_STRING
+ */
+const SORT_LOCALE_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_NATURAL
+ */
+const SORT_NATURAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_FLAG_CASE
+ */
+const SORT_FLAG_CASE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_CASE_LOWER
+ */
+const CASE_LOWER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CASE_UPPER
+ */
+const CASE_UPPER = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_COUNT_NORMAL
+ */
+const COUNT_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_COUNT_RECURSIVE
+ */
+const COUNT_RECURSIVE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_BOTH
+ */
+const ARRAY_FILTER_USE_BOTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_KEY
+ */
+const ARRAY_FILTER_USE_KEY = UNKNOWN;
+
+/* basic_functions.h */
+
 /**
  * @var float
  * @cvalue M_E
