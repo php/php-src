@@ -107,7 +107,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 
 	/* Special case where no modulus is required */
 	if (UNEXPECTED(umax == UINT32_MAX)) {
-		return true;
+		return result;
 	}
 
 	/* Increment the max so range is inclusive of max */
