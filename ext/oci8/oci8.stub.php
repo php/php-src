@@ -2,7 +2,6 @@
 
 /** @generate-class-entries */
 
-/* thies@thieso.net 990203 i do not think that we will need all of them - just in here for completeness for now! */
 
 /**
  * @var int
