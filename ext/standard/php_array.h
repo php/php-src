@@ -34,18 +34,18 @@ PHPAPI zend_long php_count_recursive(HashTable *ht);
 PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_status *status, zval *array);
 PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *status, zval *input, zend_long num_req, zval *retval, bool silent);
 
-#define EXTR_OVERWRITE			0
-#define EXTR_SKIP				1
-#define EXTR_PREFIX_SAME		2
-#define	EXTR_PREFIX_ALL			3
-#define	EXTR_PREFIX_INVALID		4
-#define	EXTR_PREFIX_IF_EXISTS	5
-#define	EXTR_IF_EXISTS			6
+#define PHP_EXTR_OVERWRITE			0
+#define PHP_EXTR_SKIP				1
+#define PHP_EXTR_PREFIX_SAME		2
+#define PHP_EXTR_PREFIX_ALL			3
+#define PHP_EXTR_PREFIX_INVALID		4
+#define PHP_EXTR_PREFIX_IF_EXISTS	5
+#define PHP_EXTR_IF_EXISTS			6
 
-#define EXTR_REFS				0x100
+#define PHP_EXTR_REFS				0x100
 
-#define CASE_LOWER				0
-#define CASE_UPPER				1
+#define PHP_CASE_LOWER				0
+#define PHP_CASE_UPPER				1
 
 #define PHP_SORT_REGULAR            0
 #define PHP_SORT_NUMERIC            1
@@ -56,8 +56,8 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 #define PHP_SORT_NATURAL            6
 #define PHP_SORT_FLAG_CASE          8
 
-#define COUNT_NORMAL      0
-#define COUNT_RECURSIVE   1
+#define PHP_COUNT_NORMAL      0
+#define PHP_COUNT_RECURSIVE   1
 
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2

@@ -6,42 +6,42 @@
 
 /**
  * @var int
- * @cvalue EXTR_OVERWRITE
+ * @cvalue PHP_EXTR_OVERWRITE
  */
 const EXTR_OVERWRITE = UNKNOWN;
 /**
  * @var int
- * @cvalue EXTR_SKIP
+ * @cvalue PHP_EXTR_SKIP
  */
 const EXTR_SKIP = UNKNOWN;
 /**
  * @var int
- * @cvalue EXTR_PREFIX_SAME
+ * @cvalue PHP_EXTR_PREFIX_SAME
  */
 const EXTR_PREFIX_SAME = UNKNOWN;
 /**
  * @var int
- * @cvalue EXTR_PREFIX_ALL
+ * @cvalue PHP_EXTR_PREFIX_ALL
  */
 const EXTR_PREFIX_ALL = UNKNOWN;
 /**
  * @var int
- * @cvalue EXTR_PREFIX_INVALID
+ * @cvalue PHP_EXTR_PREFIX_INVALID
  */
 const EXTR_PREFIX_INVALID = UNKNOWN;
 /**
  * @var int
- * @cvalue EXTR_PREFIX_IF_EXISTS
+ * @cvalue PHP_EXTR_PREFIX_IF_EXISTS
  */
 const EXTR_PREFIX_IF_EXISTS = UNKNOWN;
 /**
  * @var int
- * @cvalue EXTR_IF_EXISTS
+ * @cvalue PHP_EXTR_IF_EXISTS
  */
 const EXTR_IF_EXISTS = UNKNOWN;
 /**
  * @var int
- * @cvalue EXTR_REFS
+ * @cvalue PHP_EXTR_REFS
  */
 const EXTR_REFS = UNKNOWN;
 
@@ -89,23 +89,23 @@ const SORT_FLAG_CASE = UNKNOWN;
 
 /**
  * @var int
- * @cvalue CASE_LOWER
+ * @cvalue PHP_CASE_LOWER
  */
 const CASE_LOWER = UNKNOWN;
 /**
  * @var int
- * @cvalue CASE_UPPER
+ * @cvalue PHP_CASE_UPPER
  */
 const CASE_UPPER = UNKNOWN;
 
 /**
  * @var int
- * @cvalue COUNT_NORMAL
+ * @cvalue PHP_COUNT_NORMAL
  */
 const COUNT_NORMAL = UNKNOWN;
 /**
  * @var int
- * @cvalue COUNT_RECURSIVE
+ * @cvalue PHP_COUNT_RECURSIVE
  */
 const COUNT_RECURSIVE = UNKNOWN;
 

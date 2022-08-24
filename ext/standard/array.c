@@ -621,7 +621,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 PHP_FUNCTION(count)
 {
 	zval *array;
-	zend_long mode = COUNT_NORMAL;
+	zend_long mode = PHP_COUNT_NORMAL;
 	zend_long cnt;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -630,14 +630,14 @@ PHP_FUNCTION(count)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
+	if (mode != PHP_COUNT_NORMAL && mode != PHP_COUNT_RECURSIVE) {
 		zend_argument_value_error(2, "must be either COUNT_NORMAL or COUNT_RECURSIVE");
 		RETURN_THROWS();
 	}
 
 	switch (Z_TYPE_P(array)) {
 		case IS_ARRAY:
-			if (mode != COUNT_RECURSIVE) {
+			if (mode != PHP_COUNT_RECURSIVE) {
 				cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 			} else {
 				cnt = php_count_recursive(Z_ARRVAL_P(array));
@@ -2357,7 +2357,7 @@ PHP_FUNCTION(extract)
 {
 	zval *var_array_param;
 	zend_long extract_refs;
-	zend_long extract_type = EXTR_OVERWRITE;
+	zend_long extract_type = PHP_EXTR_OVERWRITE;
 	zend_string *prefix = NULL;
 	zend_long count;
 	zend_array *symbol_table;
@@ -2369,18 +2369,18 @@ PHP_FUNCTION(extract)
 		Z_PARAM_STR(prefix)
 	ZEND_PARSE_PARAMETERS_END();
 
-	extract_refs = (extract_type & EXTR_REFS);
+	extract_refs = (extract_type & PHP_EXTR_REFS);
 	if (extract_refs) {
 		SEPARATE_ARRAY(var_array_param);
 	}
 	extract_type &= 0xff;
 
-	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
+	if (extract_type < PHP_EXTR_OVERWRITE || extract_type > PHP_EXTR_IF_EXISTS) {
 		zend_argument_value_error(2, "must be a valid extract type");
 		RETURN_THROWS();
 	}
 
-	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
+	if (extract_type > PHP_EXTR_SKIP && extract_type <= PHP_EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
 		zend_argument_value_error(3, "is required when using this extract type");
 		RETURN_THROWS();
 	}
@@ -2401,22 +2401,22 @@ PHP_FUNCTION(extract)
 
 	if (extract_refs) {
 		switch (extract_type) {
-			case EXTR_IF_EXISTS:
+			case PHP_EXTR_IF_EXISTS:
 				count = php_extract_ref_if_exists(Z_ARRVAL_P(var_array_param), symbol_table);
 				break;
-			case EXTR_OVERWRITE:
+			case PHP_EXTR_OVERWRITE:
 				count = php_extract_ref_overwrite(Z_ARRVAL_P(var_array_param), symbol_table);
 				break;
-			case EXTR_PREFIX_IF_EXISTS:
+			case PHP_EXTR_PREFIX_IF_EXISTS:
 				count = php_extract_ref_prefix_if_exists(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_SAME:
+			case PHP_EXTR_PREFIX_SAME:
 				count = php_extract_ref_prefix_same(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_ALL:
+			case PHP_EXTR_PREFIX_ALL:
 				count = php_extract_ref_prefix_all(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_INVALID:
+			case PHP_EXTR_PREFIX_INVALID:
 				count = php_extract_ref_prefix_invalid(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
 			default:
@@ -2428,22 +2428,22 @@ PHP_FUNCTION(extract)
 		zval array_copy;
 		ZVAL_COPY(&array_copy, var_array_param);
 		switch (extract_type) {
-			case EXTR_IF_EXISTS:
+			case PHP_EXTR_IF_EXISTS:
 				count = php_extract_if_exists(Z_ARRVAL(array_copy), symbol_table);
 				break;
-			case EXTR_OVERWRITE:
+			case PHP_EXTR_OVERWRITE:
 				count = php_extract_overwrite(Z_ARRVAL(array_copy), symbol_table);
 				break;
-			case EXTR_PREFIX_IF_EXISTS:
+			case PHP_EXTR_PREFIX_IF_EXISTS:
 				count = php_extract_prefix_if_exists(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_SAME:
+			case PHP_EXTR_PREFIX_SAME:
 				count = php_extract_prefix_same(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_ALL:
+			case PHP_EXTR_PREFIX_ALL:
 				count = php_extract_prefix_all(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_INVALID:
+			case PHP_EXTR_PREFIX_INVALID:
 				count = php_extract_prefix_invalid(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			default:

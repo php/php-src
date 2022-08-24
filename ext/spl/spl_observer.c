@@ -645,13 +645,13 @@ PHP_METHOD(SplObjectStorage, contains)
 PHP_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
-	zend_long mode = COUNT_NORMAL;
+	zend_long mode = PHP_COUNT_NORMAL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &mode) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (mode == COUNT_RECURSIVE) {
+	if (mode == PHP_COUNT_RECURSIVE) {
 		RETURN_LONG(php_count_recursive(&intern->storage));
 	}
 
