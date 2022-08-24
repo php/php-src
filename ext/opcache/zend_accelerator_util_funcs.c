@@ -140,13 +140,24 @@ void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *s
 	src->pDestructor = orig_dtor;
 }
 
+static zend_never_inline void zend_accel_functions_declared_nitify(HashTable *ht)
+{
+	Bucket *p, *end;
+
+	p = ht->arData;
+	end = p + ht->nNumUsed;
+	for (; p != end; p++) {
+		if (*ZSTR_VAL(p->key)) { // if not rtd key
+			_zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
+		}
+	}
+}
+
 static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 {
 	zend_function *function1, *function2;
 	Bucket *p, *end;
 	zval *t;
-
-	bool call_observers = zend_observer_function_declared_observed;
 
 	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
 	p = source->arData;
@@ -159,11 +170,13 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 			goto failure;
 		}
 		_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
-		if (UNEXPECTED(call_observers) && *ZSTR_VAL(p->key)) { // if not rtd key
-			_zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
-		}
 	}
 	target->nInternalPointer = 0;
+
+	if (zend_observer_function_declared_observed) {
+		zend_accel_functions_declared_nitify(source);
+	}
+
 	return;
 
 failure:
