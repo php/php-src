@@ -4,6 +4,9 @@ Random: Engine: Serialization of user engines must preserve the sequence
 <?php
 
 use Random\Engine;
+use Random\Engine\Test\TestShaEngine;
+
+require __DIR__ . "/../engines.inc";
 
 final class CountingEngine32 implements Engine
 {
@@ -17,6 +20,7 @@ final class CountingEngine32 implements Engine
 
 $engines = [];
 $engines[] = new CountingEngine32();
+$engines[] = new TestShaEngine();
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
@@ -39,4 +43,5 @@ die('success');
 ?>
 --EXPECT--
 CountingEngine32
+Random\Engine\Test\TestShaEngine
 success
