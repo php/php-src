@@ -1408,11 +1408,16 @@ class FuncInfo {
                 );
             }
 
-            $macro = match (true) {
-                $this->isDeprecated => 'ZEND_DEP_FE',
-                $this->supportsCompileTimeEval => 'ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE',
-                default => 'ZEND_FE',
-            };
+            switch (true) {
+                case $this->isDeprecated:
+                    $macro = 'ZEND_DEP_FE';
+                    break;
+                case $this->supportsCompileTimeEval:
+                    $macro = 'ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE';
+                    break;
+                default:
+                    $macro = 'ZEND_FE';
+            }
 
             return sprintf("\t%s(%s, %s)\n", $macro, $functionName, $this->getArgInfoName());
         } else {
