@@ -64,7 +64,7 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 
 * Identifier names for namespaced functions generated from stub files through
   gen_stub.php have been changed. This will require changes in extensions using
-  namespaced funtions.
+  namespaced functions.
 
 ========================
 3. Module changes
