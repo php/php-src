@@ -279,6 +279,9 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
+					if (EG(exception)) {
+						zend_throw_exception_ex(php_var_ce_UnserializationFailedException, 0, "An Exception was thrown in %s::__wakeup()", ZSTR_VAL(fci.object->ce->name));
+					}
 					BG(serialize_lock)--;
 
 					zval_ptr_dtor(&retval);
@@ -296,6 +299,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 						Z_OBJCE_P(zv)->__unserialize, Z_OBJ_P(zv), NULL, &param);
 					if (EG(exception)) {
 						delayed_call_failed = 1;
+						zend_throw_exception_ex(php_var_ce_UnserializationFailedException, 0, "An Exception was thrown in %s::__unserialize()", ZSTR_VAL(Z_OBJ_P(zv)->ce->name));
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
 					BG(serialize_lock)--;

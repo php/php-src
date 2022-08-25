@@ -1415,6 +1415,10 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 		gc_check_possible_root(ref);
 	}
 
+	if (EG(exception)) {
+		zend_throw_exception_ex(php_var_ce_UnserializationFailedException, 0, "An Exception was thrown during unserialization");
+	}
+
 cleanup:
 	if (class_hash) {
 		zend_hash_destroy(class_hash);
