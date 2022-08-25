@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e46c8ef36dc0f29d877ae6e4096135414d0a4412 */
+ * Stub hash: 1d2a0d8dee8dcf1d9956dbc9326ab0b4aeb2da51 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3481,6 +3481,11 @@ static const zend_function_entry class_AssertionError_methods[] = {
 	ZEND_FE_END
 };
 
+
+static const zend_function_entry class_UnserializationFailedException_methods[] = {
+	ZEND_FE_END
+};
+
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", PHP_EXTR_OVERWRITE, CONST_PERSISTENT);
@@ -3743,6 +3748,17 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "AssertionError", class_AssertionError_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_UnserializationFailedException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "UnserializationFailedException", class_UnserializationFailedException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
 }

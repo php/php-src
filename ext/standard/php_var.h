@@ -22,6 +22,8 @@
 
 PHP_MINIT_FUNCTION(var);
 
+extern PHPAPI zend_class_entry *php_var_ce_UnserializationFailedException;
+
 PHPAPI void php_var_dump(zval *struc, int level);
 PHPAPI void php_var_export(zval *struc, int level);
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf);

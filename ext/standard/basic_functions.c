@@ -296,6 +296,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
 	php_register_incomplete_class_handlers();
 
+	php_var_ce_UnserializationFailedException = register_class_UnserializationFailedException(zend_ce_exception);
+
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 #ifdef ENABLE_TEST_CLASS

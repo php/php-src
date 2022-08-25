@@ -35,6 +35,8 @@ struct php_serialize_data {
 	uint32_t n;
 };
 
+PHPAPI zend_class_entry *php_var_ce_UnserializationFailedException;
+
 #define COMMON (is_ref ? "&" : "")
 
 static void php_array_element_dump(zval *zv, zend_ulong index, zend_string *key, int level) /* {{{ */
