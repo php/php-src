@@ -102,13 +102,18 @@ static void spl_fixedarray_init_elems(spl_fixedarray *array, zend_long from, zen
 	}
 }
 
+static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_long size)
+{
+	array->size = 0; /* reset size in case ecalloc() fails */
+	array->elements = safe_emalloc(size, sizeof(zval), 0);
+	array->size = size;
+	array->should_rebuild_properties = true;
+}
+
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 {
 	if (size > 0) {
-		array->size = 0; /* reset size in case ecalloc() fails */
-		array->elements = safe_emalloc(size, sizeof(zval), 0);
-		array->size = size;
-		array->should_rebuild_properties = true;
+		spl_fixedarray_init_non_empty_struct(array, size);
 		spl_fixedarray_init_elems(array, 0, size);
 	} else {
 		spl_fixedarray_default_ctor(array);
@@ -579,6 +584,67 @@ PHP_METHOD(SplFixedArray, __wakeup)
 		/* Remove the unserialised properties, since we now have the elements
 		 * within the spl_fixedarray_object structure. */
 		zend_hash_clean(intern_ht);
+	}
+}
+
+PHP_METHOD(SplFixedArray, __serialize)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
+	zval *current, tmp;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+
+	/* elements */
+	array_init_size(&tmp, intern->array.size);
+
+	for (zend_long i = 0; i < intern->array.size; i++) {
+		current = &intern->array.elements[i];
+		zend_hash_next_index_insert(Z_ARRVAL(tmp), current);
+		Z_TRY_ADDREF_P(current);
+	}
+
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* members */
+	ZVAL_ARR(&tmp, zend_proptable_to_symtable(
+		zend_std_get_properties(&intern->std), /* always_duplicate */ 1));
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+}
+
+PHP_METHOD(SplFixedArray, __unserialize)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
+	HashTable *data;
+	zval *storage_zv, *members_zv, *elem;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (intern->array.size == 0) {
+		storage_zv = zend_hash_index_find(data, 0);
+		members_zv = zend_hash_index_find(data, 1);
+		if (!storage_zv || !members_zv ||
+			Z_TYPE_P(storage_zv) != IS_ARRAY || Z_TYPE_P(members_zv) != IS_ARRAY
+		) {
+			zend_throw_exception(spl_ce_UnexpectedValueException,
+				"Incomplete or ill-typed serialization data", 0);
+			RETURN_THROWS();
+		}
+
+		zend_long size = zend_hash_num_elements(Z_ARRVAL_P(storage_zv));
+		spl_fixedarray_init_non_empty_struct(&intern->array, size);
+
+		zend_long i = 0;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
+			ZVAL_COPY(&intern->array.elements[i++], elem);
+		} ZEND_HASH_FOREACH_END();
+
+		object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 	}
 }
 
