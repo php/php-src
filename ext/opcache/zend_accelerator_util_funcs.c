@@ -299,18 +299,33 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 #define ADLER32_DO4(buf, i)     ADLER32_DO2(buf, i); ADLER32_DO2(buf, i + 2);
 #define ADLER32_DO8(buf, i)     ADLER32_DO4(buf, i); ADLER32_DO4(buf, i + 4);
 #define ADLER32_DO16(buf)       ADLER32_DO8(buf, 0); ADLER32_DO8(buf, 8);
+#define ADLER32_CHECK_SKIPPED(by) \
+	do {															\
+		offset = buf - start;										\
+		while (*skip_list != 0 && *skip_list < offset) {			\
+			skip_list++;											\
+		}															\
+		skipped = *skip_list != 0 && *skip_list < (offset + (by));	\
+	} while (0)
 
-unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t len)
+unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t len, uint32_t *skip_list)
 {
+	unsigned char *start = buf;
 	unsigned int s1 = checksum & 0xffff;
 	unsigned int s2 = (checksum >> 16) & 0xffff;
 	unsigned char *end;
+	bool skipped;
+	uint32_t offset;
 
 	while (len >= ADLER32_NMAX) {
 		len -= ADLER32_NMAX;
 		end = buf + ADLER32_NMAX;
+		skipped = false;
 		do {
-			ADLER32_DO16(buf);
+			ADLER32_CHECK_SKIPPED(16);
+			if (!skipped) {
+				ADLER32_DO16(buf);
+			}
 			buf += 16;
 		} while (buf != end);
 		s1 %= ADLER32_BASE;
@@ -321,16 +336,27 @@ unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t le
 		if (len >= 16) {
 			end = buf + (len & 0xfff0);
 			len &= 0xf;
+			skipped = false;
 			do {
-				ADLER32_DO16(buf);
+				ADLER32_CHECK_SKIPPED(16);
+				if (!skipped) {
+					ADLER32_DO16(buf);
+				}
 				buf += 16;
 			} while (buf != end);
 		}
 		if (len) {
 			end = buf + len;
+			skipped = false;
 			do {
-				ADLER32_DO1(buf);
-				buf++;
+				ADLER32_CHECK_SKIPPED(1);
+				if (!skipped) {
+					ADLER32_DO1(buf);
+					buf++;
+				} else {
+					// skip_list contains a list of pointers so we skip the entire pointer size
+					buf += sizeof(void*);
+				}
 			} while (buf != end);
 		}
 		s1 %= ADLER32_BASE;
@@ -346,19 +372,20 @@ unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_scrip
 	size_t size = persistent_script->size;
 	size_t persistent_script_check_block_size = ((char *)&(persistent_script->dynamic_members)) - (char *)persistent_script;
 	unsigned int checksum = ADLER32_INIT;
+	uint32_t zero = 0;
 
 	if (mem < (unsigned char*)persistent_script) {
-		checksum = zend_adler32(checksum, mem, (unsigned char*)persistent_script - mem);
+		checksum = zend_adler32(checksum, mem, (unsigned char*)persistent_script - mem, &zero);
 		size -= (unsigned char*)persistent_script - mem;
 		mem  += (unsigned char*)persistent_script - mem;
 	}
 
-	zend_adler32(checksum, mem, persistent_script_check_block_size);
-	mem  += sizeof(*persistent_script);
-	size -= sizeof(*persistent_script);
+	checksum = zend_adler32(checksum, mem, persistent_script_check_block_size, &zero);
+	mem  += ZEND_ALIGNED_SIZE(sizeof(*persistent_script));
+	size -= ZEND_ALIGNED_SIZE(sizeof(*persistent_script));
 
 	if (size > 0) {
-		checksum = zend_adler32(checksum, mem, size);
+		checksum = zend_adler32(checksum, mem, size, persistent_script->checksum_skip_list);
 	}
 	return checksum;
 }

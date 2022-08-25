@@ -122,6 +122,8 @@ typedef struct _zend_persistent_script {
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
+	/* list of offsets relative to (mem + ZEND_ALIGNED_SIZE(sizeof(zend_persistent_script))) to be skipped in the checksum calculation */
+	uint32_t      *checksum_skip_list;
 
 	/* All entries that shouldn't be counted in the ADLER32
 	 * checksum must be declared in this struct
@@ -225,6 +227,10 @@ typedef struct _zend_accel_globals {
 	/* preallocated buffer for keys */
 	zend_string             key;
 	char                    _key[MAXPATHLEN * 8];
+
+	uint32_t               *checksum_skip_list;
+	uint32_t                checksum_skip_list_count;
+	uint32_t                checksum_skip_list_capacity;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {

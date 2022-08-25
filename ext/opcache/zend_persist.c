@@ -87,6 +87,60 @@ static void zend_persist_op_array(zval *zv);
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
+static void checksum_skip_list_init(void)
+{
+	ZEND_ASSERT(ZCG(checksum_skip_list) == NULL);
+	ZCG(checksum_skip_list_count) = 0;
+	ZCG(checksum_skip_list_capacity) = 8;
+	ZCG(checksum_skip_list) = safe_emalloc(ZCG(checksum_skip_list_capacity), sizeof(uint32_t), 0);
+}
+
+static void checksum_skip_list_extend(uint32_t size)
+{
+	ZEND_ASSERT(ZCG(checksum_skip_list) != NULL);
+	ZCG(checksum_skip_list) = safe_erealloc(ZCG(checksum_skip_list), ZCG(checksum_skip_list_capacity), sizeof(uint32_t), 0);
+}
+
+void checksum_skip_list_add(void *p)
+{
+	ZEND_ASSERT(ZCG(checksum_skip_list) != NULL);
+	void *base_btr = ((char*)ZCG(current_persistent_script)->mem) + ZEND_ALIGNED_SIZE(sizeof(zend_persistent_script));
+	ZEND_ASSERT(p >= base_btr);
+	if ((ZCG(checksum_skip_list_count) + 1) >= ZCG(checksum_skip_list_capacity)) {
+		ZCG(checksum_skip_list_capacity) *= 2;
+		checksum_skip_list_extend(ZCG(checksum_skip_list_capacity));
+	}
+	ZCG(checksum_skip_list)[ZCG(checksum_skip_list_count)++] = p - base_btr;
+}
+
+static int checksum_skip_list_compare(const uint32_t *l, const uint32_t *r)
+{
+	if (*l < *r) {
+		return -1;
+	} else if (*l == *r) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+static void checksum_skip_list_swap(uint32_t *l, uint32_t *r)
+{
+	uint32_t tmp = *r;
+	*r = *l;
+	*l = tmp;
+}
+
+static uint32_t *checksum_skip_list_persist(void)
+{
+	zend_sort((void *) ZCG(checksum_skip_list), ZCG(checksum_skip_list_count), sizeof(*ZCG(checksum_skip_list)), (compare_func_t) checksum_skip_list_compare, (swap_func_t) checksum_skip_list_swap);
+	uint32_t *result = zend_shared_memdup(ZCG(checksum_skip_list), (ZCG(checksum_skip_list_count) + 1) * sizeof(uint32_t));
+	result[ZCG(checksum_skip_list_count)] = 0;
+	efree(ZCG(checksum_skip_list));
+	ZCG(checksum_skip_list) = NULL;
+	return result;
+}
+
 static void zend_hash_persist(HashTable *ht)
 {
 	uint32_t idx, nIndex;
@@ -866,6 +920,9 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		ce->inheritance_cache = NULL;
+		if (ZCG(checksum_skip_list) != NULL) {
+			checksum_skip_list_add(&ce->inheritance_cache);
+		}
 
 		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
 			if (ZSTR_HAS_CE_CACHE(ce->name)) {
@@ -1290,6 +1347,8 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	script->corrupted = 0;
 	ZCG(current_persistent_script) = script;
 
+	checksum_skip_list_init();
+
 	if (!for_shm) {
 		/* script is not going to be saved in SHM */
 		script->corrupted = 1;
@@ -1346,7 +1405,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 #endif
 
-	script->corrupted = 0;
+	script->checksum_skip_list = checksum_skip_list_persist();
+
+	script->corrupted = false;
 	ZCG(current_persistent_script) = NULL;
 
 	return script;

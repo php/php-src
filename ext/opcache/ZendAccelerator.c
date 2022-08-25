@@ -2120,7 +2120,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		unsigned int checksum = zend_accel_script_checksum(persistent_script);
 		if (checksum != persistent_script->dynamic_members.checksum ) {
 			/* The checksum is wrong */
-			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%08x, found=0x%08x",
+			zend_accel_error(ACCEL_LOG_WARNING, "Checksum failed for '%s':  expected=0x%08x, found=0x%08x",
 							 ZSTR_VAL(persistent_script->script.filename), persistent_script->dynamic_members.checksum, checksum);
 			zend_shared_alloc_lock();
 			if (!persistent_script->corrupted) {
@@ -4762,6 +4762,10 @@ static int accel_finish_startup(void)
 			ZCG(cwd) = NULL;
 			ZCG(cwd_key_len) = 0;
 			ZCG(cwd_check) = 1;
+
+			ZCG(checksum_skip_list) = NULL;
+			ZCG(checksum_skip_list_count) = 0;
+			ZCG(checksum_skip_list_capacity) = 0;
 
 			if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
 				ret = FAILURE;

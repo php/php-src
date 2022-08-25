@@ -19,6 +19,8 @@
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
 
+#include "Optimizer/zend_call_graph.h"
+
 #if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 # define ZEND_JIT_TARGET_X86   1
 # define ZEND_JIT_TARGET_ARM64 0
@@ -154,6 +156,7 @@ ZEND_EXT_API void zend_jit_activate(void);
 ZEND_EXT_API void zend_jit_deactivate(void);
 ZEND_EXT_API void zend_jit_status(zval *ret);
 ZEND_EXT_API void zend_jit_restart(void);
+ZEND_EXT_API int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg);
 
 typedef struct _zend_lifetime_interval zend_lifetime_interval;
 typedef struct _zend_life_range zend_life_range;
