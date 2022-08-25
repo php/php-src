@@ -140,20 +140,7 @@ void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *s
 	src->pDestructor = orig_dtor;
 }
 
-static zend_never_inline void zend_accel_functions_declared_notify(HashTable *ht)
-{
-	Bucket *p, *end;
-
-	p = ht->arData;
-	end = p + ht->nNumUsed;
-	for (; p != end; p++) {
-		if (*ZSTR_VAL(p->key)) { // if not rtd key
-			_zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
-		}
-	}
-}
-
-static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
+static zend_always_inline void _zend_accel_function_hash_copy(HashTable *target, HashTable *source, bool call_observers)
 {
 	zend_function *function1, *function2;
 	Bucket *p, *end;
@@ -170,12 +157,11 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 			goto failure;
 		}
 		_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+		if (UNEXPECTED(call_observers) && *ZSTR_VAL(p->key)) { // if not rtd key
+			_zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
+		}
 	}
 	target->nInternalPointer = 0;
-
-	if (zend_observer_function_declared_observed) {
-		zend_accel_functions_declared_notify(source);
-	}
 
 	return;
 
@@ -196,12 +182,20 @@ failure:
 	}
 }
 
-static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
+static zend_always_inline void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
+{
+	_zend_accel_function_hash_copy(target, source, 0);
+}
+
+static zend_never_inline void zend_accel_function_hash_copy_notify(HashTable *target, HashTable *source)
+{
+	_zend_accel_function_hash_copy(target, source, 1);
+}
+
+static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, HashTable *source, bool call_observers)
 {
 	Bucket *p, *end;
 	zval *t;
-
-	bool call_observers = zend_observer_class_linked_observed;
 
 	zend_hash_extend(target, target->nNumUsed + source->nNumUsed, 0);
 	p = source->arData;
@@ -249,6 +243,16 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 		}
 	}
 	target->nInternalPointer = 0;
+}
+
+static zend_always_inline void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
+{
+	_zend_accel_class_hash_copy(target, source, 0);
+}
+
+static zend_never_inline void zend_accel_class_hash_copy_notify(HashTable *target, HashTable *source)
+{
+	_zend_accel_class_hash_copy(target, source, 1);
 }
 
 void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persistent_script)
@@ -390,11 +394,19 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 	}
 
 	if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
-		zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
+		if (EXPECTED(!zend_observer_function_declared_observed)) {
+			zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
+		} else {
+			zend_accel_function_hash_copy_notify(CG(function_table), &persistent_script->script.function_table);
+		}
 	}
 
 	if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
-		zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table);
+		if (EXPECTED(!zend_observer_class_linked_observed)) {
+			zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table);
+		} else {
+			zend_accel_class_hash_copy_notify(CG(class_table), &persistent_script->script.class_table);
+		}
 	}
 
 	if (persistent_script->num_early_bindings) {
