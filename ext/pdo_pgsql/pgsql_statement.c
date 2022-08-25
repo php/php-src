@@ -254,8 +254,8 @@ stmt_retry:
 		stmt->row_count = (zend_long)PQntuples(S->result);
 	}
 
-	if (!in_trans && stmt->dbh->methods->in_transaction(stmt->dbh)) {
-		++H->trans_counter;
+	if (in_trans && !stmt->dbh->methods->in_transaction(stmt->dbh)) {
+		pdo_pgsql_close_lob_streams(stmt->dbh);
 	}
 
 	return 1;
