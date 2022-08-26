@@ -726,7 +726,7 @@ call_getter:
 			}
 
 			if (UNEXPECTED(prop_info)) {
-				zend_verify_prop_assignable_by_ref(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
+				zend_verify_prop_assignable_by_ref_ex(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0, ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET);
 			}
 
 			OBJ_RELEASE(zobj);

@@ -65,6 +65,12 @@ ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, u
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim);
 
 ZEND_API bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, bool strict);
+
+typedef enum {
+	ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_ASSIGNMENT,
+	ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET,
+} zend_verify_prop_assignable_by_ref_context;
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context);
 ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, bool strict);
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
@@ -449,6 +455,7 @@ ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 
 ZEND_API bool zend_verify_property_type(zend_property_info *info, zval *property, bool strict);
 ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zval *property);
+ZEND_COLD void zend_magic_get_property_type_inconsistency_error(zend_property_info *info, zval *property);
 
 #define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
 	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
