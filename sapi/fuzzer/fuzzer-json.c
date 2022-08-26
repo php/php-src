@@ -42,7 +42,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	for (int option = 0; option <=1; ++option) {
 		zval result;
 		php_json_parser parser;
-		php_json_parser_init(&parser, &result, data, Size, option, 10, false);
+		php_json_parser_init(&parser, &result, data, Size, option, 10);
 		if (php_json_yyparse(&parser) == SUCCESS) {
 			zval_ptr_dtor(&result);
 		}

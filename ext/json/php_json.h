@@ -79,6 +79,9 @@ typedef enum {
 /* json_decode() and json_encode() common options */
 #define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
 
+/* json_validate() only internal constant */
+#define PHP_JSON_VALIDATE_ONLY              (1<<23)
+
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0
 #define PHP_JSON_OUTPUT_OBJECT	1
