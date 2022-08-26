@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0alpha1
 
+- Core:
+  . Fixed bug GH-9388 (Improve unset property and __get type incompatibility
+    error message). (ilutov)
+
 - Opcache:
   . Added start, restart and force restart time to opcache's
   phpinfo section. (Mikhail Galanin)

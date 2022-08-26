@@ -830,6 +830,23 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	zend_string_release(type_str);
 }
 
+ZEND_COLD zend_never_inline void zend_magic_get_property_type_inconsistency_error(zend_property_info *info, zval *property)
+{
+	/* we _may_ land here in case reading already errored and runtime cache thus has not been updated (i.e. it contains a valid but unrelated info) */
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_string *type_str = zend_type_to_string(info->type);
+	zend_type_error("Value of type %s returned from %s::__get() must be compatible with unset property %s::$%s of type %s",
+		zend_zval_type_name(property),
+		ZSTR_VAL(info->ce->name),
+		ZSTR_VAL(info->ce->name),
+		zend_get_unmangled_property_name(info->name),
+		ZSTR_VAL(type_str));
+	zend_string_release(type_str);
+}
+
 ZEND_COLD void zend_match_unhandled_error(zval *value)
 {
 	smart_str msg = {0};
@@ -3560,7 +3577,7 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ze
 	return variable_ptr;
 }
 
-ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, bool strict) {
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
 		int result;
@@ -3591,8 +3608,18 @@ ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_inf
 		}
 	}
 
-	zend_verify_property_type_error(prop_info, val);
+	if (EXPECTED(context == ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_ASSIGNMENT)) {
+		zend_verify_property_type_error(prop_info, val);
+	} else {
+		ZEND_ASSERT(context == ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET);
+		zend_magic_get_property_type_inconsistency_error(prop_info, val);
+	}
+
 	return 0;
+}
+
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, bool strict) {
+	return zend_verify_prop_assignable_by_ref_ex(prop_info, orig_val, strict, ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_ASSIGNMENT);
 }
 
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
