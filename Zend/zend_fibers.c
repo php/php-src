@@ -360,6 +360,10 @@ ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
 	zend_observer_fiber_destroy_notify(context);
 
+	if (context->cleanup) {
+		context->cleanup(context);
+	}
+
 	zend_fiber_stack_free(context->stack);
 }
 
@@ -441,6 +445,19 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	}
 }
 
+static void zend_fiber_cleanup(zend_fiber_context *context)
+{
+	zend_fiber *fiber = zend_fiber_from_context(context);
+
+	zend_vm_stack current_stack = EG(vm_stack);
+	EG(vm_stack) = fiber->vm_stack;
+	zend_vm_stack_destroy();
+	EG(vm_stack) = current_stack;
+	fiber->execute_data = NULL;
+	fiber->stack_bottom = NULL;
+	fiber->caller = NULL;
+}
+
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
 	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_NULL && "Initial transfer value to fiber context must be NULL");
@@ -501,12 +518,10 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		transfer->flags = ZEND_FIBER_TRANSFER_FLAG_BAILOUT;
 	} zend_end_try();
 
-	transfer->context = fiber->caller;
+	fiber->context.cleanup = &zend_fiber_cleanup;
+	fiber->vm_stack = EG(vm_stack);
 
-	zend_vm_stack_destroy();
-	fiber->execute_data = NULL;
-	fiber->stack_bottom = NULL;
-	fiber->caller = NULL;
+	transfer->context = fiber->caller;
 }
 
 /* Handles forwarding of result / error from a transfer into the running fiber. */
