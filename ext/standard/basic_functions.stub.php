@@ -123,10 +123,225 @@ const ARRAY_FILTER_USE_KEY = UNKNOWN;
 /* basic_functions.h */
 
 /**
+ * @var int
+ * @cvalue PHP_CONNECTION_ABORTED
+ */
+const CONNECTION_ABORTED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_NORMAL
+ */
+const CONNECTION_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_TIMEOUT
+ */
+const CONNECTION_TIMEOUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_INI_USER
+ */
+const INI_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_PERDIR
+ */
+const INI_PERDIR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SYSTEM
+ */
+const INI_SYSTEM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_ALL
+ */
+const INI_ALL = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_NORMAL
+ */
+const INI_SCANNER_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_RAW
+ */
+const INI_SCANNER_RAW = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_TYPED
+ */
+const INI_SCANNER_TYPED = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_URL_SCHEME
+ */
+const PHP_URL_SCHEME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_HOST
+ */
+const PHP_URL_HOST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PORT
+ */
+const PHP_URL_PORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_USER
+ */
+const PHP_URL_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PASS
+ */
+const PHP_URL_PASS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PATH
+ */
+const PHP_URL_PATH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_QUERY
+ */
+const PHP_URL_QUERY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_FRAGMENT
+ */
+const PHP_URL_FRAGMENT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_QUERY_RFC1738
+ */
+const PHP_QUERY_RFC1738 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_QUERY_RFC3986
+ */
+const PHP_QUERY_RFC3986 = UNKNOWN;
+
+/**
  * @var float
  * @cvalue M_E
  */
 const M_E = 2.718281828459045;
+/**
+ * @var float
+ * @cvalue M_LOG2E
+ */
+const M_LOG2E = 1.4426950408889634074;
+/**
+ * @var float
+ * @cvalue M_LOG10E
+ */
+const M_LOG10E = 0.43429448190325182765;
+/**
+ * @var float
+ * @cvalue M_LN2
+ */
+const M_LN2 = 0.69314718055994530942;
+/**
+ * @var float
+ * @cvalue M_LN10
+ */
+const M_LN10 = 2.30258509299404568402;
+/**
+ * @var float
+ * @cvalue M_PI
+ */
+const M_PI = 3.14159265358979323846;
+/**
+ * @var float
+ * @cvalue M_PI_2
+ */
+const M_PI_2 = 1.57079632679489661923;
+/**
+ * @var float
+ * @cvalue M_PI_4
+ */
+const M_PI_4 = 0.78539816339744830962;
+/**
+ * @var float
+ * @cvalue M_1_PI
+ */
+const M_1_PI = 0.31830988618379067154;
+/**
+ * @var float
+ * @cvalue M_2_PI
+ */
+const M_2_PI = 0.63661977236758134308;
+/**
+ * @var float
+ * @cvalue M_SQRTPI
+ */
+const M_SQRTPI = 1.77245385090551602729;
+/**
+ * @var float
+ * @cvalue M_2_SQRTPI
+ */
+const M_2_SQRTPI = 1.12837916709551257390;
+/**
+ * @var float
+ * @cvalue M_LNPI
+ */
+const M_LNPI = 1.14472988584940017414;
+/**
+ * @var float
+ * @cvalue M_EULER
+ */
+const M_EULER = 0.57721566490153286061;
+/**
+ * @var float
+ * @cvalue M_SQRT2
+ */
+const M_SQRT2 = 1.41421356237309504880;
+/**
+ * @var float
+ * @cvalue M_SQRT1_2
+ */
+const M_SQRT1_2 = 0.70710678118654752440;
+/**
+ * @var float
+ * @cvalue M_SQRT3
+ */
+const M_SQRT3 = 1.73205080756887729352;
+/**
+ * @var float
+ * @cvalue ZEND_INFINITY
+ */
+const INF = UNKNOWN;
+/**
+ * @var float
+ * @cvalue ZEND_NAN
+ */
+const NAN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_UP
+ */
+const PHP_ROUND_HALF_UP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_DOWN
+ */
+const PHP_ROUND_HALF_DOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_EVEN
+ */
+const PHP_ROUND_HALF_EVEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_ODD
+ */
+const PHP_ROUND_HALF_ODD = UNKNOWN;
 
 final class __PHP_Incomplete_Class
 {
