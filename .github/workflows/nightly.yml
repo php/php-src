@@ -160,8 +160,10 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v2
-      - name: Create mssql container
-        uses: ./.github/actions/mssql
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: Create Oracle container
+        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: Install gcovr
