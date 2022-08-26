@@ -71,6 +71,7 @@ typedef struct _zend_fiber_transfer {
 /* Coroutine functions must populate the given transfer with a new context
  * and (optional) data before they return. */
 typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
+typedef void (*zend_fiber_clean)(zend_fiber_context *context);
 
 struct _zend_fiber_context {
 	/* Pointer to boost.context or ucontext_t data. */
@@ -81,6 +82,9 @@ struct _zend_fiber_context {
 
 	/* Entrypoint function of the fiber. */
 	zend_fiber_coroutine function;
+
+	/* Cleanup function for fiber. */
+	zend_fiber_clean cleanup;
 
 	/* Assigned C stack. */
 	zend_fiber_stack *stack;
@@ -120,6 +124,9 @@ struct _zend_fiber {
 
 	/* Frame on the bottom of the fiber vm stack. */
 	zend_execute_data *stack_bottom;
+
+	/* Active fiber vm stack. */
+	zend_vm_stack vm_stack;
 
 	/* Storage for fiber return value. */
 	zval result;
