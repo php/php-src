@@ -7210,7 +7210,7 @@ static void zend_jit_stop_persistent_script(zend_persistent_script *script)
 }
 
 /* Get all scripts which are accelerated by JIT */
-static void zend_jit_stop_counter_handlers()
+static void zend_jit_stop_counter_handlers(void)
 {
 	for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
 		zend_accel_hash_entry *cache_entry;
