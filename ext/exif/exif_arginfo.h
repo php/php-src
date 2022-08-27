@@ -40,5 +40,5 @@ static const zend_function_entry ext_functions[] = {
 
 static void register_exif_symbols(int module_number)
 {
-	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", USE_MBSTRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", USE_MBSTRING, CONST_PERSISTENT);
 }

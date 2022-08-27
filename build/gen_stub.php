@@ -2013,7 +2013,7 @@ class ConstInfo extends VariableLike
         $constValue = $value->value;
         $cConstValue = $value->getCConstValue($allConstInfos);
 
-        $flags = "CONST_CS | CONST_PERSISTENT";
+        $flags = "CONST_PERSISTENT";
         if ($this->isDeprecated) {
             $flags .= " | CONST_DEPRECATED";
         }
