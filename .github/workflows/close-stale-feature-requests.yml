@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      pull-requests: write
     steps:
       - uses: actions/stale@v4
         with:
