@@ -17,7 +17,8 @@ on:
   pull_request:
     branches:
       - '**'
-permissions: {} # none
+permissions:
+  contents: read
 jobs:
   LINUX_X64:
     strategy:
@@ -30,8 +31,6 @@ jobs:
             zts: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
-    permissions:
-      contents: read
     steps:
       - name: git checkout
         uses: actions/checkout@v2
@@ -69,8 +68,6 @@ jobs:
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
     runs-on: macos-11
-    permissions:
-      contents: read
     steps:
       - name: git checkout
         uses: actions/checkout@v2
