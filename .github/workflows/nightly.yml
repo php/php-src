@@ -3,11 +3,14 @@ on:
   schedule:
    - cron: "0 1 * * *"
   workflow_dispatch: ~
+permissions: {} # none
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
     if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
       asan-matrix: ${{ steps.set-matrix.outputs.asan-matrix }}
@@ -42,6 +45,8 @@ jobs:
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.asan-matrix) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - name: git checkout
         uses: actions/checkout@v2
@@ -112,6 +117,8 @@ jobs:
         zts: [true, false]
     name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: macos-11
+    permissions:
+      contents: read
     steps:
       - name: git checkout
         uses: actions/checkout@v2
@@ -166,6 +173,8 @@ jobs:
         uses: ./.github/actions/verify-generated-files
   COVERAGE_DEBUG_NTS:
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - name: git checkout
         uses: actions/checkout@v2
