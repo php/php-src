@@ -4,10 +4,16 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   build:
     if: github.repository_owner == 'php'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Close old issues that need feedback
         uses: dwieeb/needs-reply@v2

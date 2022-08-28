@@ -17,6 +17,8 @@ on:
   pull_request:
     branches:
       - '**'
+permissions:
+  contents: read
 jobs:
   LINUX_X64:
     strategy:
