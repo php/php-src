@@ -289,7 +289,7 @@ PHP_FUNCTION(json_decode)
 }
 /* }}} */
 
-/* {{{ Validates if an string contains a valid json */
+/* {{{ Validates if a string contains a valid json */
 PHP_FUNCTION(json_validate)
 {
 	char *str;
