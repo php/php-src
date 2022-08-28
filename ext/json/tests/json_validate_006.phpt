@@ -14,6 +14,9 @@ $inputs = [
     'false',
     '{}',
     '[]',
+    '-',
+    null,
+    '',
 ];
 
 foreach ($inputs as $input) {
@@ -21,7 +24,7 @@ foreach ($inputs as $input) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(2) """"
 string(0) ""
 bool(true)
@@ -54,3 +57,16 @@ string(2) "[]"
 array(0) {
 }
 bool(true)
+string(1) "-"
+NULL
+bool(false)
+
+Deprecated: json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
+
+Deprecated: json_validate(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
+NULL
+NULL
+bool(false)
+string(0) ""
+NULL
+bool(false)
