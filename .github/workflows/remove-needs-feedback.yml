@@ -5,7 +5,8 @@ on:
     types:
       - created
 
-permissions: {} # none
+permissions:
+  contents: read
 
 jobs:
   build:
