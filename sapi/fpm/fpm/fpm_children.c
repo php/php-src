@@ -120,7 +120,7 @@ static void fpm_child_unlink(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-static struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
+struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	struct fpm_child_s *child = 0;
