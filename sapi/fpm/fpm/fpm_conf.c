@@ -593,7 +593,7 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 }
 /* }}} */
 
-static void *fpm_worker_pool_config_alloc(void) /* {{{ */
+static void *fpm_worker_pool_config_alloc(void)
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -635,7 +635,6 @@ static void *fpm_worker_pool_config_alloc(void) /* {{{ */
 	current_wp = wp;
 	return wp->config;
 }
-/* }}} */
 
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 {
@@ -795,7 +794,7 @@ static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, cha
 }
 /* }}} */
 
-static int fpm_conf_process_all_pools(void) /* {{{ */
+static int fpm_conf_process_all_pools(void)
 {
 	struct fpm_worker_pool_s *wp, *wp2;
 
@@ -1194,9 +1193,8 @@ static int fpm_conf_process_all_pools(void) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_conf_unlink_pid() /* {{{ */
+int fpm_conf_unlink_pid(void)
 {
 	if (fpm_global_config.pid_file) {
 		if (0 > unlink(fpm_global_config.pid_file)) {
@@ -1206,9 +1204,8 @@ int fpm_conf_unlink_pid() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_conf_write_pid() /* {{{ */
+int fpm_conf_write_pid(void)
 {
 	int fd;
 
@@ -1235,7 +1232,6 @@ int fpm_conf_write_pid() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 static int fpm_conf_post_process(int force_daemon) /* {{{ */
 {
@@ -1662,7 +1658,7 @@ int fpm_conf_load_ini_file(char *filename) /* {{{ */
 }
 /* }}} */
 
-static void fpm_conf_dump(void) /* {{{ */
+static void fpm_conf_dump(void)
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -1766,7 +1762,6 @@ static void fpm_conf_dump(void) /* {{{ */
 		zlog(ZLOG_NOTICE, " ");
 	}
 }
-/* }}} */
 
 int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 {
