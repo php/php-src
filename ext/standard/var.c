@@ -354,15 +354,6 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		Z_PROTECT_RECURSION_P(struc);
 
 		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
-		if (myht) {
-			if (GC_IS_RECURSIVE(myht)) {
-				PUTS("*RECURSION*\n");
-				zend_release_properties(myht);
-				Z_UNPROTECT_RECURSION_P(struc);
-				return;
-			}
-			GC_PROTECT_RECURSION(myht);
-		}
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
 		zend_string_release_ex(class_name, 0);
@@ -381,7 +372,6 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 					zval_object_property_dump(prop_info, val, index, key, level);
 				}
 			} ZEND_HASH_FOREACH_END();
-			GC_UNPROTECT_RECURSION(myht);
 			zend_release_properties(myht);
 		}
 		if (level > 1) {
@@ -575,17 +565,6 @@ again:
 			}
 			Z_PROTECT_RECURSION_P(struc);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
-			if (myht) {
-				if (GC_IS_RECURSIVE(myht)) {
-					Z_UNPROTECT_RECURSION_P(struc);
-					smart_str_appendl(buf, "NULL", 4);
-					zend_error(E_WARNING, "var_export does not handle circular references");
-					zend_release_properties(myht);
-					return;
-				} else {
-					GC_TRY_PROTECT_RECURSION(myht);
-				}
-			}
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
@@ -616,7 +595,6 @@ again:
 						php_object_element_export(val, index, key, level, buf);
 					} ZEND_HASH_FOREACH_END();
 				}
-				GC_TRY_UNPROTECT_RECURSION(myht);
 				zend_release_properties(myht);
 			}
 			Z_UNPROTECT_RECURSION_P(struc);
