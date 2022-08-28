@@ -212,32 +212,15 @@ value:
 
 %% /* Functions */
 
-static int php_json_parser_array_create_validate(php_json_parser *parser, zval *array)
-{
-	ZVAL_EMPTY_ARRAY(array);
-	return SUCCESS;
-}
-
 static int php_json_parser_array_create(php_json_parser *parser, zval *array)
 {
 	array_init(array);
 	return SUCCESS;
 }
 
-static int php_json_parser_array_append_validate(php_json_parser *parser, zval *array, zval *zvalue)
-{
-	return SUCCESS;
-}
-
 static int php_json_parser_array_append(php_json_parser *parser, zval *array, zval *zvalue)
 {
 	zend_hash_next_index_insert(Z_ARRVAL_P(array), zvalue);
-	return SUCCESS;
-}
-
-static int php_json_parser_object_create_validate(php_json_parser *parser, zval *object)
-{
-	ZVAL_EMPTY_ARRAY(object);
 	return SUCCESS;
 }
 
@@ -248,11 +231,6 @@ static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 	} else {
 		object_init(object);
 	}
-	return SUCCESS;
-}
-
-static int php_json_parser_object_update_validate(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
-{
 	return SUCCESS;
 }
 
@@ -274,6 +252,28 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	}
 	zend_string_release_ex(key, 0);
 
+	return SUCCESS;
+}
+
+static int php_json_parser_array_create_validate(php_json_parser *parser, zval *array)
+{
+	ZVAL_EMPTY_ARRAY(array);
+	return SUCCESS;
+}
+
+static int php_json_parser_array_append_validate(php_json_parser *parser, zval *array, zval *zvalue)
+{
+	return SUCCESS;
+}
+
+static int php_json_parser_object_create_validate(php_json_parser *parser, zval *object)
+{
+	ZVAL_EMPTY_ARRAY(object);
+	return SUCCESS;
+}
+
+static int php_json_parser_object_update_validate(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
+{
 	return SUCCESS;
 }
 
