@@ -108,6 +108,9 @@ PHP 8.2 UPGRADE NOTES
     round-trips between PHP and Oracle Database when fetching LOBS. This is
     usable with Oracle Database 12.2 or later.
 
+- OpenSSL:
+  . Added AEAD support for chacha20-poly1305 algorithm.
+
 - ODBC:
   . Added odbc_connection_string_is_quoted, odbc_connection_string_should_quote,
     and odbc_connection_string_quote. These are primarily used behind the scenes
