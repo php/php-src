@@ -29,7 +29,7 @@
 #include <errno.h>
 
 static int fpm_event_devpoll_init(int max);
-static int fpm_event_devpoll_clean();
+static int fpm_event_devpoll_clean(void);
 static int fpm_event_devpoll_wait(struct fpm_event_queue_s *queue, unsigned long int timeout);
 static int fpm_event_devpoll_add(struct fpm_event_s *ev);
 static int fpm_event_devpoll_remove(struct fpm_event_s *ev);
@@ -51,7 +51,7 @@ static int npollfds = 0;
 
 #endif /* HAVE_DEVPOLL */
 
-struct fpm_event_module_s *fpm_event_devpoll_module(void) /* {{{ */
+struct fpm_event_module_s *fpm_event_devpoll_module(void)
 {
 #ifdef HAVE_DEVPOLL
 	return &devpoll_module;
@@ -59,7 +59,6 @@ struct fpm_event_module_s *fpm_event_devpoll_module(void) /* {{{ */
 	return NULL;
 #endif /* HAVE_DEVPOLL */
 }
-/* }}} */
 
 #ifdef HAVE_DEVPOLL
 
@@ -113,7 +112,7 @@ static int fpm_event_devpoll_init(int max) /* {{{ */
 /*
  * Clean the module
  */
-static int fpm_event_devpoll_clean() /* {{{ */
+static int fpm_event_devpoll_clean(void)
 {
 	/* close /dev/poll if open */
 	if (dpfd > -1) {
@@ -136,7 +135,6 @@ static int fpm_event_devpoll_clean() /* {{{ */
 	npollfds = 0;
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout

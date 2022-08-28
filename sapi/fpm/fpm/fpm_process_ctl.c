@@ -63,7 +63,7 @@ static int fpm_pctl_timeout_set(int sec) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_exit(void) /* {{{ */
+static void fpm_pctl_exit(void)
 {
 	zlog(ZLOG_NOTICE, "exiting, bye-bye!");
 
@@ -71,11 +71,10 @@ static void fpm_pctl_exit(void) /* {{{ */
 	fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT_MAIN);
 	exit(FPM_EXIT_OK);
 }
-/* }}} */
 
 #define optional_arg(c) (saved_argc > c ? ", \"" : ""), (saved_argc > c ? saved_argv[c] : ""), (saved_argc > c ? "\"" : "")
 
-static void fpm_pctl_exec(void) /* {{{ */
+static void fpm_pctl_exec(void)
 {
 	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
 	if (0 > fpm_signals_block()) {
@@ -104,9 +103,8 @@ static void fpm_pctl_exec(void) /* {{{ */
 	zlog(ZLOG_SYSERROR, "failed to reload: execvp() failed");
 	exit(FPM_EXIT_SOFTWARE);
 }
-/* }}} */
 
-static void fpm_pctl_action_last(void) /* {{{ */
+static void fpm_pctl_action_last(void)
 {
 	switch (fpm_state) {
 		case FPM_PCTL_STATE_RELOADING:
@@ -119,7 +117,6 @@ static void fpm_pctl_action_last(void) /* {{{ */
 			break;
 	}
 }
-/* }}} */
 
 int fpm_pctl_kill(pid_t pid, int how) /* {{{ */
 {
@@ -175,7 +172,7 @@ void fpm_pctl_kill_all(int signo) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_action_next(void) /* {{{ */
+static void fpm_pctl_action_next(void)
 {
 	int sig, timeout;
 
@@ -203,7 +200,6 @@ static void fpm_pctl_action_next(void) /* {{{ */
 	fpm_signal_sent = sig;
 	fpm_pctl_timeout_set(timeout);
 }
-/* }}} */
 
 void fpm_pctl(int new_state, int action) /* {{{ */
 {
@@ -250,13 +246,12 @@ void fpm_pctl(int new_state, int action) /* {{{ */
 }
 /* }}} */
 
-int fpm_pctl_can_spawn_children() /* {{{ */
+int fpm_pctl_can_spawn_children(void)
 {
 	return fpm_state == FPM_PCTL_STATE_NORMAL;
 }
-/* }}} */
 
-int fpm_pctl_child_exited() /* {{{ */
+int fpm_pctl_child_exited(void)
 {
 	if (fpm_state == FPM_PCTL_STATE_NORMAL) {
 		return 0;
@@ -267,9 +262,8 @@ int fpm_pctl_child_exited() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_pctl_init_main() /* {{{ */
+int fpm_pctl_init_main(void)
 {
 	int i;
 
@@ -295,7 +289,6 @@ int fpm_pctl_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
 {

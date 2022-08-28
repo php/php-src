@@ -418,7 +418,7 @@ static zend_result fpm_socket_setfib_init(void)
 }
 #endif
 
-int fpm_sockets_init_main() /* {{{ */
+int fpm_sockets_init_main(void)
 {
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
@@ -523,7 +523,6 @@ int fpm_sockets_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 #if HAVE_FPM_LQ
 
