@@ -1,58 +1,72 @@
 --TEST--
-json_validate() - Tests json_validate() performance
---INI--
-memory_limit=128M
+json_validate() - compare against json_decode() for different types of inputs 
 --FILE--
 <?php
 
-//Generate a JSON STring
-$limit = 40000;
-$jsonString = '{ "test": { "foo": "bar" },';
-for ($i=0; $i < $limit; $i++) {
-  $jsonString .= " \"test$i\": { \"foo\": { \"test\" : { \"foo\" :  { \"test\" : { \"foo\" : \"bar\" }}}}},";
+$inputs = [
+    '""',
+    '"string"',
+    '1234',
+    '123.45',
+    '-123',
+    'null',
+    'true',
+    'false',
+    '{}',
+    '[]',
+    '-',
+    null,
+    '',
+];
+
+foreach ($inputs as $input) {
+    var_dump($input, json_decode($input), json_validate($input));
 }
-$jsonString .= ' "testXXXX": { "foo": "replaceme" } }';
-
-//Start json_decode() test
-
-$memoryBefore = memory_get_usage(true) / 1024 / 1024;
-$memoryBeforePeak = memory_get_peak_usage(true) / 1024 / 1024;
-$start = microtime(true);
-
-json_decode($jsonString, true, $limit, 0);
-
-$memoryAfter = memory_get_usage(true) / 1024 / 1024;
-$memoryAfterPeak = memory_get_peak_usage(true) / 1024 / 1024;
-
-$json_decode_memory_usage = ($memoryAfter - $memoryBefore);
-$json_decode_memory_peak_usage = ($memoryAfterPeak - $memoryBeforePeak);
-$json_decode_time = (microtime(true) - $start);
-
-unset($memoryBefore);
-unset($memoryBeforePeak);
-unset($start);
-unset($memoryAfter);
-unset($memoryAfterPeak);
-
-//Start json_validate() tests
-
-$memoryBefore = memory_get_usage(true) / 1024 / 1024;
-$memoryBeforePeak = memory_get_peak_usage(true) / 1024 / 1024;
-
-json_validate($jsonString);
-
-$memoryAfter = memory_get_usage(true) / 1024 / 1024;
-$memoryAfterPeak = memory_get_peak_usage(true) / 1024 / 1024;
-
-$json_validate_memory_usage = ($memoryAfter - $memoryBefore);
-$json_validate_memory_peak_usage = ($memoryAfterPeak - $memoryBeforePeak);
-
-echo "json_validate() uses less memory than json_decode() => {$json_validate_memory_usage} MB < {$json_decode_memory_usage} MB = ". (($json_validate_memory_usage < $json_decode_memory_usage) ? "TRUE" : "FALSE") . PHP_EOL;
-echo "json_validate() uses less memory peak than json_decode() => {$json_validate_memory_peak_usage} MB < {$json_decode_memory_peak_usage} MB = ". (($json_validate_memory_peak_usage < $json_decode_memory_peak_usage) ? "TRUE" : "FALSE") . PHP_EOL;
-
-return;
 
 ?>
 --EXPECTF--
-json_validate() uses less memory than json_decode() => %f MB < %f MB = TRUE
-json_validate() uses less memory peak than json_decode() => %f MB < %f MB = TRUE
+string(2) """"
+string(0) ""
+bool(true)
+string(8) ""string""
+string(6) "string"
+bool(true)
+string(4) "1234"
+int(1234)
+bool(true)
+string(6) "123.45"
+float(123.45)
+bool(true)
+string(4) "-123"
+int(-123)
+bool(true)
+string(4) "null"
+NULL
+bool(true)
+string(4) "true"
+bool(true)
+bool(true)
+string(5) "false"
+bool(false)
+bool(true)
+string(2) "{}"
+object(stdClass)#1 (0) {
+}
+bool(true)
+string(2) "[]"
+array(0) {
+}
+bool(true)
+string(1) "-"
+NULL
+bool(false)
+
+Deprecated: json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
+
+Deprecated: json_validate(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
+NULL
+NULL
+bool(false)
+string(0) ""
+NULL
+bool(false)
