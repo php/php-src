@@ -23,7 +23,7 @@ var_dump(
 );
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

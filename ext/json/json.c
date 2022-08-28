@@ -189,11 +189,7 @@ PHP_JSON_API zend_result php_json_validate_ex(zval *return_value, const char *st
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
-		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
-			JSON_G(error_code) = error_code;
-		} else {
-			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(error_code), error_code);
-		}
+		JSON_G(error_code) = error_code;
 		RETVAL_FALSE;
 		return FAILURE;
 	}
@@ -310,32 +306,18 @@ PHP_FUNCTION(json_validate)
 	ZEND_PARSE_PARAMETERS_END();
 
 
-	if (options != 0) {
-		zend_long tmp_options = options;
-		tmp_options ^= (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_THROW_ON_ERROR);
-
-		if (tmp_options != 0) {
-			if (!((tmp_options == PHP_JSON_INVALID_UTF8_IGNORE) || (tmp_options == PHP_JSON_THROW_ON_ERROR))) {
-				zend_argument_value_error(3, "must be a valid flag (JSON_THROW_ON_ERROR, JSON_INVALID_UTF8_IGNORE)");
-				RETURN_THROWS();
-			}
-		}
+	if ((options != 0) && (options != PHP_JSON_INVALID_UTF8_IGNORE)) {
+		zend_argument_value_error(3, "must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)");
+		RETURN_THROWS();
 	}
 
 	if (!str_len) {
-		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
-			JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
-		} else {
-			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(PHP_JSON_ERROR_SYNTAX), PHP_JSON_ERROR_SYNTAX);
-		}
-
+		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
 		RETURN_FALSE;
 	}
 
-	if (!(options & PHP_JSON_THROW_ON_ERROR)) {
-		JSON_G(error_code) = PHP_JSON_ERROR_NONE;
-	}
-
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	
 	if (depth <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
