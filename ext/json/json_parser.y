@@ -351,10 +351,6 @@ PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 		int options,
 		int max_depth)
 {
-	const php_json_parser_methods *parser_methods = ((options & PHP_JSON_VALIDATE_ONLY) ? &validate_parser_methods : &default_parser_methods);
-
-	options &= ~PHP_JSON_VALIDATE_ONLY;
-
 	php_json_parser_init_ex(
 			parser,
 			return_value,
@@ -362,10 +358,15 @@ PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 			str_len,
 			options,
 			max_depth,
-			parser_methods);
+			&default_parser_methods);
 }
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser)
 {
 	return php_json_yyparse(parser);
+}
+
+PHP_JSON_API const php_json_parser_methods get_validate_methods()
+{
+	return validate_parser_methods;
 }
