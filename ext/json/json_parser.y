@@ -366,7 +366,7 @@ PHP_JSON_API int php_json_parse(php_json_parser *parser)
 	return php_json_yyparse(parser);
 }
 
-PHP_JSON_API php_json_parser_methods get_validate_methods()
+php_json_parser_methods get_validate_methods()
 {
 	return validate_parser_methods;
 }
