@@ -307,7 +307,7 @@ static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
 
 static void register_test_symbols(int module_number)
 {
-	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 }
 
 static zend_class_entry *register_class__ZendTestInterface(void)
