@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.2.0RC1
 
 - CLI:
-  . Implement built-in web server responding without body to HEAD requst on
+  . Implement built-in web server responding without body to HEAD request on
     a static resource. (Vedran Miletic, Marin Martuslovic)
   . Implement built-in web server responding with HTTP status 405 to
     DELETE/PUT/PATCH request on a static resource.
