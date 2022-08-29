@@ -36,6 +36,11 @@ class Tester
     const FILE_EXT_PID = 'pid';
 
     /**
+     * Name for the option to manage php-fpm --force-stderr flag
+     */
+    const PHP_FPM_DISABLE_FORCE_STDERR = 'disable-force-stderr';
+
+    /**
      * @var array
      */
     static private $supportedFiles = [
@@ -375,7 +380,15 @@ class Tester
     {
         $configFile = $this->createConfig();
         $desc = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
-        $cmd = [self::findExecutable(), '-F', '-O', '-y', $configFile];
+
+        $cmd = [self::findExecutable(), '-F', '-y', $configFile];
+
+        if (!(isset($this->options[self::PHP_FPM_DISABLE_FORCE_STDERR]) &&
+            $this->options[self::PHP_FPM_DISABLE_FORCE_STDERR] === true)
+        ) {
+            $cmd[] = '-O';
+        }
+
         if (getenv('TEST_FPM_RUN_AS_ROOT')) {
             $cmd[] = '--allow-to-run-as-root';
         }
@@ -1153,7 +1166,7 @@ class Tester
      * @param string $prefix
      * @return string
      */
-    private function getPrefixedFile(string $extension, string $prefix = null)
+    public function getPrefixedFile(string $extension, string $prefix = null)
     {
         $fileName = rtrim($this->fileName, '.');
         if (!is_null($prefix)) {
