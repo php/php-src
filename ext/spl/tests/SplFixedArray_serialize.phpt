@@ -28,9 +28,10 @@ $unser[4] = 'quux';
 var_dump($unser[4]);
 var_dump($unser->foo);
 
-$array = new SplFixedArray(5);
+// __unserialize is a no-op on a non-empty SplFixedArray
+$array = new SplFixedArray(1);
 $array->__unserialize([
-    [null],
+    [1],
     [
         "foo" => "bar",
     ],
@@ -40,7 +41,7 @@ var_dump($array);
 ?>
 --EXPECTF--
 Deprecated: Creation of dynamic property SplFixedArray::$foo is deprecated in %s on line %d
-O:13:"SplFixedArray":2:{i:0;a:5:{i:0;s:3:"foo";i:1;N;i:2;i:42;i:3;O:8:"stdClass":1:{s:4:"prop";s:5:"value";}i:4;a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;i:5;}}i:1;a:1:{s:3:"foo";s:3:"bar";}}
+O:13:"SplFixedArray":6:{i:0;s:3:"foo";i:1;N;i:2;i:42;i:3;O:8:"stdClass":1:{s:4:"prop";s:5:"value";}i:4;a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;i:5;}s:3:"foo";s:3:"bar";}
 
 Deprecated: Creation of dynamic property SplFixedArray::$foo is deprecated in %s on line %d
 count: 5
@@ -66,15 +67,7 @@ array(5) {
 }
 string(4) "quux"
 string(3) "bar"
-object(SplFixedArray)#5 (5) {
+object(SplFixedArray)#5 (1) {
   [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
   NULL
 }

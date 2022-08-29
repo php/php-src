@@ -638,18 +638,6 @@ declared_property:
 					}
 				}
 			} else {
-				if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
-					zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
-						ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
-					goto failure;
-				} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
-						ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
-					if (EG(exception)) {
-						goto failure;
-					}
-				}
-
 				int ret = is_property_visibility_changed(obj->ce, &key);
 
 				if (EXPECTED(!ret)) {
@@ -664,6 +652,18 @@ second_try:
 					} else if (UNEXPECTED(Z_TYPE_INFO_P(data) != IS_NULL)) {
 						var_push_dtor_value(var_hash, data);
 						ZVAL_NULL(data);
+					}
+				}
+
+				if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+					zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
+						ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+					goto failure;
+				} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
+					zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
+						ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+					if (EG(exception)) {
+						goto failure;
 					}
 				}
 			}
