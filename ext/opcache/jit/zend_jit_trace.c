@@ -6377,7 +6377,7 @@ done:
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), type,
 						(gen_handler || type == IS_UNKNOWN || !ra ||
-							(!ra[ssa_op->op2_def] && !ssa->vars[ssa_op->op2_def].no_val)));
+							(!ra[ssa_op->op2_def] /*&& !ssa->vars[ssa_op->op2_def].no_val*/)));
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op2_def]) {
