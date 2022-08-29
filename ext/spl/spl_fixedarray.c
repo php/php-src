@@ -620,7 +620,7 @@ PHP_METHOD(SplFixedArray, __unserialize)
 	HashTable *data;
 	zval members_zv, *elem;
 	zend_string *key;
-	zend_long idx, size;
+	zend_long size;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
 		RETURN_THROWS();
@@ -635,7 +635,7 @@ PHP_METHOD(SplFixedArray, __unserialize)
 		array_init(&members_zv);
 
 		intern->array.size = 0;
-		ZEND_HASH_FOREACH_KEY_VAL(data, idx, key, elem) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(data, key, elem) {
 			if (key == NULL) {
 				ZVAL_COPY(&intern->array.elements[intern->array.size], elem);
 				intern->array.size++;
@@ -645,11 +645,13 @@ PHP_METHOD(SplFixedArray, __unserialize)
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		if (intern->array.size) {
-			intern->array.elements = erealloc(intern->array.elements, sizeof(zval) * intern->array.size);
-		} else {
-			efree(intern->array.elements);
-			intern->array.elements = NULL;
+		if (intern->array.size != size) {
+			if (intern->array.size) {
+				intern->array.elements = erealloc(intern->array.elements, sizeof(zval) * intern->array.size);
+			} else {
+				efree(intern->array.elements);
+				intern->array.elements = NULL;
+			}
 		}
 
 		object_properties_load(&intern->std, Z_ARRVAL(members_zv));
