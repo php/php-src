@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9285 (Traits cannot be used in readonly classes).
     (kocsismate)
 
+- Date:
+  . Fixed bug GH-9431 (DateTime::getLastErrors() not returning false when no
+    errors/warnings). (Derick)
+
 - Opcache:
   . Fixed bug GH-9371 (Crash with JIT on mac arm64)
     (jdp1024/David Carlier)

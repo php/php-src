@@ -2269,7 +2269,11 @@ static void update_errors_warnings(timelib_error_container *last_errors) /* {{{ 
 		timelib_error_container_dtor(DATEG(last_errors));
 		DATEG(last_errors) = NULL;
 	}
-	DATEG(last_errors) = last_errors;
+	if (last_errors->warning_count || last_errors->error_count) {
+		DATEG(last_errors) = last_errors;
+	} else {
+		timelib_error_container_dtor(last_errors);
+	}
 } /* }}} */
 
 static void php_date_set_time_fraction(timelib_time *time, int microseconds)
