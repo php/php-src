@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #79451 (DOMDocument->replaceChild on doctype causes double free).
     (Nathan Freeman)
 
+- FPM:
+  . Fixed bug GH-8885 (FPM access.log with stderr begins to write logs to
+    error_log after daemon reload). (Dmitry Menshikov)
+
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
     (cmb, timwolla)

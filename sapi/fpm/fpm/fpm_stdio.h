@@ -16,5 +16,9 @@ void fpm_stdio_child_use_pipes(struct fpm_child_s *child);
 int fpm_stdio_parent_use_pipes(struct fpm_child_s *child);
 int fpm_stdio_discard_pipes(struct fpm_child_s *child);
 int fpm_stdio_open_error_log(int reopen);
+int fpm_stdio_save_original_stderr(void);
+int fpm_stdio_restore_original_stderr(int close_after_restore);
+int fpm_stdio_redirect_stderr_to_dev_null_for_syslog(void);
+int fpm_stdio_redirect_stderr_to_error_log(void);
 
 #endif
