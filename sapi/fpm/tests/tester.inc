@@ -619,12 +619,9 @@ class Tester
         string $errorMessage = null,
         bool $connKeepAlive = false,
         string $scriptFilename = null,
-<<<<<<< HEAD
-        string $stdin = null
-=======
+        string $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
->>>>>>> PHP-8.1
     ) {
         if ($this->hasError()) {
             return new Response(null, true);
@@ -634,11 +631,7 @@ class Tester
 
         try {
             $this->response = new Response(
-<<<<<<< HEAD
-                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin)
-=======
-                $this->getClient($address, $connKeepAlive)->request_data($params, false, $readLimit)
->>>>>>> PHP-8.1
+                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin, $readLimit)
             );
             if ($expectError) {
                 $this->error('Expected request error but the request was successful');
