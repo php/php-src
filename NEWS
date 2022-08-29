@@ -26,8 +26,6 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-9017 (php_stream_sock_open_from_socket could return NULL).
     (Heiko Weber)
-  . Fixed bug GH-9296 (`ksort` behaves incorrectly on arrays with mixed keys).
-    (Denis Vaksman)
 
 - Streams:
   . Fixed bug GH-8472 (The resource returned by stream_socket_accept may have
