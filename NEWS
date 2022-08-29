@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-8885 (FPM access.log with stderr begins to write logs to
     error_log after daemon reload). (Dmitry Menshikov)
+  . Fixed bug #77780 ("Headers already sent..." when previous connection was
+    aborted). (Jakub Zelenka)
 
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).

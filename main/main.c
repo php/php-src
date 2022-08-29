@@ -1854,10 +1854,12 @@ void php_request_shutdown(void *dummy)
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
-	/* 12. SAPI related shutdown (free stuff) */
+	/* 12. SAPI related shutdown*/
 	zend_try {
-		sapi_deactivate();
+		sapi_deactivate_module();
 	} zend_end_try();
+	/* free SAPI stuff */
+	sapi_deactivate_destroy();
 
 	/* 13. free virtual CWD memory */
 	virtual_cwd_deactivate();
