@@ -1,5 +1,5 @@
 --TEST--
-FPM: bug8885 - access.log with stderr begins to write logs to error_log after daemon reload (GH-8885)
+FPM: GH-8885 - access.log with stderr begins to write logs to error_log after daemon reload
 --SKIPIF--
 <?php
 include "skipif.inc";
@@ -16,7 +16,7 @@ error_log = {{FILE:LOG}}
 pid = {{FILE:PID}}
 [unconfined]
 listen = {{ADDR}}
-access.log=/proc/self/fd/2
+access.log=/dev/stderr
 ping.path = /ping
 ping.response = pong
 pm = dynamic
@@ -50,20 +50,20 @@ assert(count($stderrLines) === 1, 'Expected 1 record in the stderr output (acces
 $stderrLine = $stderrLines[0];
 assert(preg_match('/127.0.0.1 .* "GET \/ping" 200$/', $stderrLine), 'Incorrect format of access.log record');
 
-$tester->signal('USR1');
-$tester->expectNoLogMessages();
+$tester->signal('USR2');
+$tester->expectLogNotice('using inherited socket fd=\d+, "127.0.0.1:\d+"');
 
 $content = file_get_contents($errorLogFile);
 assert($content !== false && strlen($content) > 0, 'File must not be empty');
 $errorLogLines = explode("\n", $content);
 array_pop($errorLogLines);
 
-assert(count($errorLogLines) >= 4, 'Expected at least 4 records in the error_log file');
+assert(count($errorLogLines) >= 5, 'Expected at least 5 records in the error_log file');
 assert(strpos($errorLogLines[0], 'NOTICE: fpm is running, pid'));
 assert(strpos($errorLogLines[1], 'NOTICE: ready to handle connections'));
-assert(strpos($errorLogLines[2], 'NOTICE: error log file re-opened'));
-assert(strpos($errorLogLines[3], 'NOTICE: access log file re-opened'));
-
+assert(strpos($errorLogLines[2], 'NOTICE: Reloading in progress'));
+assert(strpos($errorLogLines[3], 'NOTICE: reloading: execvp'));
+assert(strpos($errorLogLines[4], 'NOTICE: using inherited socket'));
 
 $tester->ping('{{ADDR}}');
 $stderrLines = $tester->getLogLines(-1);
