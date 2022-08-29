@@ -1,5 +1,5 @@
 --TEST--
-ASSIGN_OP 001: Incrrect optimization of ASSIGN_OBJ may lead to memory leak
+ASSIGN_OP 001: Incorrect optimization of ASSIGN_OBJ may lead to memory leak
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
