@@ -606,6 +606,8 @@ class Tester
      * @param string|null $errorMessage
      * @param bool $connKeepAlive
      * @param string|null $scriptFilename = null
+     * @param bool $expectError
+     * @param int $readLimit
      * @return Response
      */
     public function request(
@@ -617,7 +619,12 @@ class Tester
         string $errorMessage = null,
         bool $connKeepAlive = false,
         string $scriptFilename = null,
+<<<<<<< HEAD
         string $stdin = null
+=======
+        bool $expectError = false,
+        int $readLimit = -1,
+>>>>>>> PHP-8.1
     ) {
         if ($this->hasError()) {
             return new Response(null, true);
@@ -627,11 +634,21 @@ class Tester
 
         try {
             $this->response = new Response(
+<<<<<<< HEAD
                 $this->getClient($address, $connKeepAlive)->request_data($params, $stdin)
+=======
+                $this->getClient($address, $connKeepAlive)->request_data($params, false, $readLimit)
+>>>>>>> PHP-8.1
             );
-            $this->message($successMessage);
+            if ($expectError) {
+                $this->error('Expected request error but the request was successful');
+            } else {
+                $this->message($successMessage);
+            }
         } catch (\Exception $exception) {
-            if ($errorMessage === null) {
+            if ($expectError) {
+                $this->message($successMessage);
+            } elseif ($errorMessage === null) {
                 $this->error("Request failed", $exception);
             } else {
                 $this->message($errorMessage);
