@@ -629,6 +629,9 @@ PHP_METHOD(SplFixedArray, __unserialize)
 	if (intern->array.size == 0) {
 		size = zend_hash_num_elements(data);
 		spl_fixedarray_init_non_empty_struct(&intern->array, size);
+		if (!size) {
+			return;
+		}
 		array_init(&members_zv);
 
 		intern->array.size = 0;
