@@ -87,6 +87,8 @@ PHP                                                                        NEWS
   . Fixed bug #65489 (glob() basedir check is inconsistent). (Jakub Zelenka)
   . Fixed GH-9200 (setcookie has an obsolete expires date format). (Derick)
   . Fixed GH-9244 (Segfault with array_multisort + array_shift). (cmb)
+  . Fixed bug GH-9296 (`ksort` behaves incorrectly on arrays with mixed keys).
+    (Denis Vaksman)
 
 04 Aug 2022, PHP 8.2.0beta2
 

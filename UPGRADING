@@ -51,6 +51,8 @@ PHP 8.2 UPGRADE NOTES
   . str_split() returns an empty array for an empty string now. Previously it
     returned an array with a single empty string entry. mb_str_split() is not
     affected by this change since it was already behaving like that.
+  . ksort() and krsort() do numeric string comparison under SORT_REGULAR using
+    the standard PHP 8 rules now.
 
 - SPL:
   . The following methods now enforce their signature:
