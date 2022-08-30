@@ -103,9 +103,15 @@ PHP_FUNCTION( numfmt_format )
 			}
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
 			break;
-
+		case FORMAT_TYPE_CURRENCY:
+			if (getThis()) {
+				zend_argument_value_error(2, "cannot use NumberFormatter::TYPE_CURRENCY constant, use formatCurrency() method instead");
+			} else {
+				zend_argument_value_error(3, "cannot use NumberFormatter::TYPE_CURRENCY constant, use numfmt_format_currency() function instead");
+			}
+			RETURN_THROWS();
 		default:
-			zend_argument_value_error(3, "must be a NumberFormatter::TYPE_* constant");
+			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			RETURN_THROWS();
 	}
 

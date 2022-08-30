@@ -85,8 +85,15 @@ PHP_FUNCTION( numfmt_parse )
 			val_double = unum_parseDouble(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
 			RETVAL_DOUBLE(val_double);
 			break;
+		case FORMAT_TYPE_CURRENCY:
+			if (getThis()) {
+				zend_argument_value_error(2, "cannot use NumberFormatter::TYPE_CURRENCY constant, use parseCurrency() method instead");
+			} else {
+				zend_argument_value_error(3, "cannot use NumberFormatter::TYPE_CURRENCY constant, use numfmt_parse_currency() function instead");
+			}
+			goto cleanup;
 		default:
-			zend_argument_value_error(3, "must be a NumberFormatter::TYPE_* constant");
+			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			goto cleanup;
 	}
 
