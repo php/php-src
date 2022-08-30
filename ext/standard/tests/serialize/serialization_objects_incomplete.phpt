@@ -4,7 +4,6 @@ Check behaviour of incomplete class
 <?php
 $incomplete = unserialize('O:1:"C":1:{s:1:"p";i:1;}');
 var_dump($incomplete);
-
 ?>
 --EXPECT--
 object(__PHP_Incomplete_Class)#1 (2) {

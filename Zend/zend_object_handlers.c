@@ -275,12 +275,14 @@ static ZEND_COLD zend_never_inline void zend_bad_property_name(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_never_inline void zend_forbidden_dynamic_property(zend_class_entry *ce, zend_string *member) {
+static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
+		zend_class_entry *ce, zend_string *member) {
 	zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
-ZEND_API zend_never_inline bool zend_deprecated_dynamic_property(zend_object *obj, zend_string *member) {
+static ZEND_COLD zend_never_inline bool zend_deprecated_dynamic_property(
+		zend_object *obj, zend_string *member) {
 	GC_ADDREF(obj);
 	zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
 		ZSTR_VAL(obj->ce->name), ZSTR_VAL(member));
