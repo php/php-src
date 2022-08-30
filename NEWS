@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0RC1
+?? ??? ????, PHP 8.2.0RC2
+
+
+01 Sep 2022, PHP 8.2.0RC1
 
 - CLI:
   . Implement built-in web server responding without body to HEAD request on
