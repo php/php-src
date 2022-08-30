@@ -168,7 +168,7 @@ ZEND_DECLARE_MODULE_GLOBALS(tidy)
 
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("tidy.default_config",	"",		PHP_INI_SYSTEM,		OnUpdateString,				default_config,		zend_tidy_globals,	tidy_globals)
-STD_PHP_INI_ENTRY("tidy.clean_output",		"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
+STD_PHP_INI_BOOLEAN("tidy.clean_output",	"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
 PHP_INI_END()
 
 static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
