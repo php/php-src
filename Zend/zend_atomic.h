@@ -19,21 +19,16 @@
 
 #include <stdbool.h>
 
-#define ZEND_GCC_PREREQ(x, y) \
-	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
-
 /* Builtins are used to avoid library linkage */
 #if __has_feature(c_atomic)
 #define	HAVE_C11_ATOMICS 1
-#elif ZEND_GCC_PREREQ(4, 7)
+#elif ZEND_GCC_VERSION >= 4007
 #define	HAVE_GNUC_ATOMICS 1
 #elif defined(__GNUC__)
 #define	HAVE_SYNC_ATOMICS 1
 #elif !defined(ZEND_WIN32)
 #define HAVE_NO_ATOMICS 1
 #endif
-
-#undef ZEND_GCC_PREREQ
 
 /* Treat zend_atomic_* types as opaque. They have definitions only for size
  * and alignment purposes.
@@ -70,10 +65,9 @@ static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *ob
 	return InterlockedExchange8(&obj->value, desired);
 }
 
-/* On this platform it is non-const due to Iterlocked API*/
-static zend_always_inline bool zend_atomic_bool_load_ex(zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
 	/* Or'ing with false won't change the value. */
-	return InterlockedOr8(&obj->value, false);
+	return InterlockedOr8(&((zend_atomic_bool *) obj)->value, false);
 }
 
 static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
@@ -101,13 +95,13 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
 static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
-	bool prev = false;
+	bool prev;
 	__atomic_exchange(&obj->value, &desired, &prev, __ATOMIC_SEQ_CST);
 	return prev;
 }
 
 static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
-	bool prev = false;
+	bool prev;
 	__atomic_load(&obj->value, &prev, __ATOMIC_SEQ_CST);
 	return prev;
 }
@@ -130,9 +124,9 @@ static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *ob
 	return prev;
 }
 
-static zend_always_inline bool zend_atomic_bool_load_ex(zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
 	/* Or'ing false won't change the value */
-	return __sync_fetch_and_or(&obj->value, false);
+	return __sync_fetch_and_or(&((zend_atomic_bool *) obj)->value, false);
 }
 
 static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
@@ -166,13 +160,7 @@ static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *ob
 ZEND_API void zend_atomic_bool_init(zend_atomic_bool *obj, bool desired);
 ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired);
 ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired);
-
-#if ZEND_WIN32 || HAVE_SYNC_ATOMICS
-/* On these platforms it is non-const due to underlying APIs. */
-ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj);
-#else
 ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj);
-#endif
 
 END_EXTERN_C()
 
