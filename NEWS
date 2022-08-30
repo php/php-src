@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug GH-9285 (Traits cannot be used in readonly classes).
     (kocsismate)
+  . Fixed bug GH-9186 (@strict-properties can be bypassed using
+    unserialization). (kocsismate)
 
 - Date:
   . Fixed bug GH-9431 (DateTime::getLastErrors() not returning false when no
