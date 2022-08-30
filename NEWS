@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC2
 
+- Standard:
+  . Marked crypt()'s $string parameter as #[\SensitiveParameter]. (timwolla)
 
 01 Sep 2022, PHP 8.2.0RC1
 

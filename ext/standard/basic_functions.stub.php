@@ -911,7 +911,7 @@ function crc32(string $string): int {}
 /* crypt.c */
 
 /** @refcount 1 */
-function crypt(string $string, string $salt): string {}
+function crypt(#[\SensitiveParameter] string $string, string $salt): string {}
 
 /* datetime.c */
 
