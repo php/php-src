@@ -276,8 +276,6 @@ array(8) {
  -- Testing krsort() -- 
 No second argument:
 array(8) {
-  ["test"]=>
-  int(27)
   [16777216]=>
   float(-0.3333333333333333)
   [1001]=>
@@ -290,6 +288,8 @@ array(8) {
   string(4) "Test"
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [-1000]=>
   array(2) {
     [0]=>
@@ -300,8 +300,6 @@ array(8) {
 }
 Using SORT_REGULAR:
 array(8) {
-  ["test"]=>
-  int(27)
   [16777216]=>
   float(-0.3333333333333333)
   [1001]=>
@@ -314,6 +312,8 @@ array(8) {
   string(4) "Test"
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [-1000]=>
   array(2) {
     [0]=>
@@ -334,10 +334,10 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [5]=>
   string(4) "Test"
-  ["test"]=>
-  int(27)
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [-1000]=>
   array(2) {
     [0]=>
@@ -383,6 +383,8 @@ array(8) {
   }
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [5]=>
   string(4) "Test"
   [17]=>
@@ -393,8 +395,6 @@ array(8) {
   string(6) "monkey"
   [16777216]=>
   float(-0.3333333333333333)
-  ["test"]=>
-  int(27)
 }
 Using SORT_REGULAR:
 array(8) {
@@ -407,6 +407,8 @@ array(8) {
   }
   [0]=>
   string(3) "PHP"
+  ["test"]=>
+  int(27)
   [5]=>
   string(4) "Test"
   [17]=>
@@ -417,8 +419,6 @@ array(8) {
   string(6) "monkey"
   [16777216]=>
   float(-0.3333333333333333)
-  ["test"]=>
-  int(27)
 }
 Using SORT_NUMERIC:
 array(8) {
