@@ -5179,7 +5179,7 @@ static ZEND_INI_DISP(zend_ffi_enable_displayer_cb) /* {{{ */
 /* }}} */
 
 ZEND_INI_BEGIN()
-	ZEND_INI_ENTRY3_EX("ffi.enable", "preload", ZEND_INI_SYSTEM, OnUpdateFFIEnable, NULL, NULL, NULL, zend_ffi_enable_displayer_cb)
+	ZEND_INI_ENTRY_EX("ffi.enable", "preload", ZEND_INI_SYSTEM, OnUpdateFFIEnable, zend_ffi_enable_displayer_cb)
 	STD_ZEND_INI_ENTRY("ffi.preload", NULL, ZEND_INI_SYSTEM, OnUpdateString, preload, zend_ffi_globals, ffi_globals)
 ZEND_INI_END()
 
