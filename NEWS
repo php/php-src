@@ -45,10 +45,6 @@ PHP                                                                        NEWS
 - SQLite3:
   . Fixed bug GH-9032 (SQLite3 authorizer crashes on NULL values). (cmb)
 
-- Standard:
-  . Fixed bug GH-9296 (`ksort` behaves incorrectly on arrays with mixed keys).
-    (Denis Vaksman)
-
 - Streams:
   . Fixed bug GH-8472 (The resource returned by stream_socket_accept may have
     incorrect metadata). (Jakub Zelenka)

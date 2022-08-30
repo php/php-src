@@ -166,25 +166,40 @@ static zend_never_inline ZEND_COLD int stable_sort_fallback(Bucket *a, Bucket *b
 
 static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
-    zval first;
-    zval second;
+	zend_uchar t;
+	zend_long l1, l2;
+	double d;
 
-    if (f->key == NULL && s->key == NULL) {
-        return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
-    } else if (f->key && s->key) {
-        return zendi_smart_strcmp(f->key, s->key);
-    }
-    if (f->key) {
-        ZVAL_STR(&first, f->key);
-    } else {
-        ZVAL_LONG(&first, f->h);
-    }
-    if (s->key) {
-        ZVAL_STR(&second, s->key);
-    } else {
-        ZVAL_LONG(&second, s->h);
-    }
-    return zend_compare(&first, &second);
+	if (f->key == NULL) {
+		if (s->key == NULL) {
+			return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
+		} else {
+			l1 = (zend_long)f->h;
+			t = is_numeric_string(s->key->val, s->key->len, &l2, &d, 1);
+			if (t == IS_LONG) {
+				/* pass */
+			} else if (t == IS_DOUBLE) {
+				return ZEND_NORMALIZE_BOOL((double)l1 - d);
+			} else {
+				l2 = 0;
+			}
+		}
+	} else {
+		if (s->key) {
+			return zendi_smart_strcmp(f->key, s->key);
+		} else {
+			l2 = (zend_long)s->h;
+			t = is_numeric_string(f->key->val, f->key->len, &l1, &d, 1);
+			if (t == IS_LONG) {
+				/* pass */
+			} else if (t == IS_DOUBLE) {
+				return ZEND_NORMALIZE_BOOL(d - (double)l2);
+			} else {
+				l1 = 0;
+			}
+		}
+	}
+	return ZEND_NORMALIZE_BOOL(l1 - l2);
 }
 /* }}} */
 
