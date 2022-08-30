@@ -185,9 +185,9 @@ namespace ZendTestNS2 {
     function namespaced_aliased_func(): void {}
 
     /**
-      * @deprecated
-      * @alias zend_test_void_return
-      */
+     * @deprecated
+     * @alias zend_test_void_return
+     */
     function namespaced_deprecated_aliased_func(): void {}
 }
 
@@ -206,8 +206,8 @@ namespace ZendTestNS2\ZendSubNS {
     function namespaced_aliased_func(): void {}
 
     /**
-      * @deprecated
-      * @alias zend_test_void_return
-      */
+     * @deprecated
+     * @alias zend_test_void_return
+     */
     function namespaced_deprecated_aliased_func(): void {}
 }
