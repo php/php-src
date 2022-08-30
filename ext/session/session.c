@@ -1871,13 +1871,13 @@ PHP_FUNCTION(session_get_cookie_params)
 	add_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
 	// TODO Use add_assoc_str() but figure out why it emits a
 	// Zend/zend_types.h:1222: zend_gc_delref: Assertion `(zval_gc_flags((p)->u.type_info) & ((1<<7)|(1<<8))) != (1<<7)' failed.
-	add_assoc_string(return_value, "path", ZSTR_VAL(PS(cookie_path)));
-	add_assoc_string(return_value, "domain", ZSTR_VAL(PS(cookie_domain)));
+	add_assoc_stringl(return_value, "path", ZSTR_VAL(PS(cookie_path)), ZSTR_LEN(PS(cookie_path)));
+	add_assoc_stringl(return_value, "domain", ZSTR_VAL(PS(cookie_domain)), ZSTR_LEN(PS(cookie_domain)));
 	add_assoc_bool(return_value, "secure", PS(cookie_secure));
 	add_assoc_bool(return_value, "httponly", PS(cookie_httponly));
 	// TODO Use add_assoc_str() but figure out why it emits a
 	// Zend/zend_types.h:1222: zend_gc_delref: Assertion `(zval_gc_flags((p)->u.type_info) & ((1<<7)|(1<<8))) != (1<<7)' failed.
-	add_assoc_string(return_value, "samesite", ZSTR_VAL(PS(cookie_samesite)));
+	add_assoc_stringl(return_value, "samesite", ZSTR_VAL(PS(cookie_samesite)), ZSTR_LEN(PS(cookie_samesite)));
 }
 /* }}} */
 
