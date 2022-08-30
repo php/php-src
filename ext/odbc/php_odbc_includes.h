@@ -228,8 +228,8 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
 	char *defDB;
 	char *defUser;
 	char *defPW;
-	zend_long allow_persistent;
-	zend_long check_persistent;
+	bool allow_persistent;
+	bool check_persistent;
 	zend_long max_persistent;
 	zend_long max_links;
 	zend_long num_persistent;
