@@ -128,7 +128,9 @@ struct _php_sqlite3_stmt_object  {
 	php_sqlite3_db_object *db_obj;
 	zval db_obj_zval;
 
-	int initialised;
+	unsigned initialised:1;
+	unsigned has_stepped:1;
+	unsigned last_step_result:30;
 
 	/* Keep track of the zvals for bound parameters */
 	HashTable *bound_params;

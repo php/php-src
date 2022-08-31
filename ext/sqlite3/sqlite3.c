@@ -591,17 +591,21 @@ PHP_METHOD(SQLite3, query)
 	ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ(stmt));
 
 	return_code = sqlite3_step(result->stmt_obj->stmt);
+	result->stmt_obj->has_stepped = 1;
+	ZEND_ASSERT(return_code >= 0 && return_code < (1 << 30));
+	result->stmt_obj->last_step_result = return_code;
 
 	switch (return_code) {
-		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
+			sqlite3_reset(result->stmt_obj->stmt);
+			ZEND_FALLTHROUGH;
+		case SQLITE_ROW: /* Valid Row */
 		{
 			php_sqlite3_free_list *free_item;
 			free_item = emalloc(sizeof(php_sqlite3_free_list));
 			free_item->stmt_obj = stmt_obj;
 			free_item->stmt_obj_zval = stmt;
 			zend_llist_add_element(&(db_obj->free_list), &free_item);
-			sqlite3_reset(result->stmt_obj->stmt);
 			break;
 		}
 		default:
@@ -610,6 +614,7 @@ PHP_METHOD(SQLite3, query)
 			}
 			sqlite3_finalize(stmt_obj->stmt);
 			stmt_obj->initialised = 0;
+			stmt_obj->has_stepped = 0;
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 	}
@@ -1432,6 +1437,7 @@ PHP_METHOD(SQLite3Stmt, reset)
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
 
+	stmt_obj->has_stepped = 0;
 	if (sqlite3_reset(stmt_obj->stmt) != SQLITE_OK) {
 		php_sqlite3_error(stmt_obj->db_obj, "Unable to reset statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
 		RETURN_FALSE;
@@ -1782,12 +1788,16 @@ PHP_METHOD(SQLite3Stmt, execute)
 	}
 
 	return_code = sqlite3_step(stmt_obj->stmt);
+	stmt_obj->has_stepped = 1;
+	ZEND_ASSERT(return_code >= 0 && return_code < (1 << 30));
+	stmt_obj->last_step_result = return_code;
 
 	switch (return_code) {
-		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
-		{
 			sqlite3_reset(stmt_obj->stmt);
+			ZEND_FALLTHROUGH;
+		case SQLITE_ROW: /* Valid Row */
+		{
 			object_init_ex(return_value, php_sqlite3_result_entry);
 			result = Z_SQLITE3_RESULT_P(return_value);
 
@@ -1800,9 +1810,6 @@ PHP_METHOD(SQLite3Stmt, execute)
 
 			break;
 		}
-		case SQLITE_ERROR:
-			sqlite3_reset(stmt_obj->stmt);
-			ZEND_FALLTHROUGH;
 		default:
 			if (!EG(exception)) {
 				php_sqlite3_error(stmt_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(stmt_obj->stmt)));
@@ -1941,7 +1948,14 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
-	ret = sqlite3_step(result_obj->stmt_obj->stmt);
+	if (result_obj->stmt_obj->has_stepped) {
+		ret = result_obj->stmt_obj->last_step_result;
+	} else {
+		ret = sqlite3_step(result_obj->stmt_obj->stmt);
+		result_obj->stmt_obj->has_stepped = 1;
+		ZEND_ASSERT(ret >= 0 && ret < (1 << 30));
+		result_obj->stmt_obj->last_step_result = ret;
+	}
 	switch (ret) {
 		case SQLITE_ROW:
 			/* If there was no return value then just skip fetching */
@@ -1985,6 +1999,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 					zend_symtable_add_new(Z_ARR_P(return_value), result_obj->column_names[i], &data);
 				}
 			}
+			result_obj->stmt_obj->has_stepped = 0;
 			break;
 
 		case SQLITE_DONE:
@@ -2021,6 +2036,7 @@ PHP_METHOD(SQLite3Result, reset)
 
 	sqlite3result_clear_column_names_cache(result_obj);
 
+	result_obj->stmt_obj->has_stepped = 0;
 	if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
 		RETURN_FALSE;
 	}
@@ -2047,6 +2063,7 @@ PHP_METHOD(SQLite3Result, finalize)
 		zend_llist_del_element(&(result_obj->db_obj->free_list), &result_obj->stmt_obj_zval,
 			(int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
 	} else {
+		result_obj->stmt_obj->has_stepped = 0;
 		sqlite3_reset(result_obj->stmt_obj->stmt);
 	}
 
@@ -2274,11 +2291,13 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 	sqlite3result_clear_column_names_cache(intern);
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
-		if (intern->stmt_obj && intern->stmt_obj->initialised) {
-			sqlite3_reset(intern->stmt_obj->stmt);
-		}
-
 		zval_ptr_dtor(&intern->stmt_obj_zval);
+		if (intern->stmt_obj && intern->stmt_obj->initialised) {
+			if (GC_REFCOUNT(&intern->stmt_obj->zo) == 0) {
+				sqlite3_reset(intern->stmt_obj->stmt);
+				intern->stmt_obj->has_stepped = 0;
+			}
+		}
 	}
 
 	zend_object_std_dtor(&intern->zo);
@@ -2315,6 +2334,7 @@ static zend_object *php_sqlite3_stmt_object_new(zend_class_entry *class_type) /*
 	object_properties_init(&intern->zo, class_type);
 
 	intern->zo.handlers = &sqlite3_stmt_object_handlers;
+	intern->has_stepped = 0;
 
 	return &intern->zo;
 }
