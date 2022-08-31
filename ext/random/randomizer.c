@@ -272,6 +272,12 @@ PHP_METHOD(Random_Randomizer, __unserialize)
 		Z_PARAM_ARRAY_HT(d);
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
+	if (zend_hash_num_elements(d) != 1) {
+		zend_throw_exception(NULL, "Invalid serialization data for Random\\Randomizer object", 0);
+		RETURN_THROWS();
+	}
+
 	members_zv = zend_hash_index_find(d, 0);
 	if (!members_zv || Z_TYPE_P(members_zv) != IS_ARRAY) {
 		zend_throw_exception(NULL, "Invalid serialization data for Random\\Randomizer object", 0);

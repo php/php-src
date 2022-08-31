@@ -64,6 +64,20 @@ try {
     echo $e->getMessage(), PHP_EOL;
 }
 
+// additional array values (1)
+try {
+    var_dump(unserialize('O:32:"Random\Engine\Xoshiro256StarStar":3:{i:0;a:0:{}i:1;a:4:{i:0;s:16:"db1c182f1bf60cbb";i:1;s:16:"2465f04d36a1c797";i:2;s:16:"da25c09be4fabe33";i:3;s:16:"33a0d052f241624e";}i:2;N;}'));
+} catch (\Exception $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+// additional array values (2)
+try {
+    var_dump(unserialize('O:32:"Random\Engine\Xoshiro256StarStar":2:{i:0;a:0:{}i:1;a:5:{i:0;s:16:"db1c182f1bf60cbb";i:1;s:16:"2465f04d36a1c797";i:2;s:16:"da25c09be4fabe33";i:3;s:16:"33a0d052f241624e";i:4;N;}}'));
+} catch (\Exception $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
 ?>
 --EXPECT--
 Random\Engine\Mt19937
@@ -79,5 +93,7 @@ Invalid serialization data for Random\Engine\PcgOneseq128XslRr64 object
 
 
 Random\Engine\Xoshiro256StarStar
+Invalid serialization data for Random\Engine\Xoshiro256StarStar object
+Invalid serialization data for Random\Engine\Xoshiro256StarStar object
 Invalid serialization data for Random\Engine\Xoshiro256StarStar object
 Invalid serialization data for Random\Engine\Xoshiro256StarStar object
