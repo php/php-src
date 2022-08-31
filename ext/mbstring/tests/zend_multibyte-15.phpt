@@ -13,6 +13,5 @@ declare(encoding="UTF-8") {
     echo "ok\n";
 }
 ?>
---EXPECT--
-ok
-ok
+--EXPECTF--
+Fatal error: Encoding declaration pragma must not use block mode in %s on line %d
