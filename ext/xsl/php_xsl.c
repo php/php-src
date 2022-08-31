@@ -103,7 +103,6 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	intern->parameter = zend_new_array(0);
 	intern->registered_phpfunctions = zend_new_array(0);
 
-	intern->std.handlers = &xsl_object_handlers;
 	return &intern->std;
 }
 /* }}} */
@@ -118,6 +117,7 @@ PHP_MINIT_FUNCTION(xsl)
 
 	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
 	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;
+	xsl_xsltprocessor_class_entry->default_object_handlers = &xsl_object_handlers;
 
 #ifdef HAVE_XSL_EXSLT
 	exsltRegisterAll();

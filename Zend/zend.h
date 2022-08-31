@@ -182,6 +182,8 @@ struct _zend_class_entry {
 	zend_function *__serialize;
 	zend_function *__unserialize;
 
+	const zend_object_handlers *default_object_handlers;
+
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
 	/* allocated only if class implements ArrayAccess interface */

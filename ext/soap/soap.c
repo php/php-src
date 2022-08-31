@@ -194,7 +194,6 @@ static zend_object *soap_server_object_create(zend_class_entry *ce)
 	soap_server_object *obj = zend_object_alloc(sizeof(soap_server_object), ce);
 	zend_object_std_init(&obj->std, ce);
 	object_properties_init(&obj->std, ce);
-	obj->std.handlers = &soap_server_object_handlers;
 	return &obj->std;
 }
 
@@ -407,6 +406,7 @@ PHP_MINIT_FUNCTION(soap)
 	/* Register SoapServer class */
 	soap_server_class_entry = register_class_SoapServer();
 	soap_server_class_entry->create_object = soap_server_object_create;
+	soap_server_class_entry->default_object_handlers = &soap_server_object_handlers;
 
 	memcpy(&soap_server_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	soap_server_object_handlers.offset = XtOffsetOf(soap_server_object, std);

@@ -227,8 +227,6 @@ static zend_object *php_random_randomizer_new(zend_class_entry *ce)
 	zend_object_std_init(&randomizer->std, ce);
 	object_properties_init(&randomizer->std, ce);
 
-	randomizer->std.handlers = &random_randomizer_object_handlers;
-
 	return &randomizer->std;
 }
 
@@ -880,6 +878,7 @@ PHP_MINIT_FUNCTION(random)
 	/* Random\Randomizer */
 	random_ce_Random_Randomizer = register_class_Random_Randomizer();
 	random_ce_Random_Randomizer->create_object = php_random_randomizer_new;
+	random_ce_Random_Randomizer->default_object_handlers = &random_randomizer_object_handlers;
 	memcpy(&random_randomizer_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	random_randomizer_object_handlers.offset = XtOffsetOf(php_random_randomizer, std);
 	random_randomizer_object_handlers.free_obj = randomizer_free_obj;

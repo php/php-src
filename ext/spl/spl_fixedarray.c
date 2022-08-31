@@ -282,7 +282,6 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 
 	while (parent) {
 		if (parent == spl_ce_SplFixedArray) {
-			intern->std.handlers = &spl_handler_SplFixedArray;
 			break;
 		}
 
@@ -959,6 +958,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_ce_SplFixedArray = register_class_SplFixedArray(
 		zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_countable, php_json_serializable_ce);
 	spl_ce_SplFixedArray->create_object = spl_fixedarray_new;
+	spl_ce_SplFixedArray->default_object_handlers = &spl_handler_SplFixedArray;
 	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
 
 	memcpy(&spl_handler_SplFixedArray, &std_object_handlers, sizeof(zend_object_handlers));

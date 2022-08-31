@@ -47,8 +47,6 @@ zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
 
-	intern->zo.handlers = &Spoofchecker_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -93,6 +91,7 @@ void spoofchecker_register_Spoofchecker_class(void)
 	/* Create and register 'Spoofchecker' class. */
 	Spoofchecker_ce_ptr = register_class_Spoofchecker();
 	Spoofchecker_ce_ptr->create_object = Spoofchecker_object_create;
+	Spoofchecker_ce_ptr->default_object_handlers = &Spoofchecker_handlers;
 
 	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);
