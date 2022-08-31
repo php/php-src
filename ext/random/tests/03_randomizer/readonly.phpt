@@ -1,43 +1,30 @@
 --TEST--
-Random: Randomizer: readonly engine
+Random: Randomizer: The engine property must be readonly
 --FILE--
 <?php
 
-$one = new \Random\Randomizer(
-    new \Random\Engine\PcgOneseq128XslRr64(1234)
-);
+use Random\Engine\PcgOneseq128XslRr64;
+use Random\Engine\Xoshiro256StarStar;
+use Random\Randomizer;
 
-$one_ng_clone = clone $one->engine;
-if ($one->engine->generate() !== $one_ng_clone->generate()) {
-    die('invalid result');
-}
+$randomizer = new Randomizer(new PcgOneseq128XslRr64(1234));
+$referenceRandomizer = new Randomizer(new PcgOneseq128XslRr64(1234));
 
 try {
-    $one->engine = $one_ng_clone;
-} catch (\Throwable $e) {
-    echo $e->getMessage() . PHP_EOL;
+    $randomizer->engine = new Xoshiro256StarStar(1234);
+} catch (Throwable $e) {
+    echo $e->getMessage(), PHP_EOL;
 }
 
-$two = new \Random\Randomizer(
-    new \Random\Engine\Secure()
-);
-
-try {
-    $two_ng_clone = clone $two->engine;
-} catch (\Throwable $e) {
-    echo $e->getMessage() . PHP_EOL;
+for ($i = 0; $i < 10_000; $i++) {
+    if ($randomizer->getInt(0, $i) !== $referenceRandomizer->getInt(0, $i)) {
+        die("failure: state differs at {$i}");
+    }
 }
 
-try {
-    $two->engine = $one_ng_clone;
-} catch (\Throwable $e) {
-    echo $e->getMessage() . PHP_EOL;
-}
+die('success');
 
-die('success')
 ?>
 --EXPECT--
-Cannot modify readonly property Random\Randomizer::$engine
-Trying to clone an uncloneable object of class Random\Engine\Secure
 Cannot modify readonly property Random\Randomizer::$engine
 success

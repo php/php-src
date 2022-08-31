@@ -16,7 +16,7 @@ try {
 
 for ($i = 0; $i < 10_000; $i++) {
     if ($engine->generate() !== $referenceEngine->generate()) {
-        die('failure: state changed');
+        die("failure: state differs at {$i}");
     }
 }
 

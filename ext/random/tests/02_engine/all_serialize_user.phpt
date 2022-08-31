@@ -4,18 +4,11 @@ Random: Engine: Serialization of user engines must preserve the sequence
 <?php
 
 use Random\Engine;
+use Random\Engine\Test\TestShaEngine;
 
-final class User64 implements Engine
-{
-    private int $count = 0;
+require __DIR__ . "/../engines.inc";
 
-    public function generate(): string
-    {
-        return pack('P*', ++$this->count);
-    }
-}
-
-final class User32 implements Engine
+final class CountingEngine32 implements Engine
 {
     private int $count = 0;
 
@@ -26,12 +19,12 @@ final class User32 implements Engine
 }
 
 $engines = [];
-if (PHP_INT_SIZE >= 8) {
-    $engines[] = new User64();
-}
-$engines[] = new User32();
+$engines[] = new CountingEngine32();
+$engines[] = new TestShaEngine();
 
 foreach ($engines as $engine) {
+    echo $engine::class, PHP_EOL;
+
     for ($i = 0; $i < 10_000; $i++) {
         $engine->generate();
     }
@@ -40,9 +33,7 @@ foreach ($engines as $engine) {
 
     for ($i = 0; $i < 10_000; $i++) {
         if ($engine->generate() !== $engine2->generate()) {
-            $className = $engine::class;
-
-            die("failure: {$className} at {$i}");
+            die("failure: state differs at {$i}");
         }
     }
 }
@@ -51,4 +42,6 @@ die('success');
 
 ?>
 --EXPECT--
+CountingEngine32
+Random\Engine\Test\TestShaEngine
 success
