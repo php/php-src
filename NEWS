@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Tim Starling)
   . Fixed bug GH-9361 (Segmentation fault on script exit #9379). (cmb,
     Christian Schneider)
+  . Fixed bug GH-9447 (Invalid class FQN emitted by AST dump for new and class
+    constants in constant expressions). (ilutov)
 
 - DOM:
   . Fixed bug #79451 (DOMDocument->replaceChild on doctype causes double free).
