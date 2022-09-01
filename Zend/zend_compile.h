@@ -917,6 +917,9 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
 
+/* ZEND_FETCH_ flags in class name AST of new const expression must not clash with ZEND_NAME_ flags */
+#define ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT 2
+
 #define ZEND_TYPE_NULLABLE (1<<8)
 
 #define ZEND_ARRAY_SYNTAX_LIST 1  /* list() */
