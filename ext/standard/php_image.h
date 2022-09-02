@@ -44,12 +44,10 @@ typedef enum
   IMAGE_FILETYPE_ICO,
   IMAGE_FILETYPE_WEBP,
   IMAGE_FILETYPE_AVIF,
-/* WHEN EXTENDING: PLEASE ALSO REGISTER IN image.c:PHP_MINIT_FUNCTION(imagetypes) */
+/* WHEN EXTENDING: PLEASE ALSO REGISTER IN basic_function.stub.php */
   IMAGE_FILETYPE_COUNT
 } image_filetype;
 /* }}} */
-
-PHP_MINIT_FUNCTION(imagetypes);
 
 PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetype);
 
