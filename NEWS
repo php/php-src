@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0alpha1
 
+- Opcache:
+  . Added start, restart and force restart time to opcache's
+  phpinfo section. (Mikhail Galanin)
+  
 - Posix:
   . Added posix_sysconf. (David Carlier)
 
