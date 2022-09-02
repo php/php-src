@@ -9812,8 +9812,8 @@ static void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 		zend_string_release_ex(class_name, 0);
 		if (tmp != class_name) {
 			zval *zv = zend_ast_get_zval(class_ast);
-
 			ZVAL_STR(zv, tmp);
+			class_ast->attr = ZEND_NAME_FQ;
 		}
 	}
 
@@ -9908,7 +9908,7 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 	zval *class_ast_zv = zend_ast_get_zval(class_ast);
 	zval_ptr_dtor_nogc(class_ast_zv);
 	ZVAL_STR(class_ast_zv, class_name);
-	class_ast->attr = fetch_type;
+	class_ast->attr = fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT;
 }
 
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)
