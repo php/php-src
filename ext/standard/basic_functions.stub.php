@@ -343,6 +343,88 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
 
+/* dns.c */
+
+#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
+/**
+ * @var int
+ * @cvalue PHP_DNS_A
+ */
+const DNS_A = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_NS
+ */
+const DNS_NS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_CNAME
+ */
+const DNS_CNAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_SOA
+ */
+const DNS_SOA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_PTR
+ */
+const DNS_PTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_HINFO
+ */
+const DNS_HINFO = UNKNOWN;
+#if (!defined(PHP_WIN32))
+/**
+ * @var int
+ * @cvalue PHP_DNS_CAA
+ */
+const DNS_CAA = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue PHP_DNS_MX
+ */
+const DNS_MX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_TXT
+ */
+const DNS_TXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_SRV
+ */
+const DNS_SRV = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_NAPTR
+ */
+const DNS_NAPTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_AAAA
+ */
+const DNS_AAAA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_A6
+ */
+const DNS_A6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_ANY
+ */
+const DNS_ANY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_ALL
+ */
+const DNS_ALL = UNKNOWN;
+#endif
+
 /* syslog.c */
 
 /* error levels */
