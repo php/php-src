@@ -740,6 +740,7 @@ const LOG_NOWAIT = UNKNOWN;
 const LOG_PERROR = UNKNOWN;
 #endif
 
+/** @undocumentable */
 #[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
 {

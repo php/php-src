@@ -2453,6 +2453,8 @@ class ClassInfo {
     public $cond;
     /** @var int|null */
     public $phpVersionIdMinimumCompatibility;
+    /** @var bool */
+    public $isUndocumentable;
 
     /**
      * @param AttributeInfo[] $attributes
@@ -2480,7 +2482,8 @@ class ClassInfo {
         array $funcInfos,
         array $enumCaseInfos,
         ?string $cond,
-        ?int $minimumPhpVersionIdCompatibility
+        ?int $minimumPhpVersionIdCompatibility,
+        bool $isUndocumentable
     ) {
         $this->name = $name;
         $this->flags = $flags;
@@ -2499,6 +2502,7 @@ class ClassInfo {
         $this->enumCaseInfos = $enumCaseInfos;
         $this->cond = $cond;
         $this->phpVersionIdMinimumCompatibility = $minimumPhpVersionIdCompatibility;
+        $this->isUndocumentable = $isUndocumentable;
     }
 
     /**
@@ -3088,6 +3092,8 @@ class FileInfo {
     public $generateLegacyArginfoForPhpVersionId;
     /** @var bool */
     public $generateClassEntries = false;
+    /** @var bool */
+    public $isUndocumentable = false;
 
     /**
      * @return iterable<FuncInfo>
@@ -3499,7 +3505,8 @@ function parseClass(
     array $methods,
     array $enumCases,
     ?string $cond,
-    ?int $minimumPhpVersionIdCompatibility
+    ?int $minimumPhpVersionIdCompatibility,
+    bool $isUndocumentable
 ): ClassInfo {
     $flags = $class instanceof Class_ ? $class->flags : 0;
     $comment = $class->getDocComment();
@@ -3521,6 +3528,8 @@ function parseClass(
                 $isStrictProperties = true;
             } else if ($tag->name === 'not-serializable') {
                 $isNotSerializable = true;
+            } else if ($tag->name === 'undocumentable') {
+                $isUndocumentable = true;
             }
         }
     }
@@ -3579,7 +3588,8 @@ function parseClass(
         $methods,
         $enumCases,
         $cond,
-        $minimumPhpVersionIdCompatibility
+        $minimumPhpVersionIdCompatibility,
+        $isUndocumentable
     );
 }
 
@@ -3732,7 +3742,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             }
 
             $fileInfo->classInfos[] = parseClass(
-                $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond, $fileInfo->generateLegacyArginfoForPhpVersionId
+                $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond, $fileInfo->generateLegacyArginfoForPhpVersionId, $fileInfo->isUndocumentable
             );
             continue;
         }
@@ -3783,6 +3793,8 @@ function parseStubFile(string $code): FileInfo {
             } else if ($tag->name === 'generate-class-entries') {
                 $fileInfo->generateClassEntries = true;
                 $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
+            } else if ($tag->name === 'undocumentable') {
+                $fileInfo->isUndocumentable = true;
             }
         }
     }
@@ -4219,12 +4231,14 @@ function generateClassSynopses(array $classMap, iterable $allConstInfos): array 
 }
 
 /**
- * @param ClassInfo[] $classMap
+ * @param array<string, ClassInfo> $classMap
  * $param iterable<ConstInfo> $allConstInfos
  * @return array<string, string>
  */
 function replaceClassSynopses(string $targetDirectory, array $classMap, iterable $allConstInfos): array
 {
+    $existingClassSynopses = [];
+
     $classSynopses = [];
 
     $it = new RecursiveIteratorIterator(
@@ -4281,6 +4295,9 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
             if (!isset($classMap[$className])) {
                 continue;
             }
+
+            $existingClassSynopses[$className] = $className;
+
             $classInfo = $classMap[$className];
 
             $newClassSynopsis = $classInfo->getClassSynopsisElement($doc, $classMap, $allConstInfos);
@@ -4317,6 +4334,14 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
             );
 
             $classSynopses[$pathName] = $replacedXml;
+        }
+    }
+
+    $missingClassSynopses = array_diff_key($classMap, $existingClassSynopses);
+    foreach ($missingClassSynopses as $className => $info) {
+        /** @var ClassInfo $info */
+        if (!$info->isUndocumentable) {
+            echo "Warning: Missing class synopsis page for $className\n";
         }
     }
 

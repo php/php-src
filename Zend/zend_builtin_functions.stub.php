@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @undocumentable */
 #[\AllowDynamicProperties]
 class stdClass
 {
