@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d472a7623af41d460417e6399ed829302b60e3c3 */
+ * Stub hash: 38c6088c48d8f582ede1363855a867dc4aade34b */
 
 
 
@@ -78,16 +78,16 @@ static void register_file_symbols(int module_number)
 #if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(IPPROTO_IP)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_IP", IPPROTO_IP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(IPPROTO_TCP) || defined(PHP_WIN32)
+#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_TCP) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_TCP", IPPROTO_TCP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(IPPROTO_UDP) || defined(PHP_WIN32)
+#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_UDP) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_UDP", IPPROTO_UDP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_ICMP) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_ICMP", IPPROTO_ICMP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(IPPROTO_RAW) || defined(PHP_WIN32)
+#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_RAW) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_RAW", IPPROTO_RAW, CONST_PERSISTENT);
 #endif
 #if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)

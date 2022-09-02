@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 470fcd62773b033ac200d7817b7917eee5bb812e */
+ * Stub hash: 893c86a23c81c32d2c8a4b2ca14a785cd8a99a37 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -267,7 +267,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_parse_result, 0, 3, _IS_BOO
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+#if (defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
@@ -410,7 +410,7 @@ ZEND_FUNCTION(ldap_parse_reference);
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_RESULT)
 ZEND_FUNCTION(ldap_parse_result);
 #endif
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+#if (defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC))
 ZEND_FUNCTION(ldap_set_rebind_proc);
 #endif
 #if defined(HAVE_LDAP_START_TLS_S)
@@ -513,7 +513,7 @@ static const zend_function_entry ext_functions[] = {
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_RESULT)
 	ZEND_FE(ldap_parse_result, arginfo_ldap_parse_result)
 #endif
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+#if (defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC))
 	ZEND_FE(ldap_set_rebind_proc, arginfo_ldap_set_rebind_proc)
 #endif
 #if defined(HAVE_LDAP_START_TLS_S)

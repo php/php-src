@@ -215,7 +215,7 @@ const SQL_TIME = UNKNOWN;
  */
 const SQL_TIMESTAMP = UNKNOWN;
 
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
 /**
  * @var int
  * @cvalue SQL_TYPE_DATE

@@ -325,7 +325,7 @@ const STREAM_PF_UNIX = UNKNOWN;
 const STREAM_IPPROTO_IP = UNKNOWN;
 #endif
 
-#if defined(IPPROTO_TCP) || defined(PHP_WIN32)
+#if (defined(IPPROTO_TCP) || defined(PHP_WIN32))
 /**
  * @var int
  * @cvalue IPPROTO_TCP
@@ -333,7 +333,7 @@ const STREAM_IPPROTO_IP = UNKNOWN;
 const STREAM_IPPROTO_TCP = UNKNOWN;
 #endif
 
-#if defined(IPPROTO_UDP) || defined(PHP_WIN32)
+#if (defined(IPPROTO_UDP) || defined(PHP_WIN32))
 /**
  * @var int
  * @cvalue IPPROTO_UDP
@@ -341,7 +341,7 @@ const STREAM_IPPROTO_TCP = UNKNOWN;
 const STREAM_IPPROTO_UDP = UNKNOWN;
 #endif
 
-#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+#if (defined(IPPROTO_ICMP) || defined(PHP_WIN32))
 /**
  * @var int
  * @cvalue IPPROTO_ICMP
@@ -349,7 +349,7 @@ const STREAM_IPPROTO_UDP = UNKNOWN;
 const STREAM_IPPROTO_ICMP = UNKNOWN;
 #endif
 
-#if defined(IPPROTO_RAW) || defined(PHP_WIN32)
+#if (defined(IPPROTO_RAW) || defined(PHP_WIN32))
 /**
  * @var int
  * @cvalue IPPROTO_RAW
