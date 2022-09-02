@@ -518,7 +518,7 @@ static const func_info_t func_infos[] = {
 	F1("gethostbyaddr", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("gethostbyname", MAY_BE_STRING),
 	F1("gethostbynamel", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	F1("dns_get_record", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 #endif
 	F1("md5", MAY_BE_STRING),
@@ -621,7 +621,7 @@ static const func_info_t func_infos[] = {
 	F1("php_ini_loaded_file", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("iptcembed", MAY_BE_STRING|MAY_BE_BOOL),
 	F1("iptcparse", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if (defined(HAVE_SYMLINK) || defined(PHP_WIN32))
 	F1("readlink", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
 	F1("decbin", MAY_BE_STRING),
