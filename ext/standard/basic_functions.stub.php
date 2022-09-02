@@ -345,7 +345,7 @@ const PHP_ROUND_HALF_ODD = UNKNOWN;
 
 /* dns.c */
 
-#if defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS))
+#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
 /**
  * @var int
  * @cvalue PHP_DNS_A
@@ -376,7 +376,7 @@ const DNS_PTR = UNKNOWN;
  * @cvalue PHP_DNS_HINFO
  */
 const DNS_HINFO = UNKNOWN;
-#if !defined(PHP_WIN32)
+#if (!defined(PHP_WIN32))
 /**
  * @var int
  * @cvalue PHP_DNS_CAA
