@@ -26,6 +26,7 @@
 #include "php_http.h"
 #include "php_incomplete_class.h"
 #include "php_getopt.h"
+#include "php_ext_syslog.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
