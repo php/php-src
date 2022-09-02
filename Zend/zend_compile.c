@@ -1207,7 +1207,8 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	}
 	if (type_mask & MAY_BE_STATIC) {
 		zend_string *name = ZSTR_KNOWN(ZEND_STR_STATIC);
-		if (scope) {
+		// During compilation of eval'd code the called scope refers to the scope calling the eval
+		if (scope && !zend_is_compiling()) {
 			zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
 			if (called_scope) {
 				name = called_scope->name;
