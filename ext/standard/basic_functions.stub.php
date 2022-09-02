@@ -343,6 +343,122 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
 
+/* image.c */
+
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_GIF
+ */
+const IMAGETYPE_GIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPEG
+ */
+const IMAGETYPE_JPEG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PNG
+ */
+const IMAGETYPE_PNG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWF
+ */
+const IMAGETYPE_SWF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PSD
+ */
+const IMAGETYPE_PSD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_BMP
+ */
+const IMAGETYPE_BMP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_II
+ */
+const IMAGETYPE_TIFF_II = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_MM
+ */
+const IMAGETYPE_TIFF_MM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JP2
+ */
+const IMAGETYPE_JP2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPX
+ */
+const IMAGETYPE_JPX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JB2
+ */
+const IMAGETYPE_JB2 = UNKNOWN;
+#if (defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB))
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWC
+ */
+const IMAGETYPE_SWC = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_IFF
+ */
+const IMAGETYPE_IFF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WBMP
+ */
+const IMAGETYPE_WBMP = UNKNOWN;
+/* keep alias */
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPEG2000 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_XBM
+ */
+const IMAGETYPE_XBM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_ICO
+ */
+const IMAGETYPE_ICO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WEBP
+ */
+const IMAGETYPE_WEBP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_AVIF
+ */
+const IMAGETYPE_AVIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_UNKNOWN
+ */
+const IMAGETYPE_UNKNOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_COUNT
+ */
+const IMAGETYPE_COUNT = UNKNOWN;
+
 /* syslog.c */
 
 /* error levels */
