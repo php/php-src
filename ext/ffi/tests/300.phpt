@@ -6,7 +6,6 @@ opcache
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip not for Windows');
-if (ini_get('opcache.preload_user')) die('skip FFI::load() does not support opcache.preload_user');
 ?>
 --INI--
 ffi.enable=1
