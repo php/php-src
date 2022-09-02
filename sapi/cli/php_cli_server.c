@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <signal.h>
 
 #ifdef PHP_WIN32
 # include <process.h>
@@ -47,6 +48,14 @@
 
 #if HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
+
+#ifdef HAVE_PRCTL
+# include <sys/prctl.h>
+#endif
+
+#ifdef HAVE_PROCCTL
+# include <sys/procctl.h>
 #endif
 
 #include "SAPI.h"
@@ -2432,6 +2441,24 @@ static char *php_cli_server_parse_addr(const char *addr, int *pport) {
 	return pestrndup(addr, end - addr, 1);
 }
 
+#if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
+static void php_cli_server_worker_install_pdeathsig(void)
+{
+	// Ignore failure to register PDEATHSIG, it's not available on all platforms anyway
+#if defined(HAVE_PRCTL)
+	prctl(PR_SET_PDEATHSIG, SIGTERM);
+#elif defined(HAVE_PROCCTL)
+	int signal = SIGTERM;
+	procctl(P_PID, 0, PROC_PDEATHSIG_CTL, &signal);
+#endif
+
+	// Check if parent has exited just after the fork
+	if (getppid() != php_cli_server_master) {
+		exit(1);
+	}
+}
+#endif
+
 static void php_cli_server_startup_workers(void) {
 	char *workers = getenv("PHP_CLI_SERVER_WORKERS");
 	if (!workers) {
@@ -2459,6 +2486,9 @@ static void php_cli_server_startup_workers(void) {
 					php_cli_server_worker + 1;
 				return;
 			} else if (pid == 0) {
+#if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
+				php_cli_server_worker_install_pdeathsig();
+#endif
 				return;
 			} else {
 				php_cli_server_workers[php_cli_server_worker] = pid;

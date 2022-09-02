@@ -74,10 +74,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/un.h>
+#include <php_config.h>
 
 #include "lsapilib.h"
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+#ifdef HAVE_PRCTL
 #include <sys/prctl.h>
 #endif
 
@@ -381,7 +382,7 @@ static void lsapi_enable_core_dump(void)
 
 #endif
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+#ifdef HAVE_PRCTL
     if (prctl(PR_SET_DUMPABLE, s_enable_core_dump,0,0,0) == -1)
         perror( "prctl: Failed to set dumpable, "
                     "core dump may not be available!");
