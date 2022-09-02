@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-8932 (ReflectionFunction provides no way to get the called
     class of a Closure). (cmb, Nicolas Grekas)
+  . Fixed bug GH-9409 (Private method is incorrectly dumped as "overwrites").
+    (ilutov)
 
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
