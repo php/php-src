@@ -425,6 +425,122 @@ const DNS_ANY = UNKNOWN;
 const DNS_ALL = UNKNOWN;
 #endif
 
+/* image.c */
+
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_GIF
+ */
+const IMAGETYPE_GIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPEG
+ */
+const IMAGETYPE_JPEG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PNG
+ */
+const IMAGETYPE_PNG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWF
+ */
+const IMAGETYPE_SWF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PSD
+ */
+const IMAGETYPE_PSD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_BMP
+ */
+const IMAGETYPE_BMP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_II
+ */
+const IMAGETYPE_TIFF_II = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_MM
+ */
+const IMAGETYPE_TIFF_MM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JP2
+ */
+const IMAGETYPE_JP2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPX
+ */
+const IMAGETYPE_JPX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JB2
+ */
+const IMAGETYPE_JB2 = UNKNOWN;
+#if (defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB))
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWC
+ */
+const IMAGETYPE_SWC = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_IFF
+ */
+const IMAGETYPE_IFF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WBMP
+ */
+const IMAGETYPE_WBMP = UNKNOWN;
+/* keep alias */
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPEG2000 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_XBM
+ */
+const IMAGETYPE_XBM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_ICO
+ */
+const IMAGETYPE_ICO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WEBP
+ */
+const IMAGETYPE_WEBP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_AVIF
+ */
+const IMAGETYPE_AVIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_UNKNOWN
+ */
+const IMAGETYPE_UNKNOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_COUNT
+ */
+const IMAGETYPE_COUNT = UNKNOWN;
+
 /* syslog.c */
 
 /* error levels */
@@ -1224,7 +1340,7 @@ function gethostbyname(string $hostname): string {}
  */
 function gethostbynamel(string $hostname): array|false {}
 
-#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 function dns_check_record(string $hostname, string $type = "MX"): bool {}
 
 /** @alias dns_check_record */
@@ -1254,7 +1370,7 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
-#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
+#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
 function net_get_interfaces(): array|false {}
 #endif
 
@@ -1653,7 +1769,7 @@ function closedir($dir_handle = null): void {}
 
 function chdir(string $directory): bool {}
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
+#if (defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC))
 function chroot(string $directory): bool {}
 #endif
 
@@ -2070,7 +2186,7 @@ function levenshtein(string $string1, string $string2, int $insertion_cost = 1, 
 
 /* link.c */
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if (defined(HAVE_SYMLINK) || defined(PHP_WIN32))
 /** @refcount 1 */
 function readlink(string $path): string|false {}
 
@@ -2474,7 +2590,7 @@ function sapi_windows_vt100_support($stream, ?bool $enable = null): bool {}
 /** @param resource $stream */
 function stream_set_chunk_size($stream, int $size): int {}
 
-#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
+#if (defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32))
 /** @param resource $stream */
 function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eebef4c1eaf464b0ff093516cf13f1c33d7d0911 */
+ * Stub hash: c1f54f259bde2c49c5b49a595751acd2fb365efe */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -292,21 +292,21 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_timeout, 0, 1, MAY_BE_LONG|
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_get_quota, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, quota_root, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_get_quotaroot, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_set_quota, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, quota_root, IS_STRING, 0)
@@ -314,7 +314,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_set_quota, 0, 3, _IS_BOOL, 
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_setacl, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -323,7 +323,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_setacl, 0, 4, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 #define arginfo_imap_getacl arginfo_imap_get_quotaroot
 #endif
 
@@ -403,19 +403,19 @@ ZEND_FUNCTION(imap_mutf7_to_utf8);
 ZEND_FUNCTION(imap_mime_header_decode);
 ZEND_FUNCTION(imap_thread);
 ZEND_FUNCTION(imap_timeout);
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_FUNCTION(imap_get_quota);
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_FUNCTION(imap_get_quotaroot);
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_FUNCTION(imap_set_quota);
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_FUNCTION(imap_setacl);
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 ZEND_FUNCTION(imap_getacl);
 #endif
 ZEND_FUNCTION(imap_mail);
@@ -494,19 +494,19 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imap_mime_header_decode, arginfo_imap_mime_header_decode)
 	ZEND_FE(imap_thread, arginfo_imap_thread)
 	ZEND_FE(imap_timeout, arginfo_imap_timeout)
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 	ZEND_FE(imap_get_quota, arginfo_imap_get_quota)
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 	ZEND_FE(imap_get_quotaroot, arginfo_imap_get_quotaroot)
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 	ZEND_FE(imap_set_quota, arginfo_imap_set_quota)
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 	ZEND_FE(imap_setacl, arginfo_imap_setacl)
 #endif
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+#if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
 	ZEND_FE(imap_getacl, arginfo_imap_getacl)
 #endif
 	ZEND_FE(imap_mail, arginfo_imap_mail)
