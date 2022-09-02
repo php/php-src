@@ -644,11 +644,13 @@ declared_property:
 					if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
 						zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
 							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+						zval_ptr_dtor_str(&key);
 						goto failure;
 					} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 						zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
 							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
 						if (EG(exception)) {
+							zval_ptr_dtor_str(&key);
 							goto failure;
 						}
 					}
