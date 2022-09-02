@@ -31,6 +31,7 @@
 #include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
+#include "ext/date/php_date.h"
 #include "opcache_arginfo.h"
 
 #if HAVE_JIT
@@ -461,6 +462,9 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
 		} else {
 			char buf[32];
+			zend_string *start_time, *restart_time, *force_restart_time;
+			zval *date_ISO8601 = zend_get_constant_str("DATE_ISO8601", sizeof("DATE_ISO8601")-1);
+
 			php_info_print_table_row(2, "Startup", "OK");
 			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
 			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZCSG(hits));
@@ -491,6 +495,26 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Hash keys restarts", buf);
 			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZCSG(manual_restarts));
 			php_info_print_table_row(2, "Manual restarts", buf);
+
+			start_time = php_format_date(Z_STRVAL_P(date_ISO8601), Z_STRLEN_P(date_ISO8601), ZCSG(start_time), 1);
+			php_info_print_table_row(2, "Start time", ZSTR_VAL(start_time));
+			zend_string_release(start_time);
+
+			if (ZCSG(last_restart_time)) {
+				restart_time = php_format_date(Z_STRVAL_P(date_ISO8601), Z_STRLEN_P(date_ISO8601), ZCSG(last_restart_time), 1);
+				php_info_print_table_row(2, "Last restart time", ZSTR_VAL(restart_time));
+				zend_string_release(restart_time);
+			} else {
+				php_info_print_table_row(2, "Last restart time", "none");
+			}
+
+			if (ZCSG(force_restart_time)) {
+				force_restart_time = php_format_date(Z_STRVAL_P(date_ISO8601), Z_STRLEN_P(date_ISO8601), ZCSG(force_restart_time), 1);
+				php_info_print_table_row(2, "Last force restart time", ZSTR_VAL(force_restart_time));
+				zend_string_release(force_restart_time);
+			} else {
+				php_info_print_table_row(2, "Last force restart time", "none");
+			}
 		}
 	}
 
