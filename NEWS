@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed pcre.jit on Apple Silicon. (Niklas Keller)
 
+- Reflection:
+  . Fixed bug GH-8932 (ReflectionFunction provides no way to get the called
+    class of a Closure). (cmb, Nicolas Grekas)
+
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
     (cmb, timwolla)
