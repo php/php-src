@@ -303,6 +303,8 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug GH-8421 (Closures should accept attributes with
     Attribute::TARGET_FUNCTION). (ollieread)
+  . Fixed bug GH-9409 (Private method is incorrectly dumped as "overwrites").
+    (ilutov)
 
 - Zlib:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
