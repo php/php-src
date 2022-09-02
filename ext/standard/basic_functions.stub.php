@@ -343,6 +343,205 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
 
+/* syslog.c */
+
+/* error levels */
+
+/**
+ * system unusable
+ * @var int
+ * @cvalue LOG_EMERG
+ */
+const LOG_EMERG = UNKNOWN;
+/**
+ * immediate action required
+ * @var int
+ * @cvalue LOG_ALERT
+ */
+const LOG_ALERT = UNKNOWN;
+/**
+ * critical conditions
+ * @var int
+ * @cvalue LOG_CRIT
+ */
+const LOG_CRIT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_ERR
+ */
+const LOG_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_WARNING
+ */
+const LOG_WARNING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_NOTICE
+ */
+const LOG_NOTICE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_INFO
+ */
+const LOG_INFO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_DEBUG
+ */
+const LOG_DEBUG = UNKNOWN;
+/* facility: type of program logging the message */
+/**
+ * @var int
+ * @cvalue LOG_KERN
+ */
+const LOG_KERN = UNKNOWN;
+/**
+ * generic user level
+ * @var int
+ * @cvalue LOG_USER
+ */
+const LOG_USER = UNKNOWN;
+/**
+ * log to email
+ * @var int
+ * @cvalue LOG_MAIL
+ */
+const LOG_MAIL = UNKNOWN;
+/**
+ * other system daemons
+ * @var int
+ * @cvalue LOG_DAEMON
+ */
+const LOG_DAEMON = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_AUTH
+ */
+const LOG_AUTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_SYSLOG
+ */
+const LOG_SYSLOG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LPR
+ */
+const LOG_LPR = UNKNOWN;
+#ifdef LOG_NEWS
+/* No LOG_NEWS on HP-UX */
+/**
+ * usenet new
+ * @var int
+ * @cvalue LOG_NEWS
+ */
+const LOG_NEWS = UNKNOWN;
+#endif
+#ifdef LOG_UUCP
+/* No LOG_UUCP on HP-UX */
+/**
+ * @var int
+ * @cvalue LOG_UUCP
+ */
+const LOG_UUCP = UNKNOWN;
+#endif
+#ifdef LOG_CRON
+/* apparently some systems don't have this one */
+/**
+ * @var int
+ * @cvalue LOG_CRON
+ */
+const LOG_CRON = UNKNOWN;
+#endif
+#ifdef LOG_AUTHPRIV
+/* AIX doesn't have LOG_AUTHPRIV */
+/**
+ * @var int
+ * @cvalue LOG_AUTHPRIV
+ */
+const LOG_AUTHPRIV = UNKNOWN;
+#endif
+#ifndef PHP_WIN32
+/**
+ * @var int
+ * @cvalue LOG_LOCAL0
+ */
+const LOG_LOCAL0 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL1
+ */
+const LOG_LOCAL1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL2
+ */
+const LOG_LOCAL2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL3
+ */
+const LOG_LOCAL3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL4
+ */
+const LOG_LOCAL4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL5
+ */
+const LOG_LOCAL5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL6
+ */
+const LOG_LOCAL6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL7
+ */
+const LOG_LOCAL7 = UNKNOWN;
+#endif
+/* options */
+/**
+ * @var int
+ * @cvalue LOG_PID
+ */
+const LOG_PID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_CONS
+ */
+const LOG_CONS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_ODELAY
+ */
+const LOG_ODELAY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_NDELAY
+ */
+const LOG_NDELAY = UNKNOWN;
+#ifdef LOG_NOWAIT
+/**
+ * @var int
+ * @cvalue LOG_NOWAIT
+ */
+const LOG_NOWAIT = UNKNOWN;
+#endif
+#ifdef LOG_PERROR
+/* AIX doesn't have LOG_PERROR */
+/**
+ * log to stderr
+ * @var int
+ * @cvalue LOG_PERROR
+ */
+const LOG_PERROR = UNKNOWN;
+#endif
+
 #[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
 {
