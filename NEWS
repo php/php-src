@@ -52,6 +52,10 @@ PHP                                                                        NEWS
     always returns 1). (timwolla)
   . Fixed Randomizer::getInt() consistency for 32-bit engines. (timwolla)
 
+- Reflection:
+  . Fixed bug GH-8932 (ReflectionFunction provides no way to get the called
+    class of a Closure). (cmb, Nicolas Grekas)
+
 - Streams:
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
     (cmb, timwolla)
