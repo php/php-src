@@ -6733,7 +6733,8 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	if (ce->type == ZEND_USER_CLASS) {
+	if (ce->type == ZEND_USER_CLASS ||
+		(ce->type == ZEND_INTERNAL_CLASS && attr->target == ZEND_ATTRIBUTE_TARGET_PROPERTY)) {
 		uint32_t flags = ZEND_ATTRIBUTE_TARGET_ALL;
 
 		if (marker->argc > 0) {
