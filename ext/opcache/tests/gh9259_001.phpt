@@ -15,5 +15,4 @@ echo 'OK';
 --EXPECTF--
 %sWarning opcache.interned_strings_buffer must be less than or equal to 4095, 131072 given%s
 
-%sWarning Not enough free shared space to allocate %d bytes (%d bytes free)
-%sFatal Error Insufficient shared memory for interned strings buffer! (tried to allocate %d bytes)
+OK

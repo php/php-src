@@ -90,10 +90,10 @@ static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 	}
 	if (size > MAX_INTERNED_STRINGS_BUFFER_SIZE) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer must be less than or equal to " ZEND_LONG_FMT ", " ZEND_LONG_FMT " given.\n", MAX_INTERNED_STRINGS_BUFFER_SIZE, size);
-		*p = MAX_INTERNED_STRINGS_BUFFER_SIZE;
-	} else {
-		*p = size;
+		return FAILURE;
 	}
+
+	*p = size;
 
 	return SUCCESS;
 }
