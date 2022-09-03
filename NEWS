@@ -6,8 +6,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
     overflow). (Arnaud)
 
+- Random:
+  . Fixed bug GH-9464 (build on older macOs releases). (David Bohman)
+
 - Standard:
   . Marked crypt()'s $string parameter as #[\SensitiveParameter]. (timwolla)
+  . Fixed bug GH-9464 (build on older macOs releases). (David Bohman)
 
 01 Sep 2022, PHP 8.2.0RC1
 
