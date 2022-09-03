@@ -8736,7 +8736,10 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 		}
 	}
 
-	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+	if ((op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) == MAY_BE_DOUBLE) {
+		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+			|.cold_code
+		}
 		|2:
 		if (CAN_USE_AVX()) {
 			|	vxorps xmm0, xmm0, xmm0
@@ -8785,6 +8788,10 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 				|1:
 				|	SET_ZVAL_TYPE_INFO res_addr, eax
 			}
+			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+				|	jmp >9
+				|.code
+			}
 		} else {
 			if (exit_addr) {
 				if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
@@ -8796,6 +8803,9 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 					|	je &exit_addr
 					|1:
 				}
+				if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+					|	jmp >9
+				}
 			} else {
 				ZEND_ASSERT(true_label != (uint32_t)-1 || false_label != (uint32_t)-1);
 				if (false_label != (uint32_t)-1 ) {
@@ -8804,11 +8814,19 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 					|1:
 					if (true_label != (uint32_t)-1) {
 						|	jmp =>true_label
+					} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+						|	jmp >9
 					}
 				} else {
 					|	jp  => true_label
 					|	jne  => true_label
+					if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+						|	jmp >9
+					}
 				}
+			}
+			if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)) {
+				|.code
 			}
 		}
 	} else if (op1_info & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG))) {
@@ -9010,7 +9028,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 			stack_check = 0;
 		}
 	} else {
-		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value) * sizeof(zval);
+		used_stack = (ZEND_CALL_FRAME_SLOT + opline->extended_value + ZEND_OBSERVER_ENABLED) * sizeof(zval);
 
 		|	// if (EXPECTED(ZEND_USER_CODE(func->type))) {
 		if (!is_closure) {

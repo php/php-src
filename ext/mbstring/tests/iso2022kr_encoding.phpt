@@ -114,6 +114,9 @@ convertInvalidString("\xFF\x86", "\x1B\$)C%", "UTF-16BE", "ISO-2022-KR");
 // character at the end of a string, although the string was already ending in ASCII mode
 convertValidString("\x68\x46\x00a", "\x1B\$)C\x0E\x68\x46\x0Fa", "UTF-16BE", "ISO-2022-KR", false);
 
+// Regression test: Don't shift from KS X 1001 to ASCII mode on invalid escape sequence
+convertInvalidString("\x0E\x1BX\x74\x30", "\x00%\x76\x20", "ISO-2022-KR", "UTF-16BE", false);
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\x1B", "%", "ISO-2022-KR", "UTF-8");

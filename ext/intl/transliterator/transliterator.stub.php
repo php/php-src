@@ -5,6 +5,17 @@
 /** @not-serializable */
 class Transliterator
 {
+    /**
+     * @var int
+     * @cvalue TRANSLITERATOR_FORWARD
+     */
+    public const FORWARD = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TRANSLITERATOR_REVERSE
+     */
+    public const REVERSE = UNKNOWN;
+
     public readonly string $id;
 
     final private function __construct() {}

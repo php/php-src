@@ -360,6 +360,15 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 				}
 				goto failure;
 			}
+
+			if (UNEXPECTED(ce->ce_flags & ZEND_ACC_TRAIT)) {
+				/** Prevent accessing trait constants directly on cases like \defined() or \constant(), etc. */
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+					zend_throw_error(NULL, "Cannot access trait constant %s::%s directly", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+				}
+				goto failure;
+			}
+
 			ret_constant = &c->value;
 		}
 	}

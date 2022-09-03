@@ -1,17 +1,20 @@
 --TEST--
-Random: Engine: PcgOneseq128XslRr64: value
+Random: Engine: PcgOneseq128XslRr64: For a reference seed a fixed reference value must be generated
 --FILE--
 <?php
 
-$engine = new \Random\Engine\PcgOneseq128XslRr64(1234);
+use Random\Engine\PcgOneseq128XslRr64;
 
-for ($i = 0; $i < 10000; $i++) {
+$engine = new PcgOneseq128XslRr64(1234);
+
+for ($i = 0; $i < 10_000; $i++) {
     $engine->generate();
 }
 
 $engine->jump(1234567);
 
-echo \bin2hex($engine->generate());
+var_dump(bin2hex($engine->generate()));
+
 ?>
 --EXPECT--
-b88e2a0f23720a1d
+string(16) "b88e2a0f23720a1d"

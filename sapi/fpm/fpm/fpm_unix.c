@@ -486,7 +486,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_unix_init_main() /* {{{ */
+int fpm_unix_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 	int is_root = !geteuid();
@@ -623,4 +623,3 @@ int fpm_unix_init_main() /* {{{ */
 
 	return 0;
 }
-/* }}} */

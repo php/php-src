@@ -131,18 +131,6 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo)
 	RETURN_EMPTY_ARRAY();
 }
 
-static zend_object *attributes_sensitive_parameter_value_new(zend_class_entry *ce)
-{
-	zend_object *object;
-
-	object = zend_objects_new(ce);
-	object->handlers = &attributes_object_handlers_sensitive_parameter_value;
-
-	object_properties_init(object, ce);
-
-	return object;
-}
-
 static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
 {
 	return NULL;
@@ -382,7 +370,7 @@ void zend_register_attribute_ce(void)
 
 	/* This is not an actual attribute, thus the zend_mark_internal_attribute() call is missing. */
 	zend_ce_sensitive_parameter_value = register_class_SensitiveParameterValue();
-	zend_ce_sensitive_parameter_value->create_object = attributes_sensitive_parameter_value_new;
+	zend_ce_sensitive_parameter_value->default_object_handlers = &attributes_object_handlers_sensitive_parameter_value;
 }
 
 void zend_attributes_shutdown(void)

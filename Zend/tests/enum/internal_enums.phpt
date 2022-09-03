@@ -86,9 +86,9 @@ enum(ZendTestIntEnum::Foo)
 enum(ZendTestIntEnum::Foo)
 enum(ZendTestIntEnum::Foo)
 enum(ZendTestIntEnum::Foo)
-ValueError: 2 is not a valid backing value for enum "ZendTestIntEnum"
+ValueError: 2 is not a valid backing value for enum ZendTestIntEnum
 NULL
-ValueError: 2 is not a valid backing value for enum "ZendTestIntEnum"
+ValueError: 2 is not a valid backing value for enum ZendTestIntEnum
 NULL
 enum(ZendTestIntEnum::Baz)
 enum(ZendTestIntEnum::Baz)

@@ -82,7 +82,6 @@ static zend_object *xmlwriter_object_new(zend_class_entry *class_type)
 	intern = zend_object_alloc(sizeof(ze_xmlwriter_object), class_type);
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &xmlwriter_object_handlers;
 
 	return &intern->std;
 }
@@ -1039,6 +1038,7 @@ static PHP_MINIT_FUNCTION(xmlwriter)
 	xmlwriter_object_handlers.clone_obj = NULL;
 	xmlwriter_class_entry_ce = register_class_XMLWriter();
 	xmlwriter_class_entry_ce->create_object = xmlwriter_object_new;
+	xmlwriter_class_entry_ce->default_object_handlers = &xmlwriter_object_handlers;
 
 	return SUCCESS;
 }

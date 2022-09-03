@@ -1531,12 +1531,10 @@ PHP_FUNCTION(mb_parse_str)
 
 	info.data_type              = PARSE_STRING;
 	info.separator              = PG(arg_separator).input;
-	info.report_errors          = 1;
+	info.report_errors          = true;
 	info.to_encoding            = MBSTRG(current_internal_encoding);
-	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
-	info.from_language          = MBSTRG(language);
 
 	detected = _php_mb_encoding_handler_ex(&info, track_vars_array, encstr);
 
@@ -2502,7 +2500,7 @@ append_trim_marker:
 /* Trim the string to terminal width; optional, add a 'trim marker' if it was truncated */
 PHP_FUNCTION(mb_strimwidth)
 {
-	zend_string *str, *trimmarker, *encoding = NULL;
+	zend_string *str, *trimmarker = zend_empty_string, *encoding = NULL;
 	zend_long from, width;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)

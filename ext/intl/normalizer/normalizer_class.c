@@ -12,6 +12,7 @@
    +----------------------------------------------------------------------+
  */
 
+#include "normalizer.h"
 #include "normalizer_class.h"
 #include "php_intl.h"
 #include "normalizer_arginfo.h"

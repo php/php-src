@@ -118,7 +118,6 @@ function mb_strcut(string $string, int $start, ?int $length = null, ?string $enc
 
 function mb_strwidth(string $string, ?string $encoding = null): int {}
 
-/** @refcount 1 */
 function mb_strimwidth(string $string, int $start, int $width, string $trim_marker = "", ?string $encoding = null): string {}
 
 /**

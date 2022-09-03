@@ -22,7 +22,7 @@
 #include "zend_globals.h"
 #include "zend_variables.h"
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(_M_ARM64)
 # include <arm_neon.h>
 #endif
 
@@ -183,7 +183,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 			_mm_storeu_si128((__m128i*)&HT_HASH_EX(data,  8), xmm0);
 			_mm_storeu_si128((__m128i*)&HT_HASH_EX(data, 12), xmm0);
 		} while (0);
-#elif defined(__aarch64__)
+#elif defined(__aarch64__) || defined(_M_ARM64)
 		do {
 			int32x4_t t = vdupq_n_s32(-1);
 			vst1q_s32((int32_t*)&HT_HASH_EX(data,  0), t);
@@ -2716,7 +2716,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, Ha
 
 
 /* This function should be made binary safe  */
-ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos)
+ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;
@@ -2740,7 +2740,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zen
 	return HASH_KEY_NON_EXISTENT;
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos)
+ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;

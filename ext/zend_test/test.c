@@ -415,10 +415,26 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
 	}
 }
 
-static ZEND_FUNCTION(namespaced_func)
+static ZEND_FUNCTION(ZendTestNS2_namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
+}
+
+static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_TRUE;
+}
+
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 static ZEND_FUNCTION(zend_test_parameter_with_attribute)
@@ -756,6 +772,7 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 PHP_RINIT_FUNCTION(zend_test)
 {
 	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
+	ZT_G(observer_nesting_depth) = 0;
 	return SUCCESS;
 }
 

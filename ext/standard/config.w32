@@ -25,7 +25,7 @@ ADD_FLAG("LIBS_STANDARD", "iphlpapi.lib");
 
 EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	crc32.c crypt.c crypt_freesec.c crypt_blowfish.c crypt_sha256.c \
-	crypt_sha512.c  php_crypt_r.c crc32_x86.c \
+	crypt_sha512.c  php_crypt_r.c " + (TARGET_ARCH != 'arm64'? " crc32_x86.c" : "") + " \
 	datetime.c dir.c dl.c dns.c dns_win32.c exec.c \
 	file.c filestat.c formatted_print.c fsock.c head.c html.c image.c \
 	info.c iptc.c link.c mail.c math.c md5.c metaphone.c microtime.c \

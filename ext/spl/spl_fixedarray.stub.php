@@ -9,6 +9,10 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
+
     /** @tentative-return-type */
     public function count(): int {}
 

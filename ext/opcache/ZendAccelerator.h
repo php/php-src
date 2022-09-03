@@ -137,11 +137,7 @@ typedef struct _zend_persistent_script {
 	 */
 	struct zend_persistent_script_dynamic_members {
 		time_t       last_used;
-#ifdef ZEND_WIN32
-		LONGLONG   hits;
-#else
-		zend_ulong        hits;
-#endif
+		zend_ulong   hits;
 		unsigned int memory_consumption;
 		unsigned int checksum;
 		time_t       revalidate;

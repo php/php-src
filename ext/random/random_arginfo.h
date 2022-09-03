@@ -234,8 +234,8 @@ static const zend_function_entry class_Random_RandomException_methods[] = {
 
 static void register_random_symbols(int module_number)
 {
-	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT);
 }
 
 static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *class_entry_Random_Engine)

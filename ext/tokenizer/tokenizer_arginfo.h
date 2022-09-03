@@ -62,7 +62,7 @@ static const zend_function_entry class_PhpToken_methods[] = {
 
 static void register_tokenizer_symbols(int module_number)
 {
-	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_PERSISTENT);
 }
 
 static zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringable)

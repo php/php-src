@@ -117,5 +117,5 @@ static const zend_function_entry ext_functions[] = {
 
 static void register_readline_symbols(int module_number)
 {
-	REGISTER_STRING_CONSTANT("READLINE_LIB", READLINE_LIB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("READLINE_LIB", READLINE_LIB, CONST_PERSISTENT);
 }

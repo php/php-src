@@ -196,6 +196,13 @@ for ($i = 0; $i <= 0xFF; $i++) {
 identifyInvalidString("\x1B", 'JIS');
 identifyInvalidString("\x1B", 'ISO-2022-JP');
 
+convertInvalidString("\x1B$", "%", "JIS", "UTF-8");
+convertInvalidString("\x1B$", "%", "ISO-2022-JP", "UTF-8");
+convertInvalidString("\x1B(", "%", "JIS", "UTF-8");
+convertInvalidString("\x1B(", "%", "ISO-2022-JP", "UTF-8");
+convertInvalidString("\x1B,", "%,", "JIS", "UTF-8");
+convertInvalidString("\x1B,", "%,", "ISO-2022-JP", "UTF-8");
+
 echo "All escape sequences work as expected\n";
 
 foreach (['JIS', 'ISO-2022-JP'] as $encoding) {

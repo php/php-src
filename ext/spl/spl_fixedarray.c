@@ -102,13 +102,18 @@ static void spl_fixedarray_init_elems(spl_fixedarray *array, zend_long from, zen
 	}
 }
 
+static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_long size)
+{
+	array->size = 0; /* reset size in case ecalloc() fails */
+	array->elements = size ? safe_emalloc(size, sizeof(zval), 0) : NULL;
+	array->size = size;
+	array->should_rebuild_properties = true;
+}
+
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 {
 	if (size > 0) {
-		array->size = 0; /* reset size in case ecalloc() fails */
-		array->elements = safe_emalloc(size, sizeof(zval), 0);
-		array->size = size;
-		array->should_rebuild_properties = true;
+		spl_fixedarray_init_non_empty_struct(array, size);
 		spl_fixedarray_init_elems(array, 0, size);
 	} else {
 		spl_fixedarray_default_ctor(array);
@@ -277,7 +282,6 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 
 	while (parent) {
 		if (parent == spl_ce_SplFixedArray) {
-			intern->std.handlers = &spl_handler_SplFixedArray;
 			break;
 		}
 
@@ -582,6 +586,78 @@ PHP_METHOD(SplFixedArray, __wakeup)
 	}
 }
 
+PHP_METHOD(SplFixedArray, __serialize)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
+	zval *current;
+	zend_string *key;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	uint32_t property_num = zend_hash_num_elements(intern->std.properties);
+	array_init_size(return_value, intern->array.size + property_num);
+
+	/* elements */
+	for (zend_long i = 0; i < intern->array.size; i++) {
+		current = &intern->array.elements[i];
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), current);
+		Z_TRY_ADDREF_P(current);
+	}
+
+	/* members */
+	ZEND_HASH_FOREACH_STR_KEY_VAL(intern->std.properties, key, current) {
+		zend_hash_add(Z_ARRVAL_P(return_value), key, current);
+		Z_TRY_ADDREF_P(current);
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_METHOD(SplFixedArray, __unserialize)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
+	HashTable *data;
+	zval members_zv, *elem;
+	zend_string *key;
+	zend_long size;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (intern->array.size == 0) {
+		size = zend_hash_num_elements(data);
+		spl_fixedarray_init_non_empty_struct(&intern->array, size);
+		if (!size) {
+			return;
+		}
+		array_init(&members_zv);
+
+		intern->array.size = 0;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(data, key, elem) {
+			if (key == NULL) {
+				ZVAL_COPY(&intern->array.elements[intern->array.size], elem);
+				intern->array.size++;
+			} else {
+				Z_TRY_ADDREF_P(elem);
+				zend_hash_add(Z_ARRVAL(members_zv), key, elem);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		if (intern->array.size != size) {
+			if (intern->array.size) {
+				intern->array.elements = erealloc(intern->array.elements, sizeof(zval) * intern->array.size);
+			} else {
+				efree(intern->array.elements);
+				intern->array.elements = NULL;
+			}
+		}
+
+		object_properties_load(&intern->std, Z_ARRVAL(members_zv));
+		zval_ptr_dtor(&members_zv);
+	}
+}
+
 PHP_METHOD(SplFixedArray, count)
 {
 	zval *object = ZEND_THIS;
@@ -882,6 +958,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_ce_SplFixedArray = register_class_SplFixedArray(
 		zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_countable, php_json_serializable_ce);
 	spl_ce_SplFixedArray->create_object = spl_fixedarray_new;
+	spl_ce_SplFixedArray->default_object_handlers = &spl_handler_SplFixedArray;
 	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
 
 	memcpy(&spl_handler_SplFixedArray, &std_object_handlers, sizeof(zend_object_handlers));

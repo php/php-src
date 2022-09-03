@@ -2659,6 +2659,7 @@ ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LI
 	return p;
 }
 
+static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void);
 
 ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 {
@@ -2669,7 +2670,7 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 	}
 	p = (char *) malloc(length + 1);
 	if (UNEXPECTED(p == NULL)) {
-		return p;
+		zend_out_of_memory();
 	}
 	if (EXPECTED(length)) {
 		memcpy(p, s, length);
@@ -3107,6 +3108,15 @@ ZEND_API void * __zend_realloc(void *p, size_t len)
 	p = realloc(p, len);
 	if (EXPECTED(p || !len)) {
 		return p;
+	}
+	zend_out_of_memory();
+}
+
+ZEND_API char * __zend_strdup(const char *s)
+{
+	char *tmp = strdup(s);
+	if (EXPECTED(tmp)) {
+		return tmp;
 	}
 	zend_out_of_memory();
 }

@@ -33,6 +33,12 @@ extern zend_module_entry zip_module_entry;
 
 #define PHP_ZIP_VERSION "1.21.0"
 
+#ifdef HAVE_LIBZIP_VERSION
+#define LIBZIP_VERSION_STR zip_libzip_version()
+#else
+#define LIBZIP_VERSION_STR LIBZIP_VERSION
+#endif
+
 #define ZIP_OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
 
 typedef struct _ze_zip_rsrc {

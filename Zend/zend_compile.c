@@ -1093,6 +1093,7 @@ ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname) /* {{{ 
 	if (func->common.function_name) {
 		zend_string_addref(func->common.function_name);
 	}
+	zend_observer_function_declared_notify(&func->op_array, Z_STR_P(lcname));
 	return SUCCESS;
 }
 /* }}} */
@@ -1116,12 +1117,14 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 	}
 
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		zend_observer_class_linked_notify(ce, Z_STR_P(lcname));
 		return ce;
 	}
 
 	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
 	if (ce) {
 		ZEND_ASSERT(!EG(exception));
+		zend_observer_class_linked_notify(ce, Z_STR_P(lcname));
 		return ce;
 	}
 
@@ -1594,7 +1597,12 @@ static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *c
 /* We don't use zend_verify_const_access because we need to deal with unlinked classes. */
 static bool zend_verify_ct_const_access(zend_class_constant *c, zend_class_entry *scope)
 {
-	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
+	if (c->ce->ce_flags & ZEND_ACC_TRAIT) {
+		/* This condition is only met on directly accessing trait constants,
+		 * because the ce is replaced to the class entry of the composing class
+		 * on binding. */
+		return 0;
+	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
 		return 1;
 	} else if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PRIVATE) {
 		return c->ce == scope;
@@ -1820,6 +1828,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 
+	ce->default_object_handlers = &std_object_handlers;
 	ce->default_properties_count = 0;
 	ce->default_static_members_count = 0;
 	ce->properties_info_table = NULL;
@@ -3982,6 +3991,7 @@ static void zend_compile_init_user_func(zend_ast *name_ast, uint32_t num_args, z
 static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcname) /* {{{ */
 {
 	znode arg_node;
+	zend_op *opline;
 
 	if (args->children != 2) {
 		return FAILURE;
@@ -4023,7 +4033,8 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 	zend_compile_expr(&arg_node, args->child[1]);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
 	zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
-	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+	opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 
 	return SUCCESS;
 }
@@ -7238,6 +7249,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
 			do_bind_function_error(lcname, op_array, 1);
 		}
+		zend_observer_function_declared_notify(op_array, lcname);
 		zend_string_release_ex(lcname, 0);
 		return;
 	}
@@ -7400,7 +7412,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 	}
 
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Enums may not include properties");
+		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include properties", ZSTR_VAL(ce->name));
 	}
 
 	if (flags & ZEND_ACC_ABSTRACT) {
@@ -7531,11 +7543,6 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
-
-	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
-		return;
-	}
 
 	for (i = 0; i < children; ++i) {
 		zend_class_constant *c;
@@ -7875,6 +7882,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 				zend_string_release(lcname);
 				zend_build_properties_info_table(ce);
 				ce->ce_flags |= ZEND_ACC_LINKED;
+				zend_observer_class_linked_notify(ce, lcname);
 				return;
 			}
 		} else if (!extends_ast) {
@@ -8055,6 +8063,13 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 		zend_ast *new_name_ast = use_ast->child[1];
 		zend_string *old_name = zend_ast_get_str(old_name_ast);
 		zend_string *new_name, *lookup_name;
+
+		/* Check that we are not attempting to alias a built-in type */
+		if (type == ZEND_SYMBOL_CLASS && zend_is_reserved_class_name(old_name)) {
+			zend_throw_exception_ex(zend_ce_compile_error, 0,
+				"Cannot alias '%s' as it is a built-in type", ZSTR_VAL(old_name));
+			return;
+		}
 
 		if (new_name_ast) {
 			new_name = zend_string_copy(zend_ast_get_str(new_name_ast));
@@ -9623,11 +9638,12 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 	last_const_node.op_type = IS_UNUSED;
 	for (i = 0; i < list->children; i++) {
 		zend_ast *encaps_var = list->child[i];
+
 		if (encaps_var->attr & (ZEND_ENCAPS_VAR_DOLLAR_CURLY|ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR)) {
-			if (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR) {
-				zend_error(E_DEPRECATED, "Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead");
-			} else {
+			if ((encaps_var->kind == ZEND_AST_VAR || encaps_var->kind == ZEND_AST_DIM) && (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY)) {
 				zend_error(E_DEPRECATED, "Using ${var} in strings is deprecated, use {$var} instead");
+			} else if (encaps_var->kind == ZEND_AST_VAR && (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR)) {
+				zend_error(E_DEPRECATED, "Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead");
 			}
 		}
 
@@ -9796,8 +9812,8 @@ static void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 		zend_string_release_ex(class_name, 0);
 		if (tmp != class_name) {
 			zval *zv = zend_ast_get_zval(class_ast);
-
 			ZVAL_STR(zv, tmp);
+			class_ast->attr = ZEND_NAME_FQ;
 		}
 	}
 
@@ -9892,7 +9908,7 @@ static void zend_compile_const_expr_new(zend_ast **ast_ptr)
 	zval *class_ast_zv = zend_ast_get_zval(class_ast);
 	zval_ptr_dtor_nogc(class_ast_zv);
 	ZVAL_STR(class_ast_zv, class_name);
-	class_ast->attr = fetch_type;
+	class_ast->attr = fetch_type << ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT;
 }
 
 static void zend_compile_const_expr_args(zend_ast **ast_ptr)
@@ -10544,7 +10560,7 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				c = (zend_uchar) Z_STRVAL_P(container)[offset];
 				ZVAL_CHAR(&result, c);
 			} else if (Z_TYPE_P(container) <= IS_FALSE) {
-				ZVAL_NULL(&result);
+				return; /* warning... handle at runtime */
 			} else {
 				return;
 			}
@@ -10631,6 +10647,7 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_eval_const_expr(&ast->child[2]);
 			return;
 		case ZEND_AST_PROP:
+		case ZEND_AST_NULLSAFE_PROP:
 			zend_eval_const_expr(&ast->child[0]);
 			zend_eval_const_expr(&ast->child[1]);
 			return;

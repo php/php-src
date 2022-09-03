@@ -27,6 +27,7 @@
 #include "zend_API.h"
 #include "zend_sort.h"
 #include "zend_constants.h"
+#include "zend_observer.h"
 
 #include "zend_vm.h"
 
@@ -1048,6 +1049,8 @@ ZEND_API void pass_two(zend_op_array *op_array)
 	CG(context).opcodes_size = op_array->last;
 	CG(context).literals_size = op_array->last_literal;
 #endif
+
+    op_array->T += ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 
 	/* Needs to be set directly after the opcode/literal reallocation, to ensure destruction
 	 * happens correctly if any of the following fixups generate a fatal error. */

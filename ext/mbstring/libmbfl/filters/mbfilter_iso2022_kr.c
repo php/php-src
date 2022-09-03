@@ -145,7 +145,7 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 		if (c == '$') {
 			filter->status++;
 		} else {
-			filter->status = 0;
+			filter->status &= ~0xF;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
@@ -154,7 +154,7 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 		if (c == ')') {
 			filter->status++;
 		} else {
-			filter->status = 0;
+			filter->status &= ~0xF;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
@@ -178,6 +178,7 @@ static int mbfl_filt_conv_2022kr_wchar_flush(mbfl_convert_filter *filter)
 		/* 2-byte character was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
@@ -257,6 +258,10 @@ int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)
 {
+	if (filter->status & 0xF) {
+		/* Escape sequence or 2-byte character was truncated */
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
+	}
 	/* back to ascii */
 	if (filter->status & 0x10) {
 		CK((*filter->output_function)(0x0f, filter->data)); /* shift in */
@@ -304,7 +309,6 @@ static size_t mb_iso2022kr_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 						p--;
 				}
 				*out++ = MBFL_BAD_INPUT;
-				*state = ASCII;
 			}
 		} else if (c == 0xF) {
 			*state = ASCII;

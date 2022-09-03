@@ -2246,7 +2246,20 @@ try_and_get_another_connection:
 				RETCODE ret;
 				UCHAR d_name[32];
 				SQLSMALLINT len;
+				SQLUINTEGER dead = SQL_CD_FALSE;
 
+				ret = SQLGetConnectAttr(db_conn->hdbc,
+					SQL_ATTR_CONNECTION_DEAD,
+					&dead, 0, NULL);
+				if (ret == SQL_SUCCESS && dead == SQL_CD_TRUE) {
+					/* Bail early here, since we know it's gone */
+					zend_hash_str_del(&EG(persistent_list), hashed_details, hashed_len);
+					goto try_and_get_another_connection;
+				}
+				/* If the driver doesn't support it, or returns
+				 * false (could be a false positive), fall back
+				 * to the old heuristic.
+				 */
 				ret = SQLGetInfo(db_conn->hdbc,
 					SQL_DATA_SOURCE_READ_ONLY,
 					d_name, sizeof(d_name), &len);

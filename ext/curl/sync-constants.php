@@ -10,16 +10,86 @@
 
 const CURL_DOC_FILE = 'https://curl.haxx.se/libcurl/c/symbols-in-versions.html';
 
-const SOURCE_FILE = __DIR__ . '/interface.c';
+const SOURCE_FILE = __DIR__ . '/curl_arginfo.h';
 
 const MIN_SUPPORTED_CURL_VERSION = '7.29.0';
 
-const IGNORED_CONSTANTS = [
+const IGNORED_CURL_CONSTANTS = [
     'CURLOPT_PROGRESSDATA',
-    'CURLOPT_XFERINFODATA'
+    'CURLOPT_XFERINFODATA',
+];
+
+const IGNORED_PHP_CONSTANTS = [
+    'CURLOPT_BINARYTRANSFER',
+    'CURLOPT_RETURNTRANSFER',
+    'CURLOPT_SAFE_UPLOAD',
 ];
 
 const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION)_[A-Z0-9_]+$~';
+
+/**
+ * A simple helper to create ASCII tables.
+ * It assumes that the same number of columns is always given to add().
+ */
+class AsciiTable
+{
+    /**
+     * @var array
+     */
+    private $values = [];
+
+    /**
+     * @var array
+     */
+    private $length = [];
+
+    /**
+     * @var int
+     */
+    private $padding = 4;
+
+    /**
+     * @param string[] $values
+     *
+     * @return void
+     */
+    public function add(string ...$values) : void
+    {
+        $this->values[] = $values;
+
+        foreach ($values as $key => $value) {
+            $length = strlen($value);
+
+            if (isset($this->length[$key])) {
+                $this->length[$key] = max($this->length[$key], $length);
+            } else {
+                $this->length[$key] = $length;
+            }
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString() : string
+    {
+        $result = '';
+
+        foreach ($this->values as $values) {
+            foreach ($values as $key => $value) {
+                if ($key !== 0) {
+                    $result .= str_repeat(' ', $this->padding);
+                }
+
+                $result .= str_pad($value, $this->length[$key]);
+            }
+
+            $result .= "\n";
+        }
+
+        return $result;
+    }
+}
 
 $curlConstants   = getCurlConstants();
 $sourceConstants = getSourceConstants();
@@ -161,7 +231,7 @@ function getCurlConstants() : array
         $deprecated = $match[3] ?? null;
         $removed    = $match[4] ?? null;
 
-        if (in_array($name, IGNORED_CONSTANTS, true) || !preg_match(CONSTANTS_REGEX_PATTERN, $name)) {
+        if (in_array($name, IGNORED_CURL_CONSTANTS, true) || !preg_match(CONSTANTS_REGEX_PATTERN, $name)) {
             // not a wanted constant
             continue;
         }
@@ -187,7 +257,7 @@ function getSourceConstants() : array
 {
     $source = file_get_contents(SOURCE_FILE);
 
-    preg_match_all('/REGISTER_CURL_CONSTANT\(([A-Za-z0-9_]+)\)/', $source, $matches);
+    preg_match_all('/REGISTER_LONG_CONSTANT\(\"\w+\", (\w+), .+\)/', $source, $matches);
 
     $constants = [];
 
@@ -196,7 +266,7 @@ function getSourceConstants() : array
             continue;
         }
 
-        if (!preg_match(CONSTANTS_REGEX_PATTERN, $name)) {
+        if (in_array($name, IGNORED_PHP_CONSTANTS, true) || !preg_match(CONSTANTS_REGEX_PATTERN, $name)) {
             // not a wanted constant
             continue;
         }
@@ -253,68 +323,4 @@ function getHexVersion(string $version) : string
     }
 
     return $hex;
-}
-
-/**
- * A simple helper to create ASCII tables.
- * It assumes that the same number of columns is always given to add().
- */
-class AsciiTable
-{
-    /**
-     * @var array
-     */
-    private $values = [];
-
-    /**
-     * @var array
-     */
-    private $length = [];
-
-    /**
-     * @var int
-     */
-    private $padding = 4;
-
-    /**
-     * @param string[] $values
-     *
-     * @return void
-     */
-    public function add(string ...$values) : void
-    {
-        $this->values[] = $values;
-
-        foreach ($values as $key => $value) {
-            $length = strlen($value);
-
-            if (isset($this->length[$key])) {
-                $this->length[$key] = max($this->length[$key], $length);
-            } else {
-                $this->length[$key] = $length;
-            }
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString() : string
-    {
-        $result = '';
-
-        foreach ($this->values as $values) {
-            foreach ($values as $key => $value) {
-                if ($key !== 0) {
-                    $result .= str_repeat(' ', $this->padding);
-                }
-
-                $result .= str_pad($value, $this->length[$key]);
-            }
-
-            $result .= "\n";
-        }
-
-        return $result;
-    }
 }

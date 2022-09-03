@@ -1806,6 +1806,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OBSERVER;
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 		}
@@ -2190,12 +2191,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-#ifdef _M_X64
+#if ZEND_ENABLE_ZVAL_LONG64
 		InterlockedIncrement64(&ZCSG(hits));
+		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #else
 		InterlockedIncrement(&ZCSG(hits));
+		InterlockedIncrement(&persistent_script->dynamic_members.hits);
 #endif
-		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
 		/* see bug #15471 (old BTS) */
@@ -3931,12 +3933,7 @@ static void preload_link(void)
 
 				/* Inheritance successful, print out any warnings. */
 				zend_error_cb = orig_error_cb;
-				EG(record_errors) = false;
-				for (uint32_t i = 0; i < EG(num_errors); i++) {
-					zend_error_info *error = EG(errors)[i];
-					zend_error_zstr_at(
-						error->type, error->filename, error->lineno, error->message);
-				}
+				zend_emit_recorded_errors();
 			} zend_catch {
 				/* Clear variance obligations that were left behind on bailout. */
 				if (CG(delayed_variance_obligations)) {

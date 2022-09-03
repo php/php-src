@@ -26,9 +26,7 @@ PHPAPI void* php_reallocarray(void *p, size_t nmb, size_t siz)
 #ifndef _WIN32
 	if (__builtin_mul_overflow(nmb, siz, &r)) {
 #else
-	
-	r = siz * nmb;
-	if (siz != 0 && r / siz != nmb) {
+	if (SizeTMult(nmb, siz, &r) != S_OK) {
 #endif
 		// EOVERFLOW may have been, arguably, more appropriate
 		// but this is what other implementations set

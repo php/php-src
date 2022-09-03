@@ -95,7 +95,7 @@ $tStamp = mktime (17, 17, 17, 1, 2855, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Tuesday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Tuesday            00:30:00\n\n";
+print "wanted=Tuesday            00:00:00\n\n";
 
 print "TZ=Pacific/Tarawa - Is it OK for this to be Midday? Note: does
 not appear to have a DST or timezone transition.\n";
@@ -250,9 +250,9 @@ result=Sunday 1981-03-29 02:00:00 +00 1
 wanted=Sunday            02:00:00
 
 TZ=Asia/Tehran - Is it OK for this to be 0:30 AM? yes
-tStamp=Tuesday 1977-10-25 17:17:17 +0330 0
-result=Tuesday 1977-11-01 00:30:00 +04 0
-wanted=Tuesday            00:30:00
+tStamp=Tuesday 1977-10-25 17:17:17 +04 0
+result=Tuesday 1977-11-01 00:00:00 +04 0
+wanted=Tuesday            00:00:00
 
 TZ=Pacific/Tarawa - Is it OK for this to be Midday? Note: does
 not appear to have a DST or timezone transition.

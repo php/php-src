@@ -1003,6 +1003,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	xmlNodePtr newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
 	int stricterror;
+	bool replacedoctype = false;
 
 	int ret;
 
@@ -1059,6 +1060,9 @@ PHP_METHOD(DOMNode, replaceChild)
 			dom_reconcile_ns(nodep->doc, newchild);
 		}
 	} else if (oldchild != newchild) {
+		xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
+		replacedoctype = (intSubset == (xmlDtd *) oldchild);
+
 		if (newchild->doc == NULL && nodep->doc != NULL) {
 			xmlSetTreeDoc(newchild, nodep->doc);
 			newchildobj->document = intern->document;
@@ -1066,6 +1070,10 @@ PHP_METHOD(DOMNode, replaceChild)
 		}
 		xmlReplaceNode(oldchild, newchild);
 		dom_reconcile_ns(nodep->doc, newchild);
+
+		if (replacedoctype) {
+			nodep->doc->intSubset = (xmlDtd *) newchild;
+		}
 	}
 	DOM_RET_OBJ(oldchild, &ret, intern);
 }

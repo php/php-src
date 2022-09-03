@@ -283,7 +283,6 @@ static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ 
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
-	intern->zo.handlers = &reflection_object_handlers;
 	return &intern->zo;
 }
 /* }}} */
@@ -1697,6 +1696,28 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureScopeClass)
 		closure_func = zend_get_closure_method_def(Z_OBJ(intern->obj));
 		if (closure_func && closure_func->common.scope) {
 			zend_reflection_class_factory(closure_func->common.scope, return_value);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ Returns the called scope associated to the closure */
+ZEND_METHOD(ReflectionFunctionAbstract, getClosureCalledClass)
+{
+	reflection_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT();
+	if (!Z_ISUNDEF(intern->obj)) {
+		zend_class_entry *called_scope;
+		zend_function *closure_func;
+		zend_object *object;
+		if (Z_OBJ_HANDLER(intern->obj, get_closure)
+		 && Z_OBJ_HANDLER(intern->obj, get_closure)(Z_OBJ(intern->obj), &called_scope, &closure_func, &object, 1) == SUCCESS
+		 && closure_func && (called_scope || closure_func->common.scope)) {
+			zend_reflection_class_factory(called_scope ? (zend_class_entry *) called_scope : closure_func->common.scope, return_value);
 		}
 	}
 }
@@ -7127,67 +7148,88 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflector_ptr = register_class_Reflector(zend_ce_stringable);
 
 	reflection_function_abstract_ptr = register_class_ReflectionFunctionAbstract(reflector_ptr);
+	reflection_function_abstract_ptr->default_object_handlers = &reflection_object_handlers;
 	reflection_function_abstract_ptr->create_object = reflection_objects_new;
 
 	reflection_function_ptr = register_class_ReflectionFunction(reflection_function_abstract_ptr);
 	reflection_function_ptr->create_object = reflection_objects_new;
+	reflection_function_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_generator_ptr = register_class_ReflectionGenerator();
 	reflection_generator_ptr->create_object = reflection_objects_new;
+	reflection_generator_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_parameter_ptr = register_class_ReflectionParameter(reflector_ptr);
 	reflection_parameter_ptr->create_object = reflection_objects_new;
+	reflection_parameter_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_type_ptr = register_class_ReflectionType(zend_ce_stringable);
 	reflection_type_ptr->create_object = reflection_objects_new;
+	reflection_type_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_named_type_ptr = register_class_ReflectionNamedType(reflection_type_ptr);
 	reflection_named_type_ptr->create_object = reflection_objects_new;
+	reflection_named_type_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_union_type_ptr = register_class_ReflectionUnionType(reflection_type_ptr);
 	reflection_union_type_ptr->create_object = reflection_objects_new;
+	reflection_union_type_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_intersection_type_ptr = register_class_ReflectionIntersectionType(reflection_type_ptr);
 	reflection_intersection_type_ptr->create_object = reflection_objects_new;
+	reflection_intersection_type_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_method_ptr = register_class_ReflectionMethod(reflection_function_abstract_ptr);
 	reflection_method_ptr->create_object = reflection_objects_new;
+	reflection_method_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_class_ptr = register_class_ReflectionClass(reflector_ptr);
 	reflection_class_ptr->create_object = reflection_objects_new;
+	reflection_class_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_object_ptr = register_class_ReflectionObject(reflection_class_ptr);
 	reflection_object_ptr->create_object = reflection_objects_new;
+	reflection_object_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_property_ptr = register_class_ReflectionProperty(reflector_ptr);
 	reflection_property_ptr->create_object = reflection_objects_new;
+	reflection_property_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_class_constant_ptr = register_class_ReflectionClassConstant(reflector_ptr);
 	reflection_class_constant_ptr->create_object = reflection_objects_new;
+	reflection_class_constant_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_extension_ptr = register_class_ReflectionExtension(reflector_ptr);
 	reflection_extension_ptr->create_object = reflection_objects_new;
+	reflection_extension_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_zend_extension_ptr = register_class_ReflectionZendExtension(reflector_ptr);
 	reflection_zend_extension_ptr->create_object = reflection_objects_new;
+	reflection_zend_extension_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_reference_ptr = register_class_ReflectionReference();
 	reflection_reference_ptr->create_object = reflection_objects_new;
+	reflection_reference_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_attribute_ptr = register_class_ReflectionAttribute(reflector_ptr);
 	reflection_attribute_ptr->create_object = reflection_objects_new;
+	reflection_attribute_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_enum_ptr = register_class_ReflectionEnum(reflection_class_ptr);
 	reflection_enum_ptr->create_object = reflection_objects_new;
+	reflection_enum_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_enum_unit_case_ptr = register_class_ReflectionEnumUnitCase(reflection_class_constant_ptr);
 	reflection_enum_unit_case_ptr->create_object = reflection_objects_new;
+	reflection_enum_unit_case_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_enum_backed_case_ptr = register_class_ReflectionEnumBackedCase(reflection_enum_unit_case_ptr);
 	reflection_enum_backed_case_ptr->create_object = reflection_objects_new;
+	reflection_enum_backed_case_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_fiber_ptr = register_class_ReflectionFiber();
 	reflection_fiber_ptr->create_object = reflection_objects_new;
+	reflection_fiber_ptr->default_object_handlers = &reflection_object_handlers;
 
 	REFLECTION_G(key_initialized) = 0;
 
