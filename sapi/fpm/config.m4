@@ -13,30 +13,6 @@ AC_DEFUN([AC_FPM_STDLIBS],
   AC_SEARCH_LIBS(inet_addr, nsl)
 ])
 
-AC_DEFUN([AC_FPM_PRCTL],
-[
-  AC_MSG_CHECKING([for prctl])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/prctl.h>]], [[prctl(0, 0, 0, 0, 0);]])], [
-    AC_DEFINE([HAVE_PRCTL], 1, [do we have prctl?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
-AC_DEFUN([AC_FPM_PROCCTL],
-[
-  AC_MSG_CHECKING([for procctl])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/procctl.h>]], [[procctl(0, 0, 0, 0);]])], [
-    AC_DEFINE([HAVE_PROCCTL], 1, [do we have procctl?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
 AC_DEFUN([AC_FPM_SETPFLAGS],
 [
   AC_MSG_CHECKING([for setpflags])
@@ -530,8 +506,6 @@ if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
 
   AC_FPM_STDLIBS
-  AC_FPM_PRCTL
-  AC_FPM_PROCCTL
   AC_FPM_SETPFLAGS
   AC_FPM_CLOCK
   AC_FPM_TRACE

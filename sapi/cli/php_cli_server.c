@@ -50,8 +50,12 @@
 #include <dlfcn.h>
 #endif
 
-#ifdef __linux__
+#ifdef HAVE_PRCTL
 # include <sys/prctl.h>
+#endif
+
+#ifdef HAVE_PROCCTL
+# include <sys/procctl.h>
 #endif
 
 #include "SAPI.h"
@@ -2437,12 +2441,16 @@ static char *php_cli_server_parse_addr(const char *addr, int *pport) {
 	return pestrndup(addr, end - addr, 1);
 }
 
-#ifdef __linux__
+#if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
 static void php_cli_server_worker_install_pdeathsig(void)
 {
-	if (prctl(PR_SET_PDEATHSIG, SIGTERM) == -1) {
-		// Ignore failure to register PDEATHSIG, it's not available on all platforms anyway
-	}
+	// Ignore failure to register PDEATHSIG, it's not available on all platforms anyway
+#if defined(HAVE_PRCTL)
+	prctl(PR_SET_PDEATHSIG, SIGTERM);
+#elif defined(HAVE_PROCCTL)
+	int signal = SIGTERM;
+	procctl(P_PID, 0, PROC_PDEATHSIG_CTL, &signal);
+#endif
 
 	// Check if parent has exited just after the fork
 	if (getppid() != php_cli_server_master) {
@@ -2478,7 +2486,7 @@ static void php_cli_server_startup_workers(void) {
 					php_cli_server_worker + 1;
 				return;
 			} else if (pid == 0) {
-#ifdef __linux__
+#if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
 				php_cli_server_worker_install_pdeathsig();
 #endif
 				return;
