@@ -1004,10 +1004,13 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 /**
  * Helper function for zend_file_cache_script_store().
  *
- * @return true on success, false on error
+ * @return true on success, false on error and errno is set to indicate the cause of the error
  */
 static bool zend_file_cache_script_write(int fd, const zend_persistent_script *script, const zend_file_cache_metainfo *info, const void *buf, const zend_string *s)
 {
+	ssize_t written;
+	const ssize_t total_size = (ssize_t)(sizeof(*info) + script->size + info->str_size);
+
 #ifdef HAVE_SYS_UIO_H
 	const struct iovec vec[] = {
 		{ .iov_base = (void *)info, .iov_len = sizeof(*info) },
@@ -1015,12 +1018,42 @@ static bool zend_file_cache_script_write(int fd, const zend_persistent_script *s
 		{ .iov_base = (void *)ZSTR_VAL(s), .iov_len = info->str_size },
 	};
 
-	return writev(fd, vec, sizeof(vec) / sizeof(vec[0])) == (ssize_t)(sizeof(*info) + script->size + info->str_size);
+	written = writev(fd, vec, sizeof(vec) / sizeof(vec[0]));
+	if (EXPECTED(written == total_size)) {
+		return true;
+	}
+
+	errno = written == -1 ? errno : EAGAIN;
+	return false;
 #else
-	return ZEND_LONG_MAX >= (zend_long)(sizeof(*info) + script->size + info->str_size) &&
-		write(fd, info, sizeof(*info)) == sizeof(*info) &&
-		write(fd, buf, script->size) == script->size &&
-		write(fd, ZSTR_VAL(s), info->str_size) == info->str_size;
+	if (UNEXPECTED(ZEND_LONG_MAX < (zend_long)total_size)) {
+# ifdef EFBIG
+		errno = EFBIG;
+# else
+		errno = ERANGE;
+# endif
+		return false;
+	}
+
+	written = write(fd, info, sizeof(*info));
+	if (UNEXPECTED(written != sizeof(*info))) {
+		errno = written == -1 ? errno : EAGAIN;
+		return false;
+	}
+
+	written = write(fd, buf, script->size);
+	if (UNEXPECTED(written != script->size)) {
+		errno = written == -1 ? errno : EAGAIN;
+		return false;
+	}
+
+	written = write(fd, ZSTR_VAL(s), info->str_size);
+	if (UNEXPECTED(written != info->str_size)) {
+		errno = written == -1 ? errno : EAGAIN;
+		return false;
+	}
+
+	return true;
 #endif
 }
 
@@ -1095,7 +1128,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 #endif
 
 	if (!zend_file_cache_script_write(fd, script, &info, buf, s)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s': %s\n", filename, strerror(errno));
 		zend_string_release_ex(s, 0);
 		close(fd);
 		efree(mem);
@@ -1107,7 +1140,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	zend_string_release_ex(s, 0);
 	efree(mem);
 	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s': %s\n", filename, strerror(errno));
 	}
 	close(fd);
 	efree(filename);

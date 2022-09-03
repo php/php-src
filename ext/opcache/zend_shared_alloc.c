@@ -328,7 +328,7 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 #define MIN_FREE_MEMORY 64*1024
 
 #define SHARED_ALLOC_FAILED() do {		\
-		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate "ZEND_LONG_FMT" bytes ("ZEND_LONG_FMT" bytes free)", (zend_long)size, (zend_long)ZSMMG(shared_free)); \
+		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %zu bytes (%zu bytes free)", size, ZSMMG(shared_free)); \
 		if (zend_shared_alloc_get_largest_free_block() < MIN_FREE_MEMORY) { \
 			ZSMMG(memory_exhausted) = 1; \
 		} \
@@ -338,6 +338,10 @@ void *zend_shared_alloc(size_t size)
 {
 	int i;
 	unsigned int block_size = ZEND_ALIGNED_SIZE(size);
+
+	if (UNEXPECTED(block_size < size)) {
+		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Possible integer overflow in shared memory allocation (%zu + %zu)", size, PLATFORM_ALIGNMENT);
+	}
 
 #if 1
 	if (!ZCG(locked)) {

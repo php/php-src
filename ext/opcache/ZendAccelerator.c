@@ -2840,18 +2840,23 @@ static inline int accel_find_sapi(void)
 static int zend_accel_init_shm(void)
 {
 	int i;
+	size_t accel_shared_globals_size;
 
 	zend_shared_alloc_lock();
 
 	if (ZCG(accel_directives).interned_strings_buffer) {
-		accel_shared_globals = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
+		accel_shared_globals_size = ZCG(accel_directives).interned_strings_buffer * 1024 * 1024;
 	} else {
 		/* Make sure there is always at least one interned string hash slot,
 		 * so the table can be queried unconditionally. */
-		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals) + sizeof(uint32_t));
+		accel_shared_globals_size = sizeof(zend_accel_shared_globals) + sizeof(uint32_t);
 	}
+
+	accel_shared_globals = zend_shared_alloc(accel_shared_globals_size);
 	if (!accel_shared_globals) {
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
+				"Insufficient shared memory for interned strings buffer! (tried to allocate %zu bytes)",
+				accel_shared_globals_size);
 		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
