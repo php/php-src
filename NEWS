@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC2
 
+- Opcache:
+  . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
+    overflow). (Arnaud)
+
 - Standard:
   . Marked crypt()'s $string parameter as #[\SensitiveParameter]. (timwolla)
 
