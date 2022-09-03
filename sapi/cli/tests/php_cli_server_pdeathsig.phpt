@@ -12,33 +12,31 @@ if (!(str_contains(PHP_OS, 'Linux') || str_contains(PHP_OS, 'FreeBSD'))) {
 --FILE--
 <?php
 
-function split_ps_pids(?string $lines): array {
-    return preg_split('(\R)', trim($lines ?? ''), flags: PREG_SPLIT_NO_EMPTY);
+function split_words(?string $lines): array {
+    return preg_split('(\s)', trim($lines ?? ''), flags: PREG_SPLIT_NO_EMPTY);
 }
 
-function get_worker_pids_by_ppid(string $ppid): array {
-    return split_ps_pids(shell_exec('ps -o pid= --ppid ' . $ppid));
+function find_workers_by_ppid(string $ppid) {
+    return split_words(shell_exec('pgrep -P ' . $ppid));
 }
 
-function get_worker_pids_by_pids(array $pids): array {
-    $pidFilters = array_map(fn (string $pid) => '--pid ' . $pid, $pids);
-    return split_ps_pids(shell_exec('ps -o pid= ' . join(' ', $pidFilters)));
+function find_workers_by_pids(array $pids) {
+    return split_words(shell_exec('ps -o pid= -p ' . join(' ', $pids)));
 }
 
 include "php_cli_server.inc";
 $cliServerInfo = php_cli_server_start('');
 
-$ppid = proc_get_status($cliServerInfo->processHandle)['pid'];
-
-$workerPids = get_worker_pids_by_ppid($ppid);
-if (count($workerPids) === 0) {
+$master = proc_get_status($cliServerInfo->processHandle)['pid'];
+$workers = find_workers_by_ppid($master);
+if (count($workers) === 0) {
     throw new \Exception('Could not find worker pids');
 }
 
 proc_terminate($cliServerInfo->processHandle, 9); // SIGKILL
-$workerPids = get_worker_pids_by_pids($workerPids);
 
-if (count($workerPids) !== 0) {
+$workers = find_workers_by_pids($workers);
+if (count($workers) !== 0) {
     throw new \Exception('Workers were not properly terminated');
 }
 
