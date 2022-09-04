@@ -6546,9 +6546,11 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 {
 	zend_attribute *attr;
 	zend_internal_attribute *config;
+	zend_string *lcname;
 
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t g, i, j;
+	uint32_t added = 0;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ATTRIBUTE_LIST);
 
@@ -6573,8 +6575,27 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 
 			uint32_t flags = (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)
 				? ZEND_ATTRIBUTE_STRICT_TYPES : 0;
+
+			lcname = zend_string_tolower_ex(name, false);
+			config = zend_internal_attribute_get(lcname);
+			zend_string_release(lcname);
+
+			if (
+					config != NULL
+					// If attribute is targeted to PARAMETER only ...
+					&& (ZEND_ATTRIBUTE_TARGET_PARAMETER & config->flags)
+					&& !(ZEND_ATTRIBUTE_TARGET_PROPERTY & config->flags)
+					// ... and current target is promoted property ...
+					&& (target & ZEND_ATTRIBUTE_TARGET_PROPERTY)
+					&& (target & ZEND_ATTRIBUTE_TARGET_PARAMETER)) {
+				// ... then skip processing as it was already linked to parameter
+				zend_string_release(name);
+				continue;
+			}
+
 			attr = zend_add_attribute(
 				attributes, name, args ? args->children : 0, flags, offset, el->lineno);
+			added++;
 			zend_string_release(name);
 
 			/* Populate arguments */
@@ -6613,6 +6634,11 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 				}
 			}
 		}
+	}
+
+	if (added == 0) {
+		// attributes wasn't initialized
+		return;
 	}
 
 	/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
@@ -6889,7 +6915,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				scope, name, &default_value, property_flags | ZEND_ACC_PROMOTED, doc_comment, type);
 			if (attributes_ast) {
 				zend_compile_attributes(
-					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY | ZEND_ATTRIBUTE_TARGET_PARAMETER);
 			}
 		}
 	}
