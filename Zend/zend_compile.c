@@ -6550,7 +6550,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t g, i, j;
-	uint32_t addedAttributesCount = 0;
+	uint32_t added_attributes_count = 0;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ATTRIBUTE_LIST);
 
@@ -6593,7 +6593,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 
 			attr = zend_add_attribute(
 				attributes, name, args ? args->children : 0, flags, offset, el->lineno);
-			addedAttributesCount++;
+			added_attributes_count++;
 			zend_string_release(name);
 
 			/* Populate arguments */
@@ -6634,7 +6634,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 		}
 	}
 
-	if (addedAttributesCount == 0) {
+	if (added_attributes_count == 0) {
 		// Attributes wasn't initialized
 		return;
 	}
