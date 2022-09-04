@@ -69,9 +69,9 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"opcache.jit_hot_side_exit=1\n"
 		"opcache.jit_max_root_traces=32768",
 		opcache_path);
-	free(opcache_path);
 
 	create_file();
 	fuzzer_init_php_for_execute(ini_buf);
+	free(opcache_path);
 	return 0;
 }
