@@ -37,7 +37,11 @@ PHP 8.3 UPGRADE NOTES
 
 ========================================
 6. New Functions
-========================================
+=======================k=================
+
+- Posix:
+  . Added posix_sysconf call to get runtime
+  informations. (David Carlier)
 
 ========================================
 7. New Classes and Interfaces
@@ -54,6 +58,12 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Posix:
+  . POSIX_SC_ARG_MAX.
+  . POSIX_SC_PAGESIZE.
+  . POSIX_SC_NPROCESSORS_CONF.
+  . POSIX_SC_NPROCESSORS_ONLN.
 
 ========================================
 11. Changes to INI File Handling
