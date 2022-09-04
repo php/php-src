@@ -670,7 +670,7 @@ PHP_MINFO_FUNCTION(spl)
 	char *strg;
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "SPL support",        "enabled");
+	php_info_print_table_row(2, "SPL support", "enabled");
 
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)

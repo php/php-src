@@ -804,7 +804,7 @@ static PHP_GSHUTDOWN_FUNCTION(zend_test)
 PHP_MINFO_FUNCTION(zend_test)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "zend_test extension", "enabled");
+	php_info_print_table_row(2, "zend_test extension", "enabled");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

@@ -2406,7 +2406,7 @@ PHP_MSHUTDOWN_FUNCTION(sqlite3)
 PHP_MINFO_FUNCTION(sqlite3)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "SQLite3 support", "enabled");
+	php_info_print_table_row(2, "SQLite3 support", "enabled");
 	php_info_print_table_row(2, "SQLite Library", sqlite3_libversion());
 	php_info_print_table_end();
 

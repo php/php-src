@@ -118,7 +118,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 PHP_MINFO_FUNCTION(pdo_odbc)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for ODBC (" PDO_ODBC_TYPE ")" , "enabled");
+	php_info_print_table_row(2, "PDO Driver for ODBC (" PDO_ODBC_TYPE ")" , "enabled");
 #ifdef SQL_ATTR_CONNECTION_POOLING
 	php_info_print_table_row(2, "ODBC Connection Pooling",	pdo_odbc_pool_on == SQL_CP_OFF ?
 			"Disabled" : (pdo_odbc_pool_mode == SQL_CP_STRICT_MATCH ? "Enabled, strict matching" : "Enabled, relaxed matching"));

@@ -275,7 +275,7 @@ PHP_MINFO_FUNCTION(pdo)
 	pdo_driver_t *pdriver;
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO support", "enabled");
+	php_info_print_table_row(2, "PDO support", "enabled");
 
 	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		spprintf(&drivers, 0, "%s, %s", ldrivers, pdriver->driver_name);
