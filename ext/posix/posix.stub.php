@@ -191,6 +191,34 @@ const POSIX_RLIMIT_NPTS = UNKNOWN;
  */
 const POSIX_RLIMIT_INFINITY = UNKNOWN;
 #endif
+#ifdef _SC_ARG_MAX
+/**
+ * @var int
+ * @cvalue _SC_ARG_MAX
+ */
+const POSIX_SC_ARG_MAX = UNKNOWN;
+#endif
+#ifdef _SC_PAGESIZE
+/**
+ * @var int
+ * @cvalue _SC_PAGESIZE
+ */
+const POSIX_SC_PAGESIZE = UNKNOWN;
+#endif
+#ifdef _SC_NPROCESSORS_CONF
+/**
+ * @var int
+ * @cvalue _SC_NPROCESSORS_CONF
+ */
+const POSIX_SC_NPROCESSORS_CONF = UNKNOWN;
+#endif
+#ifdef _SC_NPROCESSORS_ONLN
+/**
+ * @var int
+ * @cvalue _SC_NPROCESSORS_ONLN
+ */
+const POSIX_SC_NPROCESSORS_ONLN = UNKNOWN;
+#endif
 
 function posix_kill(int $process_id, int $signal): bool {}
 
@@ -327,3 +355,5 @@ function posix_strerror(int $error_code): string {}
 #ifdef HAVE_INITGROUPS
 function posix_initgroups(string $username, int $group_id): bool {}
 #endif
+
+function posix_sysconf(int $conf_id): int {}

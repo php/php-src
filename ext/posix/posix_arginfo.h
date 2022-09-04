@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e7f501e4ca2c30f6bf52ea5912037c1e59743949 */
+ * Stub hash: 82454cec6f55336a530c23663efeb7ac71932bba */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -159,6 +159,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_initgroups, 0, 2, _IS_BOOL
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_sysconf, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, conf_id, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(posix_kill);
 ZEND_FUNCTION(posix_getpid);
@@ -222,6 +226,7 @@ ZEND_FUNCTION(posix_strerror);
 #if defined(HAVE_INITGROUPS)
 ZEND_FUNCTION(posix_initgroups);
 #endif
+ZEND_FUNCTION(posix_sysconf);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -288,6 +293,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_INITGROUPS)
 	ZEND_FE(posix_initgroups, arginfo_posix_initgroups)
 #endif
+	ZEND_FE(posix_sysconf, arginfo_posix_sysconf)
 	ZEND_FE_END
 };
 
@@ -368,5 +374,17 @@ static void register_posix_symbols(int module_number)
 #endif
 #if defined(HAVE_SETRLIMIT)
 	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_INFINITY", RLIM_INFINITY, CONST_PERSISTENT);
+#endif
+#if defined(_SC_ARG_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_SC_ARG_MAX", _SC_ARG_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_SC_PAGESIZE)
+	REGISTER_LONG_CONSTANT("POSIX_SC_PAGESIZE", _SC_PAGESIZE, CONST_PERSISTENT);
+#endif
+#if defined(_SC_NPROCESSORS_CONF)
+	REGISTER_LONG_CONSTANT("POSIX_SC_NPROCESSORS_CONF", _SC_NPROCESSORS_CONF, CONST_PERSISTENT);
+#endif
+#if defined(_SC_NPROCESSORS_ONLN)
+	REGISTER_LONG_CONSTANT("POSIX_SC_NPROCESSORS_ONLN", _SC_NPROCESSORS_ONLN, CONST_PERSISTENT);
 #endif
 }
