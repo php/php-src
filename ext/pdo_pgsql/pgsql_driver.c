@@ -228,7 +228,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 		if (H->lob_streams) {
 			pdo_pgsql_close_lob_streams(dbh);
 			zend_hash_destroy(H->lob_streams);
-			pefree(H->lob_streams, 1);
+			pefree(H->lob_streams, dbh->is_persistent);
 			H->lob_streams = NULL;
 		}
 		if (H->server) {
