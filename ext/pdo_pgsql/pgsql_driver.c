@@ -34,6 +34,8 @@
 #include "zend_exceptions.h"
 #include "pgsql_driver_arginfo.h"
 
+static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh);
+
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
 	size_t i = strlen(message)-1;
@@ -139,10 +141,12 @@ static ssize_t pgsql_lob_read(php_stream *stream, char *buf, size_t count)
 static int pgsql_lob_close(php_stream *stream, int close_handle)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)(Z_PDO_DBH_P(&self->dbh))->driver_data;
 
 	if (close_handle) {
 		lo_close(self->conn, self->lfd);
 	}
+	zend_hash_index_del(H->lob_streams, php_stream_get_resource_id(stream));
 	zval_ptr_dtor(&self->dbh);
 	efree(self);
 	return 0;
@@ -193,6 +197,7 @@ php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
 
 	if (stm) {
 		Z_ADDREF_P(dbh);
+		zend_hash_index_add_ptr(H->lob_streams, php_stream_get_resource_id(stm), stm->res);
 		return stm;
 	}
 
@@ -201,10 +206,29 @@ php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
 }
 /* }}} */
 
+void pdo_pgsql_close_lob_streams(pdo_dbh_t *dbh)
+{
+	zend_resource *res;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	if (H->lob_streams) {
+		ZEND_HASH_REVERSE_FOREACH_PTR(H->lob_streams, res) {
+			if (res->type >= 0) {
+				zend_list_close(res);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+
 static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (H) {
+		if (H->lob_streams) {
+			pdo_pgsql_close_lob_streams(dbh);
+			zend_hash_destroy(H->lob_streams);
+			pefree(H->lob_streams, dbh->is_persistent);
+			H->lob_streams = NULL;
+		}
 		if (H->server) {
 			PQfinish(H->server);
 			H->server = NULL;
@@ -294,6 +318,8 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 	zend_long ret = 1;
 	ExecStatusType qs;
 
+	bool in_trans = pgsql_handle_in_transaction(dbh);
+
 	if (!(res = PQexec(H->server, ZSTR_VAL(sql)))) {
 		/* fatal error */
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
@@ -312,6 +338,9 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 		ret = Z_L(0);
 	}
 	PQclear(res);
+	if (in_trans && !pgsql_handle_in_transaction(dbh)) {
+		pdo_pgsql_close_lob_streams(dbh);
+	}
 
 	return ret;
 }
@@ -502,9 +531,7 @@ static zend_result pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 
 static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh)
 {
-	pdo_pgsql_db_handle *H;
-
-	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	return PQtransactionStatus(H->server) > PQTRANS_IDLE;
 }
@@ -537,7 +564,9 @@ static bool pgsql_handle_commit(pdo_dbh_t *dbh)
 
 	/* When deferred constraints are used the commit could
 	   fail, and a ROLLBACK implicitly ran. See bug #67462 */
-	if (!ret) {
+	if (ret) {
+		pdo_pgsql_close_lob_streams(dbh);
+	} else {
 		dbh->in_txn = pgsql_handle_in_transaction(dbh);
 	}
 
@@ -546,7 +575,13 @@ static bool pgsql_handle_commit(pdo_dbh_t *dbh)
 
 static bool pgsql_handle_rollback(pdo_dbh_t *dbh)
 {
-	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh);
+	int ret = pdo_pgsql_transaction_cmd("ROLLBACK", dbh);
+
+	if (ret) {
+		pdo_pgsql_close_lob_streams(dbh);
+	}
+
+	return ret;
 }
 
 /* {{{ Returns true if the copy worked fine or false if error */
@@ -1241,6 +1276,8 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	}
 
 	H->server = PQconnectdb(conn_str);
+	H->lob_streams = (HashTable *) pemalloc(sizeof(HashTable), dbh->is_persistent);
+	zend_hash_init(H->lob_streams, 0, NULL, NULL, 1);
 
 	if (tmp_user) {
 		zend_string_release_ex(tmp_user, 0);
