@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
     overflow). (Arnaud)
 
+- PDO_PGSQL:
+  . Fixed bug GH-9411 (PgSQL large object resource is incorrectly closed).
+    (Yurunsoft)
+
 - Random:
   . Fixed bug GH-9464 (build on older macOs releases). (David Bohman)
 

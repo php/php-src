@@ -134,6 +134,8 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	pdo_pgsql_db_handle *H = S->H;
 	ExecStatusType status;
 
+	bool in_trans = stmt->dbh->methods->in_transaction(stmt->dbh);
+
 	/* ensure that we free any previous unfetched results */
 	if(S->result) {
 		PQclear(S->result);
@@ -250,6 +252,10 @@ stmt_retry:
 		H->pgoid = PQoidValue(S->result);
 	} else {
 		stmt->row_count = (zend_long)PQntuples(S->result);
+	}
+
+	if (in_trans && !stmt->dbh->methods->in_transaction(stmt->dbh)) {
+		pdo_pgsql_close_lob_streams(stmt->dbh);
 	}
 
 	return 1;
