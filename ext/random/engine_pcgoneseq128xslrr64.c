@@ -83,6 +83,11 @@ static bool unserialize(php_random_status *status, HashTable *data)
 	uint64_t u[2];
 	zval *t;
 
+	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
+	if (zend_hash_num_elements(data) != 2) {
+		return false;
+	}
+
 	for (uint32_t i = 0; i < 2; i++) {
 		t = zend_hash_index_find(data, i);
 		if (!t || Z_TYPE_P(t) != IS_STRING || Z_STRLEN_P(t) != (2 * sizeof(uint64_t))) {
