@@ -210,9 +210,14 @@ php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
 
 void pdo_pgsql_close_lob_streams(pdo_dbh_t *dbh)
 {
+	zend_resource *res;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (H->lob_streams) {
-		zend_close_rsrc_list(H->lob_streams);
+		ZEND_HASH_REVERSE_FOREACH_PTR(H->lob_streams, res) {
+			if (res->type >= 0) {
+				zend_resource_dtor(res);
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 
