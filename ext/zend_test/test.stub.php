@@ -3,6 +3,7 @@
 /**
  * @generate-class-entries static
  * @generate-legacy-arginfo 80000
+ * @undocumentable
  */
 namespace {
     /**
