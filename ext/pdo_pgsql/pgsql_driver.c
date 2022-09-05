@@ -1268,7 +1268,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	}
 
 	H->server = PQconnectdb(conn_str);
-	H->lob_streams = (HashTable *) pemalloc(sizeof(HashTable), 1);
+	H->lob_streams = (HashTable *) pemalloc(sizeof(HashTable), dbh->is_persistent);
 	zend_hash_init(H->lob_streams, 0, NULL, NULL, 1);
 
 	if (tmp_user) {
