@@ -4235,7 +4235,7 @@ function generateClassSynopses(array $classMap, iterable $allConstInfos): array 
  * $param iterable<ConstInfo> $allConstInfos
  * @return array<string, string>
  */
-function replaceClassSynopses(string $targetDirectory, array $classMap, iterable $allConstInfos): array
+function replaceClassSynopses(string $targetDirectory, array $classMap, iterable $allConstInfos, bool $isVerify): array
 {
     $existingClassSynopses = [];
 
@@ -4337,11 +4337,13 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
         }
     }
 
-    $missingClassSynopses = array_diff_key($classMap, $existingClassSynopses);
-    foreach ($missingClassSynopses as $className => $info) {
-        /** @var ClassInfo $info */
-        if (!$info->isUndocumentable) {
-            echo "Warning: Missing class synopsis page for $className\n";
+    if ($isVerify) {
+        $missingClassSynopses = array_diff_key($classMap, $existingClassSynopses);
+        foreach ($missingClassSynopses as $className => $info) {
+            /** @var ClassInfo $info */
+            if (!$info->isUndocumentable) {
+                echo "Warning: Missing class synopsis page for $className\n";
+            }
         }
     }
 
@@ -4816,7 +4818,7 @@ if ($generateClassSynopses) {
 }
 
 if ($replaceClassSynopses) {
-    $classSynopses = replaceClassSynopses($targetSynopses, $classMap, $context->allConstInfos);
+    $classSynopses = replaceClassSynopses($targetSynopses, $classMap, $context->allConstInfos, $verify);
 
     foreach ($classSynopses as $filename => $content) {
         if (file_put_contents($filename, $content)) {
