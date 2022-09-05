@@ -226,7 +226,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (H) {
 		if (H->lob_streams) {
-			zend_close_rsrc_list(H->lob_streams);
+			pdo_pgsql_close_lob_streams(dbh);
 			zend_hash_destroy(H->lob_streams);
 			pefree(H->lob_streams, 1);
 			H->lob_streams = NULL;
