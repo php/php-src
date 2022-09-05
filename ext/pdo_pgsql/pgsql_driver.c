@@ -215,7 +215,7 @@ void pdo_pgsql_close_lob_streams(pdo_dbh_t *dbh)
 	if (H->lob_streams) {
 		ZEND_HASH_REVERSE_FOREACH_PTR(H->lob_streams, res) {
 			if (res->type >= 0) {
-				zend_resource_dtor(res);
+				zend_list_close(res);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
