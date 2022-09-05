@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #77780 ("Headers already sent..." when previous connection was
     aborted). (Jakub Zelenka)
 
+- PDO_PGSQL:
+  . Fixed bug GH-9411 (PgSQL large object resource is incorrectly closed).
+    (Yurunsoft)
+
 - Reflection:
   . Fixed bug GH-8932 (ReflectionFunction provides no way to get the called
     class of a Closure). (cmb, Nicolas Grekas)
