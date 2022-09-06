@@ -369,7 +369,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateBacktrackLimit, backtrack_limit, zend_pcre_globals, pcre_globals)
 	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000",  PHP_INI_ALL, OnUpdateRecursionLimit, recursion_limit, zend_pcre_globals, pcre_globals)
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	STD_PHP_INI_ENTRY("pcre.jit",             "1",       PHP_INI_ALL, OnUpdateJit, jit,             zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_BOOLEAN("pcre.jit",           "1",       PHP_INI_ALL, OnUpdateJit,            jit,             zend_pcre_globals, pcre_globals)
 #endif
 PHP_INI_END()
 

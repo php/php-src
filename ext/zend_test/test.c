@@ -415,6 +415,13 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_zend_ini_str)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_STR(ZT_G(str_test));
+}
+
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -632,6 +639,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.quantity_value", "0", PHP_INI_ALL, OnUpdateLong, quantity_value, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.str_test", "", PHP_INI_ALL, OnUpdateStr, str_test, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.not_empty_str_test", "val", PHP_INI_ALL, OnUpdateStrNotEmpty, not_empty_str_test, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void (*old_zend_execute_ex)(zend_execute_data *execute_data);

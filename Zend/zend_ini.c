@@ -876,3 +876,23 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_API ZEND_INI_MH(OnUpdateStr) /* {{{ */
+{
+	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
+	*p = new_value;
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty) /* {{{ */
+{
+	if (new_value && ZSTR_LEN(new_value) == 0) {
+		return FAILURE;
+	}
+
+	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
+	*p = new_value;
+	return SUCCESS;
+}
+/* }}} */

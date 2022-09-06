@@ -241,13 +241,13 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	zend_long 			num_active_persistent;
 	zend_long 			num_inactive_persistent;
 	zend_long			max_persistent;
-	zend_long			allow_persistent;
+	bool				allow_persistent;
 	zend_ulong			default_port;
 	char				*default_host;
 	char				*default_user;
 	char				*default_pw;
 	char				*default_socket;
-	zend_long			allow_local_infile;
+	bool				allow_local_infile;
 	char				*local_infile_directory;
 	zend_long			error_no;
 	char				*error_msg;

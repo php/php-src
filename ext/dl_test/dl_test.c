@@ -71,8 +71,8 @@ static const zend_function_entry php_dl_test_use_register_functions_directly_fun
 
 /* {{{ INI */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("dl_test.long",      "0", PHP_INI_ALL, OnUpdateLong,       long_value,       zend_dl_test_globals, dl_test_globals)
-	STD_PHP_INI_ENTRY("dl_test.string", "hello", PHP_INI_ALL, OnUpdateString,                           string_value, zend_dl_test_globals, dl_test_globals)
+	STD_PHP_INI_ENTRY("dl_test.long",       "0", PHP_INI_ALL, OnUpdateLong,   long_value,   zend_dl_test_globals, dl_test_globals)
+	STD_PHP_INI_ENTRY("dl_test.string", "hello", PHP_INI_ALL, OnUpdateString, string_value, zend_dl_test_globals, dl_test_globals)
 PHP_INI_END()
 /* }}} */
 
