@@ -590,6 +590,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_INFO(zval)			(zval).u1.type_info
 #define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
 
+#define Z_TYPE_EXTRA(zval)			(zval).u1.v.u.extra
+#define Z_TYPE_EXTRA_P(zval_p)		Z_TYPE_EXTRA(*(zval_p))
+
 #define Z_NEXT(zval)				(zval).u2.next
 #define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
 
