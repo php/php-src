@@ -49,6 +49,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	 uspoof_check2 APIs when it became stable, to use extended check result APIs.
 	 Subsequent changes in the unicode security algos are to be watched.*/
 	uspoof_setRestrictionLevel(co->uspoof, SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL);
+	co->uspoofres = uspoof_openCheckResult(SPOOFCHECKER_ERROR_CODE_P(co));
 #else
 	/* Single-script enforcement is on by default. This fails for languages
 	 like Japanese that legally use multiple scripts within a single word,
