@@ -5465,7 +5465,7 @@ ZEND_RSHUTDOWN_FUNCTION(ffi)
 ZEND_MINFO_FUNCTION(ffi)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "FFI support", "enabled");
+	php_info_print_table_row(2, "FFI support", "enabled");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

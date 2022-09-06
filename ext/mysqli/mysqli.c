@@ -588,7 +588,7 @@ PHP_MINFO_FUNCTION(mysqli)
 	char buf[32];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "MysqlI Support", "enabled");
+	php_info_print_table_row(2, "MysqlI Support", "enabled");
 	php_info_print_table_row(2, "Client API library version", mysql_get_client_info());
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_active_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);

@@ -160,7 +160,7 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 PHP_MINFO_FUNCTION(pcntl)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "pcntl support", "enabled");
+	php_info_print_table_row(2, "pcntl support", "enabled");
 	php_info_print_table_end();
 }
 

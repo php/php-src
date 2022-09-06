@@ -512,7 +512,7 @@ PHP_MINFO_FUNCTION(pgsql)
 	char buf[256];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
+	php_info_print_table_row(2, "PostgreSQL Support", "enabled");
 	php_info_print_table_row(2, "PostgreSQL (libpq) Version", pgsql_libpq_version);
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 	php_info_print_table_row(2, "Multibyte character support", "enabled");

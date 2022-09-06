@@ -123,7 +123,7 @@ PHP_RINIT_FUNCTION(dl_test)
 PHP_MINFO_FUNCTION(dl_test)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "dl_test support", "enabled");
+	php_info_print_table_row(2, "dl_test support", "enabled");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

@@ -256,13 +256,13 @@ PHP_MINFO_FUNCTION(com_dotnet)
 {
 	php_info_print_table_start();
 
-	php_info_print_table_header(2, "COM support", "enabled");
-	php_info_print_table_header(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
+	php_info_print_table_row(2, "COM support", "enabled");
+	php_info_print_table_row(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
 
 #if HAVE_MSCOREE_H
-	php_info_print_table_header(2, ".Net support", "enabled");
+	php_info_print_table_row(2, ".Net support", "enabled");
 #else
-	php_info_print_table_header(2, ".Net support", "not present in this build");
+	php_info_print_table_row(2, ".Net support", "not present in this build");
 #endif
 
 	php_info_print_table_end();
