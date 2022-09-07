@@ -212,6 +212,7 @@ function gzwrite($stream, string $data, ?int $length = null): int|false {}
 /**
  * @param resource $stream
  * @alias fwrite
+ * @undocumentable gzputs is an alias of gzwrite, but transitive aliases are not yet supported
  */
 function gzputs($stream, string $data, ?int $length = null): int|false {}
 

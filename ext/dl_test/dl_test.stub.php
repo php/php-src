@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @undocumentable
+ */
 
 function dl_test_test1(): void {}
 
