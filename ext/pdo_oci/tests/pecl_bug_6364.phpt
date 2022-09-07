@@ -3,6 +3,7 @@ PECL PDO_OCI Bug #6364 (segmentation fault on stored procedure call with OUT bin
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
+if (getenv('SKIP_ASAN')) die('skip leaks memory under asan');
 require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
