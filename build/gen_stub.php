@@ -1222,6 +1222,8 @@ class FuncInfo {
     public $numRequiredArgs;
     /** @var string|null */
     public $cond;
+    /** @var bool */
+    public $isUndocumentable;
 
     /**
      * @param ArgInfo[] $args
@@ -1238,7 +1240,8 @@ class FuncInfo {
         array $args,
         ReturnInfo $return,
         int $numRequiredArgs,
-        ?string $cond
+        ?string $cond,
+        bool $isUndocumentable
     ) {
         $this->name = $name;
         $this->classFlags = $classFlags;
@@ -1252,6 +1255,7 @@ class FuncInfo {
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
         $this->cond = $cond;
+        $this->isUndocumentable = $isUndocumentable;
     }
 
     public function isMethod(): bool
@@ -3218,7 +3222,8 @@ function parseFunctionLike(
     int $classFlags,
     int $flags,
     Node\FunctionLike $func,
-    ?string $cond
+    ?string $cond,
+    bool $isUndocumentable
 ): FuncInfo {
     try {
         $comment = $func->getDocComment();
@@ -3282,6 +3287,10 @@ function parseFunctionLike(
                             $paramMeta[$varName] = [];
                         }
                         $paramMeta[$varName][$tag->name] = true;
+                        break;
+
+                    case 'undocumentable':
+                        $isUndocumentable = true;
                         break;
                 }
             }
@@ -3383,7 +3392,8 @@ function parseFunctionLike(
             $args,
             $return,
             $numRequiredArgs,
-            $cond
+            $cond,
+            $isUndocumentable
         );
     } catch (Exception $e) {
         throw new Exception($name . "(): " .$e->getMessage());
@@ -3570,6 +3580,12 @@ function parseClass(
         throw new Exception("Unknown class kind " . get_class($class));
     }
 
+    if ($isUndocumentable) {
+        foreach ($methods as $method) {
+            $method->isUndocumentable = true;
+        }
+    }
+
     return new ClassInfo(
         $name,
         $flags,
@@ -3674,7 +3690,8 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 0,
                 0,
                 $stmt,
-                $cond
+                $cond,
+                $fileInfo->isUndocumentable
             );
             continue;
         }
@@ -3731,7 +3748,8 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                         $classFlags,
                         $classStmt->flags | $abstractFlag,
                         $classStmt,
-                        $cond
+                        $cond,
+                        $fileInfo->isUndocumentable
                     );
                 } else if ($classStmt instanceof Stmt\EnumCase) {
                     $enumCaseInfos[] = new EnumCaseInfo(
@@ -4342,7 +4360,7 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
         foreach ($missingClassSynopses as $className => $info) {
             /** @var ClassInfo $info */
             if (!$info->isUndocumentable) {
-                echo "Warning: Missing class synopsis page for $className\n";
+                echo "Warning: Missing class synopsis for $className\n";
             }
         }
     }
@@ -4388,7 +4406,8 @@ function generateMethodSynopses(array $funcMap, array $aliasMap): array {
  * @param array<string, FuncInfo> $aliasMap
  * @return array<string, string>
  */
-function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $aliasMap): array {
+function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $aliasMap, bool $isVerify): array {
+    $existingMethodSynopses = [];
     $methodSynopses = [];
 
     $it = new RecursiveIteratorIterator(
@@ -4405,6 +4424,27 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
         $xml = file_get_contents($pathName);
         if ($xml === false) {
             continue;
+        }
+
+        if ($isVerify) {
+            $matches = [];
+            preg_match("/<refname>\s*([\w:]+)\s*<\/refname>\s*<refpurpose>\s*&Alias;\s*<(?:function|methodname)>\s*([\w:]+)\s*<\/(?:function|methodname)>\s*<\/refpurpose>/i", $xml, $matches);
+            $aliasName = $matches[1] ?? null;
+            $alias = $funcMap[$aliasName] ?? null;
+            $funcName = $matches[2] ?? null;
+            $func = $funcMap[$funcName] ?? null;
+
+            if ($alias &&
+                !$alias->isUndocumentable &&
+                ($func === null || $func->alias === null || $func->alias->__toString() !== $aliasName) &&
+                ($alias->alias === null || $alias->alias->__toString() !== $funcName)
+            ) {
+                echo "Warning: $aliasName()" . ($alias->alias ? " is an alias of " . $alias->alias->__toString() . "(), but it" : "") . " is incorrectly documented as an alias for $funcName()\n";
+            }
+
+            if ($aliasName) {
+                $existingMethodSynopses[$aliasName] = $aliasName;
+            }
         }
 
         if (stripos($xml, "<methodsynopsis") === false && stripos($xml, "<constructorsynopsis") === false && stripos($xml, "<destructorsynopsis") === false) {
@@ -4448,7 +4488,9 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             if (!isset($funcMap[$funcName])) {
                 continue;
             }
+
             $funcInfo = $funcMap[$funcName];
+            $existingMethodSynopses[$funcInfo->name->__toString()] = $funcInfo->name->__toString();
 
             $newMethodSynopsis = $funcInfo->getMethodSynopsisElement($funcMap, $aliasMap, $doc);
             if ($newMethodSynopsis === null) {
@@ -4531,6 +4573,16 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             );
 
             $methodSynopses[$pathName] = $replacedXml;
+        }
+    }
+
+    if ($isVerify) {
+        $missingMethodSynopses = array_diff_key($funcMap, $existingMethodSynopses);
+        foreach ($missingMethodSynopses as $functionName => $info) {
+            /** @var FuncInfo $info */
+            if (!$info->isUndocumentable) {
+                echo "Warning: Missing method synopsis for $functionName()\n";
+            }
         }
     }
 
@@ -4845,7 +4897,7 @@ if ($generateMethodSynopses) {
 }
 
 if ($replaceMethodSynopses) {
-    $methodSynopses = replaceMethodSynopses($targetSynopses, $funcMap, $aliasMap);
+    $methodSynopses = replaceMethodSynopses($targetSynopses, $funcMap, $aliasMap, $verify);
 
     foreach ($methodSynopses as $filename => $content) {
         if (file_put_contents($filename, $content)) {
