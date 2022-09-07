@@ -4224,6 +4224,10 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 	}
 
+	if (access_type & ZEND_ACC_READONLY) {
+		ce->ce_flags |= ZEND_ACC_HAS_READONLY_PROPS;
+	}
+
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		property_info = pemalloc(sizeof(zend_property_info), 1);
 	} else {

@@ -241,7 +241,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 21,30,31)                         |     |     |     */
+/* Class Flags (unused: 30,31)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -288,6 +288,8 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class is linked apart from variance obligations.       |     |     |     */
 #define ZEND_ACC_NEARLY_LINKED           (1 << 20) /*  X  |     |     |     */
+/* Class has readonly props                               |     |     |     */
+#define ZEND_ACC_HAS_READONLY_PROPS      (1 << 21) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* stored in opcache (may be partially)                   |     |     |     */
 #define ZEND_ACC_CACHED                  (1 << 22) /*  X  |     |     |     */

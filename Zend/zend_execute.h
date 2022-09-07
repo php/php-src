@@ -463,6 +463,7 @@ ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 	} while (0)
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
+#define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS) == ZEND_ACC_HAS_READONLY_PROPS)
 
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
 ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property);
