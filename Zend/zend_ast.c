@@ -1883,6 +1883,17 @@ simple_list:
 		case ZEND_AST_MATCH_ARM_LIST:
 			zend_ast_export_list(str, (zend_ast_list*)ast, 0, 0, indent);
 			break;
+		case ZEND_AST_PROPERTY_INITIALIZER_LIST:
+			smart_str_appends(str, "{");
+			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 0, indent);
+			smart_str_appends(str, "}");
+			break;
+		case ZEND_AST_INITIALIZER_EXPR: {
+			zend_ast_export_name(str, ast->child[0], 0, indent);
+			smart_str_appends(str, ": ");
+			zend_ast_export_ex(str, ast->child[1], priority, indent);
+			break;
+		}
 		case ZEND_AST_CLOSURE_USES:
 			smart_str_appends(str, " use(");
 			zend_ast_export_var_list(str, (zend_ast_list*)ast, indent);
@@ -2013,8 +2024,6 @@ simple_list:
 			}
 			smart_str_appendc(str, '`');
 			break;
-		case ZEND_AST_CLONE:
-			PREFIX_OP("clone ", 270, 271);
 		case ZEND_AST_EXIT:
 			if (ast->child[0]) {
 				FUNC_OP("exit");
@@ -2208,6 +2217,16 @@ simple_list:
 				smart_str_appendc(str, '(');
 				zend_ast_export_ex(str, ast->child[1], 0, indent);
 				smart_str_appendc(str, ')');
+			}
+			break;
+		case ZEND_AST_CLONE:
+			if (ast->child[1]) {
+				smart_str_appends(str, "clone ");
+				zend_ast_export_ex(str, ast->child[0], priority, indent);
+				smart_str_appends(str, " with ");
+				zend_ast_export_ex(str, ast->child[1], priority, indent);
+			} else {
+				PREFIX_OP("clone ", 270, 271);
 			}
 			break;
 		case ZEND_AST_INSTANCEOF:

@@ -5,7 +5,7 @@ ReflectionParameter::__toString() with new initializer
 
 function test(
     $p1 = new stdClass,
-    $p2 = new SomeClass(new With, some: new Parameters)
+    $p2 = new SomeClass(new Foo, some: new Bar)
 ) {}
 
 echo new ReflectionParameter('test', 'p1'), "\n";
@@ -14,4 +14,4 @@ echo new ReflectionParameter('test', 'p2'), "\n";
 ?>
 --EXPECT--
 Parameter #0 [ <optional> $p1 = new \stdClass() ]
-Parameter #1 [ <optional> $p2 = new \SomeClass(new \With(), some: new \Parameters()) ]
+Parameter #1 [ <optional> $p2 = new \SomeClass(new \Foo(), some: new \Bar()) ]

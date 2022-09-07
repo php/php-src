@@ -5050,11 +5050,46 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 static void zend_compile_clone(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *obj_ast = ast->child[0];
+	zend_ast *initializer_ast = ast->child[1];
 
 	znode obj_node;
 	zend_compile_expr(&obj_node, obj_ast);
 
-	zend_emit_op_tmp(result, ZEND_CLONE, &obj_node, NULL);
+	if (!initializer_ast) {
+		zend_emit_op_tmp(result, ZEND_CLONE, &obj_node, NULL);
+	} else {
+		zend_op *opline = zend_emit_op(result, ZEND_CLONE, &obj_node, NULL);
+
+		zend_ast_list *list = zend_ast_get_list(initializer_ast);
+		uint32_t i;
+
+		for (i = 0; i < list->children; i++) {
+			zend_ast *property_init_expr_ast = list->child[i];
+			ZEND_ASSERT(property_init_expr_ast->kind == ZEND_AST_INITIALIZER_EXPR);
+
+			znode property_object_node;
+			property_object_node.op_type = IS_VAR;
+			GET_NODE(&property_object_node, opline->result);
+
+			zend_ast *property_name_ast = property_init_expr_ast->child[0];
+			znode property_name_node;
+			zend_compile_expr(&property_name_node, property_name_ast);
+
+			zend_ast *property_value_ast = property_init_expr_ast->child[1];
+			znode property_value_node;
+			zend_compile_expr(&property_value_node, property_value_ast);
+
+			opline = zend_emit_op(result, ZEND_CLONE_INIT_PROP, &property_object_node, &property_name_node);
+			opline->result.var  = get_temporary_variable();
+			opline->extended_value = zend_alloc_cache_slots(3);
+			if (i < list->children - 1) {
+				opline->result_type = IS_TMP_VAR;
+			}
+
+			zend_emit_op_data(&property_value_node);
+			GET_NODE(result, opline->result);
+		}
+	}
 }
 /* }}} */
 

@@ -821,11 +821,28 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			Z_TRY_ADDREF_P(value);
 
 			if (prop_info) {
-				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE))) {
-					Z_TRY_DELREF_P(value);
-					zend_readonly_property_modification_error(prop_info);
-					variable_ptr = &EG(error_zval);
-					goto exit;
+				bool is_readonly = (prop_info->flags & ZEND_ACC_READONLY);
+				bool is_clone_with_op = false;
+
+				if (UNEXPECTED(is_readonly)) {
+					is_clone_with_op = EG(current_execute_data) && EG(current_execute_data)->opline &&
+						EG(current_execute_data)->opline->opcode == ZEND_CLONE_INIT_PROP;
+
+					if (UNEXPECTED(
+						(!is_clone_with_op && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE)) ||
+						(is_clone_with_op && (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITED))
+					)) {
+						Z_TRY_DELREF_P(value);
+						zend_readonly_property_modification_error(prop_info);
+						variable_ptr = &EG(error_zval);
+						goto exit;
+					}
+
+					if (UNEXPECTED(!verify_readonly_initialization_access(prop_info, zobj->ce, name, "modify"))) {
+						Z_TRY_DELREF_P(value);
+						variable_ptr = &EG(error_zval);
+						goto exit;
+					}
 				}
 
 				ZVAL_COPY_VALUE(&tmp, value);
@@ -844,7 +861,12 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
-				Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
+				if (UNEXPECTED(is_readonly && is_clone_with_op)) {
+					Z_PROP_FLAG_P(variable_ptr) = IS_PROP_REINITED;
+				} else {
+					Z_PROP_FLAG_P(variable_ptr) = 0;
+				}
+
 				value = &tmp;
 			}
 

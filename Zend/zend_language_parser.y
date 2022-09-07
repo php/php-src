@@ -80,6 +80,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right T_POW
 %precedence T_CLONE
+%precedence T_WITH
 
 /* Resolve danging else conflict */
 %precedence T_NOELSE
@@ -113,6 +114,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_INSTANCEOF    "'instanceof'"
 %token <ident> T_NEW           "'new'"
 %token <ident> T_CLONE         "'clone'"
+%token <ident> T_WITH          "'with'"
 %token <ident> T_EXIT          "'exit'"
 %token <ident> T_IF            "'if'"
 %token <ident> T_ELSEIF        "'elseif'"
@@ -277,6 +279,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
+%type <ast> clone clone_property_initializer_list non_empty_clone_property_initializer_list clone_property_initializer_expr
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 
@@ -297,7 +300,7 @@ start:
 
 reserved_non_modifiers:
 	  T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
-	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
+	| T_INSTANCEOF | T_NEW | T_CLONE | T_WITH | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
 	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
@@ -1143,7 +1146,7 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' ampersand variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
+	|	clone { $$ = $1; }
 	|	variable T_PLUS_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ADD, $1, $3); }
 	|	variable T_MINUS_EQUAL expr
@@ -1598,6 +1601,25 @@ isset_variables:
 
 isset_variable:
 		expr { $$ = zend_ast_create(ZEND_AST_ISSET, $1); }
+;
+
+clone:
+		T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2, NULL); }
+	|	T_CLONE expr T_WITH clone_property_initializer_list { $$ = zend_ast_create(ZEND_AST_CLONE, $2, $4); }
+
+clone_property_initializer_list:
+		'{' '}'	{ $$ = zend_ast_create_list(0, ZEND_AST_PROPERTY_INITIALIZER_LIST); }
+	|	'{' non_empty_clone_property_initializer_list possible_comma '}' { $$ = $2; }
+;
+
+non_empty_clone_property_initializer_list:
+		clone_property_initializer_expr { $$ = zend_ast_create_list(1, ZEND_AST_PROPERTY_INITIALIZER_LIST, $1); }
+	|	non_empty_clone_property_initializer_list ',' clone_property_initializer_expr { $$ = zend_ast_list_add($1, $3); }
+;
+
+clone_property_initializer_expr:
+		identifier ':' expr { $$ = zend_ast_create(ZEND_AST_INITIALIZER_EXPR, $1, $3); }
+	|	expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_INITIALIZER_EXPR, $1, $3); }
 ;
 
 %%

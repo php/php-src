@@ -1025,11 +1025,6 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 {
 	zval tmp;
 
-	if (UNEXPECTED((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(info);
-		return &EG(uninitialized_zval);
-	}
-
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
 
@@ -1037,8 +1032,6 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 		zval_ptr_dtor(&tmp);
 		return &EG(uninitialized_zval);
 	}
-
-	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
 
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }

@@ -195,6 +195,7 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
 {
 	bool has_clone_method = old_object->ce->clone != NULL;
+	bool has_readonly_props = ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce);
 
 	if (old_object->ce->default_properties_count) {
 		zval *src = old_object->properties_table;
@@ -209,6 +210,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
 				Z_PROP_FLAG_P(dst) |= IS_PROP_REINITABLE;
 			}
+			Z_PROP_FLAG_P(dst) &= ~IS_PROP_REINITED;
 
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
@@ -220,7 +222,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			src++;
 			dst++;
 		} while (src != end);
-	} else if (old_object->properties && !has_clone_method) {
+	} else if (old_object->properties && !has_clone_method && !has_readonly_props) {
 		/* fast copy */
 		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
 			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
@@ -258,6 +260,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
 				Z_PROP_FLAG_P(&new_prop) |= IS_PROP_REINITABLE;
 			}
+			Z_PROP_FLAG_P(&new_prop) &= ~IS_PROP_REINITED;
 			if (EXPECTED(key)) {
 				_zend_hash_append(new_object->properties, key, &new_prop);
 			} else {
@@ -270,7 +273,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		GC_ADDREF(new_object);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
 
-		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
+		if (has_readonly_props) {
 			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
 				zval* prop = OBJ_PROP_NUM(new_object, i);
 				/* Unconditionally remove the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
