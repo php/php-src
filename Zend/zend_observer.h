@@ -27,6 +27,9 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API int zend_observer_fcall_op_array_extension;
+extern ZEND_API bool zend_observer_errors_observed;
+extern ZEND_API bool zend_observer_function_declared_observed;
+extern ZEND_API bool zend_observer_class_linked_observed;
 
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
@@ -80,10 +83,35 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 
 ZEND_API void zend_observer_fcall_end_all(void);
 
+typedef void (*zend_observer_function_declared_cb)(zend_op_array *op_array, zend_string *name);
+
+ZEND_API void zend_observer_function_declared_register(zend_observer_function_declared_cb cb);
+ZEND_API void ZEND_FASTCALL _zend_observer_function_declared_notify(zend_op_array *op_array, zend_string *name);
+static inline void zend_observer_function_declared_notify(zend_op_array *op_array, zend_string *name) {
+    if (UNEXPECTED(zend_observer_function_declared_observed)) {
+		_zend_observer_function_declared_notify(op_array, name);
+	}
+}
+
+typedef void (*zend_observer_class_linked_cb)(zend_class_entry *ce, zend_string *name);
+
+ZEND_API void zend_observer_class_linked_register(zend_observer_class_linked_cb cb);
+ZEND_API void ZEND_FASTCALL _zend_observer_class_linked_notify(zend_class_entry *ce, zend_string *name);
+static inline void zend_observer_class_linked_notify(zend_class_entry *ce, zend_string *name) {
+	if (UNEXPECTED(zend_observer_class_linked_observed)) {
+		_zend_observer_class_linked_notify(ce, name);
+	}
+}
+
 typedef void (*zend_observer_error_cb)(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 
 ZEND_API void zend_observer_error_register(zend_observer_error_cb callback);
-void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
+ZEND_API void _zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
+static inline void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message) {
+	if (UNEXPECTED(zend_observer_errors_observed)) {
+		_zend_observer_error_notify(type, error_filename, error_lineno, message);
+	}
+}
 
 typedef void (*zend_observer_fiber_init_handler)(zend_fiber_context *initializing);
 typedef void (*zend_observer_fiber_switch_handler)(zend_fiber_context *from, zend_fiber_context *to);

@@ -66,10 +66,25 @@ ZEND_API void *zend_llist_get_last_ex(zend_llist *l, zend_llist_position *pos);
 ZEND_API void *zend_llist_get_next_ex(zend_llist *l, zend_llist_position *pos);
 ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos);
 
-#define zend_llist_get_first(l) zend_llist_get_first_ex(l, NULL)
-#define zend_llist_get_last(l) zend_llist_get_last_ex(l, NULL)
-#define zend_llist_get_next(l) zend_llist_get_next_ex(l, NULL)
-#define zend_llist_get_prev(l) zend_llist_get_prev_ex(l, NULL)
+static zend_always_inline void *zend_llist_get_first(zend_llist *l)
+{
+	return zend_llist_get_first_ex(l, NULL);
+}
+
+static zend_always_inline void *zend_llist_get_last(zend_llist *l)
+{
+	return zend_llist_get_last_ex(l, NULL);
+}
+
+static zend_always_inline void *zend_llist_get_next(zend_llist *l)
+{
+	return zend_llist_get_next_ex(l, NULL);
+}
+
+static zend_always_inline void *zend_llist_get_prev(zend_llist *l)
+{
+	return zend_llist_get_prev_ex(l, NULL);
+}
 
 END_EXTERN_C()
 

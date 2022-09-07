@@ -46,7 +46,7 @@ static int epollfd = -1;
 
 #endif /* HAVE_EPOLL */
 
-struct fpm_event_module_s *fpm_event_epoll_module(void) /* {{{ */
+struct fpm_event_module_s *fpm_event_epoll_module(void)
 {
 #ifdef HAVE_EPOLL
 	return &epoll_module;
@@ -54,7 +54,6 @@ struct fpm_event_module_s *fpm_event_epoll_module(void) /* {{{ */
 	return NULL;
 #endif /* HAVE_EPOLL */
 }
-/* }}} */
 
 #ifdef HAVE_EPOLL
 
@@ -92,7 +91,7 @@ static int fpm_event_epoll_init(int max) /* {{{ */
 /*
  * Clean the module
  */
-static int fpm_event_epoll_clean() /* {{{ */
+static int fpm_event_epoll_clean(void)
 {
 	/* free epollfds */
 	if (epollfds) {
@@ -108,7 +107,6 @@ static int fpm_event_epoll_clean() /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout

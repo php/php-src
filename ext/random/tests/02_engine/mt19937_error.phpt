@@ -1,11 +1,13 @@
 --TEST--
-Random: Engine: Mt19937: error pattern
+Random: Engine: Mt19937: Invalid $mode parameter values must be rejected
 --FILE--
 <?php
 
+use Random\Engine\Mt19937;
+
 try {
-    new \Random\Engine\Mt19937(1234, 2);
-} catch (\ValueError $e) {
+    new Mt19937(1234, 2);
+} catch (ValueError $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 

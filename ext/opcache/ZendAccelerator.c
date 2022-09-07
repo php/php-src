@@ -1806,6 +1806,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OBSERVER;
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 		}
@@ -2190,12 +2191,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-#ifdef _M_X64
+#if ZEND_ENABLE_ZVAL_LONG64
 		InterlockedIncrement64(&ZCSG(hits));
+		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #else
 		InterlockedIncrement(&ZCSG(hits));
+		InterlockedIncrement(&persistent_script->dynamic_members.hits);
 #endif
-		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
 		/* see bug #15471 (old BTS) */
@@ -2838,18 +2840,23 @@ static inline int accel_find_sapi(void)
 static int zend_accel_init_shm(void)
 {
 	int i;
+	size_t accel_shared_globals_size;
 
 	zend_shared_alloc_lock();
 
 	if (ZCG(accel_directives).interned_strings_buffer) {
-		accel_shared_globals = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
+		accel_shared_globals_size = ZCG(accel_directives).interned_strings_buffer * 1024 * 1024;
 	} else {
 		/* Make sure there is always at least one interned string hash slot,
 		 * so the table can be queried unconditionally. */
-		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals) + sizeof(uint32_t));
+		accel_shared_globals_size = sizeof(zend_accel_shared_globals) + sizeof(uint32_t);
 	}
+
+	accel_shared_globals = zend_shared_alloc(accel_shared_globals_size);
 	if (!accel_shared_globals) {
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
+				"Insufficient shared memory for interned strings buffer! (tried to allocate %zu bytes)",
+				accel_shared_globals_size);
 		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
@@ -3931,12 +3938,7 @@ static void preload_link(void)
 
 				/* Inheritance successful, print out any warnings. */
 				zend_error_cb = orig_error_cb;
-				EG(record_errors) = false;
-				for (uint32_t i = 0; i < EG(num_errors); i++) {
-					zend_error_info *error = EG(errors)[i];
-					zend_error_zstr_at(
-						error->type, error->filename, error->lineno, error->message);
-				}
+				zend_emit_recorded_errors();
 			} zend_catch {
 				/* Clear variance obligations that were left behind on bailout. */
 				if (CG(delayed_variance_obligations)) {

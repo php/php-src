@@ -117,8 +117,6 @@ static zend_object *Transliterator_object_create( zend_class_entry *ce )
 	object_properties_init( &intern->zo, ce );
 	transliterator_object_init( intern );
 
-	intern->zo.handlers = &Transliterator_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -184,12 +182,10 @@ void transliterator_register_Transliterator_class( void )
 	/* Create and register 'Transliterator' class. */
 	Transliterator_ce_ptr = register_class_Transliterator();
 	Transliterator_ce_ptr->create_object = Transliterator_object_create;
+	Transliterator_ce_ptr->default_object_handlers = &Transliterator_handlers;
 	memcpy( &Transliterator_handlers, &std_object_handlers, sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
-
-	/* constants are declared in transliterator_register_constants, called from MINIT */
-
 }
 /* }}} */

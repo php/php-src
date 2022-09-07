@@ -79,7 +79,7 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	char buf[32];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "mysqlnd", "enabled");
+	php_info_print_table_row(2, "mysqlnd", "enabled");
 	php_info_print_table_row(2, "Version", mysqlnd_get_client_info());
 	php_info_print_table_row(2, "Compression",
 #ifdef MYSQLND_COMPRESSION_ENABLED

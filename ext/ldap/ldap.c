@@ -115,7 +115,6 @@ static zend_object *ldap_link_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &ldap_link_object_handlers;
 
 	return &intern->std;
 }
@@ -161,7 +160,6 @@ static zend_object *ldap_result_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &ldap_result_object_handlers;
 
 	return &intern->std;
 }
@@ -199,7 +197,6 @@ static zend_object *ldap_result_entry_create_object(zend_class_entry *class_type
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &ldap_result_entry_object_handlers;
 
 	return &intern->std;
 }
@@ -828,6 +825,7 @@ PHP_MINIT_FUNCTION(ldap)
 
 	ldap_link_ce = register_class_LDAP_Connection();
 	ldap_link_ce->create_object = ldap_link_create_object;
+	ldap_link_ce->default_object_handlers = &ldap_link_object_handlers;
 
 	memcpy(&ldap_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_link_object_handlers.offset = XtOffsetOf(ldap_linkdata, std);
@@ -838,6 +836,7 @@ PHP_MINIT_FUNCTION(ldap)
 
 	ldap_result_ce = register_class_LDAP_Result();
 	ldap_result_ce->create_object = ldap_result_create_object;
+	ldap_result_ce->default_object_handlers = &ldap_result_object_handlers;
 
 	memcpy(&ldap_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_object_handlers.offset = XtOffsetOf(ldap_resultdata, std);
@@ -848,6 +847,7 @@ PHP_MINIT_FUNCTION(ldap)
 
 	ldap_result_entry_ce = register_class_LDAP_ResultEntry();
 	ldap_result_entry_ce->create_object = ldap_result_entry_create_object;
+	ldap_result_entry_ce->default_object_handlers = &ldap_result_entry_object_handlers;
 
 	memcpy(&ldap_result_entry_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_entry_object_handlers.offset = XtOffsetOf(ldap_result_entry, std);

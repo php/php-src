@@ -1,57 +1,50 @@
 --TEST--
-Random: Randomizer: serialize
+Random: Randomizer: Serialization of the Randomizer must preserve the sequence
 --FILE--
 <?php
 
+use Random\Engine;
+use Random\Engine\Mt19937;
+use Random\Engine\PcgOneseq128XslRr64;
+use Random\Engine\Test\TestShaEngine;
+use Random\Engine\Xoshiro256StarStar;
+use Random\Randomizer;
+
+require __DIR__ . "/../engines.inc";
+
 $engines = [];
-$engines[] = new \Random\Engine\Mt19937(\random_int(\PHP_INT_MIN, \PHP_INT_MAX), MT_RAND_MT19937);
-$engines[] = new \Random\Engine\Mt19937(\random_int(\PHP_INT_MIN, \PHP_INT_MAX), MT_RAND_PHP);
-$engines[] = new \Random\Engine\PcgOneseq128XslRr64(\random_int(\PHP_INT_MIN, \PHP_INT_MAX));
-$engines[] = new \Random\Engine\Xoshiro256StarStar(\random_int(\PHP_INT_MIN, \PHP_INT_MAX));
-$engines[] = new \Random\Engine\Secure(); 
-$generate = \random_bytes(16);
-$engines[] = new class () implements Random\Engine {
-    public function generate(): string
-    {
-        global $generate;
-        return $generate;
-    }
-};
-class UserEngine implements Random\Engine
-{
-    public function generate(): string
-    {
-        global $generate;
-        return $generate;
-    }
-}
-$engines[] = new UserEngine();
+$engines[] = new Mt19937(1234, MT_RAND_MT19937);
+$engines[] = new Mt19937(1234, MT_RAND_PHP);
+$engines[] = new PcgOneseq128XslRr64(1234);
+$engines[] = new Xoshiro256StarStar(1234);
+$engines[] = new TestShaEngine("1234");
 
 foreach ($engines as $engine) {
-    $randomizer = new Random\Randomizer($engine);
-    $randomizer->getInt(\PHP_INT_MIN, \PHP_INT_MAX);
-    try {
-        $randomizer2 = unserialize(serialize($randomizer));
-    } catch (\Exception $e) {
-        echo $e->getMessage() . PHP_EOL;
-        continue;
+    echo $engine::class, PHP_EOL;
+
+    $randomizer = new Randomizer($engine);
+
+    for ($i = 0; $i < 10_000; $i++) {
+        $randomizer->getInt(0, $i);
     }
 
-    if ($randomizer->getInt(\PHP_INT_MIN, \PHP_INT_MAX) !== $randomizer2->getInt(\PHP_INT_MIN, \PHP_INT_MAX)) {
-        die($engine::class . ': failure.');
-    }
+    $randomizer2 = unserialize(serialize($randomizer));
 
-    echo $engine::class . ': success' . PHP_EOL;
+    for ($i = 0; $i < 10_000; $i++) {
+        if ($randomizer->getInt(0, $i) !== $randomizer2->getInt(0, $i)) {
+            $className = $engine::class;
+
+            die("failure: state differs at {$i}");
+        }
+    }
 }
 
 die('success');
 ?>
---EXPECTF--
-Random\Engine\Mt19937: success
-Random\Engine\Mt19937: success
-Random\Engine\PcgOneseq128XslRr64: success
-Random\Engine\Xoshiro256StarStar: success
-Serialization of 'Random\Engine\Secure' is not allowed
-Serialization of 'Random\Engine@anonymous' is not allowed
-UserEngine: success
+--EXPECT--
+Random\Engine\Mt19937
+Random\Engine\Mt19937
+Random\Engine\PcgOneseq128XslRr64
+Random\Engine\Xoshiro256StarStar
+Random\Engine\Test\TestShaEngine
 success

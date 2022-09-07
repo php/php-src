@@ -1037,6 +1037,10 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getDeclarationName(): string {
+        return implode('_', $this->name->parts);
+    }
+
+    public function getFunctionName(): string {
         return $this->name->getLast();
     }
 
@@ -1380,39 +1384,42 @@ class FuncInfo {
             }
         } else if ($this->name instanceof FunctionName) {
             $namespace = $this->name->getNamespace();
-            $declarationName = $this->name->getDeclarationName();
+            $functionName = $this->name->getFunctionName();
+            $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
 
-            if ($this->alias && $this->isDeprecated) {
+            if ($namespace) {
+                // Namespaced functions are always declared as aliases to avoid name conflicts when two functions with
+                // the same name exist in separate namespaces
+                $macro = $this->isDeprecated ? 'ZEND_NS_DEP_FALIAS' : 'ZEND_NS_FALIAS';
+
+                // Render A\B as "A\\B" in C strings for namespaces
                 return sprintf(
-                    "\tZEND_DEP_FALIAS(%s, %s, %s)\n",
-                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    "\t%s(\"%s\", %s, %s, %s)\n",
+                    $macro, addslashes($namespace), $this->name->getFunctionName(), $declarationName, $this->getArgInfoName()
                 );
             }
 
             if ($this->alias) {
+                $macro = $this->isDeprecated ? 'ZEND_DEP_FALIAS' : 'ZEND_FALIAS';
+
                 return sprintf(
-                    "\tZEND_FALIAS(%s, %s, %s)\n",
-                    $declarationName, $this->alias->getNonNamespacedName(), $this->getArgInfoName()
+                    "\t%s(%s, %s, %s)\n",
+                    $macro, $functionName, $declarationName, $this->getArgInfoName()
                 );
             }
 
-            if ($this->isDeprecated) {
-                return sprintf(
-                    "\tZEND_DEP_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
+            switch (true) {
+                case $this->isDeprecated:
+                    $macro = 'ZEND_DEP_FE';
+                    break;
+                case $this->supportsCompileTimeEval:
+                    $macro = 'ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE';
+                    break;
+                default:
+                    $macro = 'ZEND_FE';
             }
 
-            if ($namespace) {
-                // Render A\B as "A\\B" in C strings for namespaces
-                return sprintf(
-                    "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    addslashes($namespace), $declarationName, $this->getArgInfoName());
-            } else {
-                if ($this->supportsCompileTimeEval) {
-                    return sprintf(
-                        "\tZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
-                }
-                return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
-            }
+            return sprintf("\t%s(%s, %s)\n", $macro, $functionName, $this->getArgInfoName());
         } else {
             throw new Error("Cannot happen");
         }
@@ -2013,7 +2020,7 @@ class ConstInfo extends VariableLike
         $constValue = $value->value;
         $cConstValue = $value->getCConstValue($allConstInfos);
 
-        $flags = "CONST_CS | CONST_PERSISTENT";
+        $flags = "CONST_PERSISTENT";
         if ($this->isDeprecated) {
             $flags .= " | CONST_DEPRECATED";
         }
@@ -2446,6 +2453,8 @@ class ClassInfo {
     public $cond;
     /** @var int|null */
     public $phpVersionIdMinimumCompatibility;
+    /** @var bool */
+    public $isUndocumentable;
 
     /**
      * @param AttributeInfo[] $attributes
@@ -2473,7 +2482,8 @@ class ClassInfo {
         array $funcInfos,
         array $enumCaseInfos,
         ?string $cond,
-        ?int $minimumPhpVersionIdCompatibility
+        ?int $minimumPhpVersionIdCompatibility,
+        bool $isUndocumentable
     ) {
         $this->name = $name;
         $this->flags = $flags;
@@ -2492,6 +2502,7 @@ class ClassInfo {
         $this->enumCaseInfos = $enumCaseInfos;
         $this->cond = $cond;
         $this->phpVersionIdMinimumCompatibility = $minimumPhpVersionIdCompatibility;
+        $this->isUndocumentable = $isUndocumentable;
     }
 
     /**
@@ -3081,6 +3092,8 @@ class FileInfo {
     public $generateLegacyArginfoForPhpVersionId;
     /** @var bool */
     public $generateClassEntries = false;
+    /** @var bool */
+    public $isUndocumentable = false;
 
     /**
      * @return iterable<FuncInfo>
@@ -3492,7 +3505,8 @@ function parseClass(
     array $methods,
     array $enumCases,
     ?string $cond,
-    ?int $minimumPhpVersionIdCompatibility
+    ?int $minimumPhpVersionIdCompatibility,
+    bool $isUndocumentable
 ): ClassInfo {
     $flags = $class instanceof Class_ ? $class->flags : 0;
     $comment = $class->getDocComment();
@@ -3514,6 +3528,8 @@ function parseClass(
                 $isStrictProperties = true;
             } else if ($tag->name === 'not-serializable') {
                 $isNotSerializable = true;
+            } else if ($tag->name === 'undocumentable') {
+                $isUndocumentable = true;
             }
         }
     }
@@ -3572,7 +3588,8 @@ function parseClass(
         $methods,
         $enumCases,
         $cond,
-        $minimumPhpVersionIdCompatibility
+        $minimumPhpVersionIdCompatibility,
+        $isUndocumentable
     );
 }
 
@@ -3725,7 +3742,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             }
 
             $fileInfo->classInfos[] = parseClass(
-                $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond, $fileInfo->generateLegacyArginfoForPhpVersionId
+                $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond, $fileInfo->generateLegacyArginfoForPhpVersionId, $fileInfo->isUndocumentable
             );
             continue;
         }
@@ -3776,6 +3793,8 @@ function parseStubFile(string $code): FileInfo {
             } else if ($tag->name === 'generate-class-entries') {
                 $fileInfo->generateClassEntries = true;
                 $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
+            } else if ($tag->name === 'undocumentable') {
+                $fileInfo->isUndocumentable = true;
             }
         }
     }
@@ -3997,8 +4016,14 @@ function generateArgInfoCode(
         }
     }
 
+    $php82MinimumCompatibility = $fileInfo->generateLegacyArginfoForPhpVersionId === null || $fileInfo->generateLegacyArginfoForPhpVersionId >= PHP_82_VERSION_ID;
+
     if ($fileInfo->generateClassEntries) {
-        $attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, $allConstInfos, null);
+        if ($attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, $allConstInfos, null)) {
+            if (!$php82MinimumCompatibility) {
+                $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_82_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
+            }
+        }
 
         if ($attributeInitializationCode !== "" || !empty($fileInfo->constInfos)) {
             $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
@@ -4206,12 +4231,14 @@ function generateClassSynopses(array $classMap, iterable $allConstInfos): array 
 }
 
 /**
- * @param ClassInfo[] $classMap
+ * @param array<string, ClassInfo> $classMap
  * $param iterable<ConstInfo> $allConstInfos
  * @return array<string, string>
  */
-function replaceClassSynopses(string $targetDirectory, array $classMap, iterable $allConstInfos): array
+function replaceClassSynopses(string $targetDirectory, array $classMap, iterable $allConstInfos, bool $isVerify): array
 {
+    $existingClassSynopses = [];
+
     $classSynopses = [];
 
     $it = new RecursiveIteratorIterator(
@@ -4268,6 +4295,9 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
             if (!isset($classMap[$className])) {
                 continue;
             }
+
+            $existingClassSynopses[$className] = $className;
+
             $classInfo = $classMap[$className];
 
             $newClassSynopsis = $classInfo->getClassSynopsisElement($doc, $classMap, $allConstInfos);
@@ -4304,6 +4334,16 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
             );
 
             $classSynopses[$pathName] = $replacedXml;
+        }
+    }
+
+    if ($isVerify) {
+        $missingClassSynopses = array_diff_key($classMap, $existingClassSynopses);
+        foreach ($missingClassSynopses as $className => $info) {
+            /** @var ClassInfo $info */
+            if (!$info->isUndocumentable) {
+                echo "Warning: Missing class synopsis page for $className\n";
+            }
         }
     }
 
@@ -4569,7 +4609,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.14.0";
+    $version = "4.15.1";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
@@ -4778,7 +4818,7 @@ if ($generateClassSynopses) {
 }
 
 if ($replaceClassSynopses) {
-    $classSynopses = replaceClassSynopses($targetSynopses, $classMap, $context->allConstInfos);
+    $classSynopses = replaceClassSynopses($targetSynopses, $classMap, $context->allConstInfos, $verify);
 
     foreach ($classSynopses as $filename => $content) {
         if (file_put_contents($filename, $content)) {

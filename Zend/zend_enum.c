@@ -23,11 +23,12 @@
 #include "zend_interfaces.h"
 #include "zend_enum.h"
 #include "zend_extensions.h"
+#include "zend_observer.h"
 
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum may not include %s", methodName); \
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), methodName); \
 		} \
 	} while (0);
 
@@ -45,8 +46,6 @@ zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case
 	if (backing_value_zv != NULL) {
 		ZVAL_COPY(OBJ_PROP_NUM(zobj, 1), backing_value_zv);
 	}
-
-	zobj->handlers = &enum_handlers;
 
 	return zobj;
 }
@@ -66,7 +65,7 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 			continue;
 		}
 		// FIXME: File/line number for traits?
-		zend_error_noreturn(E_COMPILE_ERROR, "Enum \"%s\" may not include properties",
+		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include properties",
 			ZSTR_VAL(ce->name));
 	} ZEND_HASH_FOREACH_END();
 }
@@ -98,7 +97,7 @@ static void zend_verify_enum_magic_methods(zend_class_entry *ce)
 		const char *forbidden_method = forbidden_methods[i];
 
 		if (zend_hash_str_exists(&ce->function_table, forbidden_method, strlen(forbidden_method))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum may not include magic method %s", forbidden_method);
+			zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include magic method %s", ZSTR_VAL(ce->name), forbidden_method);
 		}
 	}
 }
@@ -107,7 +106,7 @@ static void zend_verify_enum_interfaces(zend_class_entry *ce)
 {
 	if (zend_class_implements_interface(ce, zend_ce_serializable)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Enums may not implement the Serializable interface");
+			"Enum %s cannot implement the Serializable interface", ZSTR_VAL(ce->name));
 	}
 }
 
@@ -183,6 +182,8 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
 		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);	
 	}
+
+	ce->default_object_handlers = &enum_handlers;
 }
 
 zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
@@ -306,10 +307,10 @@ not_found:
 		}
 
 		if (ce->enum_backing_type == IS_LONG) {
-			zend_value_error(ZEND_LONG_FMT " is not a valid backing value for enum \"%s\"", long_key, ZSTR_VAL(ce->name));
+			zend_value_error(ZEND_LONG_FMT " is not a valid backing value for enum %s", long_key, ZSTR_VAL(ce->name));
 		} else {
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
-			zend_value_error("\"%s\" is not a valid backing value for enum \"%s\"", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
+			zend_value_error("\"%s\" is not a valid backing value for enum %s", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
 		}
 		return FAILURE;
 	}
@@ -407,6 +408,7 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
 	zif->type = ZEND_INTERNAL_FUNCTION;
 	zif->module = EG(current_module);
 	zif->scope = ce;
+	zif->T = ZEND_OBSERVER_ENABLED;
 	ZEND_MAP_PTR_NEW(zif->run_time_cache);
 	ZEND_MAP_PTR_SET(zif->run_time_cache, zend_arena_alloc(&CG(arena), zend_internal_run_time_cache_reserved_size()));
 

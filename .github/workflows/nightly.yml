@@ -3,6 +3,8 @@ on:
   schedule:
    - cron: "0 1 * * *"
   workflow_dispatch: ~
+permissions:
+  contents: read
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
@@ -47,8 +49,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ matrix.branch.ref }}
-      - name: Create mssql container
-        uses: ./.github/actions/mssql
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: Create Oracle container
+        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -109,7 +113,7 @@ jobs:
         debug: [true, false]
         zts: [true, false]
     name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - name: git checkout
         uses: actions/checkout@v2
@@ -167,8 +171,10 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v2
-      - name: Create mssql container
-        uses: ./.github/actions/mssql
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: Create Oracle container
+        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: Install gcovr

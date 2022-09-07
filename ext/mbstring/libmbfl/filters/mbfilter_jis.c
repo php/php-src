@@ -271,6 +271,7 @@ static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
 		 * or else escape sequence was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);
@@ -451,7 +452,7 @@ mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(0x28, filter->data));		/* '(' */
 		CK((*filter->output_function)(0x42, filter->data));		/* 'B' */
 	}
-	filter->status &= 0xff;
+	filter->status = 0;
 
 	if (filter->flush_function != NULL) {
 		return (*filter->flush_function)(filter->data);
@@ -480,6 +481,8 @@ static size_t mb_iso2022jp_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 			/* ESC seen; this is an escape sequence */
 			if ((e - p) < 2) {
 				*out++ = MBFL_BAD_INPUT;
+				if (p != e && (*p == '$' || *p == '('))
+					p++;
 				continue;
 			}
 

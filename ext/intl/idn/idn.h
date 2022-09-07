@@ -19,6 +19,8 @@
 
 #include <php.h>
 
-void idn_register_constants(INIT_FUNC_ARGS);
+enum {
+	INTL_IDN_VARIANT_UTS46 = 1
+};
 
 #endif /* IDN_IDN_H */

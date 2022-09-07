@@ -3,9 +3,9 @@
 /**
  * @generate-class-entries static
  * @generate-legacy-arginfo 80000
+ * @undocumentable
  */
 namespace {
-
     /**
      * @var int
      * @deprecated
@@ -109,6 +109,15 @@ namespace {
     /** @deprecated */
     function zend_test_deprecated(mixed $arg = null): void {}
 
+    /** @alias zend_test_void_return */
+    function zend_test_aliased(): void {}
+
+    /**
+      * @deprecated
+      * @alias zend_test_void_return
+      */
+    function zend_test_deprecated_aliased(): void {}
+
     function zend_create_unterminated_string(string $str): string {}
 
     function zend_terminate_string(string &$str): void {}
@@ -143,6 +152,8 @@ namespace {
 
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
+
+    function zend_test_zend_ini_str(): string {}
 }
 
 namespace ZendTestNS {
@@ -168,6 +179,19 @@ namespace ZendTestNS2 {
         public function method(): void {}
     }
 
+    function namespaced_func(): bool {}
+
+    /** @deprecated */
+    function namespaced_deprecated_func(): void {}
+
+    /** @alias zend_test_void_return */
+    function namespaced_aliased_func(): void {}
+
+    /**
+     * @deprecated
+     * @alias zend_test_void_return
+     */
+    function namespaced_deprecated_aliased_func(): void {}
 }
 
 namespace ZendTestNS2\ZendSubNS {
@@ -178,4 +202,15 @@ namespace ZendTestNS2\ZendSubNS {
 
     function namespaced_func(): bool {}
 
+    /** @deprecated */
+    function namespaced_deprecated_func(): void {}
+
+    /** @alias zend_test_void_return */
+    function namespaced_aliased_func(): void {}
+
+    /**
+     * @deprecated
+     * @alias zend_test_void_return
+     */
+    function namespaced_deprecated_aliased_func(): void {}
 }

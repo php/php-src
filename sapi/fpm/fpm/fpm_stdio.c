@@ -20,10 +20,11 @@
 #include "fpm_stdio.h"
 #include "zlog.h"
 
+static int fd_stderr_original = -1;
 static int fd_stdout[2];
 static int fd_stderr[2];
 
-int fpm_stdio_init_main() /* {{{ */
+int fpm_stdio_init_main(void)
 {
 	int fd = open("/dev/null", O_RDWR);
 
@@ -40,9 +41,8 @@ int fpm_stdio_init_main() /* {{{ */
 	close(fd);
 	return 0;
 }
-/* }}} */
 
-static inline int fpm_use_error_log(void) {  /* {{{ */
+static inline int fpm_use_error_log(void) {
 	/*
 	 * the error_log is NOT used when running in foreground
 	 * and from a tty (user looking at output).
@@ -60,8 +60,54 @@ static inline int fpm_use_error_log(void) {  /* {{{ */
 	return 0;
 }
 
+int fpm_stdio_init_final(void)
+{
+	if (0 > fpm_stdio_redirect_stderr_to_error_log() ||
+	    0 > fpm_stdio_redirect_stderr_to_dev_null_for_syslog()) {
+
+		return -1;
+	}
+
+	zlog_set_launched();
+	return 0;
+}
 /* }}} */
-int fpm_stdio_init_final() /* {{{ */
+
+int fpm_stdio_save_original_stderr(void)
+{
+	/* php-fpm loses STDERR fd after call of the fpm_stdio_init_final(). Check #8555. */
+	zlog(ZLOG_DEBUG, "saving original STDERR fd: dup()");
+	fd_stderr_original = dup(STDERR_FILENO);
+	if (0 > fd_stderr_original) {
+		zlog(ZLOG_SYSERROR, "failed to save original STDERR fd, access.log records may appear in error_log: dup()");
+		return -1;
+	}
+
+	return 0;
+}
+
+int fpm_stdio_restore_original_stderr(int close_after_restore)
+{
+	/* php-fpm loses STDERR fd after call of the fpm_stdio_init_final(). Check #8555. */
+	if (-1 != fd_stderr_original) {
+		zlog(ZLOG_DEBUG, "restoring original STDERR fd: dup2()");
+		if (0 > dup2(fd_stderr_original, STDERR_FILENO)) {
+			zlog(ZLOG_SYSERROR, "failed to restore original STDERR fd, access.log records may appear in error_log: dup2()");
+			return -1;
+		} else {
+			if (close_after_restore) {
+				close(fd_stderr_original);
+			}
+		}
+	} else {
+		zlog(ZLOG_DEBUG, "original STDERR fd is not restored, maybe function is called from a child: dup2()");
+		return -1;
+	}
+
+	return 0;
+}
+
+int fpm_stdio_redirect_stderr_to_error_log(void)
 {
 	if (fpm_use_error_log()) {
 		/* prevent duping if logging to syslog */
@@ -69,21 +115,28 @@ int fpm_stdio_init_final() /* {{{ */
 
 			/* there might be messages to stderr from other parts of the code, we need to log them all */
 			if (0 > dup2(fpm_globals.error_log_fd, STDERR_FILENO)) {
-				zlog(ZLOG_SYSERROR, "failed to init stdio: dup2()");
+				zlog(ZLOG_SYSERROR, "failed to tie stderr fd with error_log fd: dup2()");
 				return -1;
 			}
 		}
+	}
+
+	return 0;
+}
+
+int fpm_stdio_redirect_stderr_to_dev_null_for_syslog(void)
+{
+	if (fpm_use_error_log()) {
 #ifdef HAVE_SYSLOG_H
-		else if (fpm_globals.error_log_fd == ZLOG_SYSLOG) {
+		if (fpm_globals.error_log_fd == ZLOG_SYSLOG) {
 			/* dup to /dev/null when using syslog */
 			dup2(STDOUT_FILENO, STDERR_FILENO);
 		}
 #endif
 	}
-	zlog_set_launched();
+
 	return 0;
 }
-/* }}} */
 
 int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
@@ -109,11 +162,10 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 #define FPM_STDIO_CMD_FLUSH "\0fscf"
 
-int fpm_stdio_flush_child() /* {{{ */
+int fpm_stdio_flush_child(void)
 {
 	return write(STDERR_FILENO, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH));
 }
-/* }}} */
 
 static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
@@ -218,7 +270,7 @@ stdio_read:
 			zlog_stream_finish(log_stream);
 		}
 		if (read_fail < 0) {
-			zlog(ZLOG_SYSERROR, "unable to read what child say");
+			zlog(ZLOG_SYSERROR, "unable to read what child %d said into %s", (int) child->pid, is_stdout ? "stdout" : "stderr");
 		}
 
 		fpm_event_del(event);
@@ -336,10 +388,6 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	}
 
 	if (reopen) {
-		if (fpm_use_error_log()) {
-			dup2(fd, STDERR_FILENO);
-		}
-
 		dup2(fd, fpm_globals.error_log_fd);
 		close(fd);
 		fd = fpm_globals.error_log_fd; /* for FD_CLOSEXEC to work */

@@ -168,11 +168,17 @@ static zend_long range(php_random_status *status, zend_long min, zend_long max)
 		return php_random_range(&php_random_algo_mt19937, status, min, max);
 	}
 
-	uint64_t r = php_random_algo_mt19937.generate(status) >> 1;
 	/* Legacy mode deliberately not inside php_mt_rand_range()
 	 * to prevent other functions being affected */
-	RAND_RANGE_BADSCALING(r, min, max, PHP_MT_RAND_MAX);
-	return (zend_long) r;
+
+	uint64_t r = php_random_algo_mt19937.generate(status) >> 1;
+
+	/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
+	 * (max - min) > ZEND_LONG_MAX.
+	 */
+	zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
+
+	return (zend_long) (offset + min);
 }
 
 static bool serialize(php_random_status *status, HashTable *data)
@@ -196,6 +202,11 @@ static bool unserialize(php_random_status *status, HashTable *data)
 {
 	php_random_status_state_mt19937 *s = status->state;
 	zval *t;
+
+	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
+	if (zend_hash_num_elements(data) != (MT_N + 2)) {
+		return false;
+	}
 
 	for (uint32_t i = 0; i < MT_N; i++) {
 		t = zend_hash_index_find(data, i);
@@ -352,6 +363,12 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 		Z_PARAM_ARRAY_HT(d);
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
+	if (zend_hash_num_elements(d) != 2) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
+		RETURN_THROWS();
+	}
+
 	/* members */
 	t = zend_hash_index_find(d, 0);
 	if (!t || Z_TYPE_P(t) != IS_ARRAY) {
@@ -359,6 +376,10 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 		RETURN_THROWS();
 	}
 	object_properties_load(&engine->std, Z_ARRVAL_P(t));
+	if (EG(exception)) {
+		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
+		RETURN_THROWS();
+	}
 
 	/* state */
 	t = zend_hash_index_find(d, 1);

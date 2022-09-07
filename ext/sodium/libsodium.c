@@ -184,7 +184,7 @@ PHP_MSHUTDOWN_FUNCTION(sodium)
 PHP_MINFO_FUNCTION(sodium)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "sodium support", "enabled");
+	php_info_print_table_row(2, "sodium support", "enabled");
 	php_info_print_table_row(2, "libsodium headers version", SODIUM_VERSION_STRING);
 	php_info_print_table_row(2, "libsodium library version", sodium_version_string());
 	php_info_print_table_end();

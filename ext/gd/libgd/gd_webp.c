@@ -113,7 +113,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	}
 
 	if (!gdImageTrueColor(im)) {
-		zend_error(E_ERROR, "Paletter image not supported by webp");
+		zend_error(E_ERROR, "Palette image not supported by webp");
 		return;
 	}
 

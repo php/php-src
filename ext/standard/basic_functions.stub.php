@@ -2,12 +2,746 @@
 
 /** @generate-class-entries */
 
+/* array.c */
+
+/**
+ * @var int
+ * @cvalue PHP_EXTR_OVERWRITE
+ */
+const EXTR_OVERWRITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_SKIP
+ */
+const EXTR_SKIP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_SAME
+ */
+const EXTR_PREFIX_SAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_ALL
+ */
+const EXTR_PREFIX_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_INVALID
+ */
+const EXTR_PREFIX_INVALID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_IF_EXISTS
+ */
+const EXTR_PREFIX_IF_EXISTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_IF_EXISTS
+ */
+const EXTR_IF_EXISTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_REFS
+ */
+const EXTR_REFS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_SORT_ASC
+ */
+const SORT_ASC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_DESC
+ */
+const SORT_DESC = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_SORT_REGULAR
+ */
+const SORT_REGULAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_NUMERIC
+ */
+const SORT_NUMERIC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_STRING
+ */
+const SORT_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_LOCALE_STRING
+ */
+const SORT_LOCALE_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_NATURAL
+ */
+const SORT_NATURAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_FLAG_CASE
+ */
+const SORT_FLAG_CASE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_CASE_LOWER
+ */
+const CASE_LOWER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CASE_UPPER
+ */
+const CASE_UPPER = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_COUNT_NORMAL
+ */
+const COUNT_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_COUNT_RECURSIVE
+ */
+const COUNT_RECURSIVE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_BOTH
+ */
+const ARRAY_FILTER_USE_BOTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_KEY
+ */
+const ARRAY_FILTER_USE_KEY = UNKNOWN;
+
+/* basic_functions.h */
+
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_ABORTED
+ */
+const CONNECTION_ABORTED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_NORMAL
+ */
+const CONNECTION_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_TIMEOUT
+ */
+const CONNECTION_TIMEOUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_INI_USER
+ */
+const INI_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_PERDIR
+ */
+const INI_PERDIR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SYSTEM
+ */
+const INI_SYSTEM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_ALL
+ */
+const INI_ALL = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_NORMAL
+ */
+const INI_SCANNER_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_RAW
+ */
+const INI_SCANNER_RAW = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_TYPED
+ */
+const INI_SCANNER_TYPED = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_URL_SCHEME
+ */
+const PHP_URL_SCHEME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_HOST
+ */
+const PHP_URL_HOST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PORT
+ */
+const PHP_URL_PORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_USER
+ */
+const PHP_URL_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PASS
+ */
+const PHP_URL_PASS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PATH
+ */
+const PHP_URL_PATH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_QUERY
+ */
+const PHP_URL_QUERY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_FRAGMENT
+ */
+const PHP_URL_FRAGMENT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_QUERY_RFC1738
+ */
+const PHP_QUERY_RFC1738 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_QUERY_RFC3986
+ */
+const PHP_QUERY_RFC3986 = UNKNOWN;
+
 /**
  * @var float
  * @cvalue M_E
  */
 const M_E = 2.718281828459045;
+/**
+ * @var float
+ * @cvalue M_LOG2E
+ */
+const M_LOG2E = 1.4426950408889634074;
+/**
+ * @var float
+ * @cvalue M_LOG10E
+ */
+const M_LOG10E = 0.43429448190325182765;
+/**
+ * @var float
+ * @cvalue M_LN2
+ */
+const M_LN2 = 0.69314718055994530942;
+/**
+ * @var float
+ * @cvalue M_LN10
+ */
+const M_LN10 = 2.30258509299404568402;
+/**
+ * @var float
+ * @cvalue M_PI
+ */
+const M_PI = 3.14159265358979323846;
+/**
+ * @var float
+ * @cvalue M_PI_2
+ */
+const M_PI_2 = 1.57079632679489661923;
+/**
+ * @var float
+ * @cvalue M_PI_4
+ */
+const M_PI_4 = 0.78539816339744830962;
+/**
+ * @var float
+ * @cvalue M_1_PI
+ */
+const M_1_PI = 0.31830988618379067154;
+/**
+ * @var float
+ * @cvalue M_2_PI
+ */
+const M_2_PI = 0.63661977236758134308;
+/**
+ * @var float
+ * @cvalue M_SQRTPI
+ */
+const M_SQRTPI = 1.77245385090551602729;
+/**
+ * @var float
+ * @cvalue M_2_SQRTPI
+ */
+const M_2_SQRTPI = 1.12837916709551257390;
+/**
+ * @var float
+ * @cvalue M_LNPI
+ */
+const M_LNPI = 1.14472988584940017414;
+/**
+ * @var float
+ * @cvalue M_EULER
+ */
+const M_EULER = 0.57721566490153286061;
+/**
+ * @var float
+ * @cvalue M_SQRT2
+ */
+const M_SQRT2 = 1.41421356237309504880;
+/**
+ * @var float
+ * @cvalue M_SQRT1_2
+ */
+const M_SQRT1_2 = 0.70710678118654752440;
+/**
+ * @var float
+ * @cvalue M_SQRT3
+ */
+const M_SQRT3 = 1.73205080756887729352;
+/**
+ * @var float
+ * @cvalue ZEND_INFINITY
+ */
+const INF = UNKNOWN;
+/**
+ * @var float
+ * @cvalue ZEND_NAN
+ */
+const NAN = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_UP
+ */
+const PHP_ROUND_HALF_UP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_DOWN
+ */
+const PHP_ROUND_HALF_DOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_EVEN
+ */
+const PHP_ROUND_HALF_EVEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_ODD
+ */
+const PHP_ROUND_HALF_ODD = UNKNOWN;
+
+/* dns.c */
+
+#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
+/**
+ * @var int
+ * @cvalue PHP_DNS_A
+ */
+const DNS_A = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_NS
+ */
+const DNS_NS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_CNAME
+ */
+const DNS_CNAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_SOA
+ */
+const DNS_SOA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_PTR
+ */
+const DNS_PTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_HINFO
+ */
+const DNS_HINFO = UNKNOWN;
+#if (!defined(PHP_WIN32))
+/**
+ * @var int
+ * @cvalue PHP_DNS_CAA
+ */
+const DNS_CAA = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue PHP_DNS_MX
+ */
+const DNS_MX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_TXT
+ */
+const DNS_TXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_SRV
+ */
+const DNS_SRV = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_NAPTR
+ */
+const DNS_NAPTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_AAAA
+ */
+const DNS_AAAA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_A6
+ */
+const DNS_A6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_ANY
+ */
+const DNS_ANY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_ALL
+ */
+const DNS_ALL = UNKNOWN;
+#endif
+
+/* image.c */
+
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_GIF
+ */
+const IMAGETYPE_GIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPEG
+ */
+const IMAGETYPE_JPEG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PNG
+ */
+const IMAGETYPE_PNG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWF
+ */
+const IMAGETYPE_SWF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PSD
+ */
+const IMAGETYPE_PSD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_BMP
+ */
+const IMAGETYPE_BMP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_II
+ */
+const IMAGETYPE_TIFF_II = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_MM
+ */
+const IMAGETYPE_TIFF_MM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JP2
+ */
+const IMAGETYPE_JP2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPX
+ */
+const IMAGETYPE_JPX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JB2
+ */
+const IMAGETYPE_JB2 = UNKNOWN;
+#if (defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB))
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWC
+ */
+const IMAGETYPE_SWC = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_IFF
+ */
+const IMAGETYPE_IFF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WBMP
+ */
+const IMAGETYPE_WBMP = UNKNOWN;
+/* keep alias */
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPEG2000 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_XBM
+ */
+const IMAGETYPE_XBM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_ICO
+ */
+const IMAGETYPE_ICO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WEBP
+ */
+const IMAGETYPE_WEBP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_AVIF
+ */
+const IMAGETYPE_AVIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_UNKNOWN
+ */
+const IMAGETYPE_UNKNOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_COUNT
+ */
+const IMAGETYPE_COUNT = UNKNOWN;
+
+/* syslog.c */
+
+/* error levels */
+
+/**
+ * system unusable
+ * @var int
+ * @cvalue LOG_EMERG
+ */
+const LOG_EMERG = UNKNOWN;
+/**
+ * immediate action required
+ * @var int
+ * @cvalue LOG_ALERT
+ */
+const LOG_ALERT = UNKNOWN;
+/**
+ * critical conditions
+ * @var int
+ * @cvalue LOG_CRIT
+ */
+const LOG_CRIT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_ERR
+ */
+const LOG_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_WARNING
+ */
+const LOG_WARNING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_NOTICE
+ */
+const LOG_NOTICE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_INFO
+ */
+const LOG_INFO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_DEBUG
+ */
+const LOG_DEBUG = UNKNOWN;
+/* facility: type of program logging the message */
+/**
+ * @var int
+ * @cvalue LOG_KERN
+ */
+const LOG_KERN = UNKNOWN;
+/**
+ * generic user level
+ * @var int
+ * @cvalue LOG_USER
+ */
+const LOG_USER = UNKNOWN;
+/**
+ * log to email
+ * @var int
+ * @cvalue LOG_MAIL
+ */
+const LOG_MAIL = UNKNOWN;
+/**
+ * other system daemons
+ * @var int
+ * @cvalue LOG_DAEMON
+ */
+const LOG_DAEMON = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_AUTH
+ */
+const LOG_AUTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_SYSLOG
+ */
+const LOG_SYSLOG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LPR
+ */
+const LOG_LPR = UNKNOWN;
+#ifdef LOG_NEWS
+/* No LOG_NEWS on HP-UX */
+/**
+ * usenet new
+ * @var int
+ * @cvalue LOG_NEWS
+ */
+const LOG_NEWS = UNKNOWN;
+#endif
+#ifdef LOG_UUCP
+/* No LOG_UUCP on HP-UX */
+/**
+ * @var int
+ * @cvalue LOG_UUCP
+ */
+const LOG_UUCP = UNKNOWN;
+#endif
+#ifdef LOG_CRON
+/* apparently some systems don't have this one */
+/**
+ * @var int
+ * @cvalue LOG_CRON
+ */
+const LOG_CRON = UNKNOWN;
+#endif
+#ifdef LOG_AUTHPRIV
+/* AIX doesn't have LOG_AUTHPRIV */
+/**
+ * @var int
+ * @cvalue LOG_AUTHPRIV
+ */
+const LOG_AUTHPRIV = UNKNOWN;
+#endif
+#ifndef PHP_WIN32
+/**
+ * @var int
+ * @cvalue LOG_LOCAL0
+ */
+const LOG_LOCAL0 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL1
+ */
+const LOG_LOCAL1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL2
+ */
+const LOG_LOCAL2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL3
+ */
+const LOG_LOCAL3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL4
+ */
+const LOG_LOCAL4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL5
+ */
+const LOG_LOCAL5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL6
+ */
+const LOG_LOCAL6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL7
+ */
+const LOG_LOCAL7 = UNKNOWN;
+#endif
+/* options */
+/**
+ * @var int
+ * @cvalue LOG_PID
+ */
+const LOG_PID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_CONS
+ */
+const LOG_CONS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_ODELAY
+ */
+const LOG_ODELAY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_NDELAY
+ */
+const LOG_NDELAY = UNKNOWN;
+#ifdef LOG_NOWAIT
+/**
+ * @var int
+ * @cvalue LOG_NOWAIT
+ */
+const LOG_NOWAIT = UNKNOWN;
+#endif
+#ifdef LOG_PERROR
+/* AIX doesn't have LOG_PERROR */
+/**
+ * log to stderr
+ * @var int
+ * @cvalue LOG_PERROR
+ */
+const LOG_PERROR = UNKNOWN;
+#endif
+
+/** @undocumentable */
+#[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
 {
 }
@@ -575,7 +1309,7 @@ function crc32(string $string): int {}
 /* crypt.c */
 
 /** @refcount 1 */
-function crypt(string $string, string $salt): string {}
+function crypt(#[\SensitiveParameter] string $string, string $salt): string {}
 
 /* datetime.c */
 
@@ -607,7 +1341,7 @@ function gethostbyname(string $hostname): string {}
  */
 function gethostbynamel(string $hostname): array|false {}
 
-#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 function dns_check_record(string $hostname, string $type = "MX"): bool {}
 
 /** @alias dns_check_record */
@@ -637,7 +1371,7 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
-#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
+#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
 function net_get_interfaces(): array|false {}
 #endif
 
@@ -682,7 +1416,7 @@ function sha1_file(string $filename, bool $binary = false): string|false {}
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
-function openlog(string $prefix, int $flags, int $facility): bool {}
+function openlog(string $prefix, int $flags, int $facility): true {}
 
 function closelog(): true {}
 
@@ -1036,7 +1770,7 @@ function closedir($dir_handle = null): void {}
 
 function chdir(string $directory): bool {}
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
+#if (defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC))
 function chroot(string $directory): bool {}
 #endif
 
@@ -1453,7 +2187,7 @@ function levenshtein(string $string1, string $string2, int $insertion_cost = 1, 
 
 /* link.c */
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if (defined(HAVE_SYMLINK) || defined(PHP_WIN32))
 /** @refcount 1 */
 function readlink(string $path): string|false {}
 
@@ -1857,7 +2591,7 @@ function sapi_windows_vt100_support($stream, ?bool $enable = null): bool {}
 /** @param resource $stream */
 function stream_set_chunk_size($stream, int $size): int {}
 
-#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
+#if (defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32))
 /** @param resource $stream */
 function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
 

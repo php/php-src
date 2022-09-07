@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries static */
+/**
+ * @generate-class-entries static
+ * @undocumentable
+ */
 
 final class _ZendTestFiber
 {

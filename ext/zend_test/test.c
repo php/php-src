@@ -415,10 +415,33 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
 	}
 }
 
-static ZEND_FUNCTION(namespaced_func)
+static ZEND_FUNCTION(zend_test_zend_ini_str)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_STR(ZT_G(str_test));
+}
+
+static ZEND_FUNCTION(ZendTestNS2_namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
+}
+
+static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_TRUE;
+}
+
+static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 static ZEND_FUNCTION(zend_test_parameter_with_attribute)
@@ -616,6 +639,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.quantity_value", "0", PHP_INI_ALL, OnUpdateLong, quantity_value, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.str_test", "", PHP_INI_ALL, OnUpdateStr, str_test, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.not_empty_str_test", "val", PHP_INI_ALL, OnUpdateStrNotEmpty, not_empty_str_test, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void (*old_zend_execute_ex)(zend_execute_data *execute_data);
@@ -756,6 +781,7 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 PHP_RINIT_FUNCTION(zend_test)
 {
 	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
+	ZT_G(observer_nesting_depth) = 0;
 	return SUCCESS;
 }
 
@@ -787,7 +813,7 @@ static PHP_GSHUTDOWN_FUNCTION(zend_test)
 PHP_MINFO_FUNCTION(zend_test)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "zend_test extension", "enabled");
+	php_info_print_table_row(2, "zend_test extension", "enabled");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

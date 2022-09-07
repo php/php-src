@@ -60,7 +60,6 @@ static zend_object *inflate_context_create_object(zend_class_entry *class_type) 
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &inflate_context_object_handlers;
 
 	return &intern->std;
 }
@@ -99,7 +98,6 @@ static zend_object *deflate_context_create_object(zend_class_entry *class_type) 
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &deflate_context_object_handlers;
 
 	return &intern->std;
 }
@@ -1340,6 +1338,7 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	inflate_context_ce = register_class_InflateContext();
 	inflate_context_ce->create_object = inflate_context_create_object;
+	inflate_context_ce->default_object_handlers = &inflate_context_object_handlers;
 
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	inflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1350,6 +1349,7 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	deflate_context_ce = register_class_DeflateContext();
 	deflate_context_ce->create_object = deflate_context_create_object;
+	deflate_context_ce->default_object_handlers = &deflate_context_object_handlers;
 
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	deflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1404,7 +1404,7 @@ static PHP_RSHUTDOWN_FUNCTION(zlib)
 static PHP_MINFO_FUNCTION(zlib)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "ZLib Support", "enabled");
+	php_info_print_table_row(2, "ZLib Support", "enabled");
 	php_info_print_table_row(2, "Stream Wrapper", "compress.zlib://");
 	php_info_print_table_row(2, "Stream Filter", "zlib.inflate, zlib.deflate");
 	php_info_print_table_row(2, "Compiled Version", ZLIB_VERSION);

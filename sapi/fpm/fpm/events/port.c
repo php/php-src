@@ -26,7 +26,7 @@
 #include <errno.h>
 
 static int fpm_event_port_init(int max);
-static int fpm_event_port_clean();
+static int fpm_event_port_clean(void);
 static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long int timeout);
 static int fpm_event_port_add(struct fpm_event_s *ev);
 static int fpm_event_port_remove(struct fpm_event_s *ev);
@@ -90,7 +90,7 @@ static int fpm_event_port_init(int max) /* {{{ */
 /*
  * Clean the module
  */
-static int fpm_event_port_clean() /* {{{ */
+static int fpm_event_port_clean(void)
 {
 	if (pfd > -1) {
 		close(pfd);
@@ -105,7 +105,6 @@ static int fpm_event_port_clean() /* {{{ */
 	nevents = 0;
 	return 0;
 }
-/* }}} */
 
 /*
  * wait for events or timeout

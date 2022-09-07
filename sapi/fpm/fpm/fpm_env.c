@@ -60,7 +60,7 @@ int setenv(char *name, char *value, int overwrite) /* {{{ */
 #endif
 
 #ifndef HAVE_CLEARENV
-void clearenv() /* {{{ */
+void clearenv(void)
 {
 	char **envp;
 	char *s;
@@ -79,7 +79,6 @@ void clearenv() /* {{{ */
 	}
 
 }
-/* }}} */
 #endif
 
 #ifndef HAVE_UNSETENV
@@ -195,7 +194,7 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_env_init_main() /* {{{ */
+int fpm_env_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 	char *title;
@@ -273,4 +272,3 @@ int fpm_env_init_main() /* {{{ */
 	efree(title);
 	return 0;
 }
-/* }}} */

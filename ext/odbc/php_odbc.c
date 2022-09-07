@@ -349,7 +349,7 @@ static PHP_INI_DISP(display_cursortype)
 
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("odbc.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
+	STD_PHP_INI_BOOLEAN("odbc.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateBool,
 			allow_persistent, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY_EX("odbc.max_persistent",  "-1", PHP_INI_SYSTEM, OnUpdateLong,
 			max_persistent, zend_odbc_globals, odbc_globals, display_link_nums)
@@ -365,7 +365,7 @@ PHP_INI_BEGIN()
 			defaultlrl, zend_odbc_globals, odbc_globals, display_lrl)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultbinmode", "1", PHP_INI_ALL, OnUpdateLong,
 			defaultbinmode, zend_odbc_globals, odbc_globals, display_binmode)
-	STD_PHP_INI_BOOLEAN("odbc.check_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong,
+	STD_PHP_INI_BOOLEAN("odbc.check_persistent", "1", PHP_INI_SYSTEM, OnUpdateBool,
 			check_persistent, zend_odbc_globals, odbc_globals)
 	STD_PHP_INI_ENTRY_EX("odbc.default_cursortype", "3", PHP_INI_ALL, OnUpdateLong,
 			default_cursortype, zend_odbc_globals, odbc_globals, display_cursortype)
@@ -438,7 +438,7 @@ PHP_MINFO_FUNCTION(odbc)
 	char buf[32];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "ODBC Support", "enabled");
+	php_info_print_table_row(2, "ODBC Support", "enabled");
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ODBCG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ODBCG(num_links));
@@ -2246,7 +2246,20 @@ try_and_get_another_connection:
 				RETCODE ret;
 				UCHAR d_name[32];
 				SQLSMALLINT len;
+				SQLUINTEGER dead = SQL_CD_FALSE;
 
+				ret = SQLGetConnectAttr(db_conn->hdbc,
+					SQL_ATTR_CONNECTION_DEAD,
+					&dead, 0, NULL);
+				if (ret == SQL_SUCCESS && dead == SQL_CD_TRUE) {
+					/* Bail early here, since we know it's gone */
+					zend_hash_str_del(&EG(persistent_list), hashed_details, hashed_len);
+					goto try_and_get_another_connection;
+				}
+				/* If the driver doesn't support it, or returns
+				 * false (could be a false positive), fall back
+				 * to the old heuristic.
+				 */
 				ret = SQLGetInfo(db_conn->hdbc,
 					SQL_DATA_SOURCE_READ_ONLY,
 					d_name, sizeof(d_name), &len);

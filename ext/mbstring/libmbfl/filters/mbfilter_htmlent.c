@@ -180,7 +180,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 	int pos;
 	unsigned int ent = 0;
 	mbfl_html_entity_entry *entity;
-	char *buffer = (char*)filter->opaque;
+	unsigned char *buffer = (unsigned char*)filter->opaque;
 
 	if (!filter->status) {
 		if (c == '&' ) {
@@ -196,7 +196,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					if (filter->status > 3) {
 						/* numeric entity */
 						for (pos=3; pos<filter->status; pos++) {
-							int v =  buffer[pos];
+							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
 							} else if (v >= 'A' && v <= 'F') {
@@ -242,13 +242,12 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					CK((*filter->output_function)(c, filter->data));
 				}
 				filter->status = 0;
-				/*php_error_docref("ref.mbstring", E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
 			} else {
 				/* named entity */
 				buffer[filter->status] = 0;
 				entity = (mbfl_html_entity_entry *)mbfl_html_entity_list;
 				while (entity->name) {
-					if (!strcmp(buffer+1, entity->name))	{
+					if (!strcmp((const char*)buffer+1, entity->name)) {
 						ent = entity->code;
 						break;
 					}

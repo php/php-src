@@ -2222,7 +2222,6 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *f
 
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
-	intern->zo.handlers = &sxe_object_handlers;
 
 	return intern;
 }
@@ -2673,6 +2672,7 @@ PHP_MINIT_FUNCTION(simplexml)
 {
 	sxe_class_entry = register_class_SimpleXMLElement(zend_ce_stringable, zend_ce_countable, spl_ce_RecursiveIterator);
 	sxe_class_entry->create_object = sxe_object_new;
+	sxe_class_entry->default_object_handlers = &sxe_object_handlers;
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));

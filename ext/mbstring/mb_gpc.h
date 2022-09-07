@@ -26,9 +26,7 @@ typedef struct _php_mb_encoding_handler_info_t {
 	const mbfl_encoding **from_encodings;
 	size_t num_from_encodings;
 	int data_type;
-	unsigned int report_errors : 1;
-	enum mbfl_no_language to_language;
-	enum mbfl_no_language from_language;
+	bool report_errors;
 } php_mb_encoding_handler_info_t;
 
 /* }}}*/

@@ -1608,6 +1608,15 @@ ZEND_API void zend_begin_record_errors(void)
 	EG(errors) = NULL;
 }
 
+ZEND_API void zend_emit_recorded_errors(void)
+{
+	EG(record_errors) = false;
+	for (uint32_t i = 0; i < EG(num_errors); i++) {
+		zend_error_info *error = EG(errors)[i];
+		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
+	}
+}
+
 ZEND_API void zend_free_recorded_errors(void)
 {
 	if (!EG(num_errors)) {

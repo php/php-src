@@ -9,6 +9,8 @@ $data = unserialize($exploit);
 var_dump($data);
 ?>
 --EXPECTF--
+Deprecated: Creation of dynamic property ArrayObject::$0 is deprecated in %s on line %d
+
 Fatal error: Uncaught InvalidArgumentException: Overloaded object of type DateInterval is not compatible with ArrayObject in %s
 Stack trace:
 %s

@@ -36,6 +36,11 @@ class Tester
     const FILE_EXT_PID = 'pid';
 
     /**
+     * Name for the option to manage php-fpm --force-stderr flag
+     */
+    const PHP_FPM_DISABLE_FORCE_STDERR = 'disable-force-stderr';
+
+    /**
      * @var array
      */
     static private $supportedFiles = [
@@ -375,7 +380,15 @@ class Tester
     {
         $configFile = $this->createConfig();
         $desc = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
-        $cmd = [self::findExecutable(), '-F', '-O', '-y', $configFile];
+
+        $cmd = [self::findExecutable(), '-F', '-y', $configFile];
+
+        if (!(isset($this->options[self::PHP_FPM_DISABLE_FORCE_STDERR]) &&
+            $this->options[self::PHP_FPM_DISABLE_FORCE_STDERR] === true)
+        ) {
+            $cmd[] = '-O';
+        }
+
         if (getenv('TEST_FPM_RUN_AS_ROOT')) {
             $cmd[] = '--allow-to-run-as-root';
         }
@@ -593,6 +606,8 @@ class Tester
      * @param string|null $errorMessage
      * @param bool $connKeepAlive
      * @param string|null $scriptFilename = null
+     * @param bool $expectError
+     * @param int $readLimit
      * @return Response
      */
     public function request(
@@ -604,7 +619,9 @@ class Tester
         string $errorMessage = null,
         bool $connKeepAlive = false,
         string $scriptFilename = null,
-        string $stdin = null
+        string $stdin = null,
+        bool $expectError = false,
+        int $readLimit = -1,
     ) {
         if ($this->hasError()) {
             return new Response(null, true);
@@ -614,11 +631,17 @@ class Tester
 
         try {
             $this->response = new Response(
-                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin)
+                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin, $readLimit)
             );
-            $this->message($successMessage);
+            if ($expectError) {
+                $this->error('Expected request error but the request was successful');
+            } else {
+                $this->message($successMessage);
+            }
         } catch (\Exception $exception) {
-            if ($errorMessage === null) {
+            if ($expectError) {
+                $this->message($successMessage);
+            } elseif ($errorMessage === null) {
                 $this->error("Request failed", $exception);
             } else {
                 $this->message($errorMessage);
@@ -1153,7 +1176,7 @@ class Tester
      * @param string $prefix
      * @return string
      */
-    private function getPrefixedFile(string $extension, string $prefix = null)
+    public function getPrefixedFile(string $extension, string $prefix = null)
     {
         $fileName = rtrim($this->fileName, '.');
         if (!is_null($prefix)) {

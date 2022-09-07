@@ -144,7 +144,6 @@ static zend_object *php_openssl_certificate_create_object(zend_class_entry *clas
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &php_openssl_certificate_object_handlers;
 
 	return &intern->std;
 }
@@ -184,7 +183,6 @@ static zend_object *php_openssl_request_create_object(zend_class_entry *class_ty
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &php_openssl_request_object_handlers;
 
 	return &intern->std;
 }
@@ -225,7 +223,6 @@ static zend_object *php_openssl_pkey_create_object(zend_class_entry *class_type)
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &php_openssl_pkey_object_handlers;
 
 	return &intern->std;
 }
@@ -489,7 +486,7 @@ static void php_openssl_check_path_error(uint32_t arg_num, int type, const char 
 }
 
 /* openssl file path check extended */
-static bool php_openssl_check_path_ex(
+bool php_openssl_check_path_ex(
 		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num,
 		bool contains_file_protocol, bool is_from_array, const char *option_name)
 {
@@ -519,15 +516,15 @@ static bool php_openssl_check_path_ex(
 		error_msg = "must not contain any null bytes";
 		error_type = E_ERROR;
 	} else if (expand_filepath(fs_file_path, real_path) == NULL) {
-		error_msg = "The argument must be a valid file path";
+		error_msg = "must be a valid file path";
 	}
 
 	if (error_msg != NULL) {
 		if (arg_num == 0) {
 			const char *option_title = option_name ? option_name : "unknown";
 			const char *option_label = is_from_array ? "array item" : "option";
-			php_error_docref(NULL, E_WARNING, "Path '%s' for %s %s %s",
-				real_path, option_title, option_label, error_msg);
+			php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
+					option_title, option_label, error_msg);
 		} else if (is_from_array && option_name != NULL) {
 			php_openssl_check_path_error(
 					arg_num, error_type, "option %s array item %s", option_name, error_msg);
@@ -544,31 +541,6 @@ static bool php_openssl_check_path_ex(
 	}
 
 	return false;
-}
-
-/* openssl file path check */
-static inline bool php_openssl_check_path(
-		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num)
-{
-	return php_openssl_check_path_ex(
-			file_path, file_path_len, real_path, arg_num, false, false, NULL);
-}
-
-/* openssl file path extra check with zend string */
-static inline bool php_openssl_check_path_str_ex(
-		zend_string *file_path, char *real_path, uint32_t arg_num,
-		bool contains_file_protocol, bool is_from_array, const char *option_name)
-{
-	return php_openssl_check_path_ex(
-			ZSTR_VAL(file_path), ZSTR_LEN(file_path), real_path, arg_num, contains_file_protocol,
-			is_from_array, option_name);
-}
-
-/* openssl file path check with zend string */
-static inline bool php_openssl_check_path_str(
-		zend_string *file_path, char *real_path, uint32_t arg_num)
-{
-	return php_openssl_check_path_str_ex(file_path, real_path, arg_num, true, false, NULL);
 }
 
 static int ssl_stream_data_index;
@@ -1215,6 +1187,7 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
+	php_openssl_certificate_ce->default_object_handlers = &php_openssl_certificate_object_handlers;
 
 	memcpy(&php_openssl_certificate_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_certificate_object_handlers.offset = XtOffsetOf(php_openssl_certificate_object, std);
@@ -1225,6 +1198,7 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_openssl_request_ce = register_class_OpenSSLCertificateSigningRequest();
 	php_openssl_request_ce->create_object = php_openssl_request_create_object;
+	php_openssl_request_ce->default_object_handlers = &php_openssl_request_object_handlers;
 
 	memcpy(&php_openssl_request_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_request_object_handlers.offset = XtOffsetOf(php_openssl_request_object, std);
@@ -1235,6 +1209,7 @@ PHP_MINIT_FUNCTION(openssl)
 
 	php_openssl_pkey_ce = register_class_OpenSSLAsymmetricKey();
 	php_openssl_pkey_ce->create_object = php_openssl_pkey_create_object;
+	php_openssl_pkey_ce->default_object_handlers = &php_openssl_pkey_object_handlers;
 
 	memcpy(&php_openssl_pkey_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_openssl_pkey_object_handlers.offset = XtOffsetOf(php_openssl_pkey_object, std);
@@ -7170,27 +7145,43 @@ struct php_openssl_cipher_mode {
 	int aead_ivlen_flag;
 };
 
-static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type) /* {{{ */
+#if PHP_OPENSSL_API_VERSION >= 0x10100
+static inline void php_openssl_set_aead_flags(struct php_openssl_cipher_mode *mode) {
+	mode->is_aead = true;
+	mode->aead_get_tag_flag = EVP_CTRL_AEAD_GET_TAG;
+	mode->aead_set_tag_flag = EVP_CTRL_AEAD_SET_TAG;
+	mode->aead_ivlen_flag = EVP_CTRL_AEAD_SET_IVLEN;
+}
+#endif
+
+static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EVP_CIPHER *cipher_type)
 {
 	int cipher_mode = EVP_CIPHER_mode(cipher_type);
 	memset(mode, 0, sizeof(struct php_openssl_cipher_mode));
 	switch (cipher_mode) {
-#ifdef EVP_CIPH_OCB_MODE
+#if PHP_OPENSSL_API_VERSION >= 0x10100
 		/* Since OpenSSL 1.1, all AEAD ciphers use a common framework. We check for
 		 * EVP_CIPH_OCB_MODE, because LibreSSL does not support it. */
 		case EVP_CIPH_GCM_MODE:
+# ifdef EVP_CIPH_OCB_MODE
 		case EVP_CIPH_OCB_MODE:
+# endif
 		case EVP_CIPH_CCM_MODE:
-			mode->is_aead = 1;
+			php_openssl_set_aead_flags(mode);
 			/* For OCB mode, explicitly set the tag length even when decrypting,
 			 * see https://github.com/openssl/openssl/issues/8331. */
 			mode->set_tag_length_always = cipher_mode == EVP_CIPH_OCB_MODE;
 			mode->set_tag_length_when_encrypting = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
-			mode->aead_get_tag_flag = EVP_CTRL_AEAD_GET_TAG;
-			mode->aead_set_tag_flag = EVP_CTRL_AEAD_SET_TAG;
-			mode->aead_ivlen_flag = EVP_CTRL_AEAD_SET_IVLEN;
 			break;
+# ifdef NID_chacha20_poly1305
+		default:
+			if (EVP_CIPHER_nid(cipher_type) == NID_chacha20_poly1305) {
+				php_openssl_set_aead_flags(mode);
+			}
+			break;
+
+# endif
 #else
 # ifdef EVP_CIPH_GCM_MODE
 		case EVP_CIPH_GCM_MODE:
@@ -7213,7 +7204,6 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 #endif
 	}
 }
-/* }}} */
 
 static int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_required_len,
 		bool *free_iv, EVP_CIPHER_CTX *cipher_ctx, struct php_openssl_cipher_mode *mode) /* {{{ */
@@ -7600,44 +7590,76 @@ PHP_FUNCTION(openssl_decrypt)
 }
 /* }}} */
 
-PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
+static inline const EVP_CIPHER *php_openssl_get_evp_cipher_by_name(const char *method)
 {
 	const EVP_CIPHER *cipher_type;
 
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		return -1;
+		return NULL;
 	}
 
-	return EVP_CIPHER_iv_length(cipher_type);
+	return cipher_type;
 }
 
-/* {{{ */
+PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method)
+{
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+
+	return cipher_type == NULL ? -1 : EVP_CIPHER_iv_length(cipher_type);
+}
+
 PHP_FUNCTION(openssl_cipher_iv_length)
 {
-	char *method;
-	size_t method_len;
+	zend_string *method;
 	zend_long ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &method, &method_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &method) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (!method_len) {
+	if (ZSTR_LEN(method) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 
 	/* Warning is emitted in php_openssl_cipher_iv_length */
-	if ((ret = php_openssl_cipher_iv_length(method)) == -1) {
+	if ((ret = php_openssl_cipher_iv_length(ZSTR_VAL(method))) == -1) {
 		RETURN_FALSE;
 	}
 
 	RETURN_LONG(ret);
 }
-/* }}} */
 
+PHP_OPENSSL_API zend_long php_openssl_cipher_key_length(const char *method)
+{
+	const EVP_CIPHER *cipher_type = php_openssl_get_evp_cipher_by_name(method);
+
+	return cipher_type == NULL ? -1 : EVP_CIPHER_key_length(cipher_type);
+}
+
+PHP_FUNCTION(openssl_cipher_key_length)
+{
+	zend_string *method;
+	zend_long ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &method) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(method) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	/* Warning is emitted in php_openssl_cipher_key_length */
+	if ((ret = php_openssl_cipher_key_length(ZSTR_VAL(method))) == -1) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
+}
 
 PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_length)
 {

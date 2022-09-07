@@ -19,7 +19,7 @@
 #ifndef ZEND_ALLOC_SIZES_H
 #define ZEND_ALLOC_SIZES_H
 
-#define ZEND_MM_CHUNK_SIZE (2 * 1024 * 1024)               /* 2 MB  */
+#define ZEND_MM_CHUNK_SIZE ((size_t) (2 * 1024 * 1024))    /* 2 MB  */
 #define ZEND_MM_PAGE_SIZE  (4 * 1024)                      /* 4 KB  */
 #define ZEND_MM_PAGES      (ZEND_MM_CHUNK_SIZE / ZEND_MM_PAGE_SIZE)  /* 512 */
 #define ZEND_MM_FIRST_PAGE (1)

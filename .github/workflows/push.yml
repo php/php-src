@@ -13,10 +13,13 @@ on:
       - PHP-7.4
       - PHP-8.0
       - PHP-8.1
+      - PHP-8.2
       - master
   pull_request:
     branches:
       - '**'
+permissions:
+  contents: read
 jobs:
   LINUX_X64:
     strategy:
@@ -32,8 +35,10 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v2
-      - name: Create mssql container
-        uses: ./.github/actions/mssql
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: Create Oracle container
+        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -63,7 +68,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - name: git checkout
         uses: actions/checkout@v2

@@ -153,7 +153,7 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 {
 	php_info_print_table_start();
 
-	php_info_print_table_header(2, "PDO Driver for MySQL", "enabled");
+	php_info_print_table_row(2, "PDO Driver for MySQL", "enabled");
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
 
 	php_info_print_table_end();

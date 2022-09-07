@@ -430,7 +430,7 @@ static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mysqli.max_persistent",		"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_persistent,		zend_mysqli_globals,		mysqli_globals,	display_link_numbers)
-	STD_PHP_INI_BOOLEAN("mysqli.allow_persistent",		"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_persistent,	zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_BOOLEAN("mysqli.allow_persistent",		"1",	PHP_INI_SYSTEM,		OnUpdateBool,		allow_persistent,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_BOOLEAN("mysqli.rollback_on_cached_plink",	"0",PHP_INI_SYSTEM,		OnUpdateBool,		rollback_on_cached_plink,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
@@ -441,7 +441,7 @@ PHP_INI_BEGIN()
 #else
 	STD_PHP_INI_ENTRY("mysqli.default_socket",			NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysqli_globals,		mysqli_globals)
 #endif
-	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"0",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"0",	PHP_INI_SYSTEM,		OnUpdateBool,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.local_infile_directory",	NULL,	PHP_INI_SYSTEM,		OnUpdateString,		local_infile_directory,	zend_mysqli_globals,	mysqli_globals)
 PHP_INI_END()
 /* }}} */
@@ -588,7 +588,7 @@ PHP_MINFO_FUNCTION(mysqli)
 	char buf[32];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "MysqlI Support", "enabled");
+	php_info_print_table_row(2, "MysqlI Support", "enabled");
 	php_info_print_table_row(2, "Client API library version", mysql_get_client_info());
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_active_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);

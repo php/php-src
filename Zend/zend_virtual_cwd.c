@@ -603,6 +603,7 @@ retry_reparse_point:
 			if (!pathw) {
 				return (size_t)-1;
 			}
+			PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, (size_t)-1, 1);
 			hFind = FindFirstFileExW(pathw, FindExInfoBasic, &dataw, FindExSearchNameMatch, NULL, 0);
 			if (INVALID_HANDLE_VALUE == hFind) {
 				if (use_realpath == CWD_REALPATH) {
@@ -1139,7 +1140,13 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
 
 	if (path_length == (size_t)-1) {
+#ifdef ZEND_WIN32
+		if (errno != EACCES) {
+			errno = ENOENT;
+		}
+#else
 		errno = ENOENT;
+#endif
 		return 1;
 	}
 

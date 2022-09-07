@@ -337,6 +337,10 @@ static void mb_wchar_to_base64(uint32_t *in, size_t len, mb_convert_buf *buf, bo
 	}
 
 	if (end && bits) {
+		if (chars_output > 72) {
+			out = mb_convert_buf_add2(out, '\r', '\n');
+			chars_output = 0;
+		}
 		if (bits == 8) {
 			out = mb_convert_buf_add4(out, mbfl_base64_table[(cache >> 2) & 0x3F], mbfl_base64_table[(cache & 0x3) << 4], '=', '=');
 		} else {

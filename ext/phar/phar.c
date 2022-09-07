@@ -3565,7 +3565,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 {
 	phar_request_initialize();
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Phar: PHP Archive support", "enabled");
+	php_info_print_table_row(2, "Phar: PHP Archive support", "enabled");
 	php_info_print_table_row(2, "Phar API version", PHP_PHAR_API_VERSION);
 	php_info_print_table_row(2, "Phar-based phar archives", "enabled");
 	php_info_print_table_row(2, "Tar-based phar archives", "enabled");

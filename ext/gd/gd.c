@@ -177,7 +177,6 @@ zend_object *php_gd_image_object_create(zend_class_entry *class_type)
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &php_gd_image_object_handlers;
 
 	return &intern->std;
 }
@@ -207,6 +206,7 @@ static void php_gd_object_minit_helper(void)
 {
 	gd_image_ce = register_class_GdImage();
 	gd_image_ce->create_object = php_gd_image_object_create;
+	gd_image_ce->default_object_handlers = &php_gd_image_object_handlers;
 
 	/* setting up the object handlers for the GdImage class */
 	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -307,7 +307,7 @@ ZEND_GET_MODULE(gd)
 
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY_EX("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL, zend_ini_boolean_displayer_cb)
 PHP_INI_END()
 /* }}} */
 

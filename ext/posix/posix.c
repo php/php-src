@@ -1145,3 +1145,14 @@ PHP_FUNCTION(posix_initgroups)
 }
 /* }}} */
 #endif
+
+PHP_FUNCTION(posix_sysconf)
+{
+	zend_long conf_id;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(conf_id)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(sysconf(conf_id));
+}

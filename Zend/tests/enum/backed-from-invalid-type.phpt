@@ -30,5 +30,5 @@ try {
 
 ?>
 --EXPECT--
-"42" is not a valid backing value for enum "Suit"
+"42" is not a valid backing value for enum Suit
 Foo::from(): Argument #1 ($value) must be of type int, string given

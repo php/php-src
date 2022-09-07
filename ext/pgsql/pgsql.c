@@ -157,7 +157,6 @@ static zend_object *pgsql_link_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &pgsql_link_object_handlers;
 
 	return &intern->std;
 }
@@ -213,7 +212,6 @@ static zend_object *pgsql_result_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &pgsql_result_object_handlers;
 
 	return &intern->std;
 }
@@ -251,7 +249,6 @@ static zend_object *pgsql_lob_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &pgsql_lob_object_handlers;
 
 	return &intern->std;
 }
@@ -440,6 +437,7 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	pgsql_link_ce = register_class_PgSql_Connection();
 	pgsql_link_ce->create_object = pgsql_link_create_object;
+	pgsql_link_ce->default_object_handlers = &pgsql_link_object_handlers;
 
 	memcpy(&pgsql_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_link_object_handlers.offset = XtOffsetOf(pgsql_link_handle, std);
@@ -450,6 +448,7 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	pgsql_result_ce = register_class_PgSql_Result();
 	pgsql_result_ce->create_object = pgsql_result_create_object;
+	pgsql_result_ce->default_object_handlers = &pgsql_result_object_handlers;
 
 	memcpy(&pgsql_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_result_object_handlers.offset = XtOffsetOf(pgsql_result_handle, std);
@@ -460,6 +459,7 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	pgsql_lob_ce = register_class_PgSql_Lob();
 	pgsql_lob_ce->create_object = pgsql_lob_create_object;
+	pgsql_lob_ce->default_object_handlers = &pgsql_lob_object_handlers;
 
 	memcpy(&pgsql_lob_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_lob_object_handlers.offset = XtOffsetOf(pgLofp, std);
@@ -512,7 +512,7 @@ PHP_MINFO_FUNCTION(pgsql)
 	char buf[256];
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
+	php_info_print_table_row(2, "PostgreSQL Support", "enabled");
 	php_info_print_table_row(2, "PostgreSQL (libpq) Version", pgsql_libpq_version);
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 	php_info_print_table_row(2, "Multibyte character support", "enabled");

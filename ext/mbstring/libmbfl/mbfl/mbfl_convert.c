@@ -85,8 +85,6 @@ static const struct mbfl_convert_vtbl *mbfl_special_filter_list[] = {
 	&vtbl_uuencode_8bit,
 	&vtbl_8bit_qprint,
 	&vtbl_qprint_8bit,
-	&vtbl_8bit_7bit,
-	&vtbl_7bit_8bit,
 	&vtbl_pass,
 	NULL
 };
@@ -302,13 +300,11 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding *from, const mbfl_encoding *to)
 {
 	if (to->no_encoding == mbfl_no_encoding_base64 ||
-	    to->no_encoding == mbfl_no_encoding_qprint ||
-	    to->no_encoding == mbfl_no_encoding_7bit) {
+	    to->no_encoding == mbfl_no_encoding_qprint) {
 		from = &mbfl_encoding_8bit;
 	} else if (from->no_encoding == mbfl_no_encoding_base64 ||
 			   from->no_encoding == mbfl_no_encoding_qprint ||
-			   from->no_encoding == mbfl_no_encoding_uuencode ||
-			   from->no_encoding == mbfl_no_encoding_7bit) {
+			   from->no_encoding == mbfl_no_encoding_uuencode) {
 		to = &mbfl_encoding_8bit;
 	}
 
@@ -352,6 +348,12 @@ zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encodi
 {
 	uint32_t wchar_buf[128];
 	unsigned int state = 0;
+
+	if (to == &mbfl_encoding_base64 || to == &mbfl_encoding_qprint) {
+		from = &mbfl_encoding_8bit;
+	} else if (from == &mbfl_encoding_base64 || from == &mbfl_encoding_qprint || from == &mbfl_encoding_uuencode) {
+		to = &mbfl_encoding_8bit;
+	}
 
 	mb_convert_buf buf;
 	mb_convert_buf_init(&buf, in_len, replacement_char, error_mode);

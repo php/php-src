@@ -232,9 +232,9 @@ static const zend_function_entry class_SessionHandler_methods[] = {
 
 static void register_session_symbols(int module_number)
 {
-	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_SESSION_ACTIVE", php_session_active, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_SESSION_ACTIVE", php_session_active, CONST_PERSISTENT);
 }
 
 static zend_class_entry *register_class_SessionHandlerInterface(void)

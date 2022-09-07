@@ -36,7 +36,12 @@ extern const mbfl_encoding mbfl_encoding_cp932;
 extern const struct mbfl_convert_vtbl vtbl_cp932_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_cp932;
 
+extern const mbfl_encoding mbfl_encoding_sjiswin;
+extern const struct mbfl_convert_vtbl vtbl_sjiswin_wchar;
+extern const struct mbfl_convert_vtbl vtbl_wchar_sjiswin;
+
 int mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_cp932(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_wchar_sjiswin(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_CP932_H */

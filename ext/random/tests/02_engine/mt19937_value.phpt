@@ -1,15 +1,18 @@
 --TEST--
-Random: Engine: Mt19937: value
+Random: Engine: Mt19937: For a reference seed a fixed reference value must be generated
 --FILE--
 <?php
 
-$engine = new \Random\Engine\Mt19937(1234);
+use Random\Engine\Mt19937;
 
-for ($i = 0; $i < 10000; $i++) {
+$engine = new Mt19937(1234);
+
+for ($i = 0; $i < 10_000; $i++) {
     $engine->generate();
 }
 
-echo \bin2hex($engine->generate());
+var_dump(bin2hex($engine->generate()));
+
 ?>
 --EXPECT--
-60fe95d9
+string(8) "60fe95d9"
