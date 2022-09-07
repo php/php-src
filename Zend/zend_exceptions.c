@@ -735,7 +735,7 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_throwable = register_class_Throwable(zend_ce_stringable);
 	zend_ce_throwable->interface_gets_implemented = zend_implement_throwable;
 
-	memcpy(&default_exception_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	ZEND_MEMCPY_INLINE(&default_exception_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
 
 	zend_ce_exception = register_class_Exception(zend_ce_throwable);

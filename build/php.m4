@@ -2734,6 +2734,26 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
 ])
 
 dnl
+dnl PHP_CHECK_BUILTIN_MEMCPY_INLINE
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_MEMCPY_INLINE], [
+  AC_MSG_CHECKING([for __builtin_memcpy_inline])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    int d, s = 5;
+    __builtin_memcpy_inline(&d,&s,sizeof(d));
+  ]])], [
+    have_builtin_memcpy_inline=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_memcpy_inline=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_MEMCPY_INLINE], [$have_builtin_memcpy_inline], [Whether the compiler supports __builtin_memcpy_inline])
+])
+
+dnl
 dnl PHP_PATCH_CONFIG_HEADERS([FILE])
 dnl
 dnl PACKAGE_* symbols are automatically defined by Autoconf. When including

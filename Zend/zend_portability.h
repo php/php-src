@@ -367,6 +367,12 @@ char *alloca();
 # define UNEXPECTED(condition) (condition)
 #endif
 
+#if PHP_HAVE_BUILTIN_MEMCPY_INLINE
+# define ZEND_MEMCPY_INLINE(a, b, s) __builtin_memcpy_inline(a, b, s)
+#else
+# define ZEND_MEMCPY_INLINE(a, b, s) memcpy(a, b, s)
+#endif
+
 #ifndef XtOffsetOf
 # define XtOffsetOf(s_type, field) offsetof(s_type, field)
 #endif

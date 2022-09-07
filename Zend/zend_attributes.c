@@ -365,7 +365,7 @@ void zend_register_attribute_ce(void)
 	zend_ce_sensitive_parameter = register_class_SensitiveParameter();
 	zend_mark_internal_attribute(zend_ce_sensitive_parameter);
 
-	memcpy(&attributes_object_handlers_sensitive_parameter_value, &std_object_handlers, sizeof(zend_object_handlers));
+	ZEND_MEMCPY_INLINE(&attributes_object_handlers_sensitive_parameter_value, &std_object_handlers, sizeof(zend_object_handlers));
 	attributes_object_handlers_sensitive_parameter_value.get_properties_for = attributes_sensitive_parameter_value_get_properties_for;
 
 	/* This is not an actual attribute, thus the zend_mark_internal_attribute() call is missing. */

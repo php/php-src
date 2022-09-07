@@ -157,7 +157,7 @@ void zend_register_enum_ce(void)
 	zend_ce_backed_enum = register_class_BackedEnum(zend_ce_unit_enum);
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
 
-	memcpy(&enum_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	ZEND_MEMCPY_INLINE(&enum_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enum_handlers.clone_obj = NULL;
 	enum_handlers.compare = zend_objects_not_comparable;
 }
