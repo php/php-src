@@ -60,6 +60,14 @@ struct _WSAMSG {
 #define MAX_USER_BUFF_SIZE ((size_t)(100*1024*1024))
 #define DEFAULT_BUFF_SIZE 8192
 
+/* The CMSG_DATA macro does pointer arithmetics on NULL which triggers errors in the Clang UBSAN build */
+#ifdef __has_feature
+# if __has_feature(undefined_behavior_sanitizer)
+#  undef CMSG_DATA
+#  define CMSG_DATA(cmsg) ((unsigned char *) ((uintptr_t) (cmsg) + sizeof(struct cmsghdr)))
+# endif
+#endif
+
 struct _ser_context {
 	HashTable		params; /* stores pointers; has to be first */
 	struct err_s	err;
