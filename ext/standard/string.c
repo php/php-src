@@ -50,45 +50,6 @@
 #include <emmintrin.h>
 #endif
 
-#define STR_PAD_LEFT			0
-#define STR_PAD_RIGHT			1
-#define STR_PAD_BOTH			2
-#define PHP_PATHINFO_DIRNAME 	1
-#define PHP_PATHINFO_BASENAME 	2
-#define PHP_PATHINFO_EXTENSION 	4
-#define PHP_PATHINFO_FILENAME 	8
-#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION | PHP_PATHINFO_FILENAME)
-
-#define STR_STRSPN				0
-#define STR_STRCSPN				1
-
-/* {{{ register_string_constants */
-void register_string_constants(INIT_FUNC_ARGS)
-{
-	REGISTER_LONG_CONSTANT("STR_PAD_LEFT", STR_PAD_LEFT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STR_PAD_RIGHT", STR_PAD_RIGHT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STR_PAD_BOTH", STR_PAD_BOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_DIRNAME", PHP_PATHINFO_DIRNAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_BASENAME", PHP_PATHINFO_BASENAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_FILENAME", PHP_PATHINFO_FILENAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_ALL", PHP_PATHINFO_ALL, CONST_CS | CONST_PERSISTENT);
-
-	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
-	REGISTER_LONG_CONSTANT("CHAR_MAX", CHAR_MAX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_CTYPE", LC_CTYPE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_NUMERIC", LC_NUMERIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_TIME", LC_TIME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_COLLATE", LC_COLLATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_MONETARY", LC_MONETARY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_ALL", LC_ALL, CONST_CS | CONST_PERSISTENT);
-# ifdef LC_MESSAGES
-	REGISTER_LONG_CONSTANT("LC_MESSAGES", LC_MESSAGES, CONST_CS | CONST_PERSISTENT);
-# endif
-
-}
-/* }}} */
-
 /* this is read-only, so it's ok */
 ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
 
@@ -288,13 +249,13 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		RETURN_LONG(0);
 	}
 
-	if (behavior == STR_STRSPN) {
+	if (behavior == PHP_STR_STRSPN) {
 		RETURN_LONG(php_strspn(ZSTR_VAL(s11) + start /*str1_start*/,
 						ZSTR_VAL(s22) /*str2_start*/,
 						ZSTR_VAL(s11) + start + len /*str1_end*/,
 						ZSTR_VAL(s22) + ZSTR_LEN(s22) /*str2_end*/));
 	} else {
-		ZEND_ASSERT(behavior == STR_STRCSPN);
+		ZEND_ASSERT(behavior == PHP_STR_STRCSPN);
 		RETURN_LONG(php_strcspn(ZSTR_VAL(s11) + start /*str1_start*/,
 						ZSTR_VAL(s22) /*str2_start*/,
 						ZSTR_VAL(s11) + start + len /*str1_end*/,
@@ -306,14 +267,14 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 /* {{{ Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
-	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRSPN);
+	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_STR_STRSPN);
 }
 /* }}} */
 
 /* {{{ Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
-	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRCSPN);
+	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_STR_STRCSPN);
 }
 /* }}} */
 
@@ -5550,7 +5511,7 @@ PHP_FUNCTION(str_pad)
 	size_t num_pad_chars;		/* Number of padding characters (total - input size) */
 	char *pad_str = " "; /* Pointer to padding string */
 	size_t pad_str_len = 1;
-	zend_long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
+	zend_long   pad_type_val = PHP_STR_PAD_RIGHT; /* The padding type value */
 	size_t	   i, left_pad=0, right_pad=0;
 	zend_string *result = NULL;	/* Resulting string */
 
@@ -5573,7 +5534,7 @@ PHP_FUNCTION(str_pad)
 		RETURN_THROWS();
 	}
 
-	if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
+	if (pad_type_val < PHP_STR_PAD_LEFT || pad_type_val > PHP_STR_PAD_BOTH) {
 		zend_argument_value_error(4, "must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
 		RETURN_THROWS();
 	}
@@ -5584,17 +5545,17 @@ PHP_FUNCTION(str_pad)
 
 	/* We need to figure out the left/right padding lengths. */
 	switch (pad_type_val) {
-		case STR_PAD_RIGHT:
+		case PHP_STR_PAD_RIGHT:
 			left_pad = 0;
 			right_pad = num_pad_chars;
 			break;
 
-		case STR_PAD_LEFT:
+		case PHP_STR_PAD_LEFT:
 			left_pad = num_pad_chars;
 			right_pad = 0;
 			break;
 
-		case STR_PAD_BOTH:
+		case PHP_STR_PAD_BOTH:
 			left_pad = num_pad_chars / 2;
 			right_pad = num_pad_chars - left_pad;
 			break;

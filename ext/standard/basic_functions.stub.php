@@ -740,6 +740,93 @@ const LOG_NOWAIT = UNKNOWN;
 const LOG_PERROR = UNKNOWN;
 #endif
 
+/* string.c */
+
+/**
+ * @var int
+ * @cvalue PHP_STR_PAD_LEFT
+ */
+const STR_PAD_LEFT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STR_PAD_RIGHT
+ */
+const STR_PAD_RIGHT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STR_PAD_BOTH
+ */
+const STR_PAD_BOTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_DIRNAME
+ */
+const PATHINFO_DIRNAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_BASENAME
+ */
+const PATHINFO_BASENAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_EXTENSION
+ */
+const PATHINFO_EXTENSION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_FILENAME
+ */
+const PATHINFO_FILENAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_ALL
+ */
+const PATHINFO_ALL = UNKNOWN;
+
+/**
+ * If last members of struct lconv equal CHAR_MAX, no grouping is done
+ * @var int
+ * @cvalue CHAR_MAX
+ */
+const CHAR_MAX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_CTYPE
+ */
+const LC_CTYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_NUMERIC
+ */
+const LC_NUMERIC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_TIME
+ */
+const LC_TIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_COLLATE
+ */
+const LC_COLLATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_MONETARY
+ */
+const LC_MONETARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_ALL
+ */
+const LC_ALL = UNKNOWN;
+#ifdef LC_MESSAGES
+/**
+ * @var int
+ * @cvalue LC_MESSAGES
+ */
+const LC_MESSAGES = UNKNOWN;
+#endif
+
 /** @undocumentable */
 #[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
