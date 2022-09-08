@@ -793,7 +793,7 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 		} else if (fptr->common.scope->parent) {
 			lc_name = zend_string_tolower(fptr->common.function_name);
 			if ((overwrites = zend_hash_find_ptr(&fptr->common.scope->parent->function_table, lc_name)) != NULL) {
-				if (fptr->common.scope != overwrites->common.scope) {
+				if (fptr->common.scope != overwrites->common.scope && !(overwrites->common.fn_flags & ZEND_ACC_PRIVATE)) {
 					smart_str_append_printf(str, ", overwrites %s", ZSTR_VAL(overwrites->common.scope->name));
 				}
 			}
