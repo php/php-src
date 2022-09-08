@@ -13,5 +13,9 @@ PHP                                                                        NEWS
 - Posix:
   . Added posix_sysconf. (David Carlier)
 
+- CLI:
+  . Added pdeathsig to builtin server to terminate workers when the master
+    process is killed. (ilutov)
+
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
