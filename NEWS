@@ -26,6 +26,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgrade bundled libmagic to 5.43. (Anatol)
 
+- FPM:
+  . The status.listen shared pool now uses the same php_values (including
+    expose_php) and php_admin_value as the pool it is shared with. (dwxh)
+
 - JSON:
   . Implemented RFC: json_validate()
     https://wiki.php.net/rfc/json_validate (Juan Morales)
