@@ -2263,20 +2263,23 @@ PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object) /* {{{ */
 
 /* Helper function used to store the latest found warnings and errors while
  * parsing, from either strtotime or parse_from_format. */
-static timelib_error_container* update_errors_warnings(timelib_error_container **last_errors) /* {{{ */
+static void update_errors_warnings(timelib_error_container **last_errors) /* {{{ */
 {
 	if (DATEG(last_errors)) {
 		timelib_error_container_dtor(DATEG(last_errors));
 		DATEG(last_errors) = NULL;
 	}
 
+	if (last_errors == NULL || (*last_errors) == NULL) {
+		return;
+	}
+
 	if ((*last_errors)->warning_count || (*last_errors)->error_count) {
 		DATEG(last_errors) = *last_errors;
-		return *last_errors;
 	}
 
 	timelib_error_container_dtor(*last_errors);
-	return NULL;
+	*last_errors = NULL;
 } /* }}} */
 
 static void php_date_set_time_fraction(timelib_time *time, int microseconds)
@@ -2327,7 +2330,7 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 	}
 
 	/* update last errors and warnings */
-	err = update_errors_warnings(&err);
+	update_errors_warnings(&err);
 
 	/* If called from a constructor throw an exception */
 	if ((flags & PHP_DATE_INIT_CTOR) && err && err->error_count) {
@@ -3005,7 +3008,7 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 	tmp_time = timelib_strtotime(modify, modify_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 
 	/* update last errors and warnings */
-	err = update_errors_warnings(&err);
+	update_errors_warnings(&err);
 
 	if (err && err->error_count) {
 		/* spit out the first library error message, at least */
