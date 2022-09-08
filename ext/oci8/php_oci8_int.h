@@ -103,7 +103,7 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
  * PHP_OCI_CRED_EXT must be distinct from the OCI_xxx privilege
  * values.
  */
-#define PHP_OCI_CRED_EXT                    (1<<31)
+#define PHP_OCI_CRED_EXT                    (1u<<31)
 #if ((PHP_OCI_CRED_EXT == OCI_DEFAULT) || (PHP_OCI_CRED_EXT & (OCI_SYSOPER | OCI_SYSDBA)))
 #error Invalid value for PHP_OCI_CRED_EXT
 #endif
