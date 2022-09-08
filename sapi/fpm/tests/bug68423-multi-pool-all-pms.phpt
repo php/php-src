@@ -19,6 +19,7 @@ pm.max_children = 5
 pm.start_servers = 2
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
+php_flag[expose_php] = on
 [pool_ondemand]
 listen = {{ADDR[ondemand]}}
 ping.path = /ping
@@ -26,12 +27,14 @@ ping.response = pong-on-demand
 pm = ondemand
 pm.max_children = 2
 pm.process_idle_timeout = 10
+php_flag[expose_php] = on
 [pool_static]
 listen = {{ADDR[static]}}
 ping.path = /ping
 ping.response = pong-static
 pm = static
 pm.max_children = 2
+php_flag[expose_php] = on
 EOT;
 
 $tester = new FPM\Tester($cfg);

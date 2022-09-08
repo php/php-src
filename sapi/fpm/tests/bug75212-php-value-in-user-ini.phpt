@@ -17,6 +17,7 @@ pm.max_children = 5
 pm.start_servers = 1
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
+php_flag[expose_php] = on
 php_admin_value[memory_limit]=32M
 php_value[date.timezone]=Europe/London
 EOT;

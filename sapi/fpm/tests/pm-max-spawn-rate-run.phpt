@@ -23,6 +23,7 @@ pm.max_spare_servers = 3
 pm.max_spawn_rate = 64
 ping.path = /ping
 ping.response = pong
+php_flag[expose_php] = on
 EOT;
 
 $tester = new FPM\Tester($cfg);

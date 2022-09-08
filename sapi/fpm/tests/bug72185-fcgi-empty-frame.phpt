@@ -20,6 +20,7 @@ pm.max_spare_servers = 2
 catch_workers_output = yes
 decorate_workers_output = no
 php_value[html_errors] = false
+php_flag[expose_php] = on
 EOT;
 
 $code = <<<'EOT'

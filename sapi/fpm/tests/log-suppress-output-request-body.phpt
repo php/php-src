@@ -39,6 +39,7 @@ pm.max_children = 5
 pm.start_servers = 2
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
+php_flag[expose_php] = on
 EOT;
 
 $tester = new FPM\Tester($cfg, $testScript);

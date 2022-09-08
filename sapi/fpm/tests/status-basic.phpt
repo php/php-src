@@ -15,6 +15,7 @@ listen = {{ADDR}}
 pm = static
 pm.max_children = 1
 pm.status_path = /status
+php_flag[expose_php] = on
 EOT;
 
 $expectedStatusData = [
