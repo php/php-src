@@ -2,6 +2,10 @@
 Test binary operands exposing the same behavior at compile as at run time
 --INI--
 memory_limit=256M
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+?>
 --FILE--
 <?php
 

@@ -76,8 +76,16 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(sockets)
 
+#define SUN_LEN_NO_UB(su) (sizeof(*(su)) - sizeof((su)->sun_path) + strlen((su)->sun_path))
+/* The SUN_LEN macro does pointer arithmetics on NULL which triggers errors in the Clang UBSAN build */
+#ifdef __has_feature
+# if __has_feature(undefined_behavior_sanitizer)
+#  undef SUN_LEN
+#  define SUN_LEN(su) SUN_LEN_NO_UB(su)
+# endif
+#endif
 #ifndef SUN_LEN
-#define SUN_LEN(su) (sizeof(*(su)) - sizeof((su)->sun_path) + strlen((su)->sun_path))
+# define SUN_LEN(su) SUN_LEN_NO_UB(su)
 #endif
 
 #ifndef PF_INET
