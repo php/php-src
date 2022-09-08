@@ -28,16 +28,18 @@ include "php_cli_server.inc";
 $cliServerInfo = php_cli_server_start('');
 
 $master = proc_get_status($cliServerInfo->processHandle)['pid'];
-$workers = find_workers_by_ppid($master);
-if (count($workers) === 0) {
+$workersBefore = find_workers_by_ppid($master);
+if (count($workersBefore) === 0) {
     throw new \Exception('Could not find worker pids');
 }
 
 proc_terminate($cliServerInfo->processHandle, 9); // SIGKILL
 
-$workers = find_workers_by_pids($workers);
-if (count($workers) !== 0) {
-    throw new \Exception('Workers were not properly terminated');
+usleep(10000);
+
+$workersAfter = find_workers_by_pids($workersBefore);
+if (count($workersAfter) !== 0) {
+    throw new \Exception('Workers were not properly terminated. Before: ' . join(', ', $workersBefore) . ', after: ' . join(', ', $workersAfter));
 }
 
 echo 'Done';
