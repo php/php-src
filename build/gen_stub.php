@@ -4442,6 +4442,14 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
                 echo "Warning: $aliasName()" . ($alias->alias ? " is an alias of " . $alias->alias->__toString() . "(), but it" : "") . " is incorrectly documented as an alias for $funcName()\n";
             }
 
+            $matches = [];
+            preg_match("/<(?:para|simpara)>\s*(?:&info.function.alias;|&info.method.alias;|&Alias;)\s+<(?:function|methodname)>\s*([\w:]+)\s*<\/(?:function|methodname)>/i", $xml, $matches);
+            $descriptionFuncName = $matches[1] ?? null;
+            $descriptionFunc = $funcMap[$descriptionFuncName] ?? null;
+            if ($descriptionFunc && $funcName !== $descriptionFuncName) {
+                echo "Warning: Alias in the method synopsis description of $pathName doesn't match the alias in the <refpurpose>\n";
+            }
+
             if ($aliasName) {
                 $existingMethodSynopses[$aliasName] = $aliasName;
             }
