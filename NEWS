@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+29 Sep 2022, PHP 7.4.31
+
+- Core:
+  . Fixed bug #81727: Don't mangle HTTP variable names that clash with ones
+    that have a specific semantic meaning. (Derick)
+
 09 Jun 2022, PHP 7.4.30
 
 - mysqlnd:
