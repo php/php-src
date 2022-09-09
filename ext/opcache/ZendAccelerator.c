@@ -4609,14 +4609,15 @@ static int accel_finish_startup(void)
 			return SUCCESS;
 		}
 
-		if (geteuid() == 0) {
+		uid_t euid = geteuid();
+		if (euid == 0) {
 			pid_t pid;
 			struct passwd *pw;
 
 			if (!ZCG(accel_directives).preload_user
 			 || !*ZCG(accel_directives).preload_user) {
 				zend_shared_alloc_unlock();
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload_user\" has not been defined");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload\" requires \"opcache.preload_user\" when running under uid 0");
 				return FAILURE;
 			}
 
@@ -4627,43 +4628,45 @@ static int accel_finish_startup(void)
 				return FAILURE;
 			}
 
-			pid = fork();
-			if (pid == -1) {
-				zend_shared_alloc_unlock();
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to fork()");
-				return FAILURE;
-			} else if (pid == 0) { /* children */
-				if (setgid(pw->pw_gid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
-					exit(1);
-				}
-				if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
-					exit(1);
-				}
-				if (setuid(pw->pw_uid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
-					exit(1);
-				}
-				in_child = true;
-			} else { /* parent */
-				int status;
-
-				if (waitpid(pid, &status, 0) < 0) {
+			if (pw->pw_uid != euid) {
+				pid = fork();
+				if (pid == -1) {
 					zend_shared_alloc_unlock();
-					zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
+					zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to fork()");
 					return FAILURE;
-				}
+				} else if (pid == 0) { /* children */
+					if (setgid(pw->pw_gid) < 0) {
+						zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
+						exit(1);
+					}
+					if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
+						zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
+						exit(1);
+					}
+					if (setuid(pw->pw_uid) < 0) {
+						zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
+						exit(1);
+					}
+					in_child = true;
+				} else { /* parent */
+					int status;
 
-				if (ZCSG(preload_script)) {
-					preload_load();
-				}
+					if (waitpid(pid, &status, 0) < 0) {
+						zend_shared_alloc_unlock();
+						zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
+						return FAILURE;
+					}
 
-				zend_shared_alloc_unlock();
-				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-					return SUCCESS;
-				} else {
-					return FAILURE;
+					if (ZCSG(preload_script)) {
+						preload_load();
+					}
+
+					zend_shared_alloc_unlock();
+					if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+						return SUCCESS;
+					} else {
+						return FAILURE;
+					}
 				}
 			}
 		} else {
