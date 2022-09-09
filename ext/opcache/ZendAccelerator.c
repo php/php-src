@@ -4687,6 +4687,13 @@ static int accel_finish_startup_preload_subprocess(pid_t *pid)
 	if (!ZCG(accel_directives).preload_user
 	 || !*ZCG(accel_directives).preload_user) {
 
+		bool sapi_requires_preload_user = !(strcmp(sapi_module.name, "cli") == 0
+		  || strcmp(sapi_module.name, "phpdbg") == 0);
+
+		if (!sapi_requires_preload_user) {
+			*pid = -1;
+			return SUCCESS;
+		}
 
 		zend_shared_alloc_unlock();
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload\" requires \"opcache.preload_user\" when running under uid 0");

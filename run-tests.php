@@ -2059,9 +2059,6 @@ TEST $file
         // Make sure warnings still show up on the second run.
         $ini_settings['opcache.record_warnings'] = '1';
     }
-    if (extension_loaded('posix') && posix_getuid() === 0) {
-        $ini_settings['opcache.preload_user'] = 'root';
-    }
 
     // Any special ini settings
     // these may overwrite the test defaults...
@@ -2070,6 +2067,19 @@ TEST $file
         $ini = str_replace('{TMP}', sys_get_temp_dir(), $ini);
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
         $ini = preg_replace('/{MAIL:(\S+)}/', $replacement, $ini);
+        $skip = false;
+        $ini = preg_replace_callback('/{ENV:(\S+)}/', function ($m) use (&$skip) {
+            $name = $m[1];
+            $value = getenv($name);
+            if ($value === false) {
+                $skip = sprintf('Environment variable %s is not set', $name);
+                return '';
+            }
+            return $value;
+        }, $ini);
+        if ($skip !== false) {
+            return skip_test($tested, $tested_file, $shortname, $skip);
+        }
         settings2array(preg_split("/[\n\r]+/", $ini), $ini_settings);
 
         if ($num_repeats > 1 && isset($ini_settings['opcache.opt_debug_level'])) {
