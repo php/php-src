@@ -9,7 +9,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Added start, restart and force restart time to opcache's
   phpinfo section. (Mikhail Galanin)
-  
+  . Fix GH-9139: Allow FFI in opcache.preload when opcache.preload_user=root
+  (Arnaud, Kapitan Oczywisty)
+
 - Posix:
   . Added posix_sysconf. (David Carlier)
 
