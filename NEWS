@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81726: phar wrapper: DOS when using quine gzip file.
     (CVE-2022-31628). (cmb)
+  . Fixed bug #81727: Don't mangle HTTP variable names that clash with ones
+    that have a specific semantic meaning. (CVE-2022-31629). (Derick)
   . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
     (Tim Starling)
   . Fixed bug GH-9361 (Segmentation fault on script exit #9379). (cmb,
