@@ -1066,16 +1066,7 @@ static zend_always_inline bool zend_check_type_slow(
 		if (UNEXPECTED(ZEND_TYPE_HAS_LIST(*type))) {
 			zend_type *list_type;
 			if (ZEND_TYPE_IS_INTERSECTION(*type)) {
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
-					ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-					/* If type is not an instance of one of the types taking part in the
-					 * intersection it cannot be a valid instance of the whole intersection type. */
-					if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
-						return false;
-					}
-					PROGRESS_CACHE_SLOT();
-				} ZEND_TYPE_LIST_FOREACH_END();
-				return true;
+				return zend_check_intersection_type_from_cache_slot(ZEND_TYPE_LIST(*type), Z_OBJCE_P(arg), &cache_slot);
 			} else {
 				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
 					if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
