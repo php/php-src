@@ -2375,6 +2375,7 @@ static void zend_compile_memoized_expr(znode *result, zend_ast *expr) /* {{{ */
 }
 /* }}} */
 
+/* Remember to update type_num_classes() in compact_literals.c when changing this function */
 static size_t zend_type_get_num_classes(zend_type type) {
 	if (!ZEND_TYPE_IS_COMPLEX(type)) {
 		return 0;
