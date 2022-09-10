@@ -3657,6 +3657,8 @@ function getFileDocComment(array $stmts): ?DocComment {
 function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstract $prettyPrinter) {
     $conds = [];
     foreach ($stmts as $stmt) {
+        $cond = handlePreprocessorConditions($conds, $stmt);
+
         if ($stmt instanceof Stmt\Nop) {
             continue;
         }
@@ -3665,8 +3667,6 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             handleStatements($fileInfo, $stmt->stmts, $prettyPrinter);
             continue;
         }
-
-        $cond = handlePreprocessorConditions($conds, $stmt);
 
         if ($stmt instanceof Stmt\Const_) {
             foreach ($stmt->consts as $const) {
@@ -3774,6 +3774,9 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
         }
 
         throw new Exception("Unexpected node {$stmt->getType()}");
+    }
+    if (!empty($conds)) {
+        throw new Exception("Unterminated preprocessor conditions");
     }
 }
 
