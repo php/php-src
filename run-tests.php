@@ -748,11 +748,6 @@ function main(): void
             }
         }
 
-        // Convert extension names to lowercase
-        foreach ($exts_to_test as $key => $val) {
-            $exts_to_test[$key] = strtolower($val);
-        }
-
         foreach ($test_dirs as $dir) {
             find_files(TEST_PHP_SRCDIR . "/{$dir}", $dir == 'ext');
         }
