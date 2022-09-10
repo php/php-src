@@ -63,7 +63,23 @@ static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
 
 	if (ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
 		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			return ZEND_TYPE_LIST(arg_info->type)->num_types;
+			/* Intersection types cannot have nested list types */
+			if (ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
+				return ZEND_TYPE_LIST(arg_info->type)->num_types;
+			}
+			ZEND_ASSERT(ZEND_TYPE_IS_UNION(arg_info->type));
+			size_t count = 0;
+			zend_type *list_type;
+
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
+				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+					count += ZEND_TYPE_LIST(*list_type)->num_types;
+				} else {
+					ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+					count += 1;
+				}
+			} ZEND_TYPE_LIST_FOREACH_END();
+			return count;
 		}
 		return 1;
 	}
