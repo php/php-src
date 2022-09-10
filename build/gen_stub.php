@@ -17,10 +17,6 @@ use PhpParser\PrettyPrinterAbstract;
 error_reporting(E_ALL);
 ini_set("precision", "-1");
 
-if (PHP_VERSION_ID < 70400) {
-    throw new Exception("The build system requires PHP 7.4 at least.\n");
-}
-
 const PHP_70_VERSION_ID = 70000;
 const PHP_80_VERSION_ID = 80000;
 const PHP_81_VERSION_ID = 80100;
