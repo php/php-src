@@ -62,6 +62,8 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
+* The build system now requires PHP 7.4.0 at least. Previously PHP 7.1 was
+  required.
 * Unsupported libxml2 2.10.0 symbols are no longer exported on Windows.
 * Identifier names for namespaced functions generated from stub files through
   gen_stub.php have been changed. This requires that namespaced functions
