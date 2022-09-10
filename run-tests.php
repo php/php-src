@@ -2020,7 +2020,7 @@ TEST $file
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
-            if (!in_array(strtolower($req_ext), $loaded)) {
+            if (!in_array($req_ext, $loaded, true)) {
                 if ($req_ext == 'opcache' || $req_ext == 'xdebug') {
                     $ext_file = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
                     $ini_settings['zend_extension'][] = $ext_file;
