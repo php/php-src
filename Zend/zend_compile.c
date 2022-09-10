@@ -2380,7 +2380,23 @@ static size_t zend_type_get_num_classes(zend_type type) {
 		return 0;
 	}
 	if (ZEND_TYPE_HAS_LIST(type)) {
-		return ZEND_TYPE_LIST(type)->num_types;
+		/* Intersection types cannot have nested list types */
+		if (ZEND_TYPE_IS_INTERSECTION(type)) {
+			return ZEND_TYPE_LIST(type)->num_types;
+		}
+		ZEND_ASSERT(ZEND_TYPE_IS_UNION(type));
+		size_t count = 0;
+		zend_type *list_type;
+
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+				count += ZEND_TYPE_LIST(*list_type)->num_types;
+			} else {
+				ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+				count += 1;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		return count;
 	}
 	return 1;
 }
