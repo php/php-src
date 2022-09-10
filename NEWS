@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Standard:
   . Marked crypt()'s $string parameter as #[\SensitiveParameter]. (timwolla)
   . Fixed bug GH-9464 (build on older macOs releases). (David Bohman)
+  . Fixed bug GH-9518 (Disabling IPv6 support disables unrelated constants).
+    (cmb)
 
 01 Sep 2022, PHP 8.2.0RC1
 
