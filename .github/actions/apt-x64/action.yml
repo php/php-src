@@ -126,4 +126,8 @@ runs:
         rm /opt/oracle/instantclient/sdk/include/ldap.h
         # fix debug build warning: zend_signal: handler was replaced for signal (2) after startup
         echo DISABLE_INTERRUPT=on > /opt/oracle/instantclient/network/admin/sqlnet.ora
-        sh -c 'echo /opt/oracle/instantclient >/etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig'
+        if [ -f /etc/alpine-release ]; then
+            echo "/lib:/usr/local/lib:/usr/lib:/opt/oracle/instantclient" > /etc/ld-musl-x86_64.path
+        else
+            sh -c 'echo /opt/oracle/instantclient >/etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig'
+        fi
