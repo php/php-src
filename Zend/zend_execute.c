@@ -1001,6 +1001,8 @@ static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
 # define HAVE_CACHE_SLOT 1
 #endif
 
+#define PROGRESS_CACHE_SLOT() if (HAVE_CACHE_SLOT) {cache_slot++;}
+
 static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 		void **cache_slot, zend_type *type)
 {
@@ -1065,9 +1067,7 @@ static zend_always_inline bool zend_check_type_slow(
 					if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce)) {
 						return false;
 					}
-					if (HAVE_CACHE_SLOT) {
-						cache_slot++;
-					}
+					PROGRESS_CACHE_SLOT();
 				} ZEND_TYPE_LIST_FOREACH_END();
 				return true;
 			} else {
@@ -1085,9 +1085,7 @@ static zend_always_inline bool zend_check_type_slow(
 						}
 					}
 
-					if (HAVE_CACHE_SLOT) {
-						cache_slot++;
-					}
+					PROGRESS_CACHE_SLOT();
 				} ZEND_TYPE_LIST_FOREACH_END();
 			}
 		} else {
