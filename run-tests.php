@@ -880,24 +880,19 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     // load list of enabled and loadable extensions
     save_text($info_file, <<<'PHP'
         <?php
-        $exts = [];
-        foreach (get_loaded_extensions() as $ext) {
-            $exts[] = ['Zend OPcache' => 'opcache'][$ext] ?? $ext;
-        }
+        $exts = get_loaded_extensions();
         $ext_dir = ini_get('extension_dir');
         foreach (scandir($ext_dir) as $file) {
-            if (!preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
-                continue;
-            }
-            $ext = $matches[1];
-            if (!in_array($ext, $exts) && !extension_loaded($ext) && @dl($file)) {
-                $exts[] = $ext;
+            if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+                if (@dl($matches[1])) {
+                    $exts[] = $matches[1];
+                }
             }
         }
         echo implode(',', $exts);
-        ?>
-    PHP);
-    $exts_to_test = explode(',', shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\""));
+        PHP);
+    $extensionsNames = explode(',', shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\""));
+    $exts_to_test = array_unique(remap_loaded_extensions_names($extensionsNames));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
         'session' => ['session.auto_start=0'],
@@ -2790,6 +2785,22 @@ SH;
 }
 
 /**
+ * Map "Zend OPcache" to "opcache" and convert all ext names to lowercase.
+ */
+function remap_loaded_extensions_names(array $names): array
+{
+    $exts = [];
+    foreach ($names as $name) {
+        if ($name === 'Core') {
+            continue;
+        }
+        $exts[] = ['Zend OPcache' => 'opcache'][$name] ?? strtolower($name);
+    }
+
+    return $exts;
+}
+
+/**
  * @return bool|int
  */
 function comp_line(string $l1, string $l2, bool $is_reg)
@@ -3686,11 +3697,8 @@ class SkipCache
         }
 
         $extDir = shell_exec("$php -d display_errors=0 -r \"echo ini_get('extension_dir');\"");
-        $extensions = explode(",", shell_exec("$php -d display_errors=0 -r \"echo implode(',', get_loaded_extensions());\""));
-        $extensions = array_map('strtolower', $extensions);
-        if (in_array('zend opcache', $extensions)) {
-            $extensions[] = 'opcache';
-        }
+        $extensionsNames = explode(",", shell_exec("$php -d display_errors=0 -r \"echo implode(',', get_loaded_extensions());\""));
+        $extensions = remap_loaded_extensions_names($extensionsNames);
 
         $result = [$extDir, $extensions];
         $this->extensions[$php] = $result;
