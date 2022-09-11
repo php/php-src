@@ -11,8 +11,6 @@ oci8.privileged_connect=1
 --FILE--
 <?php
 
-// Run Test
-
 echo "Test 1\n";
 
 $c = oci_pconnect('/', 'notemtpy', 'anything', null, OCI_CRED_EXT);
