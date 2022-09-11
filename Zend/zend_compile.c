@@ -177,6 +177,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
 	{ZEND_STRL("mixed")},
+	{ZEND_STRL("callable")},
 	{NULL, 0}
 };
 

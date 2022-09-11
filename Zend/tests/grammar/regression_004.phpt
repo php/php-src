@@ -1,5 +1,5 @@
 --TEST--
-Test possible function naming regression on procedural scope
+Test possible function naming regression on procedural scope now allowed
 --FILE--
 <?php
 
@@ -9,7 +9,10 @@ class Obj
     function return(){} // valid
 }
 
-function echo(){} // not valid
+function echo(){print("test\n");} // valid
+\echo();
+namespace\echo();
 ?>
---EXPECTF--
-Parse error: syntax error, unexpected token "echo", expecting "(" in %s on line %d
+--EXPECT--
+test
+test

@@ -1,5 +1,5 @@
 --TEST--
-Test possible constant naming regression on procedural scope
+Test possible constant naming regression on procedural scope now allowed
 --FILE--
 <?php
 
@@ -9,6 +9,9 @@ class Obj
 }
 
 const return = 'nope';
+var_dump(\return);
+var_dump(Obj::return);
 ?>
---EXPECTF--
-Parse error: syntax error, unexpected token "return", expecting identifier in %s on line %d
+--EXPECT--
+string(4) "nope"
+string(3) "yep"
