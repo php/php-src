@@ -127,6 +127,8 @@ runs:
         # fix debug build warning: zend_signal: handler was replaced for signal (2) after startup
         echo DISABLE_INTERRUPT=on > /opt/oracle/instantclient/network/admin/sqlnet.ora
         if [ -f /etc/alpine-release ]; then
+            apk add libaio libc6-compat libnsl
+            ln -s /lib/libc.so.6 /usr/lib/libresolv.so.2
             echo "/lib:/usr/local/lib:/usr/lib:/opt/oracle/instantclient" > /etc/ld-musl-x86_64.path
         else
             sh -c 'echo /opt/oracle/instantclient >/etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig'
