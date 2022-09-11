@@ -66,7 +66,7 @@ var_dump($c);
 
 echo "Test 7\n";
 
-$c = oci_connect('/', '', 'mysql', null, OCI_CRED_EXT);
+$c = oci_connect('/', '', 'anything.invalid', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -75,7 +75,7 @@ var_dump($c);
 
 echo "Test 8\n";
 
-$c = oci_connect('/', null, 'mysql', null, OCI_CRED_EXT);
+$c = oci_connect('/', null, 'anything.invalid', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
