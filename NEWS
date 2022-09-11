@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
     overflow). (Arnaud)
 
+- OpenSSL:
+  . Fixed bug GH-9517 (Compilation error openssl extension related to PR
+    GH-9366). (Jakub Zelenka)
+
 - PDO_PGSQL:
   . Fixed bug GH-9411 (PgSQL large object resource is incorrectly closed).
     (Yurunsoft)

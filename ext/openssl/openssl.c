@@ -7163,14 +7163,14 @@ static void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, c
 		/* Since OpenSSL 1.1, all AEAD ciphers use a common framework. We check for
 		 * EVP_CIPH_OCB_MODE, because LibreSSL does not support it. */
 		case EVP_CIPH_GCM_MODE:
+		case EVP_CIPH_CCM_MODE:
 # ifdef EVP_CIPH_OCB_MODE
 		case EVP_CIPH_OCB_MODE:
-# endif
-		case EVP_CIPH_CCM_MODE:
-			php_openssl_set_aead_flags(mode);
 			/* For OCB mode, explicitly set the tag length even when decrypting,
 			 * see https://github.com/openssl/openssl/issues/8331. */
 			mode->set_tag_length_always = cipher_mode == EVP_CIPH_OCB_MODE;
+# endif
+			php_openssl_set_aead_flags(mode);
 			mode->set_tag_length_when_encrypting = cipher_mode == EVP_CIPH_CCM_MODE;
 			mode->is_single_run_aead = cipher_mode == EVP_CIPH_CCM_MODE;
 			break;
