@@ -160,21 +160,17 @@ function extractStubHash(string $arginfoFile): ?string {
 }
 
 class Context {
-    /** @var bool */
-    public $forceParse = false;
-    /** @var bool */
-    public $forceRegeneration = false;
+    public bool $forceParse = false;
+    public bool $forceRegeneration = false;
     /** @var iterable<ConstInfo> */
-    public $allConstInfos = [];
+    public iterable $allConstInfos = [];
     /** @var FileInfo[] */
-    public $parsedFiles = [];
+    public array $parsedFiles = [];
 }
 
 class ArrayType extends SimpleType {
-    /** @var Type */
-    public $keyType;
-    /** @var Type */
-    public $valueType;
+    public Type $keyType;
+    public Type $valueType;
 
     public static function createGenericArray(): self
     {
@@ -212,10 +208,8 @@ class ArrayType extends SimpleType {
 }
 
 class SimpleType {
-    /** @var string */
-    public $name;
-    /** @var bool */
-    public $isBuiltin;
+    public string $name;
+    public bool $isBuiltin;
 
     public static function fromNode(Node $node): SimpleType {
         if ($node instanceof Node\Name) {
@@ -552,9 +546,8 @@ class SimpleType {
 
 class Type {
     /** @var SimpleType[] */
-    public $types;
-    /** @var bool */
-    public $isIntersection = false;
+    public array $types;
+    public bool $isIntersection;
 
     public static function fromNode(Node $node): Type {
         if ($node instanceof Node\UnionType || $node instanceof Node\IntersectionType) {
@@ -780,10 +773,9 @@ class Type {
 
 class ArginfoType {
     /** @var SimpleType[] $classTypes */
-    public $classTypes;
-
+    public array $classTypes;
     /** @var SimpleType[] $builtinTypes */
-    private $builtinTypes;
+    private array $builtinTypes;
 
     /**
      * @param SimpleType[] $classTypes
@@ -819,20 +811,14 @@ class ArgInfo {
     const SEND_BY_REF = 1;
     const SEND_PREFER_REF = 2;
 
-    /** @var string */
-    public $name;
-    /** @var int */
-    public $sendBy;
-    /** @var bool */
-    public $isVariadic;
-    /** @var Type|null */
-    public $type;
-    /** @var Type|null */
-    public $phpDocType;
-    /** @var string|null */
-    public $defaultValue;
+    public string $name;
+    public int $sendBy;
+    public bool $isVariadic;
+    public ?Type $type;
+    public ?Type $phpDocType;
+    public ?string $defaultValue;
     /** @var AttributeInfo[] */
-    public $attributes;
+    public array $attributes;
 
     /**
      * @param AttributeInfo[] $attributes
@@ -943,8 +929,7 @@ abstract class AbstractConstName implements ConstOrClassConstName
 }
 
 class ConstName extends AbstractConstName {
-    /** @var string */
-    public $const;
+    public string $const;
 
     public function __construct(string $const)
     {
@@ -963,10 +948,8 @@ class ConstName extends AbstractConstName {
 }
 
 class ClassConstName extends AbstractConstName {
-    /** @var Name */
-    public $class;
-    /** @var string */
-    public $const;
+    public Name $class;
+    public string $const;
 
     public function __construct(Name $class, string $const)
     {
@@ -986,10 +969,8 @@ class ClassConstName extends AbstractConstName {
 }
 
 class PropertyName {
-    /** @var Name */
-    public $class;
-    /** @var string */
-    public $property;
+    public Name $class;
+    public string $property;
 
     public function __construct(Name $class, string $property)
     {
@@ -1015,8 +996,7 @@ interface FunctionOrMethodName {
 }
 
 class FunctionName implements FunctionOrMethodName {
-    /** @var Name */
-    private $name;
+    private Name $name;
 
     public function __construct(Name $name) {
         $this->name = $name;
@@ -1079,10 +1059,8 @@ class FunctionName implements FunctionOrMethodName {
 }
 
 class MethodName implements FunctionOrMethodName {
-    /** @var Name */
-    public $className;
-    /** @var string */
-    public $methodName;
+    public Name $className;
+    public string $methodName;
 
     public function __construct(Name $className, string $methodName) {
         $this->className = $className;
@@ -1137,16 +1115,11 @@ class ReturnInfo {
         self::REFCOUNT_N,
     ];
 
-    /** @var bool */
-    public $byRef;
-    /** @var Type|null */
-    public $type;
-    /** @var Type|null */
-    public $phpDocType;
-    /** @var bool */
-    public $tentativeReturnType;
-    /** @var string */
-    public $refcount;
+    public bool $byRef;
+    public ?Type $type;
+    public ?Type $phpDocType;
+    public bool $tentativeReturnType;
+    public string $refcount;
 
     public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType, ?string $refcount) {
         $this->byRef = $byRef;
@@ -1198,32 +1171,20 @@ class ReturnInfo {
 }
 
 class FuncInfo {
-    /** @var FunctionOrMethodName */
-    public $name;
-    /** @var int */
-    public $classFlags;
-    /** @var int */
-    public $flags;
-    /** @var string|null */
-    public $aliasType;
-    /** @var FunctionName|null */
-    public $alias;
-    /** @var bool */
-    public $isDeprecated;
-    /** @var bool */
-    public $supportsCompileTimeEval;
-    /** @var bool */
-    public $verify;
+    public FunctionOrMethodName $name;
+    public int $classFlags;
+    public int $flags;
+    public ?string $aliasType;
+    public ?FunctionOrMethodName $alias;
+    public bool $isDeprecated;
+    public bool $supportsCompileTimeEval;
+    public bool $verify;
     /** @var ArgInfo[] */
-    public $args;
-    /** @var ReturnInfo */
-    public $return;
-    /** @var int */
-    public $numRequiredArgs;
-    /** @var string|null */
-    public $cond;
-    /** @var bool */
-    public $isUndocumentable;
+    public array $args;
+    public ReturnInfo $return;
+    public int $numRequiredArgs;
+    public ?string $cond;
+    public bool $isUndocumentable;
 
     /**
      * @param ArgInfo[] $args
@@ -1608,18 +1569,10 @@ class EvaluatedValue
 {
     /** @var mixed */
     public $value;
-
-    /** @var SimpleType */
-    public $type;
-
-    /** @var string|null */
-    public $cConstValue;
-
-    /** @var bool */
-    public $isUnknownConstValue;
-
-    /** @var ConstInfo|null */
-    public $originatingConst;
+    public SimpleType $type;
+    public ?string $cConstValue;
+    public bool $isUnknownConstValue;
+    public ?ConstInfo $originatingConst;
 
     /**
      * @param iterable<ConstInfo> $allConstInfos
@@ -1752,14 +1705,10 @@ class EvaluatedValue
 
 abstract class VariableLike
 {
-    /** @var Type|null */
-    public $phpDocType;
-    /** @var int */
-    public $flags;
-    /** @var string|null */
-    public $link;
-    /** @var int|null */
-    public $phpVersionIdMinimumCompatibility;
+    public ?Type $phpDocType;
+    public int $flags;
+    public ?string $link;
+    public ?int $phpVersionIdMinimumCompatibility;
 
     public function __construct(
         int $flags,
@@ -1880,18 +1829,12 @@ abstract class VariableLike
 
 class ConstInfo extends VariableLike
 {
-    /** @var ConstOrClassConstName */
-    public $name;
-    /** @var Expr */
-    public $value;
-    /** @var bool */
-    public $isDeprecated;
-    /** @var string|null */
-    public $valueString;
-    /** @var string|null */
-    public $cond;
-    /** @var string|null */
-    public $cValue;
+    public ConstOrClassConstName $name;
+    public Expr $value;
+    public bool $isDeprecated;
+    public ?string $valueString;
+    public ?string $cond;
+    public ?string $cValue;
 
     public function __construct(
         ConstOrClassConstName $name,
@@ -2146,16 +2089,11 @@ class ConstInfo extends VariableLike
 
 class PropertyInfo extends VariableLike
 {
-    /** @var PropertyName */
-    public $name;
-    /** @var Type|null */
-    public $type;
-    /** @var Expr|null */
-    public $defaultValue;
-    /** @var string|null */
-    public $defaultValueString;
-    /** @var bool */
-    public $isDocReadonly;
+    public PropertyName $name;
+    public ?Type $type;
+    public ?Expr $defaultValue;
+    public ?string $defaultValueString;
+    public bool $isDocReadonly;
 
     public function __construct(
         PropertyName $name,
@@ -2353,10 +2291,8 @@ class PropertyInfo extends VariableLike
 }
 
 class EnumCaseInfo {
-    /** @var string */
-    public $name;
-    /** @var Expr|null */
-    public $value;
+    public string $name;
+    public ?Expr $value;
 
     public function __construct(string $name, ?Expr $value) {
         $this->name = $name;
@@ -2383,10 +2319,9 @@ class EnumCaseInfo {
 }
 
 class AttributeInfo {
-    /** @var string */
-    public $class;
+    public string $class;
     /** @var \PhpParser\Node\Arg[] */
-    public $args;
+    public array $args;
 
     /** @param \PhpParser\Node\Arg[] $args */
     public function __construct(string $class, array $args) {
@@ -2423,42 +2358,31 @@ class AttributeInfo {
 }
 
 class ClassInfo {
-    /** @var Name */
-    public $name;
-    /** @var int */
-    public $flags;
-    /** @var string */
-    public $type;
-    /** @var string|null */
-    public $alias;
-    /** @var SimpleType|null */
-    public $enumBackingType;
-    /** @var bool */
-    public $isDeprecated;
-    /** @var bool */
-    public $isStrictProperties;
+    public Name $name;
+    public int $flags;
+    public string $type;
+    public ?string $alias;
+    public ?SimpleType $enumBackingType;
+    public bool $isDeprecated;
+    public bool $isStrictProperties;
     /** @var AttributeInfo[] */
-    public $attributes;
-    /** @var bool */
-    public $isNotSerializable;
+    public array $attributes;
+    public bool $isNotSerializable;
     /** @var Name[] */
-    public $extends;
+    public array $extends;
     /** @var Name[] */
-    public $implements;
+    public array $implements;
     /** @var ConstInfo[] */
-    public $constInfos;
+    public array $constInfos;
     /** @var PropertyInfo[] */
-    public $propertyInfos;
+    public array $propertyInfos;
     /** @var FuncInfo[] */
-    public $funcInfos;
+    public array $funcInfos;
     /** @var EnumCaseInfo[] */
-    public $enumCaseInfos;
-    /** @var string|null */
-    public $cond;
-    /** @var int|null */
-    public $phpVersionIdMinimumCompatibility;
-    /** @var bool */
-    public $isUndocumentable;
+    public array $enumCaseInfos;
+    public ?string $cond;
+    public ?int $phpVersionIdMinimumCompatibility;
+    public bool $isUndocumentable;
 
     /**
      * @param AttributeInfo[] $attributes
@@ -3081,23 +3005,18 @@ class ClassInfo {
 
 class FileInfo {
     /** @var string[] */
-    public $dependencies = [];
+    public array $dependencies = [];
     /** @var ConstInfo[] */
-    public $constInfos = [];
+    public array $constInfos = [];
     /** @var FuncInfo[] */
-    public $funcInfos = [];
+    public array $funcInfos = [];
     /** @var ClassInfo[] */
-    public $classInfos = [];
-    /** @var bool */
-    public $generateFunctionEntries = false;
-    /** @var string */
-    public $declarationPrefix = "";
-    /** @var int|null */
-    public $generateLegacyArginfoForPhpVersionId;
-    /** @var bool */
-    public $generateClassEntries = false;
-    /** @var bool */
-    public $isUndocumentable = false;
+    public array $classInfos = [];
+    public bool $generateFunctionEntries = false;
+    public string $declarationPrefix = "";
+    public ?int $generateLegacyArginfoForPhpVersionId = null;
+    public bool $generateClassEntries = false;
+    public bool $isUndocumentable = false;
 
     /**
      * @return iterable<FuncInfo>
@@ -3144,10 +3063,8 @@ class FileInfo {
 }
 
 class DocCommentTag {
-    /** @var string */
-    public $name;
-    /** @var string|null */
-    public $value;
+    public string $name;
+    public ?string $value;
 
     public function __construct(string $name, ?string $value) {
         $this->name = $name;
