@@ -30,4 +30,4 @@ runs:
           --offline \
           --show-diff \
           --show-slow 1000 \
-          --set-timeout 120
+          --set-timeout 1200
