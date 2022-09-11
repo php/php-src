@@ -35,13 +35,16 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.129 2020/12/08 21:26:00 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.136 2022/09/13 16:08:34 christos Exp $")
 #endif
 
 #include "magic.h"
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_SPAWN_H
+#include <spawn.h>
 #endif
 #include <string.h>
 #include <errno.h>
@@ -51,7 +54,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.129 2020/12/08 21:26:00 christos Exp $")
 #ifndef HAVE_SIG_T
 typedef void (*sig_t)(int);
 #endif /* HAVE_SIG_T */
-#ifndef PHP_WIN32
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
 #ifdef HAVE_SYS_WAIT_H
@@ -60,14 +63,13 @@ typedef void (*sig_t)(int);
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
-#if defined(HAVE_ZLIB_H) && defined(PHP_FILEINFO_UNCOMPRESS)
+
+#if defined(HAVE_ZLIB_H) && defined(ZLIBSUPPORT)
 #define BUILTIN_DECOMPRESS
 #include <zlib.h>
 #endif
 
-#undef FIONREAD
-
-#if defined(PHP_FILEINFO_UNCOMPRESS)
+#if defined(HAVE_BZLIB_H) && defined(BZLIBSUPPORT)
 #define BUILTIN_BZLIB
 #include <bzlib.h>
 #endif
@@ -118,8 +120,6 @@ zlibcmp(const unsigned char *buf)
 	return 1;
 }
 #endif
-
-#ifdef PHP_FILEINFO_UNCOMPRESS
 
 static int
 lzmacmp(const unsigned char *buf)
@@ -224,7 +224,8 @@ private int uncompressxzlib(const unsigned char *, unsigned char **, size_t,
     size_t *);
 #endif
 
-static int makeerror(unsigned char **, size_t *, const char *, ...);
+static int makeerror(unsigned char **, size_t *, const char *, ...)
+    __attribute__((__format__(__printf__, 3, 4)));
 private const char *methodname(size_t);
 
 private int
@@ -296,7 +297,7 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
 			if (urv == ERRDATA)
 				prv = format_decompression_error(ms, i, newbuf);
 			else
-				prv = file_buffer(ms, NULL, NULL, name, newbuf, nsz);
+				prv = file_buffer(ms, -1, NULL, name, newbuf, nsz);
 			if (prv == -1)
 				goto error;
 			rv = 1;
@@ -313,17 +314,17 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
 			 * XXX: If file_buffer fails here, we overwrite
 			 * the compressed text. FIXME.
 			 */
-			if (file_buffer(ms, NULL, NULL, NULL, buf, nbytes) == -1) {
+			if (file_buffer(ms, -1, NULL, NULL, buf, nbytes) == -1) {
 				if (file_pop_buffer(ms, pb) != NULL)
 					abort();
 				goto error;
 			}
 			if ((rbuf = file_pop_buffer(ms, pb)) != NULL) {
 				if (file_printf(ms, "%s", rbuf) == -1) {
-					efree(rbuf);
+					free(rbuf);
 					goto error;
 				}
-				efree(rbuf);
+				free(rbuf);
 			}
 			if (!mime && file_printf(ms, ")") == -1)
 				goto error;
@@ -344,8 +345,7 @@ out:
 	if (sa_saved && sig_act.sa_handler != SIG_IGN)
 		(void)sigaction(SIGPIPE, &sig_act, NULL);
 
-	if (newbuf)
-		efree(newbuf);
+	free(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
 	DPRINTF("Zmagic returns %d\n", rv);
 	return rv;
@@ -380,7 +380,7 @@ swrite(int fd, const void *buf, size_t n)
  * `safe' read for sockets and pipes.
  */
 protected ssize_t
-sread(int fd, void *buf, size_t n, int canbepipe)
+sread(int fd, void *buf, size_t n, int canbepipe __attribute__((__unused__)))
 {
 	ssize_t rv;
 #ifdef FIONREAD
@@ -428,7 +428,7 @@ sread(int fd, void *buf, size_t n, int canbepipe)
 
 nocheck:
 	do
-		switch ((rv = FINFO_READ_FUNC(fd, buf, n))) {
+		switch ((rv = read(fd, buf, n))) {
 		case -1:
 			if (errno == EINTR)
 				continue;
@@ -452,7 +452,21 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 	ssize_t r;
 	int tfd;
 
-	(void)strlcpy(buf, "/tmp/file.XXXXXX", sizeof buf);
+#ifdef WIN32
+	const char *t;
+	buf[0] = '\0';
+	if ((t = getenv("TEMP")) != NULL)
+		(void)strlcpy(buf, t, sizeof(buf));
+	else if ((t = getenv("TMP")) != NULL)
+		(void)strlcpy(buf, t, sizeof(buf));
+	else if ((t = getenv("TMPDIR")) != NULL)
+		(void)strlcpy(buf, t, sizeof(buf));
+	if (buf[0] != '\0')
+		(void)strlcat(buf, "/", sizeof(buf));
+	(void)strlcat(buf, "file.XXXXXX", sizeof(buf));
+#else
+	(void)strlcpy(buf, "/tmp/file.XXXXXX", sizeof(buf));
+#endif
 #ifndef HAVE_MKSTEMP
 	{
 		char *ptr = mktemp(buf);
@@ -507,13 +521,13 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 		return -1;
 	}
 	(void)close(tfd);
-	if (FINFO_LSEEK_FUNC(fd, (zend_off_t)0, SEEK_SET) == (zend_off_t)-1) {
+	if (lseek(fd, CAST(off_t, 0), SEEK_SET) == CAST(off_t, -1)) {
 		file_badseek(ms);
 		return -1;
 	}
 	return fd;
 }
-#ifdef PHP_FILEINFO_UNCOMPRESS
+#if HAVE_FORK
 #ifdef BUILTIN_DECOMPRESS
 
 #define FHCRC		(1 << 1)
@@ -564,7 +578,7 @@ uncompresszlib(const unsigned char *old, unsigned char **newch,
 	int rc;
 	z_stream z;
 
-	if ((*newch = CAST(unsigned char *, emalloc(bytes_max + 1))) == NULL)
+	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
 		return makeerror(newch, n, "No buffer, %s", strerror(errno));
 
 	z.next_in = CCAST(Bytef *, old);
@@ -721,16 +735,61 @@ closep(int *fd)
 		closefd(fd, i);
 }
 
-static int
-copydesc(int i, int fd)
+static void
+movedesc(void *v, int i, int fd)
 {
 	if (fd == i)
-		return 0; /* "no dup was necessary" */
+		return; /* "no dup was necessary" */
+#ifdef HAVE_POSIX_SPAWNP
+	posix_spawn_file_actions_t *fa = RCAST(posix_spawn_file_actions_t *, v);
+	posix_spawn_file_actions_adddup2(fa, fd, i);
+	posix_spawn_file_actions_addclose(fa, fd);
+#else
 	if (dup2(fd, i) == -1) {
 		DPRINTF("dup(%d, %d) failed (%s)\n", fd, i, strerror(errno));
 		exit(1);
 	}
-	return 1;
+	close(v ? fd : fd);
+#endif
+}
+
+static void
+closedesc(void *v, int fd)
+{
+#ifdef HAVE_POSIX_SPAWNP
+	posix_spawn_file_actions_t *fa = RCAST(posix_spawn_file_actions_t *, v);
+	posix_spawn_file_actions_addclose(fa, fd);
+#else
+	close(v ? fd : fd);
+#endif
+}
+
+static void
+handledesc(void *v, int fd, int fdp[3][2])
+{
+	if (fd != -1) {
+		(void) lseek(fd, CAST(off_t, 0), SEEK_SET);
+		movedesc(v, STDIN_FILENO, fd);
+	} else {
+		movedesc(v, STDIN_FILENO, fdp[STDIN_FILENO][0]);
+		if (fdp[STDIN_FILENO][1] > 2)
+		    closedesc(v, fdp[STDIN_FILENO][1]);
+	}
+
+	file_clear_closexec(STDIN_FILENO);
+
+///FIXME: if one of the fdp[i][j] is 0 or 1, this can bomb spectacularly
+	movedesc(v, STDOUT_FILENO, fdp[STDOUT_FILENO][1]);
+	if (fdp[STDOUT_FILENO][0] > 2)
+		closedesc(v, fdp[STDOUT_FILENO][0]);
+
+	file_clear_closexec(STDOUT_FILENO);
+
+	movedesc(v, STDERR_FILENO, fdp[STDERR_FILENO][1]);
+	if (fdp[STDERR_FILENO][0] > 2)
+		closedesc(v, fdp[STDERR_FILENO][0]);
+
+	file_clear_closexec(STDERR_FILENO);
 }
 
 static pid_t
@@ -820,6 +879,10 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 	pid_t writepid = -1;
 	size_t i;
 	ssize_t r;
+	char *const *args;
+#ifdef HAVE_POSIX_SPAWNP
+	posix_spawn_file_actions_t fa;
+#endif
 
 	switch (method) {
 #ifdef BUILTIN_DECOMPRESS
@@ -870,6 +933,22 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 		    strerror(errno));
 	}
 
+	args = RCAST(char *const *, RCAST(intptr_t, compr[method].argv));
+#ifdef HAVE_POSIX_SPAWNP
+	posix_spawn_file_actions_init(&fa);
+
+	handledesc(&fa, fd, fdp);
+
+	status = posix_spawnp(&pid, compr[method].argv[0], &fa, NULL,
+	    args, NULL);
+
+	posix_spawn_file_actions_destroy(&fa);
+
+	if (status == -1) {
+		return makeerror(newch, n, "Cannot posix_spawn `%s', %s",
+		    compr[method].argv[0], strerror(errno));
+	}
+#else
 	/* For processes with large mapped virtual sizes, vfork
 	 * may be _much_ faster (10-100 times) than fork.
 	 */
@@ -884,37 +963,14 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 		 * in a way which confuses parent. In particular,
 		 * do not modify fdp[i][j].
 		 */
-		if (fd != -1) {
-			(void) lseek(fd, CAST(off_t, 0), SEEK_SET);
-			if (copydesc(STDIN_FILENO, fd))
-				(void) close(fd);
-		} else {
-			if (copydesc(STDIN_FILENO, fdp[STDIN_FILENO][0]))
-				(void) close(fdp[STDIN_FILENO][0]);
-			if (fdp[STDIN_FILENO][1] > 2)
-				(void) close(fdp[STDIN_FILENO][1]);
-		}
-		file_clear_closexec(STDIN_FILENO);
+		handledesc(NULL, fd, fdp);
 
-///FIXME: if one of the fdp[i][j] is 0 or 1, this can bomb spectacularly
-		if (copydesc(STDOUT_FILENO, fdp[STDOUT_FILENO][1]))
-			(void) close(fdp[STDOUT_FILENO][1]);
-		if (fdp[STDOUT_FILENO][0] > 2)
-			(void) close(fdp[STDOUT_FILENO][0]);
-		file_clear_closexec(STDOUT_FILENO);
-
-		if (copydesc(STDERR_FILENO, fdp[STDERR_FILENO][1]))
-			(void) close(fdp[STDERR_FILENO][1]);
-		if (fdp[STDERR_FILENO][0] > 2)
-			(void) close(fdp[STDERR_FILENO][0]);
-		file_clear_closexec(STDERR_FILENO);
-
-		(void)execvp(compr[method].argv[0],
-		    RCAST(char *const *, RCAST(intptr_t, compr[method].argv)));
+		(void)execvp(compr[method].argv[0], args);
 		dprintf(STDERR_FILENO, "exec `%s' failed, %s",
 		    compr[method].argv[0], strerror(errno));
 		_exit(1); /* _exit(), not exit(), because of vfork */
 	}
+#endif
 	/* parent */
 	/* Close write sides of child stdout/err pipes */
 	for (i = 1; i < __arraycount(fdp); i++)
@@ -933,7 +989,10 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 		goto err;
 	}
 	rv = OKDATA;
+	errno = 0;
 	r = sread(fdp[STDOUT_FILENO][0], *newch, bytes_max, 0);
+	if (r == 0 && errno == 0)
+		goto ok;
 	if (r <= 0) {
 		DPRINTF("Read stdout failed %d (%s)\n", fdp[STDOUT_FILENO][0],
 		    r != -1 ? strerror(errno) : "no data");
@@ -988,5 +1047,4 @@ wait_err:
 
 	return rv;
 }
-#endif
 #endif

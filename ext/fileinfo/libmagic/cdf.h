@@ -35,10 +35,10 @@
 #ifndef _H_CDF_
 #define _H_CDF_
 
-#ifdef PHP_WIN32
+#ifdef WIN32
 #include <winsock2.h>
-#define asctime_r php_asctime_r
-#define ctime_r php_ctime_r
+#define timespec timeval
+#define tv_nsec tv_usec
 #endif
 #ifdef __DJGPP__
 #define timespec timeval

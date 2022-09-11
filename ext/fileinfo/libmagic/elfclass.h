@@ -41,7 +41,7 @@
 			return toomany(ms, "program headers", phnum);
 		flags |= FLAGS_IS_CORE;
 		if (dophn_core(ms, clazz, swap, fd,
-		    CAST(zend_off_t, elf_getu(swap, elfhdr.e_phoff)), phnum,
+		    CAST(off_t, elf_getu(swap, elfhdr.e_phoff)), phnum,
 		    CAST(size_t, elf_getu16(swap, elfhdr.e_phentsize)),
 		    fsize, &flags, &notecount) == -1)
 			return -1;
@@ -56,7 +56,7 @@
 		if (shnum > ms->elf_shnum_max)
 			return toomany(ms, "section", shnum);
 		if (dophn_exec(ms, clazz, swap, fd,
-		    CAST(zend_off_t, elf_getu(swap, elfhdr.e_phoff)), phnum,
+		    CAST(off_t, elf_getu(swap, elfhdr.e_phoff)), phnum,
 		    CAST(size_t, elf_getu16(swap, elfhdr.e_phentsize)),
 		    fsize, shnum, &flags, &notecount) == -1)
 			return -1;
@@ -66,7 +66,7 @@
 		if (shnum > ms->elf_shnum_max)
 			return toomany(ms, "section headers", shnum);
 		if (doshn(ms, clazz, swap, fd,
-		    CAST(zend_off_t, elf_getu(swap, elfhdr.e_shoff)), shnum,
+		    CAST(off_t, elf_getu(swap, elfhdr.e_shoff)), shnum,
 		    CAST(size_t, elf_getu16(swap, elfhdr.e_shentsize)),
 		    fsize, elf_getu16(swap, elfhdr.e_machine),
 		    CAST(int, elf_getu16(swap, elfhdr.e_shstrndx)),
