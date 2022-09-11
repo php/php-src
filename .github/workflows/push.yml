@@ -22,8 +22,125 @@ jobs:
         include:
           - debug: true
             zts: false
+            i: 0
+          - debug: true
+            zts: false
+            i: 1
+          - debug: true
+            zts: false
+            i: 2
+          - debug: true
+            zts: false
+            i: 3
+          - debug: true
+            zts: false
+            i: 4
+          - debug: true
+            zts: false
+            i: 5
+          - debug: true
+            zts: false
+            i: 6
+          - debug: true
+            zts: false
+            i: 7
+          - debug: true
+            zts: false
+            i: 8
+          - debug: true
+            zts: false
+            i: 9
+          - debug: true
+            zts: false
+            i: 10
+          - debug: true
+            zts: false
+            i: 11
+          - debug: true
+            zts: false
+            i: 12
+          - debug: true
+            zts: false
+            i: 13
+          - debug: true
+            zts: false
+            i: 14
+          - debug: true
+            zts: false
+            i: 15
+          - debug: true
+            zts: false
+            i: 16
+          - debug: true
+            zts: false
+            i: 17
+          - debug: true
+            zts: false
+            i: 18
+          - debug: true
+            zts: false
+            i: 19
+
           - debug: false
             zts: true
+            i: 0
+          - debug: false
+            zts: true
+            i: 1
+          - debug: false
+            zts: true
+            i: 2
+          - debug: false
+            zts: true
+            i: 3
+          - debug: false
+            zts: true
+            i: 4
+          - debug: false
+            zts: true
+            i: 5
+          - debug: false
+            zts: true
+            i: 6
+          - debug: false
+            zts: true
+            i: 7
+          - debug: false
+            zts: true
+            i: 8
+          - debug: false
+            zts: true
+            i: 9
+          - debug: false
+            zts: true
+            i: 10
+          - debug: false
+            zts: true
+            i: 11
+          - debug: false
+            zts: true
+            i: 12
+          - debug: false
+            zts: true
+            i: 13
+          - debug: false
+            zts: true
+            i: 14
+          - debug: false
+            zts: true
+            i: 15
+          - debug: false
+            zts: true
+            i: 16
+          - debug: false
+            zts: true
+            i: 17
+          - debug: false
+            zts: true
+            i: 18
+          - debug: false
+            zts: true
+            i: 19
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
     steps:
