@@ -269,6 +269,9 @@ ZEND_API zend_result zend_parse_ini_string(char *str, bool unbuffered_errors, in
 static void zval_ini_dtor(zval *zv)
 {
 	if (Z_TYPE_P(zv) == IS_STRING) {
+		if (ZEND_SYSTEM_INI) {
+			GC_MAKE_PERSISTENT_LOCAL(Z_STR_P(zv));
+		}
 		zend_string_release(Z_STR_P(zv));
 	}
 }
@@ -324,6 +327,9 @@ statement:
 			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
+			if (ZEND_SYSTEM_INI) {
+				GC_MAKE_PERSISTENT_LOCAL(Z_STR($1));
+			}
 			zend_string_release(Z_STR($1));
 			zval_ini_dtor(&$3);
 		}
