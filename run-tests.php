@@ -23,8 +23,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* Temporary variables while this file is being refactored. */
 /** @var ?JUnit */
 $junit = null;
