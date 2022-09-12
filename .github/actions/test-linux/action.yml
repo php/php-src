@@ -24,5 +24,10 @@ runs:
         export PDO_OCI_TEST_PASS="pass"
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export SKIP_IO_CAPTURE_TESTS=1
-        strace -k -t sapi/cli/php ext/oci8/tests/extauth_02.phpt
-        strace -k -t sapi/cli/php ext/oci8/tests/extauth_02.phpt
+        sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
+          -j$(/usr/bin/nproc) \
+          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          --offline \
+          --show-diff \
+          --show-slow 1000 \
+          --set-timeout 120

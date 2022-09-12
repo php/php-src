@@ -754,7 +754,7 @@ function main(): void
         $ignored_by_ext = 0;
         sort($exts_to_test);
         $test_dirs = [];
-        $optionals = ['ext/bcmath', 'ext/oci8', 'ext/pdo_oci'];
+        $optionals = ['Zend', 'tests', 'ext', 'sapi'];
 
         foreach ($optionals as $dir) {
             if (is_dir($dir)) {
