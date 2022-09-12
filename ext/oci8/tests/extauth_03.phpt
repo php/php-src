@@ -14,7 +14,7 @@ oci8.privileged_connect=1
 echo "Test 1\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('/', 'notemtpy', 'x.cz', null, OCI_CRED_EXT);
+$c = oci_pconnect('/', 'notemtpy', 'sql1', null, OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -25,7 +25,7 @@ var_dump($c);
 echo "Test 2\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('notemtpy', 'notemtpy', 'x.cz', null, OCI_CRED_EXT);
+$c = oci_pconnect('notemtpy', 'notemtpy', 'sql1', null, OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -36,7 +36,7 @@ var_dump($c);
 echo "Test 3\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('notemtpy', '', 'x.cz', null, OCI_CRED_EXT);
+$c = oci_pconnect('notemtpy', '', 'sql1', null, OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -47,7 +47,7 @@ var_dump($c);
 echo "Test 4\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('a', 'b', 'x.cz', null, OCI_SYSDBA+OCI_SYSOPER);
+$c = oci_pconnect('a', 'b', 'sql1', null, OCI_SYSDBA+OCI_SYSOPER);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -58,7 +58,7 @@ var_dump($c);
 echo "Test 5\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('a', 'b', 'x.cz', null, OCI_SYSDBA+OCI_SYSOPER+OCI_CRED_EXT);
+$c = oci_pconnect('a', 'b', 'sql1', null, OCI_SYSDBA+OCI_SYSOPER+OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -69,7 +69,7 @@ var_dump($c);
 echo "Test 6\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('', '', 'x.cz', null, OCI_CRED_EXT);
+$c = oci_pconnect('', '', 'sql1', null, OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -80,7 +80,7 @@ var_dump($c);
 echo "Test 7\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('/', '', 'x.cz', null, OCI_CRED_EXT);
+$c = oci_pconnect('/', '', 'sql1', null, OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -91,7 +91,7 @@ var_dump($c);
 echo "Test 8\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('/', null, 'x.cz', null, OCI_CRED_EXT);
+$c = oci_pconnect('/', null, 'sql1', null, OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -102,7 +102,7 @@ var_dump($c);
 echo "Test 9\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('/', '', 'x.cz', null, OCI_SYSDBA+OCI_CRED_EXT);
+$c = oci_pconnect('/', '', 'sql1', null, OCI_SYSDBA+OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();
@@ -113,7 +113,7 @@ var_dump($c);
 echo "Test 10\n";
 
 $tt = microtime(true);
-$c = oci_pconnect('/', '', 'x.cz', null, OCI_SYSOPER+OCI_CRED_EXT);
+$c = oci_pconnect('/', '', 'sql1', null, OCI_SYSOPER+OCI_CRED_EXT);
 echo 'elapsed: ' . round(microtime(true) - $tt) . " secs\n";
 if (!$c) {
     $m = oci_error();

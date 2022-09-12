@@ -146,6 +146,8 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v2
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
         uses: ./.github/actions/setup-oracle
       - name: apt
