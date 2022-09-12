@@ -14,6 +14,7 @@ runs:
           ldap-utils \
           openssl \
           slapd \
+          strace \
           language-pack-de \
           libgmp-dev \
           libicu-dev \
