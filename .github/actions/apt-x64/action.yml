@@ -15,6 +15,7 @@ runs:
           openssl \
           slapd \
           strace \
+          ltrace \
           language-pack-de \
           libgmp-dev \
           libicu-dev \
