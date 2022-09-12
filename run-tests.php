@@ -878,6 +878,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         foreach (scandir($ext_dir) as $file) {
             if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
                 $t = microtime(true);
+                var_dump($matches[1]);
                 if (dl($matches[1])) {
                     $exts[] = $matches[1];
                     $exts[] = microtime(true) - $t;
