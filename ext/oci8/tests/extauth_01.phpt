@@ -13,7 +13,7 @@ oci8.privileged_connect=1
 
 echo "Test 1\n";
 
-$c = oci_connect('/', 'notemtpy', 'sql1', null, OCI_CRED_EXT);
+$c = oci_connect('/', 'notemtpy', 'x.cz', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -22,7 +22,7 @@ var_dump($c);
 
 echo "Test 2\n";
 
-$c = oci_connect('notemtpy', 'notemtpy', 'sql1', null, OCI_CRED_EXT);
+$c = oci_connect('notemtpy', 'notemtpy', 'x.cz', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -31,7 +31,7 @@ var_dump($c);
 
 echo "Test 3\n";
 
-$c = oci_connect('notemtpy', '', 'sql1', null, OCI_CRED_EXT);
+$c = oci_connect('notemtpy', '', 'x.cz', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -40,7 +40,7 @@ var_dump($c);
 
 echo "Test 4\n";
 
-$c = oci_connect('a', 'b', 'sql1', null, OCI_SYSDBA+OCI_SYSOPER);
+$c = oci_connect('a', 'b', 'x.cz', null, OCI_SYSDBA+OCI_SYSOPER);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -49,7 +49,7 @@ var_dump($c);
 
 echo "Test 5\n";
 
-$c = oci_connect('a', 'b', 'sql1', null, OCI_SYSDBA+OCI_SYSOPER+OCI_CRED_EXT);
+$c = oci_connect('a', 'b', 'x.cz', null, OCI_SYSDBA+OCI_SYSOPER+OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -58,7 +58,7 @@ var_dump($c);
 
 echo "Test 6\n";
 
-$c = oci_connect('', '', 'sql1', null, OCI_CRED_EXT);
+$c = oci_connect('', '', 'x.cz', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -67,7 +67,7 @@ var_dump($c);
 
 echo "Test 7\n";
 
-$c = oci_connect('/', '', 'sql1', null, OCI_CRED_EXT);
+$c = oci_connect('/', '', 'x.cz', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -76,7 +76,7 @@ var_dump($c);
 
 echo "Test 8\n";
 
-$c = oci_connect('/', null, 'sql1', null, OCI_CRED_EXT);
+$c = oci_connect('/', null, 'x.cz', null, OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -85,7 +85,7 @@ var_dump($c);
 
 echo "Test 9\n";
 
-$c = oci_connect('/', '', 'sql1', null, OCI_SYSDBA+OCI_CRED_EXT);
+$c = oci_connect('/', '', 'x.cz', null, OCI_SYSDBA+OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
@@ -94,7 +94,7 @@ var_dump($c);
 
 echo "Test 10\n";
 
-$c = oci_connect('/', '', 'sql1', null, OCI_SYSOPER+OCI_CRED_EXT);
+$c = oci_connect('/', '', 'x.cz', null, OCI_SYSOPER+OCI_CRED_EXT);
 if (!$c) {
     $m = oci_error();
     var_dump($m);
