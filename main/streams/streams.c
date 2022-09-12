@@ -1674,6 +1674,7 @@ static void stream_resource_persistent_dtor(zend_resource *rsrc)
 
 void php_shutdown_stream_hashes(void)
 {
+	FG(user_stream_current_filename) = NULL;
 	if (FG(stream_wrappers)) {
 		zend_hash_destroy(FG(stream_wrappers));
 		efree(FG(stream_wrappers));
