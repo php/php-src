@@ -127,43 +127,43 @@ var_dump($c);
 Test 1
 
 Warning: oci_connect(): OCI_CRED_EXT can only be used with a username of "/" and a NULL password in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 bool(false)
 bool(false)
 Test 2
 
 Warning: oci_connect(): OCI_CRED_EXT can only be used with a username of "/" and a NULL password in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 bool(false)
 bool(false)
 Test 3
 
 Warning: oci_connect(): OCI_CRED_EXT can only be used with a username of "/" and a NULL password in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 bool(false)
 bool(false)
 Test 4
 
 Warning: oci_connect(): OCI_SYSDBA and OCI_SYSOPER cannot be used together in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 bool(false)
 bool(false)
 Test 5
 
 Warning: oci_connect(): OCI_SYSDBA and OCI_SYSOPER cannot be used together in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 bool(false)
 bool(false)
 Test 6
 
 Warning: oci_connect(): OCI_CRED_EXT can only be used with a username of "/" and a NULL password in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 bool(false)
 bool(false)
 Test 7
 
 Warning: oci_connect(): ORA-12154: %s in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 array(4) {
   ["code"]=>
   int(12154)
@@ -178,7 +178,7 @@ bool(false)
 Test 8
 
 Warning: oci_connect(): ORA-12154: %s in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 array(4) {
   ["code"]=>
   int(12154)
@@ -193,7 +193,7 @@ bool(false)
 Test 9
 
 Warning: oci_connect(): ORA-%d: TNS:%s in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 array(4) {
   ["code"]=>
   int(%d)
@@ -208,7 +208,7 @@ bool(false)
 Test 10
 
 Warning: oci_connect(): ORA-%d: TNS:%s in %s on line %d
-elapsed: %d secs
+elapsed: %c secs
 array(4) {
   ["code"]=>
   int(%d)
