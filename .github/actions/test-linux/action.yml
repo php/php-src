@@ -24,5 +24,5 @@ runs:
         export PDO_OCI_TEST_PASS="pass"
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export SKIP_IO_CAPTURE_TESTS=1
-        ltrace -fS -t sapi/cli/php ext/oci8/tests/extauth_02.phpt
-        ltrace -fS -t sapi/cli/php ext/oci8/tests/extauth_02.phpt
+        strace -k -t sapi/cli/php ext/oci8/tests/extauth_02.phpt
+        strace -k -t sapi/cli/php ext/oci8/tests/extauth_02.phpt
