@@ -4,15 +4,12 @@ Test External Authentication errors with oci_connect
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 if (substr(PHP_OS, 0, 3) == 'WIN') die("skip feature not available on Windows platforms");
-require(__DIR__.'/details.inc');
-if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
+die("skip random CI timeouts caused by Oracle Instant Client, see https://github.com/php/php-src/pull/9524#issuecomment-1244409815");
 ?>
 --INI--
 oci8.privileged_connect=1
 --FILE--
 <?php
-
-// Run Test
 
 echo "Test 1\n";
 
