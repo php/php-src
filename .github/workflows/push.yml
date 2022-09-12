@@ -162,9 +162,21 @@ jobs:
         uses: ./.github/actions/install-linux
       - name: Setup
         uses: ./.github/actions/setup-x64
-      - name: Test
+      - name: Test 1
         uses: ./.github/actions/test-linux
-      - name: Test Tracing JIT
+      - name: Test 2
+        uses: ./.github/actions/test-linux
+      - name: Test 3
+        uses: ./.github/actions/test-linux
+      - name: Test 4
+        uses: ./.github/actions/test-linux
+      - name: Test Tracing JIT 1
+        uses: ./.github/actions/test-linux
+      - name: Test Tracing JIT 2
+        uses: ./.github/actions/test-linux
+      - name: Test Tracing JIT 3
+        uses: ./.github/actions/test-linux
+      - name: Test Tracing JIT 4
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
