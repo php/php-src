@@ -877,8 +877,12 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         $ext_dir = ini_get('extension_dir');
         foreach (scandir($ext_dir) as $file) {
             if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
-                $t = microtime(true);
-                var_dump($matches[1]);
+                // remove once https://github.com/php/php-src/issues/9196 is fixed
+                // @dl() is fast (about 1 ms / dl() call)
+                if (extension_loaded($matches[1])) {
+                    continue;
+                }
+
                 if (dl($matches[1])) {
                     $exts[] = $matches[1];
                     $exts[] = microtime(true) - $t;
