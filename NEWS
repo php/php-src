@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2022, PHP 8.0.24
+15 Sep 2022, PHP 8.0.24RC1
 
 - Core:
   . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
