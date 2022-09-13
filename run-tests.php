@@ -877,22 +877,20 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         $ext_dir = ini_get('extension_dir');
         foreach (scandir($ext_dir) as $file) {
             if (preg_match('/^(?:php_)?([_a-zA-Z0-9]+)\.(?:so|dll)$/', $file, $matches)) {
+                // workaround dl('mysqli') fatal error
                 // remove once https://github.com/php/php-src/issues/9196 is fixed
-                // @dl() is fast (about 1 ms / dl() call)
-                if (extension_loaded($matches[1])) {
+                if ($matches[1] === 'mysqli') {
                     continue;
                 }
 
-                if (dl($matches[1])) {
+                if (@dl($matches[1])) {
                     $exts[] = $matches[1];
-                    $exts[] = microtime(true) - $t;
                 }
             }
         }
         echo implode(',', $exts);
         PHP);
     $extensionsNames = explode(',', shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\""));
-    print_r($extensionsNames);echo "\nxxxxxx\n\n\n";
     $exts_to_test = array_unique(remap_loaded_extensions_names($extensionsNames));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
