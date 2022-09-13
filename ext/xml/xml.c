@@ -157,7 +157,7 @@ static void xml_call_handler(xml_parser *, zval *, zend_function *, int, zval *,
 static void _xml_xmlchar_zval(const XML_Char *, int, const XML_Char *, zval *);
 static int _xml_xmlcharlen(const XML_Char *);
 static void _xml_add_to_info(xml_parser *parser, const char *name);
-inline static zend_string *_xml_decode_tag(xml_parser *parser, const char *tag);
+inline static zend_string *_xml_decode_tag(xml_parser *parser, const XML_Char *tag);
 
 void _xml_startElementHandler(void *, const XML_Char *, const XML_Char **);
 void _xml_endElementHandler(void *, const XML_Char *);
@@ -570,11 +570,11 @@ static void _xml_add_to_info(xml_parser *parser, const char *name)
 /* }}} */
 
 /* {{{ _xml_decode_tag() */
-static zend_string *_xml_decode_tag(xml_parser *parser, const char *tag)
+static zend_string *_xml_decode_tag(xml_parser *parser, const XML_Char *tag)
 {
 	zend_string *str;
 
-	str = xml_utf8_decode((const XML_Char *)tag, strlen(tag), parser->target_encoding);
+	str = xml_utf8_decode(tag, _xml_xmlcharlen(tag), parser->target_encoding);
 
 	if (parser->case_folding) {
 		zend_str_toupper(ZSTR_VAL(str), ZSTR_LEN(str));
@@ -595,7 +595,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 	if (parser) {
 		parser->level++;
 
-		tag_name = _xml_decode_tag(parser, (const char *)name);
+		tag_name = _xml_decode_tag(parser, name);
 
 		if (!Z_ISUNDEF(parser->startElementHandler)) {
 			ZVAL_COPY(&args[0], &parser->index);
@@ -605,7 +605,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			while (attributes && *attributes) {
 				zval tmp;
 
-				att = _xml_decode_tag(parser, (const char *)attributes[0]);
+				att = _xml_decode_tag(parser, attributes[0]);
 				val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 				ZVAL_STR(&tmp, val);
@@ -642,7 +642,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				while (attributes && *attributes) {
 					zval tmp;
 
-					att = _xml_decode_tag(parser, (const char *)attributes[0]);
+					att = _xml_decode_tag(parser, attributes[0]);
 					val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 					ZVAL_STR(&tmp, val);
@@ -679,7 +679,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 	if (parser) {
 		zval retval, args[2];
 
-		zend_string *tag_name = _xml_decode_tag(parser, (const char *)name);
+		zend_string *tag_name = _xml_decode_tag(parser, name);
 
 		if (!Z_ISUNDEF(parser->endElementHandler)) {
 			ZVAL_COPY(&args[0], &parser->index);
