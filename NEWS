@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9516 ((A&B)|D as a param should allow AB or D. Not just A).
     (Girgias)
 
+- GMP
+  . Fixed bug GH-9308 (GMP throws the wrong error when a GMP object is passed
+    to gmp_init()). (Girgias)
+
 - Opcache:
   . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
     overflow). (Arnaud)
