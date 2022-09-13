@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9308 (GMP throws the wrong error when a GMP object is passed
     to gmp_init()). (Girgias)
 
+- Intl
+  . Fixed bug GH-9421 (Incorrect argument number for ValueError in NumberFormatter).
+    (Girgias)
+
 - Opcache:
   . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
     overflow). (Arnaud)
