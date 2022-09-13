@@ -156,7 +156,7 @@ inline static char xml_decode_us_ascii(unsigned short);
 static void xml_call_handler(xml_parser *, zval *, zend_function *, int, zval *, zval *);
 static void _xml_xmlchar_zval(const XML_Char *, int, const XML_Char *, zval *);
 static int _xml_xmlcharlen(const XML_Char *);
-static void _xml_add_to_info(xml_parser *parser,char *name);
+static void _xml_add_to_info(xml_parser *parser, const char *name);
 inline static zend_string *_xml_decode_tag(xml_parser *parser, const char *tag);
 
 void _xml_startElementHandler(void *, const XML_Char *, const XML_Char **);
@@ -548,7 +548,7 @@ static int _xml_xmlcharlen(const XML_Char *s)
 /* }}} */
 
 /* {{{ _xml_add_to_info() */
-static void _xml_add_to_info(xml_parser *parser,char *name)
+static void _xml_add_to_info(xml_parser *parser, const char *name)
 {
 	zval *element;
 
@@ -556,10 +556,11 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 		return;
 	}
 
-	if ((element = zend_hash_str_find(Z_ARRVAL(parser->info), name, strlen(name))) == NULL) {
+	size_t name_len = strlen(name);
+	if ((element = zend_hash_str_find(Z_ARRVAL(parser->info), name, name_len)) == NULL) {
 		zval values;
 		array_init(&values);
-		element = zend_hash_str_update(Z_ARRVAL(parser->info), name, strlen(name), &values);
+		element = zend_hash_str_update(Z_ARRVAL(parser->info), name, name_len, &values);
 	}
 
 	add_next_index_long(element, parser->curtag);
