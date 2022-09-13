@@ -1049,7 +1049,7 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
 
     while (($name = readdir($o)) !== false) {
         if (is_dir("{$dir}/{$name}") && !in_array($name, ['.', '..', '.svn'])) {
-            $skip_ext = ($is_ext_dir && !in_array(strtolower($name), $exts_to_test));
+            $skip_ext = ($is_ext_dir && !in_array($name, $exts_to_test));
             if ($skip_ext) {
                 $exts_skipped[] = $name;
             }
