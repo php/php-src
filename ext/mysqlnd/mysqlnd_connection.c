@@ -506,8 +506,24 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	if (PASS == conn->vio->data->m.connect(conn->vio, *scheme, conn->persistent, conn->stats, conn->error_info)) {
 		conn->protocol_frame_codec->data->m.reset(conn->protocol_frame_codec, conn->stats, conn->error_info);
 		size_t client_flags = mysql_flags;
+		php_stream * net_stream = NULL;
+
+		if (conn->vio->data->options.timeout_connect) {
+			net_stream = conn->vio->data->m.get_stream(conn->vio);
+			struct timeval tv;
+			tv.tv_sec = conn->vio->data->options.timeout_connect;
+			tv.tv_usec = 0;
+			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		}
 
 		ret = conn->command->handshake(conn, *username, *password, *database, client_flags);
+
+		if (net_stream) {
+			struct timeval tv;
+			tv.tv_sec = conn->vio->data->options.timeout_read;
+			tv.tv_usec = 0;
+			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		}
 	}
 	DBG_RETURN(ret);
 }
