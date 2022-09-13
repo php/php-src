@@ -1059,11 +1059,14 @@ static bool zend_check_intersection_type_from_cache_slot(zend_type_list *interse
 	zend_type *list_type;
 	bool status = true;
 	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
-		ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
-		/* If type is not an instance of one of the types taking part in the
-		 * intersection it cannot be a valid instance of the whole intersection type. */
-		if (!ce || !instanceof_function(arg_ce, ce)) {
-			status = false;
+		/* Only check classes if the type might be valid */
+		if (status) {
+			ce = zend_fetch_ce_from_cache_slot(cache_slot, list_type);
+			/* If type is not an instance of one of the types taking part in the
+			 * intersection it cannot be a valid instance of the whole intersection type. */
+			if (!ce || !instanceof_function(arg_ce, ce)) {
+				status = false;
+			}
 		}
 		PROGRESS_CACHE_SLOT();
 	} ZEND_TYPE_LIST_FOREACH_END();
