@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-9500 (Using dnf type with parentheses after readonly keyword
     results in a parse error). (ilutov)
+  . Fixed bug GH-9516 ((A&B)|D as a param should allow AB or D. Not just A).
+    (Girgias)
 
 - Opcache:
   . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
