@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.11
+?? ??? ????, PHP 8.1.12
+
+
+29 Sep 2022, PHP 8.1.11
 
 - Core:
   . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
