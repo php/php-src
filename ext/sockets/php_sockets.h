@@ -184,9 +184,14 @@ PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket 
 #endif
 
 #ifdef WIN32
+#elif defined(ENFILE)
+#define PHP_SOCKET_ENFILE ENFILE
+#endif
+
+#ifdef WIN32
 #define PHP_SOCKET_EMFILE WSAEMFILE
 #elif defined(EMFILE)
-#define PHP_SOCKET_ENFILE EMFILE
+#define PHP_SOCKET_EMFILE EMFILE
 #endif
 
 #ifdef WIN32
@@ -257,7 +262,7 @@ PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket 
 
 #ifdef WIN32
 #define PHP_SOCKET_EPFNOSUPPORT WSAEPFNOSUPPORT
-#elif defined(EOPNOTSUPP)
+#elif defined(EPFNOSUPPORT)
 #define PHP_SOCKET_EPFNOSUPPORT EPFNOSUPPORT
 #endif
 
@@ -293,8 +298,8 @@ PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket 
 
 #ifdef WIN32
 #define PHP_SOCKET_ENETRESET WSAENETRESET
-#elif defined(WSAENETRESET)
-#define PHP_SOCKET_ENETRESET ENETUNREACH
+#elif defined(ENETRESET)
+#define PHP_SOCKET_ENETRESET ENETRESET
 #endif
 
 #ifdef WIN32
@@ -304,9 +309,9 @@ PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket 
 #endif
 
 #ifdef WIN32
-#define PHP_SOCKET_ECONNRESET WSAECONNABORTED
-#elif defined(ECONNABORTED)
-#define PHP_SOCKET_ECONNRESET ECONNABORTED
+#define PHP_SOCKET_ECONNRESET WSAECONNRESET
+#elif defined(ECONNRESET)
+#define PHP_SOCKET_ECONNRESET ECONNRESET
 #endif
 
 #ifdef WIN32
@@ -329,14 +334,8 @@ PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket 
 
 #ifdef WIN32
 #define PHP_SOCKET_ESHUTDOWN WSAESHUTDOWN
-#elif defined(EISCONN)
+#elif defined(ESHUTDOWN)
 #define PHP_SOCKET_ESHUTDOWN ESHUTDOWN
-#endif
-
-#ifdef WIN32
-#define PHP_SOCKET_ETOOMANYREFS WSAETOOMANYREFS
-#elif defined(EISCONN)
-#define PHP_SOCKET_ETOOMANYREFS ETOOMANYREFS
 #endif
 
 #ifdef WIN32
