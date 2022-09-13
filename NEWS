@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug #77780 ("Headers already sent..." when previous connection was
     aborted). (Jakub Zelenka)
 
+- GMP
+  . Fixed bug GH-9308 (GMP throws the wrong error when a GMP object is passed
+    to gmp_init()). (Girgias)
+
 - PCRE:
   . Fixed pcre.jit on Apple Silicon. (Niklas Keller)
 
