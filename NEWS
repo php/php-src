@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0RC2
+?? ??? ????, PHP 8.2.0RC3
+
+
+15 Sep 2022, PHP 8.2.0RC2
 
 - Core:
   . Fixed bug GH-9500 (Using dnf type with parentheses after readonly keyword
