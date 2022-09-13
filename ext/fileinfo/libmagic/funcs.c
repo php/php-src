@@ -51,6 +51,13 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.131 2022/09/13 18:46:07 christos Exp $")
 #define SIZE_MAX	((size_t)~0)
 #endif
 
+#include "php.h"
+#include "main/php_network.h"
+
+#ifndef PREG_OFFSET_CAPTURE
+# define PREG_OFFSET_CAPTURE                 (1<<8)
+#endif
+
 protected char *
 file_copystr(char *buf, size_t blen, size_t width, const char *str)
 {
@@ -66,7 +73,7 @@ file_copystr(char *buf, size_t blen, size_t width, const char *str)
 private void
 file_clearbuf(struct magic_set *ms)
 {
-	free(ms->o.buf);
+	efree(ms->o.buf);
 	ms->o.buf = NULL;
 	ms->o.blen = 0;
 }
@@ -132,7 +139,7 @@ file_checkfmt(char *msg, size_t mlen, const char *fmt)
 protected int
 file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 {
-	int len;
+	size_t len;
 	char *buf, *newstr;
 	char tbuf[1024];
 
@@ -145,10 +152,10 @@ file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 		return -1;
 	}
 
-	len = vasprintf(&buf, fmt, ap);
-	if (len < 0 || (size_t)len > 1024 || len + ms->o.blen > 1024 * 1024) {
+	len = vspprintf(&buf, 0, fmt, ap);
+	if (len > 1024 || len + ms->o.blen > 1024 * 1024) {
 		size_t blen = ms->o.blen;
-		free(buf);
+		if (buf) efree(buf);
 		file_clearbuf(ms);
 		file_error(ms, 0, "Output buffer space exceeded %d+%"
 		    SIZE_T_FORMAT "u", len, blen);
@@ -156,20 +163,14 @@ file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 	}
 
 	if (ms->o.buf != NULL) {
-		len = asprintf(&newstr, "%s%s", ms->o.buf, buf);
-		free(buf);
-		if (len < 0)
-			goto out;
-		free(ms->o.buf);
+		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, buf);
+		efree(buf);
+		efree(ms->o.buf);
 		buf = newstr;
 	}
 	ms->o.buf = buf;
 	ms->o.blen = len;
 	return 0;
-out:
-	file_clearbuf(ms);
-	file_error(ms, errno, "vasprintf failed");
-	return -1;
 }
 
 protected int
@@ -320,8 +321,8 @@ file_default(struct magic_set *ms, size_t nb)
  */
 /*ARGSUSED*/
 protected int
-file_buffer(struct magic_set *ms, int fd, struct stat *st,
-    const char *inname __attribute__ ((__unused__)),
+file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
+    const char *inname,
     const void *buf, size_t nb)
 {
 	int m = 0, rv = 0, looks_text = 0;
@@ -331,6 +332,19 @@ file_buffer(struct magic_set *ms, int fd, struct stat *st,
 	const char *ftype = NULL;
 	char *rbuf = NULL;
 	struct buffer b;
+	int fd = -1;
+
+	if (stream) {
+#ifdef _WIN64
+		php_socket_t _fd = fd;
+#else
+		int _fd;
+#endif
+		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&_fd, 0);
+		if (SUCCESS == _ret) {
+			fd = (int)_fd;
+		}
+	}
 
 	buffer_init(&b, fd, st, buf, nb);
 	ms->mode = b.st.st_mode;
@@ -363,7 +377,8 @@ file_buffer(struct magic_set *ms, int fd, struct stat *st,
 		}
 	}
 #endif
-#if HAVE_FORK
+
+#if PHP_FILEINFO_UNCOMPRESS
 	/* try compression stuff */
 	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
 		m = file_zmagic(ms, &b, inname);
@@ -488,10 +503,10 @@ simple:
 		if (file_printf(ms, "%s", code_mime) == -1)
 			rv = -1;
 	}
-#if HAVE_FORK
+#if PHP_FILEINFO_UNCOMPRESS
  done_encoding:
 #endif
-	free(rbuf);
+	efree(rbuf);
 	buffer_fini(&b);
 	if (rv)
 		return rv;
@@ -509,7 +524,7 @@ file_reset(struct magic_set *ms, int checkloaded)
 	}
 	file_clearbuf(ms);
 	if (ms->o.pbuf) {
-		free(ms->o.pbuf);
+		efree(ms->o.pbuf);
 		ms->o.pbuf = NULL;
 	}
 	ms->event_flags &= ~EVENT_HAD_ERR;
@@ -547,7 +562,7 @@ file_getbuffer(struct magic_set *ms)
 		return NULL;
 	}
 	psize = len * 4 + 1;
-	if ((pbuf = CAST(char *, realloc(ms->o.pbuf, psize))) == NULL) {
+	if ((pbuf = CAST(char *, erealloc(ms->o.pbuf, psize))) == NULL) {
 		file_oomem(ms, psize);
 		return NULL;
 	}
@@ -611,8 +626,8 @@ file_check_mem(struct magic_set *ms, unsigned int level)
 	if (level >= ms->c.len) {
 		len = (ms->c.len = 20 + level) * sizeof(*ms->c.li);
 		ms->c.li = CAST(struct level_info *, (ms->c.li == NULL) ?
-		    malloc(len) :
-		    realloc(ms->c.li, len));
+		    emalloc(len) :
+		    erealloc(ms->c.li, len));
 		if (ms->c.li == NULL) {
 			file_oomem(ms, len);
 			return -1;
@@ -635,87 +650,38 @@ file_printedlen(const struct magic_set *ms)
 protected int
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
-	file_regex_t rx;
-	int rc, rv = -1;
+	zend_string *pattern;
+	uint32_t opts = 0;
+	pcre_cache_entry *pce;
+	zend_string *res;
+	zend_string *repl;
+	size_t rep_cnt = 0;
 
-	rc = file_regcomp(ms, &rx, pat, REG_EXTENDED);
-	if (rc == 0) {
-		regmatch_t rm;
-		int nm = 0;
-		while (file_regexec(ms, &rx, ms->o.buf, 1, &rm, 0) == 0) {
-			ms->o.buf[rm.rm_so] = '\0';
-			if (file_printf(ms, "%s%s", rep,
-			    rm.rm_eo != 0 ? ms->o.buf + rm.rm_eo : "") == -1)
-				goto out;
-			nm++;
-		}
-		rv = nm;
+	opts |= PCRE2_MULTILINE;
+	pattern = convert_libmagic_pattern((char*)pat, strlen(pat), opts);
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
+		zend_string_release(pattern);
+		rep_cnt = -1;
+		goto out;
 	}
+	zend_string_release(pattern);
+
+	repl = zend_string_init(rep, strlen(rep), 0);
+	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);
+
+	zend_string_release_ex(repl, 0);
+	if (NULL == res) {
+		rep_cnt = -1;
+		goto out;
+	}
+
+	strncpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
+	ms->o.buf[ZSTR_LEN(res)] = '\0';
+
+	zend_string_release_ex(res, 0);
+
 out:
-	file_regfree(&rx);
-	return rv;
-}
-
-protected int
-file_regcomp(struct magic_set *ms file_locale_used, file_regex_t *rx,
-    const char *pat, int flags)
-{
-#ifdef USE_C_LOCALE
-	locale_t old = uselocale(ms->c_lc_ctype);
-	assert(old != NULL);
-#else
-	char old[1024];
-	strlcpy(old, setlocale(LC_CTYPE, NULL), sizeof(old));
-	(void)setlocale(LC_CTYPE, "C");
-#endif
-	int rc;
-	rc = regcomp(rx, pat, flags);
-
-#ifdef USE_C_LOCALE
-	uselocale(old);
-#else
-	(void)setlocale(LC_CTYPE, old);
-#endif
-	if (rc > 0 && (ms->flags & MAGIC_CHECK)) {
-		char errmsg[512];
-
-		(void)regerror(rc, rx, errmsg, sizeof(errmsg));
-		file_magerror(ms, "regex error %d for `%s', (%s)", rc, pat,
-		    errmsg);
-	}
-	return rc;
-}
-
-/*ARGSUSED*/
-protected int
-file_regexec(struct magic_set *ms file_locale_used, file_regex_t *rx,
-    const char *str, size_t nmatch, regmatch_t* pmatch, int eflags)
-{
-#ifdef USE_C_LOCALE
-	locale_t old = uselocale(ms->c_lc_ctype);
-	assert(old != NULL);
-#else
-	char old[1024];
-	strlcpy(old, setlocale(LC_CTYPE, NULL), sizeof(old));
-	(void)setlocale(LC_CTYPE, "C");
-#endif
-	int rc;
-	/* XXX: force initialization because glibc does not always do this */
-	if (nmatch != 0)
-		memset(pmatch, 0, nmatch * sizeof(*pmatch));
-	rc = regexec(rx, str, nmatch, pmatch, eflags);
-#ifdef USE_C_LOCALE
-	uselocale(old);
-#else
-	(void)setlocale(LC_CTYPE, old);
-#endif
-	return rc;
-}
-
-protected void
-file_regfree(file_regex_t *rx)
-{
-	regfree(rx);
+	return rep_cnt;
 }
 
 protected file_pushbuf_t *
@@ -726,7 +692,7 @@ file_push_buffer(struct magic_set *ms)
 	if (ms->event_flags & EVENT_HAD_ERR)
 		return NULL;
 
-	if ((pb = (CAST(file_pushbuf_t *, malloc(sizeof(*pb))))) == NULL)
+	if ((pb = (CAST(file_pushbuf_t *, emalloc(sizeof(*pb))))) == NULL)
 		return NULL;
 
 	pb->buf = ms->o.buf;
@@ -746,8 +712,8 @@ file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
 	char *rbuf;
 
 	if (ms->event_flags & EVENT_HAD_ERR) {
-		free(pb->buf);
-		free(pb);
+		efree(pb->buf);
+		efree(pb);
 		return NULL;
 	}
 
@@ -757,7 +723,7 @@ file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
 	ms->o.blen = pb->blen;
 	ms->offset = pb->offset;
 
-	free(pb);
+	efree(pb);
 	return rbuf;
 }
 
@@ -841,6 +807,7 @@ file_print_guid(char *str, size_t len, const uint64_t *guid)
 #endif
 }
 
+#if 0
 protected int
 file_pipe_closexec(int *fds)
 {
@@ -856,6 +823,7 @@ file_pipe_closexec(int *fds)
 	return 0;
 #endif
 }
+#endif
 
 protected int
 file_clear_closexec(int fd) {

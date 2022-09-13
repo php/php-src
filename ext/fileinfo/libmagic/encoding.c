@@ -97,7 +97,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 		nbytes = ms->encoding_max;
 
 	mlen = (nbytes + 1) * sizeof((*ubuf)[0]);
-	*ubuf = CAST(file_unichar_t *, calloc(CAST(size_t, 1), mlen));
+	*ubuf = CAST(file_unichar_t *, ecalloc(CAST(size_t, 1), mlen));
 	if (*ubuf == NULL) {
 		file_oomem(ms, mlen);
 		goto done;
@@ -150,7 +150,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 		unsigned char *nbuf;
 
 		mlen = (nbytes + 1) * sizeof(nbuf[0]);
-		if ((nbuf = CAST(unsigned char *, malloc(mlen))) == NULL) {
+		if ((nbuf = CAST(unsigned char *, emalloc(mlen))) == NULL) {
 			file_oomem(ms, mlen);
 			goto done;
 		}
@@ -170,7 +170,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 			rv = 0;
 			*type = "binary";
 		}
-		free(nbuf);
+		efree(nbuf);
 	}
 
  done:

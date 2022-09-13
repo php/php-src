@@ -31,7 +31,11 @@ FILE_RCSID("@(#)$File: readcdf.c,v 1.76 2022/01/17 16:59:01 christos Exp $")
 
 #include <assert.h>
 #include <stdlib.h>
+#ifdef PHP_WIN32
+#include "win32/unistd.h"
+#else
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
@@ -100,10 +104,6 @@ cdf_clsid_to_mime(const uint64_t clsid[2], const struct cv *cv)
 		if (clsid[0] == cv[i].clsid[0] && clsid[1] == cv[i].clsid[1])
 			return cv[i].mime;
 	}
-#ifdef CDF_DEBUG
-	fprintf(stderr, "unknown mime %" PRIx64 ", %" PRIx64 "\n", clsid[0],
-	    clsid[1]);
-#endif
 	return NULL;
 }
 
@@ -112,35 +112,24 @@ cdf_app_to_mime(const char *vbuf, const struct nv *nv)
 {
 	size_t i;
 	const char *rv = NULL;
-#ifdef USE_C_LOCALE
-	locale_t old_lc_ctype, c_lc_ctype;
+	char *vbuf_lower;
 
-	c_lc_ctype = newlocale(LC_CTYPE_MASK, "C", 0);
-	assert(c_lc_ctype != NULL);
-	old_lc_ctype = uselocale(c_lc_ctype);
-	assert(old_lc_ctype != NULL);
-#else
-	char *old_lc_ctype = setlocale(LC_CTYPE, NULL);
-	assert(old_lc_ctype != NULL);
-	old_lc_ctype = strdup(old_lc_ctype);
-	assert(old_lc_ctype != NULL);
-	(void)setlocale(LC_CTYPE, "C");
-#endif
-	for (i = 0; nv[i].pattern != NULL; i++)
-		if (strcasestr(vbuf, nv[i].pattern) != NULL) {
+	vbuf_lower = zend_str_tolower_dup(vbuf, strlen(vbuf));
+	for (i = 0; nv[i].pattern != NULL; i++) {
+		char *pattern_lower;
+		int found;
+
+		pattern_lower = zend_str_tolower_dup(nv[i].pattern, strlen(nv[i].pattern));
+		found = (strstr(vbuf_lower, pattern_lower) != NULL);
+		efree(pattern_lower);
+
+		if (found) {
 			rv = nv[i].mime;
 			break;
 		}
-#ifdef CDF_DEBUG
-	fprintf(stderr, "unknown app %s\n", vbuf);
-#endif
-#ifdef USE_C_LOCALE
-	(void)uselocale(old_lc_ctype);
-	freelocale(c_lc_ctype);
-#else
-	(void)setlocale(LC_CTYPE, old_lc_ctype);
-	free(old_lc_ctype);
-#endif
+	}
+
+	efree(vbuf_lower);
 	return rv;
 }
 
@@ -156,7 +145,9 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 	const char *s, *e;
 	int len;
 
-	if (!NOTMIME(ms) && root_storage)
+	memset(&ts, 0, sizeof(ts));
+
+        if (!NOTMIME(ms) && root_storage)
 		str = cdf_clsid_to_mime(root_storage->d_storage_uuid,
 		    clsid2mime);
 
@@ -282,10 +273,10 @@ cdf_file_catalog(struct magic_set *ms, const cdf_header_t *h,
 			if (file_printf(ms, "%s%s",
 			    cdf_u16tos8(buf, ce[i].ce_namlen, ce[i].ce_name),
 			    i == cat->cat_num - 1 ? "]" : ", ") == -1) {
-				free(cat);
+				efree(cat);
 				return -1;
 			}
-		free(cat);
+		efree(cat);
 	} else if (ms->flags & MAGIC_MIME_TYPE) {
 		if (file_printf(ms, "application/CDFV2") == -1)
 			return -1;
@@ -346,7 +337,7 @@ cdf_file_summary_info(struct magic_set *ms, const cdf_header_t *h,
 	}
 
 	m = cdf_file_property_info(ms, info, count, root_storage);
-	free(info);
+	efree(info);
 
 	return m == -1 ? -2 : m;
 }
@@ -656,11 +647,11 @@ out5:
 	cdf_zero_stream(&scn);
 	cdf_zero_stream(&sst);
 out3:
-	free(dir.dir_tab);
+	efree(dir.dir_tab);
 out2:
-	free(ssat.sat_tab);
+	efree(ssat.sat_tab);
 out1:
-	free(sat.sat_tab);
+	efree(sat.sat_tab);
 out0:
 	/* If we handled it already, return */
 	if (i != -1)

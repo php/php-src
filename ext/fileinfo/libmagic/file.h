@@ -33,17 +33,14 @@
 #ifndef __file_h__
 #define __file_h__
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
-#ifdef HAVE_STDINT_H
+#include "php.h"
+#include "ext/standard/php_string.h"
+#include "ext/pcre/php_pcre.h"
+
 #include <stdint.h>
-#endif
-
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
 
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
@@ -79,19 +76,18 @@
 #include <stdio.h>	/* Include that here, to make sure __P gets defined */
 #include <errno.h>
 #include <fcntl.h>	/* For open and flags */
-#include <regex.h>
-#include <time.h>
+
 #include <sys/types.h>
-#ifndef WIN32
+#ifdef PHP_WIN32
+#include "win32/param.h"
+#else
 #include <sys/param.h>
 #endif
 /* Do this here and now, because struct stat gets re-defined on solaris */
 #include <sys/stat.h>
 #include <stdarg.h>
-#include <locale.h>
-#if defined(HAVE_XLOCALE_H)
-#include <xlocale.h>
-#endif
+
+#define abort()	zend_error_noreturn(E_ERROR, "fatal libmagic error")
 
 #define ENABLE_CONDITIONALS
 
@@ -171,14 +167,12 @@
 #define FILE_COMPILE	2
 #define FILE_LIST	3
 
-typedef regex_t file_regex_t;
-
 struct buffer {
 	int fd;
-	struct stat st;
+	zend_stat_t st;
 	const void *fbuf;
 	size_t flen;
-	off_t eoff;
+	zend_off_t eoff;
 	void *ebuf;
 	size_t elen;
 };
@@ -281,7 +275,7 @@ struct magic {
 #define				FILE_OCTAL		59
 #define				FILE_NAMES_SIZE		60 /* size of array to contain all names */
 
-#define IS_STRING(t) \
+#define IS_LIBMAGIC_STRING(t) \
 	((t) == FILE_STRING || \
 	 (t) == FILE_PSTRING || \
 	 (t) == FILE_BESTRING16 || \
@@ -515,10 +509,9 @@ protected const char *file_fmtvarint(char *, size_t, const unsigned char *,
 protected const char *file_fmtnum(char *, size_t, const char *, int);
 protected struct magic_set *file_ms_alloc(int);
 protected void file_ms_free(struct magic_set *);
-protected int file_default(struct magic_set *, size_t);
-protected int file_buffer(struct magic_set *, int, struct stat *, const char *,
-    const void *, size_t);
-protected int file_fsmagic(struct magic_set *, const char *, struct stat *);
+protected int file_buffer(struct magic_set *, php_stream *, zend_stat_t *, const char *, const void *,
+    size_t);
+protected int file_fsmagic(struct magic_set *, const char *, zend_stat_t *);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
 protected int file_vprintf(struct magic_set *, const char *, va_list)
     __attribute__((__format__(__printf__, 2, 0)));
@@ -534,7 +527,7 @@ protected int file_printf(struct magic_set *, const char *, ...)
 protected int file_reset(struct magic_set *, int);
 protected int file_tryelf(struct magic_set *, const struct buffer *);
 protected int file_trycdf(struct magic_set *, const struct buffer *);
-#if HAVE_FORK
+#ifdef PHP_FILEINFO_UNCOMPRESS
 protected int file_zmagic(struct magic_set *, const struct buffer *,
     const char *);
 #endif
@@ -588,18 +581,12 @@ protected int file_pipe_closexec(int *);
 protected int file_clear_closexec(int);
 protected char *file_strtrim(char *);
 
-protected void buffer_init(struct buffer *, int, const struct stat *,
+protected void buffer_init(struct buffer *, int, const zend_stat_t *,
     const void *, size_t);
 protected void buffer_fini(struct buffer *);
 protected int buffer_fill(const struct buffer *);
 
-
-
-protected int file_regcomp(struct magic_set *, file_regex_t *, const char *,
-    int);
-protected int file_regexec(struct magic_set *, file_regex_t *, const char *,
-    size_t, regmatch_t *, int);
-protected void file_regfree(file_regex_t *);
+public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options);
 
 typedef struct {
 	char *buf;
@@ -615,23 +602,10 @@ extern const char *file_names[];
 extern const size_t file_nnames;
 #endif
 
-#ifndef HAVE_PREAD
-ssize_t pread(int, void *, size_t, off_t);
-#endif
-#ifndef HAVE_VASPRINTF
-int vasprintf(char **, const char *, va_list);
-#endif
-#ifndef HAVE_ASPRINTF
-int asprintf(char **, const char *, ...);
-#endif
-#ifndef HAVE_DPRINTF
-int dprintf(int, const char *, ...);
-#endif
-
-#ifndef HAVE_STRLCPY
+#ifndef strlcpy
 size_t strlcpy(char *, const char *, size_t);
 #endif
-#ifndef HAVE_STRLCAT
+#ifndef strlcat
 size_t strlcat(char *, const char *, size_t);
 #endif
 #ifndef HAVE_STRCASESTR
@@ -647,39 +621,6 @@ char   *ctime_r(const time_t *, char *);
 #ifndef HAVE_ASCTIME_R
 char   *asctime_r(const struct tm *, char *);
 #endif
-#ifndef HAVE_GMTIME_R
-struct tm *gmtime_r(const time_t *, struct tm *);
-#endif
-#ifndef HAVE_LOCALTIME_R
-struct tm *localtime_r(const time_t *, struct tm *);
-#endif
-#ifndef HAVE_FMTCHECK
-const char *fmtcheck(const char *, const char *)
-     __attribute__((__format_arg__(2)));
-#endif
-
-#ifdef HAVE_LIBSECCOMP
-// basic filter
-// this mode should not interfere with normal operations
-// only some dangerous syscalls are blacklisted
-int enable_sandbox_basic(void);
-
-// enhanced filter
-// this mode allows only the necessary syscalls used during normal operation
-// extensive testing required !!!
-int enable_sandbox_full(void);
-#endif
-
-protected const char *file_getprogname(void);
-protected void file_setprogname(const char *);
-protected void file_err(int, const char *, ...)
-    __attribute__((__format__(__printf__, 2, 3), __noreturn__));
-protected void file_errx(int, const char *, ...)
-    __attribute__((__format__(__printf__, 2, 3), __noreturn__));
-protected void file_warn(const char *, ...)
-    __attribute__((__format__(__printf__, 1, 2)));
-protected void file_warnx(const char *, ...)
-    __attribute__((__format__(__printf__, 1, 2)));
 
 #if defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H) && !defined(QUICK)
 #define QUICK
@@ -707,6 +648,18 @@ static const char *rcsid(const char *p) { \
 #endif
 #ifndef __RCSID
 #define __RCSID(a)
+#endif
+
+#ifdef PHP_WIN32
+#ifdef _WIN64
+#define FINFO_LSEEK_FUNC _lseeki64
+#else
+#define FINFO_LSEEK_FUNC _lseek
+#endif
+#define FINFO_READ_FUNC _read
+#else
+#define FINFO_LSEEK_FUNC lseek
+#define FINFO_READ_FUNC read
 #endif
 
 #endif /* __file_h__ */

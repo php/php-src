@@ -31,19 +31,23 @@ FILE_RCSID("@(#)$File: buffer.c,v 1.8 2020/02/16 15:52:49 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
+#ifdef PHP_WIN32
+#include "win32/unistd.h"
+#else
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
 void
-buffer_init(struct buffer *b, int fd, const struct stat *st, const void *data,
+buffer_init(struct buffer *b, int fd, const zend_stat_t *st, const void *data,
     size_t len)
 {
 	b->fd = fd;
 	if (st)
 		memcpy(&b->st, st, sizeof(b->st));
-	else if (b->fd == -1 || fstat(b->fd, &b->st) == -1)
+	else if (b->fd == -1 || zend_fstat(b->fd, &b->st) == -1)
 		memset(&b->st, 0, sizeof(b->st));
 	b->fbuf = data;
 	b->flen = len;
@@ -55,7 +59,7 @@ buffer_init(struct buffer *b, int fd, const struct stat *st, const void *data,
 void
 buffer_fini(struct buffer *b)
 {
-	free(b->ebuf);
+	efree(b->ebuf);
 }
 
 int
@@ -71,12 +75,14 @@ buffer_fill(const struct buffer *bb)
 
 	b->elen =  CAST(size_t, b->st.st_size) < b->flen ?
 	    CAST(size_t, b->st.st_size) : b->flen;
-	if ((b->ebuf = malloc(b->elen)) == NULL)
+	if ((b->ebuf = emalloc(b->elen)) == NULL)
 		goto out;
 
 	b->eoff = b->st.st_size - b->elen;
-	if (pread(b->fd, b->ebuf, b->elen, b->eoff) == -1) {
-		free(b->ebuf);
+	if (FINFO_LSEEK_FUNC(b->fd, b->eoff, SEEK_SET) == (zend_off_t)-1 ||
+		FINFO_READ_FUNC(b->fd, b->ebuf, b->elen) != (ssize_t)b->elen)
+	{
+		efree(b->ebuf);
 		b->ebuf = NULL;
 		goto out;
 	}

@@ -39,6 +39,8 @@ __RCSID("$NetBSD: strncasecmp.c,v 1.2 2007/06/04 18:19:27 christos Exp $");
 
 #include "file.h"
 
+#include <inttypes.h>
+#include <stdint.h>
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>

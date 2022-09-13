@@ -96,7 +96,7 @@ file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 		rv = file_ascmagic_with_encoding(ms, &bb,
 		    ubuf, ulen, code, type, text);
 
-	free(ubuf);
+	efree(ubuf);
 
 	return rv;
 }
@@ -143,7 +143,7 @@ file_ascmagic_with_encoding(struct magic_set *ms, const struct buffer *b,
 		/* malloc size is a conservative overestimate; could be
 		   improved, or at least realloced after conversion. */
 		mlen = ulen * 6;
-		if ((utf8_buf = CAST(unsigned char *, malloc(mlen))) == NULL) {
+		if ((utf8_buf = CAST(unsigned char *, emalloc(mlen))) == NULL) {
 			file_oomem(ms, mlen);
 			goto done;
 		}
@@ -330,7 +330,8 @@ file_ascmagic_with_encoding(struct magic_set *ms, const struct buffer *b,
 	}
 	rv = 1;
 done:
-	free(utf8_buf);
+	if (utf8_buf)
+		efree(utf8_buf);
 
 	return rv;
 }

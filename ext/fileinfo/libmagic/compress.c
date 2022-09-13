@@ -63,13 +63,14 @@ typedef void (*sig_t)(int);
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
-
-#if defined(HAVE_ZLIB_H) && defined(ZLIBSUPPORT)
+#if defined(HAVE_ZLIB_H) && defined(PHP_FILEINFO_UNCOMPRESS)
 #define BUILTIN_DECOMPRESS
 #include <zlib.h>
 #endif
 
-#if defined(HAVE_BZLIB_H) && defined(BZLIBSUPPORT)
+#undef FIONREAD
+
+#if defined(PHP_FILEINFO_UNCOMPRESS)
 #define BUILTIN_BZLIB
 #include <bzlib.h>
 #endif
@@ -120,6 +121,8 @@ zlibcmp(const unsigned char *buf)
 	return 1;
 }
 #endif
+
+#ifdef PHP_FILEINFO_UNCOMPRESS
 
 static int
 lzmacmp(const unsigned char *buf)
@@ -297,7 +300,7 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
 			if (urv == ERRDATA)
 				prv = format_decompression_error(ms, i, newbuf);
 			else
-				prv = file_buffer(ms, -1, NULL, name, newbuf, nsz);
+				prv = file_buffer(ms, NULL, NULL, name, newbuf, nsz);
 			if (prv == -1)
 				goto error;
 			rv = 1;
@@ -314,17 +317,17 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
 			 * XXX: If file_buffer fails here, we overwrite
 			 * the compressed text. FIXME.
 			 */
-			if (file_buffer(ms, -1, NULL, NULL, buf, nbytes) == -1) {
+			if (file_buffer(ms, NULL, NULL, NULL, buf, nbytes) == -1) {
 				if (file_pop_buffer(ms, pb) != NULL)
 					abort();
 				goto error;
 			}
 			if ((rbuf = file_pop_buffer(ms, pb)) != NULL) {
 				if (file_printf(ms, "%s", rbuf) == -1) {
-					free(rbuf);
+					efree(rbuf);
 					goto error;
 				}
-				free(rbuf);
+				efree(rbuf);
 			}
 			if (!mime && file_printf(ms, ")") == -1)
 				goto error;
@@ -345,7 +348,8 @@ out:
 	if (sa_saved && sig_act.sa_handler != SIG_IGN)
 		(void)sigaction(SIGPIPE, &sig_act, NULL);
 
-	free(newbuf);
+	if (newbuf)
+		efree(newbuf);
 	ms->flags |= MAGIC_COMPRESS;
 	DPRINTF("Zmagic returns %d\n", rv);
 	return rv;
@@ -428,7 +432,7 @@ sread(int fd, void *buf, size_t n, int canbepipe __attribute__((__unused__)))
 
 nocheck:
 	do
-		switch ((rv = read(fd, buf, n))) {
+		switch ((rv = FINFO_READ_FUNC(fd, buf, n))) {
 		case -1:
 			if (errno == EINTR)
 				continue;
@@ -521,13 +525,13 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 		return -1;
 	}
 	(void)close(tfd);
-	if (lseek(fd, CAST(off_t, 0), SEEK_SET) == CAST(off_t, -1)) {
+	if (FINFO_LSEEK_FUNC(fd, (zend_off_t)0, SEEK_SET) == (zend_off_t)-1) {
 		file_badseek(ms);
 		return -1;
 	}
 	return fd;
 }
-#if HAVE_FORK
+#ifdef PHP_FILEINFO_UNCOMPRESS
 #ifdef BUILTIN_DECOMPRESS
 
 #define FHCRC		(1 << 1)
@@ -578,7 +582,7 @@ uncompresszlib(const unsigned char *old, unsigned char **newch,
 	int rc;
 	z_stream z;
 
-	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
+	if ((*newch = CAST(unsigned char *, emalloc(bytes_max + 1))) == NULL)
 		return makeerror(newch, n, "No buffer, %s", strerror(errno));
 
 	z.next_in = CCAST(Bytef *, old);
@@ -1047,4 +1051,5 @@ wait_err:
 
 	return rv;
 }
+#endif
 #endif

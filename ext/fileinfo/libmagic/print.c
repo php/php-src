@@ -28,6 +28,7 @@
 /*
  * print.c - debugging printout routines
  */
+#include "php.h"
 
 #include "file.h"
 
@@ -73,7 +74,7 @@ file_mdump(struct magic *m)
 	if (m->mask_op & FILE_OPINVERSE)
 		(void) fputc('~', stderr);
 
-	if (IS_STRING(m->type)) {
+	if (IS_LIBMAGIC_STRING(m->type)) {
 		if (m->str_flags) {
 			(void) fputc('/', stderr);
 			if (m->str_flags & STRING_COMPACT_WHITESPACE)
@@ -246,18 +247,18 @@ protected void
 file_magwarn(struct magic_set *ms, const char *f, ...)
 {
 	va_list va;
+	char *expanded_format = NULL;
+	int expanded_len;
 
-	/* cuz we use stdout for most, stderr here */
-	(void) fflush(stdout);
-
-	if (ms->file)
-		(void) fprintf(stderr, "%s, %lu: ", ms->file,
-		    CAST(unsigned long, ms->line));
-	(void) fprintf(stderr, "Warning: ");
 	va_start(va, f);
-	(void) vfprintf(stderr, f, va);
+	expanded_len = vasprintf(&expanded_format, f, va);
 	va_end(va);
-	(void) fputc('\n', stderr);
+
+	if (expanded_len >= 0 && expanded_format) {
+		php_error_docref(NULL, E_WARNING, "%s", expanded_format);
+
+		free(expanded_format);
+	}
 }
 
 protected const char *
@@ -285,13 +286,13 @@ file_fmtdatetime(char *buf, size_t bsize, uint64_t v, int flags)
 	}
 
 	if (flags & FILE_T_LOCAL) {
-		tm = localtime_r(&t, &tmz);
+		tm = php_localtime_r(&t, &tmz);
 	} else {
-		tm = gmtime_r(&t, &tmz);
+		tm = php_gmtime_r(&t, &tmz);
 	}
 	if (tm == NULL)
 		goto out;
-	pp = asctime_r(tm, buf);
+	pp = php_asctime_r(tm, buf);
 
 	if (pp == NULL)
 		goto out;

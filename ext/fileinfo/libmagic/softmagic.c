@@ -43,6 +43,10 @@ FILE_RCSID("@(#)$File: softmagic.c,v 1.328 2022/09/13 18:46:07 christos Exp $")
 #include <time.h>
 #include "der.h"
 
+#ifndef PREG_OFFSET_CAPTURE
+# define PREG_OFFSET_CAPTURE                 (1<<8)
+#endif
+
 private int match(struct magic_set *, struct magic *, file_regex_t **, size_t,
     const struct buffer *, size_t, int, int, int, uint16_t *,
     uint16_t *, int *, int *, int *, int *);
@@ -150,8 +154,8 @@ file_softmagic(struct magic_set *ms, const struct buffer *b,
 	return rv;
 }
 
-#define FILE_FMTDEBUG
-#ifdef FILE_FMTDEBUG
+
+#if defined(FILE_FMTDEBUG) && defined(HAVE_FMTCHECK)
 #define F(a, b, c) file_fmtcheck((a), (b), (c), __FILE__, __LINE__)
 
 private const char * __attribute__((__format_arg__(3)))
@@ -170,10 +174,14 @@ file_fmtcheck(struct magic_set *ms, const char *desc, const char *def,
 		    " with `%s'", file, line, desc, def);
 	return ptr;
 }
-#else
+#elif defined(HAVE_FMTCHECK)
 #define F(a, b, c) fmtcheck((b), (c))
+#else
+#define F(a, b, c) ((b))
 #endif
 
+/* NOTE this function has been kept an the state of 5.39 for BC. Observe
+ * further as the upgrade to 5.41 or above goes. */
 /*
  * Go through the whole list, stopping if you find a match.  Process all
  * the continuations of that match before returning.
@@ -235,7 +243,7 @@ match(struct magic_set *ms, struct magic *magic, file_regex_t **magic_rxcomp,
 		file_regex_t **m_rxcomp = &magic_rxcomp[magindex];
 
 		if (m->type != FILE_NAME)
-		if ((IS_STRING(m->type) &&
+		if ((IS_LIBMAGIC_STRING(m->type) &&
 #define FLT (STRING_BINTEST | STRING_TEXTTEST)
 		     ((text && (m->str_flags & FLT) == STRING_BINTEST) ||
 		      (!text && (m->str_flags & FLT) == STRING_TEXTTEST))) ||
@@ -484,19 +492,25 @@ flush:
 private int
 check_fmt(struct magic_set *ms, const char *fmt)
 {
-	file_regex_t rx;
-	int rc, rv = -1;
-        const char* pat = "%[-0-9\\.]*s";
+	pcre_cache_entry *pce;
+	int rv = -1;
+	zend_string *pattern;
 
 	if (strchr(fmt, '%') == NULL)
 		return 0;
 
-	rc = file_regcomp(ms, &rx, pat, REG_EXTENDED|REG_NOSUB);
-	if (rc == 0) {
-		rc = file_regexec(ms, &rx, fmt, 0, 0, 0);
-		rv = !rc;
+	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
+		rv = -1;
+	} else {
+		pcre2_code *re = php_pcre_pce_re(pce);
+		pcre2_match_data *match_data = php_pcre_create_match_data(0, re);
+		if (match_data) {
+			rv = pcre2_match(re, (PCRE2_SPTR)fmt, strlen(fmt), 0, 0, match_data, php_pcre_mctx()) > 0;
+			php_pcre_free_match_data(match_data);
+		}
 	}
-	file_regfree(&rx);
+	zend_string_release(pattern);
 	return rv;
 }
 
@@ -514,7 +528,7 @@ strndup(const char *str, size_t n)
 
 	for (len = 0; len < n && str[len]; len++)
 		continue;
-	if ((copy = CAST(char *, malloc(len + 1))) == NULL)
+	if ((copy = CAST(char *, emalloc(len + 1))) == NULL)
 		return NULL;
 	(void)memcpy(copy, str, len);
 	copy[len] = '\0';
@@ -1544,7 +1558,7 @@ save_cont(struct magic_set *ms, struct cont *c)
 	size_t len;
 	*c = ms->c;
 	len = c->len * sizeof(*c->li);
-	ms->c.li = CAST(struct level_info *, malloc(len));
+	ms->c.li = CAST(struct level_info *, emalloc(len));
 	if (ms->c.li == NULL) {
 		ms->c = *c;
 		return -1;
@@ -1556,7 +1570,7 @@ save_cont(struct magic_set *ms, struct cont *c)
 private void
 restore_cont(struct magic_set *ms, struct cont *c)
 {
-	free(ms->c.li);
+	efree(ms->c.li);
 	ms->c = *c;
 }
 
@@ -1878,15 +1892,15 @@ mget(struct magic_set *ms, struct magic *m, const struct buffer *b,
 			if ((ms->flags & MAGIC_NODESC) == 0 &&
 			    file_printf(ms, F(ms, m->desc, "%u"), offset) == -1)
 			{
-				free(rbuf);
+				if (rbuf) efree(rbuf);
 				return -1;
 			}
 			if (file_printf(ms, "%s", rbuf) == -1) {
-				free(rbuf);
+				if (rbuf) efree(rbuf);
 				return -1;
 			}
 		}
-		free(rbuf);
+		if (rbuf) efree(rbuf);
 		return rv;
 
 	case FILE_USE:
@@ -2057,6 +2071,60 @@ alloc_regex(struct magic_set *ms, struct magic *m)
 	return NULL;
 }
 
+public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options)
+{
+	int i, j;
+	zend_string *t;
+
+	for (i = j = 0; i < len; i++) {
+		switch (val[i]) {
+			case '~':
+				j += 2;
+				break;
+			case '\0':
+				j += 4;
+				break;
+			default:
+				j++;
+				break;
+		}
+	}
+	t = zend_string_alloc(j + 4, 0);
+
+	j = 0;
+	ZSTR_VAL(t)[j++] = '~';
+
+	for (i = 0; i < len; i++, j++) {
+		switch (val[i]) {
+			case '~':
+				ZSTR_VAL(t)[j++] = '\\';
+				ZSTR_VAL(t)[j] = '~';
+				break;
+			case '\0':
+				ZSTR_VAL(t)[j++] = '\\';
+				ZSTR_VAL(t)[j++] = 'x';
+				ZSTR_VAL(t)[j++] = '0';
+				ZSTR_VAL(t)[j] = '0';
+				break;
+			default:
+				ZSTR_VAL(t)[j] = val[i];
+				break;
+		}
+	}
+	ZSTR_VAL(t)[j++] = '~';
+
+	if (options & PCRE2_CASELESS)
+		ZSTR_VAL(t)[j++] = 'i';
+
+	if (options & PCRE2_MULTILINE)
+		ZSTR_VAL(t)[j++] = 'm';
+
+	ZSTR_VAL(t)[j]='\0';
+	ZSTR_LEN(t) = j;
+
+	return t;
+}
+
 private int
 magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
 {
@@ -2218,8 +2286,8 @@ magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
 			idx = m->str_range + slen;
 			if (m->str_range == 0 || ms->search.s_len < idx)
 				idx = ms->search.s_len;
-			found = CAST(const char *, memmem(ms->search.s, idx,
-			    m->value.s, slen));
+			found = CAST(const char *, php_memnstr(ms->search.s,
+			    m->value.s, slen, ms->search.s + idx));
 			if (!found) {
 				v = 1;
 				break;
@@ -2229,7 +2297,6 @@ magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
 			ms->search.rm_len = ms->search.s_len - idx;
 			break;
 		}
-#endif
 
 		for (idx = 0; m->str_range == 0 || idx < m->str_range; idx++) {
 			if (slen + idx > ms->search.s_len) {
@@ -2248,55 +2315,80 @@ magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
 		break;
 	}
 	case FILE_REGEX: {
-		int rc;
-		file_regex_t *rx = *m_cache;
-		const char *search;
-		regmatch_t pmatch;
-		size_t slen = ms->search.s_len;
-		char *copy;
+		zend_string *pattern;
+		uint32_t options = 0;
+		pcre_cache_entry *pce;
 
-		if (ms->search.s == NULL)
-			return 0;
+		options |= PCRE2_MULTILINE;
 
-		if (rx == NULL) {
-			rx = *m_cache = alloc_regex(ms, m);
-			if (rx == NULL)
-				return -1;
+		if (m->str_flags & STRING_IGNORE_CASE) {
+			options |= PCRE2_CASELESS;
 		}
-		l = 0;
-		if (slen != 0) {
-		    copy = CAST(char *, malloc(slen));
-		    if (copy == NULL)  {
-			file_error(ms, errno,
-			    "can't allocate %" SIZE_T_FORMAT "u bytes",
-			    slen);
+
+		pattern = convert_libmagic_pattern((char *)m->value.s, m->vallen, options);
+
+		l = v = 0;
+		if ((pce = pcre_get_compiled_regex_cache(pattern)) == NULL) {
+			zend_string_release(pattern);
 			return -1;
 		    }
 		    memcpy(copy, ms->search.s, slen);
 		    copy[--slen] = '\0';
 		    search = copy;
 		} else {
-		    search = CCAST(char *, "");
-		    copy = NULL;
-		}
-		rc = file_regexec(ms, rx, RCAST(const char *, search),
-		    1, &pmatch, 0);
-		free(copy);
-		switch (rc) {
-		case 0:
-			ms->search.s += CAST(int, pmatch.rm_so);
-			ms->search.offset += CAST(size_t, pmatch.rm_so);
-			ms->search.rm_len = CAST(size_t,
-			    pmatch.rm_eo - pmatch.rm_so);
-			v = 0;
-			break;
+			/* pce now contains the compiled regex */
+			zval retval;
+			zval subpats;
+			zend_string *haystack;
 
-		case REG_NOMATCH:
-			v = 1;
-			break;
+			ZVAL_NULL(&retval);
+			ZVAL_NULL(&subpats);
 
-		default:
-			return -1;
+			/* Cut the search len from haystack, equals to REG_STARTEND */
+			haystack = zend_string_init(ms->search.s, ms->search.s_len, 0);
+
+			/* match v = 0, no match v = 1 */
+			php_pcre_match_impl(pce, haystack, &retval, &subpats, 0, 1, PREG_OFFSET_CAPTURE, 0);
+			/* Free haystack */
+			zend_string_release(haystack);
+
+			if (Z_LVAL(retval) < 0) {
+				zval_ptr_dtor(&subpats);
+				zend_string_release(pattern);
+				return -1;
+			} else if ((Z_LVAL(retval) > 0) && (Z_TYPE(subpats) == IS_ARRAY)) {
+				/* Need to fetch global match which equals pmatch[0] */
+				zval *pzval;
+				HashTable *ht = Z_ARRVAL(subpats);
+				if ((pzval = zend_hash_index_find(ht, 0)) != NULL && Z_TYPE_P(pzval) == IS_ARRAY) {
+					/* If everything goes according to the master plan
+					   tmpcopy now contains two elements:
+					   0 = the match
+					   1 = starting position of the match */
+					zval *match, *offset;
+					if ((match = zend_hash_index_find(Z_ARRVAL_P(pzval), 0)) &&
+							(offset = zend_hash_index_find(Z_ARRVAL_P(pzval), 1))) {
+						if (Z_TYPE_P(match) != IS_STRING && Z_TYPE_P(offset) != IS_LONG) {
+							goto error_out;
+						}
+						ms->search.s += Z_LVAL_P(offset); /* this is where the match starts */
+						ms->search.offset += Z_LVAL_P(offset); /* this is where the match starts as size_t */
+						ms->search.rm_len = Z_STRLEN_P(match) /* This is the length of the matched pattern */;
+						v = 0;
+					} else {
+						goto error_out;
+					}
+				} else {
+error_out:
+					zval_ptr_dtor(&subpats);
+					zend_string_release(pattern);
+					return -1;
+				}
+			} else {
+				v = 1;
+			}
+			zval_ptr_dtor(&subpats);
+			zend_string_release(pattern);
 		}
 		break;
 	}
