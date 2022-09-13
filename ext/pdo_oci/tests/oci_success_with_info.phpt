@@ -3,6 +3,10 @@ Handling OCI_SUCCESS_WITH_INFO
 --EXTENSIONS--
 pdo
 pdo_oci
+--SKIPIF--
+<?php
+if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
+?>
 --FILE--
 <?php
 
@@ -67,7 +71,7 @@ $conn->exec('CREATE USER BUG77120_USER IDENTIFIED BY "' . $password . '" PROFILE
 $conn->exec('GRANT CREATE SESSION TO BUG77120_USER');
 
 // let the password expire
-sleep(2);
+sleep(3); // 2 seconds is causing random test failures
 
 $conn = connectAsUser('BUG77120_USER', $password);
 var_dump($conn->errorInfo());
