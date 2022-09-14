@@ -138,37 +138,37 @@ function xml_parser_create(?string $encoding = null): XMLParser {}
 
 function xml_parser_create_ns(?string $encoding = null, string $separator = ":"): XMLParser {}
 
-function xml_set_object(XMLParser $parser, object $object): bool {}
+function xml_set_object(XMLParser $parser, object $object): true {}
 
 /**
  * @param callable $start_handler
  * @param callable $end_handler
  */
-function xml_set_element_handler(XMLParser $parser, $start_handler, $end_handler): bool {}
+function xml_set_element_handler(XMLParser $parser, $start_handler, $end_handler): true {}
 
 /** @param callable $handler */
-function xml_set_character_data_handler(XMLParser $parser, $handler): bool {}
+function xml_set_character_data_handler(XMLParser $parser, $handler): true {}
 
 /** @param callable $handler */
-function xml_set_processing_instruction_handler(XMLParser $parser, $handler): bool {}
+function xml_set_processing_instruction_handler(XMLParser $parser, $handler): true {}
 
 /** @param callable $handler */
-function xml_set_default_handler(XMLParser $parser, $handler): bool {}
+function xml_set_default_handler(XMLParser $parser, $handler): true {}
 
 /** @param callable $handler */
-function xml_set_unparsed_entity_decl_handler(XMLParser $parser, $handler): bool {}
+function xml_set_unparsed_entity_decl_handler(XMLParser $parser, $handler): true {}
 
 /** @param callable $handler */
-function xml_set_notation_decl_handler(XMLParser $parser, $handler): bool {}
+function xml_set_notation_decl_handler(XMLParser $parser, $handler): true {}
 
 /** @param callable $handler */
-function xml_set_external_entity_ref_handler(XMLParser $parser, $handler): bool {}
+function xml_set_external_entity_ref_handler(XMLParser $parser, $handler): true {}
 
 /** @param callable $handler */
-function xml_set_start_namespace_decl_handler(XMLParser $parser, $handler): bool {}
+function xml_set_start_namespace_decl_handler(XMLParser $parser, $handler): true {}
 
 /** @param callable $handler */
-function xml_set_end_namespace_decl_handler(XMLParser $parser, $handler): bool {}
+function xml_set_end_namespace_decl_handler(XMLParser $parser, $handler): true {}
 
 function xml_parse(XMLParser $parser, string $data, bool $is_final = false): int {}
 
@@ -192,7 +192,7 @@ function xml_get_current_byte_index(XMLParser $parser): int {}
 function xml_parser_free(XMLParser $parser): bool {}
 
 /** @param string|int $value */
-function xml_parser_set_option(XMLParser $parser, int $option, $value): bool {}
+function xml_parser_set_option(XMLParser $parser, int $option, $value): true {}
 
 /** @refcount 1 */
 function xml_parser_get_option(XMLParser $parser, int $option): string|int {}
