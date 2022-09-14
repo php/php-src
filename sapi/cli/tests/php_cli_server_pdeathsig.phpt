@@ -35,11 +35,18 @@ if (count($workersBefore) === 0) {
 
 proc_terminate($cliServerInfo->processHandle, 9); // SIGKILL
 
-usleep(10000);
-
-$workersAfter = find_workers_by_pids($workersBefore);
-if (count($workersAfter) !== 0) {
-    throw new \Exception('Workers were not properly terminated. Before: ' . join(', ', $workersBefore) . ', after: ' . join(', ', $workersAfter));
+$try = 1;
+$max_tries = 5;
+while (true) {
+    $workersAfter = find_workers_by_pids($workersBefore);
+    if (count($workersAfter) === 0) {
+        break;
+    }
+    if ($try >= $max_tries) {
+        throw new \Exception('Workers were not properly terminated. Before: ' . join(', ', $workersBefore) . ', after: ' . join(', ', $workersAfter));
+    }
+    $try++;
+    usleep(100_000);
 }
 
 echo 'Done';
