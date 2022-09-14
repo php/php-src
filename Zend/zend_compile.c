@@ -8084,9 +8084,8 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 
 		/* Check that we are not attempting to alias a built-in type */
 		if (type == ZEND_SYMBOL_CLASS && zend_is_reserved_class_name(old_name)) {
-			zend_throw_exception_ex(zend_ce_compile_error, 0,
+			zend_error_noreturn(E_COMPILE_ERROR, 
 				"Cannot alias '%s' as it is a built-in type", ZSTR_VAL(old_name));
-			return;
 		}
 
 		if (new_name_ast) {
