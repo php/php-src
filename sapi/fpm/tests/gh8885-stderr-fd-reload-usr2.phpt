@@ -40,7 +40,11 @@ assert($content !== false && strlen($content) > 0, 'File must not be empty');
 $errorLogLines = explode("\n", $content);
 array_pop($errorLogLines);
 
-assert(count($errorLogLines) === 2, 'Expected 2 records in the error_log file');
+if (count($errorLogLines) === 3) {
+    assert(strpos($errorLogLines[2], 'systemd'));
+} else {
+    assert(count($errorLogLines) === 2, 'Expected 2 records in the error_log file:' . print_r($errorLogLines, true));
+}
 assert(strpos($errorLogLines[0], 'NOTICE: fpm is running, pid'));
 assert(strpos($errorLogLines[1], 'NOTICE: ready to handle connections'));
 
@@ -61,10 +65,15 @@ array_pop($errorLogLines);
 assert(count($errorLogLines) >= 5, 'Expected at least 5 records in the error_log file');
 assert(strpos($errorLogLines[0], 'NOTICE: fpm is running, pid'));
 assert(strpos($errorLogLines[1], 'NOTICE: ready to handle connections'));
-assert(strpos($errorLogLines[2], 'NOTICE: Reloading in progress'));
-assert(strpos($errorLogLines[3], 'NOTICE: reloading: execvp'));
-assert(strpos($errorLogLines[4], 'NOTICE: using inherited socket'));
-
+if (strpos($errorLogLines[2], 'systemd')) {
+    assert(strpos($errorLogLines[3], 'NOTICE: Reloading in progress'));
+    assert(strpos($errorLogLines[4], 'NOTICE: reloading: execvp'));
+    assert(strpos($errorLogLines[5], 'NOTICE: using inherited socket'));
+} else {
+    assert(strpos($errorLogLines[2], 'NOTICE: Reloading in progress'));
+    assert(strpos($errorLogLines[3], 'NOTICE: reloading: execvp'));
+    assert(strpos($errorLogLines[4], 'NOTICE: using inherited socket'));
+}
 $tester->ping('{{ADDR}}');
 $stderrLines = $tester->getLogLines(-1);
 assert(count($stderrLines) === 1, 'Must be only 1 record in the access.log');

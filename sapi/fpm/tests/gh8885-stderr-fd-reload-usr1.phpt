@@ -40,7 +40,11 @@ assert($content !== false && strlen($content) > 0, 'File must not be empty');
 $errorLogLines = explode("\n", $content);
 array_pop($errorLogLines);
 
-assert(count($errorLogLines) === 2, 'Expected 2 records in the error_log file');
+if (count($errorLogLines) === 3) {
+    assert(strpos($errorLogLines[2], 'systemd'));
+} else {
+    assert(count($errorLogLines) === 2, 'Expected 2 records in the error_log file:' . print_r($errorLogLines, true));
+}
 assert(strpos($errorLogLines[0], 'NOTICE: fpm is running, pid'));
 assert(strpos($errorLogLines[1], 'NOTICE: ready to handle connections'));
 
@@ -61,9 +65,13 @@ array_pop($errorLogLines);
 assert(count($errorLogLines) >= 4, 'Expected at least 4 records in the error_log file');
 assert(strpos($errorLogLines[0], 'NOTICE: fpm is running, pid'));
 assert(strpos($errorLogLines[1], 'NOTICE: ready to handle connections'));
-assert(strpos($errorLogLines[2], 'NOTICE: error log file re-opened'));
-assert(strpos($errorLogLines[3], 'NOTICE: access log file re-opened'));
-
+if (strpos($errorLogLines[2], 'systemd')) {
+    assert(strpos($errorLogLines[3], 'NOTICE: error log file re-opened'));
+    assert(strpos($errorLogLines[4], 'NOTICE: access log file re-opened'));
+} else {
+    assert(strpos($errorLogLines[2], 'NOTICE: error log file re-opened'));
+    assert(strpos($errorLogLines[3], 'NOTICE: access log file re-opened'));
+}
 
 $tester->ping('{{ADDR}}');
 $stderrLines = $tester->getLogLines(-1);
