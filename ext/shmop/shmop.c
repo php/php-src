@@ -84,6 +84,7 @@ static zend_object *shmop_create_object(zend_class_entry *class_type)
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &shmop_object_handlers;
 
 	return &intern->std;
 }
@@ -108,7 +109,6 @@ PHP_MINIT_FUNCTION(shmop)
 {
 	shmop_ce = register_class_Shmop();
 	shmop_ce->create_object = shmop_create_object;
-	shmop_ce->default_object_handlers = &shmop_object_handlers;
 
 	memcpy(&shmop_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	shmop_object_handlers.offset = XtOffsetOf(php_shmop, std);

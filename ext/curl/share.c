@@ -136,11 +136,14 @@ PHP_FUNCTION(curl_share_strerror)
 
 /* CurlShareHandle class */
 
+static zend_object_handlers curl_share_handlers;
+
 static zend_object *curl_share_create_object(zend_class_entry *class_type) {
 	php_curlsh *intern = zend_object_alloc(sizeof(php_curlsh), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &curl_share_handlers;
 
 	return &intern->std;
 }
@@ -158,11 +161,8 @@ void curl_share_free_obj(zend_object *object)
 	zend_object_std_dtor(&sh->std);
 }
 
-static zend_object_handlers curl_share_handlers;
-
 void curl_share_register_handlers(void) {
 	curl_share_ce->create_object = curl_share_create_object;
-	curl_share_ce->default_object_handlers = &curl_share_handlers;
 
 	memcpy(&curl_share_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_share_handlers.offset = XtOffsetOf(php_curlsh, std);

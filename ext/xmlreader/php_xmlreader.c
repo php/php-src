@@ -368,6 +368,7 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	intern->prop_handler = &xmlreader_prop_handlers;
+	intern->std.handlers = &xmlreader_object_handlers;
 
 	return &intern->std;
 }
@@ -1162,7 +1163,6 @@ PHP_MINIT_FUNCTION(xmlreader)
 
 	xmlreader_class_entry = register_class_XMLReader();
 	xmlreader_class_entry->create_object = xmlreader_objects_new;
-	xmlreader_class_entry->default_object_handlers = &xmlreader_object_handlers;
 
 	memcpy(&xmlreader_open_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", sizeof("open")-1), sizeof(zend_internal_function));
 	xmlreader_open_fn.fn_flags &= ~ZEND_ACC_STATIC;

@@ -256,6 +256,7 @@ static inline zend_object *gmp_create_object_ex(zend_class_entry *ce, mpz_ptr *g
 
 	mpz_init(intern->num);
 	*gmpnum_target = intern->num;
+	intern->std.handlers = &gmp_object_handlers;
 
 	return &intern->std;
 }
@@ -532,7 +533,6 @@ ZEND_MINIT_FUNCTION(gmp)
 {
 	gmp_ce = register_class_GMP();
 	gmp_ce->create_object = gmp_create_object;
-	gmp_ce->default_object_handlers = &gmp_object_handlers;
 	gmp_ce->serialize = gmp_serialize;
 	gmp_ce->unserialize = gmp_unserialize;
 

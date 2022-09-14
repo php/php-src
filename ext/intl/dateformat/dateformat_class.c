@@ -57,6 +57,8 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 	intern->calendar			= -1;
 	intern->requested_locale	= NULL;
 
+	intern->zo.handlers = &IntlDateFormatter_handlers;
+
 	return &intern->zo;
 }
 /* }}} */
@@ -102,7 +104,6 @@ void dateformat_register_IntlDateFormatter_class( void )
 	/* Create and register 'IntlDateFormatter' class. */
 	IntlDateFormatter_ce_ptr = register_class_IntlDateFormatter();
 	IntlDateFormatter_ce_ptr->create_object = IntlDateFormatter_object_create;
-	IntlDateFormatter_ce_ptr->default_object_handlers = &IntlDateFormatter_handlers;
 
 	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);

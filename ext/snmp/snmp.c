@@ -185,6 +185,8 @@ static zend_object *php_snmp_object_new(zend_class_entry *class_type) /* {{{ */
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
 
+	intern->zo.handlers = &php_snmp_object_handlers;
+
 	return &intern->zo;
 
 }
@@ -2022,7 +2024,6 @@ PHP_MINIT_FUNCTION(snmp)
 	/* Register SNMP Class */
 	php_snmp_ce = register_class_SNMP();
 	php_snmp_ce->create_object = php_snmp_object_new;
-	php_snmp_ce->default_object_handlers = &php_snmp_object_handlers;
 	php_snmp_object_handlers.offset = XtOffsetOf(php_snmp_object, zo);
 	php_snmp_object_handlers.clone_obj = NULL;
 	php_snmp_object_handlers.free_obj = php_snmp_object_free_storage;

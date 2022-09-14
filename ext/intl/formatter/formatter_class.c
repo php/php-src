@@ -51,6 +51,8 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
 
+	intern->zo.handlers = &NumberFormatter_handlers;
+
 	return &intern->zo;
 }
 /* }}} */
@@ -97,7 +99,6 @@ void formatter_register_class( void )
 	/* Create and register 'NumberFormatter' class. */
 	NumberFormatter_ce_ptr = register_class_NumberFormatter();
 	NumberFormatter_ce_ptr->create_object = NumberFormatter_object_create;
-	NumberFormatter_ce_ptr->default_object_handlers = &NumberFormatter_handlers;
 
 	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));

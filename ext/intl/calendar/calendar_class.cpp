@@ -256,6 +256,9 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
     object_properties_init(&intern->zo, ce);
 	calendar_object_init(intern);
 
+
+	intern->zo.handlers = &Calendar_handlers;
+
 	return &intern->zo;
 }
 /* }}} */
@@ -267,7 +270,6 @@ void calendar_register_IntlCalendar_class(void)
 {
 	/* Create and register 'IntlCalendar' class. */
 	Calendar_ce_ptr = register_class_IntlCalendar();
-	Calendar_ce_ptr->default_object_handlers = &Calendar_handlers;
 	Calendar_ce_ptr->create_object = Calendar_object_create;
 
 	memcpy( &Calendar_handlers, &std_object_handlers,

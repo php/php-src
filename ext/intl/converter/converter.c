@@ -911,6 +911,7 @@ static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converte
 	object_properties_init(&objval->obj, ce);
 	intl_error_init(&(objval->error));
 
+	objval->obj.handlers = &php_converter_object_handlers;
 	*pobjval = objval;
 
 	return &objval->obj;
@@ -972,7 +973,6 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce = register_class_UConverter();
 	php_converter_ce->create_object = php_converter_create_object;
-	php_converter_ce->default_object_handlers = &php_converter_object_handlers;
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;

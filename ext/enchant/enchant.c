@@ -61,6 +61,7 @@ static zend_object *enchant_broker_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &enchant_broker_handlers;
 
 	return &intern->std;
 }
@@ -79,6 +80,7 @@ static zend_object *enchant_dict_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &enchant_dict_handlers;
 
 	return &intern->std;
 }
@@ -189,7 +191,6 @@ PHP_MINIT_FUNCTION(enchant)
 {
 	enchant_broker_ce = register_class_EnchantBroker();
 	enchant_broker_ce->create_object = enchant_broker_create_object;
-	enchant_broker_ce->default_object_handlers = &enchant_broker_handlers;
 
 	memcpy(&enchant_broker_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
@@ -199,7 +200,6 @@ PHP_MINIT_FUNCTION(enchant)
 
 	enchant_dict_ce = register_class_EnchantDictionary();
 	enchant_dict_ce->create_object = enchant_dict_create_object;
-	enchant_dict_ce->default_object_handlers = &enchant_dict_handlers;
 
 	memcpy(&enchant_dict_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);

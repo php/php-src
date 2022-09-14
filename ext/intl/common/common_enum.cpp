@@ -200,6 +200,8 @@ static zend_object *IntlIterator_object_create(zend_class_entry *ce)
 
 	intern->iterator = NULL;
 
+	intern->zo.handlers = &IntlIterator_handlers;
+
 	return &intern->zo;
 }
 
@@ -285,7 +287,6 @@ U_CFUNC void intl_register_common_symbols(int module_number)
 	/* Create and register 'IntlIterator' class. */
 	IntlIterator_ce_ptr = register_class_IntlIterator(zend_ce_iterator);
 	IntlIterator_ce_ptr->create_object = IntlIterator_object_create;
-	IntlIterator_ce_ptr->default_object_handlers = &IntlIterator_handlers;
 	IntlIterator_ce_ptr->get_iterator = IntlIterator_get_iterator;
 
 	memcpy(&IntlIterator_handlers, &std_object_handlers,

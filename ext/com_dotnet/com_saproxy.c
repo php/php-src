@@ -440,6 +440,7 @@ void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *inde
 	ZVAL_DUP(&proxy->indices[proxy->dimensions-1], index);
 
 	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry);
+	proxy->std.handlers = &php_com_saproxy_handlers;
 	ZVAL_OBJ(proxy_out, &proxy->std);
 }
 
