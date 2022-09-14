@@ -15,7 +15,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->exec("CREATE TABLE gh9372 (col VARCHAR(10))");
 $db->exec("INSERT INTO gh9372 VALUES ('something')");
 
-$stmt = $db->prepare("SELECT * FROM bug74186 WHERE col = ?");
+$stmt = $db->prepare("SELECT * FROM gh9372 WHERE col = ?");
 $stmt->bindValue(1, 'something else');
 try {
     $stmt->execute();
@@ -25,7 +25,7 @@ try {
     }
 }
 
-$stmt = $db->prepare("SELECT * FROM bug74186 WHERE col = ?");
+$stmt = $db->prepare("SELECT * FROM gh9372 WHERE col = ?");
 $stream = fopen("php://memory", "w+");
 fwrite($stream, 'something else');
 rewind($stream);
