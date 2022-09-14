@@ -360,7 +360,7 @@ static timelib_error_message *alloc_error_message(timelib_error_message **messag
 	return *messages + (*count)++;
 }
 
-static void add_warning(Scanner *s, int error_code, char *error)
+static void add_warning(Scanner *s, int error_code, const char *error)
 {
 	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
 
@@ -370,7 +370,7 @@ static void add_warning(Scanner *s, int error_code, char *error)
 	message->message = timelib_strdup(error);
 }
 
-static void add_error(Scanner *s, int error_code, char *error)
+static void add_error(Scanner *s, int error_code, const char *error)
 {
 	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
 
@@ -380,7 +380,7 @@ static void add_error(Scanner *s, int error_code, char *error)
 	message->message = timelib_strdup(error);
 }
 
-static void add_pbf_warning(Scanner *s, int error_code, char *error, const char *sptr, const char *cptr)
+static void add_pbf_warning(Scanner *s, int error_code, const char *error, const char *sptr, const char *cptr)
 {
 	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
 
@@ -390,7 +390,7 @@ static void add_pbf_warning(Scanner *s, int error_code, char *error, const char 
 	message->message = timelib_strdup(error);
 }
 
-static void add_pbf_error(Scanner *s, int error_code, char *error, const char *sptr, const char *cptr)
+static void add_pbf_error(Scanner *s, int error_code, const char *error, const char *sptr, const char *cptr)
 {
 	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
 
@@ -484,6 +484,7 @@ static timelib_sll timelib_get_nr_ex(const char **ptr, int max_length, int *scan
 		}
 		++*ptr;
 	}
+
 	begin = *ptr;
 	while ((**ptr >= '0') && (**ptr <= '9') && len < max_length) {
 		++*ptr;
@@ -541,24 +542,49 @@ static timelib_sll timelib_get_frac_nr(const char **ptr)
 
 static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_length)
 {
-	timelib_ull dir = 1;
+	char *str, *str_ptr;
+	timelib_sll tmp_nr = 0;
+	int len = 0;
+
+	str = timelib_calloc(1, max_length + 2); // for sign and \0
+	str_ptr = str;
 
 	while (((**ptr < '0') || (**ptr > '9')) && (**ptr != '+') && (**ptr != '-')) {
 		if (**ptr == '\0') {
+			add_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Found unexpected data");
+			timelib_free(str);
+			return 0;
+		}
+		++*ptr;
+	}
+
+	if ((**ptr == '+') || (**ptr == '-')) {
+		*str_ptr = **ptr;
+		++*ptr;
+		++str_ptr;
+	}
+
+	while (((**ptr < '0') || (**ptr > '9'))) {
+		if (**ptr == '\0') {
+			timelib_free(str);
 			add_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Found unexpected data");
 			return 0;
 		}
 		++*ptr;
 	}
 
-	while (**ptr == '+' || **ptr == '-')
-	{
-		if (**ptr == '-') {
-			dir *= -1;
-		}
+	while ((**ptr >= '0') && (**ptr <= '9') && len < max_length) {
+		*str_ptr = **ptr;
 		++*ptr;
+		++str_ptr;
+		++len;
 	}
-	return dir * timelib_get_nr(ptr, max_length);
+
+	tmp_nr = strtoll(str, NULL, 10);
+
+	timelib_free(str);
+
+	return tmp_nr;
 }
 
 static timelib_sll timelib_lookup_relative_text(const char **ptr, int *behavior)
@@ -2620,15 +2646,18 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 	if (parsed->h == TIMELIB_UNSET) parsed->h = now->h != TIMELIB_UNSET ? now->h : 0;
 	if (parsed->i == TIMELIB_UNSET) parsed->i = now->i != TIMELIB_UNSET ? now->i : 0;
 	if (parsed->s == TIMELIB_UNSET) parsed->s = now->s != TIMELIB_UNSET ? now->s : 0;
-	if (parsed->z == TIMELIB_UNSET) parsed->z = now->z != TIMELIB_UNSET ? now->z : 0;
-	if (parsed->dst == TIMELIB_UNSET) parsed->dst = now->dst != TIMELIB_UNSET ? now->dst : 0;
 
-	if (!parsed->tz_abbr) {
-		parsed->tz_abbr = now->tz_abbr ? timelib_strdup(now->tz_abbr) : NULL;
-	}
 	if (!parsed->tz_info) {
 		parsed->tz_info = now->tz_info ? (!(options & TIMELIB_NO_CLONE) ? timelib_tzinfo_clone(now->tz_info) : now->tz_info) : NULL;
+
+		if (parsed->z == TIMELIB_UNSET) parsed->z = now->z != TIMELIB_UNSET ? now->z : 0;
+		if (parsed->dst == TIMELIB_UNSET) parsed->dst = now->dst != TIMELIB_UNSET ? now->dst : 0;
+
+		if (!parsed->tz_abbr) {
+			parsed->tz_abbr = now->tz_abbr ? timelib_strdup(now->tz_abbr) : NULL;
+		}
 	}
+
 	if (parsed->zone_type == 0 && now->zone_type != 0) {
 		parsed->zone_type = now->zone_type;
 /*		parsed->tz_abbr = now->tz_abbr ? timelib_strdup(now->tz_abbr) : NULL;
@@ -2640,7 +2669,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 */
 }
 
-char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst)
+const char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst)
 {
 	const timelib_tz_lookup_table *tp;
 

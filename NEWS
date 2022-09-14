@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC3
 
+- Date:
+  . Fixed bug with parsing large negative numbers with the @ notation. (Derick)
+
 - Sockets:
   . Fixed socket constants regression as of PHP 8.2.0beta3. (Bruce Dou)
 
