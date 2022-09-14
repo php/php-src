@@ -1052,7 +1052,7 @@ PHP_FUNCTION(xml_set_object)
 	zval_ptr_dtor(&parser->object);
 	ZVAL_OBJ_COPY(&parser->object, Z_OBJ_P(mythis));
 
-	RETVAL_TRUE;
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1070,7 +1070,8 @@ PHP_FUNCTION(xml_set_element_handler)
 	xml_set_handler(&parser->startElementHandler, shdl);
 	xml_set_handler(&parser->endElementHandler, ehdl);
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1087,7 +1088,8 @@ PHP_FUNCTION(xml_set_character_data_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->characterDataHandler, hdl);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1104,7 +1106,8 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->processingInstructionHandler, hdl);
 	XML_SetProcessingInstructionHandler(parser->parser, _xml_processingInstructionHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1121,7 +1124,8 @@ PHP_FUNCTION(xml_set_default_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->defaultHandler, hdl);
 	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1138,7 +1142,8 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->unparsedEntityDeclHandler, hdl);
 	XML_SetUnparsedEntityDeclHandler(parser->parser, _xml_unparsedEntityDeclHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1155,7 +1160,8 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->notationDeclHandler, hdl);
 	XML_SetNotationDeclHandler(parser->parser, _xml_notationDeclHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1172,7 +1178,8 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->externalEntityRefHandler, hdl);
 	XML_SetExternalEntityRefHandler(parser->parser, (void *) _xml_externalEntityRefHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1189,7 +1196,8 @@ PHP_FUNCTION(xml_set_start_namespace_decl_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->startNamespaceDeclHandler, hdl);
 	XML_SetStartNamespaceDeclHandler(parser->parser, _xml_startNamespaceDeclHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1206,7 +1214,8 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 	parser = Z_XMLPARSER_P(pind);
 	xml_set_handler(&parser->endNamespaceDeclHandler, hdl);
 	XML_SetEndNamespaceDeclHandler(parser->parser, _xml_endNamespaceDeclHandler);
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1406,6 +1415,8 @@ PHP_FUNCTION(xml_parser_set_option)
 			if (parser->toffset < 0) {
 				php_error_docref(NULL, E_WARNING, "tagstart ignored, because it is out of range");
 				parser->toffset = 0;
+				/* TODO Promote to ValueError in PHP 9.0 */
+				RETURN_FALSE;
 			}
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
@@ -1431,7 +1442,8 @@ PHP_FUNCTION(xml_parser_set_option)
 			RETURN_THROWS();
 			break;
 	}
-	RETVAL_TRUE;
+
+	RETURN_TRUE;
 }
 /* }}} */
 
