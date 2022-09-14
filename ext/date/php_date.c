@@ -3585,7 +3585,7 @@ PHP_FUNCTION(timezone_name_get)
 PHP_FUNCTION(timezone_name_from_abbr)
 {
 	zend_string  *abbr;
-	char         *tzid;
+	const char   *tzid;
 	zend_long     gmtoffset = -1;
 	zend_long     isdst = -1;
 

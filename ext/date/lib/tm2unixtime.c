@@ -372,7 +372,7 @@ static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 
 		case TIMELIB_ZONETYPE_ID:
 			tzi = tz->tz_info;
-			/* Break intentionally missing */
+			TIMELIB_BREAK_INTENTIONALLY_MISSING
 
 		default: {
 			/* No timezone in struct, fallback to reference if possible */

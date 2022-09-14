@@ -30,9 +30,9 @@
 # include "timelib_config.h"
 #endif
 
-#define TIMELIB_VERSION 202116
-#define TIMELIB_EXTENDED_VERSION 20211601
-#define TIMELIB_ASCII_VERSION "2021.16"
+#define TIMELIB_VERSION 202117
+#define TIMELIB_EXTENDED_VERSION 20211701
+#define TIMELIB_ASCII_VERSION "2021.17"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -342,10 +342,10 @@ typedef struct _timelib_error_container {
 } timelib_error_container;
 
 typedef struct _timelib_tz_lookup_table {
-	char       *name;
+	const char *name;
 	int         type;
 	float       gmtoffset;
-	char       *full_tz_name;
+	const char *full_tz_name;
 } timelib_tz_lookup_table;
 
 typedef struct _timelib_tzdb_index_entry {
@@ -354,7 +354,7 @@ typedef struct _timelib_tzdb_index_entry {
 } timelib_tzdb_index_entry;
 
 typedef struct _timelib_tzdb {
-	char                           *version;
+	const char                     *version;
 	int                             index_size;
 	const timelib_tzdb_index_entry *index;
 	const unsigned char            *data;
@@ -583,7 +583,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
  *
  * The returned char* is not duplicated, and should not be freed.
  */
-char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst);
+const char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst);
 
 /* Returns an array of known time zone abbreviations
  *
