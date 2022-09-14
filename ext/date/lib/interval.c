@@ -90,8 +90,9 @@ static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_
 static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time *two)
 {
 	timelib_rel_time *rt;
-	timelib_sll dst_corr = 0, dst_h_corr = 0, dst_m_corr = 0;
-	timelib_time_offset *trans = NULL;
+	timelib_sll       dst_corr = 0, dst_h_corr = 0, dst_m_corr = 0;
+	int32_t           trans_offset;
+	timelib_sll       trans_transition_time;
 
 	rt = timelib_rel_time_ctor();
 	rt->invert = 0;
@@ -117,16 +118,16 @@ static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time 
 	if (one->dst == 1 && two->dst == 0) {
 		/* First for two "Type 3" times */
 		if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID) {
-			trans = timelib_get_time_zone_info(two->sse, two->tz_info);
-			if (trans) {
-				if (one->sse < trans->transition_time && one->sse >= trans->transition_time + dst_corr) {
+			int success = timelib_get_time_zone_offset_info(two->sse, two->tz_info, &trans_offset, &trans_transition_time, NULL);
+			if (
+				success &&
+				one->sse < trans_transition_time &&
+				one->sse >= trans_transition_time + dst_corr
+			) {
 					timelib_sll flipped = SECS_PER_HOUR + (rt->i * 60) + (rt->s);
 					rt->h = flipped / SECS_PER_HOUR;
 					rt->i = (flipped - rt->h * SECS_PER_HOUR) / 60;
 					rt->s = flipped % 60;
-				}
-				timelib_time_offset_dtor(trans);
-				trans = NULL;
 			}
 		} else if (rt->h == 0 && (rt->i < 0 || rt->s < 0)) {
 			/* Then for all the others */
@@ -145,12 +146,12 @@ static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time 
 	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
 		if (one->dst == 1 && two->dst == 0) { /* Fall Back */
 			if (two->tz_info) {
-				trans = timelib_get_time_zone_info(two->sse, two->tz_info);
+				int success = timelib_get_time_zone_offset_info(two->sse, two->tz_info, &trans_offset, &trans_transition_time, NULL);
 
 				if (
-					trans &&
-					two->sse >= trans->transition_time &&
-					((two->sse - one->sse + dst_corr) % SECS_PER_DAY) > (two->sse - trans->transition_time)
+					success &&
+					two->sse >= trans_transition_time &&
+					((two->sse - one->sse + dst_corr) % SECS_PER_DAY) > (two->sse - trans_transition_time)
 				) {
 					rt->h -= dst_h_corr;
 					rt->i -= dst_m_corr;
@@ -158,13 +159,13 @@ static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time 
 			}
 		} else if (one->dst == 0 && two->dst == 1) { /* Spring Forward */
 			if (two->tz_info) {
-				trans = timelib_get_time_zone_info(two->sse, two->tz_info);
+				int success = timelib_get_time_zone_offset_info(two->sse, two->tz_info, &trans_offset, &trans_transition_time, NULL);
 
 				if (
-					trans &&
-					!((one->sse + SECS_PER_DAY > trans->transition_time) && (one->sse + SECS_PER_DAY <= (trans->transition_time + dst_corr))) &&
-					two->sse >= trans->transition_time &&
-					((two->sse - one->sse + dst_corr) % SECS_PER_DAY) > (two->sse - trans->transition_time)
+					success &&
+					!((one->sse + SECS_PER_DAY > trans_transition_time) && (one->sse + SECS_PER_DAY <= (trans_transition_time + dst_corr))) &&
+					two->sse >= trans_transition_time &&
+					((two->sse - one->sse + dst_corr) % SECS_PER_DAY) > (two->sse - trans_transition_time)
 				) {
 					rt->h -= dst_h_corr;
 					rt->i -= dst_m_corr;
@@ -172,12 +173,13 @@ static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time 
 			}
 		} else if (two->sse - one->sse >= SECS_PER_DAY) {
 			/* Check whether we're in the period to the next transition time */
-			trans = timelib_get_time_zone_info(two->sse - two->z, two->tz_info);
-			dst_corr = one->z - trans->offset;
+			if (timelib_get_time_zone_offset_info(two->sse - two->z, two->tz_info, &trans_offset, &trans_transition_time, NULL)) {
+				dst_corr = one->z - trans_offset;
 
-			if (two->sse >= trans->transition_time - dst_corr && two->sse < trans->transition_time) {
-				rt->d--;
-				rt->h = 24;
+				if (two->sse >= trans_transition_time - dst_corr && two->sse < trans_transition_time) {
+					rt->d--;
+					rt->h = 24;
+				}
 			}
 		}
 	} else {
@@ -187,10 +189,6 @@ static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time 
 		swap_if_negative(rt);
 
 		timelib_do_rel_normalize(rt->invert ? one : two, rt);
-	}
-
-	if (trans) {
-		timelib_time_offset_dtor(trans);
 	}
 
 	return rt;

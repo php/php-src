@@ -112,6 +112,20 @@
 		m = NULL;   \
 	}
 
+#if defined (__GNUC__)
+# define TIMELIB_GNUC_CHECK_VERSION(major, minor) \
+      ((__GNUC__ > (major)) ||                   \
+      ((__GNUC__ == (major)) && (__GNUC_MINOR__ >= (minor))))
+#else
+# define TIMELIB_GNUC_CHECK_VERSION(major, minor) 0
+#endif
+
+#if TIMELIB_GNUC_CHECK_VERSION(7, 0)
+# define TIMELIB_BREAK_INTENTIONALLY_MISSING __attribute__ ((fallthrough));
+#else
+# define TIMELIB_BREAK_INTENTIONALLY_MISSING
+#endif
+
 struct _ttinfo
 {
 	int32_t      offset;
