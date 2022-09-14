@@ -30,9 +30,9 @@
 # include "timelib_config.h"
 #endif
 
-#define TIMELIB_VERSION 202201
-#define TIMELIB_EXTENDED_VERSION 20220101
-#define TIMELIB_ASCII_VERSION "2022.01"
+#define TIMELIB_VERSION 202202
+#define TIMELIB_EXTENDED_VERSION 20220102
+#define TIMELIB_ASCII_VERSION "2022.02"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -342,10 +342,10 @@ typedef struct _timelib_error_container {
 } timelib_error_container;
 
 typedef struct _timelib_tz_lookup_table {
-	char       *name;
+	const char *name;
 	int         type;
 	float       gmtoffset;
-	char       *full_tz_name;
+	const char *full_tz_name;
 } timelib_tz_lookup_table;
 
 typedef struct _timelib_tzdb_index_entry {
@@ -354,7 +354,7 @@ typedef struct _timelib_tzdb_index_entry {
 } timelib_tzdb_index_entry;
 
 typedef struct _timelib_tzdb {
-	char                           *version;
+	const char                     *version;
 	int                             index_size;
 	const timelib_tzdb_index_entry *index;
 	const unsigned char            *data;
@@ -584,7 +584,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
  *
  * The returned char* is not duplicated, and should not be freed.
  */
-char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst);
+const char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst);
 
 /* Returns an array of known time zone abbreviations
  *
@@ -792,6 +792,19 @@ int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);
  * 'transition_time');
  */
 timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);
+
+/**
+ * Returns offset information with time zone 'tz' for the time stamp 'ts'.
+ *
+ * The returned information contains: the offset in seconds East of UTC (in
+ * the output parameter 'offset'), whether DST is active (in the output
+ * parameter 'is_dst'), and the transition time that got to this state (in
+ * the output parameter 'transition_time'); if NULL is passed, the value is
+ * not retrieved
+ *
+ * Returns 1 if successful, 0 for failure.
+ */
+int timelib_get_time_zone_offset_info(timelib_sll ts, timelib_tzinfo *tz, int32_t* offset, timelib_sll* transition_time, unsigned int* is_dst);
 
 /**
  * Returns the UTC offset currently applicable for the information stored in 't'.
