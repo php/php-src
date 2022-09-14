@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9447 (Invalid class FQN emitted by AST dump for new and class
     constants in constant expressions). (ilutov)
 
+- Date:
+  . Fixed bug GH-9165 (strtotime translates a date-time with DST/non-DST hour
+    differently based on default timezone). (Derick)
+
 - DOM:
   . Fixed bug #79451 (DOMDocument->replaceChild on doctype causes double free).
     (Nathan Freeman)
