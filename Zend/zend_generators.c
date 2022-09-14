@@ -404,7 +404,9 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 
 static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ */
 {
-	zend_generator *generator = emalloc(sizeof(zend_generator));
+	zend_generator *generator;
+
+	generator = emalloc(sizeof(zend_generator));
 	memset(generator, 0, sizeof(zend_generator));
 
 	/* The key will be incremented on first use, so it'll start at 0 */
@@ -419,6 +421,8 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 	generator->node.ptr.root = NULL;
 
 	zend_object_std_init(&generator->std, class_type);
+	generator->std.handlers = &zend_generator_handlers;
+
 	return (zend_object*)generator;
 }
 /* }}} */
@@ -1128,7 +1132,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_ce_generator->create_object = zend_generator_create;
 	/* get_iterator has to be assigned *after* implementing the interface */
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
-	zend_ce_generator->default_object_handlers = &zend_generator_handlers;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_generator_handlers.free_obj = zend_generator_free_storage;

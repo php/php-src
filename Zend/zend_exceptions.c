@@ -240,7 +240,7 @@ ZEND_API void zend_clear_exception(void) /* {{{ */
 }
 /* }}} */
 
-static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* {{{ */
+static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, bool skip_top_traces) /* {{{ */
 {
 	zval tmp;
 	zval trace;
@@ -248,11 +248,13 @@ static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* 
 	zend_string *filename;
 
 	zend_object *object = zend_objects_new(class_type);
+	object->handlers = &default_exception_handlers;
+
 	object_properties_init(object, class_type);
 
 	if (EG(current_execute_data)) {
 		zend_fetch_debug_backtrace(&trace,
-			0,
+			skip_top_traces,
 			EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 	} else {
 		array_init(&trace);
@@ -277,6 +279,18 @@ static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* 
 	zend_update_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), &trace);
 
 	return object;
+}
+/* }}} */
+
+static zend_object *zend_default_exception_new(zend_class_entry *class_type) /* {{{ */
+{
+	return zend_default_exception_new_ex(class_type, 0);
+}
+/* }}} */
+
+static zend_object *zend_error_exception_new(zend_class_entry *class_type) /* {{{ */
+{
+	return zend_default_exception_new_ex(class_type, 0);
 }
 /* }}} */
 
@@ -725,11 +739,6 @@ ZEND_METHOD(Exception, __toString)
 }
 /* }}} */
 
-static void zend_init_exception_class_entry(zend_class_entry *ce) {
-	ce->create_object = zend_default_exception_new;
-	ce->default_object_handlers = &default_exception_handlers;
-}
-
 void zend_register_default_exception(void) /* {{{ */
 {
 	zend_ce_throwable = register_class_Throwable(zend_ce_stringable);
@@ -739,37 +748,37 @@ void zend_register_default_exception(void) /* {{{ */
 	default_exception_handlers.clone_obj = NULL;
 
 	zend_ce_exception = register_class_Exception(zend_ce_throwable);
-	zend_init_exception_class_entry(zend_ce_exception);
+	zend_ce_exception->create_object = zend_default_exception_new;
 
 	zend_ce_error_exception = register_class_ErrorException(zend_ce_exception);
-	zend_init_exception_class_entry(zend_ce_error_exception);
+	zend_ce_error_exception->create_object = zend_error_exception_new;
 
 	zend_ce_error = register_class_Error(zend_ce_throwable);
-	zend_init_exception_class_entry(zend_ce_error);
+	zend_ce_error->create_object = zend_default_exception_new;
 
 	zend_ce_compile_error = register_class_CompileError(zend_ce_error);
-	zend_init_exception_class_entry(zend_ce_compile_error);
+	zend_ce_compile_error->create_object = zend_default_exception_new;
 
 	zend_ce_parse_error = register_class_ParseError(zend_ce_compile_error);
-	zend_init_exception_class_entry(zend_ce_parse_error);
+	zend_ce_parse_error->create_object = zend_default_exception_new;
 
 	zend_ce_type_error = register_class_TypeError(zend_ce_error);
-	zend_init_exception_class_entry(zend_ce_type_error);
+	zend_ce_type_error->create_object = zend_default_exception_new;
 
 	zend_ce_argument_count_error = register_class_ArgumentCountError(zend_ce_type_error);
-	zend_init_exception_class_entry(zend_ce_argument_count_error);
+	zend_ce_argument_count_error->create_object = zend_default_exception_new;
 
 	zend_ce_value_error = register_class_ValueError(zend_ce_error);
-	zend_init_exception_class_entry(zend_ce_value_error);
+	zend_ce_value_error->create_object = zend_default_exception_new;
 
 	zend_ce_arithmetic_error = register_class_ArithmeticError(zend_ce_error);
-	zend_init_exception_class_entry(zend_ce_arithmetic_error);
+	zend_ce_arithmetic_error->create_object = zend_default_exception_new;
 
 	zend_ce_division_by_zero_error = register_class_DivisionByZeroError(zend_ce_arithmetic_error);
-	zend_init_exception_class_entry(zend_ce_division_by_zero_error);
+	zend_ce_division_by_zero_error->create_object = zend_default_exception_new;
 
 	zend_ce_unhandled_match_error = register_class_UnhandledMatchError(zend_ce_error);
-	zend_init_exception_class_entry(zend_ce_unhandled_match_error);
+	zend_ce_unhandled_match_error->create_object = zend_default_exception_new;
 
 	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
 

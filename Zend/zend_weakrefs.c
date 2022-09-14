@@ -210,6 +210,9 @@ static zend_object* zend_weakref_new(zend_class_entry *ce) {
 	zend_weakref *wr = zend_object_alloc(sizeof(zend_weakref), zend_ce_weakref);
 
 	zend_object_std_init(&wr->std, zend_ce_weakref);
+
+	wr->std.handlers = &zend_weakref_handlers;
+
 	return &wr->std;
 }
 
@@ -301,6 +304,7 @@ static zend_object *zend_weakmap_create_object(zend_class_entry *ce)
 {
 	zend_weakmap *wm = zend_object_alloc(sizeof(zend_weakmap), ce);
 	zend_object_std_init(&wm->std, ce);
+	wm->std.handlers = &zend_weakmap_handlers;
 
 	zend_hash_init(&wm->ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 	return &wm->std;
@@ -647,7 +651,6 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_ce_weakref = register_class_WeakReference();
 
 	zend_ce_weakref->create_object = zend_weakref_new;
-	zend_ce_weakref->default_object_handlers = &zend_weakref_handlers;
 
 	memcpy(&zend_weakref_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
@@ -659,7 +662,6 @@ void zend_register_weakref_ce(void) /* {{{ */
 
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
-	zend_ce_weakmap->default_object_handlers = &zend_weakmap_handlers;
 
 	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);
