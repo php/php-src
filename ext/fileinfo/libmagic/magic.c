@@ -25,6 +25,11 @@
  * SUCH DAMAGE.
  */
 
+#ifdef WIN32
+#include <windows.h>
+#include <shlwapi.h>
+#endif
+
 #include "file.h"
 
 #ifndef	lint
@@ -34,16 +39,12 @@ FILE_RCSID("@(#)$File: magic.c,v 1.117 2021/12/06 15:33:00 christos Exp $")
 #include "magic.h"
 
 #include <stdlib.h>
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#else
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <string.h>
-#include "config.h"
-
-#ifdef PHP_WIN32
-#include <shlwapi.h>
+#ifdef QUICK
+#include <sys/mman.h>
 #endif
 #include <limits.h>	/* for PIPE_BUF */
 

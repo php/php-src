@@ -54,7 +54,7 @@ FILE_RCSID("@(#)$File: der.c,v 1.24 2022/07/30 18:08:36 christos Exp $")
 #include "magic.h"
 #include "der.h"
 #else
-#ifndef PHP_WIN32
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 #include <sys/stat.h>

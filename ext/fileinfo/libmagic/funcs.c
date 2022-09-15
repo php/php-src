@@ -51,13 +51,6 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.131 2022/09/13 18:46:07 christos Exp $")
 #define SIZE_MAX	((size_t)~0)
 #endif
 
-#include "php.h"
-#include "main/php_network.h"
-
-#ifndef PREG_OFFSET_CAPTURE
-# define PREG_OFFSET_CAPTURE                 (1<<8)
-#endif
-
 protected char *
 file_copystr(char *buf, size_t blen, size_t width, const char *str)
 {
@@ -139,7 +132,7 @@ file_checkfmt(char *msg, size_t mlen, const char *fmt)
 protected int
 file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 {
-	size_t len;
+	int len;
 	char *buf, *newstr;
 	char tbuf[1024];
 

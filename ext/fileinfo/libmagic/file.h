@@ -35,12 +35,13 @@
 
 #include "config.h"
 
-#include "php.h"
-#include "ext/standard/php_string.h"
-#include "ext/pcre/php_pcre.h"
-
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
 
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
@@ -78,16 +79,12 @@
 #include <fcntl.h>	/* For open and flags */
 
 #include <sys/types.h>
-#ifdef PHP_WIN32
-#include "win32/param.h"
-#else
+#ifndef WIN32
 #include <sys/param.h>
 #endif
 /* Do this here and now, because struct stat gets re-defined on solaris */
 #include <sys/stat.h>
 #include <stdarg.h>
-
-#define abort()	zend_error_noreturn(E_ERROR, "fatal libmagic error")
 
 #define ENABLE_CONDITIONALS
 
@@ -166,6 +163,8 @@
 #define FILE_CHECK	1
 #define FILE_COMPILE	2
 #define FILE_LIST	3
+
+typedef void* file_regex_t;
 
 struct buffer {
 	int fd;
@@ -586,8 +585,6 @@ protected void buffer_init(struct buffer *, int, const zend_stat_t *,
 protected void buffer_fini(struct buffer *);
 protected int buffer_fill(const struct buffer *);
 
-public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options);
-
 typedef struct {
 	char *buf;
 	size_t blen;
@@ -648,18 +645,6 @@ static const char *rcsid(const char *p) { \
 #endif
 #ifndef __RCSID
 #define __RCSID(a)
-#endif
-
-#ifdef PHP_WIN32
-#ifdef _WIN64
-#define FINFO_LSEEK_FUNC _lseeki64
-#else
-#define FINFO_LSEEK_FUNC _lseek
-#endif
-#define FINFO_READ_FUNC _read
-#else
-#define FINFO_LSEEK_FUNC lseek
-#define FINFO_READ_FUNC read
 #endif
 
 #endif /* __file_h__ */

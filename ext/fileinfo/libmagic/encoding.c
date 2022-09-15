@@ -175,7 +175,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 
  done:
 	if (ubuf == &udefbuf)
-		free(udefbuf);
+		efree(udefbuf);
 
 	return rv;
 }

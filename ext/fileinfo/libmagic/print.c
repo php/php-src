@@ -28,7 +28,6 @@
 /*
  * print.c - debugging printout routines
  */
-#include "php.h"
 
 #include "file.h"
 

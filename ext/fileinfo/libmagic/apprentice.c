@@ -29,8 +29,6 @@
  * apprentice - make one pass through /etc/magic, learning its secrets.
  */
 
-#include "php.h"
-
 #include "file.h"
 
 #ifndef	lint
@@ -39,19 +37,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.326 2022/09/13 18:46:07 christos Exp $")
 
 #include "magic.h"
 #include <stdlib.h>
-
-#if defined(__hpux) && !defined(HAVE_STRTOULL)
-#if SIZEOF_LONG == 8
-# define strtoull strtoul
-#else
-# define strtoull __strtoull
-#endif
-#endif
-
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#define strtoull _strtoui64
-#else
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -85,10 +70,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.326 2022/09/13 18:46:07 christos Exp $")
 #ifdef MAP_FAILED
 #undef MAP_FAILED
 #endif
-#endif
-
-#ifndef offsetof
-#define offsetof(STRUCTURE,FIELD) ((int)((char*)&((STRUCTURE*)0)->FIELD))
 #endif
 
 #ifndef MAP_FAILED
@@ -206,6 +187,39 @@ private struct {
 };
 
 #include "../data_file.c"
+
+#ifdef COMPILE_ONLY
+
+int main(int, char *[]);
+
+int
+main(int argc, char *argv[])
+{
+	int ret;
+	struct magic_set *ms;
+	char *progname;
+
+	if ((progname = strrchr(argv[0], '/')) != NULL)
+		progname++;
+	else
+		progname = argv[0];
+
+	if (argc != 2) {
+		(void)fprintf(stderr, "Usage: %s file\n", progname);
+		return 1;
+	}
+
+	if ((ms = magic_open(MAGIC_CHECK)) == NULL) {
+		(void)fprintf(stderr, "%s: %s\n", progname, strerror(errno));
+		return 1;
+	}
+	ret = magic_compile(ms, argv[1]) == -1 ? 1 : 0;
+	if (ret == 1)
+		(void)fprintf(stderr, "%s: %s\n", progname, magic_error(ms));
+	magic_close(ms);
+	return ret;
+}
+#endif /* COMPILE_ONLY */
 
 struct type_tbl_s {
 	const char name[16];
@@ -440,15 +454,7 @@ add_mlist(struct mlist *mlp, struct magic_map *map, size_t idx)
 	ml->map = idx == 0 ? map : NULL;
 	ml->magic = map->magic[idx];
 	ml->nmagic = map->nmagic[idx];
-	if (ml->nmagic) {
-		ml->magic_rxcomp = CAST(file_regex_t **,
-		    ecalloc(ml->nmagic, sizeof(*ml->magic_rxcomp)));
-		if (ml->magic_rxcomp == NULL) {
-			efree(ml);
-			return -1;
-		}
-	} else
-		ml->magic_rxcomp = NULL;
+
 	mlp->prev->next = ml;
 	ml->prev = mlp->prev;
 	ml->next = mlp;
@@ -655,51 +661,6 @@ mlist_free(struct mlist *mlist)
 	}
 	mlist_free_one(mlist);
 }
-
-#ifndef COMPILE_ONLY
-/* void **bufs: an array of compiled magic files */
-protected int
-buffer_apprentice(struct magic_set *ms, struct magic **bufs,
-    size_t *sizes, size_t nbufs)
-{
-	size_t i, j;
-	struct mlist *ml;
-	struct magic_map *map;
-
-	if (nbufs == 0)
-		return -1;
-
-	(void)file_reset(ms, 0);
-
-	init_file_tables();
-
-	for (i = 0; i < MAGIC_SETS; i++) {
-		mlist_free(ms->mlist[i]);
-		if ((ms->mlist[i] = mlist_alloc()) == NULL) {
-			file_oomem(ms, sizeof(*ms->mlist[i]));
-			goto fail;
-		}
-	}
-
-	for (i = 0; i < nbufs; i++) {
-		map = apprentice_buf(ms, bufs[i], sizes[i]);
-		if (map == NULL)
-			goto fail;
-
-		for (j = 0; j < MAGIC_SETS; j++) {
-			if (add_mlist(ms->mlist[j], map, j) == -1) {
-				file_oomem(ms, sizeof(*ml));
-				goto fail;
-			}
-		}
-	}
-
-	return 0;
-fail:
-	mlist_free_all(ms);
-	return -1;
-}
-#endif
 
 /* const char *fn: list of magic files and directories */
 protected int
@@ -3221,28 +3182,6 @@ eatsize(const char **p)
 	}
 
 	*p = l;
-}
-
-/*
- * handle a buffer containing a compiled file.
- */
-private struct magic_map *
-apprentice_buf(struct magic_set *ms, struct magic *buf, size_t len)
-{
-	struct magic_map *map;
-
-	if ((map = CAST(struct magic_map *, calloc(1, sizeof(*map)))) == NULL) {
-		file_oomem(ms, sizeof(*map));
-		return NULL;
-	}
-	map->len = len;
-	map->p = buf;
-	map->type = MAP_TYPE_USER;
-	if (check_buffer(ms, map, "buffer") != 0) {
-		apprentice_unmap(map);
-		return NULL;
-	}
-	return map;
 }
 
 /*

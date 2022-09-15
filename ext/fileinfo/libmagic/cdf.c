@@ -43,17 +43,9 @@ FILE_RCSID("@(#)$File: cdf.c,v 1.121 2021/10/20 13:56:15 christos Exp $")
 #include <err.h>
 #endif
 #include <stdlib.h>
-
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#else
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#ifndef UINT32_MAX
-# define UINT32_MAX (0xffffffff)
-#endif
-
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
@@ -101,44 +93,9 @@ static union {
 			    CDF_TOLE8(CAST(uint64_t, x))))
 #define CDF_GETUINT32(x, y)	cdf_getuint32(x, y)
 
-#define CDF_MALLOC(n) cdf_malloc(__FILE__, __LINE__, (n))
-#define CDF_REALLOC(p, n) cdf_realloc(__FILE__, __LINE__, (p), (n))
-#define CDF_CALLOC(n, u) cdf_calloc(__FILE__, __LINE__, (n), (u))
-
-
-/*ARGSUSED*/
-static void *
-cdf_malloc(const char *file __attribute__((__unused__)),
-    size_t line __attribute__((__unused__)), size_t n)
-{
-	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
-	    file, line, __func__, n));
-	if (n == 0)
-	    n++;
-	return malloc(n);
-}
-
-/*ARGSUSED*/
-static void *
-cdf_realloc(const char *file __attribute__((__unused__)),
-    size_t line __attribute__((__unused__)), void *p, size_t n)
-{
-	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u\n",
-	    file, line, __func__, n));
-	return realloc(p, n);
-}
-
-/*ARGSUSED*/
-static void *
-cdf_calloc(const char *file __attribute__((__unused__)),
-    size_t line __attribute__((__unused__)), size_t n, size_t u)
-{
-	DPRINTF(("%s,%" SIZE_T_FORMAT "u: %s %" SIZE_T_FORMAT "u %"
-	    SIZE_T_FORMAT "u\n", file, line, __func__, n, u));
-	if (n == 0)
-	    n++;
-	return calloc(n, u);
-}
+#define CDF_MALLOC(n) emalloc(n)
+#define CDF_REALLOC(p, n) erealloc(p, n)
+#define CDF_CALLOC(n, u) ecalloc(n, u)
 
 #if defined(HAVE_BYTESWAP_H)
 # define _cdf_tole2(x)	bswap_16(x)

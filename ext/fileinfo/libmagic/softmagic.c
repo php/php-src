@@ -43,10 +43,6 @@ FILE_RCSID("@(#)$File: softmagic.c,v 1.328 2022/09/13 18:46:07 christos Exp $")
 #include <time.h>
 #include "der.h"
 
-#ifndef PREG_OFFSET_CAPTURE
-# define PREG_OFFSET_CAPTURE                 (1<<8)
-#endif
-
 private int match(struct magic_set *, struct magic *, file_regex_t **, size_t,
     const struct buffer *, size_t, int, int, int, uint16_t *,
     uint16_t *, int *, int *, int *, int *);
@@ -2050,81 +2046,6 @@ file_strncmp16(const char *a, const char *b, size_t len, size_t maxlen,
 	return file_strncmp(a, b, len, maxlen, flags);
 }
 
-private file_regex_t *
-alloc_regex(struct magic_set *ms, struct magic *m)
-{
-	int rc;
-	file_regex_t *rx = CAST(file_regex_t *, malloc(sizeof(*rx)));
-
-	if (rx == NULL) {
-		file_error(ms, errno, "can't allocate %" SIZE_T_FORMAT
-		    "u bytes", sizeof(*rx));
-		return NULL;
-	}
-
-	rc = file_regcomp(ms, rx, m->value.s, REG_EXTENDED | REG_NEWLINE |
-	    ((m->str_flags & STRING_IGNORE_CASE) ? REG_ICASE : 0));
-	if (rc == 0)
-		return rx;
-
-	free(rx);
-	return NULL;
-}
-
-public zend_string* convert_libmagic_pattern(const char *val, size_t len, uint32_t options)
-{
-	int i, j;
-	zend_string *t;
-
-	for (i = j = 0; i < len; i++) {
-		switch (val[i]) {
-			case '~':
-				j += 2;
-				break;
-			case '\0':
-				j += 4;
-				break;
-			default:
-				j++;
-				break;
-		}
-	}
-	t = zend_string_alloc(j + 4, 0);
-
-	j = 0;
-	ZSTR_VAL(t)[j++] = '~';
-
-	for (i = 0; i < len; i++, j++) {
-		switch (val[i]) {
-			case '~':
-				ZSTR_VAL(t)[j++] = '\\';
-				ZSTR_VAL(t)[j] = '~';
-				break;
-			case '\0':
-				ZSTR_VAL(t)[j++] = '\\';
-				ZSTR_VAL(t)[j++] = 'x';
-				ZSTR_VAL(t)[j++] = '0';
-				ZSTR_VAL(t)[j] = '0';
-				break;
-			default:
-				ZSTR_VAL(t)[j] = val[i];
-				break;
-		}
-	}
-	ZSTR_VAL(t)[j++] = '~';
-
-	if (options & PCRE2_CASELESS)
-		ZSTR_VAL(t)[j++] = 'i';
-
-	if (options & PCRE2_MULTILINE)
-		ZSTR_VAL(t)[j++] = 'm';
-
-	ZSTR_VAL(t)[j]='\0';
-	ZSTR_LEN(t) = j;
-
-	return t;
-}
-
 private int
 magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
 {
@@ -2297,6 +2218,7 @@ magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
 			ms->search.rm_len = ms->search.s_len - idx;
 			break;
 		}
+#endif
 
 		for (idx = 0; m->str_range == 0 || idx < m->str_range; idx++) {
 			if (slen + idx > ms->search.s_len) {
@@ -2331,10 +2253,6 @@ magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
 		if ((pce = pcre_get_compiled_regex_cache(pattern)) == NULL) {
 			zend_string_release(pattern);
 			return -1;
-		    }
-		    memcpy(copy, ms->search.s, slen);
-		    copy[--slen] = '\0';
-		    search = copy;
 		} else {
 			/* pce now contains the compiled regex */
 			zval retval;
