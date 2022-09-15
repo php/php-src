@@ -10,8 +10,10 @@ opcache.file_cache={TMP}
 opcache.log_verbosity_level=2
 --SKIPIF--
 <?php
-if (!posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1)) die('skip Test requires setrlimit(RLIMIT_FSIZE) to work');
+if (!posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, -1)) die('skip Test requires setrlimit(RLIMIT_FSIZE) to work');
 if (ini_parse_quantity(ini_get('opcache.jit_buffer_size')) !== 0) die('skip File cache is disabled when JIT is on');
+// Allow gcov to write to file
+posix_setrlimit(POSIX_RLIMIT_FSIZE, -1, -1);
 ?>
 --FILE--
 <?php
@@ -30,10 +32,13 @@ if (defined('SIGXFSZ')) {
 }
 
 // Should cause writing to cache file to fail
-var_dump(posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1));
+var_dump(posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, -1));
 
 // Will attempt to write to cache file, and fail
 require $file;
+
+// Allow gcov to write to file
+posix_setrlimit(POSIX_RLIMIT_FSIZE, -1, -1);
 ?>
 --EXPECTF--
 bool(true)
