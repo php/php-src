@@ -3,7 +3,10 @@ Test for timelib #124: Problem with large negative timestamps
 --INI--
 date.timezone=UTC
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) echo "skip this test is for 64-bit only"; ?>
+<?php
+if (PHP_INT_SIZE != 8) echo "skip this test is for 64-bit only";
+if (getenv('SKIP_ASAN')) die('skip triggers undefined behavior');
+?>
 --FILE--
 <?php
 var_dump((new DateTime("@-9223372036854775808"))->getTimestamp());
