@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC3
 
+- Core:
+  . Fixed observer class notify with Opcache file_cache_only=1. (ilutov)
+
 - Date:
   . Fixed bug with parsing large negative numbers with the @ notation. (Derick)
 

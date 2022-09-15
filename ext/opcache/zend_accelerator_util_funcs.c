@@ -232,10 +232,10 @@ static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, Ha
 		} else {
 			zend_class_entry *ce = Z_PTR(p->val);
 			_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
-			if ((ce->ce_flags & ZEND_ACC_LINKED)
-			 && ZSTR_HAS_CE_CACHE(ce->name)
-			 && ZSTR_VAL(p->key)[0]) {
-				ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
+			if ((ce->ce_flags & ZEND_ACC_LINKED) && ZSTR_VAL(p->key)[0]) {
+				if (ZSTR_HAS_CE_CACHE(ce->name)) {
+					ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
+				}
 				if (UNEXPECTED(call_observers)) {
 					_zend_observer_class_linked_notify(ce, p->key);
 				}
