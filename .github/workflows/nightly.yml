@@ -165,6 +165,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   COVERAGE_DEBUG_NTS:
+    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
