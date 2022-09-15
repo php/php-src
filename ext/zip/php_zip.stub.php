@@ -633,12 +633,6 @@ class ZipArchive implements Countable
      */
     public const EM_UNKNOWN = UNKNOWN;
 
-    /**
-     * @var string
-     * @cvalue LIBZIP_VERSION_STR
-     */
-    public const LIBZIP_VERSION = UNKNOWN;
-
     /** @readonly */
     public int $lastId;
     /** @readonly */
