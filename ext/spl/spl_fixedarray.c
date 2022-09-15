@@ -597,8 +597,9 @@ PHP_METHOD(SplFixedArray, __serialize)
 		RETURN_THROWS();
 	}
 
-	uint32_t property_num = zend_hash_num_elements(intern->std.properties);
-	array_init_size(return_value, intern->array.size + property_num);
+	uint32_t num_properties =
+		intern->std.properties ? zend_hash_num_elements(intern->std.properties) : 0;
+	array_init_size(return_value, intern->array.size + num_properties);
 
 	/* elements */
 	for (zend_long i = 0; i < intern->array.size; i++) {
@@ -608,10 +609,12 @@ PHP_METHOD(SplFixedArray, __serialize)
 	}
 
 	/* members */
-	ZEND_HASH_FOREACH_STR_KEY_VAL(intern->std.properties, key, current) {
-		zend_hash_add(Z_ARRVAL_P(return_value), key, current);
-		Z_TRY_ADDREF_P(current);
-	} ZEND_HASH_FOREACH_END();
+	if (intern->std.properties) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(intern->std.properties, key, current) {
+			zend_hash_add(Z_ARRVAL_P(return_value), key, current);
+			Z_TRY_ADDREF_P(current);
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 
 PHP_METHOD(SplFixedArray, __unserialize)

@@ -38,6 +38,9 @@ $array->__unserialize([
 ]);
 var_dump($array);
 
+var_dump($s = serialize(new SplFixedArray));
+var_dump(unserialize($s));
+
 ?>
 --EXPECTF--
 Deprecated: Creation of dynamic property SplFixedArray::$foo is deprecated in %s on line %d
@@ -70,4 +73,7 @@ string(3) "bar"
 object(SplFixedArray)#5 (1) {
   [0]=>
   NULL
+}
+string(25) "O:13:"SplFixedArray":0:{}"
+object(SplFixedArray)#1 (0) {
 }
