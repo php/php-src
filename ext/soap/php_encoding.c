@@ -2386,7 +2386,14 @@ iterator_done:
 		if (style == SOAP_ENCODED) {
 			if (soap_version == SOAP_1_1) {
 				smart_str_0(&array_type);
-				if (strcmp(ZSTR_VAL(array_type.s),"xsd:anyType") == 0) {
+#if defined(__GNUC__) && __GNUC__ >= 11
+				ZEND_CGG_DIAGNOSTIC_IGNORED_START("-Wstringop-overread")
+#endif
+				bool is_xsd_any_type = strcmp(ZSTR_VAL(array_type.s),"xsd:anyType") == 0;
+#if defined(__GNUC__) && __GNUC__ >= 11
+				ZEND_CGG_DIAGNOSTIC_IGNORED_END
+#endif
+				if (is_xsd_any_type) {
 					smart_str_free(&array_type);
 					smart_str_appendl(&array_type,"xsd:ur-type",sizeof("xsd:ur-type")-1);
 				}
