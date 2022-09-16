@@ -2696,7 +2696,12 @@ COMMAND $cmd
         }
 
         // write .diff
-        $diff = generate_diff($wanted, $wanted_re, $output);
+        if (!empty($environment['TEST_PHP_DIFF_CMD'])) {
+            $diff = generate_diff_external($environment['TEST_PHP_DIFF_CMD'], $exp_filename, $output_filename);
+        } else {
+            $diff = generate_diff($wanted, $wanted_re, $output);
+        }
+
         if (is_array($IN_REDIRECT)) {
             $orig_shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
             $diff = "# original source file: $orig_shortname\n" . $diff;
@@ -2957,6 +2962,13 @@ function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): ar
     }
 
     return $diff;
+}
+
+function generate_diff_external(string $diff_cmd, string $exp_file, string $output_file): string
+{
+    $retval = shell_exec("{$diff_cmd} {$exp_file} {$output_file}");
+
+    return is_string($retval) ? $retval : 'Could not run external diff tool set through PHP_TEST_DIFF_CMD environment variable';
 }
 
 function generate_diff(string $wanted, ?string $wanted_re, string $output): string
