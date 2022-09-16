@@ -305,12 +305,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		p = ce->default_properties_table;
-		end = p + ce->default_properties_count;
+		if (ce->default_properties_table) {
+			p = ce->default_properties_table;
+			end = p + ce->default_properties_count;
 
-		while (p < end) {
-			zval_ptr_dtor_nogc(p);
-			p++;
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
 		}
 		return;
 	}
