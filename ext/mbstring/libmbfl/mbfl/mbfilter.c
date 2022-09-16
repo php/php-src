@@ -1276,6 +1276,7 @@ mbfl_strcut(
 			bk = _bk;
 		}
 
+		decoder->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
 		(*encoder->filter_flush)(encoder);
 
 		if (bk.decoder.filter_dtor)
