@@ -429,6 +429,10 @@ PHP 8.2 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- Support for binary and octal number prefixes for INI settings has been added.
+  Previously only hexadecimal prefixes and using a leading 0 for octal numbers
+  was supported.
+
 - Parsing of some ill-formatted values will now trigger a warning when this was
   silently ignored before. Interpretation of these values is not changed, for
   backwards compatibility. This affects the following settings:
