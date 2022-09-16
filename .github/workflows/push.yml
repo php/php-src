@@ -28,6 +28,13 @@ env:
   CXX: ccache g++
 jobs:
   LINUX_X64:
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
     strategy:
       fail-fast: false
       matrix:
@@ -37,7 +44,7 @@ jobs:
           - debug: false
             zts: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -85,7 +92,7 @@ jobs:
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: ubuntu:22.04
     env:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
