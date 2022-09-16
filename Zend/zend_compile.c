@@ -6364,6 +6364,7 @@ static zend_type zend_compile_typename(
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_type_list *type_list;
 		bool is_composite = false;
+		bool has_only_iterable_class = true;
 		ALLOCA_FLAG(use_heap)
 
 		type_list = do_alloca(ZEND_TYPE_LIST_SIZE(list->children), use_heap);
@@ -6372,8 +6373,10 @@ static zend_type zend_compile_typename(
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type;
+			uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
 
 			if (type_ast->kind == ZEND_AST_TYPE_INTERSECTION) {
+				has_only_iterable_class = false;
 				is_composite = true;
 				/* The first class type can be stored directly as the type ptr payload. */
 				if (ZEND_TYPE_IS_COMPLEX(type) && !ZEND_TYPE_HAS_LIST(type)) {
@@ -6381,8 +6384,9 @@ static zend_type zend_compile_typename(
 					type_list->num_types = 1;
 					type_list->types[0] = type;
 					ZEND_TYPE_FULL_MASK(type_list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
-					ZEND_TYPE_SET_LIST(type, type_list);
 				}
+				/* Mark type as list type */
+				ZEND_TYPE_SET_LIST(type, type_list);
 
 				single_type = zend_compile_typename(type_ast, false);
 				ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(single_type));
@@ -6407,6 +6411,9 @@ static zend_type zend_compile_typename(
 			if (single_type_mask == MAY_BE_ANY) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Type mixed can only be used as a standalone type");
 			}
+			if (ZEND_TYPE_IS_COMPLEX(single_type) && !ZEND_TYPE_IS_ITERABLE_FALLBACK(single_type)) {
+				has_only_iterable_class = false;
+			}
 
 			uint32_t type_mask_overlap = ZEND_TYPE_PURE_MASK(type) & single_type_mask;
 			if (type_mask_overlap) {
@@ -6415,8 +6422,9 @@ static zend_type zend_compile_typename(
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Duplicate type %s is redundant", ZSTR_VAL(overlap_type_str));
 			}
-			if ( ((ZEND_TYPE_PURE_MASK(type) & MAY_BE_TRUE) && (single_type_mask == MAY_BE_FALSE))
-					|| ((ZEND_TYPE_PURE_MASK(type) & MAY_BE_FALSE) && (single_type_mask == MAY_BE_TRUE)) ) {
+
+			if ( ((type_mask & MAY_BE_TRUE) && (single_type_mask == MAY_BE_FALSE))
+					|| ((type_mask & MAY_BE_FALSE) && (single_type_mask == MAY_BE_TRUE)) ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type contains both true and false, bool should be used instead");
 			}
@@ -6458,7 +6466,8 @@ static zend_type zend_compile_typename(
 		free_alloca(type_list, use_heap);
 
 		uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
-		if ((type_mask & MAY_BE_OBJECT) && (ZEND_TYPE_IS_COMPLEX(type) || (type_mask & MAY_BE_STATIC))) {
+		if ((type_mask & MAY_BE_OBJECT) &&
+				((!has_only_iterable_class && ZEND_TYPE_IS_COMPLEX(type)) || (type_mask & MAY_BE_STATIC))) {
 			zend_string *type_str = zend_type_to_string(type);
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Type %s contains both object and a class type, which is redundant",
