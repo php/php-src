@@ -8,6 +8,7 @@ pcntl
 opcache.enable_cli=1
 opcache.file_cache={TMP}
 opcache.log_verbosity_level=2
+opcache.interned_strings_buffer=8
 --SKIPIF--
 <?php
 if (!posix_setrlimit(POSIX_RLIMIT_FSIZE, 1, 1)) die('skip Test requires setrlimit(RLIMIT_FSIZE) to work');
