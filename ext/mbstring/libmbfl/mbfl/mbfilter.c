@@ -1096,6 +1096,7 @@ mbfl_strcut(
 	} else {
 		mbfl_convert_filter *encoder     = NULL;
 		mbfl_convert_filter *decoder     = NULL;
+		int mode_backup;
 		const unsigned char *p, *q, *r;
 		struct {
 			mbfl_convert_filter encoder;
@@ -1111,6 +1112,8 @@ mbfl_strcut(
 				mbfl_memory_device_output, 0, &device))) {
 			return NULL;
 		}
+
+		mode_backup = decoder->illegal_mode;
 
 		/* wchar filter */
 		if (!(encoder = mbfl_convert_filter_new(
@@ -1276,7 +1279,9 @@ mbfl_strcut(
 			bk = _bk;
 		}
 
+		decoder->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
 		(*encoder->filter_flush)(encoder);
+		decoder->illegal_mode = mode_backup;
 
 		if (bk.decoder.filter_dtor)
 			bk.decoder.filter_dtor(&bk.decoder);
