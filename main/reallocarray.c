@@ -15,6 +15,7 @@
 */
 
 #include "php.h"
+#include "stdint.h"
 
 #ifndef HAVE_REALLOCARRAY
 
@@ -23,10 +24,14 @@
 PHPAPI void* php_reallocarray(void *p, size_t nmb, size_t siz)
 {
 	size_t r;
-#ifndef _WIN32
+#ifdef _WIN32
+	if (SizeTMult(nmb, siz, &r) != S_OK) {
+#elif defined(PHP_HAVE_BUILTIN_MUL_OVERFLOW)
 	if (__builtin_mul_overflow(nmb, siz, &r)) {
 #else
-	if (SizeTMult(nmb, siz, &r) != S_OK) {
+	if (SIZE_MAX / siz >= nmb) {
+		r = siz * nmb;
+	} else {
 #endif
 		// EOVERFLOW may have been, arguably, more appropriate
 		// but this is what other implementations set
