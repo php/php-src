@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed GH-9584 (Avoid memory corruption when not unregistering custom session
     handler). (ilutov)
 
+- Standard:
+  . Revert "Fixed parse_url(): can not recognize port without scheme."
+    (andypost)
+
 15 Sep 2022, PHP 8.2.0RC2
 
 - Core:

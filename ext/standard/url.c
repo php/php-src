@@ -150,7 +150,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 				p++;
 			}
 
-			if ((p == ue || *p == '/' || *p == '?' || *p == '#') && (p - e) < 7) {
+			if ((p == ue || *p == '/') && (p - e) < 7) {
 				goto parse_port;
 			}
 
@@ -190,7 +190,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			pp++;
 		}
 
-		if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/' || *pp == '?' || *pp == '#')) {
+		if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/')) {
 			zend_long port;
 			char *end;
 			memcpy(port_buf, p, (pp - p));
