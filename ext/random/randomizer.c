@@ -141,7 +141,6 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	zend_string *retval;
 	zend_long length;
-	uint64_t result;
 	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -156,7 +155,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	retval = zend_string_alloc(length, 0);
 
 	while (total_size < length) {
-		result = randomizer->algo->generate(randomizer->status);
+		uint64_t result = randomizer->algo->generate(randomizer->status);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
