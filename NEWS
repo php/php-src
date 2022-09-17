@@ -421,7 +421,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-7847 (stripos with large haystack has bad performance).
     (ilutov)
   . New function memory_reset_peak_usage(). (Patrick Allaert)
-  . Fixed parse_url(): can not recognize port without scheme. (pandaLIU)
 
 - Streams:
   . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
