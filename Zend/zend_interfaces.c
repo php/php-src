@@ -480,6 +480,7 @@ typedef struct {
 static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	zend_internal_iterator *intern = emalloc(sizeof(zend_internal_iterator));
 	zend_object_std_init(&intern->std, ce);
+	intern->std.handlers = &zend_internal_iterator_handlers;
 	intern->iter = NULL;
 	intern->rewind_called = 0;
 	return &intern->std;
@@ -654,7 +655,6 @@ ZEND_API void zend_register_interfaces(void)
 
 	zend_ce_internal_iterator = register_class_InternalIterator(zend_ce_iterator);
 	zend_ce_internal_iterator->create_object = zend_internal_iterator_create;
-	zend_ce_internal_iterator->default_object_handlers = &zend_internal_iterator_handlers;
 
 	memcpy(&zend_internal_iterator_handlers, zend_get_std_object_handlers(),
 		sizeof(zend_object_handlers));

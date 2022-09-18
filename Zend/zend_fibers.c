@@ -589,9 +589,12 @@ static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fib
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
 {
 	zend_fiber *fiber = emalloc(sizeof(zend_fiber));
+
 	memset(fiber, 0, sizeof(zend_fiber));
 
 	zend_object_std_init(&fiber->std, ce);
+	fiber->std.handlers = &zend_fiber_handlers;
+
 	return &fiber->std;
 }
 
@@ -900,7 +903,6 @@ void zend_register_fiber_ce(void)
 {
 	zend_ce_fiber = register_class_Fiber();
 	zend_ce_fiber->create_object = zend_fiber_object_create;
-	zend_ce_fiber->default_object_handlers = &zend_fiber_handlers;
 
 	zend_fiber_handlers = std_object_handlers;
 	zend_fiber_handlers.dtor_obj = zend_fiber_object_destroy;
