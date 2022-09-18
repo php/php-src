@@ -132,7 +132,7 @@ file_checkfmt(char *msg, size_t mlen, const char *fmt)
 protected int
 file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 {
-	int len;
+	size_t len;
 	char *buf, *newstr;
 	char tbuf[1024];
 
@@ -150,7 +150,7 @@ file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
 		size_t blen = ms->o.blen;
 		if (buf) efree(buf);
 		file_clearbuf(ms);
-		file_error(ms, 0, "Output buffer space exceeded %d+%"
+		file_error(ms, 0, "Output buffer space exceeded %" SIZE_T_FORMAT "u+%"
 		    SIZE_T_FORMAT "u", len, blen);
 		return -1;
 	}

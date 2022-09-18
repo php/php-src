@@ -43,7 +43,7 @@ FILE_RCSID("@(#)$File: softmagic.c,v 1.328 2022/09/13 18:46:07 christos Exp $")
 #include <time.h>
 #include "der.h"
 
-private int match(struct magic_set *, struct magic *, file_regex_t **, size_t,
+private int match(struct magic_set *, struct magic *, size_t,
     const struct buffer *, size_t, int, int, int, uint16_t *,
     uint16_t *, int *, int *, int *, int *);
 private int mget(struct magic_set *, struct magic *, const struct buffer *,
@@ -52,7 +52,7 @@ private int mget(struct magic_set *, struct magic *, const struct buffer *,
     uint16_t *, int *, int *, int *, int *);
 private int msetoffset(struct magic_set *, struct magic *, struct buffer *,
     const struct buffer *, size_t, unsigned int);
-private int magiccheck(struct magic_set *, struct magic *, file_regex_t **);
+private int magiccheck(struct magic_set *, struct magic *);
 private int mprint(struct magic_set *, struct magic *);
 private int moffset(struct magic_set *, struct magic *, const struct buffer *,
     int32_t *);
@@ -131,7 +131,7 @@ file_softmagic(struct magic_set *ms, const struct buffer *b,
 	}
 
 	for (ml = ms->mlist[0]->next; ml != ms->mlist[0]; ml = ml->next) {
-		int ret = match(ms, ml->magic, ml->magic_rxcomp, ml->nmagic, b,
+		int ret = match(ms, ml->magic, ml->nmagic, b,
 		    0, mode, text, 0, indir_count, name_count,
 		    &printed_something, &need_separator, NULL, NULL);
 		switch (ret) {
@@ -206,7 +206,7 @@ file_fmtcheck(struct magic_set *ms, const char *desc, const char *def,
  *	so that higher-level continuations are processed.
  */
 private int
-match(struct magic_set *ms, struct magic *magic, file_regex_t **magic_rxcomp,
+match(struct magic_set *ms, struct magic *magic,
     size_t nmagic, const struct buffer *b, size_t offset, int mode, int text,
     int flip, uint16_t *indir_count, uint16_t *name_count,
     int *printed_something, int *need_separator, int *returnval,
@@ -236,7 +236,6 @@ match(struct magic_set *ms, struct magic *magic, file_regex_t **magic_rxcomp,
 	for (magindex = 0; magindex < nmagic; magindex++) {
 		int flush = 0;
 		struct magic *m = &magic[magindex];
-		file_regex_t **m_rxcomp = &magic_rxcomp[magindex];
 
 		if (m->type != FILE_NAME)
 		if ((IS_LIBMAGIC_STRING(m->type) &&
@@ -274,7 +273,7 @@ flush:
 				*returnval = 1;
 			}
 
-			switch (magiccheck(ms, m, m_rxcomp)) {
+			switch (magiccheck(ms, m)) {
 			case -1:
 				return -1;
 			case 0:
@@ -335,7 +334,6 @@ flush:
 		while (magindex + 1 < nmagic &&
 		    magic[magindex + 1].cont_level != 0) {
 			m = &magic[++magindex];
-			m_rxcomp = &magic_rxcomp[magindex];
 			ms->line = m->lineno; /* for messages */
 
 			if (cont_level < m->cont_level)
@@ -389,7 +387,7 @@ flush:
 				break;
 			}
 
-			switch (flush ? 1 : magiccheck(ms, m, m_rxcomp)) {
+			switch (flush ? 1 : magiccheck(ms, m)) {
 			case -1:
 				return -1;
 			case 0:
@@ -1870,7 +1868,7 @@ mget(struct magic_set *ms, struct magic *m, const struct buffer *b,
 		for (mlp = ms->mlist[0]->next; mlp != ms->mlist[0];
 		    mlp = mlp->next)
 		{
-			if ((rv = match(ms, mlp->magic, mlp->magic_rxcomp,
+			if ((rv = match(ms, mlp->magic,
 			    mlp->nmagic, &bb, 0, BINTEST, text, 0, indir_count,
 			    name_count, printed_something, need_separator,
 			    NULL, NULL)) != 0)
@@ -1923,7 +1921,7 @@ mget(struct magic_set *ms, struct magic *m, const struct buffer *b,
 		nfound_match = 0;
 		(*name_count)++;
 		eoffset = ms->eoffset;
-		rv = match(ms, ml.magic, ml.magic_rxcomp, ml.nmagic, b,
+		rv = match(ms, ml.magic, ml.nmagic, b,
 		    offset + o, mode, text, flip, indir_count, name_count,
 		    printed_something, need_separator, returnval,
 		    &nfound_match);
@@ -2047,7 +2045,7 @@ file_strncmp16(const char *a, const char *b, size_t len, size_t maxlen,
 }
 
 private int
-magiccheck(struct magic_set *ms, struct magic *m, file_regex_t **m_cache)
+magiccheck(struct magic_set *ms, struct magic *m)
 {
 	uint64_t l = m->value.q;
 	uint64_t v;

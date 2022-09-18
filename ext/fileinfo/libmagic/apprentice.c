@@ -147,10 +147,7 @@ private uint64_t swap8(uint64_t);
 #endif
 
 private char *mkdbname(struct magic_set *, const char *, int);
-private struct magic_map *apprentice_buf(struct magic_set *, struct magic *,
-    size_t);
 private struct magic_map *apprentice_map(struct magic_set *, const char *);
-private int check_buffer(struct magic_set *, struct magic_map *, const char *);
 private void apprentice_unmap(struct magic_map *);
 private int apprentice_compile(struct magic_set *, struct magic_map *,
     const char *);
@@ -597,8 +594,6 @@ free:
 private void
 apprentice_unmap(struct magic_map *map)
 {
-	size_t i;
-	char *p;
 	if (map == NULL)
 		return;
 	if (map->p != php_magic_database) {
@@ -1316,7 +1311,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 					continue;
 				}
 				if ((*bang[i].fun)(ms, &me,
-				    line + bang[i].len + 2,
+				    line + bang[i].len + 2, 
 				    len - bang[i].len - 2) != 0) {
 					(*errs)++;
 					continue;
@@ -3648,7 +3643,6 @@ file_magicfind(struct magic_set *ms, const char *name, struct mlist *v)
 				continue;
 			if (strcmp(ma[i].value.s, name) == 0) {
 				v->magic = &ma[i];
-				v->magic_rxcomp = &(ml->magic_rxcomp[i]);
 				for (j = i + 1; j < ml->nmagic; j++)
 				    if (ma[j].cont_level == 0)
 					    break;

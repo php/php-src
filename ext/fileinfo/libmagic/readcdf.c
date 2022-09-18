@@ -145,7 +145,7 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 
 	memset(&ts, 0, sizeof(ts));
 
-        if (!NOTMIME(ms) && root_storage)
+	if (!NOTMIME(ms) && root_storage)
 		str = cdf_clsid_to_mime(root_storage->d_storage_uuid,
 		    clsid2mime);
 

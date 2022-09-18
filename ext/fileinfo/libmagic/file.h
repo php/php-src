@@ -164,8 +164,6 @@
 #define FILE_COMPILE	2
 #define FILE_LIST	3
 
-typedef void* file_regex_t;
-
 struct buffer {
 	int fd;
 	zend_stat_t st;
@@ -405,7 +403,6 @@ struct magic {
 /* list of magic entries */
 struct mlist {
 	struct magic *magic;		/* array of magic entries */
-	file_regex_t **magic_rxcomp;	/* array of compiled regexps */
 	size_t nmagic;			/* number of entries in array */
 	void *map;			/* internal resources used by entry */
 	struct mlist *next, *prev;
