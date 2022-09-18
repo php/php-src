@@ -1075,6 +1075,7 @@ static zend_object *php_zip_object_new(zend_class_entry *class_type) /* {{{ */
 	intern->prop_handler = &zip_prop_handlers;
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
+	intern->zo.handlers = &zip_object_handlers;
 	intern->last_id = -1;
 
 	return &intern->zo;
@@ -3100,7 +3101,6 @@ static PHP_MINIT_FUNCTION(zip)
 
 	zip_class_entry = register_class_ZipArchive(zend_ce_countable);
 	zip_class_entry->create_object = php_zip_object_new;
-	zip_class_entry->default_object_handlers = &zip_object_handlers;
 
 	zend_hash_init(&zip_prop_handlers, 0, NULL, php_zip_free_prop_handler, 1);
 	php_zip_register_prop_handler(&zip_prop_handlers, "lastId",    php_zip_last_id, NULL, IS_LONG);

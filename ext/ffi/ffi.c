@@ -234,7 +234,6 @@ static zend_always_inline void zend_ffi_object_init(zend_object *object, zend_cl
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
 	object->ce = ce;
-	object->handlers = ce->default_object_handlers;
 	object->properties = NULL;
 	zend_objects_store_put(object);
 }
@@ -247,6 +246,7 @@ static zend_object *zend_ffi_cdata_new(zend_class_entry *class_type) /* {{{ */
 	cdata = emalloc(sizeof(zend_ffi_cdata));
 
 	zend_ffi_object_init(&cdata->std, class_type);
+	cdata->std.handlers = &zend_ffi_cdata_handlers;
 
 	cdata->type = NULL;
 	cdata->ptr = NULL;
@@ -495,6 +495,7 @@ static zend_never_inline zend_ffi_cdata *zend_ffi_cdata_to_zval_slow_ptr(void *p
 	zend_ffi_cdata *cdata = emalloc(sizeof(zend_ffi_cdata));
 
 	zend_ffi_object_init(&cdata->std, zend_ffi_cdata_ce);
+	cdata->std.handlers = &zend_ffi_cdata_handlers;
 	cdata->type = type;
 	cdata->flags = flags;
 	cdata->ptr = (void*)&cdata->ptr_holder;
@@ -2173,6 +2174,7 @@ static zend_object *zend_ffi_ctype_new(zend_class_entry *class_type) /* {{{ */
 	ctype = emalloc(sizeof(zend_ffi_ctype));
 
 	zend_ffi_object_init(&ctype->std, class_type);
+	ctype->std.handlers = &zend_ffi_ctype_handlers;
 
 	ctype->type = NULL;
 
@@ -2259,6 +2261,7 @@ static zend_object *zend_ffi_new(zend_class_entry *class_type) /* {{{ */
 	ffi = emalloc(sizeof(zend_ffi));
 
 	zend_ffi_object_init(&ffi->std, class_type);
+	ffi->std.handlers = &zend_ffi_handlers;
 
 	ffi->lib = NULL;
 	ffi->symbols = NULL;
@@ -2470,6 +2473,7 @@ static zval *zend_ffi_read_var(zend_object *obj, zend_string *var_name, int read
 
 		cdata = emalloc(sizeof(zend_ffi_cdata));
 		zend_ffi_object_init(&cdata->std, zend_ffi_cdata_ce);
+		cdata->std.handlers = &zend_ffi_cdata_handlers;
 		cdata->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
 		cdata->flags = ZEND_FFI_FLAG_CONST;
 		cdata->ptr_holder = sym->addr;
@@ -5301,7 +5305,6 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
-	zend_ffi_ce->default_object_handlers = &zend_ffi_handlers;
 
 	memcpy(&zend_ffi_new_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "new", sizeof("new")-1), sizeof(zend_internal_function));
 	zend_ffi_new_fn.fn_flags &= ~ZEND_ACC_STATIC;
@@ -5333,7 +5336,6 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
-	zend_ffi_cdata_ce->default_object_handlers = &zend_ffi_cdata_handlers;
 	zend_ffi_cdata_ce->get_iterator = zend_ffi_cdata_get_iterator;
 
 	memcpy(&zend_ffi_cdata_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -5408,7 +5410,6 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_ctype_ce = register_class_FFI_CType();
 	zend_ffi_ctype_ce->create_object = zend_ffi_ctype_new;
-	zend_ffi_ctype_ce->default_object_handlers = &zend_ffi_ctype_handlers;
 
 	memcpy(&zend_ffi_ctype_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_ffi_ctype_handlers.get_constructor      = zend_fake_get_constructor;

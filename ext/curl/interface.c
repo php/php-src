@@ -398,7 +398,6 @@ PHP_MINIT_FUNCTION(curl)
 
 	curl_ce = register_class_CurlHandle();
 	curl_ce->create_object = curl_create_object;
-	curl_ce->default_object_handlers = &curl_object_handlers;
 
 	memcpy(&curl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_object_handlers.offset = XtOffsetOf(php_curl, std);
@@ -427,6 +426,7 @@ static zend_object *curl_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &curl_object_handlers;
 
 	return &intern->std;
 }

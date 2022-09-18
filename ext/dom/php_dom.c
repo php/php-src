@@ -660,7 +660,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_nodelist_class_entry = register_class_DOMNodeList(zend_ce_aggregate, zend_ce_countable);
 	dom_nodelist_class_entry->create_object = dom_nnodemap_objects_new;
-	dom_nodelist_class_entry->default_object_handlers = &dom_nnodemap_object_handlers;
 	dom_nodelist_class_entry->get_iterator = php_dom_get_iterator;
 
 	zend_hash_init(&dom_nodelist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
@@ -669,7 +668,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_namednodemap_class_entry = register_class_DOMNamedNodeMap(zend_ce_aggregate, zend_ce_countable);
 	dom_namednodemap_class_entry->create_object = dom_nnodemap_objects_new;
-	dom_namednodemap_class_entry->default_object_handlers = &dom_nnodemap_object_handlers;
 	dom_namednodemap_class_entry->get_iterator = php_dom_get_iterator;
 
 	zend_hash_init(&dom_namednodemap_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
@@ -1040,6 +1038,8 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 	objmap->ht = NULL;
 	objmap->local = NULL;
 	objmap->ns = NULL;
+
+	intern->std.handlers = &dom_nnodemap_object_handlers;
 
 	return &intern->std;
 }

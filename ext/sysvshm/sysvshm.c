@@ -47,6 +47,7 @@ static zend_object *sysvshm_create_object(zend_class_entry *class_type) {
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &sysvshm_object_handlers;
 
 	return &intern->std;
 }
@@ -100,7 +101,6 @@ PHP_MINIT_FUNCTION(sysvshm)
 {
 	sysvshm_ce = register_class_SysvSharedMemory();
 	sysvshm_ce->create_object = sysvshm_create_object;
-	sysvshm_ce->default_object_handlers = &sysvshm_object_handlers;
 
 	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvshm_object_handlers.offset = XtOffsetOf(sysvshm_shm, std);

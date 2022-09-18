@@ -98,6 +98,8 @@ static zend_object *IntlDatePatternGenerator_object_create(zend_class_entry *ce)
 	object_properties_init(&intern->zo, ce);
 	IntlDatePatternGenerator_object_init(intern);
 
+	intern->zo.handlers = &IntlDatePatternGenerator_handlers;
+
 	return &intern->zo;
 }
 
@@ -113,7 +115,6 @@ void dateformat_register_IntlDatePatternGenerator_class( void )
 	/* Create and register 'IntlDatePatternGenerator' class. */
 	IntlDatePatternGenerator_ce_ptr = register_class_IntlDatePatternGenerator();
 	IntlDatePatternGenerator_ce_ptr->create_object = IntlDatePatternGenerator_object_create;
-	IntlDatePatternGenerator_ce_ptr->default_object_handlers = &IntlDatePatternGenerator_handlers;
 
 	memcpy(&IntlDatePatternGenerator_handlers, &std_object_handlers,
 		sizeof IntlDatePatternGenerator_handlers);

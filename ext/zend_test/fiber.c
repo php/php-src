@@ -150,6 +150,7 @@ static zend_object *zend_test_fiber_object_create(zend_class_entry *ce)
 	memset(fiber, 0, sizeof(zend_test_fiber));
 
 	zend_object_std_init(&fiber->std, ce);
+	fiber->std.handlers = &zend_test_fiber_handlers;
 
 	return &fiber->std;
 }
@@ -343,7 +344,6 @@ void zend_test_fiber_init(void)
 {
 	zend_test_fiber_class = register_class__ZendTestFiber();
 	zend_test_fiber_class->create_object = zend_test_fiber_object_create;
-	zend_test_fiber_class->default_object_handlers = &zend_test_fiber_handlers;
 
 	zend_test_fiber_handlers = std_object_handlers;
 	zend_test_fiber_handlers.dtor_obj = zend_test_fiber_object_destroy;
