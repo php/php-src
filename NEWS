@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.12
 
+- Core:
+  . Fixes segfault with Fiber on FreeBSD i386 architecture. (David Carlier)
+
 - Fileinfo:
   . Fixed bug GH-8805 (finfo returns wrong mime type for woff/woff2 files).
     (Anatol)
