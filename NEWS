@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug with parsing large negative numbers with the @ notation. (Derick)
 
+- Fileinfo:
+  . Fixed bug GH-8805 (finfo returns wrong mime type for woff/woff2 files).
+    (Anatol)
+
 - Sockets:
   . Fixed socket constants regression as of PHP 8.2.0beta3. (Bruce Dou)
 
