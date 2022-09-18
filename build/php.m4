@@ -2568,6 +2568,27 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CTZLL], [
 ])
 
 dnl
+dnl PHP_CHECK_BUILTIN_MUL_OVERFLOW
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_MUL_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_mul_overflow])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    long tmpvar;
+    return __builtin_mul_overflow(3, 7, &tmpvar);
+  ]])], [
+    have_builtin_mul_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_mul_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_MUL_OVERFLOW],
+   [$have_builtin_mul_overflow], [Whether the compiler supports __builtin_mul_overflow])
+])
+
+dnl
 dnl PHP_CHECK_BUILTIN_SMULL_OVERFLOW
 dnl
 AC_DEFUN([PHP_CHECK_BUILTIN_SMULL_OVERFLOW], [

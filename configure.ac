@@ -494,6 +494,8 @@ dnl Check __builtin_ctzl
 PHP_CHECK_BUILTIN_CTZL
 dnl Check __builtin_ctzll
 PHP_CHECK_BUILTIN_CTZLL
+dnl Check __builtin_mul_overflow
+PHP_CHECK_BUILTIN_MUL_OVERFLOW
 dnl Check __builtin_smull_overflow
 PHP_CHECK_BUILTIN_SMULL_OVERFLOW
 dnl Check __builtin_smulll_overflow
