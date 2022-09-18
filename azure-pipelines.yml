@@ -33,6 +33,11 @@ jobs:
     parameters:
       configurationName: I386_DEBUG_ZTS
       configurationParameters: '--enable-debug --enable-zts'
+  - template: azure/opcache_variation_job.yml
+    parameters:
+      configurationName: DEBUG_NTS_OPCACHE
+      configurationParameters: '--enable-debug --disable-zts'
+      timeoutInMinutes: 120
   - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
     - template: azure/i386/job.yml
       parameters:
@@ -59,11 +64,6 @@ jobs:
             --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
             CFLAGS='-fno-sanitize-recover'
         timeoutInMinutes: 90
-    - template: azure/opcache_variation_job.yml
-      parameters:
-        configurationName: DEBUG_NTS_OPCACHE
-        configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 120
     - template: azure/job.yml
       parameters:
         configurationName: DEBUG_NTS_REPEAT
