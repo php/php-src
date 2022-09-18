@@ -14125,11 +14125,13 @@
 
 # https://www.w3.org/TR/WOFF/
 0	string		wOFF	Web Open Font Format
+!:mime font/woff
 >0	use		woff
 >20	beshort		x	\b, version %d
 >22	beshort		x	\b.%d
 # https://www.w3.org/TR/WOFF2/
 0	string		wOF2	Web Open Font Format (Version 2)
+!:mime font/woff2
 >0	use		woff
 #>20	belong		x	\b, totalCompressedSize %d
 >24	beshort		x	\b, version %d

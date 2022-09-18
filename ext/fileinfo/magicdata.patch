@@ -1,3 +1,20 @@
+diff -ur Magdir.orig/fonts Magdir/fonts
+--- Magdir.orig/fonts	2021-02-23 01:49:24.000000000 +0100
++++ Magdir/fonts	2022-09-18 14:07:14.233023271 +0200
+@@ -384,11 +384,13 @@
+ 
+ # https://www.w3.org/TR/WOFF/
+ 0	string		wOFF	Web Open Font Format
++!:mime font/woff
+ >0	use		woff
+ >20	beshort		x	\b, version %d
+ >22	beshort		x	\b.%d
+ # https://www.w3.org/TR/WOFF2/
+ 0	string		wOF2	Web Open Font Format (Version 2)
++!:mime font/woff2
+ >0	use		woff
+ #>20	belong		x	\b, totalCompressedSize %d
+ >24	beshort		x	\b, version %d
 diff -ur Magdir.orig/mail.news Magdir/mail.news
 --- Magdir.orig/mail.news	2021-03-31 01:47:28.000000000 +0200
 +++ Magdir/mail.news	2021-04-05 19:41:55.168556972 +0200

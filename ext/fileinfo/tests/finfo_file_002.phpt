@@ -43,4 +43,6 @@ array(%d) {
   string(11) "image/x-tga"
   ["%s/resources/test.webm"]=>
   string(10) "video/webm"
+  ["%s/resources/test.woff"]=>
+  string(9) "font/woff"
 }
