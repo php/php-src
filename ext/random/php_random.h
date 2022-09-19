@@ -319,6 +319,8 @@ ZEND_BEGIN_MODULE_GLOBALS(random)
 	int random_fd;
 ZEND_END_MODULE_GLOBALS(random)
 
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(random)
+
 # define RANDOM_G(v)	ZEND_MODULE_GLOBALS_ACCESSOR(random, v)
 
 #endif	/* PHP_RANDOM_H */
