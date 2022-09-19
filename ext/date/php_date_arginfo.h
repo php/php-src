@@ -789,98 +789,98 @@ static zend_class_entry *register_class_DateTimeInterface(void)
 	class_entry = zend_register_internal_interface(&ce);
 
 	zval const_ATOM_value;
-	zend_string *const_ATOM_value_str = zend_string_init(DATE_FORMAT_RFC3339, sizeof(DATE_FORMAT_RFC3339) - 1, 1);
+	zend_string *const_ATOM_value_str = zend_string_init(DATE_FORMAT_RFC3339, strlen(DATE_FORMAT_RFC3339), 1);
 	ZVAL_STR(&const_ATOM_value, const_ATOM_value_str);
 	zend_string *const_ATOM_name = zend_string_init_interned("ATOM", sizeof("ATOM") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_ATOM_name, &const_ATOM_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_ATOM_name);
 
 	zval const_COOKIE_value;
-	zend_string *const_COOKIE_value_str = zend_string_init(DATE_FORMAT_COOKIE, sizeof(DATE_FORMAT_COOKIE) - 1, 1);
+	zend_string *const_COOKIE_value_str = zend_string_init(DATE_FORMAT_COOKIE, strlen(DATE_FORMAT_COOKIE), 1);
 	ZVAL_STR(&const_COOKIE_value, const_COOKIE_value_str);
 	zend_string *const_COOKIE_name = zend_string_init_interned("COOKIE", sizeof("COOKIE") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_COOKIE_name, &const_COOKIE_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_COOKIE_name);
 
 	zval const_ISO8601_value;
-	zend_string *const_ISO8601_value_str = zend_string_init(DATE_FORMAT_ISO8601, sizeof(DATE_FORMAT_ISO8601) - 1, 1);
+	zend_string *const_ISO8601_value_str = zend_string_init(DATE_FORMAT_ISO8601, strlen(DATE_FORMAT_ISO8601), 1);
 	ZVAL_STR(&const_ISO8601_value, const_ISO8601_value_str);
 	zend_string *const_ISO8601_name = zend_string_init_interned("ISO8601", sizeof("ISO8601") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_ISO8601_name, &const_ISO8601_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_ISO8601_name);
 
 	zval const_ISO8601_EXPANDED_value;
-	zend_string *const_ISO8601_EXPANDED_value_str = zend_string_init(DATE_FORMAT_ISO8601_EXPANDED, sizeof(DATE_FORMAT_ISO8601_EXPANDED) - 1, 1);
+	zend_string *const_ISO8601_EXPANDED_value_str = zend_string_init(DATE_FORMAT_ISO8601_EXPANDED, strlen(DATE_FORMAT_ISO8601_EXPANDED), 1);
 	ZVAL_STR(&const_ISO8601_EXPANDED_value, const_ISO8601_EXPANDED_value_str);
 	zend_string *const_ISO8601_EXPANDED_name = zend_string_init_interned("ISO8601_EXPANDED", sizeof("ISO8601_EXPANDED") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_ISO8601_EXPANDED_name, &const_ISO8601_EXPANDED_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_ISO8601_EXPANDED_name);
 
 	zval const_RFC822_value;
-	zend_string *const_RFC822_value_str = zend_string_init(DATE_FORMAT_RFC822, sizeof(DATE_FORMAT_RFC822) - 1, 1);
+	zend_string *const_RFC822_value_str = zend_string_init(DATE_FORMAT_RFC822, strlen(DATE_FORMAT_RFC822), 1);
 	ZVAL_STR(&const_RFC822_value, const_RFC822_value_str);
 	zend_string *const_RFC822_name = zend_string_init_interned("RFC822", sizeof("RFC822") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC822_name, &const_RFC822_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC822_name);
 
 	zval const_RFC850_value;
-	zend_string *const_RFC850_value_str = zend_string_init(DATE_FORMAT_RFC850, sizeof(DATE_FORMAT_RFC850) - 1, 1);
+	zend_string *const_RFC850_value_str = zend_string_init(DATE_FORMAT_RFC850, strlen(DATE_FORMAT_RFC850), 1);
 	ZVAL_STR(&const_RFC850_value, const_RFC850_value_str);
 	zend_string *const_RFC850_name = zend_string_init_interned("RFC850", sizeof("RFC850") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC850_name, &const_RFC850_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC850_name);
 
 	zval const_RFC1036_value;
-	zend_string *const_RFC1036_value_str = zend_string_init(DATE_FORMAT_RFC1036, sizeof(DATE_FORMAT_RFC1036) - 1, 1);
+	zend_string *const_RFC1036_value_str = zend_string_init(DATE_FORMAT_RFC1036, strlen(DATE_FORMAT_RFC1036), 1);
 	ZVAL_STR(&const_RFC1036_value, const_RFC1036_value_str);
 	zend_string *const_RFC1036_name = zend_string_init_interned("RFC1036", sizeof("RFC1036") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC1036_name, &const_RFC1036_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC1036_name);
 
 	zval const_RFC1123_value;
-	zend_string *const_RFC1123_value_str = zend_string_init(DATE_FORMAT_RFC1123, sizeof(DATE_FORMAT_RFC1123) - 1, 1);
+	zend_string *const_RFC1123_value_str = zend_string_init(DATE_FORMAT_RFC1123, strlen(DATE_FORMAT_RFC1123), 1);
 	ZVAL_STR(&const_RFC1123_value, const_RFC1123_value_str);
 	zend_string *const_RFC1123_name = zend_string_init_interned("RFC1123", sizeof("RFC1123") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC1123_name, &const_RFC1123_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC1123_name);
 
 	zval const_RFC7231_value;
-	zend_string *const_RFC7231_value_str = zend_string_init(DATE_FORMAT_RFC7231, sizeof(DATE_FORMAT_RFC7231) - 1, 1);
+	zend_string *const_RFC7231_value_str = zend_string_init(DATE_FORMAT_RFC7231, strlen(DATE_FORMAT_RFC7231), 1);
 	ZVAL_STR(&const_RFC7231_value, const_RFC7231_value_str);
 	zend_string *const_RFC7231_name = zend_string_init_interned("RFC7231", sizeof("RFC7231") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC7231_name, &const_RFC7231_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC7231_name);
 
 	zval const_RFC2822_value;
-	zend_string *const_RFC2822_value_str = zend_string_init(DATE_FORMAT_RFC2822, sizeof(DATE_FORMAT_RFC2822) - 1, 1);
+	zend_string *const_RFC2822_value_str = zend_string_init(DATE_FORMAT_RFC2822, strlen(DATE_FORMAT_RFC2822), 1);
 	ZVAL_STR(&const_RFC2822_value, const_RFC2822_value_str);
 	zend_string *const_RFC2822_name = zend_string_init_interned("RFC2822", sizeof("RFC2822") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC2822_name, &const_RFC2822_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC2822_name);
 
 	zval const_RFC3339_value;
-	zend_string *const_RFC3339_value_str = zend_string_init(DATE_FORMAT_RFC3339, sizeof(DATE_FORMAT_RFC3339) - 1, 1);
+	zend_string *const_RFC3339_value_str = zend_string_init(DATE_FORMAT_RFC3339, strlen(DATE_FORMAT_RFC3339), 1);
 	ZVAL_STR(&const_RFC3339_value, const_RFC3339_value_str);
 	zend_string *const_RFC3339_name = zend_string_init_interned("RFC3339", sizeof("RFC3339") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC3339_name, &const_RFC3339_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC3339_name);
 
 	zval const_RFC3339_EXTENDED_value;
-	zend_string *const_RFC3339_EXTENDED_value_str = zend_string_init(DATE_FORMAT_RFC3339_EXTENDED, sizeof(DATE_FORMAT_RFC3339_EXTENDED) - 1, 1);
+	zend_string *const_RFC3339_EXTENDED_value_str = zend_string_init(DATE_FORMAT_RFC3339_EXTENDED, strlen(DATE_FORMAT_RFC3339_EXTENDED), 1);
 	ZVAL_STR(&const_RFC3339_EXTENDED_value, const_RFC3339_EXTENDED_value_str);
 	zend_string *const_RFC3339_EXTENDED_name = zend_string_init_interned("RFC3339_EXTENDED", sizeof("RFC3339_EXTENDED") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RFC3339_EXTENDED_name, &const_RFC3339_EXTENDED_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RFC3339_EXTENDED_name);
 
 	zval const_RSS_value;
-	zend_string *const_RSS_value_str = zend_string_init(DATE_FORMAT_RFC1123, sizeof(DATE_FORMAT_RFC1123) - 1, 1);
+	zend_string *const_RSS_value_str = zend_string_init(DATE_FORMAT_RFC1123, strlen(DATE_FORMAT_RFC1123), 1);
 	ZVAL_STR(&const_RSS_value, const_RSS_value_str);
 	zend_string *const_RSS_name = zend_string_init_interned("RSS", sizeof("RSS") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RSS_name, &const_RSS_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RSS_name);
 
 	zval const_W3C_value;
-	zend_string *const_W3C_value_str = zend_string_init(DATE_FORMAT_RFC3339, sizeof(DATE_FORMAT_RFC3339) - 1, 1);
+	zend_string *const_W3C_value_str = zend_string_init(DATE_FORMAT_RFC3339, strlen(DATE_FORMAT_RFC3339), 1);
 	ZVAL_STR(&const_W3C_value, const_W3C_value_str);
 	zend_string *const_W3C_name = zend_string_init_interned("W3C", sizeof("W3C") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_W3C_name, &const_W3C_value, ZEND_ACC_PUBLIC, NULL);
