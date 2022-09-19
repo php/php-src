@@ -6455,6 +6455,14 @@ static zend_type zend_compile_typename(
 		}
 
 		free_alloca(type_list, use_heap);
+
+		uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
+		if ((type_mask & MAY_BE_OBJECT) && (ZEND_TYPE_IS_COMPLEX(type) || (type_mask & MAY_BE_STATIC))) {
+			zend_string *type_str = zend_type_to_string(type);
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Type %s contains both object and a class type, which is redundant",
+				ZSTR_VAL(type_str));
+		}
 	} else if (ast->kind == ZEND_AST_TYPE_INTERSECTION) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		zend_type_list *type_list;
@@ -6513,13 +6521,6 @@ static zend_type zend_compile_typename(
 
 	if (type_mask == MAY_BE_ANY && is_marked_nullable) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Type mixed cannot be marked as nullable since mixed already includes null");
-	}
-
-	if ((type_mask & MAY_BE_OBJECT) && (ZEND_TYPE_IS_COMPLEX(type) || (type_mask & MAY_BE_STATIC))) {
-		zend_string *type_str = zend_type_to_string(type);
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Type %s contains both object and a class type, which is redundant",
-			ZSTR_VAL(type_str));
 	}
 
 	if ((type_mask & MAY_BE_NULL) && is_marked_nullable) {
@@ -8083,7 +8084,7 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 
 		/* Check that we are not attempting to alias a built-in type */
 		if (type == ZEND_SYMBOL_CLASS && zend_is_reserved_class_name(old_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, 
+			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot alias '%s' as it is a built-in type", ZSTR_VAL(old_name));
 		}
 
