@@ -1105,11 +1105,11 @@ const SOCKET_ESRMNT = UNKNOWN;
  */
 const SOCKET_ECOMM = UNKNOWN;
 #endif
-#ifdef PHP_SOCKET_EPROTO
+#ifdef EPROTO
 /**
  * Protocol error
  * @var int
- * @cvalue PHP_SOCKET_EPROTO
+ * @cvalue EPROTO
  */
 const SOCKET_EPROTO = UNKNOWN;
 #endif
