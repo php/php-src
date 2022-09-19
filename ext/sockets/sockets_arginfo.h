@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c4fe33bd6d665f80be942c9cc9c0ce954d719c0d */
+ * Stub hash: d28c6b566f4739b1eaefb82032e620aeb59728dc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -738,8 +738,8 @@ static void register_sockets_symbols(int module_number)
 #if defined(ECOMM)
 	REGISTER_LONG_CONSTANT("SOCKET_ECOMM", ECOMM, CONST_PERSISTENT);
 #endif
-#if defined(PHP_SOCKET_EPROTO)
-	REGISTER_LONG_CONSTANT("SOCKET_EPROTO", PHP_SOCKET_EPROTO, CONST_PERSISTENT);
+#if defined(EPROTO)
+	REGISTER_LONG_CONSTANT("SOCKET_EPROTO", EPROTO, CONST_PERSISTENT);
 #endif
 #if defined(EMULTIHOP)
 	REGISTER_LONG_CONSTANT("SOCKET_EMULTIHOP", EMULTIHOP, CONST_PERSISTENT);
