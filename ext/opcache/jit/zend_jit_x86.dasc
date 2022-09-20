@@ -152,6 +152,11 @@ static size_t tsrm_tls_offset;
 
 #define IS_SIGNED_32BIT(val) ((((intptr_t)(val)) <= 0x7fffffff) && (((intptr_t)(val)) >= (-2147483647 - 1)))
 
+/* Call range is before or after 2GB */
+#define MAY_USE_32BIT_ADDR(addr) \
+	(IS_SIGNED_32BIT((char*)(addr) - (char*)dasm_buf) && \
+	IS_SIGNED_32BIT((char*)(addr) - (char*)dasm_end))
+
 #define CAN_USE_AVX() (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX)
 
 /* Not Implemented Yet */
@@ -353,7 +358,7 @@ static size_t tsrm_tls_offset;
 
 |.macro EXT_CALL, func, tmp_reg
 |	.if X64
-||		if (IS_32BIT(dasm_end) && IS_32BIT(func)) {
+||		if (MAY_USE_32BIT_ADDR(func)) {
 |			call qword &func
 ||		} else {
 |			LOAD_ADDR tmp_reg, func
@@ -366,7 +371,7 @@ static size_t tsrm_tls_offset;
 
 |.macro EXT_JMP, func, tmp_reg
 |	.if X64
-||		if (IS_32BIT(dasm_end) && IS_32BIT(func)) {
+||		if (MAY_USE_32BIT_ADDR(func)) {
 |			jmp qword &func
 ||		} else {
 |			LOAD_ADDR tmp_reg, func
