@@ -668,8 +668,14 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, q) {
+			zend_class_constant* c;
+
 			if (q->key) {
 				q->key = new_interned_string(q->key);
+			}
+			c = (zend_class_constant*)Z_PTR(q->val);
+			if (Z_TYPE(c->value) == IS_STRING) {
+				ZVAL_STR(&c->value, new_interned_string(Z_STR(c->value)));
 			}
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
