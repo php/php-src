@@ -64,7 +64,7 @@
 
 #include "random_arginfo.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(random)
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(random)
 
 PHPAPI zend_class_entry *random_ce_Random_Engine;
 PHPAPI zend_class_entry *random_ce_Random_CryptoSafeEngine;
