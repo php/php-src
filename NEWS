@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-8805 (finfo returns wrong mime type for woff/woff2 files).
     (Anatol)
 
+- Opcache:
+  . Added indirect call reduction for jit on x86 architectures. (wxue1)
+
 29 Sep 2022, PHP 8.1.11
 
 - Core:
