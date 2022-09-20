@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed socket constants regression as of PHP 8.2.0beta3. (Bruce Dou)
 
+- Session:
+  . Fixed GH-9584 (Avoid memory corruption when not unregistering custom session
+    handler). (ilutov)
+
 15 Sep 2022, PHP 8.2.0RC2
 
 - Core:
