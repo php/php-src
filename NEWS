@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed socket constants regression as of PHP 8.2.0beta3. (Bruce Dou)
 
+- Session:
+  . Fixed GH-9584 (PS(mod_user_class_name) must not leak into next request).
+    (ilutov)
+
 15 Sep 2022, PHP 8.2.0RC2
 
 - Core:
