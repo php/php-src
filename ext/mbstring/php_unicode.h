@@ -77,8 +77,8 @@
 MBSTRING_API bool php_unicode_is_prop(unsigned long code, ...);
 MBSTRING_API bool php_unicode_is_prop1(unsigned long code, int prop);
 
-MBSTRING_API char *php_unicode_convert_case(
-		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
+MBSTRING_API zend_string *php_unicode_convert_case(
+		int case_mode, const char *srcstr, size_t srclen,
 		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar);
 
 #define PHP_UNICODE_CASE_UPPER        0

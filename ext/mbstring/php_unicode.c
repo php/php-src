@@ -34,7 +34,6 @@
 #include "mbstring.h"
 #include "php_unicode.h"
 #include "unicode_data.h"
-#include "libmbfl/mbfl/mbfilter_wchar.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
@@ -177,7 +176,7 @@ static unsigned php_unicode_totitle_raw(unsigned code, enum mbfl_no_encoding enc
 	return php_unicode_toupper_raw(code, enc);
 }
 
-unsigned php_unicode_tofold_raw(unsigned code, enum mbfl_no_encoding enc)
+static unsigned php_unicode_tofold_raw(unsigned code, enum mbfl_no_encoding enc)
 {
 	if (code < 0x80) {
 		/* Fast path for ASCII */
@@ -229,195 +228,143 @@ static inline unsigned php_unicode_tofold_simple(unsigned code, enum mbfl_no_enc
 	return code;
 }
 
-static inline void php_unicode_tolower_full(unsigned code, enum mbfl_no_encoding enc,
-	mbfl_convert_filter* next_filter) {
-	code = php_unicode_tolower_raw(code, enc);
-	if (UNEXPECTED(code > 0xffffff)) {
-		unsigned len = code >> 24;
-		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
-		}
-	} else {
-		(next_filter->filter_function)(code, next_filter);
-	}
-}
-
-static inline void php_unicode_toupper_full(unsigned code, enum mbfl_no_encoding enc,
-	mbfl_convert_filter* next_filter) {
-	code = php_unicode_toupper_raw(code, enc);
-	if (UNEXPECTED(code > 0xffffff)) {
-		unsigned len = code >> 24;
-		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
-		}
-	} else {
-		(next_filter->filter_function)(code, next_filter);
-	}
-}
-
-static inline void php_unicode_totitle_full(unsigned code, enum mbfl_no_encoding enc,
-	mbfl_convert_filter* next_filter) {
-	code = php_unicode_totitle_raw(code, enc);
-	if (UNEXPECTED(code > 0xffffff)) {
-		unsigned len = code >> 24;
-		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
-		}
-	} else {
-		(next_filter->filter_function)(code, next_filter);
-	}
-}
-
-static inline void php_unicode_tofold_full(unsigned code, enum mbfl_no_encoding enc,
-	mbfl_convert_filter* next_filter) {
-	code = php_unicode_tofold_raw(code, enc);
-	if (UNEXPECTED(code > 0xffffff)) {
-		unsigned len = code >> 24;
-		const unsigned *p = &_uccase_extra_table[code & 0xffffff];
-		while (len--) {
-			(next_filter->filter_function)(*++p, next_filter);
-		}
-	} else {
-		(next_filter->filter_function)(code, next_filter);
-	}
-}
-
-struct convert_case_data {
-	mbfl_convert_filter *next_filter;
-	enum mbfl_no_encoding no_encoding;
-	int case_mode;
-	int title_mode;
-};
-
-static int convert_case_filter(int c, void *void_data)
+static uint32_t *emit_special_casing_sequence(uint32_t w, uint32_t *out)
 {
-	struct convert_case_data *data = (struct convert_case_data *) void_data;
-	unsigned code;
-
-	/* Handle invalid characters early, as we assign special meaning to
-	 * codepoints above 0xffffff. */
-	if (UNEXPECTED((unsigned) c > 0xffffff)) {
-		(*data->next_filter->filter_function)(c, data->next_filter);
-		return 0;
+	unsigned int len = w >> 24;
+	const unsigned int *p = &_uccase_extra_table[w & 0xFFFFFF];
+	while (len--) {
+		*out++ = *++p;
 	}
+	return out;
+}
 
-	switch (data->case_mode) {
+MBSTRING_API zend_string *php_unicode_convert_case(int case_mode, const char *srcstr, size_t in_len, const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
+{
+	/* A Unicode codepoint can expand out to up to 3 codepoints when uppercased, lowercased, or title cased
+	 * See http://www.unicode.org/Public/UNIDATA/SpecialCasing.txt */
+	uint32_t wchar_buf[64], converted_buf[192];
+	unsigned int state = 0, title_mode = 0;
+	unsigned char *in = (unsigned char*)srcstr;
+	enum mbfl_no_encoding enc = src_encoding->no_encoding;
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, in_len + 1, illegal_substchar, illegal_mode);
+
+	while (in_len) {
+		size_t out_len = src_encoding->to_wchar(&in, &in_len, wchar_buf, 64, &state);
+		ZEND_ASSERT(out_len <= 64);
+		uint32_t *p = converted_buf;
+
+		/* In all cases, handle invalid characters early, as we assign special meaning to codepoints > 0xFFFFFF */
+		switch (case_mode) {
 		case PHP_UNICODE_CASE_UPPER_SIMPLE:
-			code = php_unicode_toupper_simple(c, data->no_encoding);
-			(data->next_filter->filter_function)(code, data->next_filter);
-			break;
-
-		case PHP_UNICODE_CASE_UPPER:
-			php_unicode_toupper_full(c, data->no_encoding, data->next_filter);
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_toupper_simple(w, enc);
+			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER_SIMPLE:
-			code = php_unicode_tolower_simple(c, data->no_encoding);
-			(data->next_filter->filter_function)(code, data->next_filter);
-			break;
-
-		case PHP_UNICODE_CASE_LOWER:
-			php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
-			break;
-
-		case PHP_UNICODE_CASE_FOLD:
-			php_unicode_tofold_full(c, data->no_encoding, data->next_filter);
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tolower_simple(w, enc);
+			}
 			break;
 
 		case PHP_UNICODE_CASE_FOLD_SIMPLE:
-			code = php_unicode_tofold_simple(c, data->no_encoding);
-			(data->next_filter->filter_function)(code, data->next_filter);
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tofold_simple(w, enc);
+			}
 			break;
 
 		case PHP_UNICODE_CASE_TITLE_SIMPLE:
-		case PHP_UNICODE_CASE_TITLE:
-		{
-			if (data->title_mode) {
-				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
-					code = php_unicode_tolower_simple(c, data->no_encoding);
-					(data->next_filter->filter_function)(code, data->next_filter);
-				} else {
-					php_unicode_tolower_full(c, data->no_encoding, data->next_filter);
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					*p++ = w;
+					continue;
 				}
-			} else {
-				if (data->case_mode == PHP_UNICODE_CASE_TITLE_SIMPLE) {
-					code = php_unicode_totitle_simple(c, data->no_encoding);
-					(data->next_filter->filter_function)(code, data->next_filter);
-				} else {
-					php_unicode_totitle_full(c, data->no_encoding, data->next_filter);
+				*p++ = title_mode ? php_unicode_tolower_simple(w, enc) : php_unicode_totitle_simple(w, enc);
+				if (!php_unicode_is_case_ignorable(w)) {
+					title_mode = php_unicode_is_cased(w);
 				}
-			}
-			if (!php_unicode_is_case_ignorable(c)) {
-				data->title_mode = php_unicode_is_cased(c);
 			}
 			break;
-		}
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
 
-	return 0;
-}
-
-MBSTRING_API char *php_unicode_convert_case(
-		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
-{
-	struct convert_case_data data;
-	mbfl_convert_filter *from_wchar, *to_wchar;
-	mbfl_string result;
-
-	mbfl_memory_device device;
-	mbfl_memory_device_init(&device, srclen + 1, 0);
-
-	/* encoding -> wchar filter */
-	to_wchar = mbfl_convert_filter_new(src_encoding,
-			&mbfl_encoding_wchar, convert_case_filter, NULL, &data);
-	if (to_wchar == NULL) {
-		mbfl_memory_device_clear(&device);
-		return NULL;
-	}
-
-	/* wchar -> encoding filter */
-	from_wchar = mbfl_convert_filter_new(
-			&mbfl_encoding_wchar, src_encoding,
-			mbfl_memory_device_output, NULL, &device);
-	if (from_wchar == NULL) {
-		mbfl_convert_filter_delete(to_wchar);
-		mbfl_memory_device_clear(&device);
-		return NULL;
-	}
-
-	to_wchar->illegal_mode = illegal_mode;
-	to_wchar->illegal_substchar = illegal_substchar;
-	from_wchar->illegal_mode = illegal_mode;
-	from_wchar->illegal_substchar = illegal_substchar;
-
-	data.next_filter = from_wchar;
-	data.no_encoding = src_encoding->no_encoding;
-	data.case_mode = case_mode;
-	data.title_mode = 0;
-
-	{
-		/* feed data */
-		const unsigned char *p = (const unsigned char *) srcstr;
-		size_t n = srclen;
-		while (n > 0) {
-			if ((*to_wchar->filter_function)(*p++, to_wchar) < 0) {
-				break;
+		case PHP_UNICODE_CASE_UPPER:
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					*p++ = w;
+					continue;
+				}
+				w = php_unicode_toupper_raw(w, enc);
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					p = emit_special_casing_sequence(w, p);
+				} else {
+					*p++ = w;
+				}
 			}
-			n--;
+			break;
+
+		case PHP_UNICODE_CASE_LOWER:
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					*p++ = w;
+					continue;
+				}
+				w = php_unicode_tolower_raw(w, enc);
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					p = emit_special_casing_sequence(w, p);
+				} else {
+					*p++ = w;
+				}
+			}
+			break;
+
+		case PHP_UNICODE_CASE_FOLD:
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					*p++ = w;
+					continue;
+				}
+				w = php_unicode_tofold_raw(w, enc);
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					p = emit_special_casing_sequence(w, p);
+				} else {
+					*p++ = w;
+				}
+			}
+			break;
+
+		case PHP_UNICODE_CASE_TITLE:
+			for (int i = 0; i < out_len; i++) {
+				uint32_t w = wchar_buf[i];
+				if (UNEXPECTED(w > 0xFFFFFF)) {
+					*p++ = w;
+					continue;
+				}
+				uint32_t w2 = title_mode ? php_unicode_tolower_raw(w, enc) : php_unicode_totitle_raw(w, enc);
+				if (UNEXPECTED(w2 > 0xFFFFFF)) {
+					p = emit_special_casing_sequence(w2, p);
+				} else {
+					*p++ = w2;
+				}
+				if (!php_unicode_is_case_ignorable(w)) {
+					title_mode = php_unicode_is_cased(w);
+				}
+			}
+			break;
+
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
+
+		ZEND_ASSERT(p - converted_buf <= 192);
+		src_encoding->from_wchar(converted_buf, p - converted_buf, &buf, !in_len);
 	}
 
-	mbfl_convert_filter_flush(to_wchar);
-	mbfl_convert_filter_flush(from_wchar);
-	mbfl_memory_device_result(&device, &result);
-	mbfl_convert_filter_delete(to_wchar);
-	mbfl_convert_filter_delete(from_wchar);
-
-	*ret_len = result.len;
-	return (char *) result.val;
+	return mb_convert_buf_result(&buf);
 }
