@@ -2753,24 +2753,18 @@ PHP_FUNCTION(mb_convert_encoding)
 }
 /* }}} */
 
-static char *mbstring_convert_case(
-		int case_mode, const char *str, size_t str_len, size_t *ret_len,
-		const mbfl_encoding *enc) {
-	return php_unicode_convert_case(
-		case_mode, str, str_len, ret_len, enc,
-		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
+static zend_string *mbstring_convert_case(int case_mode, const char *str, size_t str_len, const mbfl_encoding *enc)
+{
+	return php_unicode_convert_case(case_mode, str, str_len, enc, MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
 }
 
-/* {{{ Returns a case-folded version of source_string */
 PHP_FUNCTION(mb_convert_case)
 {
-	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len, ret_len;
+	zend_string *str, *from_encoding = NULL;
 	zend_long case_mode = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(case_mode)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
@@ -2786,25 +2780,15 @@ PHP_FUNCTION(mb_convert_case)
 		RETURN_THROWS();
 	}
 
-	char *newstr = mbstring_convert_case(case_mode, str, str_len, &ret_len, enc);
-	/* If newstr is NULL something went wrong in mbfl and this is a bug */
-	ZEND_ASSERT(newstr != NULL);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(newstr, ret_len);
-	efree(newstr);
+	RETURN_STR(mbstring_convert_case(case_mode, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
-/* }}} */
 
-/* {{{ Returns a upper cased version of source_string */
 PHP_FUNCTION(mb_strtoupper)
 {
-	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len, ret_len;
+	zend_string *str, *from_encoding = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2814,46 +2798,26 @@ PHP_FUNCTION(mb_strtoupper)
 		RETURN_THROWS();
 	}
 
-	char *newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
-	/* If newstr is NULL something went wrong in mbfl and this is a bug */
-	ZEND_ASSERT(newstr != NULL);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(newstr, ret_len);
-	efree(newstr);
+	RETURN_STR(mbstring_convert_case(PHP_UNICODE_CASE_UPPER, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
-/* }}} */
 
-/* {{{ Returns a lower cased version of source_string */
 PHP_FUNCTION(mb_strtolower)
 {
-	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len;
-	char *newstr;
-	size_t ret_len;
-	const mbfl_encoding *enc;
+	zend_string *str, *from_encoding = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	enc = php_mb_get_encoding(from_encoding, 2);
+	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
 	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
-	/* If newstr is NULL something went wrong in mbfl and this is a bug */
-	ZEND_ASSERT(newstr != NULL);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(newstr, ret_len);
-	efree(newstr);
+	RETURN_STR(mbstring_convert_case(PHP_UNICODE_CASE_LOWER, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
-/* }}} */
 
 static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
 {
@@ -4774,11 +4738,11 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 	return last;
 }
 
-/* {{{ MBSTRING_API int php_mb_stripos() */
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *enc)
 {
-	size_t n = (size_t) -1;
+	size_t n = (size_t)-1;
 	mbfl_string haystack, needle;
+	zend_string *haystack_converted = NULL, *needle_converted = NULL;
 
 	mbfl_string_init_set(&haystack, enc);
 	mbfl_string_init_set(&needle, enc);
@@ -4786,21 +4750,20 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 	do {
 		/* We're using simple case-folding here, because we'd have to deal with remapping of
 		 * offsets otherwise. */
-
-		size_t len = 0;
-		haystack.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
-		haystack.len = len;
+		haystack_converted = mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char*)old_haystack, old_haystack_len, enc);
+		haystack.val = (unsigned char*)ZSTR_VAL(haystack_converted);
+		haystack.len = ZSTR_LEN(haystack_converted);
 
 		if (!haystack.val) {
 			break;
 		}
-
 		if (haystack.len == 0) {
 			break;
 		}
 
-		needle.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
-		needle.len = len;
+		needle_converted = mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char*)old_needle, old_needle_len, enc);
+		needle.val = (unsigned char*)ZSTR_VAL(needle_converted);
+		needle.len = ZSTR_LEN(needle_converted);
 
 		if (!needle.val) {
 			break;
@@ -4809,17 +4772,15 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		n = mbfl_strpos(&haystack, &needle, offset, mode);
 	} while(0);
 
-	if (haystack.val) {
-		efree(haystack.val);
+	if (haystack_converted) {
+		zend_string_free(haystack_converted);
 	}
-
-	if (needle.val) {
-		efree(needle.val);
+	if (needle_converted) {
+		zend_string_free(needle_converted);
 	}
 
 	return n;
 }
-/* }}} */
 
 static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *list_size) /* {{{ */
 {
