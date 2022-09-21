@@ -298,10 +298,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
-#ifdef ENABLE_TEST_CLASS
-	test_class_startup();
-#endif
-
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 
