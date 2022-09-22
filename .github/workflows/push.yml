@@ -61,14 +61,7 @@ jobs:
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-  MACOS:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - debug: true
-            zts: false
-    name: "MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+  MACOS_DEBUG_NTS:
     runs-on: macos-11
     steps:
       - name: git checkout
@@ -78,9 +71,7 @@ jobs:
       - name: ./configure
         uses: ./.github/actions/configure-macos
         with:
-          configurationParameters: >-
-            --${{ matrix.debug && 'enable' || 'disable' }}-debug
-            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+          configurationParameters: --enable-debug --disable-zts
       - name: make
         run: |-
           export PATH="/usr/local/opt/bison/bin:$PATH"
