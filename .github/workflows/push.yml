@@ -90,3 +90,105 @@ jobs:
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  COMMUNITY:
+    #needs: GENERATE_MATRIX
+    #if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        #branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+        include:
+          - branch: { name: 'PR', ref: '' }
+    name: "${{ matrix.branch.name }}_COMMUNITY"
+    runs-on: ubuntu-20.04
+    env:
+      UBSAN_OPTIONS: print_stacktrace=1
+      USE_ZEND_ALLOC: 0
+      USE_TRACKED_ALLOC: 1
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        #with:
+        #  ref: ${{ matrix.branch.ref }}
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            --enable-debug
+            --enable-zts
+            --enable-address-sanitizer
+            --enable-undefined-sanitizer
+            CFLAGS='-DZEND_TRACK_ARENA_ALLOC -fno-sanitize-recover'
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        run: |
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+      - name: Enable Opcache and JIT
+        run: |
+          echo zend_extension=opcache.so > /etc/php.d/opcache.ini
+          echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+          echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+      - name: Test Laravel
+        if: always()
+        run: |
+          git clone https://github.com/laravel/framework.git --branch=master --depth=1
+          cd framework
+          git rev-parse HEAD
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          # Hack to disable a test that hangs
+          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("*/\n    public function testSharedGet()", "* @group skip\n     */\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
+          export ASAN_OPTIONS=exitcode=139
+          php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
+          if [ $EXIT_CODE -gt 128 ]; then
+            exit 1
+          fi
+      - name: Test Symfony
+        if: always()
+        run: |
+          git clone https://github.com/symfony/symfony.git --depth=1
+          cd symfony
+          git rev-parse HEAD
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php ./phpunit install
+          # Test causes a heap-buffer-overflow but I cannot reproduce it locally...
+          php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
+          # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
+          php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("*/\n    public function testCastNonTrailingCharPointer()", "* @group skip\n     */\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
+          export ASAN_OPTIONS=exitcode=139
+          export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
+          X=0
+          for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
+            php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
+            if [ $EXIT_CODE -gt 128 ]; then
+              X=1;
+            fi
+          done
+          exit $X
+      - name: Test PHPUnit
+        if: always()
+        run: |
+          git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
+          cd phpunit
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php ./phpunit || EXIT_CODE=$?
+          if [ $EXIT_CODE -gt 128 ]; then
+            exit 1
+          fi
+      - name: 'Symfony Preloading'
+        if: always()
+        run: |
+          php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
+          cd symfony_demo
+          git rev-parse HEAD
+          sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
+          php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
