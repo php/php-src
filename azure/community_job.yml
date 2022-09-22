@@ -47,7 +47,7 @@ jobs:
         sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
         export USE_ZEND_ALLOC=0
         export ASAN_OPTIONS=exitcode=139
-        php vendor/bin/phpunit
+        php vendor/bin/phpunit --verbose --testdox
         if [ $? -gt 128 ]; then
           exit 1
         fi
@@ -64,7 +64,7 @@ jobs:
         export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
         X=0
         for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-          php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient;
+          php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --verbose --testdox
           if [ $? -gt 128 ]; then
             X=1;
           fi
