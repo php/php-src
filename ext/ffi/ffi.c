@@ -180,6 +180,7 @@ typedef struct _zend_ffi_cdata {
 	zend_ffi_type         *type;
 	void                  *ptr;
 	void                  *ptr_holder;
+	zend_object           *ptr_obj;
 	zend_ffi_flags         flags;
 } zend_ffi_cdata;
 
@@ -249,6 +250,7 @@ static zend_object *zend_ffi_cdata_new(zend_class_entry *class_type) /* {{{ */
 
 	cdata->type = NULL;
 	cdata->ptr = NULL;
+	cdata->ptr_obj = NULL;
 	cdata->flags = 0;
 
 	return &cdata->std;
@@ -439,6 +441,7 @@ static zend_never_inline zend_ffi_cdata *zend_ffi_cdata_to_zval_slow(void *ptr, 
 	cdata->type = type;
 	cdata->flags = flags;
 	cdata->ptr = ptr;
+	cdata->ptr_obj = NULL;
 	return cdata;
 }
 /* }}} */
@@ -453,6 +456,7 @@ static zend_never_inline zend_ffi_cdata *zend_ffi_cdata_to_zval_slow_ptr(void *p
 	cdata->flags = flags;
 	cdata->ptr = (void*)&cdata->ptr_holder;
 	*(void**)cdata->ptr = *(void**)ptr;
+	cdata->ptr_obj = NULL;
 	return cdata;
 }
 /* }}} */
@@ -478,6 +482,7 @@ static zend_never_inline zend_ffi_cdata *zend_ffi_cdata_to_zval_slow_ret(void *p
 	} else {
 		cdata->ptr = ptr;
 	}
+	cdata->ptr_obj = NULL;
 	return cdata;
 }
 /* }}} */
@@ -2321,6 +2326,9 @@ static void zend_ffi_cdata_dtor(zend_ffi_cdata *cdata) /* {{{ */
 			pefree(cdata->ptr_holder, cdata->flags & ZEND_FFI_FLAG_PERSISTENT);
 		}
 	}
+	if (cdata->ptr_obj) {
+		zend_object_release(cdata->ptr_obj);
+	}
 }
 /* }}} */
 
@@ -2426,6 +2434,7 @@ static zval *zend_ffi_read_var(zend_object *obj, zend_string *var_name, int read
 		cdata->flags = ZEND_FFI_FLAG_CONST;
 		cdata->ptr_holder = sym->addr;
 		cdata->ptr = &cdata->ptr_holder;
+		cdata->ptr_obj = NULL;
 		ZVAL_OBJ(rv, &cdata->std);
 	} else {
 		ZVAL_LONG(rv, sym->value);
@@ -4179,6 +4188,8 @@ ZEND_METHOD(FFI, addr) /* {{{ */
 	new_cdata->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
 	new_cdata->ptr_holder = cdata->ptr;
 	new_cdata->ptr = &new_cdata->ptr_holder;
+	Z_ADDREF_P(zv);
+	new_cdata->ptr_obj = Z_OBJ_P(zv);
 
 	if (GC_REFCOUNT(&cdata->std) == 1 && Z_REFCOUNT_P(arg) == 1) {
 		if (ZEND_FFI_TYPE_IS_OWNED(cdata->type)) {
