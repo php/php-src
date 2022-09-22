@@ -35,7 +35,7 @@ ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
 	zend_atomic_bool_store_ex(obj, desired);
 }
 
-#if ZEND_WIN32 || HAVE_SYNC_ATOMICS
+#if defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)
 /* On these platforms it is non-const due to underlying APIs. */
 ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj) {
 	return zend_atomic_bool_load_ex(obj);
