@@ -142,6 +142,11 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 		PS(session_vars) = NULL;
 	}
 
+	if (PS(mod_user_class_name)) {
+		zend_string_release(PS(mod_user_class_name));
+		PS(mod_user_class_name) = NULL;
+	}
+
 	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
 	/* Set session status to prevent error while restoring save handler INI value. */
 	PS(session_status) = php_session_none;
