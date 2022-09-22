@@ -31,6 +31,13 @@ jobs:
     parameters:
       configurationName: I386_DEBUG_ZTS
       configurationParameters: '--enable-debug --enable-zts'
+  - template: azure/community_job.yml
+    parameters:
+      configurationName: COMMUNITY
+      configurationParameters: >-
+          --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
+          CFLAGS='-fno-sanitize-recover'
+      timeoutInMinutes: 90
   - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
     - template: azure/i386/job.yml
       parameters:
@@ -49,13 +56,6 @@ jobs:
         configurationName: DEBUG_ZTS_MSAN
         configurationParameters: '--enable-debug --enable-zts'
         runTestsParameters: --msan
-        timeoutInMinutes: 90
-    - template: azure/community_job.yml
-      parameters:
-        configurationName: COMMUNITY
-        configurationParameters: >-
-            --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
-            CFLAGS='-fno-sanitize-recover'
         timeoutInMinutes: 90
     - template: azure/opcache_variation_job.yml
       parameters:
