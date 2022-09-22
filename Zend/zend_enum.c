@@ -34,8 +34,7 @@
 
 ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
-
-static zend_object_handlers enum_handlers;
+ZEND_API zend_object_handlers zend_enum_object_handlers;
 
 zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case_name, zval *backing_value_zv)
 {
@@ -157,9 +156,9 @@ void zend_register_enum_ce(void)
 	zend_ce_backed_enum = register_class_BackedEnum(zend_ce_unit_enum);
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
 
-	memcpy(&enum_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	enum_handlers.clone_obj = NULL;
-	enum_handlers.compare = zend_objects_not_comparable;
+	memcpy(&zend_enum_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_enum_object_handlers.clone_obj = NULL;
+	zend_enum_object_handlers.compare = zend_objects_not_comparable;
 }
 
 void zend_enum_add_interfaces(zend_class_entry *ce)
@@ -183,7 +182,7 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);	
 	}
 
-	ce->default_object_handlers = &enum_handlers;
+	ce->default_object_handlers = &zend_enum_object_handlers;
 }
 
 zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
