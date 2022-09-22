@@ -83,7 +83,7 @@ jobs:
       displayName: 'Test Amphp'
       condition: or(succeeded(), failed())
     - script: |
-        git clone https://github.com/sebastianbergmann/phpunit.git --branch=master --depth=1
+        git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
         cd phpunit
         git rev-parse HEAD
         export USE_ZEND_ALLOC=0
