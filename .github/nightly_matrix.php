@@ -42,7 +42,7 @@ function get_branches() {
     return get_branch_matrix($changed_branches);
 }
 
-function get_asan_matrix(array $branches) {
+function get_matrix_include(array $branches) {
     $jobs = [];
     foreach ($branches as $branch) {
         $jobs[] = [
@@ -52,6 +52,13 @@ function get_asan_matrix(array $branches) {
             'zts' => true,
             'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
             'run_tests_parameters' => '--asan',
+        ];
+        $jobs[] = [
+            'name' => '_REPEAT',
+            'branch' => $branch,
+            'debug' => true,
+            'zts' => false,
+            'run_tests_parameters' => '--repeat 2',
         ];
     }
     return $jobs;
@@ -65,7 +72,7 @@ if ($discard_cache) {
 }
 
 $branches = get_branches();
-$asan_matrix = get_asan_matrix($branches);
+$matrix_include = get_matrix_include($branches);
 
 echo '::set-output name=branches::' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n";
-echo '::set-output name=asan-matrix::' . json_encode($asan_matrix, JSON_UNESCAPED_SLASHES) . "\n";
+echo '::set-output name=matrix-include::' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n";

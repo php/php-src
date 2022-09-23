@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
-      asan-matrix: ${{ steps.set-matrix.outputs.asan-matrix }}
+      matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -39,7 +39,7 @@ jobs:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
         debug: [true, false]
         zts: [true, false]
-        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.asan-matrix) }}
+        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
     steps:
