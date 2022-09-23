@@ -6656,6 +6656,7 @@ done:
 				 && (init_opline->opcode != ZEND_INIT_METHOD_CALL
 				  || init_opline->op1_type == IS_UNDEF
 				  || (!(p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL)
+				   && ssa_op
 				   && (ssa_op-1)->op1_use >=0
 				   && ssa->var_info[(ssa_op-1)->op1_use].delayed_fetch_this))
 				 && (init_opline->opcode != ZEND_INIT_USER_CALL
