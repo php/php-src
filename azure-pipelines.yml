@@ -60,10 +60,6 @@ jobs:
         configurationName: DEBUG_NTS_REPEAT
         configurationParameters: '--enable-debug --disable-zts'
         runTestsParameters: '--repeat 2'
-    - template: azure/libmysqlclient_job.yml
-      parameters:
-        configurationName: LIBMYSQLCLIENT_DEBUG_NTS
-        configurationParameters: '--enable-debug --disable-zts'
     - template: azure/job.yml
       parameters:
         configurationName: VARIATION_DEBUG_ZTS
