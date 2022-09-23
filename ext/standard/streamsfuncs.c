@@ -798,7 +798,9 @@ PHP_FUNCTION(stream_select)
 		RETURN_THROWS();
 	}
 
-	PHP_SAFE_MAX_FD(max_fd, max_set_count);
+	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
+		RETURN_FALSE;
+	}
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (!secnull) {
