@@ -55,8 +55,3 @@ jobs:
             CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'
         timeoutInMinutes: 90
-    - template: azure/file_cache_job.yml
-      parameters:
-        configurationName: DEBUG_NTS_FILE_CACHE
-        configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 90
