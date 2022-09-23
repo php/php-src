@@ -52,13 +52,6 @@ jobs:
         configurationParameters: '--enable-debug --enable-zts'
         runTestsParameters: --msan
         timeoutInMinutes: 90
-    - template: azure/community_job.yml
-      parameters:
-        configurationName: COMMUNITY
-        configurationParameters: >-
-            --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
-            CFLAGS='-fno-sanitize-recover'
-        timeoutInMinutes: 90
     - template: azure/opcache_variation_job.yml
       parameters:
         configurationName: DEBUG_NTS_OPCACHE
