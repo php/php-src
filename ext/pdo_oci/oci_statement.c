@@ -236,9 +236,9 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	ZEND_ASSERT(param);
 
 	if (Z_ISREF(param->parameter))
-        parameter = Z_REFVAL(param->parameter);
-    else
-        parameter = &param->parameter;
+		parameter = Z_REFVAL(param->parameter);
+	else
+		parameter = &param->parameter;
 
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
 		P->actual_len = sizeof(OCILobLocator*);

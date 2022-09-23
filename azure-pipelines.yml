@@ -41,12 +41,6 @@ jobs:
       parameters:
         configurationName: I386_RELEASE_ZTS
         configurationParameters: '--disable-debug --enable-zts'
-    - template: azure/msan_job.yml
-      parameters:
-        configurationName: DEBUG_ZTS_MSAN
-        configurationParameters: '--enable-debug --enable-zts'
-        runTestsParameters: --msan
-        timeoutInMinutes: 90
     - template: azure/community_job.yml
       parameters:
         configurationName: COMMUNITY
