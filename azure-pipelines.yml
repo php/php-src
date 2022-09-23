@@ -59,9 +59,3 @@ jobs:
       parameters:
         configurationName: LIBMYSQLCLIENT_DEBUG_NTS
         configurationParameters: '--enable-debug --disable-zts'
-    - template: azure/job.yml
-      parameters:
-        configurationName: VARIATION_DEBUG_ZTS
-        configurationParameters: >-
-            --enable-debug --enable-zts
-            CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1"
