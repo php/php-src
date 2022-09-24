@@ -2753,7 +2753,7 @@ PHP_FUNCTION(mb_convert_encoding)
 }
 /* }}} */
 
-static zend_string *mbstring_convert_case(int case_mode, const char *str, size_t str_len, const mbfl_encoding *enc)
+static zend_string *mbstring_convert_case(php_case_mode case_mode, const char *str, size_t str_len, const mbfl_encoding *enc)
 {
 	return php_unicode_convert_case(case_mode, str, str_len, enc, MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
 }
@@ -2775,7 +2775,7 @@ PHP_FUNCTION(mb_convert_case)
 		RETURN_THROWS();
 	}
 
-	if (case_mode < 0 || case_mode > PHP_UNICODE_CASE_MODE_MAX) {
+	if (case_mode < 0 || case_mode >= PHP_UNICODE_CASE_MODE_MAX) {
 		zend_argument_value_error(2, "must be one of the MB_CASE_* constants");
 		RETURN_THROWS();
 	}
