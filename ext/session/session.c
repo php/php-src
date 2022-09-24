@@ -1083,8 +1083,9 @@ PHPAPI int php_session_register_module(const ps_module *ptr) /* {{{ */
 /* }}} */
 
 /* Dummy PS module function */
+/* We consider any ID valid, so we return FAILURE to indicate that a session doesn't exist */
 PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS) {
-	return SUCCESS;
+	return FAILURE;
 }
 
 /* Dummy PS module function */
