@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.25
 
+- Session:
+  . Fixed bug GH-9583 (session_create_id() fails with user defined save handler
+    that doesn't have a validateId() method). (Girgias)
+
 29 Sep 2022, PHP 8.0.24
 
 - Core:
