@@ -25,6 +25,7 @@
 #include "zend_strtod.h"
 #include "zend_modules.h"
 #include "zend_smart_str.h"
+#include <ctype.h>
 
 static HashTable *registered_zend_ini_directives;
 
@@ -552,7 +553,6 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 	char *str = ZSTR_VAL(value);
 	char *str_end = &str[ZSTR_LEN(value)];
 	char *digits = str;
-	size_t digits_len = ZSTR_LEN(value);
 	bool overflow = false;
 	zend_ulong factor;
 	smart_str invalid = {0};
@@ -561,10 +561,10 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 
 	/* Ignore leading whitespace. ZEND_STRTOL() also skips leading whitespaces,
 	 * but we need the position of the first non-whitespace later. */
-	while (digits < str_end && zend_is_whitespace(*digits)) {++digits; --digits_len;}
+	while (digits < str_end && zend_is_whitespace(*digits)) {++digits;}
 
 	/* Ignore trailing whitespace */
-	while (digits < str_end && zend_is_whitespace(*(str_end-1))) {--str_end; --digits_len;}
+	while (digits < str_end && zend_is_whitespace(*(str_end-1))) {--str_end;}
 
 	if (digits == str_end) {
 		*errstr = NULL;
@@ -574,69 +574,78 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 	bool is_negative = false;
 	if (digits[0] == '+') {
 		++digits;
-		--digits_len;
 	} else if (digits[0] == '-') {
 		is_negative = true;
 		++digits;
-		--digits_len;
 	}
 
+	/* TODO Handle cases such as ++25, --25, or white space after sign symbol?
+	if (!isdigit(digits[0])) {
+
+	}
+	*/
+
 	int base = 0;
-	if (digits_len >= 2 && digits[0] == '0') {
+	if (digits[0] == '0' && !isdigit(digits[1])) {
+		/* Value is just 0 */
+		if ((digits+1) == str_end) {
+			*errstr = NULL;
+			return 0;
+		}
+
 		switch (digits[1]) {
+			/* Multiplier suffixes */
+			case 'g':
+			case 'G':
+			case 'm':
+			case 'M':
+			case 'k':
+			case 'K':
+				goto evaluation;
 			case 'x':
 			case 'X':
 				base = 16;
-				digits += 2;
-				digits_len -= 2;
 				break;
 			case 'o':
 			case 'O':
 				base = 8;
-				digits += 2;
-				digits_len -= 2;
 				break;
 			case 'b':
 			case 'B':
 				base = 2;
-				digits += 2;
-				digits_len -= 2;
 				break;
+			default:
+				*errstr = zend_strpprintf(0, "Invalid prefix \"0%c\", interpreting as \"0\" for backwards compatibility",
+					digits[1]);
+				return 0;
         }
-		/* TODO Error for invalid prefix? */
-		if (digits == str_end) {
-			*errstr = NULL;
+        digits += 2;
+		if (UNEXPECTED(digits == str_end)) {
+			*errstr = zend_strpprintf(0, "Invalid quantity: no digits after base prefix, interpreting as \"0\" for backwards compatibility");
 			return 0;
 		}
 	}
+	evaluation:
 
-	zend_ulong retval;
 	errno = 0;
-
-	if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
-		retval = (zend_ulong) ZEND_STRTOL(digits, &digits_end, base);
-	} else {
-		retval = ZEND_STRTOUL(digits, &digits_end, base);
-	}
+	zend_ulong retval = ZEND_STRTOUL(digits, &digits_end, base);
 
 	if (errno == ERANGE) {
 		overflow = true;
 	} else if (signed_result == ZEND_INI_PARSE_QUANTITY_UNSIGNED) {
-		/* ZEND_STRTOUL() does not report a range error when the subject starts
-		 * with a minus sign, so we check this here. Ignore "-1" as it is
-		 * commonly used as max value, for instance in memory_limit=-1. */
 		if (is_negative) {
-			if (digits_end - digits == 1 && digits_end == str_end && digits[0] == '1') {
+			/* Ignore "-1" as it is commonly used as max value, for instance in memory_limit=-1. */
+			if (retval == 1 && digits_end == str_end) {
 				retval = -1;
 			} else {
 				overflow = true;
 			}
 		}
-	}
-
-	if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
-		if (is_negative) {
-			retval = (zend_ulong) (-1 * (zend_long) retval);
+	} else if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
+		if ((zend_long) retval < 0) {
+			overflow = true;
+		} else if (is_negative) {
+			retval = 0u - retval;
 		}
 	}
 

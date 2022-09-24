@@ -13,6 +13,10 @@ $tests = [
     '1X',    # Unknown multiplier.
     '1.0K',  # Non integral digits.
 
+    '0X',    # Valid prefix with no value
+    '0Z',    # Invalid prefix
+    '0XK',   # Valid prefix with no value and multiplier
+
     # Null bytes
     " 123\x00K",
     "\x00 123K",
@@ -47,6 +51,21 @@ int(1)
 
 Warning: Invalid quantity "1.0K", interpreting as "1K" for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
 int(1024)
+
+# "0X"
+
+Warning: Invalid quantity: no digits after base prefix, interpreting as "0" for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+int(0)
+
+# "0Z"
+
+Warning: Invalid prefix "0Z", interpreting as "0" for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+int(0)
+
+# "0XK"
+
+Warning: Invalid quantity "0XK": no valid leading digits, interpreting as "0" for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+int(0)
 
 # " 123\000K"
 
