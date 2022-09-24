@@ -238,7 +238,7 @@ static uint32_t *emit_special_casing_sequence(uint32_t w, uint32_t *out)
 	return out;
 }
 
-MBSTRING_API zend_string *php_unicode_convert_case(int case_mode, const char *srcstr, size_t in_len, const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
+MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, const char *srcstr, size_t in_len, const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
 {
 	/* A Unicode codepoint can expand out to up to 3 codepoints when uppercased, lowercased, or title cased
 	 * See http://www.unicode.org/Public/UNIDATA/SpecialCasing.txt */
