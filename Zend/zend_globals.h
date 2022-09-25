@@ -323,6 +323,9 @@ struct _zend_php_scanner_globals {
 	int heredoc_indentation;
 	bool heredoc_indentation_uses_spaces;
 
+	/* Short tags - either from defaults or tokenizer extension overrides */
+	bool short_tags;
+
 	/* original (unfiltered) script */
 	unsigned char *script_org;
 	size_t script_org_size;

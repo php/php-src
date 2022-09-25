@@ -246,6 +246,7 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 
 	lex_state->on_event = SCNG(on_event);
 	lex_state->on_event_context = SCNG(on_event_context);
+	lex_state->short_tags = SCNG(short_tags);
 
 	lex_state->ast = CG(ast);
 	lex_state->ast_arena = CG(ast_arena);
@@ -289,6 +290,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 
 	SCNG(on_event) = lex_state->on_event;
 	SCNG(on_event_context) = lex_state->on_event_context;
+	SCNG(short_tags) = lex_state->short_tags;
 
 	CG(ast) = lex_state->ast;
 	CG(ast_arena) = lex_state->ast_arena;
@@ -731,6 +733,7 @@ ZEND_API void zend_prepare_string_for_scanning(zval *str, zend_string *filename)
 
 	SCNG(yy_in) = NULL;
 	SCNG(yy_start) = NULL;
+	SCNG(short_tags) = CG(short_tags);
 
 	buf = Z_STRVAL_P(str);
 	size = old_len;
@@ -2239,7 +2242,7 @@ string:
 		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
 	}
 	/* Degenerate case: <?phpX is interpreted as <? phpX with short tags. */
-	if (CG(short_tags)) {
+	if (SCNG(short_tags)) {
 		yyless(2);
 		BEGIN(ST_IN_SCRIPTING);
 		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
@@ -2248,7 +2251,7 @@ string:
 }
 
 <INITIAL>"<?" {
-	if (CG(short_tags)) {
+	if (SCNG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
 		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
 	} else {
@@ -2273,7 +2276,7 @@ inline_char_handler:
 		}
 
 		if (*YYCURSOR == '?') {
-			if (CG(short_tags) /* <? */
+			if (SCNG(short_tags) /* <? */
 				|| (*(YYCURSOR + 1) == '=') /* <?= */
 				|| (!strncasecmp((char*)YYCURSOR + 1, "php", 3) && /* <?php[ \t\r\n] */
 					(YYCURSOR + 4 == YYLIMIT ||
