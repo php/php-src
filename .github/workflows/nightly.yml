@@ -428,6 +428,7 @@ jobs:
             --enable-calendar \
             --enable-ftp \
             --enable-zend-test \
+            --enable-dl-test=shared \
             --enable-werror \
             --enable-memory-sanitizer \
             --with-config-file-path=/etc \
