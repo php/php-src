@@ -371,3 +371,95 @@ jobs:
             -d opcache.file_cache_only=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  MSAN:
+    needs: GENERATE_MATRIX
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+    name: "${{ matrix.branch.name }}_MSAN"
+    runs-on: ubuntu-22.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        run: |
+          export CC=clang
+          export CXX=clang++
+          export CFLAGS="-DZEND_TRACK_ARENA_ALLOC"
+          ./buildconf --force
+          # msan requires all used libraries to be instrumented,
+          # so we should avoiding linking against anything but libc here
+          ./configure \
+            --enable-debug \
+            --enable-zts \
+            --enable-option-checking=fatal \
+            --prefix=/usr \
+            --without-sqlite3 \
+            --without-pdo-sqlite \
+            --without-libxml \
+            --disable-dom \
+            --disable-simplexml \
+            --disable-xml \
+            --disable-xmlreader \
+            --disable-xmlwriter \
+            --without-pcre-jit \
+            --disable-opcache-jit \
+            --enable-phpdbg \
+            --enable-fpm \
+            --with-pdo-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --disable-mysqlnd-compression-support \
+            --without-pear \
+            --enable-exif \
+            --enable-sysvsem \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --enable-mbstring \
+            --disable-mbregex \
+            --enable-sockets \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --enable-zend-test \
+            --enable-werror \
+            --enable-memory-sanitizer \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        run: |
+          sudo make install
+          sudo mkdir     /etc/php.d
+          sudo chmod 777 /etc/php.d
+          echo mysqli.default_socket=/var/run/mysqld/mysqld.sock    > /etc/php.d/mysqli.ini
+          echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/pdo_mysql.ini
+      - name: Setup
+        run: |
+          set -x
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          # Ensure local_infile tests can run.
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          sudo locale-gen de_DE
+      - name: Test
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            --msan
+      - name: Test Opcache
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            --msan
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
