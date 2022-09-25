@@ -46,7 +46,3 @@ jobs:
       parameters:
         configurationName: I386_RELEASE_ZTS
         configurationParameters: '--disable-debug --enable-zts'
-    - template: azure/libmysqlclient_job.yml
-      parameters:
-        configurationName: LIBMYSQLCLIENT_DEBUG_NTS
-        configurationParameters: '--enable-debug --disable-zts'
