@@ -39,40 +39,6 @@ jobs:
         echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
-        git clone https://github.com/laravel/framework.git --branch=master --depth=1
-        cd framework
-        git rev-parse HEAD
-        php8.0 /usr/bin/composer install --no-progress
-        # Hack to disable a test that hangs on azure
-        sed -i 's/PHP_OS/"Darwin"/' tests/Filesystem/FilesystemTest.php
-        export USE_ZEND_ALLOC=0
-        export ASAN_OPTIONS=exitcode=139
-        php vendor/bin/phpunit
-        if [ $? -gt 128 ]; then
-          exit 1
-        fi
-      displayName: 'Test Laravel'
-    - script: |
-        git clone https://github.com/symfony/symfony.git --depth=1
-        cd symfony
-        git rev-parse HEAD
-        php8.0 /usr/bin/composer install --no-progress
-        php8.0 ./phpunit install
-        export USE_ZEND_ALLOC=0
-        export USE_TRACKED_ALLOC=1
-        export ASAN_OPTIONS=exitcode=139
-        export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
-        X=0
-        for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-          php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient;
-          if [ $? -gt 128 ]; then
-            X=1;
-          fi
-        done
-        exit $X
-      displayName: 'Test Symfony'
-      condition: or(succeeded(), failed())
-    - script: |
         git clone https://github.com/amphp/amp.git --branch=master --depth=1
         cd amp
         git rev-parse HEAD
