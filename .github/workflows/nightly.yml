@@ -461,3 +461,50 @@ jobs:
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  LIBMYSQLCLIENT:
+    needs: GENERATE_MATRIX
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+    name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: apt
+        run: |
+          sudo apt-get update -y | true
+          sudo apt install bison re2c
+      - name: Setup
+        run: |
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          # Ensure local_infile tests can run.
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+      # Does not support caching_sha2_auth :(
+      # - name: Build mysql-5.6
+      #  uses: ./.github/actions/build-libmysqlclient
+      #  with:
+      #    libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
+      # - name: Test mysql-5.6
+      #   uses: ./.github/actions/test-libmysqlclient
+      - name: Build mysql-5.7
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          libmysql: mysql-5.7.38-linux-glibc2.12-x86_64.tar.gz
+      - name: Test mysql-5.7
+        uses: ./.github/actions/test-libmysqlclient
+      - name: Build mysql-8.0
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          # FIXME: There are new warnings
+          # configurationParameters: --enable-werror
+          libmysql: mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz
+      - name: Test mysql-8.0
+        uses: ./.github/actions/test-libmysqlclient
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
