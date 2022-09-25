@@ -289,3 +289,74 @@ jobs:
           git rev-parse HEAD
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
           php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
+  OPCACHE_VARIATION:
+    needs: GENERATE_MATRIX
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+    name: "${{ matrix.branch.name }}_OPCACHE_VARIATION"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: Create Oracle container
+        uses: ./.github/actions/setup-oracle
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            --enable-debug --disable-zts
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        uses: ./.github/actions/setup-x64
+      - name: Test File Cache (prime shm)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-prime
+      - name: Test File Cache (prime shm, use shm)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-use
+      - name: Test File Cache (prime shm, use file)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-use
+            -d opcache.file_cache_only=1
+      - name: Test File Cache Only (prime)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-prime
+            -d opcache.file_cache_only=1
+      - name: Test File Cache Only (use)
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            --file-cache-use
+            -d opcache.file_cache_only=1
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
