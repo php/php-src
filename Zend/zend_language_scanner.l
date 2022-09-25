@@ -544,6 +544,7 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	/* Reset the scanner for scanning the new file */
 	SCNG(yy_in) = file_handle;
 	SCNG(yy_start) = NULL;
+	SCNG(short_tags) = CG(short_tags);
 
 	if (size != (size_t)-1) {
 		if (CG(multibyte)) {
