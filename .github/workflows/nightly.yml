@@ -234,7 +234,7 @@ jobs:
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
       - name: Test Laravel
-        if: always()
+        if: github.ref != 'refs/heads/PHP-8.0'
         run: |
           git clone https://github.com/laravel/framework.git --branch=master --depth=1
           cd framework
@@ -248,7 +248,7 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
-        if: always()
+        if: github.ref != 'refs/heads/PHP-8.0'
         run: |
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
