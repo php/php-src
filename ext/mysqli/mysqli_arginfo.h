@@ -1493,7 +1493,7 @@ static zend_class_entry *register_class_mysqli_sql_exception(zend_class_entry *c
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	zval property_sqlstate_default_value;
-	zend_string *property_sqlstate_default_value_str = zend_string_init("00000", sizeof("00000") - 1, 1);
+	zend_string *property_sqlstate_default_value_str = zend_string_init("00000", strlen("00000"), 1);
 	ZVAL_STR(&property_sqlstate_default_value, property_sqlstate_default_value_str);
 	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, 1);
 	zend_declare_typed_property(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));

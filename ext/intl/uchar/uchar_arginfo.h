@@ -319,7 +319,7 @@ static zend_class_entry *register_class_IntlChar(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	zval const_UNICODE_VERSION_value;
-	zend_string *const_UNICODE_VERSION_value_str = zend_string_init(U_UNICODE_VERSION, sizeof(U_UNICODE_VERSION) - 1, 1);
+	zend_string *const_UNICODE_VERSION_value_str = zend_string_init(U_UNICODE_VERSION, strlen(U_UNICODE_VERSION), 1);
 	ZVAL_STR(&const_UNICODE_VERSION_value, const_UNICODE_VERSION_value_str);
 	zend_string *const_UNICODE_VERSION_name = zend_string_init_interned("UNICODE_VERSION", sizeof("UNICODE_VERSION") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_UNICODE_VERSION_name, &const_UNICODE_VERSION_value, ZEND_ACC_PUBLIC, NULL);

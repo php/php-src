@@ -1670,7 +1670,7 @@ class EvaluatedValue
                 $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
             } else {
                 $constValue = $cConstValue ?: '"' . addslashes($this->value) . '"';
-                $code .= "\tzend_string *{$zvalName}_str = zend_string_init($constValue, sizeof($constValue) - 1, 1);\n";
+                $code .= "\tzend_string *{$zvalName}_str = zend_string_init($constValue, strlen($constValue), 1);\n";
                 $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
             }
         } elseif ($this->type->isArray()) {
