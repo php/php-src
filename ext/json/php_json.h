@@ -102,6 +102,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth);
 PHP_JSON_API zend_result php_json_encode(smart_str *buf, zval *val, int options);
 PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth);
+PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_long options, zend_long depth);
 
 static inline zend_result php_json_decode(zval *return_value, const char *str, size_t str_len, bool assoc, zend_long depth)
 {
