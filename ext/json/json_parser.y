@@ -257,7 +257,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 
 static int php_json_parser_array_create_validate(php_json_parser *parser, zval *array)
 {
-	ZVAL_EMPTY_ARRAY(array);
+	ZVAL_NULL(array);
 	return SUCCESS;
 }
 
@@ -268,7 +268,7 @@ static int php_json_parser_array_append_validate(php_json_parser *parser, zval *
 
 static int php_json_parser_object_create_validate(php_json_parser *parser, zval *object)
 {
-	ZVAL_EMPTY_ARRAY(object);
+	ZVAL_NULL(object);
 	return SUCCESS;
 }
 
@@ -366,7 +366,7 @@ PHP_JSON_API int php_json_parse(php_json_parser *parser)
 	return php_json_yyparse(parser);
 }
 
-php_json_parser_methods get_validate_methods()
+const php_json_parser_methods* php_json_get_validate_methods()
 {
-	return validate_parser_methods;
+	return &validate_parser_methods;
 }
