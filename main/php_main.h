@@ -48,6 +48,16 @@ extern int php_shutdown_environ(void);
 #ifdef ZTS
 PHPAPI void php_reserve_tsrm_memory(void);
 PHPAPI bool php_tsrm_startup(void);
+
+#define PHP_ZTS 1
+#else
+#define PHP_ZTS 0
+#endif
+
+#ifdef PHP_WIN32
+#define PHP_OS_STR "WINNT"
+#else
+#define PHP_OS_STR PHP_OS
 #endif
 
 END_EXTERN_C()
