@@ -179,12 +179,12 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 /* }}} */
 
 /* {{{ */
-PHP_JSON_API zend_result php_json_validate_ex(const char *str, size_t str_len, zend_long options, zend_long depth)
+PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_long options, zend_long depth)
 {
 	php_json_parser parser;
 	zval tmp;
-	const php_json_parser_methods parser_validate_methods = get_validate_methods();
-	php_json_parser_init_ex(&parser, &tmp, str, str_len, (int)options, (int)depth, &parser_validate_methods);
+	const php_json_parser_methods* parser_validate_methods = php_json_get_validate_methods();
+	php_json_parser_init_ex(&parser, &tmp, str, str_len, (int)options, (int)depth, parser_validate_methods);
 
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
