@@ -2322,9 +2322,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 		if (ssa_op->op2_def >= 0 && !(ssa_var_info[ssa_op->op2_def].type & MAY_BE_REF)) {
 			UPDATE_SSA_TYPE(tmp, ssa_op->op2_def);
 		}
-		if (opline->opcode == ZEND_ASSIGN_OP
-		 || opline->opcode == ZEND_ASSIGN_DIM_OP
+		if (opline->opcode == ZEND_ASSIGN_DIM_OP
 		 || opline->opcode == ZEND_ASSIGN_OBJ_OP
+		 || opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP
 		 || opline->opcode == ZEND_ASSIGN_DIM
 		 || opline->opcode == ZEND_ASSIGN_OBJ) {
 			if ((ssa_op+1)->op1_def >= 0 && !(ssa_var_info[(ssa_op+1)->op1_def].type & MAY_BE_REF)) {
