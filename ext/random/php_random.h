@@ -74,6 +74,8 @@ PHPAPI double php_combined_lcg(void);
 
 # define MT_N (624)
 
+#define PHP_RANDOM_RANGE_ATTEMPTS (50)
+
 PHPAPI void php_mt_srand(uint32_t seed);
 PHPAPI uint32_t php_mt_rand(void);
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);

@@ -131,7 +131,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 		&& ((php_random_status_state_mt19937 *) randomizer->status->state)->mode != MT_RAND_MT19937
 	)) {
 		uint64_t r = php_random_algo_mt19937.generate(randomizer->status) >> 1;
-			
+
 		/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
 		 * (max - min) > ZEND_LONG_MAX.
 		 */
@@ -255,6 +255,102 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 		array_init(return_value);
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 	}
+}
+/* }}} */
+
+/* {{{ Get Random Bytes for Alphabet */
+PHP_METHOD(Random_Randomizer, getBytesFromAlphabet)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	zend_long length;
+	zend_string *alphabet, *retval;
+	size_t total_size = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2);
+		Z_PARAM_STR(alphabet)
+		Z_PARAM_LONG(length)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const size_t alphabet_length = ZSTR_LEN(alphabet);
+
+	if (alphabet_length < 1) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	if (length < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	retval = zend_string_alloc(length, 0);
+
+	if (alphabet_length > 0xFF) {
+		while (total_size < length) {
+			uint64_t offset = randomizer->algo->range(randomizer->status, 0, alphabet_length - 1);
+
+			if (EG(exception)) {
+				zend_string_free(retval);
+				RETURN_THROWS();
+			}
+
+			ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(alphabet)[offset];
+		}
+	} else {
+		uint64_t mask;
+		if (alphabet_length <= 0x1) {
+			mask = 0x0;
+		} else if (alphabet_length <= 0x2) {
+			mask = 0x1;
+		} else if (alphabet_length <= 0x4) {
+			mask = 0x3;
+		} else if (alphabet_length <= 0x8) {
+			mask = 0x7;
+		} else if (alphabet_length <= 0x10) {
+			mask = 0xF;
+ 		} else if (alphabet_length <= 0x20) {
+			mask = 0x1F;
+		} else if (alphabet_length <= 0x40) {
+			mask = 0x3F;
+		} else if (alphabet_length <= 0x80) {
+			mask = 0x7F;
+		} else {
+			mask = 0xFF;
+		}
+
+		int failures = 0;
+		while (total_size < length) {
+			uint64_t result = randomizer->algo->generate(randomizer->status);
+			if (EG(exception)) {
+				zend_string_free(retval);
+				RETURN_THROWS();
+			}
+
+			for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
+				uint64_t offset = (result >> (i * 8)) & mask;
+
+				if (offset >= alphabet_length) {
+					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
+						zend_string_free(retval);
+						zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
+						RETURN_THROWS();
+					}
+
+					continue;
+				}
+
+				failures = 0;
+
+				ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(alphabet)[offset];
+				if (total_size >= length) {
+					break;
+				}
+			}
+		}
+	}
+
+	ZSTR_VAL(retval)[length] = '\0';
+	RETURN_STR(retval);
 }
 /* }}} */
 
