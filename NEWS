@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-9388 (Improve unset property and __get type incompatibility
     error message). (ilutov)
+  . SA_ONSTACK is now set for signal handlers to be friendlier to other
+    in-process code such as Go's cgo. (Kévin Dunglas)
 
 - Opcache:
   . Added start, restart and force restart time to opcache's

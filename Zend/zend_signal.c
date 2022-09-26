@@ -248,7 +248,7 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN) {
 			sa.sa_sigaction = (void *) SIG_IGN;
 		} else {
-			sa.sa_flags     = SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
+			sa.sa_flags     = SA_ONSTACK | SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
 			sa.sa_sigaction = zend_signal_handler_defer;
 			sa.sa_mask      = global_sigmask;
 		}
