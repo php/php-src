@@ -556,22 +556,22 @@ static zend_class_entry *register_class_ZendTestStringEnum(void)
 	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, class_ZendTestStringEnum_methods);
 
 	zval enum_case_Foo_value;
-	zend_string *enum_case_Foo_value_str = zend_string_init("Test1", sizeof("Test1") - 1, 1);
+	zend_string *enum_case_Foo_value_str = zend_string_init("Test1", strlen("Test1"), 1);
 	ZVAL_STR(&enum_case_Foo_value, enum_case_Foo_value_str);
 	zend_enum_add_case_cstr(class_entry, "Foo", &enum_case_Foo_value);
 
 	zval enum_case_Bar_value;
-	zend_string *enum_case_Bar_value_str = zend_string_init("Test2", sizeof("Test2") - 1, 1);
+	zend_string *enum_case_Bar_value_str = zend_string_init("Test2", strlen("Test2"), 1);
 	ZVAL_STR(&enum_case_Bar_value, enum_case_Bar_value_str);
 	zend_enum_add_case_cstr(class_entry, "Bar", &enum_case_Bar_value);
 
 	zval enum_case_Baz_value;
-	zend_string *enum_case_Baz_value_str = zend_string_init("Test2\\a", sizeof("Test2\\a") - 1, 1);
+	zend_string *enum_case_Baz_value_str = zend_string_init("Test2\\a", strlen("Test2\\a"), 1);
 	ZVAL_STR(&enum_case_Baz_value, enum_case_Baz_value_str);
 	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
 
 	zval enum_case_FortyTwo_value;
-	zend_string *enum_case_FortyTwo_value_str = zend_string_init("42", sizeof("42") - 1, 1);
+	zend_string *enum_case_FortyTwo_value_str = zend_string_init("42", strlen("42"), 1);
 	ZVAL_STR(&enum_case_FortyTwo_value, enum_case_FortyTwo_value_str);
 	zend_enum_add_case_cstr(class_entry, "FortyTwo", &enum_case_FortyTwo_value);
 
