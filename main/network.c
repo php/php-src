@@ -1200,7 +1200,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 #ifdef PHP_WIN32
 		WSASetLastError(WSAEINVAL);
 #else
-	errno = ERANGE;
+		errno = ERANGE;
 #endif
 		return -1;
 	}
