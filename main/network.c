@@ -1198,7 +1198,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 
 	if (!PHP_SAFE_MAX_FD(max_fd, nfds + 1)) {
 #ifdef PHP_WIN32
-	WSASetLastError(WSAEINVAL);
+		WSASetLastError(WSAEINVAL);
 #else
 	errno = ERANGE;
 #endif
