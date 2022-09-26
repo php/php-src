@@ -226,9 +226,8 @@ jobs:
           configurationParameters: >-
             --enable-debug
             --enable-zts
-            --enable-address-sanitizer
-            --enable-undefined-sanitizer
-            CFLAGS='-DZEND_TRACK_ARENA_ALLOC -fno-sanitize-recover'
+            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
+            LDFLAGS='-fsanitize=undefined,address'
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
