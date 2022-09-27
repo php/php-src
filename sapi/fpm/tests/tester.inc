@@ -5,6 +5,7 @@ namespace FPM;
 use Adoy\FastCGI\Client;
 
 require_once 'fcgi.inc';
+require_once 'logreader.inc';
 require_once 'logtool.inc';
 require_once 'response.inc';
 
@@ -36,14 +37,9 @@ class Tester
     const FILE_EXT_PID = 'pid';
 
     /**
-     * Name for the option to manage php-fpm --force-stderr flag
-     */
-    const PHP_FPM_DISABLE_FORCE_STDERR = 'disable-force-stderr';
-
-    /**
      * @var array
      */
-    static private $supportedFiles = [
+    static private array $supportedFiles = [
         self::FILE_EXT_LOG_ACC,
         self::FILE_EXT_LOG_ERR,
         self::FILE_EXT_LOG_SLOW,
@@ -57,46 +53,51 @@ class Tester
     /**
      * @var array
      */
-    static private $filesToClean = ['.user.ini'];
+    static private array $filesToClean = ['.user.ini'];
 
     /**
      * @var bool
      */
-    private $debug;
+    private bool $debug;
 
     /**
      * @var array
      */
-    private $clients;
+    private array $clients = [];
+
+    /**
+     * @var LogReader
+     */
+    private LogReader $logReader;
 
     /**
      * @var LogTool
      */
-    private $logTool;
+    private LogTool $logTool;
 
     /**
      * Configuration template
      *
      * @var string|array
      */
-    private $configTemplate;
+    private string|array $configTemplate;
 
     /**
      * The PHP code to execute
      *
      * @var string
      */
-    private $code;
+    private string $code;
 
     /**
      * @var array
      */
-    private $options;
+    private array $options;
 
     /**
      * @var string
      */
-    private $fileName;
+    private string $fileName;
 
     /**
      * @var resource
@@ -111,19 +112,19 @@ class Tester
     /**
      * @var array
      */
-    private $ports = [];
+    private array $ports = [];
 
     /**
-     * @var string
+     * @var string|null
      */
-    private $error;
+    private ?string $error = null;
 
     /**
      * The last response for the request call
      *
-     * @var Response
+     * @var Response|null
      */
-    private $response;
+    private ?Response $response;
 
     /**
      * Clean all the created files up
@@ -133,19 +134,19 @@ class Tester
     static public function clean($backTraceIndex = 1)
     {
         $filePrefix = self::getCallerFileName($backTraceIndex);
-        if (substr($filePrefix, -6) === 'clean.') {
+        if (str_ends_with($filePrefix, 'clean.')) {
             $filePrefix = substr($filePrefix, 0, -6);
         }
 
         $filesToClean = array_merge(
             array_map(
-                function($fileExtension) use ($filePrefix) {
+                function ($fileExtension) use ($filePrefix) {
                     return $filePrefix . $fileExtension;
                 },
                 self::$supportedFiles
             ),
             array_map(
-                function($fileExtension) {
+                function ($fileExtension) {
                     return __DIR__ . '/' . $fileExtension;
                 },
                 self::$filesToClean
@@ -164,9 +165,10 @@ class Tester
     /**
      * Clean config files
      */
-    static public function cleanConfigFiles() {
+    static public function cleanConfigFiles()
+    {
         if (is_dir(self::CONF_DIR)) {
-            foreach(glob(self::CONF_DIR . '/*.conf') as $name) {
+            foreach (glob(self::CONF_DIR . '/*.conf') as $name) {
                 unlink($name);
             }
             rmdir(self::CONF_DIR);
@@ -175,9 +177,10 @@ class Tester
 
     /**
      * @param int $backTraceIndex
+     *
      * @return string
      */
-    static private function getCallerFileName($backTraceIndex = 1)
+    static private function getCallerFileName(int $backTraceIndex = 1): string
     {
         $backtrace = debug_backtrace();
         if (isset($backtrace[$backTraceIndex]['file'])) {
@@ -192,7 +195,7 @@ class Tester
     /**
      * @return bool|string
      */
-    static public function findExecutable()
+    static public function findExecutable(): bool|string
     {
         $phpPath = getenv("TEST_PHP_EXECUTABLE");
         for ($i = 0; $i < 2; $i++) {
@@ -205,11 +208,11 @@ class Tester
         }
 
         if ($phpPath && is_dir($phpPath)) {
-            if (file_exists($phpPath."/fpm/php-fpm") && is_executable($phpPath."/fpm/php-fpm")) {
+            if (file_exists($phpPath . "/fpm/php-fpm") && is_executable($phpPath . "/fpm/php-fpm")) {
                 /* gotcha */
-                return $phpPath."/fpm/php-fpm";
+                return $phpPath . "/fpm/php-fpm";
             }
-            $phpSbinFpmi = $phpPath."/sbin/php-fpm";
+            $phpSbinFpmi = $phpPath . "/sbin/php-fpm";
             if (file_exists($phpSbinFpmi) && is_executable($phpSbinFpmi)) {
                 return $phpSbinFpmi;
             }
@@ -231,11 +234,11 @@ class Tester
      */
     static public function skipIfAnyFileDoesNotExist($files)
     {
-        if (!is_array($files)) {
+        if ( ! is_array($files)) {
             $files = array($files);
         }
         foreach ($files as $file) {
-            if (!file_exists($file)) {
+            if ( ! file_exists($file)) {
                 die("skip File $file does not exist");
             }
         }
@@ -245,11 +248,12 @@ class Tester
      * Skip test if config file is invalid.
      *
      * @param string $configTemplate
+     *
      * @throws \Exception
      */
     static public function skipIfConfigFails(string $configTemplate)
     {
-        $tester = new self($configTemplate, '', [], self::getCallerFileName());
+        $tester     = new self($configTemplate, '', [], self::getCallerFileName());
         $testResult = $tester->testConfig();
         if ($testResult !== null) {
             self::clean(2);
@@ -305,7 +309,7 @@ class Tester
      */
     static public function skipIfPosixNotLoaded()
     {
-        if (!extension_loaded('posix')) {
+        if ( ! extension_loaded('posix')) {
             die('skip posix extension not loaded');
         }
     }
@@ -314,22 +318,25 @@ class Tester
      * Tester constructor.
      *
      * @param string|array $configTemplate
-     * @param string $code
-     * @param array $options
-     * @param string $fileName
+     * @param string       $code
+     * @param array        $options
+     * @param string|null  $fileName
+     * @param bool|null    $debug
      */
     public function __construct(
-        $configTemplate,
+        string|array $configTemplate,
         string $code = '',
         array $options = [],
-        $fileName = null
+        string $fileName = null,
+        bool $debug = null
     ) {
         $this->configTemplate = $configTemplate;
-        $this->code = $code;
-        $this->options = $options;
-        $this->fileName = $fileName ?: self::getCallerFileName();
-        $this->logTool = new LogTool();
-        $this->debug = (bool) getenv('TEST_FPM_DEBUG');
+        $this->code           = $code;
+        $this->options        = $options;
+        $this->fileName       = $fileName ?: self::getCallerFileName();
+        $this->debug          = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        $this->logReader      = new LogReader($this->debug);
+        $this->logTool        = new LogTool($this->logReader, $this->debug);
     }
 
     /**
@@ -338,6 +345,7 @@ class Tester
     public function setUserIni(string $ini)
     {
         $iniFile = __DIR__ . '/.user.ini';
+        $this->trace('Setting .user.ini file', $ini, isFile: true);
         file_put_contents($iniFile, $ini);
     }
 
@@ -350,7 +358,8 @@ class Tester
     public function testConfig()
     {
         $configFile = $this->createConfig();
-        $cmd = self::findExecutable() . ' -t -y ' . $configFile . ' 2>&1';
+        $cmd        = self::findExecutable() . ' -t -y ' . $configFile . ' 2>&1';
+        $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
         if ($code) {
             return preg_replace("/\[.+?\]/", "", $output[0]);
@@ -362,20 +371,20 @@ class Tester
     /**
      * Start PHP-FPM master process
      *
-     * @param array $extraArgs
+     * @param array $extraArgs   Command extra arguments.
+     * @param bool  $forceStderr Whether to output to stderr so error log is used.
+     *
      * @return bool
      * @throws \Exception
      */
-    public function start(array $extraArgs = [])
+    public function start(array $extraArgs = [], bool $forceStderr = true)
     {
         $configFile = $this->createConfig();
-        $desc = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
+        $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
 
         $cmd = [self::findExecutable(), '-F', '-y', $configFile];
 
-        if (!(isset($this->options[self::PHP_FPM_DISABLE_FORCE_STDERR]) &&
-            $this->options[self::PHP_FPM_DISABLE_FORCE_STDERR] === true)
-        ) {
+        if ($forceStderr) {
             $cmd[] = '-O';
         }
 
@@ -383,10 +392,11 @@ class Tester
             $cmd[] = '--allow-to-run-as-root';
         }
         $cmd = array_merge($cmd, $extraArgs);
+        $this->trace('Starting FPM using command:', $cmd, true);
 
         $this->masterProcess = proc_open($cmd, $desc, $pipes);
         register_shutdown_function(
-            function($masterProcess) use($configFile) {
+            function ($masterProcess) use ($configFile) {
                 @unlink($configFile);
                 if (is_resource($masterProcess)) {
                     @proc_terminate($masterProcess);
@@ -397,8 +407,9 @@ class Tester
             },
             $this->masterProcess
         );
-        if (!$this->outDesc !== false) {
+        if ( ! $this->outDesc !== false) {
             $this->outDesc = $pipes[1];
+            $this->logReader->setStreamSource('{{MASTER:OUT}}', $this->outDesc);
         }
 
         return true;
@@ -407,49 +418,35 @@ class Tester
     /**
      * Run until needle is found in the log.
      *
-     * @param string $needle
-     * @param int $max
+     * @param string $pattern Search pattern to find.
+     *
      * @return bool
      * @throws \Exception
      */
-    public function runTill(string $needle, $max = 10)
+    public function runTill(string $pattern)
     {
         $this->start();
-        $found = false;
-        for ($i = 0; $i < $max; $i++) {
-            $line = $this->getLogLine();
-            if (is_null($line)) {
-                break;
-            }
-            if (preg_match($needle, $line) === 1) {
-                $found = true;
-                break;
-            }
-        }
+        $found = $this->logTool->expectPattern($pattern);
         $this->close(true);
 
-        if (!$found) {
-            return $this->error("The search pattern not found");
-        }
-
-        return true;
+        return $found;
     }
 
     /**
      * Check if connection works.
      *
-     * @param string $host
-     * @param null|string $successMessage
-     * @param null|string $errorMessage
-     * @param int $attempts
-     * @param int $delay
+     * @param string      $host
+     * @param string|null $successMessage
+     * @param string|null $errorMessage
+     * @param int         $attempts
+     * @param int         $delay
      */
     public function checkConnection(
-        $host = '127.0.0.1',
-        $successMessage = null,
-        $errorMessage = 'Connection failed',
-        $attempts = 20,
-        $delay = 50000
+        string $host = '127.0.0.1',
+        string $successMessage = null,
+        ?string $errorMessage = 'Connection failed',
+        int $attempts = 20,
+        int $delay = 50000
     ) {
         $i = 0;
         do {
@@ -457,9 +454,10 @@ class Tester
                 usleep($delay);
             }
             $fp = @fsockopen($host, $this->getPort());
-        } while ((++$i < $attempts) && !$fp);
+        } while ((++$i < $attempts) && ! $fp);
 
         if ($fp) {
+            $this->trace('Checking connection successful');
             $this->message($successMessage);
             fclose($fp);
         } else {
@@ -471,22 +469,23 @@ class Tester
     /**
      * Execute request with parameters ordered for better checking.
      *
-     * @param string $address
+     * @param string      $address
      * @param string|null $successMessage
      * @param string|null $errorMessage
-     * @param string $uri
-     * @param string $query
-     * @param array $headers
+     * @param string      $uri
+     * @param string      $query
+     * @param array       $headers
+     *
      * @return Response
      */
     public function checkRequest(
         string $address,
         string $successMessage = null,
         string $errorMessage = null,
-        $uri = '/ping',
-        $query = '',
-        $headers = []
-    ) {
+        string $uri = '/ping',
+        string $query = '',
+        array $headers = []
+    ): Response {
         return $this->request($query, $headers, $uri, $address, $successMessage, $errorMessage);
     }
 
@@ -509,10 +508,11 @@ class Tester
     /**
      * Execute and check status request(s).
      *
-     * @param array $expectedFields
+     * @param array       $expectedFields
      * @param string|null $address
-     * @param string $statusPath
-     * @param mixed $formats
+     * @param string      $statusPath
+     * @param mixed       $formats
+     *
      * @throws \Exception
      */
     public function status(
@@ -521,14 +521,14 @@ class Tester
         string $statusPath = '/status',
         $formats = ['plain', 'html', 'xml', 'json', 'openmetrics']
     ) {
-        if (!is_array($formats)) {
+        if ( ! is_array($formats)) {
             $formats = [$formats];
         }
 
         require_once "status.inc";
         $status = new Status();
         foreach ($formats as $format) {
-            $query = $format === 'plain' ? '' : $format;
+            $query    = $format === 'plain' ? '' : $format;
             $response = $this->request($query, [], $statusPath, $address);
             $status->checkStatus($response, $expectedFields, $format);
         }
@@ -537,10 +537,11 @@ class Tester
     /**
      * Get request params array.
      *
-     * @param string $query
-     * @param array $headers
+     * @param string      $query
+     * @param array       $headers
      * @param string|null $uri
      * @param string|null $scriptFilename
+     *
      * @return array
      */
     private function getRequestParams(
@@ -548,7 +549,7 @@ class Tester
         array $headers = [],
         string $uri = null,
         string $scriptFilename = null
-    ) {
+    ): array {
         if (is_null($uri)) {
             $uri = $this->makeSourceFile();
         }
@@ -560,7 +561,7 @@ class Tester
                 'SCRIPT_FILENAME'   => $scriptFilename ?: $uri,
                 'SCRIPT_NAME'       => $uri,
                 'QUERY_STRING'      => $query,
-                'REQUEST_URI'       => $uri . ($query ? '?'.$query : ""),
+                'REQUEST_URI'       => $uri . ($query ? '?' . $query : ""),
                 'DOCUMENT_URI'      => $uri,
                 'SERVER_SOFTWARE'   => 'php/fcgiclient',
                 'REMOTE_ADDR'       => '127.0.0.1',
@@ -576,24 +577,25 @@ class Tester
             $headers
         );
 
-        return array_filter($params, function($value) {
-            return !is_null($value);
+        return array_filter($params, function ($value) {
+            return ! is_null($value);
         });
     }
 
     /**
      * Execute request.
      *
-     * @param string $query
-     * @param array $headers
+     * @param string      $query
+     * @param array       $headers
      * @param string|null $uri
      * @param string|null $address
      * @param string|null $successMessage
-     * @param string|null $errorMessage
-     * @param bool $connKeepAlive
+     * @param string|null $errorMessagereadLimit
+     * @param bool        $connKeepAlive
      * @param string|null $scriptFilename = null
-     * @param bool $expectError
-     * @param int $readLimit
+     * @param bool        $expectError
+     * @param int         $readLimit
+     *
      * @return Response
      */
     public function request(
@@ -607,12 +609,13 @@ class Tester
         string $scriptFilename = null,
         bool $expectError = false,
         int $readLimit = -1,
-    ) {
+    ): Response {
         if ($this->hasError()) {
             return new Response(null, true);
         }
 
         $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename);
+        $this->trace('Request params', $params);
 
         try {
             $this->response = new Response(
@@ -636,37 +639,37 @@ class Tester
         if ($this->debug) {
             $this->response->debugOutput();
         }
+
         return $this->response;
     }
 
     /**
      * Execute multiple requests in parallel.
      *
-     * @param array|int $requests
+     * @param int|array   $requests
      * @param string|null $address
      * @param string|null $successMessage
      * @param string|null $errorMessage
-     * @param bool $connKeepAlive
-     * @param int $readTimeout
+     * @param bool        $connKeepAlive
+     * @param int         $readTimeout
+     *
      * @return Response[]
      * @throws \Exception
      */
     public function multiRequest(
-        $requests,
+        int|array $requests,
         string $address = null,
         string $successMessage = null,
         string $errorMessage = null,
         bool $connKeepAlive = false,
         int $readTimeout = 0
     ) {
-        if ($this->hasError()) {
-            return new Response(null, true);
-        }
-
         if (is_numeric($requests)) {
             $requests = array_fill(0, $requests, []);
-        } elseif (!is_array($requests)) {
-            throw new \Exception('Requests can be either numeric or array');
+        }
+
+        if ($this->hasError()) {
+            return array_map(fn($request) => new Response(null, true), $requests);
         }
 
         try {
@@ -677,8 +680,9 @@ class Tester
                     $requestData['headers'] ?? [],
                     $requestData['uri'] ?? null
                 );
+
                 return [
-                    'client' => $client,
+                    'client'    => $client,
                     'requestId' => $client->async_request($params, false),
                 ];
             }, $requests);
@@ -688,9 +692,11 @@ class Tester
                 if ($this->debug) {
                     $response->debugOutput();
                 }
+
                 return $response;
             }, $connections);
             $this->message($successMessage);
+
             return $responses;
         } catch (\Exception $exception) {
             if ($errorMessage === null) {
@@ -698,6 +704,8 @@ class Tester
             } else {
                 $this->message($errorMessage);
             }
+
+            return array_map(fn($request) => new Response(null, true), $requests);
         }
     }
 
@@ -705,10 +713,11 @@ class Tester
      * Get client.
      *
      * @param string $address
-     * @param bool $keepAlive
+     * @param bool   $keepAlive
+     *
      * @return Client
      */
-    private function getClient(string $address = null, $keepAlive = false)
+    private function getClient(string $address = null, $keepAlive = false): Client
     {
         $address = $address ? $this->processTemplate($address) : $this->getAddr();
         if ($address[0] === '/') { // uds
@@ -716,7 +725,7 @@ class Tester
             $port = -1;
         } elseif ($address[0] === '[') { // ipv6
             $addressParts = explode(']:', $address);
-            $host = $addressParts[0];
+            $host         = $addressParts[0];
             if (isset($addressParts[1])) {
                 $host .= ']';
                 $port = $addressParts[1];
@@ -725,98 +734,21 @@ class Tester
             }
         } else { // ipv4
             $addressParts = explode(':', $address);
-            $host = $addressParts[0];
-            $port = $addressParts[1] ?? $this->getPort();
+            $host         = $addressParts[0];
+            $port         = $addressParts[1] ?? $this->getPort();
         }
 
-        if (!$keepAlive) {
+        if ( ! $keepAlive) {
             return new Client($host, $port);
         }
 
-        if (!isset($this->clients[$host][$port])) {
+        if ( ! isset($this->clients[$host][$port])) {
             $client = new Client($host, $port);
             $client->setKeepAlive(true);
             $this->clients[$host][$port] = $client;
         }
 
         return $this->clients[$host][$port];
-    }
-
-    /**
-     * Display logs
-     *
-     * @param int $number
-     * @param string $ignore
-     */
-    public function displayLog(int $number = 1, string $ignore = 'systemd')
-    {
-        /* Read $number lines or until EOF */
-        while ($number > 0 || ($number < 0 && !feof($this->outDesc))) {
-            $a = fgets($this->outDesc);
-            if (empty($ignore) || !strpos($a, $ignore)) {
-                echo $a;
-                $number--;
-            }
-        }
-    }
-
-    /**
-     * Get a single log line
-     *
-     * @return null|string
-     */
-    private function getLogLine()
-    {
-        $read = [$this->outDesc];
-        $write = null;
-        $except = null;
-        if (stream_select($read, $write, $except, $timeout=3)) {
-            return fgets($this->outDesc);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get log lines
-     *
-     * @param int $number
-     * @param bool $skipBlank
-     * @param string $ignore
-     * @return array
-     */
-    public function getLogLines(int $number = 1, bool $skipBlank = false, string $ignore = 'systemd')
-    {
-        $lines = [];
-        /* Read $n lines or until EOF */
-        while ($number > 0 || ($number < 0 && !feof($this->outDesc))) {
-            $line = $this->getLogLine();
-            if (is_null($line)) {
-                break;
-            }
-            if ((empty($ignore) || !strpos($line, $ignore)) && (!$skipBlank || strlen(trim($line)) > 0)) {
-                $lines[] = $line;
-                $number--;
-            }
-        }
-
-        if ($this->debug) {
-            foreach ($lines as $line) {
-                echo "LOG LINE: " . $line;
-            }
-        }
-
-        return $lines;
-    }
-
-    /**
-     * @return mixed|string
-     */
-    public function getLastLogLine()
-    {
-        $lines = $this->getLogLines();
-
-        return $lines[0] ?? '';
     }
 
     /**
@@ -855,12 +787,13 @@ class Tester
      * Reload FPM by sending USR2 signal and optionally change config before that.
      *
      * @param string|array $configTemplate
+     *
      * @return string
      * @throws \Exception
      */
     public function reload($configTemplate = null)
     {
-        if (!is_null($configTemplate)) {
+        if ( ! is_null($configTemplate)) {
             self::cleanConfigFiles();
             $this->configTemplate = $configTemplate;
             $this->createConfig();
@@ -870,10 +803,22 @@ class Tester
     }
 
     /**
+     * Reload FPM logs by sending USR1 signal.
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function reloadLogs(): string
+    {
+        return $this->signal('USR1');
+    }
+
+    /**
      * Send signal to the supplied PID or the server PID.
      *
-     * @param string $signal
+     * @param string   $signal
      * @param int|null $pid
+     *
      * @return string
      */
     public function signal($signal, int $pid = null)
@@ -881,6 +826,8 @@ class Tester
         if (is_null($pid)) {
             $pid = $this->getPid();
         }
+        $cmd = "kill -$signal $pid";
+        $this->trace('Sending signal using command', $cmd, true);
 
         return exec("kill -$signal $pid");
     }
@@ -903,7 +850,6 @@ class Tester
         if ($terminate) {
             $this->terminate();
         }
-        fclose($this->outDesc);
         proc_close($this->masterProcess);
     }
 
@@ -911,6 +857,7 @@ class Tester
      * Create a config file.
      *
      * @param string $extension
+     *
      * @return string
      * @throws \Exception
      */
@@ -918,11 +865,11 @@ class Tester
     {
         if (is_array($this->configTemplate)) {
             $configTemplates = $this->configTemplate;
-            if (!isset($configTemplates['main'])) {
+            if ( ! isset($configTemplates['main'])) {
                 throw new \Exception('The config template array has to have main config');
             }
             $mainTemplate = $configTemplates['main'];
-            if (!is_dir(self::CONF_DIR)) {
+            if ( ! is_dir(self::CONF_DIR)) {
                 mkdir(self::CONF_DIR);
             }
             foreach ($this->createPoolConfigs($configTemplates) as $name => $poolConfig) {
@@ -944,29 +891,32 @@ class Tester
      * Create pool config templates.
      *
      * @param array $configTemplates
+     *
      * @return array
      * @throws \Exception
      */
     private function createPoolConfigs(array $configTemplates)
     {
-        if (!isset($configTemplates['poolTemplate'])) {
+        if ( ! isset($configTemplates['poolTemplate'])) {
             unset($configTemplates['main']);
+
             return $configTemplates;
         }
         $poolTemplate = $configTemplates['poolTemplate'];
-        $configs = [];
+        $configs      = [];
         if (isset($configTemplates['count'])) {
             $start = $configTemplates['start'] ?? 1;
-            for ($i = $start;  $i < $start + $configTemplates['count']; $i++) {
+            for ($i = $start; $i < $start + $configTemplates['count']; $i++) {
                 $configs[$i] = str_replace('%index%', $i, $poolTemplate);
             }
         } elseif (isset($configTemplates['names'])) {
-            foreach($configTemplates['names'] as $name) {
+            foreach ($configTemplates['names'] as $name) {
                 $configs[$name] = str_replace('%name%', $name, $poolTemplate);
             }
         } else {
             throw new \Exception('The config template requires count or names if poolTemplate set');
         }
+
         return $configs;
     }
 
@@ -974,33 +924,37 @@ class Tester
      * Process template string.
      *
      * @param string $template
+     *
      * @return string
      */
     private function processTemplate(string $template)
     {
-        $vars = [
-            'FILE:LOG:ACC' => ['getAbsoluteFile', self::FILE_EXT_LOG_ACC],
-            'FILE:LOG:ERR' => ['getAbsoluteFile', self::FILE_EXT_LOG_ERR],
-            'FILE:LOG:SLOW' => ['getAbsoluteFile', self::FILE_EXT_LOG_SLOW],
-            'FILE:PID' => ['getAbsoluteFile', self::FILE_EXT_PID],
-            'RFILE:LOG:ACC' => ['getRelativeFile', self::FILE_EXT_LOG_ACC],
-            'RFILE:LOG:ERR' => ['getRelativeFile', self::FILE_EXT_LOG_ERR],
+        $vars    = [
+            'FILE:LOG:ACC'   => ['getAbsoluteFile', self::FILE_EXT_LOG_ACC],
+            'FILE:LOG:ERR'   => ['getAbsoluteFile', self::FILE_EXT_LOG_ERR],
+            'FILE:LOG:SLOW'  => ['getAbsoluteFile', self::FILE_EXT_LOG_SLOW],
+            'FILE:PID'       => ['getAbsoluteFile', self::FILE_EXT_PID],
+            'RFILE:LOG:ACC'  => ['getRelativeFile', self::FILE_EXT_LOG_ACC],
+            'RFILE:LOG:ERR'  => ['getRelativeFile', self::FILE_EXT_LOG_ERR],
             'RFILE:LOG:SLOW' => ['getRelativeFile', self::FILE_EXT_LOG_SLOW],
-            'RFILE:PID' => ['getRelativeFile', self::FILE_EXT_PID],
-            'ADDR:IPv4' => ['getAddr', 'ipv4'],
-            'ADDR:IPv4:ANY' => ['getAddr', 'ipv4-any'],
-            'ADDR:IPv6' => ['getAddr', 'ipv6'],
-            'ADDR:IPv6:ANY' => ['getAddr', 'ipv6-any'],
-            'ADDR:UDS' => ['getAddr', 'uds'],
-            'PORT' => ['getPort', 'ip'],
-            'INCLUDE:CONF' => self::CONF_DIR . '/*.conf',
-            'USER' => ['getUser'],
-            'GROUP' => ['getGroup'],
-            'UID' => ['getUid'],
-            'GID' => ['getGid'],
+            'RFILE:PID'      => ['getRelativeFile', self::FILE_EXT_PID],
+            'ADDR:IPv4'      => ['getAddr', 'ipv4'],
+            'ADDR:IPv4:ANY'  => ['getAddr', 'ipv4-any'],
+            'ADDR:IPv6'      => ['getAddr', 'ipv6'],
+            'ADDR:IPv6:ANY'  => ['getAddr', 'ipv6-any'],
+            'ADDR:UDS'       => ['getAddr', 'uds'],
+            'PORT'           => ['getPort', 'ip'],
+            'INCLUDE:CONF'   => self::CONF_DIR . '/*.conf',
+            'USER'           => ['getUser'],
+            'GROUP'          => ['getGroup'],
+            'UID'            => ['getUid'],
+            'GID'            => ['getGid'],
+            'MASTER:OUT'     => 'pipe:1',
+            'STDERR'         => '/dev/stderr',
+            'STDOUT'         => '/dev/stdout',
         ];
         $aliases = [
-            'ADDR' => 'ADDR:IPv4',
+            'ADDR'     => 'ADDR:IPv4',
             'FILE:LOG' => 'FILE:LOG:ERR',
         ];
         foreach ($aliases as $aliasName => $aliasValue) {
@@ -1011,17 +965,19 @@ class Tester
             '/{{([a-zA-Z0-9:]+)(\[\w+\])?}}/',
             function ($matches) use ($vars) {
                 $varName = $matches[1];
-                if (!isset($vars[$varName])) {
+                if ( ! isset($vars[$varName])) {
                     $this->error("Invalid config variable $varName");
+
                     return 'INVALID';
                 }
-                $pool = $matches[2] ?? 'default';
+                $pool     = $matches[2] ?? 'default';
                 $varValue = $vars[$varName];
                 if (is_string($varValue)) {
                     return $varValue;
                 }
                 $functionName = array_shift($varValue);
-                $varValue[] = $pool;
+                $varValue[]   = $pool;
+
                 return call_user_func_array([$this, $functionName], $varValue);
             },
             $template
@@ -1031,6 +987,7 @@ class Tester
     /**
      * @param string $type
      * @param string $pool
+     *
      * @return string
      */
     public function getAddr(string $type = 'ipv4', $pool = 'default')
@@ -1045,9 +1002,9 @@ class Tester
                 return $address;
             }
 
-            return sys_get_temp_dir().'/'.
-                hash('crc32', dirname($address)).'-'.
-                basename($address);
+            return sys_get_temp_dir() . '/' .
+                   hash('crc32', dirname($address)) . '-' .
+                   basename($address);
         }
 
         return $this->getHost($type) . ':' . $port;
@@ -1056,19 +1013,20 @@ class Tester
     /**
      * @param string $type
      * @param string $pool
-     * @param bool $useAsId
+     * @param bool   $useAsId
+     *
      * @return int
      */
     public function getPort(string $type = 'ip', $pool = 'default', $useAsId = false)
     {
-        if ($type === 'uds' && !$useAsId) {
+        if ($type === 'uds' && ! $useAsId) {
             return -1;
         }
 
         if (isset($this->ports['values'][$pool])) {
             return $this->ports['values'][$pool];
         }
-        $port = ($this->ports['last'] ?? 9000 + PHP_INT_SIZE - 1) + 1;
+        $port                         = ($this->ports['last'] ?? 9000 + PHP_INT_SIZE - 1) + 1;
         $this->ports['values'][$pool] = $this->ports['last'] = $port;
 
         return $port;
@@ -1076,6 +1034,7 @@ class Tester
 
     /**
      * @param string $type
+     *
      * @return string
      */
     public function getHost(string $type = 'ipv4')
@@ -1096,6 +1055,7 @@ class Tester
      * Get listen address.
      *
      * @param string|null $template
+     *
      * @return string
      */
     public function getListen($template = null)
@@ -1111,45 +1071,55 @@ class Tester
     public function getPid()
     {
         $pidFile = $this->getFile('pid');
-        if (!is_file($pidFile)) {
-            return (int) $this->error("PID file has not been created");
+        if ( ! is_file($pidFile)) {
+            return (int)$this->error("PID file has not been created");
         }
         $pidContent = file_get_contents($pidFile);
-        if (!is_numeric($pidContent)) {
-            return (int) $this->error("PID content '$pidContent' is not integer");
+        if ( ! is_numeric($pidContent)) {
+            return (int)$this->error("PID content '$pidContent' is not integer");
         }
+        $this->trace('PID found', $pidContent);
 
-        return (int) $pidContent;
+        return (int)$pidContent;
     }
 
 
     /**
-     * @param string $extension
+     * Get file path for resource file.
+     *
+     * @param string      $extension
      * @param string|null $dir
      * @param string|null $name
+     *
      * @return string
      */
-    private function getFile(string $extension, $dir = null, $name = null)
+    private function getFile(string $extension, string $dir = null, string $name = null): string
     {
         $fileName = (is_null($name) ? $this->fileName : $name . '.') . $extension;
 
-        return is_null($dir) ? $fileName : $dir . '/'  . $fileName;
+        return is_null($dir) ? $fileName : $dir . '/' . $fileName;
     }
 
     /**
+     * Get absolute file path for the resource file used by templates.
+     *
      * @param string $extension
+     *
      * @return string
      */
-    private function getAbsoluteFile(string $extension)
+    private function getAbsoluteFile(string $extension): string
     {
         return $this->getFile($extension);
     }
 
     /**
+     * Get relative file name for resource file used by templates.
+     *
      * @param string $extension
+     *
      * @return string
      */
-    private function getRelativeFile(string $extension)
+    private function getRelativeFile(string $extension): string
     {
         $fileName = rtrim(basename($this->fileName), '.');
 
@@ -1157,14 +1127,17 @@ class Tester
     }
 
     /**
-     * @param string $extension
-     * @param string $prefix
+     * Get prefixed file.
+     *
+     * @param string      $extension
+     * @param string|null $prefix
+     *
      * @return string
      */
-    public function getPrefixedFile(string $extension, string $prefix = null)
+    public function getPrefixedFile(string $extension, string $prefix = null): string
     {
         $fileName = rtrim($this->fileName, '.');
-        if (!is_null($prefix)) {
+        if ( ! is_null($prefix)) {
             $fileName = $prefix . '/' . basename($fileName);
         }
 
@@ -1172,26 +1145,40 @@ class Tester
     }
 
     /**
-     * @param string $extension
-     * @param string $content
+     * Create a resource file.
+     *
+     * @param string      $extension
+     * @param string      $content
      * @param string|null $dir
      * @param string|null $name
+     *
      * @return string
      */
-    private function makeFile(string $extension, string $content = '', $dir = null, $name = null)
-    {
+    private function makeFile(
+        string $extension,
+        string $content = '',
+        string $dir = null,
+        string $name = null,
+        bool $overwrite = true
+    ): string {
         $filePath = $this->getFile($extension, $dir, $name);
+        if ( ! $overwrite && is_file($filePath)) {
+            return $filePath;
+        }
         file_put_contents($filePath, $content);
+        $this->trace('Created file: ' . $filePath, $content, isFile: true);
 
         return $filePath;
     }
 
     /**
+     * Create a source code file.
+     *
      * @return string
      */
-    public function makeSourceFile()
+    public function makeSourceFile(): string
     {
-        return $this->makeFile('src.php', $this->code);
+        return $this->makeFile('src.php', $this->code, overwrite: false);
     }
 
     /**
@@ -1205,26 +1192,34 @@ class Tester
     }
 
     /**
-     * @param string $msg
+     * Display error.
+     *
+     * @param string          $msg
      * @param \Exception|null $exception
+     *
+     * @return false
      */
-    private function error($msg, \Exception $exception = null)
+    private function error($msg, \Exception $exception = null): bool
     {
-        $this->error =  'ERROR: ' . $msg;
+        $this->error = 'ERROR: ' . $msg;
         if ($exception) {
             $this->error .= '; EXCEPTION: ' . $exception->getMessage();
         }
         $this->error .= "\n";
 
         echo $this->error;
+
+        return false;
     }
 
     /**
+     * Check whether any error was set.
+     *
      * @return bool
      */
     private function hasError()
     {
-        return !is_null($this->error) || !is_null($this->logTool->getError());
+        return ! is_null($this->error) || ! is_null($this->logTool->getError());
     }
 
     /**
@@ -1232,14 +1227,16 @@ class Tester
      *
      * @param string $extension
      * @param string $prefix
+     *
      * @return bool
      */
     public function expectFile(string $extension, $prefix = null)
     {
         $filePath = $this->getPrefixedFile($extension, $prefix);
-        if (!file_exists($filePath)) {
+        if ( ! file_exists($filePath)) {
             return $this->error("The file $filePath does not exist");
         }
+        $this->trace('File path exists as expected', $filePath);
 
         return true;
     }
@@ -1249,6 +1246,7 @@ class Tester
      *
      * @param string $extension
      * @param string $prefix
+     *
      * @return bool
      */
     public function expectNoFile(string $extension, $prefix = null)
@@ -1257,6 +1255,7 @@ class Tester
         if (file_exists($filePath)) {
             return $this->error("The file $filePath exists");
         }
+        $this->trace('File path does not exist as expected', $filePath);
 
         return true;
     }
@@ -1265,8 +1264,8 @@ class Tester
      * Expect message to be written to FastCGI error stream.
      *
      * @param string $message
-     * @param int $limit
-     * @param int $repeat
+     * @param int    $limit
+     * @param int    $repeat
      */
     public function expectFastCGIErrorMessage(
         string $message,
@@ -1280,37 +1279,74 @@ class Tester
     /**
      * Expect reloading lines to be logged.
      *
-     * @param int $socketCount
+     * @param int  $socketCount
+     * @param bool $expectInitialProgressMessage
+     * @param bool $expectReloadingMessage
+     *
+     * @throws \Exception
      */
-    public function expectLogReloadingNotices($socketCount = 1)
+    public function expectLogReloadingNotices(
+        int $socketCount = 1,
+        bool $expectInitialProgressMessage = true,
+        bool $expectReloadingMessage = true
+    ) {
+        $this->logTool->expectReloadingLines(
+            $socketCount,
+            $expectInitialProgressMessage,
+            $expectReloadingMessage
+        );
+    }
+
+    /**
+     * Expect reloading lines to be logged.
+     *
+     * @throws \Exception
+     */
+    public function expectLogReloadingLogsNotices()
     {
-        $this->logTool->expectReloadingLines($this->getLogLines($socketCount + 4));
+        $this->logTool->expectReloadingLogsLines();
     }
 
     /**
      * Expect starting lines to be logged.
+     * @throws \Exception
      */
     public function expectLogStartNotices()
     {
-        $this->logTool->expectStartingLines($this->getLogLines(2));
+        $this->logTool->expectStartingLines();
     }
 
     /**
      * Expect terminating lines to be logged.
+     * @throws \Exception
      */
     public function expectLogTerminatingNotices()
     {
-        $this->logTool->expectTerminatorLines($this->getLogLines(-1));
+        $this->logTool->expectTerminatorLines();
+    }
+
+    /**
+     * Expect log pattern in logs.
+     *
+     * @param string $pattern Log pattern
+     *
+     * @throws \Exception
+     */
+    public function expectLogPattern(string $pattern)
+    {
+        $this->logTool->expectPattern($pattern);
     }
 
     /**
      * Expect log message that can span multiple lines.
      *
      * @param string $message
-     * @param int $limit
-     * @param int $repeat
-     * @param bool $decorated
-     * @param bool $wrapped
+     * @param int    $limit
+     * @param int    $repeat
+     * @param bool   $decorated
+     * @param bool   $wrapped
+     *
+     * @throws \Exception
      */
     public function expectLogMessage(
         string $message,
@@ -1321,135 +1357,180 @@ class Tester
     ) {
         $this->logTool->setExpectedMessage($message, $limit, $repeat);
         if ($wrapped) {
-            $logLines = $this->getLogLines(-1, true);
-            $this->logTool->checkWrappedMessage($logLines, true, $decorated);
+            $this->logTool->checkWrappedMessage(true, $decorated);
         } else {
-            $logLines = $this->getLogLines(1, true);
-            $this->logTool->checkTruncatedMessage($logLines[0] ?? '');
-        }
-        if ($this->debug) {
-            $this->message("-------------- LOG LINES: -------------");
-            var_dump($logLines);
-            $this->message("---------------------------------------\n");
+            $this->logTool->checkTruncatedMessage();
         }
     }
 
     /**
      * Expect a single log line.
      *
-     * @param string $message
+     * @param string $message   The expected message.
+     * @param bool   $isStdErr  Whether it is logged to stderr.
+     * @param bool   $decorated Whether the log lines are decorated.
+     *
      * @return bool
+     * @throws \Exception
      */
-    public function expectLogLine(string $message, bool $is_stderr = true)
-    {
+    public function expectLogLine(
+        string $message,
+        bool $isStdErr = true,
+        bool $decorated = true
+    ): bool {
         $messageLen = strlen($message);
-        $limit = $messageLen > 1024 ? $messageLen + 16 : 1024;
+        $limit      = $messageLen > 1024 ? $messageLen + 16 : 1024;
         $this->logTool->setExpectedMessage($message, $limit);
-        $logLines = $this->getLogLines(1, true);
-        if ($this->debug) {
-            $this->message("LOG LINE: " . ($logLines[0] ?? ''));
-        }
 
-        return $this->logTool->checkWrappedMessage($logLines, false, true, $is_stderr);
+        return $this->logTool->checkWrappedMessage(false, $decorated, $isStdErr);
     }
 
     /**
      * Expect log entry.
      *
-     * @param string $type The log type
-     * @param string $message The expected message
-     * @param string|null $pool The pool for pool prefixed log entry
-     * @param int $count The number of items
+     * @param string      $type         The log type
+     * @param string      $message      The expected message
+     * @param string|null $pool         The pool for pool prefixed log entry
+     * @param int         $count        The number of items
+     * @param bool        $checkAllLogs Whether to also check past logs.
+     *
      * @return bool
+     * @throws \Exception
      */
-    private function expectLogEntry(string $type, string $message, $pool = null, $count = 1)
-    {
+    private function expectLogEntry(
+        string $type,
+        string $message,
+        string $pool = null,
+        int $count = 1,
+        bool $checkAllLogs = false
+    ): bool {
         for ($i = 0; $i < $count; $i++) {
-            if (!$this->logTool->expectEntry($type, $this->getLastLogLine(), $message, $pool)) {
+            if ( ! $this->logTool->expectEntry($type, $message, $pool, $checkAllLogs)) {
                 return false;
             }
         }
+
         return true;
     }
 
     /**
      * Expect a log debug message.
      *
-     * @param string $message
+     * @param string      $message
      * @param string|null $pool
-     * @param int $count
+     * @param int         $count
+     * @param bool        $checkAllLogs Whether to also check past logs.
+     *
      * @return bool
+     * @throws \Exception
      */
-    public function expectLogDebug(string $message, $pool = null, $count = 1)
-    {
-        return $this->expectLogEntry(LogTool::DEBUG, $message, $pool, $count);
+    public function expectLogDebug(
+        string $message,
+        string $pool = null,
+        int $count = 1,
+        bool $checkAllLogs = false
+    ): bool {
+        return $this->expectLogEntry(LogTool::DEBUG, $message, $pool, $count, $checkAllLogs);
     }
 
     /**
      * Expect a log notice.
      *
-     * @param string $message
+     * @param string      $message
      * @param string|null $pool
-     * @param int $count
+     * @param int         $count
+     * @param bool        $checkAllLogs Whether to also check past logs.
+     *
      * @return bool
+     * @throws \Exception
      */
-    public function expectLogNotice(string $message, $pool = null, $count = 1)
-    {
-        return $this->expectLogEntry(LogTool::NOTICE, $message, $pool, $count);
+    public function expectLogNotice(
+        string $message,
+        string $pool = null,
+        int $count = 1,
+        bool $checkAllLogs = false
+    ): bool {
+        return $this->expectLogEntry(LogTool::NOTICE, $message, $pool, $count, $checkAllLogs);
     }
 
     /**
      * Expect a log warning.
      *
-     * @param string $message
+     * @param string      $message
      * @param string|null $pool
-     * @param int $count
+     * @param int         $count
+     * @param bool        $checkAllLogs Whether to also check past logs.
+     *
      * @return bool
+     * @throws \Exception
      */
-    public function expectLogWarning(string $message, $pool = null, $count = 1)
-    {
-        return $this->expectLogEntry(LogTool::WARNING, $message, $pool, $count);
+    public function expectLogWarning(
+        string $message,
+        string $pool = null,
+        int $count = 1,
+        bool $checkAllLogs = false
+    ): bool {
+        return $this->expectLogEntry(LogTool::WARNING, $message, $pool, $count, $checkAllLogs);
     }
 
     /**
      * Expect a log error.
      *
-     * @param string $message
+     * @param string      $message
      * @param string|null $pool
-     * @param int $count
+     * @param int         $count
+     * @param bool        $checkAllLogs Whether to also check past logs.
+     *
      * @return bool
+     * @throws \Exception
      */
-    public function expectLogError(string $message, $pool = null, $count = 1)
-    {
-        return $this->expectLogEntry(LogTool::ERROR, $message, $pool, $count);
+    public function expectLogError(
+        string $message,
+        string $pool = null,
+        int $count = 1,
+        bool $checkAllLogs = false
+    ): bool {
+        return $this->expectLogEntry(LogTool::ERROR, $message, $pool, $count, $checkAllLogs);
     }
 
     /**
      * Expect a log alert.
      *
-     * @param string $message
+     * @param string      $message
      * @param string|null $pool
-     * @param int $count
+     * @param int         $count
+     * @param bool        $checkAllLogs Whether to also check past logs.
+     *
      * @return bool
+     * @throws \Exception
      */
-    public function expectLogAlert(string $message, $pool = null, $count = 1)
-    {
-        return $this->expectLogEntry(LogTool::ALERT, $message, $pool, $count);
+    public function expectLogAlert(
+        string $message,
+        string $pool = null,
+        int $count = 1,
+        bool $checkAllLogs = false
+    ): bool {
+        return $this->expectLogEntry(LogTool::ALERT, $message, $pool, $count, $checkAllLogs);
     }
 
     /**
      * Expect no log lines to be logged.
      *
      * @return bool
+     * @throws \Exception
      */
-    public function expectNoLogMessages()
+    public function expectNoLogMessages(): bool
     {
-        $logLines = $this->getLogLines(-1, true);
-        if (!empty($logLines)) {
+        $logLine = $this->logReader->getLine(timeoutSeconds: 0, timeoutMicroseconds: 1000);
+        if ($logLine === "") {
+            $logLine = $this->logReader->getLine(timeoutSeconds: 0, timeoutMicroseconds: 1000);
+        }
+        if ($logLine !== null) {
             return $this->error(
-                "Expected no log lines but following lines logged:\n" . implode("\n", $logLines)
+                "Expected no log lines but following line logged: $logLine"
             );
         }
+        $this->trace('No log message received as expected');
 
         return true;
     }
@@ -1458,42 +1539,17 @@ class Tester
      * Expect log config options
      *
      * @param array $options
+     *
      * @return bool
+     * @throws \Exception
      */
     public function expectLogConfigOptions(array $options)
     {
-        $configOptions = $this->getConfigOptions();
         foreach ($options as $name => $value) {
-            if (!isset($configOptions[$name])) {
-                return $this->error("Expected config option: {$name} = {$value} but {$name} is not set");
-            }
-            if ($configOptions[$name] != $value) {
-                return $this->error(
-                    "Expected config option: {$name} = {$value} but got: {$name} = {$configOptions[$name]}"
-                );
-            }
+            $this->expectLogNotice("\s+$name\s=\s$value", checkAllLogs: true);
         }
 
         return true;
-    }
-
-    /**
-     * Get set config options
-     *
-     * @return array
-     */
-    private function getConfigOptions()
-    {
-        $options = [];
-
-        foreach ($this->getLogLines(-1) as $line) {
-            preg_match('/.+NOTICE:\s+(.+)\s=\s(.+)/', $line, $matches);
-            if ($matches) {
-                $options[$matches[1]] = $matches[2];
-            }
-        }
-
-        return $options;
     }
 
     /**
@@ -1504,6 +1560,82 @@ class Tester
         $accessLog = $this->getFile('acc.log');
         if (is_file($accessLog)) {
             print file_get_contents($accessLog);
+        }
+    }
+
+    /**
+     * Read all log entries.
+     *
+     * @param string      $type    The log type
+     * @param string      $message The expected message
+     * @param string|null $pool    The pool for pool prefixed log entry
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function readAllLogEntries(string $type, string $message, string $pool = null): bool
+    {
+        return $this->logTool->readAllEntries($type, $message, $pool);
+    }
+
+    /**
+     * Read all log entries.
+     *
+     * @param string      $message The expected message
+     * @param string|null $pool    The pool for pool prefixed log entry
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function readAllLogNotices(string $message, string $pool = null): bool
+    {
+        return $this->readAllLogEntries(LogTool::NOTICE, $message, $pool);
+    }
+
+    /**
+     * Switch the logs source.
+     *
+     * @param string $source The source file path or name if log is a pipe.
+     *
+     * @throws \Exception
+     */
+    public function switchLogSource(string $source)
+    {
+        $this->trace('Switching log descriptor to:', $source);
+        $this->logReader->setFileSource($source, $this->processTemplate($source));
+    }
+
+    /**
+     * Trace execution by printing supplied message only in debug mode.
+     *
+     * @param string            $title     Trace title to print if supplied.
+     * @param string|array|null $message   Message to print.
+     * @param bool              $isCommand Whether message is a command array.
+     */
+    private function trace(
+        string $title,
+        string|array $message = null,
+        bool $isCommand = false,
+        bool $isFile = false
+    ): void {
+        if ($this->debug) {
+            echo "\n";
+            echo ">>> $title\n";
+            if (is_array($message)) {
+                if ($isCommand) {
+                    echo implode(' ', $message) . "\n";
+                } else {
+                    print_r($message);
+                }
+            } elseif ($message !== null) {
+                if ($isFile) {
+                    $this->logReader->printSeparator();
+                }
+                echo $message . "\n";
+                if ($isFile) {
+                    $this->logReader->printSeparator();
+                }
+            }
         }
     }
 }
