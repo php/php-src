@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed GH-9584 (Avoid memory corruption when not unregistering custom session
     handler). (ilutov)
+  . Fixed bug GH-9583 (session_create_id() fails with user defined save handler
+      that doesn't have a validateId() method). (Girgias)
 
 - Standard:
   . Revert "Fixed parse_url(): can not recognize port without scheme."
