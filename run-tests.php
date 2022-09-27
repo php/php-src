@@ -362,6 +362,7 @@ function main(): void
     $context_line_count = 3;
     $num_repeats = 1;
     $show_progress = true;
+    $ignored_by_ext = [];
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -735,7 +736,6 @@ function main(): void
         $test_files = [];
         $exts_tested = $exts_to_test;
         $exts_skipped = [];
-        $ignored_by_ext = [];
         sort($exts_to_test);
         $test_dirs = [];
         $optionals = ['Zend', 'tests', 'ext', 'sapi'];
