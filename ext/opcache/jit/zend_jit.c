@@ -4237,30 +4237,40 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 	zend_op_array *op_array = &EX(func)->op_array;
 	zend_op *opline = op_array->opcodes;
 	zend_jit_op_array_extension *jit_extension;
+	bool do_bailout = 0;
 
 	zend_shared_alloc_lock();
 
 	if (ZEND_FUNC_INFO(op_array)) {
+
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
-		/* restore original opcode handlers */
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
+		zend_try {
+			/* restore original opcode handlers */
+			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+					opline++;
+				}
 			}
-		}
-		jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
-		opline->handler = jit_extension->orig_handler;
+			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+			opline->handler = jit_extension->orig_handler;
 
-		/* perform real JIT for this function */
-		zend_real_jit_func(op_array, NULL, NULL);
+			/* perform real JIT for this function */
+			zend_real_jit_func(op_array, NULL, NULL);
+		} zend_catch {
+			do_bailout = 0;
+		} zend_end_try();
 
 		zend_jit_protect();
 		SHM_PROTECT();
 	}
 
 	zend_shared_alloc_unlock();
+
+	if (do_bailout) {
+		zend_bailout();
+	}
 
 	/* JIT-ed code is going to be called by VM */
 	return 0;
@@ -4304,6 +4314,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 	zend_op_array *op_array = &EX(func)->op_array;
 	zend_jit_op_array_hot_extension *jit_extension;
 	uint32_t i;
+	bool do_bailout = 0;
 
 	zend_shared_alloc_lock();
 	jit_extension = (zend_jit_op_array_hot_extension*)ZEND_FUNC_INFO(op_array);
@@ -4312,12 +4323,16 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
-		for (i = 0; i < op_array->last; i++) {
-			op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
-		}
+		zend_try {
+			for (i = 0; i < op_array->last; i++) {
+				op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
+			}
 
-		/* perform real JIT for this function */
-		zend_real_jit_func(op_array, NULL, opline);
+			/* perform real JIT for this function */
+			zend_real_jit_func(op_array, NULL, opline);
+		} zend_catch {
+			do_bailout = 1;
+		} zend_end_try();
 
 		zend_jit_protect();
 		SHM_PROTECT();
@@ -4325,6 +4340,9 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 
 	zend_shared_alloc_unlock();
 
+	if (do_bailout) {
+		zend_bailout();
+	}
 	/* JIT-ed code is going to be called by VM */
 }
 
