@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Added indirect call reduction for jit on x86 architectures. (wxue1)
 
+- Session:
+  . Fixed bug GH-9583 (session_create_id() fails with user defined save handler
+    that doesn't have a validateId() method). (Girgias)
+
 29 Sep 2022, PHP 8.1.11
 
 - Core:
