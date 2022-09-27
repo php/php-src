@@ -470,6 +470,8 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+        exclude:
+          - branch: { name: 'PHP-80', ref: 'PHP-8.0' }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
     runs-on: ubuntu-20.04
     steps:
@@ -498,15 +500,21 @@ jobs:
         uses: ./.github/actions/build-libmysqlclient
         with:
           libmysql: mysql-5.7.38-linux-glibc2.12-x86_64.tar.gz
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-5.7
         uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Build mysql-8.0
         uses: ./.github/actions/build-libmysqlclient
         with:
           # FIXME: There are new warnings
           # configurationParameters: --enable-werror
           libmysql: mysql-8.0.30-linux-glibc2.12-x86_64.tar.xz
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-8.0
         uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
