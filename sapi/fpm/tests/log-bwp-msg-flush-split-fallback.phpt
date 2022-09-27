@@ -30,9 +30,8 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
-$lines = $tester->getLogLines(2);
-var_dump($lines[0] === str_repeat('a', 1021)  . "\0f\n");
-var_dump($lines[1] === "abc\n");
+$tester->expectLogLine(str_repeat('a', 1021)  . "\0f", decorated: false);
+$tester->expectLogLine("abc", decorated: false);
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
@@ -40,8 +39,6 @@ $tester->close();
 ?>
 Done
 --EXPECT--
-bool(true)
-bool(true)
 Done
 --CLEAN--
 <?php

@@ -170,11 +170,11 @@ class Response
      */
     public function debugOutput()
     {
-        echo "-------------- RESPONSE: --------------\n";
-        echo "OUT:\n";
-        echo $this->data['out_response'];
-        echo "ERR:\n";
-        echo $this->data['err_response'];
+        echo ">>> Response\n";
+        echo "----------------- OUT -----------------\n";
+        echo $this->data['out_response'] . "\n";
+        echo "----------------- ERR -----------------\n";
+        echo $this->data['err_response'] . "\n";
         echo "---------------------------------------\n\n";
     }
 
