@@ -53,7 +53,7 @@ function get_matrix_include(array $branches) {
             'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
             'run_tests_parameters' => '--asan',
         ];
-        if ($branch !== 'PHP-8.0') {
+        if ($branch['ref'] !== 'PHP-8.0') {
             $jobs[] = [
                 'name' => '_REPEAT',
                 'branch' => $branch,
