@@ -3,9 +3,10 @@ PHP                                                                        NEWS
 29 Sep 2022, PHP 7.4.31
 
 - Core:
-  . Fixed bug #81726: phar wrapper: DOS when using quine gzip file. (cmb)
+  . Fixed bug #81726: phar wrapper: DOS when using quine gzip file.
+    (CVE-2022-31628). (cmb)
   . Fixed bug #81727: Don't mangle HTTP variable names that clash with ones
-    that have a specific semantic meaning. (Derick)
+    that have a specific semantic meaning. (CVE-2022-31629). (Derick)
 
 09 Jun 2022, PHP 7.4.30
 
