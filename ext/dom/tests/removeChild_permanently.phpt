@@ -24,6 +24,7 @@ var_dump($dom->getElementById('foo'));
 $root->removeChild($dom->getElementById('foo'));
 var_dump($dom->getElementById('bar'));
 var_dump($dom->getElementById('foo'));
+echo $dom->saveXML();
 ?>
 --EXPECTF--
 object(DOMElement)#%d (%d) {
@@ -123,3 +124,5 @@ object(DOMElement)#%d (%d) {
   string(0) ""
 }
 NULL
+<?xml version="1.0"?>
+<html><p2 id="bar"/></html>
