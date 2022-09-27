@@ -642,7 +642,10 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 			}
 		}
 	} else if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
-		if ((zend_long) retval < 0) {
+		/* Handle PHP_INT_MIN case */
+		if (is_negative && retval == ((zend_ulong)ZEND_LONG_MAX +1)) {
+			retval = 0u - retval;
+		} else if ((zend_long) retval < 0) {
 			overflow = true;
 		} else if (is_negative) {
 			retval = 0u - retval;

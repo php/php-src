@@ -30,13 +30,13 @@ $tests = [
     'No overflow 002' => '1',
     'No overflow 003' => '100',
     'No overflow 004' => strval(PHP_INT_MAX),
-    'No overflow 005' => strval(-PHP_INT_MAX),
+    'No overflow 005' => strval(PHP_INT_MIN),
     'No overflow 006' => '2K',
     'No overflow 007' => '-2K',
     'Subject overflow 001' => increment(strval(PHP_INT_MAX)),
-    'Subject overflow 002' => decrement(strval(-PHP_INT_MAX)),
+    'Subject overflow 002' => decrement(strval(PHP_INT_MIN)),
     'Multiplier overflow 001' => strval(PHP_INT_MAX).'K',
-    'Multiplier overflow 002' => strval(-PHP_INT_MAX).'K',
+    'Multiplier overflow 002' => strval(PHP_INT_MIN).'K',
 ];
 
 foreach ($tests as $name => $value) {
