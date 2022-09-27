@@ -7107,7 +7107,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 				ret = ZEND_JIT_TRACE_STOP_COMPILER_ERROR;
 			}
 
-exit:
+exit:;
 		} zend_catch {
 			do_bailout = 1;
 		} zend_end_try();
@@ -7849,7 +7849,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 				ret = ZEND_JIT_TRACE_STOP_COMPILER_ERROR;
 			}
 
-exit:
+exit:;
 		} zend_catch {
 			do_bailout = 1;
 		}  zend_end_try();
