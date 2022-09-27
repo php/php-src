@@ -6047,7 +6047,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_INIT_METHOD_CALL:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING) {
-							goto generic_dynamic_call;
+							break;
 						}
 						on_this = delayed_fetch_this = 0;
 						ce = NULL;
@@ -6111,53 +6111,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_INIT_DYNAMIC_CALL:
 						if (orig_op2_type != IS_OBJECT || op2_ce != zend_ce_closure) {
-							goto generic_dynamic_call;
+							break;
 						}
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						frame_flags = TRACE_FRAME_MASK_NESTED;
 						if (!zend_jit_init_closure_call(&dasm_state, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1, peek_checked_stack - checked_stack)) {
 							goto jit_failure;
-						}
-						goto done;
-					case ZEND_INIT_STATIC_METHOD_CALL:
-generic_dynamic_call:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
-							goto jit_failure;
-						}
-						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func
-						 && (opline->opcode != ZEND_INIT_STATIC_METHOD_CALL
-						  || opline->op1_type != IS_CONST
-						  || opline->op2_type != IS_CONST
-						  || zend_jit_may_be_modified((p+1)->func, op_array))) {
-							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
-								goto jit_failure;
-							}
-						}
-						goto done;
-					case ZEND_INIT_USER_CALL:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
-							goto jit_failure;
-						}
-						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func
-						 && (opline->op2_type != IS_CONST
-						  || zend_jit_may_be_modified((p+1)->func, op_array))) {
-							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
-								goto jit_failure;
-							}
-						}
-						goto done;
-					case ZEND_NEW:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
-							goto jit_failure;
-						}
-						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func
-						 && (opline->op1_type != IS_CONST
-						  || zend_jit_may_be_modified((p+1)->func, op_array))) {
-							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_OBJECT, 1);
-							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
-								goto jit_failure;
-							}
 						}
 						goto done;
 					case ZEND_SEND_ARRAY:
@@ -6197,6 +6157,14 @@ generic_dynamic_call:
 				if (!zend_jit_trace_handler(&dasm_state, op_array, opline,
 						zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info), p + 1)) {
 					goto jit_failure;
+				}
+				if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
+					if (zend_jit_may_be_polymorphic_call(opline) ||
+							zend_jit_may_be_modified((p+1)->func, op_array)) {
+						if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
+							goto jit_failure;
+						}
+					}
 				}
 			}
 
