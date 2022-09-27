@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0RC3
+29 Sep 2022, PHP 8.2.0RC3
 
 - Core:
   . Fixed observer class notify with Opcache file_cache_only=1. (ilutov)
