@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-15 Sep 2022, PHP 8.0.24RC1
+29 Sep 2022, PHP 8.0.24
 
 - Core:
   . Fixed bug GH-9323 (Crash in ZEND_RETURN/GC/zend_call_function)
@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     Christian Schneider)
   . Fixed bug GH-9407 (LSP error in eval'd code refers to wrong class for static
     type). (ilutov)
+  . Fix #81727 (Don't mangle semantically meaningful HTTP var names). (derick)
 
 - DOM:
   . Fixed bug #79451 (DOMDocument->replaceChild on doctype causes double free).
@@ -27,6 +28,9 @@ PHP                                                                        NEWS
 - Intl
   . Fixed bug GH-9421 (Incorrect argument number for ValueError in NumberFormatter).
     (Girgias)
+
+- Phar:
+  . Fix #81726 (DOS when using quine gzip file). (cmb)
 
 - PDO_PGSQL:
   . Fixed bug GH-9411 (PgSQL large object resource is incorrectly closed).
