@@ -24,4 +24,4 @@ $res = dns_get_record('php.net', DNS_MX, $auth, $additional);
 var_dump(!empty($res) && empty($additional));
 ?>
 --EXPECT--
-bool(true)
+bool(false)
