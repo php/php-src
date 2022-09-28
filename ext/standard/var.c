@@ -842,7 +842,7 @@ static int php_var_serialize_try_add_sleep_prop(
 	}
 
 	if (!zend_hash_add(ht, name, val)) {
-		php_error_docref(NULL, E_NOTICE,
+		php_error_docref(NULL, E_WARNING,
 			"\"%s\" is returned from __sleep() multiple times", ZSTR_VAL(error_name));
 		return SUCCESS;
 	}
