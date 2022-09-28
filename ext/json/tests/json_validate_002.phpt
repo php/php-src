@@ -5,7 +5,6 @@ json_validate() - Error handling
 
 require_once("json_validate_requires.inc");
 
-json_validate_trycatchdump(null);
 json_validate_trycatchdump("");
 json_validate_trycatchdump("-");
 json_validate_trycatchdump("", -1);
@@ -19,10 +18,6 @@ json_validate_trycatchdump("{}", 512, JSON_INVALID_UTF8_IGNORE);
 
 ?>
 --EXPECTF--
-Deprecated: json_validate(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
-bool(false)
-int(4)
-string(12) "Syntax error"
 bool(false)
 int(4)
 string(12) "Syntax error"

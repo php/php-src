@@ -15,7 +15,6 @@ $inputs = [
     '{}',
     '[]',
     '-',
-    null,
     '',
 ];
 
@@ -58,13 +57,6 @@ array(0) {
 }
 bool(true)
 string(1) "-"
-NULL
-bool(false)
-
-Deprecated: json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
-
-Deprecated: json_validate(): Passing null to parameter #1 ($json) of type string is deprecated in %s on line %d
-NULL
 NULL
 bool(false)
 string(0) ""
