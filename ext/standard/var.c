@@ -1406,6 +1406,11 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			zval_ptr_dtor(return_value);
 		}
 		RETVAL_FALSE;
+	} else if ((char*)p < buf + buf_len) {
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Extra data starting at offset " ZEND_LONG_FMT " of %zd bytes",
+				(zend_long)((char*)p - buf), buf_len);
+		}
 	} else if (BG(unserialize).level > 1) {
 		ZVAL_COPY(return_value, retval);
 	} else if (Z_REFCOUNTED_P(return_value)) {
