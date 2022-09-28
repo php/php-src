@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.32
+29 Sep 2022, PHP 7.4.32
 
 - Core:
   . Fixed bug #81726: phar wrapper: DOS when using quine gzip file.
