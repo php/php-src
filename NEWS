@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.11
+29 Sep 2022, PHP 8.1.11
 
 - Core:
   . Fixed bug #81726: phar wrapper: DOS when using quine gzip file.
