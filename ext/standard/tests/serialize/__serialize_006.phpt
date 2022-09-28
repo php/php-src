@@ -13,5 +13,5 @@ var_dump(unserialize('O:4:"Test":1:{}'));
 --EXPECTF--
 Warning: unserialize(): Unexpected end of serialized data in %s on line %d
 
-Notice: unserialize(): Error at offset 14 of 15 bytes in %s on line %d
+Warning: unserialize(): Error at offset 14 of 15 bytes in %s on line %d
 bool(false)
