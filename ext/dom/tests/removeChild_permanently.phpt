@@ -1,5 +1,5 @@
 --TEST--
-DOMDocument::removeChild: The node cannot be removed permanently
+DOMDocument::removeChild: The node that cannot be removed permanently
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
