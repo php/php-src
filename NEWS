@@ -21,5 +21,8 @@ PHP                                                                        NEWS
   . Added pdeathsig to builtin server to terminate workers when the master
     process is killed. (ilutov)
 
+- Reflection:
+  . Fix GH-9470 (ReflectionMethod constructor should not find private parent
+    method). (ilutov)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
