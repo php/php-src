@@ -34,4 +34,8 @@ PHP                                                                        NEWS
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
     over socket binding for a cpu core. (David Carlier)
 
+- Reflection:
+  . Fix GH-9470 (ReflectionMethod constructor should not find private parent
+    method). (ilutov)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
