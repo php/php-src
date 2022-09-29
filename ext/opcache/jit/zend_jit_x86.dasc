@@ -3636,11 +3636,13 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 		    opline->opcode == ZEND_GENERATOR_CREATE) {
 
 			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-#if 0
-				/* this check should be handled by the following OPLINE guard or jmp [IP] */
-				|	cmp IP, zend_jit_halt_op
-				|	je ->trace_halt
-#endif
+				if (trace->op != ZEND_JIT_TRACE_END ||
+				    (trace->stop != ZEND_JIT_TRACE_STOP_RETURN &&
+				     trace->stop != ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+					/* this check may be handled by the following OPLINE guard or jmp [IP] */
+					|	cmp IP, zend_jit_halt_op
+					|	je ->trace_halt
+				}
 			} else if (GCC_GLOBAL_REGS) {
 				|	test IP, IP
 				|	je ->trace_halt
