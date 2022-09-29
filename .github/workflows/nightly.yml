@@ -431,7 +431,7 @@ jobs:
             --enable-memory-sanitizer \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d \
-            ${{ matrix.branch.ref != 'PHP-8.0' && '--enable-dl-test=shared' }}
+            ${{ matrix.branch.ref != 'PHP-8.0' && '--enable-dl-test=shared' || '' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
