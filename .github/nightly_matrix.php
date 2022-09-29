@@ -42,7 +42,7 @@ function get_branches() {
     return get_branch_matrix($changed_branches);
 }
 
-function get_asan_matrix(array $branches) {
+function get_matrix_include(array $branches) {
     $jobs = [];
     foreach ($branches as $branch) {
         $jobs[] = [
@@ -65,7 +65,7 @@ if ($discard_cache) {
 }
 
 $branches = get_branches();
-$asan_matrix = get_asan_matrix($branches);
+$matrix_include = get_matrix_include($branches);
 
 echo '::set-output name=branches::' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n";
-echo '::set-output name=asan-matrix::' . json_encode($asan_matrix, JSON_UNESCAPED_SLASHES) . "\n";
+echo '::set-output name=matrix-include::' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n";
