@@ -290,7 +290,7 @@ jobs:
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: always()
+        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
