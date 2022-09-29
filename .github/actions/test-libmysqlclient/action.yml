@@ -19,5 +19,5 @@ runs:
         rm -rf junit.xml | true
         sapi/cli/php run-tests.php -P -q \
           -g FAIL,BORK,LEAK,XLEAK \
-          --offline --show-diff --show-slow 1000 --set-timeout 120 \
+          --no-progress --offline --show-diff --show-slow 1000 --set-timeout 120 \
           ext/pdo_mysql
