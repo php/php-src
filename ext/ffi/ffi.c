@@ -119,6 +119,7 @@ struct _zend_ffi_type {
 			ffi_abi        abi;
 		} func;
 	};
+	bool sized;
 };
 
 typedef struct _zend_ffi_field {
@@ -1754,6 +1755,7 @@ static zend_object* zend_ffi_add(zend_ffi_cdata *base_cdata, zend_ffi_type *base
 		new_type->kind = ZEND_FFI_TYPE_POINTER;
 		new_type->attr = 0;
 		new_type->size = sizeof(void*);
+		new_type->sized = true;
 		new_type->align = _Alignof(void*);
 
 		ptr_type = base_type->array.type;
@@ -2422,6 +2424,7 @@ static zval *zend_ffi_read_var(zend_object *obj, zend_string *var_name, int read
 		new_type->kind = ZEND_FFI_TYPE_POINTER;
 		new_type->attr = 0;
 		new_type->size = sizeof(void*);
+		new_type->sized = true;
 		new_type->align = _Alignof(void*);
 		new_type->pointer.type = ZEND_FFI_TYPE(sym->type);
 
@@ -3743,6 +3746,11 @@ ZEND_METHOD(FFI, new) /* {{{ */
 		zend_ffi_type_dtor(type_ptr);
 		return;
 	}
+	if (!type->sized) {
+		zend_throw_error(zend_ffi_exception_ce, "Cannot instantiate FFI\\CData of unsized type");
+		zend_ffi_type_dtor(type_ptr);
+		return;
+	}
 
 	ptr = pemalloc(type->size, flags & ZEND_FFI_FLAG_PERSISTENT);
 	memset(ptr, 0, type->size);
@@ -4134,12 +4142,14 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 		new_type->kind = ZEND_FFI_TYPE_ARRAY;
 		new_type->attr = 0;
 		new_type->size = n * ZEND_FFI_TYPE(type)->size;
+		new_type->sized = ZEND_FFI_TYPE(type)->sized;
 		new_type->align = ZEND_FFI_TYPE(type)->align;
 		new_type->array.type = type;
 		new_type->array.length = n;
 
 		if (n == 0) {
 			new_type->attr |= ZEND_FFI_ATTR_INCOMPLETE_ARRAY;
+			new_type->sized = false;
 		}
 
 		type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
@@ -4177,6 +4187,7 @@ ZEND_METHOD(FFI, addr) /* {{{ */
 	new_type->kind = ZEND_FFI_TYPE_POINTER;
 	new_type->attr = 0;
 	new_type->size = sizeof(void*);
+	new_type->sized = true;
 	new_type->align = _Alignof(void*);
 	/* life-time (source must relive the resulting pointer) ??? */
 	new_type->pointer.type = type;
@@ -5477,19 +5488,19 @@ ZEND_MINFO_FUNCTION(ffi)
 }
 /* }}} */
 
-static const zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1};
-static const zend_ffi_type zend_ffi_type_char = {.kind=ZEND_FFI_TYPE_CHAR, .size=1, .align=_Alignof(char)};
-static const zend_ffi_type zend_ffi_type_bool = {.kind=ZEND_FFI_TYPE_BOOL, .size=1, .align=_Alignof(uint8_t)};
-static const zend_ffi_type zend_ffi_type_sint8 = {.kind=ZEND_FFI_TYPE_SINT8, .size=1, .align=_Alignof(int8_t)};
-static const zend_ffi_type zend_ffi_type_uint8 = {.kind=ZEND_FFI_TYPE_UINT8, .size=1, .align=_Alignof(uint8_t)};
-static const zend_ffi_type zend_ffi_type_sint16 = {.kind=ZEND_FFI_TYPE_SINT16, .size=2, .align=_Alignof(int16_t)};
-static const zend_ffi_type zend_ffi_type_uint16 = {.kind=ZEND_FFI_TYPE_UINT16, .size=2, .align=_Alignof(uint16_t)};
-static const zend_ffi_type zend_ffi_type_sint32 = {.kind=ZEND_FFI_TYPE_SINT32, .size=4, .align=_Alignof(int32_t)};
-static const zend_ffi_type zend_ffi_type_uint32 = {.kind=ZEND_FFI_TYPE_UINT32, .size=4, .align=_Alignof(uint32_t)};
-static const zend_ffi_type zend_ffi_type_sint64 = {.kind=ZEND_FFI_TYPE_SINT64, .size=8, .align=_Alignof(int64_t)};
-static const zend_ffi_type zend_ffi_type_uint64 = {.kind=ZEND_FFI_TYPE_UINT64, .size=8, .align=_Alignof(uint64_t)};
-static const zend_ffi_type zend_ffi_type_float = {.kind=ZEND_FFI_TYPE_FLOAT, .size=sizeof(float), .align=_Alignof(float)};
-static const zend_ffi_type zend_ffi_type_double = {.kind=ZEND_FFI_TYPE_DOUBLE, .size=sizeof(double), .align=_Alignof(double)};
+static const zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1, .sized=false};
+static const zend_ffi_type zend_ffi_type_char = {.kind=ZEND_FFI_TYPE_CHAR, .size=1, .align=_Alignof(char), .sized=true};
+static const zend_ffi_type zend_ffi_type_bool = {.kind=ZEND_FFI_TYPE_BOOL, .size=1, .align=_Alignof(uint8_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_sint8 = {.kind=ZEND_FFI_TYPE_SINT8, .size=1, .align=_Alignof(int8_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_uint8 = {.kind=ZEND_FFI_TYPE_UINT8, .size=1, .align=_Alignof(uint8_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_sint16 = {.kind=ZEND_FFI_TYPE_SINT16, .size=2, .align=_Alignof(int16_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_uint16 = {.kind=ZEND_FFI_TYPE_UINT16, .size=2, .align=_Alignof(uint16_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_sint32 = {.kind=ZEND_FFI_TYPE_SINT32, .size=4, .align=_Alignof(int32_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_uint32 = {.kind=ZEND_FFI_TYPE_UINT32, .size=4, .align=_Alignof(uint32_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_sint64 = {.kind=ZEND_FFI_TYPE_SINT64, .size=8, .align=_Alignof(int64_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_uint64 = {.kind=ZEND_FFI_TYPE_UINT64, .size=8, .align=_Alignof(uint64_t), .sized=true};
+static const zend_ffi_type zend_ffi_type_float = {.kind=ZEND_FFI_TYPE_FLOAT, .size=sizeof(float), .align=_Alignof(float), .sized=true};
+static const zend_ffi_type zend_ffi_type_double = {.kind=ZEND_FFI_TYPE_DOUBLE, .size=sizeof(double), .align=_Alignof(double), .sized=true};
 
 #ifdef HAVE_LONG_DOUBLE
 static const zend_ffi_type zend_ffi_type_long_double = {.kind=ZEND_FFI_TYPE_LONGDOUBLE, .size=sizeof(long double), .align=_Alignof(long double)};
@@ -5806,6 +5817,7 @@ void zend_ffi_make_enum_type(zend_ffi_dcl *dcl) /* {{{ */
 		type->align = zend_ffi_type_uint32.align;
 		type->enumeration.kind = ZEND_FFI_TYPE_UINT32;
 	}
+	type->sized = true;
 	dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(type);
 	dcl->attr &= ~ZEND_FFI_ENUM_ATTRS;
 }
@@ -5927,6 +5939,7 @@ void zend_ffi_make_struct_type(zend_ffi_dcl *dcl) /* {{{ */
 	type->kind = ZEND_FFI_TYPE_STRUCT;
 	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_STRUCT_ATTRS);
 	type->size = 0;
+	type->sized = true;
 	type->align = dcl->align > 1 ? dcl->align : 1;
 	if (dcl->flags & ZEND_FFI_DCL_UNION) {
 		type->attr |= ZEND_FFI_ATTR_UNION;
@@ -6002,6 +6015,7 @@ void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_
 		field->offset = struct_type->size;
 		struct_type->size += field_type->size;
 	}
+	struct_type->sized = struct_type->sized && ZEND_FFI_TYPE(field_dcl->type)->sized;
 	field->type = field_dcl->type;
 	field->is_const = (bool)(field_dcl->attr & ZEND_FFI_ATTR_CONST);
 	field->is_nested = 0;
@@ -6061,6 +6075,7 @@ void zend_ffi_add_anonymous_field(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_
 		new_field->first_bit = field->first_bit;
 		new_field->bits = field->bits;
 		field->type = ZEND_FFI_TYPE(field->type); /* reset "owned" flag */
+		struct_type->sized = struct_type->sized && ZEND_FFI_TYPE(field->type)->sized;
 
 		if (key) {
 			if (!zend_hash_add_ptr(&struct_type->record.fields, key, new_field)) {
@@ -6208,6 +6223,7 @@ void zend_ffi_make_pointer_type(zend_ffi_dcl *dcl) /* {{{ */
 	type->kind = ZEND_FFI_TYPE_POINTER;
 	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_POINTER_ATTRS);
 	type->size = sizeof(void*);
+	type->sized = true;
 	type->align = _Alignof(void*);
 	zend_ffi_finalize_type(dcl);
 	if (zend_ffi_validate_vla(ZEND_FFI_TYPE(dcl->type)) != SUCCESS) {
@@ -6272,6 +6288,7 @@ void zend_ffi_make_array_type(zend_ffi_dcl *dcl, zend_ffi_val *len) /* {{{ */
 	type->kind = ZEND_FFI_TYPE_ARRAY;
 	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_ARRAY_ATTRS);
 	type->size = length * element_type->size;
+	type->sized = element_type->sized && length != 0;
 	type->align = element_type->align;
 	type->array.type = dcl->type;
 	type->array.length = length;
@@ -6366,6 +6383,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 	type->kind = ZEND_FFI_TYPE_FUNC;
 	type->attr = FFI_G(default_type_attr) | (dcl->attr & ZEND_FFI_FUNC_ATTRS);
 	type->size = sizeof(void*);
+	type->sized = true;
 	type->align = 1;
 	type->func.ret_type = dcl->type;
 	switch (dcl->abi) {
@@ -6447,11 +6465,13 @@ void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_
 		if (ZEND_FFI_TYPE_IS_OWNED(arg_dcl->type)) {
 			type->kind = ZEND_FFI_TYPE_POINTER;
 			type->size = sizeof(void*);
+			type->sized = true;
 		} else {
 			zend_ffi_type *new_type = pemalloc(sizeof(zend_ffi_type), FFI_G(persistent));
 			new_type->kind = ZEND_FFI_TYPE_POINTER;
 			new_type->attr = FFI_G(default_type_attr) | (type->attr & ZEND_FFI_POINTER_ATTRS);
 			new_type->size = sizeof(void*);
+			new_type->sized = true;
 			new_type->align = _Alignof(void*);
 			new_type->pointer.type = ZEND_FFI_TYPE(type->array.type);
 			arg_dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
@@ -6461,6 +6481,7 @@ void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_
 		new_type->kind = ZEND_FFI_TYPE_POINTER;
 		new_type->attr = FFI_G(default_type_attr);
 		new_type->size = sizeof(void*);
+		new_type->sized = true;
 		new_type->align = _Alignof(void*);
 		new_type->pointer.type = arg_dcl->type;
 		arg_dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
