@@ -1737,8 +1737,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			prev = zend_generator_check_placeholder_frame(prev);
 		}
 
-		frameno++;
-
 		/* We use _zend_hash_append*() and the array must be preallocated */
 		stack_frame = zend_new_array(8);
 		zend_hash_real_init_mixed(stack_frame);
@@ -1882,6 +1880,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		ZVAL_ARR(&tmp, stack_frame);
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		frameno++;
 
 skip_frame:
 		if (UNEXPECTED(ZEND_CALL_KIND(call) == ZEND_CALL_TOP_FUNCTION)
