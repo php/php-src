@@ -43,25 +43,26 @@ class Response
 
     /**
      * @param string|array|null $data
-     * @param bool $expectInvalid
+     * @param bool              $expectInvalid
      */
     public function __construct($data = null, $expectInvalid = false)
     {
-        if (!is_array($data)) {
+        if ( ! is_array($data)) {
             $data = [
-                'response' => $data,
+                'response'     => $data,
                 'err_response' => null,
                 'out_response' => $data,
             ];
         }
 
-        $this->data = $data;
+        $this->data          = $data;
         $this->expectInvalid = $expectInvalid;
     }
 
     /**
-     * @param mixed $body
+     * @param mixed  $body
      * @param string $contentType
+     *
      * @return Response
      */
     public function expectBody($body, $contentType = 'text/html')
@@ -99,11 +100,14 @@ class Response
     }
 
     /**
-     * @param string $name
-     * @param string $value
+     * Expect header in the response.
+     *
+     * @param string $name Header name.
+     * @param string $value Header value.
+     *
      * @return Response
      */
-    public function expectHeader($name, $value)
+    public function expectHeader($name, $value): Response
     {
         $this->checkHeader($name, $value);
 
@@ -111,10 +115,13 @@ class Response
     }
 
     /**
-     * @param string|null $errorMessage
+     * Expect error in the response.
+     *
+     * @param string|null $errorMessage Expected error message.
+     *
      * @return Response
      */
-    public function expectError($errorMessage)
+    public function expectError($errorMessage): Response
     {
         $errorData = $this->getErrorData();
         if ($errorData !== $errorMessage) {
@@ -128,19 +135,23 @@ class Response
     }
 
     /**
-     * @param string $errorMessage
+     * Expect no error in the response.
+     *
      * @return Response
      */
-    public function expectNoError()
+    public function expectNoError(): Response
     {
         return $this->expectError(null);
     }
 
     /**
-     * @param string $contentType
+     * Get response body.
+     *
+     * @param string $contentType Expect body to have specified content type.
+     *
      * @return string|null
      */
-    public function getBody($contentType = 'text/html')
+    public function getBody(string $contentType = 'text/html'): ?string
     {
         if ($this->checkIfValid() && $this->checkDefaultHeaders($contentType)) {
             return $this->rawBody;
@@ -150,7 +161,7 @@ class Response
     }
 
     /**
-     * Print raw body
+     * Print raw body.
      */
     public function dumpBody()
     {
@@ -158,7 +169,7 @@ class Response
     }
 
     /**
-     * Print raw body
+     * Print raw body.
      */
     public function printBody()
     {
@@ -181,7 +192,7 @@ class Response
     /**
      * @return string|null
      */
-    public function getErrorData()
+    public function getErrorData(): ?string
     {
         return $this->data['err_response'];
     }
@@ -191,13 +202,13 @@ class Response
      *
      * @return bool
      */
-    private function checkIfValid()
+    private function checkIfValid(): bool
     {
         if ($this->isValid()) {
             return true;
         }
 
-        if (!$this->expectInvalid) {
+        if ( ! $this->expectInvalid) {
             $this->error("The response is invalid: $this->rawData");
         }
 
@@ -205,10 +216,13 @@ class Response
     }
 
     /**
+     * Check default headers that should be present.
+     *
      * @param string $contentType
+     *
      * @return bool
      */
-    private function checkDefaultHeaders($contentType)
+    private function checkDefaultHeaders($contentType): bool
     {
         // check default headers
         return (
@@ -218,28 +232,32 @@ class Response
     }
 
     /**
-     * @param string $name
-     * @param string $value
-     * @param bool $useRegex
+     * Check a specified header.
+     *
+     * @param string $name     Header name.
+     * @param string $value    Header value.
+     * @param bool   $useRegex Whether value is regular expression.
+     *
      * @return bool
      */
-    private function checkHeader(string $name, string $value, $useRegex = false)
+    private function checkHeader(string $name, string $value, $useRegex = false): bool
     {
-        $lcName = strtolower($name);
+        $lcName  = strtolower($name);
         $headers = $this->getHeaders();
-        if (!isset($headers[$lcName])) {
+        if ( ! isset($headers[$lcName])) {
             return $this->error("The header $name is not present");
         }
         $header = $headers[$lcName];
 
-        if (!$useRegex) {
+        if ( ! $useRegex) {
             if ($header === $value) {
                 return true;
             }
+
             return $this->error("The header $name value '$header' is not the same as '$value'");
         }
 
-        if (!preg_match($value, $header)) {
+        if ( ! preg_match($value, $header)) {
             return $this->error("The header $name value '$header' does not match RegExp '$value'");
         }
 
@@ -247,11 +265,13 @@ class Response
     }
 
     /**
+     * Get all headers.
+     *
      * @return array|null
      */
-    private function getHeaders()
+    private function getHeaders(): ?array
     {
-        if (!$this->isValid()) {
+        if ( ! $this->isValid()) {
             return null;
         }
 
@@ -260,7 +280,7 @@ class Response
         }
 
         $headerRows = explode("\r\n", $this->rawHeaders);
-        $headers = [];
+        $headers    = [];
         foreach ($headerRows as $headerRow) {
             $colonPosition = strpos($headerRow, ':');
             if ($colonPosition === false) {
@@ -292,8 +312,8 @@ class Response
     private function processData()
     {
         $this->rawData = $this->data['out_response'];
-        $this->valid = (
-            !is_null($this->rawData) &&
+        $this->valid   = (
+            ! is_null($this->rawData) &&
             strpos($this->rawData, self::HEADER_SEPARATOR)
         );
         if ($this->valid) {
@@ -308,9 +328,10 @@ class Response
      * Emit error message
      *
      * @param string $message
+     *
      * @return bool
      */
-    private function error($message)
+    private function error($message): bool
     {
         echo "ERROR: $message\n";
 
