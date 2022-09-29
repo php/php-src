@@ -1083,9 +1083,10 @@ PHPAPI int php_session_register_module(const ps_module *ptr) /* {{{ */
 /* }}} */
 
 /* Dummy PS module function */
-/* We consider any ID valid, so we return FAILURE to indicate that a session doesn't exist */
+/* We consider any ID valid (thus also implying that a session with such an ID exists),
+	thus we always return SUCCESS */
 PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS) {
-	return FAILURE;
+	return SUCCESS;
 }
 
 /* Dummy PS module function */
@@ -2317,7 +2318,7 @@ PHP_FUNCTION(session_create_id)
 		int limit = 3;
 		while (limit--) {
 			new_id = PS(mod)->s_create_sid(&PS(mod_data));
-			if (!PS(mod)->s_validate_sid) {
+			if (!PS(mod)->s_validate_sid || (PS(mod_user_implemented) && Z_ISUNDEF(PS(mod_user_names).name.ps_validate_sid))) {
 				break;
 			} else {
 				/* Detect collision and retry */
