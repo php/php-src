@@ -268,8 +268,11 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 		}
 		zend_string_release_ex(opened_path, 0);
 		if (new_op_array) {
+			uint32_t orig_jit_trace_num = EG(jit_trace_num);
+
 			ZVAL_UNDEF(&result);
 			zend_execute(new_op_array, &result);
+			EG(jit_trace_num) = orig_jit_trace_num;
 
 			destroy_op_array(new_op_array);
 			efree(new_op_array);
