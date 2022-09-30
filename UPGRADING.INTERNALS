@@ -22,7 +22,6 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 * php_stristr() no longer lowercases the haystack and needle as a side effect.
   Call zend_str_tolower() yourself if necessary. You no longer need to copy
   the haystack and needle before passing them to php_stristr().
-* zend_register_module_ex() no longer copies the module entry.
 * The main/php_stdint.h header has been removed.
   Include the standard <inttypes.h> and/or <stdint.h> headers instead.
   Replace usage of u_char by the standard C99 uint8_t type.
