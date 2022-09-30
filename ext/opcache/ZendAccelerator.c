@@ -4677,7 +4677,7 @@ static int accel_finish_startup_preload_subprocess(pid_t *pid)
 	if (euid != 0) {
 		if (ZCG(accel_directives).preload_user
 		 && *ZCG(accel_directives).preload_user) {
-			zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored");
+			zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored because the current user is not \"root\"");
 		}
 
 		*pid = -1;
