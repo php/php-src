@@ -425,6 +425,69 @@ const DNS_ANY = UNKNOWN;
 const DNS_ALL = UNKNOWN;
 #endif
 
+/* html.c */
+
+/**
+* @var int
+* @cvalue PHP_HTML_SPECIALCHARS
+*/
+const HTML_SPECIALCHARS = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_HTML_ENTITIES
+*/
+const HTML_ENTITIES = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_COMPAT
+*/
+const ENT_COMPAT = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_QUOTES
+*/
+const ENT_QUOTES = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_NOQUOTES
+*/
+const ENT_NOQUOTES = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_IGNORE
+*/
+const ENT_IGNORE = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_SUBSTITUTE
+*/
+const ENT_SUBSTITUTE = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_DISALLOWED
+*/
+const ENT_DISALLOWED = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_HTML401
+*/
+const ENT_HTML401 = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_XML1
+*/
+const ENT_XML1 = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_XHTML
+*/
+const ENT_XHTML = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_HTML5
+*/
+const ENT_HTML5 = UNKNOWN;
+
 /* image.c */
 
 /**
@@ -540,6 +603,89 @@ const IMAGETYPE_UNKNOWN = UNKNOWN;
  * @cvalue IMAGE_FILETYPE_COUNT
  */
 const IMAGETYPE_COUNT = UNKNOWN;
+
+/* info.c */
+
+/**
+ * @var int
+ * @cvalue PHP_INFO_GENERAL
+ */
+const INFO_GENERAL = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_CREDITS
+*/
+const INFO_CREDITS = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_CONFIGURATION
+*/
+const INFO_CONFIGURATION = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_MODULES
+*/
+const INFO_MODULES = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_ENVIRONMENT
+*/
+const INFO_ENVIRONMENT = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_VARIABLES
+*/
+const INFO_VARIABLES = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_LICENSE
+*/
+const INFO_LICENSE = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_ALL
+*/
+const INFO_ALL = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_GROUP
+*/
+const CREDITS_GROUP = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_GENERAL
+*/
+const CREDITS_GENERAL = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_SAPI
+*/
+const CREDITS_SAPI = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_MODULES
+*/
+const CREDITS_MODULES = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_DOCS
+*/
+const CREDITS_DOCS = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_FULLPAGE
+*/
+const CREDITS_FULLPAGE = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_QA
+*/
+const CREDITS_QA = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_ALL
+*/
+const CREDITS_ALL = UNKNOWN;
 
 /* syslog.c */
 
