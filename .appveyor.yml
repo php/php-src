@@ -36,7 +36,7 @@ environment:
                 - THREAD_SAFE: 1
                   OPCACHE: 1
                   PARALLEL: -j2
-                  INTRINSICS: AVX
+                  INTRINSICS: AVX2
 
 services:
         # the setup scripts have to be touched, once some other db version is used
