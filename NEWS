@@ -22,6 +22,8 @@ PHP                                                                        NEWS
     Christian Schneider)
   . Fixed bug GH-9447 (Invalid class FQN emitted by AST dump for new and class
     constants in constant expressions). (ilutov)
+  . Fixed bug #81727: Don't mangle HTTP variable names that clash with ones
+    that have a specific semantic meaning. (CVE-2022-31629). (Derick)
 
 - DOM:
   . Fixed bug #79451 (DOMDocument->replaceChild on doctype causes double free).
@@ -47,6 +49,10 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Fixed bug GH-9411 (PgSQL large object resource is incorrectly closed).
     (Yurunsoft)
+
+- Phar:
+  . Fixed bug #81726: phar wrapper: DOS when using quine gzip file.
+    (CVE-2022-31628). (cmb)
 
 - Reflection:
   . Fixed bug GH-8932 (ReflectionFunction provides no way to get the called
