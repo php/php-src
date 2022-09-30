@@ -24,7 +24,7 @@ echo str_repeat('asdfghjkl', 150000) . "\n";
 EOT;
 
 $tester = new FPM\Tester($cfg, $code);
-$tester->start();
+$tester->start(['-dextension=session']);
 $tester->expectLogStartNotices();
 $tester
     ->request(

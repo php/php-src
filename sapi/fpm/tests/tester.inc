@@ -392,7 +392,7 @@ class Tester
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
 
-        $cmd = [self::findExecutable(), '-F', '-y', $configFile];
+        $cmd = [self::findExecutable(), '-F', '-y', $configFile, '-dextension_dir=modules'];
 
         if ($forceStderr) {
             $cmd[] = '-O';
