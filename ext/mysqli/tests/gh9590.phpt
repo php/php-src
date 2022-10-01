@@ -1,9 +1,9 @@
 --TEST--
 Bug GH-9602 (stream_select does not abort upon exception or empty valid fd set)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('connect.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$IS_MYSQLND)
