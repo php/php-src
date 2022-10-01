@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9583 (session_create_id() fails with user defined save handler
     that doesn't have a validateId() method). (Girgias)
 
+- Streams:
+  . Fixed bug GH-9590 (stream_select does not abort upon exception or empty
+    valid fd set). (Arnaud)
+
 29 Sep 2022, PHP 8.1.11
 
 - Core:
