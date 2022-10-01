@@ -11,9 +11,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once __DIR__ . '/skipifconnectfailure.inc';
-if (!$IS_MYSQLND) {
-    die('skip mysqlnd only');
-}
 ?>
 --FILE--
 <?php

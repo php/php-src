@@ -33,14 +33,8 @@ require_once('skipifconnectfailure.inc');
         printf("[007] Expecting string/any non empty, got %s/%s\n", gettype($error), $error);
     var_dump($res);
     var_dump($link);
-    if ($IS_MYSQLND) {
-        if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
-            printf("[008] mysqlnd used to be more verbose and used to support SELECT\n");
-        }
-    } else {
-        if ($link->info != NULL) {
-            printf("[008] Time for wonders - libmysql has started to support SELECT, change test\n");
-        }
+    if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
+        printf("[008] mysqlnd used to be more verbose and used to support SELECT\n");
     }
 
     mysqli_close($link);

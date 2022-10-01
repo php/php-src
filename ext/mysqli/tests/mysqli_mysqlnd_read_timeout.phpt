@@ -5,9 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND)
-    /* The libmysql read_timeout limit default is 365 * 24 * 3600 seconds. It cannot be altered through PHP API calls */
-    die("skip mysqlnd only test");
 ?>
 --INI--
 default_socket_timeout=60

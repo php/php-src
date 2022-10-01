@@ -66,21 +66,19 @@ require_once('skipifconnectfailure.inc');
         }
     }
 
-    if ($IS_MYSQLND) {
-        ini_set('mysqli.default_host', 'p:' . $host);
-        if (!is_object($mysqli = new mysqli())) {
-            // Due to an API flaw this shall not connect
-            printf("[010] Failed to create mysqli object\n");
-        } else {
-            // There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
-            // We had long discussions on this and found that the ext/mysqli API as
-            // such is broken. As we can't fix it, we document how it has behaved from
-            // the first day on. And that's: no connection.
-            try {
-                $mysqli->query('SELECT 1');
-            } catch (Error $exception) {
-                echo $exception->getMessage() . "\n";
-            }
+    ini_set('mysqli.default_host', 'p:' . $host);
+    if (!is_object($mysqli = new mysqli())) {
+        // Due to an API flaw this shall not connect
+        printf("[010] Failed to create mysqli object\n");
+    } else {
+        // There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
+        // We had long discussions on this and found that the ext/mysqli API as
+        // such is broken. As we can't fix it, we document how it has behaved from
+        // the first day on. And that's: no connection.
+        try {
+            $mysqli->query('SELECT 1');
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
         }
     }
 
