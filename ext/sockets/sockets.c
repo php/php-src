@@ -605,7 +605,9 @@ PHP_FUNCTION(socket_select)
 		RETURN_THROWS();
 	}
 
-	PHP_SAFE_MAX_FD(max_fd, 0); /* someone needs to make this look more like stream_socket_select */
+	if (!PHP_SAFE_MAX_FD(max_fd, 0)) {
+		RETURN_FALSE;
+	}
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (!sec_is_null) {
