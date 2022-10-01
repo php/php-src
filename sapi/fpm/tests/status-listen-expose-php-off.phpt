@@ -1,5 +1,5 @@
 --TEST--
-FPM: Status pool is inheriting FPM setting overrides test
+FPM: Status pool is inheriting FPM setting overrides test - expose_php = off
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
