@@ -2,6 +2,7 @@
 Bug GH-9602 (stream_select does not abort upon exception or empty valid fd set)
 --EXTENSIONS--
 mysqli
+posix
 --SKIPIF--
 <?php
 require_once('skipifconnectfailure.inc');
