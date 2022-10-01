@@ -2256,7 +2256,9 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 		DBG_RETURN(FAIL);
 	}
 
-	PHP_SAFE_MAX_FD(max_fd, max_set_count);
+	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
+		DBG_RETURN(FAIL);
+	}
 
 	/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 	if (usec > 999999) {
