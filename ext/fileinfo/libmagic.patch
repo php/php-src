@@ -2640,7 +2640,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  	}
  	return file_getbuffer(ms);
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2022-10-02 20:46:41.085566920 +0200
+--- libmagic.orig/magic.h	2022-10-02 20:59:55.617810794 +0200
 +++ libmagic/magic.h	2022-10-02 15:56:16.394142341 +0200
 @@ -126,6 +126,7 @@
  
@@ -2829,7 +2829,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	if (i != -1)
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2022-09-13 20:46:07.000000000 +0200
-+++ libmagic/softmagic.c	2022-10-02 15:56:16.394142341 +0200
++++ libmagic/softmagic.c	2022-10-02 20:58:58.073503436 +0200
 @@ -43,7 +43,7 @@
  #include <time.h>
  #include "der.h"
@@ -3047,7 +3047,24 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		    offset + o, mode, text, flip, indir_count, name_count,
  		    printed_something, need_separator, returnval,
  		    &nfound_match);
-@@ -2036,29 +2044,8 @@
+@@ -1992,11 +2000,13 @@
+ 			}
+ 			else if ((flags & STRING_COMPACT_WHITESPACE) &&
+ 			    isspace(*a)) {
++				/* XXX Dirty. The data and the pattern is what is causing this.
++				       Revert _i for the next port and see if it still matters. */
++				uint32_t _i = 0;
+ 				a++;
+-				if (isspace(*b)) {
+-					b++;
++				if (isspace(*b++)) {
+ 					if (!isspace(*a))
+-						while (b < eb && isspace(*b))
++						while (EXPECTED(_i++ < 2048) && b < eb && isspace(*b))
+ 							b++;
+ 				}
+ 				else {
+@@ -2036,29 +2046,8 @@
  	return file_strncmp(a, b, len, maxlen, flags);
  }
  
@@ -3078,7 +3095,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  {
  	uint64_t l = m->value.q;
  	uint64_t v;
-@@ -2218,8 +2205,8 @@
+@@ -2218,8 +2207,8 @@
  			idx = m->str_range + slen;
  			if (m->str_range == 0 || ms->search.s_len < idx)
  				idx = ms->search.s_len;
@@ -3089,7 +3106,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  			if (!found) {
  				v = 1;
  				break;
-@@ -2248,55 +2235,76 @@
+@@ -2248,55 +2237,76 @@
  		break;
  	}
  	case FILE_REGEX: {

@@ -2000,11 +2000,13 @@ file_strncmp(const char *s1, const char *s2, size_t len, size_t maxlen,
 			}
 			else if ((flags & STRING_COMPACT_WHITESPACE) &&
 			    isspace(*a)) {
+				/* XXX Dirty. The data and the pattern is what is causing this.
+				       Revert _i for the next port and see if it still matters. */
+				uint32_t _i = 0;
 				a++;
-				if (isspace(*b)) {
-					b++;
+				if (isspace(*b++)) {
 					if (!isspace(*a))
-						while (b < eb && isspace(*b))
+						while (EXPECTED(_i++ < 2048) && b < eb && isspace(*b))
 							b++;
 				}
 				else {
