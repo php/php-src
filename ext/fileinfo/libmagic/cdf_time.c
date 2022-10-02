@@ -152,7 +152,7 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 #endif
 #ifdef notyet
 	struct tm tm;
-	if (php_gmtime_r(&ts->ts_sec, &tm) == NULL) {
+	if (gmtime_r(&ts->ts_sec, &tm) == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -168,7 +168,7 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 char *
 cdf_ctime(const time_t *sec, char *buf)
 {
-	char *ptr = php_ctime_r(sec, buf);
+	char *ptr = ctime_r(sec, buf);
 	if (ptr != NULL)
 		return buf;
 #ifdef WIN32

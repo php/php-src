@@ -48,6 +48,9 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.326 2022/09/13 18:46:07 christos Exp $")
 #ifdef QUICK
 #include <sys/mman.h>
 #endif
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
 #include <limits.h>
 #ifdef HAVE_BYTESWAP_H
 #include <byteswap.h>
@@ -3333,6 +3336,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 {
 	static const size_t nm = sizeof(*map->nmagic) * MAGIC_SETS;
 	static const size_t m = sizeof(**map->magic);
+	php_stream *stream;
 	size_t len;
 	char *dbname;
 	int rv = -1;
@@ -3341,7 +3345,6 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 		struct magic m;
 		uint32_t h[2 + MAGIC_SETS];
 	} hdr;
-	php_stream *stream;
 
 	dbname = mkdbname(ms, fn, 1);
 
@@ -3373,10 +3376,10 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 		}
 	}
 
+	rv = 0;
 	if (stream) {
 		php_stream_close(stream);
 	}
-	rv = 0;
 out:
 	efree(dbname);
 	return rv;
