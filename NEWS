@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-9590 (stream_select does not abort upon exception or empty
     valid fd set). (Arnaud)
+  . Fixed bug GH-9653 (file copy between different filesystems). (David Carlier)
 
 29 Sep 2022, PHP 8.2.0RC3
 
