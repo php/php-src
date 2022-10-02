@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . SA_ONSTACK is now set for signal handlers to be friendlier to other
     in-process code such as Go's cgo. (Kévin Dunglas)
 
+- Fileinfo:
+  . Upgrade bundled libmagic to 5.43. (Anatol)
+
 - Opcache:
   . Added start, restart and force restart time to opcache's
   phpinfo section. (Mikhail Galanin)
