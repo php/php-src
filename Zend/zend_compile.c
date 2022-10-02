@@ -6819,15 +6819,6 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				zend_error_noreturn(E_COMPILE_ERROR, "never cannot be used as a parameter type");
 			}
 
-			if (force_nullable && ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
-				/* We drop the nullable type flag to generate the correct type string */
-				ZEND_TYPE_FULL_MASK(arg_info->type) = ZEND_TYPE_FULL_MASK(arg_info->type) & ~MAY_BE_NULL;
-				zend_string *type_str = zend_type_to_string(arg_info->type);
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot use null as default value for parameter $%s of type %s",
-					ZSTR_VAL(name), ZSTR_VAL(type_str));
-			}
-
 			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable
 					&& !zend_is_valid_default_value(arg_info->type, &default_node.u.constant)) {
 				zend_string *type_str = zend_type_to_string(arg_info->type);
