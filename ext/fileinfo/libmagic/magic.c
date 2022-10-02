@@ -25,11 +25,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef WIN32
-#include <windows.h>
-#include <shlwapi.h>
-#endif
-
 #include "file.h"
 
 #ifndef	lint

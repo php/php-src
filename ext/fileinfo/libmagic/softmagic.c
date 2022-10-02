@@ -772,7 +772,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		char *cp, *scp;
 		int rval;
 
-		cp = strndup(RCAST(const char *, ms->search.s),
+		cp = estrndup(RCAST(const char *, ms->search.s),
 		    ms->search.rm_len);
 		if (cp == NULL) {
 			file_oomem(ms, ms->search.rm_len);
@@ -782,7 +782,7 @@ mprint(struct magic_set *ms, struct magic *m)
 
 		rval = file_printf(ms, F(ms, desc, "%s"), file_printable(ms,
 		    sbuf, sizeof(sbuf), scp, ms->search.rm_len));
-		free(cp);
+		efree(cp);
 
 		if (rval == -1)
 			return -1;

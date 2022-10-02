@@ -48,7 +48,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.326 2022/09/13 18:46:07 christos Exp $")
 #ifdef QUICK
 #include <sys/mman.h>
 #endif
-#include <dirent.h>
 #include <limits.h>
 #ifdef HAVE_BYTESWAP_H
 #include <byteswap.h>

@@ -36,7 +36,10 @@
 
 #define strtoull _strtoui64
 
+
+#define HAVE_ASCTIME_R 1
 #define asctime_r php_asctime_r
+#define HAVE_CTIME_R 1
 #define ctime_r php_ctime_r
 
 #else
