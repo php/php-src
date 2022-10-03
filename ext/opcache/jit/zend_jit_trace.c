@@ -2699,6 +2699,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	const zend_ssa *op_array_ssa;
 	const zend_ssa_op *ssa_op;
 	int i, j, idx, count, level;
+	int last_idx = -1;
 	int *start, *end;
 	uint8_t *flags;
 	const zend_op_array **vars_op_array;
@@ -3103,6 +3104,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			}
 		}
 	} else {
+		last_idx = idx;
 		for (i = 0; i < op_array->last_var; i++) {
 			zend_jit_close_var(stack, i, start, end, flags, idx);
 		}
@@ -3411,6 +3413,14 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					}
 				}
 				phi = phi->next;
+			}
+		} else {
+			for (i = 0; i < ssa->vars_count; i++) {
+				if (intervals[i]
+				 && intervals[i]->range.end == last_idx
+				 && !(intervals[i]->flags & (ZREG_LOAD|ZREG_STORE))) {
+					intervals[i]->flags |= ZREG_STORE;
+				}
 			}
 		}
 
