@@ -6159,6 +6159,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					goto jit_failure;
 				}
 				if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
+					if (opline->opcode == ZEND_NEW && ssa_op->result_def >= 0) {
+						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_OBJECT, 1);
+					}
 					if (zend_jit_may_be_polymorphic_call(opline) ||
 							zend_jit_may_be_modified((p+1)->func, op_array)) {
 						if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
