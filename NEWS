@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-9823 (Don’t reset func in zend_closure_internal_handler).
     (Florian Sowade)
   . Fixed potential NULL pointer dereference Windows shm*() functions. (cmb)
+  . Fix target validation for internal attributes with constructor property
+    promotion. (kooldev)
 
 - FPM:
   . Fixed bug GH-9754 (SaltStack (using Python subprocess) hangs when running
