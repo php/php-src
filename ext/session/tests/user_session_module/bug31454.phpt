@@ -21,5 +21,5 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-session_set_save_handler(): Argument #1 ($open) must be a valid callback, function "Array" not found or invalid function name
+session_set_save_handler(): Argument #1 ($open) must be a valid callback, first array member is not a valid class name or object
 Done
