@@ -801,7 +801,7 @@ ZEND_FUNCTION(get_object_vars)
 }
 /* }}} */
 
-/* {{{ Returns an array of mangled object properties. Does not respect property visibility. */
+/* {{{ Returns an array of mangled object properties. Does not respect property visibility and does not call magic methods. */
 ZEND_FUNCTION(get_mangled_object_vars)
 {
 	zend_object *obj;
@@ -822,6 +822,21 @@ ZEND_FUNCTION(get_mangled_object_vars)
 		 obj->handlers != &std_object_handlers ||
 		 GC_IS_RECURSIVE(properties)));
 	RETURN_ARR(properties);
+}
+/* }}} */
+
+/* {{{ Loads an array of mangled object properties. Does not respect property visibility and does not call magic methods. */
+ZEND_FUNCTION(load_mangled_object_vars)
+{
+	zend_object *obj;
+	HashTable *vars;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJ(obj)
+		Z_PARAM_ARRAY_HT(vars)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object_properties_load(obj, vars);
 }
 /* }}} */
 
