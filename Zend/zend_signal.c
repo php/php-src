@@ -334,6 +334,9 @@ void zend_signal_activate(void)
 /* {{{ zend_signal_deactivate */
 void zend_signal_deactivate(void)
 {
+	int signo;
+	struct sigaction sa;
+
 	if (SIGG(check)) {
 		size_t x;
 		struct sigaction sa;
@@ -352,6 +355,21 @@ void zend_signal_deactivate(void)
 		}
 	}
 
+	/* Restore previously registered signal handlers from orig_handlers */
+	for (signo = 0; signo < NSIG; ++signo) {
+		if (sigaction(signo, NULL, &sa) == 0) {
+			if (sa.sa_flags & SA_SIGINFO) {
+				sa.sa_sigaction = global_orig_handlers[signo-1].handler;
+			} else {
+				sa.sa_handler = global_orig_handlers[signo-1].handler;
+			}
+			sa.sa_flags = global_orig_handlers[signo-1].flags;
+			if (sigaction(signo, &sa, NULL) < 0) {
+				zend_error(E_CORE_WARNING, "zend_signal: unable to restore handler for signal (%d) at shutdown", signo);
+			}
+		}
+	}
+	
 	/* After active=0 is set, signal handlers will be called directly and other
 	 * state that is reset below will not be accessed. */
 	*((volatile int *) &SIGG(active)) = 0;
