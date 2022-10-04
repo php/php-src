@@ -49,7 +49,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 	zval retval;							\
 	zend_result ret = FAILURE
 
-#define PSF(a) PS(mod_user_names).name.ps_##a
+#define PSF(a) PS(mod_user_names).ps_##a
 
 #define FINISH \
 	if (Z_TYPE(retval) != IS_UNDEF) { \
