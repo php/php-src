@@ -23,9 +23,13 @@
 BEGIN_EXTERN_C()
 
 typedef struct _zend_gc_status {
+	bool active;
+	bool gc_protected;
+	bool full;
 	uint32_t runs;
 	uint32_t collected;
 	uint32_t threshold;
+	uint32_t buf_size;
 	uint32_t num_roots;
 } zend_gc_status;
 
