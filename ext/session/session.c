@@ -1951,31 +1951,31 @@ static inline void set_user_save_handler_ini(void) {
 }
 
 #define SESSION_RELEASE_USER_HANDLER_OO(struct_name) \
-	if (!Z_ISUNDEF(PS(mod_user_names).name.struct_name)) { \
-		zval_ptr_dtor(&PS(mod_user_names).name.struct_name); \
-		ZVAL_UNDEF(&PS(mod_user_names).name.struct_name); \
+	if (!Z_ISUNDEF(PS(mod_user_names).struct_name)) { \
+		zval_ptr_dtor(&PS(mod_user_names).struct_name); \
+		ZVAL_UNDEF(&PS(mod_user_names).struct_name); \
 	}
 
 #define SESSION_SET_USER_HANDLER_OO(struct_name, zstr_method_name) \
-	array_init_size(&PS(mod_user_names).name.struct_name, 2); \
+	array_init_size(&PS(mod_user_names).struct_name, 2); \
 	Z_ADDREF_P(obj); \
-	add_next_index_zval(&PS(mod_user_names).name.struct_name, obj); \
-	add_next_index_str(&PS(mod_user_names).name.struct_name, zstr_method_name);
+	add_next_index_zval(&PS(mod_user_names).struct_name, obj); \
+	add_next_index_str(&PS(mod_user_names).struct_name, zstr_method_name);
 
 #define SESSION_SET_USER_HANDLER_OO_MANDATORY(struct_name, method_name) \
-	if (!Z_ISUNDEF(PS(mod_user_names).name.struct_name)) { \
-		zval_ptr_dtor(&PS(mod_user_names).name.struct_name); \
+	if (!Z_ISUNDEF(PS(mod_user_names).struct_name)) { \
+		zval_ptr_dtor(&PS(mod_user_names).struct_name); \
 	} \
-	array_init_size(&PS(mod_user_names).name.struct_name, 2); \
+	array_init_size(&PS(mod_user_names).struct_name, 2); \
 	Z_ADDREF_P(obj); \
-	add_next_index_zval(&PS(mod_user_names).name.struct_name, obj); \
-	add_next_index_str(&PS(mod_user_names).name.struct_name, zend_string_init(method_name, strlen(method_name), false));
+	add_next_index_zval(&PS(mod_user_names).struct_name, obj); \
+	add_next_index_str(&PS(mod_user_names).struct_name, zend_string_init(method_name, strlen(method_name), false));
 
 #define SESSION_SET_USER_HANDLER_PROCEDURAL(struct_name, fci) \
-	if (!Z_ISUNDEF(PS(mod_user_names).name.struct_name)) { \
-		zval_ptr_dtor(&PS(mod_user_names).name.struct_name); \
+	if (!Z_ISUNDEF(PS(mod_user_names).struct_name)) { \
+		zval_ptr_dtor(&PS(mod_user_names).struct_name); \
 	} \
-	ZVAL_COPY(&PS(mod_user_names).name.struct_name, &fci.function_name);
+	ZVAL_COPY(&PS(mod_user_names).struct_name, &fci.function_name);
 
 #define SESSION_SET_USER_HANDLER_PROCEDURAL_OPTIONAL(struct_name, fci) \
 	if (ZEND_FCI_INITIALIZED(fci)) { \
@@ -2294,7 +2294,7 @@ PHP_FUNCTION(session_regenerate_id)
 		RETURN_THROWS();
 	}
 	if (PS(use_strict_mode)) {
-		if ((!PS(mod_user_implemented) && PS(mod)->s_validate_sid) || !Z_ISUNDEF(PS(mod_user_names).name.ps_validate_sid)) {
+		if ((!PS(mod_user_implemented) && PS(mod)->s_validate_sid) || !Z_ISUNDEF(PS(mod_user_names).ps_validate_sid)) {
 			int limit = 3;
 			/* Try to generate non-existing ID */
 			while (limit-- && PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == SUCCESS) {
@@ -2360,7 +2360,7 @@ PHP_FUNCTION(session_create_id)
 		int limit = 3;
 		while (limit--) {
 			new_id = PS(mod)->s_create_sid(&PS(mod_data));
-			if (!PS(mod)->s_validate_sid || (PS(mod_user_implemented) && Z_ISUNDEF(PS(mod_user_names).name.ps_validate_sid))) {
+			if (!PS(mod)->s_validate_sid || (PS(mod_user_implemented) && Z_ISUNDEF(PS(mod_user_names).ps_validate_sid))) {
 				break;
 			} else {
 				/* Detect collision and retry */
@@ -2776,9 +2776,9 @@ static PHP_RINIT_FUNCTION(session) /* {{{ */
 /* }}} */
 
 #define SESSION_FREE_USER_HANDLER(struct_name) \
-	if (!Z_ISUNDEF(PS(mod_user_names).name.struct_name)) { \
-		zval_ptr_dtor(&PS(mod_user_names).name.struct_name); \
-		ZVAL_UNDEF(&PS(mod_user_names).name.struct_name); \
+	if (!Z_ISUNDEF(PS(mod_user_names).struct_name)) { \
+		zval_ptr_dtor(&PS(mod_user_names).struct_name); \
+		ZVAL_UNDEF(&PS(mod_user_names).struct_name); \
 	}
 
 
@@ -2827,15 +2827,15 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = 0;
 	/* Unset user defined handlers */
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_open);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_close);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_read);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_write);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_destroy);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_gc);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_create_sid);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_validate_sid);
-	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_update_timestamp);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_open);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_close);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_read);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_write);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_destroy);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_gc);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_create_sid);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_validate_sid);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_update_timestamp);
 	ZVAL_UNDEF(&ps_globals->http_session_vars);
 }
 /* }}} */
