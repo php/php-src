@@ -2775,6 +2775,13 @@ static PHP_RINIT_FUNCTION(session) /* {{{ */
 }
 /* }}} */
 
+#define SESSION_FREE_USER_HANDLER(struct_name) \
+	if (!Z_ISUNDEF(PS(mod_user_names).name.struct_name)) { \
+		zval_ptr_dtor(&PS(mod_user_names).name.struct_name); \
+		ZVAL_UNDEF(&PS(mod_user_names).name.struct_name); \
+	}
+
+
 static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
@@ -2785,12 +2792,16 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 	php_rshutdown_session_globals();
 
 	/* this should NOT be done in php_rshutdown_session_globals() */
-	for (int i = 0; i < PS_NUM_APIS; i++) {
-		if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
-			zval_ptr_dtor(&PS(mod_user_names).names[i]);
-			ZVAL_UNDEF(&PS(mod_user_names).names[i]);
-		}
-	}
+	/* Free user defined handlers */
+	SESSION_FREE_USER_HANDLER(ps_open);
+	SESSION_FREE_USER_HANDLER(ps_close);
+	SESSION_FREE_USER_HANDLER(ps_read);
+	SESSION_FREE_USER_HANDLER(ps_write);
+	SESSION_FREE_USER_HANDLER(ps_destroy);
+	SESSION_FREE_USER_HANDLER(ps_gc);
+	SESSION_FREE_USER_HANDLER(ps_create_sid);
+	SESSION_FREE_USER_HANDLER(ps_validate_sid);
+	SESSION_FREE_USER_HANDLER(ps_update_timestamp);
 
 	return SUCCESS;
 }
@@ -2815,9 +2826,16 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->mod_user_is_open = 0;
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = 0;
-	for (int i = 0; i < PS_NUM_APIS; i++) {
-		ZVAL_UNDEF(&ps_globals->mod_user_names.names[i]);
-	}
+	/* Unset user defined handlers */
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_open);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_close);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_read);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_write);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_destroy);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_gc);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_create_sid);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_validate_sid);
+	ZVAL_UNDEF(&ps_globals->mod_user_names.name.ps_update_timestamp);
 	ZVAL_UNDEF(&ps_globals->http_session_vars);
 }
 /* }}} */
