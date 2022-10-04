@@ -119,8 +119,8 @@ require_once('skipifconnectfailure.inc');
     }
 
     ini_set('mysqli.default_host', 'p:' . $host);
-        if (!is_object($link = mysqli_connect())) {
-            printf("[021] Usage of mysqli.default_host (persistent) failed\n") ;
+    if (!is_object($link = mysqli_connect())) {
+        printf("[021] Usage of mysqli.default_host (persistent) failed\n") ;
     } else {
         if (!$res = mysqli_query($link, "SELECT 'mysqli.default_host (persistent)' AS 'testing'"))
             printf("[022] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
