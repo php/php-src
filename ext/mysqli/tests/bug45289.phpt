@@ -25,10 +25,7 @@ require_once('skipifconnectfailure.inc');
         printf("[003] [%d] %s\n", $stmt->errno, $stmt->error);
 
     if ($res = $link->store_result()) {
-        if ($IS_MYSQLND)
-            printf("[004] Can store result!\n");
-        else
-            printf("[004] [007] http://bugs.mysql.com/bug.php?id=47485\n");
+        printf("[004] Can store result!\n");
     } else {
         printf("[004] [%d] %s\n", $link->errno, $link->error);
     }

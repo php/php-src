@@ -33,15 +33,9 @@ require_once('skipifconnectfailure.inc');
 
     $index = 0;
     while ($stmt->fetch()) {
-        /* NOTE: libmysql - http://bugs.mysql.com/bug.php?id=47483 */
         if ($data[$index] != $column1) {
-            if ($IS_MYSQLND || $index != 1) {
-                printf("[004] Row %d, expecting %s/%s got %s/%s\n",
-                    $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
-            } else {
-                if ($column1 != "thre")
-                    printf("[005] Got '%s'. Please check if http://bugs.mysql.com/bug.php?id=47483 has been fixed and adapt tests bug45019.phpt/mysqli_ps_select_union.phpt", $column1);
-            }
+            printf("[004] Row %d, expecting %s/%s got %s/%s\n",
+                $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
         }
         $index++;
     }

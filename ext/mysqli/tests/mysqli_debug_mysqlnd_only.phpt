@@ -14,9 +14,6 @@ if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     die("skip: debug functionality not enabled");
-
-if (!$IS_MYSQLND)
-    die("skip mysqlnd only test");
 ?>
 --FILE--
 <?php

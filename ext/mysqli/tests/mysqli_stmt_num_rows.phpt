@@ -83,7 +83,7 @@ require_once('skipifconnectfailure.inc');
         day, after Klingons visited earth, becomes the official one. Meanwhile, do
         not rely on it.
         */
-        if ($IS_MYSQLND && (7 !== ($tmp = mysqli_stmt_num_rows($stmt))))
+        if (7 !== ($tmp = mysqli_stmt_num_rows($stmt)))
             printf("[54] Expecting int/7, got %s/%s\n", gettype($tmp), $tmp);
 
     } else {
