@@ -10,5 +10,5 @@ function foo(X&Y $foo = null) {
 foo(null);
 
 ?>
---EXPECTF--
+--EXPECT--
 NULL
