@@ -35,6 +35,14 @@ PHP 8.3 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Core:
+  . gc_status() has added the following 4 fields:
+    "running" => bool
+    "protected" => bool
+    "full" => bool
+    "buffer_size" => int
+    See GH-9336
+
 ========================================
 6. New Functions
 ========================================
