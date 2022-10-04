@@ -883,8 +883,8 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 	} else {
 		MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 		MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-		MBSTRG(filter_illegal_substchar) = 0x3f;	/* '?' */
-		MBSTRG(current_filter_illegal_substchar) = 0x3f;	/* '?' */
+		MBSTRG(filter_illegal_substchar) = '?';
+		MBSTRG(current_filter_illegal_substchar) = '?';
 	}
 
 	return SUCCESS;
@@ -1015,9 +1015,9 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->default_detect_order_list = (enum mbfl_no_encoding *) php_mb_default_identify_list_neut;
 	mbstring_globals->default_detect_order_list_size = sizeof(php_mb_default_identify_list_neut) / sizeof(php_mb_default_identify_list_neut[0]);
 	mbstring_globals->filter_illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-	mbstring_globals->filter_illegal_substchar = 0x3f;	/* '?' */
+	mbstring_globals->filter_illegal_substchar = '?';
 	mbstring_globals->current_filter_illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-	mbstring_globals->current_filter_illegal_substchar = 0x3f;	/* '?' */
+	mbstring_globals->current_filter_illegal_substchar = '?';
 	mbstring_globals->illegalchars = 0;
 	mbstring_globals->encoding_translation = 0;
 	mbstring_globals->strict_detection = 0;

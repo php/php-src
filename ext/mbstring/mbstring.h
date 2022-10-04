@@ -87,9 +87,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	enum mbfl_no_encoding *default_detect_order_list;
 	size_t default_detect_order_list_size;
 	int filter_illegal_mode;
-	int filter_illegal_substchar;
+	uint32_t filter_illegal_substchar;
 	int current_filter_illegal_mode;
-	int current_filter_illegal_substchar;
+	uint32_t current_filter_illegal_substchar;
 	enum mbfl_no_language language;
 	bool encoding_translation;
 	bool strict_detection;

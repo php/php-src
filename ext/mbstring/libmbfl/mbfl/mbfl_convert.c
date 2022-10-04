@@ -243,7 +243,7 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 	unsigned int w = c;
 	int ret = 0;
 	int mode_backup = filter->illegal_mode;
-	int substchar_backup = filter->illegal_substchar;
+	uint32_t substchar_backup = filter->illegal_substchar;
 
 	/* The used substitution character may not be supported by the target character encoding.
 	 * If that happens, first try to use "?" instead and if that also fails, silently drop the

@@ -154,7 +154,7 @@ void mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode)
 	}
 }
 
-void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar)
+void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, uint32_t substchar)
 {
 	if (convd->filter2) {
 		convd->filter2->illegal_substchar = substchar;
@@ -387,7 +387,7 @@ mbfl_convert_encoding(
 
 	if (filter2 != NULL) {
 		filter2->illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-		filter2->illegal_substchar = 0x3f;		/* '?' */
+		filter2->illegal_substchar = '?';
 	}
 
 	mbfl_memory_device_init(&device, string->len, (string->len >> 2) + 8);
