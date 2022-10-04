@@ -92,8 +92,7 @@ if (!$TEST_EXPERIMENTAL)
     if (!$mysqli->query("CREATE TABLE t1 (a smallint)"))
         printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($warning = new mysqli_warning($mysqli)))
-        printf("[024] Expecting object/mysqli_warning, got %s/%s", gettype($warning), $warning);
+    $warning = new mysqli_warning($mysqli);
 
     if (!is_string($warning->message) || ('' == $warning->message))
         printf("[025] Expecting string, got %s/%s", gettype($warning->message), $warning->message);
