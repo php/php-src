@@ -489,13 +489,6 @@ retry:
 		}
 	}
 
-	if (s1 <= 0 && (filter->to->no_encoding == mbfl_no_encoding_2022jp_2004 || filter->to->no_encoding == mbfl_no_encoding_eucjp2004) && (c == 0x5C || c == 0x7E)) {
-		/* ISO-2022-JP-2004 can represent ASCII characters directly, so there is no need
-		 * to use the JIS X 0208 REVERSE SOLIDUS for ASCII backslash, or WAVE DASH for tilde
-		 * Likewise for EUC-JP-2004 */
-		s1 = c;
-	}
-
 	/* check for major japanese chars: U+4E00 - U+9FFF */
 	if (s1 <= 0) {
 		for (k = 0; k < uni2jis_tbl_len; k++) {
