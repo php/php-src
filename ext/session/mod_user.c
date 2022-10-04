@@ -82,11 +82,7 @@ PS_OPEN_FUNC(user)
 	zval args[2];
 	STDVARS;
 
-	if (Z_ISUNDEF(PSF(open))) {
-		php_error_docref(NULL, E_WARNING, "User session functions are not defined");
-
-		return FAILURE;
-	}
+	ZEND_ASSERT(!Z_ISUNDEF(PSF(open)));
 
 	ZVAL_STRING(&args[0], (char*)save_path);
 	ZVAL_STRING(&args[1], (char*)session_name);
@@ -110,6 +106,8 @@ PS_CLOSE_FUNC(user)
 {
 	bool bailout = 0;
 	STDVARS;
+
+	ZEND_ASSERT(!Z_ISUNDEF(PSF(close)));
 
 	if (!PS(mod_user_implemented)) {
 		/* already closed */
@@ -139,6 +137,8 @@ PS_READ_FUNC(user)
 	zval args[1];
 	STDVARS;
 
+	ZEND_ASSERT(!Z_ISUNDEF(PSF(read)));
+
 	ZVAL_STR_COPY(&args[0], key);
 
 	ps_call_handler(&PSF(read), 1, args, &retval);
@@ -159,6 +159,8 @@ PS_WRITE_FUNC(user)
 	zval args[2];
 	STDVARS;
 
+	ZEND_ASSERT(!Z_ISUNDEF(PSF(write)));
+
 	ZVAL_STR_COPY(&args[0], key);
 	ZVAL_STR_COPY(&args[1], val);
 
@@ -172,6 +174,8 @@ PS_DESTROY_FUNC(user)
 	zval args[1];
 	STDVARS;
 
+	ZEND_ASSERT(!Z_ISUNDEF(PSF(destroy)));
+
 	ZVAL_STR_COPY(&args[0], key);
 
 	ps_call_handler(&PSF(destroy), 1, args, &retval);
@@ -183,6 +187,8 @@ PS_GC_FUNC(user)
 {
 	zval args[1];
 	zval retval;
+
+	ZEND_ASSERT(!Z_ISUNDEF(PSF(gc)));
 
 	ZVAL_LONG(&args[0], maxlifetime);
 
