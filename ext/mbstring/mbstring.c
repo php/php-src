@@ -80,6 +80,8 @@ static inline bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_en
 
 static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 
+static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding);
+
 /* See mbfilter_cp5022x.c */
 uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, int mode);
 /* }}} */
@@ -2829,11 +2831,9 @@ static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t
 /* {{{ Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
-	char *str;
-	size_t str_len;
-	zend_string *encoding_str = NULL;
+	zend_string *str, *encoding_str = NULL;
 	HashTable *encoding_ht = NULL;
-	bool strict = 0;
+	bool strict = false;
 
 	mbfl_string string;
 	const mbfl_encoding *ret;
@@ -2841,7 +2841,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	size_t size;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(encoding_ht, encoding_str)
 		Z_PARAM_BOOL(strict)
@@ -2879,11 +2879,11 @@ PHP_FUNCTION(mb_detect_encoding)
 
 	if (strict && size == 1) {
 		/* If there is only a single candidate encoding, mb_check_encoding is faster */
-		ret = (php_mb_check_encoding(str, str_len, *elist)) ? *elist : NULL;
+		ret = (mb_check_str_encoding(str, *elist)) ? *elist : NULL;
 	} else {
 		mbfl_string_init(&string);
-		string.val = (unsigned char *)str;
-		string.len = str_len;
+		string.val = (unsigned char*)ZSTR_VAL(str);
+		string.len = ZSTR_LEN(str);
 		ret = mbfl_identify_encoding(&string, elist, size, strict);
 	}
 
@@ -4357,7 +4357,7 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
+MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
 {
 	uint32_t wchar_buf[128];
 	unsigned char *in = (unsigned char*)input;
@@ -4370,7 +4370,7 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const m
 	ZEND_ASSERT(out_len <= 8);
 	for (int i = 0; i < out_len; i++) {
 		if (wchar_buf[i] == MBFL_BAD_INPUT) {
-			return 0;
+			return false;
 		}
 	}
 
@@ -4379,12 +4379,28 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const m
 		ZEND_ASSERT(out_len <= 128);
 		for (int i = 0; i < out_len; i++) {
 			if (wchar_buf[i] == MBFL_BAD_INPUT) {
-				return 0;
+				return false;
 			}
 		}
 	}
 
-	return 1;
+	return true;
+}
+
+static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding)
+{
+	if (encoding == &mbfl_encoding_utf8) {
+		if (GC_FLAGS(str) & IS_STR_VALID_UTF8) {
+			return true;
+		}
+		bool result = php_mb_check_encoding(ZSTR_VAL(str), ZSTR_LEN(str), encoding);
+		if (result && !ZSTR_IS_INTERNED(str)) {
+			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		}
+		return result;
+	} else {
+		return php_mb_check_encoding(ZSTR_VAL(str), ZSTR_LEN(str), encoding);
+	}
 }
 
 static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
@@ -4404,14 +4420,14 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
-			if (!php_mb_check_encoding(ZSTR_VAL(key), ZSTR_LEN(key), encoding)) {
+			if (!mb_check_str_encoding(key, encoding)) {
 				valid = 0;
 				break;
 			}
 		}
 		switch (Z_TYPE_P(entry)) {
 			case IS_STRING:
-				if (!php_mb_check_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), encoding)) {
+				if (!mb_check_str_encoding(Z_STR_P(entry), encoding)) {
 					valid = 0;
 					break;
 				}
@@ -4459,7 +4475,7 @@ PHP_FUNCTION(mb_check_encoding)
 	if (input_ht) {
 		RETURN_BOOL(php_mb_check_encoding_recursive(input_ht, encoding));
 	} else if (input_str) {
-		RETURN_BOOL(php_mb_check_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str), encoding));
+		RETURN_BOOL(mb_check_str_encoding(input_str, encoding));
 	} else {
 		php_error_docref(NULL, E_DEPRECATED,
 			"Calling mb_check_encoding() without argument is deprecated");
