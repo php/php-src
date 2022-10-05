@@ -6415,7 +6415,7 @@ done:
 								ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 								if (ra && ra[ssa_op->op1_def]) {
 									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
-										ra[ssa_op->op1_def]->reg & ZREG_STORE);
+										ra[ssa_op->op1_def]->flags & ZREG_STORE);
 								}
 							}
 							if (type == IS_LONG
