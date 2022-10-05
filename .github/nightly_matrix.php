@@ -66,7 +66,7 @@ function get_matrix_include(array $branches) {
                 'branch' => $branch,
                 'debug' => true,
                 'zts' => true,
-                'run_tests_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
+                'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
             ];
         }
     }
