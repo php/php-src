@@ -109,6 +109,41 @@ PHP_METHOD(Random_Randomizer, nextInt)
 }
 /* }}} */
 
+/* {{{ Generate a float in [0, 1) */
+PHP_METHOD(Random_Randomizer, nextFloat)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	uint64_t result;
+	size_t total_size;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	result = 0;
+	total_size = 0;
+	do {
+		uint64_t r = randomizer->algo->generate(randomizer->status);
+		result = result | (r << (total_size * 8));
+		total_size += randomizer->status->last_generated_size;
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	} while (total_size < sizeof(uint64_t));
+
+	/* A double has 53 bits of precision, thus we must not
+	 * use the full 64 bits of the uint64_t, because we would
+	 * introduce a bias / rounding error.
+	 */
+	const double step_size = 1.0 / (1ULL << 53);
+
+	/* Use the upper 53 bits, because some engine's lower bits
+	 * are of lower quality.
+	 */
+	result = (result >> 11);
+
+	RETURN_DOUBLE(step_size * result);
+}
+/* }}} */
+
 /* {{{ Generate random number in range */
 PHP_METHOD(Random_Randomizer, getInt)
 {

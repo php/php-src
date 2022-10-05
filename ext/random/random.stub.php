@@ -133,6 +133,8 @@ namespace Random
 
         public function nextInt(): int {}
 
+        public function nextFloat(): float {}
+
         public function getInt(int $min, int $max): int {}
 
         public function getBytes(int $length): string {}
