@@ -102,6 +102,10 @@ PHP 8.3 UPGRADE NOTES
     other SAPIs, this directive is required when running as root because
     preloading is done before the SAPI switches to an unprivileged user.
 
+- Streams:
+  . Blocking fread() on socket connection returns immediately if there are
+    any buffered data instead of waiting for more data.
+
 ========================================
 14. Performance Improvements
 ========================================

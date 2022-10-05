@@ -225,6 +225,7 @@ struct _php_stream  {
 	size_t readbuflen;
 	zend_off_t readpos;
 	zend_off_t writepos;
+	ssize_t didread;
 
 	/* how much data to read when filling buffer */
 	size_t chunk_size;

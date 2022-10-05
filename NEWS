@@ -35,6 +35,10 @@ PHP                                                                        NEWS
     over socket binding for a cpu core. (David Carlier)
   . Added SKF_AD_QUEUE for cbpf filters. (David Carlier)
 
+- Streams:
+  . Fixed bug #51056: blocking fread() will block even if data is available.
+    (Jakub Zelenka)
+
 - Reflection:
   . Fix GH-9470 (ReflectionMethod constructor should not find private parent
     method). (ilutov)

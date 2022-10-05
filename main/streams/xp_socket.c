@@ -120,10 +120,10 @@ retry:
 	return didwrite;
 }
 
-static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock)
+static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock, bool has_buffered_data)
 {
 	int retval;
-	struct timeval *ptimeout;
+	struct timeval *ptimeout, zero_timeout;
 
 	if (!sock || sock->socket == -1) {
 		return;
@@ -131,10 +131,16 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 
 	sock->timeout_event = 0;
 
-	if (sock->timeout.tv_sec == -1)
+	if (has_buffered_data) {
+		/* If there is already buffered data, use no timeout. */
+		zero_timeout.tv_sec = 0;
+		zero_timeout.tv_usec = 0;
+		ptimeout = &zero_timeout;
+	} else if (sock->timeout.tv_sec == -1) {
 		ptimeout = NULL;
-	else
+	} else {
 		ptimeout = &sock->timeout;
+	}
 
 	while(1) {
 		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
@@ -153,21 +159,37 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	ssize_t nr_bytes = 0;
-	int err;
 
 	if (!sock || sock->socket == -1) {
 		return -1;
 	}
 
+	int recv_flags = 0;
+	/* Special handling for blocking read. */
 	if (sock->is_blocked) {
-		php_sock_stream_wait_for_data(stream, sock);
-		if (sock->timeout_event)
-			return -1;
+		/* Find out if there is any data buffered from the previous read. */
+		bool has_buffered_data = stream->didread > 0;
+		/* No need to wait if there is any data buffered or no timeout. */
+		bool dont_wait = has_buffered_data ||
+				(sock->timeout.tv_sec == 0 && sock->timeout.tv_usec == 0);
+		/* Set MSG_DONTWAIT if no wait is needed or there is unlimited timeout which was
+		 * added by fix for #41984 commited in 9343c5404. */
+		if (dont_wait || sock->timeout.tv_sec != -1) {
+			recv_flags = MSG_DONTWAIT;
+		}
+		/* If the wait is needed or it is a platform without MSG_DONTWAIT support (e.g. Windows),
+		 * then poll for data. */
+		if (!dont_wait || MSG_DONTWAIT == 0) {
+			php_sock_stream_wait_for_data(stream, sock, has_buffered_data);
+			if (sock->timeout_event) {
+				/* It is ok to timeout if there is any data buffered so return 0, otherwise -1. */
+				return has_buffered_data ? 0 : -1;
+			}
+		}
 	}
 
-	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
-	err = php_socket_errno();
+	ssize_t nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), recv_flags);
+	int err = php_socket_errno();
 
 	if (nr_bytes < 0) {
 		if (PHP_IS_TRANSIENT_ERROR(err)) {

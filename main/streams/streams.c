@@ -680,7 +680,8 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 
 PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 {
-	ssize_t toread = 0, didread = 0;
+	ssize_t toread = 0;
+	stream->didread = 0;
 
 	while (size > 0) {
 
@@ -699,7 +700,7 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			stream->readpos += toread;
 			size -= toread;
 			buf += toread;
-			didread += toread;
+			stream->didread += toread;
 		}
 
 		/* ignore eof here; the underlying state might have changed */
@@ -712,14 +713,14 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			if (toread < 0) {
 				/* Report an error if the read failed and we did not read any data
 				 * before that. Otherwise return the data we did read. */
-				if (didread == 0) {
+				if (stream->didread == 0) {
 					return toread;
 				}
 				break;
 			}
 		} else {
 			if (php_stream_fill_read_buffer(stream, size) != SUCCESS) {
-				if (didread == 0) {
+				if (stream->didread == 0) {
 					return -1;
 				}
 				break;
@@ -736,7 +737,7 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			}
 		}
 		if (toread > 0) {
-			didread += toread;
+			stream->didread += toread;
 			buf += toread;
 			size -= toread;
 		} else {
@@ -752,11 +753,11 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 		}
 	}
 
-	if (didread > 0) {
-		stream->position += didread;
+	if (stream->didread > 0) {
+		stream->position += stream->didread;
 	}
 
-	return didread;
+	return stream->didread;
 }
 
 /* Like php_stream_read(), but reading into a zend_string buffer. This has some similarity
