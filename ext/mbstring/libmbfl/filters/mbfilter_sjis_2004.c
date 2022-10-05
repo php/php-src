@@ -24,8 +24,14 @@
 /*
  * The source code included in this files was separated from mbfilter_sjis.c
  * by rui hirokawa <hirokawa@php.net> on 15 aug 2011.
- *
  */
+
+/* Although the specification for Shift-JIS-2004 indicates that 0x5C and
+ * 0x7E should (respectively) represent a Yen sign and an overbar, feedback
+ * from Japanese PHP users indicates that they prefer 0x5C and 0x7E to be
+ * treated as equivalent to U+005C and U+007E. This is the historical
+ * behavior of mbstring, and promotes compatibility with other software
+ * which handles Shift-JIS and Shift-JIS-2004 text in this way. */
 
 #include "mbfilter.h"
 #include "mbfilter_sjis_2004.h"
@@ -565,13 +571,6 @@ retry:
 		}
 	}
 
-	if (s1 <= 0 && (filter->to->no_encoding == mbfl_no_encoding_2022jp_2004 || filter->to->no_encoding == mbfl_no_encoding_eucjp2004) && (c == 0x5C || c == 0x7E)) {
-		/* ISO-2022-JP-2004 can represent ASCII characters directly, so there is no need
-		 * to use the JIS X 0208 REVERSE SOLIDUS for ASCII backslash, or WAVE DASH for tilde
-		 * Likewise for EUC-JP-2004 */
-		s1 = c;
-	}
-
 	/* check for major japanese chars: U+4E00 - U+9FFF */
 	if (s1 <= 0) {
 		for (k = 0; k < uni2jis_tbl_len; k++) {
@@ -1077,12 +1076,6 @@ process_codepoint: ;
 			}
 		}
 
-		if (!s && (w == 0x5C || w == 0x7E)) {
-			/* EUC-JP-2004 can represent ASCII characters directly, so there is no need
-			 * to use the JIS X 0208 REVERSE SOLIDUS for ASCII backslash, or WAVE DASH for tilde */
-			s = w;
-		}
-
 		/* Check for major Japanese chars: U+4E00-U+9FFF */
 		if (!s) {
 			for (int k = 0; k < uni2jis_tbl_len; k++) {
@@ -1334,12 +1327,6 @@ process_codepoint: ;
 					break;
 				}
 			}
-		}
-
-		if (!s && (w == 0x5C || w == 0x7E)) {
-			/* ISO-2022-JP-2004 can represent ASCII characters directly, so there is no need
-			 * to use the JIS X 0208 REVERSE SOLIDUS for ASCII backslash, or WAVE DASH for tilde */
-			s = w;
 		}
 
 		/* Check for major Japanese chars: U+4E00-U+9FFF */
