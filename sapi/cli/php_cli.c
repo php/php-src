@@ -536,7 +536,7 @@ static void cli_register_file_handles(void)
 	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
 	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
 
-	/* Release stream resources, but don't free the underlying handles. Othewrise,
+	/* Release stream resources, but don't free the underlying handles. Otherwise,
 	 * extensions which write to stderr or company during mshutdown/gshutdown
 	 * won't have the expected functionality.
 	 */

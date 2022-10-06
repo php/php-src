@@ -101,7 +101,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		ITypeLib *pTL;
 		char *typelib_name;
 		char *modifier, *ptr;
-		int mode = CONST_CS | CONST_PERSISTENT;	/* CONST_PERSISTENT is ok here */
+		int mode = CONST_PERSISTENT;	/* CONST_PERSISTENT is ok here */
 
 		if (typelib_name_buffer[0]==';') {
 			continue;

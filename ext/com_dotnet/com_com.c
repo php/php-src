@@ -39,7 +39,7 @@ PHP_METHOD(com, __construct)
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
 	HRESULT res = E_FAIL;
-	int mode = COMG(autoreg_case_sensitive) ? CONST_CS : 0;
+	int mode = 0;
 	ITypeLib *TL = NULL;
 	COSERVERINFO	info;
 	COAUTHIDENTITY	authid = {0};
@@ -817,7 +817,7 @@ PHP_FUNCTION(com_load_typelib)
 	php_com_initialize();
 	pTL = php_com_load_typelib_via_cache(name, codepage);
 	if (pTL) {
-		if (php_com_import_typelib(pTL, cs ? CONST_CS : 0, codepage) == SUCCESS) {
+		if (php_com_import_typelib(pTL, 0, codepage) == SUCCESS) {
 			RETVAL_TRUE;
 		}
 
