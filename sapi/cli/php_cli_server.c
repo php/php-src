@@ -1673,6 +1673,7 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	zend_hash_add(&client->request.headers_original_case, client->current_header_name, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
+	zend_string_release_ex(client->current_header_name, /* persistent */ true);
 
 	client->current_header_name = NULL;
 	client->current_header_value = NULL;
