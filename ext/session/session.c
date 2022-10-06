@@ -1068,9 +1068,10 @@ PHPAPI zend_result php_session_register_module(const ps_module *ptr) /* {{{ */
 /* }}} */
 
 /* Dummy PS module function */
-/* We consider any ID valid, so we return FAILURE to indicate that a session doesn't exist */
+/* We consider any ID valid (thus also implying that a session with such an ID exists),
+	thus we always return SUCCESS */
 PHPAPI zend_result php_session_validate_sid(PS_VALIDATE_SID_ARGS) {
-	return FAILURE;
+	return SUCCESS;
 }
 
 /* Dummy PS module function */
@@ -2254,18 +2255,24 @@ PHP_FUNCTION(session_regenerate_id)
 		}
 		RETURN_THROWS();
 	}
-	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
-		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == SUCCESS) {
-		zend_string_release_ex(PS(id), 0);
-		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
-		if (!PS(id)) {
-			PS(mod)->s_close(&PS(mod_data));
-			PS(session_status) = php_session_none;
-			if (!EG(exception)) {
-				zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+	if (PS(use_strict_mode)) {
+		if ((!PS(mod_user_implemented) && PS(mod)->s_validate_sid) || !Z_ISUNDEF(PS(mod_user_names).name.ps_validate_sid)) {
+			int limit = 3;
+			/* Try to generate non-existing ID */
+			while (limit-- && PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == SUCCESS) {
+				zend_string_release_ex(PS(id), 0);
+				PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
+				if (!PS(id)) {
+					PS(mod)->s_close(&PS(mod_data));
+					PS(session_status) = php_session_none;
+					if (!EG(exception)) {
+						zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+					}
+					RETURN_THROWS();
+				}
 			}
-			RETURN_THROWS();
 		}
+		// TODO warn that ID cannot be verified? else { }
 	}
 	/* Read is required to make new session data at this point. */
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &data, PS(gc_maxlifetime)) == FAILURE) {
@@ -2292,7 +2299,6 @@ PHP_FUNCTION(session_regenerate_id)
 /* }}} */
 
 /* {{{ Generate new session ID. Intended for user save handlers. */
-/* This is not used yet */
 PHP_FUNCTION(session_create_id)
 {
 	zend_string *prefix = NULL, *new_id;
@@ -2316,7 +2322,7 @@ PHP_FUNCTION(session_create_id)
 		int limit = 3;
 		while (limit--) {
 			new_id = PS(mod)->s_create_sid(&PS(mod_data));
-			if (!PS(mod)->s_validate_sid) {
+			if (!PS(mod)->s_validate_sid || (PS(mod_user_implemented) && Z_ISUNDEF(PS(mod_user_names).name.ps_validate_sid))) {
 				break;
 			} else {
 				/* Detect collision and retry */
