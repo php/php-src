@@ -24,35 +24,40 @@ require_once('skipifconnectfailure.inc');
 
     // Run the following tests without an anoynmous MySQL user and use a password for the test user!
     ini_set('mysqli.default_socket', $socket);
-    if (!is_object($mysqli = new mysqli($host, $user, $passwd, $db, $port)) || (0 !== mysqli_connect_errno())) {
+    $mysqli = new mysqli($host, $user, $passwd, $db, $port);
+    if (0 !== mysqli_connect_errno()) {
         printf("[005] Usage of mysqli.default_socket failed\n") ;
     } else {
         $mysqli->close();
     }
 
     ini_set('mysqli.default_port', $port);
-    if (!is_object($mysqli = new mysqli($host, $user, $passwd, $db)) || (0 !== mysqli_connect_errno())) {
+    $mysqli = new mysqli($host, $user, $passwd, $db);
+    if (0 !== mysqli_connect_errno()) {
         printf("[006] Usage of mysqli.default_port failed\n") ;
     } else {
         $mysqli->close();
     }
 
     ini_set('mysqli.default_pw', $passwd);
-    if (!is_object($mysqli = new mysqli($host, $user)) || (0 !== mysqli_connect_errno())) {
+    $mysqli = new mysqli($host, $user);
+    if (0 !== mysqli_connect_errno()) {
         printf("[007] Usage of mysqli.default_pw failed\n") ;
     } else {
         $mysqli->close();
     }
 
     ini_set('mysqli.default_user', $user);
-    if (!is_object($mysqli = new mysqli($host)) || (0 !== mysqli_connect_errno())) {
+    $mysqli = new mysqli($host);
+    if (0 !== mysqli_connect_errno()) {
         printf("[008] Usage of mysqli.default_user failed\n") ;
     } else {
         $mysqli->close();
     }
 
     ini_set('mysqli.default_host', $host);
-    if (!is_object($mysqli = new mysqli()) || (0 !== mysqli_connect_errno())) {
+    $mysqli = new mysqli();
+    if (0 !== mysqli_connect_errno()) {
         printf("[012] Failed to create mysqli object\n");
     } else {
         // There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
@@ -66,22 +71,16 @@ require_once('skipifconnectfailure.inc');
         }
     }
 
-    if ($IS_MYSQLND) {
-        ini_set('mysqli.default_host', 'p:' . $host);
-        if (!is_object($mysqli = new mysqli())) {
-            // Due to an API flaw this shall not connect
-            printf("[010] Failed to create mysqli object\n");
-        } else {
-            // There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
-            // We had long discussions on this and found that the ext/mysqli API as
-            // such is broken. As we can't fix it, we document how it has behaved from
-            // the first day on. And that's: no connection.
-            try {
-                $mysqli->query('SELECT 1');
-            } catch (Error $exception) {
-                echo $exception->getMessage() . "\n";
-            }
-        }
+    ini_set('mysqli.default_host', 'p:' . $host);
+    $mysqli = new mysqli();
+    // There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
+    // We had long discussions on this and found that the ext/mysqli API as
+    // such is broken. As we can't fix it, we document how it has behaved from
+    // the first day on. And that's: no connection.
+    try {
+        $mysqli->query('SELECT 1');
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
     }
 
     print "... and now Exceptions\n";

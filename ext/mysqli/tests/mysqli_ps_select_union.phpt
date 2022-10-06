@@ -41,32 +41,30 @@ require_once('skipifconnectfailure.inc');
     }
     $stmt->close();
 
-    if ($IS_MYSQLND) {
-        /*
-        Advantage mysqlnd -
-        The metadata mysqlnd has available after prepare is better than
-        the one made available by the MySQL Client Library (libmysql).
-        "libmysql" will give wrong results and that is OK -
-        http://bugs.mysql.com/bug.php?id=47483
-        */
-        if (!($stmt = $link->prepare("SELECT CAST('one' AS CHAR) AS column1 UNION SELECT CAST('three' AS CHAR) UNION SELECT CAST('two' AS CHAR)")))
-            printf("[005] [%d] %s\n", $link->errno, $link->error);
+    /*
+    Advantage mysqlnd -
+    The metadata mysqlnd has available after prepare is better than
+    the one made available by the MySQL Client Library (libmysql).
+    "libmysql" will give wrong results and that is OK -
+    http://bugs.mysql.com/bug.php?id=47483
+    */
+    if (!($stmt = $link->prepare("SELECT CAST('one' AS CHAR) AS column1 UNION SELECT CAST('three' AS CHAR) UNION SELECT CAST('two' AS CHAR)")))
+        printf("[005] [%d] %s\n", $link->errno, $link->error);
 
-        $column1 = null;
-        /* Note: bind_result before execute */
-        if (!$stmt->bind_result($column1) || !$stmt->execute())
-            printf("[006] [%d] %s\n", $stmt->errno, $stmt->error);
+    $column1 = null;
+    /* Note: bind_result before execute */
+    if (!$stmt->bind_result($column1) || !$stmt->execute())
+        printf("[006] [%d] %s\n", $stmt->errno, $stmt->error);
 
-        $index = 0;
-        while ($stmt->fetch()) {
-            if ($data[$index] != $column1) {
-                printf("[007] Row %d, expecting %s/%s got %s/%s\n",
-                    $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
-            }
-            $index++;
+    $index = 0;
+    while ($stmt->fetch()) {
+        if ($data[$index] != $column1) {
+            printf("[007] Row %d, expecting %s/%s got %s/%s\n",
+                $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
         }
-        $stmt->close();
+        $index++;
     }
+    $stmt->close();
 
     // Regular (non-prepared) queries
     print "Mixing CAST('somestring'AS CHAR), integer and CAST(integer AS CHAR)...\n";
@@ -98,25 +96,23 @@ require_once('skipifconnectfailure.inc');
     }
     $stmt->close();
 
-    if ($IS_MYSQLND) {
-        /* Advantage mysqlnd - see above... */
-        if (!($stmt = $link->prepare("SELECT 1 AS column1 UNION SELECT CAST('three' AS CHAR) UNION SELECT CAST(2 AS CHAR)")))
-            printf("[012] [%d] %s\n", $link->errno, $link->error);
+    /* Advantage mysqlnd - see above... */
+    if (!($stmt = $link->prepare("SELECT 1 AS column1 UNION SELECT CAST('three' AS CHAR) UNION SELECT CAST(2 AS CHAR)")))
+        printf("[012] [%d] %s\n", $link->errno, $link->error);
 
-        $column1 = null;
-        if (!$stmt->bind_result($column1) || !$stmt->execute())
-            printf("[013] [%d] %s\n", $stmt->errno, $stmt->error);
+    $column1 = null;
+    if (!$stmt->bind_result($column1) || !$stmt->execute())
+        printf("[013] [%d] %s\n", $stmt->errno, $stmt->error);
 
-        $index = 0;
-        while ($stmt->fetch()) {
-            if ($data[$index] != $column1) {
-                printf("[014] Row %d, expecting %s/%s got %s/%s\n",
-                    $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
-            }
-            $index++;
+    $index = 0;
+    while ($stmt->fetch()) {
+        if ($data[$index] != $column1) {
+            printf("[014] Row %d, expecting %s/%s got %s/%s\n",
+                $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
         }
-        $stmt->close();
+        $index++;
     }
+    $stmt->close();
 
     print "Using integer only...\n";
     if (!($res = $link->query("SELECT 1 AS column1 UNION SELECT 303 UNION SELECT 2")))
@@ -147,25 +143,23 @@ require_once('skipifconnectfailure.inc');
     }
     $stmt->close();
 
-    if ($IS_MYSQLND) {
-        /* Advantage mysqlnd - see above */
-        if (!($stmt = $link->prepare("SELECT 1 AS column1 UNION SELECT 303 UNION SELECT 2")))
-            printf("[019] [%d] %s\n", $link->errno, $link->error);
+    /* Advantage mysqlnd - see above */
+    if (!($stmt = $link->prepare("SELECT 1 AS column1 UNION SELECT 303 UNION SELECT 2")))
+        printf("[019] [%d] %s\n", $link->errno, $link->error);
 
-        $column1 = null;
-        if (!$stmt->bind_result($column1) || !$stmt->execute())
-            printf("[020] [%d] %s\n", $stmt->errno, $stmt->error);
+    $column1 = null;
+    if (!$stmt->bind_result($column1) || !$stmt->execute())
+        printf("[020] [%d] %s\n", $stmt->errno, $stmt->error);
 
-        $index = 0;
-        while ($stmt->fetch()) {
-            if ($data[$index] != $column1) {
-                printf("[021] Row %d, expecting %s/%s got %s/%s\n",
-                    $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
-            }
-            $index++;
+    $index = 0;
+    while ($stmt->fetch()) {
+        if ($data[$index] != $column1) {
+            printf("[021] Row %d, expecting %s/%s got %s/%s\n",
+                $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
         }
-        $stmt->close();
+        $index++;
     }
+    $stmt->close();
 
     print "Testing bind_param(), strings only...\n";
     $two = 'two';
@@ -185,27 +179,25 @@ require_once('skipifconnectfailure.inc');
     }
     $stmt->close();
 
-    if ($IS_MYSQLND) {
-        /* Advantage mysqlnd - see above */
-        $two = 'two';
-        $three = 'three';
-        if (!($stmt = $link->prepare("SELECT 'one' AS column1 UNION SELECT ? UNION SELECT ?")))
-            printf("[024] [%d] %s\n", $stmt->errno, $stmt->error);
+    /* Advantage mysqlnd - see above */
+    $two = 'two';
+    $three = 'three';
+    if (!($stmt = $link->prepare("SELECT 'one' AS column1 UNION SELECT ? UNION SELECT ?")))
+        printf("[024] [%d] %s\n", $stmt->errno, $stmt->error);
 
-        $column1 = null;
-        if (!$stmt->bind_param('ss', $three, $two) || !$stmt->bind_result($column1) || !$stmt->execute())
-            printf("[025] [%d] %s\n", $stmt->errno, $stmt->error);
+    $column1 = null;
+    if (!$stmt->bind_param('ss', $three, $two) || !$stmt->bind_result($column1) || !$stmt->execute())
+        printf("[025] [%d] %s\n", $stmt->errno, $stmt->error);
 
-        $index = 0;
-        while ($stmt->fetch()) {
-            if ($data[$index] != $column1) {
-                printf("[26] Row %d, expecting %s/%s, got %s/%s\n",
-                    $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
-            }
-            $index++;
+    $index = 0;
+    while ($stmt->fetch()) {
+        if ($data[$index] != $column1) {
+            printf("[26] Row %d, expecting %s/%s, got %s/%s\n",
+                $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
         }
-        $stmt->close();
+        $index++;
     }
+    $stmt->close();
 
     print "Testing bind_param(), strings only, with CAST AS CHAR...\n";
     $two = 'two';
@@ -225,27 +217,25 @@ require_once('skipifconnectfailure.inc');
     }
     $stmt->close();
 
-    if ($IS_MYSQLND) {
-        /* Advantage mysqlnd - see above */
-        $two = 'two';
-        $three = 'three beers are more than enough';
-        if (!($stmt = $link->prepare("SELECT CAST('one' AS CHAR) AS column1 UNION SELECT CAST(? AS CHAR) UNION SELECT CAST(? AS CHAR)")))
-            printf("[029] [%d] %s\n", $stmt->errno, $stmt->error);
+    /* Advantage mysqlnd - see above */
+    $two = 'two';
+    $three = 'three beers are more than enough';
+    if (!($stmt = $link->prepare("SELECT CAST('one' AS CHAR) AS column1 UNION SELECT CAST(? AS CHAR) UNION SELECT CAST(? AS CHAR)")))
+        printf("[029] [%d] %s\n", $stmt->errno, $stmt->error);
 
-        $column1 = null;
-        if (!$stmt->bind_param('ss', $three, $two) || !$stmt->bind_result($column1) || !$stmt->execute())
-            printf("[030] [%d] %s\n", $stmt->errno, $stmt->error);
+    $column1 = null;
+    if (!$stmt->bind_param('ss', $three, $two) || !$stmt->bind_result($column1) || !$stmt->execute())
+        printf("[030] [%d] %s\n", $stmt->errno, $stmt->error);
 
-        $index = 0;
-        while ($stmt->fetch()) {
-            if ($data[$index] != $column1) {
-                printf("[31] Row %d, expecting %s/%s, got %s/%s\n",
-                    $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
-            }
-            $index++;
+    $index = 0;
+    while ($stmt->fetch()) {
+        if ($data[$index] != $column1) {
+            printf("[31] Row %d, expecting %s/%s, got %s/%s\n",
+                $index + 1, gettype($data[$index]), $data[$index], gettype($column1), $column1);
         }
-        $stmt->close();
+        $index++;
     }
+    $stmt->close();
 
     $link->close();
 

@@ -5,8 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND)
-    die("skip Test for mysqlnd only");
 ?>
 --FILE--
 <?php

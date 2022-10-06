@@ -5,10 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-
-if (!$IS_MYSQLND) {
-    die("skip Might hit known and open bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184");
-}
 ?>
 --FILE--
 <?php
