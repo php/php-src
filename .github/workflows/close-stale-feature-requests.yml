@@ -17,13 +17,13 @@ jobs:
     steps:
       - uses: actions/stale@v5
         with:
+          close-issue-reason: not_planned
           days-before-close: 14
           days-before-stale: 90
           exempt-all-assignees: true
           only-issue-labels: "Status: Requires RFC,Feature"
           # Hack to skip PRs, unfortunately there's no option to disable PRs
           only-pr-labels: inexistent-label
-          close-issue-reason: not_planned
           stale-issue-message: >-
             There has not been any recent activity in this feature request. It will automatically be closed in 14 days
             if no further action is taken. Please see https://github.com/probot/stale#is-closing-stale-issues-really-a-good-idea
