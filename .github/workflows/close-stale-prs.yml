@@ -15,7 +15,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@v4
+      - uses: actions/stale@v5
         with:
           days-before-close: 7
           days-before-stale: 60
@@ -23,4 +23,5 @@ jobs:
           # Hack to skip issues, unfortunately there's no option to disable issues
           only-issue-labels: inexistent-label
           only-pr-labels: Waiting on Author
+          close-issue-reason: not_planned
           stale-pr-message: There has not been any recent activity in this PR. It will automatically be closed in 7 days if no further action is taken.
