@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   phpinfo section. (Mikhail Galanin)
   . Fix GH-9139: Allow FFI in opcache.preload when opcache.preload_user=root
   (Arnaud, Kapitan Oczywisty)
+  . Made opcache.preload_user always optional in the cli and phpdbg SAPIs
+  (Arnaud)
 
 - Posix:
   . Added posix_sysconf. (David Carlier)
