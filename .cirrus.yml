@@ -170,7 +170,6 @@ asan_task:
     - >-
         sapi/cli/php run-tests.php
         -P -q -x -j2
-        -g FAIL,BORK,LEAK,XLEAK
         --no-progress
         --offline
         --show-diff
@@ -204,4 +203,4 @@ freebsd_task:
     - export STACK_LIMIT_DEFAULTS_CHECK=1
     - export TEST_NON_ROOT_USER=testuser
     - export TEST_FPM_RUN_AS_ROOT=1
-    - sapi/cli/php run-tests.php -P -q -j2 -g FAIL,BORK,LEAK,XLEAK --no-progress --offline --show-diff --show-slow 1000 --set-timeout 120 -d zend_extension=opcache.so
+    - sapi/cli/php run-tests.php -P -q -j2 --no-progress --offline --show-diff --show-slow 1000 --set-timeout 120 -d zend_extension=opcache.so
