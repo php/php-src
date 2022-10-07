@@ -353,7 +353,7 @@ PHP                                                                        NEWS
   . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
 
 - PCRE:
-  . Implemented FR #77726 (Allow null character in regex patterns). (cmb)
+  . Implemented FR #77726 (Allow null character in regex patterns). (tobil4sk)
 
 - Standard:
   . Deprecated utf8_encode() and utf8_decode(). (Rowan Tommins)
