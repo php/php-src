@@ -2398,7 +2398,6 @@ ZEND_VM_C_LABEL(assign_object):
 		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
 			void **cache_slot = CACHE_ADDR(opline->extended_value);
 			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
-			zend_object *zobj = Z_OBJ_P(object);
 			zval *property_val;
 
 			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
