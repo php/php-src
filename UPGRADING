@@ -47,6 +47,10 @@ PHP 8.3 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- JSON:
+  . Added json_validate(), which returns whether the json is valid for
+    the given $depth and $options.
+
 - Posix:
   . Added posix_sysconf call to get runtime informations.
 
