@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgrade bundled libmagic to 5.43. (Anatol)
 
+- JSON:
+  . Implemented RFC: json_validate()
+    https://wiki.php.net/rfc/json_validate (Juan Morales)
+
 - Opcache:
   . Added start, restart and force restart time to opcache's
   phpinfo section. (Mikhail Galanin)
