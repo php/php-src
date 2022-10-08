@@ -2441,6 +2441,14 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		retval = FAILURE;
 		goto out;
 	}
+	// server_sock needs to be non-blocking when using multiple processes. Without it, the first process would
+	// successfully accept the connection but the others would block, causing client sockets of the same select
+	// call not to be handled.
+	if (SUCCESS != php_set_sock_blocking(server_sock, 0)) {
+		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to make server socket non-blocking");
+		retval = FAILURE;
+		goto out;
+	}
 	server->server_sock = server_sock;
 
 	php_cli_server_startup_workers();
@@ -2581,7 +2589,8 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 		struct sockaddr *sa = pemalloc(server->socklen, 1);
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
-			if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
+			int err = php_socket_errno();
+			if (err != SOCK_EAGAIN && php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 				char *errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 				php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR,
 					"Failed to accept a client (reason: %s)", errstr);
