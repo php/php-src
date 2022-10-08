@@ -1,5 +1,5 @@
 --TEST--
-Extra data at the end of a valid value
+Test unserialize() with extra data at the end of a valid value
 --FILE--
 <?php
 
