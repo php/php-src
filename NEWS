@@ -21,17 +21,17 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Added start, restart and force restart time to opcache's
-  phpinfo section. (Mikhail Galanin)
-  . Fix GH-9139: Allow FFI in opcache.preload when opcache.preload_user=root
-  (Arnaud, Kapitan Oczywisty)
-  . Made opcache.preload_user always optional in the cli and phpdbg SAPIs
-  (Arnaud)
+    phpinfo section. (Mikhail Galanin)
+  . Fix GH-9139: Allow FFI in opcache.preload when opcache.preload_user=root.
+    (Arnaud, Kapitan Oczywisty)
+  . Made opcache.preload_user always optional in the cli and phpdbg SAPIs.
+    (Arnaud)
 
 - Posix:
   . Added posix_sysconf. (David Carlier)
 
 - Sockets:
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
-  over socket binding for a cpu core. (David Carlier)
+    over socket binding for a cpu core. (David Carlier)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
