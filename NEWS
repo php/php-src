@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - Sockets:
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
     over socket binding for a cpu core. (David Carlier)
+  . Added SKF_AD_QUEUE for cbpf filters. (David Carlier)
 
 - Reflection:
   . Fix GH-9470 (ReflectionMethod constructor should not find private parent

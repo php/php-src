@@ -1978,16 +1978,17 @@ PHP_FUNCTION(socket_set_option)
 				static struct sock_fprog bpfprog;
 
 				switch (k) {
-                		case SKF_AD_CPU:
-					cbpf[0].code = (BPF_LD|BPF_W|BPF_ABS);
-                    			cbpf[0].k = (uint32_t)(SKF_AD_OFF + k);
-					cbpf[1].code = (BPF_RET|BPF_A);
-                    			bpfprog.len = 2;
-                    		break;
-                		default:
-                    			php_error_docref(NULL, E_WARNING, "Unsupported CBPF filter");
-                    			RETURN_FALSE;
-                		}
+					case SKF_AD_CPU:
+					case SKF_AD_QUEUE:
+						cbpf[0].code = (BPF_LD|BPF_W|BPF_ABS);
+						cbpf[0].k = (uint32_t)(SKF_AD_OFF + k);
+						cbpf[1].code = (BPF_RET|BPF_A);
+						bpfprog.len = 2;
+					break;
+					default:
+						php_error_docref(NULL, E_WARNING, "Unsupported CBPF filter");
+						RETURN_FALSE;
+				}
 
 				bpfprog.filter = cbpf;
 				optlen = sizeof(bpfprog);
