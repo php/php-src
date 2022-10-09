@@ -280,13 +280,17 @@ static int php_json_parser_object_update_validate(php_json_parser *parser, zval 
 static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
 	int token = php_json_scan(&parser->scanner);
-	value->value = parser->scanner.value;
 
-	if (parser->methods.array_create == php_json_parser_array_create_validate
+	bool validate = parser->methods.array_create == php_json_parser_array_create_validate
 		&& parser->methods.array_append == php_json_parser_array_append_validate
 		&& parser->methods.object_create == php_json_parser_object_create_validate
-		&& parser->methods.object_update == php_json_parser_object_update_validate) {
+		&& parser->methods.object_update == php_json_parser_object_update_validate;
+
+	if (validate) {
 		zval_ptr_dtor_str(&(parser->scanner.value));
+		ZVAL_UNDEF(&value->value);
+	} else {
+		value->value = parser->scanner.value;
 	}
 
 	return token;
