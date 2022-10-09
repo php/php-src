@@ -288,6 +288,7 @@ static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 
 	if (validate) {
 		zval_ptr_dtor_str(&(parser->scanner.value));
+		ZVAL_UNDEF(&value->value);
 	} else {
 		value->value = parser->scanner.value;
 	}
