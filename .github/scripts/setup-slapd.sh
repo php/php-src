@@ -1,5 +1,5 @@
 #!/bin/sh
-set -ev
+set -ex
 
 # Create TLS certificate
 sudo mkdir -p /etc/ldap/ssl
