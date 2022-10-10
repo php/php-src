@@ -18,8 +18,5 @@ var_dump(json_encode([&$arr]));
 
 ?>
 --EXPECT--
-object(X)#1 (1) {
-  ["prop"]=>
-  string(5) "value"
-}
+*RECURSION*
 string(20) "[[{"prop":"value"}]]"

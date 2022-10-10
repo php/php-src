@@ -43,6 +43,5 @@ array(4) {
   [12]=>
   int(6)
   ["test"]=>
-  object(JsonSerializable@anonymous)#2 (0) {
-  }
+  *RECURSION*
 }
