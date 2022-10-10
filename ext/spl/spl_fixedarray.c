@@ -608,7 +608,7 @@ PHP_METHOD(SplFixedArray, __wakeup)
 
 		spl_fixedarray_init(&intern->array, size);
 
-		ZEND_HASH_FOREACH_VAL(intern_ht, data) {
+		ZEND_HASH_FOREACH_VAL_IND(intern_ht, data) {
 			ZVAL_COPY(&intern->array.elements[index], data);
 			index++;
 		} ZEND_HASH_FOREACH_END();
