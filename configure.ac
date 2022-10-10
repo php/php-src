@@ -1224,6 +1224,7 @@ AS_CASE([$host_cpu],
 AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
   [aix*|os400*], [fiber_os="aix"],
+  [freebsd*], [fiber_os="freebsd"],
   [fiber_os="other"]
 )
 
@@ -1247,6 +1248,15 @@ elif test "$fiber_os" = 'aix'; then
   # AIX uses a different calling convention (shared with non-_CALL_ELF Linux).
   # The AIX assembler isn't GNU, but the file is compatible.
   fiber_asm_file="${fiber_asm_file_prefix}_xcoff_gas"
+elif test "$fiber_os" = 'freebsd'; then
+  case $fiber_cpu in
+    i386*)
+      fiber_asm="no"
+      ;;
+    *)
+      fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
+      ;;
+  esac
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
   fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
 else
