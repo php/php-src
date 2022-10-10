@@ -1333,6 +1333,10 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 	uint32_t ht_iter;
 	int result = SUCCESS;
 
+	if (zend_hash_num_elements(target_hash) == 0) {
+		return result;
+	}
+
 	/* Set up known arguments */
 	ZVAL_UNDEF(&args[1]);
 	if (userdata) {
