@@ -118,6 +118,11 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+#ifndef __STDC_IEC_559__
+	zend_throw_exception(random_ce_Random_RandomException, "The nextFloat() method requires the underlying 'double' representation to be IEEE-754.", 0);
+	RETURN_THROWS();
+#endif
+
 	result = 0;
 	total_size = 0;
 	do {
@@ -133,6 +138,7 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 	 * use the full 64 bits of the uint64_t, because we would
 	 * introduce a bias / rounding error.
 	 */
+	ZEND_ASSERT(DBL_MANT_DIG == 53);
 	const double step_size = 1.0 / (1ULL << 53);
 
 	/* Use the upper 53 bits, because some engine's lower bits
