@@ -34,6 +34,7 @@
 #include "zend_hash.h"
 #include "pdo_dbh_arginfo.h"
 #include "zend_observer.h"
+#include "zend_extensions.h"
 
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
@@ -1204,6 +1205,9 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 	if (func->common.function_name) {
 		zend_string_release_ex(func->common.function_name, 0);
 	}
+	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
+		efree(ZEND_MAP_PTR(func->common.run_time_cache));
+	}
 	efree(func);
 }
 /* }}} */
@@ -1212,6 +1216,9 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
 		zend_string_release_ex(func->common.function_name, 1);
+	}
+	if (ZEND_MAP_PTR(func->common.run_time_cache)) {
+		pefree(ZEND_MAP_PTR(func->common.run_time_cache), 1);
 	}
 	pefree(func, 1);
 }
@@ -1240,13 +1247,14 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 
 	memset(&func, 0, sizeof(func));
 
+	size_t rt_cache_size = zend_internal_run_time_cache_reserved_size();
 	while (funcs->fname) {
 		func.type = ZEND_INTERNAL_FUNCTION;
 		func.handler = funcs->handler;
 		func.function_name = zend_string_init(funcs->fname, strlen(funcs->fname), dbh->is_persistent);
 		func.scope = dbh_obj->std.ce;
 		func.prototype = NULL;
-		ZEND_MAP_PTR(func.run_time_cache) = NULL;
+		ZEND_MAP_PTR(func.run_time_cache) = rt_cache_size ? pemalloc(rt_cache_size, dbh->is_persistent) : NULL;
 		func.T = ZEND_OBSERVER_ENABLED;
 		if (funcs->flags) {
 			func.fn_flags = funcs->flags | ZEND_ACC_NEVER_CACHE;
