@@ -1968,6 +1968,10 @@ class ConstInfo extends VariableLike
         $cConstValue = $value->getCConstValue($allConstInfos);
 
         $flags = "CONST_PERSISTENT";
+        if ($this->phpVersionIdMinimumCompatibility !== null && $this->phpVersionIdMinimumCompatibility < 80000) {
+            $flags .= " | CONST_CS";
+        }
+
         if ($this->isDeprecated) {
             $flags .= " | CONST_DEPRECATED";
         }
