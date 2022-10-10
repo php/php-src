@@ -52,6 +52,7 @@ function get_matrix_include(array $branches) {
             'zts' => true,
             'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
             'run_tests_parameters' => '--asan',
+            'timeout_minutes' => 480,
         ];
         if ($branch['ref'] !== 'PHP-8.0') {
             $jobs[] = [
@@ -60,6 +61,7 @@ function get_matrix_include(array $branches) {
                 'debug' => true,
                 'zts' => false,
                 'run_tests_parameters' => '--repeat 2',
+                'timeout_minutes' => 360,
             ];
             $jobs[] = [
                 'name' => '_VARIATION',
@@ -67,6 +69,7 @@ function get_matrix_include(array $branches) {
                 'debug' => true,
                 'zts' => true,
                 'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
+                'timeout_minutes' => 360,
             ];
         }
     }
