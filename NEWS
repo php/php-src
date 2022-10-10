@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8805 (finfo returns wrong mime type for woff/woff2 files).
     (Anatol)
 
+- MBString:
+  - Fixed bug GH-9683 (Problem when ISO-2022-JP-MS is specified in
+    mb_ encode_mimeheader). (Alex Dowad)
+
 - Opcache:
   . Added indirect call reduction for jit on x86 architectures. (wxue1)
 
