@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35a9585a433b9e3d57263c07ccafd1b6edd2f10b */
+ * Stub hash: 453f55b59c0b61f2c8a41b17694be74c3e0a6171 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -72,7 +72,7 @@ ZEND_METHOD(SplFixedArray, jsonSerialize);
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, __construct, arginfo_class_SplFixedArray___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(SplFixedArray, __wakeup, arginfo_class_SplFixedArray___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, __wakeup, arginfo_class_SplFixedArray___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME(SplFixedArray, __serialize, arginfo_class_SplFixedArray___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, __unserialize, arginfo_class_SplFixedArray___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, count, arginfo_class_SplFixedArray_count, ZEND_ACC_PUBLIC)
