@@ -52,6 +52,7 @@ function get_matrix_include(array $branches) {
             'zts' => true,
             'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
             'run_tests_parameters' => '--asan',
+            'timeout_minutes' => 480,
         ];
     }
     return $jobs;
