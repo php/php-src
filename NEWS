@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0RC4
+?? ??? ????, PHP 8.2.0RC5
+
+
+13 Oct 2022, PHP 8.2.0RC4
 
 - Core:
   . Fixed bug GH-9655 (Pure intersection types cannot be implicitly nullable)
