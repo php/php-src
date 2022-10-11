@@ -701,15 +701,6 @@ ZEND_API zend_result zend_fcall_info_init(zval *callable, uint32_t check_flags, 
  */
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, bool free_mem);
 
-/** Save current arguments from zend_fcall_info *fci
- * params array will be set to NULL
- */
-ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, uint32_t *param_count, zval **params);
-
-/** Free arguments connected with zend_fcall_info *fci and set back saved ones.
- */
-ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, uint32_t param_count, zval *params);
-
 /** Set or clear the arguments in the zend_call_info struct taking care of
  * refcount. If args is NULL and arguments are set then those are cleared.
  */
@@ -733,11 +724,6 @@ ZEND_API void zend_fcall_info_argv(zend_fcall_info *fci, uint32_t argc, va_list 
  * a variable amount of zval** arguments.
  */
 ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
-
-/** Call a function using information created by zend_fcall_info_init()/args().
- * If args is given then those replace the argument info in fci is temporarily.
- */
-ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval, zval *args);
 
 /* Zend FCC API to store and handle PHP userland functions */
 static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b)

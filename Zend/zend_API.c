@@ -4136,23 +4136,6 @@ ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, bool free_mem) /*
 }
 /* }}} */
 
-ZEND_API void zend_fcall_info_args_save(zend_fcall_info *fci, uint32_t *param_count, zval **params) /* {{{ */
-{
-	*param_count = fci->param_count;
-	*params = fci->params;
-	fci->param_count = 0;
-	fci->params = NULL;
-}
-/* }}} */
-
-ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, uint32_t param_count, zval *params) /* {{{ */
-{
-	zend_fcall_info_args_clear(fci, 1);
-	fci->param_count = param_count;
-	fci->params = params;
-}
-/* }}} */
-
 ZEND_API zend_result zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args) /* {{{ */
 {
 	zval *arg, *params;
@@ -4231,29 +4214,6 @@ ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...) /* 
 	va_start(argv, argc);
 	zend_fcall_info_argv(fci, argc, &argv);
 	va_end(argv);
-}
-/* }}} */
-
-ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval_ptr, zval *args) /* {{{ */
-{
-	zval retval, *org_params = NULL;
-	uint32_t org_count = 0;
-	zend_result result;
-
-	fci->retval = retval_ptr ? retval_ptr : &retval;
-	if (args) {
-		zend_fcall_info_args_save(fci, &org_count, &org_params);
-		zend_fcall_info_args(fci, args);
-	}
-	result = zend_call_function(fci, fcc);
-
-	if (!retval_ptr && Z_TYPE(retval) != IS_UNDEF) {
-		zval_ptr_dtor(&retval);
-	}
-	if (args) {
-		zend_fcall_info_args_restore(fci, org_count, org_params);
-	}
-	return result;
 }
 /* }}} */
 
