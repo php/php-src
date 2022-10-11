@@ -1276,7 +1276,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 
 	if (!0) {
-		i_zval_ptr_dtor(ret);
+		zval_ptr_dtor(ret);
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1338,7 +1338,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 
 	if (!1) {
-		i_zval_ptr_dtor(ret);
+		zval_ptr_dtor(ret);
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1402,7 +1402,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_OBS
 	}
 
 	if (!RETURN_VALUE_USED(opline)) {
-		i_zval_ptr_dtor(ret);
+		zval_ptr_dtor(ret);
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -1570,7 +1570,7 @@ fcall_by_name_end:
 		}
 
 		if (!0) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -1665,7 +1665,7 @@ fcall_by_name_end:
 		}
 
 		if (!1) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -1763,7 +1763,7 @@ fcall_by_name_end:
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -1866,7 +1866,7 @@ fcall_end:
 		}
 
 		if (!0) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -1975,7 +1975,7 @@ fcall_end:
 		}
 
 		if (!1) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -2086,7 +2086,7 @@ fcall_end:
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -22268,7 +22268,7 @@ fe_fetch_w_exit:
 
 			ref = Z_REF_P(value);
 			GC_ADDREF(ref);
-			i_zval_ptr_dtor(variable_ptr);
+			zval_ptr_dtor(variable_ptr);
 			ZVAL_REF(variable_ptr, ref);
 		}
 	} else {
@@ -48638,7 +48638,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 			}
 		}
 
-		i_zval_ptr_dtor(variable_ptr);
+		zval_ptr_dtor(variable_ptr);
 		if (UNEXPECTED(!Z_ISREF_P(value))) {
 			zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
 			GC_SET_REFCOUNT(ref, 2);
@@ -48653,7 +48653,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 			ZVAL_REF(variable_ptr, Z_REF_P(value));
 		}
 	} else {
-		i_zval_ptr_dtor(variable_ptr);
+		zval_ptr_dtor(variable_ptr);
 		ZVAL_COPY(variable_ptr, value);
 	}
 

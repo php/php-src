@@ -1749,7 +1749,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 			zval *end = zv + ht->nNumUsed;
 
 			do {
-				i_zval_ptr_dtor(zv);
+				zval_ptr_dtor(zv);
 			} while (++zv != end);
 		} else {
 			Bucket *p = ht->arData;
@@ -1757,11 +1757,11 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 
 			if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 				do {
-					i_zval_ptr_dtor(&p->val);
+					zval_ptr_dtor(&p->val);
 				} while (++p != end);
 			} else if (HT_IS_WITHOUT_HOLES(ht)) {
 				do {
-					i_zval_ptr_dtor(&p->val);
+					zval_ptr_dtor(&p->val);
 					if (EXPECTED(p->key)) {
 						zend_string_release_ex(p->key, 0);
 					}
@@ -1769,7 +1769,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 			} else {
 				do {
 					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-						i_zval_ptr_dtor(&p->val);
+						zval_ptr_dtor(&p->val);
 						if (EXPECTED(p->key)) {
 							zend_string_release_ex(p->key, 0);
 						}
@@ -1877,11 +1877,11 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 		end = p + ht->nNumUsed;
 		if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 			do {
-				i_zval_ptr_dtor(&p->val);
+				zval_ptr_dtor(&p->val);
 			} while (++p != end);
 		} else if (HT_IS_WITHOUT_HOLES(ht)) {
 			do {
-				i_zval_ptr_dtor(&p->val);
+				zval_ptr_dtor(&p->val);
 				if (EXPECTED(p->key)) {
 					zend_string_release(p->key);
 				}
@@ -1889,7 +1889,7 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 		} else {
 			do {
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-					i_zval_ptr_dtor(&p->val);
+					zval_ptr_dtor(&p->val);
 					if (EXPECTED(p->key)) {
 						zend_string_release(p->key);
 					}

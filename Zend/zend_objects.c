@@ -68,7 +68,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
 					}
 				}
-				i_zval_ptr_dtor(p);
+				zval_ptr_dtor(p);
 			}
 			p++;
 		} while (p != end);
@@ -198,7 +198,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		zval *end = src + old_object->ce->default_properties_count;
 
 		do {
-			i_zval_ptr_dtor(dst);
+			zval_ptr_dtor(dst);
 			ZVAL_COPY_VALUE_PROP(dst, src);
 			zval_add_ref(dst);
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&

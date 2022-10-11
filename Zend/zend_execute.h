@@ -273,7 +273,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 		uint32_t count = ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args;
 		zval *p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 		do {
-			i_zval_ptr_dtor(p);
+			zval_ptr_dtor(p);
 			p++;
 		} while (--count);
  	}

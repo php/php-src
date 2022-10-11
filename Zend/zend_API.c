@@ -4010,7 +4010,7 @@ ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, bool free_mem) /*
 		zval *end = p + fci->param_count;
 
 		while (p != end) {
-			i_zval_ptr_dtor(p);
+			zval_ptr_dtor(p);
 			p++;
 		}
 		if (free_mem) {

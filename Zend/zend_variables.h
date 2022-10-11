@@ -36,7 +36,7 @@ static zend_always_inline void zval_ptr_dtor_nogc(zval *zval_ptr)
 	}
 }
 
-static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr)
+static zend_always_inline void zval_ptr_dtor(zval *zval_ptr)
 {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);

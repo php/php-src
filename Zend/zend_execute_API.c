@@ -220,7 +220,7 @@ static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 	if (Z_TYPE_P(zv) == IS_INDIRECT) {
 		zv = Z_INDIRECT_P(zv);
 	}
-	i_zval_ptr_dtor(zv);
+	zval_ptr_dtor(zv);
 }
 /* }}} */
 
@@ -339,7 +339,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 					zval *end = p + ce->default_properties_count;
 
 					while (p != end) {
-						i_zval_ptr_dtor(p);
+						zval_ptr_dtor(p);
 						ZVAL_UNDEF(p);
 						p++;
 					}

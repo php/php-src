@@ -17,6 +17,8 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 * zend_class_entry now possesses a default_object_handlers field, which
   provides a default object handler when create_object() is not overriding it.
 
+* The i_zval_ptr_dtor() function has been removed, use zval_ptr_dtor() instead.
+
 ========================
 2. Build system changes
 ========================

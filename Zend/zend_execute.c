@@ -3780,7 +3780,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 	zval *cv = EX_VAR_NUM(0);
 	int count = EX(func)->op_array.last_var;
 	while (EXPECTED(count != 0)) {
-		i_zval_ptr_dtor(cv);
+		zval_ptr_dtor(cv);
 		cv++;
 		count--;
 	}

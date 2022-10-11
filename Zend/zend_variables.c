@@ -71,19 +71,13 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str)
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref)
 {
 	ZEND_ASSERT(!ZEND_REF_HAS_TYPE_SOURCES(ref));
-	i_zval_ptr_dtor(&ref->val);
+	zval_ptr_dtor(&ref->val);
 	efree_size(ref, sizeof(zend_reference));
 }
 
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref)
 {
 }
-
-ZEND_API void zval_ptr_dtor(zval *zval_ptr) /* {{{ */
-{
-	i_zval_ptr_dtor(zval_ptr);
-}
-/* }}} */
 
 ZEND_API void zval_internal_ptr_dtor(zval *zval_ptr) /* {{{ */
 {

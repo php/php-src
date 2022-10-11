@@ -305,7 +305,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 				}
 			}
 
-			i_zval_ptr_dtor(zv);
+			zval_ptr_dtor(zv);
 		}
 		next = var_dtor_hash->next;
 		efree_size(var_dtor_hash, sizeof(var_dtor_entries));

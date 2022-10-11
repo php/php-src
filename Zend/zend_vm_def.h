@@ -3959,7 +3959,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 	}
 
 	if (!RETURN_VALUE_USED(opline)) {
-		i_zval_ptr_dtor(ret);
+		zval_ptr_dtor(ret);
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -4082,7 +4082,7 @@ ZEND_VM_C_LABEL(fcall_by_name_end):
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -4187,7 +4187,7 @@ ZEND_VM_C_LABEL(fcall_end):
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
-			i_zval_ptr_dtor(ret);
+			zval_ptr_dtor(ret);
 		}
 	}
 
@@ -7148,7 +7148,7 @@ ZEND_VM_C_LABEL(fe_fetch_w_exit):
 
 			ref = Z_REF_P(value);
 			GC_ADDREF(ref);
-			i_zval_ptr_dtor(variable_ptr);
+			zval_ptr_dtor(variable_ptr);
 			ZVAL_REF(variable_ptr, ref);
 		}
 	} else {
@@ -7598,7 +7598,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMP|VAR|CV, JMP_ADDR)
 	uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
 	if (EXPECTED(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
 		ZVAL_NULL(result);
-		if (OP1_TYPE == IS_CV 
+		if (OP1_TYPE == IS_CV
 			&& UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)
 			&& (opline->extended_value & ZEND_JMP_NULL_BP_VAR_IS) == 0
 		) {
@@ -8851,7 +8851,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, UNUSED, REF)
 			}
 		}
 
-		i_zval_ptr_dtor(variable_ptr);
+		zval_ptr_dtor(variable_ptr);
 		if (UNEXPECTED(!Z_ISREF_P(value))) {
 			zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
 			GC_SET_REFCOUNT(ref, 2);
@@ -8866,7 +8866,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, UNUSED, REF)
 			ZVAL_REF(variable_ptr, Z_REF_P(value));
 		}
 	} else {
-		i_zval_ptr_dtor(variable_ptr);
+		zval_ptr_dtor(variable_ptr);
 		ZVAL_COPY(variable_ptr, value);
 	}
 
