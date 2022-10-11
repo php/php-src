@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2022, PHP 8.0.25
+?? ??? 2022, PHP 8.0.26
+
+
+27 Oct 2022, PHP 8.0.25
 
 - Session:
   . Fixed bug GH-9583 (session_create_id() fails with user defined save handler
