@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.12
+?? ??? ????, PHP 8.1.13
+
+
+
+27 Oct 2022, PHP 8.1.12
 
 - Core:
   . Fixes segfault with Fiber on FreeBSD i386 architecture. (David Carlier)
