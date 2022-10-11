@@ -188,7 +188,7 @@ typedef struct _zend_ffi_ctype {
 	zend_ffi_type         *type;
 } zend_ffi_ctype;
 
-/* This is a "mutable" copy of zend_empty_array that prevents asseerts in attempts of iteraton
+/* This is a "mutable" copy of zend_empty_array that prevents asserts in attempts of iteration
  * (see https://github.com/php/php-src/issues/9697) */
 static HashTable _empty_array;
 
