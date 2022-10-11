@@ -114,12 +114,14 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 
 			ZVAL_STRINGL(&fci.function_name, lc_name, name->len);
 			fci.size = sizeof(zend_fcall_info);
-			//???fci.symbol_table = zend_rebuild_symbol_table();
 			fci.object = NULL;
 			fci.retval = &fretval;
+			fci.param_count = 0;
+			fci.params = NULL;
+			fci.named_params = NULL;
 
+			zval params;
 			if (name->next) {
-				zval params;
 				phpdbg_param_t *next = name->next;
 
 				array_init(&params);
@@ -170,11 +172,8 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 
 					next = next->next;
 				}
-
-				zend_fcall_info_args(&fci, &params);
-			} else {
-				fci.params = NULL;
-				fci.param_count = 0;
+				/* Add positional arguments */
+				fci.named_params = Z_ARRVAL(params);
 			}
 
 			phpdbg_activate_err_buf(0);

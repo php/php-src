@@ -1756,11 +1756,11 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	zend_long            row;
 	bool row_is_null = 1;
 	char            *field_name;
-	zval            *ctor_params = NULL;
+	HashTable		*ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!Ca", &result, pgsql_result_ce, &row, &row_is_null, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l!Ch", &result, pgsql_result_ce, &row, &row_is_null, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (!ce) {
@@ -1853,13 +1853,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			fci.retval = &retval;
 			fci.params = NULL;
 			fci.param_count = 0;
-			fci.named_params = NULL;
-
-			if (ctor_params) {
-				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
-					ZEND_UNREACHABLE();
-				}
-			}
+			fci.named_params = ctor_params;
 
 			fcc.function_handler = ce->constructor;
 			fcc.called_scope = Z_OBJCE_P(return_value);
@@ -1870,10 +1864,8 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			} else {
 				zval_ptr_dtor(&retval);
 			}
-			if (fci.params) {
-				efree(fci.params);
-			}
-		} else if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) > 0) {
+		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
+			/* TODO Convert this to a ValueError */
 			zend_argument_error(zend_ce_exception, 3,
 				"must be empty when the specified class (%s) does not have a constructor",
 				ZSTR_VAL(ce->name)
