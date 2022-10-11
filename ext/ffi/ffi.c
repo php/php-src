@@ -188,6 +188,10 @@ typedef struct _zend_ffi_ctype {
 	zend_ffi_type         *type;
 } zend_ffi_ctype;
 
+/* This is a "mutable" copy of zend_empty_array that prevents asseerts in attempts of iteraton
+ * (see https://github.com/php/php-src/issues/9697) */
+static HashTable _empty_array;
+
 static zend_class_entry *zend_ffi_exception_ce;
 static zend_class_entry *zend_ffi_parser_exception_ce;
 static zend_class_entry *zend_ffi_ce;
@@ -4699,7 +4703,7 @@ static ZEND_COLD zend_function *zend_fake_get_method(zend_object **obj_ptr, zend
 
 static HashTable *zend_fake_get_properties(zend_object *obj) /* {{{ */
 {
-	return (HashTable*)&zend_empty_array;
+	return &_empty_array;
 }
 /* }}} */
 
@@ -4934,6 +4938,10 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_class_entry ce;
 
 	REGISTER_INI_ENTRIES();
+
+	memcpy(&_empty_array, &zend_empty_array, sizeof(HashTable));
+	GC_SET_REFCOUNT(&_empty_array, 1);
+	GC_TYPE_INFO(&_empty_array) = GC_ARRAY;
 
 	FFI_G(is_cli) = strcmp(sapi_module.name, "cli") == 0;
 
