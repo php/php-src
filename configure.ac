@@ -364,7 +364,6 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
-PHP_CHECK_FUNC(copy_file_range)
 PHP_CHECK_FUNC(dlopen, dl, root)
 PHP_CHECK_FUNC(dlsym, dl, root)
 if test "$ac_cv_func_dlopen" = "yes"; then
@@ -693,6 +692,33 @@ int main(void) {
 [ac_cv_func_getaddrinfo=no])])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
+fi
+
+AC_CACHE_CHECK([for copy_file_range], ac_cv_copy_file_range,
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#ifdef __linux__
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <linux/version.h>
+#include <unistd.h>
+
+int main(void) {
+(void)copy_file_range(-1, 0, -1, 0, 0, 0);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
+#error "kernel too old"
+#else
+return 0;
+#endif
+}
+#else
+#error "unsupported platform"
+#endif
+]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no])
+])
+
+if test "$ac_cv_copy_file_range" = yes; then
+  AC_DEFINE(HAVE_COPY_FILE_RANGE,1,[Define if copy_file_range support])
 fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
