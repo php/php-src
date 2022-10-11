@@ -713,18 +713,6 @@ ZEND_API zend_result zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function
  */
 ZEND_API void zend_fcall_info_argp(zend_fcall_info *fci, uint32_t argc, zval *argv);
 
-/** Set arguments in the zend_fcall_info struct taking care of refcount.
- * If argc is 0 the arguments which are set will be cleared, else pass
- * a variable amount of zval** arguments.
- */
-ZEND_API void zend_fcall_info_argv(zend_fcall_info *fci, uint32_t argc, va_list *argv);
-
-/** Set arguments in the zend_fcall_info struct taking care of refcount.
- * If argc is 0 the arguments which are set will be cleared, else pass
- * a variable amount of zval** arguments.
- */
-ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
-
 /* Zend FCC API to store and handle PHP userland functions */
 static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b)
 {
