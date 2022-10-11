@@ -24,9 +24,6 @@
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
 #endif
-#ifdef HAVE_NL_LANGINFO
-PHP_MINIT_FUNCTION(nl_langinfo);
-#endif
 #ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
 PHP_MINIT_FUNCTION(string_intrin);
 #endif

@@ -82,6 +82,9 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #include <string.h>
 #include <locale.h>
+#ifdef HAVE_LANGINFO_H
+# include <langinfo.h>
+#endif
 
 #ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
@@ -310,10 +313,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 #ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
-#endif
-
-#ifdef HAVE_NL_LANGINFO
-	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
 #ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR

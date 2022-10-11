@@ -1021,6 +1021,473 @@ const LC_ALL = UNKNOWN;
 const LC_MESSAGES = UNKNOWN;
 #endif
 
+#ifdef HAVE_NL_LANGINFO
+#ifdef ABDAY_1
+/**
+ * @var int
+ * @cvalue ABDAY_1
+ */
+const ABDAY_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_2
+ */
+const ABDAY_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_3
+ */
+const ABDAY_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_4
+ */
+const ABDAY_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_5
+ */
+const ABDAY_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_6
+ */
+const ABDAY_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_7
+ */
+const ABDAY_7 = UNKNOWN;
+#endif
+#ifdef DAY_1
+/**
+ * @var int
+ * @cvalue DAY_1
+ */
+const DAY_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_2
+ */
+const DAY_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_3
+ */
+const DAY_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_4
+ */
+const DAY_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_5
+ */
+const DAY_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_6
+ */
+const DAY_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_7
+ */
+const DAY_7 = UNKNOWN;
+#endif
+#ifdef ABMON_1
+/**
+ * @var int
+ * @cvalue ABMON_1
+ */
+const ABMON_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_2
+ */
+const ABMON_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_3
+ */
+const ABMON_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_4
+ */
+const ABMON_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_5
+ */
+const ABMON_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_6
+ */
+const ABMON_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_7
+ */
+const ABMON_7 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_8
+ */
+const ABMON_8 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_9
+ */
+const ABMON_9 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_10
+ */
+const ABMON_10 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_11
+ */
+const ABMON_11 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_12
+ */
+const ABMON_12 = UNKNOWN;
+#endif
+#ifdef MON_1
+/**
+ * @var int
+ * @cvalue MON_1
+ */
+const MON_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_2
+ */
+const MON_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_3
+ */
+const MON_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_4
+ */
+const MON_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_5
+ */
+const MON_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_6
+ */
+const MON_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_7
+ */
+const MON_7 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_8
+ */
+const MON_8 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_9
+ */
+const MON_9 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_10
+ */
+const MON_10 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_11
+ */
+const MON_11 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_12
+ */
+const MON_12 = UNKNOWN;
+#endif
+#ifdef AM_STR
+/**
+ * @var int
+ * @cvalue AM_STR
+ */
+const AM_STR = UNKNOWN;
+#endif
+#ifdef PM_STR
+/**
+ * @var int
+ * @cvalue PM_STR
+ */
+const PM_STR = UNKNOWN;
+#endif
+#ifdef D_T_FMT
+/**
+ * @var int
+ * @cvalue D_T_FMT
+ */
+const D_T_FMT = UNKNOWN;
+#endif
+#ifdef D_FMT
+/**
+ * @var int
+ * @cvalue D_FMT
+ */
+const D_FMT = UNKNOWN;
+#endif
+#ifdef T_FMT
+/**
+ * @var int
+ * @cvalue T_FMT
+ */
+const T_FMT = UNKNOWN;
+#endif
+#ifdef T_FMT_AMPM
+/**
+ * @var int
+ * @cvalue T_FMT_AMPM
+ */
+const T_FMT_AMPM = UNKNOWN;
+#endif
+#ifdef ERA
+/**
+ * @var int
+ * @cvalue ERA
+ */
+const ERA = UNKNOWN;
+#endif
+#ifdef ERA_YEAR
+/**
+ * @var int
+ * @cvalue ERA_YEAR
+ */
+const ERA_YEAR = UNKNOWN;
+#endif
+#ifdef ERA_D_T_FMT
+/**
+ * @var int
+ * @cvalue ERA_D_T_FMT
+ */
+const ERA_D_T_FMT = UNKNOWN;
+#endif
+#ifdef ERA_D_FMT
+/**
+ * @var int
+ * @cvalue ERA_D_FMT
+ */
+const ERA_D_FMT = UNKNOWN;
+#endif
+#ifdef ERA_T_FMT
+/**
+ * @var int
+ * @cvalue ERA_T_FMT
+ */
+const ERA_T_FMT = UNKNOWN;
+#endif
+#ifdef ALT_DIGITS
+/**
+ * @var int
+ * @cvalue ALT_DIGITS
+ */
+const ALT_DIGITS = UNKNOWN;
+#endif
+#ifdef INT_CURR_SYMBOL
+/**
+ * @var int
+ * @cvalue INT_CURR_SYMBOL
+ */
+const INT_CURR_SYMBOL = UNKNOWN;
+#endif
+#ifdef CURRENCY_SYMBOL
+/**
+ * @var int
+ * @cvalue CURRENCY_SYMBOL
+ */
+const CURRENCY_SYMBOL = UNKNOWN;
+#endif
+#ifdef CRNCYSTR
+/**
+ * @var int
+ * @cvalue CRNCYSTR
+ */
+const CRNCYSTR = UNKNOWN;
+#endif
+#ifdef MON_DECIMAL_POINT
+/**
+ * @var int
+ * @cvalue MON_DECIMAL_POINT
+ */
+const MON_DECIMAL_POINT = UNKNOWN;
+#endif
+#ifdef MON_THOUSANDS_SEP
+/**
+ * @var int
+ * @cvalue MON_THOUSANDS_SEP
+ */
+const MON_THOUSANDS_SEP = UNKNOWN;
+#endif
+#ifdef MON_GROUPING
+/**
+ * @var int
+ * @cvalue MON_GROUPING
+ */
+const MON_GROUPING = UNKNOWN;
+#endif
+#ifdef POSITIVE_SIGN
+/**
+ * @var int
+ * @cvalue POSITIVE_SIGN
+ */
+const POSITIVE_SIGN = UNKNOWN;
+#endif
+#ifdef NEGATIVE_SIGN
+/**
+ * @var int
+ * @cvalue NEGATIVE_SIGN
+ */
+const NEGATIVE_SIGN = UNKNOWN;
+#endif
+#ifdef INT_FRAC_DIGITS
+/**
+ * @var int
+ * @cvalue INT_FRAC_DIGITS
+ */
+const INT_FRAC_DIGITS = UNKNOWN;
+#endif
+#ifdef FRAC_DIGITS
+/**
+ * @var int
+ * @cvalue FRAC_DIGITS
+ */
+const FRAC_DIGITS = UNKNOWN;
+#endif
+#ifdef P_CS_PRECEDES
+/**
+ * @var int
+ * @cvalue P_CS_PRECEDES
+ */
+const P_CS_PRECEDES = UNKNOWN;
+#endif
+#ifdef P_SEP_BY_SPACE
+/**
+ * @var int
+ * @cvalue P_SEP_BY_SPACE
+ */
+const P_SEP_BY_SPACE = UNKNOWN;
+#endif
+#ifdef N_CS_PRECEDES
+/**
+ * @var int
+ * @cvalue N_CS_PRECEDES
+ */
+const N_CS_PRECEDES = UNKNOWN;
+#endif
+#ifdef N_SEP_BY_SPACE
+/**
+ * @var int
+ * @cvalue N_SEP_BY_SPACE
+ */
+const N_SEP_BY_SPACE = UNKNOWN;
+#endif
+#ifdef P_SIGN_POSN
+/**
+ * @var int
+ * @cvalue P_SIGN_POSN
+ */
+const P_SIGN_POSN = UNKNOWN;
+#endif
+#ifdef N_SIGN_POSN
+/**
+ * @var int
+ * @cvalue N_SIGN_POSN
+ */
+const N_SIGN_POSN = UNKNOWN;
+#endif
+#ifdef DECIMAL_POINT
+/**
+ * @var int
+ * @cvalue DECIMAL_POINT
+ */
+const DECIMAL_POINT = UNKNOWN;
+#endif
+#ifdef RADIXCHAR
+/**
+ * @var int
+ * @cvalue RADIXCHAR
+ */
+const RADIXCHAR = UNKNOWN;
+#endif
+#ifdef THOUSANDS_SEP
+/**
+ * @var int
+ * @cvalue THOUSANDS_SEP
+ */
+const THOUSANDS_SEP = UNKNOWN;
+#endif
+#ifdef THOUSEP
+/**
+ * @var int
+ * @cvalue THOUSEP
+ */
+const THOUSEP = UNKNOWN;
+#endif
+#ifdef GROUPING
+/**
+ * @var int
+ * @cvalue GROUPING
+ */
+const GROUPING = UNKNOWN;
+#endif
+#ifdef YESEXPR
+/**
+ * @var int
+ * @cvalue YESEXPR
+ */
+const YESEXPR = UNKNOWN;
+#endif
+#ifdef NOEXPR
+/**
+ * @var int
+ * @cvalue NOEXPR
+ */
+const NOEXPR = UNKNOWN;
+#endif
+#ifdef YESSTR
+/**
+ * @var int
+ * @cvalue YESSTR
+ */
+const YESSTR = UNKNOWN;
+#endif
+#ifdef NOSTR
+/**
+ * @var int
+ * @cvalue NOSTR
+ */
+const NOSTR = UNKNOWN;
+#endif
+#ifdef CODESET
+/**
+ * @var int
+ * @cvalue CODESET
+ */
+const CODESET = UNKNOWN;
+#endif
+#endif
+
 /** @undocumentable */
 #[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
