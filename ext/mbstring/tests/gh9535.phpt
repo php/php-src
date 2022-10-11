@@ -86,6 +86,8 @@ foreach($encodings as $encoding) {
 }
 
 ?>
+--XFAIL--
+Discussion: https://github.com/php/php-src/pull/9562
 --EXPECTF--
 BASE64: 宛如繁
 HTML-ENTITIES: 宛&#22914
