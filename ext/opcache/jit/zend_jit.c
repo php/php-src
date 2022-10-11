@@ -5181,6 +5181,10 @@ ZEND_EXT_API void zend_jit_restart(void)
 	if (dasm_buf) {
 		zend_jit_unprotect();
 
+#if ZEND_JIT_TARGET_ARM64
+		memset(dasm_labels_veneers, 0, sizeof(void*) * ZEND_MM_ALIGNED_SIZE_EX(zend_lb_MAX, DASM_ALIGNMENT));
+#endif
+
 		/* restore JIT buffer pos */
 		dasm_ptr[0] = dasm_ptr[1];
 
