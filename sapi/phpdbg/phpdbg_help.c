@@ -398,6 +398,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-s**      **-s=**, **-s**=foo         Read code to execute from stdin with an optional delimiter" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-p**      **-p**, **-p=func**, **-p* **   Output opcodes and quit" CR
+"  **-z**      **-z**extlib            Load Zend extension" CR
 "  **-h**                          Print the help overview" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
