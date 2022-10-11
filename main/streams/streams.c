@@ -29,6 +29,9 @@
 #include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include <stddef.h>
+#if defined(HAVE_SYS_SENDFILE_H)
+#include <sys/sendfile.h>
+#endif
 #include <fcntl.h>
 #include "php_streams_int.h"
 
@@ -1576,7 +1579,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 		php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0);
 		php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0);
 
-		/* clamp to INT_MAX to avoid EOVERFLOW */
+		/* clamp to SIZE_MAX to avoid EOVERFLOW */
 		const size_t cfr_max = MIN(maxlen, (size_t)SSIZE_MAX);
 
 		/* copy_file_range() is a Linux-specific system call
@@ -1639,6 +1642,53 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 	}
 #endif // __FreeBSD__
 #endif // HAVE_COPY_FILE_RANGE
+#ifdef HAVE_SENDFILEV
+	if (php_stream_is(src, PHP_STREAM_IS_STDIO) &&
+	    php_stream_is(dest, PHP_STREAM_IS_STDIO) &&
+	    src->writepos == src->readpos &&
+	    dest->mode[0] == 'w' &&
+	    php_stream_can_cast(src, PHP_STREAM_AS_FD) == SUCCESS &&
+	    php_stream_can_cast(dest, PHP_STREAM_AS_FD) == SUCCESS) {
+		int src_fd, dest_fd;
+
+		php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0);
+		php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0);
+
+		/* clamp to INT_MAX to avoid EOVERFLOW */
+		const size_t cfr_max = MIN(maxlen, (size_t)INT_MAX);
+		struct sendfilevec vec = {
+			.sfv_fd = src_fd,
+			.sfv_flag = 0,
+			.sfv_off = 0,
+			.sfv_len = cfr_max,
+		};
+		ssize_t result = -1;
+		size_t nbytes = 0;
+		/* we use the syscall only when output is in write mode */
+		do {
+			result = sendfilev(dest_fd, &vec, 1, &nbytes);
+		} while (result == -1 && errno == EAGAIN);
+
+		if (result > 0) {
+			haveread += nbytes;
+
+			src->position += nbytes;
+			dest->position += nbytes;
+
+			if ((maxlen != PHP_STREAM_COPY_ALL && nbytes == maxlen) ||
+			    php_stream_eof(src)) {
+				*len = haveread;
+				return SUCCESS;
+			}
+		} else if (result == 0) {
+			*len = haveread;
+			return SUCCESS;
+		} else if (result < 0) {
+			*len = haveread;
+			return FAILURE;
+		}
+	}
+#endif // HAVE_SENDFILEV
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
