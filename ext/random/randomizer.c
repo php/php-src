@@ -88,27 +88,6 @@ PHP_METHOD(Random_Randomizer, __construct)
 }
 /* }}} */
 
-/* {{{ Generate positive random number */
-PHP_METHOD(Random_Randomizer, nextInt)
-{
-	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	uint64_t result;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	result = randomizer->algo->generate(randomizer->status);
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
-		zend_throw_exception(random_ce_Random_RandomException, "Generated value exceeds size of int", 0);
-		RETURN_THROWS();
-	}
-
-	RETURN_LONG((zend_long) (result >> 1));
-}
-/* }}} */
-
 /* {{{ Generate a float in [0, 1) */
 PHP_METHOD(Random_Randomizer, nextFloat)
 {
@@ -147,6 +126,101 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 	result = (result >> 11);
 
 	RETURN_DOUBLE(step_size * result);
+}
+/* }}} */
+
+static double getFloat_gamma_low(double x)
+{
+	return x - nextafter(x, -DBL_MAX);
+}
+
+static double getFloat_gamma_high(double x)
+{
+	return nextafter(x, DBL_MAX) - x;
+}
+
+static double getFloat_gamma(double x, double y)
+{
+	double high = getFloat_gamma_high(x);
+	double low = getFloat_gamma_low(y);
+
+	return high > low ? high : low;
+}
+
+static uint64_t getFloat_ceilint(double a, double b, double g)
+{
+	double s = b / g - a / g;
+	double e;
+
+	if (fabs(a) <= fabs(b)) {
+		e = -a / g - (s - b / g);
+	} else {
+		e = b / g - (s + a / g);
+	}
+
+	double si = ceil(s);
+
+	return (s != si) ? (uint64_t)si : (uint64_t)si + (e > 0);
+}
+
+/* {{{ Generates a random float within [min, max).
+ *
+ * The algorithm used is the γ-section algorithm as published in:
+ *
+ * Drawing Random Floating-Point Numbers from an Interval. Frédéric
+ * Goualard, ACM Trans. Model. Comput. Simul., 32:3, 2022.
+ * https://doi.org/10.1145/3503512
+ */
+PHP_METHOD(Random_Randomizer, getFloat)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	double min, max;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DOUBLE(min)
+		Z_PARAM_DOUBLE(max)
+	ZEND_PARSE_PARAMETERS_END();
+
+#ifndef __STDC_IEC_559__
+	zend_throw_exception(random_ce_Random_RandomException, "The getFloat() method requires the underlying 'double' representation to be IEEE-754.", 0);
+	RETURN_THROWS();
+#endif
+
+	if (UNEXPECTED(max < min)) {
+		zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
+		RETURN_THROWS();
+	}
+
+	double g = getFloat_gamma(min, max);
+	uint64_t hi = getFloat_ceilint(min, max, g);
+	uint64_t k = randomizer->algo->range(randomizer->status, 1, hi);
+
+	if (fabs(min) <= fabs(max)) {
+		RETURN_DOUBLE(k == hi ? min : max - k * g);
+	} else {
+		RETURN_DOUBLE(min + (k - 1) * g);
+	}
+}
+/* }}} */
+
+/* {{{ Generate positive random number */
+PHP_METHOD(Random_Randomizer, nextInt)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	uint64_t result;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	result = randomizer->algo->generate(randomizer->status);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
+		zend_throw_exception(random_ce_Random_RandomException, "Generated value exceeds size of int", 0);
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG((zend_long) (result >> 1));
 }
 /* }}} */
 
