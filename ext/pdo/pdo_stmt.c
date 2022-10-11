@@ -633,13 +633,15 @@ static bool do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 		fci->retval = &stmt->fetch.cls.retval;
 		fci->param_count = 0;
 		fci->params = NULL;
+		fci->named_params = stmt->fetch.cls.ctor_args;
 
-		zend_fcall_info_args_ex(fci, ce->constructor, &stmt->fetch.cls.ctor_args);
+		// TODO Should we really wrap arguments that are meant to be passed by reference back to userland functions? */
+		//zend_fcall_info_args_ex(fci, ce->constructor, &);
 
 		fcc->function_handler = ce->constructor;
 		fcc->called_scope = ce;
 		return 1;
-	} else if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
+	} else if (stmt->fetch.cls.ctor_args) {
 		zend_throw_error(NULL, "User-supplied statement does not accept constructor arguments");
 		return 0;
 	} else {
@@ -687,13 +689,17 @@ static bool do_fetch_func_prepare(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
+static void do_fetch_opt_finish(pdo_stmt_t *stmt, bool free_ctor_agrs) /* {{{ */
 {
 	/* fci.size is used to check if it is valid */
 	if (stmt->fetch.cls.fci.size && stmt->fetch.cls.fci.params) {
-		if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args)) {
+		if (stmt->fetch.cls.ctor_args) {
 			/* Added to free constructor arguments */
 			zend_fcall_info_args_clear(&stmt->fetch.cls.fci, 1);
+			zend_array_destroy(stmt->fetch.cls.ctor_args);
+			stmt->fetch.cls.ctor_args = NULL;
+			stmt->fetch.cls.fci.param_count = 0;
+			stmt->fetch.cls.fci.named_params = NULL;
 		} else {
 			efree(stmt->fetch.cls.fci.params);
 		}
@@ -701,10 +707,11 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 	}
 
 	stmt->fetch.cls.fci.size = 0;
-	if (!Z_ISUNDEF(stmt->fetch.cls.ctor_args) && free_ctor_agrs) {
-		zval_ptr_dtor(&stmt->fetch.cls.ctor_args);
-		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
+	if (stmt->fetch.cls.ctor_args && free_ctor_agrs) {
+		zend_array_destroy(stmt->fetch.cls.ctor_args);
+		stmt->fetch.cls.ctor_args = NULL;
 		stmt->fetch.cls.fci.param_count = 0;
+		stmt->fetch.cls.fci.named_params = NULL;
 	}
 	if (stmt->fetch.func.values) {
 		efree(stmt->fetch.func.values);
@@ -719,7 +726,8 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 {
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
-	zval grp_val, *pgrp, retval, old_ctor_args = {{0}, {0}, {0}};
+	zval grp_val, *pgrp, retval;
+	HashTable *old_ctor_args = NULL;
 	int colno;
 	int i = 0;
 
@@ -813,7 +821,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				zend_class_entry *cep;
 
 				old_ce = stmt->fetch.cls.ce;
-				ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
+				old_ctor_args = stmt->fetch.cls.ctor_args;
 				old_arg_count = stmt->fetch.cls.fci.param_count;
 				do_fetch_opt_finish(stmt, 0);
 
@@ -1045,7 +1053,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			if (flags & PDO_FETCH_CLASSTYPE) {
 				do_fetch_opt_finish(stmt, 0);
 				stmt->fetch.cls.ce = old_ce;
-				ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
+				stmt->fetch.cls.ctor_args = old_ctor_args;
 				stmt->fetch.cls.fci.param_count = old_arg_count;
 			}
 			break;
@@ -1181,28 +1189,28 @@ PHP_METHOD(PDOStatement, fetchObject)
 {
 	zend_class_entry *ce = NULL;
 	zend_class_entry *old_ce;
-	zval old_ctor_args, *ctor_args = NULL;
+	HashTable *old_ctor_args, *ctor_args = NULL;
 	int old_arg_count;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_CLASS_OR_NULL(ce)
-		Z_PARAM_ARRAY(ctor_args)
+		Z_PARAM_ARRAY_HT(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
 	old_ce = stmt->fetch.cls.ce;
-	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
+	old_ctor_args = stmt->fetch.cls.ctor_args;
 	old_arg_count = stmt->fetch.cls.fci.param_count;
 
 	do_fetch_opt_finish(stmt, 0);
 
-	if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-		ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
+	if (ctor_args && zend_hash_num_elements(ctor_args)) {
+		stmt->fetch.cls.ctor_args = zend_array_dup(ctor_args);
 	} else {
-		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
+		stmt->fetch.cls.ctor_args = NULL;
 	}
 	if (ce) {
 		stmt->fetch.cls.ce = ce;
@@ -1217,7 +1225,7 @@ PHP_METHOD(PDOStatement, fetchObject)
 	do_fetch_opt_finish(stmt, 1);
 
 	stmt->fetch.cls.ce = old_ce;
-	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
+	stmt->fetch.cls.ctor_args = old_ctor_args;
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 }
 /* }}} */
@@ -1251,7 +1259,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 	zval data, *return_all = NULL;
 	zval *arg2 = NULL;
 	zend_class_entry *old_ce;
-	zval old_ctor_args, *ctor_args = NULL;
+	HashTable *old_ctor_args, *ctor_args = NULL;
 	bool error = false;
 	int flags, old_arg_count;
 
@@ -1259,7 +1267,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(how)
 		Z_PARAM_ZVAL_OR_NULL(arg2)
-		Z_PARAM_ARRAY_OR_NULL(ctor_args)
+		Z_PARAM_ARRAY_HT_OR_NULL(ctor_args)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
@@ -1268,7 +1276,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 	}
 
 	old_ce = stmt->fetch.cls.ce;
-	ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
+	old_ctor_args = stmt->fetch.cls.ctor_args;
 	old_arg_count = stmt->fetch.cls.fci.param_count;
 
 	do_fetch_opt_finish(stmt, 0);
@@ -1292,10 +1300,10 @@ PHP_METHOD(PDOStatement, fetchAll)
 				stmt->fetch.cls.ce = zend_standard_class_def;
 			}
 
-			if (ctor_args && zend_hash_num_elements(Z_ARRVAL_P(ctor_args)) > 0) {
-				ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, ctor_args); /* we're not going to free these */
+			if (ctor_args && zend_hash_num_elements(ctor_args) > 0) {
+				stmt->fetch.cls.ctor_args = ctor_args; /* we're not going to free these */
 			} else {
-				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
+				stmt->fetch.cls.ctor_args = NULL;
 			}
 
 			do_fetch_class_prepare(stmt);
@@ -1392,7 +1400,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 
 	/* Restore defaults which were changed by PDO_FETCH_CLASS mode */
 	stmt->fetch.cls.ce = old_ce;
-	ZVAL_COPY_VALUE(&stmt->fetch.cls.ctor_args, &old_ctor_args);
+	stmt->fetch.cls.ctor_args = old_ctor_args;
 	stmt->fetch.cls.fci.param_count = old_arg_count;
 
 	/* on no results, return an empty array */
@@ -1764,8 +1772,11 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 
 		case PDO_FETCH_CLASS: {
 			HashTable *constructor_args = NULL;
-			/* Undef constructor arguments */
-			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
+			/* Free constructor arguments */
+			if (stmt->fetch.cls.ctor_args) {
+				zend_array_destroy(stmt->fetch.cls.ctor_args);
+				stmt->fetch.cls.ctor_args = NULL;
+			}
 			/* Gets its class name from 1st column */
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
 				if (variadic_num_args != 0) {
@@ -1818,7 +1829,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 
 				/* If constructor arguments are present and not empty */
 				if (constructor_args) {
-					ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(constructor_args));
+					stmt->fetch.cls.ctor_args = zend_array_dup(constructor_args);
 				}
 			}
 

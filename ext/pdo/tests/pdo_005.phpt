@@ -110,9 +110,15 @@ array(3) {
     string(2) "CC"
   }
 }
+
+Warning: TestDerived::__construct(): Argument #1 ($row) must be passed by reference, value given in %s on line %d
 TestDerived::__construct(0,1)
-TestDerived::__construct(1,2)
-TestDerived::__construct(2,3)
+
+Warning: TestDerived::__construct(): Argument #1 ($row) must be passed by reference, value given in %s on line %d
+TestDerived::__construct(0,2)
+
+Warning: TestDerived::__construct(): Argument #1 ($row) must be passed by reference, value given in %s on line %d
+TestDerived::__construct(0,3)
 array(3) {
   [0]=>
   object(TestDerived)#%d (5) {
@@ -136,7 +142,7 @@ array(3) {
     ["val2":"TestBase":private]=>
     NULL
     ["row":protected]=>
-    int(1)
+    int(0)
     ["val2"]=>
     string(2) "BB"
   }
@@ -149,7 +155,7 @@ array(3) {
     ["val2":"TestBase":private]=>
     NULL
     ["row":protected]=>
-    int(2)
+    int(0)
     ["val2"]=>
     string(2) "CC"
   }
