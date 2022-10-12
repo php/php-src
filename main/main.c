@@ -2121,9 +2121,6 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_CS | CONST_NO_FILE_CACHE);
 	}
 
-	php_output_register_constants();
-	php_rfc1867_register_constants();
-
 	/* this will read in php.ini, set up the configuration parameters,
 	   load zend extensions and register php function extensions
 	   to be loaded later */
