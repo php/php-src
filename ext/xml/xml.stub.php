@@ -134,6 +134,12 @@ const XML_OPTION_SKIP_TAGSTART = UNKNOWN;
  */
 const XML_OPTION_SKIP_WHITE = UNKNOWN;
 
+/**
+ * @var string
+ * @cvalue PHP_XML_SAX_IMPL
+ */
+const XML_SAX_IMPL = UNKNOWN;
+
 function xml_parser_create(?string $encoding = null): XMLParser {}
 
 function xml_parser_create_ns(?string $encoding = null, string $separator = ":"): XMLParser {}
