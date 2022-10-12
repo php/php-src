@@ -371,6 +371,26 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
 
+/* crypt.c */
+
+/**
+ * @var int
+ * @cvalue PHP_MAX_SALT_LEN
+ */
+const CRYPT_SALT_LENGTH = UNKNOWN;
+/** @var int */
+const CRYPT_STD_DES = 1;
+/** @var int */
+const CRYPT_EXT_DES = 1;
+/** @var int */
+const CRYPT_MD5 = 1;
+/** @var int */
+const CRYPT_BLOWFISH = 1;
+/** @var int */
+const CRYPT_SHA256 = 1;
+/** @var int */
+const CRYPT_SHA512 = 1;
+
 /* dns.c */
 
 #if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
