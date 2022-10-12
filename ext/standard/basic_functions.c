@@ -16,6 +16,7 @@
  */
 
 #include "php.h"
+#include "php_assert.h"
 #include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"

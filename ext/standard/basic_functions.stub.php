@@ -120,6 +120,34 @@ const ARRAY_FILTER_USE_BOTH = UNKNOWN;
  */
 const ARRAY_FILTER_USE_KEY = UNKNOWN;
 
+/* assert.c */
+
+/**
+ * @var int
+ * @cvalue PHP_ASSERT_ACTIVE
+ */
+const ASSERT_ACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ASSERT_CALLBACK
+ */
+const ASSERT_CALLBACK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ASSERT_BAIL
+ */
+const ASSERT_BAIL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ASSERT_WARNING
+ */
+const ASSERT_WARNING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ASSERT_EXCEPTION
+ */
+const ASSERT_EXCEPTION = UNKNOWN;
+
 /* basic_functions.h */
 
 /**
