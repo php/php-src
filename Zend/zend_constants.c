@@ -111,16 +111,6 @@ void zend_register_standard_constants(void)
 {
 	register_zend_constants_symbols(0);
 
-	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_PROVIDE_OBJECT", DEBUG_BACKTRACE_PROVIDE_OBJECT, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_IGNORE_ARGS", DEBUG_BACKTRACE_IGNORE_ARGS, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_BOOL_CONSTANT("ZEND_THREAD_SAFE", ZTS_V, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_BOOL_CONSTANT("ZEND_DEBUG_BUILD", ZEND_DEBUG, CONST_PERSISTENT | CONST_CS);
-
-	/* Special constants true/false/null.  */
-	REGISTER_MAIN_BOOL_CONSTANT("TRUE", 1, CONST_PERSISTENT);
-	REGISTER_MAIN_BOOL_CONSTANT("FALSE", 0, CONST_PERSISTENT);
-	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT);
-
 	true_const = zend_hash_str_find_ptr(EG(zend_constants), "TRUE", sizeof("TRUE")-1);
 	false_const = zend_hash_str_find_ptr(EG(zend_constants), "FALSE", sizeof("FALSE")-1);
 	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);
