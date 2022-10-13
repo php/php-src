@@ -23,6 +23,14 @@ PHP_RINIT_FUNCTION(assert);
 PHP_RSHUTDOWN_FUNCTION(assert);
 PHP_MINFO_FUNCTION(assert);
 
+enum {
+	PHP_ASSERT_ACTIVE=1,
+	PHP_ASSERT_CALLBACK,
+	PHP_ASSERT_BAIL,
+	PHP_ASSERT_WARNING,
+	PHP_ASSERT_EXCEPTION
+};
+
 extern PHPAPI zend_class_entry *assertion_error_ce;
 
 #endif /* PHP_ASSERT_H */

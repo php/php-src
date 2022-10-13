@@ -25,6 +25,9 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+ a. ext/json
+   - A new function php_json_validate_ex has been added to check if the
+     provided C string is valid for the given depth and options.
 ========================
 4. OpCode changes
 ========================

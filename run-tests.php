@@ -1647,11 +1647,47 @@ escape:
     }
 }
 
+/**
+ * Calls fwrite and retries when network writes fail with errors such as "Resource temporarily unavailable"
+ *
+ * @param resource $stream the stream to fwrite to
+ * @param string $data
+ * @return int|false
+ */
+function safe_fwrite($stream, string $data)
+{
+    // safe_fwrite was tested by adding $message['unused'] = str_repeat('a', 20_000_000); in send_message()
+    // fwrites on tcp sockets can return false or less than strlen if the recipient is busy.
+    // (e.g. fwrite(): Send of 577 bytes failed with errno=35 Resource temporarily unavailable)
+    $bytes_written = 0;
+    while ($bytes_written < strlen($data)) {
+        $n = @fwrite($stream, substr($data, $bytes_written));
+        if ($n === false) {
+            $write_streams = [$stream];
+            $read_streams = [];
+            $except_streams = [];
+            /* Wait for up to 10 seconds for the stream to be ready to write again. */
+            $result = stream_select($read_streams, $write_streams, $except_streams, 10);
+            if (!$result) {
+                echo "ERROR: send_message() stream_select() failed\n";
+                return false;
+            }
+            $n = @fwrite($stream, substr($data, $bytes_written));
+            if ($n === false) {
+                echo "ERROR: send_message() Failed to write chunk after stream_select: " . error_get_last()['message'] . "\n";
+                return false;
+            }
+        }
+        $bytes_written += $n;
+    }
+    return $bytes_written;
+}
+
 function send_message($stream, array $message): void
 {
     $blocking = stream_get_meta_data($stream)["blocked"];
     stream_set_blocking($stream, true);
-    fwrite($stream, base64_encode(serialize($message)) . "\n");
+    safe_fwrite($stream, base64_encode(serialize($message)) . "\n");
     stream_set_blocking($stream, $blocking);
 }
 
@@ -2059,9 +2095,6 @@ TEST $file
         // Make sure warnings still show up on the second run.
         $ini_settings['opcache.record_warnings'] = '1';
     }
-    if (extension_loaded('posix') && posix_getuid() === 0) {
-        $ini_settings['opcache.preload_user'] = 'root';
-    }
 
     // Any special ini settings
     // these may overwrite the test defaults...
@@ -2070,6 +2103,19 @@ TEST $file
         $ini = str_replace('{TMP}', sys_get_temp_dir(), $ini);
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
         $ini = preg_replace('/{MAIL:(\S+)}/', $replacement, $ini);
+        $skip = false;
+        $ini = preg_replace_callback('/{ENV:(\S+)}/', function ($m) use (&$skip) {
+            $name = $m[1];
+            $value = getenv($name);
+            if ($value === false) {
+                $skip = sprintf('Environment variable %s is not set', $name);
+                return '';
+            }
+            return $value;
+        }, $ini);
+        if ($skip !== false) {
+            return skip_test($tested, $tested_file, $shortname, $skip);
+        }
         settings2array(preg_split("/[\n\r]+/", $ini), $ini_settings);
 
         if ($num_repeats > 1 && isset($ini_settings['opcache.opt_debug_level'])) {

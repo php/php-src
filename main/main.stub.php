@@ -234,3 +234,111 @@ const PHP_WINDOWS_NT_SERVER = UNKNOWN;
  */
 const PHP_WINDOWS_NT_WORKSTATION = UNKNOWN;
 #endif
+
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_START
+ */
+const PHP_OUTPUT_HANDLER_START = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_WRITE
+ */
+const PHP_OUTPUT_HANDLER_WRITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_FLUSH
+ */
+const PHP_OUTPUT_HANDLER_FLUSH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_CLEAN
+ */
+const PHP_OUTPUT_HANDLER_CLEAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_FINAL
+ */
+const PHP_OUTPUT_HANDLER_FINAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_WRITE
+ */
+const PHP_OUTPUT_HANDLER_CONT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_FINAL
+ */
+const PHP_OUTPUT_HANDLER_END = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_CLEANABLE
+ */
+const PHP_OUTPUT_HANDLER_CLEANABLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_FLUSHABLE
+ */
+const PHP_OUTPUT_HANDLER_FLUSHABLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_REMOVABLE
+ */
+const PHP_OUTPUT_HANDLER_REMOVABLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_STDFLAGS
+ */
+const PHP_OUTPUT_HANDLER_STDFLAGS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_STARTED
+ */
+const PHP_OUTPUT_HANDLER_STARTED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_DISABLED
+ */
+const PHP_OUTPUT_HANDLER_DISABLED = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_OK
+ */
+const UPLOAD_ERR_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_A
+ */
+const UPLOAD_ERR_INI_SIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_B
+ */
+const UPLOAD_ERR_FORM_SIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_C
+ */
+const UPLOAD_ERR_PARTIAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_D
+ */
+const UPLOAD_ERR_NO_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_E
+ */
+const UPLOAD_ERR_NO_TMP_DIR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_F
+ */
+const UPLOAD_ERR_CANT_WRITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UPLOAD_ERROR_X
+ */
+const UPLOAD_ERR_EXTENSION = UNKNOWN;
