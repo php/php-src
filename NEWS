@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC5
 
+- MySQLnd:
+  . Fixed potential heap corruption due to alignment mismatch. (cmb)
 
 13 Oct 2022, PHP 8.2.0RC4
 
