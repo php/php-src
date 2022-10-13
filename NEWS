@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.26
 
+- SOAP:
+  . Fixed GH-9720 (Null pointer dereference while serializing the response).
+    (cmb)
 
 27 Oct 2022, PHP 8.0.25
 
