@@ -141,10 +141,7 @@ static double getFloat_gamma_high(double x)
 
 static double getFloat_gamma(double x, double y)
 {
-	double high = getFloat_gamma_high(x);
-	double low = getFloat_gamma_low(y);
-
-	return high > low ? high : low;
+	return (fabs(x) > fabs(y)) ? getFloat_gamma_high(x) : getFloat_gamma_low(y);
 }
 
 static uint64_t getFloat_ceilint(double a, double b, double g)
