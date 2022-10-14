@@ -1911,6 +1911,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_FETCH_DIM_R:
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_FETCH_LIST_R:
+				case ZEND_FETCH_LIST_IS:
 					ADD_OP1_TRACE_GUARD();
 					ADD_OP2_TRACE_GUARD();
 
@@ -2829,6 +2830,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 						 || opline->opcode == ZEND_SWITCH_LONG
 						 || opline->opcode == ZEND_MATCH
 						 || opline->opcode == ZEND_FETCH_LIST_R
+						 || opline->opcode == ZEND_FETCH_LIST_IS
 						 || opline->opcode == ZEND_COPY_TMP
 						 || opline->opcode == ZEND_SWITCH_STRING
 						 || opline->opcode == ZEND_FE_FETCH_R
@@ -5583,6 +5585,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_DIM_R:
 					case ZEND_FETCH_DIM_IS:
 					case ZEND_FETCH_LIST_R:
+					case ZEND_FETCH_LIST_IS:
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN
@@ -8108,7 +8111,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		EX(opline) = t->exit_info[exit_num].opline - 1;
 		if ((EX(opline)->op1_type & (IS_VAR|IS_TMP_VAR))
 		 && !(t->exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP1)
-		 && EX(opline)->opcode != ZEND_FETCH_LIST_R) {
+		 && EX(opline)->opcode != ZEND_FETCH_LIST_R && EX(opline)->opcode != ZEND_FETCH_LIST_IS) {
 			Z_TRY_ADDREF_P(EX_VAR(EX(opline)->op1.var));
 		}
 		return 1;
@@ -8121,6 +8124,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			ZEND_ASSERT((opline-1)->opcode == ZEND_FETCH_DIM_R
 					|| (opline-1)->opcode == ZEND_FETCH_DIM_IS
 					|| (opline-1)->opcode == ZEND_FETCH_LIST_R
+					|| (opline-1)->opcode == ZEND_FETCH_LIST_IS
 					|| (opline-1)->opcode == ZEND_FETCH_DIM_FUNC_ARG);
 			EX(opline) = opline-1;
 			zval_ptr_dtor_nogc(EX_VAR((opline-1)->op2.var));

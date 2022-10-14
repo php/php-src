@@ -869,6 +869,7 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_SWITCH_STRING
 	 || opline->opcode == ZEND_MATCH
 	 || opline->opcode == ZEND_FETCH_LIST_R
+	 || opline->opcode == ZEND_FETCH_LIST_IS
 	 || opline->opcode == ZEND_COPY_TMP) {
 		return 1;
 	}

@@ -3245,6 +3245,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_LIST_R:
 		case ZEND_FETCH_LIST_W:
+		case ZEND_FETCH_LIST_IS:
 			if (ssa_op->op1_def >= 0) {
 				uint32_t key_type = 0;
 				tmp = t1 & ~(MAY_BE_RC1|MAY_BE_RCN);
@@ -3397,7 +3398,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 				 || opline->opcode == ZEND_FETCH_DIM_R
 				 || opline->opcode == ZEND_FETCH_DIM_IS
 				 || opline->opcode == ZEND_FETCH_DIM_UNSET
-				 || opline->opcode == ZEND_FETCH_LIST_R) {
+				 || opline->opcode == ZEND_FETCH_LIST_R
+				 || opline->opcode == ZEND_FETCH_LIST_IS) {
 					UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 				} else {
 					/* invalid key type */
@@ -3409,10 +3411,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			/* FETCH_LIST on a string behaves like FETCH_R on null */
 			tmp = zend_array_element_type(
-				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
+				opline->opcode != ZEND_FETCH_LIST_R && opline->opcode != ZEND_FETCH_LIST_IS ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
 				opline->op1_type,
 				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
-					&& opline->opcode != ZEND_FETCH_LIST_R,
+					&& opline->opcode != ZEND_FETCH_LIST_R && opline->opcode != ZEND_FETCH_LIST_IS,
 				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_FUNC_ARG && (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE))) {
 				tmp |= MAY_BE_NULL;
@@ -4524,6 +4526,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 				case ZEND_FETCH_LIST_R:
+				case ZEND_FETCH_LIST_IS:
 				case ZEND_QM_ASSIGN:
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAL_EX:

@@ -736,6 +736,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			case ZEND_FETCH_DIM_UNSET:
 			case ZEND_FETCH_LIST_R:
 			case ZEND_FETCH_LIST_W:
+			case ZEND_FETCH_LIST_IS:
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_DIM_OP:
 			case ZEND_UNSET_DIM:

@@ -169,6 +169,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					if (opline->opcode != ZEND_CASE
 					 && opline->opcode != ZEND_CASE_STRICT
 					 && opline->opcode != ZEND_FETCH_LIST_R
+					 && opline->opcode != ZEND_FETCH_LIST_IS
 					 && opline->opcode != ZEND_SWITCH_LONG
 					 && opline->opcode != ZEND_SWITCH_STRING
 					 && opline->opcode != ZEND_MATCH
@@ -371,6 +372,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 
 			case ZEND_FETCH_LIST_R:
 			case ZEND_FETCH_LIST_W:
+			case ZEND_FETCH_LIST_IS:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* LIST variable will be deleted later by FREE */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;

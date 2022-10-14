@@ -3062,7 +3062,7 @@ static void zend_compile_list_assign(
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
-		zend_ast *var_ast, *key_ast;
+		zend_ast *var_ast, *key_ast, *coaleasce_default_ast = NULL;
 		znode fetch_result, dim_node;
 		zend_op *opline;
 
@@ -3105,16 +3105,38 @@ static void zend_compile_list_assign(
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
 
+		zend_uchar opcode = ZEND_FETCH_LIST_R;
+		if (var_ast->kind == ZEND_AST_COALESCE) {
+			coaleasce_default_ast = var_ast->child[1];
+			var_ast = var_ast->child[0];
+
+			opcode = ZEND_FETCH_LIST_IS;
+		} else if (elem_ast->attr) {
+			opcode = expr_node->op_type == IS_CV ? ZEND_FETCH_DIM_W : ZEND_FETCH_LIST_W;
+		}
+
 		zend_verify_list_assign_target(var_ast, array_style);
 
-		opline = zend_emit_op(&fetch_result,
-			elem_ast->attr ? (expr_node->op_type == IS_CV ? ZEND_FETCH_DIM_W : ZEND_FETCH_LIST_W) : ZEND_FETCH_LIST_R, expr_node, &dim_node);
+		opline = zend_emit_op(&fetch_result, opcode, expr_node, &dim_node);
 
 		if (dim_node.op_type == IS_CONST) {
 			zend_handle_numeric_dim(opline, &dim_node);
 		}
 
-		if (elem_ast->attr) {
+		if (coaleasce_default_ast) {
+			znode default_node;
+
+			uint32_t opnum = get_next_op_number();
+			zend_emit_op_tmp(&fetch_result, ZEND_COALESCE, &fetch_result, NULL);
+
+			zend_compile_expr(&default_node, coaleasce_default_ast);
+
+			opline = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &default_node, NULL);
+			SET_NODE(opline->result, &fetch_result);
+
+			opline = &CG(active_op_array)->opcodes[opnum];
+			opline->op2.opline_num = get_next_op_number();
+		} else if (elem_ast->attr) {
 			zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
 		}
 		if (var_ast->kind == ZEND_AST_ARRAY) {
