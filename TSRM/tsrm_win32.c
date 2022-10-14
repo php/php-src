@@ -696,6 +696,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 	shm->descriptor = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
 	if (shm->descriptor == NULL) {
 		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+		CloseHandle(shm->segment);
 		return -1;
 	}
 
