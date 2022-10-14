@@ -3003,6 +3003,9 @@ function is_nan(float $num): bool {}
 function intdiv(int $num1, int $num2): int {}
 
 /** @compile-time-eval */
+function intadd(int $num1, int $num2): int {}
+
+/** @compile-time-eval */
 function is_infinite(float $num): bool {}
 
 /** @compile-time-eval */

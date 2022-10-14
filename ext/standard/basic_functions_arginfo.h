@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39d455982dfdea9d0b9b646bc207b05f7108d1b2 */
+ * Stub hash: e8852fec678c5ce2a0c9bbba38c47c2c976da9cf */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1669,6 +1669,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intdiv, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, num2, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_intadd arginfo_intdiv
+
 #define arginfo_is_infinite arginfo_is_finite
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pow, 0, 2, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_OBJECT)
@@ -2662,6 +2664,7 @@ ZEND_FUNCTION(pi);
 ZEND_FUNCTION(is_finite);
 ZEND_FUNCTION(is_nan);
 ZEND_FUNCTION(intdiv);
+ZEND_FUNCTION(intadd);
 ZEND_FUNCTION(is_infinite);
 ZEND_FUNCTION(pow);
 ZEND_FUNCTION(exp);
@@ -3300,6 +3303,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_finite, arginfo_is_finite)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_nan, arginfo_is_nan)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(intdiv, arginfo_intdiv)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(intadd, arginfo_intadd)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_infinite, arginfo_is_infinite)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(pow, arginfo_pow)
 	ZEND_FE(exp, arginfo_exp)
