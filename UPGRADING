@@ -91,6 +91,17 @@ PHP 8.3 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- FFI:
+  . FFI::load() is now allowed during preloading when opcache.preload_user is the
+    current system user. Previously, calling FFI::load() was not possible during
+    preloading if the opcache.preload_user directive was set.
+
+- Opcache:
+  . In the cli and phpdbg SAPIs, preloading does not require the
+    opcache.preload_user directive to be set anymore when running as root. In
+    other SAPIs, this directive is required when running as root because
+    preloading is done before the SAPI switches to an unprivileged user.
+
 ========================================
 14. Performance Improvements
 ========================================
