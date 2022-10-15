@@ -48,8 +48,6 @@ typedef struct _spl_fixedarray {
 	zend_long size;
 	/* It is possible to resize this, so this can't be combined with the object */
 	zval *elements;
-	/* True if this was modified after the last call to get_properties or the hash table wasn't rebuilt. */
-	bool                 should_rebuild_properties;
 } spl_fixedarray;
 
 typedef struct _spl_fixedarray_object {
@@ -107,7 +105,6 @@ static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_lon
 	array->size = 0; /* reset size in case ecalloc() fails */
 	array->elements = size ? safe_emalloc(size, sizeof(zval), 0) : NULL;
 	array->size = size;
-	array->should_rebuild_properties = true;
 }
 
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
@@ -177,7 +174,6 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		/* nothing to do */
 		return;
 	}
-	array->should_rebuild_properties = true;
 
 	/* first initialization */
 	if (array->size == 0) {
@@ -211,47 +207,41 @@ static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, i
 	return ht;
 }
 
-static HashTable* spl_fixedarray_object_get_properties(zend_object *obj)
+static HashTable* spl_fixedarray_object_get_properties_for(zend_object *obj, zend_prop_purpose purpose)
 {
-	spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
-	HashTable *ht = zend_std_get_properties(obj);
+	/* This has __serialize, so the purpose is not ZEND_PROP_PURPOSE_SERIALIZE, which would expect a non-null return value */
+	ZEND_ASSERT(purpose != ZEND_PROP_PURPOSE_SERIALIZE);
 
-	if (!spl_fixedarray_empty(&intern->array)) {
-		/*
-		 * Usually, the reference count of the hash table is 1,
-		 * except during cyclic reference cycles.
-		 *
-		 * Maintain the DEBUG invariant that a hash table isn't modified during iteration,
-		 * and avoid unnecessary work rebuilding a hash table for unmodified properties.
-		 *
-		 * See https://github.com/php/php-src/issues/8079 and ext/spl/tests/fixedarray_022.phpt
-		 * Also see https://github.com/php/php-src/issues/8044 for alternate considered approaches.
-		 */
-		if (!intern->array.should_rebuild_properties) {
-			/* Return the same hash table so that recursion cycle detection works in internal functions. */
-			return ht;
-		}
-		intern->array.should_rebuild_properties = false;
+	const spl_fixedarray_object *intern = spl_fixed_array_from_obj(obj);
+	/*
+	 * SplFixedArray can be subclassed or have dynamic properties (With or without AllowDynamicProperties in subclasses).
+	 * Instances of subclasses with declared properties may have properties but not yet have a property table.
+	 */
+	HashTable *source_properties = obj->properties ? obj->properties : (obj->ce->default_properties_count ? zend_std_get_properties(obj) : NULL);
 
-		zend_long j = zend_hash_num_elements(ht);
+	const zend_long size = intern->array.size;
+	if (size == 0 && (!source_properties || !zend_hash_num_elements(source_properties))) {
+		return NULL;
+	}
+	zval *const elements = intern->array.elements;
+	HashTable *ht = zend_new_array(size);
 
-		if (GC_REFCOUNT(ht) > 1) {
-			intern->std.properties = zend_array_dup(ht);
-			GC_TRY_DELREF(ht);
-		}
-		for (zend_long i = 0; i < intern->array.size; i++) {
-			zend_hash_index_update(ht, i, &intern->array.elements[i]);
-			Z_TRY_ADDREF(intern->array.elements[i]);
-		}
-		if (j > intern->array.size) {
-			for (zend_long i = intern->array.size; i < j; ++i) {
-				zend_hash_index_del(ht, i);
+	for (zend_long i = 0; i < size; i++) {
+		Z_TRY_ADDREF_P(&elements[i]);
+		zend_hash_next_index_insert(ht, &elements[i]);
+	}
+	if (source_properties && zend_hash_num_elements(source_properties) > 0) {
+		zend_long nkey;
+		zend_string *skey;
+		zval *value;
+		ZEND_HASH_MAP_FOREACH_KEY_VAL_IND(source_properties, nkey, skey, value) {
+			Z_TRY_ADDREF_P(value);
+			if (skey) {
+				zend_hash_add_new(ht, skey, value);
+			} else {
+				zend_hash_index_update(ht, nkey, value);
 			}
-		}
-		if (HT_IS_PACKED(ht)) {
-			/* Engine doesn't expet packed array */
-			zend_hash_packed_to_hash(ht);
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	return ht;
@@ -394,9 +384,6 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 	}
 
 	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
-	if (type != BP_VAR_IS && type != BP_VAR_R) {
-		intern->array.should_rebuild_properties = true;
-	}
 	return spl_fixedarray_object_read_dimension_helper(intern, offset);
 }
 
@@ -420,7 +407,6 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
-		intern->array.should_rebuild_properties = true;
 		/* Fix #81429 */
 		zval *ptr = &(intern->array.elements[index]);
 		zval tmp;
@@ -461,7 +447,6 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
-		intern->array.should_rebuild_properties = true;
 		zval_ptr_dtor(&(intern->array.elements[index]));
 		ZVAL_NULL(&intern->array.elements[index]);
 	}
@@ -973,7 +958,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.unset_dimension = spl_fixedarray_object_unset_dimension;
 	spl_handler_SplFixedArray.has_dimension   = spl_fixedarray_object_has_dimension;
 	spl_handler_SplFixedArray.count_elements  = spl_fixedarray_object_count_elements;
-	spl_handler_SplFixedArray.get_properties  = spl_fixedarray_object_get_properties;
+	spl_handler_SplFixedArray.get_properties_for = spl_fixedarray_object_get_properties_for;
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
 
