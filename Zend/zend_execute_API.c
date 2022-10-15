@@ -1355,7 +1355,9 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 #ifndef ZEND_WIN32
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
-#ifndef ZTS
+#ifdef ZTS
+	if (!tsrm_is_managed_thread()) return;
+#else
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		/* Die on hard timeout */
 		const char *error_filename = NULL;

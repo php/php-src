@@ -87,6 +87,8 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 	zend_signal_queue_t *queue, *qtmp;
 
 #ifdef ZTS
+	if (!tsrm_is_managed_thread()) return;
+
 	/* A signal could hit after TSRM shutdown, in this case globals are already freed. */
 	if (tsrm_is_shutdown()) {
 		/* Forward to default handler handler */
