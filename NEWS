@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.26
 
+- Core:
+  . Fixed bug GH-9752 (Generator crashes when interrupted during argument
+    evaluation with extra named params). (Arnaud)
+
 - SOAP:
   . Fixed GH-9720 (Null pointer dereference while serializing the response).
     (cmb)
