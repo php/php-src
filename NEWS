@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC5
 
+- Core:
+  . Fixed bug GH-9752 (Generator crashes when interrupted during argument
+    evaluation with extra named params). (Arnaud)
+
 - MySQLnd:
   . Fixed potential heap corruption due to alignment mismatch. (cmb)
 
