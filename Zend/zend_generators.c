@@ -44,6 +44,7 @@ ZEND_API void zend_generator_restore_call_stack(zend_generator *generator) /* {{
 			ZEND_CALL_NUM_ARGS(call),
 			Z_PTR(call->This));
 		memcpy(((zval*)new_call) + ZEND_CALL_FRAME_SLOT, ((zval*)call) + ZEND_CALL_FRAME_SLOT, ZEND_CALL_NUM_ARGS(call) * sizeof(zval));
+		new_call->extra_named_params = call->extra_named_params;
 		new_call->prev_execute_data = prev_call;
 		prev_call = new_call;
 
