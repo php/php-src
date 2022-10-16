@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     error message). (ilutov)
   . SA_ONSTACK is now set for signal handlers to be friendlier to other
     in-process code such as Go's cgo. (Kévin Dunglas)
+  . SA_ONSTACK is now set when signals are disabled. (Kévin Dunglas)
 
 - Fileinfo:
   . Upgrade bundled libmagic to 5.43. (Anatol)
@@ -26,6 +27,9 @@ PHP                                                                        NEWS
     (Arnaud, Kapitan Oczywisty)
   . Made opcache.preload_user always optional in the cli and phpdbg SAPIs.
     (Arnaud)
+
+- PCNTL:
+  . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
 
 - Posix:
   . Added posix_sysconf. (David Carlier)
