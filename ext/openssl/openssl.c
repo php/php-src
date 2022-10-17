@@ -57,6 +57,10 @@
 #include <openssl/pkcs12.h>
 #include <openssl/cms.h>
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L && !defined(OPENSSL_NO_ENGINE)
+#include <openssl/engine.h>
+#endif
+
 /* Common */
 #include <time.h>
 
@@ -1436,6 +1440,11 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
 	EVP_cleanup();
+
+#ifndef OPENSSL_NO_ENGINE
+	/* Free engine list initialized by OPENSSL_config */
+	ENGINE_cleanup();
+#endif
 
 	/* prevent accessing locking callback from unloaded extension */
 	CRYPTO_set_locking_callback(NULL);
