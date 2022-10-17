@@ -5777,6 +5777,10 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		if (opline->op1_type == IS_CONST) {
 			Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
 		}
+		if (arms->children == 0) {
+			/* Mark this as an "expression throw" for opcache. */
+			opline->extended_value = ZEND_THROW_IS_EXPR;
+		}
 	}
 
 	for (uint32_t i = 0; i < arms->children; ++i) {
