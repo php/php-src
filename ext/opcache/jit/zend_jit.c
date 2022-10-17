@@ -4564,6 +4564,13 @@ ZEND_EXT_API void zend_jit_restart(void)
 		}
 
 		zend_jit_protect();
+
+#ifdef HAVE_DISASM
+		if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
+			zend_jit_disasm_shutdown();
+			zend_jit_disasm_init();
+		}
+#endif
 	}
 }
 
