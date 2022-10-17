@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9752 (Generator crashes when interrupted during argument
     evaluation with extra named params). (Arnaud)
 
+- Date:
+  . Fixed bug GH-9763 (DateTimeZone ctr mishandles input and adds null byte if
+    the argument is an offset larger than 100*60 minutes). (Derick)
+
 - SOAP:
   . Fixed GH-9720 (Null pointer dereference while serializing the response).
     (cmb)
