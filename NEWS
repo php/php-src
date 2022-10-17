@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed potential heap corruption due to alignment mismatch. (cmb)
 
+- OpenSSL:
+  . Fixed missing clean up of OpenSSL engine list - attempt to fix GH-8620.
+    (Jakub Zelenka)
+
 - PDO_ODBC:
   . Fixed bug GH-9372 (HY010 when binding overlong parameter). (cmb)
 
