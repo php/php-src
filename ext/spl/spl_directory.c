@@ -1480,7 +1480,7 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 		php_stat(intern->file_name, FS_LPERMS, return_value);
 		if (Z_TYPE_P(return_value) == IS_FALSE) {
 			return;
-		} else if (!S_ISLNK(Z_LVAL_P(return_value))) {
+		} else if (!S_ISLNK(Z_LVAL_P(return_value)) && Z_LVAL_P(return_value) != 0) {
 			RETURN_BOOL(S_ISDIR(Z_LVAL_P(return_value)));
 		} else {
 			if (!allow_links
