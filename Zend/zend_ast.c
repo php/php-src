@@ -475,7 +475,6 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 		return SUCCESS;
 	}
 
-	/* Objects or references cannot occur in a constant expression. */
 	zend_throw_error(NULL, "Only arrays can be unpacked in constant expression");
 	return FAILURE;
 }
