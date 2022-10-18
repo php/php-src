@@ -8,6 +8,10 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
+// Executing the statements fails with some drivers, but not others.
+// The test is written in a way to always pass, unless the execution
+// fails with a different code than 22001 (String data, right truncation).
+
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
