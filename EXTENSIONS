@@ -63,6 +63,11 @@ PRIMARY MAINTAINER:  Joe Watkins <krakjoe@php.net>, Bob Weinand <bwoebi@php.net>
 MAINTENANCE:         Unknown
 STATUS:              5.6
 -------------------------------------------------------------------------------
+EXTENSION:           frankenPHP
+PRIMARY MAINTAINER:  Kévin Dunglas <kevin@dunglas.fr>
+MAINTENANCE:         Maintained
+STATUS:              8.2
+-------------------------------------------------------------------------------
 
 
 == Database extensions ==
