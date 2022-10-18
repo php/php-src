@@ -17,3 +17,4 @@ CREDIT_LINE("Embed", "Edin Kadribasic");
 CREDIT_LINE("FastCGI Process Manager", "Andrei Nigmatulin, dreamcat4, Antony Dovgal, Jerome Loyet");
 CREDIT_LINE("litespeed", "George Wang");
 CREDIT_LINE("phpdbg", "Felipe Pena, Joe Watkins, Bob Weinand");
+CREDIT_LINE("FrankenPHP", "Kévin Dunglas");
