@@ -207,11 +207,13 @@ PHPAPI void _php_emit_fd_setsize_warning(int max_fd);
 static inline bool _php_check_fd_setsize(php_socket_t *max_fd, int setsize)
 {
 #ifdef PHP_WIN32
+	(void)(max_fd); // Unused
 	if (setsize + 1 >= FD_SETSIZE) {
 		_php_emit_fd_setsize_warning(setsize);
 		return false;
 	}
 #else
+	(void)(setsize); // Unused
 	if (*max_fd >= FD_SETSIZE) {
 		_php_emit_fd_setsize_warning(*max_fd);
 		*max_fd = FD_SETSIZE - 1;
