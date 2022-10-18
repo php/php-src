@@ -57,6 +57,8 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 * The CHECK_NULL_PATH and CHECK_ZVAL_NULL_PATH macros are now wrappers using
   the new inline functions: bool zend_str_has_nul_byte(const zend_string *str)
   and zend_char_has_nul_byte(const char *s, size_t known_length)
+* Added zend_enum_get_case_by_value() function, which provides an internal API
+  similiar to BackedEnum::from() and BackedEnum::tryFrom().
 
 ========================
 2. Build system changes
