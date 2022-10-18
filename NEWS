@@ -9,8 +9,11 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed potential heap corruption due to alignment mismatch. (cmb)
 
+- PDO_ODBC:
+  . Fixed bug GH-9372 (HY010 when binding overlong parameter). (cmb)
+
 - SOAP:
-  . Fixed GH-9720 (Null pointer dereference while serializing the response).
+  . Fixed bug GH-9720 (Null pointer dereference while serializing the response).
     (cmb)
 
 13 Oct 2022, PHP 8.2.0RC4
