@@ -1,8 +1,9 @@
 --TEST--
 Bug GH-9372 (HY010 when binding overlong parameter)
+--EXTENSIONS--
+pdo_odbc
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_odbc')) die('skip pdo_odbc extension not available');
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
