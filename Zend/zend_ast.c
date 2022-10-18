@@ -476,7 +476,7 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 	}
 
 	/* Objects or references cannot occur in a constant expression. */
-	zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
+	zend_throw_error(NULL, "Only arrays can be unpacked in constant expression");
 	return FAILURE;
 }
 
