@@ -195,9 +195,22 @@ static zend_always_inline zend_string *zend_string_copy(zend_string *s)
 	return s;
 }
 
+static zend_always_inline zend_string *zend_string_dup_safe(zend_string *s, bool persistent)
+{
+	if (ZSTR_IS_INTERNED(s) && (!persistent || (GC_FLAGS(s) & IS_STR_PERSISTENT))) {
+		return s;
+	} else {
+		return zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
+	}
+}
+
+/* Callers should use PHP 8.2's definition of zend_string_dup_safe instead,
+   if they need a temporary or interned persistent string
+   and aren't sure if it might be a temporary (allocated with emalloc) interned string. */
 static zend_always_inline zend_string *zend_string_dup(zend_string *s, bool persistent)
 {
 	if (ZSTR_IS_INTERNED(s)) {
+		ZEND_ASSERT(!persistent || (GC_FLAGS(s) & (IS_STR_PERSISTENT|IS_STR_PERMANENT)));
 		return s;
 	} else {
 		return zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
