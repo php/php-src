@@ -844,7 +844,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 			memcpy(&BG(lssb), &ssb, sizeof(php_stream_statbuf));
 		}
 		if (!(flags & PHP_STREAM_URL_STAT_LINK)
-		 || !S_ISLNK(ssb.sb.st_mode) && ssb.sb.st_mode != 0) {
+		 || (!S_ISLNK(ssb.sb.st_mode) && ssb.sb.st_mode != 0)) {
 			if (BG(CurrentStatFile)) {
 				zend_string_release(BG(CurrentStatFile));
 			}
