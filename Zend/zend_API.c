@@ -4175,21 +4175,6 @@ ZEND_API zend_result zend_fcall_info_args(zend_fcall_info *fci, zval *args) /* {
 }
 /* }}} */
 
-ZEND_API void zend_fcall_info_argp(zend_fcall_info *fci, uint32_t argc, zval *argv) /* {{{ */
-{
-	zend_fcall_info_args_clear(fci, !argc);
-
-	if (argc) {
-		fci->param_count = argc;
-		fci->params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
-
-		for (uint32_t i = 0; i < argc; ++i) {
-			ZVAL_COPY(&fci->params[i], &argv[i]);
-		}
-	}
-}
-/* }}} */
-
 ZEND_API void zend_get_callable_zval_from_fcc(const zend_fcall_info_cache *fcc, zval *callable)
 {
 	if (fcc->closure) {
