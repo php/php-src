@@ -47,31 +47,37 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 
 #define PSF(a) PS(mod_user_names).ps_##a
 
-#define FINISH(return_value) \
-	if (Z_TYPE(return_value) != IS_UNDEF) { \
-		if (Z_TYPE(return_value) == IS_TRUE) { \
-			ret = SUCCESS; \
-		} else if (Z_TYPE(return_value) == IS_FALSE) { \
-			ret = FAILURE; \
-		}  else if ((Z_TYPE(return_value) == IS_LONG) && (Z_LVAL(return_value) == -1)) { \
-			if (!EG(exception)) { \
-				php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&return_value)); \
-			} \
-			ret = FAILURE; \
-		} else if ((Z_TYPE(return_value) == IS_LONG) && (Z_LVAL(return_value) == 0)) { \
-			if (!EG(exception)) { \
-				php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&return_value)); \
-			} \
-			ret = SUCCESS; \
-		} else { \
-			if (!EG(exception)) { \
-				zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&return_value)); \
-			} \
-			ret = FAILURE; \
-			zval_ptr_dtor(&return_value); \
-		} \
-	} \
-	return ret
+static zend_result verify_bool_return_type_userland_calls(const zval* value)
+{
+	/* Exit or exception in userland call */
+	if (Z_TYPE_P(value) == IS_UNDEF) {
+		return FAILURE;
+	}
+	if (Z_TYPE_P(value) == IS_TRUE) {
+		return SUCCESS;
+	}
+	if (Z_TYPE_P(value) == IS_FALSE) {
+		return FAILURE;
+	}
+	if ((Z_TYPE_P(value) == IS_LONG) && (Z_LVAL_P(value) == -1)) {
+		/* TODO Why are exception cheked? */
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(value));
+		}
+		return FAILURE;
+	}
+	if ((Z_TYPE_P(value) == IS_LONG) && (Z_LVAL_P(value) == 0)) {
+		/* TODO Why are exception cheked? */
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(value));
+		}
+		return SUCCESS;
+	}
+	if (!EG(exception)) {
+		zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_type_name(value)); \
+    }
+    return FAILURE;
+}
 
 PS_OPEN_FUNC(user)
 {
@@ -96,7 +102,9 @@ PS_OPEN_FUNC(user)
 
 	PS(mod_user_implemented) = 1;
 
-	FINISH(retval);
+	ret = verify_bool_return_type_userland_calls(&retval);
+	zval_ptr_dtor(&retval);
+	return ret;
 }
 
 PS_CLOSE_FUNC(user)
@@ -127,7 +135,9 @@ PS_CLOSE_FUNC(user)
 		zend_bailout();
 	}
 
-	FINISH(retval);
+	ret = verify_bool_return_type_userland_calls(&retval);
+	zval_ptr_dtor(&retval);
+	return ret;
 }
 
 PS_READ_FUNC(user)
@@ -166,7 +176,9 @@ PS_WRITE_FUNC(user)
 
 	ps_call_handler(&PSF(write), 2, args, &retval);
 
-	FINISH(retval);
+	ret = verify_bool_return_type_userland_calls(&retval);
+	zval_ptr_dtor(&retval);
+	return ret;
 }
 
 PS_DESTROY_FUNC(user)
@@ -181,7 +193,9 @@ PS_DESTROY_FUNC(user)
 
 	ps_call_handler(&PSF(destroy), 1, args, &retval);
 
-	FINISH(retval);
+	ret = verify_bool_return_type_userland_calls(&retval);
+	zval_ptr_dtor(&retval);
+	return ret;
 }
 
 PS_GC_FUNC(user)
@@ -250,7 +264,9 @@ PS_VALIDATE_SID_FUNC(user)
 
 		ps_call_handler(&PSF(validate_sid), 1, args, &retval);
 
-		FINISH(retval);
+		ret = verify_bool_return_type_userland_calls(&retval);
+		zval_ptr_dtor(&retval);
+		return ret;
 	}
 
 	/* dummy function defined by PS_MOD */
@@ -273,5 +289,7 @@ PS_UPDATE_TIMESTAMP_FUNC(user)
 		ps_call_handler(&PSF(write), 2, args, &retval);
 	}
 
-	FINISH(retval);
+	ret = verify_bool_return_type_userland_calls(&retval);
+	zval_ptr_dtor(&retval);
+	return ret;
 }
