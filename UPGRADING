@@ -24,6 +24,8 @@ PHP 8.3 UPGRADE NOTES
     Error when using more than
     `zend.max_allowed_stack_size-zend.reserved_stack_size` bytes of stack
     (`fiber.stack_size-zend.reserved_stack_size` for fibers).
+  . Class constants can now be accessed dynamically using the C::{$name} syntax.
+    RFC: https://wiki.php.net/rfc/dynamic_class_constant_fetch
 
 ========================================
 2. New Features

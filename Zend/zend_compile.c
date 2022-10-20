@@ -9669,16 +9669,18 @@ static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	class_ast = ast->child[0];
 	const_ast = ast->child[1];
 
-	if (class_ast->kind == ZEND_AST_ZVAL) {
-		zend_string *resolved_name;
-
-		resolved_name = zend_resolve_class_name_ast(class_ast);
-		if (const_ast->kind == ZEND_AST_ZVAL && zend_try_ct_eval_class_const(&result->u.constant, resolved_name, zend_ast_get_str(const_ast))) {
-			result->op_type = IS_CONST;
+	if (class_ast->kind == ZEND_AST_ZVAL && const_ast->kind == ZEND_AST_ZVAL) {
+		zval *const_zv = zend_ast_get_zval(const_ast);
+		if (Z_TYPE_P(const_zv) == IS_STRING) {
+			zend_string *const_str = Z_STR_P(const_zv);
+			zend_string *resolved_name = zend_resolve_class_name_ast(class_ast);
+			if (zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
+				result->op_type = IS_CONST;
+				zend_string_release_ex(resolved_name, 0);
+				return;
+			}
 			zend_string_release_ex(resolved_name, 0);
-			return;
 		}
-		zend_string_release_ex(resolved_name, 0);
 	}
 
 	zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
@@ -9689,7 +9691,9 @@ static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_set_class_name_op1(opline, &class_node);
 
-	opline->extended_value = zend_alloc_cache_slots(2);
+	if (opline->op1_type == IS_CONST || opline->op2_type == IS_CONST) {
+		opline->extended_value = zend_alloc_cache_slots(2);
+	}
 }
 /* }}} */
 

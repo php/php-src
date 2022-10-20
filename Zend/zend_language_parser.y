@@ -1379,6 +1379,10 @@ class_constant:
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
+	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
 ;
 
 optional_expr:

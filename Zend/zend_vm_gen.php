@@ -260,7 +260,7 @@ $op1_get_zval_ptr_deref = array(
     "UNUSED"   => "NULL",
     "CV"       => "_get_zval_ptr_cv_deref_\\1(opline->op1.var EXECUTE_DATA_CC)",
     "TMPVAR"   => "???",
-    "TMPVARCV" => "???",
+    "TMPVARCV" => "_get_zval_ptr_tmpvarcv(opline->op1_type, opline->op1, \\1 EXECUTE_DATA_CC)",
 );
 
 $op2_get_zval_ptr_deref = array(
@@ -271,7 +271,7 @@ $op2_get_zval_ptr_deref = array(
     "UNUSED"   => "NULL",
     "CV"       => "_get_zval_ptr_cv_deref_\\1(opline->op2.var EXECUTE_DATA_CC)",
     "TMPVAR"   => "???",
-    "TMPVARCV" => "???",
+    "TMPVARCV" => "_get_zval_ptr_tmpvarcv(opline->op2_type, opline->op2, \\1 EXECUTE_DATA_CC)",
 );
 
 $op1_get_zval_ptr_undef = array(
@@ -436,7 +436,7 @@ $op1_free_op = array(
     "UNUSED"   => "",
     "CV"       => "",
     "TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
-    "TMPVARCV" => "???",
+    "TMPVARCV" => "FREE_OP(opline->op1_type, opline->op1.var)",
 );
 
 $op2_free_op = array(
@@ -447,7 +447,7 @@ $op2_free_op = array(
     "UNUSED"   => "",
     "CV"       => "",
     "TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
-    "TMPVARCV" => "???",
+    "TMPVARCV" => "FREE_OP(opline->op2_type, opline->op2.var)",
 );
 
 $op1_free_op_if_var = array(
