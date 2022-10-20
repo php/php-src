@@ -411,6 +411,9 @@ class ReflectionProperty implements Reflector
     public function isInitialized(?object $object = null): bool {}
 
     /** @tentative-return-type */
+    public function unitializeValue(?object $object = null): void {}
+
+    /** @tentative-return-type */
     public function isPublic(): bool {}
 
     /** @tentative-return-type */

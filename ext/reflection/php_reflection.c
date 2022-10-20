@@ -5650,7 +5650,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 }
 /* }}} */
 
-/* {{{ Returns this property's value */
+/* {{{ Returns true if property was initialized */
 ZEND_METHOD(ReflectionProperty, isInitialized)
 {
 	reflection_object *intern;
@@ -5692,6 +5692,13 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 
 		RETVAL_BOOL(retval);
 	}
+}
+/* }}} */
+
+/* {{{ Uninitialize this property's value */
+ZEND_METHOD(ReflectionProperty, uninitializeValue)
+{
+	// TODO
 }
 /* }}} */
 
