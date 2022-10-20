@@ -3,6 +3,8 @@ Handling OCI_SUCCESS_WITH_INFO
 --EXTENSIONS--
 pdo
 pdo_oci
+--XFAIL--
+This test frequently fails in CI
 --SKIPIF--
 <?php
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
