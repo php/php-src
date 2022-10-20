@@ -23,6 +23,10 @@ PHP 8.3 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Posix
+  . posix_getrlimit() now takes an optional $res parameter to allow fetching a
+    single resource limit.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
