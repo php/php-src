@@ -4559,6 +4559,43 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
+	if (sort_type == PHP_ARRAY_UNIQUE_UNSORTED) {
+		zend_long input_num_key;
+		zend_string *input_str_key;
+		zval *input_val;
+
+		array_init(return_value);
+		HashTable *result_ht = Z_ARR_P(return_value);
+
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), input_num_key, input_str_key, input_val) {
+			zval *input_val_deref = input_val;
+			ZVAL_DEREF(input_val_deref);
+
+			zval *result_val;
+			ZEND_HASH_FOREACH_VAL(result_ht, result_val) {
+				ZVAL_DEREF(result_val);
+				if (fast_is_identical_function(input_val_deref, result_val)) {
+					goto skip_unsorted;
+				}
+			} ZEND_HASH_FOREACH_END();
+
+			if (UNEXPECTED(Z_ISREF_P(input_val) && Z_REFCOUNT_P(input_val) == 1)) {
+				ZVAL_DEREF(input_val);
+			}
+			Z_TRY_ADDREF_P(input_val);
+
+			if (input_str_key) {
+				zend_hash_add_new(Z_ARRVAL_P(return_value), input_str_key, input_val);
+			} else {
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), input_num_key, input_val);
+			}
+
+skip_unsorted:;
+		} ZEND_HASH_FOREACH_END();
+
+		return;
+	}
+
 	cmp = php_get_data_compare_func_unstable(sort_type, 0);
 
 	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
