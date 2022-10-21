@@ -2625,14 +2625,8 @@ add_unpack_again:
 		HashTable *ht = Z_ARRVAL_P(op1);
 		zval *val;
 
-		if (HT_IS_PACKED(ht) &&
-			(zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
-			if (zend_hash_num_elements(result_ht) == 0) {
-				result_ht->nTableSize = zend_hash_num_elements(ht);;
-				zend_hash_real_init_packed(result_ht);
-			} else {
-				zend_hash_extend(result_ht, zend_hash_num_elements(result_ht) + zend_hash_num_elements(ht), 1);
-			}
+		if (HT_IS_PACKED(ht) && (zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
+			zend_hash_extend(result_ht, zend_hash_num_elements(result_ht) + zend_hash_num_elements(ht), 1);
 			ZEND_HASH_FILL_PACKED(result_ht) {
 				ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
 					if (UNEXPECTED(Z_ISREF_P(val)) &&
