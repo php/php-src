@@ -3221,7 +3221,7 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 	int result;
 
 	apply_info->count++;
-	zend_fcall_info_call(&apply_info->fci, &apply_info->fcc, &retval, NULL);
+	zend_call_function_with_return_value(&apply_info->fci, &apply_info->fcc, &retval);
 	result = zend_is_true(&retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
 	zval_ptr_dtor(&retval);
 	return result;
