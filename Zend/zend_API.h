@@ -733,6 +733,15 @@ ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_
  * will be UNDEF. Otherwise, the retval will be a non-UNDEF value. */
 ZEND_API zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache);
 
+/* Call the FCI/FCC pair while setting the call return value to the passed zval*. */
+static zend_always_inline zend_result zend_call_function_with_return_value(
+	zend_fcall_info *fci, zend_fcall_info_cache *fci_cache, zval *retval)
+{
+	ZEND_ASSERT(retval && "Use zend_call_function() directly if not providing a retval");
+	fci->retval = retval;
+	return zend_call_function(fci, fci_cache);
+}
+
 /* Call the provided zend_function with the given params.
  * If retval_ptr is NULL, the return value is discarded.
  * If object is NULL, this must be a free function or static call.
