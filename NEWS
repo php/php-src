@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8805 (finfo returns wrong mime type for woff/woff2 files).
     (Anatol)
 
+- Hash:
+  . Fixed bug #81738: buffer overflow in hash_update() on long parameter.
+    (CVE-2022-37454) (nicky at mouha dot be)
+
 - MBString:
   - Fixed bug GH-9683 (Problem when ISO-2022-JP-MS is specified in
     mb_ encode_mimeheader). (Alex Dowad)
