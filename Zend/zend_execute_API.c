@@ -471,8 +471,6 @@ void shutdown_executor(void) /* {{{ */
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
 			efree(EG(ht_iterators));
 		}
-
-		ZEND_ASSERT(EG(filename_override) == NULL);
 	}
 
 #if ZEND_DEBUG
