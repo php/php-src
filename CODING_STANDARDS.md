@@ -225,22 +225,14 @@ rewritten to comply with these rules.
 
 ## Syntax and indentation
 
-1. Never use C++ style comments (i.e. `//` comment). Always use C-style comments
-    instead. PHP is written in C, and is aimed at compiling under any ANSI-C
-    compliant compiler. Even though many compilers accept C++-style comments in
-    C code, you have to ensure that your code would compile with other compilers
-    as well. The only exception to this rule is code that is Win32-specific,
-    because the Win32 port is MS-Visual C++ specific, and this compiler is known
-    to accept C++-style comments in C code.
-
-2. Use K&R-style. Of course, we can't and don't want to force anybody to use a
+1. Use K&R-style. Of course, we can't and don't want to force anybody to use a
     style he or she is not used to, but, at the very least, when you write code
     that goes into the core of PHP or one of its standard modules, please
     maintain the K&R style. This applies to just about everything, starting with
     indentation and comment styles and up to function declaration syntax. Also
     see [Indentstyle](http://www.catb.org/~esr/jargon/html/I/indent-style.html).
 
-3. Be generous with whitespace and braces. Keep one empty line between the
+2. Be generous with whitespace and braces. Keep one empty line between the
     variable declaration section and the statements in a block, as well as
     between logical statement groups in a block. Maintain at least one empty
     line between two functions, preferably two. Always prefer:
@@ -257,13 +249,19 @@ rewritten to comply with these rules.
     if(foo)bar;
     ```
 
-4. When indenting, use the tab character. A tab is expected to represent four
+3. When indenting, use the tab character. A tab is expected to represent four
     spaces. It is important to maintain consistency in indentation so that
     definitions, comments, and control structures line up correctly.
 
-5. Preprocessor statements (`#if` and such) MUST start at column one. To indent
+4. Preprocessor statements (`#if` and such) MUST start at column one. To indent
     preprocessor directives you should put the `#` at the beginning of a line,
     followed by any number of spaces.
+
+5. The length of constant string literals should be calculated via ``strlen()``
+   instead of using ``sizeof()-1`` as it is cleared and any modern compiler
+   will understand it. Legacy usages of the latter style exists within the
+   codebase but should not be refactored, unless larger refactoring around that
+   code is taking place
 
 ## Testing
 
