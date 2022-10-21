@@ -259,9 +259,9 @@ rewritten to comply with these rules.
 
 5. The length of constant string literals should be calculated via ``strlen()``
    instead of using ``sizeof()-1`` as it is cleared and any modern compiler
-   will understand it. Legacy usages of the latter style exists within the
+   will optimize it away. Legacy usages of the latter style exists within the
    codebase but should not be refactored, unless larger refactoring around that
-   code is taking place
+   code is taking place.
 
 ## Testing
 
