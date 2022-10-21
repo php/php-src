@@ -5,7 +5,7 @@ intl
 --INI--
 date.timezone=UTC
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '72.1') >= 0) die('skip for ICU < 72.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
 --FILE--
 <?php
 
@@ -21,6 +21,6 @@ echo $fmt->format($ts), "\n";
 
 ?>
 --EXPECT--
-Sunday, January 1, 2012 at 12:00:00 AM Coordinated Universal Time
-Sunday, January 1, 2012 at 12:00:00 AM Coordinated Universal Time
-Sunday, January 1, 2012 at 12:00:00 AM Coordinated Universal Time
+Sunday, January 1, 2012 at 12:00:00 AM Coordinated Universal Time
+Sunday, January 1, 2012 at 12:00:00 AM Coordinated Universal Time
+Sunday, January 1, 2012 at 12:00:00 AM Coordinated Universal Time
