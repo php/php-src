@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9720 (Null pointer dereference while serializing the response).
     (cmb)
 
+- Streams:
+  . Fixed bug GH-9779 (stream_copy_to_stream fails if dest in append mode).
+    (Jakub Zelenka)
+
 13 Oct 2022, PHP 8.2.0RC4
 
 - Core:

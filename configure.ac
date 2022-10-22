@@ -690,6 +690,8 @@ if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
 fi
 
+dnl on FreeBSD, copy_file_range() works only with the undocumented flag 0x01000000;
+dnl until the problem is fixed properly, copy_file_range() is used only on Linux
 AC_CACHE_CHECK([for copy_file_range], ac_cv_copy_file_range,
 [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef __linux__
