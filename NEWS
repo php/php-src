@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9763 (DateTimeZone ctr mishandles input and adds null byte if
     the argument is an offset larger than 100*60 minutes). (Derick)
 
+- OpenSSL:
+  . Fixed bug GH-8430 (OpenSSL compiled with no-md2, no-md4 or no-rmd160 does
+    not build). (Jakub Zelenka, fsbruva)
+
 - SOAP:
   . Fixed GH-9720 (Null pointer dereference while serializing the response).
     (cmb)
