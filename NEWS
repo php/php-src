@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed missing clean up of OpenSSL engine list - attempt to fix GH-8620.
     (Jakub Zelenka)
+  . Fixed bug GH-8430 (OpenSSL compiled with no-md2, no-md4 or no-rmd160 does
+    not build). (Jakub Zelenka, fsbruva)
 
 - PDO_ODBC:
   . Fixed bug GH-9372 (HY010 when binding overlong parameter). (cmb)
