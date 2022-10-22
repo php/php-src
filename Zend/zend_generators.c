@@ -332,7 +332,7 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 {
 	zend_generator *generator = (zend_generator*)object;
 	zend_execute_data *execute_data = generator->execute_data;
-	zend_op_array *op_array;
+	zend_execute_data *call = NULL;
 
 	if (!execute_data) {
 		/* If the generator has been closed, it can only hold on to three values: The value, key
@@ -352,7 +352,6 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		return NULL;
 	}
 
-	op_array = &EX(func)->op_array;
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zend_get_gc_buffer_add_zval(gc_buffer, &generator->value);
@@ -360,57 +359,15 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 	zend_get_gc_buffer_add_zval(gc_buffer, &generator->retval);
 	zend_get_gc_buffer_add_zval(gc_buffer, &generator->values);
 
-	if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-		uint32_t i, num_cvs = EX(func)->op_array.last_var;
-		for (i = 0; i < num_cvs; i++) {
-			zend_get_gc_buffer_add_zval(gc_buffer, EX_VAR_NUM(i));
-		}
-	}
-
-	if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
-		zval *zv = EX_VAR_NUM(op_array->last_var + op_array->T);
-		zval *end = zv + (EX_NUM_ARGS() - op_array->num_args);
-		while (zv != end) {
-			zend_get_gc_buffer_add_zval(gc_buffer, zv++);
-		}
-	}
-
-	if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
-		zend_get_gc_buffer_add_obj(gc_buffer, Z_OBJ(execute_data->This));
-	}
-	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
-		zend_get_gc_buffer_add_obj(gc_buffer, ZEND_CLOSURE_OBJECT(EX(func)));
-	}
-	if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-		zval extra_named_params;
-		ZVAL_ARR(&extra_named_params, EX(extra_named_params));
-		zend_get_gc_buffer_add_zval(gc_buffer, &extra_named_params);
-	}
-
 	if (UNEXPECTED(generator->frozen_call_stack)) {
 		/* The frozen stack is linked in reverse order */
-		zend_execute_data *call = zend_generator_revert_call_stack(generator->frozen_call_stack);
-		/* -1 required because we want the last run opcode, not the next to-be-run one. */
-		uint32_t op_num = execute_data->opline - op_array->opcodes - 1;
-		zend_unfinished_calls_gc(execute_data, call, op_num, gc_buffer);
-		zend_generator_revert_call_stack(call);
+		call = zend_generator_revert_call_stack(generator->frozen_call_stack);
 	}
 
-	if (execute_data->opline != op_array->opcodes) {
-		uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
-		for (i = 0; i < op_array->last_live_range; i++) {
-			const zend_live_range *range = &op_array->live_range[i];
-			if (range->start > op_num) {
-				break;
-			} else if (op_num < range->end) {
-				uint32_t kind = range->var & ZEND_LIVE_MASK;
-				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
-				zval *var = EX_VAR(var_num);
-				if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
-					zend_get_gc_buffer_add_zval(gc_buffer, var);
-				}
-			}
-		}
+	zend_unfinished_execution_gc(execute_data, call, gc_buffer);
+
+	if (UNEXPECTED(generator->frozen_call_stack)) {
+		zend_generator_revert_call_stack(call);
 	}
 
 	if (generator->node.parent) {
