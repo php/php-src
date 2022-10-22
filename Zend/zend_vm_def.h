@@ -4444,6 +4444,7 @@ ZEND_VM_HANDLER(139, ZEND_GENERATOR_CREATE, ANY, ANY)
 		zend_execute_data *gen_execute_data;
 		uint32_t num_args, used_stack, call_info;
 
+		SAVE_OPLINE();
 		object_init_ex(return_value, zend_ce_generator);
 
 		/*
