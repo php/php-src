@@ -723,6 +723,7 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 						}
 					}
 				}
+				ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 			}
 		}
 		return;
