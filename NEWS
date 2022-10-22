@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     evaluation with extra named params). (Arnaud)
   . Fixed bug GH-9801 (Generator crashes when memory limit is exceeded during
     initialization). (Arnaud)
+  . Fixed a bug with preloaded enums possibly segfaulting. (Bob)
 
 - MySQLnd:
   . Fixed potential heap corruption due to alignment mismatch. (cmb)
