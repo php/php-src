@@ -156,7 +156,8 @@ void zend_exception_restore(void) /* {{{ */
 
 static zend_always_inline bool is_handle_exception_set(void) {
 	zend_execute_data *execute_data = EG(current_execute_data);
-	return !execute_data->func
+	return !execute_data
+		|| !execute_data->func
 		|| !ZEND_USER_CODE(execute_data->func->common.type)
 		|| execute_data->opline->opcode == ZEND_HANDLE_EXCEPTION;
 }
