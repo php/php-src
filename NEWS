@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed potential heap corruption due to alignment mismatch. (cmb)
 
+- OpenSSL:
+  . Fixed bug GH-8430 (OpenSSL compiled with no-md2, no-md4 or no-rmd160 does
+    not build). (Jakub Zelenka, fsbruva)
+
 - SOAP:
   . Fixed GH-9720 (Null pointer dereference while serializing the response).
     (cmb)
