@@ -25,9 +25,12 @@ phpt_wait();
 
 $fp = fsockopen("tcp://127.0.0.1:64324");
 
-while(!feof($fp)) {
-  $data = fread($fp, 256);
-  printf("fread read %d bytes\n", strlen($data));
+while (!feof($fp)) {
+    $data = fread($fp, 256);
+    $bytes = strlen($data);
+    if ($bytes > 0) {
+        printf("fread read %d bytes\n", $bytes);
+    }
 }
 CODE;
 
@@ -40,4 +43,3 @@ fread read 8 bytes
 fread read 256 bytes
 fread read 45 bytes
 fread read 8 bytes
-fread read 0 bytes
