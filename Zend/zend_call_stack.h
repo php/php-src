@@ -83,9 +83,9 @@ static inline size_t zend_call_stack_default_size(void)
 #ifdef __APPLE__
 	// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/CreatingThreads/CreatingThreads.html
 	if (pthread_main_np()) {
-		return 512 * 1024;
+		return 8 * 1024 * 1024;
 	}
-	return 8 * 1024 * 1024;
+	return 512 * 1024;
 #endif
 
 	return 2 * 1024 * 1024;
