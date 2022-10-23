@@ -1558,87 +1558,73 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 	}
 
 #ifdef HAVE_COPY_FILE_RANGE
-
-	/* TODO: on FreeBSD, copy_file_range() works only with the
-	   undocumented flag 0x01000000; until the problem is fixed
-	   properly, copy_file_range() is not used on FreeBSD */
-#ifndef __FreeBSD__
 	if (php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-	    php_stream_is(dest, PHP_STREAM_IS_STDIO) &&
-	    src->writepos == src->readpos &&
-	    php_stream_can_cast(src, PHP_STREAM_AS_FD) == SUCCESS &&
-	    php_stream_can_cast(dest, PHP_STREAM_AS_FD) == SUCCESS) {
-		/* both php_stream instances are backed by a file
-		   descriptor, are not filtered and the read buffer is
-		   empty: we can use copy_file_range() */
+			php_stream_is(dest, PHP_STREAM_IS_STDIO) &&
+			src->writepos == src->readpos) {
+		/* both php_stream instances are backed by a file descriptor, are not filtered and the
+		 * read buffer is empty: we can use copy_file_range() */
+		int src_fd, dest_fd, dest_open_flags = 0;
 
-		int src_fd, dest_fd;
+		/* get dest open flags to check if the stream is open in append mode */
+		php_stream_parse_fopen_modes(dest->mode, &dest_open_flags);
 
-		php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0);
-		php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0);
+		/* copy_file_range does not work with O_APPEND */
+		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
+				php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0) == SUCCESS &&
+				php_stream_parse_fopen_modes(dest->mode, &dest_open_flags) == SUCCESS &&
+				!(dest_open_flags & O_APPEND)) {
 
-		/* clamp to INT_MAX to avoid EOVERFLOW */
-		const size_t cfr_max = MIN(maxlen, (size_t)SSIZE_MAX);
+			/* clamp to INT_MAX to avoid EOVERFLOW */
+			const size_t cfr_max = MIN(maxlen, (size_t)SSIZE_MAX);
 
-		/* copy_file_range() is a Linux-specific system call
-		   which allows efficient copying between two file
-		   descriptors, eliminating the need to transfer data
-		   from the kernel to userspace and back.  For
-		   networking file systems like NFS and Ceph, it even
-		   eliminates copying data to the client, and local
-		   filesystems like Btrfs and XFS can create shared
-		   extents. */
+			/* copy_file_range() is a Linux-specific system call which allows efficient copying
+			 * between two file descriptors, eliminating the need to transfer data from the kernel
+			 * to userspace and back. For networking file systems like NFS and Ceph, it even
+			 * eliminates copying data to the client, and local filesystems like Btrfs and XFS can
+			 * create shared extents. */
+			ssize_t result = copy_file_range(src_fd, NULL, dest_fd, NULL, cfr_max, 0);
+			if (result > 0) {
+				size_t nbytes = (size_t)result;
+				haveread += nbytes;
 
-		ssize_t result = copy_file_range(src_fd, NULL,
-						 dest_fd, NULL,
-						 cfr_max, 0);
-		if (result > 0) {
-			size_t nbytes = (size_t)result;
-			haveread += nbytes;
+				src->position += nbytes;
+				dest->position += nbytes;
 
-			src->position += nbytes;
-			dest->position += nbytes;
+				if ((maxlen != PHP_STREAM_COPY_ALL && nbytes == maxlen) || php_stream_eof(src)) {
+					/* the whole request was satisfied or end-of-file reached - done */
+					*len = haveread;
+					return SUCCESS;
+				}
 
-			if ((maxlen != PHP_STREAM_COPY_ALL && nbytes == maxlen) ||
-			    php_stream_eof(src)) {
-				/* the whole request was satisfied or
-				   end-of-file reached - done */
+				/* there may be more data; continue copying using the fallback code below */
+			} else if (result == 0) {
+				/* end of file */
 				*len = haveread;
 				return SUCCESS;
+			} else if (result < 0) {
+				switch (errno) {
+					case EINVAL:
+						/* some formal error, e.g. overlapping file ranges */
+						break;
+
+					case EXDEV:
+						/* pre Linux 5.3 error */
+						break;
+
+					case ENOSYS:
+						/* not implemented by this Linux kernel */
+						break;
+
+					default:
+						/* unexpected I/O error - give up, no fallback */
+						*len = haveread;
+						return FAILURE;
+				}
+
+				/* fall back to classic copying */
 			}
-
-			/* there may be more data; continue copying
-			   using the fallback code below */
-		} else if (result == 0) {
-			/* end of file */
-			*len = haveread;
-			return SUCCESS;
-		} else if (result < 0) {
-			switch (errno) {
-			case EINVAL:
-				/* some formal error, e.g. overlapping
-				   file ranges */
-				break;
-
-			case EXDEV:
-				/* pre Linux 5.3 error */
-				break;
-
-			case ENOSYS:
-				/* not implemented by this Linux kernel */
-				break;
-
-			default:
-				/* unexpected I/O error - give up, no
-				   fallback */
-				*len = haveread;
-				return FAILURE;
-			}
-
-			/* fall back to classic copying */
 		}
 	}
-#endif // __FreeBSD__
 #endif // HAVE_COPY_FILE_RANGE
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {
