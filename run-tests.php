@@ -3060,6 +3060,28 @@ function settings2array(array $settings, &$ini_settings): void
             }
         }
     }
+
+    // When both mysqlnd and either of mysqli or pdo_msqli are compile
+    // as shared extensions, mysqlnd.so needs to be loaded before either
+    // of mysqli or pdo_msqli are loaded, as otherwise they will complain
+    // about missing symbols.
+    if (array_key_exists('extension', $ini_settings) === true) {
+        $extensions = [];
+        $mysql_extension_present = false;
+        foreach ($ini_settings['extension'] as $extension) {
+            if (strcmp($extension, "mysqlnd.so") === 0) {
+                $mysql_extension_present = true;
+            }
+            else {
+                $extensions[] = $extension;
+            }
+        }
+
+        if ($mysql_extension_present === true) {
+            array_unshift($extensions, "mysqlnd.so");
+            $ini_settings['extension'] = $extensions;
+        }
+    }
 }
 
 function settings2params(array $ini_settings): string
