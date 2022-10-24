@@ -35,7 +35,13 @@ echo "Locking DB1\n";
 var_dump($db->exec('BEGIN EXCLUSIVE;'));
 
 echo "Backup to DB2 (should fail)\n";
-var_dump($db->backup($db2));
+
+try {
+	var_dump($db->backup($db2));
+}
+catch (SQLite3Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
@@ -53,6 +59,4 @@ Resetting DB2
 Locking DB1
 bool(true)
 Backup to DB2 (should fail)
-
-Warning: SQLite3::backup(): Backup failed: source database is busy in %s on line %d
-bool(false)
+Backup failed: source database is busy

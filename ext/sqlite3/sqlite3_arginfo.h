@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bdee592c8babbc221080c6ea2d73f94b2b79274a */
+ * Stub hash: aff185e82ef4476d6da91191e78473ee03ea930a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -97,10 +97,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_openBlob, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SQLITE3_OPEN_READONLY")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_enableExceptions, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "false")
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_enableExtendedResultCodes, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
@@ -189,7 +185,6 @@ ZEND_METHOD(SQLite3, createFunction);
 ZEND_METHOD(SQLite3, createAggregate);
 ZEND_METHOD(SQLite3, createCollation);
 ZEND_METHOD(SQLite3, openBlob);
-ZEND_METHOD(SQLite3, enableExceptions);
 ZEND_METHOD(SQLite3, enableExtendedResultCodes);
 ZEND_METHOD(SQLite3, setAuthorizer);
 ZEND_METHOD(SQLite3Stmt, __construct);
@@ -209,6 +204,11 @@ ZEND_METHOD(SQLite3Result, columnType);
 ZEND_METHOD(SQLite3Result, fetchArray);
 ZEND_METHOD(SQLite3Result, reset);
 ZEND_METHOD(SQLite3Result, finalize);
+
+
+static const zend_function_entry class_SQLite3Exception_methods[] = {
+	ZEND_FE_END
+};
 
 
 static const zend_function_entry class_SQLite3_methods[] = {
@@ -237,7 +237,6 @@ static const zend_function_entry class_SQLite3_methods[] = {
 	ZEND_ME(SQLite3, createAggregate, arginfo_class_SQLite3_createAggregate, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, createCollation, arginfo_class_SQLite3_createCollation, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, openBlob, arginfo_class_SQLite3_openBlob, ZEND_ACC_PUBLIC)
-	ZEND_ME(SQLite3, enableExceptions, arginfo_class_SQLite3_enableExceptions, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, enableExtendedResultCodes, arginfo_class_SQLite3_enableExtendedResultCodes, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, setAuthorizer, arginfo_class_SQLite3_setAuthorizer, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -286,6 +285,22 @@ static void register_sqlite3_symbols(int module_number)
 #if defined(SQLITE_DETERMINISTIC)
 	REGISTER_LONG_CONSTANT("SQLITE3_DETERMINISTIC", SQLITE_DETERMINISTIC, CONST_PERSISTENT);
 #endif
+}
+
+static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class_entry_RuntimeException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SQLite3Exception", class_SQLite3Exception_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+
+	zval property_code_default_value;
+	ZVAL_LONG(&property_code_default_value, 0);
+	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
+	zend_declare_property_ex(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_string_release(property_code_name);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_SQLite3(void)

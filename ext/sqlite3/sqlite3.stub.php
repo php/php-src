@@ -68,6 +68,12 @@ const SQLITE3_OPEN_CREATE = UNKNOWN;
 const SQLITE3_DETERMINISTIC = UNKNOWN;
 #endif
 
+class SQLite3Exception extends RuntimeException
+{
+    /** @var int|string */
+    protected $code = 0;
+}
+
 /** @not-serializable */
 class SQLite3
 {
@@ -334,9 +340,6 @@ class SQLite3
 
     /** @return resource|false */
     public function openBlob(string $table, string $column, int $rowid, string $database = "main", int $flags = SQLITE3_OPEN_READONLY) {}
-
-    /** @tentative-return-type */
-    public function enableExceptions(bool $enable = false): bool {}
 
     /** @tentative-return-type */
     public function enableExtendedResultCodes(bool $enable = true): bool {}

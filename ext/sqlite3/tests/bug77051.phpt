@@ -6,7 +6,6 @@ sqlite3
 <?php
 
 $db = new SQLite3(':memory:');
-$db->enableExceptions(true);
 
 $stmt = $db->prepare('SELECT :a, :b, ?;');
 

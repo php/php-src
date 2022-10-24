@@ -11,7 +11,13 @@ echo "Creating Table\n";
 var_dump($db->exec('CREATE TABLE test (time INTEGER, id STRING)'));
 
 echo "Creating Same Table Again\n";
-var_dump($db->exec('CREATE TABLE test (time INTEGER, id STRING)'));
+
+try {
+	var_dump($db->exec('CREATE TABLE test (time INTEGER, id STRING)'));
+}
+catch (SQLite3Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 
 echo "Dropping database\n";
 var_dump($db->exec('DROP TABLE test'));
@@ -24,9 +30,7 @@ echo "Done\n";
 Creating Table
 bool(true)
 Creating Same Table Again
-
-Warning: SQLite3::exec(): table test already exists in %s on line %d
-bool(false)
+table test already exists
 Dropping database
 bool(true)
 Closing database

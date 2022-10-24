@@ -26,7 +26,12 @@ var_dump($db->querySingle('PRAGMA writable_schema;'));
 var_dump($db->querySingle('SELECT COUNT(*) FROM sqlite_master;'));
 
 // Should generate an error!
-var_dump($db->querySingle('DELETE FROM sqlite_master;'));
+try {
+	var_dump($db->querySingle('DELETE FROM sqlite_master;'));
+}
+catch (SQLite3Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 
 // Should still be 1
 var_dump($db->querySingle('SELECT COUNT(*) FROM sqlite_master;'));
@@ -36,7 +41,5 @@ bool(true)
 bool(true)
 int(1)
 int(1)
-
-Warning: SQLite3::querySingle(): Unable to prepare statement: 1, table sqlite_master may not be modified in %s on line %d
-bool(false)
+Unable to prepare statement: table sqlite_master may not be modified
 int(1)

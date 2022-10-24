@@ -26,7 +26,12 @@ var_dump($stream);
 echo "Stream Contents\n";
 var_dump(stream_get_contents($stream));
 echo "Writing to read-only stream\n";
-var_dump(fwrite($stream, 'ABCD'));
+try {
+	var_dump(fwrite($stream, 'ABCD'));
+}
+catch (SQLite3Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 echo "Closing Stream\n";
 var_dump(fclose($stream));
 echo "Opening stream in write mode\n";
@@ -38,7 +43,12 @@ echo "Stream Contents\n";
 fseek($stream, 0);
 var_dump(stream_get_contents($stream));
 echo "Expanding blob size\n";
-var_dump(fwrite($stream, 'ABCD ABCD ABCD'));
+try {
+	var_dump(fwrite($stream, 'ABCD ABCD ABCD'));
+}
+catch (SQLite3Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 echo "Closing Stream\n";
 var_dump(fclose($stream));
 echo "Closing database\n";
@@ -58,9 +68,7 @@ resource(%d) of type (stream)
 Stream Contents
 string(9) "TEST TEST"
 Writing to read-only stream
-
-Warning: fwrite(): Can't write to blob stream: is open as read only in %s on line %d
-bool(false)
+Can't write to blob stream: is open as read only
 Closing Stream
 bool(true)
 Opening stream in write mode
@@ -70,9 +78,7 @@ int(4)
 Stream Contents
 string(9) "ABCD TEST"
 Expanding blob size
-
-Warning: fwrite(): It is not possible to increase the size of a BLOB in %s on line %d
-bool(false)
+It is not possible to increase the size of a BLOB
 Closing Stream
 bool(true)
 Closing database

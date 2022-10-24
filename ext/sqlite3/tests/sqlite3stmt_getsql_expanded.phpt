@@ -13,8 +13,6 @@ if (SQLite3::version()['versionNumber'] < 3014000) {
 
 require_once(__DIR__ . '/new_db.inc');
 
-$db->enableExceptions(true);
-
 $stmt = $db->prepare('SELECT :a, :b, ?;');
 
 $stmt->bindValue(':a', 42);

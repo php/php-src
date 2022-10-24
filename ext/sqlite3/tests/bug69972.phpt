@@ -6,7 +6,13 @@ sqlite3
 <?php
 $db = new SQLite3(':memory:');
 echo "SELECTING from invalid table\n";
-$result = $db->query("SELECT * FROM non_existent_table");
+
+try {
+	$result = $db->query("SELECT * FROM non_existent_table");
+}
+catch (SQLite3Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
@@ -17,8 +23,7 @@ echo "Error Msg: " . $db->lastErrorMsg() . "\n";
 ?>
 --EXPECTF--
 SELECTING from invalid table
-
-Warning: SQLite3::query(): Unable to prepare statement: 1, no such table: non_existent_table in %sbug69972.php on line %d
+Unable to prepare statement: no such table: non_existent_table
 Closing database
 bool(true)
 Done

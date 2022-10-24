@@ -11,10 +11,12 @@ $db = new SQLite3(':memory:');
 $db->exec('CREATE TABLE foo (id INTEGER, bar STRING)');
 $db->exec("INSERT INTO foo (id, bar) VALUES (1, 'This is a test')");
 
-$stmt = $db->prepare('SELECT foo FROM bar');
+try {
+	$stmt = $db->prepare('SELECT foo FROM bar');
+} catch (SQLite3Exception $e) {
+    echo $e->getMessage() . "\n";
+}
 
-var_dump($stmt);
 ?>
 --EXPECTF--
-Warning: SQLite3::prepare(): Unable to prepare statement: 1, no such table: bar in %s on line %d
-bool(false)
+Unable to prepare statement: no such table: bar

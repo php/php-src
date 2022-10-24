@@ -7,7 +7,6 @@ open_basedir=.
 --FILE--
 <?php
 $db = new SQLite3(":memory:");
-$db->enableExceptions(true);
 
 $db->exec('attach database \':memory:\' AS "db1"');
 var_dump($db->exec('create table db1.r (id int)'));
@@ -23,4 +22,4 @@ try {
 ?>
 --EXPECT--
 bool(true)
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized

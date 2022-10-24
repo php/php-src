@@ -74,8 +74,6 @@ typedef struct _php_sqlite3_db_object  {
 	zend_fcall_info authorizer_fci;
 	zend_fcall_info_cache authorizer_fcc;
 
-	bool exception;
-
 	zend_llist free_list;
 	zend_object zo;
 } php_sqlite3_db_object;

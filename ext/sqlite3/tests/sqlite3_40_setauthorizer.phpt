@@ -6,7 +6,6 @@ sqlite3
 <?php
 
 $db = new SQLite3(':memory:');
-$db->enableExceptions(true);
 
 $db->setAuthorizer(function (int $action) {
     if ($action == SQLite3::SELECT) {
@@ -22,7 +21,7 @@ var_dump($db->querySingle('SELECT 1;'));
 try {
     // This one should fail
     var_dump($db->querySingle('CREATE TABLE test (a, b);'));
-} catch (\Exception $e) {
+} catch (SQLite3Exception $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -52,7 +51,7 @@ $db->setAuthorizer(function () {
 
 try {
     var_dump($db->querySingle('SELECT 1;'));
-} catch (\Exception $e) {
+} catch (SQLite3Exception $e) {
     echo $e->getMessage() . "\n";
     echo $e->getPrevious()->getMessage() . "\n";
 }
@@ -63,7 +62,7 @@ $db->setAuthorizer(function () {
 
 try {
     var_dump($db->querySingle('SELECT 1;'));
-} catch (\Exception $e) {
+} catch (SQLite3Exception $e) {
     echo $e->getMessage() . "\n";
     echo $e->getPrevious()->getMessage() . "\n";
 }
@@ -71,7 +70,7 @@ try {
 ?>
 --EXPECT--
 int(1)
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized
 bool(true)
 int(42)
 string(6) "SELECT"
@@ -98,7 +97,7 @@ string(28) "sqlite_master,rootpage,main,"
 string(4) "READ"
 string(28) "sqlite_master,rootpage,main,"
 bool(true)
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized
 The authorizer callback returned an invalid type: expected int
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized
 The authorizer callback returned an invalid value
