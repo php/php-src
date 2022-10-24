@@ -11418,7 +11418,7 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 		|.cold_code
 		|2:
 		|	SET_EX_OPLINE opline, REG0
-		if (if (opline->opcode != ZEND_FETCH_DIM_RW) {
+		if (opline->opcode != ZEND_FETCH_DIM_RW) {
 			|	EXT_CALL zend_jit_prepare_assign_dim_ref, REG0
 		}
 		|	mov FCARG1x, RETVALx
