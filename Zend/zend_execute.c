@@ -1210,8 +1210,8 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
  * trust that arginfo matches what is enforced by zend_parse_parameters. */
 ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
 {
-	if (fbc->internal_function.handler == ZEND_FN(pass)) {
-		/* Be lenient about the special pass function. */
+	if (fbc->internal_function.handler == ZEND_FN(pass) || (fbc->internal_function.fn_flags | ZEND_ACC_FAKE_CLOSURE)) {
+		/* Be lenient about the special pass function and about fake closures. */
 		return 0;
 	}
 

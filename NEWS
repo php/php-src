@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC6
 
+- Core:
+  . Fixed bug GH-9823 (Don’t reset func in zend_closure_internal_handler).
+    (Florian Sowade)
+
 - PDO:
   . Fixed bug GH-9818 (Initialize run time cache in PDO methods).
     (Florian Sowade)
