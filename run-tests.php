@@ -3061,7 +3061,7 @@ function settings2array(array $settings, &$ini_settings): void
         }
     }
 
-    // When both mysqlnd and either of mysqli or pdo_msqli are compile
+    // When both mysqlnd and either of mysqli or pdo_msqli are compiled
     // as shared extensions, mysqlnd.so needs to be loaded before either
     // of mysqli or pdo_msqli are loaded, as otherwise they will complain
     // about missing symbols.
