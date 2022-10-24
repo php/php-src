@@ -2,11 +2,15 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0RC6
 
+- PDO:
+  . Fixed bug GH-9818 (Initialize run time cache in PDO methods).
+    (Florian Sowade)
 
 27 Oct 2022, PHP 8.2.0RC5
 
 - CLI:
-  . Fixed bug GH-9709 (Null pointer dereference with -w/-s options). (Adam Saponara)
+  . Fixed bug GH-9709 (Null pointer dereference with -w/-s options).
+    (Adam Saponara)
 
 - GD:
   . Fixed bug #81739: OOB read due to insufficient input validation in
