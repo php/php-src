@@ -363,7 +363,7 @@ class SQLite3Stmt
     public function close(): bool {}
 
     /** @tentative-return-type */
-    public function execute(): SQLite3Result|false {}
+    public function execute(?array $params = null): SQLite3Result|false {}
 
     /** @tentative-return-type */
     public function getSQL(bool $expand = false): string|false {}

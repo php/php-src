@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bdee592c8babbc221080c6ea2d73f94b2b79274a */
+ * Stub hash: 4f6d32d3dd6893501e2e462ea7aee7a2080831a9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -132,6 +132,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SQLite3Stmt_close arginfo_class_SQLite3Stmt_clear
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_SQLite3Stmt_execute, 0, 0, SQLite3Result, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SQLite3Stmt_getSQL, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
