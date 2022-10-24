@@ -1230,12 +1230,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	/* Pure intersection type */
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
 		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
-		bool is_bracketed = false;
-		/* Shim for implicitly nullable pure intersection types */
-		if (UNEXPECTED(ZEND_TYPE_PURE_MASK(type) & MAY_BE_NULL)) {
-			is_bracketed = true;
-		}
-		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, is_bracketed);
+		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, /* is_bracketed */ false);
 	} else if (ZEND_TYPE_HAS_LIST(type)) {
 		/* A union type might not be a list */
 		zend_type *list_type;
@@ -6528,10 +6523,24 @@ static zend_type zend_compile_typename(
 
 		ZEND_ASSERT(list->children == type_list->num_types);
 
-		ZEND_TYPE_SET_LIST(type, type_list);
 		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
-		/* Inform that the type list is an intersection type */
-		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
+		/* An implicitly nullable intersection type needs to be converted to a DNF type */
+		if (force_allow_null) {
+			zend_type intersection_type = ZEND_TYPE_INIT_NONE(0);
+			ZEND_TYPE_SET_LIST(intersection_type, type_list);
+			ZEND_TYPE_FULL_MASK(intersection_type) |= _ZEND_TYPE_INTERSECTION_BIT;
+
+			zend_type_list *dnf_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(list->children));
+			dnf_type_list->num_types = 1;
+			dnf_type_list->types[0] = intersection_type;
+			ZEND_TYPE_SET_LIST(type, dnf_type_list);
+			/* Inform that the type list is a DNF type */
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_UNION_BIT;
+		} else {
+			ZEND_TYPE_SET_LIST(type, type_list);
+			/* Inform that the type list is an intersection type */
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
+		}
 	} else {
 		type = zend_compile_single_typename(ast);
 	}
