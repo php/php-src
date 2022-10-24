@@ -6522,23 +6522,25 @@ static zend_type zend_compile_typename(
 
 		ZEND_ASSERT(list->children == type_list->num_types);
 
-		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 		/* An implicitly nullable intersection type needs to be converted to a DNF type */
 		if (force_allow_null) {
 			zend_type intersection_type = ZEND_TYPE_INIT_NONE(0);
 			ZEND_TYPE_SET_LIST(intersection_type, type_list);
 			ZEND_TYPE_FULL_MASK(intersection_type) |= _ZEND_TYPE_INTERSECTION_BIT;
+			ZEND_TYPE_FULL_MASK(intersection_type) |= _ZEND_TYPE_ARENA_BIT;
 
-			zend_type_list *dnf_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(list->children));
+			zend_type_list *dnf_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(1));
 			dnf_type_list->num_types = 1;
 			dnf_type_list->types[0] = intersection_type;
 			ZEND_TYPE_SET_LIST(type, dnf_type_list);
 			/* Inform that the type list is a DNF type */
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_UNION_BIT;
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 		} else {
 			ZEND_TYPE_SET_LIST(type, type_list);
 			/* Inform that the type list is an intersection type */
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 		}
 	} else {
 		type = zend_compile_single_typename(ast);
