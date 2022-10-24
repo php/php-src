@@ -1,9 +1,7 @@
 --TEST--
 Bug #81739 (OOB read due to insufficient validation in imageloadfont())
---SKIPIF--
-<?php
-if (!extension_loaded("gd")) die("skip gd extension not available");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $s = fopen(__DIR__ . "/font.font", "w");
