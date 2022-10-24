@@ -1254,7 +1254,11 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		func.function_name = zend_string_init(funcs->fname, strlen(funcs->fname), dbh->is_persistent);
 		func.scope = dbh_obj->std.ce;
 		func.prototype = NULL;
-		ZEND_MAP_PTR(func.run_time_cache) = rt_cache_size ? pemalloc(rt_cache_size, dbh->is_persistent) : NULL;
+		ZEND_MAP_PTR(func.run_time_cache) = NULL;
+        if (rt_cache_size > 0) {
+            ZEND_MAP_PTR(func.run_time_cache) = pemalloc(rt_cache_size, dbh->is_persistent);
+            memset(ZEND_MAP_PTR(func.run_time_cache), 0, rt_cache_size);
+        }
 		func.T = ZEND_OBSERVER_ENABLED;
 		if (funcs->flags) {
 			func.fn_flags = funcs->flags | ZEND_ACC_NEVER_CACHE;
