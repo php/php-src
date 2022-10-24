@@ -1230,12 +1230,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	/* Pure intersection type */
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
 		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
-		bool is_bracketed = false;
-		/* Shim for implicitly nullable pure intersection types */
-		if (UNEXPECTED(ZEND_TYPE_PURE_MASK(type) & MAY_BE_NULL)) {
-			is_bracketed = true;
-		}
-		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, is_bracketed);
+		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, /* is_bracketed */ false);
 	} else if (ZEND_TYPE_HAS_LIST(type)) {
 		/* A union type might not be a list */
 		zend_type *list_type;
