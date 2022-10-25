@@ -1,12 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.26
-
-- Hash:
-  . Fixed bug #81738: buffer overflow in hash_update() on long parameter. 
-    (CVE-2022-37454) (nicky at mouha dot be)
-
-13 Oct 2022, PHP 8.0.25RC1
+27 Oct 2022, PHP 8.0.25
 
 - GD:
   . Fixed bug #81739: OOB read due to insufficient input validation in
