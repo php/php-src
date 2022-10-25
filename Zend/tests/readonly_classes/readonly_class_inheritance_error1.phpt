@@ -1,16 +1,16 @@
 --TEST--
-Non-readonly class cannot extend a readonly class
+Readonly class cannot extend a non-readonly class
 --FILE--
 <?php
 
-readonly class Foo
+class Foo
 {
 }
 
-class Bar extends Foo
+readonly class Bar extends Foo
 {
 }
 
 ?>
 --EXPECTF--
-Fatal error: Non-readonly class Bar cannot extend readonly class Foo in %s on line %d
+Fatal error: Readonly class Bar cannot extend non-readonly class Foo in %s on line %d
