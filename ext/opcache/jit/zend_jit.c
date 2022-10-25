@@ -5154,6 +5154,11 @@ static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
 		}
 #endif
 	}
+	if (op_array->num_dynamic_func_defs) {
+		for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+			zend_jit_restart_preloaded_op_array(op_array->dynamic_func_defs[i]);
+		}
+	}
 }
 
 static void zend_jit_restart_preloaded_script(zend_persistent_script *script)
