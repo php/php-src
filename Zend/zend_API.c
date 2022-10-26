@@ -3856,6 +3856,7 @@ ZEND_API bool zend_is_callable_at_frame(
 	fcc->called_scope = NULL;
 	fcc->function_handler = NULL;
 	fcc->object = NULL;
+	fcc->closure = NULL;
 
 again:
 	switch (Z_TYPE_P(callable)) {
@@ -3929,6 +3930,7 @@ check_func:
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
+				fcc->closure = Z_OBJ_P(callable);
 				if (fcc == &fcc_local) {
 					zend_release_fcall_info_cache(fcc);
 				}
