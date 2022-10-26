@@ -328,6 +328,7 @@ typedef struct _zend_fcall_info_cache {
 	zend_class_backed_enum_table(ce)
 
 #define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
+#define ZEND_FCC_INITIALIZED(fcc) ((fcc).function_handler != NULL)
 
 ZEND_API int zend_next_free_module(void);
 
@@ -729,6 +730,57 @@ ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
  */
 ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval, zval *args);
 
+/* Zend FCC API to store and handle PHP userland functions */
+static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b)
+{
+	return a->function_handler == b->function_handler
+		&& a->object == b->object
+		&& a->calling_scope == b->calling_scope
+		&& a->closure == b->closure
+	;
+}
+
+static zend_always_inline void zend_fcc_addref(zend_fcall_info_cache *fcc)
+{
+	if (fcc->object) {
+		GC_ADDREF(fcc->object);
+	}
+	if (fcc->closure) {
+		GC_ADDREF(fcc->closure);
+	}
+}
+
+static zend_always_inline void zend_fcc_dup(/* restrict */ zend_fcall_info_cache *dest, const zend_fcall_info_cache *src)
+{
+	memcpy(dest, src, sizeof(zend_fcall_info_cache));
+	zend_fcc_addref(dest);
+}
+
+static zend_always_inline void zend_fcc_dtor(zend_fcall_info_cache *fcc)
+{
+	if (fcc->object) {
+		OBJ_RELEASE(fcc->object);
+	}
+	if (fcc->closure) {
+		OBJ_RELEASE(fcc->closure);
+	}
+	memcpy(fcc, &empty_fcall_info_cache, sizeof(zend_fcall_info_cache));
+}
+
+ZEND_API void zend_get_callable_zval_from_fcc(const zend_fcall_info_cache *fcc, zval *callable);
+
+/* Moved out of zend_gc.h because zend_fcall_info_cache is an unknown type in that header */
+static zend_always_inline void zend_get_gc_buffer_add_fcc(zend_get_gc_buffer *gc_buffer, zend_fcall_info_cache *fcc)
+{
+	ZEND_ASSERT(ZEND_FCC_INITIALIZED(*fcc));
+	if (fcc->object) {
+		zend_get_gc_buffer_add_obj(gc_buffer, fcc->object);
+	}
+	if (fcc->closure) {
+		zend_get_gc_buffer_add_obj(gc_buffer, fcc->closure);
+	}
+}
+
 /* Can only return FAILURE if EG(active) is false during late engine shutdown.
  * If the call or call setup throws, EG(exception) will be set and the retval
  * will be UNDEF. Otherwise, the retval will be a non-UNDEF value. */
@@ -750,6 +802,12 @@ static zend_always_inline zend_result zend_call_function_with_return_value(
 ZEND_API void zend_call_known_function(
 		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
 		uint32_t param_count, zval *params, HashTable *named_params);
+
+static zend_always_inline void zend_call_known_fcc(
+	zend_fcall_info_cache *fcc, zval *retval_ptr, uint32_t param_count, zval *params, HashTable *named_params)
+{
+	zend_call_known_function(fcc->function_handler, fcc->object, fcc->called_scope, retval_ptr, param_count, params, named_params);
+}
 
 /* Call the provided zend_function instance method on an object. */
 static zend_always_inline void zend_call_known_instance_method(
