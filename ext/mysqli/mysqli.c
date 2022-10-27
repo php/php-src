@@ -1043,6 +1043,7 @@ PHP_METHOD(mysqli_result, __construct)
 	}
 
 	if (!result) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 
