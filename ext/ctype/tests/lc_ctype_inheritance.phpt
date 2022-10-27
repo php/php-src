@@ -1,5 +1,7 @@
 --TEST--
 Do not inherit LC_CTYPE from environment
+--EXTENSIONS--
+ctype
 --SKIPIF--
 <?php
 if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
