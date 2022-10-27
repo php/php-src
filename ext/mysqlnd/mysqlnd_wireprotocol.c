@@ -301,6 +301,7 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 	if (buf_size < packet_header->size) {
 		DBG_ERR_FMT("Packet buffer %u wasn't big enough %u, %u bytes will be unread",
 					buf_size, packet_header->size, packet_header->size - buf_size);
+		SET_CLIENT_ERROR(error_info, CR_INVALID_BUFFER_USE, UNKNOWN_SQLSTATE, "Packet buffer wasn't big enough; as a workaround consider increasing value of net_cmd_buffer_size");
 		DBG_RETURN(FAIL);
 	}
 	if (FAIL == pfc->data->m.receive(pfc, vio, buf, packet_header->size, stats, error_info)) {
