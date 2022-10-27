@@ -1589,6 +1589,9 @@ static void php_free_request_globals(void)
 		efree(PG(php_sys_temp_dir));
 		PG(php_sys_temp_dir) = NULL;
 	}
+
+	EG(filename_override) = NULL;
+	EG(lineno_override) = -1;
 }
 /* }}} */
 
