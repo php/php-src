@@ -101,12 +101,6 @@ typedef struct _spl_recursive_it_iterator {
 	zend_object_iterator   intern;
 } spl_recursive_it_iterator;
 
-typedef struct _spl_cbfilter_it_intern {
-	zend_fcall_info       fci;
-	zend_fcall_info_cache fcc;
-	zend_object           *object;
-} _spl_cbfilter_it_intern;
-
 typedef struct _spl_dual_it_object {
 	struct {
 		zval                 zobject;
@@ -143,7 +137,7 @@ typedef struct _spl_dual_it_object {
 			regex_mode       mode;
 			int              use_flags;
 		} regex;
-		_spl_cbfilter_it_intern *cbfilter;
+		zend_fcall_info_cache callback_filter;
 	} u;
 	zend_object              std;
 } spl_dual_it_object;
@@ -1441,16 +1435,11 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		}
 		case DIT_CallbackFilterIterator:
 		case DIT_RecursiveCallbackFilterIterator: {
-			_spl_cbfilter_it_intern *cfi = emalloc(sizeof(*cfi));
-			cfi->fci.object = NULL;
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of", &zobject, ce_inner, &cfi->fci, &cfi->fcc) == FAILURE) {
-				efree(cfi);
+			zend_fcall_info fci;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of", &zobject, ce_inner, &fci, &intern->u.callback_filter) == FAILURE) {
 				return NULL;
 			}
-			Z_TRY_ADDREF(cfi->fci.function_name);
-			cfi->object = cfi->fcc.object;
-			if (cfi->object) GC_ADDREF(cfi->object);
-			intern->u.cbfilter = cfi;
+			zend_fcc_addref(&intern->u.callback_filter);
 			break;
 		}
 		default:
@@ -1783,7 +1772,10 @@ PHP_METHOD(RecursiveCallbackFilterIterator, getChildren)
 
 	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &retval);
 	if (!EG(exception) && Z_TYPE(retval) != IS_UNDEF) {
-		spl_instantiate_arg_ex2(Z_OBJCE_P(ZEND_THIS), return_value, &retval, &intern->u.cbfilter->fci.function_name);
+		zval callable;
+		zend_get_callable_zval_from_fcc(&intern->u.callback_filter, &callable);
+		spl_instantiate_arg_ex2(Z_OBJCE_P(ZEND_THIS), return_value, &retval, &callable);
+		zval_ptr_dtor(&callable);
 	}
 	zval_ptr_dtor(&retval);
 } /* }}} */
@@ -1819,13 +1811,10 @@ PHP_METHOD(CallbackFilterIterator, accept)
 	ZVAL_COPY_VALUE(&params[1], &intern->current.key);
 	ZVAL_COPY_VALUE(&params[2], &intern->inner.zobject);
 
-	zend_fcall_info *fci = &intern->u.cbfilter->fci;
-	zend_fcall_info_cache *fcc = &intern->u.cbfilter->fcc;
-	fci->retval = return_value;
-	fci->param_count = 3;
-	fci->params = params;
+	zend_fcall_info_cache *fcc = &intern->u.callback_filter;
 
-	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
+	zend_call_known_fcc(fcc, return_value, 3, params, NULL);
+	if (Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
 	}
 }
@@ -2129,14 +2118,8 @@ static void spl_dual_it_free_storage(zend_object *_object)
 	}
 
 	if (object->dit_type == DIT_CallbackFilterIterator || object->dit_type == DIT_RecursiveCallbackFilterIterator) {
-		if (object->u.cbfilter) {
-			_spl_cbfilter_it_intern *cbfilter = object->u.cbfilter;
-			object->u.cbfilter = NULL;
-			zval_ptr_dtor(&cbfilter->fci.function_name);
-			if (cbfilter->fci.object) {
-				OBJ_RELEASE(cbfilter->fci.object);
-			}
-			efree(cbfilter);
+		if (ZEND_FCC_INITIALIZED(object->u.callback_filter)) {
+			zend_fcc_dtor(&object->u.callback_filter);
 		}
 	}
 
@@ -2181,11 +2164,8 @@ static HashTable *spl_dual_it_get_gc(zend_object *obj, zval **table, int *n)
 			break;
 		case DIT_CallbackFilterIterator:
 		case DIT_RecursiveCallbackFilterIterator:
-			if (object->u.cbfilter) {
-				zend_get_gc_buffer_add_zval(gc_buffer, &object->u.cbfilter->fci.function_name);
-				if (object->u.cbfilter->fci.object) {
-					zend_get_gc_buffer_add_obj(gc_buffer, object->u.cbfilter->fci.object);
-				}
+			if (ZEND_FCC_INITIALIZED(object->u.callback_filter)) {
+				zend_get_gc_buffer_add_fcc(gc_buffer, &object->u.callback_filter);
 			}
 			break;
 	}
