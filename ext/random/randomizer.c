@@ -24,6 +24,7 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_string.h"
 
+#include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
@@ -160,6 +161,58 @@ static uint64_t getFloat_ceilint(double a, double b, double g)
 	return (s != si) ? (uint64_t)si : (uint64_t)si + (e > 0);
 }
 
+static double getFloat_closed_open(const php_random_algo *algo, php_random_status *status, double min, double max)
+{
+	double g = getFloat_gamma(min, max);
+	uint64_t hi = getFloat_ceilint(min, max, g);
+	uint64_t k = algo->range(status, 1, hi);
+
+	if (fabs(min) <= fabs(max)) {
+		return k == hi ? min : max - k * g;
+	} else {
+		return min + (k - 1) * g;
+	}
+}
+
+static double getFloat_closed_closed(const php_random_algo *algo, php_random_status *status, double min, double max)
+{
+	double g = getFloat_gamma(min, max);
+	uint64_t hi = getFloat_ceilint(min, max, g);
+	uint64_t k = algo->range(status, 0, hi);
+
+	if (fabs(min) <= fabs(max)) {
+		return k == hi ? min : max - k * g;
+	} else {
+		return k == hi ? max : min + k * g;
+	}
+}
+
+static double getFloat_open_closed(const php_random_algo *algo, php_random_status *status, double min, double max)
+{
+	double g = getFloat_gamma(min, max);
+	uint64_t hi = getFloat_ceilint(min, max, g);
+	uint64_t k = algo->range(status, 0, hi - 1);
+
+	if (fabs(min) <= fabs(max)) {
+		return max - k * g;
+	} else {
+		return k == (hi - 1) ? max : min + (k + 1) * g;
+	}
+}
+
+static double getFloat_open_open(const php_random_algo *algo, php_random_status *status, double min, double max)
+{
+	double g = getFloat_gamma(min, max);
+	uint64_t hi = getFloat_ceilint(min, max, g);
+	uint64_t k = algo->range(status, 1, hi - 1);
+
+	if (fabs(min) <= fabs(max)) {
+		return max - k * g;
+	} else {
+		return min + k * g;
+	}
+}
+
 /* {{{ Generates a random float within [min, max).
  *
  * The algorithm used is the γ-section algorithm as published in:
@@ -172,10 +225,14 @@ PHP_METHOD(Random_Randomizer, getFloat)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	double min, max;
+	zend_object *bounds = NULL;
+	zend_string *bounds_name = zend_string_init("ClosedOpen", strlen("ClosedOpen"), 1);
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_DOUBLE(min)
 		Z_PARAM_DOUBLE(max)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
 	ZEND_PARSE_PARAMETERS_END();
 
 #ifndef __STDC_IEC_559__
@@ -183,19 +240,41 @@ PHP_METHOD(Random_Randomizer, getFloat)
 	RETURN_THROWS();
 #endif
 
-	if (UNEXPECTED(max < min)) {
-		zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
-		RETURN_THROWS();
+	if (bounds) {
+		zval *case_name = zend_enum_fetch_case_name(bounds);
+		bounds_name = Z_STR_P(case_name);
 	}
+	
+	if (zend_string_equals_literal(bounds_name, "ClosedOpen")) {
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
 
-	double g = getFloat_gamma(min, max);
-	uint64_t hi = getFloat_ceilint(min, max, g);
-	uint64_t k = randomizer->algo->range(randomizer->status, 1, hi);
+		RETURN_DOUBLE(getFloat_closed_open(randomizer->algo, randomizer->status, min, max));
+	} else if (zend_string_equals_literal(bounds_name, "ClosedClosed")) {
+		if (UNEXPECTED(max < min)) {
+			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
+			RETURN_THROWS();
+		}
 
-	if (fabs(min) <= fabs(max)) {
-		RETURN_DOUBLE(k == hi ? min : max - k * g);
+		RETURN_DOUBLE(getFloat_closed_closed(randomizer->algo, randomizer->status, min, max));
+	} else if (zend_string_equals_literal(bounds_name, "OpenClosed")) {
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(getFloat_open_closed(randomizer->algo, randomizer->status, min, max));
+	} else if (zend_string_equals_literal(bounds_name, "OpenOpen")) {
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(getFloat_open_open(randomizer->algo, randomizer->status, min, max));
 	} else {
-		RETURN_DOUBLE(min + (k - 1) * g);
+		ZEND_UNREACHABLE();
 	}
 }
 /* }}} */

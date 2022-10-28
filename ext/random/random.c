@@ -26,6 +26,7 @@
 
 #include "php.h"
 
+#include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
 
 #include "php_random.h"
@@ -75,6 +76,8 @@ PHPAPI zend_class_entry *random_ce_Random_Engine_Xoshiro256StarStar;
 PHPAPI zend_class_entry *random_ce_Random_Engine_Secure;
 
 PHPAPI zend_class_entry *random_ce_Random_Randomizer;
+
+PHPAPI zend_class_entry *random_ce_Random_IntervalBoundary;
 
 PHPAPI zend_class_entry *random_ce_Random_RandomError;
 PHPAPI zend_class_entry *random_ce_Random_BrokenRandomEngineError;
@@ -895,6 +898,9 @@ PHP_MINIT_FUNCTION(random)
 	random_randomizer_object_handlers.offset = XtOffsetOf(php_random_randomizer, std);
 	random_randomizer_object_handlers.free_obj = randomizer_free_obj;
 	random_randomizer_object_handlers.clone_obj = NULL;
+
+	/* Random\IntervalBoundary */
+	random_ce_Random_IntervalBoundary = register_class_Random_IntervalBoundary();
 
 	register_random_symbols(module_number);
 

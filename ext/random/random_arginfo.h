@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 773fdbcd817ace97bb0b5cfc01d02a5c69e2b1aa */
+ * Stub hash: 7b9594d2eadb778ecec34114b67f2d0ae8bbb58a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -95,6 +95,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_Randomizer_getFloat, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_DOUBLE, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, boundary, Random\\IntervalBoundary, 0, "Random\\IntervalBoundary::ClosedOpen")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Randomizer_getInt arginfo_random_int
@@ -236,6 +237,11 @@ static const zend_function_entry class_Random_Randomizer_methods[] = {
 };
 
 
+static const zend_function_entry class_Random_IntervalBoundary_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_Random_RandomError_methods[] = {
 	ZEND_FE_END
 };
@@ -339,6 +345,21 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 	zend_string *property_engine_name = zend_string_init("engine", sizeof("engine") - 1, 1);
 	zend_declare_typed_property(class_entry, property_engine_name, &property_engine_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_engine_class_Random_Engine, 0, 0));
 	zend_string_release(property_engine_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Random_IntervalBoundary(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, class_Random_IntervalBoundary_methods);
+
+	zend_enum_add_case_cstr(class_entry, "ClosedOpen", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "ClosedClosed", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "OpenClosed", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "OpenOpen", NULL);
 
 	return class_entry;
 }

@@ -270,7 +270,10 @@ extern PHPAPI zend_class_entry *random_ce_Random_Engine_PcgOneseq128XslRr64;
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_Mt19937;
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_Xoshiro256StarStar;
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_Secure;
+
 extern PHPAPI zend_class_entry *random_ce_Random_Randomizer;
+
+extern PHPAPI zend_class_entry *random_ce_Random_IntervalBoundary;
 
 static inline php_random_engine *php_random_engine_from_obj(zend_object *object) {
 	return (php_random_engine *)((char *)(object) - XtOffsetOf(php_random_engine, std));

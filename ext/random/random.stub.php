@@ -135,7 +135,7 @@ namespace Random
 
         public function nextFloat(): float {}
 
-        public function getFloat(float $min, float $max): float {}
+        public function getFloat(float $min, float $max, IntervalBoundary $boundary = IntervalBoundary::ClosedOpen): float {}
 
         public function getInt(int $min, int $max): int {}
 
@@ -152,6 +152,13 @@ namespace Random
         public function __serialize(): array {}
 
         public function __unserialize(array $data): void {}
+    }
+
+    enum IntervalBoundary {
+        case ClosedOpen;
+        case ClosedClosed;
+        case OpenClosed;
+        case OpenOpen;
     }
 
     /**
