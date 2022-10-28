@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9818 (Initialize run time cache in PDO methods).
     (Florian Sowade)
 
+- Random:
+  . Fixed bug GH-9839 (Pre-PHP 8.2 output compatibility for non-mt_rand()
+    functions for MT_RAND_PHP). (timwolla)
+
 27 Oct 2022, PHP 8.2.0RC5
 
 - CLI:
