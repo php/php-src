@@ -126,7 +126,22 @@ PHP_METHOD(Random_Randomizer, getInt)
 		RETURN_THROWS();
 	}
 
-	result = randomizer->algo->range(randomizer->status, min, max);
+	if (UNEXPECTED(
+		randomizer->algo->range == php_random_algo_mt19937.range
+		&& ((php_random_status_state_mt19937 *) randomizer->status->state)->mode != MT_RAND_MT19937
+	)) {
+		uint64_t r = php_random_algo_mt19937.generate(randomizer->status) >> 1;
+			
+		/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
+		 * (max - min) > ZEND_LONG_MAX.
+		 */
+		zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
+
+		result = (zend_long) (offset + min);
+	} else {
+		result = randomizer->algo->range(randomizer->status, min, max);
+	}
+
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
