@@ -814,7 +814,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, bool localtime)
 }
 /* }}} */
 
-PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime) /* {{{ */
+PHPAPI zend_string *php_format_timestamp(const char *format, size_t format_len, time_t ts, suseconds_t usec, bool localtime) /* {{{ */
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
@@ -827,15 +827,23 @@ PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_
 		t->tz_info = tzi;
 		t->zone_type = TIMELIB_ZONETYPE_ID;
 		timelib_unixtime2local(t, ts);
+		t->us = usec;
 	} else {
 		tzi = NULL;
 		timelib_unixtime2gmt(t, ts);
+		t->us = usec;
 	}
 
 	string = date_format(format, format_len, t, localtime);
 
 	timelib_time_dtor(t);
 	return string;
+}
+/* }}} */
+
+PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime) /* {{{ */
+{
+	return php_format_timestamp(format, format_len, ts, 0, localtime);;
 }
 /* }}} */
 

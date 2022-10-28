@@ -23,6 +23,12 @@
 #include "php_version.h"
 #define PHP_DATE_VERSION PHP_VERSION
 
+#ifndef PHP_WIN32
+#include <time.h>
+#else
+#include "win32/time.h"
+#endif
+
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
@@ -123,6 +129,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime);
 
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
+PHPAPI zend_string *php_format_timestamp(const char *format, size_t format_len, time_t ts, suseconds_t usec, bool localtime);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);

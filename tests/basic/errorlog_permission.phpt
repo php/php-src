@@ -35,4 +35,4 @@ try {
 --EXPECTF--
 got permissions=600
 errorlog contents
-[%d-%s-%d %d:%d:%d %s] hello world
+[%d-%s-%d %d:%d:%d.%d %s] hello world

@@ -799,7 +799,6 @@ PHPAPI bool php_get_module_initialized(void)
 PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int syslog_type_int)
 {
 	int fd = -1;
-	time_t error_time;
 
 	if (PG(in_error_log)) {
 		/* prevent recursive invocation */
@@ -830,16 +829,27 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			char *tmp;
 			size_t len;
 			zend_string *error_time_str;
+			time_t error_time = 0;
+			suseconds_t error_time_usec = 0;
 
-			time(&error_time);
+#if HAVE_GETTIMEOFDAY
+			struct timeval tp = {0}; /* For setting microseconds */
+
+			gettimeofday(&tp, NULL);
+			error_time = tp.tv_sec;
+			error_time_usec = tp.tv_usec;
+#else
+			error_time = time(NULL);
+#endif
+
 #ifdef ZTS
 			if (!php_during_module_startup()) {
-				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
+				error_time_str = php_format_timestamp("d-M-Y H:i:s.u e", 15, error_time, error_time_usec, true);
 			} else {
-				error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 0);
+				error_time_str = php_format_timestamp("d-M-Y H:i:s.u e", 15, error_time, error_time_usec, false);
 			}
 #else
-			error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1);
+			error_time_str = php_format_timestamp("d-M-Y H:i:s.u e", 15, error_time, error_time_usec, true);
 #endif
 			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(error_time_str), log_message, PHP_EOL);
 #ifdef PHP_WIN32
