@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9823 (Don’t reset func in zend_closure_internal_handler).
     (Florian Sowade)
 
+- mysqli:
+  . Fixed bug GH-9841 (mysqli_query throws warning despite using
+    silenced error mode). (Kamil Tekiela)
+
 - PDO:
   . Fixed bug GH-9818 (Initialize run time cache in PDO methods).
     (Florian Sowade)
@@ -21,7 +25,7 @@ PHP                                                                        NEWS
     imageloadfont(). (CVE-2022-31630) (cmb)
 
 - Hash:
-  . Fixed bug #81738: buffer overflow in hash_update() on long parameter. 
+  . Fixed bug #81738: buffer overflow in hash_update() on long parameter.
     (CVE-2022-37454) (nicky at mouha dot be)
 
 - Core:
