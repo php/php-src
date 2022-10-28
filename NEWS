@@ -52,6 +52,7 @@ PHP                                                                        NEWS
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
     over socket binding for a cpu core. (David Carlier)
   . Added SKF_AD_QUEUE for cbpf filters. (David Carlier)
+  . Added socket_atmark if send/recv needs using MSG_OOB. (David Carlier)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
