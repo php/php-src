@@ -537,6 +537,145 @@ int fpm_status_handle_request(void) /* {{{ */
 				PUTS(full_pre);
 			}
 
+			if (fpm_php_get_string_from_table(_GET_str, "openmetrics")) {
+				spprintf(&buffer, 0, "# HELP phpfpm_process_state The current state of the process (Idle, Running, ...).\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# TYPE phpfpm_process_state gauge\n");
+				PUTS(buffer);
+
+				for (i=0; i<scoreboard_p->nprocs; i++) {
+					if (!scoreboard_p->procs[i].used) {
+						continue;
+					}
+
+					proc = &scoreboard_p->procs[i];
+
+					spprintf(&buffer, 0, "phpfpm_process_state{pool=\"%s\",pid=\"%d\",state=\"%s\"} 1\n", scoreboard_p->pool, (int) proc->pid, fpm_request_get_stage_name(proc->request_stage));
+					PUTS(buffer);
+				}
+
+				spprintf(&buffer, 0, "# HELP phpfpm_process_start_since_seconds The number of seconds since the process started.\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# TYPE phpfpm_process_start_since_seconds counter\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# UNIT phpfpm_process_start_since_seconds seconds\n");
+				PUTS(buffer);
+
+				for (i=0; i<scoreboard_p->nprocs; i++) {
+					if (!scoreboard_p->procs[i].used) {
+						continue;
+					}
+
+					proc = &scoreboard_p->procs[i];
+
+					spprintf(&buffer, 0, "phpfpm_process_start_since_seconds{pool=\"%s\",pid=\"%d\"} %lu\n", scoreboard_p->pool, (int) proc->pid, (unsigned long) (now_epoch - proc->start_epoch));
+					PUTS(buffer);
+				}
+
+				spprintf(&buffer, 0, "# HELP phpfpm_process_requests The total number of requests served.\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# TYPE phpfpm_process_requests counter\n");
+				PUTS(buffer);
+
+				for (i=0; i<scoreboard_p->nprocs; i++) {
+					if (!scoreboard_p->procs[i].used) {
+						continue;
+					}
+
+					proc = &scoreboard_p->procs[i];
+
+					spprintf(&buffer, 0, "phpfpm_process_requests{pool=\"%s\",pid=\"%d\"} %lu\n", scoreboard_p->pool, (int) proc->pid, proc->requests);
+					PUTS(buffer);
+				}
+
+				spprintf(&buffer, 0, "# HELP phpfpm_process_request_seconds Time in seconds serving the current or last request.\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# TYPE phpfpm_process_request_seconds gauge\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# UNIT phpfpm_process_request_seconds seconds\n");
+				PUTS(buffer);
+
+				for (i=0; i<scoreboard_p->nprocs; i++) {
+					if (!scoreboard_p->procs[i].used) {
+						continue;
+					}
+
+					proc = &scoreboard_p->procs[i];
+					if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
+						duration = proc->duration;
+					} else {
+						timersub(&now, &proc->accepted, &duration);
+					}
+
+					spprintf(&buffer, 0, "phpfpm_process_request_seconds{pool=\"%s\",pid=\"%d\"} %.6f\n", scoreboard_p->pool, (int) proc->pid, (duration.tv_sec * 1000000UL + duration.tv_usec) / 1000000.);
+					PUTS(buffer);
+				}
+
+				spprintf(&buffer, 0, "# HELP phpfpm_process_request_cpu The percentage of cpu of the last request. This will be 0 if the process is not Idle because the calculation is done when the request processing is complete.\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# TYPE phpfpm_process_request_cpu gauge\n");
+				PUTS(buffer);
+
+				for (i=0; i<scoreboard_p->nprocs; i++) {
+					if (!scoreboard_p->procs[i].used) {
+						continue;
+					}
+
+					proc = &scoreboard_p->procs[i];
+					/* prevent NaN */
+					if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
+						cpu = 0.;
+					} else {
+						cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
+					}
+
+					spprintf(&buffer, 0, "phpfpm_process_request_cpu{pool=\"%s\",pid=\"%d\"} %.2f\n", scoreboard_p->pool, (int) proc->pid, (proc->request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.));
+					PUTS(buffer);
+				}
+
+				spprintf(&buffer, 0, "# HELP phpfpm_process_request_memory_bytes The maximum amount of memory consumed by the last request. This will be 0 if the process is not Idle because the calculation is done when the request processing is complete.\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# TYPE phpfpm_process_request_memory_bytes gauge\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# UNIT phpfpm_process_request_memory_bytes bytes\n");
+				PUTS(buffer);
+
+				for (i=0; i<scoreboard_p->nprocs; i++) {
+					if (!scoreboard_p->procs[i].used) {
+						continue;
+					}
+
+					proc = &scoreboard_p->procs[i];
+
+					spprintf(&buffer, 0, "phpfpm_process_request_memory_bytes{pool=\"%s\",pid=\"%d\"} %zu\n", scoreboard_p->pool, (int) proc->pid, (proc->request_stage == FPM_REQUEST_ACCEPTING ? proc->memory : 0));
+					PUTS(buffer);
+				}
+
+				spprintf(&buffer, 0, "# HELP phpfpm_process_request_content_length_bytes The length of the request body, in bytes, of the last request.\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# TYPE phpfpm_process_request_content_length_bytes gauge\n");
+				PUTS(buffer);
+				spprintf(&buffer, 0, "# UNIT phpfpm_process_request_content_length_bytes bytes\n");
+				PUTS(buffer);
+
+				for (i=0; i<scoreboard_p->nprocs; i++) {
+					if (!scoreboard_p->procs[i].used) {
+						continue;
+					}
+
+					proc = &scoreboard_p->procs[i];
+
+					spprintf(&buffer, 0, "phpfpm_process_request_content_length_bytes{pool=\"%s\",pid=\"%d\"} %zu\n", scoreboard_p->pool, (int) proc->pid, proc->content_length);
+					PUTS(buffer);
+				}
+
+				efree(buffer);
+
+			} else {
+				int first;
+				zend_string *tmp_query_string;
+				char *query_string;
+
 			first = 1;
 			for (i=0; i<scoreboard_p->nprocs; i++) {
 				if (!scoreboard_p->procs[i].used) {
