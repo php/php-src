@@ -335,7 +335,7 @@ function posix_getpwuid(int $user_id): array|false {}
 
 #ifdef HAVE_GETRLIMIT
 /**
- * @return array<string, int|string>|false
+ * @return array<int|string, int|string>|false
  * @refcount 1
  */
 function posix_getrlimit(?int $resource = null): array|false {}
