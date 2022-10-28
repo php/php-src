@@ -843,7 +843,7 @@ PHPAPI zend_string *php_format_timestamp(const char *format, size_t format_len, 
 
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime) /* {{{ */
 {
-	return php_format_timestamp(format, format_len, ts, 0, localtime);;
+	return php_format_timestamp(format, format_len, ts, 0, localtime);
 }
 /* }}} */
 
