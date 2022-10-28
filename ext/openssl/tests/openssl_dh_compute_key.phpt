@@ -1,5 +1,7 @@
 --TEST--
 openssl_dh_compute_key()
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

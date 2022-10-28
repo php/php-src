@@ -1,5 +1,7 @@
 --TEST--
 filter.default is deprecated
+--EXTENSIONS--
+filter
 --INI--
 filter.default=special_chars
 --FILE--
