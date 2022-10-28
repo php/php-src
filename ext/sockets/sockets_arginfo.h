@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 546bd6fd43a68c8b6a95b4145afa94c04e36364a */
+ * Stub hash: 4fb48cdd2188e8834fd2210027adc1072e885d6e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -140,6 +140,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_shutdown, 0, 1, _IS_BOOL,
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_SOCKATMARK)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_atmark, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, socket, Socket, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_last_error, 0, 0, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, socket, Socket, 1, "null")
 ZEND_END_ARG_INFO()
@@ -237,6 +243,9 @@ ZEND_FUNCTION(socket_create_pair);
 #if defined(HAVE_SHUTDOWN)
 ZEND_FUNCTION(socket_shutdown);
 #endif
+#if defined(HAVE_SOCKATMARK)
+ZEND_FUNCTION(socket_atmark);
+#endif
 ZEND_FUNCTION(socket_last_error);
 ZEND_FUNCTION(socket_clear_error);
 ZEND_FUNCTION(socket_import_stream);
@@ -288,6 +297,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_SHUTDOWN)
 	ZEND_FE(socket_shutdown, arginfo_socket_shutdown)
+#endif
+#if defined(HAVE_SOCKATMARK)
+	ZEND_FE(socket_atmark, arginfo_socket_atmark)
 #endif
 	ZEND_FE(socket_last_error, arginfo_socket_last_error)
 	ZEND_FE(socket_clear_error, arginfo_socket_clear_error)

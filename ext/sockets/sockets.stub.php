@@ -1798,6 +1798,10 @@ function socket_create_pair(int $domain, int $type, int $protocol, &$pair): bool
 function socket_shutdown(Socket $socket, int $mode = 2): bool {}
 #endif
 
+#ifdef HAVE_SOCKATMARK
+function socket_atmark(Socket $socket): bool {}
+#endif
+
 function socket_last_error(?Socket $socket = null): int {}
 
 function socket_clear_error(?Socket $socket = null): void {}
