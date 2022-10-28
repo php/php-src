@@ -4,6 +4,7 @@ posix_getrlimit() for single resource
 posix
 --SKIPIF--
 <?php
+if (getenv('SKIP_REPEAT')) die('skip Not repeatable');
 if (!function_exists('posix_getrlimit')) die('skip posix_getrlimit() not found');
 if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_CORE, 2048, -1)) {
     die('skip Failed to set POSIX_RLIMIT_CORE');
