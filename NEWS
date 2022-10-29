@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9763 (DateTimeZone ctr mishandles input and adds null byte if
     the argument is an offset larger than 100*60 minutes). (Derick)
 
+- FPM:
+  . Fixed bug GH-9754 (SaltStack (using Python subprocess) hangs when running
+    php-fpm 8.1.11). (Jakub Zelenka)
+
 - mysqli:
   . Fixed bug GH-9841 (mysqli_query throws warning despite using
     silenced error mode). (Kamil Tekiela)
