@@ -74,7 +74,9 @@ int fpm_stdio_init_final(void)
 
 int fpm_stdio_save_original_stderr(void)
 {
-	/* php-fpm loses STDERR fd after call of the fpm_stdio_init_final(). Check #8555. */
+	/* STDERR fd gets lost after calling fpm_stdio_init_final() (check GH-8555) so it can be saved.
+	 * It should be used only when PHP-FPM is not daemonized otherwise it might break some
+	 * applications (e.g. GH-9754). */
 	zlog(ZLOG_DEBUG, "saving original STDERR fd: dup()");
 	fd_stderr_original = dup(STDERR_FILENO);
 	if (0 > fd_stderr_original) {
@@ -87,7 +89,7 @@ int fpm_stdio_save_original_stderr(void)
 
 int fpm_stdio_restore_original_stderr(int close_after_restore)
 {
-	/* php-fpm loses STDERR fd after call of the fpm_stdio_init_final(). Check #8555. */
+	/* Restore original STDERR fd if it was previously saved. */
 	if (-1 != fd_stderr_original) {
 		zlog(ZLOG_DEBUG, "restoring original STDERR fd: dup2()");
 		if (0 > dup2(fd_stderr_original, STDERR_FILENO)) {
@@ -98,9 +100,6 @@ int fpm_stdio_restore_original_stderr(int close_after_restore)
 				close(fd_stderr_original);
 			}
 		}
-	} else {
-		zlog(ZLOG_DEBUG, "original STDERR fd is not restored, maybe function is called from a child: dup2()");
-		return -1;
 	}
 
 	return 0;
