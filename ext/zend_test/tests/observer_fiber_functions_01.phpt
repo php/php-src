@@ -4,6 +4,7 @@ Observer: Basic function observing in fibers
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.fiber_init=1
 zend_test.observer.fiber_switch=1

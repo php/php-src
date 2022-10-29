@@ -134,6 +134,10 @@ Options:
 
     --bless     Bless failed tests using scripts/dev/bless_tests.php.
 
+    --with-test-observers
+                Run the tests with the zend_test observers registered.
+                This requires the zend_test extension to be enabled.
+
 HELP;
 }
 
@@ -160,7 +164,7 @@ function main(): void
            $temp_source, $temp_target, $test_cnt, $test_dirs,
            $test_files, $test_idx, $test_list, $test_results, $testfile,
            $user_tests, $valgrind, $sum_results, $shuffle, $file_cache, $num_repeats,
-           $bless, $show_progress;
+           $bless, $show_progress, $global_extensions;
     // Parallel testing
     global $workers, $workerID;
     global $context_line_count;
@@ -311,6 +315,7 @@ function main(): void
         'zend.exception_string_param_max_len=15',
         'short_open_tag=0',
     ];
+    $global_extensions = [];
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
@@ -612,6 +617,13 @@ function main(): void
                 case '--version':
                     echo '$Id$' . "\n";
                     exit(1);
+                case '--with-test-observers':
+                    // register zend_test observers but don't actually print any output
+                    $ini_overwrites[] = 'zend_test.observer.enabled=1';
+                    $ini_overwrites[] = 'zend_test.observer.show_output=0';
+                    $ini_overwrites[] = 'zend_test.observer.observe_all=1';
+                    $global_extensions[] = 'zend_test';
+                    break;
 
                 default:
                     echo "Illegal switch '$switch' specified!\n";
@@ -1816,6 +1828,7 @@ function run_test(string $php, $file, array $env): string
     global $slow_min_ms;
     global $preload, $file_cache;
     global $num_repeats;
+    global $global_extensions;
     // Parallel testing
     global $workerID;
     global $show_progress;
@@ -2037,9 +2050,9 @@ TEST $file
     $ini_settings = $workerID ? ['opcache.cache_id' => "worker$workerID"] : [];
 
     // Additional required extensions
-    $extensions = [];
+    $extensions = $global_extensions;
     if ($test->hasSection('EXTENSIONS')) {
-        $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
+        $extensions = array_merge($extensions, preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS'))));
     }
     if (is_array($IN_REDIRECT) && $IN_REDIRECT['EXTENSIONS'] != []) {
         $extensions = array_merge($extensions, $IN_REDIRECT['EXTENSIONS']);
