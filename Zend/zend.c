@@ -179,9 +179,9 @@ static ZEND_INI_MH(OnUpdateMaxAllowedStackSize) /* {{{ */
 {
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 
-	if (size < ZEND_MAX_ALLOWED_STACK_USAGE_UNCHECKED) {
+	if (size < ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED) {
 		zend_error(E_WARNING, "Invalid \"%s\" setting. Value must be >= %d, but got " ZEND_LONG_FMT,
-			ZSTR_VAL(entry->name), ZEND_MAX_ALLOWED_STACK_USAGE_UNCHECKED, size);
+			ZSTR_VAL(entry->name), ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED, size);
 		return FAILURE;
 	}
 
@@ -252,9 +252,9 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_ENTRY("fiber.stack_size",		NULL,			ZEND_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
 #ifdef ZEND_CHECK_STACK_LIMIT
 	/* The maximum allowed call stack size. 0: auto detect, -1: no limit. For fibers, this is fiber.stack_size. */
-	STD_ZEND_INI_ENTRY("zend.max_allowed_stack_size",	"0",	ZEND_INI_PERDIR,	OnUpdateMaxAllowedStackSize,	max_allowed_stack_size,		zend_executor_globals,	executor_globals)
+	STD_ZEND_INI_ENTRY("zend.max_allowed_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateMaxAllowedStackSize,	max_allowed_stack_size,		zend_executor_globals,	executor_globals)
 	/* Substracted from the max allowed stack size, as a buffer, when checking for overflow. 0: auto detect. */
-	STD_ZEND_INI_ENTRY("zend.reserved_stack_size",	"0",	ZEND_INI_PERDIR,	OnUpdateReservedStackSize,	reserved_stack_size,		zend_executor_globals,	executor_globals)
+	STD_ZEND_INI_ENTRY("zend.reserved_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateReservedStackSize,	reserved_stack_size,		zend_executor_globals,	executor_globals)
 #endif
 
 ZEND_INI_END()
@@ -851,10 +851,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->errors = NULL;
 
 # ifdef ZEND_CHECK_STACK_LIMIT
-	if (!zend_call_stack_get(&executor_globals->call_stack)) {
-		executor_globals->call_stack = (zend_call_stack){0};
-	}
-# endif /* ZEND_CHECK_STACK_LIMIT */
+	zend_call_stack_init();
+# endif
 }
 /* }}} */
 
@@ -1041,12 +1039,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	CG(map_ptr_size) = 0;
 	CG(map_ptr_last) = 0;
-
-# ifdef ZEND_CHECK_STACK_LIMIT
-	if (!zend_call_stack_get(&EG(call_stack))) {
-		EG(call_stack) = (zend_call_stack){0};
-	}
-# endif /* ZEND_CHECK_STACK_LIMIT */
 #endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -1140,6 +1132,9 @@ zend_result zend_post_startup(void) /* {{{ */
 	zend_copy_ini_directives();
 #else
 	global_map_ptr_last = CG(map_ptr_last);
+# ifdef ZEND_CHECK_STACK_LIMIT
+	zend_call_stack_init();
+# endif
 #endif
 
 	return SUCCESS;

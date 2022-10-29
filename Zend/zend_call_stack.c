@@ -19,6 +19,7 @@
 /* Inspired from Chromium's stack_util.cc */
 
 #include "zend.h"
+#include "zend_globals.h"
 #include "zend_portability.h"
 #include "zend_call_stack.h"
 #include <stdint.h>
@@ -47,6 +48,43 @@
 #include <sys/syscall.h>
 #endif
 
+/* Called once per process or thread */
+ZEND_API void zend_call_stack_init(void) {
+	if (!zend_call_stack_get(&EG(call_stack))) {
+		EG(call_stack) = (zend_call_stack){0};
+	}
+
+	switch (EG(max_allowed_stack_size)) {
+		case ZEND_MAX_ALLOWED_STACK_SIZE_DETECT: {
+			void *base = EG(call_stack).base;
+			size_t size = EG(call_stack).max_size;
+			if (UNEXPECTED(base == (void*)0)) {
+				base = zend_call_stack_position();
+				size = zend_call_stack_default_size();
+				/* base is not the actual stack base */
+				size -= 32 * 1024;
+			}
+			EG(stack_base) = base;
+			EG(stack_limit) = zend_call_stack_limit(base, size, EG(reserved_stack_size));
+			break;
+	    }
+		case ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED: {
+			EG(stack_base) = (void*)0;
+			EG(stack_limit) = (void*)0;
+			break;
+	    }
+		default: {
+			ZEND_ASSERT(EG(max_allowed_stack_size) > 0);
+			void *base = EG(call_stack).base;
+			if (UNEXPECTED(base == (void*)0)) {
+				base = zend_call_stack_position();
+			}
+			EG(stack_base) = base;
+			EG(stack_limit) = zend_call_stack_limit(base, EG(max_allowed_stack_size), EG(reserved_stack_size));
+			break;
+	    }
+	}
+}
 
 #ifdef __linux__
 static bool zend_call_stack_is_main_thread(void) {

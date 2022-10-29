@@ -30,6 +30,8 @@ typedef struct _zend_call_stack {
 	size_t max_size;
 } zend_call_stack;
 
+ZEND_API void zend_call_stack_init(void);
+
 ZEND_API bool zend_call_stack_get(zend_call_stack *stack);
 
 /** Returns an approximation of the current stack position */
