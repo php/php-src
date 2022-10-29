@@ -3147,7 +3147,8 @@ PHP_FUNCTION(openssl_csr_sign)
 	zend_string *cert_str;
 	zval *zpkey, *args = NULL;
 	zend_long num_days;
-	zend_long serial = Z_L(0);
+	zend_long serial_long = Z_L(0);
+    zend_string *serial_str = NULL;
 	X509 *cert = NULL, *new_cert = NULL;
 	EVP_PKEY * key = NULL, *priv_key = NULL;
 	int i;
@@ -3160,7 +3161,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		Z_PARAM_LONG(num_days)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_OR_NULL(args)
-		Z_PARAM_LONG(serial)
+		Z_PARAM_STR_OR_LONG(serial_str, serial_long)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;
@@ -3229,11 +3230,24 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
+	if (serial_str) {
+		BIO *in = BIO_new_mem_buf(ZSTR_VAL(serial_str), ZSTR_LEN(serial_str));
+		char buffer[512];
+		int success = a2i_ASN1_INTEGER(in, X509_get_serialNumber(new_cert), buffer, sizeof(buffer));
+		BIO_free(in);
+		if (!success) {
+			php_error_docref(NULL, E_WARNING, "Error parsing serial number");
+			X509_free(new_cert);
+			new_cert = NULL;
+			goto cleanup;
+		}
+	} else {
 #if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
-	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
+		ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial_long);
 #else
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+		ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial_long);
 #endif
+	}
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 

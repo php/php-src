@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Made opcache.preload_user always optional in the cli and phpdbg SAPIs.
     (Arnaud)
 
+- OpenSSL:
+  . Allow passing serial as hex encoded string in openssl_csr_sign()
+    (Florian Sowade)
+
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
 
