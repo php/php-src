@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9823 (Don’t reset func in zend_closure_internal_handler).
     (Florian Sowade)
 
+- FPM:
+  . Fixed bug GH-9754 (SaltStack (using Python subprocess) hangs when running
+    php-fpm 8.1.11). (Jakub Zelenka)
+
 - mysqli:
   . Fixed bug GH-9841 (mysqli_query throws warning despite using
     silenced error mode). (Kamil Tekiela)
