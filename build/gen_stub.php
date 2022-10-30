@@ -1911,6 +1911,10 @@ class ConstInfo extends VariableLike
     protected function getFieldSynopsisValueString(iterable $allConstInfos): ?string
     {
         $value = EvaluatedValue::createFromExpression($this->value, null, $this->cValue, $allConstInfos);
+        if ($value->isUnknownConstValue) {
+            return null;
+        }
+
         if ($value->originatingConst) {
             return $value->originatingConst->getFieldSynopsisValueString($allConstInfos);
         }
