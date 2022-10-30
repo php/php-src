@@ -81,15 +81,23 @@ class LogReader
     /**
      * Get a single log line.
      *
-     * @param int $timeoutSeconds
-     * @param int $timeoutMicroseconds
+     * @param int  $timeoutSeconds      Read timeout in seconds
+     * @param int  $timeoutMicroseconds Read timeout in microseconds
+     * @param bool $throwOnTimeout      Whether to throw an exception on timeout
      *
      * @return null|string
      * @throws \Exception
      */
-    public function getLine(int $timeoutSeconds = 3, int $timeoutMicroseconds = 0): ?string
-    {
-        $line = $this->getSource()->getLine($timeoutSeconds, $timeoutMicroseconds);
+    public function getLine(
+        int $timeoutSeconds = 3,
+        int $timeoutMicroseconds = 0,
+        bool $throwOnTimeout = false
+    ): ?string {
+        $line = $this->getSource()->getLine(
+            $timeoutSeconds,
+            $timeoutMicroseconds,
+            $throwOnTimeout
+        );
         $this->trace(is_null($line) ? "LINE - null" : "LINE: $line");
 
         return $line;
@@ -196,17 +204,27 @@ class LogReader
     }
 }
 
+class LogTimoutException extends \Exception
+{
+}
+
 abstract class LogSource
 {
     /**
      * Get single line from the source.
      *
-     * @param int $timeoutSeconds      Read timeout in seconds
-     * @param int $timeoutMicroseconds Read timeout in microseconds
+     * @param int  $timeoutSeconds      Read timeout in seconds
+     * @param int  $timeoutMicroseconds Read timeout in microseconds
+     * @param bool $throwOnTimeout      Whether to throw an exception on timeout
      *
      * @return string|null
+     * @throws LogTimoutException
      */
-    public abstract function getLine(int $timeoutSeconds, int $timeoutMicroseconds): ?string;
+    public abstract function getLine(
+        int $timeoutSeconds,
+        int $timeoutMicroseconds,
+        bool $throwOnTimeout = false
+    ): ?string;
 
     /**
      * Get all lines that has been returned by getLine() method.
@@ -236,13 +254,18 @@ class LogStreamSource extends LogSource
     /**
      * Get single line from the stream.
      *
-     * @param int $timeoutSeconds      Read timeout in seconds
-     * @param int $timeoutMicroseconds Read timeout in microseconds
+     * @param int  $timeoutSeconds      Read timeout in seconds
+     * @param int  $timeoutMicroseconds Read timeout in microseconds
+     * @param bool $throwOnTimeout      Whether to throw an exception on timeout
      *
      * @return string|null
+     * @throws LogTimoutException
      */
-    public function getLine(int $timeoutSeconds, int $timeoutMicroseconds): ?string
-    {
+    public function getLine(
+        int $timeoutSeconds,
+        int $timeoutMicroseconds,
+        bool $throwOnTimeout = false
+    ): ?string {
         if (feof($this->stream)) {
             return null;
         }
@@ -255,6 +278,10 @@ class LogStreamSource extends LogSource
 
             return $line;
         } else {
+            if ($throwOnTimeout) {
+                throw new LogTimoutException('Timout exceeded when reading line');
+            }
+
             return null;
         }
     }
@@ -296,13 +323,18 @@ class LogFileSource extends LogSource
     /**
      * Get single line from the file.
      *
-     * @param int $timeoutSeconds      Read timeout in seconds
-     * @param int $timeoutMicroseconds Read timeout in microseconds
+     * @param int  $timeoutSeconds      Read timeout in seconds
+     * @param int  $timeoutMicroseconds Read timeout in microseconds
+     * @param bool $throwOnTimeout      Whether to throw an exception on timeout
      *
      * @return string|null
+     * @throws LogTimoutException
      */
-    public function getLine(int $timeoutSeconds, int $timeoutMicroseconds): ?string
-    {
+    public function getLine(
+        int $timeoutSeconds,
+        int $timeoutMicroseconds,
+        bool $throwOnTimeout = false
+    ): ?string {
         $endTime = microtime(true) + $timeoutSeconds + ($timeoutMicroseconds / 1_000_000);
         while ($this->position >= count($this->lines)) {
             if (is_file($this->filePath)) {
@@ -317,6 +349,10 @@ class LogFileSource extends LogSource
             }
             usleep(50_000);
             if (microtime(true) > $endTime) {
+                if ($throwOnTimeout) {
+                    throw new LogTimoutException('Timout exceeded when reading line');
+                }
+
                 return null;
             }
         }

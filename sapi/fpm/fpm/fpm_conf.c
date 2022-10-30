@@ -1290,7 +1290,7 @@ static int fpm_conf_post_process(int force_daemon) /* {{{ */
 		fpm_evaluate_full_path(&fpm_global_config.error_log, NULL, PHP_LOCALSTATEDIR, 0);
 	}
 
-	if (0 > fpm_stdio_save_original_stderr()) {
+	if (!fpm_global_config.daemonize && 0 > fpm_stdio_save_original_stderr()) {
 		return -1;
 	}
 
