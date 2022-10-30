@@ -5,6 +5,11 @@ pcntl_unshare() with wrong flag
 if (!extension_loaded("pcntl")) die("skip");
 if (!extension_loaded("posix")) die("skip posix extension not available");
 if (!function_exists("pcntl_unshare")) die("skip pcntl_unshare is not available");
+try {
+    if (@pcntl_unshare(42) == false && pcntl_get_last_error() == PCNTL_EPERM) {
+        die('skip Insufficient previleges');
+    }
+} catch (\ValueError $e) {}
 ?>
 --FILE--
 <?php

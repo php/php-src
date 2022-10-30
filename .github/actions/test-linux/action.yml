@@ -11,7 +11,9 @@ runs:
         set -x
         export MYSQL_TEST_USER=root
         export MYSQL_TEST_PASSWD=root
-        export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        if [[ -z "$PDO_MYSQL_TEST_DSN" ]]; then
+          export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        fi
         export PDO_MYSQL_TEST_USER=root
         export PDO_MYSQL_TEST_PASS=root
         export PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"

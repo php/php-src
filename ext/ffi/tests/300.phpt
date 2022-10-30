@@ -4,6 +4,8 @@ FFI 300: FFI preloading
 <?php require_once('skipif.inc'); ?>
 <?php if (!extension_loaded('Zend OPcache')) die('skip Zend OPcache extension not available'); ?>
 <?php if (substr(PHP_OS, 0, 3) == 'WIN') die('skip not for Windows'); ?>
+<?php if (!extension_loaded('posix')) die('skip POSIX extension not loaded'); ?>
+<?php if (posix_geteuid() == 0) die('skip Cannot run test as root.'); ?>
 --INI--
 ffi.enable=1
 opcache.enable=1
