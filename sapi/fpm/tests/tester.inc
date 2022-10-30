@@ -379,12 +379,17 @@ class Tester
      * @param array $extraArgs   Command extra arguments.
      * @param bool  $forceStderr Whether to output to stderr so error log is used.
      * @param bool  $daemonize   Whether to start FPM daemonized
+     * @param array $extensions  List of extension to add if shared build used.
      *
      * @return bool
      * @throws \Exception
      */
-    public function start(array $extraArgs = [], bool $forceStderr = true, bool $daemonize = false)
-    {
+    public function start(
+        array $extraArgs = [],
+        bool $forceStderr = true,
+        bool $daemonize = false,
+        array $extensions = []
+    ) {
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
 
@@ -397,6 +402,14 @@ class Tester
         $this->daemonized = $daemonize;
         if ( ! $daemonize) {
             $cmd[] = '-F';
+        }
+
+        $extensionDir = getenv('TEST_FPM_EXTENSION_DIR');
+        if ($extensionDir) {
+            $cmd[] = '-dextension_dir=' . $extensionDir;
+            foreach ($extensions as $extension) {
+                $cmd[] = '-dextension=' . $extension;
+            }
         }
 
         if (getenv('TEST_FPM_RUN_AS_ROOT')) {
