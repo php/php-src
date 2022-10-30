@@ -625,7 +625,7 @@ function main(): void
                         $environment['SKIP_MSAN'] = 1;
                     }
 
-                    $lsanSuppressions = __DIR__ . '/azure/lsan-suppressions.txt';
+                    $lsanSuppressions = __DIR__ . '/.github/lsan-suppressions.txt';
                     if (file_exists($lsanSuppressions)) {
                         $environment['LSAN_OPTIONS'] = 'suppressions=' . $lsanSuppressions
                             . ':print_suppressions=0';
