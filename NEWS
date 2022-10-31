@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.33
+?? ??? 2022, PHP 7.4.34
+
+
+03 Nov 2022, PHP 7.4.33
 
 - GD:
   . Fixed bug #81739: OOB read due to insufficient input validation in
