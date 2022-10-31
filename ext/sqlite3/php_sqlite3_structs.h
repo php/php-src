@@ -52,8 +52,9 @@ typedef struct _php_sqlite3_func {
 	const char *func_name;
 	int argc;
 
-	zval func, step, fini;
-	struct php_sqlite3_fci afunc, astep, afini;
+	zend_fcall_info_cache func;
+	zend_fcall_info_cache step;
+	zend_fcall_info_cache fini;
 } php_sqlite3_func;
 
 /* Structure for SQLite collation function */
