@@ -40,11 +40,6 @@ struct php_sqlite3_bound_param  {
 	zval parameter;
 };
 
-struct php_sqlite3_fci {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-};
-
 /* Structure for SQLite function. */
 typedef struct _php_sqlite3_func {
 	struct _php_sqlite3_func *next;
@@ -62,8 +57,7 @@ typedef struct _php_sqlite3_collation {
 	struct _php_sqlite3_collation *next;
 
 	const char *collation_name;
-	zval cmp_func;
-	struct php_sqlite3_fci fci;
+	zend_fcall_info_cache cmp_func;
 } php_sqlite3_collation;
 
 /* Structure for SQLite Database object. */
