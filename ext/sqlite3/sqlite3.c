@@ -889,27 +889,17 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	php_sqlite3_collation *collation = (php_sqlite3_collation*)coll;
 	zval zargs[2];
 	zval retval;
-	int ret;
+	int ret = 0;
 
 	// Exception occurred on previous callback. Don't attempt to call function.
 	if (EG(exception)) {
 		return 0;
 	}
 
-	collation->fci.fci.size = (sizeof(collation->fci.fci));
-	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
-	collation->fci.fci.object = NULL;
-	collation->fci.fci.retval = &retval;
-	collation->fci.fci.param_count = 2;
-
 	ZVAL_STRINGL(&zargs[0], a, a_len);
 	ZVAL_STRINGL(&zargs[1], b, b_len);
 
-	collation->fci.fci.params = zargs;
-
-	if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
-	}
+	zend_call_known_fcc(&collation->cmp_func, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
 
 	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
@@ -1043,7 +1033,7 @@ PHP_METHOD(SQLite3, createCollation)
 	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {
 		collation->collation_name = estrdup(collation_name);
 
-		ZVAL_COPY(&collation->cmp_func, &fci.function_name);
+		zend_fcc_dup(&collation->cmp_func, &fcc);
 
 		collation->next = db_obj->collations;
 		db_obj->collations = collation;
@@ -2207,8 +2197,8 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 			sqlite3_create_collation(intern->db, collation->collation_name, SQLITE_UTF8, NULL, NULL);
 		}
 		efree((char*)collation->collation_name);
-		if (!Z_ISUNDEF(collation->cmp_func)) {
-			zval_ptr_dtor(&collation->cmp_func);
+		if (ZEND_FCC_INITIALIZED(collation->cmp_func)) {
+			zend_fcc_dtor(&collation->cmp_func);
 		}
 		efree(collation);
 	}
