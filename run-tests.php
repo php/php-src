@@ -3065,22 +3065,29 @@ function settings2array(array $settings, &$ini_settings): void
     // as shared extensions, mysqlnd.so needs to be loaded before either
     // of mysqli or pdo_msqli are loaded, as otherwise they will complain
     // about missing symbols.
+    // The same limitation exists for the pdo extension before the
+    // pdo drivers (pdo_xxx)
     if (array_key_exists('extension', $ini_settings) === true) {
-        $extensions = [];
-        $mysql_extension_present = false;
-        foreach ($ini_settings['extension'] as $extension) {
-            if (strcmp($extension, "mysqlnd.so") === 0) {
-                $mysql_extension_present = true;
-            }
-            else {
-                $extensions[] = $extension;
-            }
+        $priority_extension_names = [
+            "mysqlnd.so",
+            "pdo.so"
+        ];
+
+        $priority_extensions = [];
+        // Strip out the priority extensions
+        foreach ($priority_extension_names as $priority_extension_name) {
+             $found_index = array_search($priority_extension_name, $ini_settings['extension']);
+             if ($found_index !== false) {
+                 $priority_extensions[] = $ini_settings['extension'][$found_index];
+                 unset($ini_settings['extension'][$found_index]);
+             }
         }
 
-        if ($mysql_extension_present === true) {
-            array_unshift($extensions, "mysqlnd.so");
-            $ini_settings['extension'] = $extensions;
-        }
+        // Put the priority extensions first, then the remaining extensions
+        $ini_settings['extension'] = array_merge(
+            $priority_extensions,
+            $ini_settings['extension']
+        );
     }
 }
 
