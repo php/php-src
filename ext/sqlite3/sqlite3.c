@@ -155,7 +155,6 @@ PHP_METHOD(SQLite3, open)
 #endif
 
 	db_obj->initialised = 1;
-	db_obj->authorizer_fci = empty_fcall_info;
 	db_obj->authorizer_fcc = empty_fcall_info_cache;
 
 	sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, db_obj);
@@ -1288,16 +1287,14 @@ PHP_METHOD(SQLite3, setAuthorizer)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	/* Clear previously set callback */
-	if (ZEND_FCI_INITIALIZED(db_obj->authorizer_fci)) {
-		zval_ptr_dtor(&db_obj->authorizer_fci.function_name);
-		db_obj->authorizer_fci.size = 0;
+	if (ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
+		zend_fcc_dtor(&db_obj->authorizer_fcc);
 	}
 
 	/* Only enable userland authorizer if argument is not NULL */
 	if (ZEND_FCI_INITIALIZED(fci)) {
-		db_obj->authorizer_fci = fci;
-		Z_ADDREF(db_obj->authorizer_fci.function_name);
 		db_obj->authorizer_fcc = fcc;
+		zend_fcc_addref(&db_obj->authorizer_fcc);
 	}
 
 	RETURN_TRUE;
@@ -2064,10 +2061,9 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 	}
 
 	php_sqlite3_db_object *db_obj = (php_sqlite3_db_object *)autharg;
-	zend_fcall_info *fci = &db_obj->authorizer_fci;
 
 	/* fallback to access allowed if authorizer callback is not defined */
-	if (fci->size == 0) {
+	if (!ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
 		return SQLITE_OK;
 	}
 
@@ -2101,13 +2097,10 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 		ZVAL_STRING(&argv[4], arg4);
 	}
 
-	fci->retval = &retval;
-	fci->param_count = 5;
-	fci->params = argv;
-
 	int authreturn = SQLITE_DENY;
 
-	if (zend_call_function(fci, &db_obj->authorizer_fcc) != SUCCESS || Z_ISUNDEF(retval)) {
+	zend_call_known_fcc(&db_obj->authorizer_fcc, &retval, /* argc */ 5, argv, /* named_params */ NULL);
+	if (Z_ISUNDEF(retval)) {
 		php_sqlite3_error(db_obj, "An error occurred while invoking the authorizer callback");
 	} else {
 		if (Z_TYPE(retval) != IS_LONG) {
@@ -2122,8 +2115,13 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 		}
 	}
 
-	zend_fcall_info_args_clear(fci, 0);
+	/* Free local return and argument values */
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&argv[0]);
+	zval_ptr_dtor(&argv[1]);
+	zval_ptr_dtor(&argv[2]);
+	zval_ptr_dtor(&argv[3]);
+	zval_ptr_dtor(&argv[4]);
 
 	return authreturn;
 }
@@ -2165,8 +2163,8 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 	}
 
 	/* Release function_name from authorizer */
-	if (intern->authorizer_fci.size > 0) {
-		zval_ptr_dtor(&intern->authorizer_fci.function_name);
+	if (ZEND_FCC_INITIALIZED(intern->authorizer_fcc)) {
+		zend_fcc_dtor(&intern->authorizer_fcc);
 	}
 
 	while (intern->funcs) {

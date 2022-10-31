@@ -66,7 +66,6 @@ typedef struct _php_sqlite3_db_object  {
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
 	php_sqlite3_collation *collations;
-	zend_fcall_info authorizer_fci;
 	zend_fcall_info_cache authorizer_fcc;
 
 	bool exception;
