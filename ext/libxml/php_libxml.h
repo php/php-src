@@ -42,11 +42,7 @@ ZEND_BEGIN_MODULE_GLOBALS(libxml)
 	zval stream_context;
 	smart_str error_buffer;
 	zend_llist *error_list;
-	struct _php_libxml_entity_resolver {
-		zval 					callback;
-		zend_fcall_info 		fci;
-		zend_fcall_info_cache	fcc;
-	} entity_loader;
+	zend_fcall_info_cache entity_loader_callback;
 	bool entity_loader_disabled;
 ZEND_END_MODULE_GLOBALS(libxml)
 
