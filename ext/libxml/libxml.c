@@ -228,9 +228,7 @@ static PHP_GINIT_FUNCTION(libxml)
 	ZVAL_UNDEF(&libxml_globals->stream_context);
 	libxml_globals->error_buffer.s = NULL;
 	libxml_globals->error_list = NULL;
-	ZVAL_NULL(&libxml_globals->entity_loader.callback);
-	libxml_globals->entity_loader.fci.size = 0;
-	libxml_globals->entity_loader_disabled = 0;
+	libxml_globals->entity_loader_callback = empty_fcall_info_cache;
 }
 
 /* Channel libxml file io layer through the PHP streams subsystem.
@@ -573,13 +571,9 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	const char			*resource	= NULL;
 	zval 				*ctxzv, retval;
 	zval				params[3];
-	int					status;
-	zend_fcall_info		*fci;
 
-	fci = &LIBXML(entity_loader).fci;
-
-	if (fci->size == 0) {
-		/* no custom user-land callback set up; delegate to original loader */
+	/* no custom user-land callback set up; delegate to original loader */
+	if (!ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
 		return _php_libxml_default_entity_loader(URL, ID, context);
 	}
 
@@ -611,24 +605,14 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 
 #undef ADD_NULL_OR_STRING_KEY
 
-	fci->retval	= &retval;
-	fci->params	= params;
-	fci->param_count = sizeof(params)/sizeof(*params);
+	zend_call_known_fcc(&LIBXML(entity_loader_callback), &retval, 3, params, /* named_params */ NULL);
 
-	status = zend_call_function(fci, &LIBXML(entity_loader).fcc);
-	if (status != SUCCESS || Z_ISUNDEF(retval)) {
+	if (Z_ISUNDEF(retval)) {
 		php_libxml_ctx_error(context,
 				"Call to user entity loader callback '%s' has failed",
-				Z_STRVAL(fci->function_name));
+				ZSTR_VAL(LIBXML(entity_loader_callback).function_handler->common.function_name));
 	} else {
-		/*
-		retval_ptr = *fci->retval_ptr_ptr;
-		if (retval_ptr == NULL) {
-			php_libxml_ctx_error(context,
-					"Call to user entity loader callback '%s' has failed; "
-					"probably it has thrown an exception",
-					fci->function_name);
-		} else */ if (Z_TYPE(retval) == IS_STRING) {
+		if (Z_TYPE(retval) == IS_STRING) {
 is_string:
 			resource = Z_STRVAL(retval);
 		} else if (Z_TYPE(retval) == IS_RESOURCE) {
@@ -638,7 +622,7 @@ is_string:
 				php_libxml_ctx_error(context,
 						"The user entity loader callback '%s' has returned a "
 						"resource, but it is not a stream",
-						Z_STRVAL(fci->function_name));
+						ZSTR_VAL(LIBXML(entity_loader_callback).function_handler->common.function_name));
 			} else {
 				/* TODO: allow storing the encoding in the stream context? */
 				xmlCharEncoding enc = XML_CHAR_ENCODING_NONE;
@@ -839,9 +823,9 @@ static PHP_RINIT_FUNCTION(libxml)
 
 static PHP_RSHUTDOWN_FUNCTION(libxml)
 {
-	LIBXML(entity_loader).fci.size = 0;
-	zval_ptr_dtor_nogc(&LIBXML(entity_loader).callback);
-	ZVAL_NULL(&LIBXML(entity_loader).callback);
+	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
+		zend_fcc_dtor(&LIBXML(entity_loader_callback));
+	}
 
 	return SUCCESS;
 }
@@ -1061,24 +1045,20 @@ PHP_FUNCTION(libxml_disable_entity_loader)
 /* {{{ Changes the default external entity loader */
 PHP_FUNCTION(libxml_set_external_entity_loader)
 {
-	zval					*callback;
 	zend_fcall_info			fci;
 	zend_fcall_info_cache	fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC_OR_NULL_WITH_ZVAL(fci, fcc, callback)
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Unset old callback if it's defined */
+	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
+		zend_fcc_dtor(&LIBXML(entity_loader_callback));
+	}
 	if (ZEND_FCI_INITIALIZED(fci)) { /* argument not null */
-		LIBXML(entity_loader).fci = fci;
-		LIBXML(entity_loader).fcc = fcc;
-	} else {
-		LIBXML(entity_loader).fci.size = 0;
+		zend_fcc_dup(&LIBXML(entity_loader_callback), &fcc);
 	}
-	if (!Z_ISNULL(LIBXML(entity_loader).callback)) {
-		zval_ptr_dtor_nogc(&LIBXML(entity_loader).callback);
-	}
-	ZVAL_COPY(&LIBXML(entity_loader).callback, callback);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1087,7 +1067,15 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 PHP_FUNCTION(libxml_get_external_entity_loader)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_COPY(&LIBXML(entity_loader).callback);
+
+	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
+		zval tmp;
+		zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), &tmp);
+		RETVAL_COPY(&tmp);
+		zval_ptr_dtor(&tmp);
+		return;
+	}
+	RETURN_NULL();
 }
 /* }}} */
 
