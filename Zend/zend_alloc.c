@@ -1995,7 +1995,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 				i++;
 			}
 		}
-		if (chunk->free_pages == ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE) {
+		if (chunk->free_pages == ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE && chunk != heap->main_chunk) {
 			zend_mm_chunk *next_chunk = chunk->next;
 
 			zend_mm_delete_chunk(heap, chunk);
