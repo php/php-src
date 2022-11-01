@@ -128,6 +128,7 @@ PHP_FUNCTION(mysqli_thread_id);
 PHP_FUNCTION(mysqli_thread_safe);
 PHP_FUNCTION(mysqli_use_result);
 PHP_FUNCTION(mysqli_warning_count);
+PHP_METHOD(mysqli, __debugInfo);
 
 PHP_FUNCTION(mysqli_stmt_construct);
 PHP_FUNCTION(mysqli_result_construct);
