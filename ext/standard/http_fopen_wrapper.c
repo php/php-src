@@ -144,10 +144,12 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
 	zend_bool follow_location = 1;
-	php_stream_filter *transfer_encoding = NULL;
+	php_stream_filter *body_filter = NULL;
 	int response_code;
 	smart_str req_buf = {0};
 	zend_bool custom_request_method;
+	zend_bool server_closes_connection = 0;
+	zend_bool chunked_encoding = 0;
 
 	tmp_line[0] = '\0';
 
@@ -664,6 +666,9 @@ finish:
 			php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval http_response;
 
+			if (strncasecmp(tmp_line, "HTTP/1.1", sizeof("HTTP/1.1")-1) < 0) {
+				server_closes_connection = 1;
+			}
 			if (tmp_line_len > 9) {
 				response_code = atoi(tmp_line + 9);
 			} else {
@@ -793,6 +798,10 @@ finish:
 			} else if (!strncasecmp(http_header_line, "Content-Length:", sizeof("Content-Length:")-1)) {
 				file_size = atoi(http_header_value);
 				php_stream_notify_file_size(context, file_size, http_header_line, 0);
+			} else if (!strncasecmp(http_header_line, "Connection:", sizeof("Connection:")-1)
+				&& !strncasecmp(http_header_value, "Close", sizeof("Close")-1)
+			) {
+				server_closes_connection = 1;
 			} else if (
 				!strncasecmp(http_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding:")-1)
 				&& !strncasecmp(http_header_value, "Chunked", sizeof("Chunked")-1)
@@ -806,11 +815,13 @@ finish:
 						decode = zend_is_true(tmpzval);
 					}
 					if (decode) {
-						transfer_encoding = php_stream_filter_create("dechunk", NULL, php_stream_is_persistent(stream));
-						if (transfer_encoding) {
+						body_filter = php_stream_filter_create("dechunk", NULL, php_stream_is_persistent(stream));
+						if (body_filter) {
 							/* don't store transfer-encodeing header */
 							continue;
 						}
+					} else {
+						chunked_encoding = 1;
 					}
 				}
 			}
@@ -949,12 +960,22 @@ out:
 		/* restore mode */
 		strlcpy(stream->mode, mode, sizeof(stream->mode));
 
-		if (transfer_encoding) {
-			php_stream_filter_append(&stream->readfilters, transfer_encoding);
+		if (body_filter == NULL && !server_closes_connection) {
+			zval param;
+			if (chunked_encoding) {
+				ZVAL_FALSE(&param);
+				body_filter = php_stream_filter_create("dechunk", &param, php_stream_is_persistent(stream));
+			} else if (file_size > 0) {
+				ZVAL_LONG(&param, file_size);
+				body_filter = php_stream_filter_create("consumed", &param, php_stream_is_persistent(stream));
+			}
+		}
+		if (body_filter) {
+			php_stream_filter_append(&stream->readfilters, body_filter);
 		}
 	} else {
-		if (transfer_encoding) {
-			php_stream_filter_free(transfer_encoding);
+		if (body_filter) {
+			php_stream_filter_free(body_filter);
 		}
 	}
 
