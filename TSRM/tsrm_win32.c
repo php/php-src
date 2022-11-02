@@ -686,7 +686,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return (void*)-1;
 	}
 
@@ -703,7 +703,7 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm_pair *shm = shm_get(0, (void*)shmaddr);
 	int ret;
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 
@@ -723,7 +723,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 
