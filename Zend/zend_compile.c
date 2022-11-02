@@ -1848,6 +1848,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->__call = NULL;
 		ce->__callstatic = NULL;
 		ce->__tostring = NULL;
+		ce->__tobool = NULL;
 		ce->__serialize = NULL;
 		ce->__unserialize = NULL;
 		ce->__debugInfo = NULL;
