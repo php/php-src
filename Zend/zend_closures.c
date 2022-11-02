@@ -696,7 +696,6 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 	zend_closure *closure = (zend_closure*)ZEND_CLOSURE_OBJECT(EX(func));
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	OBJ_RELEASE((zend_object*)closure);
-	EX(func) = NULL;
 }
 /* }}} */
 
