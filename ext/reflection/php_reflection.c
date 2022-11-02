@@ -1973,9 +1973,8 @@ ZEND_METHOD(ReflectionFunction, invoke)
 {
 	zval retval;
 	zval *params;
-	int result, num_args;
+	uint32_t num_args;
 	HashTable *named_params;
-	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	reflection_object *intern;
 	zend_function *fptr;
@@ -1986,14 +1985,6 @@ ZEND_METHOD(ReflectionFunction, invoke)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	fci.size = sizeof(fci);
-	ZVAL_UNDEF(&fci.function_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = num_args;
-	fci.params = params;
-	fci.named_params = named_params;
-
 	fcc.function_handler = fptr;
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
@@ -2003,20 +1994,18 @@ ZEND_METHOD(ReflectionFunction, invoke)
 			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, 0);
 	}
 
-	result = zend_call_function(&fci, &fcc);
+	zend_call_known_fcc(&fcc, &retval, num_args, params, named_params);
 
-	if (result == FAILURE) {
+	if (Z_TYPE(retval) == IS_UNDEF && !EG(exception)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of function %s() failed", ZSTR_VAL(fptr->common.function_name));
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		if (Z_ISREF(retval)) {
-			zend_unwrap_reference(&retval);
-		}
-		ZVAL_COPY_VALUE(return_value, &retval);
+	if (Z_ISREF(retval)) {
+		zend_unwrap_reference(&retval);
 	}
+	ZVAL_COPY_VALUE(return_value, &retval);
 }
 /* }}} */
 
@@ -2024,8 +2013,6 @@ ZEND_METHOD(ReflectionFunction, invoke)
 ZEND_METHOD(ReflectionFunction, invokeArgs)
 {
 	zval retval;
-	int result;
-	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	reflection_object *intern;
 	zend_function *fptr;
@@ -2037,14 +2024,6 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	fci.size = sizeof(fci);
-	ZVAL_UNDEF(&fci.function_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 0;
-	fci.params = NULL;
-	fci.named_params = params;
-
 	fcc.function_handler = fptr;
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
@@ -2054,20 +2033,18 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, 0);
 	}
 
-	result = zend_call_function(&fci, &fcc);
+	zend_call_known_fcc(&fcc, &retval, /* num_params */ 0, /* params */ NULL, params);
 
-	if (result == FAILURE) {
+	if (Z_TYPE(retval) == IS_UNDEF && !EG(exception)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of function %s() failed", ZSTR_VAL(fptr->common.function_name));
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		if (Z_ISREF(retval)) {
-			zend_unwrap_reference(&retval);
-		}
-		ZVAL_COPY_VALUE(return_value, &retval);
+	if (Z_ISREF(retval)) {
+		zend_unwrap_reference(&retval);
 	}
+	ZVAL_COPY_VALUE(return_value, &retval);
 }
 /* }}} */
 
@@ -3360,10 +3337,8 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	zval *params = NULL, *object;
 	HashTable *named_params = NULL;
 	reflection_object *intern;
-	zend_function *mptr;
-	int argc = 0, result;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_function *mptr, *callback;
+	uint32_t argc = 0;
 	zend_class_entry *obj_ce;
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
@@ -3413,40 +3388,20 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			RETURN_THROWS();
 		}
 	}
+	/* Copy the zend_function when calling via handler (e.g. Closure::__invoke()) */
+	callback = _copy_function(mptr);
+	zend_call_known_function(callback, (object ? Z_OBJ_P(object) : NULL), intern->ce, &retval, argc, params, named_params);
 
-	fci.size = sizeof(fci);
-	ZVAL_UNDEF(&fci.function_name);
-	fci.object = object ? Z_OBJ_P(object) : NULL;
-	fci.retval = &retval;
-	fci.param_count = argc;
-	fci.params = params;
-	fci.named_params = named_params;
-
-	fcc.function_handler = mptr;
-	fcc.called_scope = intern->ce;
-	fcc.object = object ? Z_OBJ_P(object) : NULL;
-
-	/*
-	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
-	 */
-	if ((mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		fcc.function_handler = _copy_function(mptr);
-	}
-
-	result = zend_call_function(&fci, &fcc);
-
-	if (result == FAILURE) {
+	if (Z_TYPE(retval) == IS_UNDEF && !EG(exception)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of method %s::%s() failed", ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		if (Z_ISREF(retval)) {
-			zend_unwrap_reference(&retval);
-		}
-		ZVAL_COPY_VALUE(return_value, &retval);
+	if (Z_ISREF(retval)) {
+		zend_unwrap_reference(&retval);
 	}
+	ZVAL_COPY_VALUE(return_value, &retval);
 }
 /* }}} */
 
