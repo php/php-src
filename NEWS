@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     evaluation with extra named params). (Arnaud)
   . Fixed bug GH-9801 (Generator crashes when memory limit is exceeded during
     initialization). (Arnaud)
+  . Fixed potential NULL pointer dereference Windows shm*() functions. (cmb)
 
 - Date:
   . Fixed bug GH-9763 (DateTimeZone ctr mishandles input and adds null byte if
