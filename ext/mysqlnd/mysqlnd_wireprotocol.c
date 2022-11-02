@@ -1976,6 +1976,7 @@ size_t php_mysqlnd_sha256_pk_request_write(MYSQLND_CONN_DATA * conn, void * _pac
 
 
 #define SHA256_PK_REQUEST_RESP_BUFFER_SIZE 2048
+#define SASL_PK_REQUEST_RESP_BUFFER_SIZE 2048
 
 /* {{{ php_mysqlnd_sha256_pk_request_response_read */
 static enum_func_status
@@ -2014,6 +2015,84 @@ premature_end:
 	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet %zu bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_sasl_pk_request_write */
+static size_t
+php_mysqlnd_sasl_pk_request_write(MYSQLND_CONN_DATA * conn, void * _packet)
+{
+    DBG_ENTER("php_mysqlnd_sasl_pk_request_write");
+
+    MYSQLND_ERROR_INFO * error_info = conn->error_info;
+    MYSQLND_PFC * pfc = conn->protocol_frame_codec;
+    MYSQLND_VIO * vio = conn->vio;
+    MYSQLND_STATS * stats = conn->stats;
+    MYSQLND_PACKET_SASL_PK_REQUEST* pkt_req = (MYSQLND_PACKET_SASL_PK_REQUEST*)_packet;
+    size_t  sent = 0;
+    zend_uchar* buffer = (zend_uchar*)malloc(pkt_req->data_len + MYSQLND_HEADER_SIZE);
+    if( !buffer ) {
+        DBG_RETURN(0);
+    }
+    memset(buffer,0,sizeof(*buffer));
+    memcpy(buffer + MYSQLND_HEADER_SIZE, pkt_req->data, pkt_req->data_len);
+
+
+    sent = pfc->data->m.send(pfc, vio,
+                             buffer,
+                             pkt_req->data_len,
+                             stats, error_info);
+
+    if(buffer) {
+        free( buffer );
+    }
+    DBG_RETURN(sent);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_sasl_pk_request_response_read */
+static enum_func_status
+php_mysqlnd_sasl_pk_request_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
+{
+    DBG_ENTER("php_mysqlnd_sasl_pk_request_response_read");
+
+    MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE * packet= (MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE *) _packet;
+    MYSQLND_ERROR_INFO * error_info = conn->error_info;
+    MYSQLND_PFC * pfc = conn->protocol_frame_codec;
+    MYSQLND_VIO * vio = conn->vio;
+    MYSQLND_STATS * stats = conn->stats;
+    MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
+    zend_uchar  buffer[SASL_PK_REQUEST_RESP_BUFFER_SIZE];
+    if( packet->data_len > SASL_PK_REQUEST_RESP_BUFFER_SIZE ) {
+        DBG_ERR_FMT("Not able to handle response, max packet size is %d",
+                    SASL_PK_REQUEST_RESP_BUFFER_SIZE);
+        DBG_RETURN(FAIL);
+    }
+    if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header),
+                                                    pfc,
+                                                    vio,
+                                                    stats,
+                                                    error_info,
+                                                    connection_state,
+                                                    buffer,
+                                                    sizeof(buffer),
+                                                    "SASL_PK_REQUEST_RESPONSE",
+                                                    PROT_SASL_PK_REQUEST_RESPONSE_PACKET)) {
+        DBG_RETURN(FAIL);
+    }
+    memcpy(packet->data, buffer + 1, packet->header.size - 1);
+    packet->data_len = packet->header.size - 1;
+    DBG_RETURN(PASS);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_sasl_pk_request_response_free_mem */
+static void
+php_mysqlnd_sasl_pk_request_response_free_mem(void * _packet)
+{
 }
 /* }}} */
 
@@ -2211,7 +2290,17 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 		php_mysqlnd_cached_sha2_result_read,
 		php_mysqlnd_cached_sha2_result_write,
 		NULL
-	} /* PROT_CACHED_SHA2_RESULT_PACKET */
+	}, /* PROT_CACHED_SHA2_RESULT_PACKET */
+	{
+		NULL, /* read */
+		php_mysqlnd_sasl_pk_request_write,
+		NULL,
+	}, /* PROT_SASL_PK_REQUEST_PACKET */
+	{
+		php_mysqlnd_sasl_pk_request_response_read,
+		NULL, /* write */
+		php_mysqlnd_sasl_pk_request_response_free_mem,
+	}, /* PROT_SASL_PK_REQUEST_RESPONSE_PACKET */
 };
 /* }}} */
 
@@ -2406,6 +2495,28 @@ MYSQLND_METHOD(mysqlnd_protocol, init_cached_sha2_result_packet)(struct st_mysql
 }
 /* }}} */
 
+/* {{{ mysqlnd_protocol::init_sasl_pk_request_packet */
+static void
+MYSQLND_METHOD(mysqlnd_protocol, init_sasl_pk_request_packet)(struct st_mysqlnd_packet_sasl_pk_request *packet)
+{
+    DBG_ENTER("mysqlnd_protocol::init_sasl_pk_request_packet");
+    memset(packet, 0, sizeof(*packet));
+    packet->header.m = &packet_methods[PROT_SASL_PK_REQUEST_PACKET];
+    DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::init_sasl_pk_request_response_packet */
+static void
+MYSQLND_METHOD(mysqlnd_protocol, init_sasl_pk_request_response_packet)(struct st_mysqlnd_packet_sasl_pk_request_response *packet)
+{
+    DBG_ENTER("mysqlnd_protocol::init_sasl_pk_request_response_packet");
+    memset(packet, 0, sizeof(*packet));
+    packet->header.m = &packet_methods[PROT_SASL_PK_REQUEST_RESPONSE_PACKET];
+    DBG_VOID_RETURN;
+}
+/* }}} */
 
 /* {{{ mysqlnd_protocol::send_command */
 static enum_func_status
@@ -2624,6 +2735,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_protocol_payload_decoder_factory)
 	MYSQLND_METHOD(mysqlnd_protocol, init_sha256_pk_request_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, init_sha256_pk_request_response_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, init_cached_sha2_result_packet),
+    MYSQLND_METHOD(mysqlnd_protocol, init_sasl_pk_request_packet),
+    MYSQLND_METHOD(mysqlnd_protocol, init_sasl_pk_request_response_packet),
 
 	MYSQLND_METHOD(mysqlnd_protocol, send_command),
 	MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response),

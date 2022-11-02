@@ -24,7 +24,14 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-
+#include <string.h>
+#ifdef MYSQLND_HAVE_SASL
+#ifdef MYSQLND_HAVE_KRB5
+#include <krb5/krb5.h>
+#endif
+#include <sasl/sasl.h>
+#include <profile.h>
+#endif
 static const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using the old insecure authentication. "
 "Please use an administration tool to reset your password with the command SET PASSWORD = PASSWORD('your_existing_password'). This will "
 "store a new, and more secure, hash value in mysql.user. If this user is used in other scripts executed by PHP 5.2 or earlier you might need to remove the old-passwords "
@@ -117,26 +124,42 @@ mysqlnd_run_authentication(
 			if (conn->error_info->error_no) {
 				goto end;
 			}
-			if (FALSE == is_change_user) {
-				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, session_options, mysql_flags,
-											charset_no,
-											first_call,
-											requested_protocol,
-											auth_plugin, plugin_data, plugin_data_len,
-											scrambled_data, scrambled_data_len,
-											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											);
-			} else {
-				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
-											   first_call,
-											   requested_protocol,
-											   auth_plugin, plugin_data, plugin_data_len,
-											   scrambled_data, scrambled_data_len,
-											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											  );
-			}
+
+            if( auth_plugin
+                && requested_protocol
+                && !strcmp(requested_protocol,"authentication_ldap_sasl_client")
+                && auth_plugin->methods.handle_server_response)
+            {
+                if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
+                            scrambled_data, scrambled_data_len, user, passwd, passwd_len,
+                            &switch_to_auth_protocol, &switch_to_auth_protocol_len,
+                            &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len)){
+                    ret = FAIL;
+                }
+            }
+            else
+            {
+                if (FALSE == is_change_user) {
+                    ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, session_options, mysql_flags,
+                                                charset_no,
+                                                first_call,
+                                                requested_protocol,
+                                                auth_plugin, plugin_data, plugin_data_len,
+                                                scrambled_data, scrambled_data_len,
+                                                &switch_to_auth_protocol, &switch_to_auth_protocol_len,
+                                                &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
+                                                );
+                } else {
+                    ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
+                                                   first_call,
+                                                   requested_protocol,
+                                                   auth_plugin, plugin_data, plugin_data_len,
+                                                   scrambled_data, scrambled_data_len,
+                                                   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
+                                                   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
+                                                  );
+                }
+            }
 			first_call = FALSE;
 			free(scrambled_data);
 
@@ -315,7 +338,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 
 	if (auth_plugin && auth_plugin->methods.handle_server_response) {
 		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
-				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+                orig_auth_plugin_data, orig_auth_plugin_data_len, user, passwd, passwd_len,
 				switch_to_auth_protocol, switch_to_auth_protocol_len,
 				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
 			goto end;
@@ -441,7 +464,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 
 	if (auth_plugin && auth_plugin->methods.handle_server_response) {
 		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
-				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+                orig_auth_plugin_data, orig_auth_plugin_data_len, user, passwd, passwd_len,
 				switch_to_auth_protocol, switch_to_auth_protocol_len,
 				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
 			goto end;
@@ -580,7 +603,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	/* copy scrambled pass*/
 	if (passwd && passwd_len) {
 		ret = malloc(SCRAMBLE_LENGTH);
-		*auth_data_len = SCRAMBLE_LENGTH;
+        *auth_data_len = SCRAMBLE_LENGTH;
 		/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
 		php_mysqlnd_scramble((zend_uchar*)ret, auth_plugin_data, (zend_uchar*)passwd, passwd_len);
 	}
@@ -934,7 +957,6 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 }
 /* }}} */
 
-
 static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plugin =
 {
 	{
@@ -1222,6 +1244,7 @@ static enum_func_status
 mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
 		MYSQLND_CONN_DATA * conn,
 		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
+        const char * const user,
 		const char * const passwd,
 		const size_t passwd_len,
 		char **new_auth_protocol, size_t *new_auth_protocol_len,
@@ -1311,6 +1334,886 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin 
 };
 #endif
 
+#ifdef MYSQLND_HAVE_SASL
+
+/******************************************* LDAP SASL ***********************************/
+
+#define SASL_SERVICE_NAME "ldap"
+#define SASL_MAX_PKT_SIZE 1518
+
+const char SASL_GSSAPI[] = "GSSAPI";
+const char SASL_SCRAM_SHA1[] = "SCRAM-SHA-1";
+const char SASL_SCRAM_SHA256[] = "SCRAM-SHA-256";
+
+static const sasl_callback_t sasl_op_callbacks[] = {
+    #ifdef SASL_CB_GETREALM
+    {SASL_CB_GETREALM, NULL, NULL},
+    #endif
+    {SASL_CB_USER, NULL, NULL},
+    {SASL_CB_AUTHNAME, NULL, NULL},
+    {SASL_CB_PASS, NULL, NULL},
+    {SASL_CB_ECHOPROMPT, NULL, NULL},
+    {SASL_CB_NOECHOPROMPT, NULL, NULL},
+    {SASL_CB_LIST_END, NULL, NULL}
+};
+
+/*
+  MAX SSF - The maximum Security Strength Factor supported by the mechanism
+  (roughly the number of bits of encryption provided, but may have other
+  meanings, for example an SSF of 1 indicates integrity protection only, no
+  encryption). SECURITY PROPERTIES are: NOPLAIN, NOACTIVE, NODICT, FORWARD,
+  NOANON, CRED, MUTUAL. More details are in:
+  https://www.sendmail.org/~ca/email/cyrus2/mechanisms.html
+*/
+sasl_security_properties_t security_properties = {
+    /** Minimum acceptable final level. (min_ssf) */
+    56,
+    /** Maximum acceptable final level. (max_ssf) */
+    0,
+    /** Maximum security layer receive buffer size. */
+    0,
+    /** security flags (security_flags) */
+    0,
+    /** Property names. (property_names) */
+    NULL,
+    /** Property values. (property_values)*/
+    NULL,
+};
+
+
+/* {{{ handle_comm */
+void handle_comm(
+        sasl_interact_t *ilist,
+        const char * const user,
+        const char * const passwd
+)
+{
+    DBG_ENTER("handle_comm");
+
+    while (ilist->id != SASL_CB_LIST_END) {
+        switch (ilist->id) {
+        /*
+        the name of the user authenticating
+      */
+        case SASL_CB_USER:
+            ilist->result = user;
+            ilist->len = strlen((const char *)ilist->result);
+            break;
+        case SASL_CB_AUTHNAME:
+            ilist->result = user;
+            ilist->len = strlen((const char *)ilist->result);
+            break;
+        case SASL_CB_PASS:
+            ilist->result = passwd;
+            ilist->len = strlen((const char *)ilist->result);
+            break;
+        default:
+            ilist->result = NULL;
+            ilist->len = 0;
+        }
+        ilist++;
+    }
+    DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ sasl_run */
+static
+int sasl_run(
+        sasl_conn_t* connection,
+        const char* auth_mechanism,
+        const char * const user,
+        const char * const passwd,
+        char **client_output,
+        int *client_output_length
+        )
+{
+    DBG_ENTER("sasl_run");
+
+    int rc_sasl = SASL_FAIL;
+    const char *mechanism = NULL;
+    char *sasl_client_output = NULL;
+    sasl_interact_t *interactions = NULL;
+
+    void *sasl_client_output_p = &sasl_client_output;
+    do {
+        rc_sasl = sasl_client_start(connection, auth_mechanism, &interactions,
+                                  (const char **)(sasl_client_output_p),
+                                  (unsigned int *)client_output_length, &mechanism);
+        if (rc_sasl == SASL_INTERACT) {
+            handle_comm(interactions,user,passwd);
+        }
+    } while (rc_sasl == SASL_INTERACT);
+
+    if (rc_sasl == SASL_NOMECH) {
+        DBG_RETURN( FAIL);
+    }
+    if (client_output != NULL) {
+        *client_output = sasl_client_output;
+    }
+    DBG_RETURN( rc_sasl );
+}
+/* }}} */
+
+
+/* {{{ sasl_step */
+static
+int sasl_step(sasl_conn_t *connection,
+              const char * const user,
+              const char * const passwd,
+              zend_uchar *server_in,
+              int server_in_length,
+              zend_uchar **client_out,
+              int *client_out_length
+)
+{
+    DBG_ENTER("sasl_step");
+
+    int rc_sasl = SASL_FAIL;
+    sasl_interact_t *interactions = NULL;
+
+    if (connection == NULL) {
+        DBG_RETURN( rc_sasl );
+    }
+    void *client_out_p = client_out;
+    do {
+        if (server_in && server_in[0] == 0x0) {
+            server_in_length = 0;
+            server_in = NULL;
+        }
+        rc_sasl = sasl_client_step(
+                    connection, (server_in == NULL) ? NULL : server_in,
+                    (server_in == NULL) ? 0 : server_in_length, &interactions,
+                    (const char **)(client_out_p),
+                    (unsigned int *)client_out_length);
+        if (rc_sasl == SASL_INTERACT) {
+            handle_comm(interactions,user,passwd);
+        } else if (rc_sasl != SASL_OK && rc_sasl != SASL_CONTINUE){
+            DBG_ERR_FMT("Failed while handshaking with the SASL server: %d",
+                        rc_sasl);
+        }
+    } while (rc_sasl == SASL_INTERACT);
+    DBG_RETURN( rc_sasl );
+}
+/* }}} */
+
+
+/* {{{ sasl_server_comm */
+static
+int sasl_server_comm(
+        MYSQLND_CONN_DATA * conn,
+        zend_uchar *request,
+        int request_len,
+        zend_uchar*response,
+        int response_len,
+        int only_resp
+)
+{
+    DBG_ENTER("sasl_server_comm");
+
+    if( !only_resp ){
+        MYSQLND_PACKET_SASL_PK_REQUEST sasl_req;
+        conn->payload_decoder_factory->m.init_sasl_pk_request_packet(&sasl_req);
+        sasl_req.data = request;
+        sasl_req.data_len = request_len;
+
+        if (! PACKET_WRITE(conn, &sasl_req)) {
+            DBG_ERR_FMT("Error while sending a sasl packet");
+            SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+            DBG_RETURN( SASL_FAIL );
+        }
+    }
+
+    MYSQLND_PACKET_SASL_PK_REQUEST_RESPONSE sasl_resp;
+    conn->payload_decoder_factory->m.init_sasl_pk_request_response_packet(&sasl_resp);
+    sasl_resp.data = response;
+    sasl_resp.data_len = response_len;
+
+    if (FAIL == PACKET_READ(conn, &sasl_resp) || NULL == sasl_resp.data) {
+        DBG_ERR_FMT("Error while receiving a SASL response.");
+        SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+        DBG_RETURN( SASL_FAIL );
+    }
+    DBG_RETURN( sasl_resp.data_len );
+}
+/* }}} */
+
+
+/* {{{ sasl_auth_exchange */
+static
+int sasl_auth_exchange(
+        MYSQLND_CONN_DATA * conn,
+        sasl_conn_t* connection,
+        const char * const user,
+        const char * const passwd,
+        zend_uchar *request,
+        int request_len,
+        int second_step
+)
+{
+    DBG_ENTER("sasl_auth_exchange");
+
+    zend_uchar* server_packet = (zend_uchar*)malloc( SASL_MAX_PKT_SIZE );
+    if( !server_packet ) {
+        DBG_RETURN(FAIL);
+    }
+    int rc_sasl = SASL_FAIL;
+    int pkt_len = 0;
+    zend_uchar *sasl_client_output = request;
+    int sasl_client_output_len = request_len;
+    if( second_step ){
+        memcpy(server_packet,request,request_len);
+        pkt_len = request_len;
+    }
+    do {
+      if( !second_step ) {
+          pkt_len = sasl_server_comm(conn,
+                                sasl_client_output,
+                                sasl_client_output_len,
+                                server_packet,
+                                SASL_MAX_PKT_SIZE,
+                                FALSE);
+          if (pkt_len < 0) {
+              DBG_ERR_FMT("Error while communicating with the SASL server");
+              php_error(E_ERROR, "Error while communicating with the SASL server");
+              rc_sasl = SASL_FAIL;
+              goto cleanup;
+          }
+      }
+      sasl_client_output = NULL;
+      sasl_client_output_len = 0;
+      if( pkt_len > 0) {
+          rc_sasl = sasl_step(connection,
+                              user,passwd,
+                              server_packet,
+                              pkt_len,
+                              &sasl_client_output,
+                              &sasl_client_output_len);
+      }
+      if( sasl_client_output_len == 0) {
+          DBG_INF_FMT("Got empty response while handshaking with the SASL server.");
+      }
+      second_step = FALSE;
+    } while (rc_sasl == SASL_CONTINUE);
+
+    // ONLY FOR KRB
+    if (rc_sasl == SASL_OK) {
+        pkt_len = sasl_server_comm(conn,
+                                   sasl_client_output,
+                                   sasl_client_output_len,
+                                   server_packet,
+                                   SASL_MAX_PKT_SIZE,
+                                   FALSE);
+      }
+
+cleanup:
+    if( server_packet ) {
+        free(server_packet);
+    }
+    DBG_RETURN( rc_sasl );
+}
+/* }}} */
+
+#ifdef MYSQLND_HAVE_KRB5
+
+#define SASL_KRB_REALMS_HEADING      "realms"
+#define SASL_KRB_HOST_DEFAULT        ""
+#define SASL_KRB_APPS_HEADING        "appdefaults"
+#define SASL_KRB_MYSQL_APPS          "mysql"
+#define SASL_KRB_LDAP_HOST_OPTION    "ldap_server_host"
+#define SASL_KRB_LDAP_DESTROY_OPTION "ldap_destroy_tgt"
+#define SASL_KRK_KDC_INFO            "kdc"
+#define SASL_KRB_TGT_INFO            "krbtgt"
+#define SASL_KRB_GENERIC_ACCCESS_DENIED "28000Access denied for user"
+
+/* {{{ sasl_krb_configure */
+static int
+sasl_krb_configure(
+        krb5_context    krb_ctx,
+        char**          ldap_server_host,
+        int*            destroy_tgt
+)
+{
+    DBG_ENTER("sasl_krb_configure");
+
+    krb5_error_code rc_krb = 0;
+    profile_t       *profile = NULL;
+    char            *host_value = NULL;
+    char            *default_realm = NULL;
+    int             opt_destroy_tgt = 0;
+
+    rc_krb = krb5_get_default_realm(krb_ctx, &default_realm);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to get default realm.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to get default realm.");
+        goto cleanup;
+    }
+
+    rc_krb = krb5_get_profile(krb_ctx, &profile);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to get the profile.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to get the profile.");
+        goto cleanup;
+    }
+
+    rc_krb = profile_get_string(profile,
+                                SASL_KRB_APPS_HEADING,
+                                SASL_KRB_MYSQL_APPS,
+                                SASL_KRB_LDAP_HOST_OPTION,
+                                SASL_KRB_HOST_DEFAULT,
+                                &host_value);
+    if (rc_krb || !strcmp(host_value, "")) {
+        if (host_value) {
+            profile_release_string(host_value);
+            host_value = NULL;
+        }
+        rc_krb = profile_get_string(profile,
+                                    SASL_KRB_REALMS_HEADING,
+                                    default_realm,
+                                    SASL_KRK_KDC_INFO,
+                                    SASL_KRB_HOST_DEFAULT,
+                                    &host_value);
+        if (rc_krb) {
+            if (host_value) {
+                profile_release_string(host_value);
+                host_value = NULL;
+            }
+            DBG_ERR_FMT("SASL kerberos setup: failed to get ldap server host.");
+            php_error(E_ERROR, "SASL kerberos setup: failed to get ldap server host.");
+            goto cleanup;
+        }
+    }
+    *ldap_server_host = host_value;
+    rc_krb = profile_get_boolean( profile,
+                                  SASL_KRB_REALMS_HEADING,
+                                  default_realm,
+                                  SASL_KRB_LDAP_DESTROY_OPTION,
+                                  opt_destroy_tgt,
+                                  (int *)&opt_destroy_tgt);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to get destroy TGT flag, default is set.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to get destroy TGT flag, default is set.");
+    }
+    else {
+        *destroy_tgt = opt_destroy_tgt;
+    }
+cleanup:
+    profile_release(profile);
+    if (rc_krb && host_value) {
+        profile_release_string(host_value);
+        host_value = NULL;
+    }
+    if (default_realm) {
+        krb5_free_default_realm(krb_ctx, default_realm);
+        default_realm = NULL;
+    }
+    DBG_RETURN(rc_krb);
+}
+/* }}} */
+
+
+/* {{{ sasl_krb_get_username */
+static int
+sasl_krb_get_username(
+        krb5_ccache     krc_cred_cache,
+        krb5_context    krb_ctx,
+        char**          name
+)
+{
+    DBG_ENTER("sasl_krb_get_username");
+
+    krb5_error_code rc_krb = 0;
+    krb5_principal  principal = NULL;
+    krb5_context    context = NULL;
+    char            *user_name = NULL;
+
+    if (krc_cred_cache == NULL) {
+        rc_krb = krb5_cc_default(krb_ctx, &krc_cred_cache);
+        if (rc_krb) {
+            DBG_ERR_FMT("SASL kerberos setup: failed to get default credentials cache.");
+            php_error(E_ERROR, "SASL kerberos setup: failed to get default credentials cache.");
+            goto cleanup;
+        }
+    }
+
+    rc_krb = krb5_cc_get_principal(krb_ctx, krc_cred_cache, &principal);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to get principal.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to get principal.");
+        goto cleanup;
+    }
+    /*
+      Parsing user name from principal.
+    */
+    rc_krb = krb5_unparse_name(krb_ctx, principal, &user_name);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to parse principal name.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to parse principal name.");
+        goto cleanup;
+    } else {
+        *name = user_name;
+    }
+cleanup:
+    if (principal) {
+        krb5_free_principal(krb_ctx, principal);
+    }
+    if (krc_cred_cache) {
+        krb5_cc_close(krb_ctx, krc_cred_cache);
+    }
+    return rc_krb;
+}
+/* }}} */
+
+
+/* {{{ sasl_krb_tgt_credentials_valid */
+int static
+sasl_krb_tgt_credentials_valid(
+        krb5_context    krb_ctx,
+        krb5_ccache     krc_cred_cache,
+        const char*     username
+)
+{
+    DBG_ENTER("sasl_krb_tgt_credentials_valid");
+
+    krb5_error_code rc_krb = 0;
+    krb5_creds      credentials;
+    krb5_timestamp  krb_current_time = NULL;
+    int             cred_ok = 0;
+    krb5_creds      matching_credential;
+    char            *realm = NULL;
+    int             ret = FALSE;
+
+    memset(&matching_credential, 0, sizeof(matching_credential));
+    memset(&credentials, 0, sizeof(credentials));
+
+    if (krc_cred_cache == NULL) {
+        rc_krb = krb5_cc_default(krb_ctx, &krc_cred_cache);
+        if (rc_krb) {
+            DBG_ERR_FMT("SASL kerberos setup: failed to get default credentials cache.");
+            php_error(E_ERROR, "SASL kerberos setup: failed to get default credentials cache.");
+            goto cleanup;
+        }
+    }
+
+    rc_krb = krb5_parse_name(krb_ctx,
+                             username,
+                             &matching_credential.client);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to parse client principal.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to parse client principal.");
+        goto cleanup;
+    }
+    rc_krb = krb5_get_default_realm(krb_ctx, &realm);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to get default realm.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to get default realm.");
+        goto cleanup;
+    }
+    rc_krb = krb5_build_principal(krb_ctx,
+                                  &matching_credential.server,
+                                  strlen(realm),
+                                  realm,
+                                  SASL_KRB_TGT_INFO,
+                                  realm,
+                                  NULL);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to build krbtgt principal.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to build krbtgt principal.");
+        goto cleanup;
+    }
+
+    rc_krb = krb5_cc_retrieve_cred(krb_ctx,
+                                   krc_cred_cache,
+                                   0,
+                                   &matching_credential,
+                                   &credentials);
+    if (rc_krb) {
+        DBG_INF_FMT("SASL kerberos setup: failed to retrieve credentials.");
+        //php_error(E_ERROR, "SASL kerberos setup: failed to retrieve credentials.");
+        goto cleanup;
+    }
+    cred_ok = 1;
+
+    rc_krb = krb5_timeofday(krb_ctx, &krb_current_time);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to retrieve current time.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to retrieve current time.");
+        goto cleanup;
+    }
+
+    if (credentials.times.endtime < krb_current_time) {
+        DBG_ERR_FMT("SASL kerberos setup:  credentials are expired.");
+        php_error(E_ERROR, "SASL kerberos setup:  credentials are expired.");
+        goto cleanup;
+    } else {
+        ret = TRUE;
+    }
+
+cleanup:
+    if (realm) {
+        krb5_free_default_realm(krb_ctx, realm);
+    }
+    if (matching_credential.server) {
+        krb5_free_principal(krb_ctx, matching_credential.server);
+    }
+    if (matching_credential.client) {
+        krb5_free_principal(krb_ctx, matching_credential.client);
+    }
+    if (cred_ok) {
+        krb5_free_cred_contents(krb_ctx, &credentials);
+    }
+    if (krc_cred_cache) {
+        krb5_cc_close(krb_ctx, krc_cred_cache);
+    }
+    return ret;
+
+}
+/* }}} */
+
+
+/* {{{ sasl_krb_tgt_retrieve_credentials */
+krb5_error_code
+sasl_krb_tgt_retrieve_credentials(
+        krb5_context    krb_ctx,
+        krb5_ccache*    krc_cred_cache,
+        const char*     username,
+        const char*     password,
+        krb5_creds*     cred_out
+        )
+{
+    DBG_ENTER("sasl_krb_tgt_retrieve_credentials");
+
+    krb5_error_code         rc_krb = 0;
+    krb5_get_init_creds_opt *options = NULL;
+    krb5_principal          principal = NULL;
+    krb5_creds              credentials;
+    int                     krb_cred_created = 0;
+    memset(&credentials, 0, sizeof(krb5_creds));
+
+
+    if( username ) {
+        rc_krb = krb5_parse_name(krb_ctx, username, &principal);
+    } else {
+        goto cleanup;
+    }
+    krb5_ccache new_cred_cache = NULL;
+    if (*krc_cred_cache == NULL) {
+        rc_krb = krb5_cc_default(krb_ctx, &new_cred_cache);
+        *krc_cred_cache = new_cred_cache;
+    }
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to get default credentials cache.");
+        //php_error(E_ERROR, "SASL kerberos setup: failed to get default credentials cache.");
+        goto cleanup;
+    }
+
+    memset(&credentials, 0, sizeof(credentials));
+    krb5_get_init_creds_opt_alloc(krb_ctx, &options);
+    /*
+      Getting TGT from TGT server.
+    */
+    rc_krb = krb5_get_init_creds_password(krb_ctx,
+                                          &credentials,
+                                          principal,
+                                          password,
+                                          NULL, NULL, 0, NULL,
+                                          options);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to obtain credentials.");
+        goto cleanup;
+    }
+    krb_cred_created = 1;
+
+    rc_krb = krb5_verify_init_creds(krb_ctx, &credentials, NULL, NULL, NULL, NULL);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to verify credentials.");
+        goto cleanup;
+    }
+    if (principal) {
+        rc_krb =krb5_cc_initialize(krb_ctx, new_cred_cache, principal);
+        if (rc_krb) {
+            DBG_ERR_FMT("SASL kerberos setup: failed to initialize credentials.");
+            goto cleanup;
+        }
+    }
+    *cred_out = credentials;
+
+cleanup:
+    if (options) {
+        krb5_get_init_creds_opt_free(krb_ctx, options);
+        options = NULL;
+    }
+    if (principal) {
+        krb5_free_principal(krb_ctx, principal);
+        principal = NULL;
+    }
+    if (krb_cred_created && rc_krb) {
+        krb5_free_cred_contents(krb_ctx, &credentials);
+    }
+    return rc_krb;
+}
+/* }}} */
+
+
+/* {{{ sasl_krb_tgt_store_credentials */
+krb5_error_code static
+sasl_krb_tgt_store_credentials(
+        krb5_context    krb_ctx,
+        krb5_ccache     krc_cred_cache,
+        krb5_creds      credentials
+        )
+{
+    DBG_ENTER("sasl_krb_tgt_store_credentials");
+
+    krb5_error_code rc_krb = 0;
+    rc_krb = krb5_cc_store_cred(krb_ctx, krc_cred_cache, &credentials);
+    if (rc_krb) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to store credentials.");
+        php_error(E_ERROR, "SASL kerberos setup: failed to store credentials.");
+    }
+    return rc_krb;
+}
+/* }}} */
+
+
+/* {{{ sasl_krb_get_credentials */
+int static
+sasl_krb_get_credentials(
+        krb5_context    krb_ctx,
+        krb5_ccache     krc_cred_cache,
+        const char*     username,
+        const char*     password,
+        int             destroy_tgt
+        )
+{
+    DBG_ENTER("sasl_krb_get_credentials");
+    krb5_creds krb_cred;
+    int        success = 0;
+    memset(&krb_cred,0,sizeof(krb5_creds));
+    if ( sasl_krb_tgt_credentials_valid(krb_ctx,krc_cred_cache,username) == TRUE ) {
+        DBG_ERR_FMT("SASL kerberos setup: Valid TGT exists.");
+        //php_error(E_ERROR, "SASL kerberos setup: Valid TGT exists.");
+        return TRUE;
+    }
+
+    if (sasl_krb_tgt_retrieve_credentials(krb_ctx,
+                                          &krc_cred_cache,
+                                          username,
+                                          password,
+                                          &krb_cred)) {
+        DBG_ERR_FMT("SASL kerberos setup: failed to obtain TGT/credentials.");
+        //php_error(E_ERROR, "SASL kerberos setup: failed to obtain TGT/credentials.");
+        goto cleanup;
+    }
+
+    if (sasl_krb_tgt_store_credentials(krb_ctx,
+                                       krc_cred_cache,
+                                       krb_cred)) {
+        goto cleanup;
+    }
+    success = 1;
+cleanup:
+    if ( !destroy_tgt ) {
+        krb5_free_cred_contents(krb_ctx, &krb_cred);
+        if (krc_cred_cache) {
+            DBG_ERR_FMT("SASL kerberos setup: Storing credentials into cache, closing krb5 cc.");
+            //php_error(E_ERROR, "SASL kerberos setup: Storing credentials into cache, closing krb5 cc.");
+            krb5_cc_close(krb_ctx, krc_cred_cache);
+        }
+    }
+    return success;
+}
+/* }}} */
+
+#endif
+
+/* {{{ mysqlnd_ldap_sasl_get_auth_data */
+static zend_uchar *
+mysqlnd_ldap_sasl__get_auth_data(
+        struct st_mysqlnd_authentication_plugin * self,
+        size_t * auth_data_len,
+        MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
+        const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
+        const MYSQLND_SESSION_OPTIONS * const session_options,
+        const MYSQLND_PFC_DATA * const pfc_data,
+        const zend_ulong mysql_flags
+)
+{
+    DBG_ENTER("mysqlnd_ldap_sasl_get_auth_data");
+
+    int         rc_sasl = SASL_FAIL;
+    sasl_conn_t *connection;
+    char        *sasl_client_output = NULL;
+    int         sasl_client_output_len = 0;
+    char        *ldap_server_host = NULL;
+
+#ifdef MYSQLND_HAVE_KRB5
+    short          using_krb = !strcmp(auth_plugin_data, SASL_GSSAPI);
+    krb5_error_code rc_krb = 0;
+    krb5_context    krb_ctx = NULL;
+    krb5_ccache     krc_cred_cache = NULL;
+    char*           krb_username = NULL;
+    int             destroy_tgt = 0;
+
+    if( using_krb ) {
+        rc_krb = krb5_init_context(&krb_ctx);
+        if(rc_krb) {
+            DBG_ERR_FMT("SASL kerberos setup: failed to initialize context.");
+            php_error(E_ERROR, "SASL kerberos setup: failed to initialize context.");
+            DBG_RETURN( NULL );
+        }
+        rc_krb = sasl_krb_configure( krb_ctx,
+                                     &ldap_server_host,
+                                     &destroy_tgt);
+        if(rc_krb) {
+            DBG_ERR_FMT("SASL kerberos setup: failed to configure kerberos.");
+            php_error(E_ERROR, "SASL kerberos setup: failed to configure kerberos.");
+            DBG_RETURN( NULL );
+        }
+        if(!user) {
+            if(!sasl_krb_get_username(krc_cred_cache,krb_ctx,&krb_username) ){
+                DBG_ERR_FMT("Failed to obtain the Kerberos username");
+                DBG_RETURN( NULL );
+            }
+            DBG_INF_FMT("Username provided by Kerberos TGT: %s",
+                        krb_username);
+        }
+
+        if(!sasl_krb_get_credentials(krb_ctx,krc_cred_cache,
+                                     user,passwd,destroy_tgt)) {
+            DBG_ERR_FMT("Failed to store the credentials.");
+            DBG_RETURN( NULL );
+        }
+    }
+    else
+#endif
+    if (strcmp(auth_plugin_data, SASL_SCRAM_SHA1) &&
+            strcmp(auth_plugin_data, SASL_SCRAM_SHA256)) {
+        DBG_ERR_FMT("Not supported SASL method: %s", auth_plugin_data);
+        php_error(E_ERROR, "Not supported SASL method: %s, "
+                  "please make sure correct method is set in "
+                  "LDAP SASL server side plug-in", auth_plugin_data);
+        DBG_RETURN( NULL );
+    }
+
+    rc_sasl = sasl_client_init(NULL);
+    if (rc_sasl == SASL_OK) {
+        rc_sasl = sasl_client_new(SASL_SERVICE_NAME, ldap_server_host, NULL, NULL, sasl_op_callbacks, 0,
+                                  &connection);
+    }
+    if (rc_sasl != SASL_OK) {
+        DBG_ERR_FMT("Error while configuring the SASL client: %d", rc_sasl);
+        php_error(E_ERROR, "Error while configuring the SASL client: %d", rc_sasl);
+        DBG_RETURN( NULL );
+    }
+
+    conn->sasl_connection = connection;
+    sasl_setprop(connection, SASL_SEC_PROPS, &security_properties);
+    rc_sasl = sasl_run(connection,conn->authentication_plugin_data.s,
+                       user,passwd,
+                       &sasl_client_output, &sasl_client_output_len);
+    if ((rc_sasl != SASL_OK) && (rc_sasl != SASL_CONTINUE)) {
+        DBG_ERR_FMT("Error while starting up the SASL authentication: %d", rc_sasl);
+        php_error(E_ERROR, "Error while starting up the SASL authentication: %d", rc_sasl);
+        goto cleanup;
+    }
+
+    zend_uchar* data = (zend_uchar*)malloc(sasl_client_output_len);
+    memcpy(data,sasl_client_output,sasl_client_output_len);
+    *auth_data_len = sasl_client_output_len;
+    return data;
+cleanup:
+    if( connection ) {
+        sasl_dispose(&connection);
+    }
+    DBG_RETURN(NULL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_ldap_sasl_get_auth_data */
+enum_func_status mysqlnd_ldap_sasl__handle_server_response(
+        struct st_mysqlnd_authentication_plugin * self,
+        MYSQLND_CONN_DATA * conn,
+        const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+        const char * const user,
+        const char * const passwd,
+        const size_t passwd_len,
+        char **new_auth_protocol, size_t *new_auth_protocol_len,
+        zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
+        )
+{
+    DBG_ENTER("mysqlnd_ldap_sasl__handle_server_response");
+    char* server_packet = (char*)malloc(SASL_MAX_PKT_SIZE);
+    if( !server_packet ) {
+        DBG_RETURN(FAIL);
+    }
+    int rc_sasl = SASL_FAIL;
+    int pkt_size = sasl_server_comm(conn,
+                auth_plugin_data,
+                auth_plugin_data_len,
+                server_packet,
+                SASL_MAX_PKT_SIZE,
+                FALSE);
+
+    if( server_packet ){
+        if( pkt_size > strlen( SASL_KRB_GENERIC_ACCCESS_DENIED ) ){
+            if(NULL != strstr( server_packet, SASL_KRB_GENERIC_ACCCESS_DENIED ) ){
+                DBG_INF("Access has been denied for the provided credentials.");
+                goto EXIT;
+            }
+        }
+    }
+
+    if( pkt_size <= 0 ){
+        DBG_ERR_FMT("Received invalid packet response from server.");
+        return FAIL;
+    }
+    if( conn->sasl_connection ) {
+        rc_sasl = sasl_auth_exchange(conn,
+                                     conn->sasl_connection,
+                                     user,
+                                     passwd,
+                                     server_packet,
+                                     pkt_size,
+                                     TRUE);
+        sasl_dispose(&conn->sasl_connection);
+    }
+
+    if( server_packet ) {
+        free(server_packet);
+    }
+EXIT:
+    DBG_RETURN( rc_sasl == SASL_OK ? PASS : FAIL );
+}
+/* }}} */
+
+
+static struct st_mysqlnd_authentication_plugin mysqlnd_ldap_sasl_auth_plugin =
+{
+    {
+        MYSQLND_PLUGIN_API_VERSION,
+        "auth_plugin_authentication_ldap_sasl_client",
+        MYSQLND_VERSION_ID,
+        PHP_MYSQLND_VERSION,
+        "PHP License 3.01",
+        "Filip Janiszewski <fjanisze@php.net>",
+        {
+            NULL, /* no statistics , will be filled later if there are some */
+            NULL, /* no statistics */
+        },
+        {
+            NULL /* plugin shutdown */
+        }
+    },
+    {/* methods */
+        mysqlnd_ldap_sasl__get_auth_data,
+        mysqlnd_ldap_sasl__handle_server_response
+    }
+};
+
+#endif
 
 /* {{{ mysqlnd_register_builtin_authentication_plugins */
 void
@@ -1318,6 +2221,9 @@ mysqlnd_register_builtin_authentication_plugins(void)
 {
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_native_auth_plugin);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_pam_authentication_plugin);
+#ifdef MYSQLND_HAVE_SASL
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_ldap_sasl_auth_plugin);
+#endif
 #ifdef MYSQLND_HAVE_SSL
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_caching_sha2_auth_plugin);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin);

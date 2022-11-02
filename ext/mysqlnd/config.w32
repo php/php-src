@@ -36,8 +36,16 @@ if (PHP_MYSQLND != "no") {
 		{
 			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Compression support");
 			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "SSL support");
+			AC_DEFINE("MYSQLND_SASL_SUPPORTED", 0, "SASL support");
+			AC_DEFINE("MYSQLND_LDAP_KRB_SUPPORTED", 0, "LDAP Kerberos support");
 			if (CHECK_LIB("crypt32.lib", "mysqlnd")) {
 				AC_DEFINE("MYSQLND_HAVE_SSL", 1, "Extended SSL support");
+			}
+			if (CHECK_LIB("libsasl2.lib", "mysqlnd")) {
+				AC_DEFINE("MYSQLND_HAVE_SASL", 1, "SASL LDAP support");
+			}
+			if (CHECK_LIB("libkrb5.lib", "mysqlnd")) {
+				AC_DEFINE("MYSQLND_HAVE_KRB5", 1, "LDAP Kerberos support");
 			}
 		}
 		PHP_INSTALL_HEADERS("", "ext/mysqlnd");

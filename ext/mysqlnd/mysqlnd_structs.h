@@ -884,6 +884,7 @@ struct st_mysqlnd_connection_state
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_connection_state) *m;
 };
 
+
 struct st_mysqlnd_connection_data
 {
 /* Operation related */
@@ -908,6 +909,7 @@ struct st_mysqlnd_connection_data
 	unsigned int	protocol_version;
 	unsigned int	port;
 	zend_ulong		server_capabilities;
+        void*           sasl_connection;
 
 	/* For UPSERT queries */
 	MYSQLND_UPSERT_STATUS * upsert_status;
@@ -984,6 +986,8 @@ struct st_mysqlnd_packet_auth_pam;
 struct st_mysqlnd_packet_sha256_pk_request;
 struct st_mysqlnd_packet_sha256_pk_request_response;
 struct st_mysqlnd_packet_cached_sha2_result;
+struct st_mysqlnd_packet_sasl_pk_request;
+struct st_mysqlnd_packet_sasl_pk_request_response;
 
 typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_greet_packet)(struct st_mysqlnd_packet_greet *packet);
 typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_auth_packet)(struct st_mysqlnd_packet_auth *packet);
@@ -1001,6 +1005,8 @@ typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_change_user_r
 typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_packet)(struct st_mysqlnd_packet_sha256_pk_request *packet);
 typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_response_packet)(struct st_mysqlnd_packet_sha256_pk_request_response *packet);
 typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_cached_sha2_result_packet)(struct st_mysqlnd_packet_cached_sha2_result *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_sasl_pk_request_packet)(struct st_mysqlnd_packet_sasl_pk_request *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_sasl_pk_request_response_packet)(struct st_mysqlnd_packet_sasl_pk_request_response *packet);
 
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command)(
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
@@ -1057,6 +1063,8 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
 	func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_packet init_sha256_pk_request_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_response_packet init_sha256_pk_request_response_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__init_cached_sha2_result_packet init_cached_sha2_result_packet;
+    func_mysqlnd_protocol_payload_decoder_factory__init_sasl_pk_request_packet init_sasl_pk_request_packet;
+    func_mysqlnd_protocol_payload_decoder_factory__init_sasl_pk_request_response_packet init_sasl_pk_request_response_packet;
 
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response;
@@ -1338,6 +1346,7 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 typedef enum_func_status (*func_auth_plugin__handle_server_response)(struct st_mysqlnd_authentication_plugin * self,
 		MYSQLND_CONN_DATA * conn,
 		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+        const char * const user,
 		const char * const passwd,
 		const size_t passwd_len,
 		char **new_auth_protocol, size_t *new_auth_protocol_len,
