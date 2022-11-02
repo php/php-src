@@ -178,6 +178,7 @@ struct _zend_class_entry {
 	zend_function *__call;
 	zend_function *__callstatic;
 	zend_function *__tostring;
+	zend_function *__tobool;
 	zend_function *__debugInfo;
 	zend_function *__serialize;
 	zend_function *__unserialize;
