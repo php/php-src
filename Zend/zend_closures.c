@@ -695,7 +695,9 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 {
 	zend_closure *closure = (zend_closure*)ZEND_CLOSURE_OBJECT(EX(func));
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	OBJ_RELEASE((zend_object*)closure);
+	// Assign to EX(this) so that it is released after observer checks etc.
+	ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_RELEASE_THIS);
+	Z_OBJ(EX(This)) = &closure->std;
 }
 /* }}} */
 

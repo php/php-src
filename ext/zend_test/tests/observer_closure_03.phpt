@@ -7,9 +7,7 @@ zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
 --FILE--
 <?php
-$closure = strlen(...);
-var_dump($closure('test'));
-
+var_dump(strlen(...)('test'));
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
