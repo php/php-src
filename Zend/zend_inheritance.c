@@ -145,6 +145,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->__tostring)) {
 		ce->__tostring = parent->__tostring;
 	}
+	if (EXPECTED(!ce->__tobool)) {
+		ce->__tobool = parent->__tobool;
+	}
 	if (EXPECTED(!ce->clone)) {
 		ce->clone = parent->clone;
 	}
@@ -2753,6 +2756,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			zend_update_inherited_handler(__isset);
 			zend_update_inherited_handler(__unset);
 			zend_update_inherited_handler(__tostring);
+			zend_update_inherited_handler(__tobool);
 			zend_update_inherited_handler(__callstatic);
 			zend_update_inherited_handler(__debugInfo);
 			zend_update_inherited_handler(__serialize);
@@ -3015,6 +3019,8 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			ce->interfaces[ce->num_interfaces - 1] = zend_ce_stringable;
 			do_interface_implementation(ce, zend_ce_stringable);
 		}
+
+		/* Believe the above (3010+) would hold tru for Falsifiable as well. */
 
 		zend_build_properties_info_table(ce);
 	} zend_catch {
