@@ -1,22 +1,22 @@
 --TEST--
-never type of __toString method
+never type of __toBool method
 --FILE--
 <?php
 
-class A implements Stringable {
-    public function __toString(): string {
-        return "hello";
+class A implements Falsifiable {
+    public function __toBool(): bool {
+        return true;
     }
 }
 
 class B extends A {
-    public function __toString(): never {
+    public function __toBool(): never {
         throw new \Exception('not supported');
     }
 }
 
 try {
-    echo (string) (new B());
+    echo (bool) (new B());
 } catch (Exception $e) {
     // do nothing
 }
