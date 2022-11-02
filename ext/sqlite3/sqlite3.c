@@ -949,6 +949,12 @@ PHP_METHOD(SQLite3, createFunction)
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, flags | SQLITE_UTF8, func, php_sqlite3_callback_func, NULL, NULL) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
 
+		if (!ZEND_FCC_INITIALIZED(fcc)) {
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+		}
 		zend_fcc_dup(&func->func, &fcc);
 
 		func->argc = sql_func_num_args;
@@ -991,7 +997,19 @@ PHP_METHOD(SQLite3, createAggregate)
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, SQLITE_UTF8, func, NULL, php_sqlite3_callback_step, php_sqlite3_callback_final) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
 
+		if (!ZEND_FCC_INITIALIZED(step_fcc)) {
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+			zend_is_callable_ex(&step_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &step_fcc, NULL);
+		}
 		zend_fcc_dup(&func->step, &step_fcc);
+		if (!ZEND_FCC_INITIALIZED(fini_fcc)) {
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+			zend_is_callable_ex(&fini_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fini_fcc, NULL);
+		}
 		zend_fcc_dup(&func->fini, &fini_fcc);
 
 		func->argc = sql_func_num_args;
@@ -1032,6 +1050,12 @@ PHP_METHOD(SQLite3, createCollation)
 	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {
 		collation->collation_name = estrdup(collation_name);
 
+		if (!ZEND_FCC_INITIALIZED(fcc)) {
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
+		}
 		zend_fcc_dup(&collation->cmp_func, &fcc);
 
 		collation->next = db_obj->collations;
@@ -1293,6 +1317,12 @@ PHP_METHOD(SQLite3, setAuthorizer)
 
 	/* Only enable userland authorizer if argument is not NULL */
 	if (ZEND_FCI_INITIALIZED(fci)) {
+		if (!ZEND_FCC_INITIALIZED(fcc)) {
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+		}
 		db_obj->authorizer_fcc = fcc;
 		zend_fcc_addref(&db_obj->authorizer_fcc);
 	}
