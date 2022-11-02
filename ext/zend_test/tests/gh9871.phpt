@@ -21,13 +21,13 @@ $property = new MyReflectionProperty('A', 'protected');
 $property->setAccessible(true);
 
 ?>
---EXPECT--
-<!-- init '/Users/bob.weinand/php-src/ext/zend_test/tests/gh9871.php' -->
-<file '/Users/bob.weinand/php-src/ext/zend_test/tests/gh9871.php'>
+--EXPECTF--
+<!-- init '%s' -->
+<file '%s'>
   <!-- init ReflectionProperty::__construct() -->
   <ReflectionProperty::__construct>
   </ReflectionProperty::__construct:NULL>
   <!-- init ReflectionProperty::setAccessible() -->
   <ReflectionProperty::setAccessible>
   </ReflectionProperty::setAccessible:NULL>
-</file '/Users/bob.weinand/php-src/ext/zend_test/tests/gh9871.php'>
+</file '%s'>
