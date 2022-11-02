@@ -66,6 +66,11 @@ interface Stringable
     public function __toString(): string;
 }
 
+interface Falsifiable
+{
+    public function __toBool(): bool;
+}
+
 /**
  * @not-serializable
  */
