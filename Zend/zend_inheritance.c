@@ -3135,13 +3135,11 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 		if (EXPECTED(!(ce->ce_flags & ZEND_ACC_PRELOADED))) {
 			if (zend_hash_set_bucket_key(EG(class_table), (Bucket *)delayed_early_binding, lcname) != NULL) {
 				Z_CE_P(delayed_early_binding) = ce;
-				zend_observer_class_linked_notify(ce, lcname);
 				return true;
 			}
 		} else {
 			/* If preloading is used, don't replace the existing bucket, add a new one. */
 			if (zend_hash_add_ptr(EG(class_table), lcname, ce) != NULL) {
-				zend_observer_class_linked_notify(ce, lcname);
 				return true;
 			}
 		}
@@ -3149,7 +3147,6 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 		return false;
 	}
 	if (zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL) {
-		zend_observer_class_linked_notify(ce, lcname);
 		return true;
 	}
 	return false;
@@ -3170,6 +3167,7 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 				if (UNEXPECTED(!register_early_bound_ce(delayed_early_binding, lcname, ret))) {
 					return NULL;
 				}
+				zend_observer_class_linked_notify(ret, lcname);
 				return ret;
 			}
 		} else {
@@ -3244,6 +3242,7 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		if (ZSTR_HAS_CE_CACHE(ce->name)) {
 			ZSTR_SET_CE_CACHE(ce->name, ce);
 		}
+		zend_observer_class_linked_notify(ce, lcname);
 
 		return ce;
 	}

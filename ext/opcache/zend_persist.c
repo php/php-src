@@ -723,7 +723,11 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 						}
 					}
 				}
-				ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+				// Real dynamically created internal functions like enum methods must have their own run_time_cache pointer. They're always on the same scope as their defining class.
+				// However, copies - as caused by inheritance of internal methods - must retain the original run_time_cache pointer, shared with the source function.
+				if (!op_array->scope || op_array->scope == ce) {
+					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+				}
 			}
 		}
 		return;
