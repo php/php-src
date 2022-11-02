@@ -691,13 +691,6 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 	}
 
 	shm->addr = shm->descriptor + sizeof(shm->descriptor);
-
-	if (NULL == shm->addr) {
-		int err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(err);
-		return (void*)-1;
-	}
-
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
