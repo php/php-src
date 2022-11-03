@@ -1,5 +1,8 @@
 --TEST--
 GH-7875 (mails are sent even if failure to log throws exception)
+--EXT--
+mail
+posix
 --SKIPIF--
 <?php
 $filename = __DIR__ . "/gh7875.mail.log";
@@ -10,15 +13,11 @@ $is_writable = is_writable($filename);
 chmod($filename, 0644);
 unlink($filename);
 if ($is_writable) die("skip cannot make file read-only");
+if (posix_geteuid() == 0) die('skip Cannot run test as root.');
 ?>
 --INI--
 sendmail_path={MAIL:{PWD}/gh7875.mail.out}
 mail.log={PWD}/gh7875.mail.log
---SKIPIF--
-<?php
-if (!extension_loaded('posix')) die('skip POSIX extension not loaded');
-if (posix_geteuid() == 0) die('skip Cannot run test as root.');
-?>
 --FILE--
 <?php
 function exception_error_handler($severity, $message, $file, $line) {
