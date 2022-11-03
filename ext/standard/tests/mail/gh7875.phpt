@@ -1,6 +1,6 @@
 --TEST--
 GH-7875 (mails are sent even if failure to log throws exception)
---EXTENTIONS--
+--EXTENSIONS--
 mail
 posix
 --SKIPIF--
