@@ -108,6 +108,77 @@ jobs:
             -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  LINUX_X32:
+    needs: GENERATE_MATRIX
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+        debug: [true, false]
+        zts: [true, false]
+    name: "${{ matrix.branch.name }}_LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: apt
+        uses: ./.github/actions/apt-x32
+      - name: ./configure
+        uses: ./.github/actions/configure-x32
+        with:
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux-x32
+      - name: Test
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.jit_buffer_size=16M
+      - name: Test OpCache
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test Function JIT
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.jit_buffer_size=16M
+            -d opcache.jit=1205
   MACOS:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
