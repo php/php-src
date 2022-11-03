@@ -973,6 +973,10 @@ cleanup_args:
 				zend_interrupt_function(EG(current_execute_data));
 			}
 		}
+
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+			OBJ_RELEASE(Z_OBJ(call->This));
+		}
 	}
 	EG(fake_scope) = orig_fake_scope;
 
