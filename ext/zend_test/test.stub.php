@@ -66,6 +66,13 @@ namespace {
         public function __construct(string $parameter) {}
     }
 
+    #[Attribute(Attribute::TARGET_PROPERTY)]
+    final class ZendTestPropertyAttribute {
+        public string $parameter;
+
+        public function __construct(string $parameter) {}
+    }
+
     class ZendTestClassWithMethodWithParameterAttribute {
         final public function no_override(string $parameter): int {}
         public function override(string $parameter): int {}
