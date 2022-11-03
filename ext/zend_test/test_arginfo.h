@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 27df6a7b48574b5c6c9a54c618fce300c7a8bd13 */
+ * Stub hash: 8c96703b432ae8d2e9e88edbe278d7d5d80a867e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -103,6 +103,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestParameterAttribute___construct, 0, 
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_ZendTestPropertyAttribute___construct arginfo_class_ZendTestParameterAttribute___construct
+
 #define arginfo_class_ZendTestClassWithMethodWithParameterAttribute_no_override arginfo_zend_test_parameter_with_attribute
 
 #define arginfo_class_ZendTestClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
@@ -144,6 +146,7 @@ static ZEND_METHOD(_ZendTestClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestTrait, testMethod);
 static ZEND_METHOD(ZendTestParameterAttribute, __construct);
+static ZEND_METHOD(ZendTestPropertyAttribute, __construct);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override);
@@ -211,6 +214,12 @@ static const zend_function_entry class_ZendTestAttribute_methods[] = {
 
 static const zend_function_entry class_ZendTestParameterAttribute_methods[] = {
 	ZEND_ME(ZendTestParameterAttribute, __construct, arginfo_class_ZendTestParameterAttribute___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestPropertyAttribute_methods[] = {
+	ZEND_ME(ZendTestPropertyAttribute, __construct, arginfo_class_ZendTestPropertyAttribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -364,6 +373,23 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ZendTestParameterAttribute", class_ZendTestParameterAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_parameter_default_value;
+	ZVAL_UNDEF(&property_parameter_default_value);
+	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
+	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_parameter_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestPropertyAttribute(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestPropertyAttribute", class_ZendTestPropertyAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
