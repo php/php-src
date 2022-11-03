@@ -2,10 +2,12 @@
 Bug #78761 (Zend memory heap corruption with preload and casting)
 --EXTENSIONS--
 ffi
+posix
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 if (ini_get('opcache.preload_user')) die('skip FFI::load() does not support opcache.preload_user');
+if (posix_geteuid() == 0) die('skip Cannot run test as root.');
 ?>
 --INI--
 opcache.enable_cli=1
