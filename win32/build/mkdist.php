@@ -357,6 +357,22 @@ foreach ($ENCHANT_DLLS as $dll) {
     }
 }
 
+$OPENSSL_DLLS = $php_build_dir . "/lib/ossl-modules/*.dll";
+$fls = glob($OPENSSL_DLLS);
+if (!empty($fls)) {
+    $openssl_dest_dir = "$dist_dir/extras/ssl";
+    if (!file_exists($openssl_dest_dir) || !is_dir($openssl_dest_dir)) {
+        if (!mkdir($openssl_dest_dir, 0777, true)) {
+            echo "WARNING: couldn't create '$openssl_dest_dir' for OpenSSL providers ";
+        }
+    }
+    foreach ($fls as $fl) {
+        if (!copy($fl, "$openssl_dest_dir/" . basename($fl))) {
+            echo "WARNING: couldn't copy $fl into the $openssl_dest_dir";
+        }
+    }
+}
+
 $SASL_DLLS = $php_build_dir . "/bin/sasl2/sasl*.dll";
 $fls = glob($SASL_DLLS);
 if (!empty($fls)) {
