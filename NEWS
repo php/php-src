@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-9801 (Generator crashes when memory limit is exceeded during
     initialization). (Arnaud)
   . Fixed potential NULL pointer dereference in Windows shm*() functions. (cmb)
+  . Fixed bug GH-9750 (Generator memory leak when interrupted during argument
+    evaluation. (Arnaud)
 
 - Date:
   . Fixed bug GH-9763 (DateTimeZone ctr mishandles input and adds null byte if
