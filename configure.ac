@@ -410,6 +410,7 @@ sys/file.h \
 sys/mman.h \
 sys/mount.h \
 sys/poll.h \
+sys/procctl.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \

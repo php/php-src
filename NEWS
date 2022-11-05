@@ -45,6 +45,8 @@ PHP                                                                        NEWS
     (Arnaud, Kapitan Oczywisty)
   . Made opcache.preload_user always optional in the cli and phpdbg SAPIs.
     (Arnaud)
+  . Allows W/X bits on page creation on FreeBSD despite system settings.
+    (David Carlier)
 
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
