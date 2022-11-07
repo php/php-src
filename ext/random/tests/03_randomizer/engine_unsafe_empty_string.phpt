@@ -50,13 +50,13 @@ try {
 }
 
 try {
-    var_dump(randomizer()->getBytesFromAlphabet('123', 10));
+    var_dump(randomizer()->getBytesFromString('123', 10));
 } catch (Random\BrokenRandomEngineError $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 
 try {
-    var_dump(randomizer()->getBytesFromAlphabet(str_repeat('a', 500), 10));
+    var_dump(randomizer()->getBytesFromString(str_repeat('a', 500), 10));
 } catch (Random\BrokenRandomEngineError $e) {
     echo $e->getMessage(), PHP_EOL;
 }

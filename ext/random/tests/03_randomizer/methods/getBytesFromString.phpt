@@ -1,5 +1,5 @@
 --TEST--
-Random: Randomizer: getBytesFromAlphabet(): Basic functionality
+Random: Randomizer: getBytesFromString(): Basic functionality
 --FILE--
 <?php
 
@@ -25,11 +25,11 @@ foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
 
     $randomizer = new Randomizer($engine);
-    var_dump($randomizer->getBytesFromAlphabet('a', 10));
-    var_dump($randomizer->getBytesFromAlphabet(str_repeat('a', 256), 5));
+    var_dump($randomizer->getBytesFromString('a', 10));
+    var_dump($randomizer->getBytesFromString(str_repeat('a', 256), 5));
 
     for ($i = 1; $i < 250; $i++) {
-        $output = $randomizer->getBytesFromAlphabet(str_repeat('ab', $i), 500);
+        $output = $randomizer->getBytesFromString(str_repeat('ab', $i), 500);
 
         // This check can theoretically fail with a chance of 0.5**500.
         if (!str_contains($output, 'a') || !str_contains($output, 'b')) {

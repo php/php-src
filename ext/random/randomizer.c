@@ -258,22 +258,22 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 }
 /* }}} */
 
-/* {{{ Get Random Bytes for Alphabet */
-PHP_METHOD(Random_Randomizer, getBytesFromAlphabet)
+/* {{{ Get Random Bytes for String */
+PHP_METHOD(Random_Randomizer, getBytesFromString)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	zend_long length;
-	zend_string *alphabet, *retval;
+	zend_string *source, *retval;
 	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2);
-		Z_PARAM_STR(alphabet)
+		Z_PARAM_STR(source)
 		Z_PARAM_LONG(length)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const size_t alphabet_length = ZSTR_LEN(alphabet);
+	const size_t source_length = ZSTR_LEN(source);
 
-	if (alphabet_length < 1) {
+	if (source_length < 1) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
@@ -285,34 +285,34 @@ PHP_METHOD(Random_Randomizer, getBytesFromAlphabet)
 
 	retval = zend_string_alloc(length, 0);
 
-	if (alphabet_length > 0xFF) {
+	if (source_length > 0xFF) {
 		while (total_size < length) {
-			uint64_t offset = randomizer->algo->range(randomizer->status, 0, alphabet_length - 1);
+			uint64_t offset = randomizer->algo->range(randomizer->status, 0, source_length - 1);
 
 			if (EG(exception)) {
 				zend_string_free(retval);
 				RETURN_THROWS();
 			}
 
-			ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(alphabet)[offset];
+			ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(source)[offset];
 		}
 	} else {
 		uint64_t mask;
-		if (alphabet_length <= 0x1) {
+		if (source_length <= 0x1) {
 			mask = 0x0;
-		} else if (alphabet_length <= 0x2) {
+		} else if (source_length <= 0x2) {
 			mask = 0x1;
-		} else if (alphabet_length <= 0x4) {
+		} else if (source_length <= 0x4) {
 			mask = 0x3;
-		} else if (alphabet_length <= 0x8) {
+		} else if (source_length <= 0x8) {
 			mask = 0x7;
-		} else if (alphabet_length <= 0x10) {
+		} else if (source_length <= 0x10) {
 			mask = 0xF;
- 		} else if (alphabet_length <= 0x20) {
+ 		} else if (source_length <= 0x20) {
 			mask = 0x1F;
-		} else if (alphabet_length <= 0x40) {
+		} else if (source_length <= 0x40) {
 			mask = 0x3F;
-		} else if (alphabet_length <= 0x80) {
+		} else if (source_length <= 0x80) {
 			mask = 0x7F;
 		} else {
 			mask = 0xFF;
@@ -329,7 +329,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromAlphabet)
 			for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
 				uint64_t offset = (result >> (i * 8)) & mask;
 
-				if (offset >= alphabet_length) {
+				if (offset >= source_length) {
 					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
 						zend_string_free(retval);
 						zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
@@ -341,7 +341,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromAlphabet)
 
 				failures = 0;
 
-				ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(alphabet)[offset];
+				ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(source)[offset];
 				if (total_size >= length) {
 					break;
 				}
