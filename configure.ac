@@ -712,7 +712,7 @@ return 0;
 #else
 #error "unsupported platform"
 #endif
-]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no])
+]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no], [ac_cv_copy_file_range=no])
 ])
 
 if test "$ac_cv_copy_file_range" = yes; then
