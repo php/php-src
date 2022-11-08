@@ -1486,7 +1486,7 @@ PHP_FUNCTION(fpm_get_status) /* {{{ */
 		RETURN_THROWS();
 	}
 
-	if (fpm_status_export_to_zval(return_value)) {
+	if (!fpm_status_export_to_zval(return_value)) {
 		RETURN_FALSE;
 	}
 }

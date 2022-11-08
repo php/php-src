@@ -20,11 +20,11 @@ static char *fpm_status_ping_uri = NULL;
 static char *fpm_status_ping_response = NULL;
 
 
-int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+bool fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (!wp || !wp->config) {
 		zlog(ZLOG_ERROR, "unable to init fpm_status because conf structure is NULL");
-		return -1;
+		return false;
 	}
 
 	if (wp->config->pm_status_path) {
@@ -34,17 +34,17 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->config->ping_path) {
 		if (!wp->config->ping_response) {
 			zlog(ZLOG_ERROR, "[pool %s] ping is set (%s) but ping.response is not set.", wp->config->name, wp->config->ping_path);
-			return -1;
+			return false;
 		}
 		fpm_status_ping_uri = strdup(wp->config->ping_path);
 		fpm_status_ping_response = strdup(wp->config->ping_response);
 	}
 
-	return 0;
+	return true;
 }
 /* }}} */
 
-int fpm_status_export_to_zval(zval *status)
+bool fpm_status_export_to_zval(zval *status)
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
 	zval fpm_proc_stats, fpm_proc_stat;
@@ -56,7 +56,7 @@ int fpm_status_export_to_zval(zval *status)
 	scoreboard_p = fpm_scoreboard_acquire(NULL, 1);
 	if (!scoreboard_p) {
 		zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in use.", scoreboard_p->pool);
-		return -1;
+		return false;
 	}
 
 	/* copy the scoreboard not to bother other processes */
@@ -130,11 +130,11 @@ int fpm_status_export_to_zval(zval *status)
 		add_next_index_zval(&fpm_proc_stats, &fpm_proc_stat);
 	}
 	add_assoc_zval(status, "procs", &fpm_proc_stats);
-	return 0;
+	return true;
 }
 /* }}} */
 
-int fpm_status_handle_request(void) /* {{{ */
+bool fpm_status_handle_request(void) /* {{{ */
 {
 	struct fpm_scoreboard_s *scoreboard_p;
 	struct fpm_scoreboard_proc_s *proc;
@@ -146,7 +146,7 @@ int fpm_status_handle_request(void) /* {{{ */
 	zend_string *_GET_str;
 
 	if (!SG(request_info).request_uri) {
-		return 0;
+		return false;
 	}
 
 	/* PING */
@@ -159,11 +159,11 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		/* handle HEAD */
 		if (SG(request_info).headers_only) {
-			return 1;
+			return true;
 		}
 
 		PUTS(fpm_status_ping_response);
-		return 1;
+		return true;
 	}
 
 	/* STATUS */
@@ -189,7 +189,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
-			return 1;
+			return true;
 		}
 
 		if (scoreboard_p->idle < 0 || scoreboard_p->active < 0) {
@@ -200,7 +200,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
-			return 1;
+			return true;
 		}
 
 		/* send common headers */
@@ -211,7 +211,7 @@ int fpm_status_handle_request(void) /* {{{ */
 		/* handle HEAD */
 		if (SG(request_info).headers_only) {
 			fpm_scoreboard_free_copy(scoreboard_p);
-			return 1;
+			return true;
 		}
 
 		/* HTML */
@@ -600,9 +600,9 @@ int fpm_status_handle_request(void) /* {{{ */
 		}
 
 		fpm_scoreboard_free_copy(scoreboard_p);
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 /* }}} */
