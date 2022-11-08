@@ -133,7 +133,7 @@ void fpm_env_setproctitle(char *title) /* {{{ */
 }
 /* }}} */
 
-int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+bool fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 	char *title;
@@ -157,11 +157,11 @@ int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		setenv("HOME", wp->home, 1);
 	}
 
-	return 0;
+	return true;
 }
 /* }}} */
 
-static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
+static void fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 
@@ -189,20 +189,16 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 			wp->home = 0;
 		}
 	}
-
-	return 0;
 }
 /* }}} */
 
-int fpm_env_init_main(void)
+bool fpm_env_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 	char *title;
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-		if (0 > fpm_env_conf_wp(wp)) {
-			return -1;
-		}
+		fpm_env_conf_wp(wp);
 	}
 #ifndef HAVE_SETPROCTITLE
 #if defined(__linux__) || defined(__APPLE__)
@@ -241,7 +237,7 @@ int fpm_env_init_main(void)
 		}
 	}
 	if (first == NULL || last == NULL) {
-		return 0;
+		return true;
 	}
 
 	fpm_env_argv_len = last - first;
@@ -255,7 +251,7 @@ int fpm_env_init_main(void)
 		}
 
 		if ((new_environ = malloc((1U + env_nb) * sizeof (char *))) == NULL) {
-			return -1;
+			return false;
 		}
 		new_environ[env_nb] = NULL;
 		while (env_nb > 0U) {
@@ -270,5 +266,5 @@ int fpm_env_init_main(void)
 	spprintf(&title, 0, "master process (%s)", fpm_globals.config);
 	fpm_env_setproctitle(title);
 	efree(title);
-	return 0;
+	return true;
 }
