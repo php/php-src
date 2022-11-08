@@ -3,6 +3,7 @@
 #ifndef FPM_PHP_H
 #define FPM_PHP_H 1
 
+#include <stdbool.h>
 #include <TSRM.h>
 
 #include "php.h"
@@ -31,7 +32,7 @@
 
 struct fpm_worker_pool_s;
 
-int fpm_php_init_child(struct fpm_worker_pool_s *wp);
+bool fpm_php_init_child(struct fpm_worker_pool_s *wp);
 char *fpm_php_script_filename(void);
 char *fpm_php_request_uri(void);
 char *fpm_php_request_method(void);
@@ -39,9 +40,9 @@ char *fpm_php_query_string(void);
 char *fpm_php_auth_user(void);
 size_t fpm_php_content_length(void);
 void fpm_php_soft_quit(void);
-int fpm_php_init_main(void);
-int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode);
-int fpm_php_limit_extensions(char *path);
+bool fpm_php_init_main(void);
+bool fpm_php_apply_defines_ex(struct key_value_s *kv, int mode);
+bool fpm_php_limit_extensions(char *path);
 char* fpm_php_get_string_from_table(zend_string *table, char *key);
 
 #endif

@@ -1358,7 +1358,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 
 	key = Z_STRVAL_P(arg1);
 
-	if (!key || strlen(key) < 1) {
+	if (Z_STRLEN_P(arg1) == 0) {
 		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: empty key");
 		return;
 	}
@@ -1375,7 +1375,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 	kv.key = key;
 	kv.value = value;
 	kv.next = NULL;
-	if (fpm_php_apply_defines_ex(&kv, *mode) == -1) {
+	if (!fpm_php_apply_defines_ex(&kv, *mode)) {
 		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: unable to set '%s'", key);
 	}
 }
