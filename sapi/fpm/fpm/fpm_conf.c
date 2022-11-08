@@ -1295,9 +1295,7 @@ static bool fpm_conf_post_process(int force_daemon) /* {{{ */
 	}
 
 #ifdef HAVE_SYSTEMD
-	if (0 > fpm_systemd_conf()) {
-		return false;
-	}
+	fpm_systemd_conf();
 #endif
 
 #ifdef HAVE_SYSLOG_H
