@@ -41,7 +41,7 @@ struct fpm_globals_s fpm_globals = {
 	.send_config_pipe = {0, 0},
 };
 
-int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr) /* {{{ */
+bool fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr) /* {{{ */
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
@@ -70,19 +70,19 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 			exit(FPM_EXIT_OK);
 		} else {
 			zlog(ZLOG_ERROR, "FPM initialization failed");
-			return -1;
+			return false;
 		}
 	}
 
 	if (!fpm_conf_write_pid()) {
 		zlog(ZLOG_ERROR, "FPM initialization failed");
-		return -1;
+		return false;
 	}
 
 	fpm_stdio_init_final();
 	zlog(ZLOG_NOTICE, "fpm is running, pid %d", (int) fpm_globals.parent_pid);
 
-	return 0;
+	return true;
 }
 /* }}} */
 

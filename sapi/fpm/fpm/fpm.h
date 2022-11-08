@@ -4,6 +4,7 @@
 #define FPM_H 1
 
 #include <unistd.h>
+#include <stdbool.h>
 
 #ifdef HAVE_SYSEXITS_H
 #include <sysexits.h>
@@ -35,7 +36,7 @@
 
 
 int fpm_run(int *max_requests);
-int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr);
+bool fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr);
 
 struct fpm_globals_s {
 	pid_t parent_pid;
