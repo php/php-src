@@ -58,7 +58,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	    !fpm_conf_init_main(test_conf, force_daemon) ||
 	    0 > fpm_unix_init_main()          ||
 	    0 > fpm_scoreboard_init_main()    ||
-	    0 > fpm_pctl_init_main()          ||
+	    !fpm_pctl_init_main()          ||
 	    !fpm_env_init_main()           ||
 	    0 > fpm_signals_init_main()       ||
 	    !fpm_children_init_main()      ||
