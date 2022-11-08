@@ -13,9 +13,9 @@
 /* posix monotonic clock - preferred source of time */
 #if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
 
-static int monotonic_works;
+static bool monotonic_works;
 
-int fpm_clock_init(void)
+bool fpm_clock_init(void)
 {
 	struct timespec ts;
 
@@ -25,7 +25,7 @@ int fpm_clock_init(void)
 		monotonic_works = 1;
 	}
 
-	return 0;
+	return true;
 }
 
 int fpm_clock_get(struct timeval *tv) /* {{{ */
@@ -58,7 +58,7 @@ static clock_serv_t mach_clock;
 
 /* this code borrowed from here: http://lists.apple.com/archives/Darwin-development/2002/Mar/msg00746.html */
 /* mach_clock also should be re-initialized in child process after fork */
-int fpm_clock_init(void)
+bool fpm_clock_init(void)
 {
 	kern_return_t ret;
 	mach_timespec_t aTime;
@@ -67,7 +67,7 @@ int fpm_clock_init(void)
 
 	if (ret != KERN_SUCCESS) {
 		zlog(ZLOG_ERROR, "host_get_clock_service() failed: %s", mach_error_string(ret));
-		return -1;
+		return false;
 	}
 
 	/* test if it works */
@@ -75,10 +75,10 @@ int fpm_clock_init(void)
 
 	if (ret != KERN_SUCCESS) {
 		zlog(ZLOG_ERROR, "clock_get_time() failed: %s", mach_error_string(ret));
-		return -1;
+		return false;
 	}
 
-	return 0;
+	return true;
 }
 
 int fpm_clock_get(struct timeval *tv) /* {{{ */
@@ -102,9 +102,9 @@ int fpm_clock_get(struct timeval *tv) /* {{{ */
 
 #else /* no clock */
 
-int fpm_clock_init(void)
+bool fpm_clock_init(void)
 {
-	return 0;
+	return true;
 }
 
 int fpm_clock_get(struct timeval *tv) /* {{{ */

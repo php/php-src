@@ -443,7 +443,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 #endif
 
-	if (0 > fpm_clock_init()) {
+	if (!fpm_clock_init()) {
 		return -1;
 	}
 
@@ -599,7 +599,7 @@ int fpm_unix_init_main(void)
 
 	/* continue as a child */
 	setsid();
-	if (0 > fpm_clock_init()) {
+	if (!fpm_clock_init()) {
 		return -1;
 	}
 
