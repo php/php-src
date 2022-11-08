@@ -38,16 +38,16 @@ void *fpm_shm_alloc(size_t size) /* {{{ */
 }
 /* }}} */
 
-int fpm_shm_free(void *mem, size_t size) /* {{{ */
+bool fpm_shm_free(void *mem, size_t size) /* {{{ */
 {
 	if (!mem) {
 		zlog(ZLOG_ERROR, "mem is NULL");
-		return 0;
+		return false;
 	}
 
 	if (munmap(mem, size) == -1) {
 		zlog(ZLOG_SYSERROR, "Unable to free shm");
-		return 0;
+		return false;
 	}
 
 	if (fpm_shm_size - size > 0) {
@@ -56,7 +56,7 @@ int fpm_shm_free(void *mem, size_t size) /* {{{ */
 		fpm_shm_size = 0;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
