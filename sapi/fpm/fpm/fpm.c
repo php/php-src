@@ -60,7 +60,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	    !fpm_scoreboard_init_main()    ||
 	    !fpm_pctl_init_main()          ||
 	    !fpm_env_init_main()           ||
-	    0 > fpm_signals_init_main()       ||
+	    !fpm_signals_init_main()       ||
 	    !fpm_children_init_main()      ||
 	    0 > fpm_sockets_init_main()       ||
 	    0 > fpm_worker_pool_init_main()   ||

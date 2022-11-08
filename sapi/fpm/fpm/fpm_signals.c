@@ -182,23 +182,23 @@ static void sig_handler(int signo) /* {{{ */
 }
 /* }}} */
 
-int fpm_signals_init_main(void)
+bool fpm_signals_init_main(void)
 {
 	struct sigaction act;
 
 	if (0 > socketpair(AF_UNIX, SOCK_STREAM, 0, sp)) {
 		zlog(ZLOG_SYSERROR, "failed to init signals: socketpair()");
-		return -1;
+		return false;
 	}
 
 	if (0 > fd_set_blocked(sp[0], 0) || 0 > fd_set_blocked(sp[1], 0)) {
 		zlog(ZLOG_SYSERROR, "failed to init signals: fd_set_blocked()");
-		return -1;
+		return false;
 	}
 
 	if (0 > fcntl(sp[0], F_SETFD, FD_CLOEXEC) || 0 > fcntl(sp[1], F_SETFD, FD_CLOEXEC)) {
 		zlog(ZLOG_SYSERROR, "failed to init signals: fcntl(F_SETFD, FD_CLOEXEC)");
-		return -1;
+		return false;
 	}
 
 	memset(&act, 0, sizeof(act));
@@ -213,17 +213,17 @@ int fpm_signals_init_main(void)
 	    0 > sigaction(SIGQUIT,  &act, 0)) {
 
 		zlog(ZLOG_SYSERROR, "failed to init signals: sigaction()");
-		return -1;
+		return false;
 	}
 
 	zlog(ZLOG_DEBUG, "Unblocking all signals");
-	if (0 > fpm_signals_unblock()) {
-		return -1;
+	if (!fpm_signals_unblock()) {
+		return false;
 	}
-	return 0;
+	return true;
 }
 
-int fpm_signals_init_child(void)
+bool fpm_signals_init_child(void)
 {
 	struct sigaction act, act_dfl;
 
@@ -246,15 +246,15 @@ int fpm_signals_init_child(void)
 	    0 > sigaction(SIGQUIT,  &act,      0)) {
 
 		zlog(ZLOG_SYSERROR, "failed to init child signals: sigaction()");
-		return -1;
+		return false;
 	}
 
 	zend_signal_init();
 
-	if (0 > fpm_signals_unblock()) {
-		return -1;
+	if (!fpm_signals_unblock()) {
+		return false;
 	}
-	return 0;
+	return true;
 }
 
 int fpm_signals_get_fd(void)
@@ -262,7 +262,7 @@ int fpm_signals_get_fd(void)
 	return sp[0];
 }
 
-int fpm_signals_init_mask(void)
+bool fpm_signals_init_mask(void)
 {
 	/* Subset of signals from fpm_signals_init_main() and fpm_got_signal()
 		blocked to avoid unexpected death during early init
@@ -273,7 +273,7 @@ int fpm_signals_init_mask(void)
 	if (0 > sigemptyset(&block_sigset) ||
 	    0 > sigemptyset(&child_block_sigset)) {
 		zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigemptyset()");
-		return -1;
+		return false;
 	}
 	for (i = 0; i < size; ++i) {
 		int sig_i = init_signal_array[i];
@@ -285,36 +285,36 @@ int fpm_signals_init_mask(void)
 			} else {
 				zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigaddset(%d)", sig_i);
 			}
-			return -1;
+			return false;
 		}
 	}
 	if (0 > sigaddset(&child_block_sigset, SIGTERM) ||
 	    0 > sigaddset(&child_block_sigset, SIGQUIT)) {
 		zlog(ZLOG_SYSERROR, "failed to prepare child signal block mask: sigaddset()");
-		return -1;
+		return false;
 	}
-	return 0;
+	return true;
 }
 
-int fpm_signals_block(void)
+bool fpm_signals_block(void)
 {
 	if (0 > sigprocmask(SIG_BLOCK, &block_sigset, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to block signals");
-		return -1;
+		return false;
 	}
-	return 0;
+	return true;
 }
 
-int fpm_signals_child_block(void)
+bool fpm_signals_child_block(void)
 {
 	if (0 > sigprocmask(SIG_BLOCK, &child_block_sigset, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to block child signals");
-		return -1;
+		return false;
 	}
-	return 0;
+	return true;
 }
 
-int fpm_signals_unblock(void)
+bool fpm_signals_unblock(void)
 {
 	/* Ensure that during reload after upgrade all signals are unblocked.
 		block_sigset could have different value before execve() */
@@ -322,7 +322,7 @@ int fpm_signals_unblock(void)
 	sigfillset(&all_signals);
 	if (0 > sigprocmask(SIG_UNBLOCK, &all_signals, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to unblock signals");
-		return -1;
+		return false;
 	}
-	return 0;
+	return true;
 }

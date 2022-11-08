@@ -77,7 +77,7 @@ static void fpm_pctl_exit(void)
 static void fpm_pctl_exec(void)
 {
 	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
-	if (0 > fpm_signals_block()) {
+	if (!fpm_signals_block()) {
 		zlog(ZLOG_WARNING, "concurrent reloads may be unstable");
 	}
 

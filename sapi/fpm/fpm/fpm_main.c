@@ -1543,7 +1543,7 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 
-	if (0 > fpm_signals_init_mask() || 0 > fpm_signals_block()) {
+	if (!fpm_signals_init_mask() || !fpm_signals_block()) {
 		zlog(ZLOG_WARNING, "Could die in the case of too early reload signal");
 	}
 	zlog(ZLOG_DEBUG, "Blocked some signals");

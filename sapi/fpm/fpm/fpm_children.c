@@ -153,7 +153,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	    !fpm_log_init_child(wp)    ||
 	    !fpm_status_init_child(wp) ||
 	    0 > fpm_unix_init_child(wp)   ||
-	    0 > fpm_signals_init_child()  ||
+	    !fpm_signals_init_child()  ||
 	    !fpm_env_init_child(wp) /* Note: this never fails */    ||
 	    !fpm_php_init_child(wp) /* Note: this never fails */) {
 
@@ -401,7 +401,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 		}
 
 		zlog(ZLOG_DEBUG, "blocking signals before child birth");
-		if (0 > fpm_signals_child_block()) {
+		if (!fpm_signals_child_block()) {
 			zlog(ZLOG_WARNING, "child may miss signals");
 		}
 
