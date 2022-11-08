@@ -320,7 +320,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 		return 0;
 	}
 
-	if (0 > fpm_scoreboard_proc_alloc(c)) {
+	if (!fpm_scoreboard_proc_alloc(c)) {
 		fpm_stdio_discard_pipes(c);
 		fpm_child_free(c);
 		return 0;
