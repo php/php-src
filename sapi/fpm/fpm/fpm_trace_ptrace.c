@@ -24,35 +24,35 @@
 
 static pid_t traced_pid;
 
-int fpm_trace_signal(pid_t pid) /* {{{ */
+bool fpm_trace_signal(pid_t pid) /* {{{ */
 {
 	if (0 > ptrace(PTRACE_ATTACH, pid, 0, 0)) {
 		zlog(ZLOG_SYSERROR, "failed to ptrace(ATTACH) child %d", pid);
-		return -1;
+		return false;
 	}
-	return 0;
+	return true;
 }
 /* }}} */
 
-int fpm_trace_ready(pid_t pid) /* {{{ */
+bool fpm_trace_ready(pid_t pid) /* {{{ */
 {
 	traced_pid = pid;
-	return 0;
+	return true;
 }
 /* }}} */
 
-int fpm_trace_close(pid_t pid) /* {{{ */
+bool fpm_trace_close(pid_t pid) /* {{{ */
 {
 	if (0 > ptrace(PTRACE_DETACH, pid, (void *) 1, 0)) {
 		zlog(ZLOG_SYSERROR, "failed to ptrace(DETACH) child %d", pid);
-		return -1;
+		return false;
 	}
 	traced_pid = 0;
-	return 0;
+	return true;
 }
 /* }}} */
 
-int fpm_trace_get_long(long addr, long *data) /* {{{ */
+bool fpm_trace_get_long(long addr, long *data) /* {{{ */
 {
 #ifdef PT_IO
 	struct ptrace_io_desc ptio = {
@@ -64,16 +64,16 @@ int fpm_trace_get_long(long addr, long *data) /* {{{ */
 
 	if (0 > ptrace(PT_IO, traced_pid, (void *) &ptio, 0)) {
 		zlog(ZLOG_SYSERROR, "failed to ptrace(PT_IO) pid %d", traced_pid);
-		return -1;
+		return false;
 	}
 #else
 	errno = 0;
 	*data = ptrace(PTRACE_PEEKDATA, traced_pid, (void *) addr, 0);
 	if (errno) {
 		zlog(ZLOG_SYSERROR, "failed to ptrace(PEEKDATA) pid %d", traced_pid);
-		return -1;
+		return false;
 	}
 #endif
-	return 0;
+	return true;
 }
 /* }}} */
