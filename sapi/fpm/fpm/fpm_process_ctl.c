@@ -338,7 +338,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 
 		/* update status structure for all PMs */
 		if (wp->listen_address_domain == FPM_AF_INET) {
-			if (0 > fpm_socket_get_listening_queue(wp->listening_socket, &cur_lq, NULL)) {
+			if (!fpm_socket_get_listening_queue(wp->listening_socket, &cur_lq, NULL)) {
 				cur_lq = 0;
 #if 0
 			} else {

@@ -11,6 +11,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdbool.h>
 
 #include "fpm_worker_pool.h"
 
@@ -27,9 +28,9 @@
 #define FPM_ENV_SOCKET_SET_SIZE 128
 
 enum fpm_address_domain fpm_sockets_domain_from_address(char *addr);
-int fpm_sockets_init_main(void);
-int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq);
-int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen);
+bool fpm_sockets_init_main(void);
+bool fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq);
+bool fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen);
 
 
 static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
