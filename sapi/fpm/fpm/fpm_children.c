@@ -149,7 +149,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_globals.max_requests = wp->config->pm_max_requests;
 	fpm_globals.listening_socket = dup(wp->listening_socket);
 
-	if (0 > fpm_stdio_init_child(wp)  ||
+	if (!fpm_stdio_init_child(wp) /* Note: this never fails */  ||
 	    !fpm_log_init_child(wp)    ||
 	    !fpm_status_init_child(wp) ||
 	    0 > fpm_unix_init_child(wp)   ||
@@ -315,7 +315,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 	c->wp = wp;
 	c->fd_stdout = -1; c->fd_stderr = -1;
 
-	if (0 > fpm_stdio_prepare_pipes(c)) {
+	if (!fpm_stdio_prepare_pipes(c)) {
 		fpm_child_free(c);
 		return 0;
 	}

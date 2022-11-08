@@ -109,7 +109,7 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 				 * access.log if it was configured to write to the stderr. Check #8885. */
 				fpm_stdio_restore_original_stderr(0);
 
-				if (0 == fpm_stdio_open_error_log(1)) {
+				if (fpm_stdio_open_error_log(/* reopen */ true)) {
 					zlog(ZLOG_NOTICE, "error log file re-opened");
 				} else {
 					zlog(ZLOG_ERROR, "unable to re-opened error log file");

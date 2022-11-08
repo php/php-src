@@ -1315,11 +1315,11 @@ static bool fpm_conf_post_process(int force_daemon) /* {{{ */
 		fpm_evaluate_full_path(&fpm_global_config.error_log, NULL, PHP_LOCALSTATEDIR, 0);
 	}
 
-	if (!fpm_global_config.daemonize && 0 > fpm_stdio_save_original_stderr()) {
+	if (!fpm_global_config.daemonize && !fpm_stdio_save_original_stderr()) {
 		return false;
 	}
 
-	if (0 > fpm_stdio_open_error_log(0)) {
+	if (!fpm_stdio_open_error_log(/* reopen */ false)) {
 		return false;
 	}
 
