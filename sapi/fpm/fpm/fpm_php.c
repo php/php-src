@@ -202,7 +202,7 @@ void fpm_php_soft_quit(void)
 
 int fpm_php_init_main(void)
 {
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0)) {
+	if (!fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0)) {
 		return -1;
 	}
 	return 0;

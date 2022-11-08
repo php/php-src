@@ -3,7 +3,9 @@
 #ifndef FPM_CLEANUP_H
 #define FPM_CLEANUP_H 1
 
-int fpm_cleanup_add(int type, void (*cleanup)(int, void *), void *);
+#include <stdbool.h>
+
+bool fpm_cleanup_add(int type, void (*cleanup)(int, void *), void *);
 void fpm_cleanups_run(int type);
 
 enum {

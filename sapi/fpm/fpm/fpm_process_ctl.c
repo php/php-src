@@ -288,7 +288,7 @@ int fpm_pctl_init_main(void)
 
 	saved_argv[i] = 0;
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_pctl_cleanup, 0)) {
+	if (!fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_pctl_cleanup, 0)) {
 		return -1;
 	}
 	return 0;

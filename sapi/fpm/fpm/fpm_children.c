@@ -482,7 +482,7 @@ bool fpm_children_init_main(void)
 		memset(last_faults, 0, sizeof(time_t) * fpm_global_config.emergency_restart_threshold);
 	}
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_children_cleanup, 0)) {
+	if (!fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_children_cleanup, 0)) {
 		return false;
 	}
 

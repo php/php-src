@@ -1876,7 +1876,7 @@ int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 		return -1;
 	}
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_conf_cleanup, 0)) {
+	if (!fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_conf_cleanup, 0)) {
 		return -1;
 	}
 

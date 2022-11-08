@@ -353,7 +353,7 @@ int fpm_event_init_main(void)
 
 	zlog(ZLOG_DEBUG, "event module is %s and %d fds have been reserved", module->name, max);
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, NULL)) {
+	if (!fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, NULL)) {
 		return -1;
 	}
 	return 0;
