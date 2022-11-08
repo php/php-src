@@ -29,7 +29,7 @@ static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
 static struct key_value_s *fpm_access_suppress_paths = NULL;
 
-static int fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc);
+static bool fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc);
 
 int fpm_log_open(int reopen) /* {{{ */
 {
@@ -70,10 +70,10 @@ int fpm_log_open(int reopen) /* {{{ */
 /* }}} */
 
 /* }}} */
-int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
+bool fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 {
 	if (!wp || !wp->config) {
-		return -1;
+		return false;
 	}
 
 	if (wp->config->access_log && *wp->config->access_log) {
@@ -86,7 +86,7 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 		struct key_value_s *kvcopy = calloc(1, sizeof(*kvcopy));
 		if (kvcopy == NULL) {
 			zlog(ZLOG_ERROR, "unable to allocate memory while opening the access log");
-			return -1;
+			return false;
 		}
 		kvcopy->value = strdup(kv->value);
 		kvcopy->next = fpm_access_suppress_paths;
@@ -105,11 +105,11 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 		}
 	}
 
-	return 0;
+	return true;
 }
 /* }}} */
 
-int fpm_log_write(char *log_format) /* {{{ */
+bool fpm_log_write(char *log_format) /* {{{ */
 {
 	char *s, *b;
 	char buffer[FPM_LOG_BUFFER+1];
@@ -125,7 +125,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 #endif
 
 	if (!log_format && (!fpm_log_format || fpm_log_fd == -1)) {
-		return -1;
+		return false;
 	}
 
 	if (!log_format) {
@@ -141,18 +141,18 @@ int fpm_log_write(char *log_format) /* {{{ */
 		scoreboard = fpm_scoreboard_get();
 		if (!scoreboard) {
 			zlog(ZLOG_WARNING, "unable to get scoreboard while preparing the access log");
-			return -1;
+			return false;
 		}
 		proc_p = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 		if (!proc_p) {
 			zlog(ZLOG_WARNING, "[pool %s] Unable to acquire shm slot while preparing the access log", scoreboard->pool);
-			return -1;
+			return false;
 		}
 		proc = *proc_p;
 		fpm_scoreboard_proc_release(proc_p);
 
 		if (UNEXPECTED(fpm_access_log_suppress(&proc))) {
-			return -1;
+			return false;
 		}
 	}
 
@@ -206,7 +206,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 						}
 					} else {
 						zlog(ZLOG_WARNING, "only 'total', 'user' or 'system' are allowed as a modifier for %%%c ('%s')", *s, format);
-						return -1;
+						return false;
 					}
 
 					format[0] = '\0';
@@ -248,7 +248,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 				case 'e': /* fastcgi env  */
 					if (format[0] == '\0') {
 						zlog(ZLOG_WARNING, "the name of the environment variable must be set between embraces for %%%c", *s);
-						return -1;
+						return false;
 					}
 
 					if (!test) {
@@ -297,7 +297,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					} else {
 						zlog(ZLOG_WARNING, "only 'bytes', 'kilo', 'kilobytes', 'mega' or 'megabytes' are allowed as a modifier for %%%c ('%s')", *s, format);
-						return -1;
+						return false;
 					}
 					format[0] = '\0';
 					break;
@@ -311,7 +311,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 				case 'o': /* header output  */
 					if (format[0] == '\0') {
 						zlog(ZLOG_WARNING, "the name of the header must be set between embraces for %%%c", *s);
-						return -1;
+						return false;
 					}
 					if (!test) {
 						sapi_header_struct *h;
@@ -448,19 +448,19 @@ int fpm_log_write(char *log_format) /* {{{ */
 						}
 						if (s[1] == '\0') {
 							zlog(ZLOG_WARNING, "missing closing embrace in the access.format");
-							return -1;
+							return false;
 						}
 					}
 					break;
 
 				default:
 					zlog(ZLOG_WARNING, "Invalid token in the access.format (%%%c)", *s);
-					return -1;
+					return false;
 			}
 
 			if (*s != '}' && format[0] != '\0') {
 				zlog(ZLOG_WARNING, "embrace is not allowed for modifier %%%c", *s);
-				return -1;
+				return false;
 			}
 			s++;
 			if (!test) {
@@ -489,11 +489,11 @@ int fpm_log_write(char *log_format) /* {{{ */
 		zend_quiet_write(fpm_log_fd, buffer, len + 1);
 	}
 
-	return 0;
+	return true;
 }
 /* }}} */
 
-static int fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc)
+static bool fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc)
 {
 	// Never suppress when query string is passed
 	if (proc->query_string[0] != '\0') {

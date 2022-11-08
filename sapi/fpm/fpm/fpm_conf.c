@@ -1339,7 +1339,7 @@ static bool fpm_conf_post_process(int force_daemon) /* {{{ */
 		if (!wp->config->access_log || !*wp->config->access_log) {
 			continue;
 		}
-		if (0 > fpm_log_write(wp->config->access_format)) {
+		if (!fpm_log_write(wp->config->access_format)) {
 			zlog(ZLOG_ERROR, "[pool %s] wrong format for access.format '%s'", wp->config->name, wp->config->access_format);
 			return false;
 		}
