@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0RC6
+?? ??? ????, PHP 8.2.0
+
+
+10 Nov 2022, PHP 8.2.0RC6
 
 - Core:
   . Fixed bug GH-9823 (Don’t reset func in zend_closure_internal_handler).
