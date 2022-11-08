@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.14
 
+- Core:
+  . Fixed bug GH-9905 (constant() behaves inconsistent when class is undefined).
+    (cmb)
 
 24 Nov 2022, PHP 8.1.13
 
