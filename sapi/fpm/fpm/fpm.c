@@ -61,7 +61,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	    0 > fpm_pctl_init_main()          ||
 	    0 > fpm_env_init_main()           ||
 	    0 > fpm_signals_init_main()       ||
-	    0 > fpm_children_init_main()      ||
+	    !fpm_children_init_main()      ||
 	    0 > fpm_sockets_init_main()       ||
 	    0 > fpm_worker_pool_init_main()   ||
 	    0 > fpm_event_init_main()) {

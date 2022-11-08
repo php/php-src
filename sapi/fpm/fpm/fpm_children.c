@@ -468,7 +468,7 @@ int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_children_init_main(void)
+bool fpm_children_init_main(void)
 {
 	if (fpm_global_config.emergency_restart_threshold &&
 		fpm_global_config.emergency_restart_interval) {
@@ -476,15 +476,15 @@ int fpm_children_init_main(void)
 		last_faults = malloc(sizeof(time_t) * fpm_global_config.emergency_restart_threshold);
 
 		if (!last_faults) {
-			return -1;
+			return false;
 		}
 
 		memset(last_faults, 0, sizeof(time_t) * fpm_global_config.emergency_restart_threshold);
 	}
 
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_children_cleanup, 0)) {
-		return -1;
+		return false;
 	}
 
-	return 0;
+	return true;
 }
