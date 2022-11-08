@@ -63,7 +63,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	    !fpm_signals_init_main()       ||
 	    !fpm_children_init_main()      ||
 	    !fpm_sockets_init_main()       ||
-	    0 > fpm_worker_pool_init_main()   ||
+	    !fpm_worker_pool_init_main()   ||
 	    !fpm_event_init_main()) {
 
 		if (fpm_globals.test_successful) {
