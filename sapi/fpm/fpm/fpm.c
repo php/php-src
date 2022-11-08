@@ -55,7 +55,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 
 	if (0 > fpm_php_init_main()           ||
 	    0 > fpm_stdio_init_main()         ||
-	    0 > fpm_conf_init_main(test_conf, force_daemon) ||
+	    !fpm_conf_init_main(test_conf, force_daemon) ||
 	    0 > fpm_unix_init_main()          ||
 	    0 > fpm_scoreboard_init_main()    ||
 	    0 > fpm_pctl_init_main()          ||
@@ -74,7 +74,7 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 		}
 	}
 
-	if (0 > fpm_conf_write_pid()) {
+	if (!fpm_conf_write_pid()) {
 		zlog(ZLOG_ERROR, "FPM initialization failed");
 		return -1;
 	}
