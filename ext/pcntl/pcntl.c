@@ -140,10 +140,18 @@ PHP_MSHUTDOWN_FUNCTION(pcntl)
 PHP_RSHUTDOWN_FUNCTION(pcntl)
 {
 	struct php_pcntl_pending_signal *sig;
+	zend_long signo;
+	zval *handle;
 
-	/* FIXME: if a signal is delivered after this point, things will go pear shaped;
-	 * need to remove signal handlers */
+	/* Reset all signals to their default disposition */
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
+		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
+			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	zend_hash_destroy(&PCNTL_G(php_signal_table));
+
 	while (PCNTL_G(head)) {
 		sig = PCNTL_G(head);
 		PCNTL_G(head) = sig->next;
@@ -154,6 +162,7 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 		PCNTL_G(spares) = sig->next;
 		efree(sig);
 	}
+
 	return SUCCESS;
 }
 
