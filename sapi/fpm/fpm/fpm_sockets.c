@@ -242,7 +242,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		umask(saved_umask);
 
-		if (0 > fpm_unix_set_socket_permissions(wp, path)) {
+		if (!fpm_unix_set_socket_permissions(wp, path)) {
 			close(sock);
 			return -1;
 		}
@@ -485,7 +485,7 @@ bool fpm_sockets_init_main(void)
 				break;
 
 			case FPM_AF_UNIX :
-				if (0 > fpm_unix_resolve_socket_permissions(wp)) {
+				if (!fpm_unix_resolve_socket_permissions(wp)) {
 					return false;
 				}
 				wp->listening_socket = fpm_socket_af_unix_listening_socket(wp);

@@ -152,7 +152,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (!fpm_stdio_init_child(wp) /* Note: this never fails */  ||
 	    !fpm_log_init_child(wp)    ||
 	    !fpm_status_init_child(wp) ||
-	    0 > fpm_unix_init_child(wp)   ||
+	    !fpm_unix_init_child(wp)   ||
 	    !fpm_signals_init_child()  ||
 	    !fpm_env_init_child(wp) /* Note: this never fails */    ||
 	    !fpm_php_init_child(wp) /* Note: this never fails */) {
