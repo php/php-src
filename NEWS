@@ -6,14 +6,6 @@ PHP                                                                        NEWS
   . Added pdeathsig to builtin server to terminate workers when the master
     process is killed. (ilutov)
 
-- GD:
-  . Fixed bug #81739: OOB read due to insufficient input validation in
-    imageloadfont(). (CVE-2022-31630) (cmb)
-
-- Hash:
-  . Fixed bug #81738: buffer overflow in hash_update() on long parameter. 
-    (CVE-2022-37454) (nicky at mouha dot be)
-
 - Core:
   . Fixed bug GH-9388 (Improve unset property and __get type incompatibility
     error message). (ilutov)
@@ -31,6 +23,14 @@ PHP                                                                        NEWS
 - FPM:
   . The status.listen shared pool now uses the same php_values (including
     expose_php) and php_admin_value as the pool it is shared with. (dwxh)
+
+- GD:
+  . Fixed bug #81739: OOB read due to insufficient input validation in
+    imageloadfont(). (CVE-2022-31630) (cmb)
+
+- Hash:
+  . Fixed bug #81738: buffer overflow in hash_update() on long parameter.
+    (CVE-2022-37454) (nicky at mouha dot be)
 
 - JSON:
   . Implemented RFC: json_validate()
@@ -50,6 +50,10 @@ PHP                                                                        NEWS
 - Posix:
   . Added posix_sysconf. (David Carlier)
 
+- Reflection:
+  . Fix GH-9470 (ReflectionMethod constructor should not find private parent
+    method). (ilutov)
+
 - Sockets:
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
     over socket binding for a cpu core. (David Carlier)
@@ -59,9 +63,5 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
     (Jakub Zelenka)
-
-- Reflection:
-  . Fix GH-9470 (ReflectionMethod constructor should not find private parent
-    method). (ilutov)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
