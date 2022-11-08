@@ -163,7 +163,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_children_free(struct fpm_child_s *child) /* {{{ */
+void fpm_children_free(struct fpm_child_s *child) /* {{{ */
 {
 	struct fpm_child_s *next;
 
@@ -171,8 +171,6 @@ int fpm_children_free(struct fpm_child_s *child) /* {{{ */
 		next = child->next;
 		fpm_child_close(child, 0 /* in_event_loop */);
 	}
-
-	return 0;
 }
 /* }}} */
 
