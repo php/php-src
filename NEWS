@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.13
+?? ??? ????, PHP 8.1.14
+
+
+24 Nov 2022, PHP 8.1.13
 
 - CLI:
   . Fixed bug GH-9709 (Null pointer dereference with -w/-s options). (Adam Saponara)
