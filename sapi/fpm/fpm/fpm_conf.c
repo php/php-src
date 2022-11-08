@@ -1323,7 +1323,7 @@ static bool fpm_conf_post_process(int force_daemon) /* {{{ */
 		return false;
 	}
 
-	if (0 > fpm_event_pre_init(fpm_global_config.events_mechanism)) {
+	if (!fpm_event_pre_init(fpm_global_config.events_mechanism)) {
 		return false;
 	}
 
