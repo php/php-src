@@ -104,7 +104,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 }
 /* }}} */
 
-static int php_disk_total_space(char *path, double *space) /* {{{ */
+static zend_result php_disk_total_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
@@ -189,7 +189,7 @@ PHP_FUNCTION(disk_total_space)
 }
 /* }}} */
 
-static int php_disk_free_space(char *path, double *space) /* {{{ */
+static zend_result php_disk_free_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
@@ -272,7 +272,7 @@ PHP_FUNCTION(disk_free_space)
 /* }}} */
 
 #ifndef PHP_WIN32
-PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid)
+PHPAPI zend_result php_get_gid_by_name(const char *name, gid_t *gid)
 {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
@@ -398,7 +398,7 @@ PHP_FUNCTION(lchgrp)
 /* }}} */
 
 #ifndef PHP_WIN32
-PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid)
+PHPAPI zend_result php_get_uid_by_name(const char *name, uid_t *uid)
 {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;
