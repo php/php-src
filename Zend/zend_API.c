@@ -3281,7 +3281,10 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 			ce->refcount++;
 		}
-		zend_observer_class_linked_notify(ce, lcname);
+		// avoid notifying at MINIT time
+		if (ce->type == ZEND_USER_CLASS) {
+			zend_observer_class_linked_notify(ce, lcname);
+		}
 		return SUCCESS;
 	}
 	return FAILURE;
