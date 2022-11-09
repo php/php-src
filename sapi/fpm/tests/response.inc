@@ -107,9 +107,20 @@ class Response
      *
      * @return Response
      */
-    public function expectHeader($name, $value): Response
+    public function expectHeader($name, $value, $useRegex = false): Response
     {
-        $this->checkHeader($name, $value);
+        $this->checkHeader($name, $value, $useRegex);
+
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return Response
+     */
+    public function expectNoHeader($name)
+    {
+        $this->checkNoHeader($name);
 
         return $this;
     }
@@ -259,6 +270,21 @@ class Response
 
         if ( ! preg_match($value, $header)) {
             return $this->error("The header $name value '$header' does not match RegExp '$value'");
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    private function checkNoHeader(string $name)
+    {
+        $lcName = strtolower($name);
+        $headers = $this->getHeaders();
+        if (isset($headers[$lcName])) {
+            return $this->error("The header $name is present");
         }
 
         return true;

@@ -93,6 +93,12 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 		zend_signal_handler(signo, siginfo, context);
 		return;
 	}
+
+	if (!tsrm_is_managed_thread()) {
+		fprintf(stderr, "zend_signal_handler_defer() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
+
+		return;
+	}
 #endif
 
 	if (EXPECTED(SIGG(active))) {

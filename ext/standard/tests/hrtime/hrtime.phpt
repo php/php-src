@@ -1,5 +1,7 @@
 --TEST--
 Test hrtime() aligns with microtime()
+--XFAIL--
+This test frequently fails in CI
 --FILE--
 <?php
 

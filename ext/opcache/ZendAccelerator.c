@@ -35,6 +35,7 @@
 #include "zend_inheritance.h"
 #include "zend_exceptions.h"
 #include "zend_mmap.h"
+#include "zend_observer.h"
 #include "main/php_main.h"
 #include "main/SAPI.h"
 #include "main/php_streams.h"
@@ -2824,6 +2825,7 @@ static inline int accel_find_sapi(void)
 		"litespeed",
 		"uwsgi",
 		"fuzzer",
+		"frankenphp",
 		NULL
 	};
 	const char **sapi_name;
@@ -3156,7 +3158,7 @@ static int accel_startup(zend_extension *extension)
 		    strcmp(sapi_module.name, "cli") == 0) {
 			zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb);
 		} else {
-			zps_startup_failure("Opcode Caching is only supported in Apache, FPM, FastCGI and LiteSpeed SAPIs", NULL, accelerator_remove_cb);
+			zps_startup_failure("Opcode Caching is only supported in Apache, FPM, FastCGI, FrankenPHP, LiteSpeed and uWSGI SAPIs", NULL, accelerator_remove_cb);
 		}
 		return SUCCESS;
 	}
@@ -4479,6 +4481,7 @@ static int accel_preload(const char *config, bool in_child)
 		script->script.main_op_array.fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 		script->script.main_op_array.last = 1;
 		script->script.main_op_array.last_literal = 1;
+		script->script.main_op_array.T = ZEND_OBSERVER_ENABLED;
 #if ZEND_USE_ABS_CONST_ADDR
 		script->script.main_op_array.literals = (zval*)emalloc(sizeof(zval));
 #else

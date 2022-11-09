@@ -50,7 +50,7 @@ ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_n
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = {0};
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL, NULL };
+ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = {0};
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
@@ -471,8 +471,6 @@ void shutdown_executor(void) /* {{{ */
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
 			efree(EG(ht_iterators));
 		}
-
-		ZEND_ASSERT(EG(filename_override) == NULL);
 	}
 
 #if ZEND_DEBUG
@@ -975,6 +973,10 @@ cleanup_args:
 				zend_interrupt_function(EG(current_execute_data));
 			}
 		}
+
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+			OBJ_RELEASE(Z_OBJ(call->This));
+		}
 	}
 	EG(fake_scope) = orig_fake_scope;
 
@@ -1355,7 +1357,13 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 #ifndef ZEND_WIN32
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
-#ifndef ZTS
+#ifdef ZTS
+	if (!tsrm_is_managed_thread()) {
+		fprintf(stderr, "zend_timeout_handler() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
+
+		return;
+	}
+#else
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		/* Die on hard timeout */
 		const char *error_filename = NULL;
@@ -1483,7 +1491,7 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 
 			act.sa_handler = zend_timeout_handler;
 			sigemptyset(&act.sa_mask);
-			act.sa_flags = SA_RESETHAND | SA_NODEFER;
+			act.sa_flags = SA_ONSTACK | SA_RESETHAND | SA_NODEFER;
 			sigaction(signo, &act, NULL);
 #  else
 			signal(signo, zend_timeout_handler);

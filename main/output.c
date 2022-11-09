@@ -939,15 +939,21 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 
 		OG(running) = handler;
 		if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-			zval retval, ob_data, ob_mode;
+			zval ob_args[2];
+			zval retval;
 
-			ZVAL_STRINGL(&ob_data, handler->buffer.data, handler->buffer.used);
-			ZVAL_LONG(&ob_mode, (zend_long) context->op);
-			zend_fcall_info_argn(&handler->func.user->fci, 2, &ob_data, &ob_mode);
-			zval_ptr_dtor(&ob_data);
+			/* ob_data */
+			ZVAL_STRINGL(&ob_args[0], handler->buffer.data, handler->buffer.used);
+			/* ob_mode */
+			ZVAL_LONG(&ob_args[1], (zend_long) context->op);
+
+			/* Set FCI info */
+			handler->func.user->fci.param_count = 2;
+			handler->func.user->fci.params = ob_args;
+			handler->func.user->fci.retval = &retval;
 
 #define PHP_OUTPUT_USER_SUCCESS(retval) ((Z_TYPE(retval) != IS_UNDEF) && !(Z_TYPE(retval) == IS_FALSE))
-			if (SUCCESS == zend_fcall_info_call(&handler->func.user->fci, &handler->func.user->fcc, &retval, NULL) && PHP_OUTPUT_USER_SUCCESS(retval)) {
+			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && PHP_OUTPUT_USER_SUCCESS(retval)) {
 				/* user handler may have returned TRUE */
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
 				if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
@@ -964,7 +970,9 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				status = PHP_OUTPUT_HANDLER_FAILURE;
 			}
 
-			zend_fcall_info_argn(&handler->func.user->fci, 0);
+			/* Free arguments and return value */
+			zval_ptr_dtor(&ob_args[0]);
+			zval_ptr_dtor(&ob_args[1]);
 			zval_ptr_dtor(&retval);
 
 		} else {

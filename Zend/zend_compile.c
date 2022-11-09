@@ -1230,12 +1230,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	/* Pure intersection type */
 	if (ZEND_TYPE_IS_INTERSECTION(type)) {
 		ZEND_ASSERT(!ZEND_TYPE_IS_UNION(type));
-		bool is_bracketed = false;
-		/* Shim for implicitly nullable pure intersection types */
-		if (UNEXPECTED(ZEND_TYPE_PURE_MASK(type) & MAY_BE_NULL)) {
-			is_bracketed = true;
-		}
-		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, is_bracketed);
+		str = add_intersection_type(str, ZEND_TYPE_LIST(type), scope, /* is_bracketed */ false);
 	} else if (ZEND_TYPE_HAS_LIST(type)) {
 		/* A union type might not be a list */
 		zend_type *list_type;
@@ -5777,6 +5772,10 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		if (opline->op1_type == IS_CONST) {
 			Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
 		}
+		if (arms->children == 0) {
+			/* Mark this as an "expression throw" for opcache. */
+			opline->extended_value = ZEND_THROW_IS_EXPR;
+		}
 	}
 
 	for (uint32_t i = 0; i < arms->children; ++i) {
@@ -6524,10 +6523,26 @@ static zend_type zend_compile_typename(
 
 		ZEND_ASSERT(list->children == type_list->num_types);
 
-		ZEND_TYPE_SET_LIST(type, type_list);
-		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
-		/* Inform that the type list is an intersection type */
-		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
+		/* An implicitly nullable intersection type needs to be converted to a DNF type */
+		if (force_allow_null) {
+			zend_type intersection_type = ZEND_TYPE_INIT_NONE(0);
+			ZEND_TYPE_SET_LIST(intersection_type, type_list);
+			ZEND_TYPE_FULL_MASK(intersection_type) |= _ZEND_TYPE_INTERSECTION_BIT;
+			ZEND_TYPE_FULL_MASK(intersection_type) |= _ZEND_TYPE_ARENA_BIT;
+
+			zend_type_list *dnf_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(1));
+			dnf_type_list->num_types = 1;
+			dnf_type_list->types[0] = intersection_type;
+			ZEND_TYPE_SET_LIST(type, dnf_type_list);
+			/* Inform that the type list is a DNF type */
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_UNION_BIT;
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
+		} else {
+			ZEND_TYPE_SET_LIST(type, type_list);
+			/* Inform that the type list is an intersection type */
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
+			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
+		}
 	} else {
 		type = zend_compile_single_typename(ast);
 	}
@@ -6575,8 +6590,9 @@ static bool zend_is_valid_default_value(zend_type type, zval *value)
 	return 0;
 }
 
-static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint32_t offset, uint32_t target) /* {{{ */
-{
+static void zend_compile_attributes(
+	HashTable **attributes, zend_ast *ast, uint32_t offset, uint32_t target, uint32_t promoted
+) /* {{{ */ {
 	zend_attribute *attr;
 	zend_internal_attribute *config;
 
@@ -6602,7 +6618,19 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 			}
 
 			zend_string *name = zend_resolve_class_name_ast(el->child[0]);
+			zend_string *lcname = zend_string_tolower_ex(name, false);
 			zend_ast_list *args = el->child[1] ? zend_ast_get_list(el->child[1]) : NULL;
+
+			config = zend_internal_attribute_get(lcname);
+			zend_string_release(lcname);
+
+			/* Exclude internal attributes that do not match on promoted properties. */
+			if (config && !(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+				if (promoted & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL)) {
+					zend_string_release(name);
+					continue;
+				}
+			}
 
 			uint32_t flags = (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)
 				? ZEND_ATTRIBUTE_STRICT_TYPES : 0;
@@ -6648,31 +6676,33 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 		}
 	}
 
-	/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
-	ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
-		if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
-			continue;
-		}
-
-		if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
-			zend_string *location = zend_get_attribute_target_names(target);
-			zend_string *allowed = zend_get_attribute_target_names(config->flags);
-
-			zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
-				ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
-			);
-		}
-
-		if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
-			if (zend_is_attribute_repeated(*attributes, attr)) {
-				zend_error_noreturn(E_ERROR, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->name));
+	if (*attributes != NULL) {
+		/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
+		ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
+			if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
+				continue;
 			}
-		}
 
-		if (config->validator != NULL) {
-			config->validator(attr, target, CG(active_class_entry));
-		}
-	} ZEND_HASH_FOREACH_END();
+			if (!(target & (config->flags & ZEND_ATTRIBUTE_TARGET_ALL))) {
+				zend_string *location = zend_get_attribute_target_names(target);
+				zend_string *allowed = zend_get_attribute_target_names(config->flags);
+
+				zend_error_noreturn(E_ERROR, "Attribute \"%s\" cannot target %s (allowed targets: %s)",
+					ZSTR_VAL(attr->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
+				);
+			}
+
+			if (!(config->flags & ZEND_ATTRIBUTE_IS_REPEATABLE)) {
+				if (zend_is_attribute_repeated(*attributes, attr)) {
+					zend_error_noreturn(E_ERROR, "Attribute \"%s\" must not be repeated", ZSTR_VAL(attr->name));
+				}
+			}
+
+			if (config->validator != NULL) {
+				config->validator(attr, target, CG(active_class_entry));
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
@@ -6807,7 +6837,10 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		arg_info->type = (zend_type) ZEND_TYPE_INIT_NONE(0);
 
 		if (attributes_ast) {
-			zend_compile_attributes(&op_array->attributes, attributes_ast, i + 1, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+			zend_compile_attributes(
+				&op_array->attributes, attributes_ast, i + 1, ZEND_ATTRIBUTE_TARGET_PARAMETER,
+				property_flags ? ZEND_ATTRIBUTE_TARGET_PROPERTY : 0
+			);
 		}
 
 		if (type_ast) {
@@ -6913,7 +6946,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				scope, name, &default_value, property_flags | ZEND_ACC_PROMOTED, doc_comment, type);
 			if (attributes_ast) {
 				zend_compile_attributes(
-					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 			}
 		}
 	}
@@ -7239,7 +7272,7 @@ static uint32_t zend_add_dynamic_func_def(zend_op_array *def) {
 	return def_offset;
 }
 
-static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, bool toplevel) /* {{{ */
+static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, bool toplevel) /* {{{ */
 {
 	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
@@ -7273,23 +7306,20 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
 			do_bind_function_error(lcname, op_array, 1);
 		}
-		zend_observer_function_declared_notify(op_array, lcname);
-		zend_string_release_ex(lcname, 0);
-		return;
-	}
-
-	uint32_t func_ref = zend_add_dynamic_func_def(op_array);
-	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
-		opline->op2.num = func_ref;
 	} else {
-		opline = get_next_op();
-		opline->opcode = ZEND_DECLARE_FUNCTION;
-		opline->op1_type = IS_CONST;
-		LITERAL_STR(opline->op1, zend_string_copy(lcname));
-		opline->op2.num = func_ref;
+		uint32_t func_ref = zend_add_dynamic_func_def(op_array);
+		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
+			opline->op2.num = func_ref;
+		} else {
+			opline = get_next_op();
+			opline->opcode = ZEND_DECLARE_FUNCTION;
+			opline->op1_type = IS_CONST;
+			LITERAL_STR(opline->op1, zend_string_copy(lcname));
+			opline->op2.num = func_ref;
+		}
 	}
-	zend_string_release_ex(lcname, 0);
+	return lcname;
 }
 /* }}} */
 
@@ -7301,7 +7331,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
-	zend_string *method_lcname = NULL;
+	zend_string *lcname = NULL;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -7330,9 +7360,9 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 
 	if (is_method) {
 		bool has_body = stmt_ast != NULL;
-		method_lcname = zend_begin_method_decl(op_array, decl->name, has_body);
+		lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		zend_begin_func_decl(result, op_array, decl, toplevel);
+		lcname = zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
 			find_implicit_binds(&info, params_ast, stmt_ast);
 			compile_implicit_lexical_binds(&info, result, op_array);
@@ -7350,7 +7380,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 			target = ZEND_ATTRIBUTE_TARGET_METHOD;
 		}
 
-		zend_compile_attributes(&op_array->attributes, decl->child[4], 0, target);
+		zend_compile_attributes(&op_array->attributes, decl->child[4], 0, target, 0);
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
@@ -7375,7 +7405,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	}
 
 	zend_compile_params(params_ast, return_type_ast,
-		is_method && zend_string_equals_literal(method_lcname, ZEND_TOSTRING_FUNC_NAME) ? IS_STRING : 0);
+		is_method && zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME) ? IS_STRING : 0);
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
@@ -7404,8 +7434,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	if (is_method) {
 		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
-			CG(active_class_entry), (zend_function *) op_array, method_lcname, E_COMPILE_ERROR);
-		zend_string_release_ex(method_lcname, 0);
+			CG(active_class_entry), (zend_function *) op_array, lcname, E_COMPILE_ERROR);
 	}
 
 	/* put the implicit return on the really last line */
@@ -7419,6 +7448,12 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 
 	/* Pop the loop variable stack separator */
 	zend_stack_del_top(&CG(loop_var_stack));
+
+	if (toplevel) {
+		zend_observer_function_declared_notify(op_array, lcname);
+	}
+
+	zend_string_release_ex(lcname, 0);
 
 	CG(active_op_array) = orig_op_array;
 	CG(active_class_entry) = orig_class_entry;
@@ -7532,7 +7567,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (attr_ast) {
-			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
 		}
 	}
 }
@@ -7593,7 +7628,7 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		c = zend_declare_class_constant_ex(ce, name, &value_zv, flags, doc_comment);
 
 		if (attr_ast) {
-			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
+			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
 		}
 	}
 }
@@ -7855,7 +7890,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	CG(active_class_entry) = ce;
 
 	if (decl->child[3]) {
-		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS);
+		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
 	}
 
 	if (implements_ast) {
@@ -8013,7 +8048,7 @@ static void zend_compile_enum_case(zend_ast *ast)
 
 	zend_ast *attr_ast = ast->child[3];
 	if (attr_ast) {
-		zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
+		zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
 	}
 }
 

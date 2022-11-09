@@ -507,6 +507,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 
 				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
+					print_hash(buf, (HashTable*) &zend_empty_array, indent, 1);
 					break;
 				}
 

@@ -686,18 +686,11 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return (void*)-1;
 	}
 
 	shm->addr = shm->descriptor + sizeof(shm->descriptor);
-
-	if (NULL == shm->addr) {
-		int err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(err);
-		return (void*)-1;
-	}
-
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
@@ -710,7 +703,7 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm_pair *shm = shm_get(0, (void*)shmaddr);
 	int ret;
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 
@@ -730,7 +723,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 

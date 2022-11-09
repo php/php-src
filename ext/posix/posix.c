@@ -1056,15 +1056,42 @@ static const struct limitlist {
 PHP_FUNCTION(posix_getrlimit)
 {
 	const struct limitlist *l = NULL;
+	zend_long res;
+	bool res_is_null = true;
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(res, res_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
-	array_init(return_value);
+	if (res_is_null) {
+		array_init(return_value);
 
-	for (l=limits; l->name; l++) {
-		if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
-			zend_array_destroy(Z_ARR_P(return_value));
+		for (l=limits; l->name; l++) {
+			if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
+				zend_array_destroy(Z_ARR_P(return_value));
+				RETURN_FALSE;
+			}
+		}
+	} else {
+		struct rlimit rl;
+		int result = getrlimit(res, &rl);
+		if (result < 0) {
+			POSIX_G(last_error) = errno;
 			RETURN_FALSE;
+		}
+
+		array_init(return_value);
+		if (rl.rlim_cur == RLIM_INFINITY) {
+			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
+		} else {
+			add_next_index_long(return_value, rl.rlim_cur);
+		}
+
+		if (rl.rlim_max == RLIM_INFINITY) {
+			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
+		} else {
+			add_next_index_long(return_value, rl.rlim_max);
 		}
 	}
 }

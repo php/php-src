@@ -779,4 +779,9 @@ TSRM_API const char *tsrm_api_name(void)
 #endif
 }/*}}}*/
 
+TSRM_API bool tsrm_is_managed_thread()
+{/*{{{*/
+	return tsrm_tls_get() ? true : false;
+}/*}}}*/
+
 #endif /* ZTS */

@@ -1978,16 +1978,17 @@ PHP_FUNCTION(socket_set_option)
 				static struct sock_fprog bpfprog;
 
 				switch (k) {
-                		case SKF_AD_CPU:
-					cbpf[0].code = (BPF_LD|BPF_W|BPF_ABS);
-                    			cbpf[0].k = (uint32_t)(SKF_AD_OFF + k);
-					cbpf[1].code = (BPF_RET|BPF_A);
-                    			bpfprog.len = 2;
-                    		break;
-                		default:
-                    			php_error_docref(NULL, E_WARNING, "Unsupported CBPF filter");
-                    			RETURN_FALSE;
-                		}
+					case SKF_AD_CPU:
+					case SKF_AD_QUEUE:
+						cbpf[0].code = (BPF_LD|BPF_W|BPF_ABS);
+						cbpf[0].k = (uint32_t)(SKF_AD_OFF + k);
+						cbpf[1].code = (BPF_RET|BPF_A);
+						bpfprog.len = 2;
+					break;
+					default:
+						php_error_docref(NULL, E_WARNING, "Unsupported CBPF filter");
+						RETURN_FALSE;
+				}
 
 				bpfprog.filter = cbpf;
 				optlen = sizeof(bpfprog);
@@ -2106,6 +2107,32 @@ PHP_FUNCTION(socket_shutdown)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
+
+#ifdef HAVE_SOCKATMARK
+PHP_FUNCTION(socket_atmark)
+{
+	zval		*arg1;
+	php_socket	*php_sock;
+	int r;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &arg1, socket_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	php_sock = Z_SOCKET_P(arg1);
+	ENSURE_SOCKET_VALID(php_sock);
+
+	r = sockatmark(php_sock->bsd_socket);
+	if (r < 0) {
+		PHP_SOCKET_ERROR(php_sock, "Unable to apply sockmark", errno);
+		RETURN_FALSE;
+	} else if (r == 0) {
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
 #endif
 
 /* {{{ Returns the last socket error (either the last used or the provided socket resource) */

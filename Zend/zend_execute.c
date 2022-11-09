@@ -1227,8 +1227,8 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED bool zend_verify_internal_arg_typ
  * trust that arginfo matches what is enforced by zend_parse_parameters. */
 ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
 {
-	if (fbc->internal_function.handler == ZEND_FN(pass)) {
-		/* Be lenient about the special pass function. */
+	if (fbc->internal_function.handler == ZEND_FN(pass) || (fbc->internal_function.fn_flags | ZEND_ACC_FAKE_CLOSURE)) {
+		/* Be lenient about the special pass function and about fake closures. */
 		return 0;
 	}
 
@@ -4101,6 +4101,136 @@ static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DAT
 	/* However control may currently be delegated to another generator.
 	 * That's the one we're interested in. */
 	return generator;
+}
+/* }}} */
+
+ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf) /* {{{ */
+{
+	zend_op *opline = EX(func)->op_array.opcodes + op_num;
+	int level;
+	int do_exit;
+	uint32_t num_args;
+
+	if (UNEXPECTED(opline->opcode == ZEND_INIT_FCALL ||
+		opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
+		opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
+		opline->opcode == ZEND_INIT_DYNAMIC_CALL ||
+		opline->opcode == ZEND_INIT_USER_CALL ||
+		opline->opcode == ZEND_INIT_METHOD_CALL ||
+		opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
+		opline->opcode == ZEND_NEW)) {
+		ZEND_ASSERT(op_num);
+		opline--;
+	}
+
+	do {
+		/* find the number of actually passed arguments */
+		level = 0;
+		do_exit = 0;
+		num_args = ZEND_CALL_NUM_ARGS(call);
+		do {
+			switch (opline->opcode) {
+				case ZEND_DO_FCALL:
+				case ZEND_DO_ICALL:
+				case ZEND_DO_UCALL:
+				case ZEND_DO_FCALL_BY_NAME:
+					level++;
+					break;
+				case ZEND_INIT_FCALL:
+				case ZEND_INIT_FCALL_BY_NAME:
+				case ZEND_INIT_NS_FCALL_BY_NAME:
+				case ZEND_INIT_DYNAMIC_CALL:
+				case ZEND_INIT_USER_CALL:
+				case ZEND_INIT_METHOD_CALL:
+				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_NEW:
+					if (level == 0) {
+						num_args = 0;
+						do_exit = 1;
+					}
+					level--;
+					break;
+				case ZEND_SEND_VAL:
+				case ZEND_SEND_VAL_EX:
+				case ZEND_SEND_VAR:
+				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_FUNC_ARG:
+				case ZEND_SEND_REF:
+				case ZEND_SEND_VAR_NO_REF:
+				case ZEND_SEND_VAR_NO_REF_EX:
+				case ZEND_SEND_USER:
+					if (level == 0) {
+						/* For named args, the number of arguments is up to date. */
+						if (opline->op2_type != IS_CONST) {
+							num_args = opline->op2.num;
+						}
+						do_exit = 1;
+					}
+					break;
+				case ZEND_SEND_ARRAY:
+				case ZEND_SEND_UNPACK:
+				case ZEND_CHECK_UNDEF_ARGS:
+					if (level == 0) {
+						do_exit = 1;
+					}
+					break;
+			}
+			if (!do_exit) {
+				opline--;
+			}
+		} while (!do_exit);
+		if (call->prev_execute_data) {
+			/* skip current call region */
+			level = 0;
+			do_exit = 0;
+			do {
+				switch (opline->opcode) {
+					case ZEND_DO_FCALL:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+						level++;
+						break;
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_NEW:
+						if (level == 0) {
+							do_exit = 1;
+						}
+						level--;
+						break;
+				}
+				opline--;
+			} while (!do_exit);
+		}
+
+		if (EXPECTED(num_args > 0)) {
+			zval *p = ZEND_CALL_ARG(call, 1);
+			do {
+				zend_get_gc_buffer_add_zval(buf, p);
+				p++;
+			} while (--num_args);
+		}
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+			zend_get_gc_buffer_add_obj(buf, Z_OBJ(call->This));
+		}
+		if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+			zval *val;
+			ZEND_HASH_FOREACH_VAL(call->extra_named_params, val) {
+				zend_get_gc_buffer_add_zval(buf, val);
+			} ZEND_HASH_FOREACH_END();
+		}
+		if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+			zend_get_gc_buffer_add_obj(buf, ZEND_CLOSURE_OBJECT(call->func));
+		}
+
+		call = call->prev_execute_data;
+	} while (call);
 }
 /* }}} */
 
