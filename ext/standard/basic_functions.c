@@ -525,7 +525,7 @@ PHP_FUNCTION(constant)
 	ZEND_PARSE_PARAMETERS_END();
 
 	scope = zend_get_executed_scope();
-	c = zend_get_constant_ex(const_name, scope, 0);
+	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_EXCEPTION);
 	if (!c) {
 		RETURN_THROWS();
 	}
