@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed GH-9932 (session name silently fails with . and [). (David Carlier)
 
+- SPL:
+  . Fixed GH-9883 (SplFileObject::__toString() reads next line). (Girgias)
+
 24 Nov 2022, PHP 8.1.13
 
 - CLI:
