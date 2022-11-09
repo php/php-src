@@ -3,6 +3,10 @@ Observer: Test with basic preloading
 --EXTENSIONS--
 zend_test
 opcache
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+?>
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
