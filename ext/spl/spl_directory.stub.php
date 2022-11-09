@@ -293,7 +293,6 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
      */
     public function getCurrentLine(): string {}
 
-    /** @implementation-alias SplFileObject::fgets */
     public function __toString(): string {}
 }
 
