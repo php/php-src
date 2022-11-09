@@ -206,8 +206,8 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	}
 	module_entry = get_module();
 	if (zend_hash_str_exists(&module_registry, module_entry->name, strlen(module_entry->name))) {
-		DL_UNLOAD(handle);
 		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module_entry->name);
+		DL_UNLOAD(handle);
 		return FAILURE;
 	}
 	if (module_entry->zend_api != ZEND_MODULE_API_NO) {
