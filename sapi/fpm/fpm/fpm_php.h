@@ -13,7 +13,6 @@
 	{ \
 		"error_log", \
 		"extension_dir", \
-		"mime_magic.magicfile", \
 		"sendmail_path", \
 		"session.cookie_path", \
 		"session_pgsql.sem_file_name", \
