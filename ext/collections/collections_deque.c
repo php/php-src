@@ -1086,25 +1086,45 @@ static zend_always_inline void collections_deque_entries_insert_values(collectio
 		collections_deque_entries_raise_capacity(array, new_capacity);
 		mask = array->mask;
 	}
-	const uint32_t offset = array->offset;
+	uint32_t offset = array->offset;
 	zval *const circular_buffer = array->circular_buffer;
 
 	collections_deque_maybe_adjust_iterators_before_insert(array, inserted_offset, argc);
 
-	/* Move elements to the end of the deque */
-	/* TODO move the start instead when there are less elements. */
-	uint32_t src_offset = (offset + old_size) & mask; /* Masked in do-while loop. */
-	uint32_t dst_offset = src_offset + argc;
-	const uint32_t src_end = (offset + inserted_offset) & mask;
+	if (inserted_offset >= (old_size / 2)) {
+		/* The inserted_offset is closer to the end of the Deque. */
+		/* Move elements to the end of the deque. */
+		uint32_t src_offset = (offset + old_size) & mask; /* Start copying from the end of the deque forward to create a gap */
+		uint32_t dst_offset = src_offset + argc; /* Masked in do-while loop. */
+		const uint32_t src_end = (offset + inserted_offset) & mask;
 
-	while (src_offset != src_end) {
-		src_offset = (src_offset - 1) & mask;
-		dst_offset = (dst_offset - 1) & mask;
-		ZEND_ASSERT(Z_TYPE(circular_buffer[src_offset]) != IS_UNDEF);
-		ZVAL_COPY_VALUE(&circular_buffer[dst_offset], &circular_buffer[src_offset]);
+		while (src_offset != src_end) {
+			src_offset = (src_offset - 1) & mask;
+			dst_offset = (dst_offset - 1) & mask;
+			ZEND_ASSERT(Z_TYPE(circular_buffer[src_offset]) != IS_UNDEF);
+			ZVAL_COPY_VALUE(&circular_buffer[dst_offset], &circular_buffer[src_offset]);
+		}
+	} else {
+		/* The inserted_offset is closer to the start of the Deque. */
+		/* Move the offset of front of the deque backwards and move elements to the front of the deque. */
+		uint32_t src_offset = offset & mask; /* Start copying from the start of the deque backward to create a gap */
+		uint32_t dst_offset = (offset - argc) & mask; /* Masked in do-while loop. New start offset of the front of the deque */
+		const uint32_t src_end = (src_offset + inserted_offset) & mask;
+		/* Adjust the offset of the front of the deque */
+		offset = dst_offset;
+		array->offset = dst_offset;
+
+		/* Move elements to the front of the deque when the insertion offset is closer to the front */
+		while (src_offset != src_end) {
+			ZEND_ASSERT(Z_TYPE(circular_buffer[src_offset]) != IS_UNDEF);
+			ZVAL_COPY_VALUE(&circular_buffer[dst_offset], &circular_buffer[src_offset]);
+			src_offset = (src_offset + 1) & mask;
+			dst_offset = (dst_offset + 1) & mask;
+		}
 	}
 
-	dst_offset = (offset + inserted_offset) & mask;
+	/* Insert 'argc' elements in the gap that was created */
+	uint32_t dst_offset = (offset + inserted_offset) & mask;
 	do {
 		zval *dest = &circular_buffer[dst_offset];
 		ZVAL_COPY(dest, args);
@@ -1153,22 +1173,39 @@ static zend_always_inline void collections_deque_entries_remove_offset(collectio
 	const uint32_t offset = array->offset;
 	zval *const circular_buffer = array->circular_buffer;
 
-	/* Move elements from the end of the deque to replace the removed element */
-	/* TODO: Remove from the front instead if there are fewer elements to remove, adjust iterators */
 	uint32_t it_offset = (offset + removed_offset) & mask;
+	zval removed_val;
 
 	collections_deque_maybe_adjust_iterators_before_remove(array, removed_offset);
-
-	zval removed_val;
 	ZVAL_COPY_VALUE(&removed_val, &circular_buffer[it_offset]);
-	const uint32_t it_end = (offset + old_size - 1) & mask;
-	ZEND_ASSERT(Z_TYPE(circular_buffer[it_offset]) != IS_UNDEF);
 
-	while (it_offset != it_end) {
-		const uint32_t next_offset = (it_offset + 1) & mask;
-		ZEND_ASSERT(Z_TYPE(circular_buffer[next_offset]) != IS_UNDEF);
-		ZVAL_COPY_VALUE(&circular_buffer[it_offset], &circular_buffer[next_offset]);
-		it_offset = next_offset;
+	if (removed_offset >= old_size / 2) {
+		/* The removed offset is closer to the end of the Deque. */
+		/* Move elements from the end of the deque backwards to replace the removed element */
+		const uint32_t it_end = (offset + old_size - 1) & mask;
+		ZEND_ASSERT(Z_TYPE(circular_buffer[it_offset]) != IS_UNDEF);
+
+		while (it_offset != it_end) {
+			const uint32_t next_offset = (it_offset + 1) & mask;
+			ZEND_ASSERT(Z_TYPE(circular_buffer[next_offset]) != IS_UNDEF);
+			ZVAL_COPY_VALUE(&circular_buffer[it_offset], &circular_buffer[next_offset]);
+			it_offset = next_offset;
+		}
+	} else {
+		/* The removed offset is closer to the end of the Deque. */
+		/* Move elements from the front of the Deque forwards to replace the removed element */
+		const uint32_t it_end = offset & mask;
+		ZEND_ASSERT(Z_TYPE(circular_buffer[it_offset]) != IS_UNDEF);
+
+		/* Move the start of the deque forward */
+		array->offset = (offset + 1) & mask;
+
+		while (it_offset != it_end) {
+			const uint32_t next_offset = (it_offset - 1) & mask;
+			ZEND_ASSERT(Z_TYPE(circular_buffer[next_offset]) != IS_UNDEF);
+			ZVAL_COPY_VALUE(&circular_buffer[it_offset], &circular_buffer[next_offset]);
+			it_offset = next_offset;
+		}
 	}
 
 	const uint32_t new_size = old_size - 1;
