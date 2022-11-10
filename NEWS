@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-9905 (constant() behaves inconsistent when class is undefined).
     (cmb)
+  . Fixed bug GH-9918 (License information for xxHash is not included in
+    README.REDIST.BINS file). (Akama Hitoshi)
 
 27 Nov 2022, PHP 8.2.0
 
