@@ -74,6 +74,15 @@
 #define ZEND_JIT_DEBUG_TRACE_TSSA      (1<<19)
 #define ZEND_JIT_DEBUG_TRACE_EXIT_INFO (1<<20)
 
+#define ZEND_JIT_DEBUG_IR_SRC            (1<<24)
+#define ZEND_JIT_DEBUG_IR_FINAL          (1<<25)
+#define ZEND_JIT_DEBUG_IR_CFG            (1<<26)
+#define ZEND_JIT_DEBUG_IR_REGS           (1<<27)
+
+#define ZEND_JIT_DEBUG_IR_AFTER_SCCP     (1<<28)
+#define ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE (1<<29)
+#define ZEND_JIT_DEBUG_IR_AFTER_REGS     (1<<30)
+
 #define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debugger flags can't be changed at run-time */
 
 #define ZEND_JIT_TRACE_MAX_LENGTH        1024 /* max length of single trace */
@@ -155,6 +164,19 @@ ZEND_EXT_API void zend_jit_deactivate(void);
 ZEND_EXT_API void zend_jit_status(zval *ret);
 ZEND_EXT_API void zend_jit_restart(void);
 
+#ifdef ZEND_JIT_IR
+
+#define ZREG_LOAD           (1<<0)
+#define ZREG_STORE          (1<<1)
+#define ZREG_LAST_USE       (1<<2)
+#define ZREG_PI             (1<<3)
+#define ZREG_PHI            (1<<4)
+#define ZREG_FORWARD        (1<<5)
+#define ZREG_CONST          (1<<6)
+
+#define ZREG_NONE           -1
+
+#else
 typedef struct _zend_lifetime_interval zend_lifetime_interval;
 typedef struct _zend_life_range zend_life_range;
 
@@ -187,5 +209,6 @@ struct _zend_lifetime_interval {
 	zend_lifetime_interval *used_as_hint;
 	zend_lifetime_interval *list_next;
 };
+#endif
 
 #endif /* HAVE_JIT_H */
