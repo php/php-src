@@ -31,7 +31,8 @@ Build PHP
 ```
 git clone -b php-ir --single-branch git@github.com:dstogov/php-src.git php-ir
 cd php-ir
-./buidconf --force
+git submodule update --init --recursive
+./buildconf --force
 mkdir install
 ./configure --enable-opcache-jit-ir --prefix=`pwd`/install --with-config-file-path=`pwd`/install/etc
 make
