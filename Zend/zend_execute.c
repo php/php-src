@@ -211,19 +211,14 @@ ZEND_API void zend_vm_stack_destroy(void)
 
 ZEND_API void* zend_vm_stack_extend(size_t size)
 {
-	zend_vm_stack stack;
-	void *ptr;
-
-	stack = EG(vm_stack);
-	stack->top = EG(vm_stack_top);
-	EG(vm_stack) = stack = zend_vm_stack_new_page(
+	EG(vm_stack)->top = EG(vm_stack_top);
+	EG(vm_stack) = zend_vm_stack_new_page(
 		EXPECTED(size < EG(vm_stack_page_size) - (ZEND_VM_STACK_HEADER_SLOTS * sizeof(zval))) ?
 			EG(vm_stack_page_size) : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size, EG(vm_stack_page_size)),
-		stack);
-	ptr = stack->top;
-	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
-	EG(vm_stack_end) = stack->end;
-	return ptr;
+		EG(vm_stack));
+	EG(vm_stack_top) = (void*)(((char*)EG(vm_stack)->top) + size);
+	EG(vm_stack_end) = EG(vm_stack)->end;
+	return EG(vm_stack)->top;
 }
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
