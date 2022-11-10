@@ -806,11 +806,22 @@ ZEND_API binary_op_type get_binary_op(int opcode);
 void zend_stop_lexing(void);
 void zend_emit_final_return(bool return_one);
 
+typedef enum {
+	ZEND_MODIFIER_TARGET_PROPERTY = 0,
+	ZEND_MODIFIER_TARGET_METHOD,
+	ZEND_MODIFIER_TARGET_CONSTANT,
+	ZEND_MODIFIER_TARGET_CPP,
+} zend_modifier_target;
+
 /* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
-uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
+uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifier_target target);
+
+uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t flags);
+uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modifiers);
+
 bool zend_handle_encoding_declaration(zend_ast *ast);
 
 ZEND_API zend_class_entry *zend_bind_class_in_slot(

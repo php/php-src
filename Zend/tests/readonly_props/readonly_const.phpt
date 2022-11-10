@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'readonly' as constant modifier in %s on line %d
+Fatal error: Cannot use the readonly modifier on a class constant in %s on line %d
