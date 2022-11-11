@@ -12766,11 +12766,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 		|	.if X64
 		|		EXT_CALL zval_update_constant_ex, r0
 		|	.else
-		||#if (PHP_VERSION_ID < 80100) && (SIZEOF_SIZE_T == 4)
-		|		EXT_CALL zval_jit_update_constant_ex, r0
-		||#else
 		|		EXT_CALL zval_update_constant_ex, r0
-		||#endif
 		|	.endif
 		|	test al, al
 		|	jnz >1
