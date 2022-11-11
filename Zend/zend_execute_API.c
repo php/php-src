@@ -670,7 +670,7 @@ ZEND_API bool zend_is_executing(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *p, zend_class_entry *scope, zend_ast_evaluate_ctx *ctx)
 {
 	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zend_ast *ast = Z_ASTVAL_P(p);
@@ -687,7 +687,7 @@ ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *p, zend_class_e
 		} else {
 			zval tmp;
 
-			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
+			if (UNEXPECTED(zend_ast_evaluate_ex(&tmp, ast, scope, ctx) != SUCCESS)) {
 				return FAILURE;
 			}
 			zval_ptr_dtor_nogc(p);
@@ -697,6 +697,12 @@ ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *p, zend_class_e
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *p, zend_class_entry *scope)
+{
+	zend_ast_evaluate_ctx ctx = {0};
+	return zval_update_constant_with_ctx(p, scope, &ctx);
+}
 
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant(zval *pp) /* {{{ */
 {
