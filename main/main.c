@@ -715,6 +715,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("output_encoding",		NULL,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("error_log",				NULL,			PHP_INI_ALL,		OnUpdateErrorLog,				error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("error_log_mode",			"0644",			PHP_INI_ALL,		OnUpdateLong,					error_log_mode,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("error_log_usec",			"0",		PHP_INI_ALL,		OnUpdateBool,	error_log_usec,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
@@ -832,6 +833,14 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			time_t error_time = 0;
 			suseconds_t error_time_usec = 0;
 
+			const char *error_log_format = "d-M-Y H:i:s e";
+			size_t error_log_format_len = sizeof("d-M-Y H:i:s e") - 1;
+
+			if (PG(error_log_usec)) {
+				error_log_format = "d-M-Y H:i:s.u e";
+				error_log_format_len = sizeof("d-M-Y H:i:s.u e") - 1;
+			}
+
 #if HAVE_GETTIMEOFDAY
 			struct timeval tp = {0}; /* For setting microseconds */
 
@@ -844,12 +853,12 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 
 #ifdef ZTS
 			if (!php_during_module_startup()) {
-				error_time_str = php_format_timestamp("d-M-Y H:i:s.u e", 15, error_time, error_time_usec, true);
+				error_time_str = php_format_timestamp(error_log_format, error_log_format_len, error_time, error_time_usec, true);
 			} else {
-				error_time_str = php_format_timestamp("d-M-Y H:i:s.u e", 15, error_time, error_time_usec, false);
+				error_time_str = php_format_timestamp(error_log_format, error_log_format_len, error_time, error_time_usec, false);
 			}
 #else
-			error_time_str = php_format_timestamp("d-M-Y H:i:s.u e", 15, error_time, error_time_usec, true);
+			error_time_str = php_format_timestamp(error_log_format, error_log_format_len, error_time, error_time_usec, true);
 #endif
 			len = spprintf(&tmp, 0, "[%s] %s%s", ZSTR_VAL(error_time_str), log_message, PHP_EOL);
 #ifdef PHP_WIN32

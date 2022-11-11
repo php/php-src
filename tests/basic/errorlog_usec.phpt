@@ -7,12 +7,12 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 }
 ?>
 --INI--
-error_log=error_permissions_test.log
-error_log_mode=0600
+error_log=error_usec_test.log
+error_log_usec=On
 --FILE--
 <?php
 
-const LOG_FILENAME='error_permissions_test.log';
+const LOG_FILENAME='error_usec_test.log';
 
 try {
     if (file_exists(LOG_FILENAME)) {
@@ -24,7 +24,6 @@ try {
 
     assert(file_exists(LOG_FILENAME));
 
-    printf("got permissions=%o\n", fileperms(LOG_FILENAME) & 0777);
     printf("errorlog contents\n%s", file_get_contents(LOG_FILENAME));
     
     umask($oldMask);
@@ -33,6 +32,5 @@ try {
 }
 ?>
 --EXPECTF--
-got permissions=600
 errorlog contents
-[%d-%s-%d %d:%d:%d %s] hello world
+[%d-%s-%d %d:%d:%d.%d %s] hello world

@@ -166,6 +166,7 @@ struct _php_core_globals {
 	bool have_called_openlog;
 	zend_long syslog_filter;
 	zend_long error_log_mode;
+	zend_bool error_log_usec;
 };
 
 
