@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c4d254eda16f8cb94f077adc4fe0866b4ad3872a */
+ * Stub hash: 3b03373d1bb68de779baaa62db14d98ca9018339 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -288,6 +288,9 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(SIGPWR)
 	REGISTER_LONG_CONSTANT("SIGPWR", LONG_CONST(SIGPWR), CONST_PERSISTENT);
+#endif
+#if defined(SIGINFO)
+	REGISTER_LONG_CONSTANT("SIGINFO", LONG_CONST(SIGINFO), CONST_PERSISTENT);
 #endif
 #if defined(SIGSYS)
 	REGISTER_LONG_CONSTANT("SIGSYS", LONG_CONST(SIGSYS), CONST_PERSISTENT);

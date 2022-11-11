@@ -77,6 +77,9 @@ PHP 8.3 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- PCNTL:
+  . SIGINFO
+
 - Posix:
   . POSIX_SC_ARG_MAX
   . POSIX_SC_PAGESIZE

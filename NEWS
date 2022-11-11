@@ -46,6 +46,7 @@ PHP                                                                        NEWS
 
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
+  . Added SIGINFO constant. (David Carlier)
 
 - Posix:
   . Added posix_sysconf. (David Carlier)
