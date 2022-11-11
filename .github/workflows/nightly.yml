@@ -43,12 +43,11 @@ jobs:
         debug: [true, false]
         name: ['']
         run_tests_parameters: ['']
-        timeout_minutes: [360]
+        test_function_jit: [true]
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
-    timeout-minutes: ${{ matrix.timeout_minutes }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -97,6 +96,9 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
+        # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
+        # avoid running into the 6 hour timeout by skipping the function JIT.
+        if: matrix.test_function_jit
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
