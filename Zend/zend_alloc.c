@@ -416,6 +416,23 @@ stderr_last_error(char *msg)
 /* OS Allocation */
 /*****************/
 
+static void zend_mm_munmap(void *addr, size_t size)
+{
+#ifdef _WIN32
+	if (VirtualFree(addr, 0, MEM_RELEASE) == 0) {
+#if ZEND_MM_ERROR
+		stderr_last_error("VirtualFree() failed");
+#endif
+	}
+#else
+	if (munmap(addr, size) != 0) {
+#if ZEND_MM_ERROR
+		fprintf(stderr, "\nmunmap() failed: [%d] %s\n", errno, strerror(errno));
+#endif
+	}
+#endif
+}
+
 #ifndef HAVE_MREMAP
 static void *zend_mm_mmap_fixed(void *addr, size_t size)
 {
@@ -435,11 +452,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 #endif
 		return NULL;
 	} else if (ptr != addr) {
-		if (munmap(ptr, size) != 0) {
-#if ZEND_MM_ERROR
-			fprintf(stderr, "\nmunmap() failed: [%d] %s\n", errno, strerror(errno));
-#endif
-		}
+		zend_mm_munmap(ptr, size);
 		return NULL;
 	}
 	return ptr;
@@ -480,23 +493,6 @@ static void *zend_mm_mmap(size_t size)
 		return NULL;
 	}
 	return ptr;
-#endif
-}
-
-static void zend_mm_munmap(void *addr, size_t size)
-{
-#ifdef _WIN32
-	if (VirtualFree(addr, 0, MEM_RELEASE) == 0) {
-#if ZEND_MM_ERROR
-		stderr_last_error("VirtualFree() failed");
-#endif
-	}
-#else
-	if (munmap(addr, size) != 0) {
-#if ZEND_MM_ERROR
-		fprintf(stderr, "\nmunmap() failed: [%d] %s\n", errno, strerror(errno));
-#endif
-	}
 #endif
 }
 
