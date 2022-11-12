@@ -419,6 +419,14 @@ stderr_last_error(char *msg)
 static void zend_mm_munmap(void *addr, size_t size)
 {
 #ifdef _WIN32
+	MEMORY_BASIC_INFORMATION mbi;
+	if (VirtualQuery(addr, &mbi, sizeof(mbi)) == 0) {
+#if ZEND_MM_ERROR
+		stderr_last_error("VirtualQuery() failed");
+#endif
+	}
+	addr = mbi.AllocationBase;
+	
 	if (VirtualFree(addr, 0, MEM_RELEASE) == 0) {
 #if ZEND_MM_ERROR
 		stderr_last_error("VirtualFree() failed");
@@ -440,11 +448,16 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	void *ptr = VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
 	if (ptr == NULL) {
+		/** ERROR_INVALID_ADDRESS is expected when fixed addr range is not free */
+		if (GetLastError() != ERROR_INVALID_ADDRESS) {
 #if ZEND_MM_ERROR
-		stderr_last_error("VirtualAlloc() fixed failed");
+			stderr_last_error("VirtualAlloc() fixed failed");
 #endif
+		}
+		SetLastError(0);
 		return NULL;
 	}
+	ZEND_ASSERT(ptr == addr);
 	return ptr;
 #else
 	int flags = MAP_PRIVATE | MAP_ANON;
@@ -687,13 +700,27 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		ptr = zend_mm_mmap(size + alignment - REAL_PAGE_SIZE);
 #ifdef _WIN32
 		offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
-		zend_mm_munmap(ptr, size + alignment - REAL_PAGE_SIZE);
-		ptr = zend_mm_mmap_fixed((void*)((char*)ptr + (alignment - offset)), size);
-		offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
 		if (offset != 0) {
-			zend_mm_munmap(ptr, size);
-			return NULL;
+			offset = alignment - offset;
 		}
+		zend_mm_munmap(ptr, size + alignment - REAL_PAGE_SIZE);
+		ptr = zend_mm_mmap_fixed((void*)((char*)ptr + offset), size);
+		if (ptr == NULL) { // fix GH-9650, fixed addr range is not free
+			ptr = zend_mm_mmap(size + alignment - REAL_PAGE_SIZE);
+			if (ptr == NULL) {
+				return NULL;
+			}
+			offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
+			if (offset != 0) {
+				ptr = (void*)((char*)ptr + alignment - offset);
+			}
+        } else {
+			offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
+			if (offset != 0) {
+				zend_mm_munmap(ptr, size);
+				return NULL;
+			}
+        }
 		return ptr;
 #else
 		offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
