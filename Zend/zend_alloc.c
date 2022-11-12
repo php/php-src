@@ -437,7 +437,15 @@ static void zend_mm_munmap(void *addr, size_t size)
 static void *zend_mm_mmap_fixed(void *addr, size_t size)
 {
 #ifdef _WIN32
-	return VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+	void *ptr = VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+
+	if (ptr == NULL) {
+#if ZEND_MM_ERROR
+		stderr_last_error("VirtualAlloc() fixed failed");
+#endif
+		return NULL;
+	}
+	return ptr;
 #else
 	int flags = MAP_PRIVATE | MAP_ANON;
 #if defined(MAP_EXCL)
@@ -448,7 +456,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR && !defined(MAP_EXCL)
-		fprintf(stderr, "\nmmap() failed: [%d] %s\n", errno, strerror(errno));
+		fprintf(stderr, "\nmmap() fixed failed: [%d] %s\n", errno, strerror(errno));
 #endif
 		return NULL;
 	} else if (ptr != addr) {
