@@ -62,7 +62,6 @@ try {
 ?>
 --EXPECTF--
 Exception in __debugInfo:
-A Object
 Error: x in %s:%d
 Stack trace:
 #0 [internal function]: A->__debugInfo()
@@ -70,7 +69,6 @@ Stack trace:
 #2 {main}
 
 Exception in __debugInfo in anonymous class:
-A@anonymous Object
 Exception: y in %s:%d
 Stack trace:
 #0 [internal function]: A@anonymous->__debugInfo()
@@ -78,7 +76,6 @@ Stack trace:
 #2 {main}
 
 Exception in __destruct of __debugInfo in anonymous class:
-A@anonymous Object
 Exception: z_w_assign in %s:%d
 Stack trace:
 #0 [internal function]: class@anonymous->__destruct()
@@ -86,12 +83,6 @@ Stack trace:
 #2 {main}
 
 Exception occuring later on:
-Array
-(
-    [foo] => bar
-    [baz] => A Object
-
-)
 Error: x in %s:%d
 Stack trace:
 #0 [internal function]: A->__debugInfo()
