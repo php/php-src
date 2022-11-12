@@ -7,11 +7,11 @@ $dq = new Collections\Deque();
 for ($i = 0; $i < 8; $i++) {
     $dq->push("v$i");
 }
-$dq->shift();
+$dq->popFront();
 $dq->push("extra");
 printf("dq=%s count=%d\n", json_encode($dq), $dq->count());
 for ($i = 0; $i < 7; $i++) {
-    $value = $dq->shift();
+    $value = $dq->popFront();
     printf("popped %s\n", $value);
 }
 // Collections\Deque should reclaim memory once roughly a quarter of the memory is actually used.

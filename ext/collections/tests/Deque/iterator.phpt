@@ -19,12 +19,12 @@ var_dump($it->key());
 var_dump($it->current());
 var_dump($it->next());
 var_dump($it->valid());
-echo "After shift\n";
-$dq->shift();
+echo "After popFront\n";
+$dq->popFront();
 var_dump($it->key());
 var_dump($it->current());
 var_dump($it->valid());
-$dq->shift();
+$dq->popFront();
 var_dump($it->key()); // null for invalid iterator
 expect_throws(fn() => $it->current());
 var_dump($it->valid());
@@ -39,7 +39,7 @@ object(stdClass)#2 (0) {
 }
 NULL
 bool(true)
-After shift
+After popFront
 int(0)
 string(4) "TEST"
 bool(true)

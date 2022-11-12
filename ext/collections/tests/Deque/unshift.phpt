@@ -1,11 +1,11 @@
 --TEST--
-Collections\Deque unshift
+Collections\Deque pushFront
 --FILE--
 <?php
 
 $it = new Collections\Deque();
 for ($i = 0; $i < 20; $i++) {
-    $it->unshift("$i");
+    $it->pushFront("$i");
 }
 foreach ($it as $value) {
     echo "$value,";
@@ -13,7 +13,7 @@ foreach ($it as $value) {
 echo "\n";
 $values = [];
 while (count($it) > 0) {
-    $values[] = $it->shift();
+    $values[] = $it->popFront();
 }
 echo json_encode($values), "\n";
 ?>

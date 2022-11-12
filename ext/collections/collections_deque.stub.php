@@ -16,19 +16,19 @@ namespace Collections;
  * This supports amortized constant time pushing and popping onto the front or back of the Deque.
  *
  * Naming is based on https://www.php.net/spldoublylinkedlist
- * and on array_push/pop/unshift/shift and array_key_first.
+ * and on array_push/pop/pushFront/popFront and array_key_first.
  */
 final class Deque implements \IteratorAggregate, \Countable, \JsonSerializable, \ArrayAccess
 {
     /** Construct the Deque from the values of the Traversable/array, ignoring keys */
     public function __construct(iterable $iterator = []) {}
     /**
-     * Returns an iterator that accounts for calls to shift/unshift tracking the position of the start of the Deque.
-     * Calls to shift/unshift will do the following:
+     * Returns an iterator that accounts for calls to popFront/pushFront tracking the position of the start of the Deque.
+     * Calls to popFront/pushFront will do the following:
      * - Increase/Decrease the value returned by the iterator's key()
      *   by the number of elements added/removed to/from the start of the Deque.
      *   (`$deque[$iteratorKey] === $iteratorValue` at the time the key and value are returned).
-     * - Repeated calls to shift will cause valid() to return false if the iterator's
+     * - Repeated calls to popFront will cause valid() to return false if the iterator's
      *   position ends up before the start of the Deque at the time iteration resumes.
      * - They will not cause the remaining values to be iterated over more than once or skipped.
      */
@@ -48,18 +48,18 @@ final class Deque implements \IteratorAggregate, \Countable, \JsonSerializable, 
 
     /** Appends value(s) to the end of the Deque, like array_push. */
     public function push(mixed ...$values): void {}
-    /** Prepends value(s) to the start of the Deque, like array_unshift. */
-    public function unshift(mixed ...$values): void {}
+    /** Prepends value(s) to the start of the Deque, like array_pushFront. */
+    public function pushFront(mixed ...$values): void {}
     /**
      * Pops a value from the end of the Deque.
      * @throws \UnderflowException if the Deque is empty
      */
     public function pop(): mixed {}
     /**
-     * Shifts a value from the start of the Deque.
+     * Pops a value from the start of the Deque.
      * @throws \UnderflowException if the Deque is empty
      */
-    public function shift(): mixed {}
+    public function popFront(): mixed {}
 
     /**
      * Peeks at the value at the start of the Deque.

@@ -17,12 +17,12 @@ expect_throws(fn () => $it->first());
 expect_throws(fn () => $it->last());
 for ($i = 0; $i <= 3; $i++) {
     $it->push("last$i");
-    $it->unshift("first$i");
+    $it->pushFront("first$i");
 }
 echo $it->first(), "\n";
 echo $it->last(), "\n";
 echo "Removing elements\n";
-echo $it->shift(), "\n";
+echo $it->popFront(), "\n";
 echo $it->pop(), "\n";
 echo "Inspecting elements after removal\n";
 echo $it->first(), "\n";

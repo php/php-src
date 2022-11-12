@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 75aa473d9be94d2b02515dad1eed3b44dd850e47 */
+ * Stub hash: a6e06241621b8552c7f12b33f9a5311672ad09b9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collections_Deque___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, iterator, Traversable, MAY_BE_ARRAY, "[]")
@@ -32,12 +32,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Collections_Deque_push, 0,
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Collections_Deque_unshift arginfo_class_Collections_Deque_push
+#define arginfo_class_Collections_Deque_pushFront arginfo_class_Collections_Deque_push
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Collections_Deque_pop, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Collections_Deque_shift arginfo_class_Collections_Deque_pop
+#define arginfo_class_Collections_Deque_popFront arginfo_class_Collections_Deque_pop
 
 #define arginfo_class_Collections_Deque_first arginfo_class_Collections_Deque_pop
 
@@ -79,9 +79,9 @@ ZEND_METHOD(Collections_Deque, toArray);
 ZEND_METHOD(Collections_Deque, __unserialize);
 ZEND_METHOD(Collections_Deque, __set_state);
 ZEND_METHOD(Collections_Deque, push);
-ZEND_METHOD(Collections_Deque, unshift);
+ZEND_METHOD(Collections_Deque, pushFront);
 ZEND_METHOD(Collections_Deque, pop);
-ZEND_METHOD(Collections_Deque, shift);
+ZEND_METHOD(Collections_Deque, popFront);
 ZEND_METHOD(Collections_Deque, first);
 ZEND_METHOD(Collections_Deque, last);
 ZEND_METHOD(Collections_Deque, insert);
@@ -101,9 +101,9 @@ static const zend_function_entry class_Collections_Deque_methods[] = {
 	ZEND_ME(Collections_Deque, __unserialize, arginfo_class_Collections_Deque___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Collections_Deque, __set_state, arginfo_class_Collections_Deque___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Collections_Deque, push, arginfo_class_Collections_Deque_push, ZEND_ACC_PUBLIC)
-	ZEND_ME(Collections_Deque, unshift, arginfo_class_Collections_Deque_unshift, ZEND_ACC_PUBLIC)
+	ZEND_ME(Collections_Deque, pushFront, arginfo_class_Collections_Deque_pushFront, ZEND_ACC_PUBLIC)
 	ZEND_ME(Collections_Deque, pop, arginfo_class_Collections_Deque_pop, ZEND_ACC_PUBLIC)
-	ZEND_ME(Collections_Deque, shift, arginfo_class_Collections_Deque_shift, ZEND_ACC_PUBLIC)
+	ZEND_ME(Collections_Deque, popFront, arginfo_class_Collections_Deque_popFront, ZEND_ACC_PUBLIC)
 	ZEND_ME(Collections_Deque, first, arginfo_class_Collections_Deque_first, ZEND_ACC_PUBLIC)
 	ZEND_ME(Collections_Deque, last, arginfo_class_Collections_Deque_last, ZEND_ACC_PUBLIC)
 	ZEND_ME(Collections_Deque, toArray, arginfo_class_Collections_Deque_toArray, ZEND_ACC_PUBLIC)

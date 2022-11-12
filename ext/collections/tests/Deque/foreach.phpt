@@ -9,27 +9,27 @@ function mut(string $s) {
     return $s;
 }
 
-echo "Test push/unshift\n";
+echo "Test push/pushFront\n";
 $deque = new Collections\Deque(['a', 'b']);
 foreach ($deque as $key => $value) {
     if (strlen($value) === 1) {
         $deque->push("{$value}_");
-        $deque->unshift("_$value");
+        $deque->pushFront("_$value");
     }
     printf("Key: %s Value: %s\n", var_export($key, true), var_export($value, true));
 }
 var_dump($deque);
-echo "Test shift\n";
+echo "Test popFront\n";
 foreach ($deque as $key => $value) {
     echo "Shifting $key $value\n";
-    var_dump($deque->shift());
+    var_dump($deque->popFront());
 }
 
-echo "Test shift out of bounds\n";
+echo "Test popFront out of bounds\n";
 $deque = new Collections\Deque([mut('a1'), mut('b1'), mut('c1'), mut('d1')]);
 foreach ($deque as $key => $value) {
-    var_dump($deque->shift());
-    var_dump($deque->shift());
+    var_dump($deque->popFront());
+    var_dump($deque->popFront());
     echo "Saw $key: $value\n";
     // iteration does not stop early, iterator points to just before start of Deque
 }
@@ -39,18 +39,18 @@ echo "Test iteration behavior\n";
 $deque = new Collections\Deque([mut('a1'), mut('a2')]);
 $it = $deque->getIterator();
 echo json_encode(['valid' => $it->valid(), 'key' => $it->key(), 'value' => $it->current()]), "\n";
-$deque->shift();
+$deque->popFront();
 // invalid, outside the range of the deque
 echo json_encode(['valid' => $it->valid(), 'key' => $it->key()]), "\n";
 $it->next();
 echo json_encode(['valid' => $it->valid(), 'key' => $it->key(), 'value' => $it->current()]), "\n";
-$deque->unshift('a', 'b');
+$deque->pushFront('a', 'b');
 unset($deque);
 echo json_encode(['valid' => $it->valid(), 'key' => $it->key(), 'value' => $it->current()]), "\n";
 
 ?>
 --EXPECT--
-Test push/unshift
+Test push/pushFront
 Key: 0 Value: 'a'
 Key: 2 Value: 'b'
 Key: 4 Value: 'a_'
@@ -69,7 +69,7 @@ object(Collections\Deque)#1 (6) {
   [5]=>
   string(2) "b_"
 }
-Test shift
+Test popFront
 Shifting 0 _b
 string(2) "_b"
 Shifting 0 _a
@@ -82,7 +82,7 @@ Shifting 0 a_
 string(2) "a_"
 Shifting 0 b_
 string(2) "b_"
-Test shift out of bounds
+Test popFront out of bounds
 string(2) "a1"
 string(2) "b1"
 Saw 0: a1

@@ -9,7 +9,7 @@ $it->push();
 printf("it=%s count=%d\n", json_encode($it), $it->count());
 $it->push(...range(0, 19));
 printf("it=%s count=%d\n", json_encode($it), $it->count());
-$it->unshift(...range(0, 19));
+$it->pushFront(...range(0, 19));
 printf("it=%s count=%d\n", json_encode($it), $it->count());
 ?>
 --EXPECT--

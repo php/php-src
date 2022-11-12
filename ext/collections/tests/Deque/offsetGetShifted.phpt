@@ -15,7 +15,7 @@ $it = new Collections\Deque();
 for ($i = 0; $i < 7; $i++) {
     $it->push("x$i");
 }
-var_dump($it->shift());
+var_dump($it->popFront());
 $it->push('new');
 $it->push('another');
 for ($i = 0; $i < count($it); $i++) {

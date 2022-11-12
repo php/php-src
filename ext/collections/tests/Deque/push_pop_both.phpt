@@ -1,5 +1,5 @@
 --TEST--
-Collections\Deque push/pop/unshift/shift
+Collections\Deque push/pop/pushFront/popFront
 --FILE--
 <?php
 
@@ -19,8 +19,8 @@ function dump_it(Collections\Deque $dq) {
 $it = new Collections\Deque([]);
 dump_it($it);
 expect_throws(fn() => $it->pop());
-expect_throws(fn() => $it->shift());
-$it->unshift(strtolower('HELLO'));
+expect_throws(fn() => $it->popFront());
+$it->pushFront(strtolower('HELLO'));
 dump_it($it);
 $it->push(strtolower('WORLD'));
 dump_it($it);
@@ -29,7 +29,7 @@ foreach ($it as $key => $value) {
 }
 for ($i = 0; $i < 50; $i++) {
     $it->push("y$i");
-    $it->unshift("x$i");
+    $it->pushFront("x$i");
 }
 dump_it($it);
 
@@ -37,7 +37,7 @@ dump_it($it);
 --EXPECT--
 count=0 []
 Caught UnderflowException: Cannot pop from empty Collections\Deque
-Caught UnderflowException: Cannot shift from empty Collections\Deque
+Caught UnderflowException: Cannot popFront from empty Collections\Deque
 count=1 ["hello"]
 count=2 ["hello","world"]
 0: "hello"
