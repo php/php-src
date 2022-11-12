@@ -51,10 +51,18 @@ try {
     echo $e . "\n";
 }
 
-echo "\nException occuring later on:\n";
+echo "\nException occuring later on (print_r):\n";
 
 try {
     print_r(['foo' => 'bar', 'baz' => new A()]);
+} catch (\Throwable $e) {
+    echo $e . "\n";
+}
+
+echo "\nException occuring later on (var_dump):\n";
+
+try {
+    var_dump(['u' => 1], ['foo' => 'bar', 'baz' => new A()], ['u' => 1]);
 } catch (\Throwable $e) {
     echo $e . "\n";
 }
@@ -82,9 +90,16 @@ Stack trace:
 #1 %s(%d): print_r(Object(A@anonymous))
 #2 {main}
 
-Exception occuring later on:
+Exception occuring later on (print_r):
 Error: x in %s:%d
 Stack trace:
 #0 [internal function]: A->__debugInfo()
 #1 %s(%d): print_r(Array)
+#2 {main}
+
+Exception occuring later on (var_dump):
+Error: x in %s:%d
+Stack trace:
+#0 [internal function]: A->__debugInfo()
+#1 %s(%d): var_dump(Array)
 #2 {main}
