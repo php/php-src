@@ -14,7 +14,7 @@ class cc{
     function __construct($c=null){
     }
 };
-$i=mysqli_connect('p:'.$host, $user, $passwd, $db);
+$i=mysqli_connect('p:'.$host, $user, $passwd, $db, $port);
 $res=mysqli_query($i, "SHOW STATUS LIKE 'Connections'");
 $t=array(new stdClass);
 while($db= mysqli_fetch_object($res,'cc',$t)){}

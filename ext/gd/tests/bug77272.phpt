@@ -8,6 +8,7 @@ gd
 <?php
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream fix not yet released');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (substr(PHP_OS, 0, 3) == 'WIN' && PHP_INT_SIZE === 4) die("skip not for Windows x86");
 ?>
 --FILE--
 <?php
