@@ -626,6 +626,9 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 
 		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
 		info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
+	} else {
+		/* IPC_PRIVATE always creates a new segment even if IPC_CREAT flag isn't passed. */
+		flags |= IPC_CREAT;
 	}
 
 	if (!shm_handle && !info_handle) {
@@ -659,6 +662,19 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 				CloseHandle(info_handle);
 			}
 			return -1;
+		}
+	}
+
+	if (key == IPC_PRIVATE) {
+		/* This should call shm_get with a brand new key id that isn't used yet. See https://man7.org/linux/man-pages/man2/shmget.2.html
+		 * Because shmop_open can be used in userland to attach to shared memory segments, use high positive numbers to avoid accidentally conflicting with userland. */
+		key = (php_rand() & 0x3fffffff) + 0x40000000;
+		for (shm_pair *ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (ptr->descriptor && ptr->descriptor->shm_perm.key == key) {
+				key = (php_rand() & 0x3fffffff) + 0x40000000;
+				ptr = TWG(shm);
+				continue;
+			}
 		}
 	}
 
