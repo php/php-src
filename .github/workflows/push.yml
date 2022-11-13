@@ -19,6 +19,7 @@ on:
       - '**'
 jobs:
   LINUX_X64:
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -62,6 +63,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
+    if: false
     name: LINUX_X32_DEBUG_ZTS
     runs-on: ubuntu-latest
     container:
@@ -103,6 +105,7 @@ jobs:
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
   MACOS_DEBUG_NTS:
+    if: false
     runs-on: macos-11
     steps:
       - name: git checkout
@@ -131,3 +134,59 @@ jobs:
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  COMMUNITY:
+    name: "COMMUNITY"
+    runs-on: ubuntu-20.04
+    env:
+      UBSAN_OPTIONS: print_stacktrace=1
+      USE_ZEND_ALLOC: 0
+      USE_TRACKED_ALLOC: 1
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            --enable-debug
+            --enable-zts
+            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
+            LDFLAGS='-fsanitize=undefined,address'
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        run: |
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+      - name: Enable Opcache and JIT
+        run: |
+          echo zend_extension=opcache.so > /etc/php.d/opcache.ini
+          echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+          echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+      - name: Test Wordpress
+        if: always()
+        run: |
+          git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
+          cd wordpress
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          cp wp-tests-config-sample.php wp-tests-config.php
+          php -r "$(cat <<- 'PHP'
+            $c = file_get_contents('wp-tests-config.php');
+            $c = str_replace('youremptytestdbnamehere', 'test', $c);
+            $c = str_replace('yourusernamehere', 'root', $c);
+            $c = str_replace('yourpasswordhere', 'root', $c);
+            file_put_contents('wp-tests-config.php', $c);
+          PHP
+          )"
+          php vendor/bin/phpunit || EXIT_CODE=$?
+          if [ $EXIT_CODE -gt 128 ]; then
+            exit 1
+          fi
