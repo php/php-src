@@ -8,7 +8,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-9918 (License information for xxHash is not included in
     README.REDIST.BINS file). (Akama Hitoshi)
 
-Pcntl:
+- MBString:
+  . Fixed bug GH-9535 (The behavior of mb_strcut in mbstring has been changed in
+    PHP8.1). (Nathan Freeman)
+
+- Pcntl:
   . Fixed bug GH-9298 (Signal handler called after rshutdown leads to crash).
     (Erki Aring)
 
