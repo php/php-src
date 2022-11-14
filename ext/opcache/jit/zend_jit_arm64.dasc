@@ -5579,7 +5579,8 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
                                   uint32_t        val_info,
                                   zend_jit_addr   res_addr,
                                   int             in_cold,
-                                  int             save_r1)
+                                  int             save_r1,
+                                  bool            check_exception)
 /* Labels: 1,2,3 */
 {
 	zend_reg tmp_reg;
@@ -5629,7 +5630,9 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 			ZEND_ASSERT(Z_MODE(val_addr) == IS_MEM_ZVAL && Z_REG(val_addr) == ZREG_FP);
 			|	LOAD_32BIT_VAL FCARG1w, Z_OFFSET(val_addr)
 			|	EXT_CALL zend_jit_undefined_op_helper, REG0
-			|	cbz RETVALx, ->exception_handler_undef
+			if (check_exception) {
+				|	cbz RETVALx, ->exception_handler_undef
+			}
 			if (save_r1) {
 				|	ldr FCARG1x, T1	// restore
 			}
@@ -5938,7 +5941,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				if (!keep_gc) {
 					|	str Rx(tmp_reg), T1 // save
 				}
-				if (!zend_jit_simple_assign(Dst, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, in_cold, 0)) {
+				if (!zend_jit_simple_assign(Dst, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, in_cold, 0, 0)) {
 					return 0;
 				}
 				if (!keep_gc) {
@@ -5946,7 +5949,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				}
 			} else {
 				|	GET_ZVAL_PTR FCARG1x, var_use_addr, TMP1
-				if (!zend_jit_simple_assign(Dst, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, in_cold, 1)) {
+				if (!zend_jit_simple_assign(Dst, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, in_cold, 1, 0)) {
 					return 0;
 				}
 			}
@@ -5958,7 +5961,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			}
 			|	ZVAL_DTOR_FUNC var_info, opline, TMP1
 			if (in_cold || (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0)) {
-				if (check_exception) {
+				if (check_exception && !(val_info & MAY_BE_UNDEF)) {
 					|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
 					|	cbz REG0, >8
 					|	b ->exception_handler
@@ -5973,6 +5976,12 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				if (in_cold) {
 					|	b >8
 				}
+			}
+			if (check_exception && (val_info & MAY_BE_UNDEF)) {
+				|8:
+				|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
+				|	cbz REG0, >8
+				|	b ->exception_handler
 			}
 			if (in_cold) {
 				|.code
@@ -6002,7 +6011,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 	    }
 	}
 
-	if (!done && !zend_jit_simple_assign(Dst, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, 0, 0)) {
+	if (!done && !zend_jit_simple_assign(Dst, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, 0, 0, check_exception)) {
 		return 0;
 	}
 
@@ -6102,7 +6111,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	b >9
 			|.code
 
-			if (!zend_jit_simple_assign(Dst, opline, var_addr, var_info, -1, (opline+1)->op1_type, op3_addr, val_info, res_addr, 0, 0)) {
+			if (!zend_jit_simple_assign(Dst, opline, var_addr, var_info, -1, (opline+1)->op1_type, op3_addr, val_info, res_addr, 0, 0, 0)) {
 				return 0;
 			}
 		} else {
@@ -8453,7 +8462,7 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, uint32_t 
 		}
 	}
 
-	if (!zend_jit_simple_assign(Dst, opline, res_addr, res_use_info, res_info, opline->op1_type, op1_addr, op1_info, 0, 0, 0)) {
+	if (!zend_jit_simple_assign(Dst, opline, res_addr, res_use_info, res_info, opline->op1_type, op1_addr, op1_info, 0, 0, 0, 1)) {
 		return 0;
 	}
 	if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
