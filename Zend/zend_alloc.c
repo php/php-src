@@ -419,18 +419,30 @@ stderr_last_error(char *msg)
 static void zend_mm_munmap(void *addr, size_t size)
 {
 #ifdef _WIN32
-	MEMORY_BASIC_INFORMATION mbi;
-	if (VirtualQuery(addr, &mbi, sizeof(mbi)) == 0) {
-#if ZEND_MM_ERROR
-		stderr_last_error("VirtualQuery() failed");
-#endif
-	}
-	addr = mbi.AllocationBase;
-	
 	if (VirtualFree(addr, 0, MEM_RELEASE) == 0) {
+		/** ERROR_INVALID_ADDRESS is expected when addr is not range start address */
+		if (GetLastError() != ERROR_INVALID_ADDRESS) {
 #if ZEND_MM_ERROR
-		stderr_last_error("VirtualFree() failed");
+			stderr_last_error("VirtualFree() failed");
 #endif
+            return;
+		}
+		SetLastError(0);
+
+		MEMORY_BASIC_INFORMATION mbi;
+		if (VirtualQuery(addr, &mbi, sizeof(mbi)) == 0) {
+#if ZEND_MM_ERROR
+			stderr_last_error("VirtualQuery() failed");
+#endif
+            return;
+		}
+		addr = mbi.AllocationBase;
+
+		if (VirtualFree(addr, 0, MEM_RELEASE) == 0) {
+#if ZEND_MM_ERROR
+			stderr_last_error("VirtualFree() failed");
+#endif
+		}
 	}
 #else
 	if (munmap(addr, size) != 0) {
