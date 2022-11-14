@@ -714,12 +714,6 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 			if (offset != 0) {
 				ptr = (void*)((char*)ptr + alignment - offset);
 			}
-        } else {
-			offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
-			if (offset != 0) {
-				zend_mm_munmap(ptr, size);
-				return NULL;
-			}
         }
 		return ptr;
 #else
