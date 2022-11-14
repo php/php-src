@@ -5430,7 +5430,8 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
                                   zend_uchar      val_type,
                                   zend_jit_addr   val_addr,
                                   uint32_t        val_info,
-                                  zend_jit_addr   res_addr)
+                                  zend_jit_addr   res_addr,
+                                  bool            check_exception)
 {
 	ir_ref end_inputs[5];
 	uint32_t end_inputs_count = 0;
@@ -5472,8 +5473,10 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_undefined_op_helper, IR_CONST_FASTCALL_FUNC),
 				ir_const_u32(&jit->ctx, Z_OFFSET(val_addr)));
 
-			zend_jit_guard(jit, ret,
-				zend_jit_stub_addr(jit, jit_stub_exception_handler_undef));
+			if (check_exception) {
+				zend_jit_guard(jit, ret,
+					zend_jit_stub_addr(jit, jit_stub_exception_handler_undef));
+			}
 
 			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
 			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_def);
@@ -5790,7 +5793,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		}
 		ref = zend_jit_zval_ptr(jit, var_use_addr);
 		if (RC_MAY_BE_1(var_info)) {
-			if (!zend_jit_simple_assign(jit, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr)) {
+			if (!zend_jit_simple_assign(jit, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, 0)) {
 				return 0;
 			}
 			counter = zend_jit_gc_delref(jit, ref);
@@ -5815,11 +5818,17 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 					jit->delay_count++;
 				}
 				end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+				if (check_exception && (val_info & MAY_BE_UNDEF)) {
+					zend_jit_check_exception(jit);
+				}
 				jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_may_leak);
 			}
 			if (Z_MODE(var_addr) == IS_REG || Z_MODE(res_addr) == IS_REG) {
 				jit->delay_buf[jit->delay_count] = jit->delay_buf[jit->delay_count - 1];
 				jit->delay_count++;
+			}
+			if (check_exception && (val_info & MAY_BE_UNDEF)) {
+				zend_jit_check_exception(jit);
 			}
 			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
 		} else /* if (RC_MAY_BE_N(var_info)) */ {
@@ -5842,7 +5851,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 	}
 
 	if (!done) {
-		if (!zend_jit_simple_assign(jit, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr)) {
+		if (!zend_jit_simple_assign(jit, opline, var_addr, var_info, var_def_info, val_type, val_addr, val_info, res_addr, check_exception)) {
 			return 0;
 		}
 		if (end_inputs_count) {
@@ -5897,14 +5906,11 @@ static int zend_jit_qm_assign(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 		}
 	}
 
-	if (!zend_jit_simple_assign(jit, opline, res_addr, res_use_info, res_info, opline->op1_type, op1_addr, op1_info, 0)) {
+	if (!zend_jit_simple_assign(jit, opline, res_addr, res_use_info, res_info, opline->op1_type, op1_addr, op1_info, 0, 1)) {
 		return 0;
 	}
 	if (!zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, res_info)) {
 		return 0;
-	}
-	if (op1_info & MAY_BE_UNDEF) {
-		zend_jit_check_exception(jit);
 	}
 	return 1;
 }
