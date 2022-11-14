@@ -147,6 +147,9 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 					 * or it could be that it ended on the first half of a surrogate pair */
 					filter->cache = filter->status = 0;
 					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+				} else {
+					/* Base64-encoded section properly terminated by - */
+					filter->cache = filter->status = 0;
 				}
 			} else { /* illegal character */
 				filter->cache = filter->status = 0;
