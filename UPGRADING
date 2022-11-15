@@ -47,6 +47,10 @@ PHP 8.3 UPGRADE NOTES
     "buffer_size" => int
     See GH-9336
 
+- Standard:
+  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
+    RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
+
 ========================================
 6. New Functions
 ========================================

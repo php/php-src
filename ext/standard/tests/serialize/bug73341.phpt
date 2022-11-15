@@ -20,5 +20,5 @@ unserialize($exploit);
 --EXPECTF--
 Error at offset 6 of 7 bytes
 
-Notice: ArrayObject::unserialize(): Unexpected end of serialized data in %sbug73341.php on line %d
+Warning: ArrayObject::unserialize(): Unexpected end of serialized data in %sbug73341.php on line %d
 Error at offset 24 of 34 bytes

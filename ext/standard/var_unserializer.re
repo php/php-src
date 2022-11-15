@@ -1402,7 +1402,7 @@ fail:
 
 "}" {
 	/* this is the case where we have less data than planned */
-	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");
+	php_error_docref(NULL, E_WARNING, "Unexpected end of serialized data");
 	return 0; /* not sure if it should be 0 or 1 here? */
 }
 
