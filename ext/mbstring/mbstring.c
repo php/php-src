@@ -3180,7 +3180,7 @@ next_option:
 	RETVAL_STR(jp_kana_convert(str, enc, opt));
 }
 
-static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zval *var, int *recursion_error) /* {{{ */
+static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zval *var, bool *recursion_error) /* {{{ */
 {
 	mbfl_string string;
 	HashTable *ht;
@@ -3196,7 +3196,7 @@ static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zv
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 		if (Z_REFCOUNTED_P(var)) {
 			if (Z_IS_RECURSIVE_P(var)) {
-				*recursion_error = 1;
+				*recursion_error = true;
 				return 0;
 			}
 			Z_PROTECT_RECURSION_P(var);
@@ -3226,31 +3226,25 @@ static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zv
 	return 0;
 } /* }}} */
 
-static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var) /* {{{ */
+static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_encoding, const mbfl_encoding* to_encoding)
 {
-	mbfl_string string, result, *ret;
 	HashTable *ht;
 	zval *entry, *orig_var;
 
 	orig_var = var;
 	ZVAL_DEREF(var);
+
 	if (Z_TYPE_P(var) == IS_STRING) {
-		string.val = (unsigned char *)Z_STRVAL_P(var);
-		string.len = Z_STRLEN_P(var);
-		ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-		if (ret != NULL) {
-			zval_ptr_dtor(orig_var);
-			// TODO: avoid reallocation ???
-			ZVAL_STRINGL(orig_var, (char *)ret->val, ret->len);
-			efree(ret->val);
-		}
+		zend_string *ret = php_mb_convert_encoding_ex(Z_STRVAL_P(var), Z_STRLEN_P(var), to_encoding, from_encoding);
+		zval_ptr_dtor(orig_var);
+		ZVAL_STR(orig_var, ret);
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 		if (Z_TYPE_P(var) == IS_ARRAY) {
 			SEPARATE_ARRAY(var);
 		}
 		if (Z_REFCOUNTED_P(var)) {
 			if (Z_IS_RECURSIVE_P(var)) {
-				return 1;
+				return true;
 			}
 			Z_PROTECT_RECURSION_P(var);
 		}
@@ -3258,11 +3252,11 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 		ht = HASH_OF(var);
 		if (ht != NULL) {
 			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
-				if (mb_recursive_convert_variable(convd, entry)) {
+				if (mb_recursive_convert_variable(entry, from_encoding, to_encoding)) {
 					if (Z_REFCOUNTED_P(var)) {
 						Z_UNPROTECT_RECURSION_P(var);
 					}
-					return 1;
+					return true;
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -3271,8 +3265,9 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 			Z_UNPROTECT_RECURSION_P(var);
 		}
 	}
-	return 0;
-} /* }}} */
+
+	return false;
+}
 
 /* {{{ Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
@@ -3281,14 +3276,12 @@ PHP_FUNCTION(mb_convert_variables)
 	zend_string *to_enc_str;
 	zend_string *from_enc_str;
 	HashTable *from_enc_ht;
-	mbfl_string string, result;
 	const mbfl_encoding *from_encoding, *to_encoding;
 	mbfl_encoding_detector *identd;
-	mbfl_buffer_converter *convd;
 	int n, argc;
 	size_t elistsz;
 	const mbfl_encoding **elist;
-	int recursion_error = 0;
+	bool recursion_error = false;
 
 	ZEND_PARSE_PARAMETERS_START(3, -1)
 		Z_PARAM_STR(to_enc_str)
@@ -3302,10 +3295,7 @@ PHP_FUNCTION(mb_convert_variables)
 		RETURN_THROWS();
 	}
 
-	/* initialize string */
 	from_encoding = MBSTRG(current_internal_encoding);
-	mbfl_string_init_set(&string, from_encoding);
-	mbfl_string_init(&result);
 
 	/* pre-conversion encoding */
 	if (from_enc_ht) {
@@ -3356,28 +3346,17 @@ PHP_FUNCTION(mb_convert_variables)
 
 	efree(ZEND_VOIDP(elist));
 
-	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
-
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-
 	/* convert */
 	n = 0;
 	while (n < argc) {
 		zval *zv = &args[n];
-
 		ZVAL_DEREF(zv);
-		recursion_error = mb_recursive_convert_variable(convd, zv);
+		recursion_error = mb_recursive_convert_variable(zv, from_encoding, to_encoding);
 		if (recursion_error) {
 			break;
 		}
 		n++;
 	}
-
-	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
-	mbfl_buffer_converter_delete(convd);
 
 	if (recursion_error) {
 		php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
