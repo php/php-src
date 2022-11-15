@@ -1490,7 +1490,7 @@ class FuncInfo {
         if ($this->isMethod()) {
             assert($this->name instanceof MethodName);
             $role = $doc->createAttribute("role");
-            $role->value = $this->name->className->__toString();
+            $role->value = addslashes($this->name->className->__toString());
             $methodSynopsis->appendChild($role);
         }
 
@@ -2763,12 +2763,13 @@ class ClassInfo {
             $classSynopsis->appendChild($classSynopsisInfo);
 
             $classReference = self::getClassSynopsisReference($this->name);
+            $escapedName = addslashes($this->name->__toString());
 
             if ($this->hasConstructor()) {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$this->name'])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -2777,7 +2778,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$this->name'])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -2786,7 +2787,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$this->name'])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -2801,9 +2802,10 @@ class ClassInfo {
             foreach ($parentsWithInheritedMethods as $parent) {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $parentReference = self::getClassSynopsisReference($parent);
+                $escapedParentName = addslashes($parent->__toString());
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$parent')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedParentName')])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
