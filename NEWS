@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Apache:
   . Fixed bug GH-9949 (Partial content on incomplete POST request). (cmb)
 
+- TSRM:
+  . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
+
 05 Jan 2023, PHP 8.1.14
 
 - Core:
