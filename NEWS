@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-9918 (License information for xxHash is not included in
     README.REDIST.BINS file). (Akama Hitoshi)
   . Fixed bug GH-9650 (Can't initialize heap: [0x000001e7]). (Michael Voříšek)
+  . Fixed potentially undefined behavior in Windows ftok(3) emulation. (cmb)
 
 - MBString:
   . Fixed bug GH-9535 (The behavior of mb_strcut in mbstring has been changed in
