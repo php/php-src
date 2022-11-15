@@ -743,15 +743,15 @@ static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, c
 static zend_always_inline void zend_fcc_addref(zend_fcall_info_cache *fcc)
 {
 	ZEND_ASSERT(ZEND_FCC_INITIALIZED(*fcc) && "FCC Not initialized, possibly refetch trampoline freed by ZPP?");
-	/*
+	/* If the cached trampoline is set, free it */
 	if (UNEXPECTED(fcc->function_handler == &EG(trampoline))) {
-		zend_function *copy = emalloc(sizeof(zend_function));
+		zend_function *copy = (zend_function*)emalloc(sizeof(zend_function));
 
 		memcpy(copy, fcc->function_handler, sizeof(zend_function));
 		fcc->function_handler->common.function_name = NULL;
 		fcc->function_handler = copy;
+		memset(&EG(trampoline), 0, sizeof(zend_function));
 	}
-	*/
 	if (fcc->object) {
 		GC_ADDREF(fcc->object);
 	}
@@ -768,13 +768,15 @@ static zend_always_inline void zend_fcc_dup(/* restrict */ zend_fcall_info_cache
 
 static zend_always_inline void zend_fcc_dtor(zend_fcall_info_cache *fcc)
 {
+	ZEND_ASSERT(fcc->function_handler);
 	if (fcc->object) {
 		OBJ_RELEASE(fcc->object);
 	}
+	/* Need to free potential trampoline (__call/__callStatic) copied function handler before releasing the closure */
+	zend_release_fcall_info_cache(fcc);
 	if (fcc->closure) {
 		OBJ_RELEASE(fcc->closure);
 	}
-	zend_release_fcall_info_cache(fcc);
 	memcpy(fcc, &empty_fcall_info_cache, sizeof(zend_fcall_info_cache));
 }
 
