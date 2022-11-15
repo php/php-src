@@ -26,14 +26,12 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readcdf.c,v 1.74 2019/09/11 15:46:30 christos Exp $")
+FILE_RCSID("@(#)$File: readcdf.c,v 1.76 2022/01/17 16:59:01 christos Exp $")
 #endif
 
 #include <assert.h>
 #include <stdlib.h>
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#else
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <string.h>
@@ -147,7 +145,7 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 
 	memset(&ts, 0, sizeof(ts));
 
-        if (!NOTMIME(ms) && root_storage)
+	if (!NOTMIME(ms) && root_storage)
 		str = cdf_clsid_to_mime(root_storage->d_storage_uuid,
 		    clsid2mime);
 
@@ -596,8 +594,8 @@ file_trycdf(struct magic_set *ms, const struct buffer *b)
 	}
 #endif
 
-	if ((i = cdf_read_user_stream(&info, &h, &sat, &ssat, &sst, &dir,
-	    "FileHeader", &scn)) != -1) {
+	if (cdf_read_user_stream(&info, &h, &sat, &ssat, &sst, &dir,
+	    "FileHeader", &scn) != -1) {
 #define HWP5_SIGNATURE "HWP Document File"
 		if (scn.sst_len * scn.sst_ss >= sizeof(HWP5_SIGNATURE) - 1
 		    && memcmp(scn.sst_tab, HWP5_SIGNATURE,
@@ -665,7 +663,8 @@ out0:
 			if (file_printf(ms, ", %s", expn) == -1)
 				return -1;
 	} else if (ms->flags & MAGIC_MIME_TYPE) {
-		if (file_printf(ms, "application/CDFV2") == -1)
+		/* https://reposcope.com/mimetype/application/x-ole-storage */
+		if (file_printf(ms, "application/x-ole-storage") == -1)
 			return -1;
 	}
 	return 1;

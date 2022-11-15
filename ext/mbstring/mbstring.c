@@ -80,6 +80,8 @@ static inline bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_en
 
 static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 
+static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding);
+
 /* See mbfilter_cp5022x.c */
 uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, int mode);
 /* }}} */
@@ -883,8 +885,8 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 	} else {
 		MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 		MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-		MBSTRG(filter_illegal_substchar) = 0x3f;	/* '?' */
-		MBSTRG(current_filter_illegal_substchar) = 0x3f;	/* '?' */
+		MBSTRG(filter_illegal_substchar) = '?';
+		MBSTRG(current_filter_illegal_substchar) = '?';
 	}
 
 	return SUCCESS;
@@ -1015,9 +1017,9 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->default_detect_order_list = (enum mbfl_no_encoding *) php_mb_default_identify_list_neut;
 	mbstring_globals->default_detect_order_list_size = sizeof(php_mb_default_identify_list_neut) / sizeof(php_mb_default_identify_list_neut[0]);
 	mbstring_globals->filter_illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-	mbstring_globals->filter_illegal_substchar = 0x3f;	/* '?' */
+	mbstring_globals->filter_illegal_substchar = '?';
 	mbstring_globals->current_filter_illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-	mbstring_globals->current_filter_illegal_substchar = 0x3f;	/* '?' */
+	mbstring_globals->current_filter_illegal_substchar = '?';
 	mbstring_globals->illegalchars = 0;
 	mbstring_globals->encoding_translation = 0;
 	mbstring_globals->strict_detection = 0;
@@ -2753,24 +2755,18 @@ PHP_FUNCTION(mb_convert_encoding)
 }
 /* }}} */
 
-static char *mbstring_convert_case(
-		int case_mode, const char *str, size_t str_len, size_t *ret_len,
-		const mbfl_encoding *enc) {
-	return php_unicode_convert_case(
-		case_mode, str, str_len, ret_len, enc,
-		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
+static zend_string *mbstring_convert_case(php_case_mode case_mode, const char *str, size_t str_len, const mbfl_encoding *enc)
+{
+	return php_unicode_convert_case(case_mode, str, str_len, enc, MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
 }
 
-/* {{{ Returns a case-folded version of source_string */
 PHP_FUNCTION(mb_convert_case)
 {
-	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len, ret_len;
+	zend_string *str, *from_encoding = NULL;
 	zend_long case_mode = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(case_mode)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
@@ -2781,30 +2777,20 @@ PHP_FUNCTION(mb_convert_case)
 		RETURN_THROWS();
 	}
 
-	if (case_mode < 0 || case_mode > PHP_UNICODE_CASE_MODE_MAX) {
+	if (case_mode < 0 || case_mode >= PHP_UNICODE_CASE_MODE_MAX) {
 		zend_argument_value_error(2, "must be one of the MB_CASE_* constants");
 		RETURN_THROWS();
 	}
 
-	char *newstr = mbstring_convert_case(case_mode, str, str_len, &ret_len, enc);
-	/* If newstr is NULL something went wrong in mbfl and this is a bug */
-	ZEND_ASSERT(newstr != NULL);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(newstr, ret_len);
-	efree(newstr);
+	RETURN_STR(mbstring_convert_case(case_mode, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
-/* }}} */
 
-/* {{{ Returns a upper cased version of source_string */
 PHP_FUNCTION(mb_strtoupper)
 {
-	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len, ret_len;
+	zend_string *str, *from_encoding = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2814,46 +2800,26 @@ PHP_FUNCTION(mb_strtoupper)
 		RETURN_THROWS();
 	}
 
-	char *newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
-	/* If newstr is NULL something went wrong in mbfl and this is a bug */
-	ZEND_ASSERT(newstr != NULL);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(newstr, ret_len);
-	efree(newstr);
+	RETURN_STR(mbstring_convert_case(PHP_UNICODE_CASE_UPPER, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
-/* }}} */
 
-/* {{{ Returns a lower cased version of source_string */
 PHP_FUNCTION(mb_strtolower)
 {
-	zend_string *from_encoding = NULL;
-	char *str;
-	size_t str_len;
-	char *newstr;
-	size_t ret_len;
-	const mbfl_encoding *enc;
+	zend_string *str, *from_encoding = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(from_encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	enc = php_mb_get_encoding(from_encoding, 2);
+	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
 	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
-	/* If newstr is NULL something went wrong in mbfl and this is a bug */
-	ZEND_ASSERT(newstr != NULL);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(newstr, ret_len);
-	efree(newstr);
+	RETURN_STR(mbstring_convert_case(PHP_UNICODE_CASE_LOWER, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
-/* }}} */
 
 static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
 {
@@ -2865,11 +2831,9 @@ static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t
 /* {{{ Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
-	char *str;
-	size_t str_len;
-	zend_string *encoding_str = NULL;
+	zend_string *str, *encoding_str = NULL;
 	HashTable *encoding_ht = NULL;
-	bool strict = 0;
+	bool strict = false;
 
 	mbfl_string string;
 	const mbfl_encoding *ret;
@@ -2877,7 +2841,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	size_t size;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(encoding_ht, encoding_str)
 		Z_PARAM_BOOL(strict)
@@ -2915,11 +2879,11 @@ PHP_FUNCTION(mb_detect_encoding)
 
 	if (strict && size == 1) {
 		/* If there is only a single candidate encoding, mb_check_encoding is faster */
-		ret = (php_mb_check_encoding(str, str_len, *elist)) ? *elist : NULL;
+		ret = (mb_check_str_encoding(str, *elist)) ? *elist : NULL;
 	} else {
 		mbfl_string_init(&string);
-		string.val = (unsigned char *)str;
-		string.len = str_len;
+		string.val = (unsigned char*)ZSTR_VAL(str);
+		string.len = ZSTR_LEN(str);
 		ret = mbfl_identify_encoding(&string, elist, size, strict);
 	}
 
@@ -4393,7 +4357,7 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
+MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
 {
 	uint32_t wchar_buf[128];
 	unsigned char *in = (unsigned char*)input;
@@ -4406,7 +4370,7 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const m
 	ZEND_ASSERT(out_len <= 8);
 	for (int i = 0; i < out_len; i++) {
 		if (wchar_buf[i] == MBFL_BAD_INPUT) {
-			return 0;
+			return false;
 		}
 	}
 
@@ -4415,12 +4379,28 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const m
 		ZEND_ASSERT(out_len <= 128);
 		for (int i = 0; i < out_len; i++) {
 			if (wchar_buf[i] == MBFL_BAD_INPUT) {
-				return 0;
+				return false;
 			}
 		}
 	}
 
-	return 1;
+	return true;
+}
+
+static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding)
+{
+	if (encoding == &mbfl_encoding_utf8) {
+		if (GC_FLAGS(str) & IS_STR_VALID_UTF8) {
+			return true;
+		}
+		bool result = php_mb_check_encoding(ZSTR_VAL(str), ZSTR_LEN(str), encoding);
+		if (result && !ZSTR_IS_INTERNED(str)) {
+			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		}
+		return result;
+	} else {
+		return php_mb_check_encoding(ZSTR_VAL(str), ZSTR_LEN(str), encoding);
+	}
 }
 
 static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
@@ -4440,14 +4420,14 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
-			if (!php_mb_check_encoding(ZSTR_VAL(key), ZSTR_LEN(key), encoding)) {
+			if (!mb_check_str_encoding(key, encoding)) {
 				valid = 0;
 				break;
 			}
 		}
 		switch (Z_TYPE_P(entry)) {
 			case IS_STRING:
-				if (!php_mb_check_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), encoding)) {
+				if (!mb_check_str_encoding(Z_STR_P(entry), encoding)) {
 					valid = 0;
 					break;
 				}
@@ -4495,7 +4475,7 @@ PHP_FUNCTION(mb_check_encoding)
 	if (input_ht) {
 		RETURN_BOOL(php_mb_check_encoding_recursive(input_ht, encoding));
 	} else if (input_str) {
-		RETURN_BOOL(php_mb_check_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str), encoding));
+		RETURN_BOOL(mb_check_str_encoding(input_str, encoding));
 	} else {
 		php_error_docref(NULL, E_DEPRECATED,
 			"Calling mb_check_encoding() without argument is deprecated");
@@ -4774,11 +4754,11 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 	return last;
 }
 
-/* {{{ MBSTRING_API int php_mb_stripos() */
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *enc)
 {
-	size_t n = (size_t) -1;
+	size_t n = (size_t)-1;
 	mbfl_string haystack, needle;
+	zend_string *haystack_converted = NULL, *needle_converted = NULL;
 
 	mbfl_string_init_set(&haystack, enc);
 	mbfl_string_init_set(&needle, enc);
@@ -4786,21 +4766,20 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 	do {
 		/* We're using simple case-folding here, because we'd have to deal with remapping of
 		 * offsets otherwise. */
-
-		size_t len = 0;
-		haystack.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
-		haystack.len = len;
+		haystack_converted = mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char*)old_haystack, old_haystack_len, enc);
+		haystack.val = (unsigned char*)ZSTR_VAL(haystack_converted);
+		haystack.len = ZSTR_LEN(haystack_converted);
 
 		if (!haystack.val) {
 			break;
 		}
-
 		if (haystack.len == 0) {
 			break;
 		}
 
-		needle.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
-		needle.len = len;
+		needle_converted = mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char*)old_needle, old_needle_len, enc);
+		needle.val = (unsigned char*)ZSTR_VAL(needle_converted);
+		needle.len = ZSTR_LEN(needle_converted);
 
 		if (!needle.val) {
 			break;
@@ -4809,17 +4788,15 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		n = mbfl_strpos(&haystack, &needle, offset, mode);
 	} while(0);
 
-	if (haystack.val) {
-		efree(haystack.val);
+	if (haystack_converted) {
+		zend_string_free(haystack_converted);
 	}
-
-	if (needle.val) {
-		efree(needle.val);
+	if (needle_converted) {
+		zend_string_free(needle_converted);
 	}
 
 	return n;
 }
-/* }}} */
 
 static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *list_size) /* {{{ */
 {

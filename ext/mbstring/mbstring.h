@@ -65,7 +65,7 @@ MBSTRING_API zend_string* php_mb_convert_encoding(
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s, const mbfl_encoding *enc);
 
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *encoding);
-MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding);
+MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
@@ -87,9 +87,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	enum mbfl_no_encoding *default_detect_order_list;
 	size_t default_detect_order_list_size;
 	int filter_illegal_mode;
-	int filter_illegal_substchar;
+	uint32_t filter_illegal_substchar;
 	int current_filter_illegal_mode;
-	int current_filter_illegal_substchar;
+	uint32_t current_filter_illegal_substchar;
 	enum mbfl_no_language language;
 	bool encoding_translation;
 	bool strict_detection;

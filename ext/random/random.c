@@ -90,14 +90,14 @@ static zend_object_handlers random_randomizer_object_handlers;
 
 static inline uint32_t rand_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax)
 {
-	uint32_t result, limit, r;
+	uint32_t result, limit;
 	size_t total_size = 0;
 	uint32_t count = 0;
 
 	result = 0;
 	total_size = 0;
 	do {
-		r = algo->generate(status);
+		uint32_t r = algo->generate(status);
 		result = result | (r << (total_size * 8));
 		total_size += status->last_generated_size;
 		if (EG(exception)) {
@@ -132,7 +132,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 		result = 0;
 		total_size = 0;
 		do {
-			r = algo->generate(status);
+			uint32_t r = algo->generate(status);
 			result = result | (r << (total_size * 8));
 			total_size += status->last_generated_size;
 			if (EG(exception)) {
@@ -146,14 +146,14 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 
 static inline uint64_t rand_range64(const php_random_algo *algo, php_random_status *status, uint64_t umax)
 {
-	uint64_t result, limit, r;
+	uint64_t result, limit;
 	size_t total_size = 0;
 	uint32_t count = 0;
 
 	result = 0;
 	total_size = 0;
 	do {
-		r = algo->generate(status);
+		uint64_t r = algo->generate(status);
 		result = result | (r << (total_size * 8));
 		total_size += status->last_generated_size;
 		if (EG(exception)) {
@@ -188,7 +188,7 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 		result = 0;
 		total_size = 0;
 		do {
-			r = algo->generate(status);
+			uint64_t r = algo->generate(status);
 			result = result | (r << (total_size * 8));
 			total_size += status->last_generated_size;
 			if (EG(exception)) {
@@ -447,7 +447,21 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
-	return php_mt_rand_range(min, max);
+	php_random_status *status = php_random_default_status();
+	php_random_status_state_mt19937 *s = status->state;
+
+	if (s->mode == MT_RAND_MT19937) {
+		return php_mt_rand_range(min, max);
+	}
+
+	uint64_t r = php_random_algo_mt19937.generate(php_random_default_status()) >> 1;
+
+	/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
+	 * (max - min) > ZEND_LONG_MAX.
+	 */
+	zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
+
+	return (zend_long) (offset + min);
 }
 /* }}} */
 

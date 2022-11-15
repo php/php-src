@@ -801,8 +801,6 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *as
 		{
 			zend_string *class_name = zend_ast_get_str(ast->child[0]);
 			zend_string *const_name = zend_ast_get_str(ast->child[1]);
-			zval *zv;
-			bool bailout = 0;
 
 			zend_string *previous_filename;
 			zend_long previous_lineno;
@@ -812,17 +810,10 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *as
 				EG(filename_override) = scope->info.user.filename;
 				EG(lineno_override) = zend_ast_get_lineno(ast);
 			}
-			zend_try {
-				zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
-			} zend_catch {
-				bailout = 1;
-			}  zend_end_try();
+			zval *zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
 			if (scope) {
 				EG(filename_override) = previous_filename;
 				EG(lineno_override) = previous_lineno;
-			}
-			if (bailout) {
-				zend_bailout();
 			}
 
 			if (UNEXPECTED(zv == NULL)) {

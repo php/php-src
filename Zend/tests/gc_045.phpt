@@ -46,13 +46,21 @@ for ($j = 0; $j < 10; $j++) {
 var_dump(gc_status());
 ?>
 --EXPECT--
-array(4) {
+array(8) {
+  ["running"]=>
+  bool(false)
+  ["protected"]=>
+  bool(false)
+  ["full"]=>
+  bool(false)
   ["runs"]=>
   int(10)
   ["collected"]=>
   int(25000)
   ["threshold"]=>
   int(10001)
+  ["buffer_size"]=>
+  int(16384)
   ["roots"]=>
   int(10000)
 }

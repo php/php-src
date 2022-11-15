@@ -24,4 +24,7 @@ PHP_MINIT_FUNCTION(crypt);
 PHP_MSHUTDOWN_FUNCTION(crypt);
 PHP_RINIT_FUNCTION(crypt);
 
+/* sha512 crypt has the maximal salt length of 123 characters */
+#define PHP_MAX_SALT_LEN 123
+
 #endif

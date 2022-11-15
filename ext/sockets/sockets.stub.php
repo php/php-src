@@ -1678,6 +1678,27 @@ const SCM_CREDS = UNKNOWN;
  */
 const LOCAL_CREDS = UNKNOWN;
 #endif
+#if defined(SO_ATTACH_REUSEPORT_CBPF)
+/**
+ * @var int
+ * @cvalue SO_ATTACH_REUSEPORT_CBPF
+ */
+const SO_ATTACH_REUSEPORT_CBPF = UNKNOWN;
+#endif
+#if defined(SO_DETACH_FILTER)
+/**
+ * @var int
+ * @cvalue SO_DETACH_FILTER
+ */
+const SO_DETACH_FILTER = UNKNOWN;
+#endif
+#if defined(SO_DETACH_BPF)
+/**
+ * @var int
+ * @cvalue SO_DETACH_BPF
+ */
+const SO_DETACH_BPF = UNKNOWN;
+#endif
 
 /**
  * @strict-properties
@@ -1775,6 +1796,10 @@ function socket_create_pair(int $domain, int $type, int $protocol, &$pair): bool
 
 #ifdef HAVE_SHUTDOWN
 function socket_shutdown(Socket $socket, int $mode = 2): bool {}
+#endif
+
+#ifdef HAVE_SOCKATMARK
+function socket_atmark(Socket $socket): bool {}
 #endif
 
 function socket_last_error(?Socket $socket = null): int {}

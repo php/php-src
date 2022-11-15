@@ -46,4 +46,10 @@ enum php_xml_option {
 	PHP_XML_OPTION_SKIP_WHITE
 };
 
+#ifdef LIBXML_EXPAT_COMPAT
+#define PHP_XML_SAX_IMPL "libxml"
+#else
+#define PHP_XML_SAX_IMPL "expat"
+#endif
+
 #endif /* PHP_XML_H */

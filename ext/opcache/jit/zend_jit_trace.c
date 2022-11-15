@@ -2699,6 +2699,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	const zend_ssa *op_array_ssa;
 	const zend_ssa_op *ssa_op;
 	int i, j, idx, count, level;
+	int last_idx = -1;
 	int *start, *end;
 	uint8_t *flags;
 	const zend_op_array **vars_op_array;
@@ -3103,6 +3104,7 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 			}
 		}
 	} else {
+		last_idx = idx;
 		for (i = 0; i < op_array->last_var; i++) {
 			zend_jit_close_var(stack, i, start, end, flags, idx);
 		}
@@ -3411,6 +3413,14 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 					}
 				}
 				phi = phi->next;
+			}
+		} else {
+			for (i = 0; i < ssa->vars_count; i++) {
+				if (intervals[i]
+				 && intervals[i]->range.end == last_idx
+				 && !(intervals[i]->flags & (ZREG_LOAD|ZREG_STORE))) {
+					intervals[i]->flags |= ZREG_STORE;
+				}
 			}
 		}
 
@@ -6159,6 +6169,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					goto jit_failure;
 				}
 				if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
+					if (opline->opcode == ZEND_NEW && ssa_op->result_def >= 0) {
+						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_OBJECT, 1);
+					}
 					if (zend_jit_may_be_polymorphic_call(opline) ||
 							zend_jit_may_be_modified((p+1)->func, op_array)) {
 						if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
@@ -6402,7 +6415,7 @@ done:
 								ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 								if (ra && ra[ssa_op->op1_def]) {
 									SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->op1.var), ra[ssa_op->op1_def]->reg,
-										ra[ssa_op->op1_def]->reg & ZREG_STORE);
+										ra[ssa_op->op1_def]->flags & ZREG_STORE);
 								}
 							}
 							if (type == IS_LONG

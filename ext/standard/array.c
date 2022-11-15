@@ -1272,6 +1272,10 @@ static int php_array_walk(
 	 * levels of recursion. */
 	zend_fcall_info fci = context->fci;
 
+	if (zend_hash_num_elements(target_hash) == 0) {
+		return result;
+	}
+
 	/* Set up known arguments */
 	ZVAL_UNDEF(&args[1]);
 	if (userdata) {

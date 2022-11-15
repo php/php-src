@@ -2882,9 +2882,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 		ht->nNumUsed = i;
 	}
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED)) {
-		/* We broke the hash colisions chains overriding Z_NEXT() by Z_EXTRA().
-		 * Reset the hash headers table as well to avoid possilbe inconsistent
+	if (!HT_IS_PACKED(ht)) {
+		/* We broke the hash collisions chains overriding Z_NEXT() by Z_EXTRA().
+		 * Reset the hash headers table as well to avoid possible inconsistent
 		 * access on recursive data structures.
 	     *
 	     * See Zend/tests/bug63882_2.phpt

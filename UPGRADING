@@ -23,6 +23,10 @@ PHP 8.3 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Posix
+  . posix_getrlimit() now takes an optional $res parameter to allow fetching a
+    single resource limit.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -35,12 +39,27 @@ PHP 8.3 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Core:
+  . gc_status() has added the following 4 fields:
+    "running" => bool
+    "protected" => bool
+    "full" => bool
+    "buffer_size" => int
+    See GH-9336
+
 ========================================
 6. New Functions
 ========================================
 
+- JSON:
+  . Added json_validate(), which returns whether the json is valid for
+    the given $depth and $options.
+
 - Posix:
   . Added posix_sysconf call to get runtime informations.
+
+- Sockets:
+  . Added socket_atmark to checks if the socket is OOB marked.
 
 ========================================
 7. New Classes and Interfaces
@@ -58,11 +77,17 @@ PHP 8.3 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- PCNTL:
+  . SIGINFO
+
 - Posix:
   . POSIX_SC_ARG_MAX
   . POSIX_SC_PAGESIZE
   . POSIX_SC_NPROCESSORS_CONF
   . POSIX_SC_NPROCESSORS_ONLN
+
+- Sockets:
+  . SO_ATTACH_REUSEPORT_CBPF (Linux only).
 
 ========================================
 11. Changes to INI File Handling
@@ -75,6 +100,21 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- FFI:
+  . FFI::load() is now allowed during preloading when opcache.preload_user is the
+    current system user. Previously, calling FFI::load() was not possible during
+    preloading if the opcache.preload_user directive was set.
+
+- Opcache:
+  . In the cli and phpdbg SAPIs, preloading does not require the
+    opcache.preload_user directive to be set anymore when running as root. In
+    other SAPIs, this directive is required when running as root because
+    preloading is done before the SAPI switches to an unprivileged user.
+
+- Streams:
+  . Blocking fread() on socket connection returns immediately if there are
+    any buffered data instead of waiting for more data.
 
 ========================================
 14. Performance Improvements

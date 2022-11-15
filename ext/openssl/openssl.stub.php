@@ -64,12 +64,14 @@ const OPENSSL_ALGO_SHA1 = UNKNOWN;
  * @cvalue OPENSSL_ALGO_MD5
  */
 const OPENSSL_ALGO_MD5 = UNKNOWN;
+#ifndef OPENSSL_NO_MD4
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_MD4
  */
 const OPENSSL_ALGO_MD4 = UNKNOWN;
-#ifdef HAVE_OPENSSL_MD2_H
+#endif
+#ifndef OPENSSL_NO_MD2
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_MD2
@@ -104,11 +106,13 @@ const OPENSSL_ALGO_SHA384 = UNKNOWN;
  * @cvalue OPENSSL_ALGO_SHA512
  */
 const OPENSSL_ALGO_SHA512 = UNKNOWN;
+#ifndef OPENSSL_NO_RMD160
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_RMD160
  */
 const OPENSSL_ALGO_RMD160 = UNKNOWN;
+#endif
 
 /* flags for S/MIME */
 

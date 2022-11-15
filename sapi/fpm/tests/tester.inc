@@ -105,6 +105,11 @@ class Tester
     private $masterProcess;
 
     /**
+     * @var bool
+     */
+    private bool $daemonized;
+
+    /**
      * @var resource
      */
     private $outDesc;
@@ -383,19 +388,38 @@ class Tester
      *
      * @param array $extraArgs   Command extra arguments.
      * @param bool  $forceStderr Whether to output to stderr so error log is used.
+     * @param bool  $daemonize   Whether to start FPM daemonized
+     * @param array $extensions  List of extension to add if shared build used.
      *
      * @return bool
      * @throws \Exception
      */
-    public function start(array $extraArgs = [], bool $forceStderr = true)
-    {
+    public function start(
+        array $extraArgs = [],
+        bool $forceStderr = true,
+        bool $daemonize = false,
+        array $extensions = []
+    ) {
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
 
-        $cmd = [self::findExecutable(), '-F', '-y', $configFile];
+        $cmd = [self::findExecutable(), '-y', $configFile];
 
         if ($forceStderr) {
             $cmd[] = '-O';
+        }
+
+        $this->daemonized = $daemonize;
+        if ( ! $daemonize) {
+            $cmd[] = '-F';
+        }
+
+        $extensionDir = getenv('TEST_FPM_EXTENSION_DIR');
+        if ($extensionDir) {
+            $cmd[] = '-dextension_dir=' . $extensionDir;
+            foreach ($extensions as $extension) {
+                $cmd[] = '-dextension=' . $extension;
+            }
         }
 
         if (getenv('TEST_FPM_RUN_AS_ROOT')) {
@@ -420,6 +444,9 @@ class Tester
         if ( ! $this->outDesc !== false) {
             $this->outDesc = $pipes[1];
             $this->logReader->setStreamSource('{{MASTER:OUT}}', $this->outDesc);
+            if ($daemonize) {
+                $this->switchLogSource('{{FILE:LOG}}');
+            }
         }
 
         return true;
@@ -853,7 +880,11 @@ class Tester
      */
     public function terminate()
     {
-        proc_terminate($this->masterProcess);
+        if ($this->daemonized) {
+            $this->signal('TERM');
+        } else {
+            proc_terminate($this->masterProcess);
+        }
     }
 
     /**
@@ -1291,6 +1322,26 @@ class Tester
     ) {
         $this->logTool->setExpectedMessage($message, $limit, $repeat);
         $this->logTool->checkTruncatedMessage($this->response->getErrorData());
+    }
+
+    /**
+     * Expect log to be empty.
+     *
+     * @throws \Exception
+     */
+    public function expectLogEmpty()
+    {
+        try {
+            $line = $this->logReader->getLine(1, 0, true);
+            if ($line === '') {
+                $line = $this->logReader->getLine(1, 0, true);
+            }
+            if ($line !== null) {
+                $this->error('Log is not closed and returned line: ' . $line);
+            }
+        } catch (LogTimoutException $exception) {
+            $this->error('Log is not closed and timed out', $exception);
+        }
     }
 
     /**

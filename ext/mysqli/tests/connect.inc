@@ -25,8 +25,6 @@
     /* Development setting: test experimental features and/or feature requests that never worked before? */
     $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 
-    $IS_MYSQLND = stristr(mysqli_get_client_info(), "mysqlnd");
-
     if (!function_exists('sys_get_temp_dir')) {
         function sys_get_temp_dir() {
 

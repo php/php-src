@@ -23,6 +23,7 @@
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
 #include "zend_system_id.h"
+#include "zend_enum.h"
 
 #include "php.h"
 #ifdef ZEND_WIN32
@@ -1714,6 +1715,10 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	}
+
+	// Memory addresses of object handlers are not stable. They can change due to ASLR or order of linking dynamic. To
+	// avoid pointing to invalid memory we relink default_object_handlers here.
+	ce->default_object_handlers = ce->ce_flags & ZEND_ACC_ENUM ? &zend_enum_object_handlers : &std_object_handlers;
 }
 
 static void zend_file_cache_unserialize_warnings(zend_persistent_script *script, void *buf)

@@ -89,6 +89,9 @@
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
+#elif defined(__clang__) && __has_builtin(__builtin_assume)
+# pragma clang diagnostic ignored "-Wassume"
+# define ZEND_ASSUME(c)	__builtin_assume(c)
 #elif ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4005) || __has_builtin(__builtin_unreachable)) && PHP_HAVE_BUILTIN_EXPECT
 # define ZEND_ASSUME(c)	do { \
 		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \

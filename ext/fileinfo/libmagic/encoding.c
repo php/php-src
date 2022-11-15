@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: encoding.c,v 1.27 2021/02/05 21:33:49 christos Exp $")
+FILE_RCSID("@(#)$File: encoding.c,v 1.39 2022/09/13 18:46:07 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -80,7 +80,6 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 	size_t nbytes = b->flen;
 	size_t mlen;
 	int rv = 1, ucs_type;
-	unsigned char *nbuf = NULL;
 	file_unichar_t *udefbuf;
 	size_t udeflen;
 
@@ -103,13 +102,6 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 		file_oomem(ms, mlen);
 		goto done;
 	}
-	mlen = (nbytes + 1) * sizeof(nbuf[0]);
-	if ((nbuf = CAST(unsigned char *,
-	    ecalloc(CAST(size_t, 1), mlen))) == NULL) {
-		file_oomem(ms, mlen);
-		goto done;
-	}
-
 	if (looks_ascii(buf, nbytes, *ubuf, ulen)) {
 		if (looks_utf7(buf, nbytes, *ubuf, ulen) > 0) {
 			DPRINTF(("utf-7 %" SIZE_T_FORMAT "u\n", *ulen));
@@ -155,6 +147,13 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 		*code = "Non-ISO extended-ASCII";
 		*code_mime = "unknown-8bit";
 	} else {
+		unsigned char *nbuf;
+
+		mlen = (nbytes + 1) * sizeof(nbuf[0]);
+		if ((nbuf = CAST(unsigned char *, emalloc(mlen))) == NULL) {
+			file_oomem(ms, mlen);
+			goto done;
+		}
 		from_ebcdic(buf, nbytes, nbuf);
 
 		if (looks_ascii(nbuf, nbytes, *ubuf, ulen)) {
@@ -171,10 +170,10 @@ file_encoding(struct magic_set *ms, const struct buffer *b,
 			rv = 0;
 			*type = "binary";
 		}
+		efree(nbuf);
 	}
 
  done:
-	efree(nbuf);
 	if (ubuf == &udefbuf)
 		efree(udefbuf);
 
@@ -265,9 +264,7 @@ private int \
 looks_ ## NAME(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf, \
     size_t *ulen) \
 { \
-	size_t i, u; \
-	unsigned char dist[256]; \
-	memset(dist, 0, sizeof(dist)); \
+	size_t i; \
 \
 	*ulen = 0; \
 \
@@ -278,16 +275,7 @@ looks_ ## NAME(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf, \
 			return 0; \
 \
 		ubuf[(*ulen)++] = buf[i]; \
-		dist[buf[i]]++; \
 	} \
-	u = 0; \
-	for (i = 0; i < __arraycount(dist); i++) { \
-		if (dist[i]) \
-			u += dist[i]; \
-	} \
-	if (u < 3) \
-		return 0; \
-\
 	return 1; \
 }
 
@@ -387,7 +375,8 @@ file_looks_utf8(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf,
 		} else {			   /* 11xxxxxx begins UTF-8 */
 			int following;
 			uint8_t x = first[buf[i]];
-			const struct accept_range *ar = &accept_ranges[x >> 4];
+			const struct accept_range *ar =
+			    &accept_ranges[(unsigned int)x >> 4];
 			if (x == XX)
 				return -1;
 
@@ -468,11 +457,16 @@ looks_utf7(const unsigned char *buf, size_t nbytes, file_unichar_t *ubuf,
 		return -1;
 }
 
+#define UCS16_NOCHAR(c) ((c) >= 0xfdd0 && (c) <= 0xfdef)
+#define UCS16_HISURR(c) ((c) >= 0xd800 && (c) <= 0xdbff)
+#define UCS16_LOSURR(c) ((c) >= 0xdc00 && (c) <= 0xdfff)
+
 private int
 looks_ucs16(const unsigned char *bf, size_t nbytes, file_unichar_t *ubf,
     size_t *ulen)
 {
 	int bigend;
+	uint32_t hi;
 	size_t i;
 
 	if (nbytes < 2)
@@ -486,21 +480,41 @@ looks_ucs16(const unsigned char *bf, size_t nbytes, file_unichar_t *ubf,
 		return 0;
 
 	*ulen = 0;
+	hi = 0;
 
 	for (i = 2; i + 1 < nbytes; i += 2) {
-		/* XXX fix to properly handle chars > 65536 */
+		uint32_t uc;
 
 		if (bigend)
-			ubf[(*ulen)++] = bf[i + 1]
-			    | (CAST(file_unichar_t, bf[i]) << 8);
+			uc = CAST(uint32_t,
+			    bf[i + 1] | (CAST(file_unichar_t, bf[i]) << 8));
 		else
-			ubf[(*ulen)++] = bf[i]
-			    | (CAST(file_unichar_t, bf[i + 1]) << 8);
+			uc = CAST(uint32_t,
+			    bf[i] | (CAST(file_unichar_t, bf[i + 1]) << 8));
 
-		if (ubf[*ulen - 1] == 0xfffe)
+		uc &= 0xffff;
+
+		switch (uc) {
+		case 0xfffe:
+		case 0xffff:
 			return 0;
-		if (ubf[*ulen - 1] < 128 &&
-		    text_chars[CAST(size_t, ubf[*ulen - 1])] != T)
+		default:
+			if (UCS16_NOCHAR(uc))
+				return 0;
+			break;
+		}
+		if (hi) {
+			if (!UCS16_LOSURR(uc))
+				return 0;
+			uc = 0x10000 + 0x400 * (hi - 1) + (uc - 0xdc00);
+			hi = 0;
+		}
+		if (uc < 128 && text_chars[CAST(size_t, uc)] != T)
+			return 0;
+		ubf[(*ulen)++] = uc;
+		if (UCS16_HISURR(uc))
+			hi = uc - 0xd800 + 1;
+		if (UCS16_LOSURR(uc))
 			return 0;
 	}
 

@@ -1675,9 +1675,13 @@ finish:
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status)
 {
+	status->active = GC_G(gc_active);
+	status->gc_protected = GC_G(gc_protected);
+	status->full = GC_G(gc_full);
 	status->runs = GC_G(gc_runs);
 	status->collected = GC_G(collected);
 	status->threshold = GC_G(gc_threshold);
+	status->buf_size = GC_G(buf_size);
 	status->num_roots = GC_G(num_roots);
 }
 

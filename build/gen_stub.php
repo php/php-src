@@ -1487,14 +1487,10 @@ class FuncInfo {
 
         $methodSynopsis = $doc->createElement($synopsisType);
 
-        $aliasedFunc = $this->aliasType === "alias" && isset($funcMap[$this->alias->__toString()]) ? $funcMap[$this->alias->__toString()] : null;
-        $aliasFunc = $aliasMap[$this->name->__toString()] ?? null;
-
-        if (($this->aliasType === "alias" && $aliasedFunc !== null && $aliasedFunc->isMethod() !== $this->isMethod()) ||
-            ($aliasFunc !== null && $aliasFunc->isMethod() !== $this->isMethod())
-        ) {
+        if ($this->isMethod()) {
+            assert($this->name instanceof MethodName);
             $role = $doc->createAttribute("role");
-            $role->value = $this->isMethod() ? "oop" : "procedural";
+            $role->value = addslashes($this->name->className->__toString());
             $methodSynopsis->appendChild($role);
         }
 
@@ -1911,6 +1907,10 @@ class ConstInfo extends VariableLike
     protected function getFieldSynopsisValueString(iterable $allConstInfos): ?string
     {
         $value = EvaluatedValue::createFromExpression($this->value, null, $this->cValue, $allConstInfos);
+        if ($value->isUnknownConstValue) {
+            return null;
+        }
+
         if ($value->originatingConst) {
             return $value->originatingConst->getFieldSynopsisValueString($allConstInfos);
         }
@@ -1968,6 +1968,10 @@ class ConstInfo extends VariableLike
         $cConstValue = $value->getCConstValue($allConstInfos);
 
         $flags = "CONST_PERSISTENT";
+        if ($this->phpVersionIdMinimumCompatibility !== null && $this->phpVersionIdMinimumCompatibility < 80000) {
+            $flags .= " | CONST_CS";
+        }
+
         if ($this->isDeprecated) {
             $flags .= " | CONST_DEPRECATED";
         }
@@ -2759,12 +2763,13 @@ class ClassInfo {
             $classSynopsis->appendChild($classSynopsisInfo);
 
             $classReference = self::getClassSynopsisReference($this->name);
+            $escapedName = addslashes($this->name->__toString());
 
             if ($this->hasConstructor()) {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -2773,7 +2778,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[not(@role='procedural')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -2782,7 +2787,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -2797,9 +2802,10 @@ class ClassInfo {
             foreach ($parentsWithInheritedMethods as $parent) {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $parentReference = self::getClassSynopsisReference($parent);
+                $escapedParentName = addslashes($parent->__toString());
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[not(@role='procedural')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedParentName')])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }

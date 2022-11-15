@@ -264,12 +264,6 @@ PHP_MINIT_FUNCTION(xml)
 	php_xml_mem_hdlrs.realloc_fcn = php_xml_realloc_wrapper;
 	php_xml_mem_hdlrs.free_fcn = php_xml_free_wrapper;
 
-#ifdef LIBXML_EXPAT_COMPAT
-	REGISTER_STRING_CONSTANT("XML_SAX_IMPL", "libxml", CONST_CS|CONST_PERSISTENT);
-#else
-	REGISTER_STRING_CONSTANT("XML_SAX_IMPL", "expat", CONST_CS|CONST_PERSISTENT);
-#endif
-
 	return SUCCESS;
 }
 

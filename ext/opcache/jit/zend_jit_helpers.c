@@ -3012,35 +3012,6 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 	}
 }
 
-#if (PHP_VERSION_ID <= 80100) && (SIZEOF_SIZE_T == 4)
-static zend_result ZEND_FASTCALL zval_jit_update_constant_ex(zval *p, zend_class_entry *scope)
-{
-	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
-		zend_ast *ast = Z_ASTVAL_P(p);
-
-		if (ast->kind == ZEND_AST_CONSTANT) {
-			zend_string *name = zend_ast_get_constant_name(ast);
-			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
-			if (UNEXPECTED(zv == NULL)) {
-				return FAILURE;
-			}
-
-			zval_ptr_dtor_nogc(p);
-			ZVAL_COPY_OR_DUP(p, zv);
-		} else {
-			zval tmp;
-
-			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
-				return FAILURE;
-			}
-			zval_ptr_dtor_nogc(p);
-			ZVAL_COPY_VALUE(p, &tmp);
-		}
-	}
-	return SUCCESS;
-}
-#endif
-
 static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
 {
 	ZEND_ASSERT(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);

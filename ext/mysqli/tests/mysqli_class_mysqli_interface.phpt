@@ -61,13 +61,10 @@ require_once('skipifconnectfailure.inc');
         'use_result'			=> true,
     );
 
-    if ($IS_MYSQLND) {
-        // mysqlnd only
-        /* $expected_methods['get_client_stats']	= true; */
-        $expected_methods['get_connection_stats']	= true;
-        $expected_methods['reap_async_query']	= true;
-        $expected_methods['poll'] = true;
-    }
+    /* $expected_methods['get_client_stats']	= true; */
+    $expected_methods['get_connection_stats']	= true;
+    $expected_methods['reap_async_query']	= true;
+    $expected_methods['poll'] = true;
 
     /* we should add ruled when to expect them */
     if (function_exists('mysqli_debug'))

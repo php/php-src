@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f64e67d8e955bc14c03dfd884dd9e5f7f047dc44 */
+ * Stub hash: 6bbbdc8c4a33d1ff9984b3d81e4f5c9b76efcb14 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -64,9 +64,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_session_set_save_handler, 0, 1, 
 	ZEND_ARG_TYPE_INFO(0, write, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, destroy, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, gc, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, create_sid, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, validate_sid, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, update_timestamp, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, create_sid, IS_CALLABLE, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, validate_sid, IS_CALLABLE, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, update_timestamp, IS_CALLABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_cache_limiter, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
