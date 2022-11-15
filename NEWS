@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9298 (Signal handler called after rshutdown leads to crash).
     (Erki Aring)
 
+- Session:
+  . Fixed GH-9932 (session name silently fails with . and [). (David Carlier)
+
 27 Nov 2022, PHP 8.2.0
 
 - CLI:
