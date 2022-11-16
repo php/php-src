@@ -593,7 +593,7 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 
 			if (ref > 0) {
 				if (reg != -1/*IR_REG_NONE*/) {
-					t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = reg;
+					t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = reg & 0x3f; // TODO: remove magic mask ???
 				}
 			} else {
 				int8_t idx = zend_jit_add_trace_const(t, ctx->ir_base[ref].val.i64);
