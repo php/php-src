@@ -2191,9 +2191,15 @@ function header(string $header, bool $replace = true, int $response_code = 0): v
 
 function header_remove(?string $name = null): void {}
 
-function setrawcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
+enum SameSite {
+    case None;
+    case Lax;
+    case Strict;
+}
 
-function setcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool {}
+function setrawcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false, SameSite $sameSite = SameSite::Lax): bool {}
+
+function setcookie(string $name, string $value = "", array|int $expires_or_options = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false, SameSite $sameSite = SameSite::Lax): bool {}
 
 function http_response_code(int $response_code = 0): int|bool {}
 

@@ -25,7 +25,9 @@
 
 #include "php_globals.h"
 #include "zend_smart_str.h"
+#include "zend_enum.h"
 
+PHPAPI zend_class_entry *SameSite_ce;
 
 /* Implementation of the language Header() function */
 /* {{{ Sends a raw HTTP header */
@@ -227,9 +229,10 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 	HashTable *options = NULL;
 	zend_long expires = 0;
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
+	zend_object *same_site_enum = NULL;
 	bool secure = 0, httponly = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 7)
+	ZEND_PARSE_PARAMETERS_START(1, 8)
 		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(value)
@@ -238,6 +241,7 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 		Z_PARAM_STR(domain)
 		Z_PARAM_BOOL(secure)
 		Z_PARAM_BOOL(httponly)
+		Z_PARAM_OBJ_OF_CLASS(same_site_enum, SameSite_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (options) {
@@ -251,6 +255,19 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 			&domain, &secure, &httponly, &samesite)
 		) {
 			goto cleanup;
+		}
+	}
+
+	if (same_site_enum) {
+		zval *case_name = zend_enum_fetch_case_name(same_site_enum);
+		samesite = zend_string_copy(Z_STR_P(case_name));
+
+		/* Verify that cookie is secure if using SameSite::None, see
+		 * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#samesitenone_requires_secure */
+		if (!secure && zend_string_equals_literal(samesite, "None")) {
+			zend_string_release(samesite);
+			zend_argument_value_error(8, "can only be SameSite::None if argument #6 ($secure) is true");
+			RETURN_THROWS();
 		}
 	}
 

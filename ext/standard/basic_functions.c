@@ -32,6 +32,7 @@
 #include "php_ext_syslog.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
+#include "zend_enum.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
 #include "zend_ini.h"
@@ -306,6 +307,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_incomplete_class_handlers();
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
+	SameSite_ce = register_class_SameSite();
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)

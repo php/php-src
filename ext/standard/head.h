@@ -32,4 +32,6 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
 	zend_string *samesite, bool url_encode);
 
+extern PHPAPI zend_class_entry *SameSite_ce;
+
 #endif

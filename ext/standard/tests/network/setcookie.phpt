@@ -19,6 +19,9 @@ setcookie('name', 'value', 0, '', '', FALSE, TRUE);
 
 setcookie('name', 'value', ['expires' => $tsp]);
 setcookie('name', 'value', ['expires' => $tsn, 'path' => '/path/', 'domain' => 'domain.tld', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+setcookie('name', 'value', /*expires:*/ $tsp, path: '/path/', domain: 'domain.tld', secure: true, httponly: true, sameSite: SameSite::None);
+setcookie('name', 'value', /*expires:*/ $tsp, path: '/path/', domain: 'domain.tld', secure: true, httponly: true, sameSite: SameSite::Lax);
+setcookie('name', 'value', /*expires:*/ $tsp, path: '/path/', domain: 'domain.tld', secure: true, httponly: true, sameSite: SameSite::Strict);
 
 $expected = array(
     'Set-Cookie: name=deleted; expires='.date('D, d M Y H:i:s', 1).' GMT; Max-Age=0',
@@ -34,7 +37,10 @@ $expected = array(
     'Set-Cookie: name=value; secure',
     'Set-Cookie: name=value; HttpOnly',
     'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsp).' GMT; Max-Age=5',
-    'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsn).' GMT; Max-Age=0; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Strict'
+    'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsn).' GMT; Max-Age=0; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Strict',
+    'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsp).' GMT; Max-Age=5; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=None',
+    'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsp).' GMT; Max-Age=5; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Lax',
+    'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsp).' GMT; Max-Age=5; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Strict',
 );
 
 $headers = headers_list();
@@ -44,26 +50,20 @@ if (($i = count($expected)) > count($headers))
     return;
 }
 
-do {
-    $header = current($headers);
-    if (strncmp($header, 'Set-Cookie:', 11) !== 0) {
+foreach ($headers as $header) {
+    if (!str_starts_with($header, 'Set-Cookie:')) {
         continue;
     }
-
     // If the second rolls over between the time() call and the internal time determination by
     // setcookie(), we might get Max-Age=4 instead of Max-Age=5.
     $header = str_replace('Max-Age=4', 'Max-Age=5', $header);
     if ($header === current($expected)) {
         $i--;
     } else {
-        echo "Header mismatch:\n\tExpected: "
-            .current($expected)
-            ."\n\tReceived: ".current($headers)."\n";
+        echo "Header mismatch:\n\tExpected: ", current($expected), "\n\tReceived: ", $header, "\n";
     }
-
     next($expected);
 }
-while (next($headers) !== FALSE);
 
 echo ($i === 0)
     ? 'OK'
