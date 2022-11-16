@@ -619,7 +619,7 @@ static void zend_jit_guard(zend_jit_ctx *jit, ir_ref condition, ir_ref addr)
 		ir_ref ref = jit->control;
 		ir_insn *insn;
 
-		while (1) {
+		while (ref > condition) {
 			insn = &jit->ctx.ir_base[ref];
 			if (insn->op == IR_GUARD) {
 				if (insn->op2 == condition) {
@@ -656,7 +656,7 @@ static void zend_jit_guard_not(zend_jit_ctx *jit, ir_ref condition, ir_ref addr)
 		ir_ref ref = jit->control;
 		ir_insn *insn;
 
-		while (1) {
+		while (ref > condition) {
 			insn = &jit->ctx.ir_base[ref];
 			if (insn->op == IR_GUARD_NOT) {
 				if (insn->op2 == condition) {
