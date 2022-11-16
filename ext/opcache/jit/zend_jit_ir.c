@@ -638,8 +638,7 @@ static void zend_jit_guard(zend_jit_ctx *jit, ir_ref condition, ir_ref addr)
 				 || insn->op == IR_CASE_DEFAULT
 				 || insn->op == IR_MERGE
 				 || insn->op == IR_LOOP_BEGIN
-				 || insn->op == IR_ENTRY
-				 || insn->op == IR_CALL) {
+				 || insn->op == IR_ENTRY) {
 				break;
 			}
 			ref = insn->op1;
@@ -676,8 +675,7 @@ static void zend_jit_guard_not(zend_jit_ctx *jit, ir_ref condition, ir_ref addr)
 				 || insn->op == IR_CASE_DEFAULT
 				 || insn->op == IR_MERGE
 				 || insn->op == IR_LOOP_BEGIN
-				 || insn->op == IR_ENTRY
-				 || insn->op == IR_CALL) {
+				 || insn->op == IR_ENTRY) {
 				break;
 			}
 			ref = insn->op1;
