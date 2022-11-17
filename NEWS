@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     README.REDIST.BINS file). (Akama Hitoshi)
   . Fixed bug GH-9650 (Can't initialize heap: [0x000001e7]). (Michael Voříšek)
   . Fixed potentially undefined behavior in Windows ftok(3) emulation. (cmb)
+  . Fixed GH-9769 (Misleading error message for unpacking of objects). (jhdxr)
 
 - Date:
   . Fixed bug GH-9699 (DateTimeImmutable::diff differences in 8.1.10 onwards -
