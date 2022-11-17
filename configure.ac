@@ -1310,7 +1310,7 @@ int main(void) {
   else
     return 1;
 }
-  ]])], [ac_cv_syscall_shadow_stack_exists=yes], [ac_cv_syscall_shadow_stack_exists=no])
+  ]])], [ac_cv_syscall_shadow_stack_exists=yes], [ac_cv_syscall_shadow_stack_exists=no], [ac_cv_syscall_shadow_stack_exists=no])
 ])
 if test "$ac_cv_syscall_shadow_stack_exists" = yes; then
   AC_DEFINE([SHADOW_STACK_SYSCALL], 1, [ ])
