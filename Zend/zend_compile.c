@@ -787,6 +787,96 @@ static void zend_do_free(znode *op1) /* {{{ */
 }
 /* }}} */
 
+
+static char *zend_modifier_token_to_string(uint32_t token)
+{
+	switch (token) {
+		case T_PUBLIC:
+			return "public";
+		case T_PROTECTED:
+			return "protected";
+		case T_PRIVATE:
+			return "private";
+		case T_STATIC:
+			return "static";
+		case T_FINAL:
+			return "final";
+		case T_READONLY:
+			return "readonly";
+		case T_ABSTRACT:
+			return "abstract";
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token)
+{
+	switch (token) {
+		case T_PUBLIC:
+			return ZEND_ACC_PUBLIC;
+		case T_PROTECTED:
+			return ZEND_ACC_PROTECTED;
+		case T_PRIVATE:
+			return ZEND_ACC_PRIVATE;
+		case T_READONLY:
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
+				return ZEND_ACC_READONLY;
+			}
+			break;
+		case T_ABSTRACT:
+			if (target == ZEND_MODIFIER_TARGET_METHOD) {
+				return ZEND_ACC_ABSTRACT;
+			}
+			break;
+		case T_FINAL:
+			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_CONSTANT) {
+				return ZEND_ACC_FINAL;
+			}
+			break;
+		case T_STATIC:
+			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_METHOD) {
+				return ZEND_ACC_STATIC;
+			}
+			break;
+	}
+
+	char *member;
+	if (target == ZEND_MODIFIER_TARGET_PROPERTY) {
+		member = "property";
+	} else if (target == ZEND_MODIFIER_TARGET_METHOD) {
+		member = "method";
+	} else if (target == ZEND_MODIFIER_TARGET_CONSTANT) {
+		member = "class constant";
+	} else if (target == ZEND_MODIFIER_TARGET_CPP) {
+		member = "promoted property";
+	} else {
+		ZEND_UNREACHABLE();
+	}
+
+	zend_throw_exception_ex(zend_ce_compile_error, 0,
+		"Cannot use the %s modifier on a %s", zend_modifier_token_to_string(token), member);
+	return 0;
+}
+
+uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modifiers)
+{
+	uint32_t flags = 0;
+	zend_ast_list *modifier_list = zend_ast_get_list(modifiers);
+
+	for (uint32_t i = 0; i < modifier_list->children; i++) {
+		uint32_t new_flag = zend_modifier_token_to_flag(target, (uint32_t) Z_LVAL_P(zend_ast_get_zval(modifier_list->child[i])));
+		if (!new_flag) {
+			return 0;
+		}
+		flags = zend_add_member_modifier(flags, new_flag, target);
+		if (!flags) {
+			return 0;
+		}
+	}
+
+	return flags;
+}
+
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
@@ -812,7 +902,7 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 }
 /* }}} */
 
-uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
+uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifier_target target) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
 	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
@@ -837,9 +927,9 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 			"Multiple readonly modifiers are not allowed", 0);
 		return 0;
 	}
-	if ((new_flags & ZEND_ACC_ABSTRACT) && (new_flags & ZEND_ACC_FINAL)) {
+	if (target == ZEND_MODIFIER_TARGET_METHOD && (new_flags & ZEND_ACC_ABSTRACT) && (new_flags & ZEND_ACC_FINAL)) {
 		zend_throw_exception(zend_ce_compile_error,
-			"Cannot use the final modifier on an abstract class member", 0);
+			"Cannot use the final modifier on an abstract method", 0);
 		return 0;
 	}
 	return new_flags;
@@ -7474,10 +7564,6 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include properties", ZSTR_VAL(ce->name));
 	}
 
-	if (flags & ZEND_ACC_ABSTRACT) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
-	}
-
 	for (i = 0; i < children; ++i) {
 		zend_property_info *info;
 		zend_ast *prop_ast = list->child[i];
@@ -7503,12 +7589,6 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */
 		if (doc_comment_ast) {
 			doc_comment = zend_string_copy(zend_ast_get_str(doc_comment_ast));
-		}
-
-		if (flags & ZEND_ACC_FINAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, "
-				"the final modifier is allowed only for methods, classes, and class constants",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
 		if (zend_hash_exists(&ce->properties_info, name)) {
@@ -7583,16 +7663,14 @@ static void zend_compile_prop_group(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* entity) /* {{{ */
+static void zend_check_trait_alias_modifiers(uint32_t attr) /* {{{ */
 {
 	if (attr & ZEND_ACC_STATIC) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'static' as %s modifier", entity);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"static\" as method modifier in trait alias");
 	} else if (attr & ZEND_ACC_ABSTRACT) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as %s modifier", entity);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"abstract\" as method modifier in trait alias");
 	} else if (attr & ZEND_ACC_FINAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as %s modifier", entity);
-	} else if (attr & ZEND_ACC_READONLY) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'readonly' as %s modifier", entity);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"final\" as method modifier in trait alias");
 	}
 }
 /* }}} */
@@ -7612,10 +7690,6 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
-
-		if (UNEXPECTED(flags & (ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_READONLY))) {
-			zend_check_const_and_trait_alias_attr(flags, "constant");
-		}
 
 		if (UNEXPECTED((flags & ZEND_ACC_PRIVATE) && (flags & ZEND_ACC_FINAL))) {
 			zend_error_noreturn(
@@ -7687,7 +7761,7 @@ static void zend_compile_trait_alias(zend_ast *ast) /* {{{ */
 
 	zend_trait_alias *alias;
 
-	zend_check_const_and_trait_alias_attr(modifiers, "method");
+	zend_check_trait_alias_modifiers(modifiers);
 
 	alias = emalloc(sizeof(zend_trait_alias));
 	zend_compile_method_ref(method_ref_ast, &alias->trait_method);
