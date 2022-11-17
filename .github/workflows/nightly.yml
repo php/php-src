@@ -377,6 +377,22 @@ jobs:
           git rev-parse HEAD
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
           php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
+      - name: Test Wordpress
+        if: always()
+        run: |
+          git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
+          cd wordpress
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          cp wp-tests-config-sample.php wp-tests-config.php
+          sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
+          sed -i 's/yourusernamehere/root/g' wp-tests-config.php
+          sed -i 's/yourpasswordhere/root/g' wp-tests-config.php
+          php vendor/bin/phpunit || EXIT_CODE=$?
+          if [ $EXIT_CODE -gt 128 ]; then
+            exit 1
+          fi
   OPCACHE_VARIATION:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
