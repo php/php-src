@@ -1933,6 +1933,52 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
 	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	zend_fetch_dimension_address_W(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
 	FREE_OP2();
+	if (opline->extended_value == ZEND_FETCH_DIM_REF) {
+ZEND_VM_C_LABEL(gc_mark_collectable_again):
+		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+			gc_mark_collectable(Z_COUNTED_P(container));
+		} else if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+			ZEND_VM_C_GOTO(gc_mark_collectable_again);
+		}
+	}
+	if (OP1_TYPE == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FETCH_DIM_W, (op->extended_value != ZEND_FETCH_DIM_REF), ZEND_FETCH_DIM_W_NO_REF, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
+{
+	USE_OPLINE
+	zval *container;
+
+	SAVE_OPLINE();
+	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	zend_fetch_dimension_address_W(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP2();
+	if (OP1_TYPE == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FETCH_DIM_W, (op->extended_value == ZEND_FETCH_DIM_REF), ZEND_FETCH_DIM_W_REF, ANY, ANY)
+{
+	USE_OPLINE
+	zval *container;
+
+	SAVE_OPLINE();
+	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	zend_fetch_dimension_address_W(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP2();
+ZEND_VM_C_LABEL(gc_mark_collectable_again):
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		gc_mark_collectable(Z_COUNTED_P(container));
+	} else if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+		ZEND_VM_C_GOTO(gc_mark_collectable_again);
+	}
 	if (OP1_TYPE == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
 	}
@@ -6031,6 +6077,11 @@ ZEND_VM_C_LABEL(num_index):
 			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
+	}
+	// FIXME: Only add when element was actually added
+	if (!(GC_FLAGS(Z_ARRVAL_P(EX_VAR(opline->result.var))) & IS_ARRAY_PERSISTENT)
+		&& (Z_TYPE_P(expr_ptr) == IS_REFERENCE || Z_TYPE_P(expr_ptr) == IS_OBJECT)) {
+		gc_mark_collectable((zend_refcounted *) Z_ARRVAL_P(EX_VAR(opline->result.var)));
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }

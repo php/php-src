@@ -46,6 +46,13 @@ ZEND_API bool gc_enabled(void);
 ZEND_API bool gc_protect(bool protect);
 ZEND_API bool gc_protected(void);
 
+/* Arrays are non-collectable by default and will be marked as collectable only
+ * when they can form a cycle. This is only the case then they contain objects
+ * or references. */
+static zend_always_inline void gc_mark_collectable(zend_refcounted *rc) {
+	GC_DEL_FLAGS(rc, GC_NOT_COLLECTABLE);
+}
+
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
 
