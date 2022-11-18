@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     README.REDIST.BINS file). (Akama Hitoshi)
   . Fixed bug GH-9890 (OpenSSL legacy providers not available on Windows). (cmb)
   . Fixed bug GH-9650 (Can't initialize heap: [0x000001e7]). (Michael Voříšek)
+  . Fixed potentially undefined behavior in Windows ftok(3) emulation. (cmb)
 
 - Pcntl:
   . Fixed bug GH-9298 (Signal handler called after rshutdown leads to crash).
