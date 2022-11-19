@@ -558,8 +558,11 @@ static size_t mb_utf7imap_to_wchar(unsigned char **in, size_t *in_len, uint32_t 
 			}
 
 			unsigned char n4 = decode_base64(*p++);
-			if (is_base64_end(n4) || p == e) {
+			if (is_base64_end(n4)) {
 				out = handle_base64_end(n4, out, &base64, n3 & 0x3, &surrogate1);
+				continue;
+			} else if (p == e) {
+				out = handle_base64_end(n4, out, &base64, true, &surrogate1);
 				continue;
 			}
 			unsigned char n5 = decode_base64(*p++);
@@ -580,8 +583,11 @@ static size_t mb_utf7imap_to_wchar(unsigned char **in, size_t *in_len, uint32_t 
 			}
 
 			unsigned char n7 = decode_base64(*p++);
-			if (is_base64_end(n7) || p == e) {
+			if (is_base64_end(n7)) {
 				out = handle_base64_end(n7, out, &base64, n6 & 0xF, &surrogate1);
+				continue;
+			} else if (p == e) {
+				out = handle_base64_end(n7, out, &base64, true, &surrogate1);
 				continue;
 			}
 			unsigned char n8 = decode_base64(*p++);

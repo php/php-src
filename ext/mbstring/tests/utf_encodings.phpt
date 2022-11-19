@@ -1063,6 +1063,16 @@ testInvalidString('+' . rawEncode("\xD8\x01"), "\x00\x00\x00%", 'UTF-7', 'UTF-32
 testInvalidString('+' . rawEncode("\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 testInvalidString('+l', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 
+// Base64 section should not have 4 ASCII characters; the first 3 can encode one
+// UTF-16 character, so there is no need for the 4th
+testInvalidString('+RR8I', "\xE4\x94\x9F%", 'UTF-7', 'UTF-8');
+// Likewise with 7 characters
+testInvalidString('+RR8IAAA', "\xE4\x94\x9F\xE0\xA0\x80%", 'UTF-7', 'UTF-8');
+
+// Similarly, it is useless for a Base64 section to only contain a single 'A'
+// (which decodes to only zero bits)
+testInvalidString("+A", "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+
 // And then, messed up Base64 encoding
 
 // Bad padding on + section (not zeroes)
