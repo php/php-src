@@ -4448,7 +4448,7 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 	EC_POINT *pnt = NULL;
 	unsigned char *pnt_oct = NULL;
 	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
+	EVP_PKEY_CTX *ctx = NULL;
 	OSSL_PARAM *params = NULL;
 	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
 	zval *curve_name_zv = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1);
@@ -4459,8 +4459,15 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 
 	*is_private = false;
 
-	if (!ctx || !bld || !curve_name_zv || Z_TYPE_P(curve_name_zv) != IS_STRING) {
+	if (!bld || !curve_name_zv || Z_TYPE_P(curve_name_zv) != IS_STRING) {
 		goto cleanup;
+	}
+	
+	/* Applications must now generate SM2 keys directly and must not create an EVP_PKEY_EC key first. */
+	if (OPENSSL_strcasecmp(Z_STRVAL_P(curve_name_zv), "SM2") == 0){
+		ctx = EVP_PKEY_CTX_new_from_name(NULL, "SM2", NULL);
+	} else {
+		ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL);
 	}
 
 	int nid = OBJ_sn2nid(Z_STRVAL_P(curve_name_zv));
@@ -4503,7 +4510,7 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		goto cleanup;
 	}
 
-	if (EVP_PKEY_fromdata_init(ctx) <= 0 ||
+	if (!ctx || EVP_PKEY_fromdata_init(ctx) <= 0 ||
 			EVP_PKEY_fromdata(ctx, &param_key, EVP_PKEY_KEYPAIR, params) <= 0) {
 		goto cleanup;
 	}
