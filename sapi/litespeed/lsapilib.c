@@ -442,9 +442,10 @@ static void lsapi_close_connection(LSAPI_Request *pReq)
     lsapi_close(pReq->m_fd);
     pReq->m_fd = -1;
     if (s_busy_workers)
-        __sync_fetch_and_sub(s_busy_workers, 1);
+        __atomic_fetch_sub(s_busy_workers, 1, __ATOMIC_SEQ_CST);
     if (s_worker_status)
-        __sync_lock_test_and_set(&s_worker_status->m_state, LSAPI_STATE_IDLE);
+        __atomic_store_n(&s_worker_status->m_state, LSAPI_STATE_IDLE,
+                         __ATOMIC_SEQ_CST);
 }
 
 
@@ -1588,10 +1589,10 @@ int LSAPI_Accept_r( LSAPI_Request * pReq )
                 else
                 {
                     if (s_worker_status)
-                        __sync_lock_test_and_set(&s_worker_status->m_state,
-                                                 LSAPI_STATE_CONNECTED);
+                        __atomic_store_n(&s_worker_status->m_state,
+                                       LSAPI_STATE_CONNECTED, __ATOMIC_SEQ_CST);
                     if (s_busy_workers)
-                        __sync_fetch_and_add(s_busy_workers, 1);
+                        __atomic_fetch_add(s_busy_workers, 1, __ATOMIC_SEQ_CST);
                     lsapi_set_nblock( pReq->m_fd , 0 );
                     if (((struct sockaddr *)&achPeer)->sa_family == AF_INET )
                     {
@@ -2919,9 +2920,9 @@ void LSAPI_reset_server_state( void )
         ++pStatus;
     }
     if (s_busy_workers)
-        __sync_lock_release(s_busy_workers);
+        __atomic_store_n(s_busy_workers, 0, __ATOMIC_SEQ_CST);
     if (s_accepting_workers)
-        __sync_lock_release(s_accepting_workers);
+        __atomic_store_n(s_accepting_workers, 0, __ATOMIC_SEQ_CST);
 
 }
 
@@ -2929,6 +2930,8 @@ void LSAPI_reset_server_state( void )
 static void lsapi_sigchild( int signal )
 {
     int status, pid;
+    char expect_connected = LSAPI_STATE_CONNECTED;
+    char expect_accepting = LSAPI_STATE_ACCEPTING;
     lsapi_child_status * child_status;
     if (g_prefork_server == NULL)
         return;
@@ -2965,19 +2968,23 @@ static void lsapi_sigchild( int signal )
         child_status = find_child_status( pid );
         if ( child_status )
         {
-            if (__sync_bool_compare_and_swap(&child_status->m_state,
-                                             LSAPI_STATE_CONNECTED,
-                                             LSAPI_STATE_IDLE))
+            if (__atomic_compare_exchange_n(&child_status->m_state,
+                                            &expect_connected,
+                                            LSAPI_STATE_IDLE, 1,
+                                            __ATOMIC_SEQ_CST,
+                                            __ATOMIC_SEQ_CST))
             {
                 if (s_busy_workers)
-                    __sync_fetch_and_sub(s_busy_workers, 1);
+                    __atomic_fetch_sub(s_busy_workers, 1, __ATOMIC_SEQ_CST);
             }
-            else if (__sync_bool_compare_and_swap(&child_status->m_state,
-                                                  LSAPI_STATE_ACCEPTING,
-                                                  LSAPI_STATE_IDLE))
+            else if (__atomic_compare_exchange_n(&child_status->m_state,
+                                                 &expect_accepting,
+                                                 LSAPI_STATE_IDLE, 1,
+                                                 __ATOMIC_SEQ_CST,
+                                                 __ATOMIC_SEQ_CST))
             {
                 if (s_accepting_workers)
-                    __sync_fetch_and_sub(s_accepting_workers, 1);
+                    __atomic_fetch_sub(s_accepting_workers, 1, __ATOMIC_SEQ_CST);
             }
             child_status->m_pid = 0;
             --g_prefork_server->m_iCurChildren;
@@ -3250,7 +3257,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
         {
             int accepting = 0;
             if (s_accepting_workers)
-                accepting = __sync_add_and_fetch(s_accepting_workers, 0);
+                accepting = __atomic_load_n(s_accepting_workers, __ATOMIC_SEQ_CST);
 
             if (pServer->m_iCurChildren > 0
                 && accepting > 0)
@@ -3316,10 +3323,10 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
                 if (pthread_atfork_func)
                     (*pthread_atfork_func)(NULL, NULL, set_skip_write);
 
-                __sync_lock_test_and_set(&s_worker_status->m_state,
-                                         LSAPI_STATE_CONNECTED);
+                __atomic_store_n(&s_worker_status->m_state,
+                                 LSAPI_STATE_CONNECTED, __ATOMIC_SEQ_CST);
                 if (s_busy_workers)
-                    __sync_add_and_fetch(s_busy_workers, 1);
+                    __atomic_add_fetch(s_busy_workers, 1, __ATOMIC_SEQ_CST);
                 lsapi_set_nblock( pReq->m_fd, 0 );
                 //keep it open if busy_count is used.
                 if (!s_keep_listener && s_busy_workers
@@ -3391,7 +3398,7 @@ int LSAPI_Postfork_Child(LSAPI_Request * pReq)
 {
     int max_children = g_prefork_server->m_iMaxChildren;
     s_pid = getpid();
-    __sync_lock_test_and_set(&pReq->child_status->m_pid, s_pid);
+    __atomic_store_n(&pReq->child_status->m_pid, s_pid, __ATOMIC_SEQ_CST);
     s_worker_status = pReq->child_status;
 
     setsid();
@@ -3403,10 +3410,10 @@ int LSAPI_Postfork_Child(LSAPI_Request * pReq)
     if (pthread_atfork_func)
         (*pthread_atfork_func)(NULL, NULL, set_skip_write);
 
-    __sync_lock_test_and_set(&s_worker_status->m_state,
-                                LSAPI_STATE_CONNECTED);
+    __atomic_store_n(&s_worker_status->m_state,
+                     LSAPI_STATE_CONNECTED, __ATOMIC_SEQ_CST);
     if (s_busy_workers)
-        __sync_add_and_fetch(s_busy_workers, 1);
+        __atomic_add_fetch(s_busy_workers, 1, __ATOMIC_SEQ_CST);
     lsapi_set_nblock( pReq->m_fd, 0 );
     //keep it open if busy_count is used.
     if (!s_keep_listener && s_busy_workers
@@ -3523,7 +3530,7 @@ int LSAPI_Accept_Before_Fork(LSAPI_Request * pReq)
         {
             int accepting = 0;
             if (s_accepting_workers)
-                accepting = __sync_add_and_fetch(s_accepting_workers, 0);
+                accepting = __atomic_load_n(s_accepting_workers, __ATOMIC_SEQ_CST);
 
             if (pServer->m_iCurChildren > 0
                 && accepting > 0)
@@ -3608,7 +3615,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
     }
     else if (s_req_processed > 0 && s_max_busy_workers > 0 && s_busy_workers)
     {
-        ret = __sync_fetch_and_add(s_busy_workers, 0);
+        ret = __atomic_load_n(s_busy_workers, __ATOMIC_SEQ_CST);
         if (ret >= s_max_busy_workers)
         {
             send_conn_close_notification(pReq->m_fd);
@@ -3652,19 +3659,19 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
             if (fd == pReq->m_fdListen)
             {
                 if (s_worker_status)
-                    __sync_lock_test_and_set(&s_worker_status->m_state,
-                                             LSAPI_STATE_ACCEPTING);
+                    __atomic_store_n(&s_worker_status->m_state,
+                                     LSAPI_STATE_ACCEPTING, __ATOMIC_SEQ_CST);
                 if (s_accepting_workers)
-                    __sync_fetch_and_add(s_accepting_workers, 1);
+                    __atomic_fetch_add(s_accepting_workers, 1, __ATOMIC_SEQ_CST);
             }
             ret = (*g_fnSelect)(fd+1, &readfds, NULL, NULL, &timeout);
             if (fd == pReq->m_fdListen)
             {
                 if (s_accepting_workers)
-                    __sync_fetch_and_sub(s_accepting_workers, 1);
+                    __atomic_fetch_sub(s_accepting_workers, 1, __ATOMIC_SEQ_CST);
                 if (s_worker_status)
-                    __sync_lock_test_and_set(&s_worker_status->m_state,
-                                             LSAPI_STATE_IDLE);
+                    __atomic_store_n(&s_worker_status->m_state,
+                                     LSAPI_STATE_IDLE, __ATOMIC_SEQ_CST);
             }
 
             if ( ret == 0 )
@@ -3712,10 +3719,11 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                     if ( pReq->m_fd != -1 )
                     {
                         if (s_worker_status)
-                            __sync_lock_test_and_set(&s_worker_status->m_state,
-                                                     LSAPI_STATE_CONNECTED);
+                            __atomic_store_n(&s_worker_status->m_state,
+                                             LSAPI_STATE_CONNECTED,
+                                             __ATOMIC_SEQ_CST);
                         if (s_busy_workers)
-                            __sync_fetch_and_add(s_busy_workers, 1);
+                            __atomic_fetch_add(s_busy_workers, 1, __ATOMIC_SEQ_CST);
 
                         fd = pReq->m_fd;
 
@@ -4386,5 +4394,5 @@ int LSAPI_Set_Restored_Parent_Pid(int pid)
 
 int LSAPI_Inc_Req_Processed(int cnt)
 {
-    return __sync_add_and_fetch(s_global_counter, cnt);
+    return __atomic_add_fetch(s_global_counter, cnt, __ATOMIC_SEQ_CST);
 }
