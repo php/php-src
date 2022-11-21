@@ -221,6 +221,14 @@ convertInvalidString("\x80", "%", "UTF7-IMAP", "UTF-8");
 convertInvalidString("abc&", "abc%", "UTF7-IMAP", "UTF-8"); // The & starts a Base-64 coded section, which is OK... but there's no data in it
 convertInvalidString("&**-", "%*-", "UTF7-IMAP", "UTF-8"); // When we hit the first bad byte in a Base-64 coded section, it drops us back into the default mode, so the following characters are literal
 
+// Try strings where Base64 has an extra trailing byte which is not needed
+convertInvalidString('&RR8I', "\xE4\x94\x9F%", 'UTF7-IMAP', 'UTF-8');
+convertInvalidString('&RR8IAAA', "\xE4\x94\x9F\xE0\xA0\x80%", 'UTF7-IMAP', 'UTF-8');
+
+// It is useless for a Base64 section to only contain a single 'A'
+// (which decodes to only zero bits)
+convertInvalidString("&A", "\x00\x00\x00%", 'UTF7-IMAP', 'UTF-32BE');
+
 echo "Done!\n";
 ?>
 --EXPECT--
