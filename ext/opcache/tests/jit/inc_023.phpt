@@ -19,6 +19,13 @@ $test->prop = "a";
 var_dump(++$test->prop);
 var_dump(--$test->prop);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Increment on non-numeric string is deprecated in %s on line %d
+
+Warning: Decrement on non-numeric string has no effect in %s on line %d
+
+Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 string(1) "c"
+
+Warning: Decrement on non-numeric string has no effect in %s on line %d
 string(1) "c"

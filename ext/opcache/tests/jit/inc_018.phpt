@@ -18,4 +18,5 @@ function foo() {
 var_dump(foo());
 ?>
 --EXPECT--
+Warning: Increment on bool has no effect in Unknown on line 0
 bool(false)

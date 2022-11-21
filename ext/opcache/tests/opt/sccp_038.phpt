@@ -15,4 +15,5 @@ foo();
 ?>
 DONE
 --EXPECT--
+Deprecated: Increment on non-numeric string is deprecated in Unknown on line 0
 DONE

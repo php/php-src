@@ -14,4 +14,5 @@ function test() {
 ?>
 DONE
 --EXPECT--
+Deprecated: Decrement on empty string is deprecated as non-numeric in Unknown on line 0
 DONE

@@ -2502,6 +2502,11 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 	int last=0; /* Shut up the compiler warning */
 	int ch;
 
+	zend_error(E_DEPRECATED, "Increment on non-numeric string is deprecated");
+	if (EG(exception)) {
+		return;
+	}
+
 	if (Z_STRLEN_P(str) == 0) {
 		zval_ptr_dtor_str(str);
 		ZVAL_CHAR(str, '1');
@@ -2615,6 +2620,9 @@ try_again:
 					default:
 						/* Perl style string increment */
 						increment_string(op1);
+						if (EG(exception)) {
+							return FAILURE;
+						}
 						break;
 				}
 			}
@@ -2660,6 +2668,10 @@ try_again:
 			break;
 		case IS_STRING:		/* Like perl we only support string increment */
 			if (Z_STRLEN_P(op1) == 0) { /* consider as 0 */
+				zend_error(E_DEPRECATED, "Decrement on empty string is deprecated as non-numeric");
+				if (EG(exception)) {
+					return FAILURE;
+				}
 				zval_ptr_dtor_str(op1);
 				ZVAL_LONG(op1, -1);
 				break;
@@ -2678,6 +2690,11 @@ try_again:
 					zval_ptr_dtor_str(op1);
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
+				default:
+					zend_error(E_WARNING, "Decrement on non-numeric string has no effect");
+					if (EG(exception)) {
+						return FAILURE;
+					}
 			}
 			break;
 		case IS_NULL:

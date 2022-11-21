@@ -62,8 +62,12 @@ Result value:int(1)
 Initial value:float(0)
 Result value:float(1)
 Initial value:string(0) ""
+
+Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 Result value:string(1) "1"
 Initial value:string(1) " "
+
+Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 Result value:string(1) " "
 Initial value:string(1) "0"
 Result value:int(1)
@@ -83,8 +87,12 @@ Result value:int(-1)
 Initial value:float(0)
 Result value:float(-1)
 Initial value:string(0) ""
+
+Deprecated: Decrement on empty string is deprecated as non-numeric in %s on line %d
 Result value:int(-1)
 Initial value:string(1) " "
+
+Warning: Decrement on non-numeric string has no effect in %s on line %d
 Result value:string(1) " "
 Initial value:string(1) "0"
 Result value:int(-1)
