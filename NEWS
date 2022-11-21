@@ -47,6 +47,8 @@ PHP                                                                        NEWS
     php-fpm 8.1.11). (Jakub Zelenka)
   . Fixed bug GH-9959 (Solaris port event mechanism is still broken after bug
     #66694). (Petr Sumbera)
+  . Fixed bug #68207 (Setting fastcgi.error_header can result in a WARNING).
+    (Jakub Zelenka)
 
 - mysqli:
   . Fixed bug GH-9841 (mysqli_query throws warning despite using
