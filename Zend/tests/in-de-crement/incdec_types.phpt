@@ -39,7 +39,7 @@ foreach ($values as $value) {
     var_dump($value);
 }
 ?>
---EXPECT--
+--EXPECTF--
 Cannot increment array
 Cannot decrement array
 Cannot increment stdClass
@@ -50,8 +50,12 @@ Using increment:
 Initial value:NULL
 Result value:int(1)
 Initial value:bool(false)
+
+Warning: Increment on type bool has no effect in %s on line %d
 Result value:bool(false)
 Initial value:bool(true)
+
+Warning: Increment on type bool has no effect in %s on line %d
 Result value:bool(true)
 Initial value:int(0)
 Result value:int(1)
@@ -67,8 +71,12 @@ Using decrement:
 Initial value:NULL
 Result value:NULL
 Initial value:bool(false)
+
+Warning: Decrement on type bool has no effect in %s on line %d
 Result value:bool(false)
 Initial value:bool(true)
+
+Warning: Decrement on type bool has no effect in %s on line %d
 Result value:bool(true)
 Initial value:int(0)
 Result value:int(-1)

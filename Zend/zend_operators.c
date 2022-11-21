@@ -2621,7 +2621,7 @@ try_again:
 			break;
 		case IS_FALSE:
 		case IS_TRUE:
-			/* Do nothing. */
+			zend_error(E_WARNING, "Increment on type bool has no effect");
 			break;
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
@@ -2681,9 +2681,11 @@ try_again:
 			}
 			break;
 		case IS_NULL:
+			/* Do nothing. */
+			break;
 		case IS_FALSE:
 		case IS_TRUE:
-			/* Do nothing. */
+			zend_error(E_WARNING, "Decrement on type bool has no effect");
 			break;
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
