@@ -4443,104 +4443,29 @@ clean_exit:
 
 static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 #if PHP_OPENSSL_API_VERSION >= 0x30000
-	BIGNUM *d = NULL, *x = NULL, *y = NULL;
-	EC_GROUP *group = NULL;
-	EC_POINT *pnt = NULL;
-	unsigned char *pnt_oct = NULL;
-	EVP_PKEY *param_key = NULL, *pkey = NULL;
-	EVP_PKEY_CTX *ctx = NULL;
-	OSSL_PARAM *params = NULL;
-	OSSL_PARAM_BLD *bld = OSSL_PARAM_BLD_new();
-	zval *curve_name_zv = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1);
+        EC_GROUP *group = NULL;
+        EVP_PKEY *pkey = NULL;
+        zval *curve_name_zv = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1);
 
-	OPENSSL_PKEY_SET_BN(data, d);
-	OPENSSL_PKEY_SET_BN(data, x);
-	OPENSSL_PKEY_SET_BN(data, y);
+        if(curve_name_zv && Z_TYPE_P(curve_name_zv) == IS_STRING && Z_STRLEN_P(curve_name_zv) > 0){
+                int nid = OBJ_sn2nid(Z_STRVAL_P(curve_name_zv));
+                group = EC_GROUP_new_by_curve_name(nid); // just for check the EC curve name
+                if (!group) {
+                        php_error_docref(NULL, E_WARNING, "Unknown curve name");
+                        goto cleanup;
+                }
+        } else {
+                php_error_docref(NULL, E_WARNING, "Missing param: \"curve_name\" ");
+                goto cleanup;
+        }
 
-	*is_private = false;
+        pkey = EVP_PKEY_Q_keygen(NULL, NULL, "EC", Z_STRVAL_P(curve_name_zv));
 
-	if (!bld || !curve_name_zv || Z_TYPE_P(curve_name_zv) != IS_STRING) {
-		goto cleanup;
-	}
-	
-	/* Applications must now generate SM2 keys directly and must not create an EVP_PKEY_EC key first. */
-	if (OPENSSL_strcasecmp(Z_STRVAL_P(curve_name_zv), "SM2") == 0){
-		ctx = EVP_PKEY_CTX_new_from_name(NULL, "SM2", NULL);
-	} else {
-		ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL);
-	}
-
-	int nid = OBJ_sn2nid(Z_STRVAL_P(curve_name_zv));
-	group = EC_GROUP_new_by_curve_name(nid);
-	if (!group) {
-		php_error_docref(NULL, E_WARNING, "Unknown curve name");
-		goto cleanup;
-	}
-
-	OSSL_PARAM_BLD_push_utf8_string(
-		bld, OSSL_PKEY_PARAM_GROUP_NAME, Z_STRVAL_P(curve_name_zv), Z_STRLEN_P(curve_name_zv));
-
-	if (d) {
-		OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_PRIV_KEY, d);
-
-		pnt = EC_POINT_new(group);
-		if (!pnt || !EC_POINT_mul(group, pnt, d, NULL, NULL, NULL)) {
-			goto cleanup;
-		}
-	} else if (x && y) {
-		/* OpenSSL does not allow setting EC_PUB_X/EC_PUB_Y, so convert to encoded format. */
-		pnt = EC_POINT_new(group);
-		if (!pnt || !EC_POINT_set_affine_coordinates(group, pnt, x, y, NULL)) {
-			goto cleanup;
-		}
-	}
-
-	if (pnt) {
-		size_t pnt_oct_len =
-			EC_POINT_point2buf(group, pnt, POINT_CONVERSION_COMPRESSED, &pnt_oct, NULL);
-		if (!pnt_oct_len) {
-			goto cleanup;
-		}
-
-		OSSL_PARAM_BLD_push_octet_string(bld, OSSL_PKEY_PARAM_PUB_KEY, pnt_oct, pnt_oct_len);
-	}
-
-	params = OSSL_PARAM_BLD_to_param(bld);
-	if (!params) {
-		goto cleanup;
-	}
-
-	if (!ctx || EVP_PKEY_fromdata_init(ctx) <= 0 ||
-			EVP_PKEY_fromdata(ctx, &param_key, EVP_PKEY_KEYPAIR, params) <= 0) {
-		goto cleanup;
-	}
-
-	EVP_PKEY_CTX_free(ctx);
-	ctx = EVP_PKEY_CTX_new(param_key, NULL);
-	if (EVP_PKEY_check(ctx)) {
-		*is_private = d != NULL;
-		EVP_PKEY_up_ref(param_key);
-		pkey = param_key;
-	} else {
-		*is_private = true;
-		PHP_OPENSSL_RAND_ADD_TIME();
-		if (EVP_PKEY_keygen_init(ctx) <= 0 || EVP_PKEY_keygen(ctx, &pkey) <= 0) {
-			goto cleanup;
-		}
-	}
+        *is_private = true;
 
 cleanup:
-	php_openssl_store_errors();
-	EVP_PKEY_free(param_key);
-	EVP_PKEY_CTX_free(ctx);
-	OSSL_PARAM_free(params);
-	OSSL_PARAM_BLD_free(bld);
-	EC_POINT_free(pnt);
-	EC_GROUP_free(group);
-	OPENSSL_free(pnt_oct);
-	BN_free(d);
-	BN_free(x);
-	BN_free(y);
+        php_openssl_store_errors();
+        EC_GROUP_free(group);
 	return pkey;
 #else
 	EVP_PKEY *pkey = EVP_PKEY_new();
