@@ -16,6 +16,7 @@ PHP                                                                        NEWS
     #66694). (Petr Sumbera)
   . Fixed bug #68207 (Setting fastcgi.error_header can result in a WARNING).
     (Jakub Zelenka)
+  . Fixed bug #80669 (FPM numeric user fails to set groups). (Jakub Zelenka)
 
 - MBString:
   . Fixed bug GH-9535 (The behavior of mb_strcut in mbstring has been changed in

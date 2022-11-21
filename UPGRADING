@@ -139,6 +139,12 @@ PHP 8.2 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- FPM:
+  . If setting user by its UID without setting a group, then the group is no
+    longer set to 0 (root) but instead to the user assigned groups like it is
+    when setting user by name.
+    
+
 ========================================
 4. Deprecated Functionality
 ========================================

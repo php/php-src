@@ -71,11 +71,11 @@ class Response
             $body = implode("\n", $body);
         }
 
-        if (
-            $this->checkIfValid() &&
-            $this->checkDefaultHeaders($contentType) &&
-            $body !== $this->rawBody
-        ) {
+        if (!$this->checkIfValid()) {
+            $this->error('Response is invalid');
+        } elseif (!$this->checkDefaultHeaders($contentType)) {
+            $this->error('Response default headers not found');
+        } elseif ($body !== $this->rawBody) {
             if ($multiLine) {
                 $this->error(
                     "==> The expected body:\n$body\n" .

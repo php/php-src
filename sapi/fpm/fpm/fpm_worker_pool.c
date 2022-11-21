@@ -34,6 +34,9 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->user) {
 		free(wp->user);
 	}
+	if (wp->set_user) {
+		free(wp->set_user);
+	}
 	if (wp->home) {
 		free(wp->home);
 	}
