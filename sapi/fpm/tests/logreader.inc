@@ -137,7 +137,7 @@ class LogReader
      *
      * @return false
      */
-    private function printError(?string $errorMessage): bool
+    public function printError(?string $errorMessage): bool
     {
         if (is_null($errorMessage)) {
             return false;
@@ -155,8 +155,8 @@ class LogReader
      * @param callable    $matcher             Callback to identify a match
      * @param string|null $notFoundMessage     Error message if matcher does not succeed.
      * @param bool        $checkAllLogs        Whether to also check past logs.
-     * @param int         $timeoutSeconds      Timeout in seconds for reading of all messages.
-     * @param int         $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @return bool
      * @throws \Exception
@@ -165,9 +165,18 @@ class LogReader
         callable $matcher,
         string $notFoundMessage = null,
         bool $checkAllLogs = false,
-        int $timeoutSeconds = 3,
-        int $timeoutMicroseconds = 0
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null
     ): bool {
+        if (is_null($timeoutSeconds) && is_null($timeoutMicroseconds)) {
+            $timeoutSeconds      = 3;
+            $timeoutMicroseconds = 0;
+        } elseif (is_null($timeoutSeconds)) {
+            $timeoutSeconds = 0;
+        } elseif (is_null($timeoutMicroseconds)) {
+            $timeoutMicroseconds = 0;
+        }
+
         $startTime = microtime(true);
         $endTime   = $startTime + $timeoutSeconds + ($timeoutMicroseconds / 1_000_000);
         if ($checkAllLogs) {
