@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 06f914771f457db2308473ad072d594f2c6c1ae0 */
+ * Stub hash: 7e67d07b6079c39a091e91dfddfbe7170067955e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -361,6 +361,7 @@ ZEND_METHOD(SplFileObject, getMaxLineLen);
 ZEND_METHOD(SplFileObject, hasChildren);
 ZEND_METHOD(SplFileObject, getChildren);
 ZEND_METHOD(SplFileObject, seek);
+ZEND_METHOD(SplFileObject, __toString);
 ZEND_METHOD(SplTempFileObject, __construct);
 
 
@@ -479,7 +480,7 @@ static const zend_function_entry class_SplFileObject_methods[] = {
 	ZEND_ME(SplFileObject, getChildren, arginfo_class_SplFileObject_getChildren, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileObject, seek, arginfo_class_SplFileObject_seek, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(SplFileObject, getCurrentLine, fgets, arginfo_class_SplFileObject_getCurrentLine, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplFileObject, __toString, fgets, arginfo_class_SplFileObject___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFileObject, __toString, arginfo_class_SplFileObject___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

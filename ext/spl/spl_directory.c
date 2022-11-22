@@ -1859,35 +1859,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 }
 /* }}} */
 
-/* {{{ spl_filesystem_object_cast */
-static zend_result spl_filesystem_object_cast(zend_object *readobj, zval *writeobj, int type)
-{
-	spl_filesystem_object *intern = spl_filesystem_from_obj(readobj);
-
-	if (type == IS_STRING) {
-		if (readobj->ce->__tostring) {
-			return zend_std_cast_object_tostring(readobj, writeobj, type);
-		}
-
-		switch (intern->type) {
-		case SPL_FS_INFO:
-		case SPL_FS_FILE:
-			ZVAL_STR_COPY(writeobj, intern->file_name);
-			return SUCCESS;
-		case SPL_FS_DIR:
-			ZVAL_STRING(writeobj, intern->u.dir.entry.d_name);
-			return SUCCESS;
-		}
-	} else if (type == _IS_BOOL) {
-		ZVAL_TRUE(writeobj);
-		return SUCCESS;
-	}
-	ZVAL_NULL(writeobj);
-	return FAILURE;
-}
-/* }}} */
-
-static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bool silent, zend_long line_add, bool csv) /* {{{ */
+static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bool silent, zend_long line_add, bool csv)
 {
 	char *buf;
 	size_t line_len = 0;
@@ -2751,6 +2723,23 @@ PHP_METHOD(SplFileObject, seek)
 	}
 } /* }}} */
 
+PHP_METHOD(SplFileObject, __toString)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
+
+	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
+
+	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
+		spl_filesystem_file_read_line(ZEND_THIS, intern);
+	}
+
+	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
+}
+
 /* {{{ PHP_MINIT_FUNCTION(spl_directory) */
 PHP_MINIT_FUNCTION(spl_directory)
 {
@@ -2760,7 +2749,6 @@ PHP_MINIT_FUNCTION(spl_directory)
 	memcpy(&spl_filesystem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
-	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
 	spl_filesystem_object_handlers.dtor_obj = spl_filesystem_object_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;
 
