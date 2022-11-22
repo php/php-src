@@ -11,6 +11,16 @@ PHP                                                                        NEWS
   . Fixed bug GH-9650 (Can't initialize heap: [0x000001e7]). (Michael Voříšek)
   . Fixed potentially undefined behavior in Windows ftok(3) emulation. (cmb)
 
+- FPM:
+  . Fixed bug GH-9959 (Solaris port event mechanism is still broken after bug
+    #66694). (Petr Sumbera)
+  . Fixed bug #68207 (Setting fastcgi.error_header can result in a WARNING).
+    (Jakub Zelenka)
+
+- MBString:
+  . Fixed bug GH-9535 (The behavior of mb_strcut in mbstring has been changed in
+    PHP8.1). (Nathan Freeman)
+
 - Pcntl:
   . Fixed bug GH-9298 (Signal handler called after rshutdown leads to crash).
     (Erki Aring)
