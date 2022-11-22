@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-9754 (SaltStack (using Python subprocess) hangs when running
     php-fpm 8.1.11). (Jakub Zelenka)
+  . Fixed bug GH-9959 (Solaris port event mechanism is still broken after bug
+    #66694). (Petr Sumbera)
 
 - mysqli:
   . Fixed bug GH-9841 (mysqli_query throws warning despite using
