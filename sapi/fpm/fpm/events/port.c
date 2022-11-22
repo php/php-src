@@ -144,14 +144,20 @@ static int fpm_event_port_wait(struct fpm_event_queue_s *queue, unsigned long in
 	}
 
 	for (i = 0; i < nget; i++) {
+		struct fpm_event_s *ev;
 
 		/* do we have a ptr to the event ? */
 		if (!events[i].portev_user) {
 			continue;
 		}
 
+		ev = (struct fpm_event_s *)events[i].portev_user;
+
+		/* re-associate for next event */
+		fpm_event_port_add(ev);
+
 		/* fire the event */
-		fpm_event_fire((struct fpm_event_s *)events[i].portev_user);
+		fpm_event_fire(ev);
 
 		/* sanity check */
 		if (fpm_globals.parent_pid != getpid()) {
