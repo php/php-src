@@ -218,6 +218,23 @@ testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", 'UTF-16BE', 'ISO-2022-JP', false)
 
 echo "Other mappings from Unicode -> ISO-2022-JP are OK\n";
 
+// Single bytes from 0xA3-0xDF can be used to encode kana in JIS8
+$grInvoked = [
+	"\xA3" => "\x1B(I\x23\x1B(B",
+	"\xB1" => "\x1B(I\x31\x1B(B",
+	"\xC2" => "\x1B(I\x42\x1B(B",
+	"\xDF" => "\x1B(I\x5F\x1B(B"
+];
+foreach ($grInvoked as $gr => $jisx) {
+	// JISX 0201 is used as the canonical form for outputting kana
+	testValidString($gr, $jisx, 'JIS', 'JIS', false);
+	if (mb_convert_encoding($gr, 'UTF-16BE', 'JIS') !== mb_convert_encoding($jisx, 'UTF-16BE', 'JIS'))
+		die("Equivalent GR byte and JISX 0201 sequence do not decode to the same codepoint");
+}
+
+echo "GR-invoked kana support OK\n";
+
+// Check handling of BOM
 convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "JIS", false);
 convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "ISO-2022-JP", false);
 
@@ -239,4 +256,5 @@ JIS X 0208 support OK
 JIS X 0212 support OK
 All escape sequences work as expected
 Other mappings from Unicode -> ISO-2022-JP are OK
+GR-invoked kana support OK
 Done!
