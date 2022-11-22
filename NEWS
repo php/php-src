@@ -1,6 +1,19 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0RC6
+24 Nov 2022, PHP 8.2.0RC7
+
+- Core:
+  . Move observer_declared_function_notify until after pass_two(). (Bob)
+  . Do not report MINIT stage internal class aliases in extensions. (Bob)
+
+- Opcache:
+  . Fix opcache preload with observers enabled. (Bob)
+
+- Standard:
+  . Fix crash reading module_entry after DL_UNLOAD() when module already
+    loaded. (Bob)
+
+10 Nov 2022, PHP 8.2.0RC6
 
 - Core:
   . Fixed bug GH-9823 (Don’t reset func in zend_closure_internal_handler).
