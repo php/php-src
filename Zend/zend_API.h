@@ -750,7 +750,6 @@ static zend_always_inline void zend_fcc_addref(zend_fcall_info_cache *fcc)
 		memcpy(copy, fcc->function_handler, sizeof(zend_function));
 		fcc->function_handler->common.function_name = NULL;
 		fcc->function_handler = copy;
-		memset(&EG(trampoline), 0, sizeof(zend_function));
 	}
 	if (fcc->object) {
 		GC_ADDREF(fcc->object);
