@@ -304,7 +304,7 @@ class Tester
      */
     static public function skipIfNotRoot()
     {
-        if (getmyuid() != 0) {
+        if (exec('whoami') !== 'root') {
             die('skip not running as root');
         }
     }
@@ -314,7 +314,7 @@ class Tester
      */
     static public function skipIfRoot()
     {
-        if (getmyuid() == 0) {
+        if (exec('whoami') === 'root') {
             die('skip running as root');
         }
     }
@@ -326,6 +326,17 @@ class Tester
     {
         if ( ! extension_loaded('posix')) {
             die('skip posix extension not loaded');
+        }
+    }
+
+    /**
+     * Skip if posix extension not loaded.
+     */
+    static public function skipIfUserDoesNotExist($userName)
+    {
+        self::skipIfPosixNotLoaded();
+        if (posix_getpwnam($userName) === false) {
+            die("skip user $userName does not exist");
         }
     }
 
