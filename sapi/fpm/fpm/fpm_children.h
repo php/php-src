@@ -10,13 +10,14 @@
 #include "fpm_events.h"
 #include "zlog.h"
 
+struct fpm_child_s;
+
 int fpm_children_create_initial(struct fpm_worker_pool_s *wp);
 int fpm_children_free(struct fpm_child_s *child);
 void fpm_children_bury(void);
 int fpm_children_init_main(void);
 int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn, int is_debug);
-
-struct fpm_child_s;
+struct fpm_child_s *fpm_child_find(pid_t pid);
 
 struct fpm_child_s {
 	struct fpm_child_s *prev, *next;
