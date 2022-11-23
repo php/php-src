@@ -22,8 +22,8 @@ PHP 8.2 UPGRADE NOTES
 - Date:
   . DateTime::createFromImmutable() now has a tentative return type of static,
     previously it was DateTime.
-  . DateTimeImmutable::createFromMutable() now has a tentative return type of static,
-    previously it was DateTimeImmutable.
+  . DateTimeImmutable::createFromMutable() now has a tentative return type of
+    static, previously it was DateTimeImmutable.
 
 - ODBC:
   . The ODBC extension now escapes the username and password for the case when
@@ -134,7 +134,6 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/rng_extension
     RFC: https://wiki.php.net/rfc/random_extension_improvement
 
-
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -143,7 +142,6 @@ PHP 8.2 UPGRADE NOTES
   . If setting user by its UID without setting a group, then the group is no
     longer set to 0 (root) but instead to the user assigned groups like it is
     when setting user by name.
-    
 
 ========================================
 4. Deprecated Functionality
@@ -290,9 +288,11 @@ PHP 8.2 UPGRADE NOTES
     unserialization yielded unusable objects or failed.
 
 - mysqli:
-  . The support for libmysql has been removed. It's no longer possible to compile
-    mysqli with libmysql and all relevant functionality has been removed.
-  . The reconnect property of mysqli_driver has been removed. It was supported only by libmysql.
+  . The support for libmysql has been removed. It's no longer possible to
+    compile mysqli with libmysql and all relevant functionality has been
+    removed.
+  . The reconnect property of mysqli_driver has been removed. It was supported
+    only by libmysql.
   . The INI directive mysqli.reconnect has been removed.
   . The constant MYSQLI_IS_MARIADB has been deprecated.
 
