@@ -786,6 +786,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		array_init_size(&ary, elements);
 		/* Avoid reallocation due to packed -> mixed conversion. */
 		zend_hash_real_init_mixed(Z_ARRVAL(ary));
+		gc_ht_mark_collectable(Z_ARRVAL(ary));
 		if (!process_nested_array_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements)) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
@@ -1094,6 +1095,7 @@ use_double:
 		/* we can't convert from packed to hash during unserialization, because
 		   reference to some zvals might be kept in var_hash (to support references) */
 		zend_hash_real_init_mixed(Z_ARRVAL_P(rval));
+		gc_ht_mark_collectable(Z_ARRVAL_P(rval));
 	} else {
 		ZVAL_EMPTY_ARRAY(rval);
 		return finish_nested_data(UNSERIALIZE_PASSTHRU);

@@ -49,8 +49,15 @@ ZEND_API bool gc_protected(void);
 /* Arrays are non-collectable by default and will be marked as collectable only
  * when they can form a cycle. This is only the case then they contain objects
  * or references. */
-static zend_always_inline void gc_mark_collectable(zend_refcounted *rc) {
-	GC_DEL_FLAGS(rc, GC_NOT_COLLECTABLE);
+static zend_always_inline bool gc_ht_check_collectable(HashTable *ht) {
+	return (GC_FLAGS(ht) & (GC_PERSISTENT|GC_NOT_COLLECTABLE)) == GC_NOT_COLLECTABLE;
+}
+static zend_always_inline bool gc_ht_value_may_cause_cycle(zval *zv) {
+	return (Z_TYPE_P(zv) & (IS_OBJECT|IS_REFERENCE)) != 0;
+}
+static zend_always_inline void gc_ht_mark_collectable(HashTable *ht) {
+	ZEND_ASSERT(gc_ht_check_collectable(ht));
+	GC_DEL_FLAGS((zend_refcounted *) ht, GC_NOT_COLLECTABLE);
 }
 
 /* The default implementation of the gc_collect_cycles callback. */

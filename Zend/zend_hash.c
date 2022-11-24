@@ -250,7 +250,9 @@ ZEND_API const HashTable zend_empty_array = {
 static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, bool persistent)
 {
 	GC_SET_REFCOUNT(ht, 1);
-	GC_TYPE_INFO(ht) = GC_ARRAY | (((persistent ? GC_PERSISTENT : 0)|GC_NOT_COLLECTABLE) << GC_FLAGS_SHIFT);
+	GC_TYPE_INFO(ht) = GC_ARRAY
+		| ((persistent ? GC_PERSISTENT : 0) << GC_FLAGS_SHIFT)
+		| (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT);
 	HT_FLAGS(ht) = HASH_FLAG_UNINITIALIZED;
 	ht->nTableMask = HT_MIN_MASK;
 	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
@@ -761,8 +763,6 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 
 			ZEND_ASSERT((flag & HASH_ADD_NEW) == 0);
 			if (flag & HASH_LOOKUP) {
-				// zval will be modified in place, assume cycles are possible
-				gc_mark_collectable((zend_refcounted *) ht);
 				return &p->val;
 			} else if (flag & HASH_ADD) {
 				if (!(flag & HASH_UPDATE_INDIRECT)) {
@@ -789,9 +789,8 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 				ht->pDestructor(data);
 			}
 			ZVAL_COPY_VALUE(data, pData);
-			if (!(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)
-				&& (Z_TYPE_P(data) == IS_REFERENCE || Z_TYPE_P(data) == IS_OBJECT)) {
-				gc_mark_collectable((zend_refcounted *) ht);
+			if (gc_ht_check_collectable(ht) && gc_ht_value_may_cause_cycle(data)) {
+				gc_ht_mark_collectable(ht);
 			}
 			return data;
 		}
@@ -818,9 +817,8 @@ add_to_hash:
 	} else {
 		ZVAL_COPY_VALUE(&p->val, pData);
 	}
-	if (!(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)
-		&& (Z_TYPE_P(&p->val) == IS_REFERENCE || Z_TYPE_P(&p->val) == IS_OBJECT)) {
-		gc_mark_collectable((zend_refcounted *) ht);
+	if (gc_ht_check_collectable(ht) && gc_ht_value_may_cause_cycle(&p->val)) {
+		gc_ht_mark_collectable(ht);
 	}
 
 	return &p->val;
@@ -1026,8 +1024,6 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 			zv = ht->arPacked + h;
 			if (Z_TYPE_P(zv) != IS_UNDEF) {
 				if (flag & HASH_LOOKUP) {
-					// zval will be modified in place, assume cycles are possible
-					gc_mark_collectable((zend_refcounted *) ht);
 					return zv;
 				}
 replace:
@@ -1038,11 +1034,11 @@ replace:
 					ht->pDestructor(zv);
 				}
 				ZVAL_COPY_VALUE(zv, pData);
-				if (!(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
+				if (gc_ht_check_collectable(ht)) {
 					zval *pData_direct = pData;
 replace_mark_collectable_try_again:
-					if (Z_TYPE_P(pData_direct) == IS_REFERENCE || Z_TYPE_P(pData_direct) == IS_OBJECT) {
-						gc_mark_collectable((zend_refcounted *) ht);
+					if (gc_ht_value_may_cause_cycle(pData_direct)) {
+						gc_ht_mark_collectable(ht);
 					} else if (Z_TYPE_P(pData_direct) == IS_INDIRECT) {
 						pData_direct = Z_INDIRECT_P(pData_direct);
 						goto replace_mark_collectable_try_again;
@@ -1068,13 +1064,11 @@ add_to_packed:
 			ht->nNextFreeElement = ht->nNumUsed = h + 1;
 			ht->nNumOfElements++;
 			if (flag & HASH_LOOKUP) {
-				gc_mark_collectable((zend_refcounted *) ht);
 				ZVAL_NULL(zv);
 			} else {
 				ZVAL_COPY_VALUE(zv, pData);
-				if (!(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)
-					&& (Z_TYPE_P(pData) == IS_REFERENCE || Z_TYPE_P(pData) == IS_OBJECT)) {
-					gc_mark_collectable((zend_refcounted *) ht);
+				if (gc_ht_check_collectable(ht) && gc_ht_value_may_cause_cycle(pData)) {
+					gc_ht_mark_collectable(ht);
 				}
 			}
 
@@ -1101,8 +1095,6 @@ convert_to_hash:
 			p = zend_hash_index_find_bucket(ht, h);
 			if (p) {
 				if (flag & HASH_LOOKUP) {
-					// zval will be modified in place, assume cycles are possible
-					gc_mark_collectable((zend_refcounted *) ht);
 					return &p->val;
 				}
 				ZEND_ASSERT((flag & HASH_ADD_NEW) == 0);
@@ -1130,19 +1122,14 @@ convert_to_hash:
 		ZVAL_COPY_VALUE(&p->val, pData);
 	}
 
-	if (!(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
-		if (flag & HASH_LOOKUP) {
-			// zval will be modified in place, assume cycles are possible
-			gc_mark_collectable((zend_refcounted *) ht);
-		} else {
-			zval *pData_direct = pData;
+	if (gc_ht_check_collectable(ht) && !(flag & HASH_LOOKUP)) {
+		zval *pData_direct = pData;
 hash_mark_collectable_try_again:
-			if (Z_TYPE_P(pData_direct) == IS_REFERENCE || Z_TYPE_P(pData_direct) == IS_OBJECT) {
-				gc_mark_collectable((zend_refcounted *) ht);
-			} else if (Z_TYPE_P(pData_direct) == IS_INDIRECT) {
-				pData_direct = Z_INDIRECT_P(pData_direct);
-				goto hash_mark_collectable_try_again;
-			}
+		if (gc_ht_value_may_cause_cycle(pData_direct)) {
+			gc_ht_mark_collectable(ht);
+		} else if (Z_TYPE_P(pData_direct) == IS_INDIRECT) {
+			pData_direct = Z_INDIRECT_P(pData_direct);
+			goto hash_mark_collectable_try_again;
 		}
 	}
 
