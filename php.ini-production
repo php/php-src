@@ -915,6 +915,12 @@ default_socket_timeout = 60
 ;   Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=bz2
+
+; The ldap extension must be before curl if OpenSSL 1.0.2 and OpenLDAP is used
+; otherwise it results in segfault when unloading after using SASL.
+; See https://github.com/php/php-src/issues/8620 for more info.
+;extension=ldap
+
 ;extension=curl
 ;extension=ffi
 ;extension=ftp
@@ -924,7 +930,6 @@ default_socket_timeout = 60
 ;extension=gmp
 ;extension=intl
 ;extension=imap
-;extension=ldap
 ;extension=mbstring
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
