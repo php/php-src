@@ -4830,6 +4830,7 @@ static void php_openssl_copy_bn_param(
 	}
 }
 
+#ifdef HAVE_EVP_PKEY_EC
 static zend_string *php_openssl_get_utf8_param(
 		EVP_PKEY *pkey, const char *param, const char *name) {
 	char buf[64];
@@ -4842,6 +4843,7 @@ static zend_string *php_openssl_get_utf8_param(
 	}
 	return NULL;
 }
+#endif
 #endif
 
 /* {{{ returns an array with the key details (bits, pkey, type)*/
@@ -4907,6 +4909,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			php_openssl_copy_bn_param(&ary, pkey, OSSL_PKEY_PARAM_PRIV_KEY, "priv_key");
 			php_openssl_copy_bn_param(&ary, pkey, OSSL_PKEY_PARAM_PUB_KEY, "pub_key");
 			break;
+#ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC: {
 			ktype = OPENSSL_KEYTYPE_EC;
 			array_init(&ary);
@@ -4935,6 +4938,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			php_openssl_copy_bn_param(&ary, pkey, OSSL_PKEY_PARAM_PRIV_KEY, "d");
 			break;
 		}
+#endif
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 #else
