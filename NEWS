@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug GH-9997 (OpenSSL engine clean up segfault). (Jakub Zelenka)
+  . Fixed bug GH-9064 (PHP fails to build if openssl was built with --no-ec).
+    (Jakub Zelenka)
 
 - Pcntl:
   . Fixed bug GH-9298 (Signal handler called after rshutdown leads to crash).
