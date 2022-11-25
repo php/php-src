@@ -3643,7 +3643,7 @@ static int php_openssl_get_evp_pkey_type(int key_type) {
 	switch (key_type) {
 	case OPENSSL_KEYTYPE_RSA:
 		return EVP_PKEY_RSA;
-#if !defined(NO_DSA)
+#if !defined(OPENSSL_NO_DSA)
 	case OPENSSL_KEYTYPE_DSA:
 		return EVP_PKEY_DSA;
 #endif
@@ -3695,7 +3695,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 		}
 
 		switch (type) {
-#if !defined(NO_DSA)
+#if !defined(OPENSSL_NO_DSA)
 		case EVP_PKEY_DSA:
 			if (EVP_PKEY_CTX_set_dsa_paramgen_bits(ctx, req->priv_key_bits) <= 0) {
 				php_openssl_store_errors();
