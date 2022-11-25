@@ -1765,17 +1765,57 @@ PHP_METHOD(SQLite3Stmt, execute)
 	php_sqlite3_stmt *stmt_obj;
 	php_sqlite3_result *result;
 	zval *object = ZEND_THIS;
+	zval *input_params = NULL;
 	int return_code = 0;
 	int bind_rc = 0;
 
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_NULL(input_params)
+	ZEND_PARSE_PARAMETERS_END();
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
 	/* Always reset statement before execution, see bug #77051 */
 	sqlite3_reset(stmt_obj->stmt);
+
+	if (input_params) {
+		struct php_sqlite3_bound_param param = {0};
+		zval *tmp;
+		zend_string *key = NULL;
+		zend_ulong num_index;
+
+		if (stmt_obj->bound_params) {
+			zend_hash_destroy(stmt_obj->bound_params);
+			FREE_HASHTABLE(stmt_obj->bound_params);
+			stmt_obj->bound_params = NULL;
+		}
+
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input_params), num_index, key, tmp) {
+			memset(&param, 0, sizeof(param));
+
+			param.param_number = -1;
+			param.type = SQLITE3_TEXT;
+			ZVAL_COPY(&param.parameter, tmp);
+
+			if (key) {
+				param.name = key;
+			} else {
+				/* for easier use, we are zero-based here */
+				param.param_number = num_index + 1;
+			}
+
+			if (!register_bound_parameter_to_sqlite(&param, stmt_obj)) {
+				if (!Z_ISUNDEF(param.parameter)) {
+					zval_ptr_dtor(&(param.parameter));
+					ZVAL_UNDEF(&param.parameter);
+				}
+				RETURN_FALSE;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	/* Bind parameters to the statement */
 	bind_rc = php_sqlite3_bind_params(stmt_obj);
