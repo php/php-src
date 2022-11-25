@@ -814,7 +814,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, bool localtime)
 }
 /* }}} */
 
-PHPAPI zend_string *php_format_timestamp(const char *format, size_t format_len, time_t ts, suseconds_t usec, bool localtime) /* {{{ */
+PHPAPI zend_string *php_format_timestamp(const char *format, size_t format_len, time_t ts, suseconds_t usec, bool localtime)
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
@@ -839,7 +839,6 @@ PHPAPI zend_string *php_format_timestamp(const char *format, size_t format_len, 
 	timelib_time_dtor(t);
 	return string;
 }
-/* }}} */
 
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime) /* {{{ */
 {

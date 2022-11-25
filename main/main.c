@@ -834,22 +834,24 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			suseconds_t error_time_usec = 0;
 
 			const char *error_log_format = "d-M-Y H:i:s e";
-			size_t error_log_format_len = sizeof("d-M-Y H:i:s e") - 1;
 
 			if (PG(error_log_usec)) {
 				error_log_format = "d-M-Y H:i:s.u e";
-				error_log_format_len = sizeof("d-M-Y H:i:s.u e") - 1;
+#if HAVE_GETTIMEOFDAY
+				struct timeval tp = {0}; /* For setting microseconds */
+
+				gettimeofday(&tp, NULL);
+				error_time = tp.tv_sec;
+				error_time_usec = tp.tv_usec;
+#else
+				error_time = time(NULL);
+#endif
+			} else {
+				error_time = time(NULL);
 			}
 
-#if HAVE_GETTIMEOFDAY
-			struct timeval tp = {0}; /* For setting microseconds */
+			size_t error_log_format_len = strlen(error_log_format);
 
-			gettimeofday(&tp, NULL);
-			error_time = tp.tv_sec;
-			error_time_usec = tp.tv_usec;
-#else
-			error_time = time(NULL);
-#endif
 
 #ifdef ZTS
 			if (!php_during_module_startup()) {
