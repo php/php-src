@@ -293,7 +293,7 @@ const OPENSSL_CIPHER_AES_256_CBC = UNKNOWN;
  * @cvalue OPENSSL_KEYTYPE_RSA
  */
 const OPENSSL_KEYTYPE_RSA = UNKNOWN;
-#ifndef NO_DSA
+#ifndef OPENSSL_NO_DSA
 /**
  * @var int
  * @cvalue OPENSSL_KEYTYPE_DSA

@@ -2,6 +2,10 @@
 openssl_pkey_new() basic usage tests
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 function openssl_pkey_test_cmp($expected, $bin_key) {

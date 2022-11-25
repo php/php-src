@@ -2,6 +2,10 @@
 openssl_csr_get_subject() tests
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
