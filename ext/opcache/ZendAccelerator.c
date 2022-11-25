@@ -3975,7 +3975,7 @@ static void preload_link(void)
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				break;
 			}
-			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+			if ((ce->ce_flags & ZEND_ACC_LINKED) && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				if (!(ce->ce_flags & ZEND_ACC_TRAIT)) { /* don't update traits */
 					CG(in_compilation) = 1; /* prevent autoloading */
 					if (preload_try_resolve_constants(ce)) {
