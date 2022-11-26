@@ -2279,6 +2279,7 @@ static int zend_jit_hybrid_hot_code_stub(dasm_State **Dst)
 	}
 
 	|->hybrid_hot_code:
+	|	SAVE_IP
 	|	mov word [r2], ZEND_JIT_COUNTER_INIT
 	|	mov FCARG1a, FP
 	|	GET_IP FCARG2a
@@ -2368,6 +2369,7 @@ static int zend_jit_hybrid_hot_trace_stub(dasm_State **Dst)
 	}
 
 	|->hybrid_hot_trace:
+	|	SAVE_IP
 	|	mov word [r2], ZEND_JIT_COUNTER_INIT
 	|	mov FCARG1a, FP
 	|	GET_IP FCARG2a
@@ -5518,6 +5520,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 				|	LOAD_ZVAL_ADDR FCARG1a, res_addr
 			}
 			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+			|	SET_EX_OPLINE opline, r0
 			|	EXT_CALL zend_jit_fast_assign_concat_helper, r0
 			/* concatenation with itself may reduce refcount */
 			op2_info |= MAY_BE_RC1;
@@ -5532,6 +5535,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 				|	sub r4, 12
 				|	PUSH_ZVAL_ADDR op2_addr, r0
 			|.endif
+			|	SET_EX_OPLINE opline, r0
 			if (op1_type == IS_CV || op1_type == IS_CONST) {
 				|	EXT_CALL zend_jit_fast_concat_helper, r0
 			} else {
@@ -10559,6 +10563,7 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 			}
 			|	mov aword T1, r0 // save
 		}
+		|	SET_EX_OPLINE opline, r0
 		|	EMALLOC sizeof(zend_reference), op_array, opline
 		|	mov dword [r0], 2
 		|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], GC_REFERENCE
@@ -12589,6 +12594,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	if (opline->extended_value) {
 		|	add FCARG2a, opline->extended_value
 	}
+	|	SET_EX_OPLINE opline, r0
 	|	EXT_CALL zend_jit_fetch_global_helper, r0
 	|	jmp <1
 	|.code
@@ -15677,6 +15683,7 @@ static int zend_jit_rope(dasm_State **Dst, const zend_op *opline, uint32_t op2_i
 
 		|	lea FCARG1a, [FP + opline->op1.var]
 		|	mov FCARG2d, opline->extended_value
+		|	SET_EX_OPLINE opline, r0
 		|	EXT_CALL zend_jit_rope_end, r0
 		|	SET_ZVAL_PTR res_addr, r0
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING_EX
