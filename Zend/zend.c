@@ -1601,6 +1601,28 @@ ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
 	zend_error_zstr_at(type, filename, lineno, message);
 }
 
+/* Assert that global state was properly setup before entering a function that
+ * may trigger an error. */
+ZEND_API void zend_may_error(void)
+{
+	if (!zend_is_executing()) {
+		return;
+	}
+
+	zend_long lineno_override = EG(lineno_override);
+	if (lineno_override != -1) {
+		return;
+	}
+
+	zend_execute_data *ex = EG(current_execute_data);
+	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+		ex = ex->prev_execute_data;
+	}
+
+	/* zend_error() will dereference ex->opline */
+	ZEND_ASSERT(!ex || ex->opline);
+}
+
 ZEND_API void zend_begin_record_errors(void)
 {
 	ZEND_ASSERT(!EG(record_errors) && "Error recording already enabled");
