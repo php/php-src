@@ -2986,6 +2986,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEN
 				}
 			}
 			if (!EG(error_reporting_ini_entry)->modified) {
+				SAVE_OPLINE();
 				if (!EG(modified_ini_directives)) {
 					ALLOC_HASHTABLE(EG(modified_ini_directives));
 					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
@@ -5447,6 +5448,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_C
 		called_scope = Z_CE(EX(This));
 		object = NULL;
 	}
+
+	SAVE_OPLINE();
 	zend_create_closure(EX_VAR(opline->result.var), func,
 		EX(func)->op_array.scope, called_scope, object);
 
@@ -6635,6 +6638,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -6643,6 +6647,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -7318,6 +7323,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_CONST_HA
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
@@ -8555,6 +8561,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDL
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -8566,6 +8573,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDL
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -8979,6 +8987,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -8987,6 +8996,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -9514,6 +9524,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_TMPVAR_H
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
@@ -10437,6 +10448,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_H
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
@@ -10803,6 +10815,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 
 	if (result_size) {
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
+		SAVE_OPLINE();
 
 		ht = zend_new_array(result_size);
 		ZVAL_ARR(EX_VAR(opline->result.var), ht);
@@ -10920,6 +10933,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CV_HANDLER(Z
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -10931,6 +10945,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CV_HANDLER(Z
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -11344,6 +11359,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -11352,6 +11368,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -11878,6 +11895,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDL
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
@@ -14950,6 +14968,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CONST_HANDL
 		} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -14961,6 +14980,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CONST_HANDL
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -15688,6 +15708,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 		} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -15696,6 +15717,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -16386,6 +16408,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_TMPVAR_HAND
 		} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -16397,6 +16420,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_TMPVAR_HAND
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -17124,6 +17148,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 		} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -17132,6 +17157,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -18073,6 +18099,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CV_HANDLER(
 		} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -18084,6 +18111,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CV_HANDLER(
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -18449,6 +18477,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 		} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST && (IS_TMP_VAR|IS_VAR) != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -18457,6 +18486,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -19661,6 +19691,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CONST_HANDLE
 	uint32_t i;
 	size_t len = 0;
 	char *target;
+	SAVE_OPLINE();
 
 	rope = (zend_string**)EX_VAR(opline->op1.var);
 	if (IS_CONST == IS_CONST) {
@@ -19678,7 +19709,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CONST_HANDLE
 				rope[opline->extended_value] = Z_STR_P(var);
 			}
 		} else {
-			SAVE_OPLINE();
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(var) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
@@ -19847,6 +19877,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_CONST_HAND
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
@@ -20138,6 +20169,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDL
 	uint32_t i;
 	size_t len = 0;
 	char *target;
+	SAVE_OPLINE();
 
 	rope = (zend_string**)EX_VAR(opline->op1.var);
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -20155,7 +20187,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDL
 				rope[opline->extended_value] = Z_STR_P(var);
 			}
 		} else {
-			SAVE_OPLINE();
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(var) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
@@ -20287,6 +20318,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_TMPVAR_HAN
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
@@ -20748,6 +20780,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HAN
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
@@ -20999,6 +21032,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CV_HANDLER(Z
 	uint32_t i;
 	size_t len = 0;
 	char *target;
+	SAVE_OPLINE();
 
 	rope = (zend_string**)EX_VAR(opline->op1.var);
 	if (IS_CV == IS_CONST) {
@@ -21016,7 +21050,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CV_HANDLER(Z
 				rope[opline->extended_value] = Z_STR_P(var);
 			}
 		} else {
-			SAVE_OPLINE();
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
@@ -21148,6 +21181,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
@@ -24611,6 +24645,7 @@ send_var_by_ref:
 		if (Z_ISREF_P(varptr)) {
 			Z_ADDREF_P(varptr);
 		} else {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(varptr, 2);
 		}
 		ZVAL_REF(arg, Z_REF_P(varptr));
@@ -24884,6 +24919,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_CONST_HAND
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
@@ -27176,6 +27212,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_TMPVAR_HAN
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
@@ -28873,6 +28910,7 @@ send_var_by_ref:
 		if (Z_ISREF_P(varptr)) {
 			Z_ADDREF_P(varptr);
 		} else {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(varptr, 2);
 		}
 		ZVAL_REF(arg, Z_REF_P(varptr));
@@ -28939,6 +28977,7 @@ send_var_by_ref:
 		if (Z_ISREF_P(varptr)) {
 			Z_ADDREF_P(varptr);
 		} else {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(varptr, 2);
 		}
 		ZVAL_REF(arg, Z_REF_P(varptr));
@@ -29197,6 +29236,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HAN
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
@@ -29359,6 +29399,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 
 	if (IS_VAR == IS_CV) {
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_NEW_EMPTY_REF(op1);
 			Z_SET_REFCOUNT_P(op1, 2);
 			ZVAL_NULL(Z_REFVAL_P(op1));
@@ -29367,6 +29408,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 			if (Z_ISREF_P(op1)) {
 				Z_ADDREF_P(op1);
 			} else {
+				SAVE_OPLINE();
 				ZVAL_MAKE_REF_EX(op1, 2);
 			}
 			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
@@ -29374,6 +29416,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_INDIRECT)) {
 		op1 = Z_INDIRECT_P(op1);
 		if (EXPECTED(!Z_ISREF_P(op1))) {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(op1, 2);
 		} else {
 			GC_ADDREF(Z_REF_P(op1));
@@ -31452,6 +31495,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_CV_HANDLER
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
@@ -33628,6 +33672,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_H
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_UNUSED != IS_UNUSED) {
@@ -35367,6 +35412,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_UNUSED_TMPVAR_
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_UNUSED != IS_UNUSED) {
@@ -36004,6 +36050,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_UNUSED != IS_UNUSED) {
@@ -36264,6 +36311,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 
 	if (result_size) {
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
+		SAVE_OPLINE();
 
 		ht = zend_new_array(result_size);
 		ZVAL_ARR(EX_VAR(opline->result.var), ht);
@@ -37839,6 +37887,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_UNUSED_CV_HAND
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_UNUSED != IS_UNUSED) {
@@ -39817,6 +39866,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CONST_HANDLER(Z
 		} else if (IS_CV != IS_CONST && IS_CV != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -39828,6 +39878,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CONST_HANDLER(Z
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -42312,6 +42363,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 		} else if (IS_CV != IS_CONST && IS_CV != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -42320,6 +42372,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -42656,6 +42709,7 @@ send_var_by_ref:
 		if (Z_ISREF_P(varptr)) {
 			Z_ADDREF_P(varptr);
 		} else {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(varptr, 2);
 		}
 		ZVAL_REF(arg, Z_REF_P(varptr));
@@ -42793,6 +42847,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_CONST_HANDL
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {
@@ -43304,6 +43359,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_GLOBAL_SPEC_C
 
 	value = zend_hash_find_known_hash(&EG(symbol_table), varname);
 	if (UNEXPECTED(value == NULL)) {
+		SAVE_OPLINE();
 		value = zend_hash_add_new(&EG(symbol_table), varname, &EG(uninitialized_zval));
 		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
@@ -43323,6 +43379,7 @@ check_indirect:
 	}
 
 	if (UNEXPECTED(!Z_ISREF_P(value))) {
+		SAVE_OPLINE();
 		ZVAL_MAKE_REF_EX(value, 2);
 		ref = Z_REF_P(value);
 	} else {
@@ -43628,6 +43685,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_TMPVAR_HANDLER(
 		} else if (IS_CV != IS_CONST && IS_CV != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -43639,6 +43697,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_TMPVAR_HANDLER(
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -46052,6 +46111,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 		} else if (IS_CV != IS_CONST && IS_CV != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -46060,6 +46120,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -46392,6 +46453,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_TMPVAR_HAND
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {
@@ -48095,6 +48157,7 @@ send_var_by_ref:
 		if (Z_ISREF_P(varptr)) {
 			Z_ADDREF_P(varptr);
 		} else {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(varptr, 2);
 		}
 		ZVAL_REF(arg, Z_REF_P(varptr));
@@ -48160,6 +48223,7 @@ send_var_by_ref:
 		if (Z_ISREF_P(varptr)) {
 			Z_ADDREF_P(varptr);
 		} else {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(varptr, 2);
 		}
 		ZVAL_REF(arg, Z_REF_P(varptr));
@@ -48297,6 +48361,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HAND
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {
@@ -48636,6 +48701,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 	HashTable *ht;
 	zval *value;
 	zval *variable_ptr;
+	SAVE_OPLINE();
 
 	variable_ptr = EX_VAR(opline->op1.var);
 
@@ -48648,7 +48714,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 
 	value = (zval*)((char*)ht->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 
-	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_BIND_REF) {
 		if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 			if (UNEXPECTED(zval_update_constant_ex(value, EX(func)->op_array.scope) != SUCCESS)) {
@@ -48698,6 +48763,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLE
 
 	if (IS_CV == IS_CV) {
 		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			SAVE_OPLINE();
 			ZVAL_NEW_EMPTY_REF(op1);
 			Z_SET_REFCOUNT_P(op1, 2);
 			ZVAL_NULL(Z_REFVAL_P(op1));
@@ -48706,6 +48772,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLE
 			if (Z_ISREF_P(op1)) {
 				Z_ADDREF_P(op1);
 			} else {
+				SAVE_OPLINE();
 				ZVAL_MAKE_REF_EX(op1, 2);
 			}
 			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
@@ -48713,6 +48780,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLE
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_INDIRECT)) {
 		op1 = Z_INDIRECT_P(op1);
 		if (EXPECTED(!Z_ISREF_P(op1))) {
+			SAVE_OPLINE();
 			ZVAL_MAKE_REF_EX(op1, 2);
 		} else {
 			GC_ADDREF(Z_REF_P(op1));
@@ -48921,6 +48989,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND
 		} else if (IS_CV != IS_CONST && IS_CV != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			if (UNEXPECTED(len > ZSTR_MAX_LEN - ZSTR_LEN(op2_str))) {
 				zend_error_noreturn(E_ERROR, "Integer overflow in memory allocation");
@@ -48932,6 +49001,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -51444,6 +51514,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 		} else if (IS_CV != IS_CONST && IS_CV != IS_CV &&
 		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
 			size_t len = ZSTR_LEN(op1_str);
+			SAVE_OPLINE();
 
 			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -51452,6 +51523,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 				zend_string_release_ex(op2_str, 0);
 			}
 		} else {
+			SAVE_OPLINE();
 			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
 			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
@@ -51784,6 +51856,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER(
 	zval *array;
 	uint32_t size;
 	USE_OPLINE
+	SAVE_OPLINE();
 
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {

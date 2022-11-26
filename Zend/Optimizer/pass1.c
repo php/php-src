@@ -130,6 +130,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 				memset(&fake_execute_data, 0, sizeof(zend_execute_data));
 				fake_execute_data.func = (zend_function*)op_array;
+				fake_execute_data.opline = op_array->opcodes;
 				EG(current_execute_data) = &fake_execute_data;
 				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1)) != NULL) {
 

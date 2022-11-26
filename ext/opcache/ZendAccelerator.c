@@ -4424,6 +4424,7 @@ static int accel_preload(const char *config, bool in_child)
 
 				memset(&fake_execute_data, 0, sizeof(fake_execute_data));
 				fake_execute_data.func = (zend_function*)&script->script.main_op_array;
+				fake_execute_data.opline = script->script.main_op_array.opcodes;
 				EG(current_execute_data) = &fake_execute_data;
 				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1)) != NULL) {
 					script->compiler_halt_offset = Z_LVAL_P(offset);
