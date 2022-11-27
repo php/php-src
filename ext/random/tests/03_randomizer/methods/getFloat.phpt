@@ -1,5 +1,5 @@
 --TEST--
-Random: Randomizer: nextFloat(): Basic functionality
+Random: Randomizer: getFloat(): Basic functionality
 --FILE--
 <?php
 
@@ -9,6 +9,7 @@ use Random\Engine\PcgOneseq128XslRr64;
 use Random\Engine\Secure;
 use Random\Engine\Test\TestShaEngine;
 use Random\Engine\Xoshiro256StarStar;
+use Random\IntervalBoundary;
 use Random\Randomizer;
 
 require __DIR__ . "/../../engines.inc";
@@ -27,10 +28,10 @@ foreach ($engines as $engine) {
     $randomizer = new Randomizer($engine);
 
     // Basic range test.
-    for ($i = 0; $i < 10_000; $i++) {
-        $result = $randomizer->nextFloat();
+    for ($i = 0.0; $i < 10_000.0; $i += 1.2345) {
+        $result = $randomizer->getFloat(-$i, $i, IntervalBoundary::ClosedClosed);
 
-        if ($result >= 1 || $result < 0) {
+        if ($result > $i || $result < -$i) {
             die("failure: out of range at {$i}");
         }
     }
