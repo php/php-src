@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug #81738: buffer overflow in hash_update() on long parameter.
     (CVE-2022-37454) (nicky at mouha dot be)
 
+- Intl:
+  . Added pattern format error infos for msgfmt_set_pattern. (David Carlier)
+
 - JSON:
   . Added json_validate(). (Juan Morales)
 
