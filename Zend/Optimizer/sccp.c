@@ -1764,6 +1764,14 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SET_RESULT_BOT(result);
 			break;
 		}
+		case ZEND_HAS_TYPE: {
+			SKIP_IF_TOP(op1);
+			zend_type *type = Z_PTR_P(op2);
+			// FIXME: Abusing internal/return type flags to achieve strict type check
+			ZVAL_BOOL(&zv, zend_check_type_ex(type, op1, NULL, true, true));
+			SET_RESULT(result, &zv);
+			break;
+		}
 		default:
 		{
 			/* If we have no explicit implementation return BOT */

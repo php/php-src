@@ -4485,7 +4485,9 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 
 		SAVE_OPLINE();
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
-			zend_verify_return_error(EX(func), retval_ptr);
+			if (!EG(exception)) {
+				zend_verify_return_error(EX(func), retval_ptr);
+			}
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
@@ -9396,6 +9398,22 @@ ZEND_VM_C_LABEL(default_branch):
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	}
+}
+
+// FIXME: Smart branch?
+ZEND_VM_HANDLER(211, ZEND_HAS_TYPE, ANY, CONST)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zval *expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	const zend_type *type = Z_PTR_P(GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R));
+
+	// FIXME: Abusing internal/return type flags to achieve strict type check
+	bool result = zend_check_type(type, expr, NULL, 1, 1);
+
+	ZVAL_BOOL(EX_VAR(opline->result.var), result);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_COLD_CONST_HANDLER(197, ZEND_MATCH_ERROR, CONST|TMPVARCV, UNUSED)

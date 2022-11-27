@@ -59,7 +59,7 @@ $test = function($x): static {
 
 try {
     var_dump($test(new stdClass));
-} catch (TypeError $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -86,6 +86,6 @@ object(A)#%d (0) {
 }
 A::test4(): Return value must be of type B|array, A returned
 
-{closure:%s:%d}(): Return value must be of type static, stdClass returned
+Cannot access "static" when no class scope is active
 object(A)#%d (0) {
 }

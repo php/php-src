@@ -632,6 +632,8 @@ static zend_always_inline void *zend_get_bad_ptr(void)
 	return NULL;
 }
 
+ZEND_API bool zend_check_type_ex(const zend_type *type, zval *arg, zend_class_entry *scope, bool is_return_type, bool is_internal);
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */

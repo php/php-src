@@ -48,6 +48,7 @@
 
 static void zend_persist_zval_calc(zval *z);
 static void zend_persist_op_array_calc(const zval *zv);
+static void zend_persist_type_calc(zend_type *type);
 
 static void zend_hash_persist_calc(const HashTable *ht)
 {
@@ -158,6 +159,10 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			break;
 		case IS_PTR:
+			break;
+		case IS_TYPE:
+			ADD_SIZE(sizeof(zend_type));
+			zend_persist_type_calc(Z_PTR_P(z));
 			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);

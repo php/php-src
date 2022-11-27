@@ -1126,6 +1126,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
 
+#define ZEND_AST_RANGE_INCLUSIVE_END 1
+
 /* The send mode, the is_variadic, the is_promoted, and the is_tentative flags are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT
 #define _ZEND_IS_VARIADIC_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 2))
@@ -1152,6 +1154,9 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 /* Make sure these don't clash with ZEND_FETCH_CLASS_* flags. */
 #define IS_CONSTANT_CLASS                    0x400 /* __CLASS__ in trait */
 #define IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE 0x800
+
+/* Array pattern contains ... */
+#define ZEND_ARRAY_PATTERN_NON_EXHAUSTIVE 1
 
 static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
@@ -1223,6 +1228,8 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 
 /* Used to disallow pipes with arrow functions that lead to confusing parse trees. */
 #define ZEND_PARENTHESIZED_ARROW_FUNC 1
+
+#define ZEND_PARENTHESIZED_PATTERN 1
 
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
