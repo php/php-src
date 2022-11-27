@@ -130,96 +130,9 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 }
 /* }}} */
 
-static double getFloat_gamma_low(double x)
-{
-	return x - nextafter(x, -DBL_MAX);
-}
-
-static double getFloat_gamma_high(double x)
-{
-	return nextafter(x, DBL_MAX) - x;
-}
-
-static double getFloat_gamma(double x, double y)
-{
-	return (fabs(x) > fabs(y)) ? getFloat_gamma_high(x) : getFloat_gamma_low(y);
-}
-
-static uint64_t getFloat_ceilint(double a, double b, double g)
-{
-	double s = b / g - a / g;
-	double e;
-
-	if (fabs(a) <= fabs(b)) {
-		e = -a / g - (s - b / g);
-	} else {
-		e = b / g - (s + a / g);
-	}
-
-	double si = ceil(s);
-
-	return (s != si) ? (uint64_t)si : (uint64_t)si + (e > 0);
-}
-
-static double getFloat_closed_open(const php_random_algo *algo, php_random_status *status, double min, double max)
-{
-	double g = getFloat_gamma(min, max);
-	uint64_t hi = getFloat_ceilint(min, max, g);
-	uint64_t k = algo->range(status, 1, hi);
-
-	if (fabs(min) <= fabs(max)) {
-		return k == hi ? min : max - k * g;
-	} else {
-		return min + (k - 1) * g;
-	}
-}
-
-static double getFloat_closed_closed(const php_random_algo *algo, php_random_status *status, double min, double max)
-{
-	double g = getFloat_gamma(min, max);
-	uint64_t hi = getFloat_ceilint(min, max, g);
-	uint64_t k = algo->range(status, 0, hi);
-
-	if (fabs(min) <= fabs(max)) {
-		return k == hi ? min : max - k * g;
-	} else {
-		return k == hi ? max : min + k * g;
-	}
-}
-
-static double getFloat_open_closed(const php_random_algo *algo, php_random_status *status, double min, double max)
-{
-	double g = getFloat_gamma(min, max);
-	uint64_t hi = getFloat_ceilint(min, max, g);
-	uint64_t k = algo->range(status, 0, hi - 1);
-
-	if (fabs(min) <= fabs(max)) {
-		return max - k * g;
-	} else {
-		return k == (hi - 1) ? max : min + (k + 1) * g;
-	}
-}
-
-static double getFloat_open_open(const php_random_algo *algo, php_random_status *status, double min, double max)
-{
-	double g = getFloat_gamma(min, max);
-	uint64_t hi = getFloat_ceilint(min, max, g);
-	uint64_t k = algo->range(status, 1, hi - 1);
-
-	if (fabs(min) <= fabs(max)) {
-		return max - k * g;
-	} else {
-		return min + k * g;
-	}
-}
-
-/* {{{ Generates a random float within [min, max).
+/* {{{ Generates a random float within a configurable interval.
  *
- * The algorithm used is the γ-section algorithm as published in:
- *
- * Drawing Random Floating-Point Numbers from an Interval. Frédéric
- * Goualard, ACM Trans. Model. Comput. Simul., 32:3, 2022.
- * https://doi.org/10.1145/3503512
+ * This method uses the γ-section algorithm by Frédéric Goualard.
  */
 PHP_METHOD(Random_Randomizer, getFloat)
 {
@@ -251,28 +164,28 @@ PHP_METHOD(Random_Randomizer, getFloat)
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(getFloat_closed_open(randomizer->algo, randomizer->status, min, max));
+		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->algo, randomizer->status, min, max));
 	} else if (zend_string_equals_literal(bounds_name, "ClosedClosed")) {
 		if (UNEXPECTED(max < min)) {
 			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(getFloat_closed_closed(randomizer->algo, randomizer->status, min, max));
+		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->algo, randomizer->status, min, max));
 	} else if (zend_string_equals_literal(bounds_name, "OpenClosed")) {
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(getFloat_open_closed(randomizer->algo, randomizer->status, min, max));
+		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->algo, randomizer->status, min, max));
 	} else if (zend_string_equals_literal(bounds_name, "OpenOpen")) {
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(getFloat_open_open(randomizer->algo, randomizer->status, min, max));
+		RETURN_DOUBLE(php_random_gammasection_open_open(randomizer->algo, randomizer->status, min, max));
 	} else {
 		ZEND_UNREACHABLE();
 	}

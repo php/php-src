@@ -309,6 +309,11 @@ PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgon
 PHPAPI void php_random_xoshiro256starstar_jump(php_random_status_state_xoshiro256starstar *state);
 PHPAPI void php_random_xoshiro256starstar_jump_long(php_random_status_state_xoshiro256starstar *state);
 
+PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, php_random_status *status, double min, double max);
+PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo, php_random_status *status, double min, double max);
+PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, php_random_status *status, double min, double max);
+PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, php_random_status *status, double min, double max);
+
 extern zend_module_entry random_module_entry;
 # define phpext_random_ptr &random_module_entry
 
