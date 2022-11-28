@@ -3799,13 +3799,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 	if (UNEXPECTED(fbc == NULL)) {
 		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
 		/* Fetch lowercase name stored in the next literal slot */
-		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
+		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ false);
 		if (UNEXPECTED(fbc == NULL)) {
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
 			/* Fallback onto global namespace, by fetching the unqualified lowercase name stored in the second literal slot */
-			fbc = zend_lookup_function_ex(Z_STR_P(function_name+2), Z_STR_P(function_name+2), /* use_autoload */ true);
+			fbc = zend_lookup_function_ex(Z_STR_P(function_name+2), Z_STR_P(function_name+2), /* use_autoload */ false);
 			if (fbc == NULL) {
 				if (UNEXPECTED(EG(exception))) {
 					HANDLE_EXCEPTION();

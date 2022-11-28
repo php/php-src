@@ -17,6 +17,7 @@ namespace {
     autoload_register_function('autoload_second');
 }
 namespace bar {
+    echo "Try-catch around function_exists()\n";
     try {
         \function_exists('foo');
     } catch (\Exception $e) {
@@ -24,22 +25,38 @@ namespace bar {
             echo $e->getMessage()."\n";
         } while ($e = $e->getPrevious());
     }
+    echo "Try-catch around unqualified function call\n";
     try {
         foo();
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
+        /* No autoloading for unqualified function names */
         do {
-            echo $e->getMessage()."\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
+        } while ($e = $e->getPrevious());
+    }
+    echo "Try-catch around qualified function call\n";
+    try {
+        \foo();
+    } catch (\Throwable $e) {
+        do {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         } while ($e = $e->getPrevious());
     }
 
+    echo "function_exists() without try-catch\n";
     \function_exists('foo');
 }
 ?>
 --EXPECTF--
+Try-catch around function_exists()
 autoload_first
 first
+Try-catch around unqualified function call
+Error: Call to undefined function bar\foo()
+Try-catch around qualified function call
 autoload_first
-first
+Exception: first
+function_exists() without try-catch
 autoload_first
 
 Fatal error: Uncaught Exception: first in %s:%d
