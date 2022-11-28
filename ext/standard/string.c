@@ -1080,7 +1080,7 @@ PHP_FUNCTION(strtok)
 
 	if (!BG(strtok_string)) {
 		/* String to tokenize not set. */
-		php_error_docref(NULL, E_WARNING, "First call must set the string argument to tokenize with `%s`", ZSTR_VAL(tok));
+		php_error_docref(NULL, E_WARNING, "Both arguments must be provided when starting tokenization");
 		RETURN_FALSE;
 	}
 
