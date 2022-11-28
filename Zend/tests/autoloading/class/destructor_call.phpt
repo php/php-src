@@ -1,7 +1,5 @@
 --TEST--
-SPL: spl_autoload() and object freed
---INI--
-include_path=.
+Destructor call of autoloader when object freed
 --FILE--
 <?php
 class A {
@@ -17,7 +15,7 @@ class A {
 $a = new A;
 $a->var = 2;
 
-spl_autoload_register(array($a, 'autoload'));
+autoload_register_class(array($a, 'autoload'));
 unset($a);
 
 var_dump(class_exists("C", true));

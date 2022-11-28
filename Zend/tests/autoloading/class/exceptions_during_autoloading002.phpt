@@ -1,7 +1,5 @@
 --TEST--
-SPL: spl_autoload() with exceptions
---INI--
-include_path=.
+Exceptions during autoloading
 --FILE--
 <?php
 
@@ -44,14 +42,14 @@ foreach($funcs as $idx => $func)
 
     var_dump($func);
     try {
-        spl_autoload_register($func);
+        autoload_register_class($func);
     } catch (TypeError $e) {
         echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
-        var_dump(count(spl_autoload_functions()));
+        var_dump(count(autoload_list_class()));
         continue;
     }
 
-    if (count(spl_autoload_functions())) {
+    if (count(autoload_list_class())) {
         echo "registered\n";
 
         try {
@@ -61,8 +59,8 @@ foreach($funcs as $idx => $func)
         }
     }
 
-    spl_autoload_unregister($func);
-    var_dump(count(spl_autoload_functions()));
+    autoload_unregister_class($func);
+    var_dump(count(autoload_list_class()));
 }
 
 ?>
@@ -81,7 +79,7 @@ Exception: Bla
 int(0)
 ====2====
 string(22) "MyAutoLoader::dynaLoad"
-TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::dynaLoad() cannot be called statically
+TypeError: autoload_register_class(): Argument #1 ($callback) must be a valid callback, non-static method MyAutoLoader::dynaLoad() cannot be called statically
 int(0)
 ====3====
 array(2) {
@@ -101,7 +99,7 @@ array(2) {
   [1]=>
   string(8) "dynaLoad"
 }
-TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::dynaLoad() cannot be called statically
+TypeError: autoload_register_class(): Argument #1 ($callback) must be a valid callback, non-static method MyAutoLoader::dynaLoad() cannot be called statically
 int(0)
 ====5====
 array(2) {

@@ -1,16 +1,16 @@
 --TEST--
-Bug #73896 (spl_autoload() crashes when calls magic _call())
+Bug #73896 (autoload_register_class() crashes when calls magic __call())
 --FILE--
 <?php
 class Registrator {
-    public static function call($callable, array  $args) {
+    public static function call($callable, array $args) {
         return call_user_func_array($callable, [$args]);
     }
 }
 
 class teLoader {
     public function __construct() {
-        Registrator::call('spl_autoload_register', [$this, 'autoload']);
+        Registrator::call('autoload_register_class', [$this, 'autoload']);
     }
 
     public function __call($method, $args) {
@@ -18,6 +18,7 @@ class teLoader {
     }
 
     protected function autoload($class) {
+        // TODO Should this actually be called?
         die("Protected autoload() called!\n");
     }
 

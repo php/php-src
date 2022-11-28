@@ -29,12 +29,15 @@
 #include "zend_extensions.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
+#include "zend_autoload.h"
 #include "zend_builtin_functions_arginfo.h"
 #include "zend_smart_str.h"
 
 /* }}} */
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
+	zend_autoload_class = zend_perform_class_autoload;
+
 	zend_register_default_classes();
 
 	zend_standard_class_def = register_class_stdClass();
