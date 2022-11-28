@@ -68,6 +68,7 @@ PHP 8.3 UPGRADE NOTES
   . array_pad() is now only limited by the maximum number of elements an array
     can have. Before, it was only possible to add at most 1048576 elements at a
     time.
+  . strtok() raises a warninin the case token is not provided when starting tokenization.
 
 ========================================
 6. New Functions
