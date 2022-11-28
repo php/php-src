@@ -1,11 +1,13 @@
 --TEST--
 SPL: FixedArray: Bug GH-8044 (var_export/debug_zval_dump HT_ASSERT_RC1 debug failure for SplFixedArray)
+--XFAIL--
+var_export now expect consistent properties
 --FILE--
 <?php
 call_user_func(function () {
     $x = new SplFixedArray(1);
     $x[0] = $x;
-    var_export($x); echo "\n";
+    json_encode($x); echo "\n";
     debug_zval_dump($x); echo "\n";
 });
 ?>

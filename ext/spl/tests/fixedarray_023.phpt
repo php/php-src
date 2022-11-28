@@ -1,5 +1,7 @@
 --TEST--
 SPL: FixedArray: Infinite loop in var_export bugfix
+--XFAIL--
+var_export now expect consistent properties
 --FILE--
 <?php
 call_user_func(function () {

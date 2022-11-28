@@ -554,7 +554,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					smart_str_appendc(buf, '\n');
 				}
 
-				if (GC_IS_RECURSIVE(Z_OBJ_P(expr))) {
+				if (GC_IS_DEBUG_RECURSIVE(Z_OBJ_P(expr))) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
@@ -564,9 +564,9 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					break;
 				}
 
-				GC_PROTECT_RECURSION(Z_OBJ_P(expr));
+				GC_PROTECT_DEBUG_RECURSION(Z_OBJ_P(expr));
 				print_hash(buf, properties, indent, 1);
-				GC_UNPROTECT_RECURSION(Z_OBJ_P(expr));
+				GC_UNPROTECT_DEBUG_RECURSION(Z_OBJ_P(expr));
 
 				zend_release_properties(properties);
 				break;

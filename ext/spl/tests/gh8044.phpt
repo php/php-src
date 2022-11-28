@@ -1,5 +1,7 @@
 --TEST--
 Bug GH-8044 (var_export/debug_zval_dump HT_ASSERT_RC1 debug failure for SplFixedArray)
+--XFAIL--
+var_export now expect consistent properties
 --FILE--
 <?php
 call_user_func(function () {

@@ -532,10 +532,29 @@ static zend_result php_json_escape_string(
 }
 /* }}} */
 
+#define PHP_JSON_SERIALIZABLE_OBJECT_PROTECT_RECURSION(_obj, _ht) \
+	do { \
+		if (UNEXPECTED(_ht)) { \
+			GC_PROTECT_RECURSION(_ht); \
+		} else { \
+			GC_PROTECT_RECURSION(_obj); \
+		} \
+	} while (0)
+
+#define PHP_JSON_SERIALIZABLE_OBJECT_UNPROTECT_RECURSION(_obj, _ht) \
+	do { \
+		if (UNEXPECTED(_ht)) { \
+			GC_UNPROTECT_RECURSION(_ht); \
+		} else { \
+			GC_UNPROTECT_RECURSION(_obj); \
+		} \
+	} while (0)
+
 static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
-	HashTable* myht = Z_OBJPROP_P(val);
+	zend_object *obj = Z_OBJ_P(val);
+	HashTable* myht = GC_IS_RECURSIVE(obj) ? Z_OBJPROP_P(val) : NULL;
 	zval retval, fname;
 	zend_result return_code;
 
@@ -547,7 +566,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 		return FAILURE;
 	}
 
-	PHP_JSON_HASH_PROTECT_RECURSION(myht);
+	PHP_JSON_SERIALIZABLE_OBJECT_PROTECT_RECURSION(obj, myht);
 
 	ZVAL_STRING(&fname, "jsonSerialize");
 
@@ -560,7 +579,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 			smart_str_appendl(buf, "null", 4);
 		}
-		PHP_JSON_HASH_UNPROTECT_RECURSION(myht);
+		PHP_JSON_SERIALIZABLE_OBJECT_UNPROTECT_RECURSION(obj, myht);
 		return FAILURE;
 	}
 
@@ -572,19 +591,19 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 			smart_str_appendl(buf, "null", 4);
 		}
-		PHP_JSON_HASH_UNPROTECT_RECURSION(myht);
+		PHP_JSON_SERIALIZABLE_OBJECT_UNPROTECT_RECURSION(obj, myht);
 		return FAILURE;
 	}
 
 	if ((Z_TYPE(retval) == IS_OBJECT) &&
 		(Z_OBJ(retval) == Z_OBJ_P(val))) {
 		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
-		PHP_JSON_HASH_UNPROTECT_RECURSION(myht);
+		PHP_JSON_SERIALIZABLE_OBJECT_UNPROTECT_RECURSION(obj, myht);
 		return_code = php_json_encode_array(buf, &retval, options, encoder);
 	} else {
 		/* All other types, encode as normal */
 		return_code = php_json_encode_zval(buf, &retval, options, encoder);
-		PHP_JSON_HASH_UNPROTECT_RECURSION(myht);
+		PHP_JSON_SERIALIZABLE_OBJECT_UNPROTECT_RECURSION(obj, myht);
 	}
 
 	zval_ptr_dtor(&retval);

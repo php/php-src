@@ -642,10 +642,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_TRY_DELREF(p)			zend_gc_try_delref(&(p)->gc)
 
 #define GC_TYPE_MASK				0x0000000f
-#define GC_FLAGS_MASK				0x000003f0
-#define GC_INFO_MASK				0xfffffc00
+#define GC_FLAGS_MASK				0x000007f0
+#define GC_INFO_MASK				0xfffff800
 #define GC_FLAGS_SHIFT				0
-#define GC_INFO_SHIFT				10
+#define GC_INFO_SHIFT				11
 
 static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
@@ -684,10 +684,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 /* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
 #define GC_NOT_COLLECTABLE			(1<<4)
-#define GC_PROTECTED                (1<<5) /* used for recursion detection */
-#define GC_IMMUTABLE                (1<<6) /* can't be changed in place */
-#define GC_PERSISTENT               (1<<7) /* allocated using malloc */
-#define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
+#define GC_PROTECTED                (1<<5)  /* used for recursion detection */
+#define GC_IMMUTABLE                (1<<6)  /* can't be changed in place */
+#define GC_PERSISTENT               (1<<7)  /* allocated using malloc */
+#define GC_PERSISTENT_LOCAL         (1<<8)  /* persistent, but thread-local */
+#define GC_DEBUG_PROTECTED          (1<<10) /* whether the protection is for debug functions */
 
 #define GC_NULL						(IS_NULL         | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_STRING					(IS_STRING       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
@@ -788,6 +789,24 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_IS_RECURSIVE_P(zv)        Z_IS_RECURSIVE(*(zv))
 #define Z_PROTECT_RECURSION_P(zv)   Z_PROTECT_RECURSION(*(zv))
 #define Z_UNPROTECT_RECURSION_P(zv) Z_UNPROTECT_RECURSION(*(zv))
+
+#define GC_IS_DEBUG_RECURSIVE(p) \
+	((GC_FLAGS(p) & GC_PROTECTED) && (GC_FLAGS(p) & GC_DEBUG_PROTECTED))
+
+#define GC_PROTECT_DEBUG_RECURSION(p) do { \
+		GC_ADD_FLAGS(p, (GC_PROTECTED | GC_DEBUG_PROTECTED)); \
+	} while (0)
+
+#define GC_UNPROTECT_DEBUG_RECURSION(p) do { \
+		GC_DEL_FLAGS(p, (GC_PROTECTED | GC_DEBUG_PROTECTED)); \
+	} while (0)
+
+#define Z_IS_DEBUG_RECURSIVE(zval)        GC_IS_DEBUG_RECURSIVE(Z_COUNTED(zval))
+#define Z_PROTECT_DEBUG_RECURSION(zval)   GC_PROTECT_DEBUG_RECURSION(Z_COUNTED(zval))
+#define Z_UNPROTECT_DEBUG_RECURSION(zval) GC_UNPROTECT_DEBUG_RECURSION(Z_COUNTED(zval))
+#define Z_IS_DEBUG_RECURSIVE_P(zv)        Z_IS_DEBUG_RECURSIVE(*(zv))
+#define Z_PROTECT_DEBUG_RECURSION_P(zv)   Z_PROTECT_DEBUG_RECURSION(*(zv))
+#define Z_UNPROTECT_DEBUG_RECURSION_P(zv) Z_UNPROTECT_DEBUG_RECURSION(*(zv))
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
 #define Z_CONSTANT(zval)			(Z_TYPE(zval) == IS_CONSTANT_AST)
