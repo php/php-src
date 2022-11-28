@@ -24,6 +24,10 @@ ZEND_FUNCTION(autoload_register_class);
 ZEND_FUNCTION(autoload_unregister_class);
 ZEND_FUNCTION(autoload_call_class);
 ZEND_FUNCTION(autoload_list_class);
+ZEND_FUNCTION(autoload_register_function);
+ZEND_FUNCTION(autoload_unregister_function);
+ZEND_FUNCTION(autoload_call_function);
+ZEND_FUNCTION(autoload_list_function);
 
 ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, zend_string *lc_name);
 ZEND_API zend_function *zend_perform_function_autoload(zend_string *function_name, zend_string *lc_name);
