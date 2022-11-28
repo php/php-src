@@ -387,7 +387,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
-				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, CONST_CS, 0);
+				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, 0, 0);
 			}
 			zend_string_release_ex(name, 0);
 		}

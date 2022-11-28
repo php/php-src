@@ -8403,7 +8403,7 @@ static void zend_compile_halt_compiler(zend_ast *ast) /* {{{ */
 	name = zend_mangle_property_name(const_name, sizeof(const_name) - 1,
 		ZSTR_VAL(filename), ZSTR_LEN(filename), 0);
 
-	zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), offset, CONST_CS, 0);
+	zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), offset, 0, 0);
 	zend_string_release_ex(name, 0);
 }
 /* }}} */

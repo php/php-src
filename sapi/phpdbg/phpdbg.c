@@ -911,19 +911,19 @@ void phpdbg_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_err, &zerr);
 
 	ic.value = zin;
-	ZEND_CONSTANT_SET_FLAGS(&ic, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ic.value) = 0;
 	ic.name = zend_string_init(ZEND_STRL("STDIN"), 0);
 	zend_hash_del(EG(zend_constants), ic.name);
 	zend_register_constant(&ic);
 
 	oc.value = zout;
-	ZEND_CONSTANT_SET_FLAGS(&oc, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(oc.value) = 0;
 	oc.name = zend_string_init(ZEND_STRL("STDOUT"), 0);
 	zend_hash_del(EG(zend_constants), oc.name);
 	zend_register_constant(&oc);
 
 	ec.value = zerr;
-	ZEND_CONSTANT_SET_FLAGS(&ec, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ec.value) = 0;
 	ec.name = zend_string_init(ZEND_STRL("STDERR"), 0);
 	zend_hash_del(EG(zend_constants), ec.name);
 	zend_register_constant(&ec);
