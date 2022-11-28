@@ -235,6 +235,7 @@ ZEND_FUNCTION(autoload_unregister_class)
 	 * This is forward-ported from SPL */
 	if (ZEND_FCC_INITIALIZED(fcc) && fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
 		fcc.function_handler->internal_function.handler == zif_autoload_call_class) {
+		zend_error(E_DEPRECATED, "Flushing the class autoloader table by passing autoload_call_class() is deprecated");
 		// Don't destroy the hash table, as we might be iterating over it right now.
 		zend_hash_clean(autoloader_class_autoload_functions);
 		RETURN_TRUE;

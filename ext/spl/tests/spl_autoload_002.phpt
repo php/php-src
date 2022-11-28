@@ -35,7 +35,7 @@ spl_autoload_unregister('spl_autoload');
 var_dump(spl_autoload_functions());
 
 ?>
---EXPECT--
+--EXPECTF--
 array(0) {
 }
 array(1) {
@@ -56,6 +56,8 @@ array(2) {
   [1]=>
   string(16) "SplAutoloadTest2"
 }
+
+Deprecated: Flushing the class autoloader table by passing autoload_call_class() is deprecated in %s on line %d
 array(0) {
 }
 array(1) {
