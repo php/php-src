@@ -149,6 +149,7 @@ typedef struct _php_cgi_globals_struct {
 	bool force_redirect;
 	bool discard_path;
 	bool fcgi_logging;
+	bool fcgi_logging_request_started;
 	char *redirect_status_env;
 	HashTable user_config_cache;
 	char *error_header;
@@ -598,11 +599,16 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 	 * - logging is enabled (fastcgi.logging in php.ini)
 	 * - we are currently dealing with a request
 	 * - the message is not empty
-	 * - the fcgi_write did not fail
 	 */
-	if (CGIG(fcgi_logging) && request && message && len > 0
-			&& fcgi_write(request, FCGI_STDERR, message, len) < 0) {
-		php_handle_aborted_connection();
+	if (CGIG(fcgi_logging) && request && message && len > 0) {
+		if (CGIG(fcgi_logging_request_started)) {
+			fcgi_write(request, FCGI_STDERR, "; ", 2);
+		} else {
+			CGIG(fcgi_logging_request_started) = true;
+		}
+		if (fcgi_write(request, FCGI_STDERR, message, len) < 0) {
+			php_handle_aborted_connection();
+		}
 	}
 }
 /* }}} */
@@ -1403,6 +1409,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 	php_cgi_globals->fix_pathinfo = 1;
 	php_cgi_globals->discard_path = 0;
 	php_cgi_globals->fcgi_logging = 1;
+	php_cgi_globals->fcgi_logging_request_started = false;
 	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
 	php_cgi_globals->error_header = NULL;
 	php_cgi_globals->fpm_config = NULL;
@@ -1820,6 +1827,7 @@ consult the installation file that came with this distribution, or visit \n\
 			char *primary_script = NULL;
 			request_body_fd = -1;
 			SG(server_context) = (void *) request;
+			CGIG(fcgi_logging_request_started) = false;
 			init_request_info();
 
 			fpm_request_info();

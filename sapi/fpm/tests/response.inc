@@ -42,6 +42,11 @@ class Response
     private $expectInvalid;
 
     /**
+     * @var bool
+     */
+    private bool $debugOutputted = false;
+
+    /**
      * @param string|array|null $data
      * @param bool              $expectInvalid
      */
@@ -71,9 +76,9 @@ class Response
             $body = implode("\n", $body);
         }
 
-        if (!$this->checkIfValid()) {
+        if ( ! $this->checkIfValid()) {
             $this->error('Response is invalid');
-        } elseif (!$this->checkDefaultHeaders($contentType)) {
+        } elseif ( ! $this->checkDefaultHeaders($contentType)) {
             $this->error('Response default headers not found');
         } elseif ($body !== $this->rawBody) {
             if ($multiLine) {
@@ -135,6 +140,26 @@ class Response
     }
 
     /**
+     * Expect error pattern in the response.
+     *
+     * @param string $errorMessagePattern Expected error message RegExp patter.
+     *
+     * @return Response
+     */
+    public function expectErrorPattern(string $errorMessagePattern): Response
+    {
+        $errorData = $this->getErrorData();
+        if (preg_match($errorMessagePattern, $errorData) === 0) {
+            $this->error(
+                "The expected error pattern $errorMessagePattern does not match the returned error '$errorData'"
+            );
+            $this->debugOutput();
+        }
+
+        return $this;
+    }
+
+    /**
      * Expect no error in the response.
      *
      * @return Response
@@ -187,6 +212,8 @@ class Response
         echo "----------------- ERR -----------------\n";
         echo $this->data['err_response'] . "\n";
         echo "---------------------------------------\n\n";
+
+        $this->debugOutputted = true;
     }
 
     /**
@@ -331,8 +358,11 @@ class Response
      *
      * @return bool
      */
-    private function error($message): bool
+    private function error(string $message): bool
     {
+        if ( ! $this->debugOutputted) {
+            $this->debugOutput();
+        }
         echo "ERROR: $message\n";
 
         return false;
