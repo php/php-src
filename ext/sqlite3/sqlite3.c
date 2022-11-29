@@ -2040,14 +2040,10 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 			if (memcmp(arg1, ":memory:", sizeof(":memory:")) && *arg1) {
 				if (strncmp(arg1, "file:", 5) == 0) {
 					/* starts with "file:" */
-					if (!arg1[5]) {
+					if (PG(open_basedir) && *PG(open_basedir)) {
 						return SQLITE_DENY;
 					}
-					if (php_check_open_basedir(arg1 + 5)) {
-						return SQLITE_DENY;
-					}
-				}
-				if (php_check_open_basedir(arg1)) {
+				} else if (php_check_open_basedir(arg1)) {
 					return SQLITE_DENY;
 				}
 			}
