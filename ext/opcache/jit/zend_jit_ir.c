@@ -344,7 +344,7 @@ static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_re
 				if (type2 == type) {
 					return insn->op3; /* store forwarding (S2L) */
 				} else if (IR_IS_TYPE_INT(type) && ir_type_size[type2] > ir_type_size[type]) {
-					return ir_emit1(ctx, IR_OPT(IR_TRUNC, type), insn->op3); /* partial store forwarding (S2L) */
+					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), insn->op3); /* partial store forwarding (S2L) */
 				} else {
 					return IR_UNUSED;
 				}
