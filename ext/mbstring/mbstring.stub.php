@@ -2,6 +2,55 @@
 
 /** @generate-class-entries */
 
+#ifdef HAVE_MBREGEX
+/**
+ * @var string
+ * @cvalue php_mb_oniguruma_version
+ */
+const MB_ONIGURUMA_VERSION = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_UPPER
+ */
+const MB_CASE_UPPER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_LOWER
+ */
+const MB_CASE_LOWER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_TITLE
+ */
+const MB_CASE_TITLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_FOLD
+ */
+const MB_CASE_FOLD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_UPPER_SIMPLE
+ */
+const MB_CASE_UPPER_SIMPLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_LOWER_SIMPLE
+ */
+const MB_CASE_LOWER_SIMPLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_TITLE_SIMPLE
+ */
+const MB_CASE_TITLE_SIMPLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_UNICODE_CASE_FOLD_SIMPLE
+ */
+const MB_CASE_FOLD_SIMPLE = UNKNOWN;
+
 /** @refcount 1 */
 function mb_language(?string $language = null): string|bool {}
 
@@ -69,7 +118,6 @@ function mb_strcut(string $string, int $start, ?int $length = null, ?string $enc
 
 function mb_strwidth(string $string, ?string $encoding = null): int {}
 
-/** @refcount 1 */
 function mb_strimwidth(string $string, int $start, int $width, string $trim_marker = "", ?string $encoding = null): string {}
 
 /**

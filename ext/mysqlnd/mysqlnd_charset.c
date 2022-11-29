@@ -188,9 +188,9 @@ static unsigned int mysqlnd_mbcharlen_utf8(const unsigned int utf8)
 
 
 /* {{{ big5 functions */
-#define valid_big5head(c)	(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xF9)
-#define valid_big5tail(c)	((0x40 <= (unsigned int)(c) && (unsigned int)(c) <= 0x7E) || \
-							(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xFE))
+#define valid_big5head(c)	(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xF9)
+#define valid_big5tail(c)	((0x40 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0x7E) || \
+							(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xFE))
 
 #define isbig5code(c,d) (isbig5head(c) && isbig5tail(d))
 

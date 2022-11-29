@@ -186,8 +186,6 @@ PHPAPI void php_output_startup(void);
 /* MSHUTDOWN */
 PHPAPI void php_output_shutdown(void);
 
-PHPAPI void php_output_register_constants(void);
-
 /* RINIT */
 PHPAPI int php_output_activate(void);
 /* RSHUTDOWN */

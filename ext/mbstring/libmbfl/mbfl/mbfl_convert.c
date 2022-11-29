@@ -85,8 +85,6 @@ static const struct mbfl_convert_vtbl *mbfl_special_filter_list[] = {
 	&vtbl_uuencode_8bit,
 	&vtbl_8bit_qprint,
 	&vtbl_qprint_8bit,
-	&vtbl_8bit_7bit,
-	&vtbl_7bit_8bit,
 	&vtbl_pass,
 	NULL
 };
@@ -245,7 +243,7 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 	unsigned int w = c;
 	int ret = 0;
 	int mode_backup = filter->illegal_mode;
-	int substchar_backup = filter->illegal_substchar;
+	uint32_t substchar_backup = filter->illegal_substchar;
 
 	/* The used substitution character may not be supported by the target character encoding.
 	 * If that happens, first try to use "?" instead and if that also fails, silently drop the
@@ -302,13 +300,11 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding *from, const mbfl_encoding *to)
 {
 	if (to->no_encoding == mbfl_no_encoding_base64 ||
-	    to->no_encoding == mbfl_no_encoding_qprint ||
-	    to->no_encoding == mbfl_no_encoding_7bit) {
+	    to->no_encoding == mbfl_no_encoding_qprint) {
 		from = &mbfl_encoding_8bit;
 	} else if (from->no_encoding == mbfl_no_encoding_base64 ||
 			   from->no_encoding == mbfl_no_encoding_qprint ||
-			   from->no_encoding == mbfl_no_encoding_uuencode ||
-			   from->no_encoding == mbfl_no_encoding_7bit) {
+			   from->no_encoding == mbfl_no_encoding_uuencode) {
 		to = &mbfl_encoding_8bit;
 	}
 
@@ -348,18 +344,23 @@ int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-zend_string* mb_fast_convert(zend_string *str, const mbfl_encoding *from, const mbfl_encoding *to, uint32_t replacement_char, unsigned int error_mode, unsigned int *num_errors)
+zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encoding *from, const mbfl_encoding *to, uint32_t replacement_char, unsigned int error_mode, unsigned int *num_errors)
 {
 	uint32_t wchar_buf[128];
-	unsigned char *in = (unsigned char*)ZSTR_VAL(str);
-	size_t in_len = ZSTR_LEN(str);
 	unsigned int state = 0;
+
+	if (to == &mbfl_encoding_base64 || to == &mbfl_encoding_qprint) {
+		from = &mbfl_encoding_8bit;
+	} else if (from == &mbfl_encoding_base64 || from == &mbfl_encoding_qprint || from == &mbfl_encoding_uuencode) {
+		to = &mbfl_encoding_8bit;
+	}
 
 	mb_convert_buf buf;
 	mb_convert_buf_init(&buf, in_len, replacement_char, error_mode);
 
 	while (in_len) {
 		size_t out_len = from->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
 		to->from_wchar(wchar_buf, out_len, &buf, !in_len);
 	}
 

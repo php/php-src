@@ -397,17 +397,14 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	zend_fcall_info_init(&t->func_name, 0, &fci, &t->fci_cache, NULL, NULL);
 
-	zend_fcall_info_argn(
-		&fci, 3,
-		pz_parent_ch,
-		&pz_ch,
-		&headers
-	);
+	ZEND_ASSERT(pz_parent_ch);
+	zval call_args[3] = {*pz_parent_ch, pz_ch, headers};
 
+	fci.param_count = 3;
+	fci.params = call_args;
 	fci.retval = &retval;
 
 	error = zend_call_function(&fci, &t->fci_cache);
-	zend_fcall_info_args_clear(&fci, 1);
 	zval_ptr_dtor_nogc(&headers);
 
 	if (error == FAILURE) {
@@ -441,6 +438,9 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 		case CURLMOPT_MAX_HOST_CONNECTIONS:
 		case CURLMOPT_MAX_PIPELINE_LENGTH:
 		case CURLMOPT_MAX_TOTAL_CONNECTIONS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
+		case CURLMOPT_MAX_CONCURRENT_STREAMS:
 #endif
 		{
 			zend_long lval = zval_get_long(zvalue);
@@ -509,14 +509,11 @@ PHP_FUNCTION(curl_multi_setopt)
 
 /* CurlMultiHandle class */
 
-static zend_object_handlers curl_multi_handlers;
-
 static zend_object *curl_multi_create_object(zend_class_entry *class_type) {
 	php_curlm *intern = zend_object_alloc(sizeof(php_curlm), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &curl_multi_handlers;
 
 	return &intern->std;
 }
@@ -579,8 +576,11 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 	return zend_std_get_properties(object);
 }
 
+static zend_object_handlers curl_multi_handlers;
+
 void curl_multi_register_handlers(void) {
 	curl_multi_ce->create_object = curl_multi_create_object;
+	curl_multi_ce->default_object_handlers = &curl_multi_handlers;
 
 	memcpy(&curl_multi_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_multi_handlers.offset = XtOffsetOf(php_curlm, std);

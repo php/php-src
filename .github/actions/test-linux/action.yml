@@ -1,5 +1,8 @@
 name: Test
 inputs:
+  testArtifacts:
+    default: null
+    required: false
   runTestsParameters:
     default: ''
     required: false
@@ -11,17 +14,33 @@ runs:
         set -x
         export MYSQL_TEST_USER=root
         export MYSQL_TEST_PASSWD=root
-        export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        if [[ -z "$PDO_MYSQL_TEST_DSN" ]]; then
+          export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        fi
         export PDO_MYSQL_TEST_USER=root
         export PDO_MYSQL_TEST_PASS=root
         export PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"
         export PDO_DBLIB_TEST_USER="pdo_test"
         export PDO_DBLIB_TEST_PASS="password"
+        export PHP_OCI8_TEST_USER="system"
+        export PHP_OCI8_TEST_PASS="pass"
+        export PHP_OCI8_TEST_DB="localhost/XEPDB1"
+        export PDO_OCI_TEST_USER="system"
+        export PDO_OCI_TEST_PASS="pass"
+        export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export SKIP_IO_CAPTURE_TESTS=1
+        export TEST_PHP_JUNIT=junit.out.xml
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -j$(/usr/bin/nproc) \
-          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress \
           --offline \
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120
+    - uses: actions/upload-artifact@v3
+      if: always() && inputs.testArtifacts != null
+      with:
+        name: ${{ github.job }}_${{ inputs.testArtifacts }}
+        path: ${{ github.workspace }}/junit.out.xml
+        retention-days: 5

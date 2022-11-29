@@ -49,8 +49,6 @@ zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
 
-	intern->zo.handlers = &MessageFormatter_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -98,6 +96,7 @@ void msgformat_register_class( void )
 	/* Create and register 'MessageFormatter' class. */
 	MessageFormatter_ce_ptr = register_class_MessageFormatter();
 	MessageFormatter_ce_ptr->create_object = MessageFormatter_object_create;
+	MessageFormatter_ce_ptr->default_object_handlers = &MessageFormatter_handlers;
 
 	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);

@@ -114,12 +114,14 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 
 			ZVAL_STRINGL(&fci.function_name, lc_name, name->len);
 			fci.size = sizeof(zend_fcall_info);
-			//???fci.symbol_table = zend_rebuild_symbol_table();
 			fci.object = NULL;
 			fci.retval = &fretval;
+			fci.param_count = 0;
+			fci.params = NULL;
+			fci.named_params = NULL;
 
+			zval params;
 			if (name->next) {
-				zval params;
 				phpdbg_param_t *next = name->next;
 
 				array_init(&params);
@@ -170,11 +172,8 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 
 					next = next->next;
 				}
-
-				zend_fcall_info_args(&fci, &params);
-			} else {
-				fci.params = NULL;
-				fci.param_count = 0;
+				/* Add positional arguments */
+				fci.named_params = Z_ARRVAL(params);
 			}
 
 			phpdbg_activate_err_buf(0);
@@ -306,7 +305,7 @@ void phpdbg_string_init(char *buffer) {
 
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, bool free_init) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
@@ -398,7 +397,7 @@ void phpdbg_clean(bool full, bool resubmit) /* {{{ */
 
 PHPDBG_COMMAND(exec) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != FAILURE) {
 		if (sb.st_mode & (S_IFREG|S_IFLNK)) {
@@ -1390,7 +1389,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 
 PHPDBG_COMMAND(source) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0);
@@ -1663,7 +1662,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 #ifdef ZEND_WIN32
-		if (EG(timed_out)) {
+		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 			zend_timeout();
 		}
 #endif

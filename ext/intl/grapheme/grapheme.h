@@ -18,7 +18,12 @@
 #include <php.h>
 #include <unicode/utypes.h>
 
-void grapheme_register_constants( INIT_FUNC_ARGS );
 void grapheme_close_global_iterator( void );
+
+#define GRAPHEME_EXTRACT_TYPE_COUNT		0
+#define GRAPHEME_EXTRACT_TYPE_MAXBYTES	1
+#define GRAPHEME_EXTRACT_TYPE_MAXCHARS	2
+#define GRAPHEME_EXTRACT_TYPE_MIN	GRAPHEME_EXTRACT_TYPE_COUNT
+#define GRAPHEME_EXTRACT_TYPE_MAX	GRAPHEME_EXTRACT_TYPE_MAXCHARS
 
 #endif // GRAPHEME_GRAPHEME_H

@@ -231,6 +231,7 @@ static int mbfl_filt_conv_gb18030_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		/* multi-byte character was truncated */
+		filter->status = 0;
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
@@ -364,6 +365,8 @@ int mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 
 	if (c == 0) {
 		s = 0;
+	} else if (s == 0) {
+		s = -1;
 	}
 
 	if (s >= 0) {

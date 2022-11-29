@@ -52,7 +52,7 @@ static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_
 	/* Only valid for Gregorian calendar, commented out as we don't handle
 	 * Julian calendar. We just return the 'wrong' day of week to be
 	 * consistent. */
-	c1 = century_value(y / 100);
+	c1 = century_value(positive_mod(y, 400) / 100);
 	y1 = positive_mod(y, 100);
 	m1 = timelib_is_leap(y) ? m_table_leap[m] : m_table_common[m];
 	dow = positive_mod((c1 + y1 + m1 + (y1 / 4) + d), 7);

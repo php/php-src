@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c7ae14efaeb0e8f5fdd6ddf92574a35bd5c860a1 */
+ * Stub hash: 1c03251b4e0b22056da43bf86087d6996454d2a0 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)
@@ -26,6 +26,16 @@ static const zend_function_entry class_php_user_filter_methods[] = {
 	ZEND_ME(php_user_filter, onClose, arginfo_class_php_user_filter_onClose, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_user_filters_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("PSFS_PASS_ON", PSFS_PASS_ON, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSFS_FEED_ME", PSFS_FEED_ME, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSFS_ERR_FATAL", PSFS_ERR_FATAL, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSFS_FLAG_NORMAL", PSFS_FLAG_NORMAL, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_INC", PSFS_FLAG_FLUSH_INC, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_CLOSE", PSFS_FLAG_FLUSH_CLOSE, CONST_PERSISTENT);
+}
 
 static zend_class_entry *register_class_php_user_filter(void)
 {

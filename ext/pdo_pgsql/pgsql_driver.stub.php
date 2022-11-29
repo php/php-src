@@ -2,7 +2,10 @@
 
 /** @generate-function-entries */
 
-// These are extension methods for PDO. This is not a real class.
+/**
+ * These are extension methods for PDO. This is not a real class.
+ * @undocumentable
+ */
 class PDO_PGSql_Ext {
     /** @tentative-return-type */
     public function pgsqlCopyFromArray(string $tableName, array $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}

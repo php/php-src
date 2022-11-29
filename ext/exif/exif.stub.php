@@ -2,6 +2,12 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue USE_MBSTRING
+ */
+const EXIF_USE_MBSTRING = UNKNOWN;
+
 /** @refcount 1 */
 function exif_tagname(int $index): string|false {}
 

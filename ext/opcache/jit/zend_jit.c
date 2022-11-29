@@ -47,6 +47,10 @@
 
 #include "jit/zend_jit_internal.h"
 
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+#include <pthread.h>
+#endif
+
 #ifdef ZTS
 int jit_globals_id;
 #else
@@ -106,6 +110,9 @@ int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
 const zend_op *zend_jit_halt_op = NULL;
 static int zend_jit_vm_kind = 0;
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+static int zend_write_protect = 1;
+#endif
 
 static void *dasm_buf = NULL;
 static void *dasm_end = NULL;
@@ -1656,21 +1663,17 @@ static void zend_jit_add_hint(zend_lifetime_interval **intervals, int dst, int s
 		src = dst;
 		dst = tmp;
 	}
-	while (1) {
-		if (intervals[dst]->hint) {
-			if (intervals[dst]->hint->range.start < intervals[src]->range.start) {
-				int tmp = src;
-				src = intervals[dst]->hint->ssa_var;
-				dst = tmp;
-			} else {
-				dst = intervals[dst]->hint->ssa_var;
-			}
+	while (dst != src && intervals[dst]->hint) {
+		if (intervals[dst]->hint->range.start < intervals[src]->range.start) {
+			int tmp = src;
+			src = intervals[dst]->hint->ssa_var;
+			dst = tmp;
 		} else {
-			if (dst != src) {
-				intervals[dst]->hint = intervals[src];
-			}
-			return;
+			dst = intervals[dst]->hint->ssa_var;
 		}
+	}
+	if (dst != src) {
+		intervals[dst]->hint = intervals[src];
 	}
 }
 
@@ -4234,30 +4237,40 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 	zend_op_array *op_array = &EX(func)->op_array;
 	zend_op *opline = op_array->opcodes;
 	zend_jit_op_array_extension *jit_extension;
+	bool do_bailout = 0;
 
 	zend_shared_alloc_lock();
 
 	if (ZEND_FUNC_INFO(op_array)) {
+
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
-		/* restore original opcode handlers */
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
+		zend_try {
+			/* restore original opcode handlers */
+			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+					opline++;
+				}
 			}
-		}
-		jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
-		opline->handler = jit_extension->orig_handler;
+			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+			opline->handler = jit_extension->orig_handler;
 
-		/* perform real JIT for this function */
-		zend_real_jit_func(op_array, NULL, NULL);
+			/* perform real JIT for this function */
+			zend_real_jit_func(op_array, NULL, NULL);
+		} zend_catch {
+			do_bailout = 0;
+		} zend_end_try();
 
 		zend_jit_protect();
 		SHM_PROTECT();
 	}
 
 	zend_shared_alloc_unlock();
+
+	if (do_bailout) {
+		zend_bailout();
+	}
 
 	/* JIT-ed code is going to be called by VM */
 	return 0;
@@ -4301,6 +4314,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 	zend_op_array *op_array = &EX(func)->op_array;
 	zend_jit_op_array_hot_extension *jit_extension;
 	uint32_t i;
+	bool do_bailout = 0;
 
 	zend_shared_alloc_lock();
 	jit_extension = (zend_jit_op_array_hot_extension*)ZEND_FUNC_INFO(op_array);
@@ -4309,12 +4323,16 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
-		for (i = 0; i < op_array->last; i++) {
-			op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
-		}
+		zend_try {
+			for (i = 0; i < op_array->last; i++) {
+				op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
+			}
 
-		/* perform real JIT for this function */
-		zend_real_jit_func(op_array, NULL, opline);
+			/* perform real JIT for this function */
+			zend_real_jit_func(op_array, NULL, opline);
+		} zend_catch {
+			do_bailout = 1;
+		} zend_end_try();
 
 		zend_jit_protect();
 		SHM_PROTECT();
@@ -4322,6 +4340,9 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 
 	zend_shared_alloc_unlock();
 
+	if (do_bailout) {
+		zend_bailout();
+	}
 	/* JIT-ed code is going to be called by VM */
 }
 
@@ -4605,12 +4626,12 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		int opts = PROT_READ | PROT_WRITE;
 #ifdef ZTS
-  /* TODO: EXEC+WRITE is not supported in macOS. Removing EXEC is still buggy as
-   * other threads, which are executing the JITed code, would crash anyway. */
-# ifndef __APPLE__
-		/* Another thread may be executing JITed code. */
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+		if (zend_write_protect) {
+			pthread_jit_write_protect_np(0);
+		}
+#endif
 		opts |= PROT_EXEC;
-# endif
 #endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
@@ -4638,6 +4659,11 @@ ZEND_EXT_API void zend_jit_protect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+		if (zend_write_protect) {
+			pthread_jit_write_protect_np(1);
+		}
+#endif
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
@@ -4893,11 +4919,19 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 		}
 	}
 #endif
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+	zend_write_protect = pthread_jit_write_protect_supported_np();
+#endif
 
 	dasm_buf = buf;
 	dasm_size = size;
 
 #ifdef HAVE_MPROTECT
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+	if (zend_write_protect) {
+		pthread_jit_write_protect_np(1);
+	}
+#endif
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
@@ -5103,6 +5137,11 @@ static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
 		}
 #endif
 	}
+	if (op_array->num_dynamic_func_defs) {
+		for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+			zend_jit_restart_preloaded_op_array(op_array->dynamic_func_defs[i]);
+		}
+	}
 }
 
 static void zend_jit_restart_preloaded_script(zend_persistent_script *script)
@@ -5130,6 +5169,10 @@ ZEND_EXT_API void zend_jit_restart(void)
 	if (dasm_buf) {
 		zend_jit_unprotect();
 
+#if ZEND_JIT_TARGET_ARM64
+		memset(dasm_labels_veneers, 0, sizeof(void*) * ZEND_MM_ALIGNED_SIZE_EX(zend_lb_MAX, DASM_ALIGNMENT));
+#endif
+
 		/* restore JIT buffer pos */
 		dasm_ptr[0] = dasm_ptr[1];
 
@@ -5148,6 +5191,13 @@ ZEND_EXT_API void zend_jit_restart(void)
 		}
 
 		zend_jit_protect();
+
+#ifdef HAVE_DISASM
+		if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
+			zend_jit_disasm_shutdown();
+			zend_jit_disasm_init();
+		}
+#endif
 	}
 }
 

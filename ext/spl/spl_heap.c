@@ -33,11 +33,6 @@
 
 #define SPL_HEAP_CORRUPTED       0x00000001
 
-#define SPL_PQUEUE_EXTR_MASK     0x00000003
-#define SPL_PQUEUE_EXTR_BOTH     0x00000003
-#define SPL_PQUEUE_EXTR_DATA     0x00000001
-#define SPL_PQUEUE_EXTR_PRIORITY 0x00000002
-
 zend_object_handlers spl_handler_SplHeap;
 zend_object_handlers spl_handler_SplPriorityQueue;
 
@@ -278,7 +273,7 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userda
 	if (heap->count+1 > heap->max_size) {
 		size_t alloc_size = heap->max_size * heap->elem_size;
 		/* we need to allocate more memory */
-		heap->elements  = erealloc(heap->elements, 2 * alloc_size);
+		heap->elements  = safe_erealloc(heap->elements, 2, alloc_size, 0);
 		memset((char *) heap->elements + alloc_size, 0, alloc_size);
 		heap->max_size *= 2;
 	}
@@ -433,7 +428,6 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 	while (parent) {
 		if (parent == spl_ce_SplPriorityQueue) {
 			intern->heap = spl_ptr_heap_init(spl_ptr_pqueue_elem_cmp, spl_ptr_heap_pqueue_elem_ctor, spl_ptr_heap_pqueue_elem_dtor, sizeof(spl_pqueue_elem));
-			intern->std.handlers = &spl_handler_SplPriorityQueue;
 			intern->flags = SPL_PQUEUE_EXTR_DATA;
 			break;
 		}
@@ -443,7 +437,6 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 			intern->heap = spl_ptr_heap_init(
 				parent == spl_ce_SplMinHeap ? spl_ptr_heap_zval_min_cmp : spl_ptr_heap_zval_max_cmp,
 				spl_ptr_heap_zval_ctor, spl_ptr_heap_zval_dtor, sizeof(zval));
-			intern->std.handlers = &spl_handler_SplHeap;
 			break;
 		}
 
@@ -484,7 +477,7 @@ static zend_object *spl_heap_object_clone(zend_object *old_object) /* {{{ */
 }
 /* }}} */
 
-static int spl_heap_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
+static zend_result spl_heap_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
 	spl_heap_object *intern = spl_heap_from_obj(object);
 
@@ -1134,6 +1127,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 {
 	spl_ce_SplHeap = register_class_SplHeap(zend_ce_iterator, zend_ce_countable);
 	spl_ce_SplHeap->create_object = spl_heap_object_new;
+	spl_ce_SplHeap->default_object_handlers = &spl_handler_SplHeap;
 	spl_ce_SplHeap->get_iterator = spl_heap_get_iterator;
 
 	memcpy(&spl_handler_SplHeap, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1154,6 +1148,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	spl_ce_SplPriorityQueue = register_class_SplPriorityQueue(zend_ce_iterator, zend_ce_countable);
 	spl_ce_SplPriorityQueue->create_object = spl_heap_object_new;
+	spl_ce_SplPriorityQueue->default_object_handlers = &spl_handler_SplPriorityQueue;
 	spl_ce_SplPriorityQueue->get_iterator = spl_pqueue_get_iterator;
 
 	memcpy(&spl_handler_SplPriorityQueue, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1163,10 +1158,6 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;
 	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
-
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_BOTH",      SPL_PQUEUE_EXTR_BOTH);
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_PRIORITY",  SPL_PQUEUE_EXTR_PRIORITY);
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_DATA",      SPL_PQUEUE_EXTR_DATA);
 
 	return SUCCESS;
 }

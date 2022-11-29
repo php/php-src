@@ -26,10 +26,6 @@ if ($link->server_version >= 100000) {
 
 }
 
-if  (!$IS_MYSQLND && (mysqli_get_client_version() < 50610)) {
-    die(sprintf("SKIP Needs libmysql 5.6.10 or newer, found  %s\n", mysqli_get_client_version()));
-}
-
 mysqli_query($link, 'DROP USER expiretest');
 mysqli_query($link, 'DROP USER expiretest@localhost');
 

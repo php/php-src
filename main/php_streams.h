@@ -65,7 +65,7 @@ END_EXTERN_C()
 
 #define php_stream_fopen_with_path_rel(filename, mode, path, opened, options) _php_stream_fopen_with_path((filename), (mode), (path), (opened), (options) STREAMS_REL_CC)
 
-#define php_stream_fopen_from_fd_rel(fd, mode, persistent_id)	 _php_stream_fopen_from_fd((fd), (mode), (persistent_id) STREAMS_REL_CC)
+#define php_stream_fopen_from_fd_rel(fd, mode, persistent_id, zero_position)	 _php_stream_fopen_from_fd((fd), (mode), (persistent_id), (zero_position) STREAMS_REL_CC)
 #define php_stream_fopen_from_file_rel(file, mode)	 _php_stream_fopen_from_file((file), (mode) STREAMS_REL_CC)
 
 #define php_stream_fopen_from_pipe_rel(file, mode)	 _php_stream_fopen_from_pipe((file), (mode) STREAMS_REL_CC)
@@ -182,8 +182,11 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_NO_FCLOSE					0x80
 
 /* Suppress generation of PHP warnings on stream read/write errors.
- * Currently for internal use only. */
+ * Currently, for internal use only. */
 #define PHP_STREAM_FLAG_SUPPRESS_ERRORS				0x100
+
+/* Do not close handle except it is explicitly closed by user (e.g. fclose) */
+#define PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE			0x200
 
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
@@ -222,6 +225,7 @@ struct _php_stream  {
 	size_t readbuflen;
 	zend_off_t readpos;
 	zend_off_t writepos;
+	ssize_t didread;
 
 	/* how much data to read when filling buffer */
 	size_t chunk_size;

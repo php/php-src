@@ -12,7 +12,6 @@ $interval_format = 'P%dDT%hH';
 /*
  * Forward Transitions, diff().
  */
-
 $end   = new DateTime('2010-03-14 03:00:00 -0400');
 $start = new DateTime('2010-03-14 01:59:59 -0500');
 echo 'fd1 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
@@ -143,7 +142,6 @@ echo "\n";
 /*
  * Backward Transitions, diff().
  */
-
 $end   = new DateTime('2010-11-07 01:00:00 -0500');
 $start = new DateTime('2010-11-07 01:59:59 -0400');
 echo 'bd1 ' . $end->format($date_format) . ' - ' . $start->format($date_format)

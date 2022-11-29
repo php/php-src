@@ -22,11 +22,14 @@ $closure();
 echo 'DONE' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_closure_%d.php' -->
-<file '%s%eobserver_closure_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
+  <!-- init Closure::fromCallable() -->
+  <Closure::fromCallable>
+  </Closure::fromCallable>
   <!-- init Foo::bar() -->
   <Foo::bar>
 Called as fake closure.
   </Foo::bar>
 DONE
-</file '%s%eobserver_closure_%d.php'>
+</file '%s'>

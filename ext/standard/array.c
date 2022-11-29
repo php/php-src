@@ -36,26 +36,14 @@
 #include "php_array.h"
 #include "basic_functions.h"
 #include "php_string.h"
-#include "php_rand.h"
 #include "php_math.h"
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
 #include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
+#include "ext/random/php_random.h"
 
 /* {{{ defines */
-#define EXTR_OVERWRITE			0
-#define EXTR_SKIP				1
-#define EXTR_PREFIX_SAME		2
-#define	EXTR_PREFIX_ALL			3
-#define	EXTR_PREFIX_INVALID		4
-#define	EXTR_PREFIX_IF_EXISTS	5
-#define	EXTR_IF_EXISTS			6
-
-#define EXTR_REFS				0x100
-
-#define CASE_LOWER				0
-#define CASE_UPPER				1
 
 #define DIFF_NORMAL			1
 #define DIFF_KEY			2
@@ -88,34 +76,6 @@ static void php_array_init_globals(zend_array_globals *array_globals)
 PHP_MINIT_FUNCTION(array) /* {{{ */
 {
 	ZEND_INIT_MODULE_GLOBALS(array, php_array_init_globals, NULL);
-
-	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", EXTR_OVERWRITE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("EXTR_SKIP", EXTR_SKIP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("EXTR_PREFIX_SAME", EXTR_PREFIX_SAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("EXTR_PREFIX_ALL", EXTR_PREFIX_ALL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("EXTR_PREFIX_INVALID", EXTR_PREFIX_INVALID, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("EXTR_PREFIX_IF_EXISTS", EXTR_PREFIX_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("EXTR_IF_EXISTS", EXTR_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("EXTR_REFS", EXTR_REFS, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("SORT_ASC", PHP_SORT_ASC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_DESC", PHP_SORT_DESC, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("SORT_REGULAR", PHP_SORT_REGULAR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_NUMERIC", PHP_SORT_NUMERIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_STRING", PHP_SORT_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CASE_UPPER", CASE_UPPER, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("COUNT_NORMAL", COUNT_NORMAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", COUNT_RECURSIVE, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -166,40 +126,25 @@ static zend_never_inline ZEND_COLD int stable_sort_fallback(Bucket *a, Bucket *b
 
 static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
-	zend_uchar t;
-	zend_long l1, l2;
-	double d;
+    zval first;
+    zval second;
 
-	if (f->key == NULL) {
-		if (s->key == NULL) {
-			return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
-		} else {
-			l1 = (zend_long)f->h;
-			t = is_numeric_string(s->key->val, s->key->len, &l2, &d, 1);
-			if (t == IS_LONG) {
-				/* pass */
-			} else if (t == IS_DOUBLE) {
-				return ZEND_NORMALIZE_BOOL((double)l1 - d);
-			} else {
-				l2 = 0;
-			}
-		}
-	} else {
-		if (s->key) {
-			return zendi_smart_strcmp(f->key, s->key);
-		} else {
-			l2 = (zend_long)s->h;
-			t = is_numeric_string(f->key->val, f->key->len, &l1, &d, 1);
-			if (t == IS_LONG) {
-				/* pass */
-			} else if (t == IS_DOUBLE) {
-				return ZEND_NORMALIZE_BOOL(d - (double)l2);
-			} else {
-				l1 = 0;
-			}
-		}
-	}
-	return ZEND_NORMALIZE_BOOL(l1 - l2);
+    if (f->key == NULL && s->key == NULL) {
+        return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
+    } else if (f->key && s->key) {
+        return zendi_smart_strcmp(f->key, s->key);
+    }
+    if (f->key) {
+        ZVAL_STR(&first, f->key);
+    } else {
+        ZVAL_LONG(&first, f->h);
+    }
+    if (s->key) {
+        ZVAL_STR(&second, s->key);
+    } else {
+        ZVAL_LONG(&second, s->h);
+    }
+    return zend_compare(&first, &second);
 }
 /* }}} */
 
@@ -676,7 +621,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 PHP_FUNCTION(count)
 {
 	zval *array;
-	zend_long mode = COUNT_NORMAL;
+	zend_long mode = PHP_COUNT_NORMAL;
 	zend_long cnt;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -685,14 +630,14 @@ PHP_FUNCTION(count)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
+	if (mode != PHP_COUNT_NORMAL && mode != PHP_COUNT_RECURSIVE) {
 		zend_argument_value_error(2, "must be either COUNT_NORMAL or COUNT_RECURSIVE");
 		RETURN_THROWS();
 	}
 
 	switch (Z_TYPE_P(array)) {
 		case IS_ARRAY:
-			if (mode != COUNT_RECURSIVE) {
+			if (mode != PHP_COUNT_RECURSIVE) {
 				cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 			} else {
 				cnt = php_count_recursive(Z_ARRVAL_P(array));
@@ -1326,6 +1271,10 @@ static int php_array_walk(
 	/* Create a local copy of fci, as we want to use different arguments at different
 	 * levels of recursion. */
 	zend_fcall_info fci = context->fci;
+
+	if (zend_hash_num_elements(target_hash) == 0) {
+		return result;
+	}
 
 	/* Set up known arguments */
 	ZVAL_UNDEF(&args[1]);
@@ -2412,7 +2361,7 @@ PHP_FUNCTION(extract)
 {
 	zval *var_array_param;
 	zend_long extract_refs;
-	zend_long extract_type = EXTR_OVERWRITE;
+	zend_long extract_type = PHP_EXTR_OVERWRITE;
 	zend_string *prefix = NULL;
 	zend_long count;
 	zend_array *symbol_table;
@@ -2424,18 +2373,18 @@ PHP_FUNCTION(extract)
 		Z_PARAM_STR(prefix)
 	ZEND_PARSE_PARAMETERS_END();
 
-	extract_refs = (extract_type & EXTR_REFS);
+	extract_refs = (extract_type & PHP_EXTR_REFS);
 	if (extract_refs) {
 		SEPARATE_ARRAY(var_array_param);
 	}
 	extract_type &= 0xff;
 
-	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
+	if (extract_type < PHP_EXTR_OVERWRITE || extract_type > PHP_EXTR_IF_EXISTS) {
 		zend_argument_value_error(2, "must be a valid extract type");
 		RETURN_THROWS();
 	}
 
-	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
+	if (extract_type > PHP_EXTR_SKIP && extract_type <= PHP_EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
 		zend_argument_value_error(3, "is required when using this extract type");
 		RETURN_THROWS();
 	}
@@ -2456,22 +2405,22 @@ PHP_FUNCTION(extract)
 
 	if (extract_refs) {
 		switch (extract_type) {
-			case EXTR_IF_EXISTS:
+			case PHP_EXTR_IF_EXISTS:
 				count = php_extract_ref_if_exists(Z_ARRVAL_P(var_array_param), symbol_table);
 				break;
-			case EXTR_OVERWRITE:
+			case PHP_EXTR_OVERWRITE:
 				count = php_extract_ref_overwrite(Z_ARRVAL_P(var_array_param), symbol_table);
 				break;
-			case EXTR_PREFIX_IF_EXISTS:
+			case PHP_EXTR_PREFIX_IF_EXISTS:
 				count = php_extract_ref_prefix_if_exists(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_SAME:
+			case PHP_EXTR_PREFIX_SAME:
 				count = php_extract_ref_prefix_same(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_ALL:
+			case PHP_EXTR_PREFIX_ALL:
 				count = php_extract_ref_prefix_all(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_INVALID:
+			case PHP_EXTR_PREFIX_INVALID:
 				count = php_extract_ref_prefix_invalid(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
 				break;
 			default:
@@ -2483,22 +2432,22 @@ PHP_FUNCTION(extract)
 		zval array_copy;
 		ZVAL_COPY(&array_copy, var_array_param);
 		switch (extract_type) {
-			case EXTR_IF_EXISTS:
+			case PHP_EXTR_IF_EXISTS:
 				count = php_extract_if_exists(Z_ARRVAL(array_copy), symbol_table);
 				break;
-			case EXTR_OVERWRITE:
+			case PHP_EXTR_OVERWRITE:
 				count = php_extract_overwrite(Z_ARRVAL(array_copy), symbol_table);
 				break;
-			case EXTR_PREFIX_IF_EXISTS:
+			case PHP_EXTR_PREFIX_IF_EXISTS:
 				count = php_extract_prefix_if_exists(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_SAME:
+			case PHP_EXTR_PREFIX_SAME:
 				count = php_extract_prefix_same(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_ALL:
+			case PHP_EXTR_PREFIX_ALL:
 				count = php_extract_prefix_all(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
-			case EXTR_PREFIX_INVALID:
+			case PHP_EXTR_PREFIX_INVALID:
 				count = php_extract_prefix_invalid(Z_ARRVAL(array_copy), symbol_table, prefix);
 				break;
 			default:
@@ -2598,7 +2547,7 @@ PHP_FUNCTION(array_fill)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (EXPECTED(num > 0)) {
-		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
+		if (sizeof(num) > 4 && UNEXPECTED(num > INT_MAX)) {
 			zend_argument_value_error(2, "is too large");
 			RETURN_THROWS();
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
@@ -2892,18 +2841,17 @@ err:
 #undef RANGE_CHECK_DOUBLE_INIT_ARRAY
 #undef RANGE_CHECK_LONG_INIT_ARRAY
 
-static void php_array_data_shuffle(zval *array) /* {{{ */
+/* {{{ php_array_data_shuffle */
+PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_status *status, zval *array) /* {{{ */
 {
-	uint32_t idx, j, n_elems;
+	int64_t idx, j, n_elems, rnd_idx, n_left;
 	zval *zv, temp;
 	HashTable *hash;
-	zend_long rnd_idx;
-	uint32_t n_left;
 
 	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
 
 	if (n_elems < 1) {
-		return;
+		return true;
 	}
 
 	hash = Z_ARRVAL_P(array);
@@ -2912,7 +2860,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	if (!HT_IS_PACKED(hash)) {
 		if (!HT_HAS_STATIC_KEYS_ONLY(hash)) {
 			Bucket *p = hash->arData;
-			uint32_t i = hash->nNumUsed;
+			zend_long i = hash->nNumUsed;
 
 			for (; i > 0; p++, i--) {
 				if (p->key) {
@@ -2936,7 +2884,10 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_mt_rand_range(0, n_left);
+			rnd_idx = algo->range(status, 0, n_left);
+			if (EG(exception)) {
+				return false;
+			}
 			if (rnd_idx != n_left) {
 				ZVAL_COPY_VALUE(&temp, &hash->arPacked[n_left]);
 				ZVAL_COPY_VALUE(&hash->arPacked[n_left], &hash->arPacked[rnd_idx]);
@@ -2944,7 +2895,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 	} else {
-		uint32_t iter_pos = zend_hash_iterators_lower_pos(hash, 0);
+		zend_long iter_pos = zend_hash_iterators_lower_pos(hash, 0);
 
 		if (hash->nNumUsed != hash->nNumOfElements) {
 			for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
@@ -2961,7 +2912,10 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_mt_rand_range(0, n_left);
+			rnd_idx = algo->range(status, 0, n_left);
+			if (EG(exception)) {
+				return false;
+			}
 			if (rnd_idx != n_left) {
 				ZVAL_COPY_VALUE(&temp, &hash->arPacked[n_left]);
 				ZVAL_COPY_VALUE(&hash->arPacked[n_left], &hash->arPacked[rnd_idx]);
@@ -2973,6 +2927,8 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	hash->nNumUsed = n_elems;
 	hash->nInternalPointer = 0;
 	hash->nNextFreeElement = n_elems;
+
+	return true;
 }
 /* }}} */
 
@@ -2985,7 +2941,7 @@ PHP_FUNCTION(shuffle)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_data_shuffle(array);
+	php_array_data_shuffle(php_random_default_algo(), php_random_default_status(), array);
 
 	RETURN_TRUE;
 }
@@ -4147,8 +4103,7 @@ PHP_FUNCTION(array_key_last)
 /* {{{ Return just the values from the input array */
 PHP_FUNCTION(array_values)
 {
-	zval	 *input,		/* Input array */
-			 *entry;		/* An entry in the input array */
+	zval	 *input;		/* Input array */
 	zend_array *arrval;
 	zend_long arrlen;
 
@@ -4170,20 +4125,7 @@ PHP_FUNCTION(array_values)
 		RETURN_COPY(input);
 	}
 
-	/* Initialize return array */
-	array_init_size(return_value, arrlen);
-	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-
-	/* Go through input array and add values to the return array */
-	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-		ZEND_HASH_FOREACH_VAL(arrval, entry) {
-			if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
-				entry = Z_REFVAL_P(entry);
-			}
-			Z_TRY_ADDREF_P(entry);
-			ZEND_HASH_FILL_ADD(entry);
-		} ZEND_HASH_FOREACH_END();
-	} ZEND_HASH_FILL_END();
+	RETURN_ARR(zend_array_to_list(arrval));
 }
 /* }}} */
 
@@ -5725,7 +5667,7 @@ PHP_FUNCTION(array_multisort)
 
 	/* Make sure the arrays are of the same size. */
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
-	for (i = 0; i < num_arrays; i++) {
+	for (i = 1; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_P(arrays[i])) != (uint32_t)array_size) {
 			zend_value_error("Array sizes are inconsistent");
 			MULTISORT_ABORT;
@@ -5798,6 +5740,8 @@ PHP_FUNCTION(array_multisort)
 			}
 			if (repack) {
 				zend_hash_to_packed(hash);
+			} else {
+				zend_hash_rehash(hash);
 			}
 		}
 	}
@@ -5813,47 +5757,42 @@ PHP_FUNCTION(array_multisort)
 }
 /* }}} */
 
-/* {{{ Return key/keys for random entry/entries in the array */
-PHP_FUNCTION(array_rand)
+/* {{{ php_array_pick_keys */
+PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *status, zval *input, zend_long num_req, zval *retval, bool silent)
 {
-	zval *input;
-	zend_long num_req = 1;
+	HashTable *ht = Z_ARRVAL_P(input);
+	uint32_t num_avail = zend_hash_num_elements(ht);
+	zend_long i, randval;
 	zend_string *string_key;
 	zend_ulong num_key;
-	int i;
-	int num_avail;
+	zval *zv;
+	Bucket *b;
 	zend_bitset bitset;
 	int negative_bitset = 0;
 	uint32_t bitset_len;
-	ALLOCA_FLAG(use_heap)
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY(input)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(num_req)
-	ZEND_PARSE_PARAMETERS_END();
-
-	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
+	ALLOCA_FLAG(use_heap);
 
 	if (num_avail == 0) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
+		if (!silent) {
+			zend_argument_value_error(1, "cannot be empty");
+		}
+		return false;
 	}
 
 	if (num_req == 1) {
-		HashTable *ht = Z_ARRVAL_P(input);
-
-		if ((uint32_t)num_avail < ht->nNumUsed - (ht->nNumUsed>>1)) {
+		if (num_avail < ht->nNumUsed - (ht->nNumUsed >> 1)) {
 			/* If less than 1/2 of elements are used, don't sample. Instead search for a
 			 * specific offset using linear scan. */
-			zend_long i = 0, randval = php_mt_rand_range(0, num_avail - 1);
-			ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
+			i = 0;
+			randval = algo->range(status, 0, num_avail - 1);
+			ZEND_HASH_FOREACH_KEY(ht, num_key, string_key) {
 				if (i == randval) {
 					if (string_key) {
-						RETURN_STR_COPY(string_key);
+						ZVAL_STR_COPY(retval, string_key);
 					} else {
-						RETURN_LONG(num_key);
+						ZVAL_LONG(retval, num_key);
 					}
+					return true;
 				}
 				i++;
 			} ZEND_HASH_FOREACH_END();
@@ -5865,34 +5804,38 @@ PHP_FUNCTION(array_rand)
 		 * For N=10 this becomes smaller than 0.1%. */
 		if (HT_IS_PACKED(ht)) {
 			do {
-				zend_long randval = php_mt_rand_range(0, ht->nNumUsed - 1);
-				zval *zv = &ht->arPacked[randval];
+				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				zv = &ht->arPacked[randval];
 				if (!Z_ISUNDEF_P(zv)) {
-					RETURN_LONG(randval);
+					ZVAL_LONG(retval, randval);
+					return true;
 				}
-			} while (1);
+			} while (true);
 		} else {
 			do {
-				zend_long randval = php_mt_rand_range(0, ht->nNumUsed - 1);
-				Bucket *bucket = &ht->arData[randval];
-				if (!Z_ISUNDEF(bucket->val)) {
-					if (bucket->key) {
-						RETURN_STR_COPY(bucket->key);
+				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				b = &ht->arData[randval];
+				if (!Z_ISUNDEF(b->val)) {
+					if (b->key) {
+						ZVAL_STR_COPY(retval, b->key);
 					} else {
-						RETURN_LONG(bucket->h);
+						ZVAL_LONG(retval, b->h);
 					}
+					return true;
 				}
-			} while (1);
+			} while (true);
 		}
 	}
 
 	if (num_req <= 0 || num_req > num_avail) {
-		zend_argument_value_error(2, "must be between 1 and the number of elements in argument #1 ($array)");
-		RETURN_THROWS();
+		if (!silent) {
+			zend_argument_value_error(2, "must be between 1 and the number of elements in argument #1 ($array)");
+		}
+		return false;
 	}
 
 	/* Make the return value an array only if we need to pass back more than one result. */
-	array_init_size(return_value, (uint32_t)num_req);
+	array_init_size(retval, (uint32_t) num_req);
 	if (num_req > (num_avail >> 1)) {
 		negative_bitset = 1;
 		num_req = num_avail - num_req;
@@ -5904,19 +5847,18 @@ PHP_FUNCTION(array_rand)
 
 	i = num_req;
 	while (i) {
-		zend_long randval = php_mt_rand_range(0, num_avail - 1);
+		randval = algo->range(status, 0, num_avail - 1);
 		if (!zend_bitset_in(bitset, randval)) {
 			zend_bitset_incl(bitset, randval);
 			i--;
 		}
 	}
-	/* i = 0; */
 
-	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+	zend_hash_real_init_packed(Z_ARRVAL_P(retval));
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(retval)) {
 		/* We can't use zend_hash_index_find()
 		 * because the array may have string keys or gaps. */
-		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(input), num_key, string_key) {
+		ZEND_HASH_FOREACH_KEY(ht, num_key, string_key) {
 			if (zend_bitset_in(bitset, i) ^ negative_bitset) {
 				if (string_key) {
 					ZEND_HASH_FILL_SET_STR_COPY(string_key);
@@ -5930,6 +5872,33 @@ PHP_FUNCTION(array_rand)
 	} ZEND_HASH_FILL_END();
 
 	free_alloca(bitset, use_heap);
+
+	return true;
+}
+/* }}} */
+
+/* {{{ Return key/keys for random entry/entries in the array */
+PHP_FUNCTION(array_rand)
+{
+	zval *input;
+	zend_long num_req = 1;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY(input)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(num_req)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!php_array_pick_keys(
+			php_random_default_algo(),
+			php_random_default_status(),
+			input,
+			num_req,
+			return_value,
+			false)
+	) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 

@@ -22,6 +22,4 @@
 #define COLLATOR_SORT_STRING    1
 #define COLLATOR_SORT_NUMERIC   2
 
-void collator_register_constants( INIT_FUNC_ARGS );
-
 #endif // COLLATOR_COLLATOR_H

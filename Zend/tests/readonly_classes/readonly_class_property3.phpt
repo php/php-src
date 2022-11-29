@@ -10,4 +10,4 @@ readonly class Foo
 
 ?>
 --EXPECTF--
-Fatal error: Readonly class Foo cannot declare static properties in %s on line %d
+Fatal error: Static property Foo::$bar cannot be readonly in %s on line %d

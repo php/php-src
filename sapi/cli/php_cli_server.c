@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <signal.h>
 
 #ifdef PHP_WIN32
 # include <process.h>
@@ -47,6 +48,14 @@
 
 #if HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
+
+#ifdef HAVE_PRCTL
+# include <sys/prctl.h>
+#endif
+
+#ifdef HAVE_PROCCTL
+# include <sys/procctl.h>
 #endif
 
 #include "SAPI.h"
@@ -108,6 +117,8 @@ static pid_t	*php_cli_server_workers;
 static zend_long php_cli_server_workers_max;
 #endif
 
+static zend_string* cli_concat_persistent_zstr_with_char(zend_string *old_str, const char *at, size_t length);
+
 typedef struct php_cli_server_poller {
 	fd_set rfds, wfds;
 	struct {
@@ -119,8 +130,7 @@ typedef struct php_cli_server_poller {
 typedef struct php_cli_server_request {
 	enum php_http_method request_method;
 	int protocol_version;
-	char *request_uri;
-	size_t request_uri_len;
+	zend_string *request_uri;
 	char *vpath;
 	size_t vpath_len;
 	char *path_translated;
@@ -201,6 +211,7 @@ typedef struct php_cli_server_http_response_status_code_pair {
 static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
+	{ 405, "<h1>%s</h1><p>Requested method not allowed.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
@@ -381,7 +392,6 @@ static const char *get_mime_type(const php_cli_server *server, const char *ext, 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	php_cli_server_client *client;
-	zval tmp;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -389,9 +399,8 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 
 	client = SG(server_context);
 
-	/* Need to copy the HashTable */
-	ZVAL_ARR(&tmp,&client->request.headers_original_case);
-	RETURN_COPY(&tmp);
+	/* Need to duplicate the header HashTable */
+	RETURN_ARR(zend_array_dup(&client->request.headers_original_case));
 }
 /* }}} */
 
@@ -598,6 +607,34 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 	}
 } /* }}} */
 
+static void sapi_cli_server_register_known_var_char(zval *track_vars_array,
+	const char *var_name, size_t var_name_len, const char *value, size_t value_len)
+{
+	zval new_entry;
+
+	if (!value) {
+		return;
+	}
+
+	ZVAL_STRINGL_FAST(&new_entry, value, value_len);
+
+	php_register_known_variable(var_name, var_name_len, &new_entry, track_vars_array);
+}
+
+static void sapi_cli_server_register_known_var_str(zval *track_vars_array,
+	const char *var_name, size_t var_name_len, /* const */ zend_string *value)
+{
+	zval new_entry;
+
+	if (!value) {
+		return;
+	}
+
+	ZVAL_STR_COPY(&new_entry, value);
+
+	php_register_known_variable(var_name, var_name_len, &new_entry, track_vars_array);
+}
+
 /* The entry zval will always contain a zend_string* */
 static int sapi_cli_server_register_entry_cb(zval *entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ {
 	zval *track_vars_array = va_arg(args, zval *);
@@ -617,7 +654,7 @@ static int sapi_cli_server_register_entry_cb(zval *entry, int num_args, va_list 
 		}
 		spprintf(&real_key, 0, "%s_%s", "HTTP", key);
 		if (strcmp(key, "CONTENT_TYPE") == 0 || strcmp(key, "CONTENT_LENGTH") == 0) {
-			// TODO make a version specialized for zend_string?
+			/* Is it possible to use sapi_cli_server_register_known_var_char() and not go through the SAPI filter? */
 			sapi_cli_server_register_variable(track_vars_array, key, Z_STRVAL_P(entry));
 		}
 		sapi_cli_server_register_variable(track_vars_array, real_key, Z_STRVAL_P(entry));
@@ -632,7 +669,9 @@ static int sapi_cli_server_register_entry_cb(zval *entry, int num_args, va_list 
 static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
-	sapi_cli_server_register_variable(track_vars_array, "DOCUMENT_ROOT", client->server->document_root);
+
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"DOCUMENT_ROOT", strlen("DOCUMENT_ROOT"), client->server->document_root, client->server->document_root_len);
 	{
 		char *tmp;
 		if ((tmp = strrchr(ZSTR_VAL(client->addr_str), ':'))) {
@@ -643,56 +682,71 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 
 			strncpy(port, tmp + 1, 8);
 			port[7] = '\0';
-			strncpy(addr, addr_start, addr_end - addr_start);
-			addr[addr_end - addr_start] = '\0';
-			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", addr);
-			sapi_cli_server_register_variable(track_vars_array, "REMOTE_PORT", port);
+			size_t addr_len = addr_end - addr_start;
+			strncpy(addr, addr_start, addr_len);
+			addr[addr_len] = '\0';
+			ZEND_ASSERT(addr_len == strlen(addr));
+			sapi_cli_server_register_known_var_char(track_vars_array,
+				"REMOTE_ADDR", strlen("REMOTE_ADDR"), addr, addr_len);
+			sapi_cli_server_register_known_var_char(track_vars_array,
+				"REMOTE_PORT", strlen("REMOTE_PORT"), port, strlen(port));
 		} else {
-			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", ZSTR_VAL(client->addr_str));
+			sapi_cli_server_register_known_var_str(track_vars_array,
+				"REMOTE_ADDR", strlen("REMOTE_ADDR"), client->addr_str);
 		}
 	}
 	{
-		char *tmp;
-		spprintf(&tmp, 0, "PHP %s Development Server", PHP_VERSION);
-		sapi_cli_server_register_variable(track_vars_array, "SERVER_SOFTWARE", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "PHP %s Development Server", PHP_VERSION);
+		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_SOFTWARE", strlen("SERVER_SOFTWARE"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	}
 	{
-		char *tmp;
-		spprintf(&tmp, 0, "HTTP/%d.%d", client->request.protocol_version / 100, client->request.protocol_version % 100);
-		sapi_cli_server_register_variable(track_vars_array, "SERVER_PROTOCOL", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "HTTP/%d.%d", client->request.protocol_version / 100, client->request.protocol_version % 100);
+		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_PROTOCOL", strlen("SERVER_PROTOCOL"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	}
-	sapi_cli_server_register_variable(track_vars_array, "SERVER_NAME", client->server->host);
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"SERVER_NAME", strlen("SERVER_NAME"), client->server->host, strlen(client->server->host));
 	{
-		char *tmp;
-		spprintf(&tmp, 0, "%i",  client->server->port);
-		sapi_cli_server_register_variable(track_vars_array, "SERVER_PORT", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "%i",  client->server->port);
+		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_PORT", strlen("SERVER_PORT"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	}
 
-	sapi_cli_server_register_variable(track_vars_array, "REQUEST_URI", client->request.request_uri);
-	sapi_cli_server_register_variable(track_vars_array, "REQUEST_METHOD", SG(request_info).request_method);
-	sapi_cli_server_register_variable(track_vars_array, "SCRIPT_NAME", client->request.vpath);
+	sapi_cli_server_register_known_var_str(track_vars_array,
+		"REQUEST_URI", strlen("REQUEST_URI"), client->request.request_uri);
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"REQUEST_METHOD", strlen("REQUEST_METHOD"),
+		SG(request_info).request_method, strlen(SG(request_info).request_method));
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"SCRIPT_NAME", strlen("SCRIPT_NAME"), client->request.vpath, client->request.vpath_len);
 	if (SG(request_info).path_translated) {
-		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", SG(request_info).path_translated);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"SCRIPT_FILENAME", strlen("SCRIPT_FILENAME"),
+			SG(request_info).path_translated, strlen(SG(request_info).path_translated));
 	} else if (client->server->router) {
-		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", client->server->router);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"SCRIPT_FILENAME", strlen("SCRIPT_FILENAME"), client->server->router, client->server->router_len);
 	}
 	if (client->request.path_info) {
-		sapi_cli_server_register_variable(track_vars_array, "PATH_INFO", client->request.path_info);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"PATH_INFO", strlen("PATH_INFO"), client->request.path_info, client->request.path_info_len);
 	}
 	if (client->request.path_info_len) {
-		char *tmp;
-		spprintf(&tmp, 0, "%s%s", client->request.vpath, client->request.path_info);
-		sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "%s%s", client->request.vpath, client->request.path_info);
+		sapi_cli_server_register_known_var_str(track_vars_array, "PHP_SELF", strlen("PHP_SELF"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	} else {
-		sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", client->request.vpath);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"PHP_SELF", strlen("PHP_SELF"), client->request.vpath, client->request.vpath_len);
 	}
 	if (client->request.query_string) {
+		/* Use sapi_cli_server_register_variable() to pass query string through SAPI input filter,
+		 * and check keys are proper PHP var names */
 		sapi_cli_server_register_variable(track_vars_array, "QUERY_STRING", client->request.query_string);
 	}
+	/* Use sapi_cli_server_register_variable() to pass header values through SAPI input filter,
+	 * and check keys are proper PHP var names */
 	zend_hash_apply_with_arguments(&client->request.headers, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
 } /* }}} */
 
@@ -1148,7 +1202,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 
 	/* basic */
 	spprintf(&basic_buf, 0, "%s [%d]: %s %s", ZSTR_VAL(client->addr_str), status,
-		php_http_method_str(client->request.request_method), client->request.request_uri);
+		php_http_method_str(client->request.request_method), ZSTR_VAL(client->request.request_uri));
 	if (!basic_buf) {
 		return;
 	}
@@ -1326,7 +1380,6 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 {
 	req->protocol_version = 0;
 	req->request_uri = NULL;
-	req->request_uri_len = 0;
 	req->vpath = NULL;
 	req->vpath_len = 0;
 	req->path_translated = NULL;
@@ -1347,7 +1400,7 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 {
 	if (req->request_uri) {
-		pefree(req->request_uri, 1);
+		zend_string_release_ex(req->request_uri, /* persistent */ true);
 	}
 	if (req->vpath) {
 		pefree(req->vpath, 1);
@@ -1599,15 +1652,13 @@ static int php_cli_server_client_read_request_on_url(php_http_parser *parser, co
 	php_cli_server_client *client = parser->data;
 	if (EXPECTED(client->request.request_uri == NULL)) {
 		client->request.request_method = parser->method;
-		client->request.request_uri = pestrndup(at, length, 1);
-		client->request.request_uri_len = length;
+		client->request.request_uri = zend_string_init(at, length, /* persistent */ true);
+        GC_MAKE_PERSISTENT_LOCAL(client->request.request_uri);
 	} else {
 		ZEND_ASSERT(client->request.request_method == parser->method);
 		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
-		client->request.request_uri = perealloc(client->request.request_uri, client->request.request_uri_len + length + 1, 1);
-		memcpy(client->request.request_uri + client->request.request_uri_len, at, length);
-		client->request.request_uri_len += length;
-		client->request.request_uri[client->request.request_uri_len] = '\0';
+		/* Extend URI, append content to it */
+        client->request.request_uri = cli_concat_persistent_zstr_with_char(client->request.request_uri, at, length);
 	}
 	return 0;
 }
@@ -1624,12 +1675,14 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	ZVAL_STR(&tmp, client->current_header_value);
 	/* strip off the colon */
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
+	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
 
 	/* Add the wrapped zend_string to the HashTable */
 	zend_hash_add(&client->request.headers, lc_header_name, &tmp);
 	zend_hash_add(&client->request.headers_original_case, client->current_header_name, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
+	zend_string_release_ex(client->current_header_name, /* persistent */ true);
 
 	client->current_header_name = NULL;
 	client->current_header_value = NULL;
@@ -1660,6 +1713,7 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 		case HEADER_NONE:
 			/* Create new header field */
 			client->current_header_name = zend_string_init(at, length, /* persistent */ true);
+			GC_MAKE_PERSISTENT_LOCAL(client->current_header_name);
 			break;
 		case HEADER_FIELD: {
 			/* Append header name to the previous value of it */
@@ -1679,6 +1733,7 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		case HEADER_FIELD:
 			/* Previous element was the header field, create the header value */
 			client->current_header_value = zend_string_init(at, length, /* persistent */ true);
+			GC_MAKE_PERSISTENT_LOCAL(client->current_header_value);
 			break;
 		case HEADER_VALUE: {
 			/* Append header value to the previous value of it */
@@ -1855,7 +1910,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 
 	request_info->request_method = php_http_method_str(client->request.request_method);
 	request_info->proto_num = client->request.protocol_version;
-	request_info->request_uri = client->request.request_uri;
+	request_info->request_uri = ZSTR_VAL(client->request.request_uri);
 	request_info->path_translated = client->request.path_translated;
 	request_info->query_string = client->request.query_string;
 	request_info->content_length = client->request.content_len;
@@ -1882,6 +1937,7 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	zend_string *tmp_addr = NULL;
 	php_network_populate_name_from_sockaddr(addr, addr_len, &tmp_addr, NULL, 0);
 	client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+	GC_MAKE_PERSISTENT_LOCAL(client->addr_str);
 	zend_string_release_ex(tmp_addr, /* persistent */ false);
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
@@ -1935,49 +1991,51 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 	php_cli_server_content_sender_ctor(&client->content_sender);
 	client->content_sender_initialized = true;
 
-	escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) client->request.request_uri, client->request.request_uri_len, 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
+	if (client->request.request_method != PHP_HTTP_HEAD) {
+		escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
-	{
-		static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
-		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
-		if (!chunk) {
-			goto fail;
+		{
+			static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
+			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
+			if (!chunk) {
+				goto fail;
+			}
+			snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string);
+			chunk->data.heap.len = strlen(chunk->data.heap.p);
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string);
-		chunk->data.heap.len = strlen(chunk->data.heap.p);
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(php_cli_server_css, sizeof(php_cli_server_css) - 1);
-		if (!chunk) {
-			goto fail;
+		{
+			php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(php_cli_server_css, sizeof(php_cli_server_css) - 1);
+			if (!chunk) {
+				goto fail;
+			}
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		static const char template[] = "</head><body>";
-		php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(template, sizeof(template) - 1);
-		if (!chunk) {
-			goto fail;
+		{
+			static const char template[] = "</head><body>";
+			php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(template, sizeof(template) - 1);
+			if (!chunk) {
+				goto fail;
+			}
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
-		if (!chunk) {
-			goto fail;
+		{
+			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
+			if (!chunk) {
+				goto fail;
+			}
+			snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
+			chunk->data.heap.len = strlen(chunk->data.heap.p);
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
-		chunk->data.heap.len = strlen(chunk->data.heap.p);
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		static const char epilogue_template[] = "</body></html>";
-		php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(epilogue_template, sizeof(epilogue_template) - 1);
-		if (!chunk) {
-			goto fail;
+		{
+			static const char epilogue_template[] = "</body></html>";
+			php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(epilogue_template, sizeof(epilogue_template) - 1);
+			if (!chunk) {
+				goto fail;
+			}
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
 
 	{
@@ -1993,6 +2051,15 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
 		smart_str_append_unsigned_ex(&buffer, php_cli_server_buffer_size(&client->content_sender.buffer), 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
+		if (status == 405) {
+			smart_str_appends_ex(&buffer, "Allow: ", 1);
+			smart_str_appends_ex(&buffer, php_http_method_str(PHP_HTTP_GET), 1);
+			smart_str_appends_ex(&buffer, ", ", 1);
+			smart_str_appends_ex(&buffer, php_http_method_str(PHP_HTTP_HEAD), 1);
+			smart_str_appends_ex(&buffer, ", ", 1);
+			smart_str_appends_ex(&buffer, php_http_method_str(PHP_HTTP_POST), 1);
+			smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
+		}
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 
 		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
@@ -2008,14 +2075,18 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	zend_string_free(escaped_request_uri);
+	if (escaped_request_uri) {
+		zend_string_free(escaped_request_uri);
+	}
 	return SUCCESS;
 
 fail:
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	zend_string_free(escaped_request_uri);
+	if (escaped_request_uri) {
+		zend_string_free(escaped_request_uri);
+	}
 	return FAILURE;
 } /* }}} */
 
@@ -2042,6 +2113,12 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 {
 	int fd;
 	int status = 200;
+
+	if (client->request.request_method == PHP_HTTP_DELETE
+		|| client->request.request_method == PHP_HTTP_PUT
+		|| client->request.request_method == PHP_HTTP_PATCH) {
+		return php_cli_server_send_error_page(server, client, 405);
+	}
 
 	if (client->request.path_translated && strlen(client->request.path_translated) != client->request.path_translated_len) {
 		/* can't handle paths that contain nul bytes */
@@ -2070,7 +2147,9 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 
 	php_cli_server_content_sender_ctor(&client->content_sender);
 	client->content_sender_initialized = true;
-	client->file_fd = fd;
+	if (client->request.request_method != PHP_HTTP_HEAD) {
+		client->file_fd = fd;
+	}
 
 	{
 		php_cli_server_chunk *chunk;
@@ -2288,7 +2367,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 					  !WIFSIGNALED(php_cli_server_worker_status));
 		}
 
-		free(php_cli_server_workers);
+		pefree(php_cli_server_workers, 1);
 	}
 #endif
 } /* }}} */
@@ -2363,6 +2442,24 @@ static char *php_cli_server_parse_addr(const char *addr, int *pport) {
 	return pestrndup(addr, end - addr, 1);
 }
 
+#if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
+static void php_cli_server_worker_install_pdeathsig(void)
+{
+	// Ignore failure to register PDEATHSIG, it's not available on all platforms anyway
+#if defined(HAVE_PRCTL)
+	prctl(PR_SET_PDEATHSIG, SIGTERM);
+#elif defined(HAVE_PROCCTL)
+	int signal = SIGTERM;
+	procctl(P_PID, 0, PROC_PDEATHSIG_CTL, &signal);
+#endif
+
+	// Check if parent has exited just after the fork
+	if (getppid() != php_cli_server_master) {
+		exit(1);
+	}
+}
+#endif
+
 static void php_cli_server_startup_workers(void) {
 	char *workers = getenv("PHP_CLI_SERVER_WORKERS");
 	if (!workers) {
@@ -2374,12 +2471,8 @@ static void php_cli_server_startup_workers(void) {
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;
 
-		php_cli_server_workers = calloc(
-			php_cli_server_workers_max, sizeof(pid_t));
-		if (!php_cli_server_workers) {
-			php_cli_server_workers_max = 1;
-			return;
-		}
+		php_cli_server_workers = pecalloc(
+			php_cli_server_workers_max, sizeof(pid_t), 1);
 
 		php_cli_server_master = getpid();
 
@@ -2394,6 +2487,9 @@ static void php_cli_server_startup_workers(void) {
 					php_cli_server_worker + 1;
 				return;
 			} else if (pid == 0) {
+#if defined(HAVE_PRCTL) || defined(HAVE_PROCCTL)
+				php_cli_server_worker_install_pdeathsig();
+#endif
 				return;
 			} else {
 				php_cli_server_workers[php_cli_server_worker] = pid;
@@ -2433,6 +2529,14 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 		retval = FAILURE;
 		goto out;
 	}
+	// server_sock needs to be non-blocking when using multiple processes. Without it, the first process would
+	// successfully accept the connection but the others would block, causing client sockets of the same select
+	// call not to be handled.
+	if (SUCCESS != php_set_sock_blocking(server_sock, 0)) {
+		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to make server socket non-blocking");
+		retval = FAILURE;
+		goto out;
+	}
 	server->server_sock = server_sock;
 
 	php_cli_server_startup_workers();
@@ -2449,10 +2553,6 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	{
 		size_t document_root_len = strlen(document_root);
 		_document_root = pestrndup(document_root, document_root_len, 1);
-		if (!_document_root) {
-			retval = FAILURE;
-			goto out;
-		}
 		server->document_root = _document_root;
 		server->document_root_len = document_root_len;
 	}
@@ -2460,10 +2560,6 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	if (router) {
 		size_t router_len = strlen(router);
 		_router = pestrndup(router, router_len, 1);
-		if (!_router) {
-			retval = FAILURE;
-			goto out;
-		}
 		server->router = _router;
 		server->router_len = router_len;
 	} else {
@@ -2573,7 +2669,8 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 		struct sockaddr *sa = pemalloc(server->socklen, 1);
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
-			if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
+			int err = php_socket_errno();
+			if (err != SOCK_EAGAIN && php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 				char *errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 				php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR,
 					"Failed to accept a client (reason: %s)", errstr);

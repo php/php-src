@@ -24,6 +24,7 @@
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
+#include "zend_mmap.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -62,6 +63,16 @@
 # include <sanitizer/common_interface_defs.h>
 #endif
 
+# if defined __CET__
+#  include <cet.h>
+#  define SHSTK_ENABLED (__CET__ & 0x2)
+#  define BOOST_CONTEXT_SHADOW_STACK (SHSTK_ENABLED && SHADOW_STACK_SYSCALL)
+#  define __NR_map_shadow_stack 451
+# ifndef SHADOW_STACK_SET_TOKEN
+#  define SHADOW_STACK_SET_TOKEN 0x1
+#endif
+#endif
+
 /* Encapsulates the fiber C stack with extension for debugging tools. */
 struct _zend_fiber_stack {
 	void *pointer;
@@ -79,6 +90,10 @@ struct _zend_fiber_stack {
 #ifdef ZEND_FIBER_UCONTEXT
 	/* Embedded ucontext to avoid unnecessary memory allocations. */
 	ucontext_t ucontext;
+#elif BOOST_CONTEXT_SHADOW_STACK
+	/* Shadow stack: base, size */
+	void *ss_base;
+	size_t ss_size;
 #endif
 };
 
@@ -141,7 +156,7 @@ typedef struct {
 
 /* These functions are defined in assembler files provided by boost.context (located in "Zend/asm"). */
 extern void *make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
-extern boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
+extern ZEND_INDIRECT_RETURN boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
 #endif
 
 ZEND_API zend_class_entry *zend_ce_fiber;
@@ -211,6 +226,8 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 		return NULL;
 	}
 
+	zend_mmap_set_name(pointer, alloc_size, "zend_fiber_stack");
+
 # if ZEND_FIBER_GUARD_PAGES
 	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {
 		zend_throw_exception_ex(NULL, 0, "Fiber stack protect failed: mprotect failed: %s (%d)", strerror(errno), errno);
@@ -224,6 +241,23 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 
 	stack->pointer = (void *) ((uintptr_t) pointer + ZEND_FIBER_GUARD_PAGES * page_size);
 	stack->size = stack_size;
+
+#if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
+	/* shadow stack saves ret address only, need less space */
+	stack->ss_size= stack_size >> 5;
+
+	/* align shadow stack to 8 bytes. */
+	stack->ss_size = (stack->ss_size + 7) & ~7;
+
+	/* issue syscall to create shadow stack for the new fcontext */
+	/* SHADOW_STACK_SET_TOKEN option will put "restore token" on the new shadow stack */
+	stack->ss_base = (void *)syscall(__NR_map_shadow_stack, 0, stack->ss_size, SHADOW_STACK_SET_TOKEN);
+
+	if (stack->ss_base == MAP_FAILED) {
+		zend_throw_exception_ex(NULL, 0, "Fiber shadow stack allocate failed: mmap failed: %s (%d)", strerror(errno), errno);
+		return NULL;
+	}
+#endif
 
 #ifdef VALGRIND_STACK_REGISTER
 	uintptr_t base = (uintptr_t) stack->pointer;
@@ -252,6 +286,10 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 	VirtualFree(pointer, 0, MEM_RELEASE);
 #else
 	munmap(pointer, stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
+#endif
+
+#if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
+	munmap(stack->ss_base, stack->ss_size);
 #endif
 
 	efree(stack);
@@ -338,6 +376,13 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 	// Stack grows down, calculate the top of the stack. make_fcontext then shifts pointer to lower 16-byte boundary.
 	void *stack = (void *) ((uintptr_t) context->stack->pointer + context->stack->size);
 
+#if BOOST_CONTEXT_SHADOW_STACK
+	// pass the shadow stack pointer to make_fcontext
+	// i.e., link the new shadow stack with the new fcontext
+	// TODO should be a better way?
+	*((unsigned long*) (stack - 8)) = (unsigned long)context->stack->ss_base + context->stack->ss_size;
+#endif
+
 	context->handle = make_fcontext(stack, context->stack->size, zend_fiber_trampoline);
 	ZEND_ASSERT(context->handle != NULL && "make_fcontext() never returns NULL");
 #endif
@@ -356,6 +401,10 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
 	zend_observer_fiber_destroy_notify(context);
+
+	if (context->cleanup) {
+		context->cleanup(context);
+	}
 
 	zend_fiber_stack_free(context->stack);
 }
@@ -438,6 +487,19 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	}
 }
 
+static void zend_fiber_cleanup(zend_fiber_context *context)
+{
+	zend_fiber *fiber = zend_fiber_from_context(context);
+
+	zend_vm_stack current_stack = EG(vm_stack);
+	EG(vm_stack) = fiber->vm_stack;
+	zend_vm_stack_destroy();
+	EG(vm_stack) = current_stack;
+	fiber->execute_data = NULL;
+	fiber->stack_bottom = NULL;
+	fiber->caller = NULL;
+}
+
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
 	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_NULL && "Initial transfer value to fiber context must be NULL");
@@ -498,12 +560,10 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		transfer->flags = ZEND_FIBER_TRANSFER_FLAG_BAILOUT;
 	} zend_end_try();
 
-	transfer->context = fiber->caller;
+	fiber->context.cleanup = &zend_fiber_cleanup;
+	fiber->vm_stack = EG(vm_stack);
 
-	zend_vm_stack_destroy();
-	fiber->execute_data = NULL;
-	fiber->stack_bottom = NULL;
-	fiber->caller = NULL;
+	transfer->context = fiber->caller;
 }
 
 /* Handles forwarding of result / error from a transfer into the running fiber. */
@@ -571,12 +631,9 @@ static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fib
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
 {
 	zend_fiber *fiber = emalloc(sizeof(zend_fiber));
-
 	memset(fiber, 0, sizeof(zend_fiber));
 
 	zend_object_std_init(&fiber->std, ce);
-	fiber->std.handlers = &zend_fiber_handlers;
-
 	return &fiber->std;
 }
 
@@ -644,11 +701,22 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 
 ZEND_METHOD(Fiber, __construct)
 {
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(fiber->fci, fiber->fci_cache)
+		Z_PARAM_FUNC(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
+
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
+
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_INIT || Z_TYPE(fiber->fci.function_name) != IS_UNDEF)) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot call constructor twice");
+		RETURN_THROWS();
+	}
+
+	fiber->fci = fci;
+	fiber->fci_cache = fcc;
 
 	// Keep a reference to closures or callable objects while the fiber is running.
 	Z_TRY_ADDREF(fiber->fci.function_name);
@@ -874,6 +942,7 @@ void zend_register_fiber_ce(void)
 {
 	zend_ce_fiber = register_class_Fiber();
 	zend_ce_fiber->create_object = zend_fiber_object_create;
+	zend_ce_fiber->default_object_handlers = &zend_fiber_handlers;
 
 	zend_fiber_handlers = std_object_handlers;
 	zend_fiber_handlers.dtor_obj = zend_fiber_object_destroy;

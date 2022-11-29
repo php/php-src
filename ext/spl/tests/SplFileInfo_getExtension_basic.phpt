@@ -1,5 +1,9 @@
 --TEST--
 SPL: SplFileInfo::getExtension() basic test
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === "Windows") die("skip not for Windows");
+?>
 --FILE--
 <?php
 $file = md5('SplFileInfo::getExtension');

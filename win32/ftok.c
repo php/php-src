@@ -51,7 +51,7 @@ ftok(const char *pathname, int proj_id)
 		return (key_t)-1;
 	}
 
-	ret = (key_t) ((proj_id & 0xff) << 24 | (st.st_dev & 0xff) << 16 | ((bhfi.nFileIndexLow | (__int64)bhfi.nFileIndexHigh << 32) & 0xffff));
+	ret = (key_t) ((proj_id & 0xff) << 24 | (st.st_dev & 0xff) << 16 | (bhfi.nFileIndexLow & 0xffff));
 
 	CloseHandle(fh);
 	PHP_WIN32_IOUTIL_CLEANUP_W()

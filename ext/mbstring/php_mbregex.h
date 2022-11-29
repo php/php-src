@@ -30,6 +30,8 @@ PHP_RINIT_FUNCTION(mb_regex);
 PHP_RSHUTDOWN_FUNCTION(mb_regex);
 PHP_MINFO_FUNCTION(mb_regex);
 
+extern char php_mb_oniguruma_version[256];
+
 typedef struct _zend_mb_regex_globals zend_mb_regex_globals;
 
 zend_mb_regex_globals *php_mb_regex_globals_alloc(void);

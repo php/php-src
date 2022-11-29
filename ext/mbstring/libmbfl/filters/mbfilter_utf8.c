@@ -180,6 +180,7 @@ int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
+		filter->status = 0;
 	}
 
 	if (filter->flush_function) {
@@ -240,7 +241,7 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			if ((e - p) >= 2) {
 				unsigned char c2 = *p++;
 				unsigned char c3 = *p++;
-				if ((c2 & 0xC0) != 0x80 || !((c2 >= 0x80 && c2 <= 0xBF) && ((c == 0xE0 && c2 >= 0xA0) || (c == 0xED && c2 < 0xA0) || (c > 0xE0 && c != 0xED)))) {
+				if ((c2 & 0xC0) != 0x80 || (c == 0xE0 && c2 < 0xA0) || (c == 0xED && c2 >= 0xA0)) {
 					*out++ = MBFL_BAD_INPUT;
 					p -= 2;
 				} else if ((c3 & 0xC0) != 0x80) {
@@ -248,16 +249,17 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 					p--;
 				} else {
 					uint32_t decoded = ((c & 0xF) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
-					if (decoded < 0x800 || (decoded >= 0xD800 && decoded <= 0xDFFF)) {
-						*out++ = MBFL_BAD_INPUT;
-					} else {
-						*out++ = decoded;
-					}
+					ZEND_ASSERT(decoded >= 0x800); /* Not an overlong code unit */
+					ZEND_ASSERT(decoded < 0xD800 || decoded > 0xDFFF); /* U+D800-DFFF are reserved, illegal code points */
+					*out++ = decoded;
 				}
 			} else {
 				*out++ = MBFL_BAD_INPUT;
-				while (p < e && (*p & 0xC0) == 0x80) {
+				if (p < e && (c != 0xE0 || *p >= 0xA0) && (c != 0xED || *p < 0xA0) && (*p & 0xC0) == 0x80) {
 					p++;
+					if (p < e && (*p & 0xC0) == 0x80) {
+						p++;
+					}
 				}
 			}
 		} else if (c >= 0xF0 && c <= 0xF4) { /* 4 byte character */
@@ -279,13 +281,14 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 					p--;
 				} else {
 					uint32_t decoded = ((c & 0x7) << 18) | ((c2 & 0x3F) << 12) | ((c3 & 0x3F) << 6) | (c4 & 0x3F);
-					*out++ = (decoded < 0x10000) ? MBFL_BAD_INPUT : decoded;
+					ZEND_ASSERT(decoded >= 0x10000); /* Not an overlong code unit */
+					*out++ = decoded;
 				}
 			} else {
 				*out++ = MBFL_BAD_INPUT;
 				if (p < e) {
 					unsigned char c2 = *p;
-					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || c == 0xF2 || c == 0xF3) {
+					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || (c >= 0xF1 && c <= 0xF3)) {
 						while (p < e && (*p & 0xC0) == 0x80) {
 							p++;
 						}

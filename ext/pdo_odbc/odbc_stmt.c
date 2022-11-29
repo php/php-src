@@ -155,7 +155,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 
 static int odbc_stmt_execute(pdo_stmt_t *stmt)
 {
-	RETCODE rc;
+	RETCODE rc, rc1;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	char *buf = NULL;
 	SQLLEN row_count = -1;
@@ -192,11 +192,17 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt)
 							Z_STRLEN_P(parameter),
 							&ulen)) {
 					case PDO_ODBC_CONV_NOT_REQUIRED:
-						SQLPutData(S->stmt, Z_STRVAL_P(parameter),
+						rc1 = SQLPutData(S->stmt, Z_STRVAL_P(parameter),
 							Z_STRLEN_P(parameter));
+						if (rc1 != SQL_SUCCESS && rc1 != SQL_SUCCESS_WITH_INFO) {
+							rc = rc1;
+						}
 						break;
 					case PDO_ODBC_CONV_OK:
-						SQLPutData(S->stmt, S->convbuf, ulen);
+						rc1 = SQLPutData(S->stmt, S->convbuf, ulen);
+						if (rc1 != SQL_SUCCESS && rc1 != SQL_SUCCESS_WITH_INFO) {
+							rc = rc1;
+						}
 						break;
 					case PDO_ODBC_CONV_FAIL:
 						pdo_odbc_stmt_error("error converting input string");
@@ -233,7 +239,10 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt)
 				if (len == 0) {
 					break;
 				}
-				SQLPutData(S->stmt, buf, len);
+				rc1 = SQLPutData(S->stmt, buf, len);
+				if (rc1 != SQL_SUCCESS && rc1 != SQL_SUCCESS_WITH_INFO) {
+					rc = rc1;
+				}
 			} while (1);
 		}
 	}

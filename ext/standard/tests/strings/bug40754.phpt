@@ -90,6 +90,6 @@ stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-int(2)
+int(1)
 string(8) "abcdeabc"
 string(0) ""

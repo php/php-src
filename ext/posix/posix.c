@@ -23,7 +23,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_posix.h"
-#include "posix_arginfo.h"
 
 #ifdef HAVE_POSIX
 
@@ -46,6 +45,8 @@
 #ifdef HAVE_SYS_SYSMACROS_H
 # include <sys/sysmacros.h>
 #endif
+
+#include "posix_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
@@ -71,82 +72,8 @@ static PHP_GINIT_FUNCTION(posix) /* {{{ */
 /* {{{ PHP_MINIT_FUNCTION(posix) */
 static PHP_MINIT_FUNCTION(posix)
 {
-	REGISTER_LONG_CONSTANT("POSIX_F_OK", F_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_X_OK", X_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_W_OK", W_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("POSIX_R_OK", R_OK, CONST_CS | CONST_PERSISTENT);
-#ifdef S_IFREG
-	REGISTER_LONG_CONSTANT("POSIX_S_IFREG", S_IFREG, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFCHR
-	REGISTER_LONG_CONSTANT("POSIX_S_IFCHR", S_IFCHR, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFBLK
-	REGISTER_LONG_CONSTANT("POSIX_S_IFBLK", S_IFBLK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFIFO
-	REGISTER_LONG_CONSTANT("POSIX_S_IFIFO", S_IFIFO, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef S_IFSOCK
-	REGISTER_LONG_CONSTANT("POSIX_S_IFSOCK", S_IFSOCK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_AS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_AS", RLIMIT_AS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_CORE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_CORE", RLIMIT_CORE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_CPU
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_CPU", RLIMIT_CPU, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_DATA
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_DATA", RLIMIT_DATA, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_FSIZE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_FSIZE", RLIMIT_FSIZE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_LOCKS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_LOCKS", RLIMIT_LOCKS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_MEMLOCK
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_MEMLOCK", RLIMIT_MEMLOCK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_MSGQUEUE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_MSGQUEUE", RLIMIT_MSGQUEUE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NICE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NICE", RLIMIT_NICE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NOFILE
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NOFILE", RLIMIT_NOFILE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NPROC
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NPROC", RLIMIT_NPROC, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_RSS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RSS", RLIMIT_RSS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_RTPRIO
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RTPRIO", RLIMIT_RTPRIO, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_RTTIME
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_RTTIME", RLIMIT_RTTIME, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_SIGPENDING
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_SIGPENDING", RLIMIT_SIGPENDING, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_STACK
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_STACK", RLIMIT_STACK, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_KQUEUES
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_KQUEUES", RLIMIT_KQUEUES, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef RLIMIT_NPTS
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NPTS", RLIMIT_NPTS, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef HAVE_SETRLIMIT
-	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_INFINITY", RLIM_INFINITY, CONST_CS | CONST_PERSISTENT);
-#endif
+	register_posix_symbols(module_number);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1129,15 +1056,42 @@ static const struct limitlist {
 PHP_FUNCTION(posix_getrlimit)
 {
 	const struct limitlist *l = NULL;
+	zend_long res;
+	bool res_is_null = true;
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(res, res_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
-	array_init(return_value);
+	if (res_is_null) {
+		array_init(return_value);
 
-	for (l=limits; l->name; l++) {
-		if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
-			zend_array_destroy(Z_ARR_P(return_value));
+		for (l=limits; l->name; l++) {
+			if (posix_addlimit(l->limit, l->name, return_value) == FAILURE) {
+				zend_array_destroy(Z_ARR_P(return_value));
+				RETURN_FALSE;
+			}
+		}
+	} else {
+		struct rlimit rl;
+		int result = getrlimit(res, &rl);
+		if (result < 0) {
+			POSIX_G(last_error) = errno;
 			RETURN_FALSE;
+		}
+
+		array_init(return_value);
+		if (rl.rlim_cur == RLIM_INFINITY) {
+			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
+		} else {
+			add_next_index_long(return_value, rl.rlim_cur);
+		}
+
+		if (rl.rlim_max == RLIM_INFINITY) {
+			add_next_index_stringl(return_value, UNLIMITED_STRING, sizeof(UNLIMITED_STRING)-1);
+		} else {
+			add_next_index_long(return_value, rl.rlim_max);
 		}
 	}
 }
@@ -1218,3 +1172,14 @@ PHP_FUNCTION(posix_initgroups)
 }
 /* }}} */
 #endif
+
+PHP_FUNCTION(posix_sysconf)
+{
+	zend_long conf_id;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(conf_id)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(sysconf(conf_id));
+}

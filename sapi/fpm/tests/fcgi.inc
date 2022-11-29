@@ -26,6 +26,7 @@ namespace Adoy\FastCGI;
 
 class TimedOutException extends \Exception {}
 class ForbiddenException extends \Exception {}
+class ReadLimitExceeded extends \Exception {}
 
 /**
  * Handles communication with a FastCGI application
@@ -404,16 +405,24 @@ class Client
     /**
      * Read a FastCGI Packet
      *
+     * @param int $readLimit max content size
      * @return array
+     * @throws ReadLimitExceeded
      */
-    private function readPacket()
+    private function readPacket($readLimit = -1)
     {
         if ($packet = fread($this->_sock, self::HEADER_LEN)) {
             $resp = $this->decodePacketHeader($packet);
             $resp['content'] = '';
             if ($resp['contentLength']) {
-                $len  = $resp['contentLength'];
-                while ($len && $buf=fread($this->_sock, $len)) {
+                $len = $resp['contentLength'];
+                if ($readLimit >= 0 && $len > $readLimit) {
+                    // close connection so it can be re-set reset and throw an error
+                    fclose($this->_sock);
+                    $this->_sock = null;
+                    throw new ReadLimitExceeded("Content has $len bytes but the limit is $readLimit bytes");
+                }
+                while ($len && $buf = fread($this->_sock, $len)) {
                     $len -= strlen($buf);
                     $resp['content'] .= $buf;
                 }
@@ -473,15 +482,16 @@ class Client
      *
      * @param array $params Array of parameters
      * @param string $stdin Content
+     * @param int $readLimit [optional] the number of bytes to accept in a single packet or -1 if unlimited
      * @return array
      * @throws ForbiddenException
      * @throws TimedOutException
      * @throws \Exception
      */
-    public function request_data(array $params, $stdin)
+    public function request_data(array $params, $stdin, $readLimit = -1)
     {
         $id = $this->async_request($params, $stdin);
-        return $this->wait_for_response_data($id);
+        return $this->wait_for_response_data($id, 0, $readLimit);
     }
 
     /**
@@ -579,12 +589,13 @@ class Client
      *
      * @param int $requestId
      * @param int $timeoutMs [optional] the number of milliseconds to wait.
+     * @param int $readLimit [optional] the number of bytes to accept in a single packet or -1 if unlimited
      * @return array response data
      * @throws ForbiddenException
      * @throws TimedOutException
      * @throws \Exception
      */
-    public function wait_for_response_data($requestId, $timeoutMs = 0)
+    public function wait_for_response_data($requestId, $timeoutMs = 0, $readLimit = -1)
     {
         if (!isset($this->_requests[$requestId])) {
             throw new \Exception('Invalid request id given');
@@ -608,7 +619,7 @@ class Client
         // but still not get the response requested
         $startTime = microtime(true);
 
-        while ($resp = $this->readPacket()) {
+        while ($resp = $this->readPacket($readLimit)) {
             if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
                 if ($resp['type'] == self::STDERR) {
                     $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;

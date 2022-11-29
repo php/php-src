@@ -372,9 +372,13 @@ typedef struct _zend_oparray_context {
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
 
+#define ZEND_SHORT_CIRCUITING_CHAIN_MASK 0x3
 #define ZEND_SHORT_CIRCUITING_CHAIN_EXPR 0
 #define ZEND_SHORT_CIRCUITING_CHAIN_ISSET 1
 #define ZEND_SHORT_CIRCUITING_CHAIN_EMPTY 2
+
+// Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
+#define ZEND_JMP_NULL_BP_VAR_IS 4
 
 char *zend_visibility_string(uint32_t fn_flags);
 
@@ -444,15 +448,15 @@ struct _zend_op_array {
 	uint32_t required_num_args;
 	zend_arg_info *arg_info;
 	HashTable *attributes;
+	uint32_t T;         /* number of temporary variables */
+	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	/* END of common elements */
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
 	int last_var;       /* number of CV variables */
-	uint32_t T;         /* number of temporary variables */
 	uint32_t last;      /* number of opcodes */
 
 	zend_op *opcodes;
-	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	ZEND_MAP_PTR_DEF(HashTable *, static_variables_ptr);
 	HashTable *static_variables;
 	zend_string **vars; /* names of CV variables */
@@ -499,6 +503,8 @@ typedef struct _zend_internal_function {
 	uint32_t required_num_args;
 	zend_internal_arg_info *arg_info;
 	HashTable *attributes;
+	uint32_t T;         /* number of temporary variables */
+	ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	/* END of common elements */
 
 	zif_handler handler;
@@ -523,6 +529,8 @@ union _zend_function {
 		uint32_t required_num_args;
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 		HashTable   *attributes;
+		uint32_t T;         /* number of temporary variables */
+		ZEND_MAP_PTR_DEF(void **, run_time_cache);
 	} common;
 
 	zend_op_array op_array;
@@ -798,11 +806,22 @@ ZEND_API binary_op_type get_binary_op(int opcode);
 void zend_stop_lexing(void);
 void zend_emit_final_return(bool return_one);
 
+typedef enum {
+	ZEND_MODIFIER_TARGET_PROPERTY = 0,
+	ZEND_MODIFIER_TARGET_METHOD,
+	ZEND_MODIFIER_TARGET_CONSTANT,
+	ZEND_MODIFIER_TARGET_CPP,
+} zend_modifier_target;
+
 /* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
-uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
+uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifier_target target);
+
+uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t flags);
+uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modifiers);
+
 bool zend_handle_encoding_declaration(zend_ast *ast);
 
 ZEND_API zend_class_entry *zend_bind_class_in_slot(
@@ -931,6 +950,9 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_NAME_NOT_FQ   1
 #define ZEND_NAME_RELATIVE 2
 
+/* ZEND_FETCH_ flags in class name AST of new const expression must not clash with ZEND_NAME_ flags */
+#define ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT 2
+
 #define ZEND_TYPE_NULLABLE (1<<8)
 
 #define ZEND_ARRAY_SYNTAX_LIST 1  /* list() */
@@ -1008,8 +1030,14 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_ARG_TYPE_IS_TENTATIVE(arg_info) \
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_TENTATIVE_BIT) != 0)
 
-#define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce */
+#define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce. Set in zend_compile.c for ZEND_AST_DIM nested within ZEND_AST_COALESCE. */
 #define ZEND_DIM_ALTERNATIVE_SYNTAX	(1 << 1) /* deprecated curly brace usage */
+
+/* Attributes for ${} encaps var in strings (ZEND_AST_DIM or ZEND_AST_VAR node) */
+/* ZEND_AST_VAR nodes can have any of the ZEND_ENCAPS_VAR_* flags */
+/* ZEND_AST_DIM flags can have ZEND_DIM_ALTERNATIVE_SYNTAX or ZEND_ENCAPS_VAR_DOLLAR_CURLY during the parse phase (ZEND_DIM_ALTERNATIVE_SYNTAX is a thrown fatal error). */
+#define ZEND_ENCAPS_VAR_DOLLAR_CURLY (1 << 0)
+#define ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR (1 << 1)
 
 /* Make sure these don't clash with ZEND_FETCH_CLASS_* flags. */
 #define IS_CONSTANT_CLASS                    0x400 /* __CLASS__ in trait */
@@ -1079,10 +1107,6 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 
 /* Attribute for ternary inside parentheses */
 #define ZEND_PARENTHESIZED_CONDITIONAL 1
-
-/* Attributes for ${} encaps var in strings */
-#define ZEND_ENCAPS_VAR_DOLLAR_CURLY (1<<0)
-#define ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR (1<<1)
 
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
@@ -1170,6 +1194,9 @@ END_EXTERN_C()
 
 /* this flag is set when compiler invoked during preloading in separate process */
 #define ZEND_COMPILE_PRELOAD_IN_CHILD           (1<<17)
+
+/* ignore observer notifications, e.g. to manually notify afterwards in a post-processing step after compilation */
+#define ZEND_COMPILE_IGNORE_OBSERVER			(1<<18)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

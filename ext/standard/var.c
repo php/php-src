@@ -343,15 +343,17 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		PUTS("}\n");
 		break;
 	case IS_OBJECT:
-		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
-		if (myht) {
-			if (GC_IS_RECURSIVE(myht)) {
-				PUTS("*RECURSION*\n");
-				zend_release_properties(myht);
-				return;
-			}
-			GC_PROTECT_RECURSION(myht);
+		/* Check if this is already recursing on the object before calling zend_get_properties_for,
+		 * to allow infinite recursion detection to work even if classes return temporary arrays,
+		 * and to avoid the need to update the properties table in place to reflect the state
+		 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
+		if (Z_IS_RECURSIVE_P(struc)) {
+			PUTS("*RECURSION*\n");
+			return;
 		}
+		Z_PROTECT_RECURSION_P(struc);
+
+		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
 		zend_string_release_ex(class_name, 0);
@@ -370,13 +372,13 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 					zval_object_property_dump(prop_info, val, index, key, level);
 				}
 			} ZEND_HASH_FOREACH_END();
-			GC_UNPROTECT_RECURSION(myht);
 			zend_release_properties(myht);
 		}
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
 		}
 		PUTS("}\n");
+		Z_UNPROTECT_RECURSION_P(struc);
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
@@ -552,17 +554,17 @@ again:
 			break;
 
 		case IS_OBJECT:
-			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
-			if (myht) {
-				if (GC_IS_RECURSIVE(myht)) {
-					smart_str_appendl(buf, "NULL", 4);
-					zend_error(E_WARNING, "var_export does not handle circular references");
-					zend_release_properties(myht);
-					return;
-				} else {
-					GC_TRY_PROTECT_RECURSION(myht);
-				}
+			/* Check if this is already recursing on the object before calling zend_get_properties_for,
+			 * to allow infinite recursion detection to work even if classes return temporary arrays,
+			 * and to avoid the need to update the properties table in place to reflect the state
+			 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
+			if (Z_IS_RECURSIVE_P(struc)) {
+				smart_str_appendl(buf, "NULL", 4);
+				zend_error(E_WARNING, "var_export does not handle circular references");
+				return;
 			}
+			Z_PROTECT_RECURSION_P(struc);
+			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
@@ -593,9 +595,9 @@ again:
 						php_object_element_export(val, index, key, level, buf);
 					} ZEND_HASH_FOREACH_END();
 				}
-				GC_TRY_UNPROTECT_RECURSION(myht);
 				zend_release_properties(myht);
 			}
+			Z_UNPROTECT_RECURSION_P(struc);
 			if (level > 1 && !is_enum) {
 				buffer_append_spaces(buf, level - 1);
 			}
@@ -645,7 +647,7 @@ PHP_FUNCTION(var_export)
 	smart_str_0 (&buf);
 
 	if (return_output) {
-		RETURN_NEW_STR(buf.s);
+		RETURN_STR(smart_str_extract(&buf));
 	} else {
 		PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 		smart_str_free(&buf);
@@ -840,7 +842,7 @@ static int php_var_serialize_try_add_sleep_prop(
 	}
 
 	if (!zend_hash_add(ht, name, val)) {
-		php_error_docref(NULL, E_NOTICE,
+		php_error_docref(NULL, E_WARNING,
 			"\"%s\" is returned from __sleep() multiple times", ZSTR_VAL(error_name));
 		return SUCCESS;
 	}
@@ -1318,11 +1320,7 @@ PHP_FUNCTION(serialize)
 		RETURN_THROWS();
 	}
 
-	if (buf.s) {
-		RETURN_NEW_STR(buf.s);
-	} else {
-		RETURN_EMPTY_STRING();
-	}
+	RETURN_STR(smart_str_extract(&buf));
 }
 /* }}} */
 
@@ -1401,7 +1399,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 	}
 	if (!php_var_unserialize(retval, &p, p + buf_len, &var_hash)) {
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
+			php_error_docref(NULL, E_WARNING, "Error at offset " ZEND_LONG_FMT " of %zd bytes",
 				(zend_long)((char*)p - buf), buf_len);
 		}
 		if (BG(unserialize).level <= 1) {

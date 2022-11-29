@@ -61,7 +61,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	php_stream_transport_factory factory = NULL;
 	const char *p, *protocol = NULL;
 	size_t n = 0;
-	int failed = 0;
+	bool failed = false;
+	bool bailout = false;
 	zend_string *error_text = NULL;
 	struct timeval default_timeout = { 0, 0 };
 
@@ -132,46 +133,50 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			context STREAMS_REL_CC);
 
 	if (stream) {
-		php_stream_context_set(stream, context);
+		zend_try {
+			php_stream_context_set(stream, context);
 
-		if ((flags & STREAM_XPORT_SERVER) == 0) {
-			/* client */
+			if ((flags & STREAM_XPORT_SERVER) == 0) {
+				/* client */
 
-			if (flags & (STREAM_XPORT_CONNECT|STREAM_XPORT_CONNECT_ASYNC)) {
-				if (-1 == php_stream_xport_connect(stream, name, namelen,
-							flags & STREAM_XPORT_CONNECT_ASYNC ? 1 : 0,
-							timeout, &error_text, error_code)) {
+				if (flags & (STREAM_XPORT_CONNECT|STREAM_XPORT_CONNECT_ASYNC)) {
+					if (-1 == php_stream_xport_connect(stream, name, namelen,
+								flags & STREAM_XPORT_CONNECT_ASYNC ? 1 : 0,
+								timeout, &error_text, error_code)) {
 
-					ERR_RETURN(error_string, error_text, "connect() failed: %s");
+						ERR_RETURN(error_string, error_text, "connect() failed: %s");
 
-					failed = 1;
-				}
-			}
-
-		} else {
-			/* server */
-			if (flags & STREAM_XPORT_BIND) {
-				if (0 != php_stream_xport_bind(stream, name, namelen, &error_text)) {
-					ERR_RETURN(error_string, error_text, "bind() failed: %s");
-					failed = 1;
-				} else if (flags & STREAM_XPORT_LISTEN) {
-					zval *zbacklog = NULL;
-					int backlog = 32;
-
-					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
-						backlog = zval_get_long(zbacklog);
-					}
-
-					if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
-						ERR_RETURN(error_string, error_text, "listen() failed: %s");
-						failed = 1;
+						failed = true;
 					}
 				}
+
+			} else {
+				/* server */
+				if (flags & STREAM_XPORT_BIND) {
+					if (0 != php_stream_xport_bind(stream, name, namelen, &error_text)) {
+						ERR_RETURN(error_string, error_text, "bind() failed: %s");
+						failed = true;
+					} else if (flags & STREAM_XPORT_LISTEN) {
+						zval *zbacklog = NULL;
+						int backlog = 32;
+
+						if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
+							backlog = zval_get_long(zbacklog);
+						}
+
+						if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
+							ERR_RETURN(error_string, error_text, "listen() failed: %s");
+							failed = true;
+						}
+					}
+				}
 			}
-		}
+		} zend_catch {
+			bailout = true;
+		} zend_end_try();
 	}
 
-	if (failed) {
+	if (failed || bailout) {
 		/* failure means that they don't get a stream to play with */
 		if (persistent_id) {
 			php_stream_pclose(stream);
@@ -179,6 +184,9 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			php_stream_close(stream);
 		}
 		stream = NULL;
+		if (bailout) {
+			zend_bailout();
+		}
 	}
 
 	return stream;

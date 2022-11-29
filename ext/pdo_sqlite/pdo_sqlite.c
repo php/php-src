@@ -84,7 +84,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_sqlite)
 PHP_MINFO_FUNCTION(pdo_sqlite)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for SQLite 3.x", "enabled");
+	php_info_print_table_row(2, "PDO Driver for SQLite 3.x", "enabled");
 	php_info_print_table_row(2, "SQLite Library", sqlite3_libversion());
 	php_info_print_table_end();
 }

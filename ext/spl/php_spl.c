@@ -36,7 +36,6 @@
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "ext/standard/php_mt_rand.h"
 #include "main/snprintf.h"
 
 #ifdef COMPILE_DL_SPL
@@ -269,8 +268,11 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 		}
 		zend_string_release_ex(opened_path, 0);
 		if (new_op_array) {
+			uint32_t orig_jit_trace_num = EG(jit_trace_num);
+
 			ZVAL_UNDEF(&result);
 			zend_execute(new_op_array, &result);
+			EG(jit_trace_num) = orig_jit_trace_num;
 
 			destroy_op_array(new_op_array);
 			efree(new_op_array);
@@ -521,7 +523,7 @@ PHP_FUNCTION(spl_autoload_register)
 			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
 			 * with it outselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
 		}
 
 		if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
@@ -671,7 +673,7 @@ PHP_MINFO_FUNCTION(spl)
 	char *strg;
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "SPL support",        "enabled");
+	php_info_print_table_row(2, "SPL support", "enabled");
 
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)

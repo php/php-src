@@ -81,14 +81,10 @@ echo "Done"
 --EXPECT--
 *** Testing str_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
-array(1) {
-  [0]=>
-  string(0) ""
+array(0) {
 }
 -- Iteration 2 --
-array(1) {
-  [0]=>
-  string(0) ""
+array(0) {
 }
 -- Iteration 3 --
 array(1) {

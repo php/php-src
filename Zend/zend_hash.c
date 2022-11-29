@@ -22,7 +22,7 @@
 #include "zend_globals.h"
 #include "zend_variables.h"
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(_M_ARM64)
 # include <arm_neon.h>
 #endif
 
@@ -183,7 +183,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 			_mm_storeu_si128((__m128i*)&HT_HASH_EX(data,  8), xmm0);
 			_mm_storeu_si128((__m128i*)&HT_HASH_EX(data, 12), xmm0);
 		} while (0);
-#elif defined(__aarch64__)
+#elif defined(__aarch64__) || defined(_M_ARM64)
 		do {
 			int32x4_t t = vdupq_n_s32(-1);
 			vst1q_s32((int32_t*)&HT_HASH_EX(data,  0), t);
@@ -658,15 +658,14 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterators_advance(HashTable *ht, HashPosit
 /* Hash must be known and precomputed before */
 static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, const zend_string *key)
 {
-	zend_ulong key_hash = ZSTR_H(key);
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
 
-	ZEND_ASSERT(key_hash != 0 && "Hash must be known");
+	ZEND_ASSERT(ZSTR_H(key) != 0 && "Hash must be known");
 
 	arData = ht->arData;
-	nIndex = key_hash | ht->nTableMask;
+	nIndex = ZSTR_H(key) | ht->nTableMask;
 	idx = HT_HASH_EX(arData, nIndex);
 
 	if (UNEXPECTED(idx == HT_INVALID_IDX)) {
@@ -678,7 +677,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, con
 	}
 
 	while (1) {
-		if (p->h == key_hash &&
+		if (p->h == ZSTR_H(key) &&
 		    EXPECTED(p->key) &&
 		    zend_string_equal_content(p->key, key)) {
 			return p;
@@ -2396,6 +2395,26 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	return target;
 }
 
+ZEND_API HashTable* zend_array_to_list(HashTable *source)
+{
+	HashTable *result = _zend_new_array(zend_hash_num_elements(source));
+	zend_hash_real_init_packed(result);
+
+	ZEND_HASH_FILL_PACKED(result) {
+		zval *entry;
+
+		ZEND_HASH_FOREACH_VAL(source, entry) {
+			if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
+				entry = Z_REFVAL_P(entry);
+			}
+			Z_TRY_ADDREF_P(entry);
+			ZEND_HASH_FILL_ADD(entry);
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FILL_END();
+
+	return result;
+}
+
 
 ZEND_API void ZEND_FASTCALL zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, bool overwrite)
 {
@@ -2696,7 +2715,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, Ha
 
 
 /* This function should be made binary safe  */
-ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos)
+ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;
@@ -2720,7 +2739,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zen
 	return HASH_KEY_NON_EXISTENT;
 }
 
-ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos)
+ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, const HashPosition *pos)
 {
 	uint32_t idx;
 	Bucket *p;
@@ -2862,9 +2881,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 		ht->nNumUsed = i;
 	}
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED)) {
-		/* We broke the hash colisions chains overriding Z_NEXT() by Z_EXTRA().
-		 * Reset the hash headers table as well to avoid possilbe inconsistent
+	if (!HT_IS_PACKED(ht)) {
+		/* We broke the hash collisions chains overriding Z_NEXT() by Z_EXTRA().
+		 * Reset the hash headers table as well to avoid possible inconsistent
 		 * access on recursive data structures.
 	     *
 	     * See Zend/tests/bug63882_2.phpt

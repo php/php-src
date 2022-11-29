@@ -40,7 +40,7 @@ function ptr2str($ptr)
 --EXPECTF--
 Warning: session_decode(): Failed to decode session object. Session has been destroyed in %s%ebug72562.php on line %d
 
-Notice: unserialize(): Error at offset 0 of 1 bytes in %s%ebug72562.php on line %d
+Warning: unserialize(): Error at offset 0 of 1 bytes in %s on line %d
 
-Notice: unserialize(): Error at offset 4 of 4 bytes in %s%ebug72562.php on line %d
+Warning: unserialize(): Error at offset 4 of 4 bytes in %s on line %d
 bool(false)

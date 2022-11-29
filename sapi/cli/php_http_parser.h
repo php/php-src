@@ -34,7 +34,7 @@ extern "C" {
 # include "php_config.h"
 #endif
 
-#include "php_stdint.h"
+#include <stdint.h>
 
 /* Compile with -DPHP_HTTP_PARSER_STRICT=0 to make less checks, but run
  * faster

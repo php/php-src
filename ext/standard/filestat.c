@@ -37,11 +37,6 @@
 # include <sys/vfs.h>
 #endif
 
-#ifdef OS2
-#  define INCL_DOS
-#  include <os2.h>
-#endif
-
 #if defined(__APPLE__)
   /*
    Apple statvfs has an interger overflow in libc copying to statvfs.
@@ -109,7 +104,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 }
 /* }}} */
 
-static int php_disk_total_space(char *path, double *space) /* {{{ */
+static zend_result php_disk_total_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
@@ -133,21 +128,7 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
-#elif defined(OS2) /* {{{ */
-{
-	double bytestotal = 0;
-	FSALLOCATE fsinfo;
-	char drive = path[0] & 95;
-
-	if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0) {
-		bytestotal = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnit;
-		*space = bytestotal;
-		return SUCCESS;
-	}
-	return FAILURE;
-}
-/* }}} */
-#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+#else /* {{{ if !defined(WINDOWS) */
 {
 	double bytestotal = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -208,7 +189,7 @@ PHP_FUNCTION(disk_total_space)
 }
 /* }}} */
 
-static int php_disk_free_space(char *path, double *space) /* {{{ */
+static zend_result php_disk_free_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
@@ -230,22 +211,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
-#elif defined(OS2) /* {{{ */
-{
-	double bytesfree = 0;
-	FSALLOCATE fsinfo;
-	char drive = path[0] & 95;
-
-	if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0) {
-		bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
-		*space = bytesfree;
-		return SUCCESS;
-	}
-	return FAILURE;
-}
-/* }}} */
-#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+#else /* {{{ if !defined(WINDOWS) */
 {
 	double bytesfree = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -306,7 +272,7 @@ PHP_FUNCTION(disk_free_space)
 /* }}} */
 
 #ifndef PHP_WIN32
-PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid)
+PHPAPI zend_result php_get_gid_by_name(const char *name, gid_t *gid)
 {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
@@ -432,7 +398,7 @@ PHP_FUNCTION(lchgrp)
 /* }}} */
 
 #ifndef PHP_WIN32
-PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid)
+PHPAPI zend_result php_get_uid_by_name(const char *name, uid_t *uid)
 {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;

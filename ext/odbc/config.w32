@@ -7,7 +7,7 @@ if (PHP_ODBC == "yes") {
 	if (CHECK_LIB("odbc32.lib", "odbc") && CHECK_LIB("odbccp32.lib", "odbc")
 	&& CHECK_HEADER_ADD_INCLUDE("sql.h", "CFLAGS_ODBC")
 	&& CHECK_HEADER_ADD_INCLUDE("sqlext.h", "CFLAGS_ODBC")) {
-		EXTENSION("odbc", "php_odbc.c", PHP_ODBC_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		EXTENSION("odbc", "php_odbc.c odbc_utils.c", PHP_ODBC_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE("HAVE_UODBC", 1, "ODBC support");
 		if ("no" == PHP_ODBCVER) {
 			AC_DEFINE("ODBCVER", "0x0350", "The highest supported ODBC version", false);

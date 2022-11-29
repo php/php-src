@@ -52,7 +52,7 @@ static zval *php_sxe_iterator_current_data(zend_object_iterator *iter);
 static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter);
 static void php_sxe_iterator_rewind(zend_object_iterator *iter);
-static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type);
+static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type);
 
 /* {{{ _node_as_zval() */
 static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const xmlChar *nsprefix, int isprefix)
@@ -1801,7 +1801,7 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 /* }}} */
 
 /* {{{ cast_object() */
-static int cast_object(zval *object, int type, char *contents)
+static zend_result cast_object(zval *object, int type, char *contents)
 {
 	if (contents) {
 		ZVAL_STRINGL(object, contents, strlen(contents));
@@ -1833,12 +1833,12 @@ static int cast_object(zval *object, int type, char *contents)
 /* }}} */
 
 /* {{{ sxe_object_cast() */
-static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
+static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
 {
 	php_sxe_object *sxe;
 	xmlChar        *contents = NULL;
 	xmlNodePtr	    node;
-	int rv;
+	zend_result rv;
 
 	sxe = php_sxe_fetch_object(readobj);
 
@@ -1882,7 +1882,7 @@ static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
 /* }}} */
 
 /*  {{{ Variant of sxe_object_cast_ex that handles overwritten __toString() method */
-static int sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
+static zend_result sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	if (type == IS_STRING
 		&& zend_std_cast_object_tostring(readobj, writeobj, IS_STRING) == SUCCESS
@@ -1908,7 +1908,7 @@ PHP_METHOD(SimpleXMLElement, __toString)
 }
 /* }}} */
 
-static int php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) /* {{{ */
+static zend_result php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) /* {{{ */
 {
 	xmlNodePtr      node;
 	zval            data;
@@ -1935,7 +1935,7 @@ static int php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) 
 }
 /* }}} */
 
-static int sxe_count_elements(zend_object *object, zend_long *count) /* {{{ */
+static zend_result sxe_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
 	php_sxe_object  *intern;
 	intern = php_sxe_fetch_object(object);
@@ -2222,7 +2222,6 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *f
 
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
-	intern->zo.handlers = &sxe_object_handlers;
 
 	return intern;
 }
@@ -2673,6 +2672,7 @@ PHP_MINIT_FUNCTION(simplexml)
 {
 	sxe_class_entry = register_class_SimpleXMLElement(zend_ce_stringable, zend_ce_countable, spl_ce_RecursiveIterator);
 	sxe_class_entry->create_object = sxe_object_new;
+	sxe_class_entry->default_object_handlers = &sxe_object_handlers;
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));

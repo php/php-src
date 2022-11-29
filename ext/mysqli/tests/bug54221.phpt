@@ -10,7 +10,6 @@ require_once('skipifconnectfailure.inc');
 mysqli.max_links = 1
 mysqli.allow_persistent = Off
 mysqli.max_persistent = 0
-mysqli.reconnect = Off
 --FILE--
 <?php
     include ("connect.inc");

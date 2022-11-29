@@ -1900,8 +1900,8 @@ AC_DEFUN([PHP_PROG_PHP],[
     set $php_version
     IFS=$ac_IFS
     php_version_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
-    dnl Minimum supported version for gen_stubs.php is PHP 7.1.
-    if test "$php_version_num" -lt 70100; then
+    dnl Minimum supported version for gen_stub.php is PHP 7.4.
+    if test "$php_version_num" -lt 70400; then
       AC_MSG_RESULT([$php_version (too old)])
       unset PHP
     else
@@ -2747,4 +2747,30 @@ AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
 
   $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/$1 \
     > $srcdir/$1.tmp && mv $srcdir/$1.tmp $srcdir/$1
+])
+
+dnl Check if we have prctl
+AC_DEFUN([PHP_CHECK_PRCTL],
+[
+  AC_MSG_CHECKING([for prctl])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/prctl.h>]], [[prctl(0, 0, 0, 0, 0);]])], [
+    AC_DEFINE([HAVE_PRCTL], 1, [do we have prctl?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+])
+
+dnl Check if we have procctl
+AC_DEFUN([PHP_CHECK_PROCCTL],
+[
+  AC_MSG_CHECKING([for procctl])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/procctl.h>]], [[procctl(0, 0, 0, 0);]])], [
+    AC_DEFINE([HAVE_PROCCTL], 1, [do we have procctl?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
 ])

@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+#[\AllowDynamicProperties]
 class stdClass
 {
 }
@@ -102,14 +103,12 @@ function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
 /** @return callable|null */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
-/** @return true */
-function restore_error_handler(): bool {}
+function restore_error_handler(): true {}
 
 /** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
-/** @return true */
-function restore_exception_handler(): bool {}
+function restore_exception_handler(): true {}
 
 /**
  * @return array<int, string>
@@ -195,7 +194,7 @@ function gc_enable(): void {}
 function gc_disable(): void {}
 
 /**
- * @return array<string, int>
+ * @return array<string, int|bool>
  * @refcount 1
  */
 function gc_status(): array {}

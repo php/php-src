@@ -34,6 +34,8 @@
 #include "zend_vm.h"
 #include "zend_inheritance.h"
 #include "zend_exceptions.h"
+#include "zend_mmap.h"
+#include "zend_observer.h"
 #include "main/php_main.h"
 #include "main/SAPI.h"
 #include "main/php_streams.h"
@@ -616,6 +618,21 @@ static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char 
 	return zend_string_init(str, size, permanent);
 }
 
+static inline void accel_copy_permanent_list_types(
+	zend_new_interned_string_func_t new_interned_string, zend_type type)
+{
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(*single_type));
+			accel_copy_permanent_list_types(new_interned_string, *single_type);
+		}
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			ZEND_TYPE_SET_PTR(*single_type, new_interned_string(ZEND_TYPE_NAME(*single_type)));
+		}
+	} ZEND_TYPE_FOREACH_END();
+}
+
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_interned_string)
 {
@@ -650,13 +667,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				num_args++;
 			}
 			for (i = 0 ; i < num_args; i++) {
-				zend_type *single_type;
-				ZEND_TYPE_FOREACH(arg_info[i].type, single_type) {
-					if (ZEND_TYPE_HAS_NAME(*single_type)) {
-						ZEND_TYPE_SET_PTR(*single_type,
-							new_interned_string(ZEND_TYPE_NAME(*single_type)));
-					}
-				} ZEND_TYPE_FOREACH_END();
+				accel_copy_permanent_list_types(new_interned_string, arg_info[i].type);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -700,8 +711,14 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->constants_table, q) {
+			zend_class_constant* c;
+
 			if (q->key) {
 				q->key = new_interned_string(q->key);
+			}
+			c = (zend_class_constant*)Z_PTR(q->val);
+			if (Z_TYPE(c->value) == IS_STRING) {
+				ZVAL_STR(&c->value, new_interned_string(Z_STR(c->value)));
 			}
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
@@ -1796,6 +1813,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OBSERVER;
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 		}
@@ -2180,19 +2198,21 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
-#ifdef _M_X64
+#if ZEND_ENABLE_ZVAL_LONG64
 		InterlockedIncrement64(&ZCSG(hits));
+		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #else
 		InterlockedIncrement(&ZCSG(hits));
+		InterlockedIncrement(&persistent_script->dynamic_members.hits);
 #endif
-		InterlockedIncrement64(&persistent_script->dynamic_members.hits);
 #endif
 
 		/* see bug #15471 (old BTS) */
 		if (persistent_script->script.filename) {
-			if (!EG(current_execute_data) || !EG(current_execute_data)->opline ||
+			if (!EG(current_execute_data) ||
 			    !EG(current_execute_data)->func ||
 			    !ZEND_USER_CODE(EG(current_execute_data)->func->common.type) ||
+			    !EG(current_execute_data)->opline ||
 			    EG(current_execute_data)->opline->opcode != ZEND_INCLUDE_OR_EVAL ||
 			    (EG(current_execute_data)->opline->extended_value != ZEND_INCLUDE_ONCE &&
 			     EG(current_execute_data)->opline->extended_value != ZEND_REQUIRE_ONCE)) {
@@ -2805,6 +2825,7 @@ static inline int accel_find_sapi(void)
 		"litespeed",
 		"uwsgi",
 		"fuzzer",
+		"frankenphp",
 		NULL
 	};
 	const char **sapi_name;
@@ -2828,18 +2849,23 @@ static inline int accel_find_sapi(void)
 static int zend_accel_init_shm(void)
 {
 	int i;
+	size_t accel_shared_globals_size;
 
 	zend_shared_alloc_lock();
 
 	if (ZCG(accel_directives).interned_strings_buffer) {
-		accel_shared_globals = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
+		accel_shared_globals_size = ZCG(accel_directives).interned_strings_buffer * 1024 * 1024;
 	} else {
 		/* Make sure there is always at least one interned string hash slot,
 		 * so the table can be queried unconditionally. */
-		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals) + sizeof(uint32_t));
+		accel_shared_globals_size = sizeof(zend_accel_shared_globals) + sizeof(uint32_t);
 	}
+
+	accel_shared_globals = zend_shared_alloc(accel_shared_globals_size);
 	if (!accel_shared_globals) {
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
+				"Insufficient shared memory for interned strings buffer! (tried to allocate %zu bytes)",
+				accel_shared_globals_size);
 		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
@@ -2936,7 +2962,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 # endif
 
 # if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
-static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
+static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
 {
 	void *ret = MAP_FAILED;
 	void *mem;
@@ -2949,7 +2975,7 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap failed: %s (%d)",
 			strerror(errno), errno);
-		return -1;
+		return FAILURE;
 	}
 	memcpy(mem, start, real_size);
 
@@ -2974,7 +3000,7 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 			zend_error(E_WARNING,
 				ACCELERATOR_PRODUCT_NAME " huge_code_pages: madvise(HUGEPAGE) failed: %s (%d)",
 				strerror(errno), errno);
-			return -1;
+			return FAILURE;
 		}
 #  else
 		memcpy(start, mem, real_size);
@@ -2983,17 +3009,19 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
 			strerror(errno), errno);
-		return -1;
+		return FAILURE;
 #  endif
 	}
 
-	if (ret == start) {
-		memcpy(start, mem, real_size);
-		mprotect(start, size, PROT_READ | PROT_EXEC);
-	}
+	// Given the MAP_FIXED flag the address can never diverge
+	ZEND_ASSERT(ret == start);
+	zend_mmap_set_name(start, size, "zend_huge_code_pages");
+	memcpy(start, mem, real_size);
+	mprotect(start, size, PROT_READ | PROT_EXEC);
+
 	munmap(mem, size);
 
-	return (ret == start) ? 0 : -1;
+	return SUCCESS;
 }
 
 static void accel_move_code_to_huge_pages(void)
@@ -3130,7 +3158,7 @@ static int accel_startup(zend_extension *extension)
 		    strcmp(sapi_module.name, "cli") == 0) {
 			zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb);
 		} else {
-			zps_startup_failure("Opcode Caching is only supported in Apache, FPM, FastCGI and LiteSpeed SAPIs", NULL, accelerator_remove_cb);
+			zps_startup_failure("Opcode Caching is only supported in Apache, FPM, FastCGI, FrankenPHP, LiteSpeed and uWSGI SAPIs", NULL, accelerator_remove_cb);
 		}
 		return SUCCESS;
 	}
@@ -3919,12 +3947,7 @@ static void preload_link(void)
 
 				/* Inheritance successful, print out any warnings. */
 				zend_error_cb = orig_error_cb;
-				EG(record_errors) = false;
-				for (uint32_t i = 0; i < EG(num_errors); i++) {
-					zend_error_info *error = EG(errors)[i];
-					zend_error_zstr_at(
-						error->type, error->filename, error->lineno, error->message);
-				}
+				zend_emit_recorded_errors();
 			} zend_catch {
 				/* Clear variance obligations that were left behind on bailout. */
 				if (CG(delayed_variance_obligations)) {
@@ -3960,7 +3983,7 @@ static void preload_link(void)
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				break;
 			}
-			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+			if ((ce->ce_flags & ZEND_ACC_LINKED) && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				if (!(ce->ce_flags & ZEND_ACC_TRAIT)) { /* don't update traits */
 					CG(in_compilation) = true; /* prevent autoloading */
 					if (preload_try_resolve_constants(ce)) {
@@ -4322,7 +4345,7 @@ static int accel_preload(const char *config, bool in_child)
 
 	orig_map_ptr_last = CG(map_ptr_last);
 
-	/* Compile and execute proloading script */
+	/* Compile and execute preloading script */
 	zend_stream_init_filename(&file_handle, (char *) config);
 
 	preload_scripts = emalloc(sizeof(HashTable));
@@ -4458,6 +4481,7 @@ static int accel_preload(const char *config, bool in_child)
 		script->script.main_op_array.fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 		script->script.main_op_array.last = 1;
 		script->script.main_op_array.last_literal = 1;
+		script->script.main_op_array.T = ZEND_OBSERVER_ENABLED;
 #if ZEND_USE_ABS_CONST_ADDR
 		script->script.main_op_array.literals = (zval*)emalloc(sizeof(zval));
 #else
@@ -4551,203 +4575,234 @@ static void preload_send_header(sapi_header_struct *sapi_header, void *server_co
 {
 }
 
+#ifndef ZEND_WIN32
+static int accel_finish_startup_preload(bool in_child)
+{
+	int ret = SUCCESS;
+	int rc;
+	int orig_error_reporting;
+
+	int (*orig_activate)(void) = sapi_module.activate;
+	int (*orig_deactivate)(void) = sapi_module.deactivate;
+	void (*orig_register_server_variables)(zval *track_vars_array) = sapi_module.register_server_variables;
+	int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers) = sapi_module.header_handler;
+	int (*orig_send_headers)(sapi_headers_struct *sapi_headers) = sapi_module.send_headers;
+	void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context)= sapi_module.send_header;
+	char *(*orig_getenv)(const char *name, size_t name_len) = sapi_module.getenv;
+	size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
+	void (*orig_flush)(void *server_context) = sapi_module.flush;
+#ifdef ZEND_SIGNALS
+	bool old_reset_signals = SIGG(reset);
+#endif
+
+	sapi_module.activate = NULL;
+	sapi_module.deactivate = NULL;
+	sapi_module.register_server_variables = NULL;
+	sapi_module.header_handler = preload_header_handler;
+	sapi_module.send_headers = preload_send_headers;
+	sapi_module.send_header = preload_send_header;
+	sapi_module.getenv = NULL;
+	sapi_module.ub_write = preload_ub_write;
+	sapi_module.flush = preload_flush;
+
+	zend_interned_strings_switch_storage(1);
+
+#ifdef ZEND_SIGNALS
+	SIGG(reset) = false;
+#endif
+
+	orig_error_reporting = EG(error_reporting);
+	EG(error_reporting) = 0;
+
+	rc = php_request_startup();
+
+	EG(error_reporting) = orig_error_reporting;
+
+	if (rc == SUCCESS) {
+		bool orig_report_memleaks;
+
+		/* don't send headers */
+		SG(headers_sent) = true;
+		SG(request_info).no_headers = true;
+		php_output_set_status(0);
+
+		ZCG(auto_globals_mask) = 0;
+		ZCG(request_time) = (time_t)sapi_get_request_time();
+		ZCG(cache_opline) = NULL;
+		ZCG(cache_persistent_script) = NULL;
+		ZCG(include_path_key_len) = 0;
+		ZCG(include_path_check) = true;
+
+		ZCG(cwd) = NULL;
+		ZCG(cwd_key_len) = 0;
+		ZCG(cwd_check) = true;
+
+		if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
+			ret = FAILURE;
+		}
+		preload_flush(NULL);
+
+		orig_report_memleaks = PG(report_memleaks);
+		PG(report_memleaks) = false;
+#ifdef ZEND_SIGNALS
+		/* We may not have registered signal handlers due to SIGG(reset)=0, so
+		 * also disable the check that they are registered. */
+		SIGG(check) = false;
+#endif
+		php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
+		PG(report_memleaks) = orig_report_memleaks;
+	} else {
+		zend_shared_alloc_unlock();
+		ret = FAILURE;
+	}
+#ifdef ZEND_SIGNALS
+	SIGG(reset) = old_reset_signals;
+#endif
+
+	sapi_module.activate = orig_activate;
+	sapi_module.deactivate = orig_deactivate;
+	sapi_module.register_server_variables = orig_register_server_variables;
+	sapi_module.header_handler = orig_header_handler;
+	sapi_module.send_headers = orig_send_headers;
+	sapi_module.send_header = orig_send_header;
+	sapi_module.getenv = orig_getenv;
+	sapi_module.ub_write = orig_ub_write;
+	sapi_module.flush = orig_flush;
+
+	sapi_activate();
+
+	return ret;
+}
+
+static int accel_finish_startup_preload_subprocess(pid_t *pid)
+{
+	uid_t euid = geteuid();
+	if (euid != 0) {
+		if (ZCG(accel_directives).preload_user
+		 && *ZCG(accel_directives).preload_user) {
+			zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored because the current user is not \"root\"");
+		}
+
+		*pid = -1;
+		return SUCCESS;
+	}
+
+	if (!ZCG(accel_directives).preload_user
+	 || !*ZCG(accel_directives).preload_user) {
+
+		bool sapi_requires_preload_user = !(strcmp(sapi_module.name, "cli") == 0
+		  || strcmp(sapi_module.name, "phpdbg") == 0);
+
+		if (!sapi_requires_preload_user) {
+			*pid = -1;
+			return SUCCESS;
+		}
+
+		zend_shared_alloc_unlock();
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload\" requires \"opcache.preload_user\" when running under uid 0");
+		return FAILURE;
+	}
+
+	struct passwd *pw = getpwnam(ZCG(accel_directives).preload_user);
+	if (pw == NULL) {
+		zend_shared_alloc_unlock();
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
+		return FAILURE;
+	}
+
+	if (pw->pw_uid == euid) {
+		*pid = -1;
+		return SUCCESS;
+	}
+
+	*pid = fork();
+	if (*pid == -1) {
+		zend_shared_alloc_unlock();
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to fork()");
+		return FAILURE;
+	}
+
+	if (*pid == 0) { /* children */
+		if (setgid(pw->pw_gid) < 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
+			exit(1);
+		}
+		if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
+			exit(1);
+		}
+		if (setuid(pw->pw_uid) < 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
+			exit(1);
+		}
+	}
+
+	return SUCCESS;
+}
+#endif /* ZEND_WIN32 */
+
 static int accel_finish_startup(void)
 {
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
 	}
 
-	if (ZCG(accel_directives).preload && *ZCG(accel_directives).preload) {
-#ifdef ZEND_WIN32
-		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
-		return FAILURE;
-#else
-		bool in_child = false;
-		int ret = SUCCESS;
-		int rc;
-		int orig_error_reporting;
-
-		int (*orig_activate)(void) = sapi_module.activate;
-		int (*orig_deactivate)(void) = sapi_module.deactivate;
-		void (*orig_register_server_variables)(zval *track_vars_array) = sapi_module.register_server_variables;
-		int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers) = sapi_module.header_handler;
-		int (*orig_send_headers)(sapi_headers_struct *sapi_headers) = sapi_module.send_headers;
-		void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context)= sapi_module.send_header;
-		char *(*orig_getenv)(const char *name, size_t name_len) = sapi_module.getenv;
-		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
-		void (*orig_flush)(void *server_context) = sapi_module.flush;
-#ifdef ZEND_SIGNALS
-		bool old_reset_signals = SIGG(reset);
-#endif
-
-		if (UNEXPECTED(file_cache_only)) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
-			return SUCCESS;
-		}
-
-		/* exclusive lock */
-		zend_shared_alloc_lock();
-
-		if (ZCSG(preload_script)) {
-			/* Preloading was done in another process */
-			preload_load();
-			zend_shared_alloc_unlock();
-			return SUCCESS;
-		}
-
-		if (geteuid() == 0) {
-			pid_t pid;
-			struct passwd *pw;
-
-			if (!ZCG(accel_directives).preload_user
-			 || !*ZCG(accel_directives).preload_user) {
-				zend_shared_alloc_unlock();
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload_user\" has not been defined");
-				return FAILURE;
-			}
-
-			pw = getpwnam(ZCG(accel_directives).preload_user);
-			if (pw == NULL) {
-				zend_shared_alloc_unlock();
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
-				return FAILURE;
-			}
-
-			pid = fork();
-			if (pid == -1) {
-				zend_shared_alloc_unlock();
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to fork()");
-				return FAILURE;
-			} else if (pid == 0) { /* children */
-				if (setgid(pw->pw_gid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
-					exit(1);
-				}
-				if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
-					exit(1);
-				}
-				if (setuid(pw->pw_uid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
-					exit(1);
-				}
-				in_child = true;
-			} else { /* parent */
-				int status;
-
-				if (waitpid(pid, &status, 0) < 0) {
-					zend_shared_alloc_unlock();
-					zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
-					return FAILURE;
-				}
-
-				if (ZCSG(preload_script)) {
-					preload_load();
-				}
-
-				zend_shared_alloc_unlock();
-				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-					return SUCCESS;
-				} else {
-					return FAILURE;
-				}
-			}
-		} else {
-			if (ZCG(accel_directives).preload_user
-			 && *ZCG(accel_directives).preload_user) {
-				zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored");
-			}
-		}
-
-		sapi_module.activate = NULL;
-		sapi_module.deactivate = NULL;
-		sapi_module.register_server_variables = NULL;
-		sapi_module.header_handler = preload_header_handler;
-		sapi_module.send_headers = preload_send_headers;
-		sapi_module.send_header = preload_send_header;
-		sapi_module.getenv = NULL;
-		sapi_module.ub_write = preload_ub_write;
-		sapi_module.flush = preload_flush;
-
-		zend_interned_strings_switch_storage(1);
-
-#ifdef ZEND_SIGNALS
-		SIGG(reset) = false;
-#endif
-
-		orig_error_reporting = EG(error_reporting);
-		EG(error_reporting) = 0;
-
-		rc = php_request_startup();
-
-		EG(error_reporting) = orig_error_reporting;
-
-		if (rc == SUCCESS) {
-			bool orig_report_memleaks;
-
-			/* don't send headers */
-			SG(headers_sent) = true;
-			SG(request_info).no_headers = true;
-			php_output_set_status(0);
-
-			ZCG(auto_globals_mask) = 0;
-			ZCG(request_time) = (time_t)sapi_get_request_time();
-			ZCG(cache_opline) = NULL;
-			ZCG(cache_persistent_script) = NULL;
-			ZCG(include_path_key_len) = 0;
-			ZCG(include_path_check) = true;
-
-			ZCG(cwd) = NULL;
-			ZCG(cwd_key_len) = 0;
-			ZCG(cwd_check) = true;
-
-			if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
-				ret = FAILURE;
-			}
-			preload_flush(NULL);
-
-			orig_report_memleaks = PG(report_memleaks);
-			PG(report_memleaks) = false;
-#ifdef ZEND_SIGNALS
-			/* We may not have registered signal handlers due to SIGG(reset)=0, so
-			 * also disable the check that they are registered. */
-			SIGG(check) = false;
-#endif
-			php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
-			PG(report_memleaks) = orig_report_memleaks;
-		} else {
-			zend_shared_alloc_unlock();
-			ret = FAILURE;
-		}
-#ifdef ZEND_SIGNALS
-		SIGG(reset) = old_reset_signals;
-#endif
-
-		sapi_module.activate = orig_activate;
-		sapi_module.deactivate = orig_deactivate;
-		sapi_module.register_server_variables = orig_register_server_variables;
-		sapi_module.header_handler = orig_header_handler;
-		sapi_module.send_headers = orig_send_headers;
-		sapi_module.send_header = orig_send_header;
-		sapi_module.getenv = orig_getenv;
-		sapi_module.ub_write = orig_ub_write;
-		sapi_module.flush = orig_flush;
-
-		sapi_activate();
-
-		if (in_child) {
-			if (ret == SUCCESS) {
-				exit(0);
-			} else {
-				exit(2);
-			}
-		}
-
-		return ret;
-#endif
+	if (!(ZCG(accel_directives).preload && *ZCG(accel_directives).preload)) {
+		return SUCCESS;
 	}
 
-	return SUCCESS;
+#ifdef ZEND_WIN32
+	zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
+	return FAILURE;
+#else /* ZEND_WIN32 */
+
+	if (UNEXPECTED(file_cache_only)) {
+		zend_accel_error(ACCEL_LOG_WARNING, "Preloading doesn't work in \"file_cache_only\" mode");
+		return SUCCESS;
+	}
+
+	/* exclusive lock */
+	zend_shared_alloc_lock();
+
+	if (ZCSG(preload_script)) {
+		/* Preloading was done in another process */
+		preload_load();
+		zend_shared_alloc_unlock();
+		return SUCCESS;
+	}
+
+
+	pid_t pid;
+	if (accel_finish_startup_preload_subprocess(&pid) == FAILURE) {
+		zend_shared_alloc_unlock();
+		return FAILURE;
+	}
+
+	if (pid == -1) { /* no subprocess was needed */
+		return accel_finish_startup_preload(false);
+	} else if (pid == 0) { /* subprocess */
+		int ret = accel_finish_startup_preload(true);
+
+		exit(ret == SUCCESS ? 0 : 1);
+	} else { /* parent */
+		int status;
+
+		if (waitpid(pid, &status, 0) < 0) {
+			zend_shared_alloc_unlock();
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
+		}
+
+		if (ZCSG(preload_script)) {
+			preload_load();
+		}
+
+		if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+			return SUCCESS;
+		} else {
+			return FAILURE;
+		}
+	}
+#endif /* ZEND_WIN32 */
 }
 
 ZEND_EXT_API zend_extension zend_extension_entry = {

@@ -31,16 +31,19 @@
 #  include <utime.h>
 # endif
 #endif
+#include "userspace_arginfo.h"
 
 static int le_protocols;
 
 struct php_user_stream_wrapper {
+	php_stream_wrapper wrapper;
 	char * protoname;
 	zend_class_entry *ce;
-	php_stream_wrapper wrapper;
+	zend_resource *resource;
 };
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
+static int user_wrapper_close(php_stream_wrapper *wrapper, php_stream *stream);
 static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context);
@@ -52,7 +55,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 static const php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
-	NULL, /* close - the streams themselves know how */
+	user_wrapper_close,
 	NULL, /* stat - the streams themselves know how */
 	user_wrapper_stat_url,
 	user_wrapper_opendir,
@@ -80,35 +83,8 @@ PHP_MINIT_FUNCTION(user_streams)
 	if (le_protocols == FAILURE)
 		return FAILURE;
 
-	REGISTER_LONG_CONSTANT("STREAM_USE_PATH", 			USE_PATH, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_IGNORE_URL", 		IGNORE_URL, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_REPORT_ERRORS", 		REPORT_ERRORS, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_MUST_SEEK", 			STREAM_MUST_SEEK, CONST_CS|CONST_PERSISTENT);
+	register_userspace_symbols(module_number);
 
-	REGISTER_LONG_CONSTANT("STREAM_URL_STAT_LINK", 		PHP_STREAM_URL_STAT_LINK,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_URL_STAT_QUIET", 	PHP_STREAM_URL_STAT_QUIET,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_MKDIR_RECURSIVE",	PHP_STREAM_MKDIR_RECURSIVE,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_IS_URL",	PHP_STREAM_IS_URL,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_BLOCKING",	PHP_STREAM_OPTION_BLOCKING,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_READ_TIMEOUT",	PHP_STREAM_OPTION_READ_TIMEOUT,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_READ_BUFFER",	PHP_STREAM_OPTION_READ_BUFFER,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_OPTION_WRITE_BUFFER",	PHP_STREAM_OPTION_WRITE_BUFFER,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_BUFFER_NONE",		PHP_STREAM_BUFFER_NONE,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_BUFFER_LINE",		PHP_STREAM_BUFFER_LINE,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_BUFFER_FULL",		PHP_STREAM_BUFFER_FULL,			CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_CAST_AS_STREAM",		PHP_STREAM_AS_STDIO,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_CAST_FOR_SELECT",	PHP_STREAM_AS_FD_FOR_SELECT,		CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("STREAM_META_TOUCH",			PHP_STREAM_META_TOUCH,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_OWNER",			PHP_STREAM_META_OWNER,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_OWNER_NAME",	PHP_STREAM_META_OWNER_NAME,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_GROUP",			PHP_STREAM_META_GROUP,			CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_GROUP_NAME",	PHP_STREAM_META_GROUP_NAME,		CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_META_ACCESS",		PHP_STREAM_META_ACCESS,			CONST_CS|CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -296,8 +272,8 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 	}
 
 	if (context) {
-		add_property_resource(object, "context", context->res);
 		GC_ADDREF(context->res);
+		add_property_resource(object, "context", context->res);
 	} else {
 		add_property_null(object, "context");
 	}
@@ -374,6 +350,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 		/* set wrapper data to be a reference to our object */
 		ZVAL_COPY(&stream->wrapperdata, &us->object);
+
+		GC_ADDREF(us->wrapper->resource);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));
@@ -396,6 +374,14 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 	PG(in_user_include) = old_in_user_include;
 	return stream;
+}
+
+static int user_wrapper_close(php_stream_wrapper *wrapper, php_stream *stream)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	zend_list_delete(uwrap->resource);
+	// FIXME: Unused?
+	return 0;
 }
 
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
@@ -439,6 +425,8 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 		/* set wrapper data to be a reference to our object */
 		ZVAL_COPY(&stream->wrapperdata, &us->object);
+
+		GC_ADDREF(us->wrapper->resource);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_DIR_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));
@@ -481,10 +469,12 @@ PHP_FUNCTION(stream_wrapper_register)
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
 	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
+	uwrap->resource = NULL;
 
 	rsrc = zend_register_resource(uwrap, le_protocols);
 
 	if (php_register_url_stream_wrapper_volatile(protocol, &uwrap->wrapper) == SUCCESS) {
+		uwrap->resource = rsrc;
 		RETURN_TRUE;
 	}
 
@@ -510,10 +500,18 @@ PHP_FUNCTION(stream_wrapper_unregister)
 		RETURN_THROWS();
 	}
 
+	php_stream_wrapper *wrapper = zend_hash_find_ptr(php_stream_get_url_stream_wrappers_hash(), protocol);
 	if (php_unregister_url_stream_wrapper_volatile(protocol) == FAILURE) {
 		/* We failed */
 		php_error_docref(NULL, E_WARNING, "Unable to unregister protocol %s://", ZSTR_VAL(protocol));
 		RETURN_FALSE;
+	}
+
+	ZEND_ASSERT(wrapper != NULL);
+	if (wrapper->wops == &user_stream_wops) {
+		struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper *)wrapper;
+		// uwrap will be released by resource destructor
+		zend_list_delete(uwrap->resource);
 	}
 
 	RETURN_TRUE;
@@ -929,7 +927,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 
 		switch (value) {
 		case PHP_STREAM_TRUNCATE_SUPPORTED:
-			if (zend_is_callable_ex(&func_name, Z_OBJ(us->object), 0, NULL, NULL, NULL))
+			if (zend_is_callable_ex(&func_name, Z_OBJ(us->object), IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, NULL, NULL))
 				ret = PHP_STREAM_OPTION_RETURN_OK;
 			else
 				ret = PHP_STREAM_OPTION_RETURN_ERR;

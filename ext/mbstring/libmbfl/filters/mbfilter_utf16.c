@@ -149,10 +149,10 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 1;
 	} else {
 		int n = (filter->cache << 8) | (c & 0xFF);
+		filter->cache = filter->status = 0;
 		if (n == 0xFFFE) {
 			/* Switch to little-endian mode */
 			filter->filter_function = mbfl_filt_conv_utf16le_wchar;
-			filter->cache = filter->status = 0;
 		} else {
 			filter->filter_function = mbfl_filt_conv_utf16be_wchar;
 			if (n >= 0xD800 && n <= 0xDBFF) {
@@ -165,7 +165,6 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 			} else if (n != 0xFEFF) {
 				CK((*filter->output_function)(n, filter->data));
 			}
-			filter->cache = filter->status = 0;
 		}
 	}
 
@@ -189,11 +188,11 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 2;
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
 			/* This is wrong; second part of surrogate pair has come first */
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			filter->status = 0;
 		} else {
-			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
+			CK((*filter->output_function)(n, filter->data));
 		}
 		break;
 
@@ -206,17 +205,17 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 		n = ((filter->cache & 0xFF) << 8) | (c & 0xFF);
 		if (n >= 0xD800 && n <= 0xDBFF) {
 			/* Wrong; that's the first half of a surrogate pair, not the second */
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
+			filter->status = 0;
 			n = ((filter->cache & 0x3FF00) << 2) + (n & 0x3FF) + 0x10000;
 			CK((*filter->output_function)(n, filter->data));
-			filter->status = 0;
 		} else {
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(n, filter->data));
-			filter->status = 0;
 		}
 	}
 
@@ -261,11 +260,11 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 2;
 		} else if ((c & 0xfc) == 0xdc) {
 			/* This is wrong; the second part of the surrogate pair has come first */
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			filter->status = 0;
 		} else {
-			CK((*filter->output_function)(filter->cache + ((c & 0xff) << 8), filter->data));
 			filter->status = 0;
+			CK((*filter->output_function)(filter->cache + ((c & 0xff) << 8), filter->data));
 		}
 		break;
 
@@ -279,19 +278,19 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 		if (n >= 0xD800 && n <= 0xDBFF) {
 			/* We previously saw the first part of a surrogate pair and were
 			 * expecting the second part; this is another first part */
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
 			n = filter->cache + ((c & 0x3) << 8) + 0x10000;
-			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
+			CK((*filter->output_function)(n, filter->data));
 		} else {
 			/* The first part of a surrogate pair was followed by some other codepoint
 			 * which is not part of a surrogate pair at all */
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(n, filter->data));
-			filter->status = 0;
 		}
 		break;
 	}
@@ -324,6 +323,7 @@ static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		/* Input string was truncated */
+		filter->status = 0;
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 

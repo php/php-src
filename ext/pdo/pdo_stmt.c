@@ -218,7 +218,6 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 		row->stmt = stmt;
 		zend_object_std_init(&row->std, pdo_row_ce);
 		ZVAL_OBJ(&stmt->lazy_object_ref, &row->std);
-		row->std.handlers = &pdo_row_object_handlers;
 		GC_ADDREF(&stmt->std);
 		GC_DELREF(&row->std);
 	}
@@ -1551,8 +1550,10 @@ PHP_METHOD(PDOStatement, errorInfo)
 	array_init(return_value);
 	add_next_index_string(return_value, stmt->error_code);
 
-	if (stmt->dbh->methods->fetch_err) {
-		stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value);
+	if (strncmp(stmt->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE))) {
+		if (stmt->dbh->methods->fetch_err) {
+			stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value);
+		}
 	}
 
 	error_count = zend_hash_num_elements(Z_ARRVAL_P(return_value));
@@ -2135,8 +2136,6 @@ zend_object *pdo_dbstmt_new(zend_class_entry *ce)
 	zend_object_std_init(&stmt->std, ce);
 	object_properties_init(&stmt->std, ce);
 
-	stmt->std.handlers = &pdo_dbstmt_object_handlers;
-
 	return &stmt->std;
 }
 /* }}} */
@@ -2462,7 +2461,6 @@ zend_object *pdo_row_new(zend_class_entry *ce)
 {
 	pdo_row_t *row = ecalloc(1, sizeof(pdo_row_t));
 	zend_object_std_init(&row->std, ce);
-	row->std.handlers = &pdo_row_object_handlers;
 
 	return &row->std;
 }
@@ -2472,6 +2470,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce = register_class_PDOStatement(zend_ce_aggregate);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
+	pdo_dbstmt_ce->default_object_handlers = &pdo_dbstmt_object_handlers;
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
@@ -2484,6 +2483,7 @@ void pdo_stmt_init(void)
 
 	pdo_row_ce = register_class_PDORow();
 	pdo_row_ce->create_object = pdo_row_new;
+	pdo_row_ce->default_object_handlers = &pdo_row_object_handlers;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;

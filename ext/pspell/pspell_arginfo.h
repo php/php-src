@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 54253af8d28520254e062171733c753d7104ec6b */
+ * Stub hash: 8d35f61a0b48c5422b31e78f587d9258fd3e8e37 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pspell_new, 0, 1, PSpell\\Dictionary, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, language, IS_STRING, 0)
@@ -143,6 +143,14 @@ static const zend_function_entry class_PSpell_Dictionary_methods[] = {
 static const zend_function_entry class_PSpell_Config_methods[] = {
 	ZEND_FE_END
 };
+
+static void register_pspell_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSPELL_BAD_SPELLERS", PSPELL_BAD_SPELLERS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PSPELL_RUN_TOGETHER", PSPELL_RUN_TOGETHER, CONST_PERSISTENT);
+}
 
 static zend_class_entry *register_class_PSpell_Dictionary(void)
 {

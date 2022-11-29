@@ -75,6 +75,7 @@ enum mbfl_no_encoding {
  	mbfl_no_encoding_sjis_mac,
 	mbfl_no_encoding_sjis2004,
 	mbfl_no_encoding_cp932,
+	mbfl_no_encoding_sjiswin,
 	mbfl_no_encoding_cp51932,
 	mbfl_no_encoding_jis,
 	mbfl_no_encoding_2022jp,
@@ -143,6 +144,10 @@ typedef struct {
 typedef size_t (*mb_to_wchar_fn)(unsigned char **in, size_t *in_len, uint32_t *out, size_t out_len, unsigned int *state);
 typedef void (*mb_from_wchar_fn)(uint32_t *in, size_t in_len, mb_convert_buf *out, bool end);
 
+/* When converting encoded text to a buffer of wchars (Unicode codepoints) using `mb_to_wchar_fn`,
+ * the buffer must be at least this size (to work with all supported text encodings) */
+#define MBSTRING_MIN_WCHAR_BUFSIZE 5
+
 static inline void mb_convert_buf_init(mb_convert_buf *buf, size_t initsize, uint32_t repl_char, unsigned int err_mode)
 {
 	buf->state = buf->errors = 0;
@@ -154,6 +159,7 @@ static inline void mb_convert_buf_init(mb_convert_buf *buf, size_t initsize, uin
 }
 
 #define MB_CONVERT_BUF_ENSURE(buf, out, limit, needed) \
+	ZEND_ASSERT(out <= limit); \
 	if ((limit - out) < (needed)) { \
 		size_t oldsize = limit - (unsigned char*)ZSTR_VAL(buf->str); \
 		size_t newsize = oldsize + MAX(oldsize >> 1, needed); \

@@ -9,4 +9,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Enums may not include properties in %s on line %d
+Fatal error: Enum Foo cannot include properties in %s on line %d

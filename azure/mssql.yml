@@ -1,5 +1,0 @@
-# this template should be included close to the beginning, before setup.yml
-# the container needs time to come up or the sqlcmd operation in setup.yml will have a login timeout
-steps:
-  - script: docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=<YourStrong@Passw0rd>" -p 1433:1433 --name sql1 -h sql1 -d mcr.microsoft.com/mssql/server:2019-CU8-ubuntu-16.04
-    displayName: 'Start MSSQL container'

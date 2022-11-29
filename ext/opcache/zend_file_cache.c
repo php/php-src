@@ -23,6 +23,7 @@
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
 #include "zend_system_id.h"
+#include "zend_enum.h"
 
 #include "php.h"
 #ifdef ZEND_WIN32
@@ -848,14 +849,6 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 
-	if (ce->backed_enum_table) {
-		HashTable *ht;
-		SERIALIZE_PTR(ce->backed_enum_table);
-		ht = ce->backed_enum_table;
-		UNSERIALIZE_PTR(ht);
-		zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
-	}
-
 	SERIALIZE_PTR(ce->constructor);
 	SERIALIZE_PTR(ce->destructor);
 	SERIALIZE_PTR(ce->clone);
@@ -1012,10 +1005,13 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 /**
  * Helper function for zend_file_cache_script_store().
  *
- * @return true on success, false on error
+ * @return true on success, false on error and errno is set to indicate the cause of the error
  */
 static bool zend_file_cache_script_write(int fd, const zend_persistent_script *script, const zend_file_cache_metainfo *info, const void *buf, const zend_string *s)
 {
+	ssize_t written;
+	const ssize_t total_size = (ssize_t)(sizeof(*info) + script->size + info->str_size);
+
 #ifdef HAVE_SYS_UIO_H
 	const struct iovec vec[] = {
 		{ .iov_base = (void *)info, .iov_len = sizeof(*info) },
@@ -1023,12 +1019,42 @@ static bool zend_file_cache_script_write(int fd, const zend_persistent_script *s
 		{ .iov_base = (void *)ZSTR_VAL(s), .iov_len = info->str_size },
 	};
 
-	return writev(fd, vec, sizeof(vec) / sizeof(vec[0])) == (ssize_t)(sizeof(*info) + script->size + info->str_size);
+	written = writev(fd, vec, sizeof(vec) / sizeof(vec[0]));
+	if (EXPECTED(written == total_size)) {
+		return true;
+	}
+
+	errno = written == -1 ? errno : EAGAIN;
+	return false;
 #else
-	return ZEND_LONG_MAX >= (zend_long)(sizeof(*info) + script->size + info->str_size) &&
-		write(fd, info, sizeof(*info)) == sizeof(*info) &&
-		write(fd, buf, script->size) == script->size &&
-		write(fd, ZSTR_VAL(s), info->str_size) == info->str_size;
+	if (UNEXPECTED(ZEND_LONG_MAX < (zend_long)total_size)) {
+# ifdef EFBIG
+		errno = EFBIG;
+# else
+		errno = ERANGE;
+# endif
+		return false;
+	}
+
+	written = write(fd, info, sizeof(*info));
+	if (UNEXPECTED(written != sizeof(*info))) {
+		errno = written == -1 ? errno : EAGAIN;
+		return false;
+	}
+
+	written = write(fd, buf, script->size);
+	if (UNEXPECTED(written != script->size)) {
+		errno = written == -1 ? errno : EAGAIN;
+		return false;
+	}
+
+	written = write(fd, ZSTR_VAL(s), info->str_size);
+	if (UNEXPECTED(written != info->str_size)) {
+		errno = written == -1 ? errno : EAGAIN;
+		return false;
+	}
+
+	return true;
 #endif
 }
 
@@ -1103,7 +1129,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 #endif
 
 	if (!zend_file_cache_script_write(fd, script, &info, buf, s)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s': %s\n", filename, strerror(errno));
 		zend_string_release_ex(s, 0);
 		close(fd);
 		efree(mem);
@@ -1115,7 +1141,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	zend_string_release_ex(s, 0);
 	efree(mem);
 	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s': %s\n", filename, strerror(errno));
 	}
 	close(fd);
 	efree(filename);
@@ -1645,12 +1671,6 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		}
 	}
 
-	if (ce->backed_enum_table) {
-		UNSERIALIZE_PTR(ce->backed_enum_table);
-		zend_file_cache_unserialize_hash(
-			ce->backed_enum_table, script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
-	}
-
 	UNSERIALIZE_PTR(ce->constructor);
 	UNSERIALIZE_PTR(ce->destructor);
 	UNSERIALIZE_PTR(ce->clone);
@@ -1695,6 +1715,10 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	}
+
+	// Memory addresses of object handlers are not stable. They can change due to ASLR or order of linking dynamic. To
+	// avoid pointing to invalid memory we relink default_object_handlers here.
+	ce->default_object_handlers = ce->ce_flags & ZEND_ACC_ENUM ? &zend_enum_object_handlers : &std_object_handlers;
 }
 
 static void zend_file_cache_unserialize_warnings(zend_persistent_script *script, void *buf)

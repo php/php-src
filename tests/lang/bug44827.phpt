@@ -21,5 +21,4 @@ try {
 ?>
 --EXPECTF--
 define(): Argument #1 ($constant_name) cannot be a class constant
-
-Fatal error: Class "" not found in %s on line %d
+Class "" not found

@@ -2,7 +2,7 @@
 Test that floats are converted to string locale independently
 --SKIPIF--
 <?php
-
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (!setlocale
     (LC_ALL,
     "german", "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_8859-1", "de_DE.UTF-8",
@@ -10,7 +10,6 @@ if (!setlocale
     )) {
     die("skip - locale needed for this test is not supported on this platform");
 }
-
 ?>
 --FILE--
 <?php

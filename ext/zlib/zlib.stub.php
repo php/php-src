@@ -3,6 +3,147 @@
 /** @generate-class-entries */
 
 /**
+ * @var int
+ * @cvalue PHP_ZLIB_ENCODING_GZIP
+ */
+const FORCE_GZIP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ZLIB_ENCODING_DEFLATE
+ */
+const FORCE_DEFLATE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_ZLIB_ENCODING_RAW
+ */
+const ZLIB_ENCODING_RAW = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ZLIB_ENCODING_GZIP
+ */
+const ZLIB_ENCODING_GZIP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ZLIB_ENCODING_DEFLATE
+ */
+const ZLIB_ENCODING_DEFLATE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue Z_NO_FLUSH
+ */
+const ZLIB_NO_FLUSH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_PARTIAL_FLUSH
+ */
+const ZLIB_PARTIAL_FLUSH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_SYNC_FLUSH
+ */
+const ZLIB_SYNC_FLUSH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_FULL_FLUSH
+ */
+const ZLIB_FULL_FLUSH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_BLOCK
+ */
+const ZLIB_BLOCK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_FINISH
+ */
+const ZLIB_FINISH = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue Z_FILTERED
+ */
+const ZLIB_FILTERED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_HUFFMAN_ONLY
+ */
+const ZLIB_HUFFMAN_ONLY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_RLE
+ */
+const ZLIB_RLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_FIXED
+ */
+const ZLIB_FIXED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_DEFAULT_STRATEGY
+ */
+const ZLIB_DEFAULT_STRATEGY = UNKNOWN;
+
+/**
+ * @var string
+ * @cvalue ZLIB_VERSION
+ */
+const ZLIB_VERSION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZLIB_VERNUM
+ */
+const ZLIB_VERNUM = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue Z_OK
+ */
+const ZLIB_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_STREAM_END
+ */
+const ZLIB_STREAM_END = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_NEED_DICT
+ */
+const ZLIB_NEED_DICT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_ERRNO
+ */
+const ZLIB_ERRNO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_STREAM_ERROR
+ */
+const ZLIB_STREAM_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_DATA_ERROR
+ */
+const ZLIB_DATA_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_MEM_ERROR
+ */
+const ZLIB_MEM_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_BUF_ERROR
+ */
+const ZLIB_BUF_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue Z_VERSION_ERROR
+ */
+const ZLIB_VERSION_ERROR = UNKNOWN;
+
+/**
  * @strict-properties
  * @not-serializable
  */
@@ -71,6 +212,7 @@ function gzwrite($stream, string $data, ?int $length = null): int|false {}
 /**
  * @param resource $stream
  * @alias fwrite
+ * @undocumentable gzputs is an alias of gzwrite, but transitive aliases are not yet supported
  */
 function gzputs($stream, string $data, ?int $length = null): int|false {}
 

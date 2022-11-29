@@ -93,6 +93,12 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 		zend_signal_handler(signo, siginfo, context);
 		return;
 	}
+
+	if (!tsrm_is_managed_thread()) {
+		fprintf(stderr, "zend_signal_handler_defer() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
+
+		return;
+	}
 #endif
 
 	if (EXPECTED(SIGG(active))) {
@@ -248,7 +254,7 @@ ZEND_API void zend_sigaction(int signo, const struct sigaction *act, struct siga
 		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN) {
 			sa.sa_sigaction = (void *) SIG_IGN;
 		} else {
-			sa.sa_flags     = SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
+			sa.sa_flags     = SA_ONSTACK | SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
 			sa.sa_sigaction = zend_signal_handler_defer;
 			sa.sa_mask      = global_sigmask;
 		}

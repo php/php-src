@@ -44,6 +44,7 @@ ZEND_API void zend_generator_restore_call_stack(zend_generator *generator) /* {{
 			ZEND_CALL_NUM_ARGS(call),
 			Z_PTR(call->This));
 		memcpy(((zval*)new_call) + ZEND_CALL_FRAME_SLOT, ((zval*)call) + ZEND_CALL_FRAME_SLOT, ZEND_CALL_NUM_ARGS(call) * sizeof(zval));
+		new_call->extra_named_params = call->extra_named_params;
 		new_call->prev_execute_data = prev_call;
 		prev_call = new_call;
 
@@ -93,6 +94,20 @@ ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *
 	return prev_call;
 }
 /* }}} */
+
+static zend_execute_data* zend_generator_revert_call_stack(zend_execute_data *call)
+{
+	zend_execute_data *prev = NULL;
+
+	do {
+		zend_execute_data *next = call->prev_execute_data;
+		call->prev_execute_data = prev;
+		prev = call;
+		call = next;
+	} while (call);
+
+	return prev;
+}
 
 static void zend_generator_cleanup_unfinished_execution(
 		zend_generator *generator, zend_execute_data *execute_data, uint32_t catch_op_num) /* {{{ */
@@ -372,6 +387,15 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		zend_get_gc_buffer_add_zval(gc_buffer, &extra_named_params);
 	}
 
+	if (UNEXPECTED(generator->frozen_call_stack)) {
+		/* The frozen stack is linked in reverse order */
+		zend_execute_data *call = zend_generator_revert_call_stack(generator->frozen_call_stack);
+		/* -1 required because we want the last run opcode, not the next to-be-run one. */
+		uint32_t op_num = execute_data->opline - op_array->opcodes - 1;
+		zend_unfinished_calls_gc(execute_data, call, op_num, gc_buffer);
+		zend_generator_revert_call_stack(call);
+	}
+
 	if (execute_data->opline != op_array->opcodes) {
 		uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
 		for (i = 0; i < op_array->last_live_range; i++) {
@@ -404,9 +428,7 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 
 static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ */
 {
-	zend_generator *generator;
-
-	generator = emalloc(sizeof(zend_generator));
+	zend_generator *generator = emalloc(sizeof(zend_generator));
 	memset(generator, 0, sizeof(zend_generator));
 
 	/* The key will be incremented on first use, so it'll start at 0 */
@@ -421,8 +443,6 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 	generator->node.ptr.root = NULL;
 
 	zend_object_std_init(&generator->std, class_type);
-	generator->std.handlers = &zend_generator_handlers;
-
 	return (zend_object*)generator;
 }
 /* }}} */
@@ -606,7 +626,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 static zend_result zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
 {
 	--generator->execute_data->opline;
-	
+
 	zval *value;
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
 		HashTable *ht = Z_ARR(generator->values);
@@ -687,7 +707,7 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 			ZVAL_LONG(&generator->key, iter->index);
 		}
 	}
-	
+
 	++generator->execute_data->opline;
 	return SUCCESS;
 
@@ -1132,6 +1152,7 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_ce_generator->create_object = zend_generator_create;
 	/* get_iterator has to be assigned *after* implementing the interface */
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
+	zend_ce_generator->default_object_handlers = &zend_generator_handlers;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_generator_handlers.free_obj = zend_generator_free_storage;

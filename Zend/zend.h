@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.2.0-dev"
+#define ZEND_VERSION "4.3.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -115,6 +115,7 @@ typedef struct _zend_class_mutable_data {
 	zval      *default_properties_table;
 	HashTable *constants_table;
 	uint32_t   ce_flags;
+	HashTable *backed_enum_table;
 } zend_class_mutable_data;
 
 typedef struct _zend_class_dependency {
@@ -180,6 +181,8 @@ struct _zend_class_entry {
 	zend_function *__debugInfo;
 	zend_function *__serialize;
 	zend_function *__unserialize;
+
+	const zend_object_handlers *default_object_handlers;
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
@@ -297,8 +300,9 @@ ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
 void zend_print_flat_zval_r_to_buf(smart_str *str, zval *expr);
 
-#define zend_print_variable(var) \
-	zend_print_zval((var), 0)
+static zend_always_inline size_t zend_print_variable(zval *var) {
+	return zend_print_zval(var, 0);
+}
 
 ZEND_API ZEND_COLD void zend_output_debug_string(bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
@@ -396,6 +400,7 @@ ZEND_API void zend_save_error_handling(zend_error_handling *current);
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current);
 ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
 ZEND_API void zend_begin_record_errors(void);
+ZEND_API void zend_emit_recorded_errors(void);
 ZEND_API void zend_free_recorded_errors(void);
 END_EXTERN_C()
 

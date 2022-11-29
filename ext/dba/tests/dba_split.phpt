@@ -2,11 +2,6 @@
 DBA Split Test
 --EXTENSIONS--
 dba
---SKIPIF--
-<?php
-    require_once __DIR__ .'/skipif.inc';
-    die("info $HND handler used");
-?>
 --FILE--
 <?php
 var_dump(dba_key_split(null));

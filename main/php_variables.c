@@ -54,6 +54,39 @@ static zend_always_inline void php_register_variable_quick(const char *name, siz
 	zend_string_release_ex(key, 0);
 }
 
+PHPAPI void php_register_known_variable(const char *var_name, size_t var_name_len, zval *value, zval *track_vars_array)
+{
+	HashTable *symbol_table = NULL;
+
+	ZEND_ASSERT(var_name != NULL);
+	ZEND_ASSERT(var_name_len != 0);
+	ZEND_ASSERT(track_vars_array != NULL && Z_TYPE_P(track_vars_array) == IS_ARRAY);
+
+	symbol_table = Z_ARRVAL_P(track_vars_array);
+
+#if ZEND_DEBUG
+	/* Verify the name is valid for a PHP variable */
+	ZEND_ASSERT(!(var_name_len == strlen("GLOBALS") && !memcmp(var_name, "GLOBALS", strlen("GLOBALS"))));
+	ZEND_ASSERT(!(var_name_len == strlen("this") && !memcmp(var_name, "this", strlen("this"))));
+
+	/* Assert that the variable name is not numeric */
+	zend_ulong idx;
+	ZEND_ASSERT(!ZEND_HANDLE_NUMERIC_STR(var_name, var_name_len, idx));
+	/* ensure that we don't have null bytes, spaces, dots, or array bracket in the variable name (not binary safe) */
+	const char *p = var_name;
+	for (size_t l = 0; l < var_name_len; l++) {
+		ZEND_ASSERT(*p != '\0' && *p != ' ' && *p != '.' && *p != '[');
+		p++;
+	}
+
+	/* Do not allow to register cookies this way */
+	ZEND_ASSERT(Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) == IS_UNDEF ||
+		Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]) != symbol_table);
+#endif
+
+	php_register_variable_quick(var_name, var_name_len, value, symbol_table);
+}
+
 PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *track_vars_array)
 {
 	char *p = NULL;
@@ -103,6 +136,20 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 		}
 	}
 	var_len = p - var;
+
+	/* Discard variable if mangling made it start with __Host-, where pre-mangling it did not start with __Host- */
+	if (strncmp(var, "__Host-", sizeof("__Host-")-1) == 0 && strncmp(var_name, "__Host-", sizeof("__Host-")-1) != 0) {
+		zval_ptr_dtor_nogc(val);
+		free_alloca(var_orig, use_heap);
+		return;
+	}
+
+	/* Discard variable if mangling made it start with __Secure-, where pre-mangling it did not start with __Secure- */
+	if (strncmp(var, "__Secure-", sizeof("__Secure-")-1) == 0 && strncmp(var_name, "__Secure-", sizeof("__Secure-")-1) != 0) {
+		zval_ptr_dtor_nogc(val);
+		free_alloca(var_orig, use_heap);
+		return;
+	}
 
 	if (var_len==0) { /* empty variable name, or variable name with a space in it */
 		zval_ptr_dtor_nogc(val);

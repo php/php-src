@@ -774,6 +774,14 @@ $invalid = array(
   "\xDF" => "\x00\x00\x00%",         // should have been 2-byte
   "\xEF\xBF" => "\x00\x00\x00%",     // should have been 3-byte
   "\xF0\xBF\xBF" => "\x00\x00\x00%", // should have been 4-byte
+  "\xF1\x96" => "\x00\x00\x00%",
+  "\xF1\x96\x80" => "\x00\x00\x00%",
+  "\xF2\x94" => "\x00\x00\x00%",
+  "\xF2\x94\x80" => "\x00\x00\x00%",
+  "\xF3\x94" => "\x00\x00\x00%",
+  "\xF3\x94\x80" => "\x00\x00\x00%",
+  "\xE0\x9F" => "\x00\x00\x00%\x00\x00\x00%",
+  "\xED\xA6" => "\x00\x00\x00%\x00\x00\x00%",
 
   // Multi-byte characters which end too soon and go to ASCII
   "\xDFA" => "\x00\x00\x00%\x00\x00\x00A",
@@ -1054,6 +1062,16 @@ testInvalidString('+' . rawEncode("\xD8\x01"), "\x00\x00\x00%", 'UTF-7', 'UTF-32
 // Truncated string
 testInvalidString('+' . rawEncode("\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 testInvalidString('+l', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+
+// Base64 section should not have 4 ASCII characters; the first 3 can encode one
+// UTF-16 character, so there is no need for the 4th
+testInvalidString('+RR8I', "\xE4\x94\x9F%", 'UTF-7', 'UTF-8');
+// Likewise with 7 characters
+testInvalidString('+RR8IAAA', "\xE4\x94\x9F\xE0\xA0\x80%", 'UTF-7', 'UTF-8');
+
+// Similarly, it is useless for a Base64 section to only contain a single 'A'
+// (which decodes to only zero bits)
+testInvalidString("+A", "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 
 // And then, messed up Base64 encoding
 

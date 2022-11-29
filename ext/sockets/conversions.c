@@ -60,6 +60,14 @@ struct _WSAMSG {
 #define MAX_USER_BUFF_SIZE ((size_t)(100*1024*1024))
 #define DEFAULT_BUFF_SIZE 8192
 
+/* The CMSG_DATA macro does pointer arithmetics on NULL which triggers errors in the Clang UBSAN build */
+#ifdef __has_feature
+# if __has_feature(undefined_behavior_sanitizer)
+#  undef CMSG_DATA
+#  define CMSG_DATA(cmsg) ((unsigned char *) ((uintptr_t) (cmsg) + sizeof(struct cmsghdr)))
+# endif
+#endif
+
 struct _ser_context {
 	HashTable		params; /* stores pointers; has to be first */
 	struct err_s	err;
@@ -435,7 +443,7 @@ static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_co
 	memcpy(field, &ival, sizeof(ival));
 }
 
-#ifdef SO_PASSCRED
+#if defined(SO_PASSCRED) || defined(LOCAL_CREDS_PERSISTENT) || defined(LOCAL_CREDS)
 static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
 	zend_long lval;
@@ -522,7 +530,7 @@ static void to_zval_read_uint32(const char *data, zval *zv, res_context *ctx)
 	ZVAL_LONG(zv, (zend_long)ival);
 }
 #endif
-#ifdef SO_PASSCRED
+#if defined(SO_PASSCRED) || defined(LOCAL_CREDS_PERSISTENT) || defined(LOCAL_CREDS)
 static void to_zval_read_pid_t(const char *data, zval *zv, res_context *ctx)
 {
 	pid_t ival;
@@ -1301,19 +1309,29 @@ void to_zval_read_in6_pktinfo(const char *data, zval *zv, res_context *ctx)
 }
 #endif
 
-/* CONVERSIONS for struct ucred/cmsgcred */
-#ifdef SO_PASSCRED
+/* CONVERSIONS for struct ucred */
+#if defined(SO_PASSCRED) || defined(LOCAL_CREDS_PERSISTENT) || defined(LOCAL_CREDS)
 static const field_descriptor descriptors_ucred[] = {
-#if defined(ANC_CREDS_UCRED)
-		{"pid", sizeof("pid"), 1, offsetof(struct ucred, pid), from_zval_write_pid_t, to_zval_read_pid_t},
-		{"uid", sizeof("uid"), 1, offsetof(struct ucred, uid), from_zval_write_uid_t, to_zval_read_uid_t},
-		/* assume the type gid_t is the same as uid_t: */
-		{"gid", sizeof("gid"), 1, offsetof(struct ucred, gid), from_zval_write_uid_t, to_zval_read_uid_t},
+#if defined(LOCAL_CREDS_PERSISTENT)
+		{"pid", sizeof("pid"), 1, offsetof(struct sockcred2, sc_pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), 1, offsetof(struct sockcred2, sc_euid), from_zval_write_uid_t, to_zval_read_uid_t},
+		/* the type gid_t is the same as uid_t: */
+		{"gid", sizeof("gid"), 1, offsetof(struct sockcred2, sc_egid), from_zval_write_uid_t, to_zval_read_uid_t},
+#elif defined(LOCAL_CREDS)
+		{"pid", sizeof("pid"), 1, offsetof(struct sockcred, sc_pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), 1, offsetof(struct sockcred, sc_euid), from_zval_write_uid_t, to_zval_read_uid_t},
+		/* the type gid_t is the same as uid_t: */
+		{"gid", sizeof("gid"), 1, offsetof(struct sockcred, sc_egid), from_zval_write_uid_t, to_zval_read_uid_t},
 #elif defined(ANC_CREDS_CMSGCRED)
 		{"pid", sizeof("pid"), 1, offsetof(struct cmsgcred, cmcred_pid), from_zval_write_pid_t, to_zval_read_pid_t},
 		{"uid", sizeof("uid"), 1, offsetof(struct cmsgcred, cmcred_uid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* assume the type gid_t is the same as uid_t: */
 		{"gid", sizeof("gid"), 1, offsetof(struct cmsgcred, cmcred_gid), from_zval_write_uid_t, to_zval_read_uid_t},
+#elif defined(SO_PASSCRED)
+		{"pid", sizeof("pid"), 1, offsetof(struct ucred, pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), 1, offsetof(struct ucred, uid), from_zval_write_uid_t, to_zval_read_uid_t},
+		/* assume the type gid_t is the same as uid_t: */
+		{"gid", sizeof("gid"), 1, offsetof(struct ucred, gid), from_zval_write_uid_t, to_zval_read_uid_t},
 #endif
 		{0}
 };

@@ -183,7 +183,7 @@ static void sapi_read_post_data(void)
 	 * - Make the content type lowercase
 	 * - Trim descriptive data, stay with the content-type only
 	 */
-	for (p=content_type; p<content_type+content_type_length; p++) {
+	for (p = content_type; p < content_type + content_type_length; p++) {
 		switch (*p) {
 			case ';':
 			case ',':
@@ -207,10 +207,11 @@ static void sapi_read_post_data(void)
 	} else {
 		/* fallback */
 		SG(request_info).post_entry = NULL;
-		if (!sapi_module.default_post_reader) {
-			/* no default reader ? */
+		if (UNEXPECTED(!sapi_module.default_post_reader)) {
+			/* this should not happen as there should always be a default_post_reader */
 			SG(request_info).content_type_dup = NULL;
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
+			efree(content_type);
 			return;
 		}
 	}
@@ -218,6 +219,7 @@ static void sapi_read_post_data(void)
 		*(p-1) = oldchar;
 	}
 
+	/* the content_type_dup is not set at this stage so no need to try to free it first */
 	SG(request_info).content_type_dup = content_type;
 
 	if(post_reader_func) {
@@ -357,7 +359,7 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
  * there is not already a charset option in there.
  *
  * If "mimetype" is non-NULL, it should point to a pointer allocated
- * with emalloc().  If a charset is added, the string will be
+ * with emalloc(). If a charset is added, the string will be
  * re-allocated and the new length is returned.  If mimetype is
  * unchanged, 0 is returned.
  *
@@ -489,7 +491,7 @@ static void sapi_send_headers_free(void)
 	}
 }
 
-SAPI_API void sapi_deactivate(void)
+SAPI_API void sapi_deactivate_module(void)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).request_body) {
@@ -523,6 +525,10 @@ SAPI_API void sapi_deactivate(void)
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate();
 	}
+}
+
+SAPI_API void sapi_deactivate_destroy(void)
+{
 	if (SG(rfc1867_uploaded_files)) {
 		destroy_uploaded_files_hash();
 	}
@@ -535,6 +541,12 @@ SAPI_API void sapi_deactivate(void)
 	SG(headers_sent) = 0;
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
+}
+
+SAPI_API void sapi_deactivate(void)
+{
+	sapi_deactivate_module();
+	sapi_deactivate_destroy();
 }
 
 
@@ -786,7 +798,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 			} else if (!strcasecmp(header_line, "Content-Length")) {
 				/* Script is setting Content-length. The script cannot reasonably
 				 * know the size of the message body after compression, so it's best
-				 * do disable compression altogether. This contributes to making scripts
+				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
 				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
@@ -834,7 +846,7 @@ SAPI_API int sapi_send_headers(void)
 		return SUCCESS;
 	}
 
-	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
+	/* Success-oriented. We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
@@ -1007,29 +1019,30 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 
 SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 {
+	char *value, *tmp;
+	
+	if (!sapi_module.getenv) {
+		return NULL;
+	}
 	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
 		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
 		return NULL;
 	}
-	if (sapi_module.getenv) {
-		char *value, *tmp = sapi_module.getenv(name, name_len);
-		if (tmp) {
-			value = estrdup(tmp);
-#ifdef PHP_WIN32
-			if (strlen(sapi_module.name) == sizeof("cgi-fcgi") - 1 && !strcmp(sapi_module.name, "cgi-fcgi")) {
-				/* XXX more modules to go, if needed. */
-				free(tmp);
-			}
-#endif
-		} else {
-			return NULL;
-		}
-		if (sapi_module.input_filter) {
-			sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL);
-		}
-		return value;
+	tmp = sapi_module.getenv(name, name_len);
+	if (!tmp) {
+		return NULL;
 	}
-	return NULL;
+	value = estrdup(tmp);
+#ifdef PHP_WIN32
+	if (strlen(sapi_module.name) == sizeof("cgi-fcgi") - 1 && !strcmp(sapi_module.name, "cgi-fcgi")) {
+		/* XXX more modules to go, if needed. */
+		free(tmp);
+	}
+#endif
+	if (sapi_module.input_filter) {
+		sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL);
+	}
+	return value;
 }
 
 SAPI_API int sapi_get_fd(int *fd)

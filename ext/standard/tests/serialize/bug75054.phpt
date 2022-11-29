@@ -8,5 +8,5 @@ $poc .= '000";R:2;s:4:"0000";d:0;s:4:"0000";a:9:{s:4:"0000";';
 var_dump(unserialize($poc));
 ?>
 --EXPECTF--
-Notice: unserialize(): Error at offset 43 of 145 bytes in %s on line %d
+Warning: unserialize(): Error at offset 43 of 145 bytes in %s on line %d
 bool(false)

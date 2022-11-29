@@ -6,6 +6,7 @@ pdo
 <?php
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
+if (str_starts_with(getenv('PDOTEST_DSN'), "firebird")) die('xfail firebird driver does not behave as expected');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
@@ -28,19 +29,29 @@ if ($pass === false) $pass = NULL;
 
 $conn = new PDO($dsn, $user, $pass, $attr);
 
-$query = 'SELECT 1';
-
 var_dump($conn->errorCode());
+
+$query = 'SELECT 1';
+if ($conn->getAttribute(PDO::ATTR_DRIVER_NAME) === 'oci') {
+    $query .= ' FROM DUAL';
+}
+var_dump($conn->errorCode());
+var_dump($conn->errorCode());
+
 $stmt = $conn->prepare($query);
 var_dump($conn->errorCode());
-
 var_dump($stmt->errorCode());
+
 $stmt->execute();
+var_dump($stmt->errorCode());
 var_dump($stmt->errorCode());
 
 ?>
 --EXPECT--
 NULL
 string(5) "00000"
+string(5) "00000"
+string(5) "00000"
 NULL
+string(5) "00000"
 string(5) "00000"

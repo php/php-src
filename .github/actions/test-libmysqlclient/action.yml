@@ -1,0 +1,21 @@
+name: Test libmysqlclient
+inputs:
+  withMysqli:
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        ${{ inputs.withMysqli == 'true' && 'export MYSQL_TEST_USER=root' || '' }}
+        ${{ inputs.withMysqli == 'true' && 'export MYSQL_TEST_PASSWD=root' || '' }}
+        export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
+        export PDO_MYSQL_TEST_HOST=127.0.0.1
+        export PDO_MYSQL_TEST_USER=root
+        export PDO_MYSQL_TEST_PASS=root
+        export REPORT_EXIT_STATUS=no
+        sapi/cli/php run-tests.php -P -q \
+          -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress --offline --show-diff --show-slow 1000 --set-timeout 120 \
+          ext/pdo_mysql

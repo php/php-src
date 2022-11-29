@@ -19,5 +19,7 @@
 
 void zend_test_observer_init(INIT_FUNC_ARGS);
 void zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS);
+void zend_test_observer_ginit(zend_zend_test_globals *zend_test_globals);
+void zend_test_observer_gshutdown(zend_zend_test_globals *zend_test_globals);
 
 #endif

@@ -26,7 +26,6 @@
 #define PHP_SESSION_VERSION PHP_VERSION
 
 /* save handler macros */
-#define PS_NUM_APIS      9
 #define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name
 #define PS_CLOSE_ARGS    void **mod_data
 #define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, zend_long maxlifetime
@@ -39,29 +38,29 @@
 
 typedef struct ps_module_struct {
 	const char *s_name;
-	int (*s_open)(PS_OPEN_ARGS);
-	int (*s_close)(PS_CLOSE_ARGS);
-	int (*s_read)(PS_READ_ARGS);
-	int (*s_write)(PS_WRITE_ARGS);
-	int (*s_destroy)(PS_DESTROY_ARGS);
+	zend_result (*s_open)(PS_OPEN_ARGS);
+	zend_result (*s_close)(PS_CLOSE_ARGS);
+	zend_result (*s_read)(PS_READ_ARGS);
+	zend_result (*s_write)(PS_WRITE_ARGS);
+	zend_result (*s_destroy)(PS_DESTROY_ARGS);
 	zend_long (*s_gc)(PS_GC_ARGS);
 	zend_string *(*s_create_sid)(PS_CREATE_SID_ARGS);
-	int (*s_validate_sid)(PS_VALIDATE_SID_ARGS);
-	int (*s_update_timestamp)(PS_UPDATE_TIMESTAMP_ARGS);
+	zend_result (*s_validate_sid)(PS_VALIDATE_SID_ARGS);
+	zend_result (*s_update_timestamp)(PS_UPDATE_TIMESTAMP_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data
 #define PS_SET_MOD_DATA(a) *mod_data = (a)
 
-#define PS_OPEN_FUNC(x) 	int ps_open_##x(PS_OPEN_ARGS)
-#define PS_CLOSE_FUNC(x) 	int ps_close_##x(PS_CLOSE_ARGS)
-#define PS_READ_FUNC(x) 	int ps_read_##x(PS_READ_ARGS)
-#define PS_WRITE_FUNC(x) 	int ps_write_##x(PS_WRITE_ARGS)
-#define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
+#define PS_OPEN_FUNC(x) 	zend_result ps_open_##x(PS_OPEN_ARGS)
+#define PS_CLOSE_FUNC(x) 	zend_result ps_close_##x(PS_CLOSE_ARGS)
+#define PS_READ_FUNC(x) 	zend_result ps_read_##x(PS_READ_ARGS)
+#define PS_WRITE_FUNC(x) 	zend_result ps_write_##x(PS_WRITE_ARGS)
+#define PS_DESTROY_FUNC(x) 	zend_result ps_delete_##x(PS_DESTROY_ARGS)
 #define PS_GC_FUNC(x) 		zend_long ps_gc_##x(PS_GC_ARGS)
 #define PS_CREATE_SID_FUNC(x)	zend_string *ps_create_sid_##x(PS_CREATE_SID_ARGS)
-#define PS_VALIDATE_SID_FUNC(x)	int ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
-#define PS_UPDATE_TIMESTAMP_FUNC(x) 	int ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
+#define PS_VALIDATE_SID_FUNC(x)	zend_result ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
+#define PS_UPDATE_TIMESTAMP_FUNC(x) 	zend_result ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
 
 /* Legacy save handler module definitions */
 #define PS_FUNCS(x) \
@@ -160,22 +159,19 @@ typedef struct _php_ps_globals {
 	zend_long gc_maxlifetime;
 	int module_number;
 	zend_long cache_expire;
-	union {
-		zval names[PS_NUM_APIS];
-		struct {
-			zval ps_open;
-			zval ps_close;
-			zval ps_read;
-			zval ps_write;
-			zval ps_destroy;
-			zval ps_gc;
-			zval ps_create_sid;
-			zval ps_validate_sid;
-			zval ps_update_timestamp;
-		} name;
+	struct {
+		zval ps_open;
+		zval ps_close;
+		zval ps_read;
+		zval ps_write;
+		zval ps_destroy;
+		zval ps_gc;
+		zval ps_create_sid;
+		zval ps_validate_sid;
+		zval ps_update_timestamp;
 	} mod_user_names;
-	int mod_user_implemented;
-	int mod_user_is_open;
+	bool mod_user_implemented;
+	bool mod_user_is_open;
 	zend_string *mod_user_class_name;
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
@@ -186,8 +182,8 @@ typedef struct _php_ps_globals {
 
 	zend_long sid_length;
 	zend_long sid_bits_per_character;
-	int send_cookie;
-	int define_sid;
+	bool send_cookie;
+	bool define_sid;
 
 	php_session_rfc1867_progress *rfc1867_progress;
 	bool rfc1867_enabled; /* session.upload_progress.enabled */
@@ -224,7 +220,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 typedef struct ps_serializer_struct {
 	const char *name;
 	zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS);
-	int (*decode)(PS_SERIALIZER_DECODE_ARGS);
+	zend_result (*decode)(PS_SERIALIZER_DECODE_ARGS);
 } ps_serializer;
 
 #define PS_SERIALIZER_ENCODE_NAME(x) ps_srlzr_encode_##x
@@ -233,7 +229,7 @@ typedef struct ps_serializer_struct {
 #define PS_SERIALIZER_ENCODE_FUNC(x) \
 	zend_string *PS_SERIALIZER_ENCODE_NAME(x)(PS_SERIALIZER_ENCODE_ARGS)
 #define PS_SERIALIZER_DECODE_FUNC(x) \
-	int PS_SERIALIZER_DECODE_NAME(x)(PS_SERIALIZER_DECODE_ARGS)
+	zend_result PS_SERIALIZER_DECODE_NAME(x)(PS_SERIALIZER_DECODE_ARGS)
 
 #define PS_SERIALIZER_FUNCS(x) \
 	PS_SERIALIZER_ENCODE_FUNC(x); \
@@ -245,30 +241,30 @@ typedef struct ps_serializer_struct {
 /* default create id function */
 PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
 /* Dummy PS module functions */
-PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS);
-PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
+PHPAPI zend_result php_session_validate_sid(PS_VALIDATE_SID_ARGS);
+PHPAPI zend_result php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
 PHPAPI void session_adapt_url(const char *url, size_t url_len, char **new_url, size_t *new_len);
 
-PHPAPI int php_session_destroy(void);
+PHPAPI zend_result php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
 PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash);
 PHPAPI zval *php_get_session_var(zend_string *name);
 
-PHPAPI int php_session_register_module(const ps_module *);
+PHPAPI zend_result php_session_register_module(const ps_module *);
 
-PHPAPI int php_session_register_serializer(const char *name,
+PHPAPI zend_result php_session_register_serializer(const char *name,
 	        zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS),
-	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
+	        zend_result (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
-PHPAPI int php_session_start(void);
-PHPAPI int php_session_flush(int write);
+PHPAPI zend_result php_session_start(void);
+PHPAPI zend_result php_session_flush(int write);
 
 PHPAPI const ps_module *_php_find_ps_module(const char *name);
 PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);
 
-PHPAPI int php_session_valid_key(const char *key);
-PHPAPI int php_session_reset_id(void);
+PHPAPI zend_result php_session_valid_key(const char *key);
+PHPAPI zend_result php_session_reset_id(void);
 
 #define PS_ADD_VARL(name) do {										\
 	php_add_session_var(name);							\

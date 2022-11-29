@@ -191,6 +191,7 @@ int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 			n = c & 0xff;
 		}
 		n |= filter->cache;
+		filter->status &= ~0xff;
 		if ((n & 0xffff) == 0 && ((n >> 16) & 0xffff) == 0xfffe) {
 			if (endian) {
 				filter->status = 0;		/* big-endian */
@@ -200,7 +201,6 @@ int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 		} else if (n != 0xfeff) {
 			CK((*filter->output_function)(n, filter->data));
 		}
-		filter->status &= ~0xff;
 		break;
 	}
 
@@ -301,6 +301,7 @@ static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter)
 		/* Input string was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);

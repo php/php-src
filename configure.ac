@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.2.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_INIT([PHP],[8.3.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -364,7 +364,6 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
-PHP_CHECK_FUNC(copy_file_range)
 PHP_CHECK_FUNC(dlopen, dl, root)
 PHP_CHECK_FUNC(dlsym, dl, root)
 if test "$ac_cv_func_dlopen" = "yes"; then
@@ -395,7 +394,10 @@ fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
+linux/filter.h \
+linux/sock_diag.h \
 malloc.h \
+os/signpost.h \
 poll.h \
 pty.h \
 pwd.h \
@@ -408,6 +410,7 @@ sys/file.h \
 sys/mman.h \
 sys/mount.h \
 sys/poll.h \
+sys/procctl.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \
@@ -507,6 +510,10 @@ dnl Check __builtin_cpu_init
 PHP_CHECK_BUILTIN_CPU_INIT
 dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
+dnl Check prctl
+PHP_CHECK_PRCTL
+dnl Check procctl
+PHP_CHECK_PROCCTL
 
 dnl Check for __alignof__ support in the compiler
 AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
@@ -595,6 +602,7 @@ mmap \
 nice \
 nl_langinfo \
 poll \
+pthread_jit_write_protect_np \
 putenv \
 scandir \
 setitimer \
@@ -685,6 +693,35 @@ int main(void) {
 [ac_cv_func_getaddrinfo=no])])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
+fi
+
+dnl on FreeBSD, copy_file_range() works only with the undocumented flag 0x01000000;
+dnl until the problem is fixed properly, copy_file_range() is used only on Linux
+AC_CACHE_CHECK([for copy_file_range], ac_cv_copy_file_range,
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#ifdef __linux__
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <linux/version.h>
+#include <unistd.h>
+
+int main(void) {
+(void)copy_file_range(-1, 0, -1, 0, 0, 0);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
+#error "kernel too old"
+#else
+return 0;
+#endif
+}
+#else
+#error "unsupported platform"
+#endif
+]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no], [ac_cv_copy_file_range=no])
+])
+
+if test "$ac_cv_copy_file_range" = yes; then
+  AC_DEFINE(HAVE_COPY_FILE_RANGE,1,[Define if copy_file_range support])
 fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
@@ -1048,7 +1085,7 @@ PHP_HELP_SEPARATOR([Extensions:
 
   --with-EXTENSION=[shared[,PATH]]
 
-    NOTE: Not all extensions can be build as 'shared'.
+    NOTE: Not all extensions can be built as 'shared'.
 
     Example: --with-foobar=shared,/usr/local/foobar/
 
@@ -1220,6 +1257,7 @@ AS_CASE([$host_cpu],
 AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
   [aix*|os400*], [fiber_os="aix"],
+  [freebsd*], [fiber_os="freebsd"],
   [fiber_os="other"]
 )
 
@@ -1243,16 +1281,50 @@ elif test "$fiber_os" = 'aix'; then
   # AIX uses a different calling convention (shared with non-_CALL_ELF Linux).
   # The AIX assembler isn't GNU, but the file is compatible.
   fiber_asm_file="${fiber_asm_file_prefix}_xcoff_gas"
+elif test "$fiber_os" = 'freebsd'; then
+  case $fiber_cpu in
+    i386*)
+      fiber_asm="no"
+      ;;
+    *)
+      fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
+      ;;
+  esac
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
   fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
 else
   fiber_asm="no"
 fi
 
+dnl Check whether syscall to create shadow stack exists, should be a better way, but...
+AC_CACHE_CHECK([whether syscall to create shadow stack exists], ac_cv_syscall_shadow_stack_exists,
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <unistd.h>
+#include <sys/mman.h>
+int main(void) {
+  /* test if syscall 451, i.e., map_shadow_stack is available */
+  void* base = (void *)syscall(451, 0, 0x20000, 0x1);
+  if (base != (void*)-1) {
+    munmap(base, 0x20000);
+    return 0;
+  }
+  else
+    return 1;
+}
+  ]])], [ac_cv_syscall_shadow_stack_exists=yes], [ac_cv_syscall_shadow_stack_exists=no], [ac_cv_syscall_shadow_stack_exists=no])
+])
+if test "$ac_cv_syscall_shadow_stack_exists" = yes; then
+  AC_DEFINE([SHADOW_STACK_SYSCALL], 1, [ ])
+  # asm file can't see macro from AC_DEFINE, workaround this via cflag
+  fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=1"
+  # if the syscall doesn't exist, we may block the final ELF from __PROPERTY_SHSTK
+  # via redefine macro as "-D__CET__=1"
+fi
+
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
   AC_DEFINE([ZEND_FIBER_ASM], 1, [ ])
-  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S)
+  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S, "$fiber_asm_cflag")
   AC_MSG_RESULT([$fiber_asm_file])
 else
   if test "$fiber_os" = 'mac'; then
@@ -1610,11 +1682,11 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
-       fopen_wrappers.c alloca.c  php_scandir.c \
+       fopen_wrappers.c php_scandir.c \
        php_ini_builder.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c \
+       network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
@@ -1639,7 +1711,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c \
+    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

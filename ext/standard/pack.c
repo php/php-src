@@ -102,13 +102,13 @@ static void php_pack(zval *val, size_t size, int *map, char *output)
 }
 /* }}} */
 
-static inline uint16_t php_pack_reverse_int16(uint16_t arg)
+ZEND_ATTRIBUTE_CONST static inline uint16_t php_pack_reverse_int16(uint16_t arg)
 {
 	return ((arg & 0xFF) << 8) | ((arg >> 8) & 0xFF);
 }
 
 /* {{{ php_pack_reverse_int32 */
-static inline uint32_t php_pack_reverse_int32(uint32_t arg)
+ZEND_ATTRIBUTE_CONST static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
 	uint32_t result;
 	result = ((arg & 0xFF) << 24) | ((arg & 0xFF00) << 8) | ((arg >> 8) & 0xFF00) | ((arg >> 24) & 0xFF);

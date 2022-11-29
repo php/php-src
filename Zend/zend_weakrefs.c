@@ -210,9 +210,6 @@ static zend_object* zend_weakref_new(zend_class_entry *ce) {
 	zend_weakref *wr = zend_object_alloc(sizeof(zend_weakref), zend_ce_weakref);
 
 	zend_object_std_init(&wr->std, zend_ce_weakref);
-
-	wr->std.handlers = &zend_weakref_handlers;
-
 	return &wr->std;
 }
 
@@ -304,7 +301,6 @@ static zend_object *zend_weakmap_create_object(zend_class_entry *ce)
 {
 	zend_weakmap *wm = zend_object_alloc(sizeof(zend_weakmap), ce);
 	zend_object_std_init(&wm->std, ce);
-	wm->std.handlers = &zend_weakmap_handlers;
 
 	zend_hash_init(&wm->ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 	return &wm->std;
@@ -332,6 +328,7 @@ static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int 
 		return NULL;
 	}
 
+	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return NULL;
@@ -362,6 +359,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 		return;
 	}
 
+	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return;
@@ -390,6 +388,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 /* int return and check_empty due to Object Handler API */
 static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
+	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return 0;
@@ -409,6 +408,7 @@ static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int che
 
 static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 {
+	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return;
@@ -424,7 +424,7 @@ static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 	zend_weakref_unregister(obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP), 1);
 }
 
-static int zend_weakmap_count_elements(zend_object *object, zend_long *count)
+static zend_result zend_weakmap_count_elements(zend_object *object, zend_long *count)
 {
 	zend_weakmap *wm = zend_weakmap_from(object);
 	*count = zend_hash_num_elements(&wm->ht);
@@ -647,6 +647,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_ce_weakref = register_class_WeakReference();
 
 	zend_ce_weakref->create_object = zend_weakref_new;
+	zend_ce_weakref->default_object_handlers = &zend_weakref_handlers;
 
 	memcpy(&zend_weakref_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
@@ -658,6 +659,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
+	zend_ce_weakmap->default_object_handlers = &zend_weakmap_handlers;
 
 	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);

@@ -36,14 +36,6 @@ ZEND_DECLARE_MODULE_GLOBALS(assert)
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
-enum {
-	ASSERT_ACTIVE=1,
-	ASSERT_CALLBACK,
-	ASSERT_BAIL,
-	ASSERT_WARNING,
-	ASSERT_EXCEPTION
-};
-
 PHPAPI zend_class_entry *assertion_error_ce;
 
 static PHP_INI_MH(OnChangeCallback) /* {{{ */
@@ -92,12 +84,6 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	ZEND_INIT_MODULE_GLOBALS(assert, php_assert_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
-
-	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -219,7 +205,7 @@ PHP_FUNCTION(assert_options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {
-	case ASSERT_ACTIVE:
+	case PHP_ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
 		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
@@ -235,7 +221,7 @@ PHP_FUNCTION(assert_options)
 		RETURN_LONG(oldint);
 		break;
 
-	case ASSERT_BAIL:
+	case PHP_ASSERT_BAIL:
 		oldint = ASSERTG(bail);
 		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
@@ -251,7 +237,7 @@ PHP_FUNCTION(assert_options)
 		RETURN_LONG(oldint);
 		break;
 
-	case ASSERT_WARNING:
+	case PHP_ASSERT_WARNING:
 		oldint = ASSERTG(warning);
 		if (ac == 2) {
 			zend_string *value_str = zval_try_get_string(value);
@@ -267,7 +253,7 @@ PHP_FUNCTION(assert_options)
 		RETURN_LONG(oldint);
 		break;
 
-	case ASSERT_CALLBACK:
+	case PHP_ASSERT_CALLBACK:
 		if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
 			ZVAL_COPY(return_value, &ASSERTG(callback));
 		} else if (ASSERTG(cb)) {
@@ -286,7 +272,7 @@ PHP_FUNCTION(assert_options)
 		}
 		return;
 
-	case ASSERT_EXCEPTION:
+	case PHP_ASSERT_EXCEPTION:
 		oldint = ASSERTG(exception);
 		if (ac == 2) {
 			zend_string *val = zval_try_get_string(value);

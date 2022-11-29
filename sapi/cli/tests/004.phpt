@@ -25,7 +25,7 @@ string(155) "Function [ <internal:standard> function phpinfo ] {
   - Parameters [1] {
     Parameter #0 [ <optional> int $flags = INFO_ALL ]
   }
-  - Return [ bool ]
+  - Return [ true ]
 }
 
 "

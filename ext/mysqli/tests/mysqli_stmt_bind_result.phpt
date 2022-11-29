@@ -276,12 +276,8 @@ require_once('skipifconnectfailure.inc');
     func_mysqli_stmt_bind_result($link, $engine, "b", "MEDIUMTEXT", "", 1640, 'string');
 
     /* Is this one related? http://bugs.php.net/bug.php?id=35759 */
-    if (($IS_MYSQLND) || (!$IS_MYSQLND && (ini_get('memory_limit') > 4294967296))) {
-        /* NOTE: the MySQL Client Library - not mysqlnd - will allocate
-        a hugge max_length(type) = 4GB bind buffer */
-        func_mysqli_stmt_bind_result($link, $engine, "b", "LONGBLOB", "", 1660);
-        func_mysqli_stmt_bind_result($link, $engine, "b", "LONGTEXT", "", 1680, 'string');
-    }
+    func_mysqli_stmt_bind_result($link, $engine, "b", "LONGBLOB", "", 1660);
+    func_mysqli_stmt_bind_result($link, $engine, "b", "LONGTEXT", "", 1680, 'string');
 
     func_mysqli_stmt_bind_result($link, $engine, "s", "ENUM('a', 'b')", "a", 1700, 'string');
     func_mysqli_stmt_bind_result($link, $engine, "s", "ENUM('a', 'b')", NULL, 1720, 'string');

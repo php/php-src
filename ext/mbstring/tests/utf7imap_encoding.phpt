@@ -26,6 +26,10 @@ function testInvalid($from, $to) {
 testValid("", "");
 echo "Identification passes on empty string... good start!\n";
 
+/* RFC says that 0x00 should be Base64-encoded */
+testValidString("\x00", "&AAA-", 'UTF-8', 'UTF7-IMAP');
+echo "Null byte converted correctly\n";
+
 /* Identification and conversion of ASCII characters (minus &) */
 for ($i = 0x20; $i <= 0x7E; $i++) {
 	if ($i == 0x26) // '&'
@@ -217,10 +221,19 @@ convertInvalidString("\x80", "%", "UTF7-IMAP", "UTF-8");
 convertInvalidString("abc&", "abc%", "UTF7-IMAP", "UTF-8"); // The & starts a Base-64 coded section, which is OK... but there's no data in it
 convertInvalidString("&**-", "%*-", "UTF7-IMAP", "UTF-8"); // When we hit the first bad byte in a Base-64 coded section, it drops us back into the default mode, so the following characters are literal
 
+// Try strings where Base64 has an extra trailing byte which is not needed
+convertInvalidString('&RR8I', "\xE4\x94\x9F%", 'UTF7-IMAP', 'UTF-8');
+convertInvalidString('&RR8IAAA', "\xE4\x94\x9F\xE0\xA0\x80%", 'UTF7-IMAP', 'UTF-8');
+
+// It is useless for a Base64 section to only contain a single 'A'
+// (which decodes to only zero bits)
+convertInvalidString("&A", "\x00\x00\x00%", 'UTF7-IMAP', 'UTF-32BE');
+
 echo "Done!\n";
 ?>
 --EXPECT--
 Identification passes on empty string... good start!
+Null byte converted correctly
 Testing all valid single-character ASCII strings... check!
 Non-ASCII characters convert to illegal char marker... yes!
 & can be Base64-encoded... yes!

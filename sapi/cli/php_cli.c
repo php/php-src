@@ -526,7 +526,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(void) /* {{{ */
+static void cli_register_file_handles(void)
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -536,13 +536,13 @@ static void cli_register_file_handles(void) /* {{{ */
 	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
 	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
 
-	/* Release stream resources, but don't free the underlying handles. Othewrise,
+	/* Release stream resources, but don't free the underlying handles. Otherwise,
 	 * extensions which write to stderr or company during mshutdown/gshutdown
 	 * won't have the expected functionality.
 	 */
-	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
+	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
+	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
 
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		if (s_in) php_stream_close(s_in);
@@ -557,19 +557,18 @@ static void cli_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_out, &oc.value);
 	php_stream_to_zval(s_err, &ec.value);
 
-	ZEND_CONSTANT_SET_FLAGS(&ic, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ic.value) = 0;
 	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
 	zend_register_constant(&ic);
 
-	ZEND_CONSTANT_SET_FLAGS(&oc, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(oc.value) = 0;
 	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
 	zend_register_constant(&oc);
 
-	ZEND_CONSTANT_SET_FLAGS(&ec, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ec.value) = 0;
 	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	zend_register_constant(&ec);
 }
-/* }}} */
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
@@ -939,7 +938,7 @@ do_repeat:
 		zend_register_bool_constant(
 			ZEND_STRL("PHP_CLI_PROCESS_TITLE"),
 			is_ps_title_available() == PS_TITLE_SUCCESS,
-			CONST_CS, 0);
+			0, 0);
 
 		*arg_excp = arg_free; /* reconstruct argv */
 
@@ -966,11 +965,12 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_LINT:
-			EG(exit_status) = php_lint_script(&file_handle);
-			if (EG(exit_status) == SUCCESS) {
+			if (php_lint_script(&file_handle) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", php_self);
+				EG(exit_status) = 0;
 			} else {
 				zend_printf("Errors parsing %s\n", php_self);
+				EG(exit_status) = 255;
 			}
 			break;
 		case PHP_MODE_STRIP:

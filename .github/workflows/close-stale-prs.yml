@@ -4,12 +4,18 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   stale:
     if: github.repository_owner == 'php'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/stale@v4
+      - uses: actions/stale@v6
         with:
           days-before-close: 7
           days-before-stale: 60

@@ -184,8 +184,15 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	*table = &iter->it.data;
-	*n = 1;
+	if (Z_ISUNDEF(iter->value)) {
+		*table = &iter->it.data;
+		*n = 1;
+	} else {
+		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+		zend_get_gc_buffer_add_zval(gc_buffer, &iter->it.data);
+		zend_get_gc_buffer_add_zval(gc_buffer, &iter->value);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+	}
 	return NULL;
 }
 
@@ -480,7 +487,6 @@ typedef struct {
 static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	zend_internal_iterator *intern = emalloc(sizeof(zend_internal_iterator));
 	zend_object_std_init(&intern->std, ce);
-	intern->std.handlers = &zend_internal_iterator_handlers;
 	intern->iter = NULL;
 	intern->rewind_called = 0;
 	return &intern->std;
@@ -655,6 +661,7 @@ ZEND_API void zend_register_interfaces(void)
 
 	zend_ce_internal_iterator = register_class_InternalIterator(zend_ce_iterator);
 	zend_ce_internal_iterator->create_object = zend_internal_iterator_create;
+	zend_ce_internal_iterator->default_object_handlers = &zend_internal_iterator_handlers;
 
 	memcpy(&zend_internal_iterator_handlers, zend_get_std_object_handlers(),
 		sizeof(zend_object_handlers));

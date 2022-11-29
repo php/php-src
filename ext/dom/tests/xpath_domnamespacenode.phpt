@@ -1,5 +1,7 @@
 --TEST--
 DOMXPath::query() can return DOMNodeList with DOMNameSpaceNode items
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

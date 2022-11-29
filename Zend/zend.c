@@ -146,7 +146,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
@@ -176,7 +176,7 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		EG(fiber_stack_size) = zend_ini_parse_quantity_warn(new_value, entry->name);
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
@@ -272,8 +272,7 @@ ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_li
 		ZSTR_LEN(buf.s) = max_len;
 	}
 
-	smart_str_0(&buf);
-	return buf.s;
+	return smart_str_extract(&buf);
 }
 /* }}} */
 
@@ -508,6 +507,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				}
 
 				if ((properties = zend_get_properties_for(expr, ZEND_PROP_PURPOSE_DEBUG)) == NULL) {
+					print_hash(buf, (HashTable*) &zend_empty_array, indent, 1);
 					break;
 				}
 
@@ -841,9 +841,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 static void module_destructor_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);
-
 	module_destructor(module);
-	free(module);
 }
 /* }}} */
 
@@ -1229,6 +1227,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 	if (CG(map_ptr_last)) {
 		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
 	}
+	zend_init_internal_run_time_cache();
 	zend_observer_activate();
 }
 /* }}} */
@@ -1608,6 +1607,15 @@ ZEND_API void zend_begin_record_errors(void)
 	EG(record_errors) = true;
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
+}
+
+ZEND_API void zend_emit_recorded_errors(void)
+{
+	EG(record_errors) = false;
+	for (uint32_t i = 0; i < EG(num_errors); i++) {
+		zend_error_info *error = EG(errors)[i];
+		zend_error_zstr_at(error->type, error->filename, error->lineno, error->message);
+	}
 }
 
 ZEND_API void zend_free_recorded_errors(void)

@@ -265,6 +265,32 @@ static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 	return instanceof_function(ce1, ce2);
 }
 
+static inline bool can_elide_list_type(
+	const zend_script *script, const zend_op_array *op_array,
+	const zend_ssa_var_info *use_info, zend_type type)
+{
+	zend_type *single_type;
+	/* For intersection: result==false is failure, default is success.
+	 * For union: result==true is success, default is failure. */
+	bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			ZEND_ASSERT(!is_intersection);
+			return can_elide_list_type(script, op_array, use_info, *single_type);
+		}
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
+			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
+			zend_string_release(lcname);
+			bool result = ce && safe_instanceof(use_info->ce, ce);
+			if (result == !is_intersection) {
+				return result;
+			}
+		}
+	} ZEND_TYPE_FOREACH_END();
+	return is_intersection;
+}
+
 static inline bool can_elide_return_type_check(
 		const zend_script *script, zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
 	zend_arg_info *arg_info = &op_array->arg_info[-1];
@@ -286,22 +312,7 @@ static inline bool can_elide_return_type_check(
 	}
 
 	if (disallowed_types == MAY_BE_OBJECT && use_info->ce && ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
-		zend_type *single_type;
-		/* For intersection: result==false is failure, default is success.
-		 * For union: result==true is success, default is failure. */
-		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(arg_info->type);
-		ZEND_TYPE_FOREACH(arg_info->type, single_type) {
-			if (ZEND_TYPE_HAS_NAME(*single_type)) {
-				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
-				zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
-				zend_string_release(lcname);
-				bool result = ce && safe_instanceof(use_info->ce, ce);
-				if (result == !is_intersection) {
-					return result;
-				}
-			}
-		} ZEND_TYPE_FOREACH_END();
-		return is_intersection;
+		return can_elide_list_type(script, op_array, use_info, arg_info->type);
 	}
 
 	return false;
@@ -342,7 +353,11 @@ static bool opline_supports_assign_contraction(
 		return opline->op1_type != IS_CV || opline->op1.var != cv_var;
 	}
 
-	if (opline->opcode == ZEND_ASSIGN_OP
+	if ((opline->opcode == ZEND_ASSIGN_OP
+	  || opline->opcode == ZEND_ASSIGN_OBJ
+	  || opline->opcode == ZEND_ASSIGN_DIM
+	  || opline->opcode == ZEND_ASSIGN_OBJ_OP
+	  || opline->opcode == ZEND_ASSIGN_DIM_OP)
 	 && opline->op1_type == IS_CV
 	 && opline->op1.var == cv_var
 	 && zend_may_throw(opline, &ssa->ops[ssa->vars[src_var].definition], op_array, ssa)) {
@@ -680,13 +695,32 @@ static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_b
 {
 	if (block->predecessors_count == 1 && ssa->blocks[block_num].phis == NULL) {
 		int *predecessors, i;
+		zend_basic_block *fe_fetch_block = NULL;
 
 		ZEND_ASSERT(block->successors_count == 1);
 		predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
+		if (block->predecessors_count == 1 && (block->flags & ZEND_BB_FOLLOW)) {
+			zend_basic_block *pred_block = &ssa->cfg.blocks[predecessors[0]];
+
+			if (pred_block->len > 0 && (pred_block->flags & ZEND_BB_REACHABLE)) {
+				if ((op_array->opcodes[pred_block->start + pred_block->len - 1].opcode == ZEND_FE_FETCH_R
+				 || op_array->opcodes[pred_block->start + pred_block->len - 1].opcode == ZEND_FE_FETCH_RW)
+				  && op_array->opcodes[pred_block->start + pred_block->len - 1].op2_type == IS_CV) {
+					fe_fetch_block = pred_block;
+			    }
+			}
+		}
 		for (i = 0; i < block->predecessors_count; i++) {
 			zend_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
 		}
 		zend_ssa_remove_block(op_array, ssa, block_num);
+		if (fe_fetch_block && fe_fetch_block->successors[0] == fe_fetch_block->successors[1]) {
+			/* The body of "foreach" loop was removed */
+			int ssa_var = ssa->ops[fe_fetch_block->start + fe_fetch_block->len - 1].op2_def;
+			if (ssa_var >= 0) {
+				zend_ssa_remove_uses_of_var(ssa, ssa_var);
+			}
+		}
 	}
 }
 
@@ -1076,7 +1110,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		}
 
 		if (ZEND_OPTIMIZER_PASS_14 & ctx->optimization_level) {
-			if (dce_optimize_op_array(op_array, ssa, 0)) {
+			if (dce_optimize_op_array(op_array, ctx, ssa, 0)) {
 				remove_nops = 1;
 			}
 			if (zend_dfa_optimize_jmps(op_array, ssa)) {

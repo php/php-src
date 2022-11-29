@@ -21,4 +21,4 @@ var_dump(unserialize(serialize(Foo::Bar)));
 --EXPECTF--
 Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 
-Fatal error: Enums may not implement the Serializable interface in %s on line %d
+Fatal error: Enum Foo cannot implement the Serializable interface in %s on line %d

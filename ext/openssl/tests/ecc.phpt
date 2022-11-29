@@ -3,7 +3,9 @@ openssl_*() with OPENSSL_KEYTYPE_EC
 --EXTENSIONS--
 openssl
 --SKIPIF--
-<?php if (!defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
+<?php
+if (!defined("OPENSSL_KEYTYPE_EC")) die("skip EC disabled");
+?>
 --FILE--
 <?php
 $config =  __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
@@ -64,7 +66,7 @@ $csr = openssl_csr_new($dn, $keyGenerate, $args);
 
 var_dump($keyGenerate);
 
-$args["digest_alg"] = "sha1";
+$args["digest_alg"] = "sha256";
 echo "Testing openssl_csr_new with existing ecc key\n";
 $csr = openssl_csr_new($dn, $key1, $args);
 var_dump($csr);

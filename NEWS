@@ -1,84 +1,75 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0alpha1
+?? ??? ????, PHP 8.3.0alpha1
 
 - CLI:
-  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
+  . Added pdeathsig to builtin server to terminate workers when the master
+    process is killed. (ilutov)
 
 - Core:
-  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
-  . Fixed bug GH-7771 (Fix filename/lineno of constant expressions). (ilutov)
-  . Fixed bug GH-7792 (Improve class type in error messages). (ilutov)
-  . Support huge pages on MacOS. (David CARLIER)
+  . Fixed bug GH-9388 (Improve unset property and __get type incompatibility
+    error message). (ilutov)
+  . SA_ONSTACK is now set for signal handlers to be friendlier to other
+    in-process code such as Go's cgo. (Kévin Dunglas)
+  . SA_ONSTACK is now set when signals are disabled. (Kévin Dunglas)
+  . Fix GH-9649: Signal handlers now do a no-op instead of crashing when
+    executed on threads not managed by TSRM. (Kévin Dunglas)
+  . Fixed potential NULL pointer dereference Windows shm*() functions. (cmb)
+  . Added shadow stack support for fibers. (Chen Hu)
+  . Fix bug GH-9965 (Fix accidental caching of default arguments with side
+    effects). (ilutov)
 
-- Curl:
-  . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
-  . Added support for CURLOPT_MAXFILESIZE_LARGE. (David Carlier)
-
-- Date:
-  . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
-    non-relative items are present). (Derick)
-  . Fixed bug #52015 (Allow including end date in DatePeriod iterations)
-    (Daniel Egeberg, Derick)
-  . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
-    Year). (Pavel Djundik)
+- Fileinfo:
+  . Upgrade bundled libmagic to 5.43. (Anatol)
 
 - FPM:
-  . Emit error for invalid port setting. (David Carlier)
-  . Added extra check for FPM proc dumpable on SELinux based systems.
+  . The status.listen shared pool now uses the same php_values (including
+    expose_php) and php_admin_value as the pool it is shared with. (dwxh)
+
+- GD:
+  . Fixed bug #81739: OOB read due to insufficient input validation in
+    imageloadfont(). (CVE-2022-31630) (cmb)
+
+- Hash:
+  . Fixed bug #81738: buffer overflow in hash_update() on long parameter.
+    (CVE-2022-37454) (nicky at mouha dot be)
+
+- JSON:
+  . Implemented RFC: json_validate()
+    https://wiki.php.net/rfc/json_validate (Juan Morales)
+
+- Opcache:
+  . Added start, restart and force restart time to opcache's
+    phpinfo section. (Mikhail Galanin)
+  . Fix GH-9139: Allow FFI in opcache.preload when opcache.preload_user=root.
+    (Arnaud, Kapitan Oczywisty)
+  . Made opcache.preload_user always optional in the cli and phpdbg SAPIs.
+    (Arnaud)
+  . Allows W/X bits on page creation on FreeBSD despite system settings.
     (David Carlier)
-  . Added support for listening queue on macOS. (David Carlier)
-  . Changed default for listen.backlog on Linux to -1. (Cristian Rodríguez)
 
-- Intl:
-  . Update all grandfathered language tags with preferred values
-  . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
+- PCNTL:
+  . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
+  . Added SIGINFO constant. (David Carlier)
 
-- OCI8:
-  . Added oci8.prefetch_lob_size directive to tune LOB query performance
-  . Support for building against Oracle Client libraries 10.1 and 10.2 has been
-    dropped. Oracle Client libraries 11.2 or newer are now required.
-
-- PDO_ODBC:
-  . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
-    Buckley)
+- Posix:
+  . Added posix_sysconf. (David Carlier)
 
 - Reflection:
-  . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
-  . Added ReflectionMethod::hasPrototype(). (Ollie Read)
-
-- Session:
-  . Fixed bug GH-7787 (Improve session write failure message for user error
-    handlers). (ilutov)
+  . Fix GH-9470 (ReflectionMethod constructor should not find private parent
+    method). (ilutov)
 
 - Sockets:
-  . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
-  . Added SO_MEMINFO socket option. (David Carlier)
-
-- Sodium:
-  . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
-
-- SQLite3:
-  . Changed sqlite3.defensive from PHP_INI_SYSTEM to PHP_INI_USER. (bohwaz)
+  . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
+    over socket binding for a cpu core. (David Carlier)
+  . Added SKF_AD_QUEUE for cbpf filters. (David Carlier)
+  . Added socket_atmark if send/recv needs using MSG_OOB. (David Carlier)
 
 - Standard:
-  . net_get_interfaces() also reports wireless network interfaces on Windows.
-    (Yurun)
-  . Finished AVIF support in getimagesize(). (Yannis Guyon)
-  . Fixed bug GH-7847 (stripos with large haystack has bad performance).
-    (ilutov)
-  . New function memory_reset_peak_usage(). (Patrick Allaert)
-  . Fixed parse_url(): can not recognize port without scheme. (pandaLIU)
+  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING. (timwolla)
 
 - Streams:
-  . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
-    (Cristian Rodríguez)
-
-- Zip:
-  . add ZipArchive::clearError() method
-  . add ZipArchive::getStreamName() method
-  . add ZipArchive::getStreamIndex() method
-  . On Windows, the Zip extension is now built as shared library (DLL) by
-    default. (cmb)
+  . Fixed bug #51056: blocking fread() will block even if data is available.
+    (Jakub Zelenka)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

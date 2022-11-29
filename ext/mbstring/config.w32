@@ -25,11 +25,10 @@ if (PHP_MBSTRING != "no") {
 			mbfilter_sjis_2004.c mbfilter_qprint.c mbfilter_sjis.c mbfilter_ucs2.c \
 			mbfilter_ucs4.c mbfilter_uhc.c mbfilter_utf16.c mbfilter_utf32.c \
 			mbfilter_utf7.c mbfilter_utf7imap.c mbfilter_utf8.c \
-			mbfilter_utf8_mobile.c mbfilter_euc_jp_2004.c mbfilter_uuencode.c \
+			mbfilter_utf8_mobile.c mbfilter_uuencode.c \
 			mbfilter_cp5022x.c mbfilter_sjis_mobile.c \
-			mbfilter_sjis_mac.c mbfilter_iso2022jp_2004.c \
-			mbfilter_iso2022jp_mobile.c mbfilter_singlebyte.c \
-			mbfilter_tl_jisx0201_jisx0208.c", "mbstring");
+			mbfilter_sjis_mac.c \
+			mbfilter_iso2022jp_mobile.c mbfilter_singlebyte.c", "mbstring");
 
 		ADD_SOURCES("ext/mbstring/libmbfl/mbfl", "mbfilter.c mbfilter_8bit.c \
 			mbfilter_pass.c mbfilter_wchar.c mbfl_convert.c mbfl_encoding.c \

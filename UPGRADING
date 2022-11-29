@@ -1,4 +1,4 @@
-PHP 8.2 UPGRADE NOTES
+PHP 8.3 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,60 +19,13 @@ PHP 8.2 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Date:
-  . DateTime::createFromImmutable() now has a tentative return type of static,
-    previously it was DateTime
-  . DateTimeImmutable::createFromMutable() now has a tentative return type of static,
-    previously it was DateTimeImmutable
-
-- Standard:
-  . strtolower() and strtoupper() are no longer locale-sensitive. They now
-    perform ASCII case conversion, as if the locale were "C". Use
-    mb_strtolower() if you want localized case conversion. Similarly, stristr,
-    stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
-    array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
-    conversion.
-
-- SPL:
-  . The following methods now enforce their signature:
-    * SplFileInfo::_bad_state_ex()
-    * SplFileObject::getCsvControl()
-    * SplFileObject::fflush()
-    * SplFileObject::ftell()
-    * SplFileObject::fgetc()
-    * SplFileObject::fpassthru()
-  . SplFileObject::hasChildren() now has a tentative return type of false,
-    previously it was bool
-  . SplFileObject::getChildren() now has a tentative return type of null,
-    previously it was ?RecursiveIterator
-
 ========================================
 2. New Features
 ========================================
 
-- Core:
-  . Added the #[\SensitiveParameter] attribute to redact sensitive data in
-    backtraces.
-    RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
-  . It is now possible to use null and false as standalone types.
-    RFC: https://wiki.php.net/rfc/null-false-standalone-types
-
-- Curl:
-  . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
-    HTTP method in curl_getinfo() return value.
-
-- OCI8:
-  . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
-    function to tune LOB query performance by reducing the number of
-    round-trips between PHP and Oracle Database when fetching LOBS. This is
-    usable with Oracle Database 12.2 or later.
-
-- PCRE:
-  . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
-    `(xyz)` groups non-capturing. Only named groups like `(?<name>xyz)` are
-    capturing. This only affects which groups are capturing, it is still
-    possible to use numbered subpattern references, and the matches array will
-    still contain numbered results.
+- Posix
+  . posix_getrlimit() now takes an optional $res parameter to allow fetching a
+    single resource limit.
 
 ========================================
 3. Changes in SAPI modules
@@ -82,78 +35,35 @@ PHP 8.2 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
-- Core:
-  . Creation of dynamic properties is deprecated, unless the class opts in by
-    using the #[AllowDynamicProperties] attribute. stdClass allows dynamic
-    properties. Usage of __get()/__set() is not affected by this change. A
-    dynamic properties deprecation warning can be addressed by:
-     - Declaring the property (preferred).
-     - Adding the #[AllowDynamicProperties] attribute to the class (which also
-       applies to all child classes).
-     - Using a WeakMap if you wish to associate additional data with an object
-       you do not own.
-
-  . Callables that are not accepted by the $callable() syntax (but are accepted
-    by call_user_func) are deprecated. In particular:
-
-        "self::method"
-        "parent::method"
-        "static::method"
-        ["self", "method"]
-        ["parent", "method"]
-        ["static", "method"]
-        ["Foo", "Bar::method"]
-        [new Foo, "Bar::method"]
-
-    This does not affect normal method callables like "A::method" or
-    ["A", "method"]. A deprecation notice is only emitted on call. Both
-    is_callable() and the callable type will silently accept these callables
-    until support for them is removed entirely.
-
-    RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
-
-  . The "${var}" and "${expr}" style string interpolations are deprecated and
-    will be removed in PHP 9. Use "$var"/"{$var}" or "{${expr}}", respectively.
-    RFC: https://wiki.php.net/rfc/deprecate_dollar_brace_string_interpolation
-
-- Mbstring:
-  . Use of QPrint, Base64, Uuencode, and HTML-ENTITIES 'text encodings' is
-    deprecated for all Mbstring functions. Unlike all the other text
-    encodings supported by Mbstring, these do not encode a sequence of
-    Unicode codepoints, but rather a sequence of raw bytes. It is not
-    clear what the correct return values for most Mbstring functions should
-    be when one of these non-encodings is specified. Further, PHP has
-    separate, built-in implementations of all of them; for example, UUencoded
-    data can be handled using convert_uuencode/convert_uudecode.
-
 ========================================
 5. Changed Functions
 ========================================
 
-- DBA
-  . dba_open() and dba_popen() now have the following enforced function signature
-    dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0)
-  . dba_fetch()'s optional skip argument is now at the end in line with
-    PHP userland semantics its signature now is:
-    dba_fetch(string|array $key, $dba, int $skip = 0): string|false
-    The overloaded signature
-    dba_fetch(string|array $key, $skip, $dba): string|false
-    is still accepted, but it is recommended to use the new standard variant.
+- Core:
+  . gc_status() has added the following 4 fields:
+    "running" => bool
+    "protected" => bool
+    "full" => bool
+    "buffer_size" => int
+    See GH-9336
+
+- Standard:
+  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
+    RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
 
 ========================================
 6. New Functions
 ========================================
 
-- Reflection:
-  . ReflectionFunction::isAnonymous()
-  . ReflectionMethod::hasPrototype()
+- JSON:
+  . Added json_validate(), which returns whether the json is valid for
+    the given $depth and $options.
 
-- Sodium:
-  . sodium_crypto_stream_xchacha20_xor_ic()
+- Posix:
+  . Added posix_sysconf call to get runtime informations.
 
-- Standard:
-  . The peak memory usage can now be reset to the current usage thanks to
-    memory_reset_peak_usage().
+- Sockets:
+  . Added socket_atmark to checks if the socket is OOB marked.
 
 ========================================
 7. New Classes and Interfaces
@@ -167,44 +77,21 @@ PHP 8.2 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
-- Intl:
-  . IntlBreakIterator, IntlRuleBasedBreakIterator, IntlCodePointBreakIterator,
-    IntlPartsIterator, IntlCalendar, IntlCalendar, Collator, IntlIterator,
-    UConverter, IntlDateFormatter, IntlDatePatternGenerator, MessageFormatter,
-    ResourceBundle, Spoofchecker, IntlTimeZone and Transliterator instances are
-    no longer serializable. Previously, they could be serialized, but
-    unserialization yielded unusable objects or failed.
-
-- OCI8:
-  . The minimum Oracle Client library version required is now 11.2.
-
-- SQLite3:
-  . sqlite3.defensive is now PHP_INI_USER.
-
-- Standard:
-  . getimagesize() now reports the actual image dimensions, bits and channels
-    of AVIF images. Previously, the dimensions have been reported as 0x0, and
-    bits and channels have not been reported at all.
-
-- Zip:
-  . extension updated to 1.20.0 with new methods:
-    ZipArchive::clearError, getStreamName and getStreamIndex
-
 ========================================
 10. New Global Constants
 ========================================
 
-- COM_DOTNET:
-  . LOCALE_NEUTRAL
+- PCNTL:
+  . SIGINFO
 
-- Curl:
-  . CURLOPT_XFERINFOFUNCTION
-  . CURLOPT_MAXFILESIZE_LARGE
+- Posix:
+  . POSIX_SC_ARG_MAX
+  . POSIX_SC_PAGESIZE
+  . POSIX_SC_NPROCESSORS_CONF
+  . POSIX_SC_NPROCESSORS_ONLN
 
 - Sockets:
-  . SO_INCOMING_CPU
-  . TCP_NOTSENT_LOWAT
-  . SO_MEMINFO
+  . SO_ATTACH_REUSEPORT_CBPF (Linux only).
 
 ========================================
 11. Changes to INI File Handling
@@ -214,21 +101,24 @@ PHP 8.2 UPGRADE NOTES
 12. Windows Support
 ========================================
 
-- Core:
-  . Windows specific error messages are no longer localized, but instead in
-    English to better match PHP error messages.
-
-- OCI8:
-  . Since building against Oracle Client 10g is no longer supported anyway,
-    the configuration option --with-oci8 has been dropped. --with-oci8-11g,
-    --with-oci8-12c and --with-oci8-19 are still supported.
-
-- Zip:
-  . The Zip extension is now built as shared library (DLL) by default.
-
 ========================================
 13. Other Changes
 ========================================
+
+- FFI:
+  . FFI::load() is now allowed during preloading when opcache.preload_user is the
+    current system user. Previously, calling FFI::load() was not possible during
+    preloading if the opcache.preload_user directive was set.
+
+- Opcache:
+  . In the cli and phpdbg SAPIs, preloading does not require the
+    opcache.preload_user directive to be set anymore when running as root. In
+    other SAPIs, this directive is required when running as root because
+    preloading is done before the SAPI switches to an unprivileged user.
+
+- Streams:
+  . Blocking fread() on socket connection returns immediately if there are
+    any buffered data instead of waiting for more data.
 
 ========================================
 14. Performance Improvements

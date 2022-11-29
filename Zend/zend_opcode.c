@@ -27,6 +27,7 @@
 #include "zend_API.h"
 #include "zend_sort.h"
 #include "zend_constants.h"
+#include "zend_observer.h"
 
 #include "zend_vm.h"
 
@@ -109,9 +110,15 @@ ZEND_API void destroy_zend_function(zend_function *function)
 
 ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
-		zend_type *list_type;
+		zend_type *list_type, *sublist_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
-			if (ZEND_TYPE_HAS_NAME(*list_type)) {
+			if (ZEND_TYPE_HAS_LIST(*list_type)) {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*list_type), sublist_type) {
+					if (ZEND_TYPE_HAS_NAME(*sublist_type)) {
+						zend_string_release(ZEND_TYPE_NAME(*sublist_type));
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
 				zend_string_release(ZEND_TYPE_NAME(*list_type));
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
@@ -275,6 +282,11 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 			mutable_data->default_properties_table = NULL;
 		}
 
+		if (mutable_data->backed_enum_table) {
+			zend_hash_release(mutable_data->backed_enum_table);
+			mutable_data->backed_enum_table = NULL;
+		}
+
 		ZEND_MAP_PTR_SET_IMM(ce->mutable_data, NULL);
 	}
 }
@@ -299,12 +311,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		p = ce->default_properties_table;
-		end = p + ce->default_properties_count;
+		if (ce->default_properties_table) {
+			p = ce->default_properties_table;
+			end = p + ce->default_properties_count;
 
-		while (p < end) {
-			zval_ptr_dtor_nogc(p);
-			p++;
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
 		}
 		return;
 	}
@@ -329,9 +343,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 				if (ce->attributes) {
 					zend_hash_release(ce->attributes);
-				}
-				if (ce->backed_enum_table) {
-					zend_hash_release(ce->backed_enum_table);
 				}
 
 				if (ce->num_interfaces > 0 && !(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
@@ -402,6 +413,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && (ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 				efree(ce->interfaces);
+			}
+			if (ce->backed_enum_table) {
+				zend_hash_release(ce->backed_enum_table);
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
@@ -826,6 +840,8 @@ done:
 				/* The use might have been optimized away, in which case we will hit the def
 				 * instead. */
 				if (use_opline->opcode == ZEND_COPY_TMP && use_opline->result.var == rt_var_num) {
+					start = def_opline + 1 - op_array->opcodes;
+					emit_live_range_raw(op_array, var_num, kind, start, end);
 					return;
 				}
 			} while (!(
@@ -1041,6 +1057,8 @@ ZEND_API void pass_two(zend_op_array *op_array)
 	CG(context).opcodes_size = op_array->last;
 	CG(context).literals_size = op_array->last_literal;
 #endif
+
+    op_array->T += ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 
 	/* Needs to be set directly after the opcode/literal reallocation, to ensure destruction
 	 * happens correctly if any of the following fixups generate a fatal error. */

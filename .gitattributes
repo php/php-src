@@ -18,3 +18,8 @@
 *.phpt diff=php
 *.php diff=php
 *.[ch] diff=cpp
+
+# Collapse generated files within a pull request.
+**/*_arginfo.h linguist-generated
+/Zend/zend_vm_execute.h linguist-generated
+/Zend/zend_vm_opcodes.{h,c} linguist-generated

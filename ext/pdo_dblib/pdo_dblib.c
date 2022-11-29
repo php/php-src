@@ -223,7 +223,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_dblib)
 PHP_MINFO_FUNCTION(pdo_dblib)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for "
+	php_info_print_table_row(2, "PDO Driver for "
 #ifdef PDO_DBLIB_IS_MSSQL
 		"MSSQL"
 #elif defined(PHP_WIN32)

@@ -27,4 +27,11 @@ extern zend_module_entry sysvmsg_module_entry;
 
 #endif /* HAVE_SYSVMSG */
 
+/* In order to detect MSG_EXCEPT use at run time; we have no way
+ * of knowing what the bit definitions are, so we can't just define
+ * our own MSG_EXCEPT value. */
+#define PHP_MSG_IPC_NOWAIT  1
+#define PHP_MSG_NOERROR     2
+#define PHP_MSG_EXCEPT      4
+
 #endif	/* PHP_SYSVMSG_H */
