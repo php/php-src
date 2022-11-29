@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.2
 
+- FPM:
+  . Fixed bug #77106 (Missing separator in FPM FastCGI errors). (Jakub Zelenka)
+
 - LDAP:
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
     (cmb)
