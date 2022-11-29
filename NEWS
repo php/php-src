@@ -36,6 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9298 (Signal handler called after rshutdown leads to crash).
     (Erki Aring)
 
+- PDO_Firebird:
+  . Fixed bug GH-9971 (Incorrect NUMERIC value returned from PDO_Firebird).
+    (cmb)
+
 - Session:
   . Fixed GH-9932 (session name silently fails with . and [). (David Carlier)
 
