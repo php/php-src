@@ -144,8 +144,8 @@ static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);
 static zend_string *zend_jit_func_name(const zend_op_array *op_array);
 
-#ifndef ZEND_JIT_IR
 static int zend_jit_trace_op_len(const zend_op *opline);
+#ifndef ZEND_JIT_IR
 static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num, zend_call_info *call_info);
 
 #if ZEND_JIT_TARGET_ARM64
@@ -338,6 +338,7 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 	}
 	return 0;
 }
+#endif
 
 static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {
@@ -522,6 +523,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	}
 }
 
+#ifndef ZEND_JIT_IR
 static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ssa, const zend_call_info *call_info)
 {
 	uint32_t num_args = 0;
@@ -3776,7 +3778,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
@@ -3784,6 +3785,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
 						if (opline->op2_type == IS_CONST) {

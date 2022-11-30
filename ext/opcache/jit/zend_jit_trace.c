@@ -198,12 +198,10 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 	uint32_t stack_size;
 	zend_jit_trace_stack *stack = NULL;
 
-#ifndef ZEND_JIT_IR //???
 	if (delayed_call_chain) {
 		assert(to_opline != NULL); /* CALL and IP share the same register */
 		flags |= ZEND_JIT_EXIT_RESTORE_CALL;
 	}
-#endif
 	if (JIT_G(current_frame)) {
 		op_array = &JIT_G(current_frame)->func->op_array;
 		stack_size = op_array->last_var + op_array->T;
@@ -4016,6 +4014,7 @@ static int zend_jit_trace_deoptimization(
 			}
 		}
 	}
+#endif
 
 	if (flags & ZEND_JIT_EXIT_RESTORE_CALL) {
 		if (!zend_jit_save_call_chain(jit, -1)) {
@@ -4023,6 +4022,7 @@ static int zend_jit_trace_deoptimization(
 		}
 	}
 
+#ifndef ZEND_JIT_IR //???
 	if (flags & ZEND_JIT_EXIT_FREE_OP2) {
 		const zend_op *op = opline - 1;
 
@@ -5589,7 +5589,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[ssa_op->op1_def].guarded_reference = ssa->var_info[ssa_op->op1_use].guarded_reference;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
@@ -5598,6 +5597,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
 						if (opline->op2_type == IS_CONST) {
@@ -8956,11 +8956,9 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	zend_jit_trace_stack *stack = t->stack_map + t->exit_info[exit_num].stack_offset;
 
 	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
-#ifndef ZEND_JIT_IR //???
 		zend_execute_data *call = (zend_execute_data *)regs->gpr[ZREG_RX];
 		call->prev_execute_data = EX(call);
 		EX(call) = call;
-#endif
 	}
 
 	for (i = 0; i < stack_size; i++) {
