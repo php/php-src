@@ -62,7 +62,7 @@ static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_
 	if (
 		(*one)->zone_type == TIMELIB_ZONETYPE_ID &&
 		(*two)->zone_type == TIMELIB_ZONETYPE_ID &&
-		(strcmp((*one)->tz_info->name, (*two)->tz_info->name) != 0)
+		(strcmp((*one)->tz_info->name, (*two)->tz_info->name) == 0)
 	) {
 		if (
 			((*one)->y > (*two)->y) ||
@@ -198,7 +198,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 {
 	timelib_rel_time *rt;
 
-	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID) {
+	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
 		return timelib_diff_with_tzid(one, two);
 	}
 
