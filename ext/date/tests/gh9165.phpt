@@ -1,5 +1,5 @@
 --TEST--
-GH-9165 (strtotime translates a date-time with DST/non-DST hour differently based on default timezone)
+Bug GH-9165 (strtotime translates a date-time with DST/non-DST hour differently based on default timezone)
 --FILE--
 <?php
 date_default_timezone_set('America/Lower_Princes');

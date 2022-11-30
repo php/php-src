@@ -41,7 +41,7 @@ DateInterval Object
     [weekday] => 0
     [weekday_behavior] => 0
     [first_last_day_of] => 0
-    [invert] => 1
+    [invert] => 0
     [days] => 0
     [special_type] => 0
     [special_amount] => 0
