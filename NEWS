@@ -10,6 +10,15 @@ PHP                                                                        NEWS
   . Fixed bug GH-9650 (Can't initialize heap: [0x000001e7]). (Michael Voříšek)
   . Fixed potentially undefined behavior in Windows ftok(3) emulation. (cmb)
 
+- Date:
+  . Fixed bug GH-9699 (DateTimeImmutable::diff differences in 8.1.10 onwards -
+    timezone related). (Derick)
+  . Fixed bug GH-9700 (DateTime::createFromFormat: Parsing TZID string is too
+    greedy). (Derick)
+  . Fixed bug GH-9866 (Time zone bug with \DateTimeInterface::diff()). (Derick)
+  . Fixed bug GH-9880 (DateTime diff returns wrong sign on day count when using
+    a timezone). (Derick)
+
 - FPM:
   . Fixed bug GH-9959 (Solaris port event mechanism is still broken after bug
     #66694). (Petr Sumbera)
