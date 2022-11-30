@@ -135,6 +135,7 @@ contribute:
 - [PHP coding standards](/CODING_STANDARDS.md)
 - [Mailing list rules](/docs/mailinglist-rules.md)
 - [PHP release process](/docs/release-process.md)
+- [Install PHP](https://php.net/install)
 
 ## Credits
 
