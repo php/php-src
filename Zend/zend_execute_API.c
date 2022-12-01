@@ -686,8 +686,9 @@ ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *p, zend_c
 			ZVAL_COPY_OR_DUP(p, zv);
 		} else {
 			zval tmp;
+			bool short_circuited;
 
-			if (UNEXPECTED(zend_ast_evaluate_ex(&tmp, ast, scope, ctx) != SUCCESS)) {
+			if (UNEXPECTED(zend_ast_evaluate_ex(&tmp, ast, scope, &short_circuited, ctx) != SUCCESS)) {
 				return FAILURE;
 			}
 			zval_ptr_dtor_nogc(p);
