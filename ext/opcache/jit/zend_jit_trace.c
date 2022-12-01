@@ -5626,7 +5626,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_REF:
 						if (opline->op2_type == IS_CONST) {
 							/* Named parameters not supported in JIT */
@@ -5642,6 +5641,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_VAR:
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_VAR_NO_REF:

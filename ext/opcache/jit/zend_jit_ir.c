@@ -509,6 +509,20 @@ static ir_ref zend_jit_call_3(zend_jit_ctx *jit, ir_type type, ir_ref func, ir_r
 	return call;
 }
 
+static ir_ref zend_jit_call_5(zend_jit_ctx *jit, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5)
+{
+	ir_ref call = ir_emit_N(&jit->ctx, IR_OPT(IR_CALL, type), 7);
+	ir_set_op(&jit->ctx, call, 1, jit->control);
+	ir_set_op(&jit->ctx, call, 2, func);
+	ir_set_op(&jit->ctx, call, 3, arg1);
+	ir_set_op(&jit->ctx, call, 4, arg2);
+	ir_set_op(&jit->ctx, call, 5, arg3);
+	ir_set_op(&jit->ctx, call, 6, arg3);
+	ir_set_op(&jit->ctx, call, 7, arg4);
+	jit->control = call;
+	return call;
+}
+
 static void zend_jit_ret(zend_jit_ctx *jit, ir_ref ref)
 {
 	jit->control = ir_emit3(&jit->ctx, IR_RETURN, jit->control, ref, jit->ctx.ir_base[1].op1);
@@ -758,6 +772,32 @@ static ir_ref zend_jit_phi_N(zend_jit_ctx *jit, uint32_t n, ir_ref *inputs)
 }
 
 /* PHP helpers */
+
+static ir_ref zend_jit_emalloc(zend_jit_ctx *jit, size_t size, const zend_op_array *op_array, const zend_op *opline)
+{
+#if ZEND_DEBUG
+	return zend_jit_call_5(jit, IR_ADDR,
+		zend_jit_const_func_addr(jit, (uintptr_t)_emalloc, IR_CONST_FASTCALL_FUNC),
+		zend_jit_const_addr(jit, size),
+		op_array->filename ? zend_jit_const_addr(jit, (uintptr_t)op_array->filename->val) : IR_NULL,
+		ir_const_u32(&jit->ctx, opline ? opline->lineno : 0),
+		IR_NULL,
+		ir_const_u32(&jit->ctx, 0));
+#elif defined(HAVE_BUILTIN_CONSTANT_P)
+	if (size > 24 && size <= 32) {
+		return zend_jit_call_0(jit, IR_ADDR,
+			zend_jit_const_func_addr(jit, (uintptr_t)_emalloc_32, IR_CONST_FASTCALL_FUNC));
+	} else {
+		return zend_jit_call_1(jit, IR_ADDR,
+			zend_jit_const_func_addr(jit, (uintptr_t)_emalloc, IR_CONST_FASTCALL_FUNC),
+			zend_jit_const_addr(jit, size));
+	}
+#else
+	return zend_jit_call_1(jit, IR_ADDR,
+		zend_jit_const_func_addr(jit, (uintptr_t)_emalloc, IR_CONST_FASTCALL_FUNC),
+		zend_jit_const_addr(jit, size));
+#endif
+}
 
 static ir_ref zend_jit_fp(zend_jit_ctx *jit)
 {
@@ -1496,6 +1536,11 @@ static void zend_jit_copy_zval_const(zend_jit_ctx *jit, zend_jit_addr dst, uint3
 			zend_jit_zval_set_type_info(jit, dst, Z_TYPE_INFO_P(zv));
 		}
 	}
+}
+
+static void zend_jit_gc_set_refcount(zend_jit_ctx *jit, ir_ref ref, uint32_t refcount)
+{
+	zend_jit_store(jit, ref, ir_const_u32(&jit->ctx, refcount));
 }
 
 static void zend_jit_gc_addref(zend_jit_ctx *jit, ir_ref ref)
@@ -8420,6 +8465,124 @@ static int zend_jit_send_val(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 			MAY_BE_ANY,
 			op1_addr, op1_info, 0);
 	}
+
+	return 1;
+}
+
+static int zend_jit_send_ref(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, int cold)
+{
+	zend_jit_addr op1_addr, arg_addr, ref_addr;
+	ir_ref ref_path = IR_UNUSED;
+
+	op1_addr = OP1_ADDR();
+	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
+
+	if (!zend_jit_reuse_ip(jit)) {
+		return 0;
+	}
+
+	if (opline->op1_type == IS_VAR) {
+		if (op1_info & MAY_BE_INDIRECT) {
+			ir_ref ref, ref2, if_indirect, long_path;
+
+			// JIT: ref = op1
+			ref = zend_jit_mem_zval_addr(jit, op1_addr);
+			// JIT: if (Z_TYPE_P(ref) == IS_INDIRECT)
+			if_indirect = zend_jit_if_zval_type(jit, op1_addr, IS_INDIRECT);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_indirect);
+			// JIT: ref = Z_INDIRECT_P(ref)
+			ref2 = zend_jit_zval_ref_ptr(jit, ref);
+			long_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_indirect);
+			jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit2(&jit->ctx, IR_MERGE, long_path, jit->control);
+			ref = ir_emit3(&jit->ctx, IR_OPT(IR_PHI, IR_ADDR),jit->control, ref2, ref);
+			op1_addr = ZEND_ADDR_REF_ZVAL(ref);
+		}
+	} else if (opline->op1_type == IS_CV) {
+		if (op1_info & MAY_BE_UNDEF) {
+			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+				ir_ref if_undef, long_path;
+
+				// JIT: if (Z_TYPE_P(op1) == IS_UNDEF)
+				if_undef = zend_jit_if_zval_type(jit, op1_addr, IS_UNDEF);
+				jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_undef);
+				// JIT: ZVAL_NULL(op1)
+				zend_jit_zval_set_type_info(jit,op1_addr, IS_NULL);
+				long_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+				jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_undef);
+				jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+				jit->control = ir_emit2(&jit->ctx, IR_MERGE, long_path, jit->control);
+			}
+			op1_info &= ~MAY_BE_UNDEF;
+			op1_info |= MAY_BE_NULL;
+		}
+	} else {
+		ZEND_UNREACHABLE();
+	}
+
+	if (op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) {
+		ir_ref ref, ref2;
+
+		if (op1_info & MAY_BE_REF) {
+			ir_ref if_ref;
+
+			// JIT: if (Z_TYPE_P(op1) == IS_UNDEF)
+			if_ref = zend_jit_if_zval_type(jit, op1_addr, IS_REFERENCE);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_ref);
+			// JIT: ref = Z_PTR_P(op1)
+			ref = zend_jit_zval_ptr(jit, op1_addr);
+			// JIT: GC_ADDREF(ref)
+			zend_jit_gc_addref(jit, ref);
+			// JIT: ZVAL_REFERENCE(arg, ref)
+			zend_jit_zval_set_ptr(jit, arg_addr, ref);
+			zend_jit_zval_set_type_info(jit, arg_addr, IS_REFERENCE_EX);
+			ref_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_ref);
+		}
+
+		// JIT: ZVAL_NEW_REF(arg, varptr);
+		// JIT: ref = emalloc(sizeof(zend_reference));
+		ref = zend_jit_emalloc(jit, sizeof(zend_reference), op_array, opline);
+		// JIT: GC_REFERENCE(ref) = 2
+		zend_jit_gc_set_refcount(jit, ref, 2);
+		// JIT: GC_TYPE(ref) = GC_REFERENCE
+		zend_jit_store(jit,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				ref,
+				zend_jit_const_addr(jit, offsetof(zend_reference, gc.u.type_info))),
+			ir_const_u32(&jit->ctx, GC_REFERENCE));
+		zend_jit_store(jit,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				ref,
+				zend_jit_const_addr(jit, offsetof(zend_reference, sources.ptr))),
+			IR_NULL);
+		ref2 = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+			ref,
+			zend_jit_const_addr(jit, offsetof(zend_reference, val)));
+		ref_addr = ZEND_ADDR_REF_ZVAL(ref2);
+
+        // JIT: ZVAL_COPY_VALUE(&ref->val, op1)
+		zend_jit_copy_zval(jit,
+			ref_addr,
+			MAY_BE_ANY,
+			op1_addr, op1_info, 0);
+
+		// JIT: ZVAL_REFERENCE(arg, ref)
+		zend_jit_zval_set_ptr(jit, op1_addr, ref);
+		zend_jit_zval_set_type_info(jit, op1_addr, IS_REFERENCE_EX);
+
+		// JIT: ZVAL_REFERENCE(arg, ref)
+		zend_jit_zval_set_ptr(jit, arg_addr, ref);
+		zend_jit_zval_set_type_info(jit, arg_addr, IS_REFERENCE_EX);
+	}
+
+	if (ref_path) {
+		jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+		jit->control = ir_emit2(&jit->ctx, IR_MERGE, ref_path, jit->control);
+	}
+
+	zend_jit_free_op(jit, opline->op1_type, opline->op1, op1_info, opline);
 
 	return 1;
 }
