@@ -42,7 +42,7 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
 #include "ext/random/php_random.h"
-#include "Zend/zend_strictmap.h"
+#include "zend_strictmap.h"
 
 /* {{{ defines */
 
@@ -4560,42 +4560,6 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
-	if (sort_type == PHP_ARRAY_UNIQUE_IDENTICAL) {
-		zend_long num_key;
-		zend_string *str_key;
-		zval *val;
-		zend_strictmap seen;
-
-		zend_strictmap_init(&seen);
-
-		array_init(return_value);
-
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, val) {
-			zval dummy;
-			ZVAL_TRUE(&dummy);
-			zval *val_deref = val;
-			ZVAL_DEREF(val_deref);
-			bool added = zend_strictmap_insert(&seen, val_deref, &dummy);
-
-			if (added) {
-				/* First occurrence of the value */
-				if (UNEXPECTED(Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1)) {
-					ZVAL_DEREF(val);
-				}
-				Z_TRY_ADDREF_P(val);
-
-				if (str_key) {
-					zend_hash_add_new(Z_ARRVAL_P(return_value), str_key, val);
-				} else {
-					zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, val);
-				}
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		zend_strictmap_dtor(&seen);
-		return;
-	}
-
 	cmp = php_get_data_compare_func_unstable(sort_type, 0);
 
 	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
@@ -6492,3 +6456,64 @@ PHP_FUNCTION(array_combine)
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
+
+static zend_always_inline void list_assoc_unique(INTERNAL_FUNCTION_PARAMETERS, bool preserve_keys)
+{
+	zval *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {
+		ZVAL_COPY(return_value, array);
+		return;
+	}
+
+	zend_long num_key;
+	zend_string *str_key;
+	zval *val;
+	zend_strictmap seen;
+
+	zend_strictmap_init(&seen);
+
+	array_init(return_value);
+
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, val) {
+		zval dummy;
+		ZVAL_TRUE(&dummy);
+		zval *val_deref = val;
+		ZVAL_DEREF(val_deref);
+		bool added = zend_strictmap_insert(&seen, val_deref, &dummy);
+
+		if (added) {
+			/* First occurrence of the value */
+			if (UNEXPECTED(Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1)) {
+				ZVAL_DEREF(val);
+			}
+			Z_TRY_ADDREF_P(val);
+
+			if (preserve_keys) {
+				if (str_key) {
+					zend_hash_add_new(Z_ARRVAL_P(return_value), str_key, val);
+				} else {
+					zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, val);
+				}
+			} else {
+				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), val);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_strictmap_dtor(&seen);
+}
+
+ZEND_FUNCTION(List_unique)
+{
+	list_assoc_unique(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* preserve_keys */ false);
+}
+
+ZEND_FUNCTION(Assoc_unique)
+{
+	list_assoc_unique(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* preserve_keys */ true);
+}

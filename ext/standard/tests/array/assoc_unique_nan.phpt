@@ -1,37 +1,37 @@
 --TEST--
-array_unique() with ARRAY_UNIQUE_IDENTICAL preserves NAN
+Assoc\unique() preserves NAN
 --FILE--
 <?php
 
-var_dump(array_unique([
+var_dump(Assoc\unique([
     NAN,
     NAN,
-], ARRAY_UNIQUE_IDENTICAL));
+]));
 
-var_dump(array_unique([
+var_dump(Assoc\unique([
     'foo' => NAN,
     'bar' => NAN,
-], ARRAY_UNIQUE_IDENTICAL));
+]));
 
-var_dump(array_unique([
+var_dump(Assoc\unique([
     [NAN],
     1.0,
     [NAN],
-], ARRAY_UNIQUE_IDENTICAL));
+]));
 
-var_dump(array_unique([
+var_dump(Assoc\unique([
     1.0,
     NAN,
     1.0,
     NAN,
     1.0,
-], ARRAY_UNIQUE_IDENTICAL));
+]));
 
-var_dump(array_unique([
+var_dump(Assoc\unique([
     1.0,
     NAN,
     1.0,
-], ARRAY_UNIQUE_IDENTICAL));
+]));
 
 ?>
 --EXPECT--

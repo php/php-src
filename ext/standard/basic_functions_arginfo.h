@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 122cb89e08a3a4c2d8c0f69120490dbe527037a9 */
+ * Stub hash: ae6ae27b7e077ca1f46e02d65b9c140569ee6c04 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2202,6 +2202,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+#define arginfo_List_unique arginfo_array_values
+
+#define arginfo_Assoc_unique arginfo_array_values
+
 
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
@@ -2820,6 +2824,8 @@ ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
+ZEND_FUNCTION(List_unique);
+ZEND_FUNCTION(Assoc_unique);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -3468,6 +3474,8 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
+	ZEND_NS_FALIAS("List", unique, List_unique, arginfo_List_unique)
+	ZEND_NS_FALIAS("Assoc", unique, Assoc_unique, arginfo_Assoc_unique)
 	ZEND_FE_END
 };
 
@@ -3499,7 +3507,6 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ARRAY_UNIQUE_IDENTICAL", PHP_ARRAY_UNIQUE_IDENTICAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_LOWER", PHP_CASE_LOWER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_UPPER", PHP_CASE_UPPER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_NORMAL", PHP_COUNT_NORMAL, CONST_PERSISTENT);

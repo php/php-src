@@ -1,11 +1,11 @@
 --TEST--
-Test array_unique() with ARRAY_UNIQUE_IDENTICAL
+Test Assoc\unique()
 --FILE--
 <?php
 
-var_dump(array_unique(['1234', '1234'], ARRAY_UNIQUE_IDENTICAL));
-var_dump(array_unique(['1234', 1234, 1234.0, '1234', 1234, 1234.0], ARRAY_UNIQUE_IDENTICAL));
-var_dump(array_unique([0, '0', 0.0, '0.0', '', null, null], ARRAY_UNIQUE_IDENTICAL));
+var_dump(Assoc\unique(['1234', '1234']));
+var_dump(Assoc\unique(['1234', 1234, 1234.0, '1234', 1234, 1234.0]));
+var_dump(Assoc\unique([0, '0', 0.0, '0.0', '', null, null]));
 
 $a = (object)[];
 $b = (object)[];
@@ -13,7 +13,7 @@ $a2 = [$a];
 $b2 = [$b];
 $a3 = (object)['foo' => $a];
 $b3 = (object)['foo' => $b];
-var_dump(array_unique([$a, $b, $a2, $b2, $a3, $b3], ARRAY_UNIQUE_IDENTICAL));
+var_dump(Assoc\unique([$a, $b, $a2, $b2, $a3, $b3]));
 
 ?>
 --EXPECT--

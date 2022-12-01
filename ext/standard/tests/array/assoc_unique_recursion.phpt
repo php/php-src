@@ -1,12 +1,12 @@
 --TEST--
-Test array_unique() with ARRAY_UNIQUE_IDENTICAL and recursion
+Test Assoc\unique() and recursion
 --FILE--
 <?php
 
 $a = [];
 $b = [&$a];
 $a[0] = &$b;
-array_unique([$a, $b], ARRAY_UNIQUE_IDENTICAL);
+Assoc\unique([$a, $b]);
 
 ?>
 --EXPECTF--

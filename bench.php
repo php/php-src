@@ -9,12 +9,12 @@ function generate_values(int $n) {
     return $values;
 }
 
-function bench_array_unique_identical(int $n, int $iterations) {
+function bench_assoc_unique_identical(int $n, int $iterations) {
     $values = generate_values($n);
     $start = hrtime(true);
     $sum = 0;
     for ($i = 0; $i < $iterations; $i++) {
-        $sum += array_sum(array_unique($values, ARRAY_UNIQUE_IDENTICAL));
+        $sum += array_sum(Assoc\unique($values));
     }
     $end = hrtime(true);
     printf("%30s n=%8d iterations=%8d time=%.3f sum=%d\n", __FUNCTION__, $n, $iterations, ($end - $start)/1e9, $sum);
@@ -31,5 +31,5 @@ $sizes = [
 ];
 
 foreach ($sizes as [$n, $iterations]) {
-    bench_array_unique_identical($n, $iterations);
+    bench_assoc_unique_identical($n, $iterations);
 }
