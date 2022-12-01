@@ -138,10 +138,9 @@ typedef uintptr_t zend_jit_addr;
 #define Z_MODE(addr)     (((addr) & _ZEND_ADDR_MODE_MASK))
 #define Z_ZV(addr)       ((zval*)(addr))
 #define Z_OFFSET(addr)   ((uint32_t)((addr)>>_ZEND_ADDR_OFFSET_SHIFT))
+#define Z_REG(addr)      ((zend_reg)(((addr)>>_ZEND_ADDR_REG_SHIFT) & _ZEND_ADDR_REG_MASK))
 
 #ifndef ZEND_JIT_IR
-
-#define Z_REG(addr)      ((zend_reg)(((addr)>>_ZEND_ADDR_REG_SHIFT) & _ZEND_ADDR_REG_MASK))
 
 #define _ZEND_ADDR_REG_STORE_BIT       8
 #define _ZEND_ADDR_REG_LOAD_BIT        9
@@ -213,12 +212,12 @@ static zend_always_inline zend_jit_addr _zend_jit_decode_op(uint8_t op_type, zno
 # define OP_ADDR(opline, type, op) \
 	(((opline)->type == IS_CONST) ? \
 		ZEND_ADDR_CONST_ZVAL((opline)->op.zv) : \
-		ZEND_ADDR_MEM_ZVAL(/*ZREG_FP???*/0, (opline)->op.var))
+		ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline)->op.var))
 #else
 # define OP_ADDR(opline, type, op) \
 	(((opline)->type == IS_CONST) ? \
 		ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(opline, (opline)->op)) : \
-		ZEND_ADDR_MEM_ZVAL(/*ZREG_FP???*/0, (opline)->op.var))
+		ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline)->op.var))
 #endif
 
 #define OP_REG_ADDR(opline, type, op, _ssa_op) \

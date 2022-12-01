@@ -2044,9 +2044,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
+#endif
 				case ZEND_SEND_VAL_EX:
-				case ZEND_SEND_VAR_EX:
-				case ZEND_SEND_VAR_NO_REF_EX:
+//???				case ZEND_SEND_VAR_EX:
+//???				case ZEND_SEND_VAR_NO_REF_EX:
 					if (opline->op2_type == IS_CONST) {
 						/* Named parameters not supported in JIT */
 						break;
@@ -2056,9 +2057,9 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ZEND_FALLTHROUGH;
 				case ZEND_SEND_VAL:
-				case ZEND_SEND_VAR:
-				case ZEND_SEND_VAR_NO_REF:
-				case ZEND_SEND_FUNC_ARG:
+//???				case ZEND_SEND_VAR:
+//???				case ZEND_SEND_VAR_NO_REF:
+//???				case ZEND_SEND_FUNC_ARG:
 					if (opline->op2_type == IS_CONST) {
 						/* Named parameters not supported in JIT */
 						break;
@@ -2105,6 +2106,7 @@ propagate_arg:
 						SET_STACK_INFO(frame->call->stack, opline->op2.num - 1, info);
 					}
 					break;
+#ifndef ZEND_JIT_IR //???
 				case ZEND_RETURN:
 					ADD_OP1_TRACE_GUARD();
 					/* Propagate return value types */
@@ -5597,7 +5599,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
 						if (opline->op2_type == IS_CONST) {
@@ -5625,6 +5626,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_REF:
 						if (opline->op2_type == IS_CONST) {
 							/* Named parameters not supported in JIT */

@@ -3785,7 +3785,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
 						if (opline->op2_type == IS_CONST) {
@@ -3801,6 +3800,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_REF:
 						if (opline->op2_type == IS_CONST) {
 							/* Named parameters not supported in JIT (yet) */
