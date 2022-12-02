@@ -2046,8 +2046,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					break;
 #endif
 				case ZEND_SEND_VAL_EX:
-//???				case ZEND_SEND_VAR_EX:
-//???				case ZEND_SEND_VAR_NO_REF_EX:
+				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_VAR_NO_REF_EX:
 					if (opline->op2_type == IS_CONST) {
 						/* Named parameters not supported in JIT */
 						break;
@@ -2057,9 +2057,9 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ZEND_FALLTHROUGH;
 				case ZEND_SEND_VAL:
-//???				case ZEND_SEND_VAR:
-//???				case ZEND_SEND_VAR_NO_REF:
-//???				case ZEND_SEND_FUNC_ARG:
+				case ZEND_SEND_VAR:
+				case ZEND_SEND_VAR_NO_REF:
+				case ZEND_SEND_FUNC_ARG:
 					if (opline->op2_type == IS_CONST) {
 						/* Named parameters not supported in JIT */
 						break;
@@ -5641,7 +5641,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_SEND_VAR:
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_VAR_NO_REF:
@@ -5689,6 +5688,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_CHECK_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
