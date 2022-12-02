@@ -165,6 +165,13 @@ jobs:
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
+      mariadbverylatest:
+        image: quay.io/mariadb-foundation/mariadb-devel:verylatest
+        ports:
+          - 3307:3306
+        env:
+          MARIADB_DATABASE: test
+          MARIADB_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -193,6 +200,13 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-linux
         with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+      - name: Test Extra MariaDB (very latest)
+        uses: ./.github/actions/test-mysql-extra
+        with:
+          runHost: mariadbverylatest
+          runPort: ${{ job.services.mariadbverylatest.ports[3306] }}
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
       - name: Test Tracing JIT

@@ -1,0 +1,30 @@
+name: Test Extra MySQL/MariaDB
+inputs:
+  runHost:
+    required: true
+  runPort:
+    required: true
+  runTestsParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        export MYSQL_TEST_HOST=${{ inputs.runHost }}
+        export MYSQL_TEST_USER=root
+        export MYSQL_TEST_PASSWD=root
+        export MYSQL_TEST_PORT=${{ inputs.runPort }}
+        export PDO_MYSQL_TEST_DSN="mysql:host=${{ inputs.runHost }};dbname=test;port=${{ inputs.runPort }}"
+        export PDO_MYSQL_TEST_USER=root
+        export PDO_MYSQL_TEST_PASS=root
+        sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
+          -j$(/usr/bin/nproc) \
+          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          --offline \
+          --show-diff \
+          --show-slow 1000 \
+          --set-timeout 120 \
+          ext/mysqli ext/pdo_mysql
