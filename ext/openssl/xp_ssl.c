@@ -71,6 +71,10 @@
 #define HAVE_TLS13 1
 #endif
 
+#if TONGSUO_VERSION_NUMBER >= 0x80400000 && !defined(OPENSSL_NO_NTLS)
+#define HAVE_NTLS 1
+#endif
+
 #ifndef OPENSSL_NO_ECDH
 #define HAVE_ECDH 1
 #endif
@@ -886,7 +890,7 @@ static void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stre
 }
 /* }}} */
 
-static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream, int is_ntls) /* {{{ */
 {
 	zval *val = NULL;
 	char *certfile = NULL;
@@ -928,6 +932,75 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 			}
 		}
 	}
+
+#if HAVE_NTLS
+	if (is_ntls) {
+		char *sign_cert = NULL;
+		char *sign_key = NULL;
+		char *enc_cert = NULL;
+		char *enc_key = NULL;
+
+		GET_VER_OPT_STRING("sign_cert", sign_cert);
+		if (sign_cert) {
+			char resolved_path_buff[MAXPATHLEN];
+			if (VCWD_REALPATH(sign_cert, resolved_path_buff)) {
+				sign_cert = resolved_path_buff;
+			}
+
+			if (SSL_CTX_use_sign_certificate_file(ctx, sign_cert, SSL_FILETYPE_PEM) != 1) {
+				php_error_docref(NULL, E_WARNING, "Unable to set sign_cert file '%s'", sign_cert);
+				return FAILURE;
+			}
+
+			GET_VER_OPT_STRING("sign_key", sign_key);
+
+			if (sign_key) {
+				char resolved_path_buff_pk[MAXPATHLEN];
+				if (VCWD_REALPATH(sign_key, resolved_path_buff_pk)) {
+					sign_key = resolved_path_buff_pk;
+				}
+
+				if (SSL_CTX_use_sign_PrivateKey_file(ctx, sign_key, SSL_FILETYPE_PEM) != 1) {
+					php_error_docref(NULL, E_WARNING, "Unable to set sign_key file '%s'", sign_key);
+					return FAILURE;
+				}
+			} else {
+				php_error_docref(NULL, E_WARNING, "Missing configuration value: \"sign_key\" not set");
+				return FAILURE;
+			}
+		}
+
+		GET_VER_OPT_STRING("enc_cert", enc_cert);
+		if (enc_cert) {
+			char resolved_path_buff[MAXPATHLEN];
+			if (VCWD_REALPATH(enc_cert, resolved_path_buff)) {
+				enc_cert = resolved_path_buff;
+			}
+
+			if (SSL_CTX_use_enc_certificate_file(ctx, enc_cert, SSL_FILETYPE_PEM) != 1) {
+				php_error_docref(NULL, E_WARNING, "Unable to set enc_cert file '%s'", enc_cert);
+				return FAILURE;
+			}
+
+			GET_VER_OPT_STRING("enc_key", enc_key);
+
+			if (enc_key) {
+				char resolved_path_buff_pk[MAXPATHLEN];
+				if (VCWD_REALPATH(enc_key, resolved_path_buff_pk)) {
+					enc_key = resolved_path_buff_pk;
+				}
+
+				if (SSL_CTX_use_enc_PrivateKey_file(ctx, enc_key, SSL_FILETYPE_PEM) != 1) {
+					php_error_docref(NULL, E_WARNING, "Unable to set enc_key file '%s'", enc_key);
+					return FAILURE;
+				}
+			} else {
+				php_error_docref(NULL, E_WARNING, "Missing configuration value: \"enc_key\" not set");
+				return FAILURE;
+			}
+		}
+	}
+#endif
 
 	return SUCCESS;
 }
@@ -1599,6 +1672,7 @@ int php_openssl_setup_crypto(php_stream *stream,
 	char *cipherlist = NULL;
 	char *alpn_protocols = NULL;
 	zval *val;
+	int is_ntls = 0;
 
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -1616,8 +1690,19 @@ int php_openssl_setup_crypto(php_stream *stream,
 	sslsock->is_client = cparam->inputs.method & STREAM_CRYPTO_IS_CLIENT;
 	method_flags = ((cparam->inputs.method >> 1) << 1);
 
-	method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
-	sslsock->ctx = SSL_CTX_new(method);
+#if HAVE_NTLS
+	if (method_flags & STREAM_CRYPTO_METHOD_NTLS_SERVER) {
+		is_ntls = 1;
+		method_flags &= ~STREAM_CRYPTO_METHOD_NTLS_SERVER;
+		method = sslsock->is_client ? NTLS_client_method() : NTLS_server_method();
+		sslsock->ctx = SSL_CTX_new(method);
+		SSL_CTX_enable_ntls(sslsock->ctx);
+	} else
+#endif
+	{
+		method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
+		sslsock->ctx = SSL_CTX_new(method);
+	}
 
 	GET_VER_OPT_LONG("min_proto_version", min_version);
 	GET_VER_OPT_LONG("max_proto_version", max_version);
@@ -1711,7 +1796,7 @@ int php_openssl_setup_crypto(php_stream *stream,
 #endif
 	}
 
-	if (FAILURE == php_openssl_set_local_cert(sslsock->ctx, stream)) {
+	if (FAILURE == php_openssl_set_local_cert(sslsock->ctx, stream, is_ntls)) {
 		return FAILURE;
 	}
 
@@ -2696,6 +2781,16 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 #else
 		php_error_docref(NULL, E_WARNING,
 			"TLSv1.3 support is not compiled into the OpenSSL library against which PHP is linked");
+		php_stream_close(stream);
+		return NULL;
+#endif
+	} else if (strncmp(proto, "ntls", protolen) == 0) {
+#ifdef HAVE_NTLS
+		sslsock->enable_on_connect = 1;
+		sslsock->method = STREAM_CRYPTO_METHOD_NTLS_CLIENT;
+#else
+		php_error_docref(NULL, E_WARNING,
+			"NTLS support is not compiled into the Tongsuo library against which PHP is linked");
 		php_stream_close(stream);
 		return NULL;
 #endif

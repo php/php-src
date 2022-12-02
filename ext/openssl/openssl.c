@@ -93,6 +93,9 @@
 #if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
 #define HAVE_EVP_PKEY_EC 1
 #endif
+#if !defined(OPENSSL_NO_SM2) && defined(EVP_PKEY_SM2)
+#define HAVE_EVP_PKEY_SM2 1
+#endif
 
 #include "openssl_arginfo.h"
 
@@ -110,6 +113,9 @@ enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
 #ifdef HAVE_EVP_PKEY_EC
 	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
+#endif
+#ifdef HAVE_EVP_PKEY_SM2
+	,OPENSSL_KEYTYPE_SM2
 #endif
 };
 
@@ -605,7 +611,7 @@ struct php_x509_request { /* {{{ */
 
 	int priv_key_encrypt;
 
-#ifdef HAVE_EVP_PKEY_EC
+#if defined(HAVE_EVP_PKEY_EC) || defined(HAVE_EVP_PKEY_SM2)
 	int curve_name;
 #endif
 
@@ -1002,8 +1008,14 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		php_openssl_store_errors();
 	}
 
+#if defined(HAVE_EVP_PKEY_SM2) || !defined(OPENSSL_NO_SM3)
+	if (req->priv_key_type == OPENSSL_KEYTYPE_SM2) {
+		req->md_alg = req->digest = EVP_sm3();
+	}
+#endif
+
 	PHP_SSL_CONFIG_SYNTAX_CHECK(extensions_section);
-#ifdef HAVE_EVP_PKEY_EC
+#if defined(HAVE_EVP_PKEY_EC) || defined(HAVE_EVP_PKEY_SM2)
 	/* set the ec group curve name */
 	req->curve_name = NID_undef;
 	if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), "curve_name", sizeof("curve_name")-1)) != NULL
@@ -1354,6 +1366,9 @@ PHP_MINIT_FUNCTION(openssl)
 #ifdef HAVE_EVP_PKEY_EC
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 #endif
+#ifdef HAVE_EVP_PKEY_SM2
+	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_SM2", OPENSSL_KEYTYPE_SM2, CONST_CS|CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("OPENSSL_RAW_DATA", OPENSSL_RAW_DATA, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ZERO_PADDING", OPENSSL_ZERO_PADDING, CONST_CS|CONST_PERSISTENT);
@@ -1394,6 +1409,9 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory);
 #if OPENSSL_VERSION_NUMBER >= 0x10101000
 	php_stream_xport_register("tlsv1.3", php_openssl_ssl_socket_factory);
+#endif
+#if TONGSUO_VERSION_NUMBER >= 0x80400000
+	php_stream_xport_register("ntls", php_openssl_ssl_socket_factory);
 #endif
 
 	/* override the default tcp socket provider */
@@ -3379,6 +3397,12 @@ PHP_FUNCTION(openssl_csr_sign)
 		}
 	}
 
+#ifdef HAVE_EVP_PKEY_SM2
+	if (EVP_PKEY_is_sm2(priv_key)) {
+		req.digest = EVP_sm3();
+	}
+#endif
+
 	/* Now sign it */
 	if (!X509_sign(new_cert, priv_key, req.digest)) {
 		php_openssl_store_errors();
@@ -3440,6 +3464,11 @@ PHP_FUNCTION(openssl_csr_new)
 		if (req.priv_key == NULL) {
 			php_error_docref(NULL, E_WARNING, "Unable to generate a private key");
 		} else {
+#ifdef HAVE_EVP_PKEY_SM2
+			if (EVP_PKEY_is_sm2(req.priv_key)) {
+				req.digest = EVP_sm3();
+			}
+#endif
 			csr = X509_REQ_new();
 			if (csr) {
 				if (php_openssl_make_REQ(&req, csr, dn, attribs) == SUCCESS) {
@@ -3771,6 +3800,10 @@ static int php_openssl_get_evp_pkey_type(int key_type) {
 	case OPENSSL_KEYTYPE_EC:
 		return EVP_PKEY_EC;
 #endif
+#ifdef HAVE_EVP_PKEY_SM2
+	case OPENSSL_KEYTYPE_SM2:
+		return EVP_PKEY_SM2;
+#endif
 	default:
 		return -1;
 	}
@@ -3839,6 +3872,10 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 				php_openssl_store_errors();
 				goto cleanup;
 			}
+			break;
+#endif
+#ifdef HAVE_EVP_PKEY_SM2
+		case EVP_PKEY_SM2:
 			break;
 #endif
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -4851,6 +4888,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	unsigned int pbio_len;
 	char *pbio;
 	zend_long ktype;
+	int pkey_id;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &key, php_openssl_pkey_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -4872,9 +4910,10 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	/*TODO: Use the real values once the openssl constants are used
 	 * See the enum at the top of this file
 	 */
+	pkey_id = EVP_PKEY_base_id(pkey);
 #if PHP_OPENSSL_API_VERSION >= 0x30000
 	zval ary;
-	switch (EVP_PKEY_base_id(pkey)) {
+	switch (pkey_id) {
 		case EVP_PKEY_RSA:
 			ktype = OPENSSL_KEYTYPE_RSA;
 			array_init(&ary);
@@ -4907,8 +4946,18 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			php_openssl_copy_bn_param(&ary, pkey, OSSL_PKEY_PARAM_PRIV_KEY, "priv_key");
 			php_openssl_copy_bn_param(&ary, pkey, OSSL_PKEY_PARAM_PUB_KEY, "pub_key");
 			break;
-		case EVP_PKEY_EC: {
-			ktype = OPENSSL_KEYTYPE_EC;
+		case EVP_PKEY_EC:
+#ifdef HAVE_EVP_PKEY_SM2
+		case EVP_PKEY_SM2:
+#endif
+		{
+			if (pkey_id == EVP_PKEY_EC) {
+				ktype = OPENSSL_KEYTYPE_EC;
+#ifdef HAVE_EVP_PKEY_SM2
+			} else if (pkey_id == EVP_PKEY_SM2) {
+				ktype = OPENSSL_KEYTYPE_SM2;
+#endif
+			}
 			array_init(&ary);
 			add_assoc_zval(return_value, "ec", &ary);
 
@@ -4938,7 +4987,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 #else
-	switch (EVP_PKEY_base_id(pkey)) {
+	switch (pkey_id) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			{
@@ -5014,7 +5063,16 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			break;
 #ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
-			ktype = OPENSSL_KEYTYPE_EC;
+#ifdef HAVE_EVP_PKEY_SM2
+		case EVP_PKEY_SM2:
+#endif
+			if (pkey_id == EVP_PKEY_EC) {
+				ktype = OPENSSL_KEYTYPE_EC;
+#ifdef HAVE_EVP_PKEY_SM2
+			} else if (pkey_id == EVP_PKEY_SM2) {
+				ktype = OPENSSL_KEYTYPE_SM2;
+#endif
+			}
 			if (EVP_PKEY_get0_EC_KEY(pkey) != NULL) {
 				zval ec;
 				const EC_GROUP *ec_group;
@@ -6532,7 +6590,7 @@ PHP_FUNCTION(openssl_cms_decrypt)
 			cms = d2i_CMS_bio(in, NULL);
 			break;
 		case ENCODING_PEM:
-                        cms = PEM_read_bio_CMS(in, NULL, 0, NULL);
+			cms = PEM_read_bio_CMS(in, NULL, 0, NULL);
 			break;
 		case ENCODING_SMIME:
 			cms = SMIME_read_CMS(in, &datain);
