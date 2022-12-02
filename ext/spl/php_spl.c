@@ -401,6 +401,16 @@ static autoload_func_info *autoload_func_info_from_fci(
 
 static bool autoload_func_info_equals(
 		const autoload_func_info *alfi1, const autoload_func_info *alfi2) {
+	if (UNEXPECTED(
+		(alfi1->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
+		(alfi2->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+	)) {
+		return alfi1->obj == alfi2->obj
+			&& alfi1->ce == alfi2->ce
+			&& alfi1->closure == alfi2->closure
+			&& zend_string_equals(alfi1->func_ptr->common.function_name, alfi2->func_ptr->common.function_name)
+		;
+	}
 	return alfi1->func_ptr == alfi2->func_ptr
 		&& alfi1->obj == alfi2->obj
 		&& alfi1->ce == alfi2->ce
@@ -578,6 +588,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 		/* Don't destroy the hash table, as we might be iterating over it right now. */
 		zend_hash_clean(spl_autoload_functions);
 		RETURN_TRUE;
+	}
+
+	if (!fcc.function_handler) {
+		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+		 * with it outselves. It is important that it is not refetched on every call,
+		 * because calls may occur from different scopes. */
+		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
 	}
 
 	autoload_func_info *alfi = autoload_func_info_from_fci(&fci, &fcc);

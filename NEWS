@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed GH-9883 (SplFileObject::__toString() reads next line). (Girgias)
+  . Fixed GH-10011 (Trampoline autoloader will get reregistered and cannot be
+    unregistered). (Girgias)
 
 08 Dec 2022, PHP 8.2.0
 
