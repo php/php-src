@@ -966,91 +966,95 @@ static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 				break;
 			}
 			unsigned char c2 = *p++;
+			uint32_t w = sjis_decode_tbl1[c] + sjis_decode_tbl2[c2];
 
-			if (c2 >= 0x40 && c2 <= 0xFC && c2 != 0x7F) {
-				unsigned int w = 0, s1 = 0, s2 = 0;
-				SJIS_DECODE(c, c2, s1, s2);
-				unsigned int s = (s1 - 0x21)*94 + s2 - 0x21;
-
-				if (s <= 0x89) {
-					if (s == 0x1C) {
-						w = 0x2014; /* EM DASH */
-					} else if (s == 0x1F) {
-						w = 0xFF3C; /* FULLWIDTH REVERSE SOLIDUS */
-					} else if (s == 0x20) {
-						w = 0x301C; /* FULLWIDTH TILDE */
-					} else if (s == 0x21) {
-						w = 0x2016; /* PARALLEL TO */
-					} else if (s == 0x3C) {
-						w = 0x2212; /* FULLWIDTH HYPHEN-MINUS */
-					} else if (s == 0x50) {
-						w = 0xA2; /* FULLWIDTH CENT SIGN */
-					} else if (s == 0x51) {
-						w = 0xA3; /* FULLWIDTH POUND SIGN */
-					} else if (s == 0x89) {
-						w = 0xAC; /* FULLWIDTH NOT SIGN */
-					}
-					if (w) {
-						*out++ = w;
-						continue;
-					}
+			if (w <= 0x89) {
+				if (w == 0x1C) {
+					*out++ = 0x2014; /* EM DASH */
+					continue;
+				} else if (w == 0x1F) {
+					*out++ = 0xFF3C; /* FULLWIDTH REVERSE SOLIDUS */
+					continue;
+				} else if (w == 0x20) {
+					*out++ = 0x301C; /* FULLWIDTH TILDE */
+					continue;
+				} else if (w == 0x21) {
+					*out++ = 0x2016; /* PARALLEL TO */
+					continue;
+				} else if (w == 0x3C) {
+					*out++ = 0x2212; /* FULLWIDTH HYPHEN-MINUS */
+					continue;
+				} else if (w == 0x50) {
+					*out++ = 0xA2; /* FULLWIDTH CENT SIGN */
+					continue;
+				} else if (w == 0x51) {
+					*out++ = 0xA3; /* FULLWIDTH POUND SIGN */
+					continue;
+				} else if (w == 0x89) {
+					*out++ = 0xAC; /* FULLWIDTH NOT SIGN */
+					continue;
 				}
-
-				for (int i = 0; i < 7; i++) {
-					if (s >= code_tbl[i][0] && s <= code_tbl[i][1]) {
-						*out++ = s - code_tbl[i][0] + code_tbl[i][2];
-						goto next_iteration;
-					}
-				}
-
-				for (int i = 0; i < code_tbl_m_len; i++) {
-					if (s == code_tbl_m[i][0]) {
-						int n = 5;
-						if (code_tbl_m[i][1] == 0xF860) {
-							n = 3;
-						} else if (code_tbl_m[i][1] == 0xF861) {
-							n = 4;
-						}
-						if ((limit - out) < n) {
-							p -= 2;
-							goto finished;
-						}
-						for (int j = 1; j <= n; j++) {
-							*out++ = code_tbl_m[i][j];
-						}
-						goto next_iteration;
-					}
-				}
-
-				for (int i = 0; i < 8; i++) {
-					if (s >= code_ofst_tbl[i][0] && s <= code_ofst_tbl[i][1]) {
-						w = code_map[i][s - code_ofst_tbl[i][0]];
-						if (!w) {
-							*out++ = MBFL_BAD_INPUT;
+			} else {
+				if (w >= 0x2F0 && w <= 0x3A3) {
+					for (int i = 0; i < 7; i++) {
+						if (w >= code_tbl[i][0] && w <= code_tbl[i][1]) {
+							*out++ = w - code_tbl[i][0] + code_tbl[i][2];
 							goto next_iteration;
 						}
-						if ((limit - out) < 2) {
-							p -= 2;
-							goto finished;
-						}
-						*out++ = w;
-						if (s >= 0x43E && s <= 0x441) {
-							*out++ = 0xF87A;
-						} else if (s == 0x3B1 || s == 0x3B7) {
-							*out++ = 0xF87F;
-						} else if (s == 0x4B8 || s == 0x4B9 || s == 0x4C4) {
-							*out++ = 0x20DD;
-						} else if (s == 0x1ED9 || s == 0x1EDA || s == 0x1EE8 || s == 0x1EF3 || (s >= 0x1EF5 && s <= 0x1EFB) || s == 0x1F05 || s == 0x1F06 || s == 0x1F18 || (s >= 0x1FF2 && s <= 0x20A5)) {
-							*out++ = 0xF87E;
-						}
-						goto next_iteration;
 					}
 				}
 
-				if (s < jisx0208_ucs_table_size) {
-					w = jisx0208_ucs_table[s];
+				if (w >= 0x340 && w <= 0x523) {
+					for (int i = 0; i < code_tbl_m_len; i++) {
+						if (w == code_tbl_m[i][0]) {
+							int n = 5;
+							if (code_tbl_m[i][1] == 0xF860) {
+								n = 3;
+							} else if (code_tbl_m[i][1] == 0xF861) {
+								n = 4;
+							}
+							if ((limit - out) < n) {
+								p -= 2;
+								goto finished;
+							}
+							for (int j = 1; j <= n; j++) {
+								*out++ = code_tbl_m[i][j];
+							}
+							goto next_iteration;
+						}
+					}
 				}
 
+				if (w >= 0x3AC && w <= 0x20A5) {
+					for (int i = 0; i < 8; i++) {
+						if (w >= code_ofst_tbl[i][0] && w <= code_ofst_tbl[i][1]) {
+							uint32_t w2 = code_map[i][w - code_ofst_tbl[i][0]];
+							if (!w2) {
+								*out++ = MBFL_BAD_INPUT;
+								goto next_iteration;
+							}
+							if ((limit - out) < 2) {
+								p -= 2;
+								goto finished;
+							}
+							*out++ = w2;
+							if (w >= 0x43E && w <= 0x441) {
+								*out++ = 0xF87A;
+							} else if (w == 0x3B1 || w == 0x3B7) {
+								*out++ = 0xF87F;
+							} else if (w == 0x4B8 || w == 0x4B9 || w == 0x4C4) {
+								*out++ = 0x20DD;
+							} else if (w == 0x1ED9 || w == 0x1EDA || w == 0x1EE8 || w == 0x1EF3 || (w >= 0x1EF5 && w <= 0x1EFB) || w == 0x1F05 || w == 0x1F06 || w == 0x1F18 || (w >= 0x1FF2 && w <= 0x20A5)) {
+								*out++ = 0xF87E;
+							}
+							goto next_iteration;
+						}
+					}
+				}
+			}
+
+			if (w < jisx0208_ucs_table_size) {
+				w = jisx0208_ucs_table[w];
 				if (!w)
 					w = MBFL_BAD_INPUT;
 				*out++ = w;
