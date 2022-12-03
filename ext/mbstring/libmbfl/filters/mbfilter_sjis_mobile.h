@@ -48,8 +48,6 @@ extern const unsigned short mbfl_kddi2uni_pua[7][3];
 extern const unsigned short mbfl_sb2uni_pua[6][3];
 extern const unsigned short mbfl_kddi2uni_pua_b[8][3];
 
-int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter);
 
 int mbfilter_sjis_emoji_docomo2unicode(int s, int *snd);
