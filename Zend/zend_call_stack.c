@@ -24,8 +24,7 @@
 #include "zend_call_stack.h"
 #include <stdint.h>
 #ifdef ZEND_WIN32
-# include <winnt.h>
-# include <memoryapi.h>
+# include <processthreadsapi.h>
 #else /* ZEND_WIN32 */
 # include <sys/resource.h>
 # ifdef HAVE_UNISTD_H
@@ -331,35 +330,16 @@ static bool zend_call_stack_get_freebsd(zend_call_stack *stack)
 #ifdef ZEND_WIN32
 static bool zend_call_stack_get_win32(zend_call_stack *stack)
 {
-	MEMORY_BASIC_INFORMATION stack_info;
-	int8_t *base;
+	ULONG_PTR low, high;
+	GetCurrentThreadStackLimits(&low, &high);
 
-#ifdef _M_ARM64
-	return false;
-#endif
-
-#ifdef _M_X64
-	base = (void*)((NT_TIB64*)NtCurrentTeb())->StackBase;
-#else
-	base = (void*)((NT_TIB*)NtCurrentTeb())->StackBase;
-#endif
-
-	memset(&stack_info, 0, sizeof(MEMORY_BASIC_INFORMATION));
-	size_t result_size = VirtualQuery(&stack_info, &stack_info, sizeof(MEMORY_BASIC_INFORMATION));
-	ZEND_ASSERT(result_size >= sizeof(MEMORY_BASIC_INFORMATION));
-
-	int8_t* end = (int8_t*)stack_info.AllocationBase;
-	ZEND_ASSERT(base > end);
-
-	size_t max_size = (size_t)(base - end);
+	stack->base = (void*)high;
+	stack->max_size = (uintptr_t)high - (uintptr_t)low;
 
 	// Last pages are not usable
 	// http://blogs.msdn.com/b/satyem/archive/2012/08/13/thread-s-stack-memory-management.aspx
-	ZEND_ASSERT(max_size > 4*4096);
-	max_size -= 4*4096;
-
-	stack->base = base;
-	stack->max_size = max_size;
+	ZEND_ASSERT(stack->max_size > 4*4096);
+	stack->max_size -= 4*4096;
 
 	return true;
 }

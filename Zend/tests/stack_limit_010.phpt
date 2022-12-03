@@ -20,7 +20,7 @@ $expectedMaxSize = match(php_uname('s')) {
         'i386' => 64*1024*1024 - 4096,
     },
     'Linux' => 8*1024*1024,
-    'Windows' => 67108864 - 4*4096, // Set by sapi/cli/config.w32
+    'Windows NT' => 67108864 - 4*4096, // Set by sapi/cli/config.w32
 };
 
 printf("Expected max_size: 0x%x\n", $expectedMaxSize);
