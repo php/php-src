@@ -37,7 +37,7 @@ using icu::GregorianCalendar;
 using icu::StringPiece;
 using icu::SimpleDateFormat;
 
-static const DateFormat::EStyle valid_styles[] = {
+static constexpr DateFormat::EStyle valid_styles[] = {
 		DateFormat::kNone,
 		DateFormat::kFull,
 		DateFormat::kLong,

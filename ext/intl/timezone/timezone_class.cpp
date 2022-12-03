@@ -157,7 +157,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
-		if (timeZone == NULL) {
+		if (UNEXPECTED(timeZone == NULL)) {
 			spprintf(&message, 0, "%s: could not clone TimeZone", func);
 			if (message) {
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
@@ -193,7 +193,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
-		if (timeZone == NULL) {
+		if (UNEXPECTED(timeZone == NULL)) {
 			spprintf(&message, 0, "%s: Could not create time zone", func);
 			if (message) {
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);

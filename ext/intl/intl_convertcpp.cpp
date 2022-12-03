@@ -23,7 +23,7 @@ extern "C" {
 /* {{{ intl_stringFromChar */
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status)
 {
-	if(str_len > INT32_MAX) {
+	if(UNEXPECTED(str_len > INT32_MAX)) {
 		*status = U_BUFFER_OVERFLOW_ERROR;
 		ret.setToBogus();
 		return FAILURE;
@@ -56,7 +56,7 @@ zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status)
 {
 	zend_string *u8res;
 
-	if (from.isBogus()) {
+	if (UNEXPECTED(from.isBogus())) {
 		return NULL;
 	}
 
