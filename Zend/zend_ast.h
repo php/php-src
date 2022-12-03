@@ -208,7 +208,6 @@ typedef struct _zend_ast_decl {
 	uint32_t start_lineno;
 	uint32_t end_lineno;
 	uint32_t flags;
-	unsigned char *lex_pos;
 	zend_string *doc_comment;
 	zend_string *name;
 	zend_ast *child[5];
