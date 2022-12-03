@@ -162,8 +162,10 @@ namespace {
 
     function zend_test_zend_ini_str(): string {}
 
+#ifdef ZEND_CHECK_STACK_LIMIT
     function zend_test_zend_call_stack_get(): ?array {}
     function zend_test_zend_call_stack_use_all(): int {}
+#endif
 }
 
 namespace ZendTestNS {

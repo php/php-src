@@ -457,6 +457,7 @@ static ZEND_FUNCTION(zend_test_parameter_with_attribute)
 	RETURN_LONG(1);
 }
 
+#ifdef ZEND_CHECK_STACK_LIMIT
 static ZEND_FUNCTION(zend_test_zend_call_stack_get)
 {
 	zend_call_stack stack;
@@ -513,6 +514,7 @@ static ZEND_FUNCTION(zend_test_zend_call_stack_use_all)
 
 	RETURN_LONG(zend_call_stack_use_all(limit));
 }
+#endif /* ZEND_CHECK_STACK_LIMIT */
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {

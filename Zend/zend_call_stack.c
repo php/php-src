@@ -47,6 +47,8 @@
 #include <sys/syscall.h>
 #endif
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+
 /* Called once per process or thread */
 ZEND_API void zend_call_stack_init(void) {
 	if (!zend_call_stack_get(&EG(call_stack))) {
@@ -404,3 +406,4 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 	return false;
 }
 
+#endif /* ZEND_CHECK_STACK_LIMIT */

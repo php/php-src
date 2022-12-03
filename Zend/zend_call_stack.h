@@ -25,6 +25,8 @@
 # include <pthread.h>
 #endif
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+
 typedef struct _zend_call_stack {
 	void *base;
 	size_t max_size;
@@ -85,4 +87,5 @@ static inline size_t zend_call_stack_default_size(void)
 	return 2 * 1024 * 1024;
 }
 
+#endif /* ZEND_CHECK_STACK_LIMIT */
 #endif /* ZEND_CALL_STACK_H */

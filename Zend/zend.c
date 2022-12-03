@@ -849,8 +849,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->record_errors = false;
 	executor_globals->num_errors = 0;
 	executor_globals->errors = NULL;
+#ifdef ZEND_CHECK_STACK_LIMIT
 	executor_globals->stack_limit = (void*)0;
 	executor_globals->stack_base = (void*)0;
+#endif
 }
 /* }}} */
 
@@ -872,7 +874,9 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 {
 	zend_copy_ini_directives();
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
+#ifdef ZEND_CHECK_STACK_LIMIT
 	zend_call_stack_init();
+#endif
 }
 /* }}} */
 #endif
