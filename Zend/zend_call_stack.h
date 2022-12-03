@@ -74,14 +74,6 @@ static inline size_t zend_call_stack_default_size(void)
 #ifdef __FreeBSD__
 	return 8 * 1024 * 1024;
 #endif
-#ifdef ZEND_WIN32
-	// General
-	// https://docs.microsoft.com/en-us/windows/win32/procthread/thread-stack-size
-	return 1 * 1024 * 1024;
-	// IIS
-	// https://docs.microsoft.com/en-us/troubleshoot/developer/webapps/iis/site-behavior-performance/default-maximum-stack-size-thread
-	return 256 * 1024;
-#endif
 #ifdef __APPLE__
 	// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/CreatingThreads/CreatingThreads.html
 	if (pthread_main_np()) {
