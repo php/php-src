@@ -37,6 +37,9 @@ PHP                                                                        NEWS
     index). (ColinHDev)
   . Fix bug GH-8846 (Implement delayed early binding for classes without
     parents). (ilutov)
+  . Fix bug #79836 (Segfault in concat_function). (nielsdos)
+  . Fix bug #81705 (type confusion/UAF on set_error_handler with concat
+    operation). (nielsdos)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
