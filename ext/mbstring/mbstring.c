@@ -1961,10 +1961,10 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 	}
 
 out:
-	if (haystack_u8 != NULL && haystack_u8 != haystack) {
+	if (haystack_u8 != haystack) {
 		zend_string_free(haystack_u8);
 	}
-	if (needle_u8 != NULL && needle_u8 != needle) {
+	if (needle_u8 != needle) {
 		zend_string_free(needle_u8);
 	}
 	return result;
@@ -2263,42 +2263,89 @@ PHP_FUNCTION(mb_strrichr)
 #undef MB_STRISTR
 #undef MB_STRRICHR
 
-/* {{{ Count the number of substring occurrences */
 PHP_FUNCTION(mb_substr_count)
 {
-	mbfl_string haystack, needle;
-	char *haystack_val, *needle_val;
-	zend_string *enc_name = NULL;
+	zend_string *haystack, *needle, *enc_name = NULL, *haystack_u8 = NULL, *needle_u8 = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(haystack_val, haystack.len)
-		Z_PARAM_STRING(needle_val, needle.len)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	haystack.val = (unsigned char*)haystack_val;
-	needle.val = (unsigned char*)needle_val;
-
-	if (needle.len == 0) {
+	if (ZSTR_LEN(needle) == 0) {
 		zend_argument_value_error(2, "must not be empty");
 		RETURN_THROWS();
 	}
 
-	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name, 3);
-	if (!haystack.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(enc_name, 3);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	size_t n = mbfl_substr_count(&haystack, &needle);
-	/* An error can only occur if needle is empty,
-	 * an encoding error happens (which should not happen at this stage and is a bug)
-	 * or the haystack is more than sizeof(size_t) bytes
-	 * If one of these things occur this is a bug and should be flagged as such */
-	ZEND_ASSERT(!mbfl_is_error(n));
-	RETVAL_LONG(n);
+	if (php_mb_is_no_encoding_utf8(enc->no_encoding)) {
+		/* No need to do any conversion if haystack/needle are already known-valid UTF-8
+		 * (If they are not valid, then not passing them through conversion filters could affect output) */
+		if (GC_FLAGS(haystack) & IS_STR_VALID_UTF8) {
+			haystack_u8 = haystack;
+		} else {
+			unsigned int num_errors = 0;
+			haystack_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(haystack), ZSTR_LEN(haystack), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
+			if (!num_errors && !ZSTR_IS_INTERNED(haystack)) {
+				GC_ADD_FLAGS(haystack, IS_STR_VALID_UTF8);
+			}
+		}
+
+		if (GC_FLAGS(needle) & IS_STR_VALID_UTF8) {
+			needle_u8 = needle;
+		} else {
+			unsigned int num_errors = 0;
+			needle_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
+			if (!num_errors && !ZSTR_IS_INTERNED(needle)) {
+				GC_ADD_FLAGS(needle, IS_STR_VALID_UTF8);
+			}
+		}
+	} else {
+		unsigned int num_errors = 0;
+		haystack_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(haystack), ZSTR_LEN(haystack), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
+		needle_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
+		/* A string with >0 bytes may convert to 0 codepoints; for example, the contents
+		 * may be only escape sequences */
+		if (ZSTR_LEN(needle_u8) == 0) {
+			zend_string_free(haystack_u8);
+			zend_string_free(needle_u8);
+			zend_argument_value_error(2, "must not be empty");
+			RETURN_THROWS();
+		}
+	}
+
+	size_t result = 0;
+
+	if (ZSTR_LEN(haystack_u8) < ZSTR_LEN(needle_u8)) {
+		goto out;
+	}
+
+	const char *p = ZSTR_VAL(haystack_u8), *e = p + ZSTR_LEN(haystack_u8);
+	while (true) {
+		p = zend_memnstr(p, ZSTR_VAL(needle_u8), ZSTR_LEN(needle_u8), e);
+		if (!p) {
+			break;
+		}
+		p += ZSTR_LEN(needle_u8);
+		result++;
+	}
+
+out:
+	if (haystack_u8 != haystack) {
+		zend_string_free(haystack_u8);
+	}
+	if (needle_u8 != needle) {
+		zend_string_free(needle_u8);
+	}
+
+	RETVAL_LONG(result);
 }
-/* }}} */
 
 /* {{{ Returns part of a string */
 PHP_FUNCTION(mb_substr)
