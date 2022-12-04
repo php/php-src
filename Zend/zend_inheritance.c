@@ -1470,6 +1470,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 
 	if (ce->parent_name) {
 		zend_string_release_ex(ce->parent_name, 0);
+		ce->parent_name = NULL;
 	}
 	ce->parent = parent_ce;
 	ce->default_object_handlers = parent_ce->default_object_handlers;
