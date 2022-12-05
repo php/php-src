@@ -8946,6 +8946,111 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 	return 1;
 }
 
+static int zend_jit_check_func_arg(zend_jit_ctx *jit, const zend_op *opline)
+{
+	uint32_t arg_num = opline->op2.num;
+	ir_ref ref;
+
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+	 && JIT_G(current_frame)
+	 && JIT_G(current_frame)->call
+	 && JIT_G(current_frame)->call->func) {
+		if (ARG_SHOULD_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+			if (!TRACE_FRAME_IS_LAST_SEND_BY_REF(JIT_G(current_frame)->call)) {
+				TRACE_FRAME_SET_LAST_SEND_BY_REF(JIT_G(current_frame)->call);
+				// JIT: ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+				if (jit->reuse_ip) {
+					ref = zend_jit_ip(jit);
+				} else {
+					ref = zend_jit_load(jit, IR_ADDR,
+						ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+							zend_jit_fp(jit),
+							zend_jit_const_addr(jit, offsetof(zend_execute_data, call))));
+				}
+				ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					ref,
+					zend_jit_const_addr(jit, offsetof(zend_execute_data, This.u1.type_info)));
+				zend_jit_store(jit,
+					ref,
+					ir_fold2(&jit->ctx, IR_OPT(IR_OR, IR_U32),
+						zend_jit_load(jit, IR_U32, ref),
+						ir_const_u32(&jit->ctx, ZEND_CALL_SEND_ARG_BY_REF)));
+			}
+		} else {
+			if (!TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
+				TRACE_FRAME_SET_LAST_SEND_BY_VAL(JIT_G(current_frame)->call);
+				// JIT: ZEND_DEL_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+				if (jit->reuse_ip) {
+					ref = zend_jit_ip(jit);
+				} else {
+					ref = zend_jit_load(jit, IR_ADDR,
+						ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+							zend_jit_fp(jit),
+							zend_jit_const_addr(jit, offsetof(zend_execute_data, call))));
+				}
+				ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					ref,
+					zend_jit_const_addr(jit, offsetof(zend_execute_data, This.u1.type_info)));
+				zend_jit_store(jit,
+					ref,
+					ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
+						zend_jit_load(jit, IR_U32, ref),
+						ir_const_u32(&jit->ctx, ~ZEND_CALL_SEND_ARG_BY_REF)));
+			}
+		}
+	} else {
+		// JIT: if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
+		ir_ref rx, if_ref, cold_path;
+
+		if (!zend_jit_reuse_ip(jit)) {
+			return 0;
+		}
+
+		rx = zend_jit_ip(jit);
+
+		ref = ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
+			zend_jit_load(jit, IR_U32,
+				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					zend_jit_load(jit, IR_ADDR,
+						ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+							rx,
+							zend_jit_const_addr(jit, offsetof(zend_execute_data, func)))),
+				zend_jit_const_addr(jit, offsetof(zend_function, quick_arg_flags)))),
+			ir_const_u32(&jit->ctx, mask));
+		if_ref = ir_emit2(&jit->ctx, IR_IF, jit->control, ref);
+		jit->control = ir_emit2(&jit->ctx, IR_IF_TRUE, if_ref, 1);
+
+		// JIT: ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+		ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+			rx,
+			zend_jit_const_addr(jit, offsetof(zend_execute_data, This.u1.type_info)));
+		zend_jit_store(jit,
+			ref,
+			ir_fold2(&jit->ctx, IR_OPT(IR_OR, IR_U32),
+				zend_jit_load(jit, IR_U32, ref),
+				ir_const_u32(&jit->ctx, ZEND_CALL_SEND_ARG_BY_REF)));
+
+		cold_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+		jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_ref);
+
+		// JIT: ZEND_DEL_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+		ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+			rx,
+			zend_jit_const_addr(jit, offsetof(zend_execute_data, This.u1.type_info)));
+		zend_jit_store(jit,
+			ref,
+			ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
+				zend_jit_load(jit, IR_U32, ref),
+				ir_const_u32(&jit->ctx, ~ZEND_CALL_SEND_ARG_BY_REF)));
+
+		jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+		jit->control = ir_emit2(&jit->ctx, IR_MERGE, cold_path, jit->control);
+	}
+
+	return 1;
+}
+
 static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 {
 	const void *entry;

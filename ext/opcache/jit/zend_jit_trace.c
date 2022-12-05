@@ -2129,6 +2129,7 @@ propagate_arg:
 						return_value_info.type &= ~MAY_BE_GUARD;
 					}
 					break;
+#endif
 				case ZEND_CHECK_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -2147,6 +2148,7 @@ propagate_arg:
 						TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame->call);
 					}
 					break;
+#ifndef ZEND_JIT_IR //???
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -5688,7 +5690,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_CHECK_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
@@ -5705,6 +5706,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_CHECK_UNDEF_ARGS:
 						if (JIT_G(current_frame)
 						 && JIT_G(current_frame)->call) {
