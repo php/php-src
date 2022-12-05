@@ -148,9 +148,9 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli::__construct(): (%s/%d): Access denied for user '%sunknown%s'@'%s' (using password: %s) in %s on line %d
+Warning: mysqli::__construct(): (%s/%d): Access denied for user '%sunknown%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d
 mysqli object is not fully initialized
 mysqli object is not fully initialized
 ... and now Exceptions
-Access denied for user '%s'@'%s' (using password: %s)
+Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
 done!
