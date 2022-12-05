@@ -59,14 +59,17 @@ all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
 
 !if $(RE2C) == ""
-generated_files: build_dirs Zend\zend_ini_parser.c \
+generated_files: build_dirs \
+	Zend\zend_ini_parser.c Zend\zend_ini_parser.h \
 	Zend\zend_language_parser.c \
 	sapi\phpdbg\phpdbg_parser.c \
 	$(PHPDEF) $(MCFILE)
 !else
-generated_files: build_dirs Zend\zend_ini_parser.c \
-	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
-	Zend\zend_language_scanner.c \
+generated_files: build_dirs \
+	Zend\zend_ini_parser.c Zend\zend_ini_parser.h \
+	Zend\zend_language_parser.c \
+	Zend\zend_ini_scanner.c Zend\zend_ini_scanner_defs.h \
+	Zend\zend_language_scanner.c Zend\zend_language_scanner_defs.h \
 	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_lexer.c \
 	$(PHPDEF) $(MCFILE)
 !endif
@@ -87,10 +90,10 @@ sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_pars
 	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
 
 !if $(RE2C) != ""
-Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
+Zend\zend_ini_scanner.c Zend\zend_ini_scanner_defs.h: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
-Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
+Zend\zend_language_scanner.c Zend\zend_language_scanner_defs.h: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 
 sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
