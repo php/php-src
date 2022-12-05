@@ -502,6 +502,26 @@ jobs:
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
+      - name: Test Drupal
+        if: always()
+        run: |
+          php -i|grep memory_limit
+          echo memory_limit=256M > /etc/php.d/drupal.ini
+          git clone https://git.drupalcode.org/project/drupal.git drupal --depth=1
+          cd drupal
+          git rev-parse HEAD
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          export ASAN_OPTIONS=exitcode=139
+          export SIMPLETEST_BASE_URL=http://localhost:8888/
+          export SIMPLETEST_DB=sqlite://localhost/db/sqlite1
+          mkdir db
+          rm -f core/tests/Drupal/FunctionalTests/ExistingDrupal8StyleDatabaseConnectionInSettingsPhpTest.php
+          export DRUPAL_TYPES=Annotation,Assertion,ClassFinder,Drupal,Extension,File,Plugin,Render,tar,zip
+          php -dzend.assertions=1 vendor/bin/phpunit -c core/phpunit.xml.dist --testsuite unit,kernel --group $DRUPAL_TYPES || exit 1
+          php -dzend.assertions=1 vendor/bin/phpunit -c core/phpunit.xml.dist --testsuite unit,kernel --group Database || exit 1
+          export SIMPLETEST_DB=mysql://root:root@localhost/test
+          php -dzend.assertions=1 vendor/bin/phpunit -c core/phpunit.xml.dist --testsuite unit,kernel --group Database || EXIT_CODE=1
+          [ ${EXIT_CODE:-0} -gt 128 ] && exit 1 || exit 0
   OPCACHE_VARIATION:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
