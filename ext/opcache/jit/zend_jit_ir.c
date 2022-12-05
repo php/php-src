@@ -9271,6 +9271,50 @@ static int zend_jit_count(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1
 	return 1;
 }
 
+static int zend_jit_in_array(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr,  zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+{
+	HashTable *ht = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
+	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+	ir_ref ref;
+
+	ZEND_ASSERT(opline->op1_type != IS_VAR && opline->op1_type != IS_TMP_VAR);
+	ZEND_ASSERT((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_STRING);
+
+	// JIT: result = zend_hash_find_ex(ht, Z_STR_P(op1), OP1_TYPE == IS_CONST);
+	if (opline->op1_type != IS_CONST) {
+		ref = zend_jit_call_2(jit, IR_ADDR,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_hash_find, IR_CONST_FASTCALL_FUNC),
+			zend_jit_const_addr(jit, (uintptr_t)ht),
+			zend_jit_zval_ptr(jit, op1_addr));
+	} else {
+		zend_string *str = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+
+		ref = zend_jit_call_2(jit, IR_ADDR,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_hash_find_known_hash, IR_CONST_FASTCALL_FUNC),
+			zend_jit_const_addr(jit, (uintptr_t)ht),
+			zend_jit_const_addr(jit, (uintptr_t)str));
+	}
+
+	if (exit_addr) {
+		if (smart_branch_opcode == ZEND_JMPZ) {
+			zend_jit_guard(jit, ref, zend_jit_const_addr(jit, (uintptr_t)exit_addr));
+		} else {
+			zend_jit_guard_not(jit, ref, zend_jit_const_addr(jit, (uintptr_t)exit_addr));
+		}
+	} else if (smart_branch_opcode) {
+		jit->control = ir_emit3(&jit->ctx, IR_IF, jit->control, ref,
+			(smart_branch_opcode == ZEND_JMPZ) ? target_label2 : target_label);
+	} else {
+		zend_jit_zval_set_type_info_ref(jit, res_addr,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_U32),
+				ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_U32),
+					ir_fold2(&jit->ctx, IR_OPT(IR_NE, IR_BOOL), ref, IR_NULL)),
+				ir_const_u32(&jit->ctx, IS_FALSE)));
+	}
+
+	return 1;
+}
+
 static int zend_jit_rope(zend_jit_ctx *jit, const zend_op *opline, uint32_t op2_info)
 {
 	uint32_t offset;

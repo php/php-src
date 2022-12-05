@@ -1980,13 +1980,13 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_IN_ARRAY:
 					if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
 						break;
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
+#ifndef ZEND_JIT_IR //???
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 					if ((opline->extended_value & ZEND_ISEMPTY)) {
 						// TODO: support for empty() ???
@@ -6091,7 +6091,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_IN_ARRAY:
 						if (opline->op1_type == IS_VAR || opline->op1_type == IS_TMP_VAR) {
 							break;
@@ -6122,6 +6121,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_DIM_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
