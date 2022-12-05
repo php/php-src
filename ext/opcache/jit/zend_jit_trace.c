@@ -2176,12 +2176,12 @@ propagate_arg:
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
+#endif
 				case ZEND_INIT_DYNAMIC_CALL:
 					if (orig_op2_type == IS_OBJECT && op2_ce == zend_ce_closure) {
 						ADD_OP2_TRACE_GUARD();
 					}
 					break;
-#endif
 				case ZEND_SEND_ARRAY:
 				case ZEND_SEND_UNPACK:
 				case ZEND_CHECK_UNDEF_ARGS:
@@ -6694,6 +6694,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_INIT_DYNAMIC_CALL:
 						if (orig_op2_type != IS_OBJECT || op2_ce != zend_ce_closure) {
 							break;
@@ -6705,7 +6706,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_SEND_ARRAY:
 					case ZEND_SEND_UNPACK:
 						if (JIT_G(current_frame)
