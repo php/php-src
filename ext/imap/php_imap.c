@@ -1420,7 +1420,7 @@ PHP_FUNCTION(imap_check)
 		RETURN_FALSE;
 	}
 
-	if (imap_conn_struct->imap_stream && imap_conn_struct->imap_stream->mailbox) {
+	if (imap_conn_struct->imap_stream->mailbox) {
 		rfc822_date(date);
 		object_init(return_value);
 		add_property_string(return_value, "Date", date);
