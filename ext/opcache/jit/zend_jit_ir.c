@@ -7874,7 +7874,7 @@ static int zend_jit_stack_check(zend_jit_ctx *jit, const zend_op *opline, uint32
 
 	// JIT: if (EG(vm_stack_end) - EG(vm_stack_top) < used_stack)
 	zend_jit_guard(jit,
-		ir_fold2(&jit->ctx, IR_OPT(IR_UGE, IR_ADDR),
+		ir_fold2(&jit->ctx, IR_OPT(IR_UGE, IR_BOOL),
 			ir_fold2(&jit->ctx, IR_OPT(IR_SUB, IR_ADDR),
 				zend_jit_load(jit, IR_ADDR, ZEND_JIT_EG_ADDR(vm_stack_end)),
 				zend_jit_load(jit, IR_ADDR, ZEND_JIT_EG_ADDR(vm_stack_top))),

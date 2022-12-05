@@ -2181,13 +2181,13 @@ propagate_arg:
 						ADD_OP2_TRACE_GUARD();
 					}
 					break;
+#endif
 				case ZEND_SEND_ARRAY:
 				case ZEND_SEND_UNPACK:
 				case ZEND_CHECK_UNDEF_ARGS:
 				case ZEND_INCLUDE_OR_EVAL:
 					max_used_stack = used_stack = -1;
 					break;
-#endif
 				case ZEND_TYPE_CHECK:
 					if (opline->extended_value == MAY_BE_RESOURCE) {
 						// TODO: support for is_resource() ???
@@ -4459,11 +4459,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 		if (used_stack > 0) {
 			peek_checked_stack = used_stack;
-#ifndef ZEND_JIT_IR //???
 			if (!zend_jit_stack_check(&ctx, opline, used_stack)) {
 				goto jit_failure;
 			}
-#endif
 		}
 
 		if (parent_trace) {
@@ -6707,6 +6705,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_SEND_ARRAY:
 					case ZEND_SEND_UNPACK:
 						if (JIT_G(current_frame)
@@ -6714,7 +6713,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(JIT_G(current_frame)->call);
 						}
 						break;
-#endif
 					case ZEND_ROPE_INIT:
 					case ZEND_ROPE_ADD:
 					case ZEND_ROPE_END:
