@@ -9051,6 +9051,43 @@ static int zend_jit_check_func_arg(zend_jit_ctx *jit, const zend_op *opline)
 	return 1;
 }
 
+static int zend_jit_check_undef_args(zend_jit_ctx *jit, const zend_op *opline)
+{
+	ir_ref call, cond, if_may_have_undef, ret, cold_path;
+
+	if (jit->reuse_ip) {
+		call = zend_jit_ip(jit);
+	} else {
+		call = zend_jit_load(jit, IR_ADDR,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, offsetof(zend_execute_data, call))));
+	}
+
+	cond = ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U8),
+		zend_jit_load(jit, IR_U8,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				call,
+				zend_jit_const_addr(jit, offsetof(zend_execute_data, This.u1.type_info) + 3))),
+		ir_const_u8(&jit->ctx, ZEND_CALL_MAY_HAVE_UNDEF >> 24));
+	if_may_have_undef = ir_emit2(&jit->ctx, IR_IF, jit->control, cond);
+
+	jit->control = ir_emit2(&jit->ctx, IR_IF_TRUE, if_may_have_undef, 1);
+	zend_jit_set_ex_opline(jit, opline);
+	ret = zend_jit_call_1(jit, IR_I32,
+		zend_jit_const_func_addr(jit, (uintptr_t)zend_handle_undef_args, IR_CONST_FASTCALL_FUNC),
+		call);
+	zend_jit_guard_not(jit, ret,
+		zend_jit_stub_addr(jit, jit_stub_exception_handler));
+	cold_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+
+	jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_may_have_undef);
+	jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+	jit->control = ir_emit2(&jit->ctx, IR_MERGE, cold_path, jit->control);
+
+	return 1;
+}
+
 static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 {
 	const void *entry;

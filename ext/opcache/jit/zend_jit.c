@@ -3849,12 +3849,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_CHECK_UNDEF_ARGS:
 						if (!zend_jit_check_undef_args(&ctx, opline)) {
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_DO_UCALL:
 						is_terminated = 1;
 						ZEND_FALLTHROUGH;

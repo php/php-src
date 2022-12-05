@@ -5706,7 +5706,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_CHECK_UNDEF_ARGS:
 						if (JIT_G(current_frame)
 						 && JIT_G(current_frame)->call) {
@@ -5716,6 +5715,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_DO_UCALL:
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
