@@ -3175,7 +3175,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					           ssa->cfg.blocks[b].len == 1 &&
 					           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
 						/* don't generate code for BB with single opcode */
-						zend_jit_free(&ctx);
+						zend_jit_free_ctx(&ctx);
 
 						if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 							zend_arena_release(&CG(arena), checkpoint);
@@ -3188,7 +3188,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			           ssa->cfg.blocks[b].len == 1 &&
 			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
 				/* don't generate code for BB with single opcode */
-				zend_jit_free(&ctx);
+				zend_jit_free_ctx(&ctx);
 
 				if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 					zend_arena_release(&CG(arena), checkpoint);
@@ -4251,6 +4251,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_FREE:
 					case ZEND_FE_FREE:
 						if (!zend_jit_free(&ctx, opline, OP1_INFO(),
@@ -4285,6 +4286,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_THIS:
 						if (!zend_jit_fetch_this(&ctx, opline, op_array, 0)) {
 							goto jit_failure;
@@ -4597,7 +4599,7 @@ done:
 	if (!handler) {
 		goto jit_failure;
 	}
-	zend_jit_free(&ctx);
+	zend_jit_free_ctx(&ctx);
 #endif
 
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
@@ -4611,7 +4613,7 @@ jit_failure:
 		dasm_free(&ctx);
 	}
 #else
-	zend_jit_free(&ctx);
+	zend_jit_free_ctx(&ctx);
 #endif
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 		zend_arena_release(&CG(arena), checkpoint);

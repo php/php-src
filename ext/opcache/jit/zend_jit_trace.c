@@ -1888,10 +1888,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 //				case ZEND_DIV: // TODO: check for division by zero ???
 					ADD_OP2_TRACE_GUARD();
 					ZEND_FALLTHROUGH;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_ECHO:
 				case ZEND_STRLEN:
 				case ZEND_COUNT:
+#ifndef ZEND_JIT_IR //???
 				case ZEND_FE_RESET_R:
 #endif
 				case ZEND_QM_ASSIGN:
@@ -6468,6 +6468,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						opline = orig_opline;
 						ssa_op = orig_ssa_op;
 						goto done;
+#endif
 					case ZEND_FREE:
 					case ZEND_FE_FREE:
 						op1_info = OP1_INFO();
@@ -6536,6 +6537,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_THIS:
 						delayed_fetch_this = 0;
 						if (ssa_op->result_def >= 0 && opline->result_type != IS_CV) {
@@ -7670,7 +7672,7 @@ jit_failure:
 #ifndef ZEND_JIT_IR
 	dasm_free(&ctx);
 #else
-	zend_jit_free(&ctx);
+	zend_jit_free_ctx(&ctx);
 #endif
 
 	if (name) {
@@ -7807,7 +7809,7 @@ jit_failure:
 #ifndef ZEND_JIT_IR
 	dasm_free(&ctx);
 #else
-	zend_jit_free(&ctx);
+	zend_jit_free_ctx(&ctx);
 	zend_string_release(name);
 #endif
 	zend_arena_release(&CG(arena), checkpoint);
