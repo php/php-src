@@ -9088,6 +9088,70 @@ static int zend_jit_check_undef_args(zend_jit_ctx *jit, const zend_op *opline)
 	return 1;
 }
 
+static int zend_jit_rope(zend_jit_ctx *jit, const zend_op *opline, uint32_t op2_info)
+{
+	uint32_t offset;
+
+	offset = (opline->opcode == ZEND_ROPE_INIT) ?
+		opline->result.var :
+		opline->op1.var + opline->extended_value * sizeof(zend_string*);
+
+	if (opline->op2_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, opline->op2);
+		zend_string *str;
+
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+		str = Z_STR_P(zv);
+
+		zend_jit_store(jit,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, offset)),
+			zend_jit_const_addr(jit, (uintptr_t)str));
+	} else {
+		zend_jit_addr op2_addr = OP2_ADDR();
+		ir_ref ref;
+
+		ZEND_ASSERT((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_STRING);
+
+		ref = zend_jit_zval_ptr(jit, op2_addr);
+		zend_jit_store(jit,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, offset)),
+			ref);
+		if (opline->op2_type == IS_CV) {
+			ir_ref if_refcounted, long_path;
+
+			if_refcounted = zend_jit_if_zval_refcounted(jit, op2_addr);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_refcounted);
+			zend_jit_gc_addref(jit, ref);
+			long_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_refcounted);
+			jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit2(&jit->ctx, IR_MERGE, long_path, jit->control);
+		}
+	}
+
+	if (opline->opcode == ZEND_ROPE_END) {
+		zend_jit_addr res_addr = RES_ADDR();
+		ir_ref ref;
+
+		ref = zend_jit_call_2(jit, IR_ADDR,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_rope_end, IR_CONST_FASTCALL_FUNC),
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, opline->op1.var)),
+			ir_const_u32(&jit->ctx, opline->extended_value));
+
+		zend_jit_zval_set_ptr(jit, res_addr, ref);
+		zend_jit_zval_set_type_info(jit, res_addr, IS_STRING_EX);
+	}
+
+	return 1;
+}
+
 static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 {
 	const void *entry;

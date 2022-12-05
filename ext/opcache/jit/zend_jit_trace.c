@@ -2200,7 +2200,6 @@ propagate_arg:
 						ADD_OP1_TRACE_GUARD();
 					}
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_ROPE_INIT:
 				case ZEND_ROPE_ADD:
 				case ZEND_ROPE_END:
@@ -2208,7 +2207,6 @@ propagate_arg:
 						ADD_OP2_TRACE_GUARD();
 					}
 					break;
-#endif
 				default:
 					break;
 			}
@@ -6714,6 +6712,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(JIT_G(current_frame)->call);
 						}
 						break;
+#endif
 					case ZEND_ROPE_INIT:
 					case ZEND_ROPE_ADD:
 					case ZEND_ROPE_END:
@@ -6726,7 +6725,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					default:
 						break;
 				}

@@ -4379,6 +4379,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_ROPE_INIT:
 					case ZEND_ROPE_ADD:
 					case ZEND_ROPE_END:
@@ -4390,7 +4391,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					default:
 						break;
 				}
