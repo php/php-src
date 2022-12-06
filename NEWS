@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-27 Nov 2022, PHP 8.2.0
+08 Dec 2022, PHP 8.2.0
 
 - CLI:
   . Fixed bug #81496 (Server logs incorrect request method). (lauri)
