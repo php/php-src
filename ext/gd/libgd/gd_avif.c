@@ -528,6 +528,9 @@ void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed)
 	avifIm->matrixCoefficients = lossless ? AVIF_MATRIX_COEFFICIENTS_IDENTITY : AVIF_MATRIX_COEFFICIENTS_BT709;
 
 	avifRGBImageSetDefaults(&rgb, avifIm);
+	if (!im->saveAlphaFlag) {
+		rgb.format = AVIF_RGB_FORMAT_RGB;
+	}
 	// this allocates memory, and sets rgb.rowBytes and rgb.pixels.
 	avifRGBImageAllocatePixels(&rgb);
 
@@ -542,7 +545,9 @@ void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed)
 			*(p++) = gdTrueColorGetRed(val);
 			*(p++) = gdTrueColorGetGreen(val);
 			*(p++) = gdTrueColorGetBlue(val);
-			*(p++) = alpha7BitTo8Bit(gdTrueColorGetAlpha(val));
+			if (im->saveAlphaFlag) {
+				*(p++) = alpha7BitTo8Bit(gdTrueColorGetAlpha(val));
+			}
 		}
 	}
 
