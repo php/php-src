@@ -379,10 +379,10 @@ DEF_SB_TBL(cp1251, "Windows-1251", "Windows-1251", cp1251_aliases, 0x80, cp1251_
 
 static const char *cp1252_aliases[] = {"cp1252", NULL};
 static const unsigned short cp1252_ucs_table[] = {
- 0X20AC,0X0000,0X201A,0X0192,0X201E,0X2026,0X2020,0X2021,
- 0X02C6,0X2030,0X0160,0X2039,0X0152,0X0000,0X017D,0X0000,
- 0X0000,0X2018,0X2019,0X201C,0X201D,0X2022,0X2013,0X2014,
- 0X02DC,0X2122,0X0161,0X203A,0X0153,0X0000,0X017E,0X0178
+ 0X20AC,0X0081,0X201A,0X0192,0X201E,0X2026,0X2020,0X2021,
+ 0X02C6,0X2030,0X0160,0X2039,0X0152,0X008D,0X017D,0X008F,
+ 0X0090,0X2018,0X2019,0X201C,0X201D,0X2022,0X2013,0X2014,
+ 0X02DC,0X2122,0X0161,0X203A,0X0153,0X009D,0X017E,0X0178
 };
 DEF_SB(cp1252, "Windows-1252", "Windows-1252", cp1252_aliases);
 
@@ -396,7 +396,7 @@ static int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 			}
 		}
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if ((c <= 0x7F || c >= 0xA0) && c != MBFL_BAD_INPUT) {
+	} else if ((c <= 0x7F || c >= 0xA0 || c == 0x81 || c == 0x8D || c == 0x8F || c == 0x90 || c == 0x9D) && c != MBFL_BAD_INPUT) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
