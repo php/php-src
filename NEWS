@@ -82,6 +82,8 @@ PHP                                                                        NEWS
     promotion. (kooldev)
   . Fixed bug GH-9750 (Generator memory leak when interrupted during argument
     evaluation. (Arnaud)
+  . Move observer_declared_function_notify until after pass_two(). (Bob)
+  . Do not report MINIT stage internal class aliases in extensions. (Bob)
 
 - Curl:
   . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
@@ -203,10 +205,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9259 (opcache.interned_strings_buffer setting integer
     overflow). (Arnaud)
   . Added indirect call reduction for jit on x86 architectures. (wxue1)
-
-- OPcache:
   . Fixed bug GH-9164 (Segfault in zend_accel_class_hash_copy).
     (Arnaud, Sergei Turchanov)
+  . Fix opcache preload with observers enabled. (Bob)
 
 - OpenSSL:
   . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
@@ -365,6 +366,8 @@ PHP                                                                        NEWS
     (cmb)
   . Revert "Fixed parse_url(): can not recognize port without scheme."
     (andypost)
+  . Fix crash reading module_entry after DL_UNLOAD() when module already
+    loaded. (Bob)
 
 - Streams:
   . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
