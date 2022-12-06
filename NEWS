@@ -52,6 +52,9 @@ PHP                                                                        NEWS
   . Fixed GH-10011 (Trampoline autoloader will get reregistered and cannot be
     unregistered). (Girgias)
 
+- SQLite3:
+  . Fixed bug #81742 (open_basedir bypass in SQLite3 by using file URI). (cmb)
+
 08 Dec 2022, PHP 8.2.0
 
 - CLI:
