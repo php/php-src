@@ -9769,12 +9769,17 @@ static int zend_jit_count(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1
 		// Note: See the implementation of ZEND_COUNT in Zend/zend_vm_def.h - arrays do not contain IS_UNDEF starting in php 8.1+.
 
 		ref = zend_jit_zval_ptr(jit, op1_addr);
-		ref = zend_jit_load(jit, IR_U32,
-			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
-				ref,
-				zend_jit_const_addr(jit, offsetof(HashTable, nNumOfElements))));
 		if (sizeof(void*) == 8) {
+			ref = zend_jit_load(jit, IR_U32,
+				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					ref,
+					zend_jit_const_addr(jit, offsetof(HashTable, nNumOfElements))));
 			ref = ir_emit1(&jit->ctx, IR_OPT(IR_ZEXT, IR_PHP_LONG), ref);
+		} else {
+			ref = zend_jit_load(jit, IR_PHP_LONG,
+				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					ref,
+					zend_jit_const_addr(jit, offsetof(HashTable, nNumOfElements))));
 		}
 		zend_jit_zval_set_lval(jit, res_addr, ref);
 
@@ -9825,8 +9830,17 @@ static int zend_jit_in_array(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 			zend_jit_guard_not(jit, ref, zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 		}
 	} else if (smart_branch_opcode) {
-		jit->control = ir_emit3(&jit->ctx, IR_IF, jit->control, ref,
+		zend_basic_block *bb;
+
+		ZEND_ASSERT(jit->b >= 0);
+		bb = &jit->ssa->cfg.blocks[jit->b];
+		ZEND_ASSERT(bb->successors_count == 2);
+		ref = ir_emit3(&jit->ctx, IR_IF, jit->control, ref,
 			(smart_branch_opcode == ZEND_JMPZ) ? target_label2 : target_label);
+		_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
+		_zend_jit_add_predecessor_ref(jit, bb->successors[1], jit->b, ref);
+		jit->control = IR_UNUSED;
+		jit->b = -1;
 	} else {
 		zend_jit_zval_set_type_info_ref(jit, res_addr,
 			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_U32),
