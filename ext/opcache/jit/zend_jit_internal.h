@@ -567,6 +567,12 @@ typedef struct _zend_jit_trace_exit_info {
 	uint32_t             flags;      /* set of ZEND_JIT_EXIT_... */
 	uint32_t             stack_size;
 	uint32_t             stack_offset;
+#ifdef ZEND_JIT_IR
+	int32_t              poly_func_ref;
+	int32_t              poly_this_ref;
+	int8_t               poly_func_reg;
+	int8_t               poly_this_reg;
+#endif
 } zend_jit_trace_exit_info;
 
 #ifndef ZEND_JIT_IR

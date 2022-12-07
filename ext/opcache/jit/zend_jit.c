@@ -2944,11 +2944,9 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
-#ifndef ZEND_JIT_IR //???
 	zend_class_entry *ce;
 	bool ce_is_instanceof;
 	bool on_this;
-#endif
 
 	if (JIT_G(bisect_limit)) {
 		jit_bisect_pos++;
@@ -4344,6 +4342,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_INIT_METHOD_CALL:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING) {
@@ -4377,11 +4376,14 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_init_method_call(&ctx, opline, b, op_array, ssa, ssa_op, call_level,
 								op1_info, op1_addr, ce, ce_is_instanceof, on_this, 0, NULL,
-								NULL, 0, 0)) {
+								NULL, 0,
+#ifdef ZEND_JIT_IR
+								-1, -1,
+#endif
+								0)) {
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_ROPE_INIT:
 					case ZEND_ROPE_ADD:
 					case ZEND_ROPE_END:
