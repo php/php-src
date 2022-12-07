@@ -4297,6 +4297,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_VERIFY_RETURN_TYPE:
 						if (opline->op1_type == IS_UNUSED) {
 							/* Always throws */
@@ -4318,6 +4319,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_FE_RESET_R:
 						op1_info = OP1_INFO();
 						if ((op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) != MAY_BE_ARRAY) {

@@ -1924,6 +1924,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
+#endif
 				case ZEND_VERIFY_RETURN_TYPE:
 					if (opline->op1_type == IS_UNUSED) {
 						/* Always throws */
@@ -1939,6 +1940,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
+#ifndef ZEND_JIT_IR //???
 				case ZEND_FETCH_DIM_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -6573,6 +6575,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_VERIFY_RETURN_TYPE:
 						if (opline->op1_type == IS_UNUSED) {
 							/* Always throws */
@@ -6596,6 +6599,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_FE_RESET_R:
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
