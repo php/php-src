@@ -69,12 +69,12 @@ ZEND_API void zend_call_stack_init(void) {
 			EG(stack_base) = base;
 			EG(stack_limit) = zend_call_stack_limit(base, size, EG(reserved_stack_size));
 			break;
-	    }
+		}
 		case ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED: {
 			EG(stack_base) = (void*)0;
 			EG(stack_limit) = (void*)0;
 			break;
-	    }
+		}
 		default: {
 			ZEND_ASSERT(EG(max_allowed_stack_size) > 0);
 			void *base = EG(call_stack).base;
@@ -84,7 +84,7 @@ ZEND_API void zend_call_stack_init(void) {
 			EG(stack_base) = base;
 			EG(stack_limit) = zend_call_stack_limit(base, EG(max_allowed_stack_size), EG(reserved_stack_size));
 			break;
-	    }
+		}
 	}
 }
 
