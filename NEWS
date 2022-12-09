@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Added pattern format error infos for msgfmt_set_pattern. (David Carlier)
+  . Added pattern format error infos for numfmt_set_pattern. (David Carlier)
 
 - JSON:
   . Added json_validate(). (Juan Morales)
