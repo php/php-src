@@ -258,6 +258,102 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 }
 /* }}} */
 
+/* {{{ Get Random Bytes for String */
+PHP_METHOD(Random_Randomizer, getBytesFromString)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	zend_long length;
+	zend_string *source, *retval;
+	size_t total_size = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2);
+		Z_PARAM_STR(source)
+		Z_PARAM_LONG(length)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const size_t source_length = ZSTR_LEN(source);
+
+	if (source_length < 1) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	if (length < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	retval = zend_string_alloc(length, 0);
+
+	if (source_length > 0xFF) {
+		while (total_size < length) {
+			uint64_t offset = randomizer->algo->range(randomizer->status, 0, source_length - 1);
+
+			if (EG(exception)) {
+				zend_string_free(retval);
+				RETURN_THROWS();
+			}
+
+			ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(source)[offset];
+		}
+	} else {
+		uint64_t mask;
+		if (source_length <= 0x1) {
+			mask = 0x0;
+		} else if (source_length <= 0x2) {
+			mask = 0x1;
+		} else if (source_length <= 0x4) {
+			mask = 0x3;
+		} else if (source_length <= 0x8) {
+			mask = 0x7;
+		} else if (source_length <= 0x10) {
+			mask = 0xF;
+ 		} else if (source_length <= 0x20) {
+			mask = 0x1F;
+		} else if (source_length <= 0x40) {
+			mask = 0x3F;
+		} else if (source_length <= 0x80) {
+			mask = 0x7F;
+		} else {
+			mask = 0xFF;
+		}
+
+		int failures = 0;
+		while (total_size < length) {
+			uint64_t result = randomizer->algo->generate(randomizer->status);
+			if (EG(exception)) {
+				zend_string_free(retval);
+				RETURN_THROWS();
+			}
+
+			for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
+				uint64_t offset = (result >> (i * 8)) & mask;
+
+				if (offset >= source_length) {
+					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
+						zend_string_free(retval);
+						zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
+						RETURN_THROWS();
+					}
+
+					continue;
+				}
+
+				failures = 0;
+
+				ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(source)[offset];
+				if (total_size >= length) {
+					break;
+				}
+			}
+		}
+	}
+
+	ZSTR_VAL(retval)[length] = '\0';
+	RETURN_STR(retval);
+}
+/* }}} */
+
 /* {{{ Random\Randomizer::__serialize() */
 PHP_METHOD(Random_Randomizer, __serialize)
 {

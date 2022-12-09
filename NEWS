@@ -55,6 +55,9 @@ PHP                                                                        NEWS
 - Posix:
   . Added posix_sysconf. (David Carlier)
 
+- Random:
+  . Added Randomizer::getBytesFromString(). (Joshua Rüsweg)
+
 - Reflection:
   . Fix GH-9470 (ReflectionMethod constructor should not find private parent
     method). (ilutov)
