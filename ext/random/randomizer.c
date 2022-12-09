@@ -98,11 +98,6 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-#ifndef __STDC_IEC_559__
-	zend_throw_exception(random_ce_Random_RandomException, "The nextFloat() method requires the underlying 'double' representation to be IEEE-754.", 0);
-	RETURN_THROWS();
-#endif
-
 	result = 0;
 	total_size = 0;
 	do {
@@ -118,7 +113,9 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 	 * use the full 64 bits of the uint64_t, because we would
 	 * introduce a bias / rounding error.
 	 */
-	ZEND_ASSERT(DBL_MANT_DIG == 53);
+#if DBL_MANT_DIG != 53
+# error "Random_Randomizer::nextFloat(): Requires DBL_MANT_DIG == 53 to work."
+#endif
 	const double step_size = 1.0 / (1ULL << 53);
 
 	/* Use the upper 53 bits, because some engine's lower bits
@@ -147,11 +144,6 @@ PHP_METHOD(Random_Randomizer, getFloat)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
 	ZEND_PARSE_PARAMETERS_END();
-
-#ifndef __STDC_IEC_559__
-	zend_throw_exception(random_ce_Random_RandomException, "The getFloat() method requires the underlying 'double' representation to be IEEE-754.", 0);
-	RETURN_THROWS();
-#endif
 
 	if (bounds) {
 		zval *case_name = zend_enum_fetch_case_name(bounds);
