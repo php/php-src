@@ -62,6 +62,10 @@ PHP 8.3 UPGRADE NOTES
 - Posix:
   . Added posix_sysconf call to get runtime informations.
 
+- Random:
+  . Added Randomizer::getBytesFromString().
+    RFC: https://wiki.php.net/rfc/randomizer_additions
+
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
 
