@@ -512,6 +512,7 @@ check_fmt(struct magic_set *ms, const char *fmt)
 # if defined(__aiws__) || defined(_AIX)
 #  define strndup aix_strndup	/* aix is broken */
 # endif
+#undef strndup
 char *strndup(const char *, size_t);
 
 char *
