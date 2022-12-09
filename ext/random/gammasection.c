@@ -66,7 +66,7 @@ PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, p
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
-	uint64_t k = algo->range(status, 1, hi);
+	uint64_t k = 1 + php_random_range64(algo, status, hi - 1); /* [1, hi] */
 
 	if (fabs(min) <= fabs(max)) {
 		return k == hi ? min : max - k * g;
@@ -79,7 +79,7 @@ PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo,
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
-	uint64_t k = algo->range(status, 0, hi);
+	uint64_t k = php_random_range64(algo, status, hi); /* [0, hi] */
 
 	if (fabs(min) <= fabs(max)) {
 		return k == hi ? min : max - k * g;
@@ -92,7 +92,7 @@ PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, p
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
-	uint64_t k = algo->range(status, 0, hi - 1);
+	uint64_t k = php_random_range64(algo, status, hi - 1); /* [0, hi - 1] */
 
 	if (fabs(min) <= fabs(max)) {
 		return max - k * g;
@@ -105,7 +105,7 @@ PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, php
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
-	uint64_t k = algo->range(status, 1, hi - 1);
+	uint64_t k = 1 + php_random_range64(algo, status, hi - 2); /* [1, hi - 1] */
 
 	if (fabs(min) <= fabs(max)) {
 		return max - k * g;

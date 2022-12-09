@@ -89,7 +89,7 @@ static zend_object_handlers random_engine_xoshiro256starstar_object_handlers;
 static zend_object_handlers random_engine_secure_object_handlers;
 static zend_object_handlers random_randomizer_object_handlers;
 
-static inline uint32_t rand_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax)
+PHPAPI uint32_t php_random_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax)
 {
 	uint32_t result, limit;
 	size_t total_size = 0;
@@ -145,7 +145,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	return result % umax;
 }
 
-static inline uint64_t rand_range64(const php_random_algo *algo, php_random_status *status, uint64_t umax)
+PHPAPI uint64_t php_random_range64(const php_random_algo *algo, php_random_status *status, uint64_t umax)
 {
 	uint64_t result, limit;
 	size_t total_size = 0;
@@ -313,10 +313,10 @@ PHPAPI zend_long php_random_range(const php_random_algo *algo, php_random_status
 	zend_ulong umax = (zend_ulong) max - (zend_ulong) min;
 
 	if (umax > UINT32_MAX) {
-		return (zend_long) (rand_range64(algo, status, umax) + min);
+		return (zend_long) (php_random_range64(algo, status, umax) + min);
 	}
 
-	return (zend_long) (rand_range32(algo, status, umax) + min);
+	return (zend_long) (php_random_range32(algo, status, umax) + min);
 }
 /* }}} */
 
