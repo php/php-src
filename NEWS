@@ -35,8 +35,7 @@ PHP                                                                        NEWS
     (CVE-2022-37454) (nicky at mouha dot be)
 
 - JSON:
-  . Implemented RFC: json_validate()
-    https://wiki.php.net/rfc/json_validate (Juan Morales)
+  . Added json_validate(). (Juan Morales)
 
 - Opcache:
   . Added start, restart and force restart time to opcache's
