@@ -540,7 +540,6 @@ static void zend_jit_trace_send_type(const zend_op *opline, zend_jit_trace_stack
 	SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type, 1);
 }
 
-#ifndef ZEND_JIT_IR //???
 static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num, zend_call_info *call_info)
 {
 	if (func
@@ -586,7 +585,6 @@ static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num,
 
 	return 1;
 }
-#endif
 
 static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_script *script)
 {
@@ -5731,7 +5729,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_DO_UCALL:
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
@@ -5740,7 +5737,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_IS_EQUAL:
 					case ZEND_IS_NOT_EQUAL:
 					case ZEND_IS_SMALLER:

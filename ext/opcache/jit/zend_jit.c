@@ -145,9 +145,9 @@ static void zend_jit_trace_add_code(const void *start, uint32_t size);
 static zend_string *zend_jit_func_name(const zend_op_array *op_array);
 
 static int zend_jit_trace_op_len(const zend_op *opline);
-#ifndef ZEND_JIT_IR
 static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num, zend_call_info *call_info);
 
+#ifndef ZEND_JIT_IR
 #if ZEND_JIT_TARGET_ARM64
 static zend_jit_trace_info *zend_jit_get_current_trace_info(void);
 static uint32_t zend_jit_trace_find_exit_point(const void* addr);
@@ -523,7 +523,6 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	}
 }
 
-#ifndef ZEND_JIT_IR
 static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ssa, const zend_call_info *call_info)
 {
 	uint32_t num_args = 0;
@@ -551,6 +550,7 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 	return num_args;
 }
 
+#ifndef ZEND_JIT_IR
 static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, zend_ssa *ssa, uint32_t var)
 {
 	uint32_t j, info;
@@ -3852,9 +3852,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_DO_UCALL:
+#ifndef ZEND_JIT_IR //???
 						is_terminated = 1;
+#endif
 						ZEND_FALLTHROUGH;
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
@@ -3863,7 +3864,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_IS_EQUAL:
 					case ZEND_IS_NOT_EQUAL:
 					case ZEND_IS_SMALLER:
