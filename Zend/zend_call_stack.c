@@ -25,6 +25,7 @@
 #include <stdint.h>
 #ifdef ZEND_WIN32
 # include <processthreadsapi.h>
+# include <memoryapi.h>
 #else /* ZEND_WIN32 */
 # include <sys/resource.h>
 # ifdef HAVE_UNISTD_H
@@ -332,16 +333,63 @@ static bool zend_call_stack_get_freebsd(zend_call_stack *stack)
 #ifdef ZEND_WIN32
 static bool zend_call_stack_get_win32(zend_call_stack *stack)
 {
-	ULONG_PTR low, high;
-	GetCurrentThreadStackLimits(&low, &high);
+	ULONG_PTR low_limit, high_limit;
+	ULONG size;
+	MEMORY_BASIC_INFORMATION guard_region = {0}, uncommitted_region = {0};
+	size_t result_size, page_size;
 
-	stack->base = (void*)high;
-	stack->max_size = (uintptr_t)high - (uintptr_t)low;
+	/* The stack consists of three regions: committed, guard, and uncommitted.
+	 * Memory is committed when the guard region is accessed. If only one page
+	 * is left in the uncommitted region, a stack overflow error is raised
+	 * instead.
+	 *
+	 * The total useable stack size is the size of the committed and uncommitted
+	 * regions less one page.
+	 *
+	 * http://blogs.msdn.com/b/satyem/archive/2012/08/13/thread-s-stack-memory-management.aspx
+	 * https://learn.microsoft.com/en-us/windows/win32/procthread/thread-stack-size
+	 *
+	 *                ^  Higher addresses  ^
+	 *                :                    :
+	 *                :                    :
+	 * high_limit --> |--------------------|
+	 *            ^   |                    |
+	 *            |   | Committed region   |
+	 *            |   |                    |
+	 *            |   |------------------- | <-- guard_region.BaseAddress
+	 *   reserved |   |                    |     + guard_region.RegionSize
+	 *       size |   | Guard region       |
+	 *            |   |                    |
+	 *            |   |--------------------| <-- guard_region.BaseAddress,
+	 *            |   |                    |     uncommitted_region.BaseAddress
+	 *            |   | Uncommitted region |     + uncommitted_region.RegionSize
+	 *            v   |                    |
+	 * low_limit  --> |------------------- | <-- uncommitted_region.BaseAddress
+	 *                :                    :
+	 *                :                    :
+	 *                v  Lower addresses   v
+	 */
 
-	// Last pages are not usable
-	// http://blogs.msdn.com/b/satyem/archive/2012/08/13/thread-s-stack-memory-management.aspx
-	ZEND_ASSERT(stack->max_size > 4*4096);
-	stack->max_size -= 4*4096;
+	GetCurrentThreadStackLimits(&low_limit, &high_limit);
+
+	result_size = VirtualQuery((void*)low_limit,
+			&uncommitted_region, sizeof(uncommitted_region));
+	ZEND_ASSERT(result_size >= sizeof(uncommitted_region));
+
+	result_size = VirtualQuery((int8_t*)uncommitted_region.BaseAddress + uncommitted_region.RegionSize,
+			&guard_region, sizeof(guard_region));
+	ZEND_ASSERT(result_size >= sizeof(uncommitted_region));
+
+	stack->base = (void*)high_limit;
+	stack->max_size = (uintptr_t)high_limit - (uintptr_t)low_limit;
+
+	ZEND_ASSERT(stack->max_size > guard_region.RegionSize);
+	stack->max_size -= guard_region.RegionSize;
+
+	/* The uncommitted region does not shrink below 1 page */
+	page_size = zend_get_page_size();
+	ZEND_ASSERT(stack->max_size > page_size);
+	stack->max_size -= page_size;
 
 	return true;
 }
