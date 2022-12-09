@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <errno.h>
 #include <pwd.h>
 #include <grp.h>
 
@@ -34,6 +35,15 @@
 
 #ifdef HAVE_SELINUX
 #include <selinux/selinux.h>
+#endif
+
+#ifdef HAVE_SCHED_H
+#include <sched.h>
+#endif
+
+#ifdef HAVE_SYS_CPUSET_H
+#include <sys/cpuset.h>
+typedef cpuset_t cpu_set_t;
 #endif
 
 #include "fpm.h"
@@ -421,6 +431,101 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
+#if HAVE_FPM_CPUAFFINITY
+struct fpm_cpuaffinity_conf {
+	cpu_set_t cset;
+	long min;
+	long max;
+};
+
+static long fpm_cpumax(void)
+{
+	static long cpuid = LONG_MIN;
+	if (cpuid == LONG_MIN) {
+		cpu_set_t cset;
+#if defined(HAVE_SCHED_SETAFFINITY)
+		if (sched_getaffinity(0, sizeof(cset), &cset) == 0) {
+#elif defined(HAVE_CPUSET_SETAFFINITY)
+		if (cpuset_getaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, sizeof(cset), &cset) == 0) {
+#endif
+			cpuid = CPU_COUNT(&cset);
+		} else {
+			cpuid = -1;
+		}
+	}
+
+	return cpuid;
+}
+
+static void fpm_cpuaffinity_init(struct fpm_cpuaffinity_conf *c)
+{
+	CPU_ZERO(&c->cset);
+}
+
+static void fpm_cpuaffinity_add(struct fpm_cpuaffinity_conf *c)
+{
+#if defined(HAVE_FPM_CPUAFFINITY)
+	int i;
+
+	for (i = c->min; i <= c->max; i ++) {
+		if (!CPU_ISSET(i, &c->cset)) {
+			CPU_SET(i, &c->cset);
+		}
+	}
+#endif
+}
+
+static int fpm_cpuaffinity_set(struct fpm_cpuaffinity_conf *c)
+{
+#if defined(HAVE_SCHED_SETAFFINITY)
+	return sched_setaffinity(0, sizeof(c->cset), &c->cset);
+#elif defined(HAVE_CPUSET_SETAFFINITY)
+	return cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, sizeof(c->cset), &c->cset);
+#endif
+}
+
+static int fpm_setcpuaffinity(char *cpu_list)
+{
+	char *token, *buf;
+	struct fpm_cpuaffinity_conf fconf;
+	int r, cpumax;
+
+	r = -1;
+	cpumax = fpm_cpumax();
+
+	fpm_cpuaffinity_init(&fconf);
+	token = php_strtok_r(cpu_list, ",", &buf);
+
+	while (token) {
+		char *cpu_listsep;
+
+		fconf.min = strtol(token, &cpu_listsep, 0);
+		if (errno || fconf.min < 0 || fconf.min > cpumax) {
+			return -1;
+		}
+		fconf.max = fconf.min;
+		if (*cpu_listsep == '-') {
+			if (strlen(cpu_listsep) > 1) {
+				char *err;
+				fconf.max = strtol(cpu_listsep + 1, &err, 0);
+				if (errno || *err != '\0' || fconf.max < fconf.min || fconf.max > cpumax) {
+					return -1;
+				}
+			} else {
+				return -1;
+			}
+		}
+
+		fpm_cpuaffinity_add(&fconf);
+
+		token = php_strtok_r(NULL, ";", &buf);
+	}
+
+	r = fpm_cpuaffinity_set(&fconf);
+	return r;
+}
+#endif
+
 int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	int is_root = !geteuid();
@@ -445,6 +550,15 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to set rlimit_core for this pool. Please check your system limits or decrease rlimit_core. setrlimit(RLIMIT_CORE, %d)", wp->config->name, wp->config->rlimit_core);
 		}
 	}
+#if HAVE_FPM_CPUAFFINITY
+	if (wp->config->process_cpu_list) {
+
+		if (0 > fpm_setcpuaffinity(wp->config->process_cpu_list)) {
+			zlog(ZLOG_SYSERROR, "[pool %s] failed to fpm_setcpuaffinity(%s)", wp->config->name, wp->config->process_cpu_list);
+			return -1;
+		}
+	}
+#endif
 
 	if (is_root && wp->config->chroot && *wp->config->chroot) {
 		if (0 > chroot(wp->config->chroot)) {
@@ -691,6 +805,15 @@ int fpm_unix_init_main(void)
 			zlog(ZLOG_NOTICE, "'process.priority' directive is ignored when FPM is not running as root");
 		}
 	}
+
+#if HAVE_FPM_CPUAFFINITY
+	if (fpm_global_config.process_cpu_list) {
+		if (0 > fpm_setcpuaffinity(fpm_global_config.process_cpu_list)) {
+			zlog(ZLOG_SYSERROR, "failed to fpm_setcpuaffinity(%s)", fpm_global_config.process_cpu_list);
+			return -1;
+		}
+	}
+#endif
 
 	fpm_globals.parent_pid = getpid();
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
