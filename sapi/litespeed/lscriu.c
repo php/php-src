@@ -95,8 +95,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static int s_initial_start_reqs = 0;
 static int s_requests_count = 0;
 static int s_restored = 0;
-static int (*s_lscapi_dump_me)() = NULL;
-static int (*s_lscapi_prepare_me)() = NULL;
+static int (*s_lscapi_dump_me)(void) = NULL;
+static int (*s_lscapi_prepare_me)(void) = NULL;
 static int s_native = 0;
 static int s_tried_checkpoint = 0;
 static int s_criu_debug = 0;
@@ -118,7 +118,7 @@ typedef void (*sighandler_t)(int);
 
 void lsapi_perror( const char * pMessage, int err_no );
 void LSAPI_reset_server_state( void );
-int LSAPI_Get_ppid();
+int LSAPI_Get_ppid(void);
 
 #ifdef LSAPILIB_DEBUG_CRIU
 #define lscriu_dbg(...) \
@@ -541,7 +541,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
 }
 
 
-static int init_native_env()
+static int init_native_env(void)
 {
     char *pchFd;
     pchFd = getenv("LSAPI_CRIU_SYNC_FD");
