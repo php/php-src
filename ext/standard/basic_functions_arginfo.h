@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39d455982dfdea9d0b9b646bc207b05f7108d1b2 */
+ * Stub hash: 3525b2e171019ad376db7667975b21a161c87147 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1244,15 +1244,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fopen, 0, 0, 2)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_file_descriptor, 0, 1, IS_LONG, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fscanf, 0, 2, MAY_BE_ARRAY|MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fpassthru, 0, 1, IS_LONG, 0)
-	ZEND_ARG_INFO(0, stream)
-ZEND_END_ARG_INFO()
+#define arginfo_fpassthru arginfo_file_descriptor
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftruncate, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
@@ -2542,6 +2544,7 @@ ZEND_FUNCTION(fgetc);
 ZEND_FUNCTION(fgets);
 ZEND_FUNCTION(fread);
 ZEND_FUNCTION(fopen);
+ZEND_FUNCTION(file_descriptor);
 ZEND_FUNCTION(fscanf);
 ZEND_FUNCTION(fpassthru);
 ZEND_FUNCTION(ftruncate);
@@ -3177,6 +3180,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(fgets, arginfo_fgets)
 	ZEND_FE(fread, arginfo_fread)
 	ZEND_FE(fopen, arginfo_fopen)
+	ZEND_FE(file_descriptor, arginfo_file_descriptor)
 	ZEND_FE(fscanf, arginfo_fscanf)
 	ZEND_FE(fpassthru, arginfo_fpassthru)
 	ZEND_FE(ftruncate, arginfo_ftruncate)

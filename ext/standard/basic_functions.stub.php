@@ -2642,6 +2642,9 @@ function fread($stream, int $length): string|false {}
  */
 function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null) {}
 
+/** @param resource $stream */
+function file_descriptor($stream): int {}
+
 /**
  * @param resource $stream
  * @return array<int, mixed>|int|false|null

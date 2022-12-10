@@ -864,6 +864,32 @@ PHP_FUNCTION(pclose)
 }
 /* }}} */
 
+PHP_FUNCTION(file_descriptor)
+{
+	zval *zsrc;
+	php_stream *stream;
+	php_socket_t fileno;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zsrc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_stream_from_zval(stream, zsrc);
+
+	/* TODO Should support streams that can be cast with PHP_STREAM_AS_FD_FOR_SELECT ? */
+	/* get the fd.
+	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
+	 * It is only used here so that the buffered data warning is not displayed.
+	 */
+    if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == FAILURE) {
+		zend_argument_type_error(1, "cannot represent as a file descriptor");
+		RETURN_THROWS();
+    }
+    php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&fileno, true);
+
+    RETURN_LONG(fileno);
+}
+
 /* {{{ Test for end-of-file on a file pointer */
 PHPAPI PHP_FUNCTION(feof)
 {
