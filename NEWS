@@ -22,6 +22,7 @@ PHP                                                                        NEWS
     (Dennis Buteyn)
   . Fix bug GH-8821 (Improve line numbers for errors in constant expressions).
     (ilutov)
+  . Fix bug GH-10083 (Allow comments between & and parameter). (ilutov)
 
 - Exif:
   . Removed unneeded codepaths in exif_process_TIFF_in_JPEG(). (nielsdos)
