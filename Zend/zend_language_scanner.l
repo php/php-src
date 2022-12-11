@@ -1368,6 +1368,11 @@ TABS_AND_SPACES [ \t]*
 TOKENS [;:,.|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
+OPTIONAL_WHITESPACE [ \n\r\t]*
+MULTI_LINE_COMMENT "/*"([^"*"]*"*"+)"/"
+SINGLE_LINE_COMMENT "//".*[\n\r]
+HASH_COMMENT "#"(([^"["].*[\n\r])|[\n\r])
+OPTIONAL_WHITESPACE_AND_COMMENTS ({OPTIONAL_WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_COMMENT}|{HASH_COMMENT})*
 
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -1869,7 +1874,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
-<ST_IN_SCRIPTING>"&"[ \t\r\n]*("$"|"...") {
+<ST_IN_SCRIPTING>"&"{OPTIONAL_WHITESPACE_AND_COMMENTS}("$"|"...") {
 	yyless(1);
 	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
 }
