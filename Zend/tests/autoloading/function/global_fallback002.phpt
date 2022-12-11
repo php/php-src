@@ -1,5 +1,5 @@
 --TEST--
-Fallback to global function should not trigger autoloading.
+Fallback to global function triggers autoloading once.
 --FILE--
 <?php
 
@@ -21,4 +21,5 @@ namespace bar {
 
 ?>
 --EXPECT--
+function loader called with bar\foo
 I am foo in global namespace.

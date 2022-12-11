@@ -3799,18 +3799,26 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 	if (UNEXPECTED(fbc == NULL)) {
 		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
 		/* Fetch lowercase name stored in the next literal slot */
-		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ false);
+		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
 		if (UNEXPECTED(fbc == NULL)) {
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
 			}
 			/* Fallback onto global namespace, by fetching the unqualified lowercase name stored in the second literal slot */
-			fbc = zend_lookup_function_ex(Z_STR_P(function_name+2), Z_STR_P(function_name+2), /* use_autoload */ false);
-			if (fbc == NULL) {
+			fbc = zend_lookup_function_ex(Z_STR_P(function_name+2), Z_STR_P(function_name+2), /* use_autoload */ true);
+			if (UNEXPECTED(fbc == NULL)) {
 				if (UNEXPECTED(EG(exception))) {
 					HANDLE_EXCEPTION();
 				}
 				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+			}
+			/* We bind the unqualified name to the global function
+			 * Use the lowercase name of the function stored in the first cache slot as
+			 * function names are case insensitive */
+			else {
+				zval tmp;
+				ZVAL_STR(&tmp, Z_STR_P(function_name+1));
+				do_bind_function(fbc, &tmp);
 			}
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {

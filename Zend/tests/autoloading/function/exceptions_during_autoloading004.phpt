@@ -29,7 +29,6 @@ namespace bar {
     try {
         foo();
     } catch (\Throwable $e) {
-        /* No autoloading for unqualified function names */
         do {
             echo $e::class, ': ', $e->getMessage(), "\n";
         } while ($e = $e->getPrevious());
@@ -52,7 +51,8 @@ Try-catch around function_exists()
 autoload_first
 first
 Try-catch around unqualified function call
-Error: Call to undefined function bar\foo()
+autoload_first
+Exception: first
 Try-catch around qualified function call
 autoload_first
 Exception: first
