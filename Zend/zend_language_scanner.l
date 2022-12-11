@@ -1368,6 +1368,12 @@ TABS_AND_SPACES [ \t]*
 TOKENS [;:,.|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
+OPTIONAL_WHITESPACE [ \n\r\t]*
+MULTI_LINE_COMMENT "/*"([^*]*"*"+)([^*/][^*]*"*"+)*"/"
+SINGLE_LINE_COMMENT "//".*[\n\r]
+HASH_COMMENT "#"(([^[].*[\n\r])|[\n\r])
+WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_COMMENT}|{HASH_COMMENT})+
+OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_COMMENT}|{HASH_COMMENT})*
 
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -1401,7 +1407,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_ATTRIBUTE);
 }
 
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
+<ST_IN_SCRIPTING>"yield"{WHITESPACE_OR_COMMENTS}"from"[^a-zA-Z0-9_\x80-\xff] {
 	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN_WITH_IDENT(T_YIELD_FROM);
@@ -1543,11 +1549,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
  * The enum keyword must be followed by whitespace and another identifier.
  * This avoids the BC break of using enum in classes, namespaces, functions and constants.
  */
-<ST_IN_SCRIPTING>"enum"{WHITESPACE}("extends"|"implements") {
+<ST_IN_SCRIPTING>"enum"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
 	yyless(4);
 	RETURN_TOKEN_WITH_STR(T_STRING, 0);
 }
-<ST_IN_SCRIPTING>"enum"{WHITESPACE}[a-zA-Z_\x80-\xff] {
+<ST_IN_SCRIPTING>"enum"{WHITESPACE_OR_COMMENTS}[a-zA-Z_\x80-\xff] {
 	yyless(4);
 	RETURN_TOKEN_WITH_IDENT(T_ENUM);
 }
@@ -1869,7 +1875,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
-<ST_IN_SCRIPTING>"&"[ \t\r\n]*("$"|"...") {
+<ST_IN_SCRIPTING>"&"{OPTIONAL_WHITESPACE_OR_COMMENTS}("$"|"...") {
 	yyless(1);
 	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
 }
