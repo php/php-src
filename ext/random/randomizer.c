@@ -136,7 +136,7 @@ PHP_METHOD(Random_Randomizer, getFloat)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	double min, max;
 	zend_object *bounds = NULL;
-	zend_string *bounds_name = zend_string_init("ClosedOpen", strlen("ClosedOpen"), 1);
+	int bounds_type = 'C' + sizeof("ClosedOpen") - 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_DOUBLE(min)
@@ -147,38 +147,41 @@ PHP_METHOD(Random_Randomizer, getFloat)
 
 	if (bounds) {
 		zval *case_name = zend_enum_fetch_case_name(bounds);
-		bounds_name = Z_STR_P(case_name);
+		zend_string *bounds_name = Z_STR_P(case_name);
+
+		bounds_type = ZSTR_VAL(bounds_name)[0] + ZSTR_LEN(bounds_name);
 	}
 	
-	if (zend_string_equals_literal(bounds_name, "ClosedOpen")) {
+	switch (bounds_type) {
+	case 'C' + sizeof("ClosedOpen") - 1:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->algo, randomizer->status, min, max));
-	} else if (zend_string_equals_literal(bounds_name, "ClosedClosed")) {
+	case 'C' + sizeof("ClosedClosed") - 1:
 		if (UNEXPECTED(max < min)) {
 			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->algo, randomizer->status, min, max));
-	} else if (zend_string_equals_literal(bounds_name, "OpenClosed")) {
+	case 'O' + sizeof("OpenClosed") - 1:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->algo, randomizer->status, min, max));
-	} else if (zend_string_equals_literal(bounds_name, "OpenOpen")) {
+	case 'O' + sizeof("OpenOpen") - 1:
 		if (UNEXPECTED(max <= min)) {
 			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
 			RETURN_THROWS();
 		}
 
 		RETURN_DOUBLE(php_random_gammasection_open_open(randomizer->algo, randomizer->status, min, max));
-	} else {
+	default:
 		ZEND_UNREACHABLE();
 	}
 }
