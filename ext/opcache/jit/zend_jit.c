@@ -626,6 +626,7 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_i
 	}
 	return 0;
 }
+#endif /* ZEND_JIT_IR */
 
 static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 {
@@ -646,6 +647,7 @@ static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 	return c && (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 }
 
+#ifndef ZEND_JIT_IR
 static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
 {
 	zend_property_info *info = NULL;
@@ -4339,12 +4341,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_FETCH_CONSTANT:
 						if (!zend_jit_fetch_constant(&ctx, opline, op_array, ssa, ssa_op, RES_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_INIT_METHOD_CALL:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING) {

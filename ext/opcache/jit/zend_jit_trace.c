@@ -3834,7 +3834,7 @@ static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack
 
 	for (i = 0; i < stack_size; i++) {
 #ifdef ZEND_JIT_IR
-		if (STACK_FLAGS(stack, i) == ZREG_CONST) {
+		if (STACK_FLAGS(stack, i) & (ZREG_CONST|ZREG_ZVAL_COPY)) {
 			return 1;
 		}
 #endif
@@ -3886,6 +3886,8 @@ static int zend_jit_trace_deoptimization(
 #ifndef ZEND_JIT_IR
 	bool has_constants = 0;
 	bool has_unsaved_vars = 0;
+#else
+	int check2 = -1;
 #endif
 
 	// TODO: Merge this loop with the following register LOAD loop to implement parallel move ???
@@ -3949,6 +3951,10 @@ static int zend_jit_trace_deoptimization(
 					SET_STACK_REF(stack, i, jit->ra[i].ref);
 				}
 			}
+		} else if (STACK_FLAGS(parent_stack, i) == ZREG_ZVAL_COPY) {
+			ZEND_ASSERT(reg != ZREG_NONE);
+			ZEND_ASSERT(check2 == -1);
+			check2 = i;
 		} else if (reg != ZREG_NONE) {
 			if (ssa && ssa->vars[i].no_val) {
 				/* pass */
@@ -4025,6 +4031,19 @@ static int zend_jit_trace_deoptimization(
 					}
 				}
 			}
+		}
+	}
+#else
+	if (check2 != -1) {
+		int8_t reg = STACK_REG(parent_stack, check2);
+
+		ZEND_ASSERT(STACK_FLAGS(parent_stack, check2) == ZREG_ZVAL_COPY);
+		ZEND_ASSERT(reg != ZREG_NONE);
+		if (zend_jit_escape_if_undef(jit, check2, flags, opline, reg)) {
+			return 0;
+		}
+		if (!zend_jit_restore_zval(jit, check2, reg)) {
+			return 0;
 		}
 	}
 #endif
@@ -6639,12 +6658,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_FETCH_CONSTANT:
 						if (!zend_jit_fetch_constant(&ctx, opline, op_array, ssa, ssa_op, RES_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_INIT_METHOD_CALL:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING) {
@@ -8424,6 +8443,8 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					} else {
 						ZEND_ASSERT(0);
 					}
+				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
+					fprintf(stderr, "zval_copy(%s)", zend_reg_name(STACK_REG(stack, j)));
 				} else if (STACK_REG(stack, j) != -1 /*???ZREG_NONE*/) {
 					fprintf(stderr, "(%s", zend_reg_name(STACK_REG(stack, j)));
 					if (STACK_FLAGS(stack, j) != 0) {
@@ -8441,6 +8462,11 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, (j < op_array->last_var) ? IS_CV : 0, j);
 				fprintf(stderr, ":unknown(zval_copy(%s))", zend_reg_name[ZREG_COPY]);
+#else
+			} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
+				fprintf(stderr, " ");
+				zend_dump_var(op_array, (j < op_array->last_var) ? IS_CV : 0, j);
+				fprintf(stderr, ":unknown(zval_copy(%s))", zend_reg_name(STACK_REG(stack, j)));
 #endif
 			}
 		}
@@ -9055,6 +9081,15 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZVAL_DOUBLE(EX_VAR_NUM(i), t->constants[STACK_REG(stack, i)].d);
 			} else {
 				ZEND_UNREACHABLE();
+			}
+		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_COPY) {
+			zval *val = (zval*)regs->gpr[STACK_REG(stack, i)];
+
+			if (UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
+				/* Undefined array index or property */
+				repeat_last_opline = 1;
+			} else {
+				ZVAL_COPY(EX_VAR_NUM(i), val);
 			}
 		} else if (STACK_REG(stack, i) != ZREG_NONE) {
 			if (STACK_TYPE(stack, i) == IS_LONG) {
