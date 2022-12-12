@@ -34,10 +34,10 @@ chdir($script_directory);
 ?>
 --CLEAN--
 <?php
-$test_dirname = basename(__FILE__, ".clean.php") . "私はガラスを食べられますtestdir";
+$test_dirname = __DIR__ . '/' . basename(__FILE__, ".clean.php") . "私はガラスを食べられますtestdir";
 $filepath = __DIR__ . '/file_variation_5.tmp';
-rmdir($test_dirname);
 unlink($filepath);
+rmdir($test_dirname);
 ?>
 --EXPECT--
 file() on a path containing .. and .

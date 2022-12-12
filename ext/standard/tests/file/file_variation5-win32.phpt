@@ -34,10 +34,10 @@ chdir($script_directory);
 ?>
 --CLEAN--
 <?php
-$test_dirname = basename(__FILE__, ".clean.php") . "testdir";
+$test_dirname = __DIR__ . '/' . basename(__FILE__, ".clean.php") . "testdir";
 $filepath = __DIR__ . '/file_variation_5.tmp';
+unlink($filepath); // Should be delete via the symlink deletion
 rmdir($test_dirname);
-unlink($filepath);
 ?>
 --EXPECT--
 file() on a path containing .. and .
