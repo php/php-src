@@ -15,7 +15,6 @@ $contents = array(
    "File has\r\nmultiple crlfs\n\r\n"
    );
 
-@unlink($testfile);
 foreach ($contents as $content) {
     $h = fopen($testfile, "w");
     fwrite($h, $content);
@@ -25,6 +24,11 @@ foreach ($contents as $content) {
 }
 
 echo "\n*** Done ***\n";
+?>
+--CLEAN--
+<?php
+$testfile = __DIR__."/fileVar9.txt";
+@unlink($testfile);
 ?>
 --EXPECT--
 *** Testing file() : variation ***
