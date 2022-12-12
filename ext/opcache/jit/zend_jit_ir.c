@@ -10039,7 +10039,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
 						rx,
 						zend_jit_const_addr(jit, offsetof(zend_execute_data, func))));
-				zend_jit_guard(jit,
+				zend_jit_guard_not(jit,
 					ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
 						zend_jit_load(jit, IR_U32,
 							ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
@@ -10530,7 +10530,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 						return 0;
 					}
 					ZEND_ASSERT(func_ref);
-					zend_jit_guard(jit,
+					zend_jit_guard_not(jit,
 						ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
 							zend_jit_load(jit, IR_U32,
 								ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
