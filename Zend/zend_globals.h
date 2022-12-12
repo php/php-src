@@ -22,6 +22,9 @@
 
 
 #include <setjmp.h>
+#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+#include <time.h>
+#endif
 
 #include "zend_globals_macros.h"
 
@@ -265,6 +268,10 @@ struct _zend_executor_globals {
 	bool record_errors;
 	uint32_t num_errors;
 	zend_error_info **errors;
+
+#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+	timer_t timer;
+#endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

@@ -43,6 +43,14 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+#include <time.h>
+// Musl Libc defines this macro, glibc does not
+// According to "man 2 timer_create" this field should always be available, but it's not
+# ifndef sigev_notify_thread_id
+# define sigev_notify_thread_id _sigev_un._tid
+# endif
+#endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
@@ -170,6 +178,20 @@ void init_executor(void) /* {{{ */
 	EG(full_tables_cleanup) = 0;
 	EG(vm_interrupt) = 0;
 	EG(timed_out) = 0;
+
+#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+	struct sigevent sev;
+	sev.sigev_notify = SIGEV_THREAD_ID;
+	sev.sigev_value.sival_ptr = &EG(timer);
+	sev.sigev_signo = SIGIO;
+	sev.sigev_notify_thread_id = gettid();
+
+	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0)
+		fprintf(stderr, "error %d while creating timer on thread %d\n", errno, gettid());
+# ifdef TIMER_DEBUG
+	else fprintf(stderr, "timer created on thread %d\n", gettid());
+# endif
+#endif
 
 	EG(exception) = NULL;
 	EG(prev_exception) = NULL;
@@ -394,6 +416,14 @@ void shutdown_executor(void) /* {{{ */
 	bool fast_shutdown = 0;
 #else
 	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
+#endif
+
+#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+	if (timer_delete(EG(timer)) != 0)
+		fprintf(stderr, "error %d while deleting timer on thread %d\n", errno, gettid());
+# ifdef TIMER_DEBUG
+	else fprintf(stderr, "timer deleted on thread %d\n", gettid());
+# endif
 #endif
 
 	zend_try {
@@ -1314,8 +1344,18 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 /* }}} */
 
 #ifndef ZEND_WIN32
+#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
+{
+	if (si->si_value.sival_ptr != &EG(timer)) {
+		fprintf(stderr, "ignoring timeout signal SIGIO received on thread %d\n", gettid());
+
+		return;
+	}
+#else
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
+#endif
 #ifndef ZTS
 	if (EG(timed_out)) {
 		/* Die on hard timeout */
@@ -1414,6 +1454,36 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		tq_timer = NULL;
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
+	}
+#elif defined(ZTS) && defined(HAVE_TIMER_CREATE)
+	timer_t timer = EG(timer);
+	struct itimerspec its;
+
+	its.it_value.tv_sec = seconds;
+	its.it_value.tv_nsec = 0;
+	its.it_interval.tv_sec = 0;
+	its.it_interval.tv_nsec = 0;
+
+	if (timer_settime(timer, 0, &its, NULL) != 0) {
+		fprintf(stderr, "unable to set timer on thread %d\n", gettid());
+
+		return;
+	}
+# ifdef TIMER_DEBUG
+	else fprintf(stderr, "timer set on thread %d (%ld seconds)\n", gettid(), seconds);
+# endif
+
+	if (reset_signals) {
+		sigset_t sigset;
+		struct sigaction act;
+
+		act.sa_sigaction = zend_timeout_handler;
+		sigemptyset(&act.sa_mask);
+		act.sa_flags = SA_ONSTACK | SA_SIGINFO;
+		sigaction(SIGIO, &act, NULL);
+		sigemptyset(&sigset);
+		sigaddset(&sigset, SIGIO);
+		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
 #elif defined(HAVE_SETITIMER)
 	{

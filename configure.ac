@@ -743,6 +743,9 @@ fi
 dnl Check for openpty. It may require linking against libutil or libbsd.
 PHP_CHECK_FUNC(openpty, util, bsd)
 
+dnl Check for timer_create
+PHP_CHECK_FUNC(timer_create, rt)
+
 dnl General settings.
 dnl ----------------------------------------------------------------------------
 PHP_CONFIGURE_PART(General settings)
