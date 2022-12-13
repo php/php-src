@@ -2116,7 +2116,6 @@ propagate_arg:
 						SET_STACK_INFO(frame->call->stack, opline->op2.num - 1, info);
 					}
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_RETURN:
 					ADD_OP1_TRACE_GUARD();
 					/* Propagate return value types */
@@ -2139,7 +2138,6 @@ propagate_arg:
 						return_value_info.type &= ~MAY_BE_GUARD;
 					}
 					break;
-#endif
 				case ZEND_CHECK_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -4354,7 +4352,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	zend_jit_ctx ctx;
 	zend_jit_ctx *jit = &ctx;
 	zend_jit_reg_var *ra = NULL;
-	ir_ref loop_ref = IR_UNUSED;
 #endif
 	zend_script *script = NULL;
 	zend_string *name = NULL;
@@ -4682,7 +4679,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 		}
 #else
-		loop_ref = zend_jit_trace_begin_loop(&ctx); /* start of of trace loop */
+		jit->trace_loop_ref = zend_jit_trace_begin_loop(&ctx); /* start of of trace loop */
 
 		if (ra) {
 			zend_ssa_phi *phi = ssa->blocks[1].phis;
@@ -5917,7 +5914,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_RETURN:
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
@@ -5993,7 +5989,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 						goto done;
-#endif
 					case ZEND_BOOL:
 					case ZEND_BOOL_NOT:
 						op1_info = OP1_INFO();
@@ -7535,7 +7530,7 @@ done:
 #ifndef ZEND_JIT_IR
 			zend_jit_trace_end_loop(&ctx, 0, timeout_exit_addr); /* jump back to start of the trace loop */
 #else
-			zend_jit_trace_end_loop(&ctx, loop_ref, timeout_exit_addr); /* jump back to start of the trace loop */
+			zend_jit_trace_end_loop(&ctx, jit->trace_loop_ref, timeout_exit_addr); /* jump back to start of the trace loop */
 #endif
 		}
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK

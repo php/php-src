@@ -103,11 +103,13 @@ static size_t tsrm_tls_offset = 0;
 	_(exception_handler_free_op1_op2, SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(exception_handler_free_op2,     SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(interrupt_handler,              SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
+	_(leave_function_handler,         SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(negative_shift,                 SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(mod_by_zero,                    SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(undefined_function,             SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(throw_cannot_pass_by_ref,       SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(icall_throw,                    SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
+	_(leave_throw,                    SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
 	_(hybrid_runtime_jit,             SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
 	_(hybrid_profile_jit,             SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
 	_(hybrid_func_hot_counter,        SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
@@ -148,6 +150,7 @@ typedef struct _zend_jit_ctx {
 	int                  b;           /* current basic block number or -1 */
 	ir_ref               control;
 	ir_ref               fp;
+	ir_ref               trace_loop_ref;
 	const zend_op_array *op_array;
 	zend_ssa            *ssa;
 	zend_string         *name;
@@ -377,6 +380,7 @@ static ir_alias ir_check_partial_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr
 static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr)
 {
 	ir_insn *insn;
+	uint32_t modified_regset = 0;
 
 	while (1) {
 		insn = &ctx->ir_base[ref];
@@ -389,7 +393,13 @@ static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_re
 
 			if (insn->op2 == addr) {
 				if (type2 == type) {
-					return insn->op3; /* store forwarding (S2L) */
+					ref = insn->op3;
+					insn = &ctx->ir_base[ref];
+					if (insn->op == IR_RLOAD && (modified_regset & (1 << insn->op2))) {
+						/* anti-dependency */
+						return IR_UNUSED;
+					}
+					return ref; /* store forwarding (S2L) */
 				} else if (IR_IS_TYPE_INT(type) && ir_type_size[type2] > ir_type_size[type]) {
 					return ir_fold1(ctx, IR_OPT(IR_TRUNC, type), insn->op3); /* partial store forwarding (S2L) */
 				} else {
@@ -398,6 +408,8 @@ static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_re
 			} else if (ir_check_partial_aliasing(ctx, addr, insn->op2, type, type2) != IR_NO_ALIAS) {
 				return IR_UNUSED;
 			}
+		} else if (insn->op == IR_RSTORE) {
+			modified_regset |= (1 << insn->op3);
 		} else if (insn->op == IR_START
 			 || insn->op == IR_BEGIN
 			 || insn->op == IR_IF_TRUE
@@ -663,11 +675,15 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
      || addr == zend_jit_stub_handlers[jit_stub_exception_handler_free_op1_op2]
      || addr == zend_jit_stub_handlers[jit_stub_exception_handler_free_op2]
      || addr == zend_jit_stub_handlers[jit_stub_interrupt_handler]
+     || addr == zend_jit_stub_handlers[jit_stub_leave_function_handler]
      || addr == zend_jit_stub_handlers[jit_stub_negative_shift]
      || addr == zend_jit_stub_handlers[jit_stub_mod_by_zero]
      || addr == zend_jit_stub_handlers[jit_stub_undefined_function]
      || addr == zend_jit_stub_handlers[jit_stub_throw_cannot_pass_by_ref]
-     || addr == zend_jit_stub_handlers[jit_stub_icall_throw]) {
+     || addr == zend_jit_stub_handlers[jit_stub_icall_throw]
+     || addr == zend_jit_stub_handlers[jit_stub_leave_throw]
+     || addr == zend_jit_stub_handlers[jit_stub_trace_halt]
+     || addr == zend_jit_stub_handlers[jit_stub_trace_escape]) {
 		// TODO: ???
 		return addr;
 	}
@@ -2281,6 +2297,66 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 	return 1;
 }
 
+static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
+{
+	ir_ref call_info = zend_jit_load(jit, IR_U32,
+		ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+			zend_jit_fp(jit),
+			zend_jit_const_addr(jit, offsetof(zend_execute_data, This.u1.type_info))));
+
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		ir_ref if_top = ir_emit2(&jit->ctx, IR_IF, jit->control,
+			ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
+				call_info,
+				ir_const_u32(&jit->ctx, ZEND_CALL_TOP)));
+
+		jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_top);
+		if (GCC_GLOBAL_REGS) {
+			zend_jit_call_1(jit, IR_VOID,
+				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_nested_func_helper, IR_CONST_FASTCALL_FUNC),
+				call_info);
+		} else {
+			zend_jit_call_2(jit, IR_VOID,
+				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_nested_func_helper, IR_CONST_FASTCALL_FUNC),
+				call_info,
+				zend_jit_fp(jit));
+		}
+		zend_jit_tailcall_0(jit,
+			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
+
+		jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_top);
+		if (GCC_GLOBAL_REGS) {
+			zend_jit_call_1(jit, IR_VOID,
+				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_top_func_helper, IR_CONST_FASTCALL_FUNC),
+				call_info);
+		} else {
+			zend_jit_call_2(jit, IR_VOID,
+				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_top_func_helper, IR_CONST_FASTCALL_FUNC),
+				call_info,
+				zend_jit_fp(jit));
+		}
+		zend_jit_tailcall_0(jit,
+			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
+	} else {
+ZEND_ASSERT(0);
+		if (GCC_GLOBAL_REGS) {
+//???			|	add r4, SPAD
+		} else {
+//???			|	mov FCARG2a, FP
+//???			|	mov FP, aword T2 // restore FP
+//???			|	mov RX, aword T3 // restore IP
+//???			|	add r4, NR_SPAD
+		}
+//???		|	test FCARG1d, ZEND_CALL_TOP
+//???		|	jnz >1
+//???		|	EXT_JMP zend_jit_leave_nested_func_helper, r0
+//???		|1:
+//???		|	EXT_JMP zend_jit_leave_top_func_helper, r0
+	}
+
+	return 1;
+}
+
 static int zend_jit_negative_shift_stub(zend_jit_ctx *jit)
 {
 	zend_jit_call_2(jit, IR_VOID,
@@ -2473,6 +2549,69 @@ static int zend_jit_icall_throw_stub(zend_jit_ctx *jit)
 
 	zend_jit_ijmp(jit,
 		zend_jit_stub_addr(jit, jit_stub_exception_handler));
+
+	return 1;
+}
+
+static int zend_jit_leave_throw_stub(zend_jit_ctx *jit)
+{
+	ir_ref ip, cond, if_set, long_path;
+
+	// JIT: if (opline->opcode != ZEND_HANDLE_EXCEPTION) {
+	if (GCC_GLOBAL_REGS) {
+		zend_jit_store_ip(jit,
+			zend_jit_load(jit, IR_ADDR,
+				zend_jit_ex_opline_addr(jit)));
+		ip = zend_jit_ip(jit);
+		cond = ir_fold2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL),
+			zend_jit_load(jit, IR_U8,
+				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					ip,
+					zend_jit_const_addr(jit, offsetof(zend_op, opcode)))),
+			ir_const_u8(&jit->ctx, ZEND_HANDLE_EXCEPTION));
+		if_set = ir_emit2(&jit->ctx, IR_IF, jit->control, cond);
+		jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_set);
+
+		// JIT: EG(opline_before_exception) = opline;
+		zend_jit_store(jit,
+			ZEND_JIT_EG_ADDR(opline_before_exception),
+			ip);
+
+		long_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+		jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_set);
+		jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+		jit->control = ir_emit2(&jit->ctx, IR_MERGE, long_path, jit->control);
+
+		// JIT: opline = EG(exception_op);
+		zend_jit_store_ip(jit,
+			ZEND_JIT_EG_ADDR(exception_op));
+
+		if (GCC_GLOBAL_REGS) {
+			ip = zend_jit_ip(jit);
+			zend_jit_store(jit,
+				zend_jit_ex_opline_addr(jit),
+				ip);
+		}
+
+		// JIT: HANDLE_EXCEPTION()
+		zend_jit_ijmp(jit,
+			zend_jit_stub_addr(jit, jit_stub_exception_handler));
+	} else {
+ZEND_ASSERT(0);
+//???		|	GET_IP FCARG1a
+//???		|	cmp byte OP:FCARG1a->opcode, ZEND_HANDLE_EXCEPTION
+//???		|	je >5
+//???		|	// EG(opline_before_exception) = opline;
+//???		|	MEM_STORE_ZTS aword, executor_globals, opline_before_exception, FCARG1a, r0
+//???		|5:
+//???		|	// opline = EG(exception_op);
+//???		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+//???		|	mov FP, aword T2 // restore FP
+//???		|	mov RX, aword T3 // restore IP
+//???		|	add r4, NR_SPAD // stack alignment
+//???		|	mov r0, 2 // ZEND_VM_LEAVE
+//???		|	ret
+	}
 
 	return 1;
 }
@@ -2896,6 +3035,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->b = -1;
 	jit->control = ir_emit0(&jit->ctx, IR_START);
 	jit->fp = IR_UNUSED;
+	jit->trace_loop_ref = IR_UNUSED;
 	jit->op_array = NULL;
 	jit->ssa = NULL;
 	jit->bb_start_ref = NULL;
@@ -3173,6 +3313,9 @@ static void zend_jit_setup_disasm(void)
 		ir_disasm_add_symbol("zend_jit_exception_in_interrupt_handler_helper", (uint64_t)(uintptr_t)zend_jit_exception_in_interrupt_handler_helper, sizeof(void*));
 		ir_disasm_add_symbol("zend_jit_verify_arg_slow",            (uint64_t)(uintptr_t)zend_jit_verify_arg_slow, sizeof(void*));
 		ir_disasm_add_symbol("zend_missing_arg_error",              (uint64_t)(uintptr_t)zend_missing_arg_error, sizeof(void*));
+		ir_disasm_add_symbol("zend_jit_leave_func_helper",          (uint64_t)(uintptr_t)zend_jit_leave_func_helper, sizeof(void*));
+		ir_disasm_add_symbol("zend_jit_leave_nested_func_helper",   (uint64_t)(uintptr_t)zend_jit_leave_nested_func_helper, sizeof(void*));
+		ir_disasm_add_symbol("zend_jit_leave_top_func_helper",      (uint64_t)(uintptr_t)zend_jit_leave_top_func_helper, sizeof(void*));
 	}
 
 #ifndef ZTS
@@ -3773,6 +3916,30 @@ static int zend_jit_jmp(zend_jit_ctx *jit, unsigned int target_label)
 	return 1;
 }
 
+static int zend_jit_cmp_ip(zend_jit_ctx *jit, ir_op op, const zend_op *next_opline)
+{
+	ir_ref ref;
+
+#if 1
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		ref = zend_jit_ip32(jit);
+	} else {
+		ref = zend_jit_ex_opline_addr(jit);
+		ref = zend_jit_load(jit, IR_U32, ref);
+	}
+	ref = ir_emit2(&jit->ctx, IR_OPT(op, IR_BOOL), ref, ir_const_u32(&jit->ctx, (uint32_t)(uintptr_t)next_opline));
+#else
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		ref = zend_jit_ip(jit);
+	} else {
+		ref = zend_jit_ex_opline_addr(jit);
+		ref = zend_jit_load(jit, IR_ADDR, ref);
+	}
+	ref = ir_emit2(&jit->ctx, IR_OPT(op, IR_BOOL), ref, zend_jit_const_addr(jit, (uintptr_t)next_opline));
+#endif
+	return ref;
+}
+
 static int zend_jit_cond_jmp(zend_jit_ctx *jit, const zend_op *next_opline, int target_block)
 {
 	ir_ref ref;
@@ -3790,23 +3957,7 @@ static int zend_jit_cond_jmp(zend_jit_ctx *jit, const zend_op *next_opline, int 
 		return 1;
 	}
 
-#if 1
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip32(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_U32, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_NE, IR_BOOL), ref, ir_const_u32(&jit->ctx, (uint32_t)(uintptr_t)next_opline));
-#else
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_ADDR, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_NE, IR_BOOL), ref, zend_jit_const_addr(jit, (uintptr_t)next_opline));
-#endif
+	ref = zend_jit_cmp_ip(jit, IR_NE, next_opline);
 	ref = ir_emit3(&jit->ctx, IR_IF, jit->control, ref, target_block);
 
 	_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
@@ -3823,23 +3974,7 @@ static int zend_jit_set_cond(zend_jit_ctx *jit, const zend_op *next_opline, uint
 {
 	ir_ref ref;
 
-#if 1
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip32(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_U32, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, ir_const_u32(&jit->ctx, (uint32_t)(uintptr_t)next_opline));
-#else
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_ADDR, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, zend_jit_const_addr(jit, (uintptr_t)next_opline));
-#endif
+	ref = zend_jit_cmp_ip(jit, IR_EQ, next_opline);
 	ref = ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_U32), ref);
 	ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_U32), ref, ir_const_u32(&jit->ctx, IS_FALSE));
 
@@ -4195,23 +4330,7 @@ static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *next_opline, i
 	int b = jit->b;
 	zend_basic_block *bb;
 
-#if 1
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip32(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_U32, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_NE, IR_BOOL), ref, ir_const_u32(&jit->ctx, (uint32_t)(uintptr_t)next_opline));
-#else
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_ADDR, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_NE, IR_BOOL), ref, zend_jit_const_addr(jit, (uintptr_t)next_opline));
-#endif
+	ref = zend_jit_cmp_ip(jit, IR_NE, next_opline);
 	ref = ir_emit3(&jit->ctx, IR_IF, jit->control, ref, target_block);
 
 	jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, ref);
@@ -5359,6 +5478,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 					zend_jit_set_ex_opline(jit, opline);
 					zend_jit_guard(jit, IR_FALSE,
 						zend_jit_stub_addr(jit, jit_stub_negative_shift));
+					ref = ir_const_php_long(&jit->ctx, 0); // dead code ???
 				}
 			} else {
 				ref = ir_fold2(&jit->ctx, IR_OPT(IR_SHL, IR_PHP_LONG),
@@ -5412,6 +5532,7 @@ zend_jit_set_ex_opline(jit, opline);
 					zend_jit_set_ex_opline(jit, opline);
 					zend_jit_guard(jit, IR_FALSE,
 						zend_jit_stub_addr(jit, jit_stub_negative_shift));
+					ref = ir_const_php_long(&jit->ctx, 0); // dead code ???
 				}
 			} else {
 				ref = ir_fold2(&jit->ctx, IR_OPT(IR_SAR, IR_PHP_LONG),
@@ -5456,6 +5577,7 @@ zend_jit_set_ex_opline(jit, opline);
 				zend_jit_set_ex_opline(jit, opline);
 				zend_jit_guard(jit, IR_FALSE,
 					zend_jit_stub_addr(jit, jit_stub_mod_by_zero));
+				ref = ir_const_php_long(&jit->ctx, 0); // dead code ???
 			} else {
 				ref = ir_fold2(&jit->ctx, IR_OPT(IR_MOD, IR_PHP_LONG),
 					zend_jit_zval_lval(jit, op1_addr),
@@ -8866,7 +8988,7 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 	zend_call_info *call_info = NULL;
 	zend_function *func = NULL;
 	zval *function_name;
-	ir_ref cond, if_static, cold_path, this_ref = IR_NULL, func_ref = IR_NULL;
+	ir_ref cond, if_static = IR_UNUSED, cold_path, this_ref = IR_NULL, func_ref = IR_NULL;
 
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
@@ -11123,6 +11245,538 @@ static bool zend_jit_verify_return_type(zend_jit_ctx *jit, const zend_op *opline
 	return 1;
 }
 
+static int zend_jit_leave_frame(zend_jit_ctx *jit)
+{
+	// JIT: EG(current_execute_data) = EX(prev_execute_data);
+	zend_jit_store(jit,
+		ZEND_JIT_EG_ADDR(current_execute_data),
+		zend_jit_load(jit, IR_ADDR,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, offsetof(zend_execute_data, prev_execute_data)))));
+	return 1;
+}
+
+static int zend_jit_free_cvs(zend_jit_ctx *jit)
+{
+	// JIT: EG(current_execute_data) = EX(prev_execute_data);
+	zend_jit_store(jit,
+		ZEND_JIT_EG_ADDR(current_execute_data),
+		zend_jit_load(jit, IR_ADDR,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, offsetof(zend_execute_data, prev_execute_data)))));
+
+	// JIT: zend_free_compiled_variables(execute_data);
+	zend_jit_call_1(jit, IR_VOID,
+		zend_jit_const_func_addr(jit, (uintptr_t)zend_free_compiled_variables, IR_CONST_FASTCALL_FUNC),
+		zend_jit_fp(jit));
+	return 1;
+}
+
+static int zend_jit_free_cv(zend_jit_ctx *jit, uint32_t info, uint32_t var)
+{
+	if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+		zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
+
+		zend_jit_zval_ptr_dtor(jit, var_addr, info, 1, NULL);
+	}
+	return 1;
+}
+
+static int zend_jit_leave_func(zend_jit_ctx         *jit,
+                               const zend_op_array  *op_array,
+                               const zend_op        *opline,
+                               uint32_t              op1_info,
+                               bool             left_frame,
+                               zend_jit_trace_rec   *trace,
+                               zend_jit_trace_info  *trace_info,
+                               int                   indirect_var_access,
+                               int                   may_throw)
+{
+	bool may_be_top_frame =
+		JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+		!JIT_G(current_frame) ||
+		!TRACE_FRAME_IS_NESTED(JIT_G(current_frame));
+	bool may_need_call_helper =
+		indirect_var_access || /* may have symbol table */
+		!op_array->function_name || /* may have symbol table */
+		may_be_top_frame ||
+		(op_array->fn_flags & ZEND_ACC_VARIADIC) || /* may have extra named args */
+		JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+		!JIT_G(current_frame) ||
+		TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)) == -1 || /* unknown number of args */
+		(uint32_t)TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)) > op_array->num_args; /* extra args */
+	bool may_need_release_this =
+		!(op_array->fn_flags & ZEND_ACC_CLOSURE) &&
+		op_array->scope &&
+		!(op_array->fn_flags & ZEND_ACC_STATIC) &&
+		(JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+		 !JIT_G(current_frame) ||
+		 !TRACE_FRAME_NO_NEED_RELEASE_THIS(JIT_G(current_frame)));
+	ir_ref call_info, ref, cold_path = IR_UNUSED;
+
+	call_info = zend_jit_load(jit, IR_U32,
+		ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+			zend_jit_fp(jit),
+			zend_jit_const_addr(jit, offsetof(zend_execute_data, This.u1.type_info))));
+	if (may_need_call_helper) {
+		if (!left_frame) {
+			left_frame = 1;
+		    if (!zend_jit_leave_frame(jit)) {
+				return 0;
+		    }
+		}
+		/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
+		ref = ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
+			call_info,
+			ir_const_u32(&jit->ctx, ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE));
+		if (trace && trace->op != ZEND_JIT_TRACE_END) {
+			ir_ref if_slow = ir_emit2(&jit->ctx, IR_IF, jit->control, ref);
+
+			jit->control = ir_emit2(&jit->ctx, IR_IF_TRUE, if_slow, 1);
+			if (!GCC_GLOBAL_REGS) {
+				ref = zend_jit_call_1(jit, IR_I32,
+					zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_func_helper, IR_CONST_FASTCALL_FUNC),
+					zend_jit_fp(jit));
+			} else {
+				zend_jit_call_0(jit, IR_VOID,
+					zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_func_helper, IR_CONST_FASTCALL_FUNC));
+			}
+
+			if (may_be_top_frame) {
+				// TODO: try to avoid this check ???
+				if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+#if 0
+					/* this check should be handled by the following OPLINE guard */
+					|	cmp IP, zend_jit_halt_op
+					|	je ->trace_halt
+#endif
+				} else if (GCC_GLOBAL_REGS) {
+					zend_jit_guard(jit,
+						zend_jit_ip(jit),
+						zend_jit_stub_addr(jit, jit_stub_trace_halt));
+				} else {
+					zend_jit_guard(jit,
+						ir_fold2(&jit->ctx, IR_OPT(IR_GE, IR_BOOL),
+							ref,
+							ir_const_i32(&jit->ctx, 0)),
+						zend_jit_stub_addr(jit, jit_stub_trace_halt));
+				}
+			}
+
+			if (!GCC_GLOBAL_REGS) {
+				// execute_data = EG(current_execute_data)
+				zend_jit_store_fp(jit,
+					zend_jit_load(jit, IR_ADDR,
+						ZEND_JIT_EG_ADDR(current_execute_data)));
+			}
+			cold_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_slow);
+		} else {
+			zend_jit_guard_not(jit, ref,
+				zend_jit_stub_addr(jit, jit_stub_leave_function_handler));
+		}
+	}
+
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		if (!left_frame) {
+			left_frame = 1;
+		    if (!zend_jit_leave_frame(jit)) {
+				return 0;
+		    }
+		}
+		// JIT: OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
+		zend_jit_obj_release(jit,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR), // TODO: try and fix IR_SUB ???
+				zend_jit_load(jit, IR_ADDR,
+					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+						zend_jit_fp(jit),
+						zend_jit_const_addr(jit, offsetof(zend_execute_data, func)))),
+				zend_jit_const_addr(jit, -sizeof(zend_object))));
+	} else if (may_need_release_this) {
+		ir_ref if_release, fast_path = IR_UNUSED;
+
+		if (!left_frame) {
+			left_frame = 1;
+		    if (!zend_jit_leave_frame(jit)) {
+				return 0;
+		    }
+		}
+		if (!JIT_G(current_frame) || !TRACE_FRAME_ALWAYS_RELEASE_THIS(JIT_G(current_frame))) {
+			// JIT: if (call_info & ZEND_CALL_RELEASE_THIS)
+			if_release = ir_emit2(&jit->ctx, IR_IF, jit->control,
+				ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
+					call_info,
+					ir_const_u32(&jit->ctx, ZEND_CALL_RELEASE_THIS)));
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_release);
+			fast_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_release);
+		}
+		// JIT: OBJ_RELEASE(execute_data->This))
+		zend_jit_obj_release(jit,
+			zend_jit_load(jit, IR_ADDR,
+				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					zend_jit_fp(jit),
+					zend_jit_const_addr(jit, offsetof(zend_execute_data, This.value.obj)))));
+		if (fast_path) {
+			jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit2(&jit->ctx, IR_MERGE, fast_path, jit->control);
+		}
+		// TODO: avoid EG(excption) check for $this->foo() calls
+		may_throw = 1;
+	}
+
+	// JIT: EG(vm_stack_top) = (zval*)execute_data
+	zend_jit_store(jit,
+		ZEND_JIT_EG_ADDR(vm_stack_top),
+		zend_jit_fp(jit));
+
+	// JITL execute_data = EX(prev_execute_data)
+	zend_jit_store_fp(jit,
+		zend_jit_load(jit, IR_ADDR,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, offsetof(zend_execute_data, prev_execute_data)))));
+
+	if (!left_frame) {
+		// JIT: EG(current_execute_data) = execute_data
+		zend_jit_store(jit,
+			ZEND_JIT_EG_ADDR(current_execute_data),
+			zend_jit_fp(jit));
+	}
+
+	if (trace) {
+		if (trace->op != ZEND_JIT_TRACE_END
+		 && (JIT_G(current_frame) && !TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame)))) {
+			zend_jit_reset_last_valid_opline(jit);
+		} else {
+			if (GCC_GLOBAL_REGS) {
+				zend_jit_store_ip(jit,
+					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+						zend_jit_load(jit, IR_ADDR,
+							zend_jit_ex_opline_addr(jit)),
+						zend_jit_const_addr(jit, sizeof(zend_op))));
+			} else {
+				ir_ref ref = zend_jit_ex_opline_addr(jit);
+
+				zend_jit_store(jit,
+					ref,
+					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+						zend_jit_load(jit, IR_ADDR, ref),
+						zend_jit_const_addr(jit, sizeof(zend_op))));
+			}
+		}
+
+		if (cold_path) {
+			jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit2(&jit->ctx, IR_MERGE, jit->control, cold_path);
+		}
+
+		if (trace->op == ZEND_JIT_TRACE_BACK
+		 && (!JIT_G(current_frame) || TRACE_FRAME_IS_UNKNOWN_RETURN(JIT_G(current_frame)))) {
+			const zend_op *next_opline = trace->opline;
+
+			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+			 && (op1_info & MAY_BE_RC1)
+			 && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY))) {
+				/* exception might be thrown during destruction of unused return value */
+				// JIT: if (EG(exception))
+				zend_jit_guard_not(jit,
+					zend_jit_load(jit, IR_ADDR, ZEND_JIT_EG_ADDR(exception)),
+					zend_jit_stub_addr(jit, jit_stub_leave_throw));
+			}
+			do {
+				trace++;
+			} while (trace->op == ZEND_JIT_TRACE_INIT_CALL);
+			ZEND_ASSERT(trace->op == ZEND_JIT_TRACE_VM || trace->op == ZEND_JIT_TRACE_END);
+			next_opline = trace->opline;
+			ZEND_ASSERT(next_opline != NULL);
+
+			if (trace->op == ZEND_JIT_TRACE_END
+			 && trace->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
+				trace_info->flags |= ZEND_JIT_TRACE_LOOP;
+					ir_ref ref, if_eq;
+
+				ref = zend_jit_cmp_ip(jit, IR_EQ, next_opline);
+				if_eq = ir_emit2(&jit->ctx, IR_IF, jit->control, ref);
+				jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_eq);
+				jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+				ZEND_ASSERT(jit->trace_loop_ref);
+				ZEND_ASSERT(jit->ctx.ir_base[jit->trace_loop_ref].op2 == IR_UNUSED);
+				ir_set_op(&jit->ctx, jit->trace_loop_ref, 2, jit->control);
+				jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_eq);
+
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+				zend_jit_tailcall_0(jit,
+					zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
+#else
+				zend_jit_ijmp(jit, zend_jit_stub_addr(jit, jit_stub_trace_escape));
+#endif
+			} else {
+				zend_jit_guard(jit,
+					zend_jit_cmp_ip(jit, IR_EQ, next_opline),
+					zend_jit_stub_addr(jit, jit_stub_trace_escape));
+			}
+
+			zend_jit_set_last_valid_opline(jit, trace->opline);
+
+			return 1;
+		} else if (may_throw ||
+				(((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+				  && (op1_info & MAY_BE_RC1)
+				  && (op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)))
+				 && (!JIT_G(current_frame) || TRACE_FRAME_IS_RETURN_VALUE_UNUSED(JIT_G(current_frame))))) {
+			// JIT: if (EG(exception))
+			zend_jit_guard_not(jit,
+				zend_jit_load(jit, IR_ADDR, ZEND_JIT_EG_ADDR(exception)),
+				zend_jit_stub_addr(jit, jit_stub_leave_throw));
+		}
+
+		return 1;
+	} else {
+		// JIT: if (EG(exception))
+		zend_jit_guard_not(jit,
+			zend_jit_load(jit, IR_ADDR, ZEND_JIT_EG_ADDR(exception)),
+			zend_jit_stub_addr(jit, jit_stub_leave_throw));
+		// JIT: opline = EX(opline) + 1
+		if (GCC_GLOBAL_REGS) {
+			zend_jit_store_ip(jit,
+				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					zend_jit_load(jit, IR_ADDR,
+						zend_jit_ex_opline_addr(jit)),
+					zend_jit_const_addr(jit, sizeof(zend_op))));
+		} else {
+			ir_ref ref = zend_jit_ex_opline_addr(jit);
+
+			zend_jit_store(jit,
+				ref,
+				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+					zend_jit_load(jit, IR_ADDR, ref),
+					zend_jit_const_addr(jit, sizeof(zend_op))));
+		}
+	}
+
+	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+		zend_jit_tailcall_0(jit,
+			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
+	} else if (GCC_GLOBAL_REGS) {
+		zend_jit_tailcall_0(jit,
+			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
+	} else {
+ZEND_ASSERT(0);
+//???		|	mov FP, aword T2 // restore FP
+//???		|	mov RX, aword T3 // restore IP
+//???		|	add r4, NR_SPAD // stack alignment
+//???		|	mov r0, 2 // ZEND_VM_LEAVE
+//???		|	ret
+	}
+
+	jit->control = IR_UNUSED;
+	jit->b = -1;
+
+	return 1;
+}
+
+static int jit_return_label = -1; //???
+
+static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr)
+{
+	zend_jit_addr ret_addr;
+	int8_t return_value_used;
+	ir_ref return_value = IR_UNUSED, ref, refcount, if_return_value_used = IR_UNUSED;
+	ir_ref end_inputs[5];
+	uint32_t end_inputs_count = 0;
+
+	ZEND_ASSERT(op_array->type != ZEND_EVAL_CODE && op_array->function_name);
+	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF));
+
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && JIT_G(current_frame)) {
+		if (TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
+			return_value_used = 1;
+		} else if (TRACE_FRAME_IS_RETURN_VALUE_UNUSED(JIT_G(current_frame))) {
+			return_value_used = 0;
+		} else {
+			return_value_used = -1;
+		}
+	} else {
+		return_value_used = -1;
+	}
+
+	if (ZEND_OBSERVER_ENABLED) {
+		if (Z_MODE(op1_addr) == IS_REG) {
+			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+
+			if (!zend_jit_spill_store(jit, op1_addr, dst, op1_info, 1)) {
+				return 0;
+			}
+			op1_addr = dst;
+		}
+		zend_jit_call_2(jit, IR_VOID,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_observer_fcall_end, IR_CONST_FASTCALL_FUNC),
+			zend_jit_fp(jit),
+			zend_jit_zval_addr(jit, op1_addr));
+	}
+
+	// JIT: if (!EX(return_value))
+	return_value = zend_jit_load(jit, IR_ADDR,
+		ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+			zend_jit_fp(jit),
+			zend_jit_const_addr(jit, offsetof(zend_execute_data, return_value))));
+	ret_addr = ZEND_ADDR_REF_ZVAL(return_value);
+	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+	    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		if (return_value_used == -1) {
+			if_return_value_used = ir_emit2(&jit->ctx, IR_IF, jit->control, return_value);
+			jit->control = ir_emit2(&jit->ctx, IR_IF_FALSE, if_return_value_used, 1);
+		}
+		if (return_value_used != 1) {
+			if (op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				if (jit_return_label >= 0) {
+//???					|	IF_NOT_ZVAL_REFCOUNTED op1_addr, =>jit_return_label
+				} else {
+					ir_ref if_refcounted = zend_jit_if_zval_refcounted(jit, op1_addr);
+					jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_refcounted);
+					end_inputs[end_inputs_count++]  = ir_emit1(&jit->ctx, IR_END, jit->control);
+					jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_refcounted);
+				}
+			}
+			ref = zend_jit_zval_ptr(jit, op1_addr);
+			refcount = zend_jit_gc_delref(jit, ref);
+
+			if (RC_MAY_BE_1(op1_info)) {
+				if (RC_MAY_BE_N(op1_info)) {
+					if (jit_return_label >= 0) {
+//???						|	jnz =>jit_return_label
+					} else {
+						ir_ref if_non_zero = ir_emit2(&jit->ctx, IR_IF, jit->control, refcount);
+						jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_non_zero);
+						end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+						jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_non_zero);
+					}
+				}
+				zend_jit_zval_dtor(jit, ref, op1_info, opline);
+			}
+			if (return_value_used == -1) {
+				if (jit_return_label >= 0) {
+//???					|	jmp =>jit_return_label
+				} else {
+					end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+				}
+			}
+		}
+	} else if (return_value_used == -1) {
+		if (jit_return_label >= 0) {
+//???			|	jz =>jit_return_label
+		} else {
+			if_return_value_used = ir_emit2(&jit->ctx, IR_IF, jit->control, return_value);
+			jit->control = ir_emit2(&jit->ctx, IR_IF_FALSE, if_return_value_used, 1);
+			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+		}
+	}
+
+	if (if_return_value_used) {
+		jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_return_value_used);
+	}
+
+	if (return_value_used == 0) {
+		if (end_inputs_count) {
+			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+			zend_jit_merge_N(jit, end_inputs_count, end_inputs);
+		}
+		return 1;
+	}
+
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, opline->op1);
+
+		zend_jit_copy_zval_const(jit, ret_addr, MAY_BE_ANY, MAY_BE_ANY, zv, 1);
+	} else if (opline->op1_type == IS_TMP_VAR) {
+		zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, op1_addr, op1_info, 0);
+	} else if (opline->op1_type == IS_CV) {
+		if (op1_info & MAY_BE_REF) {
+			ref = zend_jit_zval_addr(jit, op1_addr);
+			ref = zend_jit_zval_ref_deref(jit, ref);
+			op1_addr = ZEND_ADDR_REF_ZVAL(ref);
+		}
+
+		if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+			    (op1_info & (MAY_BE_REF|MAY_BE_OBJECT)) ||
+			    !op_array->function_name) {
+				zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, op1_addr, op1_info, 1);
+			} else if (return_value_used != 1) {
+				zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, op1_addr, op1_info, 0);
+				// JIT: if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) ZVAL_NULL(retval_ptr);
+				zend_jit_zval_set_type_info(jit, op1_addr, IS_NULL);
+			} else {
+				zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, op1_addr, op1_info, 0);
+			}
+		} else {
+			zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, op1_addr, op1_info, 0);
+		}
+	} else {
+		if (op1_info & MAY_BE_REF) {
+			ir_ref if_ref, ref2, if_non_zero;
+			zend_jit_addr ref_addr;
+
+			if_ref = zend_jit_if_zval_type(jit, op1_addr, IS_REFERENCE);
+			jit->control = ir_emit2(&jit->ctx, IR_IF_TRUE, if_ref, 1);
+
+			// JIT: zend_refcounted *ref = Z_COUNTED_P(retval_ptr)
+			ref = zend_jit_zval_ptr(jit, op1_addr);
+
+			// JIT: ZVAL_COPY_VALUE(return_value, &ref->value)
+			ref2 = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				ref,
+				zend_jit_const_addr(jit, offsetof(zend_reference, val)));
+			ref_addr = ZEND_ADDR_REF_ZVAL(ref2);
+			zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, ref_addr, op1_info, 0);
+			ref2 = zend_jit_gc_delref(jit, ref);
+			if_non_zero = ir_emit2(&jit->ctx, IR_IF, jit->control, ref2);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_non_zero);
+
+			// JIT: if (IS_REFCOUNTED())
+			if (jit_return_label >= 0) {
+//???				|	IF_NOT_REFCOUNTED dh, =>jit_return_label
+			} else {
+				ir_ref if_refcounted = zend_jit_if_zval_refcounted(jit, ret_addr);
+				jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_refcounted);
+				end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+				jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_refcounted);
+			}
+
+			// JIT: ADDREF
+			ref2 = zend_jit_zval_ptr(jit, ret_addr);
+			zend_jit_gc_addref(jit, ref2);
+
+			if (jit_return_label >= 0) {
+//???				|	jmp =>jit_return_label
+			} else {
+				end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+			}
+
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_non_zero);
+
+			zend_jit_efree(jit, ref, sizeof(zend_reference), op_array, opline);
+			if (jit_return_label >= 0) {
+//???				|	jmp =>jit_return_label
+			} else {
+				end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+			}
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_ref);
+		}
+		zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, op1_addr, op1_info, 0);
+	}
+
+	if (end_inputs_count) {
+		end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+		zend_jit_merge_N(jit, end_inputs_count, end_inputs);
+	}
+
+	return 1;
+}
+
 static int zend_jit_free(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, int may_throw)
 {
 	zend_jit_addr op1_addr = OP1_ADDR();
@@ -11542,24 +12196,7 @@ static int zend_jit_trace_opline_guard(zend_jit_ctx *jit, const zend_op *opline)
 		return 0;
 	}
 
-#if 1
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip32(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_U32, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, ir_const_u32(&jit->ctx, (uint32_t)(uintptr_t)opline));
-#else
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ref = zend_jit_ip(jit);
-	} else {
-		ref = zend_jit_ex_opline_addr(jit);
-		ref = zend_jit_load(jit, IR_ADDR, ref);
-	}
-	ref = ir_emit2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, zend_jit_const_addr(jit, (uintptr_t)opline));
-#endif
-
+    ref = zend_jit_cmp_ip(jit, IR_EQ, opline);
 	zend_jit_guard(jit, ref,
 		zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 
@@ -11860,23 +12497,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 			if (!exit_addr) {
 				return 0;
 			}
-#if 1
-			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-				ref = zend_jit_ip32(jit);
-			} else {
-				ref = zend_jit_ex_opline_addr(jit);
-				ref = zend_jit_load(jit, IR_U32, ref);
-			}
-			ref = ir_emit2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, ir_const_u32(&jit->ctx, (uint32_t)(uintptr_t)next_opline));
-#else
-			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-				ref = zend_jit_ip(jit);
-			} else {
-				ref = zend_jit_ex_opline_addr(jit);
-				ref = zend_jit_load(jit, IR_ADDR, ref);
-			}
-			ref = ir_emit2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, zend_jit_const_addr(jit, (uintptr_t)next_opline));
-#endif
+			ref = zend_jit_cmp_ip(jit, IR_EQ, next_opline);
 			zend_jit_guard(jit, ref,
 				zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 		}
@@ -12011,6 +12632,7 @@ static int zend_jit_trace_end_loop(zend_jit_ctx *jit, int loop_ref, const void *
 		zend_jit_check_timeout(jit, NULL, timeout_exit_addr);
 	}
 	ir_ref ref = ir_emit2(&jit->ctx, IR_LOOP_END, jit->control, loop_ref);
+	ZEND_ASSERT(jit->ctx.ir_base[loop_ref].op2 == IR_UNUSED);
 	ir_set_op(&jit->ctx, loop_ref, 2, ref);
 	return 1;
 }
@@ -12131,10 +12753,8 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_CASE:
 			return 1;
-#if 0
 		case ZEND_RETURN:
 			return (op_array->type != ZEND_EVAL_CODE && op_array->function_name);
-#endif
 		case ZEND_ASSIGN:
 			return (opline->op1_type == IS_CV);
 		case ZEND_ADD:

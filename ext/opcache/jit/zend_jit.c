@@ -550,7 +550,6 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 	return num_args;
 }
 
-#ifndef ZEND_JIT_IR
 static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, zend_ssa *ssa, uint32_t var)
 {
 	uint32_t j, info;
@@ -589,6 +588,7 @@ static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, zend_ssa *ssa, u
 	return info;
 }
 
+#ifndef ZEND_JIT_IR
 static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_info)
 {
 	switch (opline->opcode) {
@@ -3977,7 +3977,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_RETURN:
 						op1_info = OP1_INFO();
 						if ((PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info))
@@ -3997,16 +3996,16 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									op1_info, OP1_REG_ADDR())) {
 								goto jit_failure;
 							}
-							if (jit_return_label >= 0) {
-								if (!zend_jit_jmp(&ctx, jit_return_label)) {
-									goto jit_failure;
-								}
-								goto done;
-							}
-							jit_return_label = ssa->cfg.blocks_count * 2;
-							if (!zend_jit_label(&ctx, jit_return_label)) {
-								goto jit_failure;
-							}
+//???							if (jit_return_label >= 0) {
+//???								if (!zend_jit_jmp(&ctx, jit_return_label)) {
+//???									goto jit_failure;
+//???								}
+//???								goto done;
+//???							}
+//???							jit_return_label = ssa->cfg.blocks_count * 2;
+//???							if (!zend_jit_label(&ctx, jit_return_label)) {
+//???								goto jit_failure;
+//???							}
 							if (op_array->last_var > 100) {
 								/* To many CVs to unroll */
 								if (!zend_jit_free_cvs(&ctx)) {
@@ -4037,7 +4036,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						goto done;
-#endif
 					case ZEND_BOOL:
 					case ZEND_BOOL_NOT:
 						if (!zend_jit_bool_jmpznz(&ctx, opline,
