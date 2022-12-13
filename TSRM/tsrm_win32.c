@@ -645,7 +645,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 
 	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
-			if (size > SIZE_MAX - sizeof(shm->descriptor)) {
+			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
 				return -1;
 			}
 			size += sizeof(shm->descriptor);
