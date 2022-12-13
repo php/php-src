@@ -58,6 +58,9 @@ PHP                                                                        NEWS
 - SQLite3:
   . Fixed bug #81742 (open_basedir bypass in SQLite3 by using file URI). (cmb)
 
+- TSRM:
+  . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
+
 08 Dec 2022, PHP 8.2.0
 
 - CLI:
