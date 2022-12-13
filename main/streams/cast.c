@@ -317,7 +317,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 exit_success:
 
-	if ((stream->writepos - stream->readpos) > 0 &&
+	if (
+		show_err &&
+		(stream->writepos - stream->readpos) > 0 &&
 		stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE &&
 		(flags & PHP_STREAM_CAST_INTERNAL) == 0
 	) {
