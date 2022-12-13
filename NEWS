@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed potentially undefined behavior in Windows ftok(3) emulation. (cmb)
   . Fixed GH-9769 (Misleading error message for unpacking of objects). (jhdxr)
 
+- Apache:
+  . Fixed bug GH-9949 (Partial content on incomplete POST request). (cmb)
+
 - FPM:
   . Fixed bug GH-9959 (Solaris port event mechanism is still broken after bug
     #66694). (Petr Sumbera)
