@@ -2760,40 +2760,36 @@ class ClassInfo {
             "&InheritedProperties;"
         );
 
-        if (!empty($this->funcInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
-            $classSynopsisInfo->setAttribute("role", "comment");
-            $classSynopsis->appendChild($classSynopsisInfo);
+        $classSynopsis->appendChild(new DOMText("\n\n    "));
+        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
+        $classSynopsisInfo->setAttribute("role", "comment");
+        $classSynopsis->appendChild($classSynopsisInfo);
 
-            $classReference = self::getClassSynopsisReference($this->name);
+        $classReference = self::getClassSynopsisReference($this->name);
 
-            if ($this->hasConstructor()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])"
-                );
-                $classSynopsis->appendChild($includeElement);
-            }
+        $classSynopsis->appendChild(new DOMText("\n    "));
+        $includeElement = $this->createIncludeElement(
+            $doc,
+            "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])"
+        );
+        $classSynopsis->appendChild($includeElement);
 
-            if ($this->hasMethods()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[not(@role='procedural')])"
-                );
-                $classSynopsis->appendChild($includeElement);
-            }
+        if ($this->hasMethods()) {
+            $classSynopsis->appendChild(new DOMText("\n    "));
+            $includeElement = $this->createIncludeElement(
+                $doc,
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[not(@role='procedural')])"
+            );
+            $classSynopsis->appendChild($includeElement);
+        }
 
-            if ($this->hasDestructor()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])"
-                );
-                $classSynopsis->appendChild($includeElement);
-            }
+        if ($this->hasDestructor()) {
+            $classSynopsis->appendChild(new DOMText("\n    "));
+            $includeElement = $this->createIncludeElement(
+                $doc,
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])"
+            );
+            $classSynopsis->appendChild($includeElement);
         }
 
         if (!empty($parentsWithInheritedMethods)) {
