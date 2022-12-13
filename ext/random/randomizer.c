@@ -145,6 +145,16 @@ PHP_METHOD(Random_Randomizer, getFloat)
 		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (!zend_finite(min)) {
+		zend_argument_value_error(1, "must be finite");
+		RETURN_THROWS();
+	}
+
+	if (!zend_finite(max)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
 	if (bounds) {
 		zval *case_name = zend_enum_fetch_case_name(bounds);
 		zend_string *bounds_name = Z_STR_P(case_name);
