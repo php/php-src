@@ -411,6 +411,8 @@ namespace {
 
     function imap_close(IMAP\Connection $imap, int $flags = 0): bool {}
 
+    function imap_is_open(IMAP\Connection $imap): bool {}
+
     function imap_num_msg(IMAP\Connection $imap): int|false {}
 
     function imap_num_recent(IMAP\Connection $imap): int {}
