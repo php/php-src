@@ -371,7 +371,9 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 
 /* {{{ */
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
-	if (stack && stack->next) {
+	ZEND_ASSERT(stack != NULL);
+
+	if (stack->next) {
 		phpdbg_param_t *remove = stack->next;
 
 		while (remove) {
@@ -422,10 +424,9 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 				remove = next;
 			else break;
 		}
+
+		stack->next = NULL;
 	}
-
-
-	stack->next = NULL;
 } /* }}} */
 
 /* {{{ */
