@@ -781,6 +781,24 @@ PHP_FUNCTION(imap_reopen)
 }
 /* }}} */
 
+PHP_FUNCTION(imap_is_open)
+{
+	zval *imap_conn_obj;
+	php_imap_object *imap_conn_struct;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &imap_conn_obj, php_imap_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	/* Manual reimplementation of the GET_IMAP_STREAM() macro that doesn't throw */
+	imap_conn_struct = imap_object_from_zend_object(Z_OBJ_P(imap_conn_obj));
+	/* Stream was closed */
+	if (imap_conn_struct->imap_stream == NULL) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+
 /* {{{ Append a new message to a specified mailbox */
 PHP_FUNCTION(imap_append)
 {

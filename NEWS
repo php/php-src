@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8517 (Random crash of FPM master process in
     fpm_stdio_child_said). (Jakub Zelenka)
 
+- Imap:
+  . Fixed bug GH-10051 (IMAP: there's no way to check if a IMAP\Connection is
+    still open). (Girgias)
+
 - MBString:
   . Fixed bug GH-9535 (The behavior of mb_strcut in mbstring has been changed in
     PHP8.1). (Nathan Freeman)

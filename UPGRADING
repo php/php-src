@@ -234,6 +234,9 @@ PHP 8.2 UPGRADE NOTES
 - Curl:
   . curl_upkeep() (libcurl >= 7.62.0)
 
+- IMAP:
+  . imap_is_open() (Only as of PHP 8.2.1)
+
 - mysqli:
   . mysqli_execute_query()
 
