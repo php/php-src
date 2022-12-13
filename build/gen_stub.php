@@ -4261,16 +4261,18 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns:phpdoc="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                 ],
                 [
                     "&$1",
                     "<phpdoc:$1 xml:id=\"$4\" xmlns:phpdoc=\"$2\" xmlns=\"$3\">",
                     "<phpdoc:$1 xml:id=\"$5\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xi=\"$4\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xlink=\"$4\" xmlns:xi=\"$5\">",
+                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$5\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$5\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
                 ],
                 $replacedXml
@@ -4494,8 +4496,8 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    "/<refentry\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<refentry\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    '/<refentry\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<refentry\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                 ],
                 [
                     "&$1",
