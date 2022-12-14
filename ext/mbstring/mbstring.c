@@ -1023,7 +1023,8 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->illegalchars = 0;
 	mbstring_globals->encoding_translation = 0;
 	mbstring_globals->strict_detection = 0;
-	mbstring_globals->outconv = NULL;
+	mbstring_globals->outconv_enabled = false;
+	mbstring_globals->outconv_state = 0;
 	mbstring_globals->http_output_conv_mimetypes = NULL;
 #ifdef HAVE_MBREGEX
 	mbstring_globals->mb_regex_globals = php_mb_regex_globals_alloc();
@@ -1144,11 +1145,6 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 		MBSTRG(current_detect_order_list) = NULL;
 		MBSTRG(current_detect_order_list_size) = 0;
 	}
-	if (MBSTRG(outconv) != NULL) {
-		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
-		mbfl_buffer_converter_delete(MBSTRG(outconv));
-		MBSTRG(outconv) = NULL;
-	}
 
 	/* clear http input identification. */
 	MBSTRG(http_input_identify) = NULL;
@@ -1165,6 +1161,9 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 	MBSTRG(internal_encoding_set) = 0;
 	MBSTRG(http_output_set) = 0;
 	MBSTRG(http_input_set) = 0;
+
+	MBSTRG(outconv_enabled) = false;
+	MBSTRG(outconv_state) = 0;
 
 #ifdef HAVE_MBREGEX
 	PHP_RSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -1548,112 +1547,83 @@ PHP_FUNCTION(mb_parse_str)
 }
 /* }}} */
 
-/* {{{ Returns string in output buffer converted to the http_output encoding */
 PHP_FUNCTION(mb_output_handler)
 {
-	char *arg_string;
-	size_t arg_string_len;
+	zend_string *str;
 	zend_long arg_status;
-	mbfl_string string, result;
-	const char *charset;
-	char *p;
-	const mbfl_encoding *encoding;
-	int last_feed;
-	size_t len;
-	unsigned char send_text_mimetype = 0;
-	char *s, *mimetype = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(arg_string, arg_string_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(arg_status)
 	ZEND_PARSE_PARAMETERS_END();
 
-	encoding = MBSTRG(current_http_output_encoding);
+	const mbfl_encoding *encoding = MBSTRG(current_http_output_encoding);
+	if (encoding == &mbfl_encoding_pass) {
+		RETURN_STR(zend_string_copy(str));
+	}
 
-	/* start phase only */
-	if ((arg_status & PHP_OUTPUT_HANDLER_START) != 0) {
-		/* delete the converter just in case. */
-		if (MBSTRG(outconv)) {
-			MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
-			mbfl_buffer_converter_delete(MBSTRG(outconv));
-			MBSTRG(outconv) = NULL;
-		}
+	if (arg_status & PHP_OUTPUT_HANDLER_START) {
+		bool free_mimetype = false;
+		char *mimetype = NULL;
 
-		if (encoding == &mbfl_encoding_pass) {
-			RETURN_STRINGL(arg_string, arg_string_len);
-		}
-
-		/* analyze mime type */
-		if (SG(sapi_headers).mimetype &&
-			_php_mb_match_regex(
-				MBSTRG(http_output_conv_mimetypes),
-				SG(sapi_headers).mimetype,
-				strlen(SG(sapi_headers).mimetype))) {
-			if ((s = strchr(SG(sapi_headers).mimetype,';')) == NULL) {
+		/* Analyze mime type */
+		if (SG(sapi_headers).mimetype && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
+			char *s;
+			if ((s = strchr(SG(sapi_headers).mimetype, ';')) == NULL) {
 				mimetype = estrdup(SG(sapi_headers).mimetype);
 			} else {
-				mimetype = estrndup(SG(sapi_headers).mimetype,s-SG(sapi_headers).mimetype);
+				mimetype = estrndup(SG(sapi_headers).mimetype, s - SG(sapi_headers).mimetype);
 			}
-			send_text_mimetype = 1;
+			free_mimetype = true;
 		} else if (SG(sapi_headers).send_default_content_type) {
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
 		}
 
-		/* if content-type is not yet set, set it and activate the converter */
-		if (SG(sapi_headers).send_default_content_type || send_text_mimetype) {
-			charset = encoding->mime_name;
+		/* If content-type is not yet set, set it and enable conversion */
+		if (SG(sapi_headers).send_default_content_type || free_mimetype) {
+			const char *charset = encoding->mime_name;
 			if (charset) {
-				len = spprintf( &p, 0, "Content-Type: %s; charset=%s",  mimetype, charset );
+				char *p;
+				size_t len = spprintf(&p, 0, "Content-Type: %s; charset=%s",  mimetype, charset);
 				if (sapi_add_header(p, len, 0) != FAILURE) {
 					SG(sapi_headers).send_default_content_type = 0;
 				}
 			}
-			/* activate the converter */
-			MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), encoding, 0);
-			if (send_text_mimetype){
-				efree(mimetype);
-			}
+
+			MBSTRG(outconv_enabled) = true;
+		}
+
+		if (free_mimetype) {
+			efree(mimetype);
 		}
 	}
 
-	/* just return if the converter is not activated. */
-	if (MBSTRG(outconv) == NULL) {
-		RETURN_STRINGL(arg_string, arg_string_len);
+	if (!MBSTRG(outconv_enabled)) {
+		RETURN_STR(zend_string_copy(str));
 	}
 
-	/* flag */
-	last_feed = ((arg_status & PHP_OUTPUT_HANDLER_END) != 0);
-	/* mode */
-	mbfl_buffer_converter_illegal_mode(MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(MBSTRG(outconv), MBSTRG(current_filter_illegal_substchar));
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, ZSTR_LEN(str), MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
 
-	/* feed the string */
-	mbfl_string_init(&string);
-	/* these are not needed. convd has encoding info.
-	string.encoding = MBSTRG(current_internal_encoding);
-	*/
-	string.val = (unsigned char *)arg_string;
-	string.len = arg_string_len;
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(str);
+	size_t in_len = ZSTR_LEN(str);
+	bool last_feed = ((arg_status & PHP_OUTPUT_HANDLER_END) != 0);
 
-	mbfl_buffer_converter_feed(MBSTRG(outconv), &string);
-	if (last_feed) {
-		mbfl_buffer_converter_flush(MBSTRG(outconv));
+	while (in_len) {
+		size_t out_len = MBSTRG(current_internal_encoding)->to_wchar(&in, &in_len, wchar_buf, 128, &MBSTRG(outconv_state));
+		ZEND_ASSERT(out_len <= 128);
+		encoding->from_wchar(wchar_buf, out_len, &buf, !in_len && last_feed);
 	}
-	/* get the converter output, and return it */
-	mbfl_buffer_converter_result(MBSTRG(outconv), &result);
 
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)result.val, result.len);		/* the string is already strdup()'ed */
-	efree(result.val);
+	MBSTRG(illegalchars) += buf.errors;
+	RETVAL_STR(mb_convert_buf_result(&buf));
 
-	/* delete the converter if it is the last feed. */
 	if (last_feed) {
-		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
-		mbfl_buffer_converter_delete(MBSTRG(outconv));
-		MBSTRG(outconv) = NULL;
+		MBSTRG(outconv_enabled) = false;
+		MBSTRG(outconv_state) = 0;
 	}
 }
-/* }}} */
 
 /* {{{ Convert a multibyte string to an array. If split_length is specified,
  break the string down into chunks each split_length characters long. */
