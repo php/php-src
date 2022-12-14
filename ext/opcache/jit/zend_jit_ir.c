@@ -2311,30 +2311,19 @@ static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 				ir_const_u32(&jit->ctx, ZEND_CALL_TOP)));
 
 		jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_top);
-		if (GCC_GLOBAL_REGS) {
-			zend_jit_call_1(jit, IR_VOID,
-				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_nested_func_helper, IR_CONST_FASTCALL_FUNC),
-				call_info);
-		} else {
-			zend_jit_call_2(jit, IR_VOID,
-				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_nested_func_helper, IR_CONST_FASTCALL_FUNC),
-				call_info,
-				zend_jit_fp(jit));
-		}
+		zend_jit_call_1(jit, IR_VOID,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_nested_func_helper, IR_CONST_FASTCALL_FUNC),
+			call_info);
+		zend_jit_store_ip(jit,
+			zend_jit_load(jit, IR_ADDR,
+				zend_jit_ex_opline_addr(jit)));
 		zend_jit_tailcall_0(jit,
 			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
 
 		jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_top);
-		if (GCC_GLOBAL_REGS) {
-			zend_jit_call_1(jit, IR_VOID,
-				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_top_func_helper, IR_CONST_FASTCALL_FUNC),
-				call_info);
-		} else {
-			zend_jit_call_2(jit, IR_VOID,
-				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_top_func_helper, IR_CONST_FASTCALL_FUNC),
-				call_info,
-				zend_jit_fp(jit));
-		}
+		zend_jit_call_1(jit, IR_VOID,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_top_func_helper, IR_CONST_FASTCALL_FUNC),
+			call_info);
 		zend_jit_tailcall_0(jit,
 			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
 	} else {
