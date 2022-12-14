@@ -1923,8 +1923,9 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 	unsigned char *offset_pointer;
 
 	if (!php_mb_is_no_encoding_utf8(enc->no_encoding)) {
-		haystack_u8 = php_mb_convert_encoding_ex(ZSTR_VAL(haystack), ZSTR_LEN(haystack), &mbfl_encoding_utf8, enc);
-		needle_u8 = php_mb_convert_encoding_ex(ZSTR_VAL(needle), ZSTR_LEN(needle), &mbfl_encoding_utf8, enc);
+		unsigned int num_errors = 0;
+		haystack_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(haystack), ZSTR_LEN(haystack), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
+		needle_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
 	} else {
 		haystack_u8 = haystack;
 		needle_u8 = needle;
@@ -4858,8 +4859,8 @@ MBSTRING_API size_t php_mb_stripos(bool mode, zend_string *haystack, zend_string
 {
 	/* We're using simple case-folding here, because we'd have to deal with remapping of
 	 * offsets otherwise. */
-	zend_string *haystack_conv = php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, ZSTR_VAL(haystack), ZSTR_LEN(haystack), enc, &mbfl_encoding_utf8, MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
-	zend_string *needle_conv = php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
+	zend_string *haystack_conv = php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, ZSTR_VAL(haystack), ZSTR_LEN(haystack), enc, &mbfl_encoding_utf8, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, 0);
+	zend_string *needle_conv = php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, 0);
 
 	size_t n = mb_find_strpos(haystack_conv, needle_conv, &mbfl_encoding_utf8, offset, mode);
 

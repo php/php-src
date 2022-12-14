@@ -41,6 +41,12 @@ PHP                                                                        NEWS
 - JSON:
   . Added json_validate(). (Juan Morales)
 
+- MBString:
+  . mb_strpos() no longer treats invalid byte sequences as matching the
+    character '?'. (Alex Dowad)
+  . mb_stripos() no longer treats invalid byte sequences as matching
+    occurrences of the selected mb_substitute_character. (Alex Dowad)
+
 - Opcache:
   . Added start, restart and force restart time to opcache's
     phpinfo section. (Mikhail Galanin)

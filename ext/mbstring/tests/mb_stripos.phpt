@@ -41,7 +41,7 @@ print mb_stripos($euc_jp, 0, -43,       'EUC-JP') . "\n";
 
 
 // Out of range - should return false
-print ("== OUT OF RANGE ==\n");
+print "== OUT OF RANGE ==\n";
 
 $r =  mb_stripos($euc_jp, "\xC6\xFC\xCB\xDC\xB8\xEC", 40, 'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
@@ -100,6 +100,22 @@ $r = mb_stripos($euc_jp, "\xB4\xDA\xB9\xF1\xB8\xEC");
 $r = mb_stripos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
+echo "== INVALID STRINGS ==\n";
+
+// Previously, mb_stripos would internally convert invalid byte sequences to the
+// mb_substitute_char BEFORE performing search
+// So invalid byte sequences would match the substitute char, both from haystack
+// to needle and needle to haystack
+
+mb_substitute_character(0x25); // '%'
+var_dump(mb_stripos("abc%%", "\xFF", 0, "UTF-8")); // should be false
+var_dump(mb_stripos("abc\xFF", "%", 0, "UTF-8")); // should be false
+
+// However, invalid byte sequences can still match invalid byte sequences:
+var_dump(mb_stripos("abc\x80\x80", "\xFF", 0, "UTF-8"));
+var_dump(mb_stripos("abc\xFF", "c\x80", 0, "UTF-8"));
+
+
 ?>
 --EXPECT--
 String len: 43
@@ -144,3 +160,8 @@ OK_NEWLINE
 0
 OK_STR
 OK_NEWLINE
+== INVALID STRINGS ==
+bool(false)
+bool(false)
+int(3)
+int(2)
