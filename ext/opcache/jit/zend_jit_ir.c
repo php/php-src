@@ -4385,10 +4385,12 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 	ref = ir_fold2(&jit->ctx, IR_OPT(op, IR_PHP_LONG),
 		zend_jit_zval_lval(jit, op1_addr),
 		ir_const_php_long(&jit->ctx, 1));
-	zend_jit_zval_set_lval(jit, op1_def_addr, ref);
+	if (op1_def_info & MAY_BE_LONG) {
+		zend_jit_zval_set_lval(jit, op1_def_addr, ref);
+	}
 	if (may_overflow &&
-	    (((op1_def_info & MAY_BE_GUARD) && (op1_def_info & MAY_BE_LONG)) ||
-	     ((opline->result_type != IS_UNUSED && (res_info & MAY_BE_GUARD) && (res_info & MAY_BE_LONG))))) {
+	    (((op1_def_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)) ||
+	     ((opline->result_type != IS_UNUSED && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD))))) {
 		int32_t exit_point;
 		const void *exit_addr;
 		zend_jit_trace_stack *stack;
@@ -4438,22 +4440,35 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 			SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
 		}
 	} else if (may_overflow) {
-		ir_ref if_overflow, fast_path;
+		ir_ref if_overflow, fast_path = IR_UNUSED;
 
-		if_overflow = jit->control = ir_emit2(&jit->ctx, IR_IF, jit->control,
-			ir_fold1(&jit->ctx, IR_OPT(IR_OVERFLOW, IR_BOOL), ref));
-		jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_overflow);
-		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
-		    opline->result_type != IS_UNUSED) {
-			zend_jit_zval_set_lval(jit, res_addr, ref);
-			if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
-				zend_jit_zval_set_type_info(jit, res_addr, IS_LONG);
+		if (((op1_def_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD))
+		 || (opline->result_type != IS_UNUSED && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) ==  (MAY_BE_DOUBLE|MAY_BE_GUARD))) {
+			int32_t exit_point;
+			const void *exit_addr;
+
+			exit_point = zend_jit_trace_get_exit_point(opline, 0);
+			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			zend_jit_guard(jit,
+				ir_fold1(&jit->ctx, IR_OPT(IR_OVERFLOW, IR_BOOL), ref),
+				zend_jit_const_addr(jit, (uintptr_t)exit_addr));
+		} else {
+			if_overflow = jit->control = ir_emit2(&jit->ctx, IR_IF, jit->control,
+				ir_fold1(&jit->ctx, IR_OPT(IR_OVERFLOW, IR_BOOL), ref));
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_overflow);
+			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+			    opline->result_type != IS_UNUSED) {
+				zend_jit_zval_set_lval(jit, res_addr, ref);
+				if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+					zend_jit_zval_set_type_info(jit, res_addr, IS_LONG);
+				}
 			}
-		}
-		fast_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+			fast_path = ir_emit1(&jit->ctx, IR_END, jit->control);
 
-		/* overflow => cold path */
-		jit->control = ir_emit2(&jit->ctx, IR_IF_TRUE, if_overflow, 1);
+			/* overflow => cold path */
+			jit->control = ir_emit2(&jit->ctx, IR_IF_TRUE, if_overflow, 1);
+		}
+
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 #if SIZEOF_ZEND_LONG == 4
 			zend_jit_zval_set_lval(jit, op1_def_addr,
@@ -4504,8 +4519,11 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 			ZEND_ASSERT(Z_MODE(res_addr) == IS_MEM_ZVAL);
 			zend_jit_zval_set_type_info(jit, res_addr, IS_DOUBLE);
 		}
-		jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
-		jit->control = ir_emit2(&jit->ctx, IR_MERGE, fast_path, jit->control);
+
+		if (fast_path) {
+			jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit2(&jit->ctx, IR_MERGE, fast_path, jit->control);
+		}
 	} else {
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {

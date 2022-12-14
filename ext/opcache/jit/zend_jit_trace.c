@@ -4863,11 +4863,25 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (opline->result_type != IS_UNUSED) {
 								ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 							}
+#ifdef ZEND_JIT_IR
+						} else if ((op1_def_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)
+						 && !(op1_info & MAY_BE_STRING)) {
+							ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
+							if (opline->result_type != IS_UNUSED) {
+								ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+							}
+#endif
 						}
 						if (opline->result_type != IS_UNUSED
 						 && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)
 						 && !(op1_info & MAY_BE_STRING)) {
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+#ifdef ZEND_JIT_IR
+						} else if (opline->result_type != IS_UNUSED
+						 && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)
+						 && !(res_info & MAY_BE_STRING)) {
+							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+#endif
 						}
 						goto done;
 					case ZEND_BW_OR:
