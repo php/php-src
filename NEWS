@@ -60,6 +60,7 @@ PHP                                                                        NEWS
 
 - Random:
   . Added Randomizer::getBytesFromString(). (Joshua Rüsweg)
+  . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary. (timwolla)
 
 - Reflection:
   . Fix GH-9470 (ReflectionMethod constructor should not find private parent

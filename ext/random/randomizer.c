@@ -24,6 +24,7 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_string.h"
 
+#include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
@@ -85,6 +86,114 @@ PHP_METHOD(Random_Randomizer, __construct)
 	}
 
 	randomizer_common_init(randomizer, Z_OBJ_P(&engine));
+}
+/* }}} */
+
+/* {{{ Generate a float in [0, 1) */
+PHP_METHOD(Random_Randomizer, nextFloat)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	uint64_t result;
+	size_t total_size;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	result = 0;
+	total_size = 0;
+	do {
+		uint64_t r = randomizer->algo->generate(randomizer->status);
+		result = result | (r << (total_size * 8));
+		total_size += randomizer->status->last_generated_size;
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	} while (total_size < sizeof(uint64_t));
+
+	/* A double has 53 bits of precision, thus we must not
+	 * use the full 64 bits of the uint64_t, because we would
+	 * introduce a bias / rounding error.
+	 */
+#if DBL_MANT_DIG != 53
+# error "Random_Randomizer::nextFloat(): Requires DBL_MANT_DIG == 53 to work."
+#endif
+	const double step_size = 1.0 / (1ULL << 53);
+
+	/* Use the upper 53 bits, because some engine's lower bits
+	 * are of lower quality.
+	 */
+	result = (result >> 11);
+
+	RETURN_DOUBLE(step_size * result);
+}
+/* }}} */
+
+/* {{{ Generates a random float within a configurable interval.
+ *
+ * This method uses the γ-section algorithm by Frédéric Goualard.
+ */
+PHP_METHOD(Random_Randomizer, getFloat)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	double min, max;
+	zend_object *bounds = NULL;
+	int bounds_type = 'C' + sizeof("ClosedOpen") - 1;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_DOUBLE(min)
+		Z_PARAM_DOUBLE(max)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_finite(min)) {
+		zend_argument_value_error(1, "must be finite");
+		RETURN_THROWS();
+	}
+
+	if (!zend_finite(max)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
+	if (bounds) {
+		zval *case_name = zend_enum_fetch_case_name(bounds);
+		zend_string *bounds_name = Z_STR_P(case_name);
+
+		bounds_type = ZSTR_VAL(bounds_name)[0] + ZSTR_LEN(bounds_name);
+	}
+	
+	switch (bounds_type) {
+	case 'C' + sizeof("ClosedOpen") - 1:
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->algo, randomizer->status, min, max));
+	case 'C' + sizeof("ClosedClosed") - 1:
+		if (UNEXPECTED(max < min)) {
+			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->algo, randomizer->status, min, max));
+	case 'O' + sizeof("OpenClosed") - 1:
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->algo, randomizer->status, min, max));
+	case 'O' + sizeof("OpenOpen") - 1:
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(php_random_gammasection_open_open(randomizer->algo, randomizer->status, min, max));
+	default:
+		ZEND_UNREACHABLE();
+	}
 }
 /* }}} */
 
