@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.1
+?? ??? ????, PHP 8.2.2
+
+
+05 Jan 2023, PHP 8.2.1
 
 - Core:
   . Fixed bug GH-9905 (constant() behaves inconsistent when class is undefined).
