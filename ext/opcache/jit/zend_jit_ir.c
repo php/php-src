@@ -706,6 +706,7 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 
 			ZEND_ASSERT(var < t->exit_info[exit_point].stack_size);
 			if (t->stack_map[t->exit_info[exit_point].stack_offset + var].flags == ZREG_ZVAL_COPY) {
+				ZEND_ASSERT(reg != ZREG_NONE);
 				t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = reg & 0x3f; // TODO: remove magic mask ???
 			} else {
 				ZEND_ASSERT(t->stack_map[t->exit_info[exit_point].stack_offset + var].type == IS_LONG ||
@@ -714,6 +715,8 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 				if (ref > 0) {
 					if (reg != -1/*IR_REG_NONE*/) {
 						t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = reg & 0x3f; // TODO: remove magic mask ???
+					} else {
+						t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
 					}
 				} else {
 					int8_t idx = zend_jit_add_trace_const(t, ctx->ir_base[ref].val.i64);
@@ -4174,6 +4177,20 @@ static ir_ref zend_jit_deopt_rload(zend_jit_ctx *jit, ir_type type, int32_t reg)
 		ref = insn->op1;
 	}
 	return jit->control = ir_emit2(&jit->ctx, IR_OPT(IR_RLOAD, type), jit->control, reg);
+}
+
+static int zend_jit_store_type(zend_jit_ctx *jit, int var, uint8_t type)
+{
+	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, EX_NUM_TO_VAR(var));
+
+	if (type == IS_LONG) {
+		zend_jit_zval_set_type_info(jit, dst, IS_LONG);
+	} else if (type == IS_DOUBLE) {
+		zend_jit_zval_set_type_info(jit, dst, IS_DOUBLE);
+	} else {
+		ZEND_UNREACHABLE();
+	}
+	return 1;
 }
 
 static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t reg, bool set_type)

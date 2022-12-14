@@ -2827,11 +2827,11 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	int last_idx = -1;
 	int *start, *end;
 	uint8_t *flags;
-	const zend_op_array **vars_op_array;
 	zend_lifetime_interval **ra, *list, *ival;
 #else
 	zend_jit_reg_var *ra;
 #endif
+	const zend_op_array **vars_op_array;
 	void *checkpoint;
 	zend_jit_trace_stack_frame *frame;
 	zend_jit_trace_stack *stack;
@@ -2862,6 +2862,8 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 #else
 	checkpoint = zend_arena_checkpoint(CG(arena));
 	ra = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_reg_var));
+	vars_op_array = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_op_array*));
+	memset(ZEND_VOIDP(vars_op_array), 0, sizeof(zend_op_array*) * ssa->vars_count);
 #endif
 
 	op_array = trace_buffer->op_array;
@@ -2882,9 +2884,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	}
 	while (i < j) {
 		SET_STACK_VAR(stack, i, i);
-#ifndef ZEND_JIT_IR
 		vars_op_array[i] = op_array;
-#endif
 		/* We don't start intervals for variables used in Phi */
 		if ((ssa->vars[i].use_chain >= 0 /*|| ssa->vars[i].phi_use_chain*/)
 		 && !zend_ssa_is_no_val_use(ssa_opcodes[ssa->vars[i].use_chain], ssa->ops + ssa->vars[i].use_chain, i)
@@ -2923,9 +2923,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 
 		while (phi) {
 			SET_STACK_VAR(stack, phi->var, phi->ssa_var);
-#ifndef ZEND_JIT_IR
 			vars_op_array[phi->ssa_var] = op_array;
-#endif
 			if (ssa->vars[phi->ssa_var].use_chain >= 0
 			 && ssa->vars[phi->ssa_var].alias == NO_ALIAS
 			 && zend_jit_var_supports_reg(ssa, phi->ssa_var)) {
@@ -3064,9 +3062,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 					 || opline->opcode == ZEND_FETCH_CONSTANT) {
 						if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_DOUBLE)
 						 || (opline->opcode != ZEND_PRE_INC && opline->opcode != ZEND_PRE_DEC)) {
-#ifndef ZEND_JIT_IR
 							vars_op_array[ssa_op->result_def] = op_array;
-#endif
 							RA_IVAL_START(ssa_op->result_def, idx);
 							count++;
 						}
@@ -3077,9 +3073,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 				 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS
 				 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)) {
-#ifndef ZEND_JIT_IR
 					vars_op_array[ssa_op->op1_def] = op_array;
-#endif
 					RA_IVAL_START(ssa_op->op1_def, idx);
 					count++;
 				}
@@ -3088,9 +3082,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			      || ssa->vars[ssa_op->op2_def].phi_use_chain)
 				 && ssa->vars[ssa_op->op2_def].alias == NO_ALIAS
 				 && zend_jit_var_supports_reg(ssa, ssa_op->op2_def)) {
-#ifndef ZEND_JIT_IR
 					vars_op_array[ssa_op->op2_def] = op_array;
-#endif
 					RA_IVAL_START(ssa_op->op2_def, idx);
 					count++;
 				}
@@ -3136,9 +3128,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 					      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 						 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS
 						 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)) {
-#ifndef ZEND_JIT_IR
 							vars_op_array[ssa_op->op1_def] = op_array;
-#endif
 							RA_IVAL_START(ssa_op->op1_def, idx);
 							count++;
 						}
@@ -3208,9 +3198,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
 			for (i = 0; i < op_array->last_var; i++) {
 				SET_STACK_VAR(stack, i, j);
-#ifndef ZEND_JIT_IR
 				vars_op_array[j] = op_array;
-#endif
 #ifndef ZEND_JIT_IR //??? SEND
 				if (ssa->vars[j].use_chain >= 0
 				 && ssa->vars[j].alias == NO_ALIAS
@@ -3244,9 +3232,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 				j = ZEND_JIT_TRACE_GET_FIRST_SSA_VAR(p->info);
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					SET_STACK_VAR(stack, i, j);
-#ifndef ZEND_JIT_IR
 					vars_op_array[j] = op_array;
-#endif
 					if (ssa->vars[j].use_chain >= 0
 					 && ssa->vars[j].alias == NO_ALIAS
 					 && zend_jit_var_supports_reg(ssa, j)
@@ -3671,7 +3657,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 				if (RA_HAS_REG(i)) {
 					fprintf(stderr, "#%d.", i);
 					uint32_t var_num = ssa->vars[i].var;
-					zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+					zend_dump_var(vars_op_array[i], (var_num < vars_op_array[i]->last_var ? IS_CV : 0), var_num);
 					if (RA_REG_FLAGS(i) & ZREG_LAST_USE) {
 						fprintf(stderr, " last_use");
 					}
@@ -3832,7 +3818,7 @@ static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack
 
 	for (i = 0; i < stack_size; i++) {
 #ifdef ZEND_JIT_IR
-		if (STACK_FLAGS(stack, i) & (ZREG_CONST|ZREG_ZVAL_COPY)) {
+		if (STACK_FLAGS(stack, i) & (ZREG_CONST|ZREG_ZVAL_COPY|ZREG_TYPE_ONLY)) {
 			return 1;
 		}
 #endif
@@ -3948,6 +3934,15 @@ static int zend_jit_trace_deoptimization(
 				if (jit->ra && jit->ra[i].ref) {
 					SET_STACK_REF(stack, i, jit->ra[i].ref);
 				}
+			}
+		} else if (STACK_FLAGS(parent_stack, i) == ZREG_TYPE_ONLY) {
+			uint8_t type = STACK_TYPE(parent_stack, i);
+
+			if (!zend_jit_store_type(jit, i, type)) {
+				return 0;
+			}
+			if (stack) {
+				SET_STACK_TYPE(stack, i, type, 1);
 			}
 		} else if (STACK_FLAGS(parent_stack, i) == ZREG_ZVAL_COPY) {
 			ZEND_ASSERT(reg != ZREG_NONE);
@@ -8452,6 +8447,8 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					} else {
 						ZEND_ASSERT(0);
 					}
+				} else if (STACK_FLAGS(stack, j) == ZREG_TYPE_ONLY) {
+					fprintf(stderr, "(type_only)");
 				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
 					fprintf(stderr, "zval_copy(%s)", zend_reg_name(STACK_REG(stack, j)));
 				} else if (STACK_REG(stack, j) != -1 /*???ZREG_NONE*/) {
@@ -9088,6 +9085,14 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZVAL_LONG(EX_VAR_NUM(i), (zend_long)t->constants[STACK_REG(stack, i)].i);
 			} else if (STACK_TYPE(stack, i) == IS_DOUBLE) {
 				ZVAL_DOUBLE(EX_VAR_NUM(i), t->constants[STACK_REG(stack, i)].d);
+			} else {
+				ZEND_UNREACHABLE();
+			}
+		} else if (STACK_FLAGS(stack, i) == ZREG_TYPE_ONLY) {
+			if (STACK_TYPE(stack, i) == IS_LONG) {
+				Z_TYPE_INFO_P(EX_VAR_NUM(i)) = IS_LONG;
+			} else if (STACK_TYPE(stack, i) == IS_DOUBLE) {
+				Z_TYPE_INFO_P(EX_VAR_NUM(i)) = IS_DOUBLE;
 			} else {
 				ZEND_UNREACHABLE();
 			}
