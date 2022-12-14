@@ -4476,54 +4476,73 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		}
 
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+			if (Z_MODE(op1_def_addr) == IS_REG) {
+				zend_jit_zval_set_dval(jit, op1_def_addr,
+					ir_const_double(&jit->ctx, (double)ZEND_LONG_MAX + 1.0));
+			} else {
 #if SIZEOF_ZEND_LONG == 4
-			zend_jit_zval_set_lval(jit, op1_def_addr,
-				ir_const_php_long(&jit->ctx, 0));
-			zend_jit_zval_set_w2(jit, op1_def_addr,
-				ir_const_u32(&jit->ctx, 0x41e00000));
+				zend_jit_zval_set_lval(jit, op1_def_addr,
+					ir_const_php_long(&jit->ctx, 0));
+				zend_jit_zval_set_w2(jit, op1_def_addr,
+					ir_const_u32(&jit->ctx, 0x41e00000));
 #else
-			zend_jit_zval_set_lval(jit, op1_def_addr,
-				ir_const_php_long(&jit->ctx, 0x43e0000000000000));
+				zend_jit_zval_set_lval(jit, op1_def_addr,
+					ir_const_php_long(&jit->ctx, 0x43e0000000000000));
 #endif
+				zend_jit_zval_set_type_info(jit, op1_def_addr, IS_DOUBLE);
+			}
 		} else {
+			if (Z_MODE(op1_def_addr) == IS_REG) {
+				zend_jit_zval_set_dval(jit, op1_def_addr,
+					ir_const_double(&jit->ctx, (double)ZEND_LONG_MIN - 1.0));
+			} else {
 #if SIZEOF_ZEND_LONG == 4
-			zend_jit_zval_set_lval(jit, op1_def_addr,
-				ir_const_php_long(&jit->ctx, 0x00200000));
-			zend_jit_zval_set_w2(jit, op1_def_addr,
-				ir_const_u32(&jit->ctx, 0xc1e00000));
+				zend_jit_zval_set_lval(jit, op1_def_addr,
+					ir_const_php_long(&jit->ctx, 0x00200000));
+				zend_jit_zval_set_w2(jit, op1_def_addr,
+					ir_const_u32(&jit->ctx, 0xc1e00000));
 #else
-			zend_jit_zval_set_lval(jit, op1_def_addr,
-				ir_const_php_long(&jit->ctx, 0xc3e0000000000000));
+				zend_jit_zval_set_lval(jit, op1_def_addr,
+					ir_const_php_long(&jit->ctx, 0xc3e0000000000000));
 #endif
-		}
-		if (Z_MODE(op1_def_addr) == IS_MEM_ZVAL) {
-			zend_jit_zval_set_type_info(jit, op1_def_addr, IS_DOUBLE);
+				zend_jit_zval_set_type_info(jit, op1_def_addr, IS_DOUBLE);
+			}
 		}
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+				if (Z_MODE(res_addr) == IS_REG) {
+					zend_jit_zval_set_dval(jit, res_addr,
+						ir_const_double(&jit->ctx, (double)ZEND_LONG_MAX + 1.0));
+				} else {
 #if SIZEOF_ZEND_LONG == 4
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0));
-				zend_jit_zval_set_w2(jit, res_addr,
-					ir_const_u32(&jit->ctx, 0x41e00000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0));
+					zend_jit_zval_set_w2(jit, res_addr,
+						ir_const_u32(&jit->ctx, 0x41e00000));
 #else
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0x43e0000000000000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0x43e0000000000000));
 #endif
+					zend_jit_zval_set_type_info(jit, res_addr, IS_DOUBLE);
+				}
 			} else {
+				if (Z_MODE(res_addr) == IS_REG) {
+					zend_jit_zval_set_dval(jit, res_addr,
+						ir_const_double(&jit->ctx, (double)ZEND_LONG_MIN - 1.0));
+				} else {
 #if SIZEOF_ZEND_LONG == 4
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0x00200000));
-				zend_jit_zval_set_w2(jit, res_addr,
-					ir_const_u32(&jit->ctx, 0xc1e00000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0x00200000));
+					zend_jit_zval_set_w2(jit, res_addr,
+						ir_const_u32(&jit->ctx, 0xc1e00000));
 #else
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0xc3e0000000000000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0xc3e0000000000000));
 #endif
+					zend_jit_zval_set_type_info(jit, res_addr, IS_DOUBLE);
+				}
 			}
-			ZEND_ASSERT(Z_MODE(res_addr) == IS_MEM_ZVAL);
-			zend_jit_zval_set_type_info(jit, res_addr, IS_DOUBLE);
 		}
 
 		if (fast_path) {
@@ -4764,16 +4783,19 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 		}
 		if (opcode == ZEND_ADD) {
 			if (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1) {
+				if (Z_MODE(res_addr) == IS_REG) {
+					zend_jit_zval_set_dval(jit, res_addr,
+						ir_const_double(&jit->ctx, (double)ZEND_LONG_MAX + 1.0));
+				} else {
 #if SIZEOF_ZEND_LONG == 4
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0));
-				zend_jit_zval_set_w2(jit, res_addr,
-					ir_const_u32(&jit->ctx, 0x41e00000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0));
+					zend_jit_zval_set_w2(jit, res_addr,
+						ir_const_u32(&jit->ctx, 0x41e00000));
 #else
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0x43e0000000000000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0x43e0000000000000));
 #endif
-				if (Z_MODE(res_addr) != IS_REG) {
 					zend_jit_zval_set_type_info(jit, res_addr, IS_DOUBLE);
 				}
 				if ((res_info & MAY_BE_ANY) != MAY_BE_DOUBLE) {
@@ -4785,16 +4807,19 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 			op = IR_ADD;
 		} else if (opcode == ZEND_SUB) {
 			if (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1) {
+				if (Z_MODE(res_addr) == IS_REG) {
+					zend_jit_zval_set_dval(jit, res_addr,
+						ir_const_double(&jit->ctx, (double)ZEND_LONG_MIN - 1.0));
+				} else {
 #if SIZEOF_ZEND_LONG == 4
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0x00200000));
-				zend_jit_zval_set_w2(jit, res_addr,
-					ir_const_u32(&jit->ctx, 0xc1e00000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0x00200000));
+					zend_jit_zval_set_w2(jit, res_addr,
+						ir_const_u32(&jit->ctx, 0xc1e00000));
 #else
-				zend_jit_zval_set_lval(jit, res_addr,
-					ir_const_php_long(&jit->ctx, 0xc3e0000000000000));
+					zend_jit_zval_set_lval(jit, res_addr,
+						ir_const_php_long(&jit->ctx, 0xc3e0000000000000));
 #endif
-				if (Z_MODE(res_addr) != IS_REG) {
 					zend_jit_zval_set_type_info(jit, res_addr, IS_DOUBLE);
 				}
 				if ((res_info & MAY_BE_ANY) != MAY_BE_DOUBLE) {
