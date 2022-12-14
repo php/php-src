@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c1f54f259bde2c49c5b49a595751acd2fb365efe */
+ * Stub hash: c7ef736ea5c4121a4694c24af33fa1672f502c25 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -20,6 +20,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_close, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_is_open, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_num_msg, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
@@ -101,9 +105,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_gc, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_expunge, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_imap_expunge arginfo_imap_is_open
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_delete, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
@@ -171,7 +173,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_append, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, internal_date, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_imap_ping arginfo_imap_expunge
+#define arginfo_imap_ping arginfo_imap_is_open
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_base64, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -341,6 +343,7 @@ ZEND_END_ARG_INFO()
 ZEND_FUNCTION(imap_open);
 ZEND_FUNCTION(imap_reopen);
 ZEND_FUNCTION(imap_close);
+ZEND_FUNCTION(imap_is_open);
 ZEND_FUNCTION(imap_num_msg);
 ZEND_FUNCTION(imap_num_recent);
 ZEND_FUNCTION(imap_headers);
@@ -425,6 +428,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imap_open, arginfo_imap_open)
 	ZEND_FE(imap_reopen, arginfo_imap_reopen)
 	ZEND_FE(imap_close, arginfo_imap_close)
+	ZEND_FE(imap_is_open, arginfo_imap_is_open)
 	ZEND_FE(imap_num_msg, arginfo_imap_num_msg)
 	ZEND_FE(imap_num_recent, arginfo_imap_num_recent)
 	ZEND_FE(imap_headers, arginfo_imap_headers)

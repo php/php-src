@@ -385,6 +385,8 @@ static int firebird_stmt_get_col(
 				case SQL_INT64:
 					n = *(ISC_INT64*)var->sqldata;
 					break;
+				case SQL_DOUBLE:
+					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 

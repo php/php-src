@@ -780,7 +780,13 @@ static timelib_long timelib_lookup_abbr(const char **ptr, int *dst, char **tz_ab
 	timelib_long  value = 0;
 	const timelib_tz_lookup_table *tp;
 
-	while (**ptr != '\0' && **ptr != ')' && **ptr != ' ') {
+	/* Only include A-Z, a-z, 0-9, /, _, and - in abbreviations/TZ IDs */
+	while (
+		(**ptr >= 'A' && **ptr <= 'Z') ||
+		(**ptr >= 'a' && **ptr <= 'z') ||
+		(**ptr >= '0' && **ptr <= '9') ||
+		**ptr == '/' || **ptr == '_' || **ptr == '-'
+	) {
 		++*ptr;
 	}
 	end = *ptr;

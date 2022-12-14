@@ -733,6 +733,14 @@ ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_
 /* Zend FCC API to store and handle PHP userland functions */
 static zend_always_inline bool zend_fcc_equals(const zend_fcall_info_cache* a, const zend_fcall_info_cache* b)
 {
+	if (UNEXPECTED((a->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
+		(b->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
+		return a->object == b->object
+			&& a->calling_scope == b->calling_scope
+			&& a->closure == b->closure
+			&& zend_string_equals(a->function_handler->common.function_name, b->function_handler->common.function_name)
+		;
+	}
 	return a->function_handler == b->function_handler
 		&& a->object == b->object
 		&& a->calling_scope == b->calling_scope

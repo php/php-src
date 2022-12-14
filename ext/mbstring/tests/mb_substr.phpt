@@ -85,6 +85,12 @@ print "3: " . mb_convert_encoding(mb_substr($utf7, -5, 3, 'UTF-7'), 'UTF-8', 'UT
 print "4: " . mb_convert_encoding(mb_substr($utf7, 1, null, 'UTF-7'), 'UTF-8', 'UTF-7') . "\n";
 print "5:" . mb_convert_encoding(mb_substr($utf7, 10, 0, 'UTF-7'), 'UTF-8', 'UTF-7') . "\n";
 
+echo "Regression:\n";
+/* During development, one >= comparison in mb_get_substr was wrongly written as >
+ * This was caught by libFuzzer */
+$str = "\xbd\xbd\xbd\xbd\xbd\xbd\xbd\xbe\xbd\xbd\xbd\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x89\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x00\x00\x00\x00\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8b\x8b\x8b\xbd\xbd\xbd\xbd\xbd\xbd\xbd\xbe\x01:O\xaa\xd3";
+echo bin2hex(mb_substr($str, 0, 128, "JIS")), "\n";
+
 ?>
 --EXPECT--
 EUC-JP:
@@ -136,3 +142,5 @@ UTF-7:
 3: йте
 4: reek: Σὲ γνωρίζω ἀπὸ τὴν κόψη Russian: Зарегистрируйтесь
 5:
+Regression:
+1b28493d3d3d3d3d3d3d3e3d3d3d1b28423f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f000000003f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f1b28493d3d3d3d3d3d3d3e1b2842013a4f1b28492a1b2842

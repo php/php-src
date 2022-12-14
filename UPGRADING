@@ -58,9 +58,14 @@ PHP 8.3 UPGRADE NOTES
 - JSON:
   . Added json_validate(), which returns whether the json is valid for
     the given $depth and $options.
+    RFC: https://wiki.php.net/rfc/json_validate
 
 - Posix:
   . Added posix_sysconf call to get runtime informations.
+
+- Random:
+  . Added Randomizer::getBytesFromString().
+    RFC: https://wiki.php.net/rfc/randomizer_additions
 
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.

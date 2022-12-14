@@ -30,6 +30,7 @@
 #include "tsrm_win32.h"
 #include "zend_virtual_cwd.h"
 #include "win32/ioutil.h"
+#include "win32/winutil.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
@@ -610,6 +611,22 @@ TSRM_API int pclose(FILE *stream)
 #define SEGMENT_PREFIX "TSRM_SHM_SEGMENT:"
 #define INT_MIN_AS_STRING "-2147483648"
 
+
+#define TSRM_BASE_SHM_KEY_ADDRESS 0x20000000
+/* Returns a number between 0x2000_0000 and 0x3fff_ffff. On Windows, key_t is int. */
+static key_t tsrm_choose_random_shm_key(key_t prev_key) {
+	unsigned char buf[4];
+	if (php_win32_get_random_bytes(buf, 4) != SUCCESS) {
+		return prev_key + 2;
+	}
+	uint32_t n =
+		((uint32_t)(buf[0]) << 24) |
+	    (((uint32_t)buf[1]) << 16) |
+	    (((uint32_t)buf[2]) << 8) |
+	    (((uint32_t)buf[3]));
+	return (n & 0x1fffffff) + TSRM_BASE_SHM_KEY_ADDRESS;
+}
+
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
@@ -621,11 +638,14 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 		snprintf(shm_segment, sizeof(shm_segment), SEGMENT_PREFIX "%d", key);
 
 		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
+	} else {
+		/* IPC_PRIVATE always creates a new segment even if IPC_CREAT flag isn't passed. */
+		flags |= IPC_CREAT;
 	}
 
 	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
-			if (size > SIZE_MAX - sizeof(shm->descriptor)) {
+			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
 				return -1;
 			}
 			size += sizeof(shm->descriptor);
@@ -646,6 +666,19 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 		if (flags & IPC_EXCL) {
 			CloseHandle(shm_handle);
 			return -1;
+		}
+	}
+
+	if (key == IPC_PRIVATE) {
+		/* This should call shm_get with a brand new key id that isn't used yet. See https://man7.org/linux/man-pages/man2/shmget.2.html
+		 * Because extensions such as shmop/sysvshm can be used in userland to attach to shared memory segments, use unpredictable high positive numbers to avoid accidentally conflicting with userland. */
+		key = tsrm_choose_random_shm_key(TSRM_BASE_SHM_KEY_ADDRESS);
+		for (shm_pair *ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (ptr->descriptor && ptr->descriptor->shm_perm.key == key) {
+				key = tsrm_choose_random_shm_key(key);
+				ptr = TWG(shm);
+				continue;
+			}
 		}
 	}
 

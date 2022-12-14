@@ -137,6 +137,8 @@ namespace Random
 
         public function getBytes(int $length): string {}
 
+        public function getBytesFromString(string $string, int $length): string {}
+
         public function shuffleArray(array $array): array {}
 
         public function shuffleBytes(string $bytes): string {}

@@ -423,6 +423,7 @@ static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 			tz->is_localtime = 1;
 
 			in_transition = (
+				actual_transition_time != INT64_MIN &&
 				((tz->sse - actual_offset) >= (actual_transition_time + (current_offset - actual_offset))) &&
 				((tz->sse - actual_offset) < actual_transition_time)
 			);
