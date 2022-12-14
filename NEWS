@@ -72,7 +72,7 @@ PHP                                                                        NEWS
   . Added socket_atmark if send/recv needs using MSG_OOB. (David Carlier)
 
 - Standard:
-  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING. (timwolla)
+  . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
