@@ -4227,6 +4227,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_BIND_GLOBAL:
 						if (!ssa->ops || !ssa->var_info) {
 							op1_info = MAY_BE_ANY|MAY_BE_REF;
@@ -4237,7 +4238,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_RECV:
 						if (!zend_jit_recv(&ctx, opline, op_array)) {
 							goto jit_failure;

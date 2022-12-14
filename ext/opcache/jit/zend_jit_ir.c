@@ -3316,6 +3316,7 @@ static void zend_jit_setup_disasm(void)
 		ir_disasm_add_symbol("zend_jit_leave_func_helper",          (uint64_t)(uintptr_t)zend_jit_leave_func_helper, sizeof(void*));
 		ir_disasm_add_symbol("zend_jit_leave_nested_func_helper",   (uint64_t)(uintptr_t)zend_jit_leave_nested_func_helper, sizeof(void*));
 		ir_disasm_add_symbol("zend_jit_leave_top_func_helper",      (uint64_t)(uintptr_t)zend_jit_leave_top_func_helper, sizeof(void*));
+		ir_disasm_add_symbol("zend_jit_fetch_global_helper",        (uint64_t)(uintptr_t)zend_jit_fetch_global_helper, sizeof(void*));
 	}
 
 #ifndef ZTS
@@ -3330,6 +3331,7 @@ static void zend_jit_setup_disasm(void)
 	ir_disasm_add_symbol("EG(vm_stack_top)", (uint64_t)(uintptr_t)&EG(vm_stack_top), sizeof(EG(vm_stack_top)));
 	ir_disasm_add_symbol("EG(vm_stack_end)", (uint64_t)(uintptr_t)&EG(vm_stack_end), sizeof(EG(vm_stack_end)));
 	ir_disasm_add_symbol("EG(exception_op)", (uint64_t)(uintptr_t)&EG(exception_op), sizeof(EG(exception_op)));
+	ir_disasm_add_symbol("EG(symbol_table)", (uint64_t)(uintptr_t)&EG(symbol_table), sizeof(EG(symbol_table)));
 
 	ir_disasm_add_symbol("CG(map_ptr_base)", (uint64_t)(uintptr_t)&CG(map_ptr_base), sizeof(CG(map_ptr_base)));
 #endif
@@ -11767,6 +11769,140 @@ static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_
 			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_ref);
 		}
 		zend_jit_copy_zval(jit, ret_addr, MAY_BE_ANY, op1_addr, op1_info, 0);
+	}
+
+	if (end_inputs_count) {
+		end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+		zend_jit_merge_N(jit, end_inputs_count, end_inputs);
+	}
+
+	return 1;
+}
+
+static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info)
+{
+	zend_jit_addr op1_addr = OP1_ADDR();
+	zend_string *varname = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+	ir_ref cache_slot_ref, idx_ref, num_used_ref, bucket_ref, ref, ref2;
+	ir_ref cond, if_fit, if_reference, if_same_key, fast_path;
+	ir_ref slow_inputs[3], end_inputs[4];
+	uint32_t slow_inputs_count = 0;
+	uint32_t end_inputs_count = 0;
+
+	// JIT: idx = (uintptr_t)CACHED_PTR(opline->extended_value) - 1;
+	cache_slot_ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+		zend_jit_load(jit, IR_ADDR,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				zend_jit_fp(jit),
+				zend_jit_const_addr(jit, offsetof(zend_execute_data, run_time_cache)))),
+		zend_jit_const_addr(jit, opline->extended_value));
+	idx_ref = ir_fold2(&jit->ctx, IR_OPT(IR_SUB, IR_ADDR),
+		zend_jit_load(jit, IR_ADDR, cache_slot_ref),
+		zend_jit_const_addr(jit, 1));
+
+	// JIT: if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
+	num_used_ref = ir_fold2(&jit->ctx, IR_OPT(IR_MUL, IR_U32),
+		zend_jit_load(jit, IR_U32,
+			ZEND_JIT_EG_ADDR(symbol_table.nNumUsed)),
+		ir_const_u32(&jit->ctx, sizeof(Bucket)));
+	if (sizeof(void*) == 8) {
+		num_used_ref = ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_ADDR), num_used_ref);
+	}
+	cond = ir_fold2(&jit->ctx, IR_OPT(IR_LT, IR_BOOL),
+		idx_ref,
+		num_used_ref);
+	if_fit = ir_emit2(&jit->ctx, IR_IF, jit->control, cond);
+	jit->control = ir_emit2(&jit->ctx, IR_IF_FALSE, if_fit, 1);
+	slow_inputs[slow_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+	jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_fit);
+
+	// JIT: Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
+	bucket_ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+		zend_jit_load(jit, IR_ADDR,
+			ZEND_JIT_EG_ADDR(symbol_table.arData)),
+		idx_ref);
+	if_reference = zend_jit_if_zval_ref_type(jit, bucket_ref, ir_const_u8(&jit->ctx, IS_REFERENCE));
+	jit->control = ir_emit2(&jit->ctx, IR_IF_FALSE, if_reference, 1);
+	slow_inputs[slow_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+	jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_reference);
+
+	// JIT: (EXPECTED(p->key == varname))
+	cond = ir_fold2(&jit->ctx, IR_OPT(IR_EQ, IR_ADDR),
+		zend_jit_load(jit, IR_ADDR,
+			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+				bucket_ref,
+				zend_jit_const_addr(jit, offsetof(Bucket, key)))),
+		zend_jit_const_addr(jit, (uintptr_t)varname));
+	if_same_key = ir_emit2(&jit->ctx, IR_IF, jit->control, cond);
+	jit->control = ir_emit2(&jit->ctx, IR_IF_FALSE, if_same_key, 1);
+	slow_inputs[slow_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+	jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_same_key);
+
+	// JIT: GC_ADDREF(Z_PTR(p->val))
+	ref = zend_jit_zval_ref_ptr(jit, bucket_ref);
+	zend_jit_gc_addref(jit, ref);
+
+	fast_path = ir_emit1(&jit->ctx, IR_END, jit->control);
+	zend_jit_merge_N(jit, slow_inputs_count, slow_inputs);
+
+	ref2 = zend_jit_call_2(jit, IR_ADDR,
+		zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_fetch_global_helper, IR_CONST_FASTCALL_FUNC),
+		zend_jit_const_addr(jit, (uintptr_t)varname),
+		cache_slot_ref);
+
+	jit->control = ir_emit1(&jit->ctx, IR_END, jit->control);
+	jit->control = ir_emit2(&jit->ctx, IR_MERGE, fast_path, jit->control);
+	ref = ir_emit3(&jit->ctx, IR_OPT(IR_PHI, IR_ADDR), jit->control, ref, ref2);
+
+	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+		ir_ref if_refcounted = IR_UNUSED, refcount, if_non_zero, if_may_not_leak;
+
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			// JIT: if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)))
+			if_refcounted = zend_jit_if_zval_refcounted(jit, op1_addr);
+			jit->control = ir_emit2(&jit->ctx, IR_IF_TRUE, if_refcounted, 1);
+		}
+
+		// JIT:zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+		ref2 = zend_jit_zval_ptr(jit, op1_addr);
+
+		// JIT: ZVAL_REF(variable_ptr, ref)
+		zend_jit_zval_set_ptr(jit, op1_addr, ref);
+		zend_jit_zval_set_type_info(jit, op1_addr, IS_REFERENCE_EX);
+
+		// JIT: if (GC_DELREF(garbage) == 0)
+		refcount = zend_jit_gc_delref(jit, ref2);
+		if_non_zero = ir_emit2(&jit->ctx, IR_IF, jit->control, refcount);
+		if (!(op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_non_zero);
+			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+		}
+		jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_non_zero);
+
+		zend_jit_zval_dtor(jit, ref2, op1_info, opline);
+		if (op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_non_zero);
+
+			// JIT: GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
+			if_may_not_leak = zend_jit_if_gc_may_not_leak(jit, ref2);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_TRUE, if_may_not_leak);
+			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_may_not_leak);
+			zend_jit_call_1(jit, IR_VOID,
+				zend_jit_const_func_addr(jit, (uintptr_t)gc_possible_root, IR_CONST_FASTCALL_FUNC),
+				ref2);
+		}
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			end_inputs[end_inputs_count++] = ir_emit1(&jit->ctx, IR_END, jit->control);
+			jit->control = ir_emit1(&jit->ctx, IR_IF_FALSE, if_refcounted);
+		}
+	}
+
+	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		// JIT: ZVAL_REF(variable_ptr, ref)
+		zend_jit_zval_set_ptr(jit, op1_addr, ref);
+		zend_jit_zval_set_type_info(jit, op1_addr, IS_REFERENCE_EX);
 	}
 
 	if (end_inputs_count) {

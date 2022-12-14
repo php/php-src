@@ -6447,6 +6447,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_BIND_GLOBAL:
 						orig_opline = opline;
 						orig_ssa_op = ssa_op;
@@ -6472,7 +6473,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						opline = orig_opline;
 						ssa_op = orig_ssa_op;
 						goto done;
-#endif
 					case ZEND_RECV:
 						if (!zend_jit_recv(&ctx, opline, op_array)) {
 							goto jit_failure;
