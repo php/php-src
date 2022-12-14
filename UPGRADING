@@ -66,6 +66,8 @@ PHP 8.3 UPGRADE NOTES
 - Random:
   . Added Randomizer::getBytesFromString().
     RFC: https://wiki.php.net/rfc/randomizer_additions
+  . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary.
+    RFC: https://wiki.php.net/rfc/randomizer_additions
 
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
