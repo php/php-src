@@ -847,7 +847,7 @@ optimize_jmpnz:
 						goto optimize_jmpz;
 					} else if (opline->op1_type == IS_CONST) {
 						if (zend_is_true(CT_CONSTANT_EX(op_array, opline->op1.constant))) {
-							opline->opcode = ZEND_QM_ASSIGN;
+							opline->opcode = ZEND_BOOL;
 							take_successor_1(ssa, block_num, block);
 						}
 					}
@@ -861,7 +861,7 @@ optimize_jmpnz:
 						goto optimize_jmpnz;
 					} else if (opline->op1_type == IS_CONST) {
 						if (!zend_is_true(CT_CONSTANT_EX(op_array, opline->op1.constant))) {
-							opline->opcode = ZEND_QM_ASSIGN;
+							opline->opcode = ZEND_BOOL;
 							take_successor_1(ssa, block_num, block);
 						}
 					}
