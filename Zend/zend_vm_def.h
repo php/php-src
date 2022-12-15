@@ -217,6 +217,80 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(4, ZEND_DIV, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_COLD_HELPER(zend_div_by_zero_helper, ANY, ANY)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+	HANDLE_EXCEPTION();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_DIV, (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_DIV_LONG_LONG, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_div_by_zero_helper);
+	}
+	if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
+		/* Prevent overflow error/crash */
+		ZVAL_DOUBLE(EX_VAR(opline->result.var), (double) ZEND_LONG_MIN / -1);
+	}
+	if (EXPECTED(Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0)) { /* integer */
+		ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(op1) / Z_LVAL_P(op2));
+	} else {
+		ZVAL_DOUBLE(EX_VAR(opline->result.var), (double) Z_LVAL_P(op1) / Z_LVAL_P(op2));
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_DIV, (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE), ZEND_DIV_DOUBLE_DOUBLE, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (UNEXPECTED(Z_DVAL_P(op2) == 0)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_div_by_zero_helper);
+	}
+	ZVAL_DOUBLE(EX_VAR(opline->result.var), Z_DVAL_P(op1) / Z_DVAL_P(op2));
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_DIV, (op1_info == MAY_BE_LONG && op2_info == MAY_BE_DOUBLE), ZEND_DIV_LONG_DOUBLE, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (UNEXPECTED(Z_DVAL_P(op2) == 0)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_div_by_zero_helper);
+	}
+	ZVAL_DOUBLE(EX_VAR(opline->result.var), (double) Z_LVAL_P(op1) / Z_DVAL_P(op2));
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_DIV, (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_LONG), ZEND_DIV_DOUBLE_LONG, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_div_by_zero_helper);
+	}
+	ZVAL_DOUBLE(EX_VAR(opline->result.var), Z_DVAL_P(op1) / (double) Z_LVAL_P(op2));
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_COLD_HELPER(zend_mod_by_zero_helper, ANY, ANY)
 {
 	USE_OPLINE
