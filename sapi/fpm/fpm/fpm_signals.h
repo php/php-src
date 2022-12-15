@@ -4,14 +4,15 @@
 #define FPM_SIGNALS_H 1
 
 #include <signal.h>
+#include <stdbool.h>
 
-int fpm_signals_init_main(void);
-int fpm_signals_init_child(void);
+bool fpm_signals_init_main(void);
+bool fpm_signals_init_child(void);
 int fpm_signals_get_fd(void);
-int fpm_signals_init_mask(void);
-int fpm_signals_block(void);
-int fpm_signals_child_block(void);
-int fpm_signals_unblock(void);
+bool fpm_signals_init_mask(void);
+bool fpm_signals_block(void);
+bool fpm_signals_child_block(void);
+bool fpm_signals_unblock(void);
 
 extern const char *fpm_signal_names[NSIG + 1];
 

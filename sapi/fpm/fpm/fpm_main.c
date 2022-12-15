@@ -1358,7 +1358,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 
 	key = Z_STRVAL_P(arg1);
 
-	if (!key || strlen(key) < 1) {
+	if (Z_STRLEN_P(arg1) == 0) {
 		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: empty key");
 		return;
 	}
@@ -1375,7 +1375,7 @@ static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_
 	kv.key = key;
 	kv.value = value;
 	kv.next = NULL;
-	if (fpm_php_apply_defines_ex(&kv, *mode) == -1) {
+	if (!fpm_php_apply_defines_ex(&kv, *mode)) {
 		zlog(ZLOG_ERROR, "Passing INI directive through FastCGI: unable to set '%s'", key);
 	}
 }
@@ -1486,7 +1486,7 @@ PHP_FUNCTION(fpm_get_status) /* {{{ */
 		RETURN_THROWS();
 	}
 
-	if (fpm_status_export_to_zval(return_value)) {
+	if (!fpm_status_export_to_zval(return_value)) {
 		RETURN_FALSE;
 	}
 }
@@ -1530,7 +1530,6 @@ int main(int argc, char *argv[])
 	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
-	int ret;
 #if ZEND_RC_DEBUG
 	bool old_rc_debug;
 #endif
@@ -1543,7 +1542,7 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 
-	if (0 > fpm_signals_init_mask() || 0 > fpm_signals_block()) {
+	if (!fpm_signals_init_mask() || !fpm_signals_block()) {
 		zlog(ZLOG_WARNING, "Could die in the case of too early reload signal");
 	}
 	zlog(ZLOG_DEBUG, "Blocked some signals");
@@ -1777,13 +1776,13 @@ consult the installation file that came with this distribution, or visit \n\
 	zend_rc_debug = 0;
 #endif
 
-	ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
+	bool fpm_status = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
 
 #if ZEND_RC_DEBUG
 	zend_rc_debug = old_rc_debug;
 #endif
 
-	if (ret < 0) {
+	if (!fpm_status) {
 
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;

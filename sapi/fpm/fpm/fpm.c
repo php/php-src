@@ -41,7 +41,7 @@ struct fpm_globals_s fpm_globals = {
 	.send_config_pipe = {0, 0},
 };
 
-int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr) /* {{{ */
+bool fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr) /* {{{ */
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
@@ -53,36 +53,36 @@ int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int t
 	fpm_globals.run_as_root = run_as_root;
 	fpm_globals.force_stderr = force_stderr;
 
-	if (0 > fpm_php_init_main()           ||
-	    0 > fpm_stdio_init_main()         ||
-	    0 > fpm_conf_init_main(test_conf, force_daemon) ||
-	    0 > fpm_unix_init_main()          ||
-	    0 > fpm_scoreboard_init_main()    ||
-	    0 > fpm_pctl_init_main()          ||
-	    0 > fpm_env_init_main()           ||
-	    0 > fpm_signals_init_main()       ||
-	    0 > fpm_children_init_main()      ||
-	    0 > fpm_sockets_init_main()       ||
-	    0 > fpm_worker_pool_init_main()   ||
-	    0 > fpm_event_init_main()) {
+	if (!fpm_php_init_main()           ||
+	    !fpm_stdio_init_main()         ||
+	    !fpm_conf_init_main(test_conf, force_daemon) ||
+	    !fpm_unix_init_main()          ||
+	    !fpm_scoreboard_init_main()    ||
+	    !fpm_pctl_init_main()          ||
+	    !fpm_env_init_main()           ||
+	    !fpm_signals_init_main()       ||
+	    !fpm_children_init_main()      ||
+	    !fpm_sockets_init_main()       ||
+	    !fpm_worker_pool_init_main()   ||
+	    !fpm_event_init_main()) {
 
 		if (fpm_globals.test_successful) {
 			exit(FPM_EXIT_OK);
 		} else {
 			zlog(ZLOG_ERROR, "FPM initialization failed");
-			return -1;
+			return false;
 		}
 	}
 
-	if (0 > fpm_conf_write_pid()) {
+	if (!fpm_conf_write_pid()) {
 		zlog(ZLOG_ERROR, "FPM initialization failed");
-		return -1;
+		return false;
 	}
 
 	fpm_stdio_init_final();
 	zlog(ZLOG_NOTICE, "fpm is running, pid %d", (int) fpm_globals.parent_pid);
 
-	return 0;
+	return true;
 }
 /* }}} */
 

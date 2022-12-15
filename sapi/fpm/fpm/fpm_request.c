@@ -278,33 +278,35 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 }
 /* }}} */
 
-int fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
+bool fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s *proc;
 
 	/* no need in atomicity here */
 	proc = fpm_scoreboard_proc_get_from_child(child);
 	if (!proc) {
-		return 0;
+		return false;
 	}
 
 	return proc->request_stage == FPM_REQUEST_ACCEPTING;
 }
 /* }}} */
 
-int fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv) /* {{{ */
+bool fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s *proc;
 
-	if (!tv) return -1;
+	if (!tv) {
+		return false;
+	}
 
 	proc = fpm_scoreboard_proc_get_from_child(child);
 	if (!proc) {
-		return -1;
+		return false;
 	}
 
 	*tv = proc->tv;
 
-	return 1;
+	return true;
 }
 /* }}} */

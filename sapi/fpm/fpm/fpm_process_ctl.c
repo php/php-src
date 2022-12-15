@@ -56,11 +56,10 @@ static void fpm_pctl_action(struct fpm_event_s *ev, short which, void *arg) /* {
 }
 /* }}} */
 
-static int fpm_pctl_timeout_set(int sec) /* {{{ */
+static void fpm_pctl_timeout_set(int sec) /* {{{ */
 {
 	fpm_event_set_timer(&pctl_event, 0, &fpm_pctl_action, NULL);
 	fpm_event_add(&pctl_event, sec * 1000);
-	return 0;
 }
 /* }}} */
 
@@ -78,7 +77,7 @@ static void fpm_pctl_exit(void)
 static void fpm_pctl_exec(void)
 {
 	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
-	if (0 > fpm_signals_block()) {
+	if (!fpm_signals_block()) {
 		zlog(ZLOG_WARNING, "concurrent reloads may be unstable");
 	}
 
@@ -250,24 +249,23 @@ void fpm_pctl(int new_state, int action) /* {{{ */
 }
 /* }}} */
 
-int fpm_pctl_can_spawn_children(void)
+bool fpm_pctl_can_spawn_children(void)
 {
 	return fpm_state == FPM_PCTL_STATE_NORMAL;
 }
 
-int fpm_pctl_child_exited(void)
+void fpm_pctl_child_exited(void)
 {
 	if (fpm_state == FPM_PCTL_STATE_NORMAL) {
-		return 0;
+		return;
 	}
 
 	if (!fpm_globals.running_children) {
 		fpm_pctl(FPM_PCTL_STATE_UNSPECIFIED, FPM_PCTL_ACTION_LAST_CHILD_EXITED);
 	}
-	return 0;
 }
 
-int fpm_pctl_init_main(void)
+bool fpm_pctl_init_main(void)
 {
 	int i;
 
@@ -275,23 +273,23 @@ int fpm_pctl_init_main(void)
 	saved_argv = malloc(sizeof(char *) * (saved_argc + 1));
 
 	if (!saved_argv) {
-		return -1;
+		return false;
 	}
 
 	for (i = 0; i < saved_argc; i++) {
 		saved_argv[i] = strdup(fpm_globals.argv[i]);
 
 		if (!saved_argv[i]) {
-			return -1;
+			return false;
 		}
 	}
 
 	saved_argv[i] = 0;
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_pctl_cleanup, 0)) {
-		return -1;
+	if (!fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_pctl_cleanup, 0)) {
+		return false;
 	}
-	return 0;
+	return true;
 }
 
 static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
@@ -340,7 +338,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 
 		/* update status structure for all PMs */
 		if (wp->listen_address_domain == FPM_AF_INET) {
-			if (0 > fpm_socket_get_listening_queue(wp->listening_socket, &cur_lq, NULL)) {
+			if (!fpm_socket_get_listening_queue(wp->listening_socket, &cur_lq, NULL)) {
 				cur_lq = 0;
 #if 0
 			} else {

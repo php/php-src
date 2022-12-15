@@ -81,10 +81,7 @@ struct fpm_worker_pool_s *fpm_worker_pool_alloc(void)
 	return ret;
 }
 
-int fpm_worker_pool_init_main(void)
+bool fpm_worker_pool_init_main(void)
 {
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_worker_pool_cleanup, 0)) {
-		return -1;
-	}
-	return 0;
+	return fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_worker_pool_cleanup, 0);
 }

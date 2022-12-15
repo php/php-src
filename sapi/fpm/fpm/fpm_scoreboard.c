@@ -21,7 +21,7 @@ static float fpm_scoreboard_tick;
 #endif
 
 
-int fpm_scoreboard_init_main(void)
+bool fpm_scoreboard_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -45,19 +45,19 @@ int fpm_scoreboard_init_main(void)
 
 		if (wp->config->pm_max_children < 1) {
 			zlog(ZLOG_ERROR, "[pool %s] Unable to create scoreboard SHM because max_client is not set", wp->config->name);
-			return -1;
+			return false;
 		}
 
 		if (wp->scoreboard) {
 			zlog(ZLOG_ERROR, "[pool %s] Unable to create scoreboard SHM because it already exists", wp->config->name);
-			return -1;
+			return false;
 		}
 
 		scoreboard_procs_size = sizeof(struct fpm_scoreboard_proc_s) * wp->config->pm_max_children;
 		shm_mem = fpm_shm_alloc(sizeof(struct fpm_scoreboard_s) + scoreboard_procs_size);
 
 		if (!shm_mem) {
-			return -1;
+			return false;
 		}
 		wp->scoreboard = shm_mem;
 		wp->scoreboard->pm = wp->config->pm;
@@ -70,7 +70,7 @@ int fpm_scoreboard_init_main(void)
 			wp->scoreboard->shared = wp->shared->scoreboard;
 		}
 	}
-	return 0;
+	return true;
 }
 
 static struct fpm_scoreboard_s *fpm_scoreboard_get_for_update(struct fpm_scoreboard_s *scoreboard) /* {{{ */
@@ -392,7 +392,7 @@ void fpm_scoreboard_proc_free(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-int fpm_scoreboard_proc_alloc(struct fpm_child_s *child) /* {{{ */
+bool fpm_scoreboard_proc_alloc(struct fpm_child_s *child) /* {{{ */
 {
 	int i = -1;
 	struct fpm_worker_pool_s *wp = child->wp;
@@ -400,7 +400,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_child_s *child) /* {{{ */
 	int nprocs = wp->config->pm_max_children;
 
 	if (!scoreboard) {
-		return -1;
+		return false;
 	}
 
 	/* first try the slot which is supposed to be free */
@@ -422,7 +422,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_child_s *child) /* {{{ */
 	/* no free slot */
 	if (i < 0 || i >= nprocs) {
 		zlog(ZLOG_ERROR, "[pool %s] no free scoreboard slot", scoreboard->pool);
-		return -1;
+		return false;
 	}
 
 	scoreboard->procs[i].used = 1;
@@ -435,7 +435,7 @@ int fpm_scoreboard_proc_alloc(struct fpm_child_s *child) /* {{{ */
 		scoreboard->free_proc = i + 1;
 	}
 
-	return 0;
+	return true;
 }
 /* }}} */
 

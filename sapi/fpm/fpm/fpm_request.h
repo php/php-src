@@ -3,6 +3,8 @@
 #ifndef FPM_REQUEST_H
 #define FPM_REQUEST_H 1
 
+#include <stdbool.h>
+
 /* hanging in accept() */
 void fpm_request_accepting(void);
 /* start reading fastcgi request from very first byte */
@@ -20,9 +22,9 @@ struct fpm_child_s;
 struct timeval;
 
 void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *tv, int terminate_timeout, int slowlog_timeout, int track_finished);
-int fpm_request_is_idle(struct fpm_child_s *child);
+bool fpm_request_is_idle(struct fpm_child_s *child);
 const char *fpm_request_get_stage_name(int stage);
-int fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv);
+bool fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv);
 
 enum fpm_request_stage_e {
 	FPM_REQUEST_ACCEPTING = 1,

@@ -4,6 +4,7 @@
 #define FPM_CONF_H 1
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "php.h"
 
 #define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : (a == PM_STYLE_DYNAMIC ? "dynamic" : "ondemand"))
@@ -121,9 +122,9 @@ enum {
 	PM_STYLE_ONDEMAND = 3
 };
 
-int fpm_conf_init_main(int test_conf, int force_daemon);
-int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
-int fpm_conf_write_pid(void);
-int fpm_conf_unlink_pid(void);
+bool fpm_conf_init_main(int test_conf, int force_daemon);
+void fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
+bool fpm_conf_write_pid(void);
+bool fpm_conf_unlink_pid(void);
 
 #endif

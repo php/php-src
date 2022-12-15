@@ -4,8 +4,9 @@
 #define FPM_CLOCK_H 1
 
 #include <sys/time.h>
+#include <stdbool.h>
 
-int fpm_clock_init(void);
+bool fpm_clock_init(void);
 int fpm_clock_get(struct timeval *tv);
 
 #endif

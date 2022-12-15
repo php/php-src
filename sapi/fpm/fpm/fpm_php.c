@@ -21,7 +21,7 @@
 
 static char **limit_extensions = NULL;
 
-static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
+static zend_result fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
@@ -77,13 +77,13 @@ static void fpm_php_disable(char *value, int (*zend_disable)(const char *, size_
 }
 /* }}} */
 
-int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
+bool fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 {
 
 	char *name = kv->key;
 	char *value = kv->value;
-	int name_len = strlen(name);
-	int value_len = strlen(value);
+	size_t name_len = strlen(name);
+	size_t value_len = strlen(value);
 
 	if (!strcmp(name, "extension") && *value) {
 		zval zv;
@@ -92,51 +92,48 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 	}
 
 	if (fpm_php_zend_ini_alter_master(name, name_len, value, value_len, mode, PHP_INI_STAGE_ACTIVATE) == FAILURE) {
-		return -1;
+		return false;
 	}
 
 	if (!strcmp(name, "disable_functions") && *value) {
 		zend_disable_functions(value);
-		return 1;
+		return true;
 	}
 
 	if (!strcmp(name, "disable_classes") && *value) {
 		char *v = strdup(value);
 		PG(disable_classes) = v;
 		fpm_php_disable(v, zend_disable_class);
-		return 1;
+		return true;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
+static void fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 
 	for (kv = wp->config->php_values; kv; kv = kv->next) {
-		if (fpm_php_apply_defines_ex(kv, ZEND_INI_USER) == -1) {
+		if (!fpm_php_apply_defines_ex(kv, ZEND_INI_USER)) {
 			zlog(ZLOG_ERROR, "Unable to set php_value '%s'", kv->key);
 		}
 	}
 
 	for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
-		if (fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM) == -1) {
+		if (!fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM)) {
 			zlog(ZLOG_ERROR, "Unable to set php_admin_value '%s'", kv->key);
 		}
 	}
-
-	return 0;
 }
 /* }}} */
 
-static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
+static void fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (wp->listen_address_domain == FPM_AF_INET) {
 		fcgi_set_allowed_clients(wp->config->listen_allowed_clients);
 	}
-	return 0;
 }
 /* }}} */
 
@@ -200,31 +197,26 @@ void fpm_php_soft_quit(void)
 	fcgi_terminate();
 }
 
-int fpm_php_init_main(void)
+bool fpm_php_init_main(void)
 {
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0)) {
-		return -1;
-	}
-	return 0;
+	return fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0);
 }
 
-int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+bool fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	if (0 > fpm_php_apply_defines(wp) ||
-		0 > fpm_php_set_allowed_clients(wp)) {
-		return -1;
-	}
+	fpm_php_apply_defines(wp);
+	fpm_php_set_allowed_clients(wp);
 
 	if (wp->limit_extensions) {
 		/* Take ownership of limit_extensions. */
 		limit_extensions = wp->limit_extensions;
 		wp->limit_extensions = NULL;
 	}
-	return 0;
+	return true;
 }
 /* }}} */
 
-int fpm_php_limit_extensions(char *path) /* {{{ */
+bool fpm_php_limit_extensions(char *path) /* {{{ */
 {
 	char **p;
 	size_t path_len;
