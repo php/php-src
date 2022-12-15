@@ -452,40 +452,15 @@ static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *a
 
 static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from)
 {
-	mbfl_string string, result;
-	mbfl_buffer_converter *convd;
+	unsigned int num_errors = 0;
+	zend_string *result = mb_fast_convert((unsigned char*)from, from_length, (const mbfl_encoding*)encoding_from, (const mbfl_encoding*)encoding_to, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors);
 
-	/* new encoding */
-	/* initialize string */
-	string.encoding = (const mbfl_encoding*)encoding_from;
-	string.val = (unsigned char*)from;
-	string.len = from_length;
+	*to_length = ZSTR_LEN(result);
+	*to = emalloc(ZSTR_LEN(result) + 1); /* Include terminating null byte */
+	memcpy(*to, ZSTR_VAL(result), ZSTR_LEN(result) + 1);
+	zend_string_free(result);
 
-	/* initialize converter */
-	convd = mbfl_buffer_converter_new((const mbfl_encoding *)encoding_from, (const mbfl_encoding *)encoding_to, string.len);
-	if (convd == NULL) {
-		return (size_t) -1;
-	}
-
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-
-	/* do it */
-	size_t loc = mbfl_buffer_converter_feed(convd, &string);
-
-	mbfl_buffer_converter_flush(convd);
-	mbfl_string_init(&result);
-	if (!mbfl_buffer_converter_result(convd, &result)) {
-		mbfl_buffer_converter_delete(convd);
-		return (size_t)-1;
-	}
-
-	*to = result.val;
-	*to_length = result.len;
-
-	mbfl_buffer_converter_delete(convd);
-
-	return loc;
+	return from_length;
 }
 
 static zend_result php_mb_zend_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent)
