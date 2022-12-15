@@ -1899,13 +1899,10 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_ECHO:
 				case ZEND_STRLEN:
 				case ZEND_COUNT:
-#ifndef ZEND_JIT_IR //???
 				case ZEND_FE_RESET_R:
-#endif
 				case ZEND_QM_ASSIGN:
 					ADD_OP1_TRACE_GUARD();
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_FE_FETCH_R:
 					ADD_OP1_TRACE_GUARD();
 					if (op1_type == IS_ARRAY && (orig_op1_type & ~IS_TRACE_PACKED) == IS_ARRAY) {
@@ -1922,7 +1919,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
-#endif
 				case ZEND_VERIFY_RETURN_TYPE:
 					if (opline->op1_type == IS_UNUSED) {
 						/* Always throws */
@@ -6618,7 +6614,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_FE_RESET_R:
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
@@ -6662,7 +6657,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_FETCH_CONSTANT:
 						if (!zend_jit_fetch_constant(&ctx, opline, op_array, ssa, ssa_op, RES_REG_ADDR())) {
 							goto jit_failure;
