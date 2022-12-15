@@ -126,28 +126,6 @@
 #endif
 
 /*
- * buffering converter
- */
-typedef struct _mbfl_buffer_converter mbfl_buffer_converter;
-
-struct _mbfl_buffer_converter {
-	mbfl_convert_filter *filter1;
-	mbfl_convert_filter *filter2;
-	mbfl_memory_device device;
-	const mbfl_encoding *to;
-};
-
-MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new(const mbfl_encoding *from, const mbfl_encoding *to, size_t buf_initsz);
-MBFLAPI extern void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd);
-MBFLAPI extern void mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
-MBFLAPI extern void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, uint32_t substchar);
-MBFLAPI extern size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
-MBFLAPI extern void mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
-MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
-MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
-MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
-
-/*
  * encoding detector
  */
 typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
