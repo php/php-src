@@ -2756,41 +2756,37 @@ class ClassInfo {
             "&InheritedProperties;"
         );
 
-        if (!empty($this->funcInfos)) {
-            $classSynopsis->appendChild(new DOMText("\n\n    "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
-            $classSynopsisInfo->setAttribute("role", "comment");
-            $classSynopsis->appendChild($classSynopsisInfo);
+        $classSynopsis->appendChild(new DOMText("\n\n    "));
+        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
+        $classSynopsisInfo->setAttribute("role", "comment");
+        $classSynopsis->appendChild($classSynopsisInfo);
 
-            $classReference = self::getClassSynopsisReference($this->name);
-            $escapedName = addslashes($this->name->__toString());
+        $classReference = self::getClassSynopsisReference($this->name);
+        $escapedName = addslashes($this->name->__toString());
 
-            if ($this->hasConstructor()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
-                );
-                $classSynopsis->appendChild($includeElement);
-            }
+        $classSynopsis->appendChild(new DOMText("\n    "));
+        $includeElement = $this->createIncludeElement(
+            $doc,
+            "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
+        );
+        $classSynopsis->appendChild($includeElement);
 
-            if ($this->hasMethods()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
-                );
-                $classSynopsis->appendChild($includeElement);
-            }
+        if ($this->hasMethods()) {
+            $classSynopsis->appendChild(new DOMText("\n    "));
+            $includeElement = $this->createIncludeElement(
+                $doc,
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
+            );
+            $classSynopsis->appendChild($includeElement);
+        }
 
-            if ($this->hasDestructor()) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
-                );
-                $classSynopsis->appendChild($includeElement);
-            }
+        if ($this->hasDestructor()) {
+            $classSynopsis->appendChild(new DOMText("\n    "));
+            $includeElement = $this->createIncludeElement(
+                $doc,
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
+            );
+            $classSynopsis->appendChild($includeElement);
         }
 
         if (!empty($parentsWithInheritedMethods)) {
@@ -2805,7 +2801,7 @@ class ClassInfo {
                 $escapedParentName = addslashes($parent->__toString());
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedParentName')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedParentName'])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -4262,16 +4258,18 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns:phpdoc="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                 ],
                 [
                     "&$1",
                     "<phpdoc:$1 xml:id=\"$4\" xmlns:phpdoc=\"$2\" xmlns=\"$3\">",
                     "<phpdoc:$1 xml:id=\"$5\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xi=\"$4\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xlink=\"$4\" xmlns:xi=\"$5\">",
+                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$5\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$5\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
                 ],
                 $replacedXml
@@ -4495,8 +4493,8 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    "/<refentry\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<refentry\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    '/<refentry\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<refentry\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                 ],
                 [
                     "&$1",
