@@ -34,6 +34,7 @@
 #include "zend_vm.h"
 #include "zend_enum.h"
 #include "zend_observer.h"
+#include "zend_call_stack.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -10425,6 +10426,14 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 
 static void zend_compile_expr(znode *result, zend_ast *ast)
 {
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Maximum call stack size of %zu bytes reached during compilation. Try splitting expression",
+			(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_compile_expr_inner(result, ast);
 	zend_short_circuiting_commit(checkpoint, result, ast);

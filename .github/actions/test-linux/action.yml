@@ -30,6 +30,7 @@ runs:
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export SKIP_IO_CAPTURE_TESTS=1
         export TEST_PHP_JUNIT=junit.out.xml
+        export STACK_LIMIT_DEFAULTS_CHECK=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -j$(/usr/bin/nproc) \
           -g FAIL,BORK,LEAK,XLEAK \

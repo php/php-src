@@ -183,7 +183,7 @@ bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 		zend_execute_data *execute_data = EG(current_execute_data);
 #endif
 		const zend_op *opline = EG(opline_before_exception);
-		if (RETURN_VALUE_USED(opline)) {
+		if (opline && RETURN_VALUE_USED(opline)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		}
 
