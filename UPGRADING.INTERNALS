@@ -16,6 +16,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 
 * zend_class_entry now possesses a default_object_handlers field, which
   provides a default object handler when create_object() is not overriding it.
+* Custom Fiber implementations have to initialize EG(stack_limit) and
+  EG(stack_base).
+* EG(opline_before_exception) may now be null if the VM throws an exception
+  before executing any opline.
 
 ========================
 2. Build system changes
@@ -28,6 +32,7 @@ PHP 8.3 INTERNALS UPGRADE NOTES
  a. ext/json
    - A new function php_json_validate_ex has been added to check if the
      provided C string is valid for the given depth and options.
+
 ========================
 4. OpCode changes
 ========================
@@ -35,3 +40,6 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+* SAPIs that may execute in alternative stacks have to set EG(stack_limit) and
+  EG(stack_base)
