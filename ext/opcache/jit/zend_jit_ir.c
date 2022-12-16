@@ -8577,10 +8577,11 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 
 	// JIT: EG(vm_stack_top) += used_stack;
 	// JIT: EG(vm_stack_top) = (zval*)((char*)call + used_stack); // TODO: try this ???
-	ref = ZEND_JIT_EG_ADDR(vm_stack_top),
+	ref = ZEND_JIT_EG_ADDR(vm_stack_top);
 	zend_jit_store(jit, ref,
 		ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
-			zend_jit_load(jit, IR_ADDR, ref),
+			/* zend_jit_load() makes load forwarding and doesn't allow fusion on x86 ??? */
+			(JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) ? zend_jit_ip(jit) : zend_jit_load(jit, IR_ADDR, ref),
 			used_stack_ref));
 
 	// JIT: zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
