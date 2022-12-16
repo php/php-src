@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Apache:
   . Fixed bug GH-9949 (Partial content on incomplete POST request). (cmb)
 
+- LDAP:
+  . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
+    (cmb)
+
 - TSRM:
   . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
 
