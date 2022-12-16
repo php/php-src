@@ -2756,20 +2756,26 @@ class ClassInfo {
             "&InheritedProperties;"
         );
 
-        $classSynopsis->appendChild(new DOMText("\n\n    "));
-        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
-        $classSynopsisInfo->setAttribute("role", "comment");
-        $classSynopsis->appendChild($classSynopsisInfo);
+        $isConcreteClass = ($this->type === "class" && !($this->flags & Class_::MODIFIER_ABSTRACT));
+
+        if ($isConcreteClass || !empty($this->funcInfos)) {
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
+            $classSynopsisInfo->setAttribute("role", "comment");
+            $classSynopsis->appendChild($classSynopsisInfo);
+        }
 
         $classReference = self::getClassSynopsisReference($this->name);
         $escapedName = addslashes($this->name->__toString());
 
-        $classSynopsis->appendChild(new DOMText("\n    "));
-        $includeElement = $this->createIncludeElement(
-            $doc,
-            "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
-        );
-        $classSynopsis->appendChild($includeElement);
+        if ($isConcreteClass || $this->hasConstructor()) {
+            $classSynopsis->appendChild(new DOMText("\n    "));
+            $includeElement = $this->createIncludeElement(
+                $doc,
+                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
+            );
+            $classSynopsis->appendChild($includeElement);
+        }
 
         if ($this->hasMethods()) {
             $classSynopsis->appendChild(new DOMText("\n    "));
