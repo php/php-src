@@ -11,4 +11,4 @@ try {
     echo "Exception: ", $ex->getMessage(), "\n";
 }
 --EXPECT--
-Exception: Cannot directly construct LDAP\Connection, use ldap_create() instead
+Exception: Cannot directly construct LDAP\Connection, use ldap_connect() instead
