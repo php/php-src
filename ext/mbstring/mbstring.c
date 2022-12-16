@@ -60,6 +60,7 @@
 # include "php_mbregex.h"
 #endif
 
+#include "zend_smart_str.h"
 #include "zend_multibyte.h"
 #include "mbstring_arginfo.h"
 
@@ -1281,19 +1282,15 @@ PHP_FUNCTION(mb_http_input)
 			if (n == 0) {
 				RETURN_FALSE;
 			}
-			// TODO Use smart_str instead.
-			mbfl_string result;
-			mbfl_memory_device device;
-			mbfl_memory_device_init(&device, n * 12, 0);
+
+			smart_str result = {0};
 			for (size_t i = 0; i < n; i++, entry++) {
-				mbfl_memory_device_strcat(&device, (*entry)->name);
-				mbfl_memory_device_output(',', &device);
+				if (i > 0) {
+					smart_str_appendc(&result, ',');
+				}
+				smart_str_appends(&result, (*entry)->name);
 			}
-			mbfl_memory_device_unput(&device); /* Remove trailing comma */
-			mbfl_memory_device_result(&device, &result);
-			RETVAL_STRINGL((const char*)result.val, result.len);
-			mbfl_string_clear(&result);
-			return;
+			RETURN_STR(smart_str_extract(&result));
 		default:
 			zend_argument_value_error(1,
 				"must be one of \"G\", \"P\", \"C\", \"S\", \"I\", or \"L\"");
