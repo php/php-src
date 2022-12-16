@@ -121,7 +121,7 @@ static zend_object *ldap_link_create_object(zend_class_entry *class_type) {
 }
 
 static zend_function *ldap_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP\\Connection, use ldap_create() instead");
+	zend_throw_error(NULL, "Cannot directly construct LDAP\\Connection, use ldap_connect() instead");
 	return NULL;
 }
 
