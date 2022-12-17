@@ -19,6 +19,12 @@ PHP 8.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Programs that were very close to overflowing the call stack may now throw an
+    Error when using more than
+    `zend.max_allowed_stack_size-zend.reserved_stack_size` bytes of stack
+    (`fiber.stack_size-zend.reserved_stack_size` for fibers).
+
 ========================================
 2. New Features
 ========================================
@@ -104,6 +110,26 @@ PHP 8.3 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- zend.max_allowed_stack_size
+  . New INI directive to set the maximum allowed stack size. Possible
+    values are `0` (detect the process or thread maximum stack size), `-1`
+    (no limit), or a positive number of bytes. The default is `0`. When it
+    is not possible to detect the the process or thread maximum stack size,
+    a known system default is used. Setting this value too high has the same
+    effect as disabling the stack size limit. Fibers use fiber.stack_size
+    as maximum allowed stack size. An Error is thrown when the process call
+    stack exceeds `zend.max_allowed_stack_size-zend.reserved_stack_size`
+    bytes, to prevent stack-overflow-induced segmentation faults, with
+    the goal of making debugging easier. The stack size increases during
+    uncontrolled recursions involving internal functions or the magic methods
+    __toString, __clone, __sleep, __destruct.  This is not related to stack
+    buffer overflows, and is not a security feature.
+
+- zend.reserved_stack_size
+  . New INI directive to set the reserved stack size, in bytes. This is
+    subtracted from the max allowed stack size, as a buffer, when checking the
+    stack size.
+
 ========================================
 12. Windows Support
 ========================================
@@ -111,6 +137,13 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- Core:
+  . An Error is now thrown when the process call stack exceeds a certain size,
+    to prevent stack-overflow-induced segmentation faults, with the goal of
+    making debugging easier. The maximum allowed stack size is controlled
+    by the INI directives zend.max_allowed_stack_size, zend.reserved_stack_size,
+    and fiber.stack_size.
 
 - FFI:
   . FFI::load() is now allowed during preloading when opcache.preload_user is the

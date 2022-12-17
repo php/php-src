@@ -42,6 +42,7 @@
 #include "zend_smart_str.h"
 #include "zend_observer.h"
 #include "zend_system_id.h"
+#include "zend_call_stack.h"
 #include "Optimizer/zend_func_info.h"
 
 /* Virtual current working directory support */
@@ -2227,6 +2228,14 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 {
 	zend_throw_error(NULL, "[] operator not supported for strings");
 }
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_call_stack_size_error(void)
+{
+	zend_throw_error(NULL, "Maximum call stack size of %zu bytes reached. Infinite recursion?",
+		(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
+}
+#endif /* ZEND_CHECK_STACK_LIMIT */
 
 static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {

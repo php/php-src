@@ -21,7 +21,7 @@
 static ZEND_COLD void undef_result_after_exception(void) {
 	const zend_op *opline = EG(opline_before_exception);
 	ZEND_ASSERT(EG(exception));
-	if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+	if (opline && opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 		zend_execute_data *execute_data = EG(current_execute_data);
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 	}
@@ -785,7 +785,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			if (UNEXPECTED(opline->opcode == ZEND_HANDLE_EXCEPTION)) {
 				opline = EG(opline_before_exception);
 			}
-			if (!zend_jit_undefined_op_helper_write(ht, opline->op2.var)) {
+			if (opline && !zend_jit_undefined_op_helper_write(ht, opline->op2.var)) {
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					if (EG(exception)) {
 						ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -1003,7 +1003,8 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 		default:
 			zend_jit_illegal_offset();
 			undef_result_after_exception();
-			if ((EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
+			if (EG(opline_before_exception)
+			 && (EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
 			 && ((EG(opline_before_exception)+1)->op1_type & (IS_VAR|IS_TMP_VAR))) {
 				zend_execute_data *execute_data = EG(current_execute_data);
 

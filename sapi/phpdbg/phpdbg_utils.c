@@ -611,7 +611,7 @@ PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_obj
 	uint32_t op_num, i;
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3) {
+	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3 && EG(opline_before_exception)) {
 		op = EG(opline_before_exception);
 	} else {
 		op = execute_data->opline;

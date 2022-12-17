@@ -2734,6 +2734,26 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
 ])
 
 dnl
+dnl PHP_CHECK_BUILTIN_FRAME_ADDRESS
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_FRAME_ADDRESS], [
+  AC_MSG_CHECKING([for __builtin_frame_address])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    return __builtin_frame_address(0) != (void*)0;
+  ]])], [
+    have_builtin_frame_address=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_frame_address=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_FRAME_ADDRESS],
+   [$have_builtin_frame_address], [Whether the compiler supports __builtin_frame_address])
+])
+
+dnl
 dnl PHP_PATCH_CONFIG_HEADERS([FILE])
 dnl
 dnl PACKAGE_* symbols are automatically defined by Autoconf. When including

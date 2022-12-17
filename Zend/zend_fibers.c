@@ -108,6 +108,10 @@ typedef struct _zend_fiber_vm_state {
 	uint32_t jit_trace_num;
 	JMP_BUF *bailout;
 	zend_fiber *active_fiber;
+#ifdef ZEND_CHECK_STACK_LIMIT
+	void *stack_base;
+	void *stack_limit;
+#endif
 } zend_fiber_vm_state;
 
 static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)
@@ -121,6 +125,10 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 	state->jit_trace_num = EG(jit_trace_num);
 	state->bailout = EG(bailout);
 	state->active_fiber = EG(active_fiber);
+#ifdef ZEND_CHECK_STACK_LIMIT
+	state->stack_base = EG(stack_base);
+	state->stack_limit = EG(stack_limit);
+#endif
 }
 
 static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
@@ -134,6 +142,10 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 	EG(jit_trace_num) = state->jit_trace_num;
 	EG(bailout) = state->bailout;
 	EG(active_fiber) = state->active_fiber;
+#ifdef ZEND_CHECK_STACK_LIMIT
+	EG(stack_base) = state->stack_base;
+	EG(stack_limit) = state->stack_limit;
+#endif
 }
 
 #ifdef ZEND_FIBER_UCONTEXT
@@ -294,6 +306,31 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 
 	efree(stack);
 }
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+ZEND_API void* zend_fiber_stack_limit(zend_fiber_stack *stack)
+{
+	zend_ulong reserve = EG(reserved_stack_size);
+
+#ifdef __APPLE__
+	/* On Apple Clang, the stack probing function ___chkstk_darwin incorrectly
+	 * probes a location that is twice the entered function's stack usage away
+	 * from the stack pointer, when using an alternative stack.
+	 * https://openradar.appspot.com/radar?id=5497722702397440
+	 */
+	reserve = reserve * 2;
+#endif
+
+	/* stack->pointer is the end of the stack */
+	return (int8_t*)stack->pointer + reserve;
+}
+
+ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack)
+{
+	return (void*)((uintptr_t)stack->pointer + stack->size);
+}
+#endif
+
 #ifdef ZEND_FIBER_UCONTEXT
 static ZEND_NORETURN void zend_fiber_trampoline(void)
 #else
@@ -534,6 +571,11 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		EG(current_execute_data) = fiber->execute_data;
 		EG(jit_trace_num) = 0;
 		EG(error_reporting) = error_reporting;
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+		EG(stack_base) = zend_fiber_stack_base(fiber->context.stack);
+		EG(stack_limit) = zend_fiber_stack_limit(fiber->context.stack);
+#endif
 
 		fiber->fci.retval = &fiber->result;
 
