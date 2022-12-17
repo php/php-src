@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fix inverted bailout value in zend_runtime_jit() (Max Kellermann).
+  . Fix access to uninitialized variable in accel_preload(). (nielsdos)
 
 - TSRM:
   . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
