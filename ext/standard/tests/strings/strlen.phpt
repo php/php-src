@@ -150,8 +150,7 @@ String length of 'Hello%0World' is => int(11)
 String length of 'Hello, World\0' is => int(14)
 String length of 'Hello, World
 ' is => int(13)
-String length of 'Hello, World
-' is => int(13)
+String length of 'Hello, World' is => int(13)
 String length of 'Hello, World	' is => int(13)
 String length of 'Hello, World\' is => int(13)
 String length of '              ' is => int(14)
