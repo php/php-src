@@ -199,7 +199,7 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 	const char *p = str;
 	char *new = NULL;
 
-	while (p && isspace(*p)) {
+	while (isspace(*p)) {
 		++p;
 		--len;
 	}
