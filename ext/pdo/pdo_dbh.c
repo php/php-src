@@ -1164,7 +1164,7 @@ PHP_METHOD(PDO, query)
 PHP_METHOD(PDO, quote)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
-	zend_string *str;
+	zend_string *str, *quoted;
 	zend_long paramtype = PDO_PARAM_STR;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1180,8 +1180,14 @@ PHP_METHOD(PDO, quote)
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support quoting");
 		RETURN_FALSE;
 	}
+	quoted = dbh->methods->quoter(dbh, str, paramtype);
 
-	RETURN_STR(dbh->methods->quoter(dbh, str, paramtype));
+	if (quoted == NULL) {
+		PDO_HANDLE_DBH_ERR();
+		RETURN_FALSE;
+	}
+
+	RETURN_STR(quoted);
 }
 /* }}} */
 
