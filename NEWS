@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   . Fix inverted bailout value in zend_runtime_jit() (Max Kellermann).
   . Fix access to uninitialized variable in accel_preload(). (nielsdos)
   . Fix zend_jit_find_trace() crashes. (Max Kellermann)
+  . Added missing lock for EXIT_INVALIDATE in zend_jit_trace_exit. (Max Kellermann)
 
 - PHPDBG:
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
