@@ -226,7 +226,11 @@ static zend_string *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const zend_string 
 /* NB: doesn't handle binary strings... use prepared stmts for that */
 static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	char *quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
+	char *quoted;
+	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
+		return NULL;
+	}
+	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 	/* TODO use %Q format? */
 	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
 	zend_string *quoted_str = zend_string_init(quoted, strlen(quoted), 0);
