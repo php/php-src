@@ -1,5 +1,9 @@
 --TEST--
 Stack limit 009 - Check that we can actually use all the stack
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die("skip msan requires a considerably higher zend.reserved_stack_size due to instrumentation");
+?>
 --EXTENSIONS--
 zend_test
 --FILE--
