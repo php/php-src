@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.27
 
+- PDO/SQLite:
+  . Fixed bug #81740 (PDO::quote() may return unquoted string). (CVE-2022-31631) 
+    (cmb)
+
 24 Nov 2022, PHP 8.0.26
 
 - CLI:
