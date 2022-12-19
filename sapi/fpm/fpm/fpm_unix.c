@@ -281,6 +281,11 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 		if (wp->config->user && *wp->config->user) {
 			if (strlen(wp->config->user) == strspn(wp->config->user, "0123456789")) {
 				wp->set_uid = strtoul(wp->config->user, 0, 10);
+				pwd = getpwuid(wp->set_uid);
+				if (pwd) {
+					wp->set_gid = pwd->pw_gid;
+					wp->set_user = strdup(pwd->pw_name);
+				}
 			} else {
 				struct passwd *pwd;
 
@@ -404,7 +409,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			}
 		}
 		if (wp->set_uid) {
-			if (0 > initgroups(wp->config->user, wp->set_gid)) {
+			if (0 > initgroups(wp->set_user ? wp->set_user : wp->config->user, wp->set_gid)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to initgroups(%s, %d)", wp->config->name, wp->config->user, wp->set_gid);
 				return -1;
 			}

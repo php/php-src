@@ -199,7 +199,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 	mysqlnd_upsert_status_init(&stmt->upsert_status_impl);
 	stmt->upsert_status = &(stmt->upsert_status_impl);
 	stmt->state = MYSQLND_STMT_INITTED;
-	stmt->execute_cmd_buffer.length = 4096;
+	stmt->execute_cmd_buffer.length = MYSQLND_NET_CMD_BUFFER_MIN_SIZE;
 	stmt->execute_cmd_buffer.buffer = mnd_emalloc(stmt->execute_cmd_buffer.length);
 	stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
 

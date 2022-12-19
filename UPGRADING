@@ -19,9 +19,19 @@ PHP 8.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Programs that were very close to overflowing the call stack may now throw an
+    Error when using more than
+    `zend.max_allowed_stack_size-zend.reserved_stack_size` bytes of stack
+    (`fiber.stack_size-zend.reserved_stack_size` for fibers).
+
 ========================================
 2. New Features
 ========================================
+
+- Posix
+  . posix_getrlimit() now takes an optional $res parameter to allow fetching a
+    single resource limit.
 
 ========================================
 3. Changes in SAPI modules
@@ -43,6 +53,10 @@ PHP 8.3 UPGRADE NOTES
     "buffer_size" => int
     See GH-9336
 
+- Standard:
+  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
+    RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
+
 ========================================
 6. New Functions
 ========================================
@@ -50,9 +64,19 @@ PHP 8.3 UPGRADE NOTES
 - JSON:
   . Added json_validate(), which returns whether the json is valid for
     the given $depth and $options.
+    RFC: https://wiki.php.net/rfc/json_validate
 
 - Posix:
   . Added posix_sysconf call to get runtime informations.
+
+- Random:
+  . Added Randomizer::getBytesFromString().
+    RFC: https://wiki.php.net/rfc/randomizer_additions
+  . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary.
+    RFC: https://wiki.php.net/rfc/randomizer_additions
+
+- Sockets:
+  . Added socket_atmark to checks if the socket is OOB marked.
 
 ========================================
 7. New Classes and Interfaces
@@ -70,6 +94,9 @@ PHP 8.3 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- PCNTL:
+  . SIGINFO
+
 - Posix:
   . POSIX_SC_ARG_MAX
   . POSIX_SC_PAGESIZE
@@ -83,6 +110,26 @@ PHP 8.3 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- zend.max_allowed_stack_size
+  . New INI directive to set the maximum allowed stack size. Possible
+    values are `0` (detect the process or thread maximum stack size), `-1`
+    (no limit), or a positive number of bytes. The default is `0`. When it
+    is not possible to detect the the process or thread maximum stack size,
+    a known system default is used. Setting this value too high has the same
+    effect as disabling the stack size limit. Fibers use fiber.stack_size
+    as maximum allowed stack size. An Error is thrown when the process call
+    stack exceeds `zend.max_allowed_stack_size-zend.reserved_stack_size`
+    bytes, to prevent stack-overflow-induced segmentation faults, with
+    the goal of making debugging easier. The stack size increases during
+    uncontrolled recursions involving internal functions or the magic methods
+    __toString, __clone, __sleep, __destruct.  This is not related to stack
+    buffer overflows, and is not a security feature.
+
+- zend.reserved_stack_size
+  . New INI directive to set the reserved stack size, in bytes. This is
+    subtracted from the max allowed stack size, as a buffer, when checking the
+    stack size.
+
 ========================================
 12. Windows Support
 ========================================
@@ -90,6 +137,13 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- Core:
+  . An Error is now thrown when the process call stack exceeds a certain size,
+    to prevent stack-overflow-induced segmentation faults, with the goal of
+    making debugging easier. The maximum allowed stack size is controlled
+    by the INI directives zend.max_allowed_stack_size, zend.reserved_stack_size,
+    and fiber.stack_size.
 
 - FFI:
   . FFI::load() is now allowed during preloading when opcache.preload_user is the

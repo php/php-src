@@ -26,6 +26,7 @@
 
 #include "php.h"
 
+#include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
 
 #include "php_random.h"
@@ -76,6 +77,8 @@ PHPAPI zend_class_entry *random_ce_Random_Engine_Secure;
 
 PHPAPI zend_class_entry *random_ce_Random_Randomizer;
 
+PHPAPI zend_class_entry *random_ce_Random_IntervalBoundary;
+
 PHPAPI zend_class_entry *random_ce_Random_RandomError;
 PHPAPI zend_class_entry *random_ce_Random_BrokenRandomEngineError;
 PHPAPI zend_class_entry *random_ce_Random_RandomException;
@@ -86,9 +89,7 @@ static zend_object_handlers random_engine_xoshiro256starstar_object_handlers;
 static zend_object_handlers random_engine_secure_object_handlers;
 static zend_object_handlers random_randomizer_object_handlers;
 
-#define RANDOM_RANGE_ATTEMPTS (50)
-
-static inline uint32_t rand_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax)
+PHPAPI uint32_t php_random_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax)
 {
 	uint32_t result, limit;
 	size_t total_size = 0;
@@ -124,8 +125,8 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
-		if (++count > RANDOM_RANGE_ATTEMPTS) {
-			zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
+		if (++count > PHP_RANDOM_RANGE_ATTEMPTS) {
+			zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
 			return 0;
 		}
 
@@ -144,7 +145,7 @@ static inline uint32_t rand_range32(const php_random_algo *algo, php_random_stat
 	return result % umax;
 }
 
-static inline uint64_t rand_range64(const php_random_algo *algo, php_random_status *status, uint64_t umax)
+PHPAPI uint64_t php_random_range64(const php_random_algo *algo, php_random_status *status, uint64_t umax)
 {
 	uint64_t result, limit;
 	size_t total_size = 0;
@@ -180,8 +181,8 @@ static inline uint64_t rand_range64(const php_random_algo *algo, php_random_stat
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
-		if (++count > RANDOM_RANGE_ATTEMPTS) {
-			zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", RANDOM_RANGE_ATTEMPTS);
+		if (++count > PHP_RANDOM_RANGE_ATTEMPTS) {
+			zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
 			return 0;
 		}
 
@@ -312,10 +313,10 @@ PHPAPI zend_long php_random_range(const php_random_algo *algo, php_random_status
 	zend_ulong umax = (zend_ulong) max - (zend_ulong) min;
 
 	if (umax > UINT32_MAX) {
-		return (zend_long) (rand_range64(algo, status, umax) + min);
+		return (zend_long) (php_random_range64(algo, status, umax) + min);
 	}
 
-	return (zend_long) (rand_range32(algo, status, umax) + min);
+	return (zend_long) (php_random_range32(algo, status, umax) + min);
 }
 /* }}} */
 
@@ -447,7 +448,21 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
-	return php_mt_rand_range(min, max);
+	php_random_status *status = php_random_default_status();
+	php_random_status_state_mt19937 *s = status->state;
+
+	if (s->mode == MT_RAND_MT19937) {
+		return php_mt_rand_range(min, max);
+	}
+
+	uint64_t r = php_random_algo_mt19937.generate(php_random_default_status()) >> 1;
+
+	/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
+	 * (max - min) > ZEND_LONG_MAX.
+	 */
+	zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
+
+	return (zend_long) (offset + min);
 }
 /* }}} */
 
@@ -883,6 +898,9 @@ PHP_MINIT_FUNCTION(random)
 	random_randomizer_object_handlers.offset = XtOffsetOf(php_random_randomizer, std);
 	random_randomizer_object_handlers.free_obj = randomizer_free_obj;
 	random_randomizer_object_handlers.clone_obj = NULL;
+
+	/* Random\IntervalBoundary */
+	random_ce_Random_IntervalBoundary = register_class_Random_IntervalBoundary();
 
 	register_random_symbols(module_number);
 

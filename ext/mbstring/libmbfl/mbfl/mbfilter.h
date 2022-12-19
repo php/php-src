@@ -112,13 +112,11 @@
 #define MBFL_VERSION_MINOR 3
 #define MBFL_VERSION_TEENY 2
 
-/*
- * convert filter
- */
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE 0
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR 1
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG 2
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY 3
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8 4 /* For internal use only; deliberately uses invalid UTF-8 byte sequence as error marker */
 
 /*
  * convenience macros
@@ -190,40 +188,15 @@ static inline int mbfl_is_error(size_t len) {
 	return len >= (size_t) -16;
 }
 
-/*
- * strlen
- */
-MBFLAPI extern size_t
-mbfl_strlen(const mbfl_string *string);
-
 #define MBFL_ERROR_NOT_FOUND ((size_t) -1)
 #define MBFL_ERROR_ENCODING ((size_t) -4)
 #define MBFL_ERROR_EMPTY ((size_t) -8)
 #define MBFL_ERROR_OFFSET ((size_t) -16)
 
 /*
- * strpos.
- * Errors: MBFL_ERROR_NOT_FOUND, MBFL_ERROR_ENCODING, MBFL_ERROR_OFFSET
- */
-MBFLAPI extern size_t
-mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);
-
-/*
- * substr_count
- */
-MBFLAPI extern size_t
-mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle);
-
-/*
  * If specified as length, the substr until the end of the string is taken.
  */
 #define MBFL_SUBSTR_UNTIL_END ((size_t) -1)
-
-/*
- * substr
- */
-MBFLAPI extern mbfl_string *
-mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
 /*
  * strcut

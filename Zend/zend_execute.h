@@ -179,6 +179,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant(zval *pp);
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *pp, zend_class_entry *scope);
+ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *pp, zend_class_entry *scope, zend_ast_evaluate_ctx *ctx);
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {
@@ -384,6 +385,7 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *execute_data);
+ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf);
 ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num);
 
 zval * ZEND_FASTCALL zend_handle_named_arg(

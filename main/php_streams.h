@@ -182,7 +182,7 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_NO_FCLOSE					0x80
 
 /* Suppress generation of PHP warnings on stream read/write errors.
- * Currently for internal use only. */
+ * Currently, for internal use only. */
 #define PHP_STREAM_FLAG_SUPPRESS_ERRORS				0x100
 
 /* Do not close handle except it is explicitly closed by user (e.g. fclose) */

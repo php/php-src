@@ -66,6 +66,7 @@ enum _zend_ast_kind {
 	ZEND_AST_ATTRIBUTE_LIST,
 	ZEND_AST_ATTRIBUTE_GROUP,
 	ZEND_AST_MATCH_ARM_LIST,
+	ZEND_AST_MODIFIER_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -297,7 +298,12 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 );
 
+typedef struct {
+	bool had_side_effects;
+} zend_ast_evaluate_ctx;
+
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *ast, zend_class_entry *scope, bool *short_circuited_ptr, zend_ast_evaluate_ctx *ctx);
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
 ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);

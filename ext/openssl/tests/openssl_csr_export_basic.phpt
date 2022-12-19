@@ -2,6 +2,10 @@
 openssl_csr_export() tests
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 $wrong = "wrong";

@@ -57,8 +57,8 @@ releases.
 
    - https://travis-ci.com/github/php/php-src
    - https://ci.appveyor.com/project/php/php-src
-   - https://dev.azure.com/phpazuredevops/PHP/
    - https://cirrus-ci.com/github/php/php-src
+   - https://github.com/php/php-src/actions
 
    > 💡 **Tip** \
    > We recommend checking the build status a couple of days before packaging day

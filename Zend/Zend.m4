@@ -146,7 +146,37 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill sigsetjmp)
+AC_CHECK_FUNCS(getpid kill sigsetjmp pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack gettid)
+
+dnl Test whether the stack grows downwards
+dnl Assumes contiguous stack
+AC_MSG_CHECKING(whether the stack grows downwards)
+
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdint.h>
+
+int (*volatile f)(uintptr_t);
+
+int stack_grows_downwards(uintptr_t arg) {
+    int local;
+    return (uintptr_t)&local < arg;
+}
+
+int main() {
+    int local;
+
+    f = stack_grows_downwards;
+    return f((uintptr_t)&local) ? 0 : 1;
+}
+]])], [
+  AC_DEFINE([ZEND_STACK_GROWS_DOWNWARDS], 1, [Define if the stack grows downwards])
+  AC_DEFINE([ZEND_CHECK_STACK_LIMIT], 1, [Define if checking the stack limit is supported])
+  AC_MSG_RESULT(yes)
+], [
+  AC_MSG_RESULT(no)
+], [
+  AC_MSG_RESULT(no)
+])
 
 ZEND_CHECK_FLOAT_PRECISION
 ])

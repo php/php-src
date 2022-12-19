@@ -3,9 +3,11 @@ FFI 300: FFI preloading
 --EXTENSIONS--
 ffi
 opcache
+posix
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip not for Windows');
+if (posix_geteuid() == 0) die('skip Cannot run test as root.');
 ?>
 --INI--
 ffi.enable=1

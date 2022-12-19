@@ -3,6 +3,7 @@ libxml_disable_entity_loader()
 --EXTENSIONS--
 libxml
 dom
+simplexml
 --FILE--
 <?php
 

@@ -1845,7 +1845,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -1954,7 +1954,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -2064,7 +2064,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 		}
 
 #if ZEND_DEBUG
-		if (!EG(exception) && call->func) {
+		if (!EG(exception) && call->func && !(call->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
@@ -2625,23 +2625,39 @@ add_unpack_again:
 	if (EXPECTED(Z_TYPE_P(op1) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(op1);
 		zval *val;
-		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
-			if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
-				val = Z_REFVAL_P(val);
-			}
-			Z_TRY_ADDREF_P(val);
-			if (key) {
-				zend_hash_update(result_ht, key, val);
-			} else {
-				if (!zend_hash_next_index_insert(result_ht, val)) {
-					zend_cannot_add_element();
-					zval_ptr_dtor_nogc(val);
-					break;
+		if (HT_IS_PACKED(ht) && (zend_hash_num_elements(result_ht) == 0 || HT_IS_PACKED(result_ht))) {
+			zend_hash_extend(result_ht, zend_hash_num_elements(result_ht) + zend_hash_num_elements(ht), 1);
+			ZEND_HASH_FILL_PACKED(result_ht) {
+				ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
+					if (UNEXPECTED(Z_ISREF_P(val)) &&
+						UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
+						val = Z_REFVAL_P(val);
+					}
+					Z_TRY_ADDREF_P(val);
+					ZEND_HASH_FILL_ADD(val);
+				} ZEND_HASH_FOREACH_END();
+			} ZEND_HASH_FILL_END();
+		} else {
+			zend_string *key;
+
+			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+				if (UNEXPECTED(Z_ISREF_P(val)) &&
+					UNEXPECTED(Z_REFCOUNT_P(val) == 1)) {
+					val = Z_REFVAL_P(val);
 				}
-			}
-		} ZEND_HASH_FOREACH_END();
+				Z_TRY_ADDREF_P(val);
+				if (key) {
+					zend_hash_update(result_ht, key, val);
+				} else {
+					if (!zend_hash_next_index_insert(result_ht, val)) {
+						zend_cannot_add_element();
+						zval_ptr_dtor_nogc(val);
+						break;
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
 		zend_class_entry *ce = Z_OBJCE_P(op1);
 		zend_object_iterator *iter;
@@ -3165,6 +3181,12 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *throw_op = EG(opline_before_exception);
+
+	/* Exception was thrown before executing any op */
+	if (UNEXPECTED(!throw_op)) {
+		ZEND_VM_TAIL_CALL(zend_dispatch_try_catch_finally_helper_SPEC(-1, 0 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+	}
+
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
 	int i, current_try_catch_offset = -1;
 
@@ -3818,12 +3840,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CON
 			} else {
 				SAVE_OPLINE();
 				ZVAL_COPY(param, default_value);
-				if (UNEXPECTED(zval_update_constant_ex(param, EX(func)->op_array.scope) != SUCCESS)) {
+				zend_ast_evaluate_ctx ctx = {0};
+				if (UNEXPECTED(zval_update_constant_with_ctx(param, EX(func)->op_array.scope, &ctx) != SUCCESS)) {
 					zval_ptr_dtor_nogc(param);
 					ZVAL_UNDEF(param);
 					HANDLE_EXCEPTION();
 				}
-				if (!Z_REFCOUNTED_P(param)) {
+				if (!Z_REFCOUNTED_P(param) && !ctx.had_side_effects) {
 					ZVAL_COPY_VALUE(cache_val, param);
 				}
 			}
@@ -7520,7 +7543,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 		}
 	}
 	/* non persistent, case sensitive */
-	ZEND_CONSTANT_SET_FLAGS(&c, CONST_CS, PHP_USER_CONSTANT);
+	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(Z_STR_P(name));
 
 	if (zend_register_constant(&c) == FAILURE) {
@@ -55756,6 +55779,16 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 
 	LOAD_OPLINE();
 	ZEND_VM_LOOP_INTERRUPT_CHECK();
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		/* No opline was executed before exception */
+		EG(opline_before_exception) = NULL;
+		LOAD_OPLINE();
+		/* Fall through to handle exception below. */
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
 
 	while (1) {
 #if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)

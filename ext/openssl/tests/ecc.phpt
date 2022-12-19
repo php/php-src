@@ -3,7 +3,9 @@ openssl_*() with OPENSSL_KEYTYPE_EC
 --EXTENSIONS--
 openssl
 --SKIPIF--
-<?php if (!defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
+<?php
+if (!defined("OPENSSL_KEYTYPE_EC")) die("skip EC disabled");
+?>
 --FILE--
 <?php
 $config =  __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';

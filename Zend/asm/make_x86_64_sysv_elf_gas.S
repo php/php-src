@@ -26,6 +26,8 @@
 
 # if defined __CET__
 #  include <cet.h>
+#  define SHSTK_ENABLED (__CET__ & 0x2)
+#  define BOOST_CONTEXT_SHADOW_STACK (SHSTK_ENABLED && SHADOW_STACK_SYSCALL)
 # else
 #  define _CET_ENDBR
 # endif
@@ -36,6 +38,12 @@
 .align 16
 make_fcontext:
     _CET_ENDBR
+
+#if BOOST_CONTEXT_SHADOW_STACK
+    /* the new shadow stack pointer (SSP) */
+    movq  -0x8(%rdi), %r9
+#endif
+
     /* first arg of make_fcontext() == top of context-stack */
     movq  %rdi, %rax
 
@@ -67,13 +75,59 @@ make_fcontext:
     /* will be entered after context-function returns */
     movq  %rcx, 0x30(%rax)
 
+#if BOOST_CONTEXT_SHADOW_STACK
+    /* Populate the shadow stack */
+
+    /* get original SSP */
+    rdsspq  %r8
+    /* restore new shadow stack */
+    rstorssp  -0x8(%r9)
+    /* save the restore token on the original shadow stack */
+    saveprevssp
+    /* push the address of "jmp trampoline" to the new shadow stack */
+    /* as well as the stack */
+    call  1f
+    jmp  trampoline
+1:
+    /* save address of "jmp trampoline" as return-address */
+    /* for context-function */
+    pop 0x38(%rax)
+    /* Get the new SSP.  */
+    rdsspq  %r9
+    /* restore original shadow stack */
+    rstorssp  -0x8(%r8)
+    /* save the restore token on the new shadow stack.  */
+    saveprevssp
+
+    /* now the new shadow stack looks like:
+        base->  +------------------------------+
+                | address of "jmp  trampoline" |
+        SSP->   +------------------------------+
+                |         restore token        |
+                +------------------------------+
+    */
+
+    /* reserve space for the new SSP */
+    leaq  -0x8(%rax), %rax
+    /* save the new SSP to this fcontext */
+    movq  %r9, (%rax)
+#endif
+
     ret /* return pointer to context-data */
 
 trampoline:
     /* store return address on stack */
     /* fix stack alignment */
     _CET_ENDBR
+#if BOOST_CONTEXT_SHADOW_STACK
+    /* save address of "jmp *%rbp" as return-address */
+    /* on stack and shadow stack */
+    call  2f
+    jmp  *%rbp
+2:
+#else
     push %rbp
+#endif
     /* jump to context-function */
     jmp *%rbx
 

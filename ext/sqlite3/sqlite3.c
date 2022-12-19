@@ -155,7 +155,6 @@ PHP_METHOD(SQLite3, open)
 #endif
 
 	db_obj->initialised = 1;
-	db_obj->authorizer_fci = empty_fcall_info;
 	db_obj->authorizer_fcc = empty_fcall_info_cache;
 
 	sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, db_obj);
@@ -727,13 +726,13 @@ PHP_METHOD(SQLite3, querySingle)
 }
 /* }}} */
 
-static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, sqlite3_value **argv, sqlite3_context *context, int is_agg) /* {{{ */
+static int sqlite3_do_callback(zend_fcall_info_cache *fcc, uint32_t argc, sqlite3_value **argv, sqlite3_context *context, int is_agg) /* {{{ */
 {
 	zval *zargs = NULL;
 	zval retval;
-	int i;
-	int ret;
-	int fake_argc;
+	uint32_t i;
+	uint32_t fake_argc;
+	zend_result ret = SUCCESS;
 	php_sqlite3_agg_context *agg_context = NULL;
 
 	if (is_agg) {
@@ -742,14 +741,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 
 	fake_argc = argc + is_agg;
 
-	fc->fci.size = sizeof(fc->fci);
-	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
-	fc->fci.object = NULL;
-	fc->fci.retval = &retval;
-	fc->fci.param_count = fake_argc;
-
 	/* build up the params */
-
 	if (fake_argc) {
 		zargs = (zval *)safe_emalloc(fake_argc, sizeof(zval), 0);
 	}
@@ -791,23 +783,16 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		}
 	}
 
-	fc->fci.params = zargs;
-
-	if ((ret = zend_call_function(&fc->fci, &fc->fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
-	}
-
-	if (is_agg) {
-		zval_ptr_dtor(&zargs[0]);
-	}
+	zend_call_known_fcc(fcc, &retval, fake_argc, zargs, /* named_params */ NULL);
 
 	/* clean up the params */
+	if (is_agg) {
+		zval_ptr_dtor(&zargs[0]);
+		zval_ptr_dtor(&zargs[1]);
+	}
 	if (fake_argc) {
 		for (i = is_agg; i < argc + is_agg; i++) {
 			zval_ptr_dtor(&zargs[i]);
-		}
-		if (is_agg) {
-			zval_ptr_dtor(&zargs[1]);
 		}
 		efree(zargs);
 	}
@@ -872,7 +857,7 @@ static void php_sqlite3_callback_func(sqlite3_context *context, int argc, sqlite
 {
 	php_sqlite3_func *func = (php_sqlite3_func *)sqlite3_user_data(context);
 
-	sqlite3_do_callback(&func->afunc, &func->func, argc, argv, context, 0);
+	sqlite3_do_callback(&func->func, argc, argv, context, 0);
 }
 /* }}}*/
 
@@ -883,7 +868,7 @@ static void php_sqlite3_callback_step(sqlite3_context *context, int argc, sqlite
 
 	agg_context->row_count++;
 
-	sqlite3_do_callback(&func->astep, &func->step, argc, argv, context, 1);
+	sqlite3_do_callback(&func->step, argc, argv, context, 1);
 }
 /* }}} */
 
@@ -894,7 +879,7 @@ static void php_sqlite3_callback_final(sqlite3_context *context) /* {{{ */
 
 	agg_context->row_count = 0;
 
-	sqlite3_do_callback(&func->afini, &func->fini, 0, NULL, context, 1);
+	sqlite3_do_callback(&func->fini, 0, NULL, context, 1);
 }
 /* }}} */
 
@@ -903,27 +888,17 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	php_sqlite3_collation *collation = (php_sqlite3_collation*)coll;
 	zval zargs[2];
 	zval retval;
-	int ret;
+	int ret = 0;
 
 	// Exception occurred on previous callback. Don't attempt to call function.
 	if (EG(exception)) {
 		return 0;
 	}
 
-	collation->fci.fci.size = (sizeof(collation->fci.fci));
-	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
-	collation->fci.fci.object = NULL;
-	collation->fci.fci.retval = &retval;
-	collation->fci.fci.param_count = 2;
-
 	ZVAL_STRINGL(&zargs[0], a, a_len);
 	ZVAL_STRINGL(&zargs[1], b, b_len);
 
-	collation->fci.fci.params = zargs;
-
-	if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
-	}
+	zend_call_known_fcc(&collation->cmp_func, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
 
 	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
@@ -974,7 +949,13 @@ PHP_METHOD(SQLite3, createFunction)
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, flags | SQLITE_UTF8, func, php_sqlite3_callback_func, NULL, NULL) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
 
-		ZVAL_COPY(&func->func, &fci.function_name);
+		if (!ZEND_FCC_INITIALIZED(fcc)) {
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+		}
+		zend_fcc_dup(&func->func, &fcc);
 
 		func->argc = sql_func_num_args;
 		func->next = db_obj->funcs;
@@ -1016,8 +997,20 @@ PHP_METHOD(SQLite3, createAggregate)
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, SQLITE_UTF8, func, NULL, php_sqlite3_callback_step, php_sqlite3_callback_final) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
 
-		ZVAL_COPY(&func->step, &step_fci.function_name);
-		ZVAL_COPY(&func->fini, &fini_fci.function_name);
+		if (!ZEND_FCC_INITIALIZED(step_fcc)) {
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+			zend_is_callable_ex(&step_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &step_fcc, NULL);
+		}
+		zend_fcc_dup(&func->step, &step_fcc);
+		if (!ZEND_FCC_INITIALIZED(fini_fcc)) {
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+			zend_is_callable_ex(&fini_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fini_fcc, NULL);
+		}
+		zend_fcc_dup(&func->fini, &fini_fcc);
 
 		func->argc = sql_func_num_args;
 		func->next = db_obj->funcs;
@@ -1057,7 +1050,13 @@ PHP_METHOD(SQLite3, createCollation)
 	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {
 		collation->collation_name = estrdup(collation_name);
 
-		ZVAL_COPY(&collation->cmp_func, &fci.function_name);
+		if (!ZEND_FCC_INITIALIZED(fcc)) {
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
+		}
+		zend_fcc_dup(&collation->cmp_func, &fcc);
 
 		collation->next = db_obj->collations;
 		db_obj->collations = collation;
@@ -1312,16 +1311,20 @@ PHP_METHOD(SQLite3, setAuthorizer)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	/* Clear previously set callback */
-	if (ZEND_FCI_INITIALIZED(db_obj->authorizer_fci)) {
-		zval_ptr_dtor(&db_obj->authorizer_fci.function_name);
-		db_obj->authorizer_fci.size = 0;
+	if (ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
+		zend_fcc_dtor(&db_obj->authorizer_fcc);
 	}
 
 	/* Only enable userland authorizer if argument is not NULL */
 	if (ZEND_FCI_INITIALIZED(fci)) {
-		db_obj->authorizer_fci = fci;
-		Z_ADDREF(db_obj->authorizer_fci.function_name);
+		if (!ZEND_FCC_INITIALIZED(fcc)) {
+			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
+			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+			 * with it outselves. It is important that it is not refetched on every call,
+			 * because calls may occur from different scopes. */
+		}
 		db_obj->authorizer_fcc = fcc;
+		zend_fcc_addref(&db_obj->authorizer_fcc);
 	}
 
 	RETURN_TRUE;
@@ -2073,14 +2076,8 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 			if (memcmp(arg1, ":memory:", sizeof(":memory:")) && *arg1) {
 				if (strncmp(arg1, "file:", 5) == 0) {
 					/* starts with "file:" */
-					if (!arg1[5]) {
-						return SQLITE_DENY;
-					}
-					if (php_check_open_basedir(arg1 + 5)) {
-						return SQLITE_DENY;
-					}
-				}
-				if (php_check_open_basedir(arg1)) {
+					return SQLITE_DENY;
+				} else if (php_check_open_basedir(arg1)) {
 					return SQLITE_DENY;
 				}
 			}
@@ -2088,10 +2085,9 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 	}
 
 	php_sqlite3_db_object *db_obj = (php_sqlite3_db_object *)autharg;
-	zend_fcall_info *fci = &db_obj->authorizer_fci;
 
 	/* fallback to access allowed if authorizer callback is not defined */
-	if (fci->size == 0) {
+	if (!ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
 		return SQLITE_OK;
 	}
 
@@ -2125,13 +2121,10 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 		ZVAL_STRING(&argv[4], arg4);
 	}
 
-	fci->retval = &retval;
-	fci->param_count = 5;
-	fci->params = argv;
-
 	int authreturn = SQLITE_DENY;
 
-	if (zend_call_function(fci, &db_obj->authorizer_fcc) != SUCCESS || Z_ISUNDEF(retval)) {
+	zend_call_known_fcc(&db_obj->authorizer_fcc, &retval, /* argc */ 5, argv, /* named_params */ NULL);
+	if (Z_ISUNDEF(retval)) {
 		php_sqlite3_error(db_obj, "An error occurred while invoking the authorizer callback");
 	} else {
 		if (Z_TYPE(retval) != IS_LONG) {
@@ -2146,8 +2139,13 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 		}
 	}
 
-	zend_fcall_info_args_clear(fci, 0);
+	/* Free local return and argument values */
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&argv[0]);
+	zval_ptr_dtor(&argv[1]);
+	zval_ptr_dtor(&argv[2]);
+	zval_ptr_dtor(&argv[3]);
+	zval_ptr_dtor(&argv[4]);
 
 	return authreturn;
 }
@@ -2189,8 +2187,8 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 	}
 
 	/* Release function_name from authorizer */
-	if (intern->authorizer_fci.size > 0) {
-		zval_ptr_dtor(&intern->authorizer_fci.function_name);
+	if (ZEND_FCC_INITIALIZED(intern->authorizer_fcc)) {
+		zend_fcc_dtor(&intern->authorizer_fcc);
 	}
 
 	while (intern->funcs) {
@@ -2202,14 +2200,14 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 
 		efree((char*)func->func_name);
 
-		if (!Z_ISUNDEF(func->func)) {
-			zval_ptr_dtor(&func->func);
+		if (ZEND_FCC_INITIALIZED(func->func)) {
+			zend_fcc_dtor(&func->func);
 		}
-		if (!Z_ISUNDEF(func->step)) {
-			zval_ptr_dtor(&func->step);
+		if (ZEND_FCC_INITIALIZED(func->step)) {
+			zend_fcc_dtor(&func->step);
 		}
-		if (!Z_ISUNDEF(func->fini)) {
-			zval_ptr_dtor(&func->fini);
+		if (ZEND_FCC_INITIALIZED(func->fini)) {
+			zend_fcc_dtor(&func->fini);
 		}
 		efree(func);
 	}
@@ -2221,8 +2219,8 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 			sqlite3_create_collation(intern->db, collation->collation_name, SQLITE_UTF8, NULL, NULL);
 		}
 		efree((char*)collation->collation_name);
-		if (!Z_ISUNDEF(collation->cmp_func)) {
-			zval_ptr_dtor(&collation->cmp_func);
+		if (ZEND_FCC_INITIALIZED(collation->cmp_func)) {
+			zend_fcc_dtor(&collation->cmp_func);
 		}
 		efree(collation);
 	}

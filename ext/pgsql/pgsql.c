@@ -1833,9 +1833,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 
 	if (into_object) {
 		zval dataset;
-		zend_fcall_info fci;
-		zend_fcall_info_cache fcc;
-		zval retval;
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 		object_init_ex(return_value, ce);
@@ -1847,23 +1844,8 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		}
 
 		if (ce->constructor) {
-			fci.size = sizeof(fci);
-			ZVAL_UNDEF(&fci.function_name);
-			fci.object = Z_OBJ_P(return_value);
-			fci.retval = &retval;
-			fci.params = NULL;
-			fci.param_count = 0;
-			fci.named_params = ctor_params;
-
-			fcc.function_handler = ce->constructor;
-			fcc.called_scope = Z_OBJCE_P(return_value);
-			fcc.object = Z_OBJ_P(return_value);
-
-			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
-			} else {
-				zval_ptr_dtor(&retval);
-			}
+			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
+				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
 		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
 			/* TODO Convert this to a ValueError */
 			zend_argument_error(zend_ce_exception, 3,

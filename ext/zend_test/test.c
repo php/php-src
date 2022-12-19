@@ -30,6 +30,7 @@
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
+#include "zend_call_stack.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -39,6 +40,7 @@ static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
+static zend_class_entry *zend_test_property_attribute;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_forbid_dynamic_call;
@@ -455,6 +457,65 @@ static ZEND_FUNCTION(zend_test_parameter_with_attribute)
 	RETURN_LONG(1);
 }
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+static ZEND_FUNCTION(zend_test_zend_call_stack_get)
+{
+	zend_call_stack stack;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (zend_call_stack_get(&stack)) {
+		zend_string *str;
+
+		array_init(return_value);
+
+		str = strpprintf(0, "%p", stack.base);
+		add_assoc_str(return_value, "base", str);
+
+		str = strpprintf(0, "0x%zx", stack.max_size);
+		add_assoc_str(return_value, "max_size", str);
+
+		str = strpprintf(0, "%p", zend_call_stack_position());
+		add_assoc_str(return_value, "position", str);
+
+		str = strpprintf(0, "%p", EG(stack_limit));
+		add_assoc_str(return_value, "EG(stack_limit)", str);
+
+		return;
+	}
+
+	RETURN_NULL();
+}
+
+zend_long (*volatile zend_call_stack_use_all_fun)(void *limit);
+
+static zend_long zend_call_stack_use_all(void *limit)
+{
+	if (zend_call_stack_overflowed(limit)) {
+		return 1;
+	}
+
+	return 1 + zend_call_stack_use_all_fun(limit);
+}
+
+static ZEND_FUNCTION(zend_test_zend_call_stack_use_all)
+{
+	zend_call_stack stack;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (!zend_call_stack_get(&stack)) {
+		return;
+	}
+
+	zend_call_stack_use_all_fun = zend_call_stack_use_all;
+
+	void *limit = zend_call_stack_limit(stack.base, stack.max_size, 4096);
+
+	RETURN_LONG(zend_call_stack_use_all(limit));
+}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
@@ -587,6 +648,17 @@ static ZEND_METHOD(ZendTestParameterAttribute, __construct)
 	ZVAL_STR_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), parameter);
 }
 
+static ZEND_METHOD(ZendTestPropertyAttribute, __construct)
+{
+	zend_string *parameter;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(parameter)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_STR_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), parameter);
+}
+
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override)
 {
 	zend_string *parameter;
@@ -687,6 +759,9 @@ PHP_MINIT_FUNCTION(zend_test)
 
 		ZVAL_PSTRING(&attr->args[0].value, "value1");
 	}
+
+	zend_test_property_attribute = register_class_ZendTestPropertyAttribute();
+	zend_mark_internal_attribute(zend_test_property_attribute);
 
 	zend_test_class_with_method_with_parameter_attribute = register_class_ZendTestClassWithMethodWithParameterAttribute();
 

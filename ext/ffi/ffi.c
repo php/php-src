@@ -32,6 +32,17 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef HAVE_LIBDL
+#ifdef PHP_WIN32
+#include "win32/param.h"
+#include "win32/winutil.h"
+#define GET_DL_ERROR()  php_win_err()
+#else
+#include <sys/param.h>
+#define GET_DL_ERROR()  DL_ERROR()
+#endif
+#endif
+
 #ifdef HAVE_GLOB
 #ifdef PHP_WIN32
 #include "win32/glob.h"
@@ -2934,6 +2945,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	zend_string *lib = NULL;
 	zend_ffi *ffi = NULL;
 	DL_HANDLE handle = NULL;
+	char *err;
 	void *addr;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
@@ -2946,9 +2958,21 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	if (lib) {
 		handle = DL_LOAD(ZSTR_VAL(lib));
 		if (!handle) {
-			zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s'", ZSTR_VAL(lib));
+			err = GET_DL_ERROR();
+#ifdef PHP_WIN32
+			if (err && err[0]) {
+				zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (%s)", ZSTR_VAL(lib), err);
+				php_win32_error_msg_free(err);
+			} else {
+				zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (Unknown reason)", ZSTR_VAL(lib));
+			}
+#else
+			zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (%s)", ZSTR_VAL(lib), err);
+			GET_DL_ERROR(); /* free the buffer storing the error */
+#endif
 			RETURN_THROWS();
 		}
+
 #ifdef RTLD_DEFAULT
 	} else if (1) {
 		// TODO: this might need to be disabled or protected ???
@@ -3201,7 +3225,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 {
 	struct stat buf;
 	int fd;
-	char *code, *code_pos, *scope_name, *lib;
+	char *code, *code_pos, *scope_name, *lib, *err;
 	size_t code_size, scope_name_len;
 	zend_ffi *ffi;
 	DL_HANDLE handle = NULL;
@@ -3278,7 +3302,18 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 			if (preload) {
 				zend_error(E_WARNING, "FFI: Failed pre-loading '%s'", lib);
 			} else {
-				zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s'", lib);
+				err = GET_DL_ERROR();
+#ifdef PHP_WIN32
+				if (err && err[0]) {
+					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (%s)", lib, err);
+					php_win32_error_msg_free(err);
+				} else {
+					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (Unknown reason)", lib);
+				}
+#else
+				zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s' (%s)", lib, err);
+				GET_DL_ERROR(); /* free the buffer storing the error */
+#endif
 			}
 			goto cleanup;
 		}

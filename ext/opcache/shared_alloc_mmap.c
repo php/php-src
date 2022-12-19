@@ -34,6 +34,9 @@
 #endif
 
 #include "zend_execute.h"
+#ifdef HAVE_SYS_PROCCTL_H
+#include <sys/procctl.h>
+#endif
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
@@ -156,6 +159,12 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	zend_shared_segment *shared_segment;
 	int flags = PROT_READ | PROT_WRITE, fd = -1;
 	void *p;
+#if defined(HAVE_PROCCTL) && defined(PROC_WXMAP_CTL)
+	int enable_wxmap = PROC_WX_MAPPINGS_PERMIT;
+	if (procctl(P_PID, getpid(), PROC_WXMAP_CTL, &enable_wxmap) == -1) {
+		return ALLOC_FAILURE;
+	}
+#endif
 #ifdef PROT_MPROTECT
 	flags |= PROT_MPROTECT(PROT_EXEC);
 #endif

@@ -410,6 +410,7 @@ sys/file.h \
 sys/mman.h \
 sys/mount.h \
 sys/poll.h \
+sys/procctl.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \
@@ -509,6 +510,8 @@ dnl Check __builtin_cpu_init
 PHP_CHECK_BUILTIN_CPU_INIT
 dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
+dnl Check __builtin_frame_address
+PHP_CHECK_BUILTIN_FRAME_ADDRESS
 dnl Check prctl
 PHP_CHECK_PRCTL
 dnl Check procctl
@@ -716,7 +719,7 @@ return 0;
 #else
 #error "unsupported platform"
 #endif
-]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no])
+]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no], [ac_cv_copy_file_range=no])
 ])
 
 if test "$ac_cv_copy_file_range" = yes; then
@@ -1295,10 +1298,35 @@ else
   fiber_asm="no"
 fi
 
+dnl Check whether syscall to create shadow stack exists, should be a better way, but...
+AC_CACHE_CHECK([whether syscall to create shadow stack exists], ac_cv_syscall_shadow_stack_exists,
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <unistd.h>
+#include <sys/mman.h>
+int main(void) {
+  /* test if syscall 451, i.e., map_shadow_stack is available */
+  void* base = (void *)syscall(451, 0, 0x20000, 0x1);
+  if (base != (void*)-1) {
+    munmap(base, 0x20000);
+    return 0;
+  }
+  else
+    return 1;
+}
+  ]])], [ac_cv_syscall_shadow_stack_exists=yes], [ac_cv_syscall_shadow_stack_exists=no], [ac_cv_syscall_shadow_stack_exists=no])
+])
+if test "$ac_cv_syscall_shadow_stack_exists" = yes; then
+  AC_DEFINE([SHADOW_STACK_SYSCALL], 1, [ ])
+  # asm file can't see macro from AC_DEFINE, workaround this via cflag
+  fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=1"
+  # if the syscall doesn't exist, we may block the final ELF from __PROPERTY_SHSTK
+  # via redefine macro as "-D__CET__=1"
+fi
+
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
   AC_DEFINE([ZEND_FIBER_ASM], 1, [ ])
-  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S)
+  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S, "$fiber_asm_cflag")
   AC_MSG_RESULT([$fiber_asm_file])
 else
   if test "$fiber_os" = 'mac'; then
@@ -1675,7 +1703,7 @@ PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_C
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_compile.c zend_constants.c zend_dtrace.c \
+    zend_alloc.c zend_call_stack.c zend_compile.c zend_constants.c zend_dtrace.c \
     zend_execute_API.c zend_highlight.c zend_llist.c \
     zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \

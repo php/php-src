@@ -91,7 +91,7 @@ typedef enum {
 
 MBSTRING_API zend_string *php_unicode_convert_case(
 		php_case_mode case_mode, const char *srcstr, size_t srclen,
-		const mbfl_encoding *src_encoding, int illegal_mode, uint32_t illegal_substchar);
+		const mbfl_encoding *src_encoding, const mbfl_encoding *dst_encoding, int illegal_mode, uint32_t illegal_substchar);
 
 /* Optimize the common ASCII case for lower/upper */
 

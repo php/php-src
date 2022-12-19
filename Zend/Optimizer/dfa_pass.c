@@ -355,7 +355,9 @@ static bool opline_supports_assign_contraction(
 
 	if ((opline->opcode == ZEND_ASSIGN_OP
 	  || opline->opcode == ZEND_ASSIGN_OBJ
-	  || opline->opcode == ZEND_ASSIGN_DIM)
+	  || opline->opcode == ZEND_ASSIGN_DIM
+	  || opline->opcode == ZEND_ASSIGN_OBJ_OP
+	  || opline->opcode == ZEND_ASSIGN_DIM_OP)
 	 && opline->op1_type == IS_CV
 	 && opline->op1.var == cv_var
 	 && zend_may_throw(opline, &ssa->ops[ssa->vars[src_var].definition], op_array, ssa)) {
@@ -845,7 +847,7 @@ optimize_jmpnz:
 						goto optimize_jmpz;
 					} else if (opline->op1_type == IS_CONST) {
 						if (zend_is_true(CT_CONSTANT_EX(op_array, opline->op1.constant))) {
-							opline->opcode = ZEND_QM_ASSIGN;
+							opline->opcode = ZEND_BOOL;
 							take_successor_1(ssa, block_num, block);
 						}
 					}
@@ -859,7 +861,7 @@ optimize_jmpnz:
 						goto optimize_jmpnz;
 					} else if (opline->op1_type == IS_CONST) {
 						if (!zend_is_true(CT_CONSTANT_EX(op_array, opline->op1.constant))) {
-							opline->opcode = ZEND_QM_ASSIGN;
+							opline->opcode = ZEND_BOOL;
 							take_successor_1(ssa, block_num, block);
 						}
 					}

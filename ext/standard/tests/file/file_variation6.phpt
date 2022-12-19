@@ -3,7 +3,7 @@ file() with a range of integer flag values
 --FILE--
 <?php
 
-$filepath = __FILE__ . ".tmp";
+$filepath = __DIR__ . '/file_variation_6.tmp';
 $fd = fopen($filepath, "w+");
 fwrite($fd, "Line 1\nLine 2\nLine 3");
 fclose($fd);
@@ -16,8 +16,11 @@ for ($flags = 0; $flags <= 32; $flags++) {
     }
 }
 
+?>
+--CLEAN--
+<?php
+$filepath = __DIR__ . '/file_variation_6.tmp';
 unlink($filepath);
-
 ?>
 --EXPECT--
 array(3) {

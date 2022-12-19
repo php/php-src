@@ -105,6 +105,11 @@ class Tester
     private $masterProcess;
 
     /**
+     * @var bool
+     */
+    private bool $daemonized;
+
+    /**
      * @var resource
      */
     private $outDesc;
@@ -299,7 +304,7 @@ class Tester
      */
     static public function skipIfNotRoot()
     {
-        if (getmyuid() != 0) {
+        if (exec('whoami') !== 'root') {
             die('skip not running as root');
         }
     }
@@ -309,7 +314,7 @@ class Tester
      */
     static public function skipIfRoot()
     {
-        if (getmyuid() == 0) {
+        if (exec('whoami') === 'root') {
             die('skip running as root');
         }
     }
@@ -321,6 +326,17 @@ class Tester
     {
         if ( ! extension_loaded('posix')) {
             die('skip posix extension not loaded');
+        }
+    }
+
+    /**
+     * Skip if posix extension not loaded.
+     */
+    static public function skipIfUserDoesNotExist($userName)
+    {
+        self::skipIfPosixNotLoaded();
+        if (posix_getpwnam($userName) === false) {
+            die("skip user $userName does not exist");
         }
     }
 
@@ -383,19 +399,44 @@ class Tester
      *
      * @param array $extraArgs   Command extra arguments.
      * @param bool  $forceStderr Whether to output to stderr so error log is used.
+     * @param bool  $daemonize   Whether to start FPM daemonized
+     * @param array $extensions  List of extension to add if shared build used.
+     * @param array $iniEntries  List of ini entries to use.
      *
      * @return bool
      * @throws \Exception
      */
-    public function start(array $extraArgs = [], bool $forceStderr = true)
-    {
+    public function start(
+        array $extraArgs = [],
+        bool $forceStderr = true,
+        bool $daemonize = false,
+        array $extensions = [],
+        array $iniEntries = [],
+    ) {
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
 
-        $cmd = [self::findExecutable(), '-F', '-y', $configFile];
+        $cmd = [self::findExecutable(), '-y', $configFile];
 
         if ($forceStderr) {
             $cmd[] = '-O';
+        }
+
+        $this->daemonized = $daemonize;
+        if ( ! $daemonize) {
+            $cmd[] = '-F';
+        }
+
+        $extensionDir = getenv('TEST_FPM_EXTENSION_DIR');
+        if ($extensionDir) {
+            $cmd[] = '-dextension_dir=' . $extensionDir;
+            foreach ($extensions as $extension) {
+                $cmd[] = '-dextension=' . $extension;
+            }
+        }
+
+        foreach ($iniEntries as $iniEntryName => $iniEntryValue) {
+            $cmd[] = '-d' . $iniEntryName . '=' . $iniEntryValue;
         }
 
         if (getenv('TEST_FPM_RUN_AS_ROOT')) {
@@ -420,6 +461,9 @@ class Tester
         if ( ! $this->outDesc !== false) {
             $this->outDesc = $pipes[1];
             $this->logReader->setStreamSource('{{MASTER:OUT}}', $this->outDesc);
+            if ($daemonize) {
+                $this->switchLogSource('{{FILE:LOG}}');
+            }
         }
 
         return true;
@@ -853,7 +897,11 @@ class Tester
      */
     public function terminate()
     {
-        proc_terminate($this->masterProcess);
+        if ($this->daemonized) {
+            $this->signal('TERM');
+        } else {
+            proc_terminate($this->masterProcess);
+        }
     }
 
     /**
@@ -1294,6 +1342,26 @@ class Tester
     }
 
     /**
+     * Expect log to be empty.
+     *
+     * @throws \Exception
+     */
+    public function expectLogEmpty()
+    {
+        try {
+            $line = $this->logReader->getLine(1, 0, true);
+            if ($line === '') {
+                $line = $this->logReader->getLine(1, 0, true);
+            }
+            if ($line !== null) {
+                $this->error('Log is not closed and returned line: ' . $line);
+            }
+        } catch (LogTimoutException $exception) {
+            $this->error('Log is not closed and timed out', $exception);
+        }
+    }
+
+    /**
      * Expect reloading lines to be logged.
      *
      * @param int  $socketCount
@@ -1345,13 +1413,54 @@ class Tester
     /**
      * Expect log pattern in logs.
      *
-     * @param string $pattern Log pattern
+     * @param string   $pattern             Log pattern
+     * @param bool     $checkAllLogs        Whether to also check past logs.
+     * @param int|null $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @throws \Exception
      */
-    public function expectLogPattern(string $pattern)
-    {
-        $this->logTool->expectPattern($pattern);
+    public function expectLogPattern(
+        string $pattern,
+        bool $checkAllLogs = false,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null,
+    ) {
+        $this->logTool->expectPattern(
+            $pattern,
+            false,
+            $checkAllLogs,
+            $timeoutSeconds,
+            $timeoutMicroseconds
+        );
+    }
+
+    /**
+     * Expect no such log pattern in logs.
+     *
+     * @param string   $pattern             Log pattern
+     * @param bool     $checkAllLogs        Whether to also check past logs.
+     * @param int|null $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
+     *
+     * @throws \Exception
+     */
+    public function expectNoLogPattern(
+        string $pattern,
+        bool $checkAllLogs = true,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null,
+    ) {
+        if (is_null($timeoutSeconds) && is_null($timeoutMicroseconds)) {
+            $timeoutMicroseconds = 10;
+        }
+        $this->logTool->expectPattern(
+            $pattern,
+            true,
+            $checkAllLogs,
+            $timeoutSeconds,
+            $timeoutMicroseconds
+        );
     }
 
     /**
@@ -1405,11 +1514,15 @@ class Tester
     /**
      * Expect log entry.
      *
-     * @param string      $type         The log type
-     * @param string      $message      The expected message
-     * @param string|null $pool         The pool for pool prefixed log entry
-     * @param int         $count        The number of items
-     * @param bool        $checkAllLogs Whether to also check past logs.
+     * @param string      $type                The log type.
+     * @param string      $message             The expected message.
+     * @param string|null $pool                The pool for pool prefixed log entry.
+     * @param int         $count               The number of items.
+     * @param bool        $checkAllLogs        Whether to also check past logs.
+     * @param bool        $invert              Whether the log entry is not expected rather than expected.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
+     * @param string      $ignoreErrorFor      Ignore error for supplied string in the message.
      *
      * @return bool
      * @throws \Exception
@@ -1419,10 +1532,25 @@ class Tester
         string $message,
         string $pool = null,
         int $count = 1,
-        bool $checkAllLogs = false
+        bool $checkAllLogs = false,
+        bool $invert = false,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null,
+        string $ignoreErrorFor = LogTool::DEBUG
     ): bool {
         for ($i = 0; $i < $count; $i++) {
-            if ( ! $this->logTool->expectEntry($type, $message, $pool, checkAllLogs: $checkAllLogs)) {
+            $result = $this->logTool->expectEntry(
+                $type,
+                $message,
+                $pool,
+                $ignoreErrorFor,
+                $checkAllLogs,
+                $invert,
+                $timeoutSeconds,
+                $timeoutMicroseconds,
+            );
+
+            if ( ! $result) {
                 return false;
             }
         }
@@ -1433,10 +1561,13 @@ class Tester
     /**
      * Expect a log debug message.
      *
-     * @param string      $message
-     * @param string|null $pool
-     * @param int         $count
-     * @param bool        $checkAllLogs Whether to also check past logs.
+     * @param string      $message             The expected message.
+     * @param string|null $pool                The pool for pool prefixed log entry.
+     * @param int         $count               The number of items.
+     * @param bool        $checkAllLogs        Whether to also check past logs.
+     * @param bool        $invert              Whether the log entry is not expected rather than expected.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @return bool
      * @throws \Exception
@@ -1445,18 +1576,34 @@ class Tester
         string $message,
         string $pool = null,
         int $count = 1,
-        bool $checkAllLogs = false
+        bool $checkAllLogs = false,
+        bool $invert = false,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null
     ): bool {
-        return $this->expectLogEntry(LogTool::DEBUG, $message, $pool, $count, $checkAllLogs);
+        return $this->expectLogEntry(
+            LogTool::DEBUG,
+            $message,
+            $pool,
+            $count,
+            $checkAllLogs,
+            $invert,
+            $timeoutSeconds,
+            $timeoutMicroseconds,
+            LogTool::ERROR
+        );
     }
 
     /**
      * Expect a log notice.
      *
-     * @param string      $message
-     * @param string|null $pool
-     * @param int         $count
-     * @param bool        $checkAllLogs Whether to also check past logs.
+     * @param string      $message             The expected message.
+     * @param string|null $pool                The pool for pool prefixed log entry.
+     * @param int         $count               The number of items.
+     * @param bool        $checkAllLogs        Whether to also check past logs.
+     * @param bool        $invert              Whether the log entry is not expected rather than expected.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @return bool
      * @throws \Exception
@@ -1465,18 +1612,33 @@ class Tester
         string $message,
         string $pool = null,
         int $count = 1,
-        bool $checkAllLogs = false
+        bool $checkAllLogs = false,
+        bool $invert = false,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null
     ): bool {
-        return $this->expectLogEntry(LogTool::NOTICE, $message, $pool, $count, $checkAllLogs);
+        return $this->expectLogEntry(
+            LogTool::NOTICE,
+            $message,
+            $pool,
+            $count,
+            $checkAllLogs,
+            $invert,
+            $timeoutSeconds,
+            $timeoutMicroseconds
+        );
     }
 
     /**
      * Expect a log warning.
      *
-     * @param string      $message
-     * @param string|null $pool
-     * @param int         $count
-     * @param bool        $checkAllLogs Whether to also check past logs.
+     * @param string      $message             The expected message.
+     * @param string|null $pool                The pool for pool prefixed log entry.
+     * @param int         $count               The number of items.
+     * @param bool        $checkAllLogs        Whether to also check past logs.
+     * @param bool        $invert              Whether the log entry is not expected rather than expected.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @return bool
      * @throws \Exception
@@ -1485,18 +1647,33 @@ class Tester
         string $message,
         string $pool = null,
         int $count = 1,
-        bool $checkAllLogs = false
+        bool $checkAllLogs = false,
+        bool $invert = false,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null
     ): bool {
-        return $this->expectLogEntry(LogTool::WARNING, $message, $pool, $count, $checkAllLogs);
+        return $this->expectLogEntry(
+            LogTool::WARNING,
+            $message,
+            $pool,
+            $count,
+            $checkAllLogs,
+            $invert,
+            $timeoutSeconds,
+            $timeoutMicroseconds
+        );
     }
 
     /**
      * Expect a log error.
      *
-     * @param string      $message
-     * @param string|null $pool
-     * @param int         $count
-     * @param bool        $checkAllLogs Whether to also check past logs.
+     * @param string      $message             The expected message.
+     * @param string|null $pool                The pool for pool prefixed log entry.
+     * @param int         $count               The number of items.
+     * @param bool        $checkAllLogs        Whether to also check past logs.
+     * @param bool        $invert              Whether the log entry is not expected rather than expected.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @return bool
      * @throws \Exception
@@ -1505,18 +1682,33 @@ class Tester
         string $message,
         string $pool = null,
         int $count = 1,
-        bool $checkAllLogs = false
+        bool $checkAllLogs = false,
+        bool $invert = false,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null
     ): bool {
-        return $this->expectLogEntry(LogTool::ERROR, $message, $pool, $count, $checkAllLogs);
+        return $this->expectLogEntry(
+            LogTool::ERROR,
+            $message,
+            $pool,
+            $count,
+            $checkAllLogs,
+            $invert,
+            $timeoutSeconds,
+            $timeoutMicroseconds
+        );
     }
 
     /**
      * Expect a log alert.
      *
-     * @param string      $message
-     * @param string|null $pool
-     * @param int         $count
-     * @param bool        $checkAllLogs Whether to also check past logs.
+     * @param string      $message             The expected message.
+     * @param string|null $pool                The pool for pool prefixed log entry.
+     * @param int         $count               The number of items.
+     * @param bool        $checkAllLogs        Whether to also check past logs.
+     * @param bool        $invert              Whether the log entry is not expected rather than expected.
+     * @param int|null    $timeoutSeconds      Timeout in seconds for reading of all messages.
+     * @param int|null    $timeoutMicroseconds Additional timeout in microseconds for reading of all messages.
      *
      * @return bool
      * @throws \Exception
@@ -1525,9 +1717,21 @@ class Tester
         string $message,
         string $pool = null,
         int $count = 1,
-        bool $checkAllLogs = false
+        bool $checkAllLogs = false,
+        bool $invert = false,
+        int $timeoutSeconds = null,
+        int $timeoutMicroseconds = null
     ): bool {
-        return $this->expectLogEntry(LogTool::ALERT, $message, $pool, $count, $checkAllLogs);
+        return $this->expectLogEntry(
+            LogTool::ALERT,
+            $message,
+            $pool,
+            $count,
+            $checkAllLogs,
+            $invert,
+            $timeoutSeconds,
+            $timeoutMicroseconds
+        );
     }
 
     /**

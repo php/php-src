@@ -21,7 +21,7 @@
 static ZEND_COLD void undef_result_after_exception(void) {
 	const zend_op *opline = EG(opline_before_exception);
 	ZEND_ASSERT(EG(exception));
-	if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+	if (opline && opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 		zend_execute_data *execute_data = EG(current_execute_data);
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 	}
@@ -785,7 +785,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			if (UNEXPECTED(opline->opcode == ZEND_HANDLE_EXCEPTION)) {
 				opline = EG(opline_before_exception);
 			}
-			if (!zend_jit_undefined_op_helper_write(ht, opline->op2.var)) {
+			if (opline && !zend_jit_undefined_op_helper_write(ht, opline->op2.var)) {
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					if (EG(exception)) {
 						ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -1003,7 +1003,8 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 		default:
 			zend_jit_illegal_offset();
 			undef_result_after_exception();
-			if ((EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
+			if (EG(opline_before_exception)
+			 && (EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
 			 && ((EG(opline_before_exception)+1)->op1_type & (IS_VAR|IS_TMP_VAR))) {
 				zend_execute_data *execute_data = EG(current_execute_data);
 
@@ -3011,35 +3012,6 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 		}
 	}
 }
-
-#if (PHP_VERSION_ID <= 80100) && (SIZEOF_SIZE_T == 4)
-static zend_result ZEND_FASTCALL zval_jit_update_constant_ex(zval *p, zend_class_entry *scope)
-{
-	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
-		zend_ast *ast = Z_ASTVAL_P(p);
-
-		if (ast->kind == ZEND_AST_CONSTANT) {
-			zend_string *name = zend_ast_get_constant_name(ast);
-			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
-			if (UNEXPECTED(zv == NULL)) {
-				return FAILURE;
-			}
-
-			zval_ptr_dtor_nogc(p);
-			ZVAL_COPY_OR_DUP(p, zv);
-		} else {
-			zval tmp;
-
-			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
-				return FAILURE;
-			}
-			zval_ptr_dtor_nogc(p);
-			ZVAL_COPY_VALUE(p, &tmp);
-		}
-	}
-	return SUCCESS;
-}
-#endif
 
 static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
 {

@@ -151,7 +151,7 @@ mysqli.allow_local_infile=1
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
+Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d
 object(mysqli)#%d (%d) {
   ["client_info"]=>
   string(%d) "%s"

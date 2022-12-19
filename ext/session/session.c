@@ -93,6 +93,8 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 		return FAILURE;													\
 	}
 
+#define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014"
+
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
 static int php_session_send_cookie(void);
@@ -1254,7 +1256,7 @@ static void php_session_remove_cookie(void) {
 	size_t session_cookie_len;
 	size_t len = sizeof("Set-Cookie")-1;
 
-	ZEND_ASSERT(strpbrk(PS(session_name), "=,; \t\r\n\013\014") == NULL);
+	ZEND_ASSERT(strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) == NULL);
 	spprintf(&session_cookie, 0, "Set-Cookie: %s=", PS(session_name));
 
 	session_cookie_len = strlen(session_cookie);
@@ -1302,8 +1304,8 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 	}
 
 	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
-	if (strpbrk(PS(session_name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
-		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,; \\t\\r\\n\\013\\014'");
+	if (strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) != NULL) {   /* man isspace for \013 and \014 */
+		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,;.[ \\t\\r\\n\\013\\014'");
 		return FAILURE;
 	}
 

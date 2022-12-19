@@ -1,5 +1,5 @@
 --TEST--
-GH-7758 (Problems with negative timestamps and fractions)
+Bug GH-7758 (Problems with negative timestamps and fractions)
 --FILE--
 <?php
 date_default_timezone_set('UTC');

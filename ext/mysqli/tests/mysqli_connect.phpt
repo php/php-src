@@ -143,7 +143,7 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
+Warning: mysqli_connect(): (%s/%d): Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r in %s on line %d
 array(1) {
   ["testing"]=>
   string(21) "mysqli.default_socket"

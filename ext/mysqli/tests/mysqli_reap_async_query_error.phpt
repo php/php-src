@@ -26,6 +26,6 @@ try {
 
 print "done!";
 ?>
---EXPECT--
-You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1
+--EXPECTF--
+You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near ')' at line 1
 done!

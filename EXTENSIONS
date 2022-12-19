@@ -234,7 +234,7 @@ SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           bcmath
 PRIMARY MAINTAINER:  Andi Gutmans <andi@php.net> (2000 - 2004)
-MAINTENANCE:         Unknown
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           bz2

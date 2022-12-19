@@ -49,10 +49,24 @@ try {
     echo $e->getMessage(), PHP_EOL;
 }
 
+try {
+    var_dump(randomizer()->getBytesFromString('123', 10));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    var_dump(randomizer()->getBytesFromString(str_repeat('a', 500), 10));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
 ?>
 --EXPECTF--
 Failed to generate an acceptable random number in 50 attempts
 int(%d)
 string(2) "ff"
+Failed to generate an acceptable random number in 50 attempts
+Failed to generate an acceptable random number in 50 attempts
 Failed to generate an acceptable random number in 50 attempts
 Failed to generate an acceptable random number in 50 attempts

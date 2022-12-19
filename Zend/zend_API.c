@@ -3281,7 +3281,10 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 		if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 			ce->refcount++;
 		}
-		zend_observer_class_linked_notify(ce, lcname);
+		// avoid notifying at MINIT time
+		if (ce->type == ZEND_USER_CLASS) {
+			zend_observer_class_linked_notify(ce, lcname);
+		}
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -3856,6 +3859,7 @@ ZEND_API bool zend_is_callable_at_frame(
 	fcc->called_scope = NULL;
 	fcc->function_handler = NULL;
 	fcc->object = NULL;
+	fcc->closure = NULL;
 
 again:
 	switch (Z_TYPE_P(callable)) {
@@ -3929,6 +3933,7 @@ check_func:
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
+				fcc->closure = Z_OBJ_P(callable);
 				if (fcc == &fcc_local) {
 					zend_release_fcall_info_cache(fcc);
 				}
@@ -4142,6 +4147,24 @@ ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_
 	return result;
 }
 /* }}} */
+
+ZEND_API void zend_get_callable_zval_from_fcc(const zend_fcall_info_cache *fcc, zval *callable)
+{
+	if (fcc->closure) {
+		ZVAL_OBJ_COPY(callable, fcc->closure);
+	} else if (fcc->function_handler->common.scope) {
+		array_init(callable);
+		if (fcc->object) {
+			GC_ADDREF(fcc->object);
+			add_next_index_object(callable, fcc->object);
+		} else {
+			add_next_index_str(callable, zend_string_copy(fcc->calling_scope->name));
+		}
+		add_next_index_str(callable, zend_string_copy(fcc->function_handler->common.function_name));
+	} else {
+		ZVAL_STR_COPY(callable, fcc->function_handler->common.function_name);
+	}
+}
 
 ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 {

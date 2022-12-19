@@ -35,6 +35,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_fibers.h"
+#include "zend_call_stack.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -173,6 +174,52 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 }
 /* }}} */
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+static ZEND_INI_MH(OnUpdateMaxAllowedStackSize) /* {{{ */
+{
+	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
+
+	if (size < ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting. Value must be >= %d, but got " ZEND_LONG_FMT,
+			ZSTR_VAL(entry->name), ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED, size);
+		return FAILURE;
+	}
+
+	EG(max_allowed_stack_size) = size;
+
+	return SUCCESS;
+}
+/* }}} */
+
+static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
+{
+	zend_ulong size = zend_ini_parse_uquantity_warn(new_value, entry->name);
+
+	/* Min value accounts for alloca, PCRE2 START_FRAMES_SIZE, and some buffer
+	 * for normal function calls.
+	 * We could reduce this on systems without alloca if we also add stack size
+	 * checks before pcre2_match(). */
+#ifdef ZEND_ALLOCA_MAX_SIZE
+	zend_ulong min = ZEND_ALLOCA_MAX_SIZE + 16*1024;
+#else
+	zend_ulong min = 32*1024;
+#endif
+
+	if (size == 0) {
+		size = min;
+	} else if (size < min) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting. Value must be >= " ZEND_ULONG_FMT ", but got " ZEND_ULONG_FMT "\n",
+			ZSTR_VAL(entry->name), min, size);
+		return FAILURE;
+	}
+
+	EG(reserved_stack_size) = size;
+
+	return SUCCESS;
+}
+/* }}} */
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
@@ -203,6 +250,12 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.exception_string_param_max_len",	"15",	ZEND_INI_ALL,	OnSetExceptionStringParamMaxLen,	exception_string_param_max_len,		zend_executor_globals,	executor_globals)
 	STD_ZEND_INI_ENTRY("fiber.stack_size",		NULL,			ZEND_INI_ALL,		OnUpdateFiberStackSize,		fiber_stack_size,	zend_executor_globals, 		executor_globals)
+#ifdef ZEND_CHECK_STACK_LIMIT
+	/* The maximum allowed call stack size. 0: auto detect, -1: no limit. For fibers, this is fiber.stack_size. */
+	STD_ZEND_INI_ENTRY("zend.max_allowed_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateMaxAllowedStackSize,	max_allowed_stack_size,		zend_executor_globals,	executor_globals)
+	/* Substracted from the max allowed stack size, as a buffer, when checking for overflow. 0: auto detect. */
+	STD_ZEND_INI_ENTRY("zend.reserved_stack_size",	"0",	ZEND_INI_SYSTEM,	OnUpdateReservedStackSize,	reserved_stack_size,		zend_executor_globals,	executor_globals)
+#endif
 
 ZEND_INI_END()
 
@@ -796,6 +849,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->record_errors = false;
 	executor_globals->num_errors = 0;
 	executor_globals->errors = NULL;
+#ifdef ZEND_CHECK_STACK_LIMIT
+	executor_globals->stack_limit = (void*)0;
+	executor_globals->stack_base = (void*)0;
+#endif
 }
 /* }}} */
 
@@ -817,6 +874,9 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 {
 	zend_copy_ini_directives();
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
+#ifdef ZEND_CHECK_STACK_LIMIT
+	zend_call_stack_init();
+#endif
 }
 /* }}} */
 #endif
@@ -982,7 +1042,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	CG(map_ptr_size) = 0;
 	CG(map_ptr_last) = 0;
-#endif
+#endif /* ZTS */
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
 	zend_interned_strings_init();
@@ -1075,6 +1135,10 @@ zend_result zend_post_startup(void) /* {{{ */
 	zend_copy_ini_directives();
 #else
 	global_map_ptr_last = CG(map_ptr_last);
+#endif
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	zend_call_stack_init();
 #endif
 
 	return SUCCESS;

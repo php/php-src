@@ -584,6 +584,17 @@ static size_t mb_iso2022jp_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 		} else if (c < 0x80) {
 			*out++ = c;
 		} else if (c >= 0xA1 && c <= 0xDF) {
+			/* GR-invoked Kana; "GR" stands for "graphics right" and refers to bytes
+			 * with the MSB bit (in the context of ISO-2022 encoding).
+			 *
+			 * In this regard, Wikipedia states:
+			 * "Other, older variants known as JIS7 and JIS8 build directly on the 7-bit and 8-bit
+			 * encodings defined by JIS X 0201 and allow use of JIS X 0201 kana from G1 without
+			 * escape sequences, using Shift Out and Shift In or setting the eighth bit
+			 * (GR-invoked), respectively."
+			 *
+			 * Note that we support both the 'JIS7' use of 0xE/0xF Shift In/Shift Out codes
+			 * and the 'JIS8' use of GR-invoked Kana */
 			*out++ = 0xFEC0 + c;
 		} else {
 			*out++ = MBFL_BAD_INPUT;
@@ -731,6 +742,13 @@ static void mb_wchar_to_jis(uint32_t *in, size_t len, mb_convert_buf *buf, bool 
 				buf->state = ASCII;
 			}
 			out = mb_convert_buf_add(out, s);
+		} else if (s >= 0xA1 && s <= 0xDF) {
+			if (buf->state != JISX_0201_KANA) {
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 4);
+				out = mb_convert_buf_add3(out, 0x1B, '(', 'I');
+				buf->state = JISX_0201_KANA;
+			}
+			out = mb_convert_buf_add(out, s & 0x7F);
 		} else if (s < 0x8080) { /* JIS X 0208 */
 			if (buf->state != JISX_0208) {
 				MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 5);

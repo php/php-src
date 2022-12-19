@@ -706,6 +706,17 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	} while (0)
 #define FPM_WPC_STR_CP(_cfg, _scfg, _field) FPM_WPC_STR_CP_EX(_cfg, _scfg, _field, _field)
 
+void fpm_conf_apply_kv_array_to_kv_array(struct key_value_s *src, void *dest) {
+	struct key_value_s *kv;
+
+	for (kv = src; kv; kv = kv->next) {
+		zval k, v;
+		ZVAL_STRING(&k, kv->key);
+		ZVAL_STRING(&v, kv->value);
+		fpm_conf_set_array(&k, &v, &dest, 0);
+	}
+}
+
 static int fpm_worker_pool_shared_status_alloc(struct fpm_worker_pool_s *shared_wp) { /* {{{ */
 	struct fpm_worker_pool_config_s *config, *shared_config;
 	config = fpm_worker_pool_config_alloc();
@@ -737,6 +748,9 @@ static int fpm_worker_pool_shared_status_alloc(struct fpm_worker_pool_s *shared_
 	FPM_WPC_STR_CP(config, shared_config, user);
 	FPM_WPC_STR_CP(config, shared_config, group);
 	FPM_WPC_STR_CP(config, shared_config, pm_status_path);
+
+	fpm_conf_apply_kv_array_to_kv_array(shared_config->php_values, (char *)config + WPO(php_values));
+	fpm_conf_apply_kv_array_to_kv_array(shared_config->php_admin_values, (char *)config + WPO(php_admin_values));
 
 	config->pm = PM_STYLE_ONDEMAND;
 	config->pm_max_children = 2;
@@ -1303,7 +1317,7 @@ static int fpm_conf_post_process(int force_daemon) /* {{{ */
 		fpm_evaluate_full_path(&fpm_global_config.error_log, NULL, PHP_LOCALSTATEDIR, 0);
 	}
 
-	if (0 > fpm_stdio_save_original_stderr()) {
+	if (!fpm_global_config.daemonize && 0 > fpm_stdio_save_original_stderr()) {
 		return -1;
 	}
 

@@ -301,6 +301,7 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 	if (buf_size < packet_header->size) {
 		DBG_ERR_FMT("Packet buffer %zu wasn't big enough %zu, %zu bytes will be unread",
 					buf_size, packet_header->size, packet_header->size - buf_size);
+		SET_CLIENT_ERROR(error_info, CR_INVALID_BUFFER_USE, UNKNOWN_SQLSTATE, "Packet buffer wasn't big enough; as a workaround consider increasing value of net_cmd_buffer_size");
 		DBG_RETURN(FAIL);
 	}
 	if (FAIL == pfc->data->m.receive(pfc, vio, buf, packet_header->size, stats, error_info)) {
@@ -322,9 +323,6 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 static enum_func_status
 php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 {
-	zend_uchar buf[2048];
-	const zend_uchar * p = buf;
-	const zend_uchar * const begin = buf;
 	const zend_uchar * pad_start = NULL;
 	MYSQLND_PACKET_GREET *packet= (MYSQLND_PACKET_GREET *) _packet;
 	MYSQLND_ERROR_INFO * error_info = conn->error_info;
@@ -332,24 +330,20 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
+	const zend_uchar * p = buf;
+	const zend_uchar * const begin = buf;
 
 	DBG_ENTER("php_mysqlnd_greet_read");
 
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, sizeof(buf), "greeting", PROT_GREET_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, buf_len, "greeting", PROT_GREET_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
 
 	packet->authentication_plugin_data.s = packet->intern_auth_plugin_data;
 	packet->authentication_plugin_data.l = sizeof(packet->intern_auth_plugin_data);
-
-	if (packet->header.size < sizeof(buf)) {
-		/*
-		  Null-terminate the string, so strdup can work even if the packets have a string at the end,
-		  which is not ASCIIZ
-		*/
-		buf[packet->header.size] = '\0';
-	}
 
 	packet->protocol_version = uint1korr(p);
 	p++;
@@ -641,8 +635,6 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 /* }}} */
 
 
-#define AUTH_RESP_BUFFER_SIZE 2048
-
 /* {{{ php_mysqlnd_auth_response_read */
 static enum_func_status
 php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
@@ -653,26 +645,17 @@ php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	zend_uchar local_buf[AUTH_RESP_BUFFER_SIZE];
-	size_t buf_len = pfc->cmd_buffer.buffer? pfc->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
-	zend_uchar *buf = pfc->cmd_buffer.buffer? (zend_uchar *) pfc->cmd_buffer.buffer : local_buf;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 
 	DBG_ENTER("php_mysqlnd_auth_response_read");
 
-	/* leave space for terminating safety \0 */
-	buf_len--;
 	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, buf_len, "OK", PROT_OK_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
-
-	/*
-	  zero-terminate the buffer for safety. We are sure there is place for the \0
-	  because buf_len is -1 the size of the buffer pointed
-	*/
-	buf[packet->header.size] = '\0';
 
 	/* Should be always 0x0 or ERROR_MARKER for error */
 	packet->response_code = uint1korr(p);
@@ -805,8 +788,6 @@ php_mysqlnd_change_auth_response_write(MYSQLND_CONN_DATA * conn, void * _packet)
 /* }}} */
 
 
-#define OK_BUFFER_SIZE 2048
-
 /* {{{ php_mysqlnd_ok_read */
 static enum_func_status
 php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
@@ -817,9 +798,8 @@ php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	zend_uchar local_buf[OK_BUFFER_SIZE];
-	const size_t buf_len = pfc->cmd_buffer.buffer? pfc->cmd_buffer.length : OK_BUFFER_SIZE;
-	zend_uchar * const buf = pfc->cmd_buffer.buffer? (zend_uchar *) pfc->cmd_buffer.buffer : local_buf;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
 	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 	zend_ulong net_len;
@@ -1974,8 +1954,6 @@ size_t php_mysqlnd_sha256_pk_request_write(MYSQLND_CONN_DATA * conn, void * _pac
 /* }}} */
 
 
-#define SHA256_PK_REQUEST_RESP_BUFFER_SIZE 2048
-
 /* {{{ php_mysqlnd_sha256_pk_request_response_read */
 static enum_func_status
 php_mysqlnd_sha256_pk_request_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
@@ -1986,14 +1964,15 @@ php_mysqlnd_sha256_pk_request_response_read(MYSQLND_CONN_DATA * conn, void * _pa
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
-	zend_uchar *p = buf;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
+	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 
 	DBG_ENTER("php_mysqlnd_sha256_pk_request_response_read");
 
 	/* leave space for terminating safety \0 */
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, sizeof(buf), "SHA256_PK_REQUEST_RESPONSE", PROT_SHA256_PK_REQUEST_RESPONSE_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, buf_len, "SHA256_PK_REQUEST_RESPONSE", PROT_SHA256_PK_REQUEST_RESPONSE_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
@@ -2067,12 +2046,13 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
 	MYSQLND_CONNECTION_STATE * connection_state = &conn->state;
-	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
-	zend_uchar *p = buf;
+	const size_t buf_len = pfc->cmd_buffer.length;
+	zend_uchar * const buf = (zend_uchar *) pfc->cmd_buffer.buffer;
+	const zend_uchar * p = buf;
 	const zend_uchar * const begin = buf;
 
 	DBG_ENTER("php_mysqlnd_cached_sha2_result_read");
-	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, sizeof(buf), "PROT_CACHED_SHA2_RESULT_PACKET", PROT_CACHED_SHA2_RESULT_PACKET)) {
+	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, buf_len, "PROT_CACHED_SHA2_RESULT_PACKET", PROT_CACHED_SHA2_RESULT_PACKET)) {
 		DBG_RETURN(FAIL);
 	}
 	BAIL_IF_NO_MORE_DATA;
