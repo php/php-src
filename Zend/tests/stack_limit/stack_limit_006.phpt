@@ -1,5 +1,9 @@
 --TEST--
 Stack limit 006 - env size affects __libc_stack_end
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die("skip msan requires a considerably higher zend.reserved_stack_size due to instrumentation");
+?>
 --EXTENSIONS--
 zend_test
 --INI--
