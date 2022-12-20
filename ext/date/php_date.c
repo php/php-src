@@ -2897,6 +2897,10 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 		dateobj->time->us = tmp_time->us;
 	}
 
+	if (tmp_time->have_zone && tmp_time->zone_type == TIMELIB_ZONETYPE_OFFSET) {
+		timelib_set_timezone_from_offset(dateobj->time, tmp_time->z);
+	}
+
 	timelib_time_dtor(tmp_time);
 
 	timelib_update_ts(dateobj->time, NULL);
