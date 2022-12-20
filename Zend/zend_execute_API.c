@@ -188,10 +188,13 @@ void init_executor(void) /* {{{ */
 	sev.sigev_signo = SIGIO;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
-	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0)
-		fprintf(stderr, "error %d while creating timer on thread %d\n", errno, (pid_t) syscall(SYS_gettid));
+	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0) {
 # ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer created on thread %d\n", syscall(SYS_gettid));
+		fprintf(stderr, "error %d while creating timer %#jx on thread %d\n", errno, (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
+# endif
+	}
+# ifdef TIMER_DEBUG
+	else fprintf(stderr, "timer %#jx created on thread %d\n", (uintmax_t) EG(timer), syscall(SYS_gettid));
 # endif
 #endif
 
@@ -421,10 +424,13 @@ void shutdown_executor(void) /* {{{ */
 #endif
 
 #if defined(ZTS) && defined(HAVE_TIMER_CREATE)
-	if (timer_delete(EG(timer)) != 0)
-		fprintf(stderr, "error %d while deleting timer on thread %d\n", errno, (pid_t) syscall(SYS_gettid));
+	if (timer_delete(EG(timer)) != 0) {
 # ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer deleted on thread %d\n", (pid_t) syscall(SYS_gettid));
+		fprintf(stderr, "error %d while deleting timer %#jx on thread %d\n", errno, (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
+# endif
+	}
+# ifdef TIMER_DEBUG
+	else fprintf(stderr, "timer %#jx deleted on thread %d\n", (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
 # endif
 #endif
 
@@ -1350,7 +1356,9 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 	if (si->si_value.sival_ptr != &EG(timer)) {
+#ifdef TIMER_DEBUG
 		fprintf(stderr, "ignoring timeout signal SIGIO received on thread %d\n", (pid_t) syscall(SYS_gettid));
+#endif
 
 		return;
 	}
@@ -1467,12 +1475,14 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 	its.it_interval.tv_nsec = 0;
 
 	if (timer_settime(timer, 0, &its, NULL) != 0) {
-		fprintf(stderr, "unable to set timer on thread %d\n", (pid_t) syscall(SYS_gettid));
+#ifdef TIMER_DEBUG
+		fprintf(stderr, "unable to set timer %#jx on thread %d\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
+#endif
 
 		return;
 	}
 # ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer set on thread %d (%ld seconds)\n", (pid_t) syscall(SYS_gettid), seconds);
+	else fprintf(stderr, "timer %#jx set on thread %d (%ld seconds)\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
 # endif
 
 	if (reset_signals) {
