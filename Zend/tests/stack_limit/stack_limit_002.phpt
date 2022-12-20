@@ -1,5 +1,9 @@
 --TEST--
 Stack limit 002 - Stack limit checks with max_allowed_stack_size detection (fibers)
+--SKIPIF--
+<?php
+if (getenv('SKIP_MSAN')) die("skip msan requires a considerably higher zend.reserved_stack_size due to instrumentation");
+?>
 --EXTENSIONS--
 zend_test
 --INI--
