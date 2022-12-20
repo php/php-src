@@ -50,6 +50,11 @@
 # ifndef sigev_notify_thread_id
 # define sigev_notify_thread_id _sigev_un._tid
 # endif
+// Old versions of glibc miss gettid()
+# if __GLIBC__ == 2 && __GLIBC_MINOR__ < 30
+# include <sys/syscall.h>
+# define gettid() syscall(SYS_gettid)
+# endif
 #endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
