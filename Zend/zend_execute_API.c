@@ -1345,7 +1345,7 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 /* }}} */
 
 #ifndef ZEND_WIN32
-#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+# if defined(ZTS) && defined(HAVE_TIMER_CREATE)
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 	if (si->si_value.sival_ptr != &EG(timer)) {
@@ -1353,10 +1353,10 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 
 		return;
 	}
-#else
+# else
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
-#endif
+# endif
 #ifndef ZTS
 	if (EG(timed_out)) {
 		/* Die on hard timeout */
