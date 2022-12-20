@@ -46,6 +46,7 @@
 #if defined(ZTS) && defined(HAVE_TIMER_CREATE)
 #include <time.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
 // Musl Libc defines this macro, glibc does not
 // According to "man 2 timer_create" this field should always be available, but it's not
 # ifndef sigev_notify_thread_id
@@ -185,10 +186,10 @@ void init_executor(void) /* {{{ */
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(timer);
 	sev.sigev_signo = SIGIO;
-	sev.sigev_notify_thread_id = syscall(SYS_gettid);
+	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
 	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0)
-		fprintf(stderr, "error %d while creating timer on thread %d\n", errno, syscall(SYS_gettid));
+		fprintf(stderr, "error %d while creating timer on thread %d\n", errno, (pid_t) syscall(SYS_gettid));
 # ifdef TIMER_DEBUG
 	else fprintf(stderr, "timer created on thread %d\n", syscall(SYS_gettid));
 # endif
@@ -421,9 +422,9 @@ void shutdown_executor(void) /* {{{ */
 
 #if defined(ZTS) && defined(HAVE_TIMER_CREATE)
 	if (timer_delete(EG(timer)) != 0)
-		fprintf(stderr, "error %d while deleting timer on thread %d\n", errno, syscall(SYS_gettid));
+		fprintf(stderr, "error %d while deleting timer on thread %d\n", errno, (pid_t) syscall(SYS_gettid));
 # ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer deleted on thread %d\n", syscall(SYS_gettid));
+	else fprintf(stderr, "timer deleted on thread %d\n", (pid_t) syscall(SYS_gettid));
 # endif
 #endif
 
@@ -1349,7 +1350,7 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 	if (si->si_value.sival_ptr != &EG(timer)) {
-		fprintf(stderr, "ignoring timeout signal SIGIO received on thread %d\n", syscall(SYS_gettid));
+		fprintf(stderr, "ignoring timeout signal SIGIO received on thread %d\n", (pid_t) syscall(SYS_gettid));
 
 		return;
 	}
@@ -1466,12 +1467,12 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 	its.it_interval.tv_nsec = 0;
 
 	if (timer_settime(timer, 0, &its, NULL) != 0) {
-		fprintf(stderr, "unable to set timer on thread %d\n", syscall(SYS_gettid));
+		fprintf(stderr, "unable to set timer on thread %d\n", (pid_t) syscall(SYS_gettid));
 
 		return;
 	}
 # ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer set on thread %d (%ld seconds)\n", syscall(SYS_gettid), seconds);
+	else fprintf(stderr, "timer set on thread %d (%ld seconds)\n", (pid_t) syscall(SYS_gettid), seconds);
 # endif
 
 	if (reset_signals) {
