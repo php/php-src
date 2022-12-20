@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Apache:
   . Fixed bug GH-9949 (Partial content on incomplete POST request). (cmb)
 
+- Date:
+  . Fixed bug GH-9891 (DateTime modify with unixtimestamp (@) must work like
+    setTimestamp). (Derick)
+
 - LDAP:
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
     (cmb)
