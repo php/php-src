@@ -7085,36 +7085,31 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 			JIT_G(trigger) = orig_trigger;
 
 			if (handler) {
-				zend_jit_trace_exit_info *shared_exit_info = NULL;
-
 				t->exit_info = NULL;
 				if (t->exit_count) {
 					/* reallocate exit_info into shared memory */
-					shared_exit_info = (zend_jit_trace_exit_info*)zend_shared_alloc(
+					t->exit_info = (zend_jit_trace_exit_info*)zend_shared_alloc_copy(exit_info,
 						sizeof(zend_jit_trace_exit_info) * t->exit_count);
 
-					if (!shared_exit_info) {
+					if (!t->exit_info) {
 					    if (t->stack_map) {
 							efree(t->stack_map);
 						}
 						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
 						goto exit;
 					}
-					memcpy(shared_exit_info, exit_info,
-						sizeof(zend_jit_trace_exit_info) * t->exit_count);
-					t->exit_info = shared_exit_info;
 				}
 
 			    if (t->stack_map_size) {
-					zend_jit_trace_stack *shared_stack_map = (zend_jit_trace_stack*)zend_shared_alloc(t->stack_map_size * sizeof(zend_jit_trace_stack));
+					zend_jit_trace_stack *shared_stack_map = (zend_jit_trace_stack*)zend_shared_alloc_copy(
+						t->stack_map,
+						t->stack_map_size * sizeof(zend_jit_trace_stack));
+					efree(t->stack_map);
+					t->stack_map = shared_stack_map;
 					if (!shared_stack_map) {
-						efree(t->stack_map);
 						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
 						goto exit;
 					}
-					memcpy(shared_stack_map, t->stack_map, t->stack_map_size * sizeof(zend_jit_trace_stack));
-					efree(t->stack_map);
-					t->stack_map = shared_stack_map;
 			    }
 
 				t->exit_counters = ZEND_JIT_EXIT_COUNTERS;
@@ -7815,36 +7810,31 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 			JIT_G(trigger) = orig_trigger;
 
 			if (handler) {
-				zend_jit_trace_exit_info *shared_exit_info = NULL;
-
 				t->exit_info = NULL;
 				if (t->exit_count) {
 					/* reallocate exit_info into shared memory */
-					shared_exit_info = (zend_jit_trace_exit_info*)zend_shared_alloc(
+					t->exit_info = (zend_jit_trace_exit_info*)zend_shared_alloc_copy(exit_info,
 						sizeof(zend_jit_trace_exit_info) * t->exit_count);
 
-					if (!shared_exit_info) {
+					if (!t->exit_info) {
 						if (t->stack_map) {
 							efree(t->stack_map);
 						}
 						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
 						goto exit;
 					}
-					memcpy(shared_exit_info, exit_info,
-						sizeof(zend_jit_trace_exit_info) * t->exit_count);
-					t->exit_info = shared_exit_info;
 				}
 
 				if (t->stack_map_size) {
-					zend_jit_trace_stack *shared_stack_map = (zend_jit_trace_stack*)zend_shared_alloc(t->stack_map_size * sizeof(zend_jit_trace_stack));
+					zend_jit_trace_stack *shared_stack_map = (zend_jit_trace_stack*)zend_shared_alloc_copy(
+						t->stack_map,
+						t->stack_map_size * sizeof(zend_jit_trace_stack));
+					efree(t->stack_map);
+					t->stack_map = shared_stack_map;
 					if (!shared_stack_map) {
-						efree(t->stack_map);
 						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
 						goto exit;
 					}
-					memcpy(shared_stack_map, t->stack_map, t->stack_map_size * sizeof(zend_jit_trace_stack));
-					efree(t->stack_map);
-					t->stack_map = shared_stack_map;
 			    }
 
 				zend_jit_link_side_trace(

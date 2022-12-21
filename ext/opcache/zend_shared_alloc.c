@@ -363,6 +363,14 @@ void *zend_shared_alloc(size_t size)
 	return NULL;
 }
 
+void *zend_shared_alloc_copy(const void *src, size_t size)
+{
+	void *dest = zend_shared_alloc(size);
+	if (dest != NULL)
+		memcpy(dest, src, size);
+	return dest;
+}
+
 static zend_always_inline zend_ulong zend_rotr3(zend_ulong key)
 {
 	return (key >> 3) | (key << ((sizeof(key) * 8) - 3));

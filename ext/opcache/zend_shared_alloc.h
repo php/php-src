@@ -134,6 +134,14 @@ void zend_shared_alloc_shutdown(void);
 void *zend_shared_alloc(size_t size);
 
 /**
+ * Allocate a shared memory block and copy raw data from the given
+ * source pointer into it.
+ *
+ * @return the new allocation or NULL if out of memory
+ */
+void *zend_shared_alloc_copy(const void *src, size_t size);
+
+/**
  * Wrapper for zend_shared_alloc() which aligns at 64-byte boundary if
  * AVX or SSE2 are used.
  */
