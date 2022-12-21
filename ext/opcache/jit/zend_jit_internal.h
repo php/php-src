@@ -243,7 +243,7 @@ extern int zend_jit_profile_counter_rid;
 
 /* Hot Counters */
 
-static zend_always_inline zend_long zend_jit_hash(const void *ptr)
+static zend_always_inline zend_ulong zend_jit_hash(const void *ptr)
 {
 	uintptr_t x;
 
