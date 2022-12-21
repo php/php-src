@@ -283,8 +283,10 @@ typedef struct _zend_jit_op_array_hot_extension {
 	const void *orig_handlers[1];
 } zend_jit_op_array_hot_extension;
 
-#define zend_jit_op_array_hash(op_array) \
-	zend_jit_hash((op_array)->opcodes)
+static zend_always_inline zend_ulong zend_jit_op_array_hash(const zend_op_array *op_array)
+{
+	return zend_jit_hash(op_array->opcodes);
+}
 
 extern const zend_op *zend_jit_halt_op;
 
