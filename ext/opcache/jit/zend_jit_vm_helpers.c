@@ -308,15 +308,16 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 {
 	zend_jit_op_array_trace_extension *jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&EX(func)->op_array);
-	size_t offset = jit_extension->offset;
 #ifndef HAVE_GCC_GLOBAL_REGS
 	const zend_op *opline = EX(opline);
 #endif
 
-	*(ZEND_OP_TRACE_INFO(opline, offset)->counter) -= cost;
+	zend_op_trace_info *const trace_info = ZEND_OP_TRACE_INFO(opline, jit_extension->offset);
 
-	if (UNEXPECTED(*(ZEND_OP_TRACE_INFO(opline, offset)->counter) <= 0)) {
-		*(ZEND_OP_TRACE_INFO(opline, offset)->counter) = ZEND_JIT_COUNTER_INIT;
+	*(trace_info->counter) -= cost;
+
+	if (UNEXPECTED(*(trace_info->counter) <= 0)) {
+		*(trace_info->counter) = ZEND_JIT_COUNTER_INIT;
 		if (UNEXPECTED(zend_jit_trace_hot_root(execute_data, opline) < 0)) {
 #ifdef HAVE_GCC_GLOBAL_REGS
 			opline = NULL;
@@ -333,7 +334,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 		return 1;
 #endif
 	} else {
-		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO(opline, offset)->orig_handler;
+		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)trace_info->orig_handler;
 		ZEND_OPCODE_TAIL_CALL(handler);
 	}
 }
