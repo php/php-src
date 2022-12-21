@@ -1108,7 +1108,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	return entry;
 }
 
-static bool zend_may_overflow(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa)
+static bool zend_may_overflow(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, const zend_ssa *ssa)
 {
 	int res;
 	zend_long op1_min, op1_max, op2_min, op2_max;
