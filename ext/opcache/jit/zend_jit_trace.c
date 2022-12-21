@@ -7902,7 +7902,7 @@ exit:;
 	return ret;
 }
 
-int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint32_t parent_num, uint32_t exit_num)
+static int zend_jit_trace_hot_side(zend_execute_data *execute_data, uint32_t parent_num, uint32_t exit_num)
 {
 	zend_jit_trace_stop stop;
 	int ret = 0;
