@@ -2,6 +2,8 @@
 Compatibility of values of same name trait constants is checked after their constant expressions are evaluated
 --ENV--
 ENSURE_CONSTANT_IS_DEFINED_AT_RUNTIME=1
+--INI--
+variables_order=EGPCS
 --FILE--
 <?php
 
