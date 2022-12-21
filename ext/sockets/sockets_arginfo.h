@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4fb48cdd2188e8834fd2210027adc1072e885d6e */
+ * Stub hash: abec5e538a69c27451c0cac0a19a92fc6df667eb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -987,6 +987,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(SO_DETACH_BPF)
 	REGISTER_LONG_CONSTANT("SO_DETACH_BPF", SO_DETACH_BPF, CONST_PERSISTENT);
+#endif
+#if defined(TCP_QUICKACK)
+	REGISTER_LONG_CONSTANT("TCP_QUICKACK", TCP_QUICKACK, CONST_PERSISTENT);
 #endif
 }
 
