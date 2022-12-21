@@ -4459,7 +4459,7 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	}
 	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 	jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_HOT_COUNTERS;
-	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
+	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) % ZEND_HOT_COUNTERS_COUNT];
 	for (i = 0; i < op_array->last; i++) {
 		jit_extension->orig_handlers[i] = op_array->opcodes[i].handler;
 	}
