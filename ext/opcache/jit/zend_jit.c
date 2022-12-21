@@ -106,7 +106,8 @@ typedef struct _zend_jit_stub {
 zend_ulong zend_jit_profile_counter = 0;
 int zend_jit_profile_counter_rid = -1;
 
-int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
+#define ZEND_HOT_COUNTERS_COUNT 128
+static int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
 const zend_op *zend_jit_halt_op = NULL;
 static int zend_jit_vm_kind = 0;
