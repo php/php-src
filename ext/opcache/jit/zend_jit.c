@@ -4430,6 +4430,23 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 
 #include "jit/zend_jit_trace.c"
 
+/**
+ * Allocate and initialize a new #zend_jit_op_array_extension for the
+ * given #zend_op_array.
+ */
+static zend_jit_op_array_extension *zend_jit_new_op_array_extension(zend_op_array *op_array)
+{
+	zend_jit_op_array_extension *jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
+	if (!jit_extension) {
+		return NULL;
+	}
+
+	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
+	ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
+	zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
+	return jit_extension;
+}
+
 ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	if (dasm_ptr == NULL) {
@@ -4453,16 +4470,13 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 				opline++;
 			}
 		}
-		jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
+		jit_extension = zend_jit_new_op_array_extension(op_array);
 		if (!jit_extension) {
 			return FAILURE;
 		}
-		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 		jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_FIRST_EXEC;
 		jit_extension->orig_handler = (void*)opline->handler;
-		ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 		opline->handler = (const void*)zend_jit_runtime_jit_handler;
-		zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
 
 		return SUCCESS;
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST) {
@@ -4482,16 +4496,13 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 					opline++;
 				}
 			}
-			jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
+			jit_extension = zend_jit_new_op_array_extension(op_array);
 			if (!jit_extension) {
 				return FAILURE;
 			}
-			memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 			jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_PROF_REQUEST;
 			jit_extension->orig_handler = (void*)opline->handler;
-			ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 			opline->handler = (const void*)zend_jit_profile_jit_handler;
-			zend_shared_alloc_register_xlat_entry(op_array->opcodes, jit_extension);
 		}
 
 		return SUCCESS;
