@@ -4276,7 +4276,7 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 	return 0;
 }
 
-void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
+static void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
 	zend_op *opline;
 	zend_function *func;
 	zend_op_array *op_array;
