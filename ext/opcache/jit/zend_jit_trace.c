@@ -8297,6 +8297,17 @@ static int zend_jit_restart_hot_trace_counters(zend_op_array *op_array)
 	return SUCCESS;
 }
 
+/**
+ * Allocate a new "hot counter" from #zend_jit_hot_counters.
+ */
+static int16_t *zend_jit_hot_counter_allocate(void)
+{
+	int16_t *counter =
+		&zend_jit_hot_counters[ZEND_JIT_COUNTER_NUM];
+	ZEND_JIT_COUNTER_NUM = (ZEND_JIT_COUNTER_NUM + 1) % ZEND_HOT_COUNTERS_COUNT;
+	return counter;
+}
+
 static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 {
 	zend_op *opline;
@@ -8341,8 +8352,7 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 						opline->handler = (const void*)zend_jit_loop_trace_counter_handler;
 						if (!trace_info->counter) {
 							trace_info->counter =
-								&zend_jit_hot_counters[ZEND_JIT_COUNTER_NUM];
-							ZEND_JIT_COUNTER_NUM = (ZEND_JIT_COUNTER_NUM + 1) % ZEND_HOT_COUNTERS_COUNT;
+								zend_jit_hot_counter_allocate();
 						}
 						trace_info->trace_flags |=
 							ZEND_JIT_TRACE_START_LOOP;
@@ -8366,8 +8376,7 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 			/* function entry */
 			opline->handler = (const void*)zend_jit_func_trace_counter_handler;
 			trace_info->counter =
-				&zend_jit_hot_counters[ZEND_JIT_COUNTER_NUM];
-			ZEND_JIT_COUNTER_NUM = (ZEND_JIT_COUNTER_NUM + 1) % ZEND_HOT_COUNTERS_COUNT;
+				zend_jit_hot_counter_allocate();
 			trace_info->trace_flags |=
 				ZEND_JIT_TRACE_START_ENTER;
 		}
