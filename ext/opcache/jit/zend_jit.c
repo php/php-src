@@ -115,12 +115,48 @@ static int zend_jit_vm_kind = 0;
 static bool zend_write_protect = true;
 #endif
 
+/**
+ * Start of the shared memory area to contain JIT machine code.  Call
+ * zend_jit_unprotect() before writing to it, and call
+ * zend_jit_protect() when done.
+ *
+ * #dasmn_end is the end of the area and #dasm_ptr points to the end
+ * of the portion that is really used currently.
+ *
+ * This area is allocated during startup and is never changed.
+ * Allocations are linear by incrementing #dasm_ptr.
+ */
 static void *dasm_buf = NULL;
+
+/**
+ * End of the shared memory area to contain JIT machine code.
+ */
 static void *dasm_end = NULL;
+
+/**
+ * Pointer to pointer to end of the used portion of the shared memory
+ * area to contain JIT machine code.
+ *
+ * This "pointer to pointer" points to inside the shared memory area,
+ * because it needs to be shared across all processes/threads.  All
+ * accesses to the pointed-to pointer need to be protected using
+ * zend_shared_alloc_lock().
+ *
+ * Additionally, dasm_ptr[1] contains a pointer to the end of the
+ * stubs and veneers.  This is used by zend_jit_restart() to free all
+ * JIT-generated functions, but keep those stubs and veneers.
+ */
 static void **dasm_ptr = NULL;
 
+/**
+ * The total size of the #dasm_buf, including the trailer which
+ * #dasm_ptr points to (after #dasm_end).
+ */
 static size_t dasm_size = 0;
 
+/**
+ * Counter for checking the opcache.jit_bisect_limit setting.
+ */
 static zend_long jit_bisect_pos = 0;
 
 static const void *zend_jit_runtime_jit_handler = NULL;
@@ -805,6 +841,10 @@ ZEND_EXT_API void zend_jit_status(zval *ret)
 	add_assoc_zval(ret, "jit", &stats);
 }
 
+/**
+ * Generate a name for a JIT-generated native function (for the
+ * disassembler and for external debuggers/profilers/tracers).
+ */
 static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 {
 	smart_str buf = {0};
@@ -2677,6 +2717,10 @@ static bool zend_jit_supported_binary_op(zend_uchar op, uint32_t op1_info, uint3
 	}
 }
 
+/**
+ * Caller must have called zend_shared_alloc_lock() and
+ * zend_jit_unprotect().
+ */
 static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
 {
 	int b, i, end;
@@ -4717,6 +4761,9 @@ static void zend_jit_init_handlers(void)
 	}
 }
 
+/**
+ * Generate all JIT stub functions.
+ */
 static bool zend_jit_make_stubs(void)
 {
 	dasm_State* dasm_state = NULL;

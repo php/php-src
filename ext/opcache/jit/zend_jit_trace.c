@@ -3977,6 +3977,10 @@ static bool zend_jit_trace_next_is_send_result(const zend_op              *oplin
 	return false;
 }
 
+/**
+ * Caller must have called zend_shared_alloc_lock() and
+ * zend_jit_unprotect().
+ */
 static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num)
 {
 	const void *handler = NULL;

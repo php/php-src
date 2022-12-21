@@ -219,8 +219,18 @@ static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_
 	return 0;
 }
 
+/**
+ * #ZEND_FUNC_INFO for functions handled by the JIT with trigger
+ * #ZEND_JIT_ON_FIRST_EXEC or #ZEND_JIT_ON_PROF_REQUEST.  The handler
+ * #override is zend_jit_runtime_jit_handler().
+ */
 typedef struct _zend_jit_op_array_extension {
 	zend_func_info func_info;
+
+	/**
+	 * The original opcode handler, just in case we need to
+	 * restore it.
+	 */
 	const void *orig_handler;
 } zend_jit_op_array_extension;
 
@@ -252,9 +262,24 @@ static zend_always_inline zend_long zend_jit_hash(const void *ptr)
 
 void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline);
 
+/**
+ * #ZEND_FUNC_INFO for functions being handled by the JIT with trigger
+ * #ZEND_JIT_ON_HOT_COUNTERS.  The handler override is
+ * #zend_jit_func_hot_counter_handler().
+ */
 typedef struct _zend_jit_op_array_hot_extension {
 	zend_func_info func_info;
+
+	/**
+	 * Pointer to the counter.  Points to inside global variable
+	 * #zend_jit_hot_counters.
+	 */
 	int16_t    *counter;
+
+	/**
+	 * The original handler for each opline, just in case we need
+	 * to restore it.
+	 */
 	const void *orig_handlers[1];
 } zend_jit_op_array_hot_extension;
 
@@ -392,10 +417,29 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_TRACE_START_RETURN (1<<2)
 #define ZEND_JIT_TRACE_START_SIDE   (1<<3) /* used for side traces */
 
+/**
+ * Was this opline already processed by the JIT?  This is used to skip
+ * further JIT calls.
+ */
 #define ZEND_JIT_TRACE_JITED        (1<<4)
+
+/**
+ * Was this opline blacklisted by the JIT?  Blacklisted oplines will
+ * never be inspected again by the JIT.
+ */
 #define ZEND_JIT_TRACE_BLACKLISTED  (1<<5)
+
+/**
+ * Is this opline supported by the JIT?  This is determined by
+ * zend_jit_trace_supported().
+ */
 #define ZEND_JIT_TRACE_UNSUPPORTED  (1<<6)
 
+/**
+ * Not an actual trace_flag; just a descriptive macro indicating the
+ * absence of #ZEND_JIT_TRACE_UNSUPPORTED for the
+ * zend_jit_trace_supported() return value.
+ */
 #define ZEND_JIT_TRACE_SUPPORTED    0
 
 #define ZEND_JIT_EXIT_JITED         (1<<0)
@@ -410,20 +454,47 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
 #define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
 
+/**
+ * Per-opline information for #zend_jit_op_array_trace_extension.
+ */
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
 	struct {
+		/**
+		 * The original opcode handler, just in case we need
+		 * to restore it.
+		 */
 		const void *orig_handler;
 		const void *call_handler;
+
+		/**
+		 * Pointer to the counter.  Points to inside global variable
+		 * #zend_jit_hot_counters.
+		 */
 		int16_t    *counter;
+
+		/**
+		 * Bit mask of the ZEND_JIT_TRACE_* flags.
+		 */
 		uint8_t     trace_flags;
 	};
 } zend_op_trace_info;
 
+/**
+ * #ZEND_FUNC_INFO for functions handled by the JIT with trigger
+ * #ZEND_JIT_ON_HOT_TRACE.  The handler override is
+ * #zend_jit_loop_trace_counter_handler() or
+ * #zend_jit_func_trace_counter_handler(), configured by
+ * #zend_jit_setup_hot_trace_counters().
+ */
 typedef struct _zend_jit_op_array_trace_extension {
 	zend_func_info func_info;
 	const zend_op_array *op_array;
 	size_t offset; /* offset from "zend_op" to corresponding "op_info" */
+
+	/**
+	 * Information for each opline.
+	 */
 	zend_op_trace_info trace_info[1];
 } zend_jit_op_array_trace_extension;
 

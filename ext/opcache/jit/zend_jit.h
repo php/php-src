@@ -119,6 +119,10 @@ typedef struct _zend_jit_globals {
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 
+	/**
+	 * True while zend_jit_trace_execute() runs, to avoid
+	 * recursively calling it twice.
+	 */
 	bool tracing;
 
 	zend_jit_trace_rec *current_trace;
@@ -140,10 +144,36 @@ extern int jit_globals_id;
 extern zend_jit_globals jit_globals;
 #endif
 
+/**
+ * Activate the JIT on the given #zend_op_array.
+ *
+ * @return SUCCESS or FAILURE
+ */
 ZEND_EXT_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
+
+/**
+ * Activate the JIT on the given #zend_script.
+ *
+ * @return SUCCESS or FAILURE
+ */
 ZEND_EXT_API int  zend_jit_script(zend_script *script);
+
+/**
+ * Make the JIT machine code area (i.e. #dasm_buf) writable (but not
+ * executable).  Call this before generating new machine code.  Call
+ * zend_jit_protect() when done.
+ *
+ * (These write/execute permissions affect only the current process.)
+ */
 ZEND_EXT_API void zend_jit_unprotect(void);
+
+/**
+ * Make the JIT machine code area (i.e. #dasm_buf) executable (but not
+ * writable).  Call this after generating new machine code to undo the
+ * effect of zend_jit_unprotect().
+ */
 ZEND_EXT_API void zend_jit_protect(void);
+
 ZEND_EXT_API void zend_jit_init(void);
 ZEND_EXT_API int  zend_jit_config(zend_string *jit_options, int stage);
 ZEND_EXT_API int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
