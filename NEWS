@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     unpacked array). (Arnaud)
   . Fix GH-9735 (Fiber stack variables do not participate in cycle collector).
     (Arnaud)
+  . Fix GH-9675 (Broken run_time_cache init for internal enum methods).
+    (Petar Obradović, Bob)
 
 - FPM:
   . Fixed bug #77106 (Missing separator in FPM FastCGI errors). (Jakub Zelenka)
