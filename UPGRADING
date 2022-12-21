@@ -105,6 +105,7 @@ PHP 8.3 UPGRADE NOTES
 
 - Sockets:
   . SO_ATTACH_REUSEPORT_CBPF (Linux only).
+  . TCP_QUICKACK (Linux only).
 
 ========================================
 11. Changes to INI File Handling
