@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
     (cmb)
 
+- Opcache:
+  . Fix inverted bailout value in zend_runtime_jit() (Max Kellermann).
+
 05 Jan 2023, PHP 8.2.1
 
 - Core:
