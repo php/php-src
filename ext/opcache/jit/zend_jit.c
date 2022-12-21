@@ -4259,7 +4259,7 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 			/* perform real JIT for this function */
 			zend_real_jit_func(op_array, NULL, NULL);
 		} zend_catch {
-			do_bailout = 0;
+			do_bailout = true;
 		} zend_end_try();
 
 		zend_jit_protect();
