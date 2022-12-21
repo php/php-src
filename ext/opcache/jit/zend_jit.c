@@ -756,6 +756,8 @@ typedef enum _sp_adj_kind {
 
 static int sp_adj[SP_ADJ_LAST];
 
+static int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
+
 /* The generated code may contain tautological comparisons, ignore them. */
 #if defined(__clang__)
 # pragma clang diagnostic push

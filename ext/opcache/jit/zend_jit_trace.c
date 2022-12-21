@@ -8048,7 +8048,7 @@ abort:
 	return ret;
 }
 
-int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
+static int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
 {
 	uint32_t trace_num = EG(jit_trace_num);
 	zend_execute_data *execute_data = EG(current_execute_data);
