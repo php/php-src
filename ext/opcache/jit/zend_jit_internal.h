@@ -354,8 +354,6 @@ zend_constant* ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t fla
 zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 
 /* Tracer */
-#define zend_jit_opline_hash(opline) \
-	zend_jit_hash(opline)
 
 #define ZEND_JIT_TRACE_STOP(_) \
 	_(LOOP,              "loop") \
