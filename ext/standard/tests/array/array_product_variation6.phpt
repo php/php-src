@@ -8,4 +8,4 @@ $input = [gmp_init(25), gmp_init(6)];
 var_dump(array_product($input));
 ?>
 --EXPECT--
-int(1)
+int(150)

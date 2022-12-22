@@ -5918,62 +5918,95 @@ PHP_FUNCTION(array_rand)
 /* {{{ Returns the sum of the array entries */
 PHP_FUNCTION(array_sum)
 {
-	zval *input,
-		 *entry,
-		 entry_n;
+	HashTable *input;
+	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(input)
+		Z_PARAM_ARRAY_HT(input)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_LONG(return_value, 0);
+	if (zend_hash_num_elements(input) == 0) {
+		// TODO Deprecate empty array
+		RETURN_LONG(0);
+	}
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-		if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
-			continue;
+	ZVAL_LONG(return_value, 0);
+	ZEND_HASH_FOREACH_VAL(input, entry) {
+		zend_result status = add_function(return_value, return_value, entry);
+		if (status == FAILURE) {
+			ZEND_ASSERT(EG(exception));
+			zend_clear_exception();
+			/* BC resources: previously resources were cast to int */
+			if (Z_TYPE_P(entry) == IS_RESOURCE) {
+				zval tmp;
+				ZVAL_LONG(&tmp, Z_RES_HANDLE_P(entry));
+				add_function(return_value, return_value, &tmp);
+			}
+			/* BC non numeric strings: previously were cast to 0 */
+			if (Z_TYPE_P(entry) == IS_STRING) {
+				zval tmp;
+				ZVAL_LONG(&tmp, 0);
+				add_function(return_value, return_value, &tmp);
+			}
+			// TODO Warning/Deprecation?
 		}
-		ZVAL_COPY(&entry_n, entry);
-		convert_scalar_to_number(&entry_n);
-		fast_add_function(return_value, return_value, &entry_n);
 	} ZEND_HASH_FOREACH_END();
+
+	/* Traversal of array encountered a numerically catable object */
+	if (Z_TYPE_P(return_value) == IS_OBJECT) {
+		/* First try to convert to int */
+		zval dst;
+		if (Z_OBJ_HT_P(return_value)->cast_object(Z_OBJ_P(return_value), &dst, IS_LONG) == SUCCESS) {
+			zval_ptr_dtor(return_value);
+			RETURN_COPY(&dst);
+		}
+		convert_scalar_to_number(return_value);
+	}
 }
 /* }}} */
 
 /* {{{ Returns the product of the array entries */
 PHP_FUNCTION(array_product)
 {
-	zval *input,
-		 *entry,
-		 entry_n;
-	double dval;
+	HashTable *input;
+	zval *entry;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(input)
+		Z_PARAM_ARRAY_HT(input)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_LONG(return_value, 1);
-	if (!zend_hash_num_elements(Z_ARRVAL_P(input))) {
-		return;
+	if (zend_hash_num_elements(input) == 0) {
+		// TODO Deprecate empty array
+		RETURN_LONG(1);
 	}
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-		if (Z_TYPE_P(entry) == IS_ARRAY || Z_TYPE_P(entry) == IS_OBJECT) {
-			continue;
-		}
-		ZVAL_COPY(&entry_n, entry);
-		convert_scalar_to_number(&entry_n);
+	ZVAL_LONG(return_value, 1);
 
-		if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
-			dval = (double)Z_LVAL_P(return_value) * (double)Z_LVAL(entry_n);
-			if ( (double)ZEND_LONG_MIN <= dval && dval <= (double)ZEND_LONG_MAX ) {
-				Z_LVAL_P(return_value) *= Z_LVAL(entry_n);
-				continue;
+	ZEND_HASH_FOREACH_VAL(input, entry) {
+		zend_result status = mul_function(return_value, return_value, entry);
+		if (status == FAILURE) {
+			ZEND_ASSERT(EG(exception));
+			zend_clear_exception();
+			/* BC resources: previously resources were cast to int */
+			if (Z_TYPE_P(entry) == IS_RESOURCE) {
+				zval tmp;
+				ZVAL_LONG(&tmp, Z_RES_HANDLE_P(entry));
+				mul_function(return_value, return_value, &tmp);
 			}
+			/* BC non numeric strings: previously were cast to 0 */
+			if (Z_TYPE_P(entry) == IS_STRING) {
+				zval tmp;
+				ZVAL_LONG(&tmp, 0);
+				mul_function(return_value, return_value, &tmp);
+			}
+			// TODO Warning/Deprecation?
 		}
-		convert_to_double(return_value);
-		convert_to_double(&entry_n);
-		Z_DVAL_P(return_value) *= Z_DVAL(entry_n);
 	} ZEND_HASH_FOREACH_END();
+
+	/* Traversal of array encountered a numerically castable object */
+	if (Z_TYPE_P(return_value) == IS_OBJECT) {
+		convert_scalar_to_number(return_value);
+	}
 }
 /* }}} */
 
