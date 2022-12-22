@@ -15,6 +15,13 @@ print $doc->saveXML($elt) . "\n";
 $attr->removeChild($attr->firstChild);
 print $doc->saveXML($elt) . "\n";
 
+$attr->nodeValue = '&';
+print $doc->saveXML($elt) . "\n";
+
+$attr->nodeValue = '&amp;';
+print $doc->saveXML($elt) . "\n";
+
+$elt->removeAttributeNode($attr);
 $elt->setAttributeNS('http://www.w3.org/2000/svg', 'svg:id','&amp;');
 print $doc->saveXML($elt) . "\n";
 
@@ -26,5 +33,7 @@ print $doc->saveXML($elt) . "\n";
 <elt a="&amp;"/>
 <elt a="&amp;amp;"/>
 <elt a=""/>
-<elt xmlns:svg="http://www.w3.org/2000/svg" a="" svg:id="&amp;amp;"/>
-<elt xmlns:svg="http://www.w3.org/2000/svg" a="" svg:id="&amp;lt;&amp;amp;"/>
+<elt a="&amp;"/>
+<elt a="&amp;amp;"/>
+<elt xmlns:svg="http://www.w3.org/2000/svg" svg:id="&amp;amp;"/>
+<elt xmlns:svg="http://www.w3.org/2000/svg" svg:id="&amp;lt;&amp;amp;"/>
