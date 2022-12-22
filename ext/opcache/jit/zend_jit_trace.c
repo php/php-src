@@ -7096,7 +7096,6 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 					if (!shared_exit_info) {
 					    if (t->stack_map) {
 							efree(t->stack_map);
-							t->stack_map = NULL;
 						}
 						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
 						goto exit;
@@ -7130,13 +7129,11 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 			           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
 			    if (t->stack_map) {
 					efree(t->stack_map);
-					t->stack_map = NULL;
 				}
 				ret = ZEND_JIT_TRACE_STOP_TOO_MANY_EXITS;
 			} else {
 			    if (t->stack_map) {
 					efree(t->stack_map);
-					t->stack_map = NULL;
 				}
 				ret = ZEND_JIT_TRACE_STOP_COMPILER_ERROR;
 			}
@@ -7828,7 +7825,6 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 					if (!shared_exit_info) {
 						if (t->stack_map) {
 							efree(t->stack_map);
-							t->stack_map = NULL;
 						}
 						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
 						goto exit;
@@ -7869,13 +7865,11 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 			           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
 			    if (t->stack_map) {
 					efree(t->stack_map);
-					t->stack_map = NULL;
 				}
 				ret = ZEND_JIT_TRACE_STOP_TOO_MANY_EXITS;
 			} else {
 				if (t->stack_map) {
 					efree(t->stack_map);
-					t->stack_map = NULL;
 				}
 				ret = ZEND_JIT_TRACE_STOP_COMPILER_ERROR;
 			}
