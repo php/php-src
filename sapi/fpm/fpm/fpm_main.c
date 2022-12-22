@@ -1911,6 +1911,9 @@ consult the installation file that came with this distribution, or visit \n\
 
 			fpm_request_executing();
 
+			/* Reset exit status from the previous execution */
+			EG(exit_status) = 0;
+
 			php_execute_script(&file_handle);
 
 fastcgi_request_done:
