@@ -4282,12 +4282,14 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_op_array *op_array = &EX(func)->op_array;
-	zend_jit_op_array_extension *jit_extension;
 	bool do_bailout = false;
 
 	zend_shared_alloc_lock();
 
-	if (ZEND_FUNC_INFO(op_array)) {
+	zend_jit_op_array_extension *const jit_extension =
+		(zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+
+	if (jit_extension) {
 
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
@@ -4295,7 +4297,6 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 		zend_try {
 			/* restore original opcode handlers */
 			zend_op *const opline = zend_find_function_entry(op_array);
-			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
 			opline->handler = jit_extension->orig_handler;
 
 			/* perform real JIT for this function */
