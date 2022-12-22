@@ -7763,13 +7763,98 @@ static bool zend_jit_trace_exit_is_hot(uint32_t trace_num, uint32_t exit_num)
 	return false;
 }
 
+/**
+ * Helper function for zend_jit_compile_side_trace().
+ */
+static zend_jit_trace_stop _zend_jit_compile_side_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_num, uint32_t exit_num, uint32_t polymorphism)
+{
+	zend_jit_trace_exit_info exit_info[ZEND_JIT_TRACE_MAX_EXITS];
+	zend_jit_trace_info *const t = &zend_jit_traces[ZEND_JIT_TRACE_NUM];
+
+	t->id = ZEND_JIT_TRACE_NUM;
+	t->root = zend_jit_traces[parent_num].root;
+	t->parent = parent_num;
+	t->link = 0;
+	t->exit_count = 0;
+	t->child_count = 0;
+	t->stack_map_size = 0;
+	t->flags = 0;
+	t->polymorphism = polymorphism;
+	t->jmp_table_size = 0;
+	t->opline = NULL;
+	t->exit_info = exit_info;
+	t->stack_map = NULL;
+
+	const uint8_t orig_trigger = JIT_G(trigger);
+	JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
+
+	const void *const handler = zend_jit_trace(trace_buffer, parent_num, exit_num);
+
+	JIT_G(trigger) = orig_trigger;
+
+	if (handler) {
+		t->exit_info = NULL;
+		if (t->exit_count) {
+			/* reallocate exit_info into shared memory */
+			t->exit_info = (zend_jit_trace_exit_info*)zend_shared_alloc_copy(exit_info,
+				sizeof(zend_jit_trace_exit_info) * t->exit_count);
+
+			if (!t->exit_info) {
+				if (t->stack_map) {
+					efree(t->stack_map);
+				}
+				return ZEND_JIT_TRACE_STOP_NO_SHM;
+			}
+		}
+
+		if (t->stack_map_size) {
+			zend_jit_trace_stack *shared_stack_map = (zend_jit_trace_stack*)zend_shared_alloc_copy(
+				t->stack_map,
+				t->stack_map_size * sizeof(zend_jit_trace_stack));
+			efree(t->stack_map);
+			t->stack_map = shared_stack_map;
+			if (!shared_stack_map) {
+				return ZEND_JIT_TRACE_STOP_NO_SHM;
+			}
+		}
+
+		zend_jit_link_side_trace(
+			zend_jit_traces[parent_num].code_start,
+			zend_jit_traces[parent_num].code_size,
+			zend_jit_traces[parent_num].jmp_table_size,
+			exit_num,
+			handler);
+
+		t->exit_counters = ZEND_JIT_EXIT_COUNTERS;
+		ZEND_JIT_EXIT_COUNTERS += t->exit_count;
+
+		zend_jit_traces[zend_jit_traces[parent_num].root].child_count++;
+		ZEND_JIT_TRACE_NUM++;
+		zend_jit_traces[parent_num].exit_info[exit_num].flags |= ZEND_JIT_EXIT_JITED;
+
+		if ((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO) != 0
+		    && t->exit_count > 0) {
+			zend_jit_dump_exit_info(t);
+		}
+
+		return ZEND_JIT_TRACE_STOP_COMPILED;
+	} else if (t->exit_count >= ZEND_JIT_TRACE_MAX_EXITS ||
+	           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
+	    if (t->stack_map) {
+			efree(t->stack_map);
+		}
+		return ZEND_JIT_TRACE_STOP_TOO_MANY_EXITS;
+	} else {
+		if (t->stack_map) {
+			efree(t->stack_map);
+		}
+		return ZEND_JIT_TRACE_STOP_COMPILER_ERROR;
+	}
+}
+
 static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_num, uint32_t exit_num, uint32_t polymorphism)
 {
 	zend_jit_trace_stop ret;
-	const void *handler;
-	uint8_t orig_trigger;
-	zend_jit_trace_info *t;
-	zend_jit_trace_exit_info exit_info[ZEND_JIT_TRACE_MAX_EXITS];
 	bool do_bailout = false;
 
 	zend_shared_alloc_lock();
@@ -7786,86 +7871,7 @@ static zend_jit_trace_stop zend_jit_compile_side_trace(zend_jit_trace_rec *trace
 		zend_jit_unprotect();
 
 		zend_try {
-			t = &zend_jit_traces[ZEND_JIT_TRACE_NUM];
-
-			t->id = ZEND_JIT_TRACE_NUM;
-			t->root = zend_jit_traces[parent_num].root;
-			t->parent = parent_num;
-			t->link = 0;
-			t->exit_count = 0;
-			t->child_count = 0;
-			t->stack_map_size = 0;
-			t->flags = 0;
-			t->polymorphism = polymorphism;
-			t->jmp_table_size = 0;
-			t->opline = NULL;
-			t->exit_info = exit_info;
-			t->stack_map = NULL;
-
-			orig_trigger = JIT_G(trigger);
-			JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
-
-			handler = zend_jit_trace(trace_buffer, parent_num, exit_num);
-
-			JIT_G(trigger) = orig_trigger;
-
-			if (handler) {
-				t->exit_info = NULL;
-				if (t->exit_count) {
-					/* reallocate exit_info into shared memory */
-					t->exit_info = (zend_jit_trace_exit_info*)zend_shared_alloc_copy(exit_info,
-						sizeof(zend_jit_trace_exit_info) * t->exit_count);
-
-					if (!t->exit_info) {
-						if (t->stack_map) {
-							efree(t->stack_map);
-						}
-						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
-						goto exit;
-					}
-				}
-
-				if (t->stack_map_size) {
-					zend_jit_trace_stack *shared_stack_map = (zend_jit_trace_stack*)zend_shared_alloc_copy(
-						t->stack_map,
-						t->stack_map_size * sizeof(zend_jit_trace_stack));
-					efree(t->stack_map);
-					t->stack_map = shared_stack_map;
-					if (!shared_stack_map) {
-						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
-						goto exit;
-					}
-			    }
-
-				zend_jit_link_side_trace(
-					zend_jit_traces[parent_num].code_start,
-					zend_jit_traces[parent_num].code_size,
-					zend_jit_traces[parent_num].jmp_table_size,
-					exit_num,
-					handler);
-
-				t->exit_counters = ZEND_JIT_EXIT_COUNTERS;
-				ZEND_JIT_EXIT_COUNTERS += t->exit_count;
-
-				zend_jit_traces[zend_jit_traces[parent_num].root].child_count++;
-				ZEND_JIT_TRACE_NUM++;
-				zend_jit_traces[parent_num].exit_info[exit_num].flags |= ZEND_JIT_EXIT_JITED;
-
-				ret = ZEND_JIT_TRACE_STOP_COMPILED;
-			} else if (t->exit_count >= ZEND_JIT_TRACE_MAX_EXITS ||
-			           ZEND_JIT_EXIT_COUNTERS + t->exit_count >= JIT_G(max_exit_counters)) {
-			    if (t->stack_map) {
-					efree(t->stack_map);
-				}
-				ret = ZEND_JIT_TRACE_STOP_TOO_MANY_EXITS;
-			} else {
-				if (t->stack_map) {
-					efree(t->stack_map);
-				}
-				ret = ZEND_JIT_TRACE_STOP_COMPILER_ERROR;
-			}
-
-exit:;
+			ret = _zend_jit_compile_side_trace(trace_buffer, parent_num, exit_num, polymorphism);
 		} zend_catch {
 			do_bailout = true;
 		}  zend_end_try();
@@ -7878,12 +7884,6 @@ exit:;
 
 	if (do_bailout) {
 		zend_bailout();
-	}
-
-	if ((JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_EXIT_INFO) != 0
-	 && ret == ZEND_JIT_TRACE_STOP_COMPILED
-	 && t->exit_count > 0) {
-		zend_jit_dump_exit_info(t);
 	}
 
 	return ret;
