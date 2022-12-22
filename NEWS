@@ -47,6 +47,7 @@ PHP                                                                        NEWS
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
 
 - DOM:
+  . Fix bug GH-8388 (DOMAttr unescapes character reference). (Tim Starling)
   . Fix bug GH-11308 (getElementsByTagName() is O(N^2)). (nielsdos)
 
 - Exif:
