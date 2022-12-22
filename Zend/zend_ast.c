@@ -121,7 +121,6 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	ast->start_lineno = start_lineno;
 	ast->end_lineno = CG(zend_lineno);
 	ast->flags = flags;
-	ast->lex_pos = LANG_SCNG(yy_text);
 	ast->doc_comment = doc_comment;
 	ast->name = name;
 	ast->child[0] = child0;

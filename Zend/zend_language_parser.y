@@ -1250,7 +1250,6 @@ inline_function:
 		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $5, NULL, $11, $7, NULL);
-				  ((zend_ast_decl *) $$)->lex_pos = $10;
 				  CG(extra_fn_flags) = $9; }
 ;
 
