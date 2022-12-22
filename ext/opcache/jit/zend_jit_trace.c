@@ -7639,9 +7639,6 @@ repeat:
 
 	if (UNEXPECTED(trace_buffer[1].opline != orig_opline)) {
 		orig_opline = trace_buffer[1].opline;
-		op_array = (zend_op_array*)trace_buffer[0].op_array;
-		jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-		offset = jit_extension->offset;
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
 			const zend_op_array *op_array = trace_buffer[0].op_array;
 			const zend_op *opline = trace_buffer[1].opline;
