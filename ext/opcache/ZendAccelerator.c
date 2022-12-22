@@ -4412,6 +4412,8 @@ static int accel_preload(const char *config, bool in_child)
 
 		if (PG(auto_globals_jit)) {
 			ping_auto_globals_mask = zend_accel_get_auto_globals();
+		} else {
+			ping_auto_globals_mask = 0;
 		}
 
 		if (EG(zend_constants)) {
