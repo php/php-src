@@ -270,6 +270,12 @@ static inline void gmp_create(zval *target, mpz_ptr *gmpnum_target) /* {{{ */
 }
 /* }}} */
 
+static zend_function *gmp_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct GMP, use gmp_init() instead");
+	return NULL;
+}
+
 static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	mpz_ptr gmpnum;
@@ -534,6 +540,7 @@ ZEND_MINIT_FUNCTION(gmp)
 	memcpy(&gmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	gmp_object_handlers.offset = XtOffsetOf(gmp_object, std);
 	gmp_object_handlers.free_obj = gmp_free_object_storage;
+	gmp_object_handlers.get_constructor = gmp_get_constructor;
 	gmp_object_handlers.cast_object = gmp_cast_object;
 	gmp_object_handlers.get_debug_info = gmp_get_debug_info;
 	gmp_object_handlers.clone_obj = gmp_clone_obj;

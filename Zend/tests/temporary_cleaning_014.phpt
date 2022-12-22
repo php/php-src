@@ -6,7 +6,7 @@ gmp
 <?php
 set_error_handler(function() { throw new Exception; });
 try {
-    new GMP ?: null;
+    gmp_init(0) ?: null;
 } catch (Exception $e) {
 }
 ?>
