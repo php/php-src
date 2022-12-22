@@ -179,11 +179,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
-			if (nodep->children) {
-				node_list_unlink(nodep->children);
-				php_libxml_node_free_list((xmlNodePtr) nodep->children);
-				nodep->children = NULL;
-			}
+			dom_remove_all_children(nodep);
 			ZEND_FALLTHROUGH;
 		case XML_TEXT_NODE:
 		case XML_COMMENT_NODE:
@@ -783,12 +779,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	 * For the other cases, we *can* rely on xmlNodeSetContent because it is either a no-op, or handles
 	 * the content without encoding. */
 	if (type == XML_DOCUMENT_FRAG_NODE || type == XML_ELEMENT_NODE || type == XML_ATTRIBUTE_NODE) {
-		if (nodep->children) {
-			node_list_unlink(nodep->children);
-			php_libxml_node_free_list((xmlNodePtr) nodep->children);
-			nodep->children = NULL;
-		}
-
+		dom_remove_all_children(nodep);
 		xmlNode *textNode = xmlNewText(xmlChars);
 		xmlAddChild(nodep, textNode);
 	} else {

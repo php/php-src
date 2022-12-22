@@ -136,7 +136,6 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 {
 	zend_string *str;
 	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
-	xmlNodePtr node, next;
 
 	if (attrp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -148,18 +147,8 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	if (attrp->children) {
-		node_list_unlink(attrp->children);
-		node = attrp->children;
-		while (node) {
-			next = node->next;
-			xmlUnlinkNode(node);
-			xmlFreeNode(node);
-			node = next;
-		}
-	}
-
-	node = xmlNewTextLen((xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+	dom_remove_all_children((xmlNodePtr) attrp);
+	xmlNodePtr node = xmlNewTextLen((xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
 	xmlAddChild((xmlNodePtr) attrp, node);
 
 	zend_string_release_ex(str, 0);
