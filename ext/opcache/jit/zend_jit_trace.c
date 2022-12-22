@@ -7579,8 +7579,6 @@ int ZEND_FASTCALL zend_jit_trace_hot_root(zend_execute_data *execute_data, const
 	zend_jit_trace_stop stop;
 	int ret = 0;
 	zend_op_array *op_array;
-	zend_jit_op_array_trace_extension *jit_extension;
-	size_t offset;
 	uint32_t trace_num;
 	zend_jit_trace_rec trace_buffer[ZEND_JIT_TRACE_MAX_LENGTH];
 
@@ -7592,8 +7590,7 @@ repeat:
 	trace_num = ZEND_JIT_TRACE_NUM;
 	orig_opline = opline;
 	op_array = &EX(func)->op_array;
-	jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-	offset = jit_extension->offset;
+	const size_t offset = ZEND_OP_TRACE_INFO_OFFSET(op_array);
 
 	EX(opline) = opline;
 
@@ -7642,9 +7639,7 @@ repeat:
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
 			const zend_op_array *op_array = trace_buffer[0].op_array;
 			const zend_op *opline = trace_buffer[1].opline;
-			zend_jit_op_array_trace_extension *jit_extension =
-				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-			size_t offset = jit_extension->offset;
+			const size_t offset = ZEND_OP_TRACE_INFO_OFFSET(op_array);
 
 			fprintf(stderr, "---- TRACE %d start (%s) %s%s%s() %s:%d\n",
 				trace_num,

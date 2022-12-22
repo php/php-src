@@ -498,6 +498,14 @@ typedef struct _zend_jit_op_array_trace_extension {
 	zend_op_trace_info trace_info[1];
 } zend_jit_op_array_trace_extension;
 
+static zend_always_inline size_t ZEND_OP_TRACE_INFO_OFFSET(const zend_op_array *op_array)
+{
+	const zend_jit_op_array_trace_extension *jit_extension =
+		(const zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+	ZEND_ASSERT(jit_extension != NULL);
+	return jit_extension->offset;
+}
+
 static zend_always_inline zend_op_trace_info *ZEND_OP_TRACE_INFO(const zend_op *opline, size_t offset)
 {
 	return (zend_op_trace_info*)((char*)opline + offset);
