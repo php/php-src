@@ -1588,4 +1588,14 @@ static int dom_nodelist_has_dimension(zend_object *object, zval *member, int che
 	}
 } /* }}} end dom_nodelist_has_dimension */
 
+void dom_remove_all_children(xmlNodePtr nodep)
+{
+	if (nodep->children) {
+		node_list_unlink(nodep->children);
+		php_libxml_node_free_list((xmlNodePtr) nodep->children);
+		nodep->children = NULL;
+		nodep->last = NULL;
+	}
+}
+
 #endif /* HAVE_DOM */

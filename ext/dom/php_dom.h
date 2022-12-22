@@ -142,6 +142,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_child_node_remove(dom_object *context);
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc);
 
+void dom_remove_all_children(xmlNodePtr nodep);
+
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
