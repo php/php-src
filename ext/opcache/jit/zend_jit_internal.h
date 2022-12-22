@@ -838,6 +838,25 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 	}
 }
 
+/**
+ * Look up the function entry, i.e. the first #zend_op that is not
+ * #ZEND_RECV or #ZEND_RECV_INIT.
+ */
+static inline zend_op *zend_find_function_entry(zend_op_array *op_array)
+{
+	zend_op *opline = op_array->opcodes;
+
+	if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+			opline++;
+
+			ZEND_ASSERT(opline < op_array->opcodes + op_array->last);
+		}
+	}
+
+	return opline;
+}
+
 /* Instruction cache flush */
 #ifndef JIT_CACHE_FLUSH
 #  if ZEND_JIT_TARGET_ARM64

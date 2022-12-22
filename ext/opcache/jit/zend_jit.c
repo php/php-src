@@ -4282,7 +4282,6 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_op_array *op_array = &EX(func)->op_array;
-	zend_op *opline = op_array->opcodes;
 	zend_jit_op_array_extension *jit_extension;
 	bool do_bailout = false;
 
@@ -4295,11 +4294,7 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 
 		zend_try {
 			/* restore original opcode handlers */
-			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-					opline++;
-				}
-			}
+			zend_op *const opline = zend_find_function_entry(op_array);
 			jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
 			opline->handler = jit_extension->orig_handler;
 
@@ -4324,7 +4319,6 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 }
 
 static void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
-	zend_op *opline;
 	zend_function *func;
 	zend_op_array *op_array;
 	uintptr_t counter;
@@ -4335,12 +4329,7 @@ static void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
 			break;
 		}
 		op_array = &func->op_array;
-		opline = op_array->opcodes;
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
-			}
-		}
+		zend_op *const opline = zend_find_function_entry(op_array);
 		if (opline->handler == zend_jit_profile_jit_handler) {
 			if (!RUN_TIME_CACHE(op_array)) {
 				continue;
@@ -4396,14 +4385,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 static void zend_jit_setup_hot_counters_ex(zend_op_array *op_array, zend_cfg *cfg)
 {
 	if (JIT_G(hot_func)) {
-		zend_op *opline = op_array->opcodes;
-
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
-			}
-		}
-
+		zend_op *const opline = zend_find_function_entry(op_array);
 		opline->handler = (const void*)zend_jit_func_hot_counter_handler;
 	}
 
@@ -4499,7 +4481,6 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC) {
 		zend_jit_op_array_extension *jit_extension;
-		zend_op *opline = op_array->opcodes;
 
 		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 			ZEND_SET_FUNC_INFO(op_array, NULL);
@@ -4509,11 +4490,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		/* Set run-time JIT handler */
 		ZEND_ASSERT(zend_jit_runtime_jit_handler != NULL);
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
-			}
-		}
+		zend_op *const opline = zend_find_function_entry(op_array);
 		jit_extension = zend_jit_new_op_array_extension(op_array);
 		if (!jit_extension) {
 			return FAILURE;
@@ -4525,7 +4502,6 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		return SUCCESS;
 	} else if (JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST) {
 		zend_jit_op_array_extension *jit_extension;
-		zend_op *opline = op_array->opcodes;
 
 		if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
 			ZEND_SET_FUNC_INFO(op_array, NULL);
@@ -4535,11 +4511,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		ZEND_ASSERT(zend_jit_profile_jit_handler != NULL);
 		if (op_array->function_name) {
-			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-					opline++;
-				}
-			}
+			zend_op *const opline = zend_find_function_entry(op_array);
 			jit_extension = zend_jit_new_op_array_extension(op_array);
 			if (!jit_extension) {
 				return FAILURE;
@@ -5182,15 +5154,10 @@ static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
 #if 0
 	// TODO: We have to restore handlers for some inner basic-blocks, but we didn't store them ???
 	} else if (func_info->flags & (ZEND_FUNC_JIT_ON_FIRST_EXEC|ZEND_FUNC_JIT_ON_PROF_REQUEST)) {
-		zend_op *opline = op_array->opcodes;
 		zend_jit_op_array_extension *jit_extension =
 			(zend_jit_op_array_extension*)func_info;
 
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
-			}
-		}
+		zend_op *const opline = zend_find_function_entry(op_array);
 		if (func_info->flags & ZEND_FUNC_JIT_ON_FIRST_EXEC) {
 			opline->handler = (const void*)zend_jit_runtime_jit_handler;
 		} else {

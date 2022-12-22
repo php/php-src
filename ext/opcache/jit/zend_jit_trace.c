@@ -8364,13 +8364,7 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 
 	if (JIT_G(hot_func)) {
 		ZEND_ASSERT(zend_jit_func_trace_counter_handler != NULL);
-		opline = op_array->opcodes;
-		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
-			}
-		}
-
+		zend_op *const opline = zend_find_function_entry(op_array);
 		zend_op_trace_info *const trace_info = ZEND_OP_TRACE_INFO(opline, jit_extension->offset);
 		if (!trace_info->trace_flags) {
 			/* function entry */
