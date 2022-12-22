@@ -13,12 +13,6 @@ var_dump(array_pad(array("", -1, 2.0), 2, array()));
 var_dump(array_pad(array("", -1, 2.0), -3, array()));
 var_dump(array_pad(array("", -1, 2.0), -4, array()));
 
-try {
-    var_dump(array_pad(array("", -1, 2.0), 2000000, 0));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
-}
-
 ?>
 --EXPECT--
 array(1) {
@@ -84,4 +78,3 @@ array(4) {
   [3]=>
   float(2)
 }
-array_pad(): Argument #2 ($length) is too large because it results in a padding of 1999997 elements, which is larger than the allowed 1048576 elements
