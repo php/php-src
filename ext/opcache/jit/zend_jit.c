@@ -588,10 +588,10 @@ static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, zend_ssa *ssa, u
 	return info;
 }
 
-#ifndef ZEND_JIT_IR
 static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_info)
 {
 	switch (opline->opcode) {
+#ifndef ZEND_JIT_IR //???
 		case ZEND_FETCH_OBJ_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
@@ -608,6 +608,7 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_i
 				return 1;
 			}
 			break;
+#endif
 		case ZEND_FETCH_DIM_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
@@ -626,7 +627,6 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_i
 	}
 	return 0;
 }
-#endif /* ZEND_JIT_IR */
 
 static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 {
@@ -4127,7 +4127,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_DIM_R:
 					case ZEND_FETCH_DIM_IS:
 					case ZEND_FETCH_LIST_R:
@@ -4186,6 +4185,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:
@@ -5578,7 +5578,7 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 	}
 #endif
 #else
-	zend_jit_end();
+	zend_jit_shutdown_ir();
 #endif
 
 #ifdef ZTS

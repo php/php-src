@@ -1934,7 +1934,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_FETCH_DIM_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -1945,7 +1944,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ADD_OP2_TRACE_GUARD();
 					ADD_OP1_TRACE_GUARD();
 					break;
-#endif
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
 				case ZEND_POST_INC:
@@ -1992,7 +1990,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 					if ((opline->extended_value & ZEND_ISEMPTY)) {
 						// TODO: support for empty() ???
@@ -2050,7 +2047,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
-#endif
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_VAR_NO_REF_EX:
@@ -2992,7 +2988,13 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			 && ssa_op->op2_use != ssa_op->op1_use
 			 && RA_HAS_IVAL(ssa_op->op2_use)
 			 && !zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
+#ifndef ZEND_JIT_IR
 				if (support_opline) {
+#else
+				/* Quick workaround to disable register allocation for unsupported operand */
+				// TODO: Find a general solution ???
+				if (support_opline && opline->opcode != ZEND_FETCH_DIM_R) {
+#endif
 					zend_jit_trace_use_var(idx, ssa_op->op2_use, ssa_op->op2_def, ssa_op->op2_use_chain,
 #ifndef ZEND_JIT_IR
 						start, end, flags, 
@@ -3814,7 +3816,7 @@ static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack
 
 	for (i = 0; i < stack_size; i++) {
 #ifdef ZEND_JIT_IR
-		if (STACK_FLAGS(stack, i) & (ZREG_CONST|ZREG_ZVAL_COPY|ZREG_TYPE_ONLY)) {
+		if (STACK_FLAGS(stack, i) & (ZREG_CONST|ZREG_ZVAL_COPY|ZREG_TYPE_ONLY|ZREG_ZVAL_ADDREF)) {
 			return 1;
 		}
 #endif
@@ -3940,6 +3942,9 @@ static int zend_jit_trace_deoptimization(
 			if (stack) {
 				SET_STACK_TYPE(stack, i, type, 1);
 			}
+		} else if (STACK_FLAGS(parent_stack, i) == ZREG_ZVAL_ADDREF) {
+			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, EX_NUM_TO_VAR(i));
+			zend_jit_zval_try_addref(jit, dst);
 		} else if (STACK_FLAGS(parent_stack, i) == ZREG_ZVAL_COPY) {
 			ZEND_ASSERT(reg != ZREG_NONE);
 			ZEND_ASSERT(check2 == -1);
@@ -4043,29 +4048,39 @@ static int zend_jit_trace_deoptimization(
 		}
 	}
 
-#ifndef ZEND_JIT_IR //???
 	if (flags & ZEND_JIT_EXIT_FREE_OP2) {
 		const zend_op *op = opline - 1;
 
+#ifndef ZEND_JIT_IR
 		if (!zend_jit_free_op(jit, op, -1, op->op2.var)) {
 			return 0;
 		}
+#else
+		zend_jit_zval_ptr_dtor(jit, ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, op->op2.var), -1, 0, op);
+#endif
 	}
 
 	if (flags & ZEND_JIT_EXIT_FREE_OP1) {
 		const zend_op *op = opline - 1;
 
+#ifndef ZEND_JIT_IR
 		if (!zend_jit_free_op(jit, op, -1, op->op1.var)) {
 			return 0;
 		}
+#else
+		zend_jit_zval_ptr_dtor(jit, ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, op->op1.var), -1, 0, op);
+#endif
 	}
 
 	if (flags & (ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)) {
+#ifndef ZEND_JIT_IR
 		if (!zend_jit_check_exception(jit)) {
 			return 0;
 		}
-	}
+#else
+		zend_jit_check_exception(jit);
 #endif
+	}
 
 	if ((flags & ZEND_JIT_EXIT_METHOD_CALL) && !polymorphic_side_trace) {
 #ifndef ZEND_JIT_IR
@@ -6154,7 +6169,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_DIM_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
@@ -6358,6 +6372,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
@@ -6897,7 +6912,9 @@ done:
 									RA_REG_FLAGS(ssa_op->result_def) & ZREG_STORE);
 							}
 #else
-							if (ra && RA_HAS_REG(ssa_op->result_def)) {
+							if (ssa->var_info[ssa_op->result_def].avoid_refcounting) {
+								SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_NONE, ZREG_ZVAL_ADDREF);
+							} else if (ra && RA_HAS_REG(ssa_op->result_def)) {
 								SET_STACK_REF_EX(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def].ref,
 									RA_REG_FLAGS(ssa_op->result_def) & ZREG_STORE);
 							}
@@ -8443,6 +8460,8 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					}
 				} else if (STACK_FLAGS(stack, j) == ZREG_TYPE_ONLY) {
 					fprintf(stderr, "(type_only)");
+				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_ADDREF) {
+					fprintf(stderr, "(zval_try_addref)");
 				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
 					fprintf(stderr, "zval_copy(%s)", zend_reg_name(STACK_REG(stack, j)));
 				} else if (STACK_REG(stack, j) != -1 /*???ZREG_NONE*/) {
@@ -8463,6 +8482,8 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 				zend_dump_var(op_array, (j < op_array->last_var) ? IS_CV : 0, j);
 				fprintf(stderr, ":unknown(zval_copy(%s))", zend_reg_name[ZREG_COPY]);
 #else
+			} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_ADDREF) {
+				fprintf(stderr, ":unknown(zval_try_addref)");
 			} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, (j < op_array->last_var) ? IS_CV : 0, j);
@@ -9083,13 +9104,14 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZEND_UNREACHABLE();
 			}
 		} else if (STACK_FLAGS(stack, i) == ZREG_TYPE_ONLY) {
-			if (STACK_TYPE(stack, i) == IS_LONG) {
-				Z_TYPE_INFO_P(EX_VAR_NUM(i)) = IS_LONG;
-			} else if (STACK_TYPE(stack, i) == IS_DOUBLE) {
-				Z_TYPE_INFO_P(EX_VAR_NUM(i)) = IS_DOUBLE;
+			uint32_t type = STACK_TYPE(stack, i);
+			if (type <= IS_DOUBLE) {
+				Z_TYPE_INFO_P(EX_VAR_NUM(i)) = type;
 			} else {
 				ZEND_UNREACHABLE();
 			}
+		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_ADDREF) {
+			Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_COPY) {
 			zval *val = (zval*)regs->gpr[STACK_REG(stack, i)];
 
