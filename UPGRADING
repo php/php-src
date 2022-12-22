@@ -48,6 +48,10 @@ PHP 8.3 UPGRADE NOTES
   . C functions that have a return type of void now return null instead of
     returning the following object object(FFI\CData:void) { }
 
+- DOM:
+  . Assignment to DOMAttr::$value and DOMAttr::$nodeValue no longer expands
+    entities in the new value.
+
 ========================================
 2. New Features
 ========================================
