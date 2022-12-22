@@ -498,8 +498,10 @@ typedef struct _zend_jit_op_array_trace_extension {
 	zend_op_trace_info trace_info[1];
 } zend_jit_op_array_trace_extension;
 
-#define ZEND_OP_TRACE_INFO(opline, offset) \
-	((zend_op_trace_info*)(((char*)opline) + offset))
+static zend_always_inline zend_op_trace_info *ZEND_OP_TRACE_INFO(const zend_op *opline, size_t offset)
+{
+	return (zend_op_trace_info*)((char*)opline + offset);
+}
 
 /* Recorder */
 typedef enum _zend_jit_trace_op {
