@@ -6906,23 +6906,20 @@ done:
 			const zend_op_array *rec_op_array;
 
 			rec_op_array = op_array = trace_buffer->op_array;
-			jit_extension =
-				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+			size_t offset = ZEND_OP_TRACE_INFO_OFFSET(op_array);
 			p = trace_buffer + ZEND_JIT_TRACE_START_REC_SIZE;
 			for (;;p++) {
 				if (p->op == ZEND_JIT_TRACE_VM) {
 					opline = p->opline;
 				} else if (p->op == ZEND_JIT_TRACE_ENTER) {
 					if (p->op_array == rec_op_array) {
-						zend_jit_trace_setup_ret_counter(opline, jit_extension->offset);
+						zend_jit_trace_setup_ret_counter(opline, offset);
 					}
 					op_array = p->op_array;
-					jit_extension =
-						(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+					offset = ZEND_OP_TRACE_INFO_OFFSET(op_array);
 				} else if (p->op == ZEND_JIT_TRACE_BACK) {
 					op_array = p->op_array;
-					jit_extension =
-						(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+					offset = ZEND_OP_TRACE_INFO_OFFSET(op_array);
 				} else if (p->op == ZEND_JIT_TRACE_END) {
 					break;
 				}
@@ -6944,9 +6941,10 @@ done:
 				do {
 					if (frame->call_opline) {
 						op_array = &frame->func->op_array;
+						const size_t offset = ZEND_OP_TRACE_INFO_OFFSET(op_array);
 						jit_extension =
 							(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-						zend_jit_trace_setup_ret_counter(frame->call_opline, jit_extension->offset);
+						zend_jit_trace_setup_ret_counter(frame->call_opline, offset);
 					}
 					frame = frame->prev;
 				} while (frame);
