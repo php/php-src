@@ -511,6 +511,22 @@ static zend_always_inline zend_op_trace_info *ZEND_OP_TRACE_INFO(const zend_op *
 	return (zend_op_trace_info*)((char*)opline + offset);
 }
 
+/**
+ * Access the #zend_op_trace_info of an #zend_op by looking up the
+ * offset from the specified #zend_op_array.
+ */
+static zend_always_inline zend_op_trace_info *ZEND_OP_TRACE_INFO2(const zend_op_array *op_array, const zend_op *opline)
+{
+	/* the opline must be from the specified function */
+	ZEND_ASSERT(opline >= op_array->opcodes);
+	ZEND_ASSERT(opline < op_array->opcodes + op_array->last);
+
+	const zend_jit_op_array_trace_extension *jit_extension =
+		(const zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+	ZEND_ASSERT(jit_extension != NULL);
+	return ZEND_OP_TRACE_INFO(opline, jit_extension->offset);
+}
+
 /* Recorder */
 typedef enum _zend_jit_trace_op {
 	ZEND_JIT_TRACE_VM,

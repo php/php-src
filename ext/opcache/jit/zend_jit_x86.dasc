@@ -3594,11 +3594,8 @@ static int zend_jit_packed_guard(dasm_State **Dst, const zend_op *opline, uint32
 
 static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_array, const zend_op *opline, int may_throw, zend_jit_trace_rec *trace)
 {
-	zend_jit_op_array_trace_extension *jit_extension =
-		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-	size_t offset = jit_extension->offset;
 	const void *handler =
-		(zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO(opline, offset)->call_handler;
+		(zend_vm_opcode_handler_t)ZEND_OP_TRACE_INFO2(op_array, opline)->call_handler;
 
 	if (!zend_jit_set_valid_ip(Dst, opline)) {
 		return 0;

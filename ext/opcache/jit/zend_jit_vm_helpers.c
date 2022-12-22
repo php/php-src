@@ -306,13 +306,11 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key)
 
 static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_counter_helper(uint32_t cost ZEND_OPCODE_HANDLER_ARGS_DC)
 {
-	zend_jit_op_array_trace_extension *jit_extension =
-		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&EX(func)->op_array);
 #ifndef HAVE_GCC_GLOBAL_REGS
 	const zend_op *opline = EX(opline);
 #endif
 
-	zend_op_trace_info *const trace_info = ZEND_OP_TRACE_INFO(opline, jit_extension->offset);
+	zend_op_trace_info *const trace_info = ZEND_OP_TRACE_INFO2(&EX(func)->op_array, opline);
 
 	*(trace_info->counter) -= cost;
 

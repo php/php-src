@@ -7969,13 +7969,11 @@ static int zend_jit_trace_hot_side(zend_execute_data *execute_data, uint32_t par
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
 			const zend_op_array *op_array = trace_buffer[0].op_array;
 			const zend_op *opline = trace_buffer[1].opline;
-			zend_jit_op_array_trace_extension *jit_extension =
-				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-			size_t offset = jit_extension->offset;
+			const zend_op_trace_info *trace_info = ZEND_OP_TRACE_INFO2(op_array, opline);
 
 			fprintf(stderr, "---- TRACE %d start (%s) %s%s%s() %s:%d\n",
 				trace_num,
-				zend_jit_trace_star_desc(ZEND_OP_TRACE_INFO(opline, offset)->trace_flags),
+				zend_jit_trace_star_desc(trace_info->trace_flags),
 				op_array->scope ? ZSTR_VAL(op_array->scope->name) : "",
 				op_array->scope ? "::" : "",
 				op_array->function_name ?
@@ -8197,7 +8195,6 @@ static int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registe
 	}
 
 	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_INVALIDATE) {
-		zend_jit_op_array_trace_extension *jit_extension;
 		uint32_t num = trace_num;
 
 		while (t->root != num) {
@@ -8207,8 +8204,7 @@ static int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registe
 
 		zend_shared_alloc_lock();
 
-		jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(t->op_array);
-		zend_op_trace_info *const trace_info = ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset);
+		zend_op_trace_info *const trace_info = ZEND_OP_TRACE_INFO2(t->op_array, t->opline);
 
 		/* Checks under lock, just in case something has changed while we were waiting for the lock */
 		if (!(trace_info->trace_flags & (ZEND_JIT_TRACE_JITED|ZEND_JIT_TRACE_BLACKLISTED))) {
