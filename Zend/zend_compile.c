@@ -7615,6 +7615,13 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zval value_zv;
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 
+		/* Applies to all properties in the group but checked here to provide a better error message */
+		if (flags & ZEND_ACC_PPP_SET_MASK && !(flags & ZEND_ACC_PPP_MASK)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Property %s::$%s with set-visibility must specify get-visibility",
+				ZSTR_VAL(ce->name),
+				ZSTR_VAL(name));
+		}
+
 		if (type_ast) {
 			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
 
