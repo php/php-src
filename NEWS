@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Apache:
   . Fixed bug GH-9949 (Partial content on incomplete POST request). (cmb)
 
+- Core:
+  . Fixed bug GH-10072 (PHP crashes when execute_ex is overridden and a __call
+    trampoline is used from internal code). (Derick)
+
 - Date:
   . Fixed bug GH-9891 (DateTime modify with unixtimestamp (@) must work like
     setTimestamp). (Derick)
