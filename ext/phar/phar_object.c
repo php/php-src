@@ -2606,16 +2606,14 @@ PHP_METHOD(Phar, delete)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, fname, (uint32_t) fname_len)) {
-		if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
-			if (entry->is_deleted) {
-				/* entry is deleted, but has not been flushed to disk yet */
-				RETURN_TRUE;
-			} else {
-				entry->is_deleted = 1;
-				entry->is_modified = 1;
-				phar_obj->archive->is_modified = 1;
-			}
+	if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
+		if (entry->is_deleted) {
+			/* entry is deleted, but has not been flushed to disk yet */
+			RETURN_TRUE;
+		} else {
+			entry->is_deleted = 1;
+			entry->is_modified = 1;
+			phar_obj->archive->is_modified = 1;
 		}
 	} else {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be deleted", fname);
@@ -3420,18 +3418,16 @@ PHP_METHOD(Phar, copy)
 		RETURN_THROWS();
 	}
 
-	if (!zend_hash_str_exists(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len) || NULL == (oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len)) || oldentry->is_deleted) {
+	if (NULL == (oldentry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, oldfile, (uint32_t) oldfile_len)) || oldentry->is_deleted) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 			"file \"%s\" cannot be copied to file \"%s\", file does not exist in %s", oldfile, newfile, phar_obj->archive->fname);
 		RETURN_THROWS();
 	}
 
-	if (zend_hash_str_exists(&phar_obj->archive->manifest, newfile, (uint32_t) newfile_len)) {
-		if (NULL != (temp = zend_hash_str_find_ptr(&phar_obj->archive->manifest, newfile, (uint32_t) newfile_len)) || !temp->is_deleted) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"file \"%s\" cannot be copied to file \"%s\", file must not already exist in phar %s", oldfile, newfile, phar_obj->archive->fname);
-			RETURN_THROWS();
-		}
+	if (NULL != (temp = zend_hash_str_find_ptr(&phar_obj->archive->manifest, newfile, (uint32_t) newfile_len)) && !temp->is_deleted) {
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
+			"file \"%s\" cannot be copied to file \"%s\", file must not already exist in phar %s", oldfile, newfile, phar_obj->archive->fname);
+		RETURN_THROWS();
 	}
 
 	tmp_len = newfile_len;

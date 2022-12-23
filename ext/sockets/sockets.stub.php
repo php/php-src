@@ -1699,6 +1699,13 @@ const SO_DETACH_FILTER = UNKNOWN;
  */
 const SO_DETACH_BPF = UNKNOWN;
 #endif
+#if defined(TCP_QUICKACK)
+/**
+ * @var int
+ * @cvalue TCP_QUICKACK
+ */
+const TCP_QUICKACK = UNKNOWN;
+#endif
 
 /**
  * @strict-properties

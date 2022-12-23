@@ -70,6 +70,8 @@ PHP                                                                        NEWS
     over socket binding for a cpu core. (David Carlier)
   . Added SKF_AD_QUEUE for cbpf filters. (David Carlier)
   . Added socket_atmark if send/recv needs using MSG_OOB. (David Carlier)
+  . Added TCP_QUICKACK constant, to give tigher control over
+    ACK delays. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
