@@ -5915,8 +5915,8 @@ PHP_FUNCTION(array_rand)
 }
 /* }}} */
 
-/* {{{ Returns the sum of the array entries */
-PHP_FUNCTION(array_sum)
+/* Wrapper for array_sum and array_product */
+static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, binary_op_type op, zend_long initial)
 {
 	HashTable *input;
 	zval *entry;
@@ -5927,12 +5927,12 @@ PHP_FUNCTION(array_sum)
 
 	if (zend_hash_num_elements(input) == 0) {
 		php_error_docref(NULL, E_DEPRECATED, "Passing an empty array is deprecated");
-		RETURN_LONG(0);
+		RETURN_LONG(initial);
 	}
 
-	ZVAL_LONG(return_value, 0);
+	ZVAL_LONG(return_value, initial);
 	ZEND_HASH_FOREACH_VAL(input, entry) {
-		zend_result status = add_function(return_value, return_value, entry);
+		zend_result status = op(return_value, return_value, entry);
 		if (status == FAILURE) {
 			ZEND_ASSERT(EG(exception));
 			zend_clear_exception();
@@ -5940,16 +5940,16 @@ PHP_FUNCTION(array_sum)
 			if (Z_TYPE_P(entry) == IS_RESOURCE) {
 				zval tmp;
 				ZVAL_LONG(&tmp, Z_RES_HANDLE_P(entry));
-				add_function(return_value, return_value, &tmp);
+				op(return_value, return_value, &tmp);
 			}
 			/* BC non numeric strings: previously were cast to 0 */
 			if (Z_TYPE_P(entry) == IS_STRING) {
 				zval tmp;
 				ZVAL_LONG(&tmp, 0);
-				add_function(return_value, return_value, &tmp);
+				op(return_value, return_value, &tmp);
 			}
-			php_error_docref(NULL, E_WARNING, "Addition is not supported on type %s",
-				zend_zval_type_name(entry));
+			php_error_docref(NULL, E_WARNING, "%s is not supported on type %s",
+				op_name, zend_zval_type_name(entry));
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -5964,69 +5964,24 @@ PHP_FUNCTION(array_sum)
 			zend_error(E_WARNING, "Object of class %s could not be converted to int|float",
 				ZSTR_VAL(Z_OBJCE_P(return_value)->name));
 			zval_ptr_dtor(return_value);
-			RETURN_LONG(0);
+			RETURN_LONG(initial);
 		}
 		zval_ptr_dtor(return_value);
 		RETURN_COPY_VALUE(&dst);
 	}
+}
+
+/* {{{ Returns the sum of the array entries */
+PHP_FUNCTION(array_sum)
+{
+	php_array_binop(INTERNAL_FUNCTION_PARAM_PASSTHRU, "Addition", add_function, 0);
 }
 /* }}} */
 
 /* {{{ Returns the product of the array entries */
 PHP_FUNCTION(array_product)
 {
-	HashTable *input;
-	zval *entry;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY_HT(input)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (zend_hash_num_elements(input) == 0) {
-		php_error_docref(NULL, E_DEPRECATED, "Passing an empty array is deprecated");
-		RETURN_LONG(1);
-	}
-
-	ZVAL_LONG(return_value, 1);
-
-	ZEND_HASH_FOREACH_VAL(input, entry) {
-		zend_result status = mul_function(return_value, return_value, entry);
-		if (status == FAILURE) {
-			ZEND_ASSERT(EG(exception));
-			zend_clear_exception();
-			/* BC resources: previously resources were cast to int */
-			if (Z_TYPE_P(entry) == IS_RESOURCE) {
-				zval tmp;
-				ZVAL_LONG(&tmp, Z_RES_HANDLE_P(entry));
-				mul_function(return_value, return_value, &tmp);
-			}
-			/* BC non numeric strings: previously were cast to 0 */
-			if (Z_TYPE_P(entry) == IS_STRING) {
-				zval tmp;
-				ZVAL_LONG(&tmp, 0);
-				mul_function(return_value, return_value, &tmp);
-			}
-			php_error_docref(NULL, E_WARNING, "Multiplication is not supported on type %s",
-				zend_zval_type_name(entry));
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	/* Traversal of array encountered objects that support multiplication */
-	if (Z_TYPE_P(return_value) == IS_OBJECT) {
-		/* Cannot use convert_scalar_to_number() as we don't know if the cast succeeded */
-		zval dst;
-		zend_result status = Z_OBJ_HT_P(return_value)->cast_object(Z_OBJ_P(return_value), &dst, _IS_NUMBER);
-
-		/* Do not type error for BC */
-		if (status == FAILURE || (Z_TYPE(dst) != IS_LONG && Z_TYPE(dst) != IS_DOUBLE)) {
-			zend_error(E_WARNING, "Object of class %s could not be converted to int|float",
-				ZSTR_VAL(Z_OBJCE_P(return_value)->name));
-			zval_ptr_dtor(return_value);
-			RETURN_LONG(1);
-		}
-		zval_ptr_dtor(return_value);
-		RETURN_COPY_VALUE(&dst);
-	}
+	php_array_binop(INTERNAL_FUNCTION_PARAM_PASSTHRU, "Multiplication", mul_function, 1);
 }
 /* }}} */
 
