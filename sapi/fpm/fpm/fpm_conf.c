@@ -34,6 +34,7 @@
 #include "fpm_status.h"
 #include "fpm_log.h"
 #include "fpm_events.h"
+#include "fpm_unix.h"
 #include "zlog.h"
 #ifdef HAVE_SYSTEMD
 #include "fpm_systemd.h"
@@ -1854,6 +1855,12 @@ int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 	}
 
 	if (test_conf) {
+		for (struct fpm_worker_pool_s *wp = fpm_worker_all_pools; wp; wp = wp->next) {
+			if (!fpm_unix_test_config(wp)) {
+				return -1;
+			}
+		}
+
 		if (test_conf > 1) {
 			fpm_conf_dump();
 		}
