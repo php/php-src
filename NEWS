@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fix inverted bailout value in zend_runtime_jit() (Max Kellermann).
 
+- PHPDBG:
+  . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
+
 05 Jan 2023, PHP 8.2.1
 
 - Core:

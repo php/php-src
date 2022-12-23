@@ -1321,7 +1321,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 		module_entry->handle = handle;
 
 		if ((module_entry = zend_register_module_ex(module_entry)) == NULL) {
-			phpdbg_error("Unable to register module %s", module_entry->name);
+			phpdbg_error("Unable to register module %s", *name);
 
 			goto quit;
 		}
