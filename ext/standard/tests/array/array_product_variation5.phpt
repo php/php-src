@@ -5,5 +5,6 @@ Test array_product() function: ressources in array
 $input = [10, STDERR /* Should get casted to 3 as an integer */];
 var_dump(array_product($input));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: array_product(): Multiplication is not supported on type resource in %s on line %d
 int(30)

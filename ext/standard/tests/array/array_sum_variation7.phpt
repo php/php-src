@@ -57,18 +57,48 @@ echo "-- array with mixed values --\n";
 var_dump( array_sum($input) );
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_sum() : array with unexpected entries ***
 -- array with string values --
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
 int(0)
 -- array with bool values --
 int(3)
 -- array with null values --
 int(0)
 -- array with subarrays --
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
 int(0)
 -- array with object values --
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type MyClass in %s on line %d
 int(0)
 -- array with mixed values --
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type string in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type array in %s on line %d
 float(14)
 Done

@@ -5948,7 +5948,8 @@ PHP_FUNCTION(array_sum)
 				ZVAL_LONG(&tmp, 0);
 				add_function(return_value, return_value, &tmp);
 			}
-			// TODO Warning/Deprecation?
+			php_error_docref(NULL, E_WARNING, "Addition is not supported on type %s",
+				zend_zval_type_name(entry));
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -6005,7 +6006,8 @@ PHP_FUNCTION(array_product)
 				ZVAL_LONG(&tmp, 0);
 				mul_function(return_value, return_value, &tmp);
 			}
-			// TODO Warning/Deprecation?
+			php_error_docref(NULL, E_WARNING, "Multiplication is not supported on type %s",
+				zend_zval_type_name(entry));
 		}
 	} ZEND_HASH_FOREACH_END();
 
