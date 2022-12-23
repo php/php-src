@@ -5,7 +5,7 @@ gmp
 --FILE--
 <?php
 
-$g = new GMP();
+$g = gmp_init(0);
 $g->{1} = 123;
 
 $serialized = serialize($g);
