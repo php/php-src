@@ -8723,7 +8723,9 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY, SPEC(OBSERVER))
 			SAVE_OPLINE_EX();
 			ZEND_OBSERVER_FCALL_BEGIN(execute_data);
 			execute_data = EX(prev_execute_data);
-			LOAD_OPLINE();
+			if (execute_data) {
+				LOAD_OPLINE();
+			}
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
 		}
@@ -8775,7 +8777,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY, SPEC(OBSERVER))
 
 	execute_data = EG(current_execute_data);
 
-	if (!EX(func) || !ZEND_USER_CODE(EX(func)->type) || (call_info & ZEND_CALL_TOP)) {
+	if (!execute_data || !EX(func) || !ZEND_USER_CODE(EX(func)->type) || (call_info & ZEND_CALL_TOP)) {
 		ZEND_VM_RETURN();
 	}
 
