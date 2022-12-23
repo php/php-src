@@ -5926,7 +5926,7 @@ PHP_FUNCTION(array_sum)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_hash_num_elements(input) == 0) {
-		// TODO Deprecate empty array
+		php_error_docref(NULL, E_DEPRECATED, "Passing an empty array is deprecated");
 		RETURN_LONG(0);
 	}
 
@@ -5976,7 +5976,7 @@ PHP_FUNCTION(array_product)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_hash_num_elements(input) == 0) {
-		// TODO Deprecate empty array
+		php_error_docref(NULL, E_DEPRECATED, "Passing an empty array is deprecated");
 		RETURN_LONG(1);
 	}
 

@@ -9,11 +9,6 @@ Test array_sum() function : usage variations - 'input' array with unexpected val
 
 echo "*** Testing array_sum() : array with unexpected entries ***\n";
 
-// empty array
-$input = array();
-echo "-- empty array --\n";
-var_dump( array_sum($input) );
-
 // string array
 $input = array('Apple', 'Banana', 'Carrot', 'Mango', 'Orange');
 echo "-- array with string values --\n";
@@ -64,8 +59,6 @@ echo "Done"
 ?>
 --EXPECT--
 *** Testing array_sum() : array with unexpected entries ***
--- empty array --
-int(0)
 -- array with string values --
 int(0)
 -- array with bool values --
