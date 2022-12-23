@@ -5952,15 +5952,21 @@ PHP_FUNCTION(array_sum)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	/* Traversal of array encountered a numerically catable object */
+	/* Traversal of array encountered objects that support multiplication */
 	if (Z_TYPE_P(return_value) == IS_OBJECT) {
-		/* First try to convert to int */
+		/* Cannot use convert_scalar_to_number() as we don't know if the cast succeeded */
 		zval dst;
-		if (Z_OBJ_HT_P(return_value)->cast_object(Z_OBJ_P(return_value), &dst, IS_LONG) == SUCCESS) {
+		zend_result status = Z_OBJ_HT_P(return_value)->cast_object(Z_OBJ_P(return_value), &dst, _IS_NUMBER);
+
+		/* Do not type error for BC */
+		if (status == FAILURE || (Z_TYPE(dst) != IS_LONG && Z_TYPE(dst) != IS_DOUBLE)) {
+			zend_error(E_WARNING, "Object of class %s could not be converted to int|float",
+				ZSTR_VAL(Z_OBJCE_P(return_value)->name));
 			zval_ptr_dtor(return_value);
-			RETURN_COPY(&dst);
+			RETURN_LONG(0);
 		}
-		convert_scalar_to_number(return_value);
+		zval_ptr_dtor(return_value);
+		RETURN_COPY_VALUE(&dst);
 	}
 }
 /* }}} */
@@ -6003,9 +6009,21 @@ PHP_FUNCTION(array_product)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	/* Traversal of array encountered a numerically castable object */
+	/* Traversal of array encountered objects that support multiplication */
 	if (Z_TYPE_P(return_value) == IS_OBJECT) {
-		convert_scalar_to_number(return_value);
+		/* Cannot use convert_scalar_to_number() as we don't know if the cast succeeded */
+		zval dst;
+		zend_result status = Z_OBJ_HT_P(return_value)->cast_object(Z_OBJ_P(return_value), &dst, _IS_NUMBER);
+
+		/* Do not type error for BC */
+		if (status == FAILURE || (Z_TYPE(dst) != IS_LONG && Z_TYPE(dst) != IS_DOUBLE)) {
+			zend_error(E_WARNING, "Object of class %s could not be converted to int|float",
+				ZSTR_VAL(Z_OBJCE_P(return_value)->name));
+			zval_ptr_dtor(return_value);
+			RETURN_LONG(1);
+		}
+		zval_ptr_dtor(return_value);
+		RETURN_COPY_VALUE(&dst);
 	}
 }
 /* }}} */

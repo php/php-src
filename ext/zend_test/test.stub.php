@@ -117,6 +117,11 @@ namespace {
         case Baz = -1;
     }
 
+    final class DoOperationNoCast {
+        private int $val;
+        public function __construct(int $val) {}
+    }
+
     function zend_test_array_return(): array {}
 
     function zend_test_nullable_array_return(): null|array {}
