@@ -23,11 +23,7 @@ class Foo {
 
 function test($foo) {
     echo "unset(bar): ";
-    try {
-        unset($foo->bar);
-    } catch (Throwable $e) {
-        echo $e->getMessage(), ', ';
-    }
+    unset($foo->bar);
     echo $foo->bar ?? 'Unset', "\n";
 }
 
@@ -45,10 +41,10 @@ test($foo);
 
 ?>
 --EXPECT--
-unset(bar): Cannot unset private(set) property Foo::$bar from global scope, Unset
+unset(bar): __unset(bar), Unset
 Unsetting bar
 unset(bar): __unset(bar), Unset
 Setting bar
-unset(bar): Cannot unset private(set) property Foo::$bar from global scope, bar
+unset(bar): __unset(bar), bar
 Unsetting bar
 unset(bar): __unset(bar), Unset

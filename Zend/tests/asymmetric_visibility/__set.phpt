@@ -18,11 +18,7 @@ class Foo {
 $foo = new Foo();
 var_dump($foo->bar);
 
-try {
-    $foo->bar = 'baz';
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
+$foo->bar = 'baz';
 var_dump($foo->bar);
 
 $foo->setBar('baz');
@@ -31,6 +27,6 @@ var_dump($foo->bar);
 ?>
 --EXPECT--
 string(3) "bar"
-Cannot modify private(set) property Foo::$bar from global scope
+Foo::Foo::__set
 string(3) "bar"
 string(3) "baz"
