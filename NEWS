@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #77106 (Missing separator in FPM FastCGI errors). (Jakub Zelenka)
+  . Fixed bug GH-9981 (FPM does not reset fastcgi.error_header).
+    (Jakub Zelenka)
 
 - LDAP:
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).

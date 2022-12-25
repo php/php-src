@@ -160,6 +160,37 @@ class Response
     }
 
     /**
+     * Expect response status.
+     *
+     * @param string|null $status Expected status.
+     *
+     * @return Response
+     */
+    public function expectStatus(string|null $status): Response {
+        $headers = $this->getHeaders();
+        if (is_null($status) && !isset($headers['status'])) {
+            return $this;
+        }
+        if (!is_null($status) && !isset($headers['status'])) {
+            $this->error('Status is expected but not supplied');
+        } elseif ($status !== $headers['status']) {
+            $statusMessage = $status === null ? "expected not to be set": "expected to be $status";
+            $this->error("Status is $statusMessage but the actual value is {$headers['status']}");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Expect response status not to be set.
+     *
+     * @return Response
+     */
+    public function expectNoStatus(): Response {
+        return $this->expectStatus(null);
+    }
+
+    /**
      * Expect no error in the response.
      *
      * @return Response
