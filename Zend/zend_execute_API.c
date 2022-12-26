@@ -37,22 +37,7 @@
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
 #include "zend_observer.h"
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
-#include <time.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-// Musl Libc defines this macro, glibc does not
-// According to "man 2 timer_create" this field should always be available, but it's not
-# ifndef sigev_notify_thread_id
-# define sigev_notify_thread_id _sigev_un._tid
-# endif
-#endif
+#include "zend_timer.h"
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
@@ -180,23 +165,6 @@ void init_executor(void) /* {{{ */
 	EG(full_tables_cleanup) = 0;
 	EG(vm_interrupt) = 0;
 	EG(timed_out) = 0;
-
-#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
-	struct sigevent sev;
-	sev.sigev_notify = SIGEV_THREAD_ID;
-	sev.sigev_value.sival_ptr = &EG(timer);
-	sev.sigev_signo = SIGIO;
-	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
-
-	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0) {
-# ifdef TIMER_DEBUG
-		fprintf(stderr, "error %d while creating timer %#jx on thread %d\n", errno, (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
-# endif
-	}
-# ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer %#jx created on thread %d\n", (uintmax_t) EG(timer), syscall(SYS_gettid));
-# endif
-#endif
 
 	EG(exception) = NULL;
 	EG(prev_exception) = NULL;
@@ -413,6 +381,26 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
 }
 
+#ifdef ZEND_TIMER
+static void zend_timer_settime(zend_long seconds) /* {{{ }*/
+{
+	timer_t timer = EG(timer);
+	if (timer == 0) zend_error_noreturn(E_ERROR, "Timer not created");
+
+	struct itimerspec its;
+	its.it_value.tv_sec = seconds;
+	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
+
+	int errn = timer_settime(timer, 0, &its, NULL);
+	if (errn != 0) zend_strerror_noreturn(E_ERROR, errn, "Could not set timer");
+
+# ifdef TIMER_DEBUG
+	fprintf(stderr, "Timer %#jx set on thread %d (%ld seconds)\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
+# endif
+}
+/* }}} */
+#endif
+
 void shutdown_executor(void) /* {{{ */
 {
 	zend_string *key;
@@ -421,17 +409,6 @@ void shutdown_executor(void) /* {{{ */
 	bool fast_shutdown = 0;
 #else
 	bool fast_shutdown = is_zend_mm() && !EG(full_tables_cleanup);
-#endif
-
-#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
-	if (timer_delete(EG(timer)) != 0) {
-# ifdef TIMER_DEBUG
-		fprintf(stderr, "error %d while deleting timer %#jx on thread %d\n", errno, (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
-# endif
-	}
-# ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer %#jx deleted on thread %d\n", (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
-# endif
 #endif
 
 	zend_try {
@@ -1352,7 +1329,7 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 /* }}} */
 
 #ifndef ZEND_WIN32
-# if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+# ifdef ZEND_TIMER
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 	if (si->si_value.sival_ptr != &EG(timer)) {
@@ -1465,25 +1442,8 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
 	}
-#elif defined(ZTS) && defined(HAVE_TIMER_CREATE)
-	timer_t timer = EG(timer);
-	struct itimerspec its;
-
-	its.it_value.tv_sec = seconds;
-	its.it_value.tv_nsec = 0;
-	its.it_interval.tv_sec = 0;
-	its.it_interval.tv_nsec = 0;
-
-	if (timer_settime(timer, 0, &its, NULL) != 0) {
-#ifdef TIMER_DEBUG
-		fprintf(stderr, "unable to set timer %#jx on thread %d\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
-#endif
-
-		return;
-	}
-# ifdef TIMER_DEBUG
-	else fprintf(stderr, "timer %#jx set on thread %d (%ld seconds)\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
-# endif
+#elif defined(ZEND_TIMER)
+	zend_timer_settime(seconds);
 
 	if (reset_signals) {
 		sigset_t sigset;
@@ -1562,6 +1522,8 @@ void zend_unset_timeout(void) /* {{{ */
 		}
 		tq_timer = NULL;
 	}
+#elif ZEND_TIMER
+	zend_timer_settime(0);
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;

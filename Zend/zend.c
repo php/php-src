@@ -35,6 +35,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_fibers.h"
+#include "zend_timer.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -817,10 +818,60 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{
 }
 /* }}} */
 
+# ifdef ZEND_TIMER
+static void zend_timer_create() /* {{{ */
+{
+	struct sigevent sev;
+	sev.sigev_notify = SIGEV_THREAD_ID;
+	sev.sigev_value.sival_ptr = &EG(timer);
+	// The chosen signal must:
+	// 1. not be used internally by libc
+	// 2. be allowed to happen spuriously without consequences
+	// 3. not be commonly used by applications, this excludes SIGALRM, SIGUSR1 and SIGUSR2
+	// 4. not be used by profilers, this excludes SIGPROF
+	// 5. not be used internally by runtimes of programs that can embed PHP, this excludes SIGURG, which is used by Go
+	sev.sigev_signo = SIGIO;
+	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
+
+	int errn = timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer));
+	if (errn != 0) {
+		EG(timer) = 0;
+
+		zend_strerror_noreturn(E_ERROR, errn, "Could not create timer");
+	}
+
+#  ifdef TIMER_DEBUG
+		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(timer), sev.sigev_notify_thread_id);
+#  endif
+}
+/* }}} */
+# endif
+
 static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 {
 	zend_copy_ini_directives();
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
+#ifdef ZEND_TIMER
+	zend_timer_create();
+#endif
+}
+/* }}} */
+
+static void zend_thread_shutdown_handler(void) { /* {{{ */
+	zend_interned_strings_dtor();
+
+# ifdef ZEND_TIMER
+	timer_t timer = EG(timer);
+
+	if (timer == 0) return;
+
+	int errn = timer_delete(EG(timer));
+	if (errn != 0) zend_strerror_noreturn(E_ERROR, errn, "Could not delete timer");
+
+#  ifdef TIMER_DEBUG
+	fprintf(stderr, "Timer %#jx deleted on thread %d\n", (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
+#  endif
+# endif
 }
 /* }}} */
 #endif
@@ -1026,7 +1077,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
-	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
+	tsrm_set_shutdown_handler(zend_thread_shutdown_handler);
 #endif
 }
 /* }}} */
@@ -1092,6 +1143,10 @@ zend_result zend_post_startup(void) /* {{{ */
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
+
+# ifdef ZEND_TIMER
+	zend_timer_create();
+# endif
 #else
 	global_map_ptr_last = CG(map_ptr_last);
 #endif
@@ -1610,6 +1665,15 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 	va_end(args);
 	/* Should never reach this. */
 	abort();
+}
+
+ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *message)
+{
+	char buf[1024];
+	if (!strerror_r(errn, buf, sizeof(buf)))
+		zend_error_noreturn(type, "%s: %d", message, errn);
+
+	zend_error_noreturn(type, "%s: %s (%d)", message, buf, errn);
 }
 
 ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {

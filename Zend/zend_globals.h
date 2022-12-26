@@ -22,7 +22,7 @@
 
 
 #include <setjmp.h>
-#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+#ifdef ZEND_TIMER
 #include <time.h>
 #endif
 
@@ -269,7 +269,7 @@ struct _zend_executor_globals {
 	uint32_t num_errors;
 	zend_error_info **errors;
 
-#if defined(ZTS) && defined(HAVE_TIMER_CREATE)
+#ifndef ZEND_TIMER
 	timer_t timer;
 #endif
 
