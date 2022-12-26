@@ -2757,43 +2757,41 @@ class ClassInfo {
             "&InheritedProperties;"
         );
 
-        $isConcreteClassWithoutParentConstructor = $this->isConcreteClassWithoutParentConstructor($classMap);
-
-        if ($isConcreteClassWithoutParentConstructor || !empty($this->funcInfos)) {
+        if (!empty($this->funcInfos)) {
             $classSynopsis->appendChild(new DOMText("\n\n    "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
-        }
 
-        $classReference = self::getClassSynopsisReference($this->name);
-        $escapedName = addslashes($this->name->__toString());
+            $classReference = self::getClassSynopsisReference($this->name);
+            $escapedName = addslashes($this->name->__toString());
 
-        if ($isConcreteClassWithoutParentConstructor || $this->hasConstructor()) {
-            $classSynopsis->appendChild(new DOMText("\n    "));
-            $includeElement = $this->createIncludeElement(
-                $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
-            );
-            $classSynopsis->appendChild($includeElement);
-        }
+            if ($this->hasConstructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
 
-        if ($this->hasMethods()) {
-            $classSynopsis->appendChild(new DOMText("\n    "));
-            $includeElement = $this->createIncludeElement(
-                $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
-            );
-            $classSynopsis->appendChild($includeElement);
-        }
+            if ($this->hasMethods()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
 
-        if ($this->hasDestructor()) {
-            $classSynopsis->appendChild(new DOMText("\n    "));
-            $includeElement = $this->createIncludeElement(
-                $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
-            );
-            $classSynopsis->appendChild($includeElement);
+            if ($this->hasDestructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
         }
 
         if (!empty($parentsWithInheritedMethods)) {
@@ -2824,31 +2822,6 @@ class ClassInfo {
         $classSynopsis->appendChild(new DOMText("\n   "));
 
         return $classSynopsis;
-    }
-
-    /**
-     * @param array<string, ClassInfo> $classMap
-     */
-    public function getNonExistentDefaultConstructorForManual(array $classMap): ?FuncInfo {
-        if (!$this->isConcreteClassWithoutParentConstructor($classMap) || $this->hasConstructor()) {
-            return null;
-        }
-
-        return new FuncInfo(
-            new MethodName($this->name, "__construct"),
-            $this->flags,
-            0,
-            null,
-            null,
-            false,
-            false,
-            true,
-            [],
-            new ReturnInfo(false, null, null, false, null),
-            0,
-            null,
-            false
-        );
     }
 
     private static function createOoElement(
@@ -3031,13 +3004,6 @@ class ClassInfo {
         return false;
     }
 
-    /**
-     * @param array<string, ClassInfo> $classMap
-     */
-    private function isConcreteClassWithoutParentConstructor(array $classMap) {
-        return $this->type === "class" && !($this->flags & Class_::MODIFIER_ABSTRACT) && !$this->hasParentConstructor($classMap);
-    }
-
     private function createIncludeElement(DOMDocument $doc, string $query): DOMElement
     {
         $includeElement = $doc->createElement("xi:include");
@@ -3112,18 +3078,6 @@ class FileInfo {
         yield from $this->funcInfos;
         foreach ($this->classInfos as $classInfo) {
             yield from $classInfo->funcInfos;
-        }
-    }
-
-    /**
-     * @return array<string, ClassInfo> $classMap
-     */
-    public function getAllNonExistentDefaultConstructorsForManual(array $classMap): iterable {
-        foreach ($this->classInfos as $classInfo) {
-            $funcInfo = $classInfo->getNonExistentDefaultConstructorForManual($classMap);
-            if ($funcInfo !== null) {
-                yield $funcInfo;
-            }
         }
     }
 
@@ -4792,15 +4746,6 @@ foreach ($fileInfos as $fileInfo) {
     }
 }
 
-/** @var array<string, FuncInfo> $funcMapForManual */
-$funcMapForManual = $funcMap;
-
-foreach ($fileInfos as $fileInfo) {
-    foreach ($fileInfo->getAllNonExistentDefaultConstructorsForManual($classMap) as $funcInfo) {
-        $funcMapForManual[$funcInfo->name->__toString()] = $funcInfo;
-    }
-}
-
 if ($verify) {
     $errors = [];
 
@@ -4916,7 +4861,7 @@ if ($replaceClassSynopses) {
 if ($generateMethodSynopses) {
     $methodSynopsesDirectory = getcwd() . "/methodsynopses";
 
-    $methodSynopses = generateMethodSynopses($funcMapForManual, $aliasMap);
+    $methodSynopses = generateMethodSynopses($funcMap, $aliasMap);
     if (!empty($methodSynopses)) {
         if (!file_exists($methodSynopsesDirectory)) {
             mkdir($methodSynopsesDirectory);
@@ -4931,7 +4876,7 @@ if ($generateMethodSynopses) {
 }
 
 if ($replaceMethodSynopses) {
-    $methodSynopses = replaceMethodSynopses($targetSynopses, $funcMapForManual, $aliasMap, $verify);
+    $methodSynopses = replaceMethodSynopses($targetSynopses, $funcMap, $aliasMap, $verify);
 
     foreach ($methodSynopses as $filename => $content) {
         if (file_put_contents($filename, $content)) {
