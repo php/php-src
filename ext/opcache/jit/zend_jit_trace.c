@@ -1777,7 +1777,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					ADD_OP1_TRACE_GUARD();
 					ADD_OP2_TRACE_GUARD();
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_ASSIGN_DIM_OP:
 					if (opline->extended_value == ZEND_POW
 					 || opline->extended_value == ZEND_DIV) {
@@ -1836,6 +1835,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
+#ifndef ZEND_JIT_IR //???
 				case ZEND_ASSIGN_OBJ_OP:
 					if (opline->extended_value == ZEND_POW
 					 || opline->extended_value == ZEND_DIV) {
@@ -5111,7 +5111,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_ASSIGN_DIM_OP:
 						if (opline->result_type != IS_UNUSED) {
 							break;
@@ -5167,6 +5166,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_PRE_INC_OBJ:
 					case ZEND_PRE_DEC_OBJ:
 					case ZEND_POST_INC_OBJ:
@@ -5436,6 +5436,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
 						}
 						goto done;
+#endif
 					case ZEND_ASSIGN_DIM:
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
@@ -5488,7 +5489,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
 						}
 						goto done;
-#endif
 					case ZEND_ASSIGN:
 						if (opline->op1_type != IS_CV) {
 							break;
