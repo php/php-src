@@ -53,13 +53,21 @@ namespace {
     }
 
     trait _ZendTestTrait {
+        /** @var int */
+        #[ZendTestAttribute]
+        #[ZendTestAttribute]
+        public const TEST_CONST = 1;
+
         /** @var mixed */
+        #[ZendTestAttribute]
+        #[ZendTestPropertyAttribute("testProp")]
         public $testProp;
 
+        #[ZendTestAttribute]
         public function testMethod(): bool {}
     }
 
-    #[Attribute(Attribute::TARGET_ALL)]
+    #[Attribute(Attribute::TARGET_ALL|Attribute::IS_REPEATABLE)]
     final class ZendTestAttribute {
 
     }
