@@ -843,6 +843,8 @@ static void zend_timer_create() /* {{{ */
 #  ifdef TIMER_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(timer), sev.sigev_notify_thread_id);
 #  endif
+
+	sigaction(sev.sigev_signo, NULL, &EG(oldact));
 }
 /* }}} */
 # endif

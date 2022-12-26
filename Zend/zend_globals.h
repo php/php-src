@@ -24,6 +24,7 @@
 #include <setjmp.h>
 #ifdef ZEND_TIMER
 #include <time.h>
+#include <signal.h>
 #endif
 
 #include "zend_globals_macros.h"
@@ -271,6 +272,7 @@ struct _zend_executor_globals {
 
 #ifndef ZEND_TIMER
 	timer_t timer;
+	struct sigaction oldact;
 #endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];

@@ -1334,8 +1334,15 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 	if (si->si_value.sival_ptr != &EG(timer)) {
 #ifdef TIMER_DEBUG
-		fprintf(stderr, "ignoring timeout signal SIGIO received on thread %d\n", (pid_t) syscall(SYS_gettid));
+		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGIO received on thread %d\n", (pid_t) syscall(SYS_gettid));
 #endif
+
+		if (EG(oldact).sa_sigaction) {
+			EG(oldact).sa_sigaction(dummy, si, uc);
+
+			return;
+		}
+		if (EG(oldact).sa_handler) EG(oldact).sa_handler(dummy);
 
 		return;
 	}
