@@ -391,6 +391,11 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 static void zend_timer_settime(zend_long seconds) /* {{{ }*/
 {
 	timer_t timer = EG(timer);
+
+# ifdef TIMER_DEBUG
+	fprintf(stderr, "Trying to set timer %#jx on thread %d (%ld seconds)\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
+# endif
+
 	if (timer == 0) zend_error_noreturn(E_ERROR, "Timer not created");
 
 	struct itimerspec its;
@@ -399,10 +404,6 @@ static void zend_timer_settime(zend_long seconds) /* {{{ }*/
 
 	if (timer_settime(timer, 0, &its, NULL) != 0)
 		zend_strerror_noreturn(E_ERROR, errno, "Could not set timer");
-
-# ifdef TIMER_DEBUG
-	fprintf(stderr, "Timer %#jx set on thread %d (%ld seconds)\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
-# endif
 }
 /* }}} */
 #endif
