@@ -256,6 +256,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
+			case ZEND_MATCH_ERROR:
+				if (opline->op1_type == IS_TMP_VAR) {
+					src = VAR_SOURCE(opline->op1);
+					VAR_SOURCE(opline->op1) = NULL;
+				}
+				break;
+
 			case ZEND_FREE:
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
