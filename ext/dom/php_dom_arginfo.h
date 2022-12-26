@@ -1656,7 +1656,7 @@ static zend_class_entry *register_class_DOMException(zend_class_entry *class_ent
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);
 	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
-	zend_declare_property_ex(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_code_name);
 
 	return class_entry;

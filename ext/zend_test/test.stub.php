@@ -62,6 +62,21 @@ namespace {
         public function returnsThrowable(): Exception {}
     }
 
+    class ZendAttributeTest {
+        /** @var int */
+        #[ZendTestRepeatableAttribute]
+        #[ZendTestRepeatableAttribute]
+        public const TEST_CONST = 1;
+
+        /** @var mixed */
+        #[ZendTestRepeatableAttribute]
+        #[ZendTestPropertyAttribute("testProp")]
+        public $testProp;
+
+        #[ZendTestAttribute]
+        public function testMethod(): bool {}
+    }
+
     trait _ZendTestTrait {
         /** @var mixed */
         public $testProp;
@@ -72,7 +87,10 @@ namespace {
 
     #[Attribute(Attribute::TARGET_ALL)]
     final class ZendTestAttribute {
+    }
 
+    #[Attribute(Attribute::TARGET_ALL|Attribute::IS_REPEATABLE)]
+    final class ZendTestRepeatableAttribute {
     }
 
     #[Attribute(Attribute::TARGET_PARAMETER)]
