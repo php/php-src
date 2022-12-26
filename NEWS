@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 
 - PHPDBG:
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
+  . Fix NULL pointer dereference in phpdbg_create_conditional_breal(). (nielsdos)
 
 - TSRM:
   . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
