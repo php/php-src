@@ -269,10 +269,11 @@ class Tester
     static public function skipIfConfigFails(string $configTemplate)
     {
         $tester     = new self($configTemplate, '', [], self::getCallerFileName());
-        $testResult = $tester->testConfig();
+        $testResult = $tester->testConfig(true);
         if ($testResult !== null) {
             self::clean(2);
-            die("skip $testResult");
+            $message = $testResult[0] ?? 'Config failed';
+            die("skip $message");
         }
     }
 
@@ -378,17 +379,26 @@ class Tester
     /**
      * Test configuration file.
      *
-     * @return null|string
+     * @return null|array
      * @throws \Exception
      */
-    public function testConfig()
+    public function testConfig($silent = false)
     {
         $configFile = $this->createConfig();
         $cmd        = self::findExecutable() . ' -tt -y ' . $configFile . ' 2>&1';
         $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
         if ($code) {
-            return preg_replace("/\[.+?\]/", "", $output[0]);
+            $messages = [];
+            foreach ($output as $outputLine) {
+                $message    = preg_replace("/\[.+?\]/", "", $outputLine, 1);
+                $messages[] = $message;
+                if ( ! $silent) {
+                    $this->error($message, null, false);
+                }
+            }
+
+            return $messages;
         }
 
         return null;
@@ -1259,14 +1269,15 @@ class Tester
     /**
      * Display error.
      *
-     * @param string          $msg
-     * @param \Exception|null $exception
+     * @param string          $msg       Error message.
+     * @param \Exception|null $exception If there is an exception, log its message
+     * @param bool            $prefix    Whether to prefix the error message
      *
      * @return false
      */
-    private function error($msg, \Exception $exception = null): bool
+    private function error(string $msg, \Exception $exception = null, bool $prefix = true): bool
     {
-        $this->error = 'ERROR: ' . $msg;
+        $this->error = $prefix ? 'ERROR: ' . $msg : ltrim($msg);
         if ($exception) {
             $this->error .= '; EXCEPTION: ' . $exception->getMessage();
         }
