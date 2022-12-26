@@ -247,6 +247,13 @@ static void zend_jit_trace_add_code(const void *start, uint32_t size)
 	t->code_size  = size;
 }
 
+/**
+ * Locate a trace in the #zend_jit_traces array with the specified
+ * #code_start address.
+ *
+ * @return the #zend_jit_traces index or 0 if no such #code_start
+ * address was found
+ */
 static uint32_t zend_jit_find_trace(const void *addr)
 {
 	uint32_t i;
@@ -256,7 +263,6 @@ static uint32_t zend_jit_find_trace(const void *addr)
 			return i;
 		}
 	}
-	ZEND_UNREACHABLE();
 	return 0;
 }
 
@@ -6832,6 +6838,15 @@ done:
 			const void *timeout_exit_addr = NULL;
 
 			t->link = zend_jit_find_trace(p->opline->handler);
+			if (t->link == 0) {
+				/* this can happen if ZEND_JIT_EXIT_INVALIDATE was handled
+				 * by zend_jit_trace_exit() in another thread after this
+				 * thread set ZEND_JIT_TRACE_STOP_LINK in zend_jit_trace_execute();
+				 * ZEND_JIT_EXIT_INVALIDATE resets the opline handler to one of
+				 * the "_counter_handler" functions, and these are not registered
+				 * tracer functions */
+				goto jit_failure;
+			}
 			if ((zend_jit_traces[t->link].flags & ZEND_JIT_TRACE_USES_INITIAL_IP)
 			 && !zend_jit_set_ip(&dasm_state, p->opline)) {
 				goto jit_failure;
