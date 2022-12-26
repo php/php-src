@@ -1671,7 +1671,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *message)
 {
 	char buf[1024];
-	if (!strerror_r(errn, buf, sizeof(buf)))
+	if (strerror_r(errn, buf, sizeof(buf)) != 0)
 		zend_error_noreturn(type, "%s: %d", message, errn);
 
 	zend_error_noreturn(type, "%s: %s (%d)", message, buf, errn);
