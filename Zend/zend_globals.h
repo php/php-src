@@ -22,10 +22,6 @@
 
 
 #include <setjmp.h>
-#ifdef ZEND_TIMER
-#include <time.h>
-#include <signal.h>
-#endif
 
 #include "zend_globals_macros.h"
 
@@ -40,6 +36,7 @@
 #include "zend_multibyte.h"
 #include "zend_multiply.h"
 #include "zend_arena.h"
+#include "zend_timer.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -270,7 +267,7 @@ struct _zend_executor_globals {
 	uint32_t num_errors;
 	zend_error_info **errors;
 
-#ifndef ZEND_TIMER
+#ifdef ZEND_TIMER
 	timer_t timer;
 	struct sigaction oldact;
 #endif
