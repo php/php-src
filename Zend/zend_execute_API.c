@@ -397,8 +397,8 @@ static void zend_timer_settime(zend_long seconds) /* {{{ }*/
 	its.it_value.tv_sec = seconds;
 	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
 
-	int errn = timer_settime(timer, 0, &its, NULL);
-	if (errn != 0) zend_strerror_noreturn(E_ERROR, errn, "Could not set timer");
+	if (timer_settime(timer, 0, &its, NULL) != 0)
+		zend_strerror_noreturn(E_ERROR, errno, "Could not set timer");
 
 # ifdef TIMER_DEBUG
 	fprintf(stderr, "Timer %#jx set on thread %d (%ld seconds)\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
