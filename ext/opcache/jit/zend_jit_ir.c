@@ -11694,11 +11694,22 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 			zend_jit_reset_last_valid_opline(jit);
 		} else {
 			if (GCC_GLOBAL_REGS) {
+#if 1
+				zend_jit_store_ip(jit,
+					zend_jit_load(jit, IR_ADDR,
+						zend_jit_ex_opline_addr(jit)));
+				zend_jit_store_ip(jit,
+					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+						zend_jit_ip(jit),
+						zend_jit_const_addr(jit, sizeof(zend_op))));
+#else
+				// TODO: this IR produces worse code on x86, becuase of missing fusion ???
 				zend_jit_store_ip(jit,
 					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
 						zend_jit_load(jit, IR_ADDR,
 							zend_jit_ex_opline_addr(jit)),
 						zend_jit_const_addr(jit, sizeof(zend_op))));
+#endif
 			} else {
 				ir_ref ref = zend_jit_ex_opline_addr(jit);
 
