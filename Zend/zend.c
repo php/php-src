@@ -818,39 +818,6 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{
 }
 /* }}} */
 
-# ifdef ZEND_TIMER
-static void zend_timer_create() /* {{{ */
-{
-#  ifdef TIMER_DEBUG
-		fprintf(stderr, "Trying to create timer on thread %d\n", (uintmax_t) EG(timer), sev.sigev_notify_thread_id);
-#  endif
-
-	struct sigevent sev;
-	sev.sigev_notify = SIGEV_THREAD_ID;
-	sev.sigev_value.sival_ptr = &EG(timer);
-	// The chosen signal must:
-	// 1. not be used internally by libc
-	// 2. be allowed to happen spuriously without consequences
-	// 3. not be commonly used by applications, this excludes SIGALRM, SIGUSR1 and SIGUSR2
-	// 4. not be used by profilers, this excludes SIGPROF
-	// 5. not be used internally by runtimes of programs that can embed PHP, this excludes SIGURG, which is used by Go
-	sev.sigev_signo = SIGIO;
-	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
-
-	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0) {
-		EG(timer) = 0;
-		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
-	}
-
-#  ifdef TIMER_DEBUG
-		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(timer), sev.sigev_notify_thread_id);
-#  endif
-
-	sigaction(sev.sigev_signo, NULL, &EG(oldact));
-}
-/* }}} */
-# endif
-
 static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 {
 	zend_copy_ini_directives();
@@ -863,20 +830,9 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 
 static void zend_thread_shutdown_handler(void) { /* {{{ */
 	zend_interned_strings_dtor();
-
-# ifdef ZEND_TIMER
-#  ifdef TIMER_DEBUG
-	fprintf(stderr, "Trying to delete timer %#jx thread %d\n", (uintmax_t) EG(timer), (pid_t) syscall(SYS_gettid));
-#  endif
-
-	timer_t timer = EG(timer);
-	if (timer == 0) zend_error_noreturn(E_ERROR, "Timer not created");
-
-	int err = timer_delete(timer);
-	EG(timer) = 0;
-	if (err != 0)
-		zend_strerror_noreturn(E_ERROR, errno, "Could not delete timer");
-# endif
+#ifdef ZEND_TIMER
+	zend_timer_delete();
+#endif
 }
 /* }}} */
 #endif

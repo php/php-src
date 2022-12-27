@@ -37,12 +37,14 @@
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
 #include "zend_observer.h"
-#include "zend_timer.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef ZEND_TIMER
+#include <sys/syscall.h>
 #endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
@@ -386,27 +388,6 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
 }
-
-#ifdef ZEND_TIMER
-static void zend_timer_settime(zend_long seconds) /* {{{ }*/
-{
-	timer_t timer = EG(timer);
-
-# ifdef TIMER_DEBUG
-	fprintf(stderr, "Trying to set timer %#jx on thread %d (%ld seconds)\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
-# endif
-
-	if (timer == 0) zend_error_noreturn(E_ERROR, "Timer not created");
-
-	struct itimerspec its;
-	its.it_value.tv_sec = seconds;
-	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
-
-	if (timer_settime(timer, 0, &its, NULL) != 0)
-		zend_strerror_noreturn(E_ERROR, errno, "Could not set timer");
-}
-/* }}} */
-#endif
 
 void shutdown_executor(void) /* {{{ */
 {
