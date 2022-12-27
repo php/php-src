@@ -609,6 +609,7 @@ vasprintf \
 asprintf \
 nanosleep \
 memmem \
+strerror_r \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
