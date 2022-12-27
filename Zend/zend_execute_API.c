@@ -199,6 +199,11 @@ void init_executor(void) /* {{{ */
 	zend_weakrefs_init();
 
 	EG(active) = 1;
+
+#ifdef ZEND_TIMER
+	memset(EG(timer), 0, sizeof(*EG(timer)));
+	memset(&EG(oldact), 0, sizeof(EG(oldact)));
+#endif
 }
 /* }}} */
 

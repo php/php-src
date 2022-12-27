@@ -1632,7 +1632,7 @@ ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *m
 {
 #ifdef HAVE_STR_ERROR_R
 	char buf[1024];
-	strerror_r(errn, buf, sizeof(buf)) != 0;
+	strerror_r(errn, buf, sizeof(buf));
 #else
 	char *buf = strerror(errn);
 #endif

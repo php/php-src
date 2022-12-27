@@ -53,10 +53,8 @@ ZEND_API void zend_timer_create(void) /* {{{ */
 	sev.sigev_signo = SIGIO;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
-	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0) {
-		EG(timer) = 0;
+	if (timer_create(CLOCK_THREAD_CPUTIME_ID, &sev, &EG(timer)) != 0)
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
-	}
 
 #  ifdef TIMER_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(timer), sev.sigev_notify_thread_id);
