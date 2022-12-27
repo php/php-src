@@ -3907,7 +3907,7 @@ static int zend_jit_trace_deoptimization(
 #else
 		if (STACK_FLAGS(parent_stack, i) == ZREG_CONST) {
 			uint8_t type = STACK_TYPE(parent_stack, i);
-			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, EX_NUM_TO_VAR(i));
+			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(i));
 			ir_ref src;
 
 			if (type == IS_LONG) {
@@ -3943,7 +3943,7 @@ static int zend_jit_trace_deoptimization(
 				SET_STACK_TYPE(stack, i, type, 1);
 			}
 		} else if (STACK_FLAGS(parent_stack, i) == ZREG_ZVAL_ADDREF) {
-			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, EX_NUM_TO_VAR(i));
+			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(i));
 			zend_jit_zval_try_addref(jit, dst);
 		} else if (STACK_FLAGS(parent_stack, i) == ZREG_ZVAL_COPY) {
 			ZEND_ASSERT(reg != ZREG_NONE);
@@ -4056,7 +4056,7 @@ static int zend_jit_trace_deoptimization(
 			return 0;
 		}
 #else
-		zend_jit_zval_ptr_dtor(jit, ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, op->op2.var), -1, 0, op);
+		zend_jit_zval_ptr_dtor(jit, ZEND_ADDR_MEM_ZVAL(ZREG_FP, op->op2.var), -1, 0, op);
 #endif
 	}
 
@@ -4068,7 +4068,7 @@ static int zend_jit_trace_deoptimization(
 			return 0;
 		}
 #else
-		zend_jit_zval_ptr_dtor(jit, ZEND_ADDR_MEM_ZVAL(IR_REG_PHP_FP, op->op1.var), -1, 0, op);
+		zend_jit_zval_ptr_dtor(jit, ZEND_ADDR_MEM_ZVAL(ZREG_FP, op->op1.var), -1, 0, op);
 #endif
 	}
 

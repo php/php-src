@@ -4431,10 +4431,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 					}
+#ifndef ZEND_JIT_IR
 					if (!zend_jit_jmp(&ctx, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
-#ifndef ZEND_JIT_IR
 					is_terminated = 1;
 #endif
 					break;
