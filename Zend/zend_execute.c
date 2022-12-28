@@ -894,6 +894,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modificati
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_property_error(const zend_property_info *info)
+{
+	zend_throw_error(NULL, "Object was released while assigning property %s::$%s",
+		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
+}
+
 static const zend_class_entry *resolve_single_class_type(zend_string *name, const zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return self_ce;
