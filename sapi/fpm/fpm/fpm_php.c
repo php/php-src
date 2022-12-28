@@ -11,6 +11,8 @@
 #include "php_ini.h"
 #include "ext/standard/dl.h"
 
+#include "zend_timer.h"
+
 #include "fastcgi.h"
 
 #include "fpm.h"
@@ -214,6 +216,10 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		0 > fpm_php_set_allowed_clients(wp)) {
 		return -1;
 	}
+
+#if ZEND_TIMER
+	zend_timer_create();
+#endif
 
 	if (wp->limit_extensions) {
 		/* Take ownership of limit_extensions. */

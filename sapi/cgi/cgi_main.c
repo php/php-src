@@ -2053,6 +2053,10 @@ consult the installation file that came with this distribution, or visit \n\
 						sigaction(SIGQUIT, &old_quit, 0);
 						sigaction(SIGINT,  &old_int,  0);
 						zend_signal_init();
+
+#if ZEND_TIMER
+	zend_timer_create();
+#endif
 						break;
 					case -1:
 						perror("php (pre-forking)");
