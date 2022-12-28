@@ -3,8 +3,17 @@ Test array_sum() function with empty array
 --FILE--
 <?php
 $input = [];
+
+echo "array_sum() version:\n";
 var_dump(array_sum($input));
+
+echo "array_reduce() version:\n";
+var_dump(array_reduce($input, fn($carry, $value) => $carry + $value, 0));
 ?>
 --EXPECTF--
+array_sum() version:
+
 Deprecated: array_sum(): Passing an empty array is deprecated in %s on line %d
+int(0)
+array_reduce() version:
 int(0)
