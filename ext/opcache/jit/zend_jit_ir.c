@@ -665,7 +665,12 @@ static ir_ref zend_jit_loop_end(zend_jit_ctx *jit, ir_ref loop)
 
 static void zend_jit_begin(zend_jit_ctx *jit, ir_ref in)
 {
-	jit->control = ir_emit1(&jit->ctx, IR_BEGIN, in);
+	if (in && in + 1 == jit->ctx.insns_count && jit->ctx.ir_base[in].op == IR_END) {
+		jit->control = jit->ctx.ir_base[in].op1;
+		jit->ctx.insns_count--;
+	} else {
+		jit->control = ir_emit1(&jit->ctx, IR_BEGIN, in);
+	}
 }
 
 static ir_ref zend_jit_loop_begin(zend_jit_ctx *jit, ir_ref in1)
