@@ -10667,7 +10667,12 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					if (zend_accel_in_shm(func->op_array.opcodes)) {
 						zend_jit_load_ip_addr(jit, func->op_array.opcodes + num_args);
 					} else {
-						ZEND_ASSERT(func_ref);
+						if (!func_ref) {
+							func_ref = zend_jit_load(jit, IR_ADDR,
+								ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+									rx,
+									zend_jit_const_addr(jit, offsetof(zend_execute_data, func))));
+						}
 						ir_ref ip = zend_jit_load(jit, IR_ADDR,
 							ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
 								func_ref,
@@ -10694,7 +10699,12 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					if (func && zend_accel_in_shm(func->op_array.opcodes)) {
 						ip = zend_jit_const_addr(jit, (uintptr_t)func->op_array.opcodes);
 					} else {
-						ZEND_ASSERT(func_ref);
+						if (!func_ref) {
+							func_ref = zend_jit_load(jit, IR_ADDR,
+								ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+									rx,
+									zend_jit_const_addr(jit, offsetof(zend_execute_data, func))));
+						}
 						ip = zend_jit_load(jit, IR_ADDR,
 							ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
 								func_ref,
@@ -10718,7 +10728,12 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
 				ip = zend_jit_const_addr(jit, (uintptr_t)func->op_array.opcodes);
 			} else {
-				ZEND_ASSERT(func_ref);
+				if (!func_ref) {
+					func_ref = zend_jit_load(jit, IR_ADDR,
+						ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
+							rx,
+							zend_jit_const_addr(jit, offsetof(zend_execute_data, func))));
+				}
 				ip = zend_jit_load(jit, IR_ADDR,
 					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR),
 						func_ref,
