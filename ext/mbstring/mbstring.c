@@ -3185,10 +3185,7 @@ next_option:
 		 * or all FW hiragana to FW katakana, or all FW katakana to FW hiragana, but not
 		 * more than one of these */
 		if (opt & MBFL_ZEN2HAN_HIRAGANA) {
-			if (opt & MBFL_ZEN2HAN_KATAKANA) {
-				zend_argument_value_error(2, "must not combine 'h' and 'k' flags");
-				RETURN_THROWS();
-			} else if (opt & MBFL_ZENKAKU_HIRA2KATA) {
+			if (opt & MBFL_ZENKAKU_HIRA2KATA) {
 				zend_argument_value_error(2, "must not combine 'h' and 'C' flags");
 				RETURN_THROWS();
 			} else if (opt & MBFL_ZENKAKU_KATA2HIRA) {
