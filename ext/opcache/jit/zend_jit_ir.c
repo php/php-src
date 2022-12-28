@@ -5686,8 +5686,8 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 					zend_jit_load(jit, IR_ADDR,
 						zend_jit_eg_exception_addr(jit)),
 					zend_jit_stub_addr(jit, jit_stub_exception_handler_free_op2));
-//???			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
-//???				zend_jit_check_exception_undef_result(Dst, opline);
+			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+				zend_jit_check_exception_undef_result(jit, opline);
 			} else {
 				zend_jit_check_exception(jit);
 			}
@@ -5910,6 +5910,10 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 				zend_jit_guard(jit, IR_FALSE,
 					zend_jit_stub_addr(jit, jit_stub_mod_by_zero));
 				ref = ir_const_php_long(&jit->ctx, 0); // dead code ???
+			} else if (zend_long_is_power_of_two(op2_lval) && op1_range && op1_range->min >= 0) {
+				ref = ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_PHP_LONG),
+					zend_jit_zval_lval(jit, op1_addr),
+					ir_const_php_long(&jit->ctx, op2_lval - 1));
 			} else {
 				ref = ir_fold2(&jit->ctx, IR_OPT(IR_MOD, IR_PHP_LONG),
 					zend_jit_zval_lval(jit, op1_addr),
@@ -6090,8 +6094,8 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 					zend_jit_load(jit, IR_ADDR,
 						zend_jit_eg_exception_addr(jit)),
 					zend_jit_stub_addr(jit, jit_stub_exception_handler_free_op2));
-//???			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
-//???				zend_jit_check_exception_undef_result(Dst, opline);
+			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+				zend_jit_check_exception_undef_result(jit, opline);
 			} else {
 				zend_jit_check_exception(jit);
 			}
@@ -6233,8 +6237,8 @@ static int zend_jit_concat_helper(zend_jit_ctx   *jit,
 					zend_jit_load(jit, IR_ADDR,
 						zend_jit_eg_exception_addr(jit)),
 					zend_jit_stub_addr(jit, jit_stub_exception_handler_free_op2));
-//???			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
-//???				zend_jit_check_exception_undef_result(Dst, opline);
+			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+				zend_jit_check_exception_undef_result(jit, opline);
 			} else {
 				zend_jit_check_exception(jit);
 			}

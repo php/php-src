@@ -4341,9 +4341,7 @@ static bool zend_jit_trace_next_is_send_result(const zend_op              *oplin
 				zend_jit_trace_send_type(opline+1, frame->call, res_type);
 			}
 		}
-#ifndef ZEND_JIT_IR //???
 		return 1;
-#endif
 	}
 	return 0;
 }
@@ -4912,14 +4910,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (Z_MODE(res_addr) != IS_REG
 						 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 							res_use_info = -1; //???
-#ifndef ZEND_JIT_IR //???
 							send_result = 1;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 							if (!zend_jit_reuse_ip(&ctx)) {
 								goto jit_failure;
 							}
-#endif
 						} else {
 							res_use_info = zend_jit_trace_type_to_info(
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
@@ -5012,14 +5008,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (Z_MODE(res_addr) != IS_REG
 						 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 							res_use_info = -1; //???
-#ifndef ZEND_JIT_IR //???
 							send_result = 1;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 							if (!zend_jit_reuse_ip(&ctx)) {
 								goto jit_failure;
 							}
-#endif
 						} else {
 							res_use_info = zend_jit_trace_type_to_info(
 								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
@@ -5064,13 +5058,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						res_addr = RES_REG_ADDR();
 						if (zend_jit_trace_next_is_send_result(opline, p, frame)) {
-#ifndef ZEND_JIT_IR //???
 							send_result = 1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 							if (!zend_jit_reuse_ip(&ctx)) {
 								goto jit_failure;
 							}
-#endif
 						}
 						if (!zend_jit_concat(&ctx, opline,
 								op1_info, op2_info, res_addr,
@@ -5579,13 +5571,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							res_info = RES_INFO();
 							if (Z_MODE(res_addr) != IS_REG
 							 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
-#ifndef ZEND_JIT_IR //???
 								send_result = 1;
 								res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 								if (!zend_jit_reuse_ip(&ctx)) {
 									goto jit_failure;
 								}
-#endif
 							}
 						}
 						if (!zend_jit_assign(&ctx, opline,
