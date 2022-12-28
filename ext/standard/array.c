@@ -5926,7 +5926,6 @@ static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, b
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_hash_num_elements(input) == 0) {
-		php_error_docref(NULL, E_DEPRECATED, "Passing an empty array is deprecated");
 		RETURN_LONG(initial);
 	}
 
