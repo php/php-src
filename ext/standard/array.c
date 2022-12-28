@@ -5942,7 +5942,7 @@ static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, b
 				op(return_value, return_value, &tmp);
 			}
 			/* BC non numeric strings: previously were cast to 0 */
-			if (Z_TYPE_P(entry) == IS_STRING) {
+			else if (Z_TYPE_P(entry) == IS_STRING) {
 				zval tmp;
 				ZVAL_LONG(&tmp, 0);
 				op(return_value, return_value, &tmp);
