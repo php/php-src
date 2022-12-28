@@ -13308,6 +13308,18 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 			ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 		}
 
+		if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
+		 && (opline->opcode == ZEND_FETCH_LIST_R
+		  || !(opline->op1_type & (IS_VAR|IS_TMP_VAR))
+		  || op1_avoid_refcounting)
+		 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
+		 && (ssa_op+1)->op1_use == ssa_op->result_def
+		 && !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))
+		 && zend_jit_may_avoid_refcounting(opline+1, res_info)) {
+			result_avoid_refcounting = 1;
+			ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
+		}
+
 		if (opline->opcode == ZEND_FETCH_DIM_IS
 		 && !(res_info & MAY_BE_NULL)) {
 			uint32_t flags = 0;
@@ -13324,15 +13336,6 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 			if ((opline->op2_type & (IS_VAR|IS_TMP_VAR))
 			 && (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 				flags |= ZEND_JIT_EXIT_FREE_OP2;
-			}
-			if ((opline->result_type & (IS_VAR|IS_TMP_VAR))
-			 && !(flags & ZEND_JIT_EXIT_FREE_OP1)
-			 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
-			 && (ssa_op+1)->op1_use == ssa_op->result_def
-			 && !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))
-			 && zend_jit_may_avoid_refcounting(opline+1, res_info)) {
-				result_avoid_refcounting = 1;
-				ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
 			}
 
 			if (op1_avoid_refcounting) {
