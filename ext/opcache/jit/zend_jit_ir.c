@@ -14570,12 +14570,15 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 		}
 		zend_jit_free_op(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, NULL);
 		zend_jit_free_op(jit, opline->op2_type, opline->op2, op2_info, NULL);
+		if (may_throw) {
+			zend_jit_check_exception(jit);
+		}
 	} else if (fast_path) {
 		zend_jit_begin(jit, fast_path);
 		zend_jit_free_op(jit, opline->op2_type, opline->op2, op2_info, NULL);
-	}
-	if (may_throw) {
-		zend_jit_check_exception(jit);
+		if (!not_found_exit_addr || (var_info & MAY_BE_REF)) {
+			zend_jit_check_exception(jit);
+		}
 	}
 
 	return 1;
