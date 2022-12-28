@@ -7569,7 +7569,8 @@ done:
 					if (ref < 0) {
 						uint8_t type = STACK_TYPE(stack, i);
 
-						if (!zend_jit_store_ref(jit, 1 << type, i, ref,
+						if (!(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))
+						 && !zend_jit_store_ref(jit, 1 << type, i, ref,
 							STACK_MEM_TYPE(stack, i) != type)) {
 							goto jit_failure;
 						}
