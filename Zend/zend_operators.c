@@ -375,7 +375,7 @@ static zend_always_inline zend_result zendi_try_convert_scalar_to_number(zval *o
 }
 /* }}} */
 
-static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bool *failed) /* {{{ */
+static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(const zval *op, bool *failed) /* {{{ */
 {
 	*failed = 0;
 	switch (Z_TYPE_P(op)) {
@@ -452,6 +452,15 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 	}
 }
 /* }}} */
+
+ZEND_API zend_long ZEND_FASTCALL zval_try_get_long(const zval *op, bool *failed)
+{
+	if (EXPECTED(Z_TYPE_P(op) == IS_LONG)) {
+		*failed = false;
+		return Z_LVAL_P(op);
+	}
+	return zendi_try_get_long(op, failed);
+}
 
 #define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode) \
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT) \
