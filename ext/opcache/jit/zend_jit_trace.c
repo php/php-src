@@ -3178,7 +3178,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			/* Clear allocated registers */
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				j = STACK_VAR(stack, i);
-				if (j >= 0 && RA_HAS_IVAL(j)) {
+				if (j >= 0 && RA_HAS_IVAL(j) && !(RA_IVAL_FLAGS(j) & ZREG_LAST_USE)) {
 					RA_IVAL_DEL(j);
 					count--;
 				}
