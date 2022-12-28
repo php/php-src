@@ -2901,7 +2901,7 @@ class ClassInfo {
                 $parentsWithInheritedProperties[$parentName] = $parent;
             }
 
-            if (!$hasConstructor && $parentInfo->hasConstructor()) {
+            if (!$hasConstructor && $parentInfo->hasNonPrivateConstructor()) {
                 $parentsWithInheritedMethods[$parentName]["name"] = $parent;
                 $parentsWithInheritedMethods[$parentName]["types"][] = "constructorsynopsis";
             }
@@ -2959,22 +2959,10 @@ class ClassInfo {
         return false;
     }
 
-    /**
-     * @param array<string, ClassInfo> $classMap
-     */
-    private function hasParentConstructor(array $classMap): bool
+    private function hasNonPrivateConstructor(): bool
     {
-        foreach ($this->extends as $parentName) {
-            $parent = $classMap[$parentName->toString()] ?? null;
-            if ($parent === null) {
-                throw new Exception("Missing parent class " . $parent->toString());
-            }
-
-            if ($parent->hasConstructor()) {
-                return true;
-            }
-
-            if ($parent->hasParentConstructor($classMap)) {
+        foreach ($this->funcInfos as $funcInfo) {
+            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Class_::MODIFIER_PRIVATE)) {
                 return true;
             }
         }
