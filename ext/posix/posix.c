@@ -417,7 +417,7 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
+static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 {
 	php_stream *stream;
 
@@ -444,7 +444,7 @@ PHP_FUNCTION(posix_ttyname)
 {
 	zval *z_fd;
 	char *p;
-	int fd;
+	zend_long fd;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	zend_long buflen;
 #endif
@@ -453,14 +453,16 @@ PHP_FUNCTION(posix_ttyname)
 		Z_PARAM_ZVAL(z_fd)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(z_fd)) {
-		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(z_fd, &fd)) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
+				zend_zval_type_name(z_fd));
 			fd = zval_get_long(z_fd);
+		}
 	}
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	buflen = sysconf(_SC_TTY_NAME_MAX);
@@ -490,20 +492,22 @@ PHP_FUNCTION(posix_ttyname)
 PHP_FUNCTION(posix_isatty)
 {
 	zval *z_fd;
-	int fd;
+	zend_long fd;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(z_fd)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(z_fd)) {
-		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(z_fd, &fd)) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
+				zend_zval_type_name(z_fd));
 			fd = zval_get_long(z_fd);
+		}
 	}
 
 	if (isatty(fd)) {
