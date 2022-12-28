@@ -1470,6 +1470,14 @@ static void zend_jit_zval_set_type_info_ref(zend_jit_ctx *jit, zend_jit_addr add
 
 static void zend_jit_zval_set_type_info(zend_jit_ctx *jit, zend_jit_addr addr, uint32_t type_info)
 {
+	if (type_info < IS_STRING
+	 && Z_MODE(addr) == IS_MEM_ZVAL
+	 && Z_REG(addr) == ZREG_FP
+	 && JIT_G(current_frame)
+	 && STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(addr))) == type_info) {
+		/* type is already set */
+		return;
+	}
 	zend_jit_zval_set_type_info_ref(jit, addr, ir_const_u32(&jit->ctx, type_info)); 
 }
 
