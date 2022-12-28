@@ -12881,8 +12881,6 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 			case BP_VAR_RW:
 				if (packed_loaded) {
 					if (not_found_exit_addr) {
-						zend_jit_guard(jit, zend_jit_zval_ref_type(jit, ref),
-							zend_jit_const_addr(jit, (uintptr_t)not_found_exit_addr));
 						found_inputs[*found_inputs_count] = zend_jit_end(jit);
 						found_vals[*found_inputs_count] = ref;
 						(*found_inputs_count)++;
