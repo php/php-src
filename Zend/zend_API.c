@@ -136,7 +136,7 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_MIXED:
 			return "mixed";
 		case _IS_NUMBER:
-			return "number";
+			return "int|float";
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
