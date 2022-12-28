@@ -15592,7 +15592,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 		/* prevent clobbering of registers used for deoptimization */
 		for (i = 0; i < parent_vars_count; i++) {
 			if (STACK_FLAGS(parent_stack, i) != ZREG_CONST
-			 && STACK_REG(parent_stack, i) != -1/*ZREG_NONE*/) {
+			 && STACK_REG(parent_stack, i) != ZREG_NONE) {
 				int32_t reg = STACK_REG(parent_stack, i);
 				ir_type type;
 
@@ -15605,7 +15605,11 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 				} else {
 					ZEND_ASSERT(0);
 				}
-				zend_jit_rload(jit, type, reg);
+				if (ssa && ssa->vars[i].no_val) {
+					/* pass */
+				} else {
+					zend_jit_rload(jit, type, reg);
+				}
 //???			} else if (STACK_REG(parent_stack, i) == ZREG_ZVAL_COPY_GPR0) {
 //???				ZEND_REGSET_EXCL(regset, ZREG_R0);
 			}
