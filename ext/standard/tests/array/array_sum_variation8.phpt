@@ -1,5 +1,5 @@
 --TEST--
-Test array_sum() function: ressources in array
+Test array_sum() function: resources in array
 --FILE--
 <?php
 $input = [10, STDERR /* Should get casted to 3 as an integer */];

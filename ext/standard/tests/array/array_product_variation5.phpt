@@ -1,5 +1,5 @@
 --TEST--
-Test array_product() function: ressources in array
+Test array_product() function: resources in array
 --FILE--
 <?php
 $input = [10, STDERR /* Should get casted to 3 as an integer */];
