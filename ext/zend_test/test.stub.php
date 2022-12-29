@@ -74,12 +74,21 @@ namespace {
     }
 
     class ZendTestClassWithMethodWithParameterAttribute {
-        final public function no_override(string $parameter): int {}
-        public function override(string $parameter): int {}
+        final public function no_override(
+            #[ZendTestParameterAttribute("value2")]
+            string $parameter
+        ): int {}
+        public function override(
+            #[ZendTestParameterAttribute("value3")]
+            string $parameter
+        ): int {}
     }
 
     class ZendTestChildClassWithMethodWithParameterAttribute extends ZendTestClassWithMethodWithParameterAttribute {
-        public function override(string $parameter): int {}
+        public function override(
+            #[ZendTestParameterAttribute("value4")]
+            string $parameter
+        ): int {}
     }
 
     final class ZendTestForbidDynamicCall {
@@ -151,7 +160,10 @@ namespace {
 
     function zend_get_unit_enum(): ZendTestUnitEnum {}
 
-    function zend_test_parameter_with_attribute(string $parameter): int {}
+    function zend_test_parameter_with_attribute(
+        #[ZendTestParameterAttribute("value1")]
+        string $parameter
+    ): int {}
 
     function zend_get_current_func_name(): string {}
 
