@@ -65,10 +65,6 @@ ZEND_API void zend_timer_settime(zend_long seconds) /* {{{ }*/
 {
 	timer_t timer = EG(timer);
 
-	if (timer == (timer_t){0}) {
-		zend_error_noreturn(E_ERROR, "Timer not created");
-	}
-
 	struct itimerspec its;
 	its.it_value.tv_sec = seconds;
 	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
@@ -86,14 +82,6 @@ ZEND_API void zend_timer_settime(zend_long seconds) /* {{{ }*/
 ZEND_API void zend_timer_delete(void) /* {{{ */
 {
 	timer_t timer = EG(timer);
-	if (timer == (timer_t){0}) {
-		/* Don't trigger an error here because the timer may not be initialized when PHP fail early, and on threads created by PHP but not managed by it. */
-# ifdef TIMER_DEBUG
-		fprintf(stderr, "Could not delete timer that has not been created on thread %d\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
-# endif
-
-		return;
-	}
 
 # ifdef TIMER_DEBUG
 	fprintf(stderr, "Deleting timer %#jx on thread %d...\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));

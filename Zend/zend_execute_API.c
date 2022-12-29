@@ -175,8 +175,6 @@ void init_executor(void) /* {{{ */
 	EG(timed_out) = 0;
 #ifdef ZEND_TIMER
 	zend_timer_create();
-	/*EG(timer) = (timer_t){0};
-	EG(oldact) = (struct sigaction){0};*/
 #endif
 
 	EG(exception) = NULL;
