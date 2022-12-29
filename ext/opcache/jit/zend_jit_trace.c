@@ -6823,11 +6823,17 @@ done:
 #endif
 			}
 
-#ifndef ZEND_JIT_IR //???
+#ifndef ZEND_JIT_IR
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
 			 && STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var)) > ZREG_NUM) {
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 			}
+#else
+			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+			 && STACK_FLAGS(stack, EX_VAR_TO_NUM(opline->op1.var)) & ZREG_ZVAL_ADDREF) {
+				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
+			}
+
 #endif
 
 			if (opline->opcode == ZEND_ROPE_INIT) {
