@@ -1104,10 +1104,6 @@ zend_result zend_post_startup(void) /* {{{ */
 	executor_globals_ctor(executor_globals);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
-
-# ifdef ZEND_TIMER
-	zend_timer_create();
-# endif
 #else
 	global_map_ptr_last = CG(map_ptr_last);
 #endif

@@ -173,6 +173,11 @@ void init_executor(void) /* {{{ */
 	EG(full_tables_cleanup) = 0;
 	EG(vm_interrupt) = 0;
 	EG(timed_out) = 0;
+#ifdef ZEND_TIMER
+	zend_timer_create();
+	/*EG(timer) = (timer_t){0};
+	EG(oldact) = (struct sigaction){0};*/
+#endif
 
 	EG(exception) = NULL;
 	EG(prev_exception) = NULL;
@@ -199,11 +204,6 @@ void init_executor(void) /* {{{ */
 	zend_weakrefs_init();
 
 	EG(active) = 1;
-
-#ifdef ZEND_TIMER
-	memset(EG(timer), 0, sizeof(*EG(timer)));
-	memset(&EG(oldact), 0, sizeof(EG(oldact)));
-#endif
 }
 /* }}} */
 
