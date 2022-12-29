@@ -149,6 +149,7 @@ $jpEncodings = [
 test($jpStrings, $jpEncodings);
 
 $cnStrings = [
+    // Headline randomly picked from Chinese news
     "日本宫内厅宣布，真子公主和小室圭将在10月26日完婚。",
     // The Dream of Red Mansions
     "此开卷第一回也。作者自云曾历过一番梦幻之后，故将真事隐去，而借“通灵”说此《石头记》一书也",
@@ -311,6 +312,19 @@ $czechEncodings = [
 test($czechStrings, $czechEncodings);
 
 test([$hungarian], ['UTF-8', 'UTF-16', 'Windows-1252']);
+
+$turkishStrings = [
+    // Random junk indiscriminately copied from randomly picked Wikipedia articles
+    "Samsun 19 Mayıs Stadyumu, Samsun'un Tekkeköy ilçesinde bulunan akıllı çok amaçlı stadyumdur. 33.919 koltuk kapasitesiyle Samsunspor'un iç saha maçlarına ev sahipliği yapmaktadır. Toplu Konut İdaresi tarafından yaptırılan ve 2017'de tamamlanan stadyum adını Mustafa Kemal'in Samsun'a çıktığı gün olan 19 Mayıs'tan almaktadır. İlk olarak Nisan 2011'de duyurulan proje 3 Aralık 2012'de Toplu Konut İdaresince yapılan ve Ali Acar İnşaat'ın kazandığı ihale ile resmiyete dökülmüş, 4 Ağustos 2013 tarihindeki temel atma töreni ile de inşa aşamasına geçilmiştir. İnşaatın başlangıç tarihinden itibaren en geç 800 gün içerisinde tamamlanması taahhüt edilse de UEFA'nın standartlarına uyum sağlamak için projede yenileme yapılması, çatının inşasıyla sorumlu şirketin iflas etmesi gibi sebeplerle tamamlanma süresi birkaç kez sarkmıştır. Bu bağlamda, ilk etapta 2014-15 sezonunda hazır hâle geleceği açıklanan stadyumun açılışı önce 2015-16, daha sonra 2016-17 sezonu başına ertelense de bu hedefler de yakalanamamıştır.",
+    "Lütf-i Celil (Osmanlı Türkçesi: ﻟﻄﻒ ﺟﻠﻴﻞ Anlamı: \"İlahi Lütuf\"), Osmanlı Donanması'nın Lütf-i Celil sınıfının öncü gemisi olan zırhlı savaş gemisidir. Başlangıçta Osmanlı İmparatorluğu'na bağlı özerk bir devlet olan Mısır Hidivliği tarafından sipariş edilen Lütf-i Celil, Osmanlı hükûmetinin Mısır'ı gemiyi teslim etmeye zorlaması ile Fransa'daki Forges et Chantiers de la Gironde tersanesinde yapım aşamasındayken Osmanlılara devredildi. Lütf-i Celil, 1877'de 93 Harbi sırasında aktif görevde bulundu ve Rus güçlerinin Tuna'yı geçmesini önlemek için operasyonlarda bulundu. 11 Mayıs'ta devriye gezerken bir Rus topçu bataryasıyla çatışmaya girdi.",
+    "Çoğu tarihçinin kanısına göre, ABD'nin üçüncü başkanı Jefferson, karısının ölümünün ardından kölesi Sally Hemings ile 38 yıl süren ilişkisi sırasında onun altı çocuğunun babası olmuştur.",
+    "2011 İran drama filmi Bir Ayrılık, 61. Berlin Film Festivali'nde Altın Ayı kazanarak, bu ödülü alan ilk İran filmi oldu.",
+    "Josef Bringas, isyan eden general Nikiforos Fokas'a karşı Konstantinopolis'e birlikler getirdi; asilerin Boğaziçi'ni geçmelerini engellemek için tüm gemileri tuttu; Nikiforos'un babası Bardas'ı rehin aldı ama başarılı olamadı."
+];
+// ISO-8859-9 and Windows-1254 are very similar and we can't really distinguish them from each other
+// But both of them should be distinguishable from UTF-8
+test($turkishStrings, ['UTF-8', 'UTF-16', 'ISO-8859-9']);
+test($turkishStrings, ['UTF-8', 'Windows-1254']);
 
 echo "Done!\n";
 
