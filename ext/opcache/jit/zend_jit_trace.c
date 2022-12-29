@@ -8202,22 +8202,34 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			t = &zend_jit_traces[num];
 		}
 
-		SHM_UNPROTECT();
-		zend_jit_unprotect();
+		zend_shared_alloc_lock();
 
 		jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(t->op_array);
-		if (ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_START_LOOP) {
-			((zend_op*)(t->opline))->handler = (const void*)zend_jit_loop_trace_counter_handler;
-		} else if (ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_START_ENTER) {
-			((zend_op*)(t->opline))->handler = (const void*)zend_jit_func_trace_counter_handler;
-		} else if (ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_START_RETURN) {
-			((zend_op*)(t->opline))->handler = (const void*)zend_jit_ret_trace_counter_handler;
-		}
-		ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags &=
-			ZEND_JIT_TRACE_START_LOOP|ZEND_JIT_TRACE_START_ENTER|ZEND_JIT_TRACE_START_RETURN;
 
-		zend_jit_protect();
-		SHM_PROTECT();
+		/* Checks under lock, just in case something has changed while we were waiting for the lock */
+		if (!(ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags & (ZEND_JIT_TRACE_JITED|ZEND_JIT_TRACE_BLACKLISTED))) {
+			/* skip: not JIT-ed nor blacklisted */
+		} else if (ZEND_JIT_TRACE_NUM >= JIT_G(max_root_traces)) {
+			/* skip: too many root traces */
+		} else {
+			SHM_UNPROTECT();
+			zend_jit_unprotect();
+
+			if (ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_START_LOOP) {
+				((zend_op*)(t->opline))->handler = (const void*)zend_jit_loop_trace_counter_handler;
+			} else if (ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_START_ENTER) {
+				((zend_op*)(t->opline))->handler = (const void*)zend_jit_func_trace_counter_handler;
+			} else if (ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_START_RETURN) {
+				((zend_op*)(t->opline))->handler = (const void*)zend_jit_ret_trace_counter_handler;
+			}
+			ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags &=
+				ZEND_JIT_TRACE_START_LOOP|ZEND_JIT_TRACE_START_ENTER|ZEND_JIT_TRACE_START_RETURN;
+
+			zend_jit_protect();
+			SHM_PROTECT();
+		}
+
+		zend_shared_alloc_unlock();
 
 		return 0;
 	}
