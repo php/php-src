@@ -1146,6 +1146,7 @@ static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, u
 					} else if (!(tssa->var_info[tssa->ops[idx].op2_use].type & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 						return 0;
 					}
+					return 1;
 				} else if (opline->opcode == ZEND_PRE_DEC
 				 || opline->opcode == ZEND_PRE_INC
 				 || opline->opcode == ZEND_POST_DEC
