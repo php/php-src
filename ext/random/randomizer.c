@@ -190,7 +190,14 @@ PHP_METHOD(Random_Randomizer, getFloat)
 			RETURN_THROWS();
 		}
 
-		RETURN_DOUBLE(php_random_gammasection_open_open(randomizer->algo, randomizer->status, min, max));
+		RETVAL_DOUBLE(php_random_gammasection_open_open(randomizer->algo, randomizer->status, min, max));
+
+		if (UNEXPECTED(isnan(Z_DVAL_P(return_value)))) {
+			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max).");
+			RETURN_THROWS();
+		}
+
+		return;
 	default:
 		ZEND_UNREACHABLE();
 	}
