@@ -34,6 +34,9 @@ PHP                                                                        NEWS
 - Posix:
   . Fix memory leak in posix_ttyname() (girgias)
 
+- Standard:
+  . Fix GH-10187 (Segfault in stripslashes() with arm64). (nielsdos)
+
 - TSRM:
   . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
 

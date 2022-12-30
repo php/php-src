@@ -3988,19 +3988,23 @@ static zend_always_inline char *php_stripslashes_impl(const char *str, char *out
 		quad_word q;
 		vst1q_u8(q.mem, vceqq_u8(x, vdupq_n_u8('\\')));
 		if (q.dw[0] | q.dw[1]) {
-			int i = 0;
-			for (; i < 16; i++) {
+			unsigned int i = 0;
+			while (i < 16) {
 				if (q.mem[i] == 0) {
 					*out++ = str[i];
+					i++;
 					continue;
 				}
 
 				i++;			/* skip the slash */
-				char s = str[i];
-				if (s == '0')
-					*out++ = '\0';
-				else
-					*out++ = s;	/* preserve the next character */
+				if (i < len) {
+					char s = str[i];
+					if (s == '0')
+						*out++ = '\0';
+					else
+						*out++ = s;	/* preserve the next character */
+					i++;
+				}
 			}
 			str += i;
 			len -= i;
