@@ -474,15 +474,15 @@ PHP_FUNCTION(posix_ttyname)
 		efree(p);
 		RETURN_FALSE;
 	}
-	RETURN_STRING(p);
+	RETVAL_STRING(p);
 	efree(p);
 #else
 	if (NULL == (p = ttyname(fd))) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
-#endif
 	RETURN_STRING(p);
+#endif
 }
 /* }}} */
 
