@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 
 - PHPDBG:
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
+  . Fix NULL pointer dereference in phpdbg_create_conditional_breal(). (nielsdos)
 
 05 Jan 2023, PHP 8.2.1
 
