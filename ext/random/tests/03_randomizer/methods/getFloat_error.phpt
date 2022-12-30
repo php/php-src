@@ -76,7 +76,7 @@ foreach ([
 
     try {
         // There is no float between the two parameters, thus making the OpenOpen interval empty.
-        var_dump(randomizer()->getFloat(1.0, 1.0000000000000002, $boundary));
+        var_dump(randomizer()->getFloat(1.0, 1 + PHP_FLOAT_EPSILON, $boundary));
     } catch (ValueError $e) {
         echo $e->getMessage(), PHP_EOL;
     }
