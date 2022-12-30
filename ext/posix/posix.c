@@ -463,6 +463,11 @@ PHP_FUNCTION(posix_ttyname)
 				zend_zval_type_name(z_fd));
 			fd = zval_get_long(z_fd);
 		}
+		/* fd must fit in an int and be positive */
+		if (fd < 0 || fd > INT_MAX) {
+			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be between 0 and %d", INT_MAX);
+			RETURN_FALSE;
+		}
 	}
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	buflen = sysconf(_SC_TTY_NAME_MAX);
@@ -510,6 +515,10 @@ PHP_FUNCTION(posix_isatty)
 		}
 	}
 
+	/* A valid file descriptor must fit in an int and be positive */
+	if (fd < 0 || fd > INT_MAX) {
+		RETURN_FALSE;
+	}
 	if (isatty(fd)) {
 		RETURN_TRUE;
 	} else {
