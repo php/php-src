@@ -23,6 +23,12 @@ PHP                                                                        NEWS
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
   . Fix NULL pointer dereference in phpdbg_create_conditional_breal(). (nielsdos)
 
+- Posix:
+  . Fix memory leak in posix_ttyname() (girgias)
+
+- Standard:
+  . Fix GH-10187 (Segfault in stripslashes() with arm64). (nielsdos)
+
 05 Jan 2023, PHP 8.2.1
 
 - Core:
