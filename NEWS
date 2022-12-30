@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
   . Fix NULL pointer dereference in phpdbg_create_conditional_breal(). (nielsdos)
 
+- Posix:
+  . Fix memory leak in posix_ttyname() (girgias)
+
 - TSRM:
   . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
 
