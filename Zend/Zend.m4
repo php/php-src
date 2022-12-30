@@ -272,7 +272,7 @@ AC_MSG_RESULT($ZEND_SIGNALS)
 dnl By default, enable Zend Timer only for ZTS builds
 AC_ARG_ENABLE([zend-timer],
   [AS_HELP_STRING([--enable-zend-timer],
-    [whether to enable zend timer system])],
+    [whether to enable zend timer])],
     [ZEND_TIMER=$enableval],
     [ZEND_TIMER=$ZEND_ZTS])
 
@@ -284,11 +284,11 @@ if test "$ac_cv_func_timer_create" != "yes"; then
 fi
 
 if test "$ZEND_TIMER" = "yes"; then
-  AC_DEFINE(ZEND_TIMER, 1, [Use zend timer system])
+  AC_DEFINE(ZEND_TIMER, 1, [Use zend timer])
   CFLAGS="$CFLAGS -DZEND_TIMER"
 fi
 
-AC_MSG_CHECKING(whether to enable zend timer system)
+AC_MSG_CHECKING(whether to enable zend timer)
 AC_MSG_RESULT($ZEND_TIMER)
 
 ])
