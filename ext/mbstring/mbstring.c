@@ -4128,7 +4128,9 @@ PHP_FUNCTION(mb_send_mail)
 			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
 		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
-	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, CRLF, sizeof("Subject: [PHP-jp nnnnnnnn]" CRLF) - 1);
+	const char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : CRLF;
+	size_t line_sep_len = strlen(line_sep);
+	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, line_sep, strlen("Subject: [PHP-jp nnnnnnnn]") + line_sep_len);
 	if (pstr != NULL) {
 		subject_buf = subject = (char *)pstr->val;
 	}
@@ -4167,14 +4169,14 @@ PHP_FUNCTION(mb_send_mail)
 		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
 		if (n > 0 && p[n - 1] != '\n') {
-			mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+			mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 		}
 		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 	}
 
 	if (!suppressed_hdrs.cnt_type) {
@@ -4185,7 +4187,7 @@ PHP_FUNCTION(mb_send_mail)
 			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
 			mbfl_memory_device_strcat(&device, p);
 		}
-		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 	}
 	if (!suppressed_hdrs.cnt_trans_enc) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
@@ -4194,10 +4196,12 @@ PHP_FUNCTION(mb_send_mail)
 			p = "7bit";
 		}
 		mbfl_memory_device_strcat(&device, p);
-		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 	}
 
-	mbfl_memory_device_unput(&device);
+	if (!PG(mail_mixed_lf_and_crlf)) {
+		mbfl_memory_device_unput(&device);
+	}
 	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_output('\0', &device);
 	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);

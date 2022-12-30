@@ -429,6 +429,8 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 		MAIL_RET(0);
 	}
 
+	char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : "\r\n";
+
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename();
 		zend_string *f;
@@ -436,7 +438,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
-			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\r\n%s", php_getuid(), ZSTR_VAL(f), headers);
+			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s%s%s", php_getuid(), ZSTR_VAL(f), line_sep, headers);
 		} else {
 			spprintf(&ahdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
@@ -510,12 +512,12 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 			MAIL_RET(0);
 		}
 #endif
-		fprintf(sendmail, "To: %s\r\n", to);
-		fprintf(sendmail, "Subject: %s\r\n", subject);
+		fprintf(sendmail, "To: %s%s", to, line_sep);
+		fprintf(sendmail, "Subject: %s%s", subject, line_sep);
 		if (hdr != NULL) {
-			fprintf(sendmail, "%s\r\n", hdr);
+			fprintf(sendmail, "%s%s", hdr, line_sep);
 		}
-		fprintf(sendmail, "\r\n%s\r\n", message);
+		fprintf(sendmail, "%s%s%s", line_sep, message, line_sep);
 		ret = pclose(sendmail);
 
 #if PHP_SIGCHILD
