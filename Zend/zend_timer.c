@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-#include "zend_timer.h"
-
 #ifdef ZEND_TIMER
 
 #include <stdio.h>

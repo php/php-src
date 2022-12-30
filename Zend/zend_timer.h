@@ -17,11 +17,7 @@
 #ifndef ZEND_TIMER_H
 #define ZEND_TIMER_H
 
-#ifdef __linux__
-#include "php_config.h"
-
-#  if defined(ZTS) && defined(HAVE_TIMER_CREATE)
-#define ZEND_TIMER 1
+# ifdef ZEND_TIMER
 
 #include "zend_long.h"
 
@@ -29,6 +25,5 @@ ZEND_API void zend_timer_create(void);
 ZEND_API void zend_timer_settime(zend_long seconds);
 ZEND_API void zend_timer_delete(void);
 
-#  endif
 # endif
 #endif
