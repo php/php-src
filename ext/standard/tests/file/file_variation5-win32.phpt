@@ -36,7 +36,7 @@ chdir($script_directory);
 <?php
 $test_dirname = __DIR__ . '/' . basename(__FILE__, ".clean.php") . "testdir";
 $filepath = __DIR__ . '/file_variation_5.tmp';
-unlink($filepath); // Should be delete via the symlink deletion
+@unlink($filepath);
 rmdir($test_dirname);
 ?>
 --EXPECT--
