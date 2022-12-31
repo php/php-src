@@ -291,37 +291,45 @@ static size_t mb_cp936_to_wchar(unsigned char **in, size_t *in_len, uint32_t *bu
 			}
 
 			unsigned char c2 = *p++;
+			if (c2 < 0x40 || c2 == 0x7F || c2 == 0xFF) {
+				*out++ = MBFL_BAD_INPUT;
+				continue;
+			}
 
-			if (((c >= 0xAA && c <= 0xAF) || (c >= 0xF8 && c <= 0xFE)) && (c2 >= 0xA1 && c2 <= 0xFE)) {
+			if (((c >= 0xAA && c <= 0xAF) || (c >= 0xF8 && c <= 0xFE)) && c2 >= 0xA1) {
 				/* UDA part 1, 2: U+E000-U+E4C5 */
 				*out++ = 94*(c >= 0xF8 ? c - 0xF2 : c - 0xAA) + (c2 - 0xA1) + 0xE000;
-			} else if (c >= 0xA1 && c <= 0xA7 && c2 >= 0x40 && c2 < 0xA1 && c2 != 0x7F) {
+			} else if (c >= 0xA1 && c <= 0xA7 && c2 < 0xA1) {
 				/* UDA part 3: U+E4C6-U+E765*/
 				*out++ = 96*(c - 0xA1) + c2 - (c2 >= 0x80 ? 0x41 : 0x40) + 0xE4C6;
 			} else {
-				unsigned int w = (c << 8) | c2;
+				unsigned int w = (c - 0x81)*192 + c2 - 0x40; /* Convert c, c2 into GB 2312 table lookup index */
 
-				if ((w >= 0xA2AB && w <= 0xA9FE) || (w >= 0xD7FA && w <= 0xD7FE) || (w >= 0xFE50 && w <= 0xFEA0)) {
-					for (int k = 0; k < mbfl_cp936_pua_tbl_max; k++) {
-						if (w >= mbfl_cp936_pua_tbl[k][2] && w <= mbfl_cp936_pua_tbl[k][2] + mbfl_cp936_pua_tbl[k][1] - mbfl_cp936_pua_tbl[k][0]) {
-							*out++ = w -  mbfl_cp936_pua_tbl[k][2] + mbfl_cp936_pua_tbl[k][0];
-							goto next_iteration;
+				/* For CP936 and GB18030, certain GB 2312 byte combinations are mapped to PUA codepoints,
+				 * whereas the same combinations aren't mapped to any codepoint for HZ and EUC-CN
+				 * To avoid duplicating the entire GB 2312 -> Unicode lookup table, we have three
+				 * auxiliary tables which are consulted instead for specific ranges of lookup indices */
+				if (w >= 0x192B) {
+					if (w <= 0x1EBE) {
+						*out++ = cp936_pua_tbl1[w - 0x192B];
+						continue;
+					} else if (w >= 0x413A) {
+						if (w <= 0x413E) {
+							*out++ = cp936_pua_tbl2[w - 0x413A];
+							continue;
+						} else if (w >= 0x5DD0 && w <= 0x5E20) {
+							*out++ = cp936_pua_tbl3[w - 0x5DD0];
+							continue;
 						}
 					}
 				}
 
-				if (c < 0xFF && c > 0x80 && c2 >= 0x40 && c2 < 0xFF && c2 != 0x7F) {
-					w = (c - 0x81)*192 + c2 - 0x40;
-					ZEND_ASSERT(w < cp936_ucs_table_size);
-					*out++ = cp936_ucs_table[w];
-				} else {
-					*out++ = MBFL_BAD_INPUT;
-				}
+				ZEND_ASSERT(w < cp936_ucs_table_size);
+				*out++ = cp936_ucs_table[w];
 			}
 		} else {
 			*out++ = 0xF8F5;
 		}
-next_iteration: ;
 	}
 
 	*in_len = e - p;
