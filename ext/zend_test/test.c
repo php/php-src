@@ -883,10 +883,10 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_int_enum = register_class_ZendTestIntEnum();
 
 	/* DoOperationNoCast class */
-    donc_ce = register_class_DoOperationNoCast();
-    donc_ce->create_object = donc_object_create;
-    memcpy(&donc_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-    donc_object_handlers.do_operation = donc_do_operation;
+	donc_ce = register_class_DoOperationNoCast();
+	donc_ce->create_object = donc_object_create;
+	memcpy(&donc_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	donc_object_handlers.do_operation = donc_do_operation;
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
