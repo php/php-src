@@ -93,7 +93,7 @@ try {
 6
 == MacJapanese ==
 2
-6
+7
 == SJIS-2004 ==
 2
 6

@@ -1717,30 +1717,19 @@ PHP_FUNCTION(mb_str_split)
 
 static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 {
+	unsigned int char_len = encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4);
+	if (char_len) {
+		return ZSTR_LEN(string) / char_len;
+	}
+
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(string);
+	size_t in_len = ZSTR_LEN(string);
+	unsigned int state = 0;
 	size_t len = 0;
 
-	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
-		return ZSTR_LEN(string);
-	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
-		return ZSTR_LEN(string) / 2;
-	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
-		return ZSTR_LEN(string) / 4;
-	} else if (encoding->mblen_table) {
-		const unsigned char *mbtab = encoding->mblen_table;
-		unsigned char *p = (unsigned char*)ZSTR_VAL(string), *e = p + ZSTR_LEN(string);
-		while (p < e) {
-			p += mbtab[*p];
-			len++;
-		}
-	} else {
-		uint32_t wchar_buf[128];
-		unsigned char *in = (unsigned char*)ZSTR_VAL(string);
-		size_t in_len = ZSTR_LEN(string);
-		unsigned int state = 0;
-
-		while (in_len) {
-			len += encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
-		}
+	while (in_len) {
+		len += encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
 	}
 
 	return len;
