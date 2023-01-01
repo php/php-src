@@ -410,7 +410,7 @@ int mbfl_filt_conv_wchar_sjis(int c, mbfl_convert_filter *filter)
 }
 
 static const unsigned short sjis_decode_tbl1[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, -6204, -6016, -5828, -5640, -5452, -5264, -5076, -4888, -4700, -4512, -4324, -4136, -3948, -3760, -3572, -3384, -3196, -3008, -2820, -2632, -2444, -2256, -2068, -1880, -1692, -1504, -1316, -1128, -940, -752, -564, -376, -188, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, 5828, 6016, 6204, 6392, 6580, 6768, 6956, 7144, 7332, 7520, 7708, 7896, 8084, 8272, 8460, 8648, 8836, 9024, 9212, 9400, 9588, 9776, 9964, 10152, 10340, 10528, 10716, 10904, 11092
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, 0xFFFF, -6016, -5828, -5640, -5452, -5264, -5076, -4888, -4700, -4512, -4324, -4136, -3948, -3760, -3572, -3384, -3196, -3008, -2820, -2632, -2444, -2256, -2068, -1880, -1692, -1504, -1316, -1128, -940, -752, -564, -376, -188, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, 5828, 6016, 6204, 6392, 6580, 6768, 6956, 7144, 7332, 7520, 7708, 7896, 8084, 8272, 8460, 8648, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF
 };
 
 static const unsigned short sjis_decode_tbl2[] = {
@@ -422,6 +422,8 @@ static size_t mb_sjis_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 
+	e--; /* Stop the main loop 1 byte short of the end of the input */
+
 	while (p < e && out < limit) {
 		unsigned char c = *p++;
 
@@ -429,12 +431,15 @@ static size_t mb_sjis_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			*out++ = c;
 		} else if (c >= 0xA1 && c <= 0xDF) { /* Kana */
 			*out++ = 0xFEC0 + c;
-		} else if (c > 0x80 && c <= 0xEF && c != 0xA0 && p < e) {
+		} else {
+			/* Don't need to check p < e; it's not possible to go out of bounds here, due to e-- above */
 			unsigned char c2 = *p++;
 			/* This is only legal if c2 >= 0x40 && c2 <= 0xFC && c2 != 0x7F
 			 * But the values in the above conversion tables have been chosen such that
 			 * illegal values of c2 will always result in w > jisx0208_ucs_table_size,
-			 * so we don't need to do a separate bounds check on c2 */
+			 * so we don't need to do a separate bounds check on c2
+			 * Likewise, the values in the conversion tables are such that illegal values
+			 * for c will always result in w > jisx0208_ucs_table_size */
 			uint32_t w = sjis_decode_tbl1[c] + sjis_decode_tbl2[c2];
 			if (w < jisx0208_ucs_table_size) {
 				w = jisx0208_ucs_table[w];
@@ -442,14 +447,27 @@ static size_t mb_sjis_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 					w = MBFL_BAD_INPUT;
 				*out++ = w;
 			} else {
+				if (c == 0x80 || c == 0xA0 || c > 0xEF) {
+					p--;
+				}
 				*out++ = MBFL_BAD_INPUT;
 			}
+		}
+	}
+
+	/* Finish up last byte of input string if there is one */
+	if (p == e && out < limit) {
+		unsigned char c = *p++;
+		if (c <= 0x7F) {
+			*out++ = c;
+		} else if (c >= 0xA1 && c <= 0xDF) {
+			*out++ = 0xFEC0 + c;
 		} else {
 			*out++ = MBFL_BAD_INPUT;
 		}
 	}
 
-	*in_len = e - p;
+	*in_len = e - p + 1;
 	*in = p;
 	return out - buf;
 }
@@ -1057,11 +1075,17 @@ static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 	while (p < e && out < limit) {
 		unsigned char c = *p++;
 
-		if (c < 0x80 && c != 0x5C) {
-			*out++ = c;
+		if (c <= 0x80 || c == 0xA0) {
+			if (c == 0x5C) {
+				*out++ = 0xA5;
+			} else if (c == 0x80) {
+				*out++ = 0x5C;
+			} else {
+				*out++ = c;
+			}
 		} else if (c >= 0xA1 && c <= 0xDF) {
 			*out++ = 0xFEC0 + c;
-		} else if (c > 0x80 && c <= 0xED && c != 0xA0) {
+		} else if (c <= 0xED) {
 			if (p == e) {
 				*out++ = MBFL_BAD_INPUT;
 				break;
@@ -1162,12 +1186,6 @@ static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 			} else {
 				*out++ = MBFL_BAD_INPUT;
 			}
-		} else if (c == 0x5C) {
-			*out++ = 0xA5;
-		} else if (c == 0x80) {
-			*out++ = 0x5C;
-		} else if (c == 0xA0) {
-			*out++ = 0xA0;
 		} else if (c == 0xFD) {
 			*out++ = 0xA9;
 		} else if (c == 0xFE) {
@@ -2095,6 +2113,10 @@ int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
+static const unsigned short sjis_mobile_decode_tbl1[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, 0xFFFF, -6016, -5828, -5640, -5452, -5264, -5076, -4888, -4700, -4512, -4324, -4136, -3948, -3760, -3572, -3384, -3196, -3008, -2820, -2632, -2444, -2256, -2068, -1880, -1692, -1504, -1316, -1128, -940, -752, -564, -376, -188, 0, 188, 376, 564, 752, 940, 1128, 1316, 1504, 1692, 1880, 2068, 2256, 2444, 2632, 2820, 3008, 3196, 3384, 3572, 3760, 3948, 4136, 4324, 4512, 4700, 4888, 5076, 5264, 5452, 5640, 5828, 6016, 6204, 6392, 6580, 6768, 6956, 7144, 7332, 7520, 7708, 7896, 8084, 8272, 8460, 8648, 8836, 9024, 9212, 9400, 9588, 9776, 9964, 10152, 10340, 10528, 10716, 10904, 11092, 0xFFFF, 0xFFFF, 0xFFFF
+};
+
 static size_t mb_sjis_docomo_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -2110,14 +2132,14 @@ static size_t mb_sjis_docomo_to_wchar(unsigned char **in, size_t *in_len, uint32
 		} else if (c >= 0xA1 && c <= 0xDF) {
 			/* Kana */
 			*out++ = 0xFEC0 + c;
-		} else if (c > 0x80 && c < 0xFD && c != 0xA0) {
+		} else {
 			/* Kanji */
 			if (p == e) {
 				*out++ = MBFL_BAD_INPUT;
 				break;
 			}
 			unsigned char c2 = *p++;
-			uint32_t w = sjis_decode_tbl1[c] + sjis_decode_tbl2[c2];
+			uint32_t w = sjis_mobile_decode_tbl1[c] + sjis_decode_tbl2[c2];
 
 			if (w <= 137) {
 				if (w == 31) {
@@ -2161,13 +2183,14 @@ static size_t mb_sjis_docomo_to_wchar(unsigned char **in, size_t *in_len, uint32
 			} else if (w >= (94*94) && w < (114*94)) {
 				w = w - (94*94) + 0xE000;
 			} else {
+				if (c == 0x80 || c == 0xA0 || c >= 0xFD) {
+					p--;
+				}
 				*out++ = MBFL_BAD_INPUT;
 				continue;
 			}
 
 			*out++ = w ? w : MBFL_BAD_INPUT;
-		} else {
-			*out++ = MBFL_BAD_INPUT;
 		}
 	}
 
@@ -2337,14 +2360,14 @@ static size_t mb_sjis_kddi_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 		} else if (c >= 0xA1 && c <= 0xDF) {
 			/* Kana */
 			*out++ = 0xFEC0 + c;
-		} else if (c > 0x80 && c < 0xFD && c != 0xA0) {
+		} else {
 			/* Kanji */
 			if (p == e) {
 				*out++ = MBFL_BAD_INPUT;
 				break;
 			}
 			unsigned char c2 = *p++;
-			uint32_t w = sjis_decode_tbl1[c] + sjis_decode_tbl2[c2];
+			uint32_t w = sjis_mobile_decode_tbl1[c] + sjis_decode_tbl2[c2];
 
 			if (w <= 137) {
 				if (w == 31) {
@@ -2375,7 +2398,7 @@ static size_t mb_sjis_kddi_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 				int snd = 0;
 				w = mbfilter_sjis_emoji_kddi2unicode(w, &snd);
 				if (!w) {
-					w = sjis_decode_tbl1[c] + sjis_decode_tbl2[c2];
+					w = sjis_mobile_decode_tbl1[c] + sjis_decode_tbl2[c2];
 					if (w >= (94*94) && w < (114*94)) {
 						w = w - (94*94) + 0xE000;
 					}
@@ -2393,13 +2416,14 @@ static size_t mb_sjis_kddi_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 			} else if (w >= (94*94) && w < (114*94)) {
 				w = w - (94*94) + 0xE000;
 			} else {
+				if (c == 0x80 || c == 0xA0 || c >= 0xFD) {
+					p--;
+				}
 				*out++ = MBFL_BAD_INPUT;
 				continue;
 			}
 
 			*out++ = w ? w : MBFL_BAD_INPUT;
-		} else {
-			*out++ = MBFL_BAD_INPUT;
 		}
 	}
 
@@ -2645,14 +2669,14 @@ softbank_emoji_escapes:
 		} else if (c >= 0xA1 && c <= 0xDF) {
 			/* Kana */
 			*out++ = 0xFEC0 + c;
-		} else if (c > 0x80 && c < 0xFD && c != 0xA0) {
+		} else {
 			/* Kanji */
 			if (p == e) {
 				*out++ = MBFL_BAD_INPUT;
 				break;
 			}
 			unsigned char c2 = *p++;
-			uint32_t w = sjis_decode_tbl1[c] + sjis_decode_tbl2[c2];
+			uint32_t w = sjis_mobile_decode_tbl1[c] + sjis_decode_tbl2[c2];
 
 			if (w <= 137) {
 				if (w == 31) {
@@ -2683,7 +2707,7 @@ softbank_emoji_escapes:
 				int snd = 0;
 				w = mbfilter_sjis_emoji_sb2unicode(w, &snd);
 				if (!w) {
-					w = sjis_decode_tbl1[c] + sjis_decode_tbl2[c2];
+					w = sjis_mobile_decode_tbl1[c] + sjis_decode_tbl2[c2];
 					if (w >= cp932ext3_ucs_table_min && w < cp932ext3_ucs_table_max) {
 						w = cp932ext3_ucs_table[w - cp932ext3_ucs_table_min];
 					} else if (w >= (94*94) && w < (114*94)) {
@@ -2703,13 +2727,14 @@ softbank_emoji_escapes:
 			} else if (w >= (94*94) && w < (114*94)) {
 				w = w - (94*94) + 0xE000;
 			} else {
+				if (c == 0x80 || c == 0xA0 || c >= 0xFD) {
+					p--;
+				}
 				*out++ = MBFL_BAD_INPUT;
 				continue;
 			}
 
 			*out++ = w ? w : MBFL_BAD_INPUT;
-		} else {
-			*out++ = MBFL_BAD_INPUT;
 		}
 	}
 
