@@ -203,7 +203,7 @@ static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf,
 
 		if (c < 0x80) {
 			*out++ = c;
-		} else if (c > 0x80 && c < 0xFE && c != 0xC9) {
+		} else if (c > 0x80 && c < 0xFE) {
 			/* We don't need to check p < e here; it's not possible that this pointer dereference
 			 * will be outside the input string, because of e-- above */
 			unsigned char c2 = *p++;
@@ -221,6 +221,15 @@ static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf,
 				w = (c - 0xC7)*94 + c2 - 0xA1;
 				ZEND_ASSERT(w < uhc3_ucs_table_size);
 				w = uhc3_ucs_table[w];
+				if (!w) {
+					/* If c == 0xC9, we shouldn't have tried to read a 2-byte char at all... but it is faster
+					 * to fix up that rare case here rather than include an extra check in the hot path */
+					if (c == 0xC9) {
+						p--;
+					}
+					*out++ = MBFL_BAD_INPUT;
+					continue;
+				}
 			}
 			if (!w) {
 				w = MBFL_BAD_INPUT;
