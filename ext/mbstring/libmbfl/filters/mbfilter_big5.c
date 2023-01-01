@@ -400,8 +400,9 @@ static size_t mb_big5_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			unsigned char c2 = *p++;
 
 			if ((c2 >= 0x40 && c2 <= 0x7E) || (c2 >= 0xA1 && c2 <= 0xFE)) {
-				unsigned int w = ((c - 0xA1)*157) + c2 - ((c2 <= 0x7E) ? 0x40 : 0xA1 - 0x3F);
-				w = (w < big5_ucs_table_size) ? big5_ucs_table[w] : 0;
+				unsigned int w = (c - 0xA1)*157 + c2 - ((c2 <= 0x7E) ? 0x40 : 0xA1 - 0x3F);
+				ZEND_ASSERT(w < big5_ucs_table_size);
+				w = big5_ucs_table[w];
 				if (!w)
 					w = MBFL_BAD_INPUT;
 				*out++ = w;
