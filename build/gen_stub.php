@@ -2700,17 +2700,18 @@ class ClassInfo {
         }
         $classSynopsisInfo->appendChild(new DOMText("\n    "));
 
-        /** @var Name[] $parentsWithInheritedConstants */
+        /** @var array<string, Name> $parentsWithInheritedConstants */
         $parentsWithInheritedConstants = [];
-        /** @var Name[] $parentsWithInheritedProperties */
+        /** @var array<string, Name> $parentsWithInheritedProperties */
         $parentsWithInheritedProperties = [];
-        /** @var Name[] $parentsWithInheritedMethods */
+        /** @var array<int, array{name: Name, types: int[]}> $parentsWithInheritedMethods */
         $parentsWithInheritedMethods = [];
 
         $this->collectInheritedMembers(
             $parentsWithInheritedConstants,
             $parentsWithInheritedProperties,
             $parentsWithInheritedMethods,
+            $this->hasConstructor(),
             $classMap
         );
 
@@ -2756,43 +2757,41 @@ class ClassInfo {
             "&InheritedProperties;"
         );
 
-        $isConcreteClass = ($this->type === "class" && !($this->flags & Class_::MODIFIER_ABSTRACT));
-
-        if ($isConcreteClass || !empty($this->funcInfos)) {
+        if (!empty($this->funcInfos)) {
             $classSynopsis->appendChild(new DOMText("\n\n    "));
             $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
-        }
 
-        $classReference = self::getClassSynopsisReference($this->name);
-        $escapedName = addslashes($this->name->__toString());
+            $classReference = self::getClassSynopsisReference($this->name);
+            $escapedName = addslashes($this->name->__toString());
 
-        if ($isConcreteClass || $this->hasConstructor()) {
-            $classSynopsis->appendChild(new DOMText("\n    "));
-            $includeElement = $this->createIncludeElement(
-                $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
-            );
-            $classSynopsis->appendChild($includeElement);
-        }
+            if ($this->hasConstructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[@role='$escapedName'])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
 
-        if ($this->hasMethods()) {
-            $classSynopsis->appendChild(new DOMText("\n    "));
-            $includeElement = $this->createIncludeElement(
-                $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
-            );
-            $classSynopsis->appendChild($includeElement);
-        }
+            if ($this->hasMethods()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedName'])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
 
-        if ($this->hasDestructor()) {
-            $classSynopsis->appendChild(new DOMText("\n    "));
-            $includeElement = $this->createIncludeElement(
-                $doc,
-                "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
-            );
-            $classSynopsis->appendChild($includeElement);
+            if ($this->hasDestructor()) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $includeElement = $this->createIncludeElement(
+                    $doc,
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[@role='$escapedName'])"
+                );
+                $classSynopsis->appendChild($includeElement);
+            }
         }
 
         if (!empty($parentsWithInheritedMethods)) {
@@ -2802,14 +2801,21 @@ class ClassInfo {
             $classSynopsis->appendChild($classSynopsisInfo);
 
             foreach ($parentsWithInheritedMethods as $parent) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $parentReference = self::getClassSynopsisReference($parent);
-                $escapedParentName = addslashes($parent->__toString());
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedParentName'])"
-                );
-                $classSynopsis->appendChild($includeElement);
+                $parentName = $parent["name"];
+                $parentMethodsynopsisTypes = $parent["types"];
+
+                $parentReference = self::getClassSynopsisReference($parentName);
+                $escapedParentName = addslashes($parentName->__toString());
+
+                foreach ($parentMethodsynopsisTypes as $parentMethodsynopsisType) {
+                    $classSynopsis->appendChild(new DOMText("\n    "));
+                    $includeElement = $this->createIncludeElement(
+                        $doc,
+                        "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:{$parentMethodsynopsisType}[@role='$escapedParentName'])"
+                    );
+
+                    $classSynopsis->appendChild($includeElement);
+                }
             }
         }
 
@@ -2867,39 +2873,54 @@ class ClassInfo {
     }
 
     /**
-     * @param Name[] $parentsWithInheritedConstants
-     * @param Name[] $parentsWithInheritedProperties
-     * @param Name[] $parentsWithInheritedMethods
+     * @param array<string, Name> $parentsWithInheritedConstants
+     * @param array<string, Name> $parentsWithInheritedProperties
+     * @param array<string, array{name: Name, types: int[]}> $parentsWithInheritedMethods
      * @param array<string, ClassInfo> $classMap
      */
     private function collectInheritedMembers(
         array &$parentsWithInheritedConstants,
         array &$parentsWithInheritedProperties,
         array &$parentsWithInheritedMethods,
+        bool $hasConstructor,
         array $classMap
     ): void {
         foreach ($this->extends as $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
+            $parentName = $parent->toString();
+
             if (!$parentInfo) {
-                throw new Exception("Missing parent class " . $parent->toString());
+                throw new Exception("Missing parent class $parentName");
             }
 
-            if (!empty($parentInfo->constInfos) && !isset($parentsWithInheritedConstants[$parent->toString()])) {
-                $parentsWithInheritedConstants[$parent->toString()] = $parent;
+            if (!empty($parentInfo->constInfos) && !isset($parentsWithInheritedConstants[$parentName])) {
+                $parentsWithInheritedConstants[] = $parent;
             }
 
-            if (!empty($parentInfo->propertyInfos) && !isset($parentsWithInheritedProperties[$parent->toString()])) {
-                $parentsWithInheritedProperties[$parent->toString()] = $parent;
+            if (!empty($parentInfo->propertyInfos) && !isset($parentsWithInheritedProperties[$parentName])) {
+                $parentsWithInheritedProperties[$parentName] = $parent;
             }
 
-            if (!isset($parentsWithInheritedMethods[$parent->toString()]) && $parentInfo->hasMethods()) {
-                $parentsWithInheritedMethods[$parent->toString()] = $parent;
+            if (!$hasConstructor && $parentInfo->hasNonPrivateConstructor()) {
+                $parentsWithInheritedMethods[$parentName]["name"] = $parent;
+                $parentsWithInheritedMethods[$parentName]["types"][] = "constructorsynopsis";
+            }
+
+            if ($parentInfo->hasMethods()) {
+                $parentsWithInheritedMethods[$parentName]["name"] = $parent;
+                $parentsWithInheritedMethods[$parentName]["types"][] = "methodsynopsis";
+            }
+
+            if ($parentInfo->hasDestructor()) {
+                $parentsWithInheritedMethods[$parentName]["name"] = $parent;
+                $parentsWithInheritedMethods[$parentName]["types"][] = "destructorsynopsis";
             }
 
             $parentInfo->collectInheritedMembers(
                 $parentsWithInheritedConstants,
                 $parentsWithInheritedProperties,
                 $parentsWithInheritedMethods,
+                $hasConstructor,
                 $classMap
             );
         }
@@ -2921,6 +2942,7 @@ class ClassInfo {
                 $parentsWithInheritedConstants,
                 $unusedParentsWithInheritedProperties,
                 $unusedParentsWithInheritedMethods,
+                $hasConstructor,
                 $classMap
             );
         }
@@ -2930,6 +2952,17 @@ class ClassInfo {
     {
         foreach ($this->funcInfos as $funcInfo) {
             if ($funcInfo->name->isConstructor()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasNonPrivateConstructor(): bool
+    {
+        foreach ($this->funcInfos as $funcInfo) {
+            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Class_::MODIFIER_PRIVATE)) {
                 return true;
             }
         }
@@ -4061,14 +4094,14 @@ function generateAttributeInitialization(iterable $funcInfos, iterable $allConst
     );
 }
 
-/** @param FuncInfo<string, FuncInfo> $funcInfos */
-function generateOptimizerInfo(array $funcInfos): string {
+/** @param array<string, FuncInfo> $funcMap */
+function generateOptimizerInfo(array $funcMap): string {
 
     $code = "/* This is a generated file, edit the .stub.php files instead. */\n\n";
 
     $code .= "static const func_info_t func_infos[] = {\n";
 
-    $code .= generateCodeWithConditions($funcInfos, "", static function (FuncInfo $funcInfo) {
+    $code .= generateCodeWithConditions($funcMap, "", static function (FuncInfo $funcInfo) {
         return $funcInfo->getOptimizerInfo();
     });
 
@@ -4691,7 +4724,6 @@ $aliasMap = [];
 
 foreach ($fileInfos as $fileInfo) {
     foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
-        /** @var FuncInfo $funcInfo */
         $funcMap[$funcInfo->name->__toString()] = $funcInfo;
 
         // TODO: Don't use aliasMap for methodsynopsis?
