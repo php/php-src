@@ -208,20 +208,24 @@ static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf,
 			*out++ = c;
 		} else if (c > 0x80 && c < 0xFE && c != 0xC9 && p < e) {
 			unsigned char c2 = *p++;
+			if (c2 < 0x41 || c2 == 0xFF) {
+				*out++ = MBFL_BAD_INPUT;
+				continue;
+			}
 			unsigned int w = 0;
 
-			if (c >= 0x81 && c <= 0xA0 && c2 >= 0x41 && c2 <= 0xFE) {
-				w = (c - 0x81)*190 + (c2 - 0x41);
+			if (c <= 0xA0) {
+				w = (c - 0x81)*190 + c2 - 0x41;
 				if (w < uhc1_ucs_table_size) {
 					w = uhc1_ucs_table[w];
 				}
-			} else if (c >= 0xA1 && c <= 0xC6 && c2 >= 0x41 && c2 <= 0xFE) {
-				w = (c - 0xA1)*190 + (c2 - 0x41);
+			} else if (c <= 0xC6) {
+				w = (c - 0xA1)*190 + c2 - 0x41;
 				if (w < uhc2_ucs_table_size) {
 					w = uhc2_ucs_table[w];
 				}
-			} else if (c >= 0xC7 && c < 0xFE && c2 >= 0xA1 && c2 <= 0xFE) {
-				w = (c - 0xC7)*94 + (c2 - 0xA1);
+			} else if (c2 >= 0xA1) {
+				w = (c - 0xC7)*94 + c2 - 0xA1;
 				if (w < uhc3_ucs_table_size) {
 					w = uhc3_ucs_table[w];
 				}
