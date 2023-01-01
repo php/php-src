@@ -196,12 +196,16 @@ static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf,
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 
+	e--; /* Stop the main loop 1 byte short of the end of the input */
+
 	while (p < e && out < limit) {
 		unsigned char c = *p++;
 
 		if (c < 0x80) {
 			*out++ = c;
-		} else if (c > 0x80 && c < 0xFE && c != 0xC9 && p < e) {
+		} else if (c > 0x80 && c < 0xFE && c != 0xC9) {
+			/* We don't need to check p < e here; it's not possible that this pointer dereference
+			 * will be outside the input string, because of e-- above */
 			unsigned char c2 = *p++;
 			if (c2 < 0x41 || c2 == 0xFF) {
 				*out++ = MBFL_BAD_INPUT;
@@ -227,7 +231,13 @@ static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf,
 		}
 	}
 
-	*in_len = e - p;
+	/* Finish up last byte of input string if there is one */
+	if (p == e && out < limit) {
+		unsigned char c = *p++;
+		*out++ = (c < 0x80) ? c : MBFL_BAD_INPUT;
+	}
+
+	*in_len = e - p + 1;
 	*in = p;
 	return out - buf;
 }
