@@ -2571,11 +2571,9 @@ static int zend_jit_trace_escape_stub(dasm_State **Dst)
 
 static int zend_jit_trace_exit_group_stub(dasm_State **Dst, uint32_t n)
 {
-	uint32_t i;
-
 	|	bl >2
 	|1:
-	for (i = 1; i < ZEND_JIT_EXIT_POINTS_PER_GROUP; i++) {
+	for (uint32_t i = 1; i < ZEND_JIT_EXIT_POINTS_PER_GROUP; i++) {
 		|	bl >2
 	}
 	|2:
@@ -2990,13 +2988,10 @@ static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_t
 
 static int zend_jit_trace_end(dasm_State **Dst, zend_jit_trace_info *t)
 {
-	uint32_t i;
-	const void *exit_addr;
-
 	/* Emit veneers table for exit points (B instruction for each exit number) */
 	|.cold_code
-	for (i = 0; i < t->exit_count; i++) {
-		exit_addr = zend_jit_trace_get_exit_addr(i);
+	for (uint32_t i = 0; i < t->exit_count; i++) {
+		const void *const exit_addr = zend_jit_trace_get_exit_addr(i);
 		if (!exit_addr) {
 			return 0;
 		}
@@ -3010,9 +3005,7 @@ static int zend_jit_trace_end(dasm_State **Dst, zend_jit_trace_info *t)
 static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size, const void *from_addr, const void *to_addr)
 {
 	int ret = 0;
-	uint8_t *p, *end;
 	const void *veneer = NULL;
-	ptrdiff_t delta;
 
 	if (jmp_table_size) {
 		const void **jmp_slot = (const void **)((char*)code + ZEND_MM_ALIGNED_SIZE_EX(size, sizeof(void*)));
@@ -3026,8 +3019,8 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 		} while (--jmp_table_size);
 	}
 
-	end = (uint8_t*)code;
-	p = end + size;
+	uint8_t *const end = (uint8_t*)code;
+	uint8_t *p = end + size;
 	while (p > end) {
 		uint32_t *ins_ptr;
 		uint32_t ins;
@@ -3037,7 +3030,7 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 		ins = *ins_ptr;
 		if ((ins & 0xfc000000u) == 0x14000000u) {
 			// B (imm26:0..25)
-			delta = (uint32_t*)from_addr - ins_ptr;
+			ptrdiff_t delta = (uint32_t*)from_addr - ins_ptr;
 			if (((ins ^ (uint32_t)delta) & 0x01ffffffu) == 0) {
 				delta = (uint32_t*)to_addr - ins_ptr;
 				if (((delta + 0x02000000) >> 26) != 0) {
@@ -3052,7 +3045,7 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 		} else if ((ins & 0xff000000u) == 0x54000000u ||
 		           (ins & 0x7e000000u) == 0x34000000u) {
 			// B.cond, CBZ, CBNZ (imm19:5..23)
-			delta = (uint32_t*)from_addr - ins_ptr;
+			ptrdiff_t delta = (uint32_t*)from_addr - ins_ptr;
 			if (((ins ^ ((uint32_t)delta << 5)) & 0x00ffffe0u) == 0) {
 				delta = (uint32_t*)to_addr - ins_ptr;
 				if (((delta + 0x40000) >> 19) != 0) {
@@ -3070,7 +3063,7 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 			}
 		} else if ((ins & 0x7e000000u) == 0x36000000u) {
 			// TBZ, TBNZ (imm14:5..18)
-			delta = (uint32_t*)from_addr - ins_ptr;
+			ptrdiff_t delta = (uint32_t*)from_addr - ins_ptr;
 			if (((ins ^ ((uint32_t)delta << 5)) & 0x0007ffe0u) == 0) {
 				delta = (uint32_t*)to_addr - ins_ptr;
 				if (((delta + 0x2000) >> 14) != 0) {
@@ -3105,7 +3098,6 @@ static int zend_jit_link_side_trace(const void *code, size_t size, uint32_t jmp_
 
 static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t, const void *timeout_exit_addr)
 {
-	const void *link_addr;
 	size_t prologue_size;
 
 	/* Skip prologue. */
@@ -3126,7 +3118,7 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t,
 		// mov FP, FCARG1x
 		prologue_size = 12;
 	}
-	link_addr = (const void*)((const char*)t->code_start + prologue_size);
+	const void *const link_addr = (const void*)((const char*)t->code_start + prologue_size);
 
 	if (timeout_exit_addr) {
 		/* Check timeout for links to LOOP */
@@ -3306,8 +3298,6 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 
 			const zend_op *next_opline = trace->opline;
 			const zend_op *exit_opline = NULL;
-			uint32_t exit_point;
-			const void *exit_addr;
 			uint32_t old_info = 0;
 			uint32_t old_res_info = 0;
 			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
@@ -3354,8 +3344,8 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 				old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 			}
-			exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
-			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			const uint32_t exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
+			const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 			if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
 				SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
@@ -3778,13 +3768,10 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 	if (may_overflow &&
 	    (((op1_def_info & MAY_BE_GUARD) && (op1_def_info & MAY_BE_LONG)) ||
 	     ((opline->result_type != IS_UNUSED && (res_info & MAY_BE_GUARD) && (res_info & MAY_BE_LONG))))) {
-		int32_t exit_point;
-		const void *exit_addr;
-		zend_jit_trace_stack *stack;
-		uint32_t old_op1_info, old_res_info = 0;
+		uint32_t old_res_info = 0;
 
-		stack = JIT_G(current_frame)->stack;
-		old_op1_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
+		zend_jit_trace_stack *const stack = JIT_G(current_frame)->stack;
+		const uint32_t old_op1_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
 		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_DOUBLE, 0);
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 			SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_LONG_MAX_PLUS_1);
@@ -3808,8 +3795,8 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 			}
 		}
 
-		exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
-		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		const int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+		const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
 		}
@@ -5078,13 +5065,11 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 
 static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, zend_jit_addr res_addr, int may_throw)
 {
-	zend_jit_addr op1_addr, op2_addr;
-
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF) && !(op2_info & MAY_BE_UNDEF));
 	ZEND_ASSERT((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING));
 
-	op1_addr = OP1_ADDR();
-	op2_addr = OP2_ADDR();
+	const zend_jit_addr op1_addr = OP1_ADDR();
+	const zend_jit_addr op2_addr = OP2_ADDR();
 
 	return zend_jit_concat_helper(Dst, opline, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr, may_throw);
 }
@@ -6014,10 +5999,10 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 
 static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, uint32_t val_info, uint8_t dim_type, int may_throw)
 {
-	zend_jit_addr op2_addr, op3_addr, res_addr;
+	zend_jit_addr res_addr;
 
-	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
-	op3_addr = OP1_DATA_ADDR();
+	const zend_jit_addr op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
+	const zend_jit_addr op3_addr = OP1_DATA_ADDR();
 	if (opline->result_type == IS_UNUSED) {
 		res_addr = 0;
 	} else {
@@ -6225,14 +6210,13 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, uint32_t
 
 static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op1_def_info, zend_jit_addr op1_addr, uint32_t op2_info, uint32_t op1_data_info, zend_ssa_range *op1_data_range, uint8_t dim_type, int may_throw)
 {
-	zend_jit_addr op2_addr, op3_addr, var_addr;
 	const void *not_found_exit_addr = NULL;
 	uint32_t var_info = MAY_BE_NULL;
 
 	ZEND_ASSERT(opline->result_type == IS_UNUSED);
 
-	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
-	op3_addr = OP1_DATA_ADDR();
+	const zend_jit_addr op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
+	const zend_jit_addr op3_addr = OP1_DATA_ADDR();
 
 	|	SET_EX_OPLINE opline, REG0
 	if (op1_info & MAY_BE_REF) {
@@ -6371,7 +6355,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 			}
 		}
 
-		var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+		const zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
 		switch (opline->extended_value) {
 			case ZEND_ADD:
 			case ZEND_SUB:
@@ -6463,13 +6447,11 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 
 static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, uint32_t op1_def_info, zend_ssa_range *op1_range, uint32_t op2_info, zend_ssa_range *op2_range, int may_overflow, int may_throw)
 {
-	zend_jit_addr op1_addr, op2_addr;
-
 	ZEND_ASSERT(opline->op1_type == IS_CV && opline->result_type == IS_UNUSED);
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF) && !(op2_info & MAY_BE_UNDEF));
 
-	op1_addr = OP1_ADDR();
-	op2_addr = OP2_ADDR();
+	zend_jit_addr op1_addr = OP1_ADDR();
+	const zend_jit_addr op2_addr = OP2_ADDR();
 
 	if (op1_info & MAY_BE_REF) {
 		binary_op_type binary_op = get_binary_op(opline->extended_value);
@@ -8638,9 +8620,6 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 
 static int zend_jit_init_fcall_guard(dasm_State **Dst, uint32_t level, const zend_function *func, const zend_op *to_opline)
 {
-	int32_t exit_point;
-	const void *exit_addr;
-
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
 #ifdef ZEND_WIN32
 		// TODO: ASLR may cause different addresses in different workers ???
@@ -8656,8 +8635,8 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, uint32_t level, const zen
 		return 0;
 	}
 
-	exit_point = zend_jit_trace_get_exit_point(to_opline, ZEND_JIT_EXIT_POLYMORPHISM);
-	exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+	const int32_t exit_point = zend_jit_trace_get_exit_point(to_opline, ZEND_JIT_EXIT_POLYMORPHISM);
+	const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 	if (!exit_addr) {
 		return 0;
 	}
@@ -8834,12 +8813,11 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *call_info = NULL;
 	zend_function *func = NULL;
-	zval *function_name;
 
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
 
-	function_name = RT_CONSTANT(opline, opline->op2);
+	zval *const function_name = RT_CONSTANT(opline, opline->op2);
 
 	if (info) {
 		call_info = info->callee_info;
@@ -8954,11 +8932,8 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
 	 && trace->func
 	) {
-		int32_t exit_point;
-		const void *exit_addr;
-
-		exit_point = zend_jit_trace_get_exit_point(opline, func ? ZEND_JIT_EXIT_INVALIDATE : ZEND_JIT_EXIT_METHOD_CALL);
-		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		const int32_t exit_point = zend_jit_trace_get_exit_point(opline, func ? ZEND_JIT_EXIT_INVALIDATE : ZEND_JIT_EXIT_METHOD_CALL);
+		const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
 		}
@@ -9073,14 +9048,10 @@ static int zend_jit_init_closure_call(dasm_State          **Dst,
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
 	 && trace->func
 	 && trace->func->type == ZEND_USER_FUNCTION) {
-		const zend_op *opcodes;
-		int32_t exit_point;
-		const void *exit_addr;
-
 		func = (zend_function*)trace->func;
-		opcodes = func->op_array.opcodes;
-		exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_CLOSURE_CALL);
-		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		const zend_op *const opcodes = func->op_array.opcodes;
+		const int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_CLOSURE_CALL);
+		const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
 		}
@@ -9126,12 +9097,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *call_info = NULL;
 	const zend_function *func = NULL;
-	uint32_t i;
 	zend_jit_addr res_addr;
 	uint32_t call_num_args = 0;
 	bool unknown_num_args = 0;
 	const void *exit_addr = NULL;
-	const zend_op *prev_opline;
 
 	if (RETURN_VALUE_USED(opline)) {
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -9140,7 +9109,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RSP, TMP_ZVAL_OFFSET);
 	}
 
-	prev_opline = opline - 1;
+	const zend_op *prev_opline = opline - 1;
 	while (prev_opline->opcode == ZEND_EXT_FCALL_BEGIN || prev_opline->opcode == ZEND_TICKS) {
 		prev_opline--;
 	}
@@ -9350,7 +9319,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|	// opline = op_array->opcodes;
 		if (func && !unknown_num_args) {
 			|	ADD_SUB_64_WITH_CONST_32 add, TMP1, RX, (EX_NUM_TO_VAR(call_num_args) + offsetof(zval, u1.type_info)), TMP1 // induction variable
-			for (i = call_num_args; i < func->op_array.last_var; i++) {
+			for (uint32_t i = call_num_args; i < func->op_array.last_var; i++) {
 				|	// ZVAL_UNDEF(EX_VAR(n))
 				|	str wzr, [TMP1], #16
 			}
@@ -9601,7 +9570,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		|	// zend_vm_stack_free_args(call);
 		if (func && !unknown_num_args) {
-			for (i = 0; i < call_num_args; i++ ) {
+			for (uint32_t i = 0; i < call_num_args; i++ ) {
 				if (zend_jit_needs_arg_dtor(func, i, call_info)) {
 					uint32_t offset = EX_NUM_TO_VAR(i);
 					zend_jit_addr arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset);
@@ -9719,7 +9688,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr)
 {
 	uint32_t arg_num = opline->op2.num;
-	zend_jit_addr arg_addr;
 
 	ZEND_ASSERT(opline->opcode == ZEND_SEND_VAL || arg_num <= MAX_ARG_FLAG_NUM);
 
@@ -9768,7 +9736,7 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, uint32_t o
 		}
 	}
 
-	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
+	const zend_jit_addr arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
@@ -9804,10 +9772,8 @@ static int zend_jit_check_undef_args(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, int cold)
 {
-	zend_jit_addr op1_addr, arg_addr, ref_addr;
-
-	op1_addr = OP1_ADDR();
-	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
+	zend_jit_addr op1_addr = OP1_ADDR();
+	const zend_jit_addr arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 
 	if (!zend_jit_reuse_ip(Dst)) {
 		return 0;
@@ -9862,7 +9828,7 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 		|	movz TMP1w, #GC_REFERENCE
 		|	str TMP1w, [REG0, #offsetof(zend_reference, gc.u.type_info)]
 		|	str xzr, [REG0, #offsetof(zend_reference, sources.ptr)]
-		ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, offsetof(zend_reference, val));
+		const zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, offsetof(zend_reference, val));
 		if (opline->op1_type == IS_VAR) {
 			zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG1, 0);
 
@@ -9889,13 +9855,12 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, const zend
 static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr op1_def_addr)
 {
 	uint32_t arg_num = opline->op2.num;
-	zend_jit_addr arg_addr;
 
 	ZEND_ASSERT((opline->opcode != ZEND_SEND_VAR_EX &&
 	     opline->opcode != ZEND_SEND_VAR_NO_REF_EX) ||
 	    arg_num <= MAX_ARG_FLAG_NUM);
 
-	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
+	const zend_jit_addr arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 
 	if (!zend_jit_reuse_ip(Dst)) {
 		return 0;
@@ -10323,7 +10288,6 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, zend_uchar 
 
 static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
-	uint32_t  mask;
 	zend_jit_addr op1_addr = OP1_ADDR();
 
 	// TODO: support for is_resource() ???
@@ -10366,7 +10330,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 	}
 
 	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
-		mask = opline->extended_value;
+		const uint32_t mask = opline->extended_value;
 		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {
 			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline, ZREG_TMP1, ZREG_TMP2
 			if (exit_addr) {
@@ -11618,13 +11582,11 @@ static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
                                       uint32_t        target_label2,
                                       const void     *exit_addr)
 {
-	zend_jit_addr op2_addr, res_addr;
-
 	// TODO: support for empty() ???
 	ZEND_ASSERT(!(opline->extended_value & ZEND_ISEMPTY));
 
-	op2_addr = OP2_ADDR();
-	res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+	const zend_jit_addr op2_addr = OP2_ADDR();
+	const zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
 	if (op1_info & MAY_BE_REF) {
 		|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
@@ -12115,7 +12077,6 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
                               int                   may_throw)
 {
 	zval *member;
-	zend_property_info *prop_info;
 	bool may_be_dynamic = 1;
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
@@ -12128,7 +12089,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), on_this, op_array->filename);
+	zend_property_info *prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), on_this, op_array->filename);
 
 	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1x, this_addr, TMP1
@@ -12364,11 +12325,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 		if ((res_info & MAY_BE_GUARD) && JIT_G(current_frame) && prop_info) {
 			uint32_t flags = 0;
-			uint32_t old_info;
 			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
-			int32_t exit_point;
-			const void *exit_addr;
-			uint32_t type;
 			zend_jit_addr val_addr = prop_addr;
 
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
@@ -12386,13 +12343,15 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
 			}
 
-			type = concrete_type(res_info);
+			const uint32_t type = concrete_type(res_info);
+
+			const void *exit_addr;
 
 			if (prop_type != IS_UNKNOWN
 			 && prop_type != IS_UNDEF
 			 && prop_type != IS_REFERENCE
 			 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_OBJECT) {
-				exit_point = zend_jit_trace_get_exit_point(opline, 0);
+				const int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
@@ -12404,10 +12363,10 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 					SET_STACK_REG(JIT_G(current_frame)->stack,
 						EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 				}
-				old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
+				const uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_COPY_GPR0);
-				exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
+				const int32_t exit_point = zend_jit_trace_get_exit_point(opline+1, flags);
 				SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
@@ -12587,9 +12546,6 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
                                zend_class_entry     *trace_ce,
                                uint8_t               prop_type)
 {
-	zval *member;
-	zend_string *name;
-	zend_property_info *prop_info;
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 	zend_jit_addr res_addr = 0;
 	zend_jit_addr prop_addr;
@@ -12605,10 +12561,10 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	}
 
-	member = RT_CONSTANT(opline, opline->op2);
+	zval *const member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
+	zend_string *const name = Z_STR_P(member);
+	zend_property_info *prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
 
 	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1x, this_addr, TMP1
@@ -12923,12 +12879,10 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 			 && (res_info & MAY_BE_LONG)) {
 				zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 				uint32_t old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-				int32_t exit_point;
-				const void *exit_addr;
 
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
-				exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
-				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				const int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+				const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
 				}
@@ -13014,9 +12968,6 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
                                   zend_class_entry     *trace_ce,
                                   uint8_t               prop_type)
 {
-	zval *member;
-	zend_string *name;
-	zend_property_info *prop_info;
 	zend_jit_addr val_addr = OP1_DATA_ADDR();
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 	zend_jit_addr prop_addr;
@@ -13029,10 +12980,10 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
 	ZEND_ASSERT(opline->result_type == IS_UNUSED);
 
-	member = RT_CONSTANT(opline, opline->op2);
+	zval *const member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
+	zend_string *const name = Z_STR_P(member);
+	zend_property_info *prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
 
 	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1x, this_addr, TMP1
@@ -13396,9 +13347,6 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
                                uint8_t               prop_type,
                                int                   may_throw)
 {
-	zval *member;
-	zend_string *name;
-	zend_property_info *prop_info;
 	zend_jit_addr val_addr = OP1_DATA_ADDR();
 	zend_jit_addr res_addr = 0;
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
@@ -13413,10 +13361,10 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
 
-	member = RT_CONSTANT(opline, opline->op2);
+	zval *const member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
+	zend_string *const name = Z_STR_P(member);
+	zend_property_info *prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
 
 	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1x, this_addr, TMP1
@@ -13698,12 +13646,9 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, uint32_t op1_info)
 {
 	if (opline->op1_type == IS_CONST) {
-		zval *zv;
-		size_t len;
-
-		zv = RT_CONSTANT(opline, opline->op1);
+		zval *const zv = RT_CONSTANT(opline, opline->op1);
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
-		len = Z_STRLEN_P(zv);
+		const size_t len = Z_STRLEN_P(zv);
 
 		if (len > 0) {
 			const char *str = Z_STRVAL_P(zv);
@@ -13739,12 +13684,9 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr)
 {
 	if (opline->op1_type == IS_CONST) {
-		zval *zv;
-		size_t len;
-
-		zv = RT_CONSTANT(opline, opline->op1);
+		zval *const zv = RT_CONSTANT(opline, opline->op1);
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
-		len = Z_STRLEN_P(zv);
+		const size_t len = Z_STRLEN_P(zv);
 
 		|	SET_ZVAL_LVAL res_addr, len, TMP1, TMP2
 		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
@@ -13775,12 +13717,9 @@ static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, uint32_t op1
 static int zend_jit_count(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, zend_jit_addr res_addr, int may_throw)
 {
 	if (opline->op1_type == IS_CONST) {
-		zval *zv;
-		zend_long count;
-
-		zv = RT_CONSTANT(opline, opline->op1);
+		zval *const zv = RT_CONSTANT(opline, opline->op1);
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
-		count = zend_hash_num_elements(Z_ARRVAL_P(zv));
+		const zend_long count = zend_hash_num_elements(Z_ARRVAL_P(zv));
 
 		|	SET_ZVAL_LVAL res_addr, count, TMP1, TMP2
 		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
@@ -13871,13 +13810,6 @@ static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const ze
 
 static int zend_jit_hash_jmp(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, HashTable *jumptable, int default_b, const void *default_label, const zend_op *next_opline, zend_jit_trace_info *trace_info)
 {
-	uint32_t count;
-	Bucket *p;
-	const zend_op *target;
-	int b;
-	int32_t exit_point;
-	const void *exit_addr;
-
 	if (default_label) {
 		|	cbz REG0, &default_label
 	} else if (next_opline) {
@@ -13905,8 +13837,8 @@ static int zend_jit_hash_jmp(dasm_State **Dst, const zend_op *opline, const zend
 		trace_info->jmp_table_size += zend_hash_num_elements(jumptable);
 	}
 
-	count = jumptable->nNumUsed;
-	p = jumptable->arData;
+	uint32_t count = jumptable->nNumUsed;
+	Bucket *p = jumptable->arData;
 	do {
 		if (Z_TYPE(p->val) == IS_UNDEF) {
 			if (default_label) {
@@ -13917,15 +13849,15 @@ static int zend_jit_hash_jmp(dasm_State **Dst, const zend_op *opline, const zend
 				|	.addr =>default_b
 			}
 		} else {
-			target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL(p->val));
+			const zend_op *const target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL(p->val));
 			if (!next_opline) {
-				b = ssa->cfg.map[target - op_array->opcodes];
+				const int b = ssa->cfg.map[target - op_array->opcodes];
 				|	.addr =>b
 			} else if (next_opline == target) {
 				|	.addr >3
 			} else {
-				exit_point = zend_jit_trace_get_exit_point(target, 0);
-				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				const int32_t exit_point = zend_jit_trace_get_exit_point(target, 0);
+				const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 				if (!exit_addr) {
 					return 0;
 				}
@@ -13999,24 +13931,20 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 		uint32_t op1_info = OP1_INFO();
 		zend_jit_addr op1_addr = OP1_ADDR();
 		const zend_op *default_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
-		const zend_op *target;
 		int default_b = next_opline ? -1 : ssa->cfg.map[default_opline - op_array->opcodes];
-		int b;
-		int32_t exit_point;
 		const void *fallback_label = NULL;
 		const void *default_label = NULL;
-		const void *exit_addr;
 
 		if (next_opline) {
 			if (next_opline != opline + 1) {
-				exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+				const int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
 				fallback_label = zend_jit_trace_get_exit_addr(exit_point);
 				if (!fallback_label) {
 					return 0;
 				}
 			}
 			if (next_opline != default_opline) {
-				exit_point = zend_jit_trace_get_exit_point(default_opline, 0);
+				const int32_t exit_point = zend_jit_trace_get_exit_point(default_opline, 0);
 				default_label = zend_jit_trace_get_exit_addr(exit_point);
 				if (!default_label) {
 					return 0;
@@ -14091,15 +14019,15 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 								|	.addr =>default_b
 							}
 						} else {
-							target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(zv));
+							const zend_op *const target = ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(zv));
 							if (!next_opline) {
-								b = ssa->cfg.map[target - op_array->opcodes];
+								const int b = ssa->cfg.map[target - op_array->opcodes];
 								|	.addr =>b
 							} else if (next_opline == target) {
 								|	.addr >3
 							} else {
-								exit_point = zend_jit_trace_get_exit_point(target, 0);
-								exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+								const int32_t exit_point = zend_jit_trace_get_exit_point(target, 0);
+								const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 								if (!exit_addr) {
 									return 0;
 								}
@@ -14509,7 +14437,6 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 	if (!exit_addr || exit_opcode == ZEND_JMP) {
 		zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG2, 0);
 		zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
-		uint32_t val_info;
 
 		if (RETURN_VALUE_USED(opline)) {
 			zend_jit_addr res_addr = RES_ADDR();
@@ -14569,7 +14496,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 			|	MEM_ACCESS_32_WITH_UOFFSET str, REG0w, FP, (opline->op1.var + offsetof(zval, u2.fe_pos)), TMP1
 		}
 
-		val_info = ((op1_info & MAY_BE_ARRAY_OF_ANY) >> MAY_BE_ARRAY_SHIFT);
+		uint32_t val_info = ((op1_info & MAY_BE_ARRAY_OF_ANY) >> MAY_BE_ARRAY_SHIFT);
 		if (val_info & MAY_BE_ARRAY) {
 			val_info |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 		}
@@ -14625,14 +14552,12 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 	if ((res_info & MAY_BE_GUARD) && JIT_G(current_frame)) {
 		zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 		uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-		int32_t exit_point;
-		const void *exit_addr = NULL;
 
 		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 		SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_COPY_GPR0);
-		exit_point = zend_jit_trace_get_exit_point(opline+1, 0);
+		const int32_t exit_point = zend_jit_trace_get_exit_point(opline+1, 0);
 		SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
-		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
 		}
@@ -14723,18 +14648,15 @@ static int zend_jit_in_array(dasm_State **Dst, const zend_op *opline, uint32_t o
 
 static int zend_jit_rope(dasm_State **Dst, const zend_op *opline, uint32_t op2_info)
 {
-	uint32_t offset;
-
-	offset = (opline->opcode == ZEND_ROPE_INIT) ?
+	const uint32_t offset = (opline->opcode == ZEND_ROPE_INIT) ?
 		opline->result.var :
 		opline->op1.var + opline->extended_value * sizeof(zend_string*);
 
 	if (opline->op2_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, opline->op2);
-		zend_string *str;
 
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
-		str = Z_STR_P(zv);
+		zend_string *const str = Z_STR_P(zv);
 		|	LOAD_ADDR REG0, str
 		|	MEM_ACCESS_64_WITH_UOFFSET str, REG0, FP, offset, TMP1
 	} else {
@@ -14837,8 +14759,6 @@ static bool zend_jit_fetch_indirect_var(dasm_State **Dst, const zend_op *opline,
 {
 	zend_jit_addr var_addr = *var_addr_ptr;
 	uint32_t var_info = *var_info_ptr;
-	int32_t exit_point;
-	const void *exit_addr;
 
 	if (add_indirect_guard) {
 		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
@@ -14871,8 +14791,8 @@ static bool zend_jit_fetch_indirect_var(dasm_State **Dst, const zend_op *opline,
 	if (!(var_type & IS_TRACE_REFERENCE)
 	 && var_type != IS_UNKNOWN
 	 && (var_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << var_type)) {
-		exit_point = zend_jit_trace_get_exit_point(opline, 0);
-		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		const int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+		const void *const exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 		if (!exit_addr) {
 			return 0;
@@ -15368,18 +15288,14 @@ void **dasm_labels_veneers = NULL;
 
 static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, uint32_t *cp, ptrdiff_t offset)
 {
-	void *veneer;
-	ptrdiff_t na;
-	int n, m;
-
 	/* try to reuse veneers for global labels */
 	if ((ins >> 16) == DASM_REL_LG
 	 && *(b-1) < 0
 	 && dasm_labels_veneers[-*(b-1)]) {
 
-		veneer = dasm_labels_veneers[-*(b-1)];
-		na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
-		n = (int)na;
+		void *const veneer = dasm_labels_veneers[-*(b-1)];
+		const ptrdiff_t na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
+		const int n = (int)na;
 
 		/* check if we can jump to veneer */
 		if ((ptrdiff_t)n != na) {
@@ -15414,9 +15330,9 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 
 				ZEND_ASSERT(exit_point < t->exit_count);
 
-				veneer = (char*)buffer + dasm_getpclabel(&Dst, 1) - (t->exit_count - exit_point) * 4;
-				na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
-				n = (int)na;
+				void *const veneer = (char*)buffer + dasm_getpclabel(&Dst, 1) - (t->exit_count - exit_point) * 4;
+				const ptrdiff_t na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
+				const int n = (int)na;
 
 				/* check if we can jump to veneer */
 				if ((ptrdiff_t)n != na) {
@@ -15452,14 +15368,14 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 		}
 	}
 
-	veneer = (char*)buffer + (Dst->codesize + dasm_venners_size);
+	void *const veneer = (char*)buffer + (Dst->codesize + dasm_venners_size);
 
 	if (veneer > dasm_end) {
 		return 0; /* jit_buffer_size overflow */
 	}
 
-	na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
-	n = (int)na;
+	ptrdiff_t na = (ptrdiff_t)veneer - (ptrdiff_t)cp + 4;
+	const int n = (int)na;
 
 	/* check if we can jump to veneer */
 	if ((ptrdiff_t)n != na) {
@@ -15498,7 +15414,7 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 
 	/* check if we can use B to jump from veneer */
 	na = (ptrdiff_t)cp + offset - (ptrdiff_t)veneer - 4;
-	m = (int)na;
+	const int m = (int)na;
 	if ((ptrdiff_t)m != na) {
 		ZEND_ASSERT(0);
 		return 0;
