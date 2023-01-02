@@ -20,7 +20,7 @@ array(4) {
   ["name"]=>
   string(%d) "%s"
   ["passwd"]=>
-  string(1) "%s"
+  string(%d) "%S"
   ["members"]=>
 %a
   ["gid"]=>
