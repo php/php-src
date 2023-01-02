@@ -57,9 +57,9 @@ static bool will_rejoin(
 	return 0;
 }
 
-static bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
+static bool needs_pi(const zend_op_array *op_array, const zend_dfg *dfg, const zend_ssa *ssa, int from, int to, int var) /* {{{ */
 {
-	zend_basic_block *from_block, *to_block;
+	const zend_basic_block *from_block, *to_block;
 	int other_successor;
 
 	if (!DFG_ISSET(dfg->in, dfg->size, to, var)) {
