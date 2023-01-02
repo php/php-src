@@ -14,4 +14,4 @@ function foo($a) {
 foo(7);
 ?>
 --EXPECTF--
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_008.php on line 4
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %sreg_alloc_008.php on line 4

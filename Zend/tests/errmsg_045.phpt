@@ -17,4 +17,4 @@ eval('class A { private function __invoke() { } }');
 string(%d) "The magic method A::__invoke() must have public visibility"
 string(%d) "%s(%d) : eval()'d code"
 
-Warning: Undefined variable $undefined (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undefined (this will become an error in PHP 9.0) in %s on line %d

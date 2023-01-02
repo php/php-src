@@ -72,9 +72,9 @@ echo "Done";
 --EXPECTF--
 *** Testing is_a() : usage variations ***
 
-Warning: Undefined variable $undefined_var (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undefined_var (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $unset_var (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $unset_var (this will become an error in PHP 9.0) in %s on line %d
 
 Arg value 0 
 bool(false)

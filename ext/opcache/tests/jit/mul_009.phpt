@@ -12,7 +12,7 @@ $x[""][] = 1;
 $x[~"$y"] *= 1;
 ?>
 --EXPECTF--
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %smul_009.php on line 3
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %smul_009.php on line 3
 
 Fatal error: Uncaught TypeError: Unsupported operand types: array * int in %smul_009.php:3
 Stack trace:

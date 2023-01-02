@@ -20,6 +20,6 @@ foreach ($foo as $bar) {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $foo (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $foo (this will become an error in PHP 9.0) in %s on line %d
 
 Warning: foreach() argument must be of type array|object, null given in %s on line %d

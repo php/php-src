@@ -14,5 +14,5 @@ var_dump($y);
 --EXPECTF--
 string(60) "Trying to clone an uncloneable object of class SplFileObject"
 
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %s on line %d
 NULL

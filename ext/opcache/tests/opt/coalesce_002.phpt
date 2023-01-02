@@ -12,7 +12,7 @@ function t() {
 t();
 ?>
 --EXPECTF--
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %scoalesce_002.php on line 3
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %scoalesce_002.php on line 3
 
 Fatal error: Uncaught ArgumentCountError: var_dump() expects at least 1 argument, 0 given in %scoalesce_002.php:3
 Stack trace:

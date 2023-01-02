@@ -16,10 +16,10 @@ $u + 1;
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $u1 (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $u1 (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $u2 (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $u2 (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $u (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $u (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $u (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $u (this will become an error in PHP 9.0) in %s on line %d

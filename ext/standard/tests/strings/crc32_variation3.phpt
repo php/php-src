@@ -71,9 +71,9 @@ echo "Done";
 --EXPECTF--
 *** Testing crc32() : with different strings in double quotes ***
 
-Warning: Undefined variable $hello (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $hello (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $world (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $world (this will become an error in PHP 9.0) in %s on line %d
 
 -- Iteration 1 --
 int(0)

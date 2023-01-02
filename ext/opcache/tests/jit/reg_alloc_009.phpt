@@ -15,7 +15,7 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $j (This will become an error in PHP 9.0) in %sreg_alloc_009.php on line 4
+Warning: Undefined variable $j (this will become an error in PHP 9.0) in %sreg_alloc_009.php on line 4
 
 Fatal error: Uncaught ArithmeticError: Bit shift by negative number in %sreg_alloc_009.php:4
 Stack trace:

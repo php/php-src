@@ -28,13 +28,13 @@ test2();
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $obj (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $obj (this will become an error in PHP 9.0) in %s on line %d
 
 Warning: Attempt to read property "x" on null in %s on line %d
 
 Warning: Undefined property: stdClass::$x in %s on line %d
 
-Warning: Undefined variable $obj (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $obj (this will become an error in PHP 9.0) in %s on line %d
 
 Warning: Attempt to read property "x" on null in %s on line %d
 DONE

@@ -16,7 +16,7 @@ foo()
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_015.php on line 3
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %sreg_alloc_015.php on line 3
 
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %sreg_alloc_015.php on line 3
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %sreg_alloc_015.php on line 3
 DONE

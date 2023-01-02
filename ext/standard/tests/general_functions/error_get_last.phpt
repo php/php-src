@@ -22,7 +22,7 @@ NULL
 error_get_last() expects exactly 0 arguments, 1 given
 NULL
 
-Warning: Undefined variable $b (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $b (this will become an error in PHP 9.0) in %s on line %d
 array(4) {
   ["type"]=>
   int(2)

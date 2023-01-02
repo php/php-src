@@ -13,7 +13,7 @@ var_dump($_POST, $HTTP_RAW_POST_DATA);
 --EXPECTF--
 Warning: PHP Request Startup: POST Content-Length of 2050 bytes exceeds the limit of 1024 bytes in Unknown on line 0
 
-Warning: Undefined variable $HTTP_RAW_POST_DATA (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $HTTP_RAW_POST_DATA (this will become an error in PHP 9.0) in %s on line %d
 array(0) {
 }
 NULL

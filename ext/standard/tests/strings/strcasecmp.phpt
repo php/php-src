@@ -120,44 +120,44 @@ Array
 (
     [0] => a
     [1] => A
-    [2] => €
-    [3] => ÿ
+    [2] => ï¿½
+    [3] => ï¿½
     [4] => %0
 )
 
 Iteration 0
 - strcasecmp of 'a' and 'a' is => int(0)
 - strcasecmp of 'a' and 'A' is => int(0)
-- strcasecmp of 'a' and '€' is => int(-%d)
-- strcasecmp of 'a' and 'ÿ' is => int(-%d)
+- strcasecmp of 'a' and 'ï¿½' is => int(-%d)
+- strcasecmp of 'a' and 'ï¿½' is => int(-%d)
 - strcasecmp of 'a' and '%0' is => int(%d)
 
 Iteration 1
 - strcasecmp of 'A' and 'a' is => int(0)
 - strcasecmp of 'A' and 'A' is => int(0)
-- strcasecmp of 'A' and '€' is => int(-%d)
-- strcasecmp of 'A' and 'ÿ' is => int(-%d)
+- strcasecmp of 'A' and 'ï¿½' is => int(-%d)
+- strcasecmp of 'A' and 'ï¿½' is => int(-%d)
 - strcasecmp of 'A' and '%0' is => int(%d)
 
 Iteration 2
-- strcasecmp of '€' and 'a' is => int(%d)
-- strcasecmp of '€' and 'A' is => int(%d)
-- strcasecmp of '€' and '€' is => int(0)
-- strcasecmp of '€' and 'ÿ' is => int(-%d)
-- strcasecmp of '€' and '%0' is => int(%d)
+- strcasecmp of 'ï¿½' and 'a' is => int(%d)
+- strcasecmp of 'ï¿½' and 'A' is => int(%d)
+- strcasecmp of 'ï¿½' and 'ï¿½' is => int(0)
+- strcasecmp of 'ï¿½' and 'ï¿½' is => int(-%d)
+- strcasecmp of 'ï¿½' and '%0' is => int(%d)
 
 Iteration 3
-- strcasecmp of 'ÿ' and 'a' is => int(%d)
-- strcasecmp of 'ÿ' and 'A' is => int(%d)
-- strcasecmp of 'ÿ' and '€' is => int(%d)
-- strcasecmp of 'ÿ' and 'ÿ' is => int(0)
-- strcasecmp of 'ÿ' and '%0' is => int(%d)
+- strcasecmp of 'ï¿½' and 'a' is => int(%d)
+- strcasecmp of 'ï¿½' and 'A' is => int(%d)
+- strcasecmp of 'ï¿½' and 'ï¿½' is => int(%d)
+- strcasecmp of 'ï¿½' and 'ï¿½' is => int(0)
+- strcasecmp of 'ï¿½' and '%0' is => int(%d)
 
 Iteration 4
 - strcasecmp of '%0' and 'a' is => int(-%d)
 - strcasecmp of '%0' and 'A' is => int(-%d)
-- strcasecmp of '%0' and '€' is => int(-%d)
-- strcasecmp of '%0' and 'ÿ' is => int(-%d)
+- strcasecmp of '%0' and 'ï¿½' is => int(-%d)
+- strcasecmp of '%0' and 'ï¿½' is => int(-%d)
 - strcasecmp of '%0' and '%0' is => int(0)
 
 *** comparing the strings in an 
@@ -542,7 +542,7 @@ int(-%d)
 int(-%d)
 int(-%d)
 
-Warning: Undefined variable $strS (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $strS (this will become an error in PHP 9.0) in %s on line %d
 int(%d)
 int(-%d)
 int(-%d)

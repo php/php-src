@@ -49,5 +49,5 @@ object(PDO)#%d (0) {
 object(MyPDO)#%d (0) {
 }
 
-Warning: Undefined variable $bar (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $bar (this will become an error in PHP 9.0) in %s on line %d
 NULL

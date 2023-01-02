@@ -11,4 +11,4 @@ test();
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $n (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $n (this will become an error in PHP 9.0) in %s on line %d

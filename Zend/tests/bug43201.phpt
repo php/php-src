@@ -26,39 +26,39 @@ Notice: Indirect modification of overloaded property Foo::$arr has no effect in 
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 14
 
-Warning: Undefined variable $ref (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $ref (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
-
-Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
-
-Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
-
-Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undef (this will become an error in PHP 9.0) in %s on line %d
 
 Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undef (this will become an error in PHP 9.0) in %s on line %d
 
 Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undef (this will become an error in PHP 9.0) in %s on line %d
 
 Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undef (this will become an error in PHP 9.0) in %s on line %d
 
 Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undef (this will become an error in PHP 9.0) in %s on line %d
+
+Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
+
+Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
+
+Warning: Undefined variable $undef (this will become an error in PHP 9.0) in %s on line %d
 
 Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 

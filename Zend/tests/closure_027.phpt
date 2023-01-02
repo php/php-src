@@ -27,7 +27,7 @@ object(stdClass)#%d (0) {
 }
 NULL
 
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %s on line %d
 Exception: Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
 
 Fatal error: Uncaught TypeError: test(): Argument #1 ($a) must be of type Closure, stdClass given, called in %s:%d

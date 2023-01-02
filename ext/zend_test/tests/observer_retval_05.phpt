@@ -23,11 +23,11 @@ echo 'Done' . PHP_EOL;
   <!-- init foo() -->
   <foo>
 
-Warning: Undefined variable $i_do_not_exist (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $i_do_not_exist (this will become an error in PHP 9.0) in %s on line %d
   </foo:NULL>
   <foo>
 
-Warning: Undefined variable $i_do_not_exist (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $i_do_not_exist (this will become an error in PHP 9.0) in %s on line %d
   </foo:NULL>
 Done
 </file '%s%eobserver_retval_%d.php'>

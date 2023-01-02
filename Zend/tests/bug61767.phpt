@@ -18,7 +18,7 @@ $undefined->foo();
 --EXPECTF--
 Error handler called (Undefined variable $undefined (This will become an error in PHP 9.0))
 
-Fatal error: Uncaught ErrorException: Undefined variable $undefined (This will become an error in PHP 9.0) in %sbug61767.php:%d
+Fatal error: Uncaught ErrorException: Undefined variable $undefined (this will become an error in PHP 9.0) in %sbug61767.php:%d
 Stack trace:
 #0 %sbug61767.php(%d): {closure}(%s, 'Undefined varia...', '%s', %d)
 #1 {main}

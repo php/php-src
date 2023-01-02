@@ -122,8 +122,8 @@ Array
     [1] => A
     [2] => a
     [3] => A
-    [4] => €
-    [5] => ÿ
+    [4] => ï¿½
+    [5] => ï¿½
     [6] => %0
 )
 
@@ -132,8 +132,8 @@ Iteration 0
 - strcmp of 'a' and 'A' is => int(%d)
 - strcmp of 'a' and 'a' is => int(0)
 - strcmp of 'a' and 'A' is => int(%d)
-- strcmp of 'a' and '€' is => int(-%d)
-- strcmp of 'a' and 'ÿ' is => int(-%d)
+- strcmp of 'a' and 'ï¿½' is => int(-%d)
+- strcmp of 'a' and 'ï¿½' is => int(-%d)
 - strcmp of 'a' and '%0' is => int(%d)
 
 Iteration 1
@@ -141,8 +141,8 @@ Iteration 1
 - strcmp of 'A' and 'A' is => int(0)
 - strcmp of 'A' and 'a' is => int(-%d)
 - strcmp of 'A' and 'A' is => int(0)
-- strcmp of 'A' and '€' is => int(-%d)
-- strcmp of 'A' and 'ÿ' is => int(-%d)
+- strcmp of 'A' and 'ï¿½' is => int(-%d)
+- strcmp of 'A' and 'ï¿½' is => int(-%d)
 - strcmp of 'A' and '%0' is => int(%d)
 
 Iteration 2
@@ -150,8 +150,8 @@ Iteration 2
 - strcmp of 'a' and 'A' is => int(%d)
 - strcmp of 'a' and 'a' is => int(0)
 - strcmp of 'a' and 'A' is => int(%d)
-- strcmp of 'a' and '€' is => int(-%d)
-- strcmp of 'a' and 'ÿ' is => int(-%d)
+- strcmp of 'a' and 'ï¿½' is => int(-%d)
+- strcmp of 'a' and 'ï¿½' is => int(-%d)
 - strcmp of 'a' and '%0' is => int(%d)
 
 Iteration 3
@@ -159,35 +159,35 @@ Iteration 3
 - strcmp of 'A' and 'A' is => int(0)
 - strcmp of 'A' and 'a' is => int(-%d)
 - strcmp of 'A' and 'A' is => int(0)
-- strcmp of 'A' and '€' is => int(-%d)
-- strcmp of 'A' and 'ÿ' is => int(-%d)
+- strcmp of 'A' and 'ï¿½' is => int(-%d)
+- strcmp of 'A' and 'ï¿½' is => int(-%d)
 - strcmp of 'A' and '%0' is => int(%d)
 
 Iteration 4
-- strcmp of '€' and 'a' is => int(%d)
-- strcmp of '€' and 'A' is => int(%d)
-- strcmp of '€' and 'a' is => int(%d)
-- strcmp of '€' and 'A' is => int(%d)
-- strcmp of '€' and '€' is => int(0)
-- strcmp of '€' and 'ÿ' is => int(-%d)
-- strcmp of '€' and '%0' is => int(%d)
+- strcmp of 'ï¿½' and 'a' is => int(%d)
+- strcmp of 'ï¿½' and 'A' is => int(%d)
+- strcmp of 'ï¿½' and 'a' is => int(%d)
+- strcmp of 'ï¿½' and 'A' is => int(%d)
+- strcmp of 'ï¿½' and 'ï¿½' is => int(0)
+- strcmp of 'ï¿½' and 'ï¿½' is => int(-%d)
+- strcmp of 'ï¿½' and '%0' is => int(%d)
 
 Iteration 5
-- strcmp of 'ÿ' and 'a' is => int(%d)
-- strcmp of 'ÿ' and 'A' is => int(%d)
-- strcmp of 'ÿ' and 'a' is => int(%d)
-- strcmp of 'ÿ' and 'A' is => int(%d)
-- strcmp of 'ÿ' and '€' is => int(%d)
-- strcmp of 'ÿ' and 'ÿ' is => int(0)
-- strcmp of 'ÿ' and '%0' is => int(%d)
+- strcmp of 'ï¿½' and 'a' is => int(%d)
+- strcmp of 'ï¿½' and 'A' is => int(%d)
+- strcmp of 'ï¿½' and 'a' is => int(%d)
+- strcmp of 'ï¿½' and 'A' is => int(%d)
+- strcmp of 'ï¿½' and 'ï¿½' is => int(%d)
+- strcmp of 'ï¿½' and 'ï¿½' is => int(0)
+- strcmp of 'ï¿½' and '%0' is => int(%d)
 
 Iteration 6
 - strcmp of '%0' and 'a' is => int(-%d)
 - strcmp of '%0' and 'A' is => int(-%d)
 - strcmp of '%0' and 'a' is => int(-%d)
 - strcmp of '%0' and 'A' is => int(-%d)
-- strcmp of '%0' and '€' is => int(-%d)
-- strcmp of '%0' and 'ÿ' is => int(-%d)
+- strcmp of '%0' and 'ï¿½' is => int(-%d)
+- strcmp of '%0' and 'ï¿½' is => int(-%d)
 - strcmp of '%0' and '%0' is => int(0)
 
 *** comparing the strings in an 
@@ -550,7 +550,7 @@ int(-%d)
 int(-%d)
 int(-%d)
 
-Warning: Undefined variable $strS (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $strS (this will become an error in PHP 9.0) in %s on line %d
 int(%d)
 int(-%d)
 int(-%d)

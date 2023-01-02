@@ -71,9 +71,9 @@ echo "\nDone";
 --EXPECTF--
 --- Testing Variations in objects ---
 
-Warning: Undefined variable $file_handle (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $file_handle (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $file_handle (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $file_handle (this will become an error in PHP 9.0) in %s on line %d
 After Serialization => string(493) "O:1:"C":8:{s:1:"a";i:10;s:1:"b";s:6:"string";s:1:"c";b:1;s:1:"d";d:-2.344440000000000079438677857979200780391693115234375;s:1:"e";a:7:{i:0;i:1;i:1;d:2.220000000000000195399252334027551114559173583984375;i:2;s:6:"string";i:3;b:1;i:4;a:0:{}i:5;O:7:"members":3:{s:20:"%0members%0var_private";i:10;s:16:"%0*%0var_protected";s:6:"string";s:10:"var_public";a:3:{i:0;d:-100.1230000000000046611603465862572193145751953125;i:1;s:6:"string";i:2;b:1;}}i:6;N;}s:1:"f";O:9:"nomembers":0:{}s:1:"g";N;s:1:"h";N;}"
 After Unserialization => object(C)#%d (8) {
   ["a"]=>

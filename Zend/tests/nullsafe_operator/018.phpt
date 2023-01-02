@@ -9,11 +9,11 @@ var_dump($foo);
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $foo (This will become an error in PHP 9.0) in %s.php on line 3
+Warning: Undefined variable $foo (this will become an error in PHP 9.0) in %s.php on line 3
 NULL
 
-Warning: Undefined variable $foo (This will become an error in PHP 9.0) in %s.php on line 4
+Warning: Undefined variable $foo (this will become an error in PHP 9.0) in %s.php on line 4
 NULL
 
-Warning: Undefined variable $foo (This will become an error in PHP 9.0) in %s.php on line 5
+Warning: Undefined variable $foo (this will become an error in PHP 9.0) in %s.php on line 5
 NULL

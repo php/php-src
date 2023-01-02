@@ -44,7 +44,7 @@ $db = new hariCow;
 var_dump($db);
 ?>
 --EXPECTF--
-Warning: Undefined variable $db (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $db (this will become an error in PHP 9.0) in %s on line %d
 NULL
 object(hariCow)#%d (2) {
   ["x"]=>

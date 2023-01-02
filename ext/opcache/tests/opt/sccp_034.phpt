@@ -10,7 +10,7 @@ is_array(["$y $y"]);
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %ssccp_034.php on line 2
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %ssccp_034.php on line 2
 
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %ssccp_034.php on line 2
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %ssccp_034.php on line 2
 DONE

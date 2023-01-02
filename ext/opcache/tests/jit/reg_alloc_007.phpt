@@ -17,7 +17,7 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sreg_alloc_007.php on line 4
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %sreg_alloc_007.php on line 4
 
 Fatal error: Uncaught DivisionByZeroError: Modulo by zero in %sreg_alloc_007.php:6
 Stack trace:

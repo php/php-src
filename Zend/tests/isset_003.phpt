@@ -29,9 +29,9 @@ bool(true)
 bool(false)
 bool(false)
 
-Warning: Undefined variable $c (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $c (this will become an error in PHP 9.0) in %s on line %d
 
-Warning: Undefined variable $d (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $d (this will become an error in PHP 9.0) in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 

@@ -56,7 +56,7 @@ foreach($refParameters as $parameter) {
 hello from test
 third is jack
 
-Warning: Undefined variable $theIncrement (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $theIncrement (this will become an error in PHP 9.0) in %s on line %d
 parameter names from staticMethod method:
 
 object(ReflectionParameter)#%d (1) {

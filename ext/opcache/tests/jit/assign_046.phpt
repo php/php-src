@@ -20,19 +20,19 @@ test();
 --EXPECTF--
 NULL
 
-Warning: Undefined variable $b (This will become an error in PHP 9.0) in %sassign_046.php on line 6
+Warning: Undefined variable $b (this will become an error in PHP 9.0) in %sassign_046.php on line 6
 int(0)
 
-Warning: Undefined variable $b (This will become an error in PHP 9.0) in %sassign_046.php on line 6
+Warning: Undefined variable $b (this will become an error in PHP 9.0) in %sassign_046.php on line 6
 int(0)
 
-Warning: Undefined variable $b (This will become an error in PHP 9.0) in %sassign_046.php on line 6
+Warning: Undefined variable $b (this will become an error in PHP 9.0) in %sassign_046.php on line 6
 int(0)
 
-Warning: Undefined variable $b (This will become an error in PHP 9.0) in %sassign_046.php on line 6
+Warning: Undefined variable $b (this will become an error in PHP 9.0) in %sassign_046.php on line 6
 int(0)
 
-Warning: Undefined variable $b (This will become an error in PHP 9.0) in %sassign_046.php on line 6
+Warning: Undefined variable $b (this will become an error in PHP 9.0) in %sassign_046.php on line 6
 int(0)
 
-Warning: Undefined variable $b (This will become an error in PHP 9.0) in %sassign_046.php on line 6
+Warning: Undefined variable $b (this will become an error in PHP 9.0) in %sassign_046.php on line 6

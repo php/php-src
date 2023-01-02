@@ -23,7 +23,7 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $undefined (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undefined (this will become an error in PHP 9.0) in %s on line %d
 
 Warning: Attempt to read property "1" on null in %s on line %d
 Division by zero

@@ -43,4 +43,4 @@ class E extends D {
 --EXPECTF--
 int(2)
 
-Warning: Undefined variable $x (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $x (this will become an error in PHP 9.0) in %s on line %d

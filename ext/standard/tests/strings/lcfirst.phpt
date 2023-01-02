@@ -189,7 +189,7 @@ string(0) ""
 string(5) "world"
 string(7) "world'S"
 
-Warning: Undefined variable $strS (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $strS (this will become an error in PHP 9.0) in %s on line %d
 string(0) ""
 string(6) "worldS"
 string(6) "worldS"

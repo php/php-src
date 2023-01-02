@@ -223,5 +223,5 @@ array(1) {
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 Illegal offset type
 
-Warning: Undefined variable $undef (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $undef (this will become an error in PHP 9.0) in %s on line %d
 NULL

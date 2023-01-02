@@ -23,8 +23,8 @@ var_dump($a);
 int(0)
 str_word_count(): Argument #2 ($format) must be a valid format value
 
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %s on line %d
 str_word_count(): Argument #2 ($format) must be a valid format value
 
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %s on line %d
 NULL

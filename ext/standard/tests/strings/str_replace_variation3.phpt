@@ -220,7 +220,7 @@ int(0)
 string(5) "FOUND"
 string(5) "FOUND"
 
-Warning: Undefined variable $strS (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $strS (this will become an error in PHP 9.0) in %s on line %d
 string(0) ""
 string(5) "FOUND"
 string(5) "FOUND"

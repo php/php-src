@@ -13,7 +13,7 @@ function f() {
 f();
 ?>
 --EXPECTF--
-Warning: Undefined variable $y (This will become an error in PHP 9.0) in %ssccp_040.php on line 3
+Warning: Undefined variable $y (this will become an error in PHP 9.0) in %ssccp_040.php on line 3
 
 Fatal error: Uncaught Error: Array callback must have exactly two elements in %ssccp_040.php:4
 Stack trace:

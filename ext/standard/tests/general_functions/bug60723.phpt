@@ -14,6 +14,6 @@ readfile($log);
 unlink($log);
 ?>
 --EXPECTF--
-Warning: Undefined variable $aa (This will become an error in PHP 9.0) in %s on line %d
-[%s ASIA/Chongqing] PHP Warning:  Undefined variable $aa (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $aa (this will become an error in PHP 9.0) in %s on line %d
+[%s ASIA/Chongqing] PHP Warning:  Undefined variable $aa (this will become an error in PHP 9.0) in %s on line %d
 [%s ASIA/Chongqing] dummy

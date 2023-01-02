@@ -17,7 +17,7 @@ function foo() {
 var_dump(foo());
 ?>
 --EXPECTF--
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %s on line %d
 
 Warning: Undefined array key 0 in %sfetch_dim_rw_001.php on line 3
 

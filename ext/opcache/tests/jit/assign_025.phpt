@@ -21,5 +21,5 @@ foo();
 echo "ok\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable $ref (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $ref (this will become an error in PHP 9.0) in %s on line %d
 ok

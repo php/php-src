@@ -10,5 +10,5 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $42 (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $42 (this will become an error in PHP 9.0) in %s on line %d
 Division by zero

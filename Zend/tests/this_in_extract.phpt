@@ -15,5 +15,5 @@ foo();
 --EXPECTF--
 Cannot re-assign $this
 
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %s on line %d
 NULL

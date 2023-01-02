@@ -338,7 +338,7 @@ bool(false)
 string(5) "world"
 string(7) "world'S"
 
-Warning: Undefined variable $needleS (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $needleS (this will become an error in PHP 9.0) in %s on line %d
 string(13) "Hello, worldS"
 string(6) "worldS"
 string(6) "worldS"

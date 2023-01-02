@@ -67,7 +67,7 @@ array(2) {
   float(0.2)
 }
 
-Warning: compact(): Undefined variable $g (This will become an error in PHP 9.0) in %s on line %d
+Warning: compact(): Undefined variable $g (this will become an error in PHP 9.0) in %s on line %d
 array(0) {
 }
 Done

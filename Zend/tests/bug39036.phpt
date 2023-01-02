@@ -14,6 +14,6 @@ var_dump($key);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable $key (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $key (this will become an error in PHP 9.0) in %s on line %d
 NULL
 Done

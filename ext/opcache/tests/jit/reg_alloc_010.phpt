@@ -18,7 +18,7 @@ foo(null);
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $cnt (This will become an error in PHP 9.0) in %sreg_alloc_010.php on line 3
+Warning: Undefined variable $cnt (this will become an error in PHP 9.0) in %sreg_alloc_010.php on line 3
 
-Warning: Undefined variable $cnt (This will become an error in PHP 9.0) in %sreg_alloc_010.php on line 3
+Warning: Undefined variable $cnt (this will become an error in PHP 9.0) in %sreg_alloc_010.php on line 3
 DONE

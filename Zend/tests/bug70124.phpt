@@ -39,7 +39,7 @@ try  {
 }
 ?>
 --EXPECTF--
-Warning: Undefined variable $f (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $f (this will become an error in PHP 9.0) in %s on line %d
 string(34) "Value of type null is not callable"
 string(31) "Call to undefined method A::y()"
 string(31) "Call to undefined method A::y()"

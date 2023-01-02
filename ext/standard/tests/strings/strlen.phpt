@@ -181,7 +181,7 @@ int(0)
 int(5)
 int(7)
 
-Warning: Undefined variable $strS (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $strS (this will become an error in PHP 9.0) in %s on line %d
 int(0)
 int(6)
 int(6)

@@ -14,8 +14,8 @@ var_dump($fn());
 
 ?>
 --EXPECTF--
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %s on line %d
 NULL
 
-Warning: Undefined variable $5 (This will become an error in PHP 9.0) in %s on line %d
+Warning: Undefined variable $5 (this will become an error in PHP 9.0) in %s on line %d
 NULL

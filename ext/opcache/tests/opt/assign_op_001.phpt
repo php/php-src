@@ -17,9 +17,9 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_op_001.php on line 4
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %sassign_op_001.php on line 4
 
-Warning: Undefined variable $a (This will become an error in PHP 9.0) in %sassign_op_001.php on line 4
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %sassign_op_001.php on line 4
 
 Warning: Undefined array key "b" in %sassign_op_001.php on line 7
 
