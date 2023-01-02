@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.2
 
+- Core:
+  . Fixed bug GH-10200 (zif_get_object_vars:
+    Assertion `!(((__ht)->u.flags & (1<<2)) != 0)' failed). (nielsdos)
+
 - FPM:
   . Fixed bug #77106 (Missing separator in FPM FastCGI errors). (Jakub Zelenka)
   . Fixed bug GH-9981 (FPM does not reset fastcgi.error_header).
