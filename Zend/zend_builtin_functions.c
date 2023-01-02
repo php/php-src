@@ -760,7 +760,7 @@ ZEND_FUNCTION(get_object_vars)
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
-		ZEND_HASH_MAP_FOREACH_KEY_VAL(properties, num_key, key, value) {
+		ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, value) {
 			bool is_dynamic = 1;
 			if (Z_TYPE_P(value) == IS_INDIRECT) {
 				value = Z_INDIRECT_P(value);
