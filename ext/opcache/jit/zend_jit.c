@@ -338,7 +338,7 @@ static bool zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 	return false;
 }
 
-static bool zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
+static bool zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {
 	if (trace) {
 		zend_jit_trace_rec *p = trace;
@@ -517,7 +517,7 @@ static bool zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, con
 	}
 }
 
-static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ssa, const zend_call_info *call_info)
+static uint32_t skip_valid_arguments(const zend_op_array *op_array, const zend_ssa *ssa, const zend_call_info *call_info)
 {
 	uint32_t num_args = 0;
 	zend_function *func = call_info->callee_func;
@@ -529,8 +529,8 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 
 		if (ZEND_TYPE_IS_SET(arg_info->type)) {
 			if (ZEND_TYPE_IS_ONLY_MASK(arg_info->type)) {
-				zend_op *opline = call_info->arg_info[num_args].opline;
-				zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+				const zend_op *opline = call_info->arg_info[num_args].opline;
+				const zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 				uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
 				if ((OP1_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~type_mask) {
 					break;
@@ -544,7 +544,7 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 	return num_args;
 }
 
-static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, zend_ssa *ssa, uint32_t var)
+static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, const zend_ssa *ssa, uint32_t var)
 {
 	uint32_t info;
 

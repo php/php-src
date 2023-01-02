@@ -489,7 +489,7 @@ static void zend_jit_trace_send_type(const zend_op *opline, zend_jit_trace_stack
 		return;
 	}
 	if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-		zend_arg_info *arg_info;
+		const zend_arg_info *arg_info;
 
 		ZEND_ASSERT(arg_num <= op_array->num_args);
 		arg_info = &op_array->arg_info[arg_num-1];
@@ -816,7 +816,7 @@ static int zend_jit_trace_add_ret_phis(zend_jit_trace_rec *trace_buffer, uint32_
 	return ssa_vars_count;
 }
 
-static bool zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+static bool zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *const *tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	int var, use;
 	zend_ssa_op *op;
@@ -858,7 +858,7 @@ static bool zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, cons
 	return false;
 }
 
-static void zend_jit_trace_propagate_range(const zend_op_array *op_array, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+static void zend_jit_trace_propagate_range(const zend_op_array *op_array, const zend_op *const *tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	zend_ssa_range tmp;
 	int def = tssa->vars[ssa_var].definition;
@@ -873,7 +873,7 @@ static void zend_jit_trace_propagate_range(const zend_op_array *op_array, const 
 	}
 }
 
-static void zend_jit_trace_copy_ssa_var_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+static void zend_jit_trace_copy_ssa_var_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *const*tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	int def;
 	zend_ssa_op *op;
@@ -923,7 +923,7 @@ static void zend_jit_trace_copy_ssa_var_range(const zend_op_array *op_array, con
 	}
 }
 
-static bool zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+static bool zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *const*tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	int def;
 	zend_ssa_op *op;
@@ -1071,7 +1071,7 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 	return NULL;
 }
 
-static bool is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
+static bool is_checked_guard(const zend_ssa *tssa, const zend_op *const*ssa_opcodes, uint32_t var, uint32_t phi_var)
 {
 	if ((tssa->var_info[phi_var].type & MAY_BE_ANY) == MAY_BE_LONG
 	 && !(tssa->var_info[var].type & MAY_BE_REF)) {
@@ -1536,7 +1536,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						ssa_vars[i].alias = zend_jit_var_may_alias(op_array, ssa, i);
 					}
 					if (op_array->arg_info) {
-						zend_arg_info *arg_info = &op_array->arg_info[i];
+						const zend_arg_info *arg_info = &op_array->arg_info[i];
 						zend_class_entry *ce;
 						uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
 
@@ -2001,7 +2001,7 @@ propagate_arg:
 							info = ssa_var_info[ssa_ops[idx].op1_use].type & ~MAY_BE_GUARD;
 						}
 						if (frame->call->func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-							zend_arg_info *arg_info;
+							const zend_arg_info *arg_info;
 
 							ZEND_ASSERT(frame->call->func->op_array.arg_info);
 							arg_info = &frame->call->func->op_array.arg_info[opline->op2.num - 1];
@@ -2344,7 +2344,7 @@ propagate_arg:
 					} else {
 						ssa_vars[v].alias = zend_jit_var_may_alias(op_array, ssa, i);
 						if (op_array->arg_info) {
-							zend_arg_info *arg_info = &op_array->arg_info[i];
+							const zend_arg_info *arg_info = &op_array->arg_info[i];
 							zend_class_entry *ce;
 							uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
 
@@ -2513,7 +2513,7 @@ propagate_arg:
 				if (opline->result_type != IS_UNDEF) {
 					zend_class_entry *ce;
 					const zend_function *func = p->func;
-					zend_arg_info *ret_info = func->common.arg_info - 1;
+					const zend_arg_info *ret_info = func->common.arg_info - 1;
 					uint32_t ret_type = zend_fetch_arg_info_type(NULL, ret_info, &ce);
 
 					ssa_var_info[ssa_ops[idx-1].result_def].type &= ret_type;
@@ -3856,7 +3856,7 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 	}
 }
 
-static bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_ssa *ssa, const zend_op **ssa_opcodes, const zend_op_array *op_array)
+static bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_ssa *ssa, const zend_op *const*ssa_opcodes, const zend_op_array *op_array)
 {
 	zend_uchar prev_opcode;
 
