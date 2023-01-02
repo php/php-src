@@ -15,5 +15,5 @@ $my_var[] = $y;
 ?>
 DONE
 --EXPECT--
-Error: Undefined variable $y (This will become an error in PHP 9.0)
+Error: Undefined variable $y (this will become an error in PHP 9.0)
 DONE

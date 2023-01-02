@@ -83,8 +83,8 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing method_exists() : usage variations ***
-Error: 2 - Undefined variable $undefined_var (This will become an error in PHP 9.0)
-Error: 2 - Undefined variable $unset_var (This will become an error in PHP 9.0)
+Error: 2 - Undefined variable $undefined_var (this will become an error in PHP 9.0)
+Error: 2 - Undefined variable $unset_var (this will become an error in PHP 9.0)
 
 Arg value 0 
 method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given

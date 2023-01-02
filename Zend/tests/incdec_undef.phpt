@@ -15,11 +15,11 @@ unset($x);
 var_dump(++$x);
 ?>
 --EXPECT--
-Undefined variable $x (This will become an error in PHP 9.0)
+Undefined variable $x (this will become an error in PHP 9.0)
 NULL
-Undefined variable $x (This will become an error in PHP 9.0)
+Undefined variable $x (this will become an error in PHP 9.0)
 NULL
-Undefined variable $x (This will become an error in PHP 9.0)
+Undefined variable $x (this will become an error in PHP 9.0)
 NULL
-Undefined variable $x (This will become an error in PHP 9.0)
+Undefined variable $x (this will become an error in PHP 9.0)
 int(1)

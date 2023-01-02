@@ -55,10 +55,10 @@ try {
 }
 ?>
 --EXPECT--
-string(62) "Undefined variable $foo (This will become an error in PHP 9.0)"
-string(62) "Undefined variable $foo (This will become an error in PHP 9.0)"
-string(62) "Undefined variable $foo (This will become an error in PHP 9.0)"
-string(62) "Undefined variable $foo (This will become an error in PHP 9.0)"
-string(62) "Undefined variable $foo (This will become an error in PHP 9.0)"
-string(62) "Undefined variable $foo (This will become an error in PHP 9.0)"
-string(62) "Undefined variable $foo (This will become an error in PHP 9.0)"
+string(62) "Undefined variable $foo (this will become an error in PHP 9.0)"
+string(62) "Undefined variable $foo (this will become an error in PHP 9.0)"
+string(62) "Undefined variable $foo (this will become an error in PHP 9.0)"
+string(62) "Undefined variable $foo (this will become an error in PHP 9.0)"
+string(62) "Undefined variable $foo (this will become an error in PHP 9.0)"
+string(62) "Undefined variable $foo (this will become an error in PHP 9.0)"
+string(62) "Undefined variable $foo (this will become an error in PHP 9.0)"

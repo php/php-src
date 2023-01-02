@@ -22,7 +22,7 @@ array(4) {
   ["type"]=>
   int(2)
   ["message"]=>
-  string(60) "Undefined variable $b (This will become an error in PHP 9.0)"
+  string(60) "Undefined variable $b (this will become an error in PHP 9.0)"
   ["file"]=>
   string(%d) "%s"
   ["line"]=>

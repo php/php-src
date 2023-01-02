@@ -10,7 +10,7 @@ $a[$y]=$a.=($y);
 var_dump($a);
 ?>
 --EXPECT--
-Err: Undefined variable $y (This will become an error in PHP 9.0)
-Err: Undefined variable $y (This will become an error in PHP 9.0)
+Err: Undefined variable $y (this will become an error in PHP 9.0)
+Err: Undefined variable $y (this will become an error in PHP 9.0)
 Err: String offset cast occurred
 NULL

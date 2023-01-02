@@ -83,8 +83,8 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing get_parent_class() : usage variations ***
-Error: 2 - Undefined variable $undefined_var (This will become an error in PHP 9.0)
-Error: 2 - Undefined variable $unset_var (This will become an error in PHP 9.0)
+Error: 2 - Undefined variable $undefined_var (this will become an error in PHP 9.0)
+Error: 2 - Undefined variable $unset_var (this will become an error in PHP 9.0)
 
 Arg value 0
 get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given

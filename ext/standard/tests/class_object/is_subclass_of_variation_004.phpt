@@ -81,8 +81,8 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing is_subclass_of() : usage variations ***
-Error: 2 - Undefined variable $undefined_var (This will become an error in PHP 9.0)
-Error: 2 - Undefined variable $unset_var (This will become an error in PHP 9.0)
+Error: 2 - Undefined variable $undefined_var (this will become an error in PHP 9.0)
+Error: 2 - Undefined variable $unset_var (this will become an error in PHP 9.0)
 
 Arg value 0 
 bool(false)
