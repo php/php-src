@@ -398,7 +398,7 @@ static size_t mb_big5_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 
 		if (c <= 0x7F) {
 			*out++ = c;
-		} else if (c > 0xA0 && c <= 0xF9 && c != 0xC8) {
+		} else if (c > 0xA0 && c <= 0xF9) {
 			/* We don't need to check p < e here; it's not possible that this pointer dereference
 			 * will be outside the input string, because of e-- above */
 			unsigned char c2 = *p++;
@@ -407,8 +407,12 @@ static size_t mb_big5_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 				unsigned int w = (c - 0xA1)*157 + c2 - ((c2 <= 0x7E) ? 0x40 : 0xA1 - 0x3F);
 				ZEND_ASSERT(w < big5_ucs_table_size);
 				w = big5_ucs_table[w];
-				if (!w)
+				if (!w) {
+					if (c == 0xC8) {
+						p--;
+					}
 					w = MBFL_BAD_INPUT;
+				}
 				*out++ = w;
 			} else {
 				*out++ = MBFL_BAD_INPUT;
