@@ -349,13 +349,13 @@ static zend_always_inline bool try_convert_to_string(zval *op) {
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 
-ZEND_API int ZEND_FASTCALL zend_is_true(zval *op);
-ZEND_API bool ZEND_FASTCALL zend_object_is_true(zval *op);
+ZEND_API int ZEND_FASTCALL zend_is_true(const zval *op);
+ZEND_API bool ZEND_FASTCALL zend_object_is_true(const zval *op);
 
 #define zval_is_true(op) \
 	zend_is_true(op)
 
-static zend_always_inline bool i_zend_is_true(zval *op)
+static zend_always_inline bool i_zend_is_true(const zval *op)
 {
 	bool result = 0;
 
