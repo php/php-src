@@ -297,11 +297,11 @@ struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_out;
 
 	unsigned int yy_leng;
-	unsigned char *yy_start;
-	unsigned char *yy_text;
-	unsigned char *yy_cursor;
-	unsigned char *yy_marker;
-	unsigned char *yy_limit;
+	const unsigned char *yy_start;
+	const unsigned char *yy_text;
+	const unsigned char *yy_cursor;
+	const unsigned char *yy_marker;
+	const unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
 
