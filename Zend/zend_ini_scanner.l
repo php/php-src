@@ -261,7 +261,7 @@ ZEND_COLD int zend_ini_scanner_get_lineno(void)
 /* }}} */
 
 /* {{{ zend_ini_scanner_get_filename() */
-ZEND_COLD char *zend_ini_scanner_get_filename(void)
+ZEND_COLD const char *zend_ini_scanner_get_filename(void)
 {
 	return ini_filename ? ZSTR_VAL(ini_filename) : "Unknown";
 }
