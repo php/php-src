@@ -527,6 +527,17 @@ static zend_always_inline zend_op_trace_info *ZEND_OP_TRACE_INFO2(const zend_op_
 	return ZEND_OP_TRACE_INFO(opline, jit_extension->offset);
 }
 
+/**
+ * Access the #zend_ssa of an #zend_op_array.
+ */
+static zend_always_inline zend_ssa *zend_jit_op_array_trace_ssa(const zend_op_array *op_array)
+{
+	zend_jit_op_array_trace_extension *jit_extension =
+		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+	ZEND_ASSERT(jit_extension != NULL);
+	return &jit_extension->func_info.ssa;
+}
+
 /* Recorder */
 typedef enum _zend_jit_trace_op {
 	ZEND_JIT_TRACE_VM,
