@@ -18,6 +18,8 @@
 */
 
 /* {{{ includes */
+#include <limits.h>
+
 #include "libmbfl/config.h"
 #include "php.h"
 #include "php_ini.h"
@@ -58,8 +60,12 @@
 # include "php_mbregex.h"
 #endif
 
+#include "zend_smart_str.h"
 #include "zend_multibyte.h"
 #include "mbstring_arginfo.h"
+
+#include "rare_cp_bitvec.h"
+
 /* }}} */
 
 /* {{{ prototypes */
@@ -81,6 +87,8 @@ static inline bool php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_en
 static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 
 static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding);
+
+static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict);
 
 /* See mbfilter_cp5022x.c */
 uint32_t mb_convert_kana_codepoint(uint32_t c, uint32_t next, bool *consumed, uint32_t *second, int mode);
@@ -435,55 +443,25 @@ static bool php_mb_zend_encoding_lexer_compatibility_checker(const zend_encoding
 
 static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *arg_string, size_t arg_length, const zend_encoding **list, size_t list_size)
 {
-	mbfl_string string;
-
 	if (!list) {
-		list = (const zend_encoding **)MBSTRG(current_detect_order_list);
+		list = (const zend_encoding**)MBSTRG(current_detect_order_list);
 		list_size = MBSTRG(current_detect_order_list_size);
 	}
 
-	mbfl_string_init(&string);
-	string.val = (unsigned char *)arg_string;
-	string.len = arg_length;
-	return (const zend_encoding *) mbfl_identify_encoding(&string, (const mbfl_encoding **)list, list_size, 0);
+	return (const zend_encoding*)mb_guess_encoding((unsigned char*)arg_string, arg_length, (const mbfl_encoding **)list, list_size, false);
 }
 
 static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from)
 {
-	mbfl_string string, result;
-	mbfl_buffer_converter *convd;
+	unsigned int num_errors = 0;
+	zend_string *result = mb_fast_convert((unsigned char*)from, from_length, (const mbfl_encoding*)encoding_from, (const mbfl_encoding*)encoding_to, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors);
 
-	/* new encoding */
-	/* initialize string */
-	string.encoding = (const mbfl_encoding*)encoding_from;
-	string.val = (unsigned char*)from;
-	string.len = from_length;
+	*to_length = ZSTR_LEN(result);
+	*to = emalloc(ZSTR_LEN(result) + 1); /* Include terminating null byte */
+	memcpy(*to, ZSTR_VAL(result), ZSTR_LEN(result) + 1);
+	zend_string_free(result);
 
-	/* initialize converter */
-	convd = mbfl_buffer_converter_new((const mbfl_encoding *)encoding_from, (const mbfl_encoding *)encoding_to, string.len);
-	if (convd == NULL) {
-		return (size_t) -1;
-	}
-
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-
-	/* do it */
-	size_t loc = mbfl_buffer_converter_feed(convd, &string);
-
-	mbfl_buffer_converter_flush(convd);
-	mbfl_string_init(&result);
-	if (!mbfl_buffer_converter_result(convd, &result)) {
-		mbfl_buffer_converter_delete(convd);
-		return (size_t)-1;
-	}
-
-	*to = result.val;
-	*to_length = result.len;
-
-	mbfl_buffer_converter_delete(convd);
-
-	return loc;
+	return from_length;
 }
 
 static zend_result php_mb_zend_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent)
@@ -1023,7 +1001,8 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->illegalchars = 0;
 	mbstring_globals->encoding_translation = 0;
 	mbstring_globals->strict_detection = 0;
-	mbstring_globals->outconv = NULL;
+	mbstring_globals->outconv_enabled = false;
+	mbstring_globals->outconv_state = 0;
 	mbstring_globals->http_output_conv_mimetypes = NULL;
 #ifdef HAVE_MBREGEX
 	mbstring_globals->mb_regex_globals = php_mb_regex_globals_alloc();
@@ -1144,11 +1123,6 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 		MBSTRG(current_detect_order_list) = NULL;
 		MBSTRG(current_detect_order_list_size) = 0;
 	}
-	if (MBSTRG(outconv) != NULL) {
-		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
-		mbfl_buffer_converter_delete(MBSTRG(outconv));
-		MBSTRG(outconv) = NULL;
-	}
 
 	/* clear http input identification. */
 	MBSTRG(http_input_identify) = NULL;
@@ -1165,6 +1139,9 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 	MBSTRG(internal_encoding_set) = 0;
 	MBSTRG(http_output_set) = 0;
 	MBSTRG(http_input_set) = 0;
+
+	MBSTRG(outconv_enabled) = false;
+	MBSTRG(outconv_state) = 0;
 
 #ifdef HAVE_MBREGEX
 	PHP_RSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -1305,19 +1282,15 @@ PHP_FUNCTION(mb_http_input)
 			if (n == 0) {
 				RETURN_FALSE;
 			}
-			// TODO Use smart_str instead.
-			mbfl_string result;
-			mbfl_memory_device device;
-			mbfl_memory_device_init(&device, n * 12, 0);
+
+			smart_str result = {0};
 			for (size_t i = 0; i < n; i++, entry++) {
-				mbfl_memory_device_strcat(&device, (*entry)->name);
-				mbfl_memory_device_output(',', &device);
+				if (i > 0) {
+					smart_str_appendc(&result, ',');
+				}
+				smart_str_appends(&result, (*entry)->name);
 			}
-			mbfl_memory_device_unput(&device); /* Remove trailing comma */
-			mbfl_memory_device_result(&device, &result);
-			RETVAL_STRINGL((const char*)result.val, result.len);
-			mbfl_string_clear(&result);
-			return;
+			RETURN_STR(smart_str_extract(&result));
 		default:
 			zend_argument_value_error(1,
 				"must be one of \"G\", \"P\", \"C\", \"S\", \"I\", or \"L\"");
@@ -1548,171 +1521,106 @@ PHP_FUNCTION(mb_parse_str)
 }
 /* }}} */
 
-/* {{{ Returns string in output buffer converted to the http_output encoding */
 PHP_FUNCTION(mb_output_handler)
 {
-	char *arg_string;
-	size_t arg_string_len;
+	zend_string *str;
 	zend_long arg_status;
-	mbfl_string string, result;
-	const char *charset;
-	char *p;
-	const mbfl_encoding *encoding;
-	int last_feed;
-	size_t len;
-	unsigned char send_text_mimetype = 0;
-	char *s, *mimetype = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(arg_string, arg_string_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_LONG(arg_status)
 	ZEND_PARSE_PARAMETERS_END();
 
-	encoding = MBSTRG(current_http_output_encoding);
+	const mbfl_encoding *encoding = MBSTRG(current_http_output_encoding);
+	if (encoding == &mbfl_encoding_pass) {
+		RETURN_STR(zend_string_copy(str));
+	}
 
-	/* start phase only */
-	if ((arg_status & PHP_OUTPUT_HANDLER_START) != 0) {
-		/* delete the converter just in case. */
-		if (MBSTRG(outconv)) {
-			MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
-			mbfl_buffer_converter_delete(MBSTRG(outconv));
-			MBSTRG(outconv) = NULL;
-		}
+	if (arg_status & PHP_OUTPUT_HANDLER_START) {
+		bool free_mimetype = false;
+		char *mimetype = NULL;
 
-		if (encoding == &mbfl_encoding_pass) {
-			RETURN_STRINGL(arg_string, arg_string_len);
-		}
-
-		/* analyze mime type */
-		if (SG(sapi_headers).mimetype &&
-			_php_mb_match_regex(
-				MBSTRG(http_output_conv_mimetypes),
-				SG(sapi_headers).mimetype,
-				strlen(SG(sapi_headers).mimetype))) {
-			if ((s = strchr(SG(sapi_headers).mimetype,';')) == NULL) {
+		/* Analyze mime type */
+		if (SG(sapi_headers).mimetype && _php_mb_match_regex(MBSTRG(http_output_conv_mimetypes), SG(sapi_headers).mimetype, strlen(SG(sapi_headers).mimetype))) {
+			char *s;
+			if ((s = strchr(SG(sapi_headers).mimetype, ';')) == NULL) {
 				mimetype = estrdup(SG(sapi_headers).mimetype);
 			} else {
-				mimetype = estrndup(SG(sapi_headers).mimetype,s-SG(sapi_headers).mimetype);
+				mimetype = estrndup(SG(sapi_headers).mimetype, s - SG(sapi_headers).mimetype);
 			}
-			send_text_mimetype = 1;
+			free_mimetype = true;
 		} else if (SG(sapi_headers).send_default_content_type) {
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
 		}
 
-		/* if content-type is not yet set, set it and activate the converter */
-		if (SG(sapi_headers).send_default_content_type || send_text_mimetype) {
-			charset = encoding->mime_name;
+		/* If content-type is not yet set, set it and enable conversion */
+		if (SG(sapi_headers).send_default_content_type || free_mimetype) {
+			const char *charset = encoding->mime_name;
 			if (charset) {
-				len = spprintf( &p, 0, "Content-Type: %s; charset=%s",  mimetype, charset );
+				char *p;
+				size_t len = spprintf(&p, 0, "Content-Type: %s; charset=%s",  mimetype, charset);
 				if (sapi_add_header(p, len, 0) != FAILURE) {
 					SG(sapi_headers).send_default_content_type = 0;
 				}
 			}
-			/* activate the converter */
-			MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), encoding, 0);
-			if (send_text_mimetype){
-				efree(mimetype);
-			}
+
+			MBSTRG(outconv_enabled) = true;
+		}
+
+		if (free_mimetype) {
+			efree(mimetype);
 		}
 	}
 
-	/* just return if the converter is not activated. */
-	if (MBSTRG(outconv) == NULL) {
-		RETURN_STRINGL(arg_string, arg_string_len);
+	if (!MBSTRG(outconv_enabled)) {
+		RETURN_STR(zend_string_copy(str));
 	}
 
-	/* flag */
-	last_feed = ((arg_status & PHP_OUTPUT_HANDLER_END) != 0);
-	/* mode */
-	mbfl_buffer_converter_illegal_mode(MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(MBSTRG(outconv), MBSTRG(current_filter_illegal_substchar));
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, ZSTR_LEN(str), MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
 
-	/* feed the string */
-	mbfl_string_init(&string);
-	/* these are not needed. convd has encoding info.
-	string.encoding = MBSTRG(current_internal_encoding);
-	*/
-	string.val = (unsigned char *)arg_string;
-	string.len = arg_string_len;
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)ZSTR_VAL(str);
+	size_t in_len = ZSTR_LEN(str);
+	bool last_feed = ((arg_status & PHP_OUTPUT_HANDLER_END) != 0);
 
-	mbfl_buffer_converter_feed(MBSTRG(outconv), &string);
+	while (in_len) {
+		size_t out_len = MBSTRG(current_internal_encoding)->to_wchar(&in, &in_len, wchar_buf, 128, &MBSTRG(outconv_state));
+		ZEND_ASSERT(out_len <= 128);
+		encoding->from_wchar(wchar_buf, out_len, &buf, !in_len && last_feed);
+	}
+
+	MBSTRG(illegalchars) += buf.errors;
+	RETVAL_STR(mb_convert_buf_result(&buf));
+
 	if (last_feed) {
-		mbfl_buffer_converter_flush(MBSTRG(outconv));
+		MBSTRG(outconv_enabled) = false;
+		MBSTRG(outconv_state) = 0;
 	}
-	/* get the converter output, and return it */
-	mbfl_buffer_converter_result(MBSTRG(outconv), &result);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)result.val, result.len);		/* the string is already strdup()'ed */
-	efree(result.val);
-
-	/* delete the converter if it is the last feed. */
-	if (last_feed) {
-		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(MBSTRG(outconv));
-		mbfl_buffer_converter_delete(MBSTRG(outconv));
-		MBSTRG(outconv) = NULL;
-	}
-}
-/* }}} */
-
-/* {{{ Convert a multibyte string to an array. If split_length is specified,
- break the string down into chunks each split_length characters long. */
-
-/* structure to pass split params to the callback */
-struct mbfl_split_params {
-	zval *return_value; /* php function return value structure pointer */
-	mbfl_string *result_string; /* string to store result chunk */
-	size_t mb_chunk_length; /* actual chunk length in chars */
-	size_t split_length; /* split length in chars */
-	mbfl_convert_filter *next_filter; /* widechar to encoding converter */
-};
-
-/* callback function to fill split array */
-static int mbfl_split_output(int c, void *data)
-{
-	struct mbfl_split_params *params = (struct mbfl_split_params *)data; /* cast passed data */
-
-	(*params->next_filter->filter_function)(c, params->next_filter); /* decoder filter */
-
-	if (params->split_length == ++params->mb_chunk_length) { /* if current chunk size reached defined chunk size or last char reached */
-		mbfl_convert_filter_flush(params->next_filter);/* concatenate separate decoded chars to the solid string */
-		mbfl_memory_device *device = (mbfl_memory_device *)params->next_filter->data; /* chars container */
-		mbfl_string *chunk = params->result_string;
-		mbfl_memory_device_result(device, chunk); /* make chunk */
-		add_next_index_stringl(params->return_value, (const char *)chunk->val, chunk->len); /* add chunk to the array */
-		efree(chunk->val);
-		params->mb_chunk_length = 0; /* reset mb_chunk size */
-	}
-
-	return 0;
 }
 
 PHP_FUNCTION(mb_str_split)
 {
 	zend_string *str, *encoding = NULL;
-	size_t mb_len, chunks, chunk_len;
-	const char *p, *last; /* pointer for the string cursor and last string char */
-	mbfl_string string, result_string;
-	const mbfl_encoding *mbfl_encoding;
-	zend_long split_length = 1;
+	zend_long split_len = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(split_length)
+		Z_PARAM_LONG(split_len)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (split_length <= 0) {
+	if (split_len <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	} else if (split_len > UINT_MAX / 4) {
+		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
 
-	/* fill mbfl_string structure */
-	string.val = (unsigned char *) ZSTR_VAL(str);
-	string.len = ZSTR_LEN(str);
-	string.encoding = php_mb_get_encoding(encoding, 3);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 3);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
@@ -1720,106 +1628,92 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_EMPTY_ARRAY();
 	}
 
-	p = ZSTR_VAL(str); /* string cursor pointer */
-	last = ZSTR_VAL(str) + ZSTR_LEN(str); /* last string char pointer */
+	unsigned char *p = (unsigned char*)ZSTR_VAL(str), *e = p + ZSTR_LEN(str);
 
-	mbfl_encoding = string.encoding;
+	unsigned int char_len = enc->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4);
+	if (char_len) {
+		unsigned int chunk_len = char_len * split_len;
+		unsigned int chunks = ((ZSTR_LEN(str) / chunk_len) + split_len - 1) / split_len; /* round up */
+		array_init_size(return_value, chunks);
+		while (p < e) {
+			add_next_index_stringl(return_value, (const char*)p, MIN(chunk_len, e - p));
+			p += chunk_len;
+		}
+	} else if (enc->mblen_table) {
+		unsigned char const *mbtab = enc->mblen_table;
 
-	/* first scenario: 1,2,4-bytes fixed width encodings (head part) */
-	if (mbfl_encoding->flag & MBFL_ENCTYPE_SBCS) { /* 1 byte */
-		mb_len = string.len;
-		chunk_len = (size_t)split_length; /* chunk length in bytes */
-	} else if (mbfl_encoding->flag & MBFL_ENCTYPE_WCS2) { /* 2 bytes */
-		mb_len = string.len / 2;
-		chunk_len = split_length * 2;
-	} else if (mbfl_encoding->flag & MBFL_ENCTYPE_WCS4) { /* 4 bytes */
-		mb_len = string.len / 4;
-		chunk_len = split_length * 4;
-	} else if (mbfl_encoding->mblen_table != NULL) {
-		/* second scenario: variable width encodings with length table */
-		char unsigned const *mbtab = mbfl_encoding->mblen_table;
+		/* Assume that we have 1-byte characters */
+		array_init_size(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len);
 
-		/* assume that we have 1-bytes characters */
-		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
+		while (p < e) {
+			unsigned char *chunk = p; /* start of chunk */
 
-		while (p < last) { /* split cycle work until the cursor has reached the last byte */
-			char const *chunk_p = p; /* chunk first byte pointer */
-			chunk_len = 0; /* chunk length in bytes */
-			zend_long char_count;
-
-			for (char_count = 0; char_count < split_length && p < last; ++char_count) {
-				char unsigned const m = mbtab[*(const unsigned char *)p]; /* single character length table */
-				chunk_len += m;
-				p += m;
+			for (int char_count = 0; char_count < split_len && p < e; char_count++) {
+				p += mbtab[*p];
 			}
-			if (p >= last) chunk_len -= p - last; /* check if chunk is in bounds */
-			add_next_index_stringl(return_value, chunk_p, chunk_len);
+			if (p > e) {
+				p = e; /* ensure chunk is in bounds */
+			}
+			add_next_index_stringl(return_value, (const char*)chunk, p - chunk);
 		}
-		return;
 	} else {
-		/* third scenario: other multibyte encodings */
-		mbfl_convert_filter *filter, *decoder;
+		/* Assume that we have 1-byte characters */
+		array_init_size(return_value, (ZSTR_LEN(str) + split_len - 1) / split_len);
 
-		/* assume that we have 1-bytes characters */
-		array_init_size(return_value, (string.len + split_length) / split_length); /* round up */
+		uint32_t wchar_buf[128];
+		size_t in_len = ZSTR_LEN(str);
+		unsigned int state = 0, char_count = 0;
 
-		/* decoder filter to decode wchar to encoding */
-		mbfl_memory_device device;
-		mbfl_memory_device_init(&device, split_length + 1, 0);
+		mb_convert_buf buf;
 
-		decoder = mbfl_convert_filter_new(
-				&mbfl_encoding_wchar,
-				string.encoding,
-				mbfl_memory_device_output,
-				NULL,
-				&device);
-		/* assert that nothing is wrong with the decoder */
-		ZEND_ASSERT(decoder != NULL);
+		while (in_len) {
+			size_t out_len = enc->to_wchar(&p, &in_len, wchar_buf, 128, &state);
+			ZEND_ASSERT(out_len <= 128);
+			size_t i = 0;
 
-		/* wchar filter */
-		mbfl_string_init(&result_string); /* mbfl_string to store chunk in the callback */
-		struct mbfl_split_params params = { /* init callback function params structure */
-			.return_value = return_value,
-			.result_string = &result_string,
-			.mb_chunk_length = 0,
-			.split_length = (size_t)split_length,
-			.next_filter = decoder,
-		};
+			/* Is there some output remaining from the previous iteration? */
+			if (char_count) {
+				if (out_len >= split_len - char_count) {
+					/* Finish off an incomplete chunk from previous iteration
+					 * ('buf' was already initialized; we don't need to do it again) */
+					enc->from_wchar(wchar_buf, split_len - char_count, &buf, true);
+					i += split_len - char_count;
+					char_count = 0;
+					add_next_index_str(return_value, mb_convert_buf_result(&buf));
+				} else {
+					/* Output from this iteration is not enough to finish the next chunk;
+					 * output what we can, and leave 'buf' to be used again on next iteration */
+					enc->from_wchar(wchar_buf, out_len, &buf, !in_len);
+					char_count += out_len;
+					continue;
+				}
+			}
 
-		filter = mbfl_convert_filter_new(
-				string.encoding,
-				&mbfl_encoding_wchar,
-				mbfl_split_output,
-				NULL,
-				&params);
-		/* assert that nothing is wrong with the filter */
-		ZEND_ASSERT(filter != NULL);
+			while (i < out_len) {
+				/* Prepare for the next chunk */
+				mb_convert_buf_init(&buf, split_len, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
 
-		while (p < last - 1) { /* cycle each byte except last with callback function */
-			(*filter->filter_function)(*p++, filter);
+				if (out_len - i >= split_len) {
+					enc->from_wchar(wchar_buf + i, split_len, &buf, true);
+					i += split_len;
+					add_next_index_str(return_value, mb_convert_buf_result(&buf));
+				} else {
+					/* The remaining codepoints in wchar_buf aren't enough to finish a chunk;
+					 * leave them for the next iteration */
+					enc->from_wchar(wchar_buf + i, out_len - i, &buf, !in_len);
+					char_count = out_len - i;
+					break;
+				}
+			}
 		}
-		params.mb_chunk_length = split_length - 1; /* force to finish current chunk */
-		(*filter->filter_function)(*p++, filter); /* process last char */
 
-		mbfl_convert_filter_delete(decoder);
-		mbfl_convert_filter_delete(filter);
-		mbfl_memory_device_clear(&device);
-		return;
-	}
-
-	/* first scenario: 1,2,4-bytes fixed width encodings (tail part) */
-	chunks = (mb_len + split_length - 1) / split_length; /* (round up idiom) */
-	array_init_size(return_value, chunks);
-	if (chunks != 0) {
-		zend_long i;
-
-		for (i = 0; i < chunks - 1; p += chunk_len, ++i) {
-			add_next_index_stringl(return_value, p, chunk_len);
+		if (char_count) {
+			/* The main loop above has finished processing the input string, but
+			 * has left a partial chunk in 'buf' */
+			add_next_index_str(return_value, mb_convert_buf_result(&buf));
 		}
-		add_next_index_stringl(return_value, p, last - p);
 	}
 }
-/* }}} */
 
 static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 {
@@ -2705,12 +2599,7 @@ MBSTRING_API zend_string* php_mb_convert_encoding(const char *input, size_t leng
 		from_encoding = *from_encodings;
 	} else {
 		/* auto detect */
-		mbfl_string string;
-		mbfl_string_init(&string);
-		string.val = (unsigned char *)input;
-		string.len = length;
-		from_encoding = mbfl_identify_encoding(
-			&string, from_encodings, num_from_encodings, MBSTRG(strict_detection));
+		from_encoding = mb_guess_encoding((unsigned char*)input, length, from_encodings, num_from_encodings, MBSTRG(strict_detection));
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect character encoding");
 			return NULL;
@@ -2815,7 +2704,7 @@ PHP_FUNCTION(mb_convert_encoding)
 	HashTable *input_ht, *from_encodings_ht = NULL;
 	const mbfl_encoding **from_encodings;
 	size_t num_from_encodings;
-	bool free_from_encodings;
+	bool free_from_encodings = false;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_HT_OR_STR(input_ht, input_str)
@@ -2833,18 +2722,17 @@ PHP_FUNCTION(mb_convert_encoding)
 		if (php_mb_parse_encoding_array(from_encodings_ht, &from_encodings, &num_from_encodings, 3) == FAILURE) {
 			RETURN_THROWS();
 		}
-		free_from_encodings = 1;
+		free_from_encodings = true;
 	} else if (from_encodings_str) {
 		if (php_mb_parse_encoding_list(ZSTR_VAL(from_encodings_str), ZSTR_LEN(from_encodings_str),
 				&from_encodings, &num_from_encodings,
 				/* persistent */ 0, /* arg_num */ 3, /* allow_pass_encoding */ 0) == FAILURE) {
 			RETURN_THROWS();
 		}
-		free_from_encodings = 1;
+		free_from_encodings = true;
 	} else {
 		from_encodings = &MBSTRG(current_internal_encoding);
 		num_from_encodings = 1;
-		free_from_encodings = 0;
 	}
 
 	if (num_from_encodings > 1) {
@@ -2950,16 +2838,163 @@ static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t
 	return new_elist;
 }
 
+static unsigned int mb_estimate_encoding_demerits(uint32_t w)
+{
+	/* Receive wchars decoded from input string using candidate encoding.
+	 * Give the candidate many 'demerits' for each 'rare' codepoint found,
+	 * a smaller number for each ASCII punctuation character, and 1 for
+	 * all other codepoints.
+	 *
+	 * The 'common' codepoints should cover the vast majority of
+	 * codepoints we are likely to see in practice, while only covering
+	 * a small minority of the entire Unicode encoding space. Why?
+	 * Well, if the test string happens to be valid in an incorrect
+	 * candidate encoding, the bogus codepoints which it decodes to will
+	 * be more or less random. By treating the majority of codepoints as
+	 * 'rare', we ensure that in almost all such cases, the bogus
+	 * codepoints will include plenty of 'rares', thus giving the
+	 * incorrect candidate encoding lots of demerits. See
+	 * common_codepoints.txt for the actual list used.
+	 *
+	 * So, why give extra demerits for ASCII punctuation characters? It's
+	 * because there are some text encodings, like UTF-7, HZ, and ISO-2022,
+	 * which deliberately only use bytes in the ASCII range. When
+	 * misinterpreted as ASCII/UTF-8, strings in these encodings will
+	 * have an unusually high number of ASCII punctuation characters.
+	 * So giving extra demerits for such characters will improve
+	 * detection accuracy for UTF-7 and similar encodings.
+	 *
+	 * Finally, why 1 demerit for all other characters? That penalizes
+	 * long strings, meaning we will tend to choose a candidate encoding
+	 * in which the test string decodes to a smaller number of
+	 * codepoints. That prevents single-byte encodings in which almost
+	 * every possible input byte decodes to a 'common' codepoint from
+	 * being favored too much. */
+	if (w > 0xFFFF) {
+		return 40;
+	} else if (w >= 0x21 && w <= 0x2F) {
+		return 6;
+	} else if ((rare_codepoint_bitvec[w >> 5] >> (w & 0x1F)) & 1) {
+		return 30;
+	} else {
+		return 1;
+	}
+	return 0;
+}
+
+/* When doing 'strict' detection, any string which is invalid in the candidate encoding
+ * is rejected. With non-strict detection, we just continue, but apply demerits for
+ * each invalid byte sequence */
+static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict)
+{
+	if (elist_size == 0) {
+		return NULL;
+	}
+	if (elist_size == 1) {
+		if (strict) {
+			return php_mb_check_encoding((const char*)in, in_len, *elist) ? *elist : NULL;
+		} else {
+			return *elist;
+		}
+	}
+	if (in_len == 0) {
+		return *elist;
+	}
+
+	uint32_t wchar_buf[128];
+	struct conversion_data {
+		const mbfl_encoding *enc;
+		unsigned char *in;
+		size_t in_len;
+		uint64_t demerits; /* Wide bit size to prevent overflow */
+		unsigned int state;
+	};
+	/* Allocate on stack; when we return, this array is automatically freed */
+	struct conversion_data *data = alloca(elist_size * sizeof(struct conversion_data));
+
+	for (unsigned int i = 0; i < elist_size; i++) {
+		data[i].enc = elist[i];
+		data[i].in = in;
+		data[i].in_len = in_len;
+		data[i].state = 0;
+		data[i].demerits = 0;
+	}
+
+	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
+	while (elist_size > 1 && finished < elist_size) {
+		unsigned int i = 0;
+try_next_encoding:
+		while (i < elist_size) {
+			/* Do we still have more input to process for this candidate encoding? */
+			if (data[i].in_len) {
+				const mbfl_encoding *enc = data[i].enc;
+				size_t out_len = enc->to_wchar(&data[i].in, &data[i].in_len, wchar_buf, 128, &data[i].state);
+				ZEND_ASSERT(out_len <= 128);
+				/* Check this batch of decoded codepoints; are there any error markers?
+				 * Also sum up the number of demerits */
+				while (out_len) {
+					uint32_t w = wchar_buf[--out_len];
+					if (w == MBFL_BAD_INPUT) {
+						if (strict) {
+							/* This candidate encoding is not valid, eliminate it from consideration */
+							elist_size--;
+							memmove(&data[i], &data[i+1], (elist_size - i) * sizeof(struct conversion_data));
+							goto try_next_encoding;
+						} else {
+							data[i].demerits += 1000;
+						}
+					} else {
+						data[i].demerits += mb_estimate_encoding_demerits(w);
+					}
+				}
+				if (data[i].in_len == 0) {
+					finished++;
+				}
+			}
+			i++;
+		}
+	}
+
+	if (strict) {
+		if (elist_size == 0) {
+			/* All candidates were eliminated */
+			return NULL;
+		}
+		/* The above loop might have broken because there was only 1 candidate encoding left
+		 * If in strict mode, we still need to process any remaining input for that candidate */
+		if (elist_size == 1 && data[0].in_len) {
+			const mbfl_encoding *enc = data[0].enc;
+			unsigned char *in = data[0].in;
+			size_t in_len = data[0].in_len;
+			unsigned int state = data[0].state;
+			while (in_len) {
+				size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+				while (out_len) {
+					if (wchar_buf[--out_len] == MBFL_BAD_INPUT) {
+						return NULL;
+					}
+				}
+			}
+		}
+	}
+
+	/* See which remaining candidate encoding has the least demerits */
+	unsigned int best = 0;
+	for (unsigned int i = 1; i < elist_size; i++) {
+		if (data[i].demerits < data[best].demerits) {
+			best = i;
+		}
+	}
+	return data[best].enc;
+}
+
 /* {{{ Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
 {
 	zend_string *str, *encoding_str = NULL;
 	HashTable *encoding_ht = NULL;
 	bool strict = false;
-
-	mbfl_string string;
-	const mbfl_encoding *ret;
-	const mbfl_encoding **elist;
+	const mbfl_encoding *ret, **elist;
 	size_t size;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -2999,14 +3034,10 @@ PHP_FUNCTION(mb_detect_encoding)
 		strict = MBSTRG(strict_detection);
 	}
 
-	if (strict && size == 1) {
-		/* If there is only a single candidate encoding, mb_check_encoding is faster */
-		ret = (mb_check_str_encoding(str, *elist)) ? *elist : NULL;
+	if (size == 1 && *elist == &mbfl_encoding_utf8 && (GC_FLAGS(str) & IS_STR_VALID_UTF8)) {
+		ret = &mbfl_encoding_utf8;
 	} else {
-		mbfl_string_init(&string);
-		string.val = (unsigned char*)ZSTR_VAL(str);
-		string.len = ZSTR_LEN(str);
-		ret = mbfl_identify_encoding(&string, elist, size, strict);
+		ret = mb_guess_encoding((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), elist, size, strict);
 	}
 
 	efree(ZEND_VOIDP(elist));
@@ -4189,9 +4220,8 @@ PHP_FUNCTION(mb_send_mail)
 	orig_str.val = (unsigned char *)subject;
 	orig_str.len = subject_len;
 	orig_str.encoding = MBSTRG(current_internal_encoding);
-	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
-			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
-		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid || orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
+		orig_str.encoding = mb_guess_encoding((unsigned char*)subject, subject_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
 	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, CRLF, sizeof("Subject: [PHP-jp nnnnnnnn]" CRLF) - 1);
 	if (pstr != NULL) {
@@ -4203,9 +4233,8 @@ PHP_FUNCTION(mb_send_mail)
 	orig_str.len = message_len;
 	orig_str.encoding = MBSTRG(current_internal_encoding);
 
-	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid
-			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
-		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid || orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
+		orig_str.encoding = mb_guess_encoding((unsigned char*)message, message_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
 
 	pstr = NULL;

@@ -19,12 +19,21 @@ $hungarian = "Árvíztűrő tükörfúrógép";
 
 echo "== BASIC TEST ==\n";
 
-print("SJIS: " . mb_detect_encoding($sjis, 'SJIS') . "\n");
-print("JIS: " . mb_detect_encoding($jis, 'JIS') . "\n");
-print("EUC-JP: " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS') . "\n");
-print("EUC-JP: " . mb_detect_encoding($euc_jp, 'JIS,EUC-JP') . "\n");
-print("UTF-8: " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
-print("UTF-8: " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
+print("Empty String: " . mb_detect_encoding('') . "\n");
+print("Bad ASCII (non-strict): " . mb_detect_encoding("\xDD\x92", ['ASCII', 'UTF-8'], false) . "\n");
+print("Bad ASCII (strict): " . mb_detect_encoding("\xDD\x92", ['ASCII', 'UTF-8'], true) . "\n");
+print("Bad ASCII/UTF-8, with more errors for ASCII (non-strict): " . mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], false) . "\n");
+print("Bad ASCII/UTF-8, with more errors for ASCII (strict): " . var_export(mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], true), true) . "\n");
+
+print("SJIS: " . mb_detect_encoding($sjis, 'SJIS', true) . "\n");
+print("JIS: " . mb_detect_encoding($jis, 'JIS', true) . "\n");
+print("EUC-JP (strict): " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS', true) . "\n");
+print("EUC-JP (non-strict): " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS', false) . "\n");
+print("EUC-JP (fewer choices): " . mb_detect_encoding($euc_jp, 'JIS,EUC-JP') . "\n");
+print("UTF-8, polish string 1 (strict): " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1', true) . "\n");
+print("UTF-8, polish string 1 (non-strict): " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1', false) . "\n");
+print("UTF-8, polish string 2 (strict): " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1', true) . "\n");
+print("UTF-8, polish string 2 (non-strict): " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1', false) . "\n");
 
 echo "== ARRAY ENCODING LIST ==\n";
 
@@ -331,12 +340,20 @@ echo "Done!\n";
 ?>
 --EXPECT--
 == BASIC TEST ==
+Empty String: ASCII
+Bad ASCII (non-strict): UTF-8
+Bad ASCII (strict): UTF-8
+Bad ASCII/UTF-8, with more errors for ASCII (non-strict): UTF-8
+Bad ASCII/UTF-8, with more errors for ASCII (strict): false
 SJIS: SJIS
 JIS: JIS
-EUC-JP: EUC-JP
-EUC-JP: EUC-JP
-UTF-8: UTF-8
-UTF-8: UTF-8
+EUC-JP (strict): EUC-JP
+EUC-JP (non-strict): EUC-JP
+EUC-JP (fewer choices): EUC-JP
+UTF-8, polish string 1 (strict): UTF-8
+UTF-8, polish string 1 (non-strict): UTF-8
+UTF-8, polish string 2 (strict): UTF-8
+UTF-8, polish string 2 (non-strict): UTF-8
 == ARRAY ENCODING LIST ==
 JIS: JIS
 EUC-JP: EUC-JP

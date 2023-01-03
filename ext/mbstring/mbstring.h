@@ -94,7 +94,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	bool encoding_translation;
 	bool strict_detection;
 	size_t illegalchars;
-	mbfl_buffer_converter *outconv;
+	bool outconv_enabled;
+	unsigned int outconv_state;
     void *http_output_conv_mimetypes;
 #ifdef HAVE_MBREGEX
     struct _zend_mb_regex_globals *mb_regex_globals;
