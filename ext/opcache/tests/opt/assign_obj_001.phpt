@@ -15,7 +15,7 @@ test();
 --EXPECTF--
 Warning: Undefined variable $y in %sassign_obj_001.php on line 3
 
-Warning: Undefined variable $a in %sassign_obj_001.php on line 3
+Warning: Undefined variable $a (this will become an error in PHP 9.0) in %sassign_obj_001.php on line 3
 
 Fatal error: Uncaught Error: Attempt to assign property "y" on string in %sassign_obj_001.php:4
 Stack trace:
