@@ -205,7 +205,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
 ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
-ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent);
+ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
 ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);

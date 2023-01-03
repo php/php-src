@@ -223,7 +223,7 @@ static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zv
 /* }}} */
 
 
-static zend_always_inline bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class) /* {{{ */
+static zend_always_inline bool is_derived_class(const zend_class_entry *child_class, const zend_class_entry *parent_class) /* {{{ */
 {
 	child_class = child_class->parent;
 	while (child_class) {
@@ -237,14 +237,14 @@ static zend_always_inline bool is_derived_class(zend_class_entry *child_class, z
 }
 /* }}} */
 
-static zend_never_inline int is_protected_compatible_scope(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
+static zend_never_inline int is_protected_compatible_scope(const zend_class_entry *ce, const zend_class_entry *scope) /* {{{ */
 {
 	return scope &&
 		(is_derived_class(ce, scope) || is_derived_class(scope, ce));
 }
 /* }}} */
 
-static zend_never_inline zend_property_info *zend_get_parent_private_property(zend_class_entry *scope, zend_class_entry *ce, zend_string *member) /* {{{ */
+static zend_never_inline zend_property_info *zend_get_parent_private_property(zend_class_entry *scope, const zend_class_entry *ce, zend_string *member) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *prop_info;
@@ -263,7 +263,7 @@ static zend_never_inline zend_property_info *zend_get_parent_private_property(ze
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_bad_property_access(zend_property_info *property_info, zend_class_entry *ce, zend_string *member) /* {{{ */
+static ZEND_COLD zend_never_inline void zend_bad_property_access(const zend_property_info *property_info, const zend_class_entry *ce, const zend_string *member) /* {{{ */
 {
 	zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
@@ -276,13 +276,13 @@ static ZEND_COLD zend_never_inline void zend_bad_property_name(void) /* {{{ */
 /* }}} */
 
 static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
-		zend_class_entry *ce, zend_string *member) {
+		const zend_class_entry *ce, const zend_string *member) {
 	zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
 static ZEND_COLD zend_never_inline bool zend_deprecated_dynamic_property(
-		zend_object *obj, zend_string *member) {
+		zend_object *obj, const zend_string *member) {
 	GC_ADDREF(obj);
 	zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
 		ZSTR_VAL(obj->ce->name), ZSTR_VAL(member));
@@ -300,7 +300,7 @@ static ZEND_COLD zend_never_inline bool zend_deprecated_dynamic_property(
 }
 
 static ZEND_COLD zend_never_inline void zend_readonly_property_modification_scope_error(
-		zend_class_entry *ce, zend_string *member, zend_class_entry *scope, const char *operation) {
+		const zend_class_entry *ce, const zend_string *member, const zend_class_entry *scope, const char *operation) {
 	zend_throw_error(NULL, "Cannot %s readonly property %s::$%s from %s%s",
 		operation, ZSTR_VAL(ce->name), ZSTR_VAL(member),
 		scope ? "scope " : "global scope", scope ? ZSTR_VAL(scope->name) : "");
@@ -312,7 +312,7 @@ static ZEND_COLD zend_never_inline void zend_readonly_property_unset_error(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
-static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, zend_property_info **info_ptr) /* {{{ */
+static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *property_info;
@@ -411,14 +411,14 @@ found:
 
 static ZEND_COLD void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
 {
-	zend_property_info *dummy;
+	const zend_property_info *dummy;
 
 	/* Trigger the correct error */
 	zend_get_property_offset(ce, member, 0, NULL, &dummy);
 }
 /* }}} */
 
-ZEND_API zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent) /* {{{ */
+ZEND_API zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *property_info;
@@ -594,7 +594,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 {
 	zval *retval;
 	uintptr_t property_offset;
-	zend_property_info *prop_info = NULL;
+	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
 	zend_string *tmp_name = NULL;
 
@@ -767,7 +767,7 @@ static zend_always_inline bool property_uses_strict_types(void) {
 }
 
 static bool verify_readonly_initialization_access(
-		zend_property_info *prop_info, zend_class_entry *ce,
+		const zend_property_info *prop_info, const zend_class_entry *ce,
 		zend_string *name, const char *operation) {
 	zend_class_entry *scope;
 	if (UNEXPECTED(EG(fake_scope))) {
@@ -782,7 +782,7 @@ static bool verify_readonly_initialization_access(
 	/* We may have redeclared a parent property. In that case the parent should still be
 	 * allowed to initialize it. */
 	if (scope && is_derived_class(ce, scope)) {
-		zend_property_info *prop_info = zend_hash_find_ptr(&scope->properties_info, name);
+		const zend_property_info *prop_info = zend_hash_find_ptr(&scope->properties_info, name);
 		if (prop_info) {
 			/* This should be ensured by inheritance. */
 			ZEND_ASSERT(prop_info->flags & ZEND_ACC_READONLY);
@@ -800,7 +800,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 {
 	zval *variable_ptr, tmp;
 	uintptr_t property_offset;
-	zend_property_info *prop_info = NULL;
+	const zend_property_info *prop_info = NULL;
 	ZEND_ASSERT(!Z_ISREF_P(value));
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
@@ -1037,7 +1037,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 {
 	zval *retval = NULL;
 	uintptr_t property_offset;
-	zend_property_info *prop_info = NULL;
+	const zend_property_info *prop_info = NULL;
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Ptr object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
@@ -1118,7 +1118,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void **cache_slot) /* {{{ */
 {
 	uintptr_t property_offset;
-	zend_property_info *prop_info = NULL;
+	const zend_property_info *prop_info = NULL;
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__unset != NULL), cache_slot, &prop_info);
 
@@ -1750,7 +1750,7 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 	int result;
 	zval *value = NULL;
 	uintptr_t property_offset;
-	zend_property_info *prop_info = NULL;
+	const zend_property_info *prop_info = NULL;
 	zend_string *tmp_name = NULL;
 
 	property_offset = zend_get_property_offset(zobj->ce, name, 1, cache_slot, &prop_info);
