@@ -864,7 +864,7 @@ static void zend_jit_trace_propagate_range(const zend_op_array *op_array, const 
 	int def = tssa->vars[ssa_var].definition;
 
 	if (tssa->vars[ssa_var].alias == NO_ALIAS
-	 && zend_inference_propagate_range(op_array, tssa, (zend_op*)tssa_opcodes[def], (zend_ssa_op*)&tssa->ops[def], ssa_var, &tmp)) {
+	 && zend_inference_propagate_range(op_array, tssa, tssa_opcodes[def], &tssa->ops[def], ssa_var, &tmp)) {
 		tssa->var_info[ssa_var].range.min = tmp.min;
 		tssa->var_info[ssa_var].range.max = tmp.max;
 		tssa->var_info[ssa_var].range.underflow = tmp.underflow;
@@ -6281,7 +6281,7 @@ done:
 					}
 
 					if (type == IS_LONG
-					 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->result_def, &tmp)) {
+					 && zend_inference_propagate_range(op_array, ssa, opline, ssa_op, ssa_op->result_def, &tmp)) {
 						ssa->var_info[ssa_op->result_def].range.min = tmp.min;
 						ssa->var_info[ssa_op->result_def].range.max = tmp.max;
 						ssa->var_info[ssa_op->result_def].range.underflow = 0;
@@ -6342,7 +6342,7 @@ done:
 						}
 					}
 					if (type == IS_LONG
-					 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->op1_def, &tmp)) {
+					 && zend_inference_propagate_range(op_array, ssa, opline, ssa_op, ssa_op->op1_def, &tmp)) {
 						ssa->var_info[ssa_op->op1_def].range.min = tmp.min;
 						ssa->var_info[ssa_op->op1_def].range.max = tmp.max;
 						ssa->var_info[ssa_op->op1_def].range.underflow = 0;
@@ -6383,7 +6383,7 @@ done:
 						}
 					}
 					if (type == IS_LONG
-					 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->op2_def, &tmp)) {
+					 && zend_inference_propagate_range(op_array, ssa, opline, ssa_op, ssa_op->op2_def, &tmp)) {
 						ssa->var_info[ssa_op->op2_def].range.min = tmp.min;
 						ssa->var_info[ssa_op->op2_def].range.max = tmp.max;
 						ssa->var_info[ssa_op->op2_def].range.underflow = 0;
@@ -6426,7 +6426,7 @@ done:
 								}
 							}
 							if (type == IS_LONG
-							 && zend_inference_propagate_range(op_array, ssa, (zend_op*)opline, (zend_ssa_op*)ssa_op, ssa_op->op1_def, &tmp)) {
+							 && zend_inference_propagate_range(op_array, ssa, opline, ssa_op, ssa_op->op1_def, &tmp)) {
 								ssa->var_info[ssa_op->op1_def].range.min = tmp.min;
 								ssa->var_info[ssa_op->op1_def].range.max = tmp.max;
 								ssa->var_info[ssa_op->op1_def].range.underflow = 0;
