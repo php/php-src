@@ -756,7 +756,7 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 }
 
 #if ZEND_DEBUG
-static bool can_convert_to_string(zval *zv) {
+static bool can_convert_to_string(const zval *zv) {
 	/* We don't call cast_object here, because this check must be side-effect free. As this
 	 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
 	 * more than actually allowed here. */
@@ -768,7 +768,7 @@ static bool can_convert_to_string(zval *zv) {
 }
 
 /* Used to sanity-check internal arginfo types without performing any actual type conversions. */
-static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, zval *arg)
+static bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, const zval *arg)
 {
 	zend_long lval;
 	double dval;
@@ -813,7 +813,7 @@ ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool s
 	return zend_verify_weak_scalar_type_hint(type_mask, arg);
 }
 
-ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_info *info, zval *property)
+ZEND_COLD zend_never_inline void zend_verify_property_type_error(const zend_property_info *info, const zval *property)
 {
 	zend_string *type_str;
 
@@ -831,7 +831,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 	zend_string_release(type_str);
 }
 
-ZEND_COLD zend_never_inline void zend_magic_get_property_type_inconsistency_error(zend_property_info *info, zval *property)
+ZEND_COLD zend_never_inline void zend_magic_get_property_type_inconsistency_error(const zend_property_info *info, const zval *property)
 {
 	/* we _may_ land here in case reading already errored and runtime cache thus has not been updated (i.e. it contains a valid but unrelated info) */
 	if (EG(exception)) {
@@ -848,7 +848,7 @@ ZEND_COLD zend_never_inline void zend_magic_get_property_type_inconsistency_erro
 	zend_string_release(type_str);
 }
 
-ZEND_COLD void zend_match_unhandled_error(zval *value)
+ZEND_COLD void zend_match_unhandled_error(const zval *value)
 {
 	smart_str msg = {0};
 
@@ -868,18 +868,18 @@ ZEND_COLD void zend_match_unhandled_error(zval *value)
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
-		zend_property_info *info) {
+		const zend_property_info *info) {
 	zend_throw_error(NULL, "Cannot modify readonly property %s::$%s",
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(zend_property_info *info)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info)
 {
 	zend_throw_error(NULL, "Cannot indirectly modify readonly property %s::$%s",
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
-static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class_entry *self_ce) {
+static const zend_class_entry *resolve_single_class_type(zend_string *name, const zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return self_ce;
 	} else if (zend_string_equals_literal_ci(name, "parent")) {
@@ -889,8 +889,8 @@ static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class
 	}
 }
 
-static zend_always_inline zend_class_entry *zend_ce_from_type(
-		zend_property_info *info, zend_type *type) {
+static zend_always_inline const zend_class_entry *zend_ce_from_type(
+		const zend_property_info *info, const zend_type *type) {
 	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*type));
 	zend_string *name = ZEND_TYPE_NAME(*type);
 	if (ZSTR_HAS_CE_CACHE(name)) {
@@ -904,13 +904,13 @@ static zend_always_inline zend_class_entry *zend_ce_from_type(
 }
 
 static bool zend_check_intersection_for_property_class_type(zend_type_list *intersection_type_list,
-	zend_property_info *info, zend_class_entry *object_ce)
+	const zend_property_info *info, const zend_class_entry *object_ce)
 {
 	zend_type *list_type;
 
 	ZEND_TYPE_LIST_FOREACH(intersection_type_list, list_type) {
 		ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-		zend_class_entry *ce = zend_ce_from_type(info, list_type);
+		const zend_class_entry *ce = zend_ce_from_type(info, list_type);
 		if (!ce || !instanceof_function(object_ce, ce)) {
 			return false;
 		}
@@ -919,7 +919,7 @@ static bool zend_check_intersection_for_property_class_type(zend_type_list *inte
 }
 
 static bool zend_check_and_resolve_property_class_type(
-		zend_property_info *info, zend_class_entry *object_ce) {
+		const zend_property_info *info, const zend_class_entry *object_ce) {
 	if (ZEND_TYPE_HAS_LIST(info->type)) {
 		zend_type *list_type;
 		if (ZEND_TYPE_IS_INTERSECTION(info->type)) {
@@ -935,7 +935,7 @@ static bool zend_check_and_resolve_property_class_type(
 					continue;
 				}
 				ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
-				zend_class_entry *ce = zend_ce_from_type(info, list_type);
+				const zend_class_entry *ce = zend_ce_from_type(info, list_type);
 				if (ce && instanceof_function(object_ce, ce)) {
 					return true;
 				}
@@ -943,12 +943,12 @@ static bool zend_check_and_resolve_property_class_type(
 			return false;
 		}
 	} else {
-		zend_class_entry *ce = zend_ce_from_type(info, &info->type);
+		const zend_class_entry *ce = zend_ce_from_type(info, &info->type);
 		return ce && instanceof_function(object_ce, ce);
 	}
 }
 
-static zend_always_inline bool i_zend_check_property_type(zend_property_info *info, zval *property, bool strict)
+static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict)
 {
 	ZEND_ASSERT(!Z_ISREF_P(property));
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(info->type, Z_TYPE_P(property)))) {
@@ -965,7 +965,7 @@ static zend_always_inline bool i_zend_check_property_type(zend_property_info *in
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
-static zend_always_inline bool i_zend_verify_property_type(zend_property_info *info, zval *property, bool strict)
+static zend_always_inline bool i_zend_verify_property_type(const zend_property_info *info, zval *property, bool strict)
 {
 	if (i_zend_check_property_type(info, property, strict)) {
 		return 1;
@@ -975,7 +975,7 @@ static zend_always_inline bool i_zend_verify_property_type(zend_property_info *i
 	return 0;
 }
 
-ZEND_API bool zend_never_inline zend_verify_property_type(zend_property_info *info, zval *property, bool strict) {
+ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_info *info, zval *property, bool strict) {
 	return i_zend_verify_property_type(info, property, strict);
 }
 
@@ -3387,7 +3387,7 @@ static zend_always_inline zend_result zend_fetch_static_property_address(zval **
 	return SUCCESS;
 }
 
-ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv) {
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Reference with value of type %s held by property %s::$%s of type %s is not compatible with property %s::$%s of type %s",
@@ -3403,7 +3403,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 	zend_string_release(type2_str);
 }
 
-ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv) {
+ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s",
 		zend_zval_type_name(zv),
@@ -3414,7 +3414,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop,
 	zend_string_release(type_str);
 }
 
-ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info *prop1, zend_property_info *prop2, zval *zv) {
+ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv) {
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s and property %s::$%s of type %s, as this would result in an inconsistent type conversion",
@@ -3432,7 +3432,7 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(zend_property_info
 
 /* 1: valid, 0: invalid, -1: may be valid after type coercion */
 static zend_always_inline int i_zend_verify_type_assignable_zval(
-		zend_property_info *info, zval *zv, bool strict) {
+		const zend_property_info *info, const zval *zv, bool strict) {
 	zend_type type = info->type;
 	uint32_t type_mask;
 	zend_uchar zv_type = Z_TYPE_P(zv);
@@ -3474,11 +3474,11 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 
 ZEND_API bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, bool strict)
 {
-	zend_property_info *prop;
+	const zend_property_info *prop;
 
 	/* The value must satisfy each property type, and coerce to the same value for each property
 	 * type. Remember the first coerced type and value we've seen for this purpose. */
-	zend_property_info *first_prop = NULL;
+	const zend_property_info *first_prop = NULL;
 	zval coerced_value;
 	ZVAL_UNDEF(&coerced_value);
 
@@ -3584,7 +3584,7 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ze
 	return variable_ptr;
 }
 
-ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context) {
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
 		int result;
@@ -3601,7 +3601,7 @@ ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(zend_property_
 			zval tmp;
 			ZVAL_COPY(&tmp, val);
 			if (zend_verify_weak_scalar_type_hint(ZEND_TYPE_FULL_MASK(prop_info->type), &tmp)) {
-				zend_property_info *ref_prop = ZEND_REF_FIRST_SOURCE(Z_REF_P(orig_val));
+				const zend_property_info *ref_prop = ZEND_REF_FIRST_SOURCE(Z_REF_P(orig_val));
 				zend_throw_ref_type_error_type(ref_prop, prop_info, val);
 				zval_ptr_dtor(&tmp);
 				return 0;
@@ -3625,7 +3625,7 @@ ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(zend_property_
 	return 0;
 }
 
-ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, bool strict) {
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(const zend_property_info *prop_info, zval *orig_val, bool strict) {
 	return zend_verify_prop_assignable_by_ref_ex(prop_info, orig_val, strict, ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_ASSIGNMENT);
 }
 
@@ -3652,7 +3652,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_l
 	source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
 }
 
-ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
+ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop)
 {
 	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
 	zend_property_info **ptr, **end;
