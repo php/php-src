@@ -181,7 +181,7 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
 	}
 }
 
-ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, zend_string *value, size_t length)
+ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, const zend_string *value, size_t length)
 {
 	smart_str_append_escaped(str, ZSTR_VAL(value), MIN(length, ZSTR_LEN(value)));
 
@@ -190,7 +190,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, z
 	}
 }
 
-ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value, size_t truncate) {
+ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval *value, size_t truncate) {
 	ZEND_ASSERT(Z_TYPE_P(value) <= IS_STRING);
 
 	switch (Z_TYPE_P(value)) {
