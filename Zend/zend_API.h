@@ -904,9 +904,9 @@ static zend_always_inline const char *zend_get_object_type_uc(const zend_class_e
 	return zend_get_object_type_case(ce, true);
 }
 
-ZEND_API bool zend_is_iterable(zval *iterable);
+ZEND_API bool zend_is_iterable(const zval *iterable);
 
-ZEND_API bool zend_is_countable(zval *countable);
+ZEND_API bool zend_is_countable(const zval *countable);
 
 ZEND_API zend_result zend_get_default_from_internal_arg_info(
 		zval *default_value_zval, zend_internal_arg_info *arg_info);
@@ -2127,18 +2127,18 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 /* Inlined implementations shared by new and old parameter parsing APIs */
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, bool *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest, uint32_t arg_num);
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(const zval *arg, bool *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, bool *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_slow(const zval *arg, double *dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num);
 
-static zend_always_inline bool zend_parse_arg_bool(zval *arg, bool *dest, bool *is_null, bool check_null, uint32_t arg_num)
+static zend_always_inline bool zend_parse_arg_bool(const zval *arg, bool *dest, bool *is_null, bool check_null, uint32_t arg_num)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -2172,7 +2172,7 @@ static zend_always_inline bool zend_parse_arg_long(zval *arg, zend_long *dest, b
 	return 1;
 }
 
-static zend_always_inline bool zend_parse_arg_double(zval *arg, double *dest, bool *is_null, bool check_null, uint32_t arg_num)
+static zend_always_inline bool zend_parse_arg_double(const zval *arg, double *dest, bool *is_null, bool check_null, uint32_t arg_num)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -2283,7 +2283,7 @@ static zend_always_inline bool zend_parse_arg_array(zval *arg, zval **dest, bool
 	return 1;
 }
 
-static zend_always_inline bool zend_parse_arg_array_ht(zval *arg, HashTable **dest, bool check_null, bool or_object, bool separate)
+static zend_always_inline bool zend_parse_arg_array_ht(const zval *arg, HashTable **dest, bool check_null, bool or_object, bool separate)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
 		*dest = Z_ARRVAL_P(arg);
@@ -2342,7 +2342,7 @@ static zend_always_inline bool zend_parse_arg_object(zval *arg, zval **dest, zen
 	return 1;
 }
 
-static zend_always_inline bool zend_parse_arg_obj(zval *arg, zend_object **dest, zend_class_entry *ce, bool check_null)
+static zend_always_inline bool zend_parse_arg_obj(const zval *arg, zend_object **dest, zend_class_entry *ce, bool check_null)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
 	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce) != 0))) {
