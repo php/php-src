@@ -743,6 +743,19 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	datalen = parse_iv2((*p) + 2, p);
 
+	if (max - (*p) < 2) {
+		return 0;
+	}
+
+	if ((*p)[0] != ':') {
+		return 0;
+	}
+
+	if ((*p)[1] != '{') {
+		(*p) += 1;
+		return 0;
+	}
+
 	(*p) += 2;
 
 	if (datalen < 0 || (max - (*p)) <= datalen) {
@@ -754,6 +767,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	 * with unserialize reading past the end of the passed buffer if the string is not
 	 * appropriately terminated (usually NUL terminated, but '}' is also sufficient.) */
 	if ((*p)[datalen] != '}') {
+		(*p) += datalen;
 		return 0;
 	}
 
@@ -1290,6 +1304,16 @@ object ":" uiv ":" ["]	{
 	elements = parse_iv2(*p + 2, p);
 	if (elements < 0 || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
 		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
+
+	YYCURSOR = *p;
+
+	if (*(YYCURSOR) != ':') {
+		return 0;
+	}
+	if (*(YYCURSOR+1) != '{') {
+		*p = YYCURSOR+1;
 		return 0;
 	}
 
