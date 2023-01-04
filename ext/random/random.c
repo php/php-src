@@ -41,6 +41,7 @@
 # include <process.h>
 #else
 # include <sys/time.h>
+# include <errno.h>
 #endif
 
 #ifdef __linux__

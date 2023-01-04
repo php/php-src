@@ -18,6 +18,7 @@
 #include "php_json_scanner.h"
 #include "php_json_scanner_defs.h"
 #include "php_json_parser.h"
+#include "zend_strtod.h"
 #include "json_parser.tab.h"
 
 #define	YYCTYPE     php_json_ctype

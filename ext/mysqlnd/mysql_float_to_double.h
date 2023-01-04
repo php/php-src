@@ -20,6 +20,7 @@
 #include "main/php.h"
 #include <float.h>
 #include "main/snprintf.h"
+#include "zend_strtod.h"
 
 #define MAX_CHAR_BUF_LEN 255
 

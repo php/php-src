@@ -36,6 +36,8 @@
 #include <openssl/bn.h>
 #include <openssl/dh.h>
 
+#include <errno.h>
+
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
 #include "win32/time.h"

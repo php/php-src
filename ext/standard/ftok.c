@@ -27,6 +27,10 @@
 #endif
 
 #ifdef HAVE_FTOK
+
+#include <errno.h>
+#include <string.h> // for strerror()
+
 /* {{{ Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
 {

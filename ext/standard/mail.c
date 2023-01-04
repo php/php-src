@@ -44,6 +44,8 @@
 
 #ifdef PHP_WIN32
 # include "win32/sendmail.h"
+#else
+# include <errno.h>
 #endif
 
 #define SKIP_LONG_HEADER_SEP(str, pos)																	\
