@@ -52,9 +52,11 @@
 #include "zend_compile.h"
 #include "zend_modules.h"
 
-#include "Optimizer/zend_optimizer.h"
-#include "zend_accelerator_hash.h"
-#include "zend_accelerator_debug.h"
+#include "Optimizer/zend_optimizer.h" // for zend_script
+#include "zend_accelerator_hash.h" // for zend_accel_hash
+#include "php.h" // for PHPAPI
+
+#include <stdint.h>
 
 #ifndef PHPAPI
 # ifdef ZEND_WIN32
