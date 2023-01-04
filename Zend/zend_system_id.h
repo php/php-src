@@ -17,7 +17,10 @@
 #ifndef ZEND_SYSTEM_ID_H
 #define ZEND_SYSTEM_ID_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_result.h"
+
+#include <stddef.h>
 
 BEGIN_EXTERN_C()
 /* True global; Write-only during MINIT/startup */
