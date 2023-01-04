@@ -17,8 +17,8 @@
 */
 
 #include "zend_string.h"
-#include "zend.h"
 #include "zend_globals.h"
+#include "zend_hash.h"
 #include "zend_rc_debug.h"
 
 #ifdef HAVE_VALGRIND

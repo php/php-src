@@ -21,6 +21,7 @@
 
 #include "zend_alloc.h"
 #include "zend_char.h"
+#include "zend_long.h"
 #include "zend_portability.h"
 #include "zend_refcounted.h"
 
