@@ -17,19 +17,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_ini.h"
-#include "zend_vm.h"
-#include "zend_exceptions.h"
-#include "zend_builtin_functions.h"
-#include "zend_observer.h"
-#include "zend_mmap.h"
-#include "zend_compile.h"
-#include "zend_closures.h"
-
 #include "zend_fibers.h"
+#include "zend_exceptions.h"
+#include "zend_ini.h"
+#include "zend_mmap.h" // for zend_mmap_set_name()
+#include "zend_observer.h"
+#include "zend_objects.h" // for zend_object_std_init()
 #include "zend_fibers_arginfo.h"
+
+#ifdef ZEND_WIN32
+# include "win32/winutil.h" // for php_win32_error_to_msg()
+#endif
 
 #ifdef HAVE_VALGRIND
 # include <valgrind/valgrind.h>
@@ -43,6 +41,9 @@
 # include <unistd.h>
 # include <sys/mman.h>
 # include <limits.h>
+
+# include <errno.h>
+# include <string.h> // for strerror()
 
 # if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 #  define MAP_ANONYMOUS MAP_ANON
