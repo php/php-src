@@ -66,6 +66,9 @@ Example:
 #ifndef SNPRINTF_H
 #define SNPRINTF_H
 
+#include "php.h" // for PHPAPI
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
 #include <stdbool.h>
 
 BEGIN_EXTERN_C()
