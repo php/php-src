@@ -18,7 +18,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stdio.h>
+#include "zend_variables.h"
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_ast.h"
