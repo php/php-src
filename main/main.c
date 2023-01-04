@@ -82,6 +82,8 @@
 #include "rfc1867.h"
 
 #include "ext/standard/html_tables.h"
+
+#include <float.h> // for DBL_*, used by main_arginfo.h
 #include "main_arginfo.h"
 /* }}} */
 
