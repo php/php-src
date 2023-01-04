@@ -27,6 +27,7 @@
 # define YYDEBUG(s, c)
 #endif
 
+#include "zend_language_scanner.h"
 #include "zend_language_scanner_defs.h"
 
 #include <errno.h>
@@ -35,9 +36,9 @@
 # include <Winuser.h>
 #endif
 #include "zend_alloc.h"
+#include "zend_arena.h"
 #include <zend_language_parser.h>
 #include "zend_compile.h"
-#include "zend_language_scanner.h"
 #include "zend_highlight.h"
 #include "zend_constants.h"
 #include "zend_variables.h"
