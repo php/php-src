@@ -22,6 +22,7 @@
 #include "Optimizer/zend_ssa.h"
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
+#include "zend_arena.h"
 #include "zend_bitset.h"
 
 /* This pass implements a form of dead code elimination (DCE). The algorithm optimistically assumes
