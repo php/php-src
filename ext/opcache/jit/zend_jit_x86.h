@@ -19,6 +19,8 @@
 #ifndef HAVE_JIT_X86_H
 #define HAVE_JIT_X86_H
 
+#include <stdint.h>
+
 typedef enum _zend_reg {
 	ZREG_NONE = -1,
 

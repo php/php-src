@@ -21,7 +21,25 @@
 #ifndef ZEND_JIT_INTERNAL_H
 #define ZEND_JIT_INTERNAL_H
 
-#include "zend_bitset.h"
+#include "zend_jit_target.h" // for ZEND_JIT_TARGET_*
+
+#if ZEND_JIT_TARGET_X86
+# include "jit/zend_jit_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
+# include "jit/zend_jit_arm64.h"
+#endif
+
+#include "zend_jit.h" // for zend_jit_trace_stack_frame
+
+#include "zend_bitset.h" // for zend_ulong_ntz()
+#include "zend_compile.h" // for zend_op, ...
+#include "zend_constants.h"
+#include "zend_long.h"
+#include "zend_portability.h" // for zend_always_inline
+#include "zend_types.h" // for zend_uchar
+
+#include "Optimizer/zend_call_graph.h" // for struct _zend_func_info
+#include "Optimizer/zend_func_info.h" // for zend_func_info
 
 /* Register Set */
 #define ZEND_REGSET_EMPTY 0

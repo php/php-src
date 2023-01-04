@@ -19,15 +19,12 @@
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
 
-#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
-# define ZEND_JIT_TARGET_X86   1
-# define ZEND_JIT_TARGET_ARM64 0
-#elif defined (__aarch64__)
-# define ZEND_JIT_TARGET_X86   0
-# define ZEND_JIT_TARGET_ARM64 1
-#else
-# error "JIT not supported on this platform"
-#endif
+#include "ZendAccelerator.h" // for ZEND_EXT_API
+#include "zend_compile.h" // for zend_op, ...
+#include "zend_long.h"
+
+#include <stdbool.h>
+#include <stdint.h>
 
 #define ZEND_JIT_LEVEL_NONE        0     /* no JIT */
 #define ZEND_JIT_LEVEL_MINIMAL     1     /* minimal JIT (subroutine threading) */
