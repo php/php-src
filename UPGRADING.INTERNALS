@@ -20,6 +20,12 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   EG(stack_base).
 * EG(opline_before_exception) may now be null if the VM throws an exception
   before executing any opline.
+* Many C header files have been cleaned up and include dependencies
+  have been reduced.  Many headers which used to be always included by
+  Zend headers (e.g. "errno.h") are no longer implied, and this may
+  break the build of third-party extensions which relied on this
+  implementation detail.  Those extensions may need to add the missing
+  #include lines.
 
 ========================
 2. Build system changes
