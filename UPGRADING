@@ -104,6 +104,10 @@ PHP 8.2 UPGRADE NOTES
     flags to determine if it should create a sub directory or not when creating
     a database file.
 
+- GMP:
+  . GMP::__construct() can now be used instead of gmp_init() to initialize an object (Only as of PHP 8.2.3)
+
+
 - OCI8:
   . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
     function to tune LOB query performance by reducing the number of
