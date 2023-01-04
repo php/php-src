@@ -29,6 +29,8 @@
 
 #include "php_version.h"
 #include "zend.h"
+#include "zend_arena.h"
+#include "zend_objects.h"
 #include "zend_sort.h"
 #include "php_compat.h"
 
