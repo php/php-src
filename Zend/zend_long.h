@@ -19,6 +19,12 @@
 #ifndef ZEND_LONG_H
 #define ZEND_LONG_H
 
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#else
+#include "php_config.h" // for SIZEOF_SIZE_T
+#endif
+
 #include <inttypes.h>
 #include <stdint.h>
 
