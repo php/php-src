@@ -21,19 +21,18 @@
 #ifndef ZEND_OPERATORS_H
 #define ZEND_OPERATORS_H
 
-#include <errno.h>
+#include "zend_hash.h" // for zend_hash_num_elements()
+#include "zend_object_handlers.h" // for struct _zend_object_handlers
+#include "zend_portability.h" // for BEGIN_EXTERN_
+#include "zend_types.h" // for zend_result
+#include "zend_string.h" // for zend_string_copy()
+
 #include <math.h>
-#include <assert.h>
 #include <stddef.h>
 
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
 #endif
-
-#include "zend_portability.h"
-#include "zend_strtod.h"
-#include "zend_multiply.h"
-#include "zend_object_handlers.h"
 
 #define LONG_SIGN_MASK ZEND_LONG_MIN
 
