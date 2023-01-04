@@ -19,6 +19,13 @@
 #ifndef _ZEND_BITSET_H_
 #define _ZEND_BITSET_H_
 
+#include "zend_portability.h" // for zend_always_inline
+
+#include "zend_long.h"
+
+#include <stdint.h>
+#include <string.h>
+
 typedef zend_ulong *zend_bitset;
 
 #define ZEND_BITSET_ELM_SIZE sizeof(zend_ulong)
