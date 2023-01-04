@@ -20,8 +20,9 @@
 #define ZEND_CALL_GRAPH_H
 
 #include "zend_ssa.h"
-#include "zend_func_info.h"
-#include "zend_optimizer.h"
+
+typedef struct _zend_func_info zend_func_info;
+typedef struct _zend_call_info zend_call_info;
 
 typedef struct _zend_send_arg_info {
 	zend_op                *opline;
