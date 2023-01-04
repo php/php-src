@@ -18,7 +18,10 @@
 */
 
 #include "zend_extensions.h"
-#include "zend_system_id.h"
+#include "zend_arena.h"
+#include "zend_globals.h" // for struct _zend_compiler_globals
+#include "zend_globals_macros.h" // for CG()
+#include "zend_system_id.h" // for zend_add_system_entropy()
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
