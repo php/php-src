@@ -89,6 +89,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-9971 (Incorrect NUMERIC value returned from PDO_Firebird).
     (cmb)
 
+- PDO/SQLite:
+  . Fixed bug #81740 (PDO::quote() may return unquoted string). (CVE-2022-31631)
+    (cmb)
+
 - Session:
   . Fixed GH-9932 (session name silently fails with . and [). (David Carlier)
 
