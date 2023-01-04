@@ -19,12 +19,11 @@
 #ifndef ZEND_INFERENCE_H
 #define ZEND_INFERENCE_H
 
-#include "zend_optimizer.h"
+#include "zend_cfg.h" // for CRT_CONSTANT()
+#include "zend_compile.h" // for struct _zend_op
+#include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_ssa.h"
-#include "zend_bitset.h"
-
-/* Bitmask for type inference (zend_ssa_var_info.type) */
-#include "zend_type_info.h"
+#include "zend_type_info.h" // for MAY_BE_*
 
 #include <stdint.h>
 
