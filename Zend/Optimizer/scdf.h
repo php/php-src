@@ -20,6 +20,11 @@
 #define _SCDF_H
 
 #include "zend_bitset.h"
+#include "zend_long.h"
+#include "zend_ssa.h"
+
+typedef struct _zend_op_array zend_op_array;
+typedef struct _zend_optimizer_ctx zend_optimizer_ctx;
 
 typedef struct _scdf_ctx {
 	zend_op_array *op_array;
