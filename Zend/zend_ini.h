@@ -19,11 +19,23 @@
 #ifndef ZEND_INI_H
 #define ZEND_INI_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_types.h" // for zend_result
+
+#include <stdint.h>
+
 #define ZEND_INI_USER	(1<<0)
 #define ZEND_INI_PERDIR	(1<<1)
 #define ZEND_INI_SYSTEM	(1<<2)
 
 #define ZEND_INI_ALL (ZEND_INI_USER|ZEND_INI_PERDIR|ZEND_INI_SYSTEM)
+
+// forward declarations
+typedef struct _zend_file_handle zend_file_handle;
+typedef struct _zend_ini_entry zend_ini_entry;
+typedef struct _zend_module_entry zend_module_entry;
+typedef struct _zend_string zend_string;
+typedef struct _zend_array HashTable;
 
 #define ZEND_INI_MH(name) int name(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage)
 #define ZEND_INI_DISP(name) ZEND_COLD void name(zend_ini_entry *ini_entry, int type)
