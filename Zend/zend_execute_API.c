@@ -18,26 +18,20 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_execute.h"
+#include "zend_API.h" // for zend_fcall_info
+#include "zend_constants.h"
+#include "zend_closures.h" // for ZEND_CLOSURE_OBJECT()
+#include "zend_exceptions.h" // for zend_rethrow_exception()
+#include "zend_extensions.h"
+#include "zend_fibers.h" // for zend_fiber_init()
+#include "zend_observer.h" // for ZEND_OBSERVER_*()
+#include "zend_stream.h" // for zend_stream_shutdown()
+#include "zend_weakrefs.h" // for zend_weakrefs_init()
+
 #include <stdio.h>
 #include <signal.h>
 
-#include "zend.h"
-#include "zend_compile.h"
-#include "zend_execute.h"
-#include "zend_API.h"
-#include "zend_stack.h"
-#include "zend_constants.h"
-#include "zend_extensions.h"
-#include "zend_exceptions.h"
-#include "zend_closures.h"
-#include "zend_generators.h"
-#include "zend_vm.h"
-#include "zend_float.h"
-#include "zend_fibers.h"
-#include "zend_weakrefs.h"
-#include "zend_inheritance.h"
-#include "zend_observer.h"
-#include "zend_call_stack.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
