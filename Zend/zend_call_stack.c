@@ -18,11 +18,11 @@
 
 /* Inspired from Chromium's stack_util.cc */
 
-#include "zend.h"
-#include "zend_globals.h"
-#include "zend_portability.h"
 #include "zend_call_stack.h"
+#include "zend_globals.h"
+
 #include <stdint.h>
+
 #ifdef ZEND_WIN32
 # include <processthreadsapi.h>
 # include <memoryapi.h>
