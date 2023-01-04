@@ -20,6 +20,8 @@
 #ifndef ZEND_OBJECT_HANDLERS_H
 #define ZEND_OBJECT_HANDLERS_H
 
+#include "zend_types.h"
+
 #include <stdint.h>
 
 struct _zend_property_info;
