@@ -20,28 +20,30 @@
 #ifndef ZEND_GLOBALS_H
 #define ZEND_GLOBALS_H
 
-
-#include <setjmp.h>
-#include <stdint.h>
-
 #include "zend_globals_macros.h"
 
 #include "zend_atomic.h"
+#include "zend_gc.h" // for zend_get_gc_buffer
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
-#include "zend_hash.h"
 #include "zend_llist.h"
-#include "zend_objects.h"
 #include "zend_objects_API.h"
-#include "zend_modules.h"
-#include "zend_float.h"
-#include "zend_multibyte.h"
-#include "zend_multiply.h"
-#include "zend_arena.h"
+#include "zend_float.h" // for XPFPA_HAVE_CW, XPFPA_CW_DATATYPE
+#include "zend_multibyte.h" // for zend_encoding_filter
+
+#ifdef ZEND_CHECK_STACK_LIMIT
 #include "zend_call_stack.h"
+#endif
+
+#include <setjmp.h> // for JMP_BUF
+#include <stdint.h>
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
+
+typedef struct _zend_arena zend_arena;
+typedef struct _zend_objects_store zend_objects_store;
+typedef struct _zend_array HashTable;
 
 #ifdef ZTS
 
