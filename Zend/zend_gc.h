@@ -20,6 +20,12 @@
 #ifndef ZEND_GC_H
 #define ZEND_GC_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_types.h" // for GC_TYPE_INFO()
+
+#include <stdbool.h>
+#include <stdint.h>
+
 BEGIN_EXTERN_C()
 
 typedef struct _zend_gc_status {
