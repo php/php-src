@@ -21,6 +21,12 @@
 #ifndef ZEND_PORTABILITY_H
 #define ZEND_PORTABILITY_H
 
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#else
+#include "zend_config.h"
+#endif
+
 #ifdef __cplusplus
 #define BEGIN_EXTERN_C() extern "C" {
 #define END_EXTERN_C() }
