@@ -23,6 +23,7 @@ extern "C" {
 #include <math.h>
 #endif
 #include <php.h>
+#include "zend_iterators.h" // for zend_object_iterator
 #include "../intl_error.h"
 #include "../intl_data.h"
 #ifdef __cplusplus

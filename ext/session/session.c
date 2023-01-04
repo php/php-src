@@ -20,6 +20,7 @@
 #endif
 
 #include "php.h"
+#include "php_globals.h" // for PG()
 
 #ifdef PHP_WIN32
 # include "win32/winutil.h"

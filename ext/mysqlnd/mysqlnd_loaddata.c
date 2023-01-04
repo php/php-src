@@ -16,6 +16,7 @@
   +----------------------------------------------------------------------+
 */
 #include "php.h"
+#include "php_globals.h" // for PG()
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"

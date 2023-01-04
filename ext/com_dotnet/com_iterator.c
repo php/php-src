@@ -24,6 +24,7 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_iterators.h"
 
 struct php_com_iterator {
 	zend_object_iterator iter;

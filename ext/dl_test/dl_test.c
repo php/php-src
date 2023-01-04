@@ -19,6 +19,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_dl_test.h"
 #include "dl_test_arginfo.h"

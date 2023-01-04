@@ -30,6 +30,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "php_globals.h" // for PG()
 #include "php_ini.h"
 #include "zend_attributes.h"
 #include "zend_smart_str.h"

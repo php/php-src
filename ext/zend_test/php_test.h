@@ -28,6 +28,9 @@ extern zend_module_entry zend_test_module_entry;
 #include "TSRM.h"
 #endif
 
+#include <sys/types.h> // for off_t
+#include <stddef.h> // for size_t
+
 #if defined(ZTS) && defined(COMPILE_DL_ZEND_TEST)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif

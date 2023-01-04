@@ -20,6 +20,7 @@
 #endif
 
 #include "php.h"
+#include "php_globals.h" // for PG()
 #include "SAPI.h"
 
 #include "zend_variables.h"

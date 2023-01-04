@@ -19,6 +19,7 @@
 #include "fiber_arginfo.h"
 #include "zend_fibers.h"
 #include "zend_exceptions.h"
+#include "zend_objects.h"
 
 static zend_class_entry *zend_test_fiber_class;
 static zend_object_handlers zend_test_fiber_handlers;

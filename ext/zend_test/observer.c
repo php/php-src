@@ -16,6 +16,7 @@
 
 #include "php.h"
 #include "php_test.h"
+#include "php_ini.h"
 #include "observer.h"
 #include "zend_observer.h"
 #include "zend_smart_str.h"

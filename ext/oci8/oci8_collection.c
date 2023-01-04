@@ -35,6 +35,7 @@
 
 #include "php_oci8.h"
 #include "php_oci8_int.h"
+#include "zend_strtod.h"
 
 /* {{{ php_oci_collection_create()
  Create and return connection handle */

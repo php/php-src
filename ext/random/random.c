@@ -41,6 +41,7 @@
 # include <process.h>
 #else
 # include <sys/time.h>
+# include <errno.h>
 #endif
 
 #if HAVE_SYS_PARAM_H

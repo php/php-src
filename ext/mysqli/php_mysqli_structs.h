@@ -26,6 +26,7 @@
 #undef LIST
 #endif
 
+#include "zend_iterators.h" // for zend_object_iterator_funcs
 #include "ext/mysqlnd/mysqlnd.h"
 #include "mysqli_mysqlnd.h"
 

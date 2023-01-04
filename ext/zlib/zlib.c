@@ -23,6 +23,7 @@
 #endif
 
 #include "php.h"
+#include "php_globals.h" // for PG()
 #include "SAPI.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"

@@ -16,6 +16,7 @@
 */
 
 #include "php.h"
+#include "php_ini.h"
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"

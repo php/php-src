@@ -30,6 +30,8 @@
 #include "mysqlnd_ext_plugin.h"
 #include "zend_smart_str.h"
 
+#include <errno.h>
+#include <string.h> // for strerror()
 
 extern MYSQLND_CHARSET *mysqlnd_charsets;
 

@@ -20,6 +20,7 @@
 #include "fopen_wrappers.h"
 #include "file.h"
 #include "php_dir.h"
+#include "php_globals.h" // for PG()
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"

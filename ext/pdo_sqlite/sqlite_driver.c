@@ -19,6 +19,7 @@
 #endif
 
 #include "php.h"
+#include "php_globals.h" // for PG()
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"

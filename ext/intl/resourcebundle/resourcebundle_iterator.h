@@ -16,6 +16,7 @@
 #define RESOURCEBUNDLE_ITERATOR_H
 
 #include <zend.h>
+#include "zend_iterators.h" // for zend_object_iterator
 
 #include "resourcebundle/resourcebundle_class.h"
 

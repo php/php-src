@@ -19,6 +19,7 @@
 #ifndef _MBSTRING_H
 #define _MBSTRING_H
 
+#include "php.h"
 #include "php_version.h"
 #define PHP_MBSTRING_VERSION PHP_VERSION
 

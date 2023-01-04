@@ -24,6 +24,7 @@
 #include "php_scandir.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_iterators.h"
 #include "main/SAPI.h"
 
 #include <ffi.h>

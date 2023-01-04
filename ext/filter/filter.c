@@ -22,6 +22,7 @@
 #endif
 
 #include "php_filter.h"
+#include "php_globals.h" // for PG()
 
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
