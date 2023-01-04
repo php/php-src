@@ -32,6 +32,9 @@ PHP 8.3 UPGRADE NOTES
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
     single resource limit.
+  . posix_isatty() now raises type warnings for integers following the usual ZPP semantics
+  . posix_ttyname() now raises type warnings for integers following the usual ZPP semantics
+    and value warnings for invalid file descriptor integers.
 
 ========================================
 3. Changes in SAPI modules
