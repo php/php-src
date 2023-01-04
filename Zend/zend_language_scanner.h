@@ -20,6 +20,14 @@
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
 
+#include "zend_globals.h" // for zend_php_scanner_event
+#include "zend_multibyte.h" // for zend_encoding_filter
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_ptr_stack.h"
+#include "zend_stack.h"
+
+typedef struct _zend_file_handle zend_file_handle;
+
 typedef struct _zend_lex_state {
 	unsigned int yy_leng;
 	unsigned char *yy_start;
