@@ -16,13 +16,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_compile.h"
+#include "zend_enum.h"
+#include "zend_arena.h" // ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX2
+#include "zend_API.h" // for INIT_CLASS_ENTRY_EX()
 #include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
-#include "zend_enum.h"
-#include "zend_extensions.h"
+#include "zend_extensions.h" // for zend_internal_run_time_cache_reserved_size()
+#include "zend_objects.h" // for zend_objects_new()
 #include "zend_observer.h"
 
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
