@@ -22,10 +22,16 @@
 #ifndef ZEND_STREAM_H
 #define ZEND_STREAM_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_result.h"
 
-#include <sys/types.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h> // for FILE
+#include <sys/types.h> // for ssize_t
 #include <sys/stat.h>
+
+typedef struct _zend_string zend_string;
 
 /* Lightweight stream implementation for the ZE scanners.
  * These functions are private to the engine.
