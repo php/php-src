@@ -51,14 +51,17 @@
  * with more specialized routines when the requested size is known.
  */
 
-#include "zend.h"
 #include "zend_alloc.h"
-#include "zend_globals.h"
-#include "zend_operators.h"
-#include "zend_multiply.h"
+#include "zend.h" // for zend_try
 #include "zend_bitset.h"
+#include "zend_long.h"
+#include "zend_globals.h"
 #include "zend_mmap.h"
-#include <signal.h>
+#include "zend_multiply.h" // for zend_safe_address_guarded()
+
+#if ZEND_DEBUG && defined(HAVE_KILL) && defined(HAVE_GETPID)
+# include <signal.h>
+#endif
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -78,7 +81,8 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <fcntl.h>
-#include <errno.h>
+
+#include <setjmp.h> // for jmp_buf (used by zend_try)
 
 #ifndef _WIN32
 # include <sys/mman.h>
@@ -137,6 +141,14 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #endif
 #ifndef ZEND_MM_ERROR
 # define ZEND_MM_ERROR 1   /* report system errors                           */
+#endif
+
+#if ZEND_MM_CUSTOM
+# include "zend_hash.h"
+#endif
+
+#if ZEND_MM_ERROR
+# include <errno.h>
 #endif
 
 #ifndef ZEND_MM_CHECK

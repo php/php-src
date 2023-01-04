@@ -24,9 +24,8 @@
 #include "zend_portability.h"
 #include "zend_result.h"
 
-#include <stdio.h>
-
-#include "../TSRM/TSRM.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifndef ZEND_MM_ALIGNMENT
 # error "ZEND_MM_ALIGNMENT was not defined during configure"
