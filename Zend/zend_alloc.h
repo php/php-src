@@ -21,10 +21,8 @@
 #ifndef ZEND_ALLOC_H
 #define ZEND_ALLOC_H
 
-#include <stdio.h>
-
-#include "../TSRM/TSRM.h"
-#include "zend.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_types.h" // for zend_result
 
 #ifndef ZEND_MM_ALIGNMENT
 # error "ZEND_MM_ALIGNMENT was not defined during configure"
