@@ -16,11 +16,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_interfaces.h"
 #include "zend.h"
 #include "zend_API.h"
-#include "zend_interfaces.h"
+#include "zend_arena.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces_arginfo.h"
+#include "zend_objects.h" // for zend_object_std_init()
 
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
