@@ -381,31 +381,33 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const z
 	const char *ptr = ZSTR_VAL(s1);
 	size_t delta = (const char*)s2 - (const char*)s1;
 	size_t len = ZSTR_LEN(s1);
-	zend_ulong ret;
+	zend_ulong accumulator;
+	bool ret;
 
 	__asm__ (
 		".LL0%=:\n\t"
-		"movl (%2,%3), %0\n\t"
-		"xorl (%2), %0\n\t"
+		"movl (%3,%4), %0\n\t"
+		"xorl (%3), %0\n\t"
 		"jne .LL1%=\n\t"
-		"addl $0x4, %2\n\t"
-		"subl $0x4, %1\n\t"
+		"addl $0x4, %3\n\t"
+		"subl $0x4, %2\n\t"
 		"ja .LL0%=\n\t"
-		"movl $0x1, %0\n\t"
+		"movl $0x1, %k1\n\t"
 		"jmp .LL3%=\n\t"
 		".LL1%=:\n\t"
-		"cmpl $0x4,%1\n\t"
+		"cmpl $0x4,%2\n\t"
 		"jb .LL2%=\n\t"
-		"xorl %0, %0\n\t"
+		"xorl %k1, %k1\n\t"
 		"jmp .LL3%=\n\t"
 		".LL2%=:\n\t"
-		"negl %1\n\t"
-		"lea 0x20(,%1,8), %1\n\t"
-		"shll %b1, %0\n\t"
-		"sete %b0\n\t"
-		"movzbl %b0, %0\n\t"
+		"negl %2\n\t"
+		"lea 0x20(,%2,8), %2\n\t"
+		"shll %b2, %0\n\t"
+		"sete %b1\n\t"
+		"movzbl %b1, %k1\n\t"
 		".LL3%=:\n"
-		: "=&a"(ret),
+		: "=r"(accumulator),
+		  "=a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)
 		: "r"(delta)
@@ -419,31 +421,33 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const z
 	const char *ptr = ZSTR_VAL(s1);
 	size_t delta = (const char*)s2 - (const char*)s1;
 	size_t len = ZSTR_LEN(s1);
-	zend_ulong ret;
+	zend_ulong accumulator;
+	bool ret;
 
 	__asm__ (
 		".LL0%=:\n\t"
-		"movq (%2,%3), %0\n\t"
-		"xorq (%2), %0\n\t"
+		"movq (%3,%4), %0\n\t"
+		"xorq (%3), %0\n\t"
 		"jne .LL1%=\n\t"
-		"addq $0x8, %2\n\t"
-		"subq $0x8, %1\n\t"
+		"addq $0x8, %3\n\t"
+		"subq $0x8, %2\n\t"
 		"ja .LL0%=\n\t"
-		"movq $0x1, %0\n\t"
+		"movl $0x1, %k1\n\t"
 		"jmp .LL3%=\n\t"
 		".LL1%=:\n\t"
-		"cmpq $0x8,%1\n\t"
+		"cmpq $0x8,%2\n\t"
 		"jb .LL2%=\n\t"
-		"xorq %0, %0\n\t"
+		"xorl %k1, %k1\n\t"
 		"jmp .LL3%=\n\t"
 		".LL2%=:\n\t"
-		"negq %1\n\t"
-		"lea 0x40(,%1,8), %1\n\t"
-		"shlq %b1, %0\n\t"
-		"sete %b0\n\t"
-		"movzbq %b0, %0\n\t"
+		"negq %2\n\t"
+		"lea 0x40(,%2,8), %2\n\t"
+		"shlq %b2, %0\n\t"
+		"sete %b1\n\t"
+		"movzbl %b1, %k1\n\t"
 		".LL3%=:\n"
-		: "=&a"(ret),
+		: "=r"(accumulator),
+		  "=a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)
 		: "r"(delta)
