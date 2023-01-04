@@ -38,10 +38,7 @@ PDO_Firebird: Check persistent conection is alive
     $stmt2->execute();
     $result = $stmt2->fetchAll();
 
-    //check
-    //var_dump($result);
     echo "done";
-    // firebird:dbname=ffirebird3/3050:/firebird/data/TAREFAS.FDB  
     ?>
 --EXPECT--
 done
