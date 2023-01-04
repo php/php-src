@@ -20,33 +20,24 @@
 
 #define ZEND_INTENSIVE_DEBUGGING 0
 
-#include <stdio.h>
-#include <signal.h>
-
-#include "zend.h"
-#include "zend_compile.h"
 #include "zend_execute.h"
-#include "zend_API.h"
-#include "zend_ptr_stack.h"
+#include "zend_API.h" // for ZEND_FUNCTION()
+#include "zend_arena.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_ini.h"
 #include "zend_exceptions.h"
-#include "zend_interfaces.h"
 #include "zend_closures.h"
-#include "zend_generators.h"
-#include "zend_vm.h"
-#include "zend_dtrace.h"
-#include "zend_inheritance.h"
-#include "zend_type_info.h"
+#include "zend_generators.h" // for zend_ce_generator
+#include "zend_inheritance.h" // for zend_do_link_class()
 #include "zend_smart_str.h"
 #include "zend_observer.h"
-#include "zend_system_id.h"
-#include "zend_call_stack.h"
-#include "Optimizer/zend_func_info.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
+
+#include <stdio.h>
+#include <signal.h>
 
 #ifdef HAVE_GCC_GLOBAL_REGS
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
@@ -5283,6 +5274,9 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 /* This callback disables optimization of "vm_stack_data" variable in VM */
 ZEND_API void (ZEND_FASTCALL *zend_touch_vm_stack_data)(void *vm_stack_data) = NULL;
 
+#include "zend_fibers.h" // needed by zend_vm_execute.h
+#include "zend_interfaces.h" // needed by zend_vm_execute.h
+#include "zend_objects.h" // needed by zend_vm_execute.h
 #include "zend_vm_execute.h"
 
 ZEND_API zend_result zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler)
