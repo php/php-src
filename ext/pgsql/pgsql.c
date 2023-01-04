@@ -39,6 +39,7 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
+#include "zend_strtod.h"
 
 #ifdef HAVE_PGSQL
 

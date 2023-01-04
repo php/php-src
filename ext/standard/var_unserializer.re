@@ -19,6 +19,7 @@
 #include "php_incomplete_class.h"
 #include "zend_portability.h"
 #include "zend_exceptions.h"
+#include "zend_strtod.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */

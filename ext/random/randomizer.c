@@ -27,6 +27,8 @@
 #include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
 
+#include <float.h> // for DBL_MANT_DIG
+
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
 	if (engine_object->ce->type == ZEND_INTERNAL_CLASS) {
 		/* Internal classes always php_random_engine struct */

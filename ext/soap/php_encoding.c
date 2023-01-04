@@ -25,6 +25,8 @@
 #include "zend_strtod.h"
 #include "zend_interfaces.h"
 
+#include <errno.h>
+
 /* zval type decode */
 static zval *to_zval_double(zval* ret, encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_long(zval* ret, encodeTypePtr type, xmlNodePtr data);
