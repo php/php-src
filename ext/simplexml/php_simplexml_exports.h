@@ -20,6 +20,7 @@
 #define PHP_SIMPLEXML_EXPORTS_H
 
 #include "php_simplexml.h"
+#include "zend_iterators.h" // for zend_object_iterator_funcs
 
 #define SKIP_TEXT(__p) \
 	if ((__p)->type == XML_TEXT_NODE) { \
