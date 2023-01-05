@@ -1452,9 +1452,10 @@ static PHP_MINFO_FUNCTION(cgi)
 
 PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
+	zend_bool close_conn = 0;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &close_conn) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1463,7 +1464,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 		php_header();
 
 		fcgi_end(request);
-		fcgi_close(request, 0, 0);
+		fcgi_close(request, close_conn, 0);
 		RETURN_TRUE;
 	}
 
