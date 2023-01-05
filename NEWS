@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
     (cmb)
 
+- MBString:
+  . Fixed: mb_strlen (and a couple of other mbstring functions) would wrongly treat 0x80, 0xFD, 0xFE, 0xFF, and certain other byte values as the first byte of a 2-byte SJIS character. (Alex Dowad)
+
 - Opcache:
   . Fix inverted bailout value in zend_runtime_jit() (Max Kellermann).
   . Fix access to uninitialized variable in accel_preload(). (nielsdos)
