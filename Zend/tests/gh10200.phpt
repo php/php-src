@@ -1,5 +1,7 @@
 --TEST--
 GH-10200 (zif_get_object_vars: Assertion `!(((__ht)->u.flags & (1<<2)) != 0)' failed.)
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
