@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
   . Fix NULL pointer dereference in phpdbg_create_conditional_breal(). (nielsdos)
+  . Fix GH-9710: phpdbg memory leaks by option "-h" (nielsdos)
 
 - Posix:
   . Fix memory leak in posix_ttyname() (girgias)
