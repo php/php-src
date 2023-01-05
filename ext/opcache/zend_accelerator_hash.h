@@ -22,7 +22,13 @@
 #ifndef ZEND_ACCELERATOR_HASH_H
 #define ZEND_ACCELERATOR_HASH_H
 
-#include "zend.h"
+#include "zend_long.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
+#include <stdbool.h>
+#include <stdint.h>
+
+typedef struct _zend_string zend_string;
 
 /*
 	zend_accel_hash - is a hash table allocated in shared memory and

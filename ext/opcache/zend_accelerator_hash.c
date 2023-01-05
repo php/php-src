@@ -19,7 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "ZendAccelerator.h"
 #include "zend_accelerator_hash.h"
 #include "zend_accelerator_debug.h"
 #include "zend_shared_alloc.h"
