@@ -17,14 +17,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_interfaces.h"
-#include "zend_exceptions.h"
 #include "zend_generators.h"
-#include "zend_closures.h"
-#include "zend_generators_arginfo.h"
+#include "zend_API.h" // for ZEND_METHOD()
+#include "zend_closures.h" // for ZEND_CLOSURE_OBJECT()
+#include "zend_exceptions.h" // for zend_throw_exception_object()
+#include "zend_execute.h" // for zend_vm_stack_push_call_frame(()
+#include "zend_interfaces.h" // for zend_ce_iterator()
+#include "zend_objects.h" // for zend_object_std_init()
 #include "zend_observer.h"
+#include "zend_generators_arginfo.h" // for register_class_Generator()
 
 ZEND_API zend_class_entry *zend_ce_generator;
 ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;

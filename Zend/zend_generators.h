@@ -20,7 +20,16 @@
 #ifndef ZEND_GENERATORS_H
 #define ZEND_GENERATORS_H
 
+#include "zend_compile.h" // for struct _zend_execute_data
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
 #include <stdint.h>
+
+typedef struct _zend_class_entry zend_class_entry;
+typedef struct _zend_execute_data zend_execute_data;
+typedef struct _zend_object zend_object;
+typedef struct _zval_struct zval;
+typedef struct _zend_array HashTable;
 
 BEGIN_EXTERN_C()
 
