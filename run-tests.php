@@ -857,13 +857,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         $php_cgi_info = '';
     }
 
-    if ($phpdbg) {
-        $phpdbg_info = shell_exec("$phpdbg $pass_options $info_params $no_file_cache -qrr \"$info_file\"");
-        $php_info_sep = "\n---------------------------------------------------------------------";
-        $phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
-    } else {
-        $phpdbg_info = '';
-    }
+    $phpdbg_info = '';
 
     if (function_exists('opcache_invalidate')) {
         opcache_invalidate($info_file, true);
