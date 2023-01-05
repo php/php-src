@@ -267,7 +267,7 @@ typedef struct _zend_fcall_info_cache {
 #endif
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) \
-	INIT_CLASS_ENTRY_EX(class_container, class_name, sizeof(class_name)-1, functions)
+	INIT_CLASS_ENTRY_EX(class_container, class_name, strlen(class_name), functions)
 
 #define INIT_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions) \
 	{															\
