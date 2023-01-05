@@ -1012,7 +1012,7 @@ static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval
 /* }}} */
 
 /* Check if connection is liveness */
-static int pdo_firebird_check_liveness(pdo_dbh_t *dbh){
+static zend_result pdo_firebird_check_liveness(pdo_dbh_t *dbh){
 	ISC_STATUS status[20];
 	static char info[] = { isc_info_base_level, isc_info_end };
 	char result[8];
