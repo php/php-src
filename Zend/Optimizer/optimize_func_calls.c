@@ -23,10 +23,8 @@
 
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
-#include "zend_API.h"
-#include "zend_constants.h"
-#include "zend_execute.h"
-#include "zend_vm.h"
+#include "zend_arena.h"
+#include "zend_execute.h" // for zend_vm_calc_used_stack()
 
 typedef struct _optimizer_call_info {
 	zend_function *func;
