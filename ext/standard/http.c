@@ -193,26 +193,27 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				case IS_LONG:
 					smart_str_append_long(formstr, Z_LVAL_P(zdata));
 					break;
+				case IS_DOUBLE: {
+					zend_string *ekey;
+					zend_string *tmp = zend_double_to_str(Z_DVAL_P(zdata));
+					if (enc_type == PHP_QUERY_RFC3986) {
+						ekey = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+					} else {
+						ekey = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+					}
+					smart_str_append(formstr, ekey);
+					zend_string_free(tmp);
+					zend_string_free(ekey);
+					break;
+				}
 				case IS_FALSE:
 					smart_str_appendl(formstr, "0", sizeof("0")-1);
 					break;
 				case IS_TRUE:
 					smart_str_appendl(formstr, "1", sizeof("1")-1);
 					break;
-				default:
-					{
-						zend_string *ekey;
-						zend_string *tmp;
-						zend_string *str= zval_get_tmp_string(zdata, &tmp);
-						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(ZSTR_VAL(str), ZSTR_LEN(str));
-						} else {
-							ekey = php_url_encode(ZSTR_VAL(str), ZSTR_LEN(str));
-						}
-						smart_str_append(formstr, ekey);
-						zend_tmp_string_release(tmp);
-						zend_string_free(ekey);
-					}
+				/* All possible types are either handled here or previously */
+				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
