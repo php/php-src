@@ -114,15 +114,10 @@ int mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		int c1 = filter->cache, w = 0;
 
-		if (c1 >= 0x81 && c1 <= 0xa0 && c >= 0x41 && c <= 0xfe) {
+		if (c1 >= 0x81 && c1 <= 0xc6 && c >= 0x41 && c <= 0xfe) {
 			w = (c1 - 0x81)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc1_ucs_table_size) {
 				w = uhc1_ucs_table[w];
-			}
-		} else if (c1 >= 0xa1 && c1 <= 0xc6 && c >= 0x41 && c <= 0xfe) {
-			w = (c1 - 0xa1)*190 + (c - 0x41);
-			if (w >= 0 && w < uhc2_ucs_table_size) {
-				w = uhc2_ucs_table[w];
 			}
 		} else if (c1 >= 0xc7 && c1 < 0xfe && c >= 0xa1 && c <= 0xfe) {
 			w = (c1 - 0xc7)*94 + (c - 0xa1);
@@ -201,29 +196,39 @@ static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf,
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 
+	e--; /* Stop the main loop 1 byte short of the end of the input */
+
 	while (p < e && out < limit) {
 		unsigned char c = *p++;
 
 		if (c < 0x80) {
 			*out++ = c;
-		} else if (c > 0x80 && c < 0xFE && c != 0xC9 && p < e) {
+		} else if (c > 0x80 && c < 0xFE) {
+			/* We don't need to check p < e here; it's not possible that this pointer dereference
+			 * will be outside the input string, because of e-- above */
 			unsigned char c2 = *p++;
+			if (c2 < 0x41 || c2 == 0xFF) {
+				*out++ = MBFL_BAD_INPUT;
+				continue;
+			}
 			unsigned int w = 0;
 
-			if (c >= 0x81 && c <= 0xA0 && c2 >= 0x41 && c2 <= 0xFE) {
-				w = (c - 0x81)*190 + (c2 - 0x41);
-				if (w < uhc1_ucs_table_size) {
-					w = uhc1_ucs_table[w];
-				}
-			} else if (c >= 0xA1 && c <= 0xC6 && c2 >= 0x41 && c2 <= 0xFE) {
-				w = (c - 0xA1)*190 + (c2 - 0x41);
-				if (w < uhc2_ucs_table_size) {
-					w = uhc2_ucs_table[w];
-				}
-			} else if (c >= 0xC7 && c < 0xFE && c2 >= 0xA1 && c2 <= 0xFE) {
-				w = (c - 0xC7)*94 + (c2 - 0xA1);
-				if (w < uhc3_ucs_table_size) {
-					w = uhc3_ucs_table[w];
+			if (c <= 0xC6) {
+				w = (c - 0x81)*190 + c2 - 0x41;
+				ZEND_ASSERT(w < uhc1_ucs_table_size);
+				w = uhc1_ucs_table[w];
+			} else if (c2 >= 0xA1) {
+				w = (c - 0xC7)*94 + c2 - 0xA1;
+				ZEND_ASSERT(w < uhc3_ucs_table_size);
+				w = uhc3_ucs_table[w];
+				if (!w) {
+					/* If c == 0xC9, we shouldn't have tried to read a 2-byte char at all... but it is faster
+					 * to fix up that rare case here rather than include an extra check in the hot path */
+					if (c == 0xC9) {
+						p--;
+					}
+					*out++ = MBFL_BAD_INPUT;
+					continue;
 				}
 			}
 			if (!w) {
@@ -235,7 +240,13 @@ static size_t mb_uhc_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf,
 		}
 	}
 
-	*in_len = e - p;
+	/* Finish up last byte of input string if there is one */
+	if (p == e && out < limit) {
+		unsigned char c = *p++;
+		*out++ = (c < 0x80) ? c : MBFL_BAD_INPUT;
+	}
+
+	*in_len = e - p + 1;
 	*in = p;
 	return out - buf;
 }

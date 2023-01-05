@@ -118,9 +118,9 @@ int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
 			if (flag == 1) { /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
-				w = (c1 - 0xa1)*190 + c - 0x41;
-				ZEND_ASSERT(w < uhc2_ucs_table_size);
-				w = uhc2_ucs_table[w];
+				w = (c1 - 0x81)*190 + c - 0x41;
+				ZEND_ASSERT(w < uhc1_ucs_table_size);
+				w = uhc1_ucs_table[w];
 			} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
 				w = (c1 - 0xc7)*94 + c - 0xa1;
 				ZEND_ASSERT(w < uhc3_ucs_table_size);
@@ -216,23 +216,25 @@ static size_t mb_euckr_to_wchar(unsigned char **in, size_t *in_len, uint32_t *bu
 			*out++ = c;
 		} else if (((c >= 0xA1 && c <= 0xAC) || (c >= 0xB0 && c <= 0xFD)) && c != 0xC9 && p < e) {
 			unsigned char c2 = *p++;
+			if (c2 < 0xA1 || c2 == 0xFF) {
+				*out++ = MBFL_BAD_INPUT;
+				continue;
+			}
 
-			if (c >= 0xA1 && c <= 0xC6 && c2 >= 0xA1 && c2 <= 0xFE) {
-				unsigned int w = (c - 0xA1)*190 + c2 - 0x41;
-				ZEND_ASSERT(w < uhc2_ucs_table_size);
-				w = uhc2_ucs_table[w];
+			if (c <= 0xC6) {
+				unsigned int w = (c - 0x81)*190 + c2 - 0x41;
+				ZEND_ASSERT(w < uhc1_ucs_table_size);
+				w = uhc1_ucs_table[w];
 				if (!w)
 					w = MBFL_BAD_INPUT;
 				*out++ = w;
-			} else if (c >= 0xC7 && c <= 0xFE && c != 0xC9 && c2 >= 0xA1 && c2 <= 0xFE) {
+			} else {
 				unsigned int w = (c - 0xC7)*94 + c2 - 0xA1;
 				ZEND_ASSERT(w < uhc3_ucs_table_size);
 				w = uhc3_ucs_table[w];
 				if (!w)
 					w = MBFL_BAD_INPUT;
 				*out++ = w;
-			} else {
-				*out++ = MBFL_BAD_INPUT;
 			}
 		} else {
 			*out++ = MBFL_BAD_INPUT;

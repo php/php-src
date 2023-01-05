@@ -388,6 +388,22 @@ int mbfl_filt_conv_wchar_gb18030(int c, mbfl_convert_filter *filter)
 	return 0;
 }
 
+static const unsigned short gb18030_pua_tbl3[] = {
+/* 0xFE50 */
+0x0000,0xE816,0xE817,0xE818,0x0000,0x0000,0x0000,0x0000,
+0x0000,0xE81E,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+0x0000,0xE826,0x0000,0x0000,0x0000,0x0000,0xE82B,0xE82C,
+0x0000,0x0000,0x0000,0x0000,0xE831,0xE832,0x0000,0x0000,
+0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0xE83B,0x0000,
+0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0xE843,0x0000,
+0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+0xE854,0xE855,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+/* 0xFEA0 */
+0xE864
+};
+
 static size_t mb_gb18030_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -398,9 +414,14 @@ static size_t mb_gb18030_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 
 		if (c < 0x80) {
 			*out++ = c;
-		} else if (c > 0x80 && c < 0xFF && p < e) {
+		} else if (c == 0x80 || c == 0xFF) {
+			*out++ = MBFL_BAD_INPUT;
+		} else {
+			if (p == e) {
+				*out++ = MBFL_BAD_INPUT;
+				break;
+			}
 			unsigned char c2 = *p++;
-			unsigned int s = (c << 8) | c2;
 
 			if (((c >= 0x81 && c <= 0x84) || (c >= 0x90 && c <= 0xE3)) && c2 >= 0x30 && c2 <= 0x39) {
 				if (p >= e) {
@@ -437,32 +458,39 @@ static size_t mb_gb18030_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 			} else if (c >= 0xA1 && c <= 0xA7 && c2 >= 0x40 && c2 < 0xA1 && c2 != 0x7F) {
 				/* UDA part 3: U+E4C6-U+E765 */
 				*out++ = 96*(c - 0xA1) + c2 - (c2 >= 0x80 ? 0x41 : 0x40) + 0xE4C6;
-			} else {
-				if ((s >= 0xA2AB && s <= 0xA9FE) || (s >= 0xD7FA && s <= 0xD7FE) || (s >= 0xFE50 && s <= 0xFEA0)) {
-					for (int i = 0; i < mbfl_gb18030_pua_tbl_max; i++) {
-						if (s >= mbfl_gb18030_pua_tbl[i][2] && s <= mbfl_gb18030_pua_tbl[i][2] + mbfl_gb18030_pua_tbl[i][1] - mbfl_gb18030_pua_tbl[i][0]) {
-							*out++ = s - mbfl_gb18030_pua_tbl[i][2] + mbfl_gb18030_pua_tbl[i][0];
-							goto next_iteration;
+			} else if (c2 >= 0x40 && c2 != 0x7F && c2 != 0xFF) {
+				unsigned int w = (c - 0x81)*192 + c2 - 0x40;
+
+				if (w >= 0x192B) {
+					if (w <= 0x1EBE) {
+						if (w != 0x1963 && w != 0x1DBF && (w < 0x1E49 || w > 0x1E55) && w != 0x1E7F) {
+							*out++ = cp936_pua_tbl1[w - 0x192B];
+							continue;
+						}
+					} else if (w >= 0x413A) {
+						if (w <= 0x413E) {
+							*out++ = cp936_pua_tbl2[w - 0x413A];
+							continue;
+						} else if (w >= 0x5DD0 && w <= 0x5E20) {
+							unsigned int c = gb18030_pua_tbl3[w - 0x5DD0];
+							if (c) {
+								*out++ = c;
+								continue;
+							}
 						}
 					}
 				}
 
-				if ((c >= 0xA1 && c <= 0xA9 && c2 >= 0xA1 && c2 <= 0xFE) ||
-					(c >= 0xB0 && c <= 0xf7 && c2 >= 0xa1 && c2 <= 0xfe) ||
-					(c >= 0x81 && c <= 0xa0 && c2 >= 0x40 && c2 <= 0xfe && c2 != 0x7f) ||
-					(c >= 0xAA && c <= 0xfe && c2 >= 0x40 && c2 <= 0xa0 && c2 != 0x7f) ||
-					(c >= 0xA8 && c <= 0xa9 && c2 >= 0x40 && c2 <= 0xa0 && c2 != 0x7F)) {
-					unsigned int w = (c - 0x81)*192 + c2 - 0x40;
+				if ((c >= 0x81 && c <= 0xA9) || (c >= 0xB0 && c <= 0xF7 && c2 >= 0xA1) || (c >= 0xAA && c <= 0xFE && c2 <= 0xA0)) {
 					ZEND_ASSERT(w < cp936_ucs_table_size);
 					*out++ = cp936_ucs_table[w];
 				} else {
 					*out++ = MBFL_BAD_INPUT;
 				}
+			} else {
+				*out++ = MBFL_BAD_INPUT;
 			}
-		} else {
-			*out++ = MBFL_BAD_INPUT;
 		}
-next_iteration: ;
 	}
 
 	*in_len = e - p;

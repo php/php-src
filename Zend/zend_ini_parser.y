@@ -187,9 +187,8 @@ static ZEND_COLD void ini_error(const char *msg)
 {
 	char *error_buf;
 	int error_buf_len;
-	char *currently_parsed_filename;
 
-	currently_parsed_filename = zend_ini_scanner_get_filename();
+	const char *const currently_parsed_filename = zend_ini_scanner_get_filename();
 	if (currently_parsed_filename) {
 		error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
 		error_buf = (char *) emalloc(error_buf_len);
@@ -239,7 +238,7 @@ ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_e
 /* }}} */
 
 /* {{{ zend_parse_ini_string() */
-ZEND_API zend_result zend_parse_ini_string(char *str, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;

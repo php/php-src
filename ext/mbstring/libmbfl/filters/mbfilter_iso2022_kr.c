@@ -119,9 +119,9 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 		if (flag > 0 && c > 0x20 && c < 0x7f) {
 			if (flag == 1) {
 				if (c1 != 0x22 || c <= 0x65) {
-					w = (c1 - 0x21)*190 + (c - 0x41) + 0x80;
-					ZEND_ASSERT(w < uhc2_ucs_table_size);
-					w = uhc2_ucs_table[w];
+					w = (c1 - 1)*190 + (c - 0x41) + 0x80;
+					ZEND_ASSERT(w < uhc1_ucs_table_size);
+					w = uhc1_ucs_table[w];
 				}
 			} else {
 				w = (c1 - 0x47)*94 + c - 0x21;
@@ -329,9 +329,9 @@ static size_t mb_iso2022kr_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 
 			if (c < 0x47) {
 				if (c != 0x22 || c2 <= 0x65) {
-					w = (c - 0x21)*190 + (c2 - 0x41) + 0x80;
-					ZEND_ASSERT(w < uhc2_ucs_table_size);
-					w = uhc2_ucs_table[w];
+					w = (c - 1)*190 + c2 - 0x41 + 0x80;
+					ZEND_ASSERT(w < uhc1_ucs_table_size);
+					w = uhc1_ucs_table[w];
 				}
 			} else if (c != 0x49 && c <= 0x7D) {
 				w = (c - 0x47)*94 + c2 - 0x21;
