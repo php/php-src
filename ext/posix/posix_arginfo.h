@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a6ba91179f2a7ca3622aed0c28e8431868076567 */
+ * Stub hash: 68daa5f0b270b307501a785ca6a197ea161a2ded */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -164,6 +164,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_sysconf, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, conf_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_pathconf, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(posix_kill);
 ZEND_FUNCTION(posix_getpid);
@@ -228,6 +233,7 @@ ZEND_FUNCTION(posix_strerror);
 ZEND_FUNCTION(posix_initgroups);
 #endif
 ZEND_FUNCTION(posix_sysconf);
+ZEND_FUNCTION(posix_pathconf);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -295,6 +301,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(posix_initgroups, arginfo_posix_initgroups)
 #endif
 	ZEND_FE(posix_sysconf, arginfo_posix_sysconf)
+	ZEND_FE(posix_pathconf, arginfo_posix_pathconf)
 	ZEND_FE_END
 };
 
@@ -387,5 +394,35 @@ static void register_posix_symbols(int module_number)
 #endif
 #if defined(_SC_NPROCESSORS_ONLN)
 	REGISTER_LONG_CONSTANT("POSIX_SC_NPROCESSORS_ONLN", _SC_NPROCESSORS_ONLN, CONST_PERSISTENT);
+#endif
+#if defined(_PC_LINK_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_PC_LINK_MAX", _PC_LINK_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_PC_MAX_CANON)
+	REGISTER_LONG_CONSTANT("POSIX_PC_MAX_CANON", _PC_MAX_CANON, CONST_PERSISTENT);
+#endif
+#if defined(_PC_MAX_INPUT)
+	REGISTER_LONG_CONSTANT("POSIX_PC_MAX_INPUT", _PC_MAX_INPUT, CONST_PERSISTENT);
+#endif
+#if defined(_PC_NAME_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_PC_NAME_MAX", _PC_NAME_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_PC_PATH_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_PC_PATH_MAX", _PC_PATH_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_PC_PIPE_BUF)
+	REGISTER_LONG_CONSTANT("POSIX_PC_PIPE_BUF", _PC_PIPE_BUF, CONST_PERSISTENT);
+#endif
+#if defined(_PC_CHOWN_RESTRICTED)
+	REGISTER_LONG_CONSTANT("POSIX_PC_CHOWN_RESTRICTED", _PC_CHOWN_RESTRICTED, CONST_PERSISTENT);
+#endif
+#if defined(_PC_NO_TRUNC)
+	REGISTER_LONG_CONSTANT("POSIX_PC_NO_TRUNC", _PC_NO_TRUNC, CONST_PERSISTENT);
+#endif
+#if defined(_PC_ALLOC_SIZE_MIN)
+	REGISTER_LONG_CONSTANT("POSIX_PC_ALLOC_SIZE_MIN", _PC_ALLOC_SIZE_MIN, CONST_PERSISTENT);
+#endif
+#if defined(_PC_SYMLINK_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_PC_SYMLINK_MAX", _PC_SYMLINK_MAX, CONST_PERSISTENT);
 #endif
 }

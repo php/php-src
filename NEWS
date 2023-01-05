@@ -64,6 +64,7 @@ PHP                                                                        NEWS
 
 - Posix:
   . Added posix_sysconf. (David Carlier)
+  . Added posix_pathconf. (David Carlier)
 
 - Random:
   . Added Randomizer::getBytesFromString(). (Joshua Rüsweg)
