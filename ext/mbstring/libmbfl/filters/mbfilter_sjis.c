@@ -38,7 +38,7 @@
 
 static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter);
 
-const unsigned char mblen_table_sjis[] = { /* 0x81-0x9F,0xE0-0xFC */
+const unsigned char mblen_table_sjis[] = { /* 0x81-0x9F,0xE0-0xEF */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -54,7 +54,7 @@ const unsigned char mblen_table_sjis[] = { /* 0x81-0x9F,0xE0-0xFC */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
 static const char *mbfl_encoding_sjis_aliases[] = {"x-sjis", "SHIFT-JIS", NULL};
