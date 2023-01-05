@@ -1,5 +1,7 @@
 --TEST--
 PDO_Firebird: Check persistent conection is alive
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --FILE--
