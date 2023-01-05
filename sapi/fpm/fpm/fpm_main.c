@@ -1488,18 +1488,23 @@ static PHP_MINFO_FUNCTION(cgi)
 
 PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
+	bool close_conn = 1;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(close_conn)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!fcgi_is_closed(request)) {
 		php_output_end_all();
 		php_header();
 
+		if (close_conn) {
+			fcgi_request_set_keep(request, 0);
+		}
 		fcgi_end(request);
-		fcgi_close(request, 0, 0);
+		fcgi_close(request, 0, close_conn);
 		RETURN_TRUE;
 	}
 
