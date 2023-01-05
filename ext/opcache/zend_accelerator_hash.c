@@ -19,9 +19,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "ZendAccelerator.h"
 #include "zend_accelerator_hash.h"
-#include "zend_hash.h"
 #include "zend_shared_alloc.h"
 
 /* Generated on an Octa-ALPHA 300MHz CPU & 2.5GB RAM monster */
