@@ -22,7 +22,17 @@
 #ifndef ZEND_EXCEPTIONS_H
 #define ZEND_EXCEPTIONS_H
 
+#include "zend_long.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_result.h"
+
+#include <stdbool.h>
+
+typedef struct _zend_class_entry zend_class_entry;
+typedef struct _zend_object zend_object;
+typedef struct _zend_string zend_string;
+typedef struct _zval_struct zval;
+typedef struct _zend_array HashTable;
 
 BEGIN_EXTERN_C()
 

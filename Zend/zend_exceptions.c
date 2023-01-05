@@ -19,16 +19,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_builtin_functions.h"
-#include "zend_interfaces.h"
 #include "zend_exceptions.h"
-#include "zend_vm.h"
-#include "zend_dtrace.h"
+#include "zend_API.h"
+#include "zend_builtin_functions.h" // for zend_fetch_debug_backtrace()
+#include "zend_interfaces.h" // for zend_ce_stringable
 #include "zend_smart_str.h"
-#include "zend_exceptions_arginfo.h"
-#include "zend_observer.h"
+#include "zend_exceptions_arginfo.h" // for register_class_*()
+#include "zend_objects.h" // for zend_objects_new()
+#include "zend_observer.h" // for zend_observer_error_notify()
+
+#ifdef HAVE_DTRACE
+#include "zend_dtrace.h"
+#endif
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
