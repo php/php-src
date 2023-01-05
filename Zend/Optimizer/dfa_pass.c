@@ -19,6 +19,7 @@
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
+#include "zend_arena.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
