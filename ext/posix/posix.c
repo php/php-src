@@ -1196,3 +1196,28 @@ PHP_FUNCTION(posix_sysconf)
 
 	RETURN_LONG(sysconf(conf_id));
 }
+
+PHP_FUNCTION(posix_pathconf)
+{
+	zend_long name, ret;
+	char *path;
+	size_t path_len;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(path, path_len)
+		Z_PARAM_LONG(name);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (path_len == 0) {
+		RETURN_FALSE;
+	}
+
+	ret = pathconf(path, name);
+
+	if (ret < 0 && errno != 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
+}
