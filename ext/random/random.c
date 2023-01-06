@@ -234,7 +234,7 @@ static zend_object *php_random_randomizer_new(zend_class_entry *ce)
 static void randomizer_free_obj(zend_object *object) {
 	php_random_randomizer *randomizer = php_random_randomizer_from_obj(object);
 
-	if (randomizer->is_userland_algo && randomizer->status) {
+	if (randomizer->is_userland_algo) {
 		php_random_status_free(randomizer->status, false);
 	}
 
@@ -261,9 +261,11 @@ PHPAPI php_random_status *php_random_status_copy(const php_random_algo *algo, ph
 
 PHPAPI void php_random_status_free(php_random_status *status, const bool persistent)
 {
-	if (status->state) {
-		pefree(status->state, persistent);
+	if (status == NULL) {
+		return;
 	}
+
+	pefree(status->state, persistent);
 	pefree(status, persistent);
 }
 
@@ -285,10 +287,7 @@ PHPAPI void php_random_engine_common_free_object(zend_object *object)
 {
 	php_random_engine *engine = php_random_engine_from_obj(object);
 
-	if (engine->status) {
-		php_random_status_free(engine->status, false);
-	}
-
+	php_random_status_free(engine->status, false);
 	zend_object_std_dtor(object);
 }
 
