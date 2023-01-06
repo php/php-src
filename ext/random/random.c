@@ -828,7 +828,7 @@ static PHP_GINIT_FUNCTION(random)
 /* {{{ PHP_GSHUTDOWN_FUNCTION */
 static PHP_GSHUTDOWN_FUNCTION(random)
 {
-	if (random_globals->random_fd > 0) {
+	if (random_globals->random_fd >= 0) {
 		close(random_globals->random_fd);
 		random_globals->random_fd = -1;
 	}
