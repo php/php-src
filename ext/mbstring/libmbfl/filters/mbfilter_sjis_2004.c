@@ -41,7 +41,7 @@
 #include "unicode_table_jis2004.h"
 #include "unicode_table_jis.h"
 
-extern const unsigned char mblen_table_sjis[];
+extern const unsigned char mblen_table_sjis_mobile[];
 extern const unsigned char mblen_table_eucjp[];
 
 static size_t mb_sjis2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
@@ -62,7 +62,7 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	"SJIS-2004",
 	"Shift_JIS",
 	mbfl_encoding_sjis2004_aliases,
-	mblen_table_sjis,
+	mblen_table_sjis_mobile, /* Leading byte values used for SJIS-2004 are the same as mobile SJIS variants */
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis2004_wchar,
 	&vtbl_wchar_sjis2004,

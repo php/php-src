@@ -35,8 +35,26 @@
 
 #include "emoji2uni.h"
 
+const unsigned char mblen_table_sjis_mobile[] = { /* 0x81-0x9F,0xE0-0xFC */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1
+};
+
 extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
-extern const unsigned char mblen_table_sjis[];
 
 static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter);
 static size_t mb_sjis_docomo_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
@@ -55,7 +73,7 @@ const mbfl_encoding mbfl_encoding_sjis_docomo = {
 	"SJIS-Mobile#DOCOMO",
 	"Shift_JIS",
 	mbfl_encoding_sjis_docomo_aliases,
- 	mblen_table_sjis,
+	mblen_table_sjis_mobile,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_docomo_wchar,
 	&vtbl_wchar_sjis_docomo,
@@ -68,7 +86,7 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
 	"SJIS-Mobile#KDDI",
 	"Shift_JIS",
 	mbfl_encoding_sjis_kddi_aliases,
- 	mblen_table_sjis,
+	mblen_table_sjis_mobile,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_kddi_wchar,
 	&vtbl_wchar_sjis_kddi,
@@ -81,7 +99,7 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
 	"SJIS-Mobile#SOFTBANK",
 	"Shift_JIS",
 	mbfl_encoding_sjis_sb_aliases,
- 	mblen_table_sjis,
+	mblen_table_sjis_mobile,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_sb_wchar,
 	&vtbl_wchar_sjis_sb,
