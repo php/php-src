@@ -24,6 +24,9 @@ PHP                                                                        NEWS
     (ilutov)
   . Fix bug GH-10083 (Allow comments between & and parameter). (ilutov)
 
+- Date:
+  . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
+
 - Exif:
   . Removed unneeded codepaths in exif_process_TIFF_in_JPEG(). (nielsdos)
 
