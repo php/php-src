@@ -26,6 +26,13 @@ PHP 8.3 UPGRADE NOTES
     (`fiber.stack_size-zend.reserved_stack_size` for fibers).
   . Class constants can now be accessed dynamically using the C::{$name} syntax.
     RFC: https://wiki.php.net/rfc/dynamic_class_constant_fetch
+  . Executing proc_get_status() multiple times will now always return the right
+    value on posix systems. Previously, only the first call of the function
+    returned the right value. Executing proc_close() after proc_get_status() will
+    now also return the right exit code. Previously this would return -1.
+    Internally, this works by caching the result on posix systems. If you want
+    the old behaviour, you can check the "cached" key in the array returned by
+    proc_get_status() to check whether the result was cached.
 
 - FFI:
   . C functions that have a return type of void now return null instead of

@@ -226,6 +226,28 @@ static void _php_free_envp(php_process_env env)
 }
 /* }}} */
 
+#if HAVE_SYS_WAIT_H
+static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int options)
+{
+	if (proc->has_cached_exit_wait_status) {
+		*wait_status = proc->cached_exit_wait_status_value;
+		return proc->child;
+	}
+
+	pid_t wait_pid = waitpid(proc->child, wait_status, options);
+
+	/* The "exit" status is the final status of the process.
+	 * If we were to cache the status unconditionally,
+	 * we would return stale statuses in the future after the process continues. */
+	if (wait_pid > 0 && WIFEXITED(*wait_status)) {
+		proc->has_cached_exit_wait_status = true;
+		proc->cached_exit_wait_status_value = *wait_status;
+	}
+
+	return wait_pid;
+}
+#endif
+
 /* {{{ proc_open_rsrc_dtor
  * Free `proc` resource, either because all references to it were dropped or because `pclose` or
  * `proc_close` were called */
@@ -270,7 +292,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 		waitpid_options = WNOHANG;
 	}
 	do {
-		wait_pid = waitpid(proc->child, &wstatus, waitpid_options);
+		wait_pid = waitpid_cached(proc, &wstatus, waitpid_options);
 	} while (wait_pid == -1 && errno == EINTR);
 
 	if (wait_pid <= 0) {
@@ -382,8 +404,12 @@ PHP_FUNCTION(proc_get_status)
 	running = wstatus == STILL_ACTIVE;
 	exitcode = running ? -1 : wstatus;
 
+	/* The status is always available on Windows and will always read the same,
+	 * even if the child has already exited. This is because the result stays available
+	 * until the child handle is closed. Hence no caching is used on Windows. */
+	add_assoc_bool(return_value, "cached", false);
 #elif HAVE_SYS_WAIT_H
-	wait_pid = waitpid(proc->child, &wstatus, WNOHANG|WUNTRACED);
+	wait_pid = waitpid_cached(proc, &wstatus, WNOHANG|WUNTRACED);
 
 	if (wait_pid == proc->child) {
 		if (WIFEXITED(wstatus)) {
@@ -404,6 +430,8 @@ PHP_FUNCTION(proc_get_status)
 		 * looking for either does not exist or is not a child of this process */
 		running = 0;
 	}
+
+	add_assoc_bool(return_value, "cached", proc->has_cached_exit_wait_status);
 #endif
 
 	add_assoc_bool(return_value, "running", running);
@@ -1250,6 +1278,9 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
+#if HAVE_SYS_WAIT_H
+	proc->has_cached_exit_wait_status = false;
+#endif
 
 	/* Clean up all the child ends and then open streams on the parent
 	 *   ends, where appropriate */
