@@ -401,7 +401,7 @@ struct _zend_array {
 #define HT_MIN_SIZE 8
 
 #if SIZEOF_SIZE_T == 4
-# define HT_MAX_SIZE 0x04000000 /* small enough to avoid overflow checks */
+# define HT_MAX_SIZE 0x02000000 /* small enough to avoid overflow checks */
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((Bucket*)((char*)(data) + (idx)))
 # define HT_IDX_TO_HASH(idx) \
@@ -409,7 +409,7 @@ struct _zend_array {
 # define HT_HASH_TO_IDX(idx) \
 	((idx) / sizeof(Bucket))
 #elif SIZEOF_SIZE_T == 8
-# define HT_MAX_SIZE 0x80000000
+# define HT_MAX_SIZE 0x40000000
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((data) + (idx))
 # define HT_IDX_TO_HASH(idx) \
