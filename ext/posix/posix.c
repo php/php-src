@@ -1204,11 +1204,11 @@ PHP_FUNCTION(posix_pathconf)
 	size_t path_len;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(path, path_len)
+		Z_PARAM_PATH(path, path_len)
 		Z_PARAM_LONG(name);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (path_len == 0) {
+	if (path_len == 0 || php_check_open_basedir(path)) {
 		RETURN_FALSE;
 	}
 
