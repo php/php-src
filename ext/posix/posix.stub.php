@@ -219,6 +219,76 @@ const POSIX_SC_NPROCESSORS_CONF = UNKNOWN;
  */
 const POSIX_SC_NPROCESSORS_ONLN = UNKNOWN;
 #endif
+#ifdef _PC_LINK_MAX
+/**
+ * @var int
+ * @cvalue _PC_LINK_MAX
+ */
+const POSIX_PC_LINK_MAX = UNKNOWN;
+#endif
+#ifdef _PC_MAX_CANON
+/**
+ * @var int
+ * @cvalue _PC_MAX_CANON
+ */
+const POSIX_PC_MAX_CANON = UNKNOWN;
+#endif
+#ifdef _PC_MAX_INPUT
+/**
+ * @var int
+ * @cvalue _PC_MAX_INPUT
+ */
+const POSIX_PC_MAX_INPUT = UNKNOWN;
+#endif
+#ifdef _PC_NAME_MAX
+/**
+ * @var int
+ * @cvalue _PC_NAME_MAX
+ */
+const POSIX_PC_NAME_MAX = UNKNOWN;
+#endif
+#ifdef _PC_PATH_MAX
+/**
+ * @var int
+ * @cvalue _PC_PATH_MAX
+ */
+const POSIX_PC_PATH_MAX = UNKNOWN;
+#endif
+#ifdef _PC_PIPE_BUF
+/**
+ * @var int
+ * @cvalue _PC_PIPE_BUF
+ */
+const POSIX_PC_PIPE_BUF = UNKNOWN;
+#endif
+#ifdef _PC_CHOWN_RESTRICTED
+/**
+ * @var int
+ * @cvalue _PC_CHOWN_RESTRICTED
+ */
+const POSIX_PC_CHOWN_RESTRICTED = UNKNOWN;
+#endif
+#ifdef _PC_NO_TRUNC
+/**
+ * @var int
+ * @cvalue _PC_NO_TRUNC
+ */
+const POSIX_PC_NO_TRUNC = UNKNOWN;
+#endif
+#ifdef _PC_ALLOC_SIZE_MIN
+/**
+ * @var int
+ * @cvalue _PC_ALLOC_SIZE_MIN
+ */
+const POSIX_PC_ALLOC_SIZE_MIN = UNKNOWN;
+#endif
+#ifdef _PC_SYMLINK_MAX
+/**
+ * @var int
+ * @cvalue _PC_SYMLINK_MAX
+ */
+const POSIX_PC_SYMLINK_MAX = UNKNOWN;
+#endif
 
 function posix_kill(int $process_id, int $signal): bool {}
 
@@ -357,3 +427,5 @@ function posix_initgroups(string $username, int $group_id): bool {}
 #endif
 
 function posix_sysconf(int $conf_id): int {}
+
+function posix_pathconf(string $path, int $name): int|false {}

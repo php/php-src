@@ -71,6 +71,7 @@ PHP 8.3 UPGRADE NOTES
 
 - Posix:
   . Added posix_sysconf call to get runtime informations.
+  . Added posix_pathconf call to get configuration value from a directory/file.
 
 - Random:
   . Added Randomizer::getBytesFromString().

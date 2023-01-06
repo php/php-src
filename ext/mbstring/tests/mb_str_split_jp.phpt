@@ -69,6 +69,17 @@ if(end($array) !== $enc){
         last array element: %s expected: %s\n", unpack("H*", end($array))[1],unpack("H*", $enc)[1]);
 }
 
+/* SJIS byte 0x80 was previously wrongly treated as the starting byte for a 2-byte character */
+echo "== Regression test for SJIS byte 0x80 ==\n";
+foreach (['SJIS', 'SJIS-2004', 'MacJapanese', 'SJIS-Mobile#DOCOMO', 'SJIS-Mobile#KDDI', 'SJIS-Mobile#SoftBank'] as $encoding) {
+    $array = mb_str_split("\x80\xA1abc\x80\xA1", 2, $encoding);
+    echo "$encoding: [" . implode(', ', array_map('bin2hex', $array)) . "]\n";
+
+    // Also try bytes 0xFD, 0xFE, and 0xFF
+    $array = mb_str_split("abc\xFD\xFE\xFFab\xFD\xFE\xFF", 2, $encoding);
+    echo "$encoding: [" . implode(', ', array_map('bin2hex', $array)) . "]\n";
+}
+
 ?>
 --EXPECT--
 BIG-5: a4e9 a5bb
@@ -80,3 +91,16 @@ UTF-16LE: e565 2c67
 UTF-32BE: 000065e5 0000672c
 UTF-32LE: e5650000 2c670000
 UTF-8: e697a5 e69cac
+== Regression test for SJIS byte 0x80 ==
+SJIS: [80a1, 6162, 6380, a1]
+SJIS: [6162, 63fd, feff, 6162, fdfe, ff]
+SJIS-2004: [80a1, 6162, 6380, a1]
+SJIS-2004: [6162, 63fd, feff, 6162, fdfe, ff]
+MacJapanese: [80a1, 6162, 6380, a1]
+MacJapanese: [6162, 63fd, feff, 6162, fdfe, ff]
+SJIS-Mobile#DOCOMO: [80a1, 6162, 6380, a1]
+SJIS-Mobile#DOCOMO: [6162, 63fd, feff, 6162, fdfe, ff]
+SJIS-Mobile#KDDI: [80a1, 6162, 6380, a1]
+SJIS-Mobile#KDDI: [6162, 63fd, feff, 6162, fdfe, ff]
+SJIS-Mobile#SoftBank: [80a1, 6162, 6380, a1]
+SJIS-Mobile#SoftBank: [6162, 63fd, feff, 6162, fdfe, ff]
