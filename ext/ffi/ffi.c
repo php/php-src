@@ -1107,7 +1107,7 @@ static zval *zend_ffi_cdata_get(zend_object *obj, zend_string *member, int read_
 
 	if (UNEXPECTED(!zend_string_equals_literal(member, "cdata"))) {
 		zend_throw_error(zend_ffi_exception_ce, "Only 'cdata' property may be read");
-		return &EG(uninitialized_zval);;
+		return &EG(uninitialized_zval);
 	}
 
 	zend_ffi_cdata_to_zval(cdata, cdata->ptr, type, BP_VAR_R, rv, 0, 0, 0);
@@ -1123,13 +1123,13 @@ static zval *zend_ffi_cdata_set(zend_object *obj, zend_string *member, zval *val
 #if 0
 	if (UNEXPECTED(!cdata->ptr)) {
 		zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-		return &EG(uninitialized_zval);;
+		return &EG(uninitialized_zval);
 	}
 #endif
 
 	if (UNEXPECTED(!zend_string_equals_literal(member, "cdata"))) {
 		zend_throw_error(zend_ffi_exception_ce, "Only 'cdata' property may be set");
-		return &EG(uninitialized_zval);;
+		return &EG(uninitialized_zval);
 	}
 
 	zend_ffi_zval_to_cdata(cdata->ptr, type, value);
@@ -2648,7 +2648,7 @@ again:
 				zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(arg);
 
 				if (zend_ffi_is_compatible_type(type, ZEND_FFI_TYPE(cdata->type))) {
-					*pass_type = zend_ffi_make_fake_struct_type(type);;
+					*pass_type = zend_ffi_make_fake_struct_type(type);
 					arg_values[n] = cdata->ptr;
 					break;
 				}
@@ -5770,7 +5770,7 @@ void zend_ffi_resolve_typedef(const char *name, size_t name_len, zend_ffi_dcl *d
 	if (FFI_G(symbols)) {
 		sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 		if (sym && sym->kind == ZEND_FFI_SYM_TYPE) {
-			dcl->type = ZEND_FFI_TYPE(sym->type);;
+			dcl->type = ZEND_FFI_TYPE(sym->type);
 			if (sym->is_const) {
 				dcl->attr |= ZEND_FFI_ATTR_CONST;
 			}

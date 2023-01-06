@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   . Added shadow stack support for fibers. (Chen Hu)
   . Fix bug GH-9965 (Fix accidental caching of default arguments with side
     effects). (ilutov)
+  . Implement GH-10217 (Use strlen() for determining the class_name length).
+    (Dennis Buteyn)
 
 - Fileinfo:
   . Upgrade bundled libmagic to 5.43. (Anatol)
