@@ -1,9 +1,9 @@
 --TEST--
 Checks that GdImage instances can be cloned from gd > 2.2.3
---SKIPIF--
-<?php if (version_compare(GD_VERSION, '2.2.0', '<')) { die("Skipped: GdImage is not clonable before gd 2.2.3"); } ?>
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php if (version_compare(GD_VERSION, '2.2.3', '<')) die("Skipped: GdImage is not clonable before gd 2.2.3"); ?>
 --FILE--
 <?php
 
