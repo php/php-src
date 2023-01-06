@@ -1,23 +1,23 @@
 --TEST--
-Checks that GdImage instances can be cloned from gd > 2.2.0
+Checks that GdImage instances can be cloned from gd > 2.2.3
 --SKIPIF--
-<?php if (version_compare(GD_VERSION, '2.2.0', '<')) { die("Skipped: GdImage is not clonable before gd 2.2.0"); } ?>
+<?php if (version_compare(GD_VERSION, '2.2.0', '<')) { die("Skipped: GdImage is not clonable before gd 2.2.3"); } ?>
 --EXTENSIONS--
 gd
 --FILE--
 <?php
 
-    $foo = imageCreateTrueColor(32, 32);
+    $foo = imagecreatetruecolor(32, 32);
     $bar = clone $foo;
 
-    $red = imageColorAllocate($foo, 255, 0, 0);
-    imageFill($foo, 0, 0, $red);
+    $red = imagecolorallocate($foo, 255, 0, 0);
+    imagefill($foo, 0, 0, $red);
 
-    $green = imageColorAllocate($bar, 0, 255, 0);
-    imageFill($bar, 0, 0, $green);
+    $green = imagecolorallocate($bar, 0, 255, 0);
+    imagefill($bar, 0, 0, $green);
 
-    var_dump(imageColorAt($foo, 0, 0) === $red);
-    var_dump(imageColorAt($bar, 0, 0) === $green);
+    var_dump(imagecolorat($foo, 0, 0) === $red);
+    var_dump(imagecolorat($bar, 0, 0) === $green);
 
 
 ?>
