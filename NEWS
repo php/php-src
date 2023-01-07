@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-10072 (PHP crashes when execute_ex is overridden and a __call
     trampoline is used from internal code). (Derick)
+  . Fix GH-10251 (Assertion `(flag & (1<<3)) == 0' failed). (nielsdos)
 
 - Date:
   . Fixed bug GH-9891 (DateTime modify with unixtimestamp (@) must work like
