@@ -47,6 +47,10 @@ PHP                                                                        NEWS
   . mb_detect_encoding's "non-strict" mode now behaves as described in the
     documentation. Previously, it would return false if the very first byte
     of the input string was invalid in all candidate encodings. (Alex Dowad)
+  . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
+    casing rules for the Greek letter sigma. For mb_convert_case, conditional
+    casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
+    MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
 
 - Opcache:
   . Added start, restart and force restart time to opcache's
