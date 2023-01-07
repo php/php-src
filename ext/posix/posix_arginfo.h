@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 68daa5f0b270b307501a785ca6a197ea161a2ded */
+ * Stub hash: b0c74c2ad41d4ae6a624f73109815fc9fe47fd1f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -169,6 +169,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_pathconf, 0, 2, MAY_BE_LON
 	ZEND_ARG_TYPE_INFO(0, name, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_fpathconf, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, file_descriptor)
+	ZEND_ARG_TYPE_INFO(0, name, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(posix_kill);
 ZEND_FUNCTION(posix_getpid);
@@ -234,6 +239,7 @@ ZEND_FUNCTION(posix_initgroups);
 #endif
 ZEND_FUNCTION(posix_sysconf);
 ZEND_FUNCTION(posix_pathconf);
+ZEND_FUNCTION(posix_fpathconf);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -302,6 +308,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(posix_sysconf, arginfo_posix_sysconf)
 	ZEND_FE(posix_pathconf, arginfo_posix_pathconf)
+	ZEND_FE(posix_fpathconf, arginfo_posix_fpathconf)
 	ZEND_FE_END
 };
 

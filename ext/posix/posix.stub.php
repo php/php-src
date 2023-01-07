@@ -429,3 +429,5 @@ function posix_initgroups(string $username, int $group_id): bool {}
 function posix_sysconf(int $conf_id): int {}
 
 function posix_pathconf(string $path, int $name): int|false {}
+/** @param resource|int $file_descriptor */
+function posix_fpathconf($file_descriptor, int $name): int|false {}

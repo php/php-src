@@ -1225,3 +1225,35 @@ PHP_FUNCTION(posix_pathconf)
 
 	RETURN_LONG(ret);
 }
+
+PHP_FUNCTION(posix_fpathconf)
+{
+	zend_long name, ret, fd;
+	zval *z_fd;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(z_fd)
+		Z_PARAM_LONG(name);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+			zend_argument_type_error(1, "must be of type int|resource, %s given",
+				zend_zval_type_name(z_fd));
+			RETURN_THROWS();
+		}
+	}
+
+	ret = fpathconf(fd, name);
+
+	if (ret < 0 && errno != 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
+}
