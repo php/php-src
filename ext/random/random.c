@@ -261,11 +261,10 @@ PHPAPI php_random_status *php_random_status_copy(const php_random_algo *algo, ph
 
 PHPAPI void php_random_status_free(php_random_status *status, const bool persistent)
 {
-	if (status == NULL) {
-		return;
+	if (status != NULL) {
+		pefree(status->state, persistent);
 	}
 
-	pefree(status->state, persistent);
 	pefree(status, persistent);
 }
 
