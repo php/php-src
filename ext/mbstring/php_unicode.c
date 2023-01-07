@@ -238,6 +238,45 @@ static uint32_t *emit_special_casing_sequence(uint32_t w, uint32_t *out)
 	return out;
 }
 
+/* Used when determining whether special casing rules should be applied to Greek letter sigma */
+static bool scan_ahead_for_cased_letter(unsigned char *in, size_t in_len, unsigned int state, const mbfl_encoding *encoding)
+{
+	uint32_t wchar_buf[64];
+
+	while (in_len) {
+		size_t out_len = encoding->to_wchar(&in, &in_len, wchar_buf, 64, &state);
+		ZEND_ASSERT(out_len <= 64);
+		for (unsigned int i = 0; i < out_len; i++) {
+			uint32_t w = wchar_buf[i];
+			if (php_unicode_is_cased(w)) {
+				return true;
+			}
+			if (!php_unicode_is_case_ignorable(w)) {
+				return false;
+			}
+		}
+	}
+
+	return false;
+}
+
+/* Used when determining whether special casing rules should be applied to Greek letter sigma */
+static bool scan_back_for_cased_letter(uint32_t *begin, uint32_t *end)
+{
+	if (end != NULL) {
+		while (--end >= begin) {
+			uint32_t w = *end;
+			if (php_unicode_is_cased(w)) {
+				return true;
+			}
+			if (!php_unicode_is_case_ignorable(w)) {
+				return false;
+			}
+		}
+	}
+	return false;
+}
+
 MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, const char *srcstr, size_t in_len, const mbfl_encoding *src_encoding, const mbfl_encoding *dst_encoding, int illegal_mode, uint32_t illegal_substchar)
 {
 	/* A Unicode codepoint can expand out to up to 3 codepoints when uppercased, lowercased, or title cased
@@ -246,6 +285,9 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 	unsigned int state = 0, title_mode = 0;
 	unsigned char *in = (unsigned char*)srcstr;
 	enum mbfl_no_encoding enc = src_encoding->no_encoding;
+	/* In rare cases, we need to scan backwards through the previously converted codepoints to see
+	 * if special conversion rules should be used for the Greek letter sigma */
+	uint32_t *converted_end = NULL;
 
 	mb_convert_buf buf;
 	mb_convert_buf_init(&buf, in_len + 1, illegal_substchar, illegal_mode);
@@ -315,6 +357,43 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 					*p++ = w;
 					continue;
 				}
+				if (w == 0x3A3) {
+					/* For Greek capital letter sigma, there is a special casing rule;
+					 * if it is the last letter in a word, it should be downcased to U+03C2
+					 * (GREEK SMALL LETTER FINAL SIGMA)
+					 * Specifically, we need to check if this codepoint is preceded by any
+					 * number of case-ignorable codepoints, preceded by a cased letter, AND
+					 * is NOT followed by any number of case-ignorable codepoints followed
+					 * by a cased letter.
+					 * Ref: http://www.unicode.org/reports/tr21/tr21-5.html
+					 * Ref: https://unicode.org/Public/UNIDATA/SpecialCasing.txt
+					 *
+					 * While the special casing rules say we should scan backwards through "any number"
+					 * of case-ignorable codepoints, that is a great implementation burden
+					 * It would basically mean we need to keep all the codepoints in a big buffer
+					 * during this conversion operation, but we don't want to do that (to reduce the
+					 * amount of temporary scratch memory used)
+					 * Hence, we only scan back through the codepoints in wchar_buf, and if we hit the
+					 * beginning of the buffer, whatever codepoints have not yet been overwritten in
+					 * the latter part of converted_buf */
+					int j = i - 1;
+					while (j >= 0 && php_unicode_is_case_ignorable(wchar_buf[j])) {
+						j--;
+					}
+					if (j >= 0 ? php_unicode_is_cased(wchar_buf[j]) : scan_back_for_cased_letter(p, converted_end)) {
+						/* Now scan ahead to look for a cased letter */
+						j = i + 1;
+						while (j < out_len && php_unicode_is_case_ignorable(wchar_buf[j])) {
+							j++;
+						}
+						/* If we hit the end of wchar_buf, convert more of the input string into
+						 * codepoints and continue scanning */
+						if (j >= out_len ? !scan_ahead_for_cased_letter(in, in_len, state, src_encoding) : !php_unicode_is_cased(wchar_buf[j])) {
+							*p++ = 0x3C2;
+							continue;
+						}
+					}
+				}
 				w = php_unicode_tolower_raw(w, enc);
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					p = emit_special_casing_sequence(w, p);
@@ -362,6 +441,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 
+		converted_end = p;
 		ZEND_ASSERT(p - converted_buf <= 192);
 		dst_encoding->from_wchar(converted_buf, p - converted_buf, &buf, !in_len);
 	}
