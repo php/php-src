@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - Posix:
   . Fix memory leak in posix_ttyname() (girgias)
 
+- Random:
+  . Fixed bug GH-10247 (Theoretical file descriptor leak for /dev/urandom). (timwolla)
+
 - Standard:
   . Fix GH-10187 (Segfault in stripslashes() with arm64). (nielsdos)
 
