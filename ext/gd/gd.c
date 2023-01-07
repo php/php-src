@@ -3987,9 +3987,7 @@ static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
 
 static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
@@ -4009,21 +4007,16 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 	if(ctx->data) {
 		ctx->data = NULL;
 	}
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 {
-
 	if(ctx->data) {
 		php_stream_close((php_stream *) ctx->data);
 		ctx->data = NULL;
 	}
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval) {
