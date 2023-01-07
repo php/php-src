@@ -400,8 +400,15 @@ struct _zend_array {
 #define HT_MIN_MASK ((uint32_t) -2)
 #define HT_MIN_SIZE 8
 
+/* HT_MAX_SIZE is chosen to satisfy the following constraints:
+ * - HT_SIZE_TO_MASK(HT_MAX_SIZE) != 0
+ * - HT_SIZE_EX(HT_MAX_SIZE, HT_SIZE_TO_MASK(HT_MAX_SIZE)) does not overflow or
+ *   wrapparound, and is <= the addressable space size
+ * - HT_MAX_SIZE must be a power of two:
+ *   (nTableSize<HT_MAX_SIZE ? nTableSize+nTableSize : nTableSize) <= HT_MAX_SIZE
+ */
 #if SIZEOF_SIZE_T == 4
-# define HT_MAX_SIZE 0x02000000 /* small enough to avoid overflow checks */
+# define HT_MAX_SIZE 0x02000000
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((Bucket*)((char*)(data) + (idx)))
 # define HT_IDX_TO_HASH(idx) \
