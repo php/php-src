@@ -435,7 +435,7 @@ struct _zend_array {
 #define HT_SIZE_TO_MASK(nTableSize) \
 	((uint32_t)(-((nTableSize) + (nTableSize))))
 #define HT_HASH_SIZE(nTableMask) \
-	(((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))
+	(((size_t)-(uint32_t)(nTableMask)) * sizeof(uint32_t))
 #define HT_DATA_SIZE(nTableSize) \
 	((size_t)(nTableSize) * sizeof(Bucket))
 #define HT_SIZE_EX(nTableSize, nTableMask) \
