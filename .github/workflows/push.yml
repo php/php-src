@@ -31,6 +31,8 @@ jobs:
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
     steps:
+      - name: Test nproc
+        run: nproc
       - name: git checkout
         uses: actions/checkout@v3
       - name: Create MSSQL container
@@ -83,6 +85,8 @@ jobs:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
     steps:
+      - name: Test nproc
+        run: nproc
       - name: git checkout
         uses: actions/checkout@v3
       - name: apt
