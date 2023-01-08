@@ -291,7 +291,6 @@ PHPAPI char * php_conv_fp(char format, double num,
 	if (isalpha((int)*p)) {
 		*len = strlen(p);
 		memcpy(buf, p, *len + 1);
-		*is_negative = false;
 		free(p_orig);
 		return (buf);
 	}
@@ -872,8 +871,13 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 						s = "NAN";
 						s_len = 3;
 					} else if (zend_isinf(fp_num)) {
-						s = "INF";
-						s_len = 3;
+						if (fp_num > 0) {
+							s = "INF";
+							s_len = 3;
+						} else {
+							s = "-INF";
+							s_len = 4;
+						}
 					} else {
 #ifdef ZTS
 						localeconv_r(&lconv);
