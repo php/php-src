@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-10200 (zif_get_object_vars:
     Assertion `!(((__ht)->u.flags & (1<<2)) != 0)' failed). (nielsdos)
+  . Fix GH-10251 (Assertion `(flag & (1<<3)) == 0' failed). (nielsdos)
 
 - FPM:
   . Fixed bug #77106 (Missing separator in FPM FastCGI errors). (Jakub Zelenka)
@@ -26,6 +27,7 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
   . Fix NULL pointer dereference in phpdbg_create_conditional_breal(). (nielsdos)
+  . Fix GH-9710: phpdbg memory leaks by option "-h" (nielsdos)
 
 - Posix:
   . Fix memory leak in posix_ttyname() (girgias)
