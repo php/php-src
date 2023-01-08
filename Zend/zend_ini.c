@@ -519,6 +519,46 @@ ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig) /
 }
 /* }}} */
 
+
+ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists) /* {{{ */
+{
+	zend_ini_entry *ini_entry;
+
+	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
+	if (ini_entry) {
+		if (exists) {
+			*exists = 1;
+		}
+
+		if (orig && ini_entry->modified) {
+			return ini_entry->orig_value ? ini_entry->orig_value : NULL;
+		} else {
+			return ini_entry->value ? ini_entry->value : NULL;
+		}
+	} else {
+		if (exists) {
+			*exists = 0;
+		}
+		return NULL;
+	}
+}
+/* }}} */
+
+ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig) /* {{{ */
+{
+	bool exists = 1;
+	zend_string *return_value;
+
+	return_value = zend_ini_str_ex(name, name_length, orig, &exists);
+	if (!exists) {
+		return NULL;
+	} else if (!return_value) {
+		return_value = ZSTR_EMPTY_ALLOC();
+	}
+	return return_value;
+}
+/* }}} */
+
 ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
