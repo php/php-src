@@ -1165,7 +1165,12 @@ static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 					}
 				}
 
-				if (w >= 0x340 && w <= 0x523 && w != 0x409) {
+				if (w == 0x340) {
+					*out++ = 0x1F100;
+					goto next_iteration;
+				}
+
+				if (w >= 0x35A && w <= 0x523 && w != 0x409 && w != 0x439) {
 					for (int i = 0; i < code_tbl_m_len; i++) {
 						if (w == code_tbl_m[i][0]) {
 							int n = 5;
@@ -1198,12 +1203,13 @@ static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 								p -= 2;
 								goto finished;
 							}
-							*out++ = w2;
 							if (w == 0x3B1 || w == 0x3B7) {
-								*out++ = 0xF87F;
-							} else if (w == 0x4B8 || w == 0x4B9 || w == 0x4C4) {
+								w2 += 0x10000;
+							}
+							*out++ = w2;
+							if (w == 0x4B8 || w == 0x4B9 || w == 0x4C4) {
 								*out++ = 0x20DD;
-							} else if (w == 0x1ED9 || w == 0x1EDA || w == 0x1EE8 || w == 0x1EF3 || (w >= 0x1EF5 && w <= 0x1EFB) || w == 0x1F18 || (w >= 0x1FF2 && w <= 0x20A5)) {
+							} else if (w == 0x1EE8 || w == 0x1EF3 || (w >= 0x1EF5 && w <= 0x1EFA) || w == 0x1F18 || (w >= 0x1FF2 && w <= 0x20A5)) {
 								*out++ = 0xF87E;
 							}
 							goto next_iteration;
@@ -1326,6 +1332,19 @@ process_codepoint: ;
 			s = ucs_i_jis_table[w - ucs_i_jis_table_min];
 		} else if (w >= ucs_r_jis_table_min && w < ucs_r_jis_table_max) {
 			s = ucs_r_jis_table[w - ucs_r_jis_table_min];
+		}
+
+		if (w >= 0x1F100) {
+			if (w == 0x1F100) {
+				s = 0x2971;
+				goto found_kuten_code;
+			} else if (w == 0x1F136) {
+				s = 0x2B2C;
+				goto found_kuten_code;
+			} else if (w == 0x1F13C) {
+				s = 0x2B26;
+				goto found_kuten_code;
+			}
 		}
 
 		if (w >= 0x2000) {

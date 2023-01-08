@@ -42,7 +42,12 @@ while ($line = fgets($fp, 256)) {
 			$fromUnicode[pack('nn', $cp1, $cp2)] = $macJap;
 		} else {
 			$validChars[$macJap] = pack('N', $cp1);
-			$fromUnicode[pack('n', $cp1)] = $macJap;
+			if ($cp1 > 0xFFFF) {
+				$utf16 = mb_convert_encoding(pack('N', $cp1), 'UTF-16BE', 'UTF-32BE');
+				$fromUnicode[$utf16] = $macJap;
+			} else {
+				$fromUnicode[pack('n', $cp1)] = $macJap;
+			}
 		}
 	}
 }
@@ -88,6 +93,14 @@ $fromUnicode["\x21\xE9\xF8\x7A"] = "\x86\xD6"; // Downwards black arrow
 
 $fromUnicode["\xFF\x3B\xF8\x7E"] = "\xEB\x6D";
 $fromUnicode["\xFF\x3D\xF8\x7E"] = "\xEB\x6E";
+
+$fromUnicode["\xF8\x60\x00\x30\x00\x2E"] = "\x85\x91"; // Digit zero full stop
+$fromUnicode["\xFF\x4D\xF8\x7F"] = "\x86\x45"; // Square M
+$fromUnicode["\xFF\x47\xF8\x7F"] = "\x86\x4B"; // Square G
+$fromUnicode["\xF8\x60\x21\x93\x21\x91"] = "\x86\xCE"; // Downwards arrow leftwards of upwards arrow
+$fromUnicode["\x30\x01\xF8\x7E"] = "\xEB\x41"; // Vertical form for ideographic comma
+$fromUnicode["\x30\x02\xF8\x7E"] = "\xEB\x42"; // Vertical form for ideographic full stop
+$fromUnicode["\x20\x26\xF8\x7E"] = "\xEB\x63"; // Vertical form for horizontal ellipsis
 
 testAllValidChars($validChars, 'SJIS-mac', 'UTF-32BE');
 echo "MacJapanese verification and conversion works on all valid characters\n";
