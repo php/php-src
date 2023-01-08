@@ -18,18 +18,16 @@
 #include "php_ini.h"
 #include "url.h"
 
-#define URL_DEFAULT_ARG_SEP "&"
-
 static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	int encoding_type, zend_ulong index_int,
 	const char *index_string, size_t index_string_len,
 	const char *num_prefix, size_t num_prefix_len,
 	const char *key_prefix, size_t key_prefix_len,
 	const char *key_suffix, size_t key_suffix_len,
-	const char *arg_sep, size_t arg_sep_len)
+	const zend_string *arg_sep)
 {
 	if (form_str->s) {
-		smart_str_appendl(form_str, arg_sep, arg_sep_len);
+		smart_str_append(form_str, arg_sep);
 	}
 	/* Simple key=value */
 	if (key_prefix) {
@@ -100,12 +98,12 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, size_t num_prefix_len,
 				const char *key_prefix, size_t key_prefix_len,
 				const char *key_suffix, size_t key_suffix_len,
-			  zval *type, const char *arg_sep, int enc_type)
+				zval *type, const zend_string *arg_sep, int enc_type)
 {
 	zend_string *key = NULL;
 	char *newprefix, *p;
 	const char *prop_name;
-	size_t arg_sep_len, newprefix_len, prop_len;
+	size_t newprefix_len, prop_len;
 	zend_ulong idx;
 	zval *zdata = NULL;
 	ZEND_ASSERT(ht);
@@ -116,12 +114,11 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	if (!arg_sep) {
-		arg_sep = INI_STR("arg_separator.output");
-		if (!arg_sep || !strlen(arg_sep)) {
-			arg_sep = URL_DEFAULT_ARG_SEP;
+		arg_sep = zend_ini_str("arg_separator.output", strlen("arg_separator.output"), false);
+		if (ZSTR_LEN(arg_sep) == 0) {
+			arg_sep = ZSTR_CHAR('&');
 		}
 	}
-	arg_sep_len = strlen(arg_sep);
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
 		bool is_dynamic = 1;
@@ -232,18 +229,20 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				num_prefix, num_prefix_len,
 				key_prefix, key_prefix_len,
 				key_suffix, key_suffix_len,
-				arg_sep, arg_sep_len);
+				arg_sep);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
+	/* If there is a prefix we need to close the key with an encoded ] ("%5D") */
 /* {{{ Generates a form-encoded query string from an associative array or object. */
 PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
-	char *prefix = NULL, *arg_sep=NULL;
-	size_t arg_sep_len = 0, prefix_len = 0;
+	char *prefix = NULL;
+	size_t prefix_len = 0;
+	zend_string *arg_sep = NULL;
 	smart_str formstr = {0};
 	zend_long enc_type = PHP_QUERY_RFC1738;
 
@@ -251,7 +250,7 @@ PHP_FUNCTION(http_build_query)
 		Z_PARAM_ARRAY_OR_OBJECT(formdata)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(prefix, prefix_len)
-		Z_PARAM_STRING_OR_NULL(arg_sep, arg_sep_len)
+		Z_PARAM_STR(arg_sep)
 		Z_PARAM_LONG(enc_type)
 	ZEND_PARSE_PARAMETERS_END();
 
