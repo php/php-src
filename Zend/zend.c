@@ -1243,9 +1243,6 @@ ZEND_API void zend_activate(void) /* {{{ */
 	init_compiler();
 	init_executor();
 	startup_scanner();
-	if (CG(map_ptr_last)) {
-		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
-	}
 	zend_observer_activate();
 }
 /* }}} */
