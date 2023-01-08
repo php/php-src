@@ -71,6 +71,24 @@ $fromUnicode["\x00\xAF"] = "\x81\x50";
 /* Convert U+FF5E (FULLWIDTH TILDE) to 0x8160 (WAVE DASH) */
 $fromUnicode["\xFF\x5E"] = "\x81\x60";
 
+/* In the past, we mapped some SJIS-mac characters to a sequence of Unicode codepoints
+ * because there was no single codepoint which fit
+ * However, each new version of the Unicode standard adds more characters to Unicode,
+ * and in some cases, we DO now have a single codepoint which represents the same character
+ * Even in such cases, we continue to accept the old sequence of codepoints and convert
+ * it back to the same SJIS-mac character (for backwards compatibility) */
+$fromUnicode["\xF8\x61\x00\x46\x00\x41\x00\x58"] = "\x86\x9E"; // Fax sign
+/* For the following ones, we originally repurposed U+F87A to mean that a white-colored
+ * symbol should have its color palette swapped to make it black-colored
+ * But now Unicode has dedicated codepoints both for white-colored and for black-colored arrows */
+$fromUnicode["\x21\xE8\xF8\x7A"] = "\x86\xD3"; // Rightwards black arrow
+$fromUnicode["\x21\xE6\xF8\x7A"] = "\x86\xD4"; // Leftwards black arrow
+$fromUnicode["\x21\xE7\xF8\x7A"] = "\x86\xD5"; // Upwards black arrow
+$fromUnicode["\x21\xE9\xF8\x7A"] = "\x86\xD6"; // Downwards black arrow
+
+$fromUnicode["\xFF\x3B\xF8\x7E"] = "\xEB\x6D";
+$fromUnicode["\xFF\x3D\xF8\x7E"] = "\xEB\x6E";
+
 testAllValidChars($validChars, 'SJIS-mac', 'UTF-32BE');
 echo "MacJapanese verification and conversion works on all valid characters\n";
 
