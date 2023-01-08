@@ -64,6 +64,16 @@ echo "SJIS-Mobile#SoftBank:\n";
 print bin2hex(mb_substr("\x80abc\x80\xA1", 3, 2, 'SJIS-Mobile#SoftBank')) . "\n";
 print bin2hex(mb_substr("\x80abc\x80\xA1", 0, 3, 'SJIS-Mobile#SoftBank')) . "\n";
 
+echo "-- Testing MacJapanese characters which map to 3-5 codepoints each --\n";
+
+/* There are many characters in MacJapanese which map to sequences of several codepoints */
+print bin2hex(mb_substr("abc\x85\xAB\x85\xAC\x85\xAD", 0, 3, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xAB\x85\xAC\x85\xAD", 3, 2, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xAB\x85\xAC\x85\xAD", -2, 1, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xBF\x85\xC0\x85\xC1", 0, 3, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xBF\x85\xC0\x85\xC1", 3, 2, 'MacJapanese')) . "\n";
+print bin2hex(mb_substr("abc\x85\xBF\x85\xC0\x85\xC1", -2, 1, 'MacJapanese')) . "\n";
+
 echo "ISO-2022-JP:\n";
 print "1: " . bin2hex(mb_substr($iso2022jp, 0, 3, 'ISO-2022-JP')) . "\n";
 print "2: " . bin2hex(mb_substr($iso2022jp, -1, null, 'ISO-2022-JP')) . "\n";
@@ -145,6 +155,13 @@ SJIS-Mobile#KDDI:
 SJIS-Mobile#SoftBank:
 6380
 806162
+-- Testing MacJapanese characters which map to 3-5 codepoints each --
+616263
+85ab85ac
+85ac
+616263
+85bf85c0
+85c0
 ISO-2022-JP:
 1: 1b2442212121721b284241
 2: 43
