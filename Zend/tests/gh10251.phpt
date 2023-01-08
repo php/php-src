@@ -2,7 +2,7 @@
 GH-10251 (Assertion `(flag & (1<<3)) == 0' failed.)
 --FILE--
 <?php
-class A
+class A extends stdClass
 {
     function __set($o, $l)
     {
