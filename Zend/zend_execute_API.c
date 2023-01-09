@@ -174,7 +174,7 @@ void init_executor(void) /* {{{ */
 	EG(vm_interrupt) = 0;
 	EG(timed_out) = 0;
 #ifdef ZEND_TIMERS
-	zend_timers_create();
+	zend_timers_startup();
 #endif
 
 	EG(exception) = NULL;

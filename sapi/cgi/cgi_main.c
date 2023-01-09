@@ -2055,7 +2055,7 @@ consult the installation file that came with this distribution, or visit \n\
 						zend_signal_init();
 
 #if ZEND_TIMERS
-	zend_timers_create();
+	zend_timers_startup();
 #endif
 						break;
 					case -1:

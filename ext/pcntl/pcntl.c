@@ -535,7 +535,7 @@ PHP_FUNCTION(pcntl_fork)
 		php_error_docref(NULL, E_WARNING, "Error %d", errno);
 	} else if (id == 0) {
 		#ifdef ZEND_TIMERS
-			zend_timers_create();
+			zend_timers_startup();
 		#endif
 	}
 

@@ -2402,7 +2402,7 @@ static void php_cli_server_startup_workers(void) {
 				return;
 			} else {
 #if ZEND_TIMERS
-	zend_timers_create();
+	zend_timers_startup();
 #endif
 
 				php_cli_server_workers[php_cli_server_worker] = pid;

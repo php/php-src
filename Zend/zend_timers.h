@@ -21,9 +21,9 @@
 
 #include "zend_long.h"
 
-ZEND_API void zend_timers_create(void);
-ZEND_API void zend_timers_settime(zend_long seconds);
-ZEND_API void zend_timers_delete(void);
+ZEND_API void zend_timers_startup(void);
+void zend_timers_settime(zend_long seconds);
+void zend_timers_shutdown(void);
 
 # endif
 #endif

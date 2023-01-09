@@ -33,7 +33,7 @@
 # define sigev_notify_thread_id _sigev_un._tid
 # endif
 
-ZEND_API void zend_timers_create(void) /* {{{ */
+ZEND_API void zend_timers_startup(void) /* {{{ */
 {
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
@@ -47,6 +47,7 @@ ZEND_API void zend_timers_create(void) /* {{{ */
 	sev.sigev_signo = SIGIO;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
+	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
 	if (timer_create(CLOCK_REALTIME, &sev, &EG(timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
@@ -59,7 +60,7 @@ ZEND_API void zend_timers_create(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_timers_settime(zend_long seconds) /* {{{ }*/
+void zend_timers_settime(zend_long seconds) /* {{{ }*/
 {
 	timer_t timer = EG(timer);
 
@@ -77,7 +78,7 @@ ZEND_API void zend_timers_settime(zend_long seconds) /* {{{ }*/
 }
 /* }}} */
 
-ZEND_API void zend_timers_delete(void) /* {{{ */
+void zend_timers_shutdown(void) /* {{{ */
 {
 	timer_t timer = EG(timer);
 	if (timer == (timer_t){0}) {

@@ -218,7 +218,7 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 #if ZEND_TIMERS
-	zend_timers_create();
+	zend_timers_startup();
 #endif
 
 	if (wp->limit_extensions) {

@@ -823,7 +823,7 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 	zend_copy_ini_directives();
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
 #ifdef ZEND_TIMERS
-	zend_timers_create();
+	zend_timers_startup();
 #endif
 }
 /* }}} */
@@ -831,7 +831,7 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 static void zend_thread_shutdown_handler(void) { /* {{{ */
 	zend_interned_strings_dtor();
 #ifdef ZEND_TIMERS
-	zend_timers_delete();
+	zend_timers_shutdown();
 #endif
 }
 /* }}} */

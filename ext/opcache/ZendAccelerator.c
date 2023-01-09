@@ -4694,7 +4694,7 @@ static int accel_finish_startup(void)
 					exit(1);
 				}
 #ifdef ZEND_TIMERS
-				zend_timers_create();
+				zend_timers_startup();
 #endif
 				in_child = 1;
 			} else { /* parent */
