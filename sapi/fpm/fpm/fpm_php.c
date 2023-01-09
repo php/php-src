@@ -11,7 +11,7 @@
 #include "php_ini.h"
 #include "ext/standard/dl.h"
 
-#include "zend_timer.h"
+#include "zend_timers.h"
 
 #include "fastcgi.h"
 
@@ -217,8 +217,8 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		return -1;
 	}
 
-#if ZEND_TIMER
-	zend_timer_create();
+#if ZEND_TIMERS
+	zend_timers_create();
 #endif
 
 	if (wp->limit_extensions) {

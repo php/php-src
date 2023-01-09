@@ -2054,8 +2054,8 @@ consult the installation file that came with this distribution, or visit \n\
 						sigaction(SIGINT,  &old_int,  0);
 						zend_signal_init();
 
-#if ZEND_TIMER
-	zend_timer_create();
+#if ZEND_TIMERS
+	zend_timers_create();
 #endif
 						break;
 					case -1:

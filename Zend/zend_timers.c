@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef ZEND_TIMER
+#ifdef ZEND_TIMERS
 
 #include <stdio.h>
 #include <signal.h>
@@ -33,7 +33,7 @@
 # define sigev_notify_thread_id _sigev_un._tid
 # endif
 
-ZEND_API void zend_timer_create(void) /* {{{ */
+ZEND_API void zend_timers_create(void) /* {{{ */
 {
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
@@ -59,7 +59,7 @@ ZEND_API void zend_timer_create(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_timer_settime(zend_long seconds) /* {{{ }*/
+ZEND_API void zend_timers_settime(zend_long seconds) /* {{{ }*/
 {
 	timer_t timer = EG(timer);
 
@@ -77,7 +77,7 @@ ZEND_API void zend_timer_settime(zend_long seconds) /* {{{ }*/
 }
 /* }}} */
 
-ZEND_API void zend_timer_delete(void) /* {{{ */
+ZEND_API void zend_timers_delete(void) /* {{{ */
 {
 	timer_t timer = EG(timer);
 	if (timer == (timer_t){0}) {

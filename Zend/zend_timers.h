@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef ZEND_TIMER_H
-#define ZEND_TIMER_H
+#ifndef ZEND_TIMERS_H
+#define ZEND_TIMERS_H
 
-# ifdef ZEND_TIMER
+# ifdef ZEND_TIMERS
 
 #include "zend_long.h"
 
-ZEND_API void zend_timer_create(void);
-ZEND_API void zend_timer_settime(zend_long seconds);
-ZEND_API void zend_timer_delete(void);
+ZEND_API void zend_timers_create(void);
+ZEND_API void zend_timers_settime(zend_long seconds);
+ZEND_API void zend_timers_delete(void);
 
 # endif
 #endif

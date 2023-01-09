@@ -50,7 +50,7 @@
 # define NSIG 32
 #endif
 
-#include "Zend/zend_timer.h"
+#include "Zend/zend_timers.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -534,8 +534,8 @@ PHP_FUNCTION(pcntl_fork)
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error %d", errno);
 	} else if (id == 0) {
-		#ifdef ZEND_TIMER
-			zend_timer_create();
+		#ifdef ZEND_TIMERS
+			zend_timers_create();
 		#endif
 	}
 

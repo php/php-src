@@ -4693,8 +4693,8 @@ static int accel_finish_startup(void)
 					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
 					exit(1);
 				}
-#ifdef ZEND_TIMER
-				zend_timer_create();
+#ifdef ZEND_TIMERS
+				zend_timers_create();
 #endif
 				in_child = 1;
 			} else { /* parent */

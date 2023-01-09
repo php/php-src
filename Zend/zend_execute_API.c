@@ -43,7 +43,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef ZEND_TIMER
+#ifdef ZEND_TIMERS
 #include <sys/syscall.h>
 #endif
 
@@ -173,8 +173,8 @@ void init_executor(void) /* {{{ */
 	EG(full_tables_cleanup) = 0;
 	EG(vm_interrupt) = 0;
 	EG(timed_out) = 0;
-#ifdef ZEND_TIMER
-	zend_timer_create();
+#ifdef ZEND_TIMERS
+	zend_timers_create();
 #endif
 
 	EG(exception) = NULL;
@@ -1320,7 +1320,7 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 /* }}} */
 
 #ifndef ZEND_WIN32
-# ifdef ZEND_TIMER
+# ifdef ZEND_TIMERS
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 	if (si->si_value.sival_ptr != &EG(timer)) {
@@ -1440,8 +1440,8 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
 	}
-#elif defined(ZEND_TIMER)
-	zend_timer_settime(seconds);
+#elif defined(ZEND_TIMERS)
+	zend_timers_settime(seconds);
 
 	if (reset_signals) {
 		sigset_t sigset;
@@ -1520,8 +1520,8 @@ void zend_unset_timeout(void) /* {{{ */
 		}
 		tq_timer = NULL;
 	}
-#elif ZEND_TIMER
-	zend_timer_settime(0);
+#elif ZEND_TIMERS
+	zend_timers_settime(0);
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;

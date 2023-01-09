@@ -891,10 +891,10 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			efree(descr);
 		}
 
-#ifdef ZEND_TIMER
-		php_info_print_table_row(2, "Zend Timer", "enabled" );
+#ifdef ZEND_TIMERS
+		php_info_print_table_row(2, "Zend Timers", "enabled" );
 #else
-		php_info_print_table_row(2, "Zend Timer", "disabled" );
+		php_info_print_table_row(2, "Zend Timers", "disabled" );
 #endif
 
 #if HAVE_IPV6
