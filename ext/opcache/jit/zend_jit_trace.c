@@ -7114,6 +7114,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 			    if (t->stack_map_size) {
 					zend_jit_trace_stack *shared_stack_map = (zend_jit_trace_stack*)zend_shared_alloc(t->stack_map_size * sizeof(zend_jit_trace_stack));
 					if (!shared_stack_map) {
+						efree(t->stack_map);
 						ret = ZEND_JIT_TRACE_STOP_NO_SHM;
 						goto exit;
 					}
