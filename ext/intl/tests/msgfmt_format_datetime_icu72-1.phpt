@@ -5,7 +5,7 @@ date.timezone=Atlantic/Azores
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '72.1') >= 0) die('skip for ICU < 72.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -24,6 +24,6 @@ var_dump($mf->format(array($dt)));
 var_dump($mf->format(array($dti)));
 
 ?>
---EXPECTF--
-string(%s) "May %d, 2012 %d:%d:42 %s"
-string(%s) "May %d, 2012 %d:%d:42 %s"
+--EXPECT--
+string(24) "May 6, 2012 5:00:42 PM"
+string(24) "May 6, 2012 5:00:42 PM"

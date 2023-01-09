@@ -3,7 +3,7 @@ IntlDatePatternGenerator::getBestPattern()
 --EXTENSIONS--
 intl
 --SKIPIF--
-<?php if (version_compare(INTL_ICU_VERSION, '72.1') >= 0) die('skip for ICU < 72.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '72.1') < 0) die('skip for ICU >= 72.1'); ?>
 --FILE--
 <?php
 
@@ -30,7 +30,7 @@ try {
 
 ?>
 --EXPECT--
-h:mm a
+h:mm a
 HH:mm
 MMM dd, YYYY
 dd. MMM YYYY
