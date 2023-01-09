@@ -427,12 +427,34 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 					*p++ = w;
 					continue;
 				}
-				uint32_t w2 = title_mode ? php_unicode_tolower_raw(w, src_encoding) : php_unicode_totitle_raw(w, src_encoding);
+				uint32_t w2;
+				if (title_mode) {
+					if (w == 0x3A3) {
+						int j = i - 1;
+						while (j >= 0 && php_unicode_is_case_ignorable(wchar_buf[j])) {
+							j--;
+						}
+						if (j >= 0 ? php_unicode_is_cased(wchar_buf[j]) : scan_back_for_cased_letter(p, converted_end)) {
+							j = i + 1;
+							while (j < out_len && php_unicode_is_case_ignorable(wchar_buf[j])) {
+								j++;
+							}
+							if (j >= out_len ? !scan_ahead_for_cased_letter(in, in_len, state, src_encoding) : !php_unicode_is_cased(wchar_buf[j])) {
+								*p++ = 0x3C2;
+								goto set_title_mode;
+							}
+						}
+					}
+					w2 = php_unicode_tolower_raw(w, src_encoding);
+				} else {
+					w2 = php_unicode_totitle_raw(w, src_encoding);
+				}
 				if (UNEXPECTED(w2 > 0xFFFFFF)) {
 					p = emit_special_casing_sequence(w2, p);
 				} else {
 					*p++ = w2;
 				}
+set_title_mode:
 				if (!php_unicode_is_case_ignorable(w)) {
 					title_mode = php_unicode_is_cased(w);
 				}
