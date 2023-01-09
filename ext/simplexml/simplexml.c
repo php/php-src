@@ -2301,11 +2301,11 @@ PHP_FUNCTION(simplexml_load_string)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
+	if (ZEND_SIZE_T_UINT_OVFL(data_len)) {
 		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
-	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
+	if (ZEND_SIZE_T_UINT_OVFL(ns_len)) {
 		zend_argument_value_error(4, "is too long");
 		RETURN_THROWS();
 	}
@@ -2350,11 +2350,11 @@ PHP_METHOD(SimpleXMLElement, __construct)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
+	if (ZEND_SIZE_T_UINT_OVFL(data_len)) {
 		zend_argument_error(zend_ce_exception, 1, "is too long");
 		RETURN_THROWS();
 	}
-	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
+	if (ZEND_SIZE_T_UINT_OVFL(ns_len)) {
 		zend_argument_error(zend_ce_exception, 4, "is too long");
 		RETURN_THROWS();
 	}
