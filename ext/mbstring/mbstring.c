@@ -1715,12 +1715,84 @@ PHP_FUNCTION(mb_str_split)
 	}
 }
 
+#ifdef __SSE2__
+/* Thanks to StackOverflow user 'Paul R' (https://stackoverflow.com/users/253056/paul-r)
+ * From: https://stackoverflow.com/questions/36998538/fastest-way-to-horizontally-sum-sse-unsigned-byte-vector
+ * Takes a 128-bit XMM register, treats each byte as an 8-bit integer, and sums up all
+ * 16 of them, returning the sum in an ordinary scalar register */
+static inline uint32_t _mm_sum_epu8(const __m128i v)
+{
+	/* We don't have any dedicated instruction to sum up 8-bit values from a 128-bit register
+	 * _mm_sad_epu8 takes the differences between corresponding bytes of two different XMM registers,
+	 * sums up those differences, and stores them as two 16-byte integers in the top and bottom
+	 * halves of the destination XMM register
+	 * By using a zeroed-out XMM register as one operand, we ensure the "differences" which are
+	 * summed up will actually just be the 8-bit values from `v` */
+	__m128i vsum = _mm_sad_epu8(v, _mm_setzero_si128());
+	/* If _mm_sad_epu8 had stored the sum of those bytes as a single integer, we would just have
+	 * to extract it here; but it stored the sum as two different 16-bit values
+	 * _mm_cvtsi128_si32 extracts one of those values into a scalar register
+	 * _mm_extract_epi16 extracts the other one into another scalar register; then we just add them */
+	return _mm_cvtsi128_si32(vsum) + _mm_extract_epi16(vsum, 4);
+}
+#endif
+
+/* This assumes that `string` is valid UTF-8
+ * In UTF-8, the only bytes which do not start a new codepoint are 0x80-0xBF (continuation bytes)
+ * Interpreted as signed integers, those are all byte values less than -64
+ * A fast way to get the length of a UTF-8 string is to start with its byte length,
+ * then subtract off the number of continuation bytes */
+static size_t mb_fast_strlen_utf8(unsigned char *p, size_t len)
+{
+	unsigned char *e = p + len;
+
+#ifdef __SSE2__
+	if (len >= sizeof(__m128i)) {
+		const __m128i threshold = _mm_set1_epi8(-64);
+		const __m128i delta = _mm_set1_epi8(1);
+		__m128i counter = _mm_set1_epi8(0); /* Vector of 16 continuation-byte counters */
+
+		int reset_counter = 255;
+		do {
+			__m128i operand = _mm_loadu_si128((__m128i*)p); /* Load 16 bytes */
+			__m128i lt = _mm_cmplt_epi8(operand, threshold); /* Find all which are continuation bytes */
+			counter = _mm_add_epi8(counter, _mm_and_si128(lt, delta)); /* Update the 16 counters */
+
+			/* The counters can only go up to 255, so every 255 iterations, fold them into `len`
+			 * and reset them to zero */
+			if (--reset_counter == 0) {
+				len -= _mm_sum_epu8(counter);
+				counter = _mm_set1_epi8(0);
+				reset_counter = 255;
+			}
+
+			p += sizeof(__m128i);
+		} while (p + sizeof(__m128i) <= e);
+
+		len -= _mm_sum_epu8(counter); /* Fold in any remaining non-zero values in the 16 counters */
+	}
+#endif
+
+	/* Check for continuation bytes in the 0-15 remaining bytes at the end of the string */
+	while (p < e) {
+		signed char c = *p++;
+		if (c < -64) {
+			len--;
+		}
+	}
+
+	return len;
+}
+
 static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 {
 	unsigned int char_len = encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4);
 	if (char_len) {
 		return ZSTR_LEN(string) / char_len;
+	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && GC_FLAGS(string) & IS_STR_VALID_UTF8) {
+		return mb_fast_strlen_utf8((unsigned char*)ZSTR_VAL(string), ZSTR_LEN(string));
 	}
+
 
 	uint32_t wchar_buf[128];
 	unsigned char *in = (unsigned char*)ZSTR_VAL(string);
@@ -1789,14 +1861,7 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 }
 
 static size_t pointer_to_offset_utf8(unsigned char *start, unsigned char *pos) {
-	size_t result = 0;
-	while (pos > start) {
-		unsigned char c = *--pos;
-		if (c < 0x80 || (c & 0xC0) != 0x80) {
-			result++;
-		}
-	}
-	return result;
+	return mb_fast_strlen_utf8(start, pos - start);
 }
 
 static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const mbfl_encoding *enc, ssize_t offset, bool reverse)
