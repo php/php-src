@@ -785,7 +785,7 @@ static timelib_long timelib_lookup_abbr(const char **ptr, int *dst, char **tz_ab
 		(**ptr >= 'A' && **ptr <= 'Z') ||
 		(**ptr >= 'a' && **ptr <= 'z') ||
 		(**ptr >= '0' && **ptr <= '9') ||
-		**ptr == '/' || **ptr == '_' || **ptr == '-'
+		**ptr == '/' || **ptr == '_' || **ptr == '-' || **ptr == '+'
 	) {
 		++*ptr;
 	}
