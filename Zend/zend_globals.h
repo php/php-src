@@ -36,7 +36,7 @@
 #include "zend_multibyte.h"
 #include "zend_multiply.h"
 #include "zend_arena.h"
-#include "zend_timers.h"
+#include "zend_timer.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/

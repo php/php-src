@@ -14,16 +14,23 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef ZEND_TIMERS_H
-#define ZEND_TIMERS_H
+#ifndef ZEND_TIMER_H
+#define ZEND_TIMER_H
 
 # ifdef ZEND_TIMERS
 
 #include "zend_long.h"
 
-ZEND_API void zend_timers_startup(void);
-void zend_timers_settime(zend_long seconds);
-void zend_timers_shutdown(void);
+/* Must be called after calls to fork() */
+ZEND_API void zend_timer_init(void);
+void zend_timer_settime(zend_long seconds);
+void zend_timer_shutdown(void);
+
+# else
+
+#define zend_timer_init()
+#define zend_timer_settime(seconds)
+#define zend_timer_shutdown()
 
 # endif
 #endif

@@ -33,7 +33,7 @@
 # define sigev_notify_thread_id _sigev_un._tid
 # endif
 
-ZEND_API void zend_timers_startup(void) /* {{{ */
+ZEND_API void zend_timer_init(void) /* {{{ */
 {
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
@@ -60,7 +60,7 @@ ZEND_API void zend_timers_startup(void) /* {{{ */
 }
 /* }}} */
 
-void zend_timers_settime(zend_long seconds) /* {{{ }*/
+void zend_timer_settime(zend_long seconds) /* {{{ }*/
 {
 	timer_t timer = EG(timer);
 
@@ -78,7 +78,7 @@ void zend_timers_settime(zend_long seconds) /* {{{ }*/
 }
 /* }}} */
 
-void zend_timers_shutdown(void) /* {{{ */
+void zend_timer_shutdown(void) /* {{{ */
 {
 	timer_t timer = EG(timer);
 	if (timer == (timer_t){0}) {

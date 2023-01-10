@@ -35,7 +35,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_fibers.h"
-#include "zend_timers.h"
+#include "zend_timer.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -822,16 +822,14 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 {
 	zend_copy_ini_directives();
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
-#ifdef ZEND_TIMERS
-	zend_timers_startup();
-#endif
+	zend_timer_init();
 }
 /* }}} */
 
 static void zend_thread_shutdown_handler(void) { /* {{{ */
 	zend_interned_strings_dtor();
 #ifdef ZEND_TIMERS
-	zend_timers_shutdown();
+	zend_timer_shutdown();
 #endif
 }
 /* }}} */

@@ -173,9 +173,6 @@ void init_executor(void) /* {{{ */
 	EG(full_tables_cleanup) = 0;
 	EG(vm_interrupt) = 0;
 	EG(timed_out) = 0;
-#ifdef ZEND_TIMERS
-	zend_timers_startup();
-#endif
 
 	EG(exception) = NULL;
 	EG(prev_exception) = NULL;
@@ -198,6 +195,7 @@ void init_executor(void) /* {{{ */
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
+	zend_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
 
@@ -1441,7 +1439,7 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		return;
 	}
 #elif defined(ZEND_TIMERS)
-	zend_timers_settime(seconds);
+	zend_timer_settime(seconds);
 
 	if (reset_signals) {
 		sigset_t sigset;
@@ -1521,7 +1519,7 @@ void zend_unset_timeout(void) /* {{{ */
 		tq_timer = NULL;
 	}
 #elif ZEND_TIMERS
-	zend_timers_settime(0);
+	zend_timer_settime(0);
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;
