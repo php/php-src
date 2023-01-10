@@ -179,6 +179,24 @@ function extension_loaded(string $extension): bool {}
  */
 function get_extension_funcs(string $extension): array|false {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function get_extension_classes(string $extension): array|false {}
+
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function get_extension_traits(string $extension): array|false {}
+
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
+function get_extension_interfaces(string $extension): array|false {}
+
 #if ZEND_DEBUG && defined(ZTS)
 function zend_thread_id(): int {}
 #endif

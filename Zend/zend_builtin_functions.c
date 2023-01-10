@@ -1985,3 +1985,72 @@ ZEND_FUNCTION(get_extension_funcs)
 	}
 }
 /* }}} */
+
+static inline void get_declared_extension_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags) /* {{{ */
+{
+	zend_string *extension_name;
+	zend_string *lcname;
+	zend_module_entry *module;
+	zend_string *key;
+	zval *zv;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (strncasecmp(ZSTR_VAL(extension_name), "zend", sizeof("zend"))) {
+		lcname = zend_string_tolower(extension_name);
+		module = zend_hash_find_ptr(&module_registry, lcname);
+		zend_string_release_ex(lcname, 0);
+	} else {
+		module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core") - 1);
+	}
+
+	if (!module) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
+			ce = Z_PTR_P(zv);
+			if ((ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
+			 && key
+			 && ZSTR_VAL(key)[0] != 0
+			 && ce->info.internal.module == module) {
+				ZEND_HASH_FILL_GROW();
+				if (EXPECTED(Z_TYPE_P(zv) == IS_PTR)) {
+					ZEND_HASH_FILL_SET_STR_COPY(ce->name);
+				} else {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_ALIAS_PTR);
+					ZEND_HASH_FILL_SET_STR_COPY(key);
+				}
+				ZEND_HASH_FILL_NEXT();
+			}
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FILL_END();
+}
+/* }}} */
+
+/* {{{ Returns an array with the names of classes belonging to the named extension */
+ZEND_FUNCTION(get_extension_classes)
+{
+	get_declared_extension_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED);
+}
+/* }}} */
+
+/* {{{ Returns an array with the names of interfaces belonging to the named extension */
+ZEND_FUNCTION(get_extension_interfaces)
+{
+	get_declared_extension_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED | ZEND_ACC_INTERFACE);
+}
+/* }}} */
+
+/* {{{ Returns an array with the names of traits belonging to the named extension */
+ZEND_FUNCTION(get_extension_traits)
+{
+	get_declared_extension_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED | ZEND_ACC_TRAIT);
+}
+/* }}} */

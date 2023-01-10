@@ -34,6 +34,20 @@ var_dump(count(get_extension_funcs("standard")));
 var_dump(gettype(get_extension_funcs("zend")));
 var_dump(count(get_extension_funcs("zend")));
 
+var_dump(gettype(get_extension_classes("standard")));
+var_dump(count(get_extension_classes("standard")));
+var_dump(gettype(get_extension_classes("zend")));
+var_dump(count(get_extension_classes("zend")));
+
+var_dump(gettype(get_extension_interfaces("standard")));
+var_dump(count(get_extension_interfaces("standard")));
+var_dump(gettype(get_extension_interfaces("zend")));
+var_dump(count(get_extension_interfaces("zend")));
+
+var_dump(gettype(get_extension_traits("standard")));
+var_dump(count(get_extension_traits("standard")));
+var_dump(gettype(get_extension_traits("zend")));
+var_dump(count(get_extension_traits("zend")));
 
 echo "Done\n";
 ?>
@@ -52,6 +66,18 @@ int(%d)
 string(5) "array"
 int(%d)
 bool(false)
+string(5) "array"
+int(%d)
+string(5) "array"
+int(%d)
+string(5) "array"
+int(%d)
+string(5) "array"
+int(%d)
+string(5) "array"
+int(%d)
+string(5) "array"
+int(%d)
 string(5) "array"
 int(%d)
 string(5) "array"

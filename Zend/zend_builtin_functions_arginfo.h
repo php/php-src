@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 73e9ef76bde5ab44254185175d4d8dae2e797d12 */
+ * Stub hash: d3bd0b5f96b05aca65554a5c0118fd38340e5d4e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -198,6 +198,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_extension_funcs, 0, 1, MAY_B
 	ZEND_ARG_TYPE_INFO(0, extension, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_get_extension_classes arginfo_get_extension_funcs
+
+#define arginfo_get_extension_traits arginfo_get_extension_funcs
+
+#define arginfo_get_extension_interfaces arginfo_get_extension_funcs
+
 #if ZEND_DEBUG && defined(ZTS)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_thread_id, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -267,6 +273,9 @@ ZEND_FUNCTION(debug_backtrace);
 ZEND_FUNCTION(debug_print_backtrace);
 ZEND_FUNCTION(extension_loaded);
 ZEND_FUNCTION(get_extension_funcs);
+ZEND_FUNCTION(get_extension_classes);
+ZEND_FUNCTION(get_extension_traits);
+ZEND_FUNCTION(get_extension_interfaces);
 #if ZEND_DEBUG && defined(ZTS)
 ZEND_FUNCTION(zend_thread_id);
 #endif
@@ -330,6 +339,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(debug_print_backtrace, arginfo_debug_print_backtrace)
 	ZEND_FE(extension_loaded, arginfo_extension_loaded)
 	ZEND_FE(get_extension_funcs, arginfo_get_extension_funcs)
+	ZEND_FE(get_extension_classes, arginfo_get_extension_classes)
+	ZEND_FE(get_extension_traits, arginfo_get_extension_traits)
+	ZEND_FE(get_extension_interfaces, arginfo_get_extension_interfaces)
 #if ZEND_DEBUG && defined(ZTS)
 	ZEND_FE(zend_thread_id, arginfo_zend_thread_id)
 #endif
