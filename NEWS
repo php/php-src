@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-10218 (DateTimeZone fails to parse time zones that contain the
     "+" character). (Derick)
 
+- Fiber:
+  . Fix assertion on stack allocation size. (nielsdos)
+
 - FPM:
   . Fixed bug GH-9981 (FPM does not reset fastcgi.error_header).
     (Jakub Zelenka)

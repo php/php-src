@@ -174,8 +174,12 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 {
 	void *pointer;
 	const size_t page_size = zend_fiber_get_page_size();
+	const size_t minimum_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size;
 
-	ZEND_ASSERT(size >= page_size + ZEND_FIBER_GUARD_PAGES * page_size);
+	if (size < minimum_stack_size) {
+		zend_throw_exception_ex(NULL, 0, "Fiber stack size is too small, it needs to be at least %zu bytes", minimum_stack_size);
+		return NULL;
+	}
 
 	const size_t stack_size = (size + page_size - 1) / page_size * page_size;
 	const size_t alloc_size = stack_size + ZEND_FIBER_GUARD_PAGES * page_size;
