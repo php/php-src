@@ -365,7 +365,7 @@ zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encodi
 	}
 
 	*num_errors = buf.errors;
-	return mb_convert_buf_result(&buf);
+	return mb_convert_buf_result(&buf, to);
 }
 
 static uint32_t* convert_cp_to_hex(uint32_t cp, uint32_t *out)

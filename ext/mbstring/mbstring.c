@@ -1591,7 +1591,7 @@ PHP_FUNCTION(mb_output_handler)
 	}
 
 	MBSTRG(illegalchars) += buf.errors;
-	RETVAL_STR(mb_convert_buf_result(&buf));
+	RETVAL_STR(mb_convert_buf_result_raw(&buf));
 
 	if (last_feed) {
 		MBSTRG(outconv_enabled) = false;
@@ -1679,7 +1679,7 @@ PHP_FUNCTION(mb_str_split)
 					enc->from_wchar(wchar_buf, split_len - char_count, &buf, true);
 					i += split_len - char_count;
 					char_count = 0;
-					add_next_index_str(return_value, mb_convert_buf_result(&buf));
+					add_next_index_str(return_value, mb_convert_buf_result(&buf, enc));
 				} else {
 					/* Output from this iteration is not enough to finish the next chunk;
 					 * output what we can, and leave 'buf' to be used again on next iteration */
@@ -1696,7 +1696,7 @@ PHP_FUNCTION(mb_str_split)
 				if (out_len - i >= split_len) {
 					enc->from_wchar(wchar_buf + i, split_len, &buf, true);
 					i += split_len;
-					add_next_index_str(return_value, mb_convert_buf_result(&buf));
+					add_next_index_str(return_value, mb_convert_buf_result(&buf, enc));
 				} else {
 					/* The remaining codepoints in wchar_buf aren't enough to finish a chunk;
 					 * leave them for the next iteration */
@@ -1710,7 +1710,7 @@ PHP_FUNCTION(mb_str_split)
 		if (char_count) {
 			/* The main loop above has finished processing the input string, but
 			 * has left a partial chunk in 'buf' */
-			add_next_index_str(return_value, mb_convert_buf_result(&buf));
+			add_next_index_str(return_value, mb_convert_buf_result(&buf, enc));
 		}
 	}
 }
@@ -2076,7 +2076,7 @@ static zend_string* mb_get_substr_slow(unsigned char *in, size_t in_len, size_t 
 		}
 	}
 
-	return mb_convert_buf_result(&buf);
+	return mb_convert_buf_result(&buf, enc);
 }
 
 static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, const mbfl_encoding *enc)
@@ -2590,7 +2590,9 @@ append_trim_marker:
 		buf.out += ZSTR_LEN(marker);
 	}
 
-	return mb_convert_buf_result(&buf);
+	/* Even if `enc` is UTF-8, don't mark the output string as valid UTF-8, because
+	 * we have no guarantee that the trim marker string is valid UTF-8 */
+	return mb_convert_buf_result_raw(&buf);
 }
 
 /* Trim the string to terminal width; optional, add a 'trim marker' if it was truncated */
@@ -3298,7 +3300,7 @@ emit_converted_kana:
 		encoding->from_wchar(converted_buf, converted - converted_buf, &buf, !in_len);
 	}
 
-	return mb_convert_buf_result(&buf);
+	return mb_convert_buf_result(&buf, encoding);
 }
 
 char mb_convert_kana_flags[17] = {
@@ -3697,7 +3699,7 @@ static zend_string* html_numeric_entity_encode(zend_string *input, const mbfl_en
 		encoding->from_wchar(converted_buf, converted - converted_buf, &buf, !in_len);
 	}
 
-	return mb_convert_buf_result(&buf);
+	return mb_convert_buf_result(&buf, encoding);
 }
 
 /* {{{ Converts specified characters to HTML numeric entities */
@@ -3929,7 +3931,7 @@ process_converted_wchars:
 		encoding->from_wchar(converted_buf, converted - converted_buf, &buf, !in_len);
 	}
 
-	return mb_convert_buf_result(&buf);
+	return mb_convert_buf_result(&buf, encoding);
 }
 
 /* {{{ Converts HTML numeric entities to character code */
