@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-9891 (DateTime modify with unixtimestamp (@) must work like
     setTimestamp). (Derick)
+  . Fixed bug GH-10218 (DateTimeZone fails to parse time zones that contain the
+    "+" character). (Derick)
 
 - FPM:
   . Fixed bug GH-9981 (FPM does not reset fastcgi.error_header).
