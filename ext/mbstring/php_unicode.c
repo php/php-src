@@ -366,5 +366,5 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 		dst_encoding->from_wchar(converted_buf, p - converted_buf, &buf, !in_len);
 	}
 
-	return mb_convert_buf_result(&buf);
+	return mb_convert_buf_result(&buf, dst_encoding);
 }

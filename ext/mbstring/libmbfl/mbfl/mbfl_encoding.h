@@ -32,6 +32,7 @@
 #define MBFL_ENCODING_H
 
 #include "mbfl_defs.h"
+#include "mbfl_consts.h"
 #include "zend.h"
 
 enum mbfl_no_encoding {
@@ -208,7 +209,7 @@ static inline unsigned char* mb_convert_buf_add4(unsigned char *out, char c1, ch
 	return out;
 }
 
-static inline zend_string* mb_convert_buf_result(mb_convert_buf *buf)
+static inline zend_string* mb_convert_buf_result_raw(mb_convert_buf *buf)
 {
 	ZEND_ASSERT(buf->out <= buf->limit);
 	zend_string *ret = buf->str;
@@ -233,6 +234,17 @@ typedef struct {
 	mb_to_wchar_fn to_wchar;
 	mb_from_wchar_fn from_wchar;
 } mbfl_encoding;
+
+extern const mbfl_encoding mbfl_encoding_utf8;
+
+static inline zend_string* mb_convert_buf_result(mb_convert_buf *buf, const mbfl_encoding *enc)
+{
+	zend_string *ret = mb_convert_buf_result_raw(buf);
+	if (enc == &mbfl_encoding_utf8 && buf->error_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8) {
+		GC_ADD_FLAGS(ret, IS_STR_VALID_UTF8);
+	}
+	return ret;
+}
 
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
 MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
