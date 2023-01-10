@@ -541,18 +541,18 @@ void zend_shared_alloc_restore_xlat_table(uint32_t checkpoint)
 	zend_hash_discard(&ZCG(xlat_table), checkpoint);
 }
 
-void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)
+void zend_shared_alloc_register_xlat_entry(const void *key_pointer, const void *value)
 {
-	zend_ulong key = (zend_ulong)old;
+	zend_ulong key = (zend_ulong)key_pointer;
 
 	key = zend_rotr3(key);
-	zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, (void*)new);
+	zend_hash_index_add_new_ptr(&ZCG(xlat_table), key, (void*)value);
 }
 
-void *zend_shared_alloc_get_xlat_entry(const void *old)
+void *zend_shared_alloc_get_xlat_entry(const void *key_pointer)
 {
 	void *retval;
-	zend_ulong key = (zend_ulong)old;
+	zend_ulong key = (zend_ulong)key_pointer;
 
 	key = zend_rotr3(key);
 	if ((retval = zend_hash_index_find_ptr(&ZCG(xlat_table), key)) == NULL) {
