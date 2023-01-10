@@ -66,6 +66,11 @@ PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, p
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
+
+	if (UNEXPECTED(max <= min || hi < 1)) {
+		return NAN;
+	}
+
 	uint64_t k = 1 + php_random_range64(algo, status, hi - 1); /* [1, hi] */
 
 	if (fabs(min) <= fabs(max)) {
@@ -79,6 +84,11 @@ PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo,
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
+
+	if (UNEXPECTED(max < min)) {
+		return NAN;
+	}
+
 	uint64_t k = php_random_range64(algo, status, hi); /* [0, hi] */
 
 	if (fabs(min) <= fabs(max)) {
@@ -92,6 +102,11 @@ PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, p
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
+
+	if (UNEXPECTED(max <= min || hi < 1)) {
+		return NAN;
+	}
+
 	uint64_t k = php_random_range64(algo, status, hi - 1); /* [0, hi - 1] */
 
 	if (fabs(min) <= fabs(max)) {
@@ -105,6 +120,11 @@ PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, php
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
+
+	if (UNEXPECTED(max <= min || hi < 2)) {
+		return NAN;
+	}
+
 	uint64_t k = 1 + php_random_range64(algo, status, hi - 2); /* [1, hi - 1] */
 
 	if (fabs(min) <= fabs(max)) {
