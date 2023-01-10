@@ -86,6 +86,7 @@ PHP                                                                        NEWS
   . Added socket_atmark if send/recv needs using MSG_OOB. (David Carlier)
   . Added TCP_QUICKACK constant, to give tigher control over
     ACK delays. (David Carlier)
+  . Added DONTFRAGMENT support for path MTU discovery purpose. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)

@@ -1706,6 +1706,62 @@ const SO_DETACH_BPF = UNKNOWN;
  */
 const TCP_QUICKACK = UNKNOWN;
 #endif
+#if defined(IP_DONTFRAG)
+/**
+ * @var int
+ * @cvalue IP_DONTFRAG
+ */
+const IP_DONTFRAG = UNKNOWN;
+#endif
+#if defined(IP_MTU_DISCOVER)
+/**
+ * @var int
+ * @cvalue IP_MTU_DISCOVER
+ */
+const IP_MTU_DISCOVER = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_DO)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_DO
+ */
+const IP_PMTUDISC_DO = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_DONT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_DONT
+ */
+const IP_PMTUDISC_DONT = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_WANT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_WANT
+ */
+const IP_PMTUDISC_WANT = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_PROBE)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_PROBE
+ */
+const IP_PMTUDISC_PROBE = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_INTERFACE)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_INTERFACE
+ */
+const IP_PMTUDISC_INTERFACE = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_OMIT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_OMIT
+ */
+const IP_PMTUDISC_OMIT = UNKNOWN;
+#endif
 
 /**
  * @strict-properties

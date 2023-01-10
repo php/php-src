@@ -117,6 +117,14 @@ PHP 8.3 UPGRADE NOTES
 - Sockets:
   . SO_ATTACH_REUSEPORT_CBPF (Linux only).
   . TCP_QUICKACK (Linux only).
+  . IP_DONTFRAG (FreeBSD only).
+  . IP_MTU_DISCOVER (Linux only).
+  . IP_PMTUDISC_DO (Linux only).
+  . IP_PMTUDISC_DONT (Linux only).
+  . IP_PMTUDISC_WANT (Linux only).
+  . IP_PMTUDISC_PROBE (Linux only).
+  . IP_PMTUDISC_INTERFACE (Linux only).
+  . IP_PMTUDISC_OMIT (Linux only).
 
 ========================================
 11. Changes to INI File Handling
