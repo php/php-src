@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b4ac4c0f1d91c354293e21185a2e6d9f99cc9fcc */
+ * Stub hash: 60cc32e8f4ecdb46c856723828c45eb10a4e9266 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fastcgi_finish_request, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, close_conn, _IS_BOOL, 0, "false")
