@@ -106,6 +106,9 @@
 #include "php_cli_process_title.h"
 #include "php_cli_process_title_arginfo.h"
 
+#include <errno.h>
+#include <string.h> // for strerror()
+
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0

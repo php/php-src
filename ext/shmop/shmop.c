@@ -33,10 +33,12 @@
 #include "tsrm_win32.h"
 #endif
 
-
 #ifdef HAVE_SHMOP
 
 #include "ext/standard/info.h"
+
+#include <errno.h>
+#include <string.h> // for strerror()
 
 /* {{{ shmop_module_entry */
 zend_module_entry shmop_module_entry = {

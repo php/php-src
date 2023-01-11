@@ -17,10 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_compile.h"
-#include "zend_operators.h"
 #include "zend_multibyte.h"
+#include "zend_alloc.h"
+#include "zend_globals.h" // for struct _zend_compiler_globals
+#include "zend_globals_macros.h" // for LANG_SCNG()
 #include "zend_ini.h"
 
 static const zend_encoding *dummy_encoding_fetcher(const char *encoding_name)

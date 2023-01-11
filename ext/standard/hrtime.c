@@ -17,6 +17,7 @@
 
 #include "php.h"
 #include "hrtime.h"
+#include "zend_strtod.h"
 
 /* {{{ */
 /* This file reuses code parts from the cross-platform timer library

@@ -19,6 +19,7 @@
 #include "ext/standard/head.h"
 #include "php_string.h"
 #include "zend_execute.h"
+#include "zend_strtod.h" // for zend_gcvt()
 #include <stdio.h>
 
 #include <locale.h>

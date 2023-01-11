@@ -1208,7 +1208,11 @@ PHP_FUNCTION(posix_pathconf)
 		Z_PARAM_LONG(name);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (path_len == 0 || php_check_open_basedir(path)) {
+	if (path_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	} else if (php_check_open_basedir(path)) {
+		php_error_docref(NULL, E_WARNING, "Invalid path supplied: %s", path);
 		RETURN_FALSE;
 	}
 

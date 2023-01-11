@@ -39,6 +39,7 @@
 #include "sockaddr_conv.h"
 #include "main/php_network.h"
 
+#include <errno.h>
 
 enum source_op {
 	JOIN_SOURCE,

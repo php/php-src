@@ -21,9 +21,18 @@
 #ifndef ZEND_SIGNAL_H
 #define ZEND_SIGNAL_H
 
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#else
+#include "php_config.h" // for ZEND_SIGNALS
+#endif
+
 #ifdef ZEND_SIGNALS
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
 #include <signal.h>
+#include <stdbool.h>
 
 #ifndef NSIG
 #define NSIG 65

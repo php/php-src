@@ -14,6 +14,9 @@
  */
 
 #include "collator_is_numeric.h"
+#include "zend_strtod.h"
+
+#include <errno.h>
 
 /* {{{ Taken from PHP6:zend_u_strtod() */
 static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */

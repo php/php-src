@@ -28,6 +28,7 @@
 #include "php_json_encoder.h"
 #include <zend_exceptions.h>
 #include "zend_enum.h"
+#include "zend_strtod.h" // for ZEND_DOUBLE_MAX_LENGTH
 
 static const char digits[] = "0123456789abcdef";
 

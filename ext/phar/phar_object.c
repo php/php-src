@@ -21,6 +21,8 @@
 #include "func_interceptors.h"
 #include "phar_object_arginfo.h"
 
+#include <errno.h>
+
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_data;
 static zend_class_entry *phar_ce_PharException;

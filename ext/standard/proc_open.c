@@ -36,6 +36,9 @@
 #include <fcntl.h>
 #endif
 
+#include <errno.h>
+#include <string.h> // for strerror()
+
 /* This symbol is defined in ext/standard/config.m4.
  * Essentially, it is set if you HAVE_FORK || PHP_WIN32
  * Other platforms may modify that configure check and add suitable #ifdefs

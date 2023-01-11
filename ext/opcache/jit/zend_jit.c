@@ -51,6 +51,10 @@
 #include <pthread.h>
 #endif
 
+#ifdef HAVE_MPROTECT
+#include <errno.h>
+#endif
+
 #ifdef ZTS
 int jit_globals_id;
 #else
