@@ -1846,11 +1846,14 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						break;
 					}
 					ZEND_FALLTHROUGH;
+#endif
 				case ZEND_ASSIGN_OBJ:
+#ifndef ZEND_JIT_IR //???
 				case ZEND_PRE_INC_OBJ:
 				case ZEND_PRE_DEC_OBJ:
 				case ZEND_POST_INC_OBJ:
 				case ZEND_POST_DEC_OBJ:
+#endif
 					if (opline->op2_type != IS_CONST
 					 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
 					 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
@@ -1867,7 +1870,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
-#endif
 				case ZEND_CONCAT:
 				case ZEND_FAST_CONCAT:
 					if ((opline->op1_type == IS_CONST || orig_op1_type == IS_STRING)
@@ -3766,8 +3768,8 @@ static bool zend_jit_may_delay_fetch_this(const zend_op_array *op_array, zend_ss
 	} else if (opline->opcode != ZEND_FETCH_OBJ_R
 			&& opline->opcode != ZEND_FETCH_OBJ_IS
 			&& opline->opcode != ZEND_FETCH_OBJ_W
-#ifndef ZEND_JIT_IR //???
 			&& opline->opcode != ZEND_ASSIGN_OBJ
+#ifndef ZEND_JIT_IR //???
 			&& opline->opcode != ZEND_ASSIGN_OBJ_OP
 			&& opline->opcode != ZEND_PRE_INC_OBJ
 			&& opline->opcode != ZEND_PRE_DEC_OBJ
@@ -3940,6 +3942,15 @@ static int zend_jit_trace_deoptimization(
 			}
 			if (stack) {
 				SET_STACK_TYPE(stack, i, type, 1);
+			}
+		} else if (STACK_FLAGS(parent_stack, i) == ZREG_THIS) {
+			if (polymorphic_side_trace) {
+				ssa->var_info[i].delayed_fetch_this = 1;
+				if (stack) {
+					SET_STACK_REG_EX(stack, i, ZREG_NONE, ZREG_THIS);
+				}
+			} else if (!zend_jit_load_this(jit, EX_NUM_TO_VAR(i))) {
+				return 0;
 			}
 		} else if (STACK_FLAGS(parent_stack, i) == ZREG_ZVAL_ADDREF) {
 			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(i));
@@ -5338,6 +5349,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_ASSIGN_OBJ:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
@@ -5427,7 +5439,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
 						}
 						goto done;
-#endif
 					case ZEND_ASSIGN_DIM:
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
@@ -6905,7 +6916,10 @@ done:
 									RA_REG_FLAGS(ssa_op->result_def) & ZREG_STORE);
 							}
 #else
-							if (ssa->var_info[ssa_op->result_def].avoid_refcounting) {
+							if (opline->opcode == ZEND_FETCH_THIS
+							 && delayed_fetch_this) {
+								SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_NONE, ZREG_THIS);
+							} else if (ssa->var_info[ssa_op->result_def].avoid_refcounting) {
 								SET_STACK_REG_EX(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_NONE, ZREG_ZVAL_ADDREF);
 							} else if (ra && RA_HAS_REG(ssa_op->result_def)) {
 								SET_STACK_REF_EX(stack, EX_VAR_TO_NUM(opline->result.var), ra[ssa_op->result_def].ref,
@@ -8454,6 +8468,8 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					}
 				} else if (STACK_FLAGS(stack, j) == ZREG_TYPE_ONLY) {
 					fprintf(stderr, "(type_only)");
+				} else if (STACK_FLAGS(stack, j) == ZREG_THIS) {
+					fprintf(stderr, "(this)");
 				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_ADDREF) {
 					fprintf(stderr, "(zval_try_addref)");
 				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
@@ -9104,6 +9120,11 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 			} else {
 				ZEND_UNREACHABLE();
 			}
+		} else if (STACK_FLAGS(stack, i) == ZREG_THIS) {
+			zend_object *obj = Z_OBJ(EX(This));
+
+			GC_ADDREF(obj);
+			ZVAL_OBJ(EX_VAR_NUM(i), obj);
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_ADDREF) {
 			Z_TRY_ADDREF_P(EX_VAR_NUM(i));
 		} else if (STACK_FLAGS(stack, i) == ZREG_ZVAL_COPY) {

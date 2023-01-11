@@ -177,6 +177,7 @@ ZEND_EXT_API void zend_jit_restart(void);
 
 #define ZREG_TYPE_ONLY      (1<<3)
 #define ZREG_ZVAL_ADDREF    (1<<4)
+#define ZREG_THIS           (1<<5)
 
 #define ZREG_NONE           -1
 
