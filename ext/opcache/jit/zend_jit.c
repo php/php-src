@@ -3610,6 +3610,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_ASSIGN_OBJ_OP:
 						if (opline->result_type != IS_UNUSED) {
 							break;
@@ -3658,7 +3659,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_ASSIGN_OBJ:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING

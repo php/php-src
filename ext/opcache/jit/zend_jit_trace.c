@@ -1835,7 +1835,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_ASSIGN_OBJ_OP:
 					if (opline->extended_value == ZEND_POW
 					 || opline->extended_value == ZEND_DIV) {
@@ -1846,7 +1845,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						break;
 					}
 					ZEND_FALLTHROUGH;
-#endif
 				case ZEND_ASSIGN_OBJ:
 #ifndef ZEND_JIT_IR //???
 				case ZEND_PRE_INC_OBJ:
@@ -3769,8 +3767,8 @@ static bool zend_jit_may_delay_fetch_this(const zend_op_array *op_array, zend_ss
 			&& opline->opcode != ZEND_FETCH_OBJ_IS
 			&& opline->opcode != ZEND_FETCH_OBJ_W
 			&& opline->opcode != ZEND_ASSIGN_OBJ
-#ifndef ZEND_JIT_IR //???
 			&& opline->opcode != ZEND_ASSIGN_OBJ_OP
+#ifndef ZEND_JIT_IR //???
 			&& opline->opcode != ZEND_PRE_INC_OBJ
 			&& opline->opcode != ZEND_PRE_DEC_OBJ
 			&& opline->opcode != ZEND_POST_INC_OBJ
@@ -5253,6 +5251,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#endif
 					case ZEND_ASSIGN_OBJ_OP:
 						if (opline->result_type != IS_UNUSED) {
 							break;
@@ -5349,7 +5348,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_ASSIGN_OBJ:
 						if (opline->op2_type != IS_CONST
 						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
