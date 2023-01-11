@@ -591,7 +591,6 @@ static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, zend_ssa *ssa, u
 static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_info)
 {
 	switch (opline->opcode) {
-#ifndef ZEND_JIT_IR //???
 		case ZEND_FETCH_OBJ_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
@@ -608,7 +607,6 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_i
 				return 1;
 			}
 			break;
-#endif
 		case ZEND_FETCH_DIM_FUNC_ARG:
 			if (!JIT_G(current_frame) ||
 			    !JIT_G(current_frame)->call->func ||
@@ -647,7 +645,6 @@ static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 	return c && (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 }
 
-#ifndef ZEND_JIT_IR
 static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
 {
 	zend_property_info *info = NULL;
@@ -740,7 +737,6 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 
 	return 0;
 }
-#endif /* ZEND_JIT_IR */
 
 #define OP_RANGE(ssa_op, opN) \
 	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
@@ -4175,7 +4171,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:
@@ -4217,7 +4212,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_BIND_GLOBAL:
 						if (!ssa->ops || !ssa->var_info) {
 							op1_info = MAY_BE_ANY|MAY_BE_REF;

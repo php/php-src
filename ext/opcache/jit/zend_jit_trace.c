@@ -2148,7 +2148,6 @@ propagate_arg:
 						TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame->call);
 					}
 					break;
-#ifndef ZEND_JIT_IR //???
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 					if (!frame
 					 || !frame->call
@@ -2169,7 +2168,6 @@ propagate_arg:
 						ADD_OP1_TRACE_GUARD();
 					}
 					break;
-#endif
 				case ZEND_INIT_METHOD_CALL:
 					if (opline->op2_type != IS_CONST
 					 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING) {
@@ -3740,7 +3738,6 @@ static void zend_jit_trace_setup_ret_counter(const zend_op *opline, size_t offse
 	}
 }
 
-#ifndef ZEND_JIT_IR //???
 static bool zend_jit_may_delay_fetch_this(const zend_op_array *op_array, zend_ssa *ssa, const zend_op **ssa_opcodes, const zend_ssa_op *ssa_op)
 {
 	int var = ssa_op->result_def;
@@ -3769,12 +3766,15 @@ static bool zend_jit_may_delay_fetch_this(const zend_op_array *op_array, zend_ss
 	} else if (opline->opcode != ZEND_FETCH_OBJ_R
 			&& opline->opcode != ZEND_FETCH_OBJ_IS
 			&& opline->opcode != ZEND_FETCH_OBJ_W
+#ifndef ZEND_JIT_IR //???
 			&& opline->opcode != ZEND_ASSIGN_OBJ
 			&& opline->opcode != ZEND_ASSIGN_OBJ_OP
 			&& opline->opcode != ZEND_PRE_INC_OBJ
 			&& opline->opcode != ZEND_PRE_DEC_OBJ
 			&& opline->opcode != ZEND_POST_INC_OBJ
-			&& opline->opcode != ZEND_POST_DEC_OBJ) {
+			&& opline->opcode != ZEND_POST_DEC_OBJ
+#endif
+	) {
 		return 0;
 	}
 
@@ -3808,7 +3808,6 @@ static bool zend_jit_may_delay_fetch_this(const zend_op_array *op_array, zend_ss
 
 	return 1;
 }
-#endif
 
 static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack, uint32_t stack_size)
 {
@@ -6362,7 +6361,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
@@ -6457,7 +6455,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_BIND_GLOBAL:
 						orig_opline = opline;
 						orig_ssa_op = ssa_op;
@@ -6575,7 +6572,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_FETCH_THIS:
 						delayed_fetch_this = 0;
 						if (ssa_op->result_def >= 0 && opline->result_type != IS_CV) {
@@ -6588,6 +6584,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+#ifndef ZEND_JIT_IR //???
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
 					case ZEND_MATCH:
