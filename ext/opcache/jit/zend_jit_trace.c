@@ -1897,8 +1897,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_ECHO:
 				case ZEND_STRLEN:
 				case ZEND_COUNT:
-				case ZEND_FE_RESET_R:
 				case ZEND_QM_ASSIGN:
+				case ZEND_FE_RESET_R:
 					ADD_OP1_TRACE_GUARD();
 					break;
 				case ZEND_FE_FETCH_R:
@@ -4909,10 +4909,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						res_addr = RES_REG_ADDR();
-
 						if (Z_MODE(res_addr) != IS_REG
 						 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
-							res_use_info = -1; //???
 							send_result = 1;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -5010,7 +5008,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						res_addr = RES_REG_ADDR();
 						if (Z_MODE(res_addr) != IS_REG
 						 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
-							res_use_info = -1; //???
 							send_result = 1;
 							res_use_info = -1;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -8465,7 +8462,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					fprintf(stderr, "(zval_try_addref)");
 				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
 					fprintf(stderr, "zval_copy(%s)", zend_reg_name(STACK_REG(stack, j)));
-				} else if (STACK_REG(stack, j) != -1 /*???ZREG_NONE*/) {
+				} else if (STACK_REG(stack, j) != ZREG_NONE) {
 					fprintf(stderr, "(%s", zend_reg_name(STACK_REG(stack, j)));
 					if (STACK_FLAGS(stack, j) != 0) {
 						fprintf(stderr, ":%x", STACK_FLAGS(stack, j));

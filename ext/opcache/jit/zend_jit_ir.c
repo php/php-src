@@ -62,7 +62,7 @@
 #endif
 
 static uint32_t allowed_opt_flags = 0;
-static bool delayed_call_chain = 0; // TODO: temove this var (use jit->delayed_call_level) ???
+static bool delayed_call_chain = 0; // TODO: remove this var (use jit->delayed_call_level) ???
 
 #ifdef ZTS
 static size_t tsrm_ls_cache_tcb_offset = 0;
@@ -321,6 +321,7 @@ typedef enum _ir_alias {
 
 extern const uint8_t ir_type_size[IR_LAST_TYPE];
 
+#if 0
 static ir_alias ir_check_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr2)
 {
 	ir_insn *insn1, *insn2;
@@ -354,6 +355,7 @@ static ir_alias ir_check_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr2)
 	}
 	return IR_MAY_ALIAS;
 }
+#endif
 
 static ir_alias ir_check_partial_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr2, ir_type type1, ir_type type2)
 {
