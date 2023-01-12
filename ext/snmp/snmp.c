@@ -397,7 +397,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	php_snmp_error(getThis(), PHP_SNMP_ERRNO_NOERROR, "");
 
 	if (st & SNMP_CMD_WALK) { /* remember root OID */
-		memmove((char *)root, (char *)(objid_query->vars[0].name), (objid_query->vars[0].name_length) * sizeof(oid));
+		memcpy((char *)root, (char *)(objid_query->vars[0].name), (objid_query->vars[0].name_length) * sizeof(oid));
 		rootlen = objid_query->vars[0].name_length;
 		objid_query->offset = objid_query->count;
 	}
@@ -551,7 +551,7 @@ retry:
 							php_snmp_error(getThis(), PHP_SNMP_ERRNO_OID_NOT_INCREASING, "Error: OID not increasing: %s", buf2);
 							keepwalking = false;
 						} else {
-							memmove((char *)(objid_query->vars[0].name), (char *)vars->name, vars->name_length * sizeof(oid));
+							memcpy((char *)(objid_query->vars[0].name), (char *)vars->name, vars->name_length * sizeof(oid));
 							objid_query->vars[0].name_length = vars->name_length;
 							keepwalking = true;
 						}
