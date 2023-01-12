@@ -22,14 +22,11 @@
 #define ZEND_EXECUTE_H
 
 #include "zend_compile.h" // for zend_op_array
+#include "zend_globals.h" // for struct _zend_executor_globals
+#include "zend_globals_macros.h" // for EG()
 #include "zend_list.h" // for zend_rsrc_list_get_rsrc_type()
 #include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_types.h" // for zend_execute_data
-
-#if ZEND_DEBUG
-#include "zend_globals.h" // for struct _zend_executor_globals
-#include "zend_globals_macros.h" // for EG()
-#endif
 
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;
