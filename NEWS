@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix GH-10187 (Segfault in stripslashes() with arm64). (nielsdos)
+  . Fixed bug GH-10214 (Incomplete validation of object syntax during
+    unserialize()). (timwolla)
 
 05 Jan 2023, PHP 8.2.1
 
