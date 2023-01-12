@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 06c88dc2fb5582a6d21c11aee6ac0a0538e70cbc */
+ * Stub hash: 373d138420453f0b7a7e6fdd711b869229e97c5a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -170,7 +170,7 @@ static zend_class_entry *register_class_SimpleXMLElement(zend_class_entry *class
 
 	INIT_CLASS_ENTRY(ce, "SimpleXMLElement", class_SimpleXMLElement_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE|ZEND_ACC_SUBCLASS_SERIALIZABLE;
 	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_RecursiveIterator);
 
 	return class_entry;

@@ -23,7 +23,8 @@ const PHP_80_VERSION_ID = 80000;
 const PHP_81_VERSION_ID = 80100;
 const PHP_82_VERSION_ID = 80200;
 const PHP_83_VERSION_ID = 80300;
-const ALL_PHP_VERSION_IDS = [PHP_70_VERSION_ID, PHP_80_VERSION_ID, PHP_81_VERSION_ID, PHP_82_VERSION_ID, PHP_83_VERSION_ID];
+const PHP_84_VERSION_ID = 80400;
+const ALL_PHP_VERSION_IDS = [PHP_70_VERSION_ID, PHP_80_VERSION_ID, PHP_81_VERSION_ID, PHP_82_VERSION_ID, PHP_83_VERSION_ID, PHP_84_VERSION_ID];
 
 /**
  * @return FileInfo[]
@@ -1845,6 +1846,7 @@ abstract class VariableLike
             PHP_81_VERSION_ID => [$flags],
             PHP_82_VERSION_ID => [$flags],
             PHP_83_VERSION_ID => [$flags],
+            PHP_84_VERSION_ID => [$flags],
         ];
     }
 
@@ -2528,6 +2530,7 @@ class ClassInfo {
     /** @var AttributeInfo[] */
     public array $attributes;
     public bool $isNotSerializable;
+    public bool $isSubclassSerializable;
     /** @var Name[] */
     public array $extends;
     /** @var Name[] */
@@ -2563,6 +2566,7 @@ class ClassInfo {
         bool $isStrictProperties,
         array $attributes,
         bool $isNotSerializable,
+        bool $isSubclassSerializable,
         array $extends,
         array $implements,
         array $constInfos,
@@ -2582,6 +2586,7 @@ class ClassInfo {
         $this->isStrictProperties = $isStrictProperties;
         $this->attributes = $attributes;
         $this->isNotSerializable = $isNotSerializable;
+        $this->isSubclassSerializable = $isSubclassSerializable;
         $this->extends = $extends;
         $this->implements = $implements;
         $this->constInfos = $constInfos;
@@ -2795,12 +2800,19 @@ class ClassInfo {
 
         $php83Flags = $php82Flags;
 
+        $php84Flags = $php83Flags;
+
+        if ($this->isSubclassSerializable) {
+            $php84Flags[] = "ZEND_ACC_SUBCLASS_SERIALIZABLE";
+        }
+
         return [
             PHP_70_VERSION_ID => $php70Flags,
             PHP_80_VERSION_ID => $php80Flags,
             PHP_81_VERSION_ID => $php81Flags,
             PHP_82_VERSION_ID => $php82Flags,
             PHP_83_VERSION_ID => $php83Flags,
+            PHP_84_VERSION_ID => $php84Flags,
         ];
     }
 
@@ -3712,6 +3724,7 @@ function parseClass(
     $isDeprecated = false;
     $isStrictProperties = false;
     $isNotSerializable = false;
+    $isSubclassSerializable = false;
     $allowsDynamicProperties = false;
     $attributes = [];
 
@@ -3728,6 +3741,8 @@ function parseClass(
                 $isNotSerializable = true;
             } else if ($tag->name === 'undocumentable') {
                 $isUndocumentable = true;
+            } else if ($tag->name == 'subclass-serializable') {
+                $isSubclassSerializable = true;
             }
         }
     }
@@ -3743,6 +3758,10 @@ function parseClass(
 
     if ($isStrictProperties && $allowsDynamicProperties) {
         throw new Exception("A class may not have '@strict-properties' and '#[\\AllowDynamicProperties]' at the same time.");
+    }
+
+    if (!$isNotSerializable && $isSubclassSerializable) {
+        throw new Exception("@subclass-serializable without @not-serializable is a no-op");
     }
 
     $extends = [];
@@ -3783,6 +3802,7 @@ function parseClass(
         $isStrictProperties,
         $attributes,
         $isNotSerializable,
+        $isSubclassSerializable,
         $extends,
         $implements,
         $consts,

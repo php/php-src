@@ -1277,8 +1277,13 @@ object ":" uiv ":" ["]	{
 	*p = YYCURSOR;
 
 	if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
-		zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
-			ZSTR_VAL(ce->name));
+		if (ce->ce_flags & ZEND_ACC_SUBCLASS_SERIALIZABLE) {
+			zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed, unless you extend the class and provide a unserialisation method",
+				ZSTR_VAL(ce->name));
+		} else {
+			zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
+				ZSTR_VAL(ce->name));
+		}
 		zend_string_release_ex(class_name, 0);
 		return 0;
 	}

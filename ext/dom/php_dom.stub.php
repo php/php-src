@@ -294,7 +294,10 @@ interface DOMChildNode
     public function replaceWith(...$nodes): void;
 }
 
-/** @not-serializable */
+/**
+ * @not-serializable
+ * @subclass-serializable
+ */
 class DOMNode
 {
     public const int DOCUMENT_POSITION_DISCONNECTED = 0x01;
@@ -415,7 +418,10 @@ class DOMNode
     public function compareDocumentPosition(DOMNode $other): int {}
 }
 
-/** @not-serializable */
+/**
+ * @not-serializable
+ * @subclass-serializable
+ */
 class DOMNameSpaceNode
 {
     /** @readonly */
@@ -977,7 +983,10 @@ class DOMProcessingInstruction extends DOMNode
 }
 
 #ifdef LIBXML_XPATH_ENABLED
-/** @not-serializable */
+/**
+ * @not-serializable
+ * @subclass-serializable
+ */
 class DOMXPath
 {
     /** @readonly */

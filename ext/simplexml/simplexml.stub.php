@@ -8,7 +8,10 @@ function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElem
 
 function simplexml_import_dom(SimpleXMLElement|DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
-/** @not-serializable */
+/**
+ * @not-serializable
+ * @subclass-serializable
+ */
 class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
 {
     /** @tentative-return-type */

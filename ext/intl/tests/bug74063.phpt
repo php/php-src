@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-Serialization of 'NumberFormatter' is not allowed
+Serialization of 'NumberFormatter' is not allowed, unless you extend the class and provide a serialisation method

@@ -2,7 +2,10 @@
 
 /** @generate-class-entries */
 
-/** @not-serializable */
+/**
+ * @not-serializable
+ * @subclass-serializable
+ */
 class NumberFormatter
 {
     /* UNumberFormatStyle constants */
