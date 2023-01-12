@@ -43,6 +43,7 @@
 #include "libmbfl/filters/mbfilter_uuencode.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
+#include "libmbfl/filters/mbfilter_utf16.h"
 #include "libmbfl/filters/mbfilter_singlebyte.h"
 #include "libmbfl/filters/translit_kana_jisx0201_jisx0208.h"
 
@@ -2994,6 +2995,24 @@ static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, 
 		data[i].in_len = in_len;
 		data[i].state = 0;
 		data[i].demerits = 0;
+
+		/* Skip byte order mark for UTF-8, UTF-16BE, or UTF-16LE */
+		if (elist[i] == &mbfl_encoding_utf8) {
+			if (in_len >= 3 && in[0] == 0xEF && in[1] == 0xBB && in[2] == 0xBF) {
+				data[i].in_len -= 3;
+				data[i].in += 3;
+			}
+		} else if (elist[i] == &mbfl_encoding_utf16be) {
+			if (in_len >= 2 && in[0] == 0xFE && in[1] == 0xFF) {
+				data[i].in_len -= 2;
+				data[i].in += 2;
+			}
+		} else if (elist[i] == &mbfl_encoding_utf16le) {
+			if (in_len >= 2 && in[0] == 0xFF && in[1] == 0xFE) {
+				data[i].in_len -= 2;
+				data[i].in += 2;
+			}
+		}
 	}
 
 	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
