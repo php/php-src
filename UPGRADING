@@ -223,6 +223,10 @@ PHP 8.2 UPGRADE NOTES
     widened to iterable from Iterator, allowing arrays to be passed.
     RFC: https://wiki.php.net/rfc/iterator_xyz_accept_array
 
+- Standard
+  . unserialize() now performs a stricter validation of the structure of serialized
+    objects.
+
 - XML
   . xml_parser_set_option() now actually returns false when attempting to set a
     negative tag start. Previously it returned true while emitting an E_WARNING.
