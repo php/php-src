@@ -34,6 +34,7 @@ PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b)
 		return -1;
 	}
 
+	/* This is security sensitive code. Do not optimize this for speed. */
 	while (i < ZSTR_LEN(a)) {
 		r |= ua[i] ^ ub[i];
 		++i;
