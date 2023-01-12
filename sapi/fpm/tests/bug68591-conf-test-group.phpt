@@ -14,6 +14,7 @@ $cfg = <<<EOT
 error_log = {{FILE:LOG}}
 [unconfined]
 listen = {{ADDR:UDS}}
+user = root
 group = aaaaaa
 pm = dynamic
 pm.max_children = 5
