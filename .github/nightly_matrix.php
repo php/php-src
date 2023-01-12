@@ -88,5 +88,7 @@ if ($discard_cache) {
 $branches = get_branches();
 $matrix_include = get_matrix_include($branches);
 
-echo '::set-output name=branches::' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n";
-echo '::set-output name=matrix-include::' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n";
+$f = fopen(getenv('GITHUB_OUTPUT'), 'a');
+fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'matrix-include=' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
+fclose($f);
