@@ -230,10 +230,10 @@ static size_t php_strnlen(char* str, size_t maxlen) {
 /* }}} */
 
 /* {{{ error messages */
-static const char * EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
-static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
-static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
-static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
+static const char *const EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
+static const char *const EXIF_ERROR_CORRUPT   = "File structure corrupted";
+static const char *const EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
+static const char *const EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
 
 #define EXIF_ERRLOG_FILEEOF(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_FILEEOF);
 #define EXIF_ERRLOG_CORRUPT(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_CORRUPT);
@@ -244,7 +244,7 @@ static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined fi
 /* {{{ format description defines
    Describes format descriptor
 */
-static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
+static const int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
 #define NUM_FORMATS 13
 
 #define TAG_FMT_BYTE       1
