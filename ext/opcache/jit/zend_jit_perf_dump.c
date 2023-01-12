@@ -52,12 +52,12 @@ extern unsigned int thr_self(void);
 /*
  * 1) Profile using perf-<pid>.map
  *
- * perf record php -d opcache.huge_code_pages=0 -d opcache.jit_debug=0x10 bench.php
+ * perf record php -d opcache.jit_debug=0x10 bench.php
  * perf report
  *
  * 2) Profile using jit-<pid>.dump
  *
- * perf record -k 1 php -d opcache.huge_code_pages=0 -d opcache.jit_debug=0x20 bench.php
+ * perf record -k 1 php -d opcache.jit_debug=0x20 bench.php
  * perf inject -j -i perf.data -o perf.data.jitted
  * perf report -i perf.data.jitted
  *

@@ -34,7 +34,6 @@
 #include "zend_vm.h"
 #include "zend_inheritance.h"
 #include "zend_exceptions.h"
-#include "zend_mmap.h"
 #include "zend_observer.h"
 #include "main/php_main.h"
 #include "main/SAPI.h"
@@ -2947,174 +2946,6 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 }
 
-#ifdef HAVE_HUGE_CODE_PAGES
-# ifndef _WIN32
-#  include <sys/mman.h>
-#  ifndef MAP_ANON
-#   ifdef MAP_ANONYMOUS
-#    define MAP_ANON MAP_ANONYMOUS
-#   endif
-#  endif
-#  ifndef MAP_FAILED
-#   define MAP_FAILED ((void*)-1)
-#  endif
-#  ifdef MAP_ALIGNED_SUPER
-#   include <sys/types.h>
-#   include <sys/sysctl.h>
-#   include <sys/user.h>
-#   define MAP_HUGETLB MAP_ALIGNED_SUPER
-#  endif
-# endif
-
-# if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
-static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
-{
-	void *ret = MAP_FAILED;
-	void *mem;
-
-	mem = mmap(NULL, size,
-		PROT_READ | PROT_WRITE,
-		MAP_PRIVATE | MAP_ANONYMOUS,
-		-1, 0);
-	if (mem == MAP_FAILED) {
-		zend_error(E_WARNING,
-			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap failed: %s (%d)",
-			strerror(errno), errno);
-		return FAILURE;
-	}
-	memcpy(mem, start, real_size);
-
-#  ifdef MAP_HUGETLB
-	ret = mmap(start, size,
-		PROT_READ | PROT_WRITE | PROT_EXEC,
-		MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_HUGETLB,
-		-1, 0);
-#  endif
-	if (ret == MAP_FAILED) {
-		ret = mmap(start, size,
-			PROT_READ | PROT_WRITE | PROT_EXEC,
-			MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-			-1, 0);
-		/* this should never happen? */
-		ZEND_ASSERT(ret != MAP_FAILED);
-#  ifdef MADV_HUGEPAGE
-		if (-1 == madvise(start, size, MADV_HUGEPAGE)) {
-			memcpy(start, mem, real_size);
-			mprotect(start, size, PROT_READ | PROT_EXEC);
-			munmap(mem, size);
-			zend_error(E_WARNING,
-				ACCELERATOR_PRODUCT_NAME " huge_code_pages: madvise(HUGEPAGE) failed: %s (%d)",
-				strerror(errno), errno);
-			return FAILURE;
-		}
-#  else
-		memcpy(start, mem, real_size);
-		mprotect(start, size, PROT_READ | PROT_EXEC);
-		munmap(mem, size);
-		zend_error(E_WARNING,
-			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
-			strerror(errno), errno);
-		return FAILURE;
-#  endif
-	}
-
-	// Given the MAP_FIXED flag the address can never diverge
-	ZEND_ASSERT(ret == start);
-	zend_mmap_set_name(start, size, "zend_huge_code_pages");
-	memcpy(start, mem, real_size);
-	mprotect(start, size, PROT_READ | PROT_EXEC);
-
-	munmap(mem, size);
-
-	return SUCCESS;
-}
-
-static void accel_move_code_to_huge_pages(void)
-{
-#if defined(__linux__)
-	FILE *f;
-	long unsigned int huge_page_size = 2 * 1024 * 1024;
-
-	f = fopen("/proc/self/maps", "r");
-	if (f) {
-		long unsigned int  start, end, offset, inode;
-		char perm[5], dev[10], name[MAXPATHLEN];
-		int ret;
-
-		while (1) {
-			ret = fscanf(f, "%lx-%lx %4s %lx %9s %lu %s\n", &start, &end, perm, &offset, dev, &inode, name);
-			if (ret == 7) {
-				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
-					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
-					long unsigned int  seg_end = (end & ~(huge_page_size-1L));
-					long unsigned int  real_end;
-
-					ret = fscanf(f, "%lx-", &start);
-					if (ret == 1 && start == seg_end + huge_page_size) {
-						real_end = end;
-						seg_end = start;
-					} else {
-						real_end = seg_end;
-					}
-
-					if (seg_end > seg_start) {
-						zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
-						accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, real_end - seg_start, name, offset + seg_start - start);
-					}
-					break;
-				}
-			} else {
-				break;
-			}
-		}
-		fclose(f);
-	}
-#elif defined(__FreeBSD__)
-	size_t s = 0;
-	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_VMMAP, getpid()};
-	long unsigned int huge_page_size = 2 * 1024 * 1024;
-	if (sysctl(mib, 4, NULL, &s, NULL, 0) == 0) {
-		s = s * 4 / 3;
-		void *addr = mmap(NULL, s, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
-		if (addr != MAP_FAILED) {
-			if (sysctl(mib, 4, addr, &s, NULL, 0) == 0) {
-				uintptr_t start = (uintptr_t)addr;
-				uintptr_t end = start + s;
-				while (start < end) {
-					struct kinfo_vmentry *entry = (struct kinfo_vmentry *)start;
-					size_t sz = entry->kve_structsize;
-					if (sz == 0) {
-						break;
-					}
-					int permflags = entry->kve_protection;
-					if ((permflags & KVME_PROT_READ) && !(permflags & KVME_PROT_WRITE) &&
-					    (permflags & KVME_PROT_EXEC) && entry->kve_path[0] != '\0') {
-						long unsigned int seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
-						long unsigned int seg_end = (end & ~(huge_page_size-1L));
-						if (seg_end > seg_start) {
-							zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, entry->kve_path);
-							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
-							// First relevant segment found is our binary
-							break;
-						}
-					}
-					start += sz;
-				}
-			}
-			munmap(addr, s);
-		}
-	}
-#endif
-}
-# else
-static void accel_move_code_to_huge_pages(void)
-{
-	zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": opcache.huge_code_pages has no affect as huge page is not supported");
-	return;
-}
-# endif /* defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE) */
-#endif /* HAVE_HUGE_CODE_PAGES */
-
 static int accel_startup(zend_extension *extension)
 {
 #ifdef ZTS
@@ -3143,16 +2974,6 @@ static int accel_startup(zend_extension *extension)
 	if (UNEXPECTED(accel_gen_uname_id() == FAILURE)) {
 		zps_startup_failure("Unable to get user name", NULL, accelerator_remove_cb);
 		return SUCCESS;
-	}
-#endif
-
-#ifdef HAVE_HUGE_CODE_PAGES
-	if (ZCG(accel_directives).huge_code_pages &&
-	    (strcmp(sapi_module.name, "cli") == 0 ||
-	     strcmp(sapi_module.name, "cli-server") == 0 ||
-		 strcmp(sapi_module.name, "cgi-fcgi") == 0 ||
-		 strcmp(sapi_module.name, "fpm-fcgi") == 0)) {
-		accel_move_code_to_huge_pages();
 	}
 #endif
 
