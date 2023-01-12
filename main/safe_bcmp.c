@@ -19,7 +19,7 @@
 #include <string.h>
 
 /*
- * Returns 0 if both inputs match, 1 if they don't.
+ * Returns 0 if both inputs match, non-zero if they don't.
  * Returns -1 early if inputs do not have the same lengths.
  *
  */
@@ -34,6 +34,7 @@ PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b)
 		return -1;
 	}
 
+	/* This is security sensitive code. Do not optimize this for speed. */
 	while (i < ZSTR_LEN(a)) {
 		r |= ua[i] ^ ub[i];
 		++i;
