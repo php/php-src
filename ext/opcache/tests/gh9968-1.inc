@@ -1,3 +1,3 @@
 <?php
 
-opcache_compile_file('ext/opcache/tests/gh9968-2.inc');
+opcache_compile_file(__DIR__ . '/gh9968-2.inc');
