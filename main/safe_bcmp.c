@@ -19,7 +19,7 @@
 #include <string.h>
 
 /*
- * Returns 0 if both inputs match, 1 if they don't.
+ * Returns 0 if both inputs match, non-zero if they don't.
  * Returns -1 early if inputs do not have the same lengths.
  *
  */
