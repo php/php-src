@@ -100,6 +100,19 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
+echo "== BOM TEST ==\n";
+
+$str = chr(239).chr(187).chr(191).chr(195).chr(180); // UTF-8 BOM followed by ô
+var_dump(mb_detect_encoding($str, ['UTF-8', 'ISO-8859-1'], true));
+// U+4E4E is the Chinese character 乎; normally it would be impossible to distinguish UTF-16LE from UTF-16BE
+// But the BOM can tell us which one it is
+var_dump(mb_detect_encoding("\xFE\xFF\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true));
+var_dump(mb_detect_encoding("\xFF\xFE\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true));
+// However, a BOM should only appear at the beginning of the string
+$detected = mb_detect_encoding("\x4E\x4E\xFE\xFF\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true);
+if ($detected === 'UTF-16BE' || $detected === 'UTF-16LE')
+    die("Don't accept a BOM in the middle of a string");
+
 echo "== TORTURE TEST ==\n";
 
 function test($strings, $encodings) {
@@ -373,5 +386,9 @@ SJIS: SJIS
 INT: EUC-JP
 EUC-JP: EUC-JP
 mb_detect_encoding(): Argument #2 ($encodings) contains invalid encoding "BAD"
+== BOM TEST ==
+string(5) "UTF-8"
+string(8) "UTF-16BE"
+string(8) "UTF-16LE"
 == TORTURE TEST ==
 Done!
