@@ -1798,7 +1798,8 @@ consult the installation file that came with this distribution, or visit \n\
 			zend_quiet_write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
 			close(fpm_globals.send_config_pipe[1]);
 		}
-		return FPM_EXIT_CONFIG;
+		exit_status = FPM_EXIT_CONFIG;
+		goto out;
 	}
 
 	if (fpm_globals.send_config_pipe[1]) {
