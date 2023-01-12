@@ -22,7 +22,7 @@ Building and Testing
 Install pre-requested libraries. PHP and their extensions may require different libraries.
 JIT itself needs just **libcapstone** to produce disassembler output.
 
-```	
+```
 sudo dbf install capstone-devel
 ```
 
