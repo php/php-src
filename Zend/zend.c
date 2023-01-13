@@ -94,10 +94,6 @@ void (*zend_on_timeout)(int seconds);
 static void (*zend_message_dispatcher_p)(zend_long message, const void *data);
 static zval *(*zend_get_configuration_directive_p)(zend_string *name);
 
-#if ZEND_RC_DEBUG
-ZEND_API bool zend_rc_debug = 0;
-#endif
-
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
