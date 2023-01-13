@@ -17,5 +17,26 @@
 #include "zend_rc_debug.h"
 
 #if ZEND_RC_DEBUG
+
+#include "zend_types.h"
+
 ZEND_API bool zend_rc_debug = false;
+
+ZEND_API void ZEND_RC_MOD_CHECK(const zend_refcounted_h *p)
+{
+	if (!zend_rc_debug) {
+		return;
+	}
+
+	uint8_t type = zval_gc_type(p->u.type_info);
+
+	/* Skip checks for OBJECT/NULL type to avoid interpreting the flag incorrectly. */
+	if (type != IS_OBJECT && type != IS_NULL) {
+		ZEND_ASSERT(!(zval_gc_flags(p->u.type_info) & GC_IMMUTABLE));
+
+		/* The GC_PERSISTENT flag is reused for IS_OBJ_WEAKLY_REFERENCED on objects. */
+		ZEND_ASSERT((zval_gc_flags(p->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT);
+	}
+}
+
 #endif
