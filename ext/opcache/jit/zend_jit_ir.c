@@ -4589,33 +4589,6 @@ static int zend_jit_update_regs(zend_jit_ctx *jit, uint32_t var, zend_jit_addr s
 	return 1;
 }
 
-static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *next_opline, int target_block)
-{
-	ir_ref ref;
-	int b = jit->b;
-	zend_basic_block *bb;
-
-	ref = zend_jit_cmp_ip(jit, IR_NE, next_opline);
-	ref = zend_jit_if_ex(jit, ref, target_block);
-
-	zend_jit_if_false(jit, ref);
-
-	jit->b = -1; /* prevent adding predecessor ref by zend_jit_tail_handler() */
-
-	if (!zend_jit_tail_handler(jit, next_opline)) {
-		return 0;
-	}
-
-	ZEND_ASSERT(b >= 0);
-	bb = &jit->ssa->cfg.blocks[b];
-	ZEND_ASSERT(bb->successors_count == 1);
-	_zend_jit_add_predecessor_ref(jit, bb->successors[0], b, ref);
-	jit->control = IR_UNUSED;
-	jit->b = -1;
-	zend_jit_reset_last_valid_opline(jit);
-	return 1;
-}
-
 static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op1_def_info, zend_jit_addr op1_def_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr, int may_overflow, int may_throw)
 {
 	ir_ref if_long = IR_UNUSED;
@@ -11022,6 +10995,42 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 	if (user_path) {
 		zend_jit_merge_2(jit, user_path, zend_jit_end(jit));
+	}
+
+	return 1;
+}
+
+static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, int call_level, int next_block)
+{
+	ir_ref if_skip_constructor = zend_jit_if_ex(jit, zend_jit_cmp_ip(jit, IR_NE, opline), next_block);
+
+	zend_jit_if_false(jit, if_skip_constructor);
+
+	if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
+		if (!zend_jit_tail_handler(jit, opline)) {
+			return 0;
+		}
+	} else {
+		if (!zend_jit_do_fcall(jit, opline, op_array, ssa, call_level, next_block, NULL)) {
+			return 0;
+		}
+	}
+
+    /* override predecessors of the next block */
+	ZEND_ASSERT(jit->ssa->cfg.blocks[next_block].predecessors_count == 1);
+    if (!jit->control) {
+		jit->bb_edges[jit->bb_predecessors[next_block]] = if_skip_constructor;
+	} else {
+		/* merge current control path with the true branch of constructor skip condition */
+		ir_ref end = zend_jit_end(jit);
+
+		zend_jit_if_true(jit, if_skip_constructor);
+		zend_jit_merge_2(jit, end, zend_jit_end(jit));
+		jit->bb_edges[jit->bb_predecessors[next_block]] = zend_jit_end(jit);
+
+		jit->control = IR_UNUSED;
+		jit->b = -1;
+		zend_jit_reset_last_valid_opline(jit);
 	}
 
 	return 1;

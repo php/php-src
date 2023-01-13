@@ -4527,7 +4527,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								zend_jit_do_fcall(&ctx, next_opline, op_array, ssa, call_level, b + 1, NULL);
 							}
 #else
-							zend_jit_constructor(&ctx, next_opline, ssa->cfg.blocks[b].successors[0]);
+							ZEND_ASSERT(b + 1 == ssa->cfg.blocks[b].successors[0]);
+							zend_jit_constructor(&ctx, next_opline, op_array, ssa, call_level, b + 1);
 #endif
 						}
 
