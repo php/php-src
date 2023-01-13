@@ -1748,9 +1748,11 @@ static size_t mb_fast_strlen_utf8(unsigned char *p, size_t len)
 
 #ifdef __SSE2__
 	if (len >= sizeof(__m128i)) {
+		e -= sizeof(__m128i);
+
 		const __m128i threshold = _mm_set1_epi8(-64);
 		const __m128i delta = _mm_set1_epi8(1);
-		__m128i counter = _mm_set1_epi8(0); /* Vector of 16 continuation-byte counters */
+		__m128i counter = _mm_setzero_si128(); /* Vector of 16 continuation-byte counters */
 
 		int reset_counter = 255;
 		do {
@@ -1762,13 +1764,14 @@ static size_t mb_fast_strlen_utf8(unsigned char *p, size_t len)
 			 * and reset them to zero */
 			if (--reset_counter == 0) {
 				len -= _mm_sum_epu8(counter);
-				counter = _mm_set1_epi8(0);
+				counter = _mm_setzero_si128();
 				reset_counter = 255;
 			}
 
 			p += sizeof(__m128i);
-		} while (p + sizeof(__m128i) <= e);
+		} while (p <= e);
 
+		e += sizeof(__m128i);
 		len -= _mm_sum_epu8(counter); /* Fold in any remaining non-zero values in the 16 counters */
 	}
 #endif
