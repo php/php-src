@@ -39,22 +39,6 @@
 #include <limits.h>
 #include <inttypes.h>
 
-# ifndef HAVE_INT32_T
-#  if SIZEOF_INT == 4
-typedef int int32_t;
-#  elif SIZEOF_LONG == 4
-typedef long int int32_t;
-#  endif
-# endif
-
-# ifndef HAVE_UINT32_T
-#  if SIZEOF_INT == 4
-typedef unsigned int uint32_t;
-#  elif SIZEOF_LONG == 4
-typedef unsigned long int uint32_t;
-#  endif
-# endif
-
 #ifdef _WIN32
 # if _MSC_VER >= 1600
 # include <stdint.h>
