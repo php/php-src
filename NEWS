@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-9981 (FPM does not reset fastcgi.error_header).
     (Jakub Zelenka)
+  . Fixed bug #67244 (Wrong owner:group for listening unix socket).
+    (Jakub Zelenka)
 
 - LDAP:
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
