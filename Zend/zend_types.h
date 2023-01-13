@@ -411,8 +411,15 @@ struct _zend_array {
 #define HT_MIN_MASK ((uint32_t) -2)
 #define HT_MIN_SIZE 8
 
+/* HT_MAX_SIZE is chosen to satisfy the following constraints:
+ * - HT_SIZE_TO_MASK(HT_MAX_SIZE) != 0
+ * - HT_SIZE_EX(HT_MAX_SIZE, HT_SIZE_TO_MASK(HT_MAX_SIZE)) does not overflow or
+ *   wrapparound, and is <= the addressable space size
+ * - HT_MAX_SIZE must be a power of two:
+ *   (nTableSize<HT_MAX_SIZE ? nTableSize+nTableSize : nTableSize) <= HT_MAX_SIZE
+ */
 #if SIZEOF_SIZE_T == 4
-# define HT_MAX_SIZE 0x04000000 /* small enough to avoid overflow checks */
+# define HT_MAX_SIZE 0x02000000
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((Bucket*)((char*)(data) + (idx)))
 # define HT_IDX_TO_HASH(idx) \
@@ -420,7 +427,7 @@ struct _zend_array {
 # define HT_HASH_TO_IDX(idx) \
 	((idx) / sizeof(Bucket))
 #elif SIZEOF_SIZE_T == 8
-# define HT_MAX_SIZE 0x80000000
+# define HT_MAX_SIZE 0x40000000
 # define HT_HASH_TO_BUCKET_EX(data, idx) \
 	((data) + (idx))
 # define HT_IDX_TO_HASH(idx) \
@@ -439,7 +446,7 @@ struct _zend_array {
 #define HT_SIZE_TO_MASK(nTableSize) \
 	((uint32_t)(-((nTableSize) + (nTableSize))))
 #define HT_HASH_SIZE(nTableMask) \
-	(((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))
+	(((size_t)-(uint32_t)(nTableMask)) * sizeof(uint32_t))
 #define HT_DATA_SIZE(nTableSize) \
 	((size_t)(nTableSize) * sizeof(Bucket))
 #define HT_SIZE_EX(nTableSize, nTableMask) \

@@ -25,6 +25,8 @@
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
 #include "zend_mmap.h"
+#include "zend_compile.h"
+#include "zend_closures.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -659,9 +661,30 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 
+	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED) {
+		zend_get_gc_buffer_use(buf, table, num);
+		return NULL;
+	}
+
+	HashTable *lastSymTable = NULL;
+	zend_execute_data *ex = fiber->execute_data;
+	for (; ex; ex = ex->prev_execute_data) {
+		HashTable *symTable = zend_unfinished_execution_gc(ex, ex->call, buf);
+		if (symTable) {
+			if (lastSymTable) {
+				zval *val;
+				ZEND_HASH_FOREACH_VAL(lastSymTable, val) {
+					ZEND_ASSERT(Z_TYPE_P(val) == IS_INDIRECT);
+					zend_get_gc_buffer_add_zval(buf, Z_INDIRECT_P(val));
+				} ZEND_HASH_FOREACH_END();
+			}
+			lastSymTable = symTable;
+		}
+	}
+
 	zend_get_gc_buffer_use(buf, table, num);
 
-	return NULL;
+	return lastSymTable;
 }
 
 ZEND_METHOD(Fiber, __construct)
