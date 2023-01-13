@@ -22,6 +22,7 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#include "zend_func_types.h"
 #include "zend_portability.h"
 #include "zend_long.h"
 #include "zend_rc_debug.h"
@@ -89,12 +90,6 @@ typedef struct _zend_resource   zend_resource;
 typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
-
-typedef int  (*compare_func_t)(const void *, const void *);
-typedef void (*swap_func_t)(void *, void *);
-typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t, swap_func_t);
-typedef void (*dtor_func_t)(zval *pDest);
-typedef void (*copy_ctor_func_t)(zval *pElement);
 
 /*
  * zend_type - is an abstraction layer to represent information about type hint.

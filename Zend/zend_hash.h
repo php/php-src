@@ -22,6 +22,7 @@
 #define ZEND_HASH_H
 
 #include "zend.h"
+#include "zend_func_types.h"
 #include "zend_sort.h"
 #include "zend_type_code.h"
 

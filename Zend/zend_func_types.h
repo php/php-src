@@ -12,19 +12,19 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Xinchen Hui <laruence@php.net>                              |
-   |          Sterling Hughes <sterling@php.net>                          |
-   +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_SORT_H
-#define ZEND_SORT_H
+#ifndef ZEND_FUNC_TYPES_H
+#define ZEND_FUNC_TYPES_H
 
-#include "zend_func_types.h"
+#include <stddef.h>
 
-BEGIN_EXTERN_C()
-ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
-ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
-END_EXTERN_C()
+typedef struct _zval_struct zval;
 
-#endif       /* ZEND_SORT_H */
+typedef int  (*compare_func_t)(const void *, const void *);
+typedef void (*swap_func_t)(void *, void *);
+typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t, swap_func_t);
+typedef void (*dtor_func_t)(zval *pDest);
+typedef void (*copy_ctor_func_t)(zval *pElement);
+
+#endif /* ZEND_FUNC_TYPES_H */
