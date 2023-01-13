@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-10200 (zif_get_object_vars:
     Assertion `!(((__ht)->u.flags & (1<<2)) != 0)' failed). (nielsdos)
   . Fix GH-10251 (Assertion `(flag & (1<<3)) == 0' failed). (nielsdos)
+  . Fix GH-10240 (Assertion failure when adding more than 2**30 elements to an
+    unpacked array). (Arnaud)
+  . Fix GH-9735 (Fiber stack variables do not participate in cycle collector).
+    (Arnaud)
 
 - FPM:
   . Fixed bug #77106 (Missing separator in FPM FastCGI errors). (Jakub Zelenka)
