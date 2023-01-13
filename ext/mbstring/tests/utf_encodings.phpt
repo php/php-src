@@ -812,6 +812,10 @@ $invalid = array(
 );
 
 testInvalidCodepoints($invalid, 'UTF-8');
+// Regression test for bug in SSE2-based accelerated UTF-8 validation function
+
+if (mb_check_encoding("k\x08`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc6", 'UTF-8'))
+  die("UTF-8 validation was incorrect on 16-byte string with truncated multi-byte char at end");
 
 echo "== UTF-16 ==\n";
 
