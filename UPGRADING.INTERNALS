@@ -26,6 +26,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   break the build of third-party extensions which relied on this
   implementation detail.  Those extensions may need to add the missing
   #include lines.
+* Since version 8, PHP requires a C99 compiler.  Configure-time checks
+  for C99 features have been removed and therefore macro definitions
+  from php_config.h have disappeared.  Do not use those feature
+  macros.
 
 ========================
 2. Build system changes

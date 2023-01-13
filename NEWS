@@ -47,6 +47,10 @@ PHP                                                                        NEWS
   . mb_detect_encoding's "non-strict" mode now behaves as described in the
     documentation. Previously, it would return false if the very first byte
     of the input string was invalid in all candidate encodings. (Alex Dowad)
+  . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
+    casing rules for the Greek letter sigma. For mb_convert_case, conditional
+    casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
+    MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
 
 - Opcache:
   . Added start, restart and force restart time to opcache's
@@ -65,6 +69,7 @@ PHP                                                                        NEWS
 - Posix:
   . Added posix_sysconf. (David Carlier)
   . Added posix_pathconf. (David Carlier)
+  . Added posix_fpathconf. (David Carlier)
 
 - Random:
   . Added Randomizer::getBytesFromString(). (Joshua Rüsweg)
@@ -81,6 +86,7 @@ PHP                                                                        NEWS
   . Added socket_atmark if send/recv needs using MSG_OOB. (David Carlier)
   . Added TCP_QUICKACK constant, to give tigher control over
     ACK delays. (David Carlier)
+  . Added DONTFRAGMENT support for path MTU discovery purpose. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)

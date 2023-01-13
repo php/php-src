@@ -18,8 +18,11 @@
 */
 
 #include "zend_API.h"
+#include "zend_arena.h"
+#include "zend_multiply.h" // for zend_safe_address_guarded()
 #include "zend_exceptions.h"
 #include "zend_ini.h"
+#include "zend_optimizer.h"
 #include "zend_type_info.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "Optimizer/zend_call_graph.h"

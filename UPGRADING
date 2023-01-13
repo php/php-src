@@ -56,6 +56,12 @@ PHP 8.3 UPGRADE NOTES
     "buffer_size" => int
     See GH-9336
 
+- MBString:
+  . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
+    casing rules for the Greek letter sigma. For mb_convert_case, conditional
+    casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
+    MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
+
 - Standard:
   . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
@@ -72,6 +78,7 @@ PHP 8.3 UPGRADE NOTES
 - Posix:
   . Added posix_sysconf call to get runtime informations.
   . Added posix_pathconf call to get configuration value from a directory/file.
+  . Added posix_fpathconf call to get configuration value from a file descriptor.
 
 - Random:
   . Added Randomizer::getBytesFromString().
@@ -110,6 +117,14 @@ PHP 8.3 UPGRADE NOTES
 - Sockets:
   . SO_ATTACH_REUSEPORT_CBPF (Linux only).
   . TCP_QUICKACK (Linux only).
+  . IP_DONTFRAG (FreeBSD only).
+  . IP_MTU_DISCOVER (Linux only).
+  . IP_PMTUDISC_DO (Linux only).
+  . IP_PMTUDISC_DONT (Linux only).
+  . IP_PMTUDISC_WANT (Linux only).
+  . IP_PMTUDISC_PROBE (Linux only).
+  . IP_PMTUDISC_INTERFACE (Linux only).
+  . IP_PMTUDISC_OMIT (Linux only).
 
 ========================================
 11. Changes to INI File Handling

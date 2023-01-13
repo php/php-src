@@ -16,13 +16,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_compile.h"
 #include "zend_cfg.h"
-#include "zend_func_info.h"
-#include "zend_worklist.h"
-#include "zend_optimizer.h"
+#include "zend_func_info.h" // for ZEND_FUNC_FREE_LOOP_VAR
+#include "zend_globals.h" // struct _zend_executor_globals
+#include "zend_globals_macros.h" // for EG()
 #include "zend_optimizer_internal.h"
-#include "zend_sort.h"
+#include "zend_worklist.h"
 
 static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b) /* {{{ */
 {

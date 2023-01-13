@@ -27,6 +27,8 @@
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
 #include "zend_mmap.h"
+#include "zend_compile.h"
+#include "zend_closures.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -206,8 +208,12 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 {
 	void *pointer;
 	const size_t page_size = zend_fiber_get_page_size();
+	const size_t minimum_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size;
 
-	ZEND_ASSERT(size >= page_size + ZEND_FIBER_GUARD_PAGES * page_size);
+	if (size < minimum_stack_size) {
+		zend_throw_exception_ex(NULL, 0, "Fiber stack size is too small, it needs to be at least %zu bytes", minimum_stack_size);
+		return NULL;
+	}
 
 	const size_t stack_size = (size + page_size - 1) / page_size * page_size;
 	const size_t alloc_size = stack_size + ZEND_FIBER_GUARD_PAGES * page_size;
@@ -741,9 +747,30 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 
+	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED) {
+		zend_get_gc_buffer_use(buf, table, num);
+		return NULL;
+	}
+
+	HashTable *lastSymTable = NULL;
+	zend_execute_data *ex = fiber->execute_data;
+	for (; ex; ex = ex->prev_execute_data) {
+		HashTable *symTable = zend_unfinished_execution_gc(ex, ex->call, buf);
+		if (symTable) {
+			if (lastSymTable) {
+				zval *val;
+				ZEND_HASH_FOREACH_VAL(lastSymTable, val) {
+					ZEND_ASSERT(Z_TYPE_P(val) == IS_INDIRECT);
+					zend_get_gc_buffer_add_zval(buf, Z_INDIRECT_P(val));
+				} ZEND_HASH_FOREACH_END();
+			}
+			lastSymTable = symTable;
+		}
+	}
+
 	zend_get_gc_buffer_use(buf, table, num);
 
-	return NULL;
+	return lastSymTable;
 }
 
 ZEND_METHOD(Fiber, __construct)

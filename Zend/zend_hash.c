@@ -119,7 +119,7 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 	/* size should be between HT_MIN_SIZE and HT_MAX_SIZE */
 	if (nSize <= HT_MIN_SIZE) {
 		return HT_MIN_SIZE;
-	} else if (UNEXPECTED(nSize >= HT_MAX_SIZE)) {
+	} else if (UNEXPECTED(nSize > HT_MAX_SIZE)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
 	}
 
@@ -166,6 +166,8 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 {
 	void *data;
 	uint32_t nSize = ht->nTableSize;
+
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
 
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
 		data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), 1);
@@ -339,6 +341,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 	uint32_t i;
 	uint32_t nSize = ht->nTableSize;
 
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+
 	HT_ASSERT_RC1(ht);
 	HT_FLAGS(ht) &= ~HASH_FLAG_PACKED;
 	new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
@@ -381,7 +385,11 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed)
 {
 	HT_ASSERT_RC1(ht);
+
 	if (nSize == 0) return;
+
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+
 	if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		if (nSize > ht->nTableSize) {
 			ht->nTableSize = zend_hash_check_size(nSize);
@@ -1227,6 +1235,8 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 		void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 		uint32_t nSize = ht->nTableSize + ht->nTableSize;
 		Bucket *old_buckets = ht->arData;
+
+		ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
 
 		ht->nTableSize = nSize;
 		new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);

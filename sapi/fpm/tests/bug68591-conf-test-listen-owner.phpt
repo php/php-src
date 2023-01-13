@@ -15,6 +15,7 @@ error_log = {{FILE:LOG}}
 [unconfined]
 listen = {{ADDR:UDS}}
 listen.owner = aaaaaa
+user = root
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2

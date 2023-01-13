@@ -55,6 +55,14 @@
 #include "zend_accelerator_hash.h"
 #include "zend_accelerator_debug.h"
 
+#ifdef HAVE_STDATOMIC_H
+# ifdef __cplusplus
+#  include <atomic>
+# else
+#  include <stdatomic.h>
+# endif
+#endif // HAVE_STDATOMIC_H
+
 #ifndef PHPAPI
 # ifdef ZEND_WIN32
 #  define PHPAPI __declspec(dllimport)
@@ -261,7 +269,13 @@ typedef struct _zend_accel_shared_globals {
 	bool       restart_pending;
 	zend_accel_restart_reason restart_reason;
 	bool       cache_status_before_restart;
-#ifdef ZEND_WIN32
+#ifdef HAVE_STDATOMIC_H
+# ifdef __cplusplus
+	std::atomic_llong mem_usage, restart_in;
+# else
+	atomic_llong mem_usage, restart_in;
+# endif
+#elif defined(ZEND_WIN32)
 	LONGLONG   mem_usage;
 	LONGLONG   restart_in;
 #endif

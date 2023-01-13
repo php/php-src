@@ -16,13 +16,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_compile.h"
-#include "zend_generators.h"
 #include "zend_inference.h"
+#include "zend_closures.h" // for zend_ce_closure
+#include "zend_generators.h" // for zend_ce_generator
 #include "zend_func_info.h"
+#include "zend_globals.h" // struct _zend_executor_globals
+#include "zend_globals_macros.h" // for EG()
 #include "zend_call_graph.h"
-#include "zend_closures.h"
 #include "zend_worklist.h"
+#include "zend_optimizer.h"
 #include "zend_optimizer_internal.h"
 
 /* The used range inference algorithm is described in:

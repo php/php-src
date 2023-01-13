@@ -35,6 +35,8 @@
 #include "php_unicode.h"
 #include "unicode_data.h"
 
+extern const mbfl_encoding mbfl_encoding_8859_9;
+
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
 static bool prop_lookup(unsigned long code, unsigned long n)
@@ -118,14 +120,14 @@ static inline unsigned mph_lookup(
 	mph_lookup(code, _uccase_##type##_g, _uccase_##type##_g_size, \
 			_uccase_##type##_table, _uccase_##type##_table_size)
 
-static unsigned php_unicode_toupper_raw(unsigned code, enum mbfl_no_encoding enc)
+static unsigned php_unicode_toupper_raw(unsigned code, const mbfl_encoding *enc)
 {
 	/* After the ASCII characters, the first codepoint with an uppercase version
 	 * is 0xB5 (MICRO SIGN) */
 	if (code < 0xB5) {
 		/* Fast path for ASCII */
 		if (code >= 0x61 && code <= 0x7A) {
-			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x69)) {
+			if (UNEXPECTED(enc == &mbfl_encoding_8859_9 && code == 0x69)) {
 				return 0x130;
 			}
 			return code - 0x20;
@@ -140,14 +142,14 @@ static unsigned php_unicode_toupper_raw(unsigned code, enum mbfl_no_encoding enc
 	}
 }
 
-static unsigned php_unicode_tolower_raw(unsigned code, enum mbfl_no_encoding enc)
+static unsigned php_unicode_tolower_raw(unsigned code, const mbfl_encoding *enc)
 {
 	/* After the ASCII characters, the first codepoint with a lowercase version
 	 * is 0xC0 (LATIN CAPITAL LETTER A WITH GRAVE) */
 	if (code < 0xC0) {
 		/* Fast path for ASCII */
 		if (code >= 0x41 && code <= 0x5A) {
-			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x0049L)) {
+			if (UNEXPECTED(enc == &mbfl_encoding_8859_9 && code == 0x0049L)) {
 				return 0x0131L;
 			}
 			return code + 0x20;
@@ -156,7 +158,7 @@ static unsigned php_unicode_tolower_raw(unsigned code, enum mbfl_no_encoding enc
 	} else {
 		unsigned new_code = CASE_LOOKUP(code, lower);
 		if (new_code != CODE_NOT_FOUND) {
-			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x130)) {
+			if (UNEXPECTED(enc == &mbfl_encoding_8859_9 && code == 0x130)) {
 				return 0x69;
 			}
 			return new_code;
@@ -165,7 +167,7 @@ static unsigned php_unicode_tolower_raw(unsigned code, enum mbfl_no_encoding enc
 	}
 }
 
-static unsigned php_unicode_totitle_raw(unsigned code, enum mbfl_no_encoding enc)
+static unsigned php_unicode_totitle_raw(unsigned code, const mbfl_encoding *enc)
 {
 	unsigned new_code = CASE_LOOKUP(code, title);
 	if (new_code != CODE_NOT_FOUND) {
@@ -176,12 +178,12 @@ static unsigned php_unicode_totitle_raw(unsigned code, enum mbfl_no_encoding enc
 	return php_unicode_toupper_raw(code, enc);
 }
 
-static unsigned php_unicode_tofold_raw(unsigned code, enum mbfl_no_encoding enc)
+static unsigned php_unicode_tofold_raw(unsigned code, const mbfl_encoding *enc)
 {
 	if (code < 0x80) {
 		/* Fast path for ASCII */
 		if (code >= 0x41 && code <= 0x5A) {
-			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x49)) {
+			if (UNEXPECTED(enc == &mbfl_encoding_8859_9 && code == 0x49)) {
 				return 0x131;
 			}
 			return code + 0x20;
@@ -190,7 +192,7 @@ static unsigned php_unicode_tofold_raw(unsigned code, enum mbfl_no_encoding enc)
 	} else {
 		unsigned new_code = CASE_LOOKUP(code, fold);
 		if (new_code != CODE_NOT_FOUND) {
-			if (UNEXPECTED(enc == mbfl_no_encoding_8859_9 && code == 0x130)) {
+			if (UNEXPECTED(enc == &mbfl_encoding_8859_9 && code == 0x130)) {
 				return 0x69;
 			}
 			return new_code;
@@ -199,28 +201,28 @@ static unsigned php_unicode_tofold_raw(unsigned code, enum mbfl_no_encoding enc)
 	}
 }
 
-static inline unsigned php_unicode_tolower_simple(unsigned code, enum mbfl_no_encoding enc) {
+static inline unsigned php_unicode_tolower_simple(unsigned code, const mbfl_encoding *enc) {
 	code = php_unicode_tolower_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		return _uccase_extra_table[code & 0xffffff];
 	}
 	return code;
 }
-static inline unsigned php_unicode_toupper_simple(unsigned code, enum mbfl_no_encoding enc) {
+static inline unsigned php_unicode_toupper_simple(unsigned code, const mbfl_encoding *enc) {
 	code = php_unicode_toupper_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		return _uccase_extra_table[code & 0xffffff];
 	}
 	return code;
 }
-static inline unsigned php_unicode_totitle_simple(unsigned code, enum mbfl_no_encoding enc) {
+static inline unsigned php_unicode_totitle_simple(unsigned code, const mbfl_encoding *enc) {
 	code = php_unicode_totitle_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		return _uccase_extra_table[code & 0xffffff];
 	}
 	return code;
 }
-static inline unsigned php_unicode_tofold_simple(unsigned code, enum mbfl_no_encoding enc) {
+static inline unsigned php_unicode_tofold_simple(unsigned code, const mbfl_encoding *enc) {
 	code = php_unicode_tofold_raw(code, enc);
 	if (UNEXPECTED(code > 0xffffff)) {
 		return _uccase_extra_table[code & 0xffffff];
@@ -238,6 +240,45 @@ static uint32_t *emit_special_casing_sequence(uint32_t w, uint32_t *out)
 	return out;
 }
 
+/* Used when determining whether special casing rules should be applied to Greek letter sigma */
+static bool scan_ahead_for_cased_letter(unsigned char *in, size_t in_len, unsigned int state, const mbfl_encoding *encoding)
+{
+	uint32_t wchar_buf[64];
+
+	while (in_len) {
+		size_t out_len = encoding->to_wchar(&in, &in_len, wchar_buf, 64, &state);
+		ZEND_ASSERT(out_len <= 64);
+		for (unsigned int i = 0; i < out_len; i++) {
+			uint32_t w = wchar_buf[i];
+			if (php_unicode_is_cased(w)) {
+				return true;
+			}
+			if (!php_unicode_is_case_ignorable(w)) {
+				return false;
+			}
+		}
+	}
+
+	return false;
+}
+
+/* Used when determining whether special casing rules should be applied to Greek letter sigma */
+static bool scan_back_for_cased_letter(uint32_t *begin, uint32_t *end)
+{
+	if (end != NULL) {
+		while (--end >= begin) {
+			uint32_t w = *end;
+			if (php_unicode_is_cased(w)) {
+				return true;
+			}
+			if (!php_unicode_is_case_ignorable(w)) {
+				return false;
+			}
+		}
+	}
+	return false;
+}
+
 MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, const char *srcstr, size_t in_len, const mbfl_encoding *src_encoding, const mbfl_encoding *dst_encoding, int illegal_mode, uint32_t illegal_substchar)
 {
 	/* A Unicode codepoint can expand out to up to 3 codepoints when uppercased, lowercased, or title cased
@@ -245,7 +286,9 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 	uint32_t wchar_buf[64], converted_buf[192];
 	unsigned int state = 0, title_mode = 0;
 	unsigned char *in = (unsigned char*)srcstr;
-	enum mbfl_no_encoding enc = src_encoding->no_encoding;
+	/* In rare cases, we need to scan backwards through the previously converted codepoints to see
+	 * if special conversion rules should be used for the Greek letter sigma */
+	uint32_t *converted_end = NULL;
 
 	mb_convert_buf buf;
 	mb_convert_buf_init(&buf, in_len + 1, illegal_substchar, illegal_mode);
@@ -260,21 +303,21 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 		case PHP_UNICODE_CASE_UPPER_SIMPLE:
 			for (int i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
-				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_toupper_simple(w, enc);
+				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_toupper_simple(w, src_encoding);
 			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER_SIMPLE:
 			for (int i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
-				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tolower_simple(w, enc);
+				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tolower_simple(w, src_encoding);
 			}
 			break;
 
 		case PHP_UNICODE_CASE_FOLD_SIMPLE:
 			for (int i = 0; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
-				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tofold_simple(w, enc);
+				*p++ = (UNEXPECTED(w > 0xFFFFFF)) ? w : php_unicode_tofold_simple(w, src_encoding);
 			}
 			break;
 
@@ -285,7 +328,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 					*p++ = w;
 					continue;
 				}
-				*p++ = title_mode ? php_unicode_tolower_simple(w, enc) : php_unicode_totitle_simple(w, enc);
+				*p++ = title_mode ? php_unicode_tolower_simple(w, src_encoding) : php_unicode_totitle_simple(w, src_encoding);
 				if (!php_unicode_is_case_ignorable(w)) {
 					title_mode = php_unicode_is_cased(w);
 				}
@@ -299,7 +342,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 					*p++ = w;
 					continue;
 				}
-				w = php_unicode_toupper_raw(w, enc);
+				w = php_unicode_toupper_raw(w, src_encoding);
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					p = emit_special_casing_sequence(w, p);
 				} else {
@@ -315,7 +358,44 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 					*p++ = w;
 					continue;
 				}
-				w = php_unicode_tolower_raw(w, enc);
+				if (w == 0x3A3) {
+					/* For Greek capital letter sigma, there is a special casing rule;
+					 * if it is the last letter in a word, it should be downcased to U+03C2
+					 * (GREEK SMALL LETTER FINAL SIGMA)
+					 * Specifically, we need to check if this codepoint is preceded by any
+					 * number of case-ignorable codepoints, preceded by a cased letter, AND
+					 * is NOT followed by any number of case-ignorable codepoints followed
+					 * by a cased letter.
+					 * Ref: http://www.unicode.org/reports/tr21/tr21-5.html
+					 * Ref: https://unicode.org/Public/UNIDATA/SpecialCasing.txt
+					 *
+					 * While the special casing rules say we should scan backwards through "any number"
+					 * of case-ignorable codepoints, that is a great implementation burden
+					 * It would basically mean we need to keep all the codepoints in a big buffer
+					 * during this conversion operation, but we don't want to do that (to reduce the
+					 * amount of temporary scratch memory used)
+					 * Hence, we only scan back through the codepoints in wchar_buf, and if we hit the
+					 * beginning of the buffer, whatever codepoints have not yet been overwritten in
+					 * the latter part of converted_buf */
+					int j = i - 1;
+					while (j >= 0 && php_unicode_is_case_ignorable(wchar_buf[j])) {
+						j--;
+					}
+					if (j >= 0 ? php_unicode_is_cased(wchar_buf[j]) : scan_back_for_cased_letter(p, converted_end)) {
+						/* Now scan ahead to look for a cased letter */
+						j = i + 1;
+						while (j < out_len && php_unicode_is_case_ignorable(wchar_buf[j])) {
+							j++;
+						}
+						/* If we hit the end of wchar_buf, convert more of the input string into
+						 * codepoints and continue scanning */
+						if (j >= out_len ? !scan_ahead_for_cased_letter(in, in_len, state, src_encoding) : !php_unicode_is_cased(wchar_buf[j])) {
+							*p++ = 0x3C2;
+							continue;
+						}
+					}
+				}
+				w = php_unicode_tolower_raw(w, src_encoding);
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					p = emit_special_casing_sequence(w, p);
 				} else {
@@ -331,7 +411,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 					*p++ = w;
 					continue;
 				}
-				w = php_unicode_tofold_raw(w, enc);
+				w = php_unicode_tofold_raw(w, src_encoding);
 				if (UNEXPECTED(w > 0xFFFFFF)) {
 					p = emit_special_casing_sequence(w, p);
 				} else {
@@ -347,12 +427,34 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 					*p++ = w;
 					continue;
 				}
-				uint32_t w2 = title_mode ? php_unicode_tolower_raw(w, enc) : php_unicode_totitle_raw(w, enc);
+				uint32_t w2;
+				if (title_mode) {
+					if (w == 0x3A3) {
+						int j = i - 1;
+						while (j >= 0 && php_unicode_is_case_ignorable(wchar_buf[j])) {
+							j--;
+						}
+						if (j >= 0 ? php_unicode_is_cased(wchar_buf[j]) : scan_back_for_cased_letter(p, converted_end)) {
+							j = i + 1;
+							while (j < out_len && php_unicode_is_case_ignorable(wchar_buf[j])) {
+								j++;
+							}
+							if (j >= out_len ? !scan_ahead_for_cased_letter(in, in_len, state, src_encoding) : !php_unicode_is_cased(wchar_buf[j])) {
+								*p++ = 0x3C2;
+								goto set_title_mode;
+							}
+						}
+					}
+					w2 = php_unicode_tolower_raw(w, src_encoding);
+				} else {
+					w2 = php_unicode_totitle_raw(w, src_encoding);
+				}
 				if (UNEXPECTED(w2 > 0xFFFFFF)) {
 					p = emit_special_casing_sequence(w2, p);
 				} else {
 					*p++ = w2;
 				}
+set_title_mode:
 				if (!php_unicode_is_case_ignorable(w)) {
 					title_mode = php_unicode_is_cased(w);
 				}
@@ -362,6 +464,7 @@ MBSTRING_API zend_string *php_unicode_convert_case(php_case_mode case_mode, cons
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 
+		converted_end = p;
 		ZEND_ASSERT(p - converted_buf <= 192);
 		dst_encoding->from_wchar(converted_buf, p - converted_buf, &buf, !in_len);
 	}

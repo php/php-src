@@ -22,8 +22,11 @@
 #ifndef ZEND_OPTIMIZER_H
 #define ZEND_OPTIMIZER_H
 
-#include "zend.h"
-#include "zend_compile.h"
+#include "zend_compile.h" // for zend_op_array
+#include "zend_hash.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
+typedef struct _zend_string zend_string;
 
 #define ZEND_OPTIMIZER_PASS_1		(1<<0)   /* Simple local optimizations   */
 #define ZEND_OPTIMIZER_PASS_2		(1<<1)   /*                              */
