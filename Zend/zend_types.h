@@ -331,13 +331,6 @@ struct _zval_struct {
 	} u2;
 };
 
-struct _zend_string {
-	zend_refcounted_h gc;
-	zend_ulong        h;                /* hash value */
-	size_t            len;
-	char              val[1];
-};
-
 typedef struct _Bucket {
 	zval              val;
 	zend_ulong        h;                /* hash value (or numeric index)   */
@@ -626,13 +619,6 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
-
-/* string flags (zval.value->gc.u.flags) */
-#define IS_STR_CLASS_NAME_MAP_PTR   GC_PROTECTED  /* refcount is a map_ptr offset of class_entry */
-#define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
-#define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
-#define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
-#define IS_STR_VALID_UTF8           (1<<9)        /* valid UTF-8 according to PCRE */
 
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
