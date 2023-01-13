@@ -119,7 +119,7 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 	/* size should be between HT_MIN_SIZE and HT_MAX_SIZE */
 	if (nSize <= HT_MIN_SIZE) {
 		return HT_MIN_SIZE;
-	} else if (UNEXPECTED(nSize >= HT_MAX_SIZE)) {
+	} else if (UNEXPECTED(nSize > HT_MAX_SIZE)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
 	}
 
