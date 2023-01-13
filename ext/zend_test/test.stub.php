@@ -132,6 +132,19 @@ namespace {
         public function __construct(int $val) {}
     }
 
+    final class LongCastableNoOperations {
+        private int $val;
+        public function __construct(int $val) {}
+    }
+    final class FloatCastableNoOperations {
+        private float $val;
+        public function __construct(float $val) {}
+    }
+    final class NumericCastableNoOperations {
+        private int|float $val;
+        public function __construct(int|float $val) {}
+    }
+
     function zend_test_array_return(): array {}
 
     function zend_test_nullable_array_return(): null|array {}
