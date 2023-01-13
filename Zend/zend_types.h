@@ -25,6 +25,7 @@
 #include "zend_portability.h"
 #include "zend_long.h"
 #include "zend_rc_debug.h"
+#include "zend_refcounted.h"
 #include "zend_result.h"
 #include "zend_type_code.h"
 
@@ -83,7 +84,6 @@ typedef struct _zend_execute_data    zend_execute_data;
 
 typedef struct _zval_struct     zval;
 
-typedef struct _zend_refcounted zend_refcounted;
 typedef struct _zend_string     zend_string;
 typedef struct _zend_array      zend_array;
 typedef struct _zend_object     zend_object;
@@ -333,17 +333,6 @@ struct _zval_struct {
 	} u2;
 };
 
-typedef struct _zend_refcounted_h {
-	uint32_t         refcount;			/* reference counter 32-bit */
-	union {
-		uint32_t type_info;
-	} u;
-} zend_refcounted_h;
-
-struct _zend_refcounted {
-	zend_refcounted_h gc;
-};
-
 struct _zend_string {
 	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
@@ -588,32 +577,11 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 
 #define Z_TYPE_FLAGS_SHIFT			8
 
-#define GC_REFCOUNT(p)				zend_gc_refcount(&(p)->gc)
-#define GC_SET_REFCOUNT(p, rc)		zend_gc_set_refcount(&(p)->gc, rc)
-#define GC_ADDREF(p)				zend_gc_addref(&(p)->gc)
-#define GC_DELREF(p)				zend_gc_delref(&(p)->gc)
-#define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
-#define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
-#define GC_TRY_ADDREF(p)			zend_gc_try_addref(&(p)->gc)
-#define GC_TRY_DELREF(p)			zend_gc_try_delref(&(p)->gc)
-
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
 #define GC_INFO_MASK				0xfffffc00
 #define GC_FLAGS_SHIFT				0
 #define GC_INFO_SHIFT				10
-
-static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
-	return (gc_type_info & GC_TYPE_MASK);
-}
-
-static zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info) {
-	return (gc_type_info >> GC_FLAGS_SHIFT) & (GC_FLAGS_MASK >> GC_FLAGS_SHIFT);
-}
-
-static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
-	return (gc_type_info >> GC_INFO_SHIFT);
-}
 
 #define GC_TYPE_INFO(p)				(p)->gc.u.type_info
 #define GC_TYPE(p)					zval_gc_type(GC_TYPE_INFO(p))
@@ -637,21 +605,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_GC_INFO_P(zval_p)			Z_GC_INFO(*(zval_p))
 #define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
-
-/* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
-#define GC_NOT_COLLECTABLE			(1<<4)
-#define GC_PROTECTED                (1<<5) /* used for recursion detection */
-#define GC_IMMUTABLE                (1<<6) /* can't be changed in place */
-#define GC_PERSISTENT               (1<<7) /* allocated using malloc */
-#define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
-
-#define GC_NULL						(IS_NULL         | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
-#define GC_STRING					(IS_STRING       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
-#define GC_ARRAY					IS_ARRAY
-#define GC_OBJECT					IS_OBJECT
-#define GC_RESOURCE					(IS_RESOURCE     | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
-#define GC_REFERENCE				(IS_REFERENCE    | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
-#define GC_CONSTANT_AST				(IS_CONSTANT_AST | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
 #define IS_TYPE_REFCOUNTED			(1<<0)
@@ -1133,52 +1086,6 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 # define GC_MAKE_PERSISTENT_LOCAL(p) \
 	do { } while (0)
 #endif
-
-static zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
-	return p->refcount;
-}
-
-static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
-	p->refcount = rc;
-	return p->refcount;
-}
-
-static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
-	ZEND_RC_MOD_CHECK(p);
-	return ++(p->refcount);
-}
-
-static zend_always_inline void zend_gc_try_addref(zend_refcounted_h *p) {
-	if (!(p->u.type_info & GC_IMMUTABLE)) {
-		ZEND_RC_MOD_CHECK(p);
-		++p->refcount;
-	}
-}
-
-static zend_always_inline void zend_gc_try_delref(zend_refcounted_h *p) {
-	if (!(p->u.type_info & GC_IMMUTABLE)) {
-		ZEND_RC_MOD_CHECK(p);
-		--p->refcount;
-	}
-}
-
-static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
-	ZEND_ASSERT(p->refcount > 0);
-	ZEND_RC_MOD_CHECK(p);
-	return --(p->refcount);
-}
-
-static zend_always_inline uint32_t zend_gc_addref_ex(zend_refcounted_h *p, uint32_t rc) {
-	ZEND_RC_MOD_CHECK(p);
-	p->refcount += rc;
-	return p->refcount;
-}
-
-static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint32_t rc) {
-	ZEND_RC_MOD_CHECK(p);
-	p->refcount -= rc;
-	return p->refcount;
-}
 
 static zend_always_inline uint32_t zval_refcount_p(const zval* pz) {
 #if ZEND_DEBUG
