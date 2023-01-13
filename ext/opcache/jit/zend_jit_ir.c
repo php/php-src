@@ -7378,22 +7378,23 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			bb = &jit->ssa->cfg.blocks[jit->b];
 			ZEND_ASSERT(bb->successors_count == 2);
 
-			if (n == 1) {
-				ref = end_inputs[0];
-				if (bb->successors_count == 2 && bb->successors[0] == bb->successors[1]) {
-					ir_ref true_path;
-					zend_jit_if_true(jit, ref);
-					true_path = zend_jit_end(jit);
-					zend_jit_if_false(jit, ref);
-					zend_jit_merge_2(jit, true_path, zend_jit_end(jit));
-					_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, zend_jit_end(jit));
-				} else {
-					ZEND_ASSERT(bb->successors_count == 2);
-					_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
-					_zend_jit_add_predecessor_ref(jit, bb->successors[1], jit->b, ref);
+			if (UNEXPECTED(bb->successors[0] == bb->successors[1])) {
+				ir_ref merge_inputs[10];
+				uint32_t merge_inputs_count = 0;
+
+				while (n) {
+					n--;
+					zend_jit_if_true(jit, end_inputs[n]);
+					merge_inputs[merge_inputs_count++] = zend_jit_end(jit);
+					zend_jit_if_false(jit, end_inputs[n]);
+					merge_inputs[merge_inputs_count++] = zend_jit_end(jit);
 				}
-				jit->control = IR_UNUSED;
-				jit->b = -1;
+				zend_jit_merge_N(jit, merge_inputs_count, merge_inputs);
+				_zend_jit_add_predecessor_ref(jit, label, jit->b, zend_jit_end(jit));
+			} else if (n == 1) {
+				ref = end_inputs[0];
+				_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
+				_zend_jit_add_predecessor_ref(jit, bb->successors[1], jit->b, ref);
 			} else {
 				ir_ref true_inputs[5], false_inputs[5];
 
@@ -7409,9 +7410,9 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				_zend_jit_add_predecessor_ref(jit, label, jit->b, zend_jit_end(jit));
 				zend_jit_merge_N(jit, n, false_inputs);
 				_zend_jit_add_predecessor_ref(jit, label2, jit->b, zend_jit_end(jit));
-				jit->control = IR_UNUSED;
-				jit->b = -1;
 			}
+			jit->control = IR_UNUSED;
+			jit->b = -1;
 		} else {
 			zend_jit_merge_N(jit, n, end_inputs);
 		}
