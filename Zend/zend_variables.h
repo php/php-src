@@ -21,6 +21,7 @@
 #ifndef ZEND_VARIABLES_H
 #define ZEND_VARIABLES_H
 
+#include "zend_hash.h"
 #include "zend_types.h"
 #include "zend_gc.h"
 

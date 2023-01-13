@@ -21,10 +21,12 @@
 #ifndef ZEND_HASH_H
 #define ZEND_HASH_H
 
-#include "zend.h"
+#include "zend_alloc.h"
 #include "zend_func_types.h"
 #include "zend_sort.h"
+#include "zend_string.h"
 #include "zend_type_code.h"
+#include "zend_types.h"
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
@@ -46,6 +48,152 @@
 
 /* Only the low byte are real flags */
 #define HASH_FLAG_MASK 0xff
+
+typedef struct _Bucket {
+	zval              val;
+	zend_ulong        h;                /* hash value (or numeric index)   */
+	zend_string      *key;              /* string key or NULL for numerics */
+} Bucket;
+
+typedef struct _zend_array HashTable;
+
+struct _zend_array {
+	zend_refcounted_h gc;
+	union {
+		struct {
+			ZEND_ENDIAN_LOHI_4(
+				uint8_t    flags,
+				uint8_t    _unused,
+				uint8_t    nIteratorsCount,
+				uint8_t    _unused2)
+		} v;
+		uint32_t flags;
+	} u;
+	uint32_t          nTableMask;
+	union {
+		uint32_t     *arHash;   /* hash table (allocated above this pointer) */
+		Bucket       *arData;   /* array of hash buckets */
+		zval         *arPacked; /* packed array of zvals */
+	};
+	uint32_t          nNumUsed;
+	uint32_t          nNumOfElements;
+	uint32_t          nTableSize;
+	uint32_t          nInternalPointer;
+	zend_long         nNextFreeElement;
+	dtor_func_t       pDestructor;
+};
+
+/*
+ * HashTable Data Layout
+ * =====================
+ *
+ *                 +=============================+
+ *                 | HT_HASH(ht, ht->nTableMask) |                   +=============================+
+ *                 | ...                         |                   | HT_INVALID_IDX              |
+ *                 | HT_HASH(ht, -1)             |                   | HT_INVALID_IDX              |
+ *                 +-----------------------------+                   +-----------------------------+
+ * ht->arData ---> | Bucket[0]                   | ht->arPacked ---> | ZVAL[0]                     |
+ *                 | ...                         |                   | ...                         |
+ *                 | Bucket[ht->nTableSize-1]    |                   | ZVAL[ht->nTableSize-1]      |
+ *                 +=============================+                   +=============================+
+ */
+
+#define HT_INVALID_IDX ((uint32_t) -1)
+
+#define HT_MIN_MASK ((uint32_t) -2)
+#define HT_MIN_SIZE 8
+
+/* HT_MAX_SIZE is chosen to satisfy the following constraints:
+ * - HT_SIZE_TO_MASK(HT_MAX_SIZE) != 0
+ * - HT_SIZE_EX(HT_MAX_SIZE, HT_SIZE_TO_MASK(HT_MAX_SIZE)) does not overflow or
+ *   wrapparound, and is <= the addressable space size
+ * - HT_MAX_SIZE must be a power of two:
+ *   (nTableSize<HT_MAX_SIZE ? nTableSize+nTableSize : nTableSize) <= HT_MAX_SIZE
+ */
+#if SIZEOF_SIZE_T == 4
+# define HT_MAX_SIZE 0x02000000
+# define HT_HASH_TO_BUCKET_EX(data, idx) \
+	((Bucket*)((char*)(data) + (idx)))
+# define HT_IDX_TO_HASH(idx) \
+	((idx) * sizeof(Bucket))
+# define HT_HASH_TO_IDX(idx) \
+	((idx) / sizeof(Bucket))
+#elif SIZEOF_SIZE_T == 8
+# define HT_MAX_SIZE 0x40000000
+# define HT_HASH_TO_BUCKET_EX(data, idx) \
+	((data) + (idx))
+# define HT_IDX_TO_HASH(idx) \
+	(idx)
+# define HT_HASH_TO_IDX(idx) \
+	(idx)
+#else
+# error "Unknown SIZEOF_SIZE_T"
+#endif
+
+#define HT_HASH_EX(data, idx) \
+	((uint32_t*)(data))[(int32_t)(idx)]
+#define HT_HASH(ht, idx) \
+	HT_HASH_EX((ht)->arHash, idx)
+
+#define HT_SIZE_TO_MASK(nTableSize) \
+	((uint32_t)(-((nTableSize) + (nTableSize))))
+#define HT_HASH_SIZE(nTableMask) \
+	(((size_t)-(uint32_t)(nTableMask)) * sizeof(uint32_t))
+#define HT_DATA_SIZE(nTableSize) \
+	((size_t)(nTableSize) * sizeof(Bucket))
+#define HT_SIZE_EX(nTableSize, nTableMask) \
+	(HT_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
+#define HT_SIZE(ht) \
+	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
+#define HT_USED_SIZE(ht) \
+	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
+#define HT_PACKED_DATA_SIZE(nTableSize) \
+	((size_t)(nTableSize) * sizeof(zval))
+#define HT_PACKED_SIZE_EX(nTableSize, nTableMask) \
+	(HT_PACKED_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
+#define HT_PACKED_SIZE(ht) \
+	HT_PACKED_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
+#define HT_PACKED_USED_SIZE(ht) \
+	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(zval)))
+#ifdef __SSE2__
+# define HT_HASH_RESET(ht) do { \
+		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
+		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
+		__m128i xmm0 = _mm_setzero_si128(); \
+		xmm0 = _mm_cmpeq_epi8(xmm0, xmm0); \
+		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
+		do { \
+			_mm_storeu_si128((__m128i*)p, xmm0); \
+			_mm_storeu_si128((__m128i*)(p+16), xmm0); \
+			_mm_storeu_si128((__m128i*)(p+32), xmm0); \
+			_mm_storeu_si128((__m128i*)(p+48), xmm0); \
+			p += 64; \
+			size -= 64; \
+		} while (size != 0); \
+	} while (0)
+#else
+# define HT_HASH_RESET(ht) \
+	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE((ht)->nTableMask))
+#endif
+#define HT_HASH_RESET_PACKED(ht) do { \
+		HT_HASH(ht, -2) = HT_INVALID_IDX; \
+		HT_HASH(ht, -1) = HT_INVALID_IDX; \
+	} while (0)
+#define HT_HASH_TO_BUCKET(ht, idx) \
+	HT_HASH_TO_BUCKET_EX((ht)->arData, idx)
+
+#define HT_SET_DATA_ADDR(ht, ptr) do { \
+		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE((ht)->nTableMask)); \
+	} while (0)
+#define HT_GET_DATA_ADDR(ht) \
+	((char*)((ht)->arData) - HT_HASH_SIZE((ht)->nTableMask))
+
+typedef uint32_t HashPosition;
+
+typedef struct _HashTableIterator {
+	HashTable    *ht;
+	HashPosition  pos;
+} HashTableIterator;
 
 #define HT_FLAGS(ht) (ht)->u.flags
 
