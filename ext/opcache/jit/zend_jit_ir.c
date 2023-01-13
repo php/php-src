@@ -5109,7 +5109,7 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 		} else {
 			ZEND_ASSERT(0);
 		}
-#if 0
+#if 1
 		/* reload */
 		op1 = zend_jit_zval_lval(jit, op1_addr);
 		op2 = (same_ops) ? op1 : zend_jit_zval_lval(jit, op2_addr);
