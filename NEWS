@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #68591 (Configuration test does not perform UID lookups).
     (Jakub Zelenka)
   . Fixed memory leak when running FPM config test. (Jakub Zelenka)
+  . Fixed bug #67244 (Wrong owner:group for listening unix socket).
+    (Jakub Zelenka)
 
 - LDAP:
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
