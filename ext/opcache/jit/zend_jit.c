@@ -3114,16 +3114,18 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 		}
 
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
-			if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
-				/* pass */
-			} else if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE &&
+			if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE &&
 			           ssa->cfg.blocks[b].len == 1 &&
 			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT) &&
 			           op_array->opcodes[ssa->cfg.blocks[b].start].opcode != ZEND_JMP) {
-				/* don't generate code for BB with single opcode */
-				continue;
+				if (!(ssa->cfg.blocks[b].flags & (ZEND_BB_TARGET|ZEND_BB_FOLLOW))) {
+					/* don't generate code for BB with single opcode */
+					continue;
+				}
+				/* generate code without an entry point */
+			} else {
+				zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
 			}
-			zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
 		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 			if (ssa->cfg.flags & ZEND_CFG_RECV_ENTRY) {
