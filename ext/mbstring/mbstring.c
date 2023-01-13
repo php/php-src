@@ -4587,13 +4587,215 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 	return true;
 }
 
+static bool mb_fast_check_utf8(zend_string *str)
+{
+#ifdef __SSE2__
+	unsigned char *p = (unsigned char*)ZSTR_VAL(str);
+	/* `e` points 1 byte past the last full 16-byte block of string content
+	 * Note that we include the terminating null byte which is included in each zend_string
+	 * as part of the content to check; this ensures that multi-byte characters which are
+	 * truncated abruptly at the end of the string will be detected as invalid */
+	unsigned char *e = p + ((ZSTR_LEN(str) + 1) & ~(sizeof(__m128i) - 1));
+
+	/* For checking for illegal bytes 0xF5-FF */
+	const __m128i over_f5 = _mm_set1_epi8(-117);
+	/* For checking for overlong 3-byte code units and reserved codepoints U+D800-DFFF */
+	const __m128i over_9f = _mm_set1_epi8(-97);
+	/* For checking for overlong 4-byte code units and invalid codepoints > U+10FFFF */
+	const __m128i over_8f = _mm_set1_epi8(-113);
+	/* For checking for illegal bytes 0xC0-C1 */
+	const __m128i find_c0 = _mm_set1_epi8(-64);
+	const __m128i c0_to_c1 = _mm_set1_epi8(-126);
+	/* For checking structure of continuation bytes */
+	const __m128i find_e0 = _mm_set1_epi8(-32);
+	const __m128i find_f0 = _mm_set1_epi8(-16);
+
+	__m128i last_block = _mm_setzero_si128();
+	__m128i operand;
+
+	while (p < e) {
+		operand = _mm_loadu_si128((__m128i*)p); /* Load 16 bytes */
+
+check_operand:
+		/* If all 16 bytes are single-byte characters, then a number of checks can be skipped */
+		if (!_mm_movemask_epi8(_mm_cmplt_epi8(operand, _mm_setzero_si128()))) {
+			/* Even if this block only contains single-byte characters, there may have been a
+			 * multi-byte character at the end of the previous block, which was supposed to
+			 * have continuation bytes in this block
+			 * This bitmask will pick out a 2/3/4-byte character starting from the last byte of
+			 * the previous block, a 3/4-byte starting from the 2nd last, or a 4-byte starting
+			 * from the 3rd last */
+			__m128i bad_mask = _mm_set_epi8(-64, -32, -16, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+			__m128i bad = _mm_cmpeq_epi8(_mm_and_si128(last_block, bad_mask), bad_mask);
+			if (_mm_movemask_epi8(bad)) {
+				return false;
+			}
+
+			/* Consume as many full blocks of single-byte characters as we can */
+			while (true) {
+				p += sizeof(__m128i);
+				if (p >= e) {
+					goto finish_up_remaining_bytes;
+				}
+				operand = _mm_loadu_si128((__m128i*)p);
+				if (_mm_movemask_epi8(_mm_cmplt_epi8(operand, _mm_setzero_si128()))) {
+					break;
+				}
+			}
+		}
+
+		/* Check for >= 0xF5, which are illegal byte values in UTF-8
+		 * AVX512 has instructions for vectorized unsigned compare, but SSE2 only has signed compare
+		 * So we add an offset to shift 0xF5-FF to the far low end of the signed byte range
+		 * Then a single signed compare will pick out any bad bytes
+		 * `bad` is a vector of 16 good/bad values, where 0x00 means good and 0xFF means bad */
+		__m128i bad = _mm_cmplt_epi8(_mm_add_epi8(operand, over_f5), over_f5);
+
+		/* Check for overlong 3-byte code units AND reserved codepoints U+D800-DFFF
+		 * 0xE0 followed by a byte < 0xA0 indicates an overlong 3-byte code unit, and
+		 * 0xED followed by a byte >= 0xA0 indicates a reserved codepoint
+		 * We can check for both problems at once by generating a vector where each byte < 0xA0
+		 * is mapped to 0xE0, and each byte >= 0xA0 is mapped to 0xED
+		 * Shift the original block right by one byte, and XOR the shifted block with the bitmask
+		 * Any matches will give a 0x00 byte; do a compare with a zero vector to pick out the
+		 * bad positions, and OR them into `bad` */
+		__m128i operand2 = _mm_or_si128(_mm_slli_si128(operand, 1), _mm_srli_si128(last_block, 15));
+		__m128i mask1 = _mm_or_si128(find_e0, _mm_and_si128(_mm_set1_epi8(0xD), _mm_cmpgt_epi8(operand, over_9f)));
+		bad = _mm_or_si128(bad, _mm_cmpeq_epi8(_mm_setzero_si128(), _mm_xor_si128(operand2, mask1)));
+
+		/* Check for overlong 4-byte code units AND invalid codepoints > U+10FFFF
+		 * Similar to the previous check; 0xF0 followed by < 0x90 indicates an overlong 4-byte
+		 * code unit, and 0xF4 followed by >= 0x90 indicates a codepoint over U+10FFFF
+		 * Build the bitmask, XOR it with the shifted block, check for 0x00 bytes in the result */
+		__m128i mask2 = _mm_or_si128(find_f0, _mm_and_si128(_mm_set1_epi8(0x4), _mm_cmpgt_epi8(operand, over_8f)));
+		bad = _mm_or_si128(bad, _mm_cmpeq_epi8(_mm_setzero_si128(), _mm_xor_si128(operand2, mask2)));
+
+		/* Check for overlong 2-byte code units
+		 * Any 0xC0 or 0xC1 byte can only be the first byte of an overlong 2-byte code unit
+		 * Same deal as before; add an offset to shift 0xC0-C1 to the far low end of the signed
+		 * byte range, do a signed compare to pick out any bad bytes */
+		bad = _mm_or_si128(bad, _mm_cmplt_epi8(_mm_add_epi8(operand, find_c0), c0_to_c1));
+
+		/* Check structure of continuation bytes
+		 * A UTF-8 byte should be a continuation byte if, and only if, it is:
+		 * 1) 1 byte after the start of a 2-byte, 3-byte, or 4-byte character
+		 * 2) 2 bytes after the start of a 3-byte or 4-byte character
+		 * 3) 3 bytes after the start of a 4-byte character
+		 * We build 3 bitmasks with 0xFF in each such position, and OR them together to
+		 * get a single bitmask with 0xFF in each position where a continuation byte should be */
+		__m128i cont_mask = _mm_cmpeq_epi8(_mm_and_si128(operand2, find_c0), find_c0);
+		__m128i operand3 = _mm_or_si128(_mm_slli_si128(operand, 2), _mm_srli_si128(last_block, 14));
+		cont_mask = _mm_or_si128(cont_mask, _mm_cmpeq_epi8(_mm_and_si128(operand3, find_e0), find_e0));
+		__m128i operand4 = _mm_or_si128(_mm_slli_si128(operand, 3), _mm_srli_si128(last_block, 13));
+		cont_mask = _mm_or_si128(cont_mask, _mm_cmpeq_epi8(_mm_and_si128(operand4, find_f0), find_f0));
+
+		/* Now, use a signed comparison to get another bitmask with 0xFF in each position where
+		 * a continuation byte actually is
+		 * XOR those two bitmasks together; if everything is good, the result should be zero
+		 * However, if a byte which should have been a continuation wasn't, or if a byte which
+		 * shouldn't have been a continuation was, we will get 0xFF in that position */
+		__m128i continuation = _mm_cmplt_epi8(operand, find_c0);
+		bad = _mm_or_si128(bad, _mm_xor_si128(continuation, cont_mask));
+
+		/* Pick out the high bit of each byte in `bad` as a 16-bit value (into a scalar register)
+		 * If that value is non-zero, then we found a bad byte somewhere! */
+		if (_mm_movemask_epi8(bad)) {
+			return false;
+		}
+
+		last_block = operand;
+		p += sizeof(__m128i);
+	}
+
+finish_up_remaining_bytes: ;
+	/* Finish up 1-15 remaining bytes */
+	if (p == e) {
+		uint8_t remaining_bytes = ZSTR_LEN(str) & (sizeof(__m128i) - 1); /* Not including terminating null */
+
+		/* Crazy hack here... we want to use the above vectorized code to check a block of less than 16
+		 * bytes, but there is no good way to read a variable number of bytes into an XMM register
+		 * However, we know that these bytes are part of a zend_string, and a zend_string has some
+		 * 'header' fields which occupy the memory just before its content
+		 * And, those header fields occupy more than 16 bytes...
+		 * So if we go back 16 bytes from the end of the zend_string content, and load 16 bytes from there,
+		 * we may pick up some 'junk' bytes from the zend_string header fields, but we will get the 1-15
+		 * bytes we wanted in the tail end of our XMM register, and this will never cause a segfault.
+		 * Then, we do a left shift to get rid of the unwanted bytes
+		 * Conveniently, the same left shift also zero-fills the tail end of the XMM register
+		 *
+		 * The following `switch` looks useless, but it's not
+		 * The PSRLDQ instruction used for the 128-bit left shift requires an immediate (literal)
+		 * shift distance, so the compiler will choke on _mm_srli_si128(operand, shift_dist)
+		 */
+		switch (remaining_bytes) {
+		case 0:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 15)), 15);
+			goto check_operand;
+		case 1:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 14)), 14);
+			goto check_operand;
+		case 2:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 13)), 13);
+			goto check_operand;
+		case 3:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 12)), 12);
+			goto check_operand;
+		case 4:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 11)), 11);
+			goto check_operand;
+		case 5:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 10)), 10);
+			goto check_operand;
+		case 6:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 9)), 9);
+			goto check_operand;
+		case 7:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 8)), 8);
+			goto check_operand;
+		case 8:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 7)), 7);
+			goto check_operand;
+		case 9:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 6)), 6);
+			goto check_operand;
+		case 10:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 5)), 5);
+			goto check_operand;
+		case 11:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 4)), 4);
+			goto check_operand;
+		case 12:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 3)), 3);
+			goto check_operand;
+		case 13:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 2)), 2);
+			goto check_operand;
+		case 14:
+			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 1)), 1);
+			goto check_operand;
+		case 15:
+			/* No trailing bytes are left which need to be checked
+			 * We get 15 because we did not include the terminating null when
+			 * calculating `remaining_bytes`, so the value wraps around */
+			return true;
+		}
+
+		ZEND_UNREACHABLE();
+	}
+
+	return true;
+#else
+	return php_mb_check_encoding(ZSTR_VAL(str), ZSTR_LEN(str), &mbfl_encoding_utf8);
+#endif
+}
+
 static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding)
 {
 	if (encoding == &mbfl_encoding_utf8) {
 		if (GC_FLAGS(str) & IS_STR_VALID_UTF8) {
 			return true;
 		}
-		bool result = php_mb_check_encoding(ZSTR_VAL(str), ZSTR_LEN(str), encoding);
+		bool result = mb_fast_check_utf8(str);
 		if (result && !ZSTR_IS_INTERNED(str)) {
 			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
 		}
