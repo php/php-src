@@ -3975,14 +3975,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								goto jit_failure;
 							}
 						} else {
-							int j;
-							bool left_frame = 0;
-
 							if (!zend_jit_return(&ctx, opline, op_array,
 									op1_info, OP1_REG_ADDR())) {
 								goto jit_failure;
 							}
-#ifndef ZEND_JIT_IR //???
+#ifndef ZEND_JIT_IR
+							bool left_frame = 0;
 							if (jit_return_label >= 0) {
 								if (!zend_jit_jmp(&ctx, jit_return_label)) {
 									goto jit_failure;
@@ -3993,7 +3991,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (!zend_jit_label(&ctx, jit_return_label)) {
 								goto jit_failure;
 							}
-#endif
 							if (op_array->last_var > 100) {
 								/* To many CVs to unroll */
 								if (!zend_jit_free_cvs(&ctx)) {
@@ -4002,6 +3999,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								left_frame = 1;
 							}
 							if (!left_frame) {
+								int j;
+
 								for (j = 0 ; j < op_array->last_var; j++) {
 									uint32_t info = zend_ssa_cv_info(op_array, ssa, j);
 
@@ -4022,6 +4021,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									NULL, NULL, (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, 1)) {
 								goto jit_failure;
 							}
+#endif
 						}
 						goto done;
 					case ZEND_BOOL:
@@ -4584,6 +4584,42 @@ done:
 	}
 	dasm_free(&ctx);
 #else
+	if (jit->return_inputs) {
+		zend_jit_merge_list(jit, jit->return_inputs);
+
+		bool left_frame = 0;
+		if (op_array->last_var > 100) {
+			/* To many CVs to unroll */
+			if (!zend_jit_free_cvs(&ctx)) {
+				goto jit_failure;
+			}
+			left_frame = 1;
+		}
+		if (!left_frame) {
+			int j;
+
+			for (j = 0 ; j < op_array->last_var; j++) {
+				uint32_t info = zend_ssa_cv_info(op_array, ssa, j);
+
+				if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+					if (!left_frame) {
+						left_frame = 1;
+					    if (!zend_jit_leave_frame(&ctx)) {
+							goto jit_failure;
+					    }
+					}
+					if (!zend_jit_free_cv(&ctx, info, j)) {
+						goto jit_failure;
+					}
+				}
+			}
+		}
+		if (!zend_jit_leave_func(&ctx, op_array, NULL, MAY_BE_ANY, left_frame,
+				NULL, NULL, (ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) != 0, 1)) {
+			goto jit_failure;
+		}
+	}
+
 	handler = zend_jit_finish(&ctx);
 	if (!handler) {
 		goto jit_failure;
