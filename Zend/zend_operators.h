@@ -21,6 +21,8 @@
 #ifndef ZEND_OPERATORS_H
 #define ZEND_OPERATORS_H
 
+#include "zend_result.h"
+
 #include <errno.h>
 #include <math.h>
 #include <assert.h>

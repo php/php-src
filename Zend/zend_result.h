@@ -12,20 +12,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@php.net>                                 |
-   |          Zeev Suraski <zeev@php.net>                                 |
-   +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_BUILTIN_FUNCTIONS_H
-#define ZEND_BUILTIN_FUNCTIONS_H
+#ifndef ZEND_RESULT_H
+#define ZEND_RESULT_H
 
-#include "zend_result.h"
+typedef enum {
+  SUCCESS =  0,
+  FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
+} ZEND_RESULT_CODE;
 
-zend_result zend_startup_builtin_functions(void);
+typedef ZEND_RESULT_CODE zend_result;
 
-BEGIN_EXTERN_C()
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit);
-END_EXTERN_C()
-
-#endif /* ZEND_BUILTIN_FUNCTIONS_H */
+#endif /* ZEND_RESULT_H */

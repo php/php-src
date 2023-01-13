@@ -21,6 +21,7 @@
 
 #include "zend_optimizer.h"
 #include "zend_cfg.h"
+#include "zend_result.h"
 
 typedef struct _zend_ssa_range {
 	zend_long              min;
