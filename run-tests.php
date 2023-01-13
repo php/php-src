@@ -1504,6 +1504,10 @@ escape:
                     kill_children($workerProcs);
                     error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
                 }
+                if (feof($workerSock)) {
+                    kill_children($workerProcs);
+                    error("Worker $i died unexpectedly");
+                }
                 while (false !== ($rawMessage = fgets($workerSock))) {
                     // work around fgets truncating things
                     if (($rawMessageBuffers[$i] ?? '') !== '') {
