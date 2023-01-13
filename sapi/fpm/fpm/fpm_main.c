@@ -27,6 +27,7 @@
 #include "php.h"
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
+#include "zend_rc_debug.h"
 #include "zend_stream.h"
 
 #include "SAPI.h"
