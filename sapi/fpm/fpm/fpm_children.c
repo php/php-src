@@ -297,8 +297,10 @@ void fpm_children_bury(void)
 					break;
 				}
 			}
+		} else if (fpm_globals.parent_pid == 1) {
+			zlog(ZLOG_DEBUG, "unknown child (%d) exited %s - most likely an orphan process (master process is the init process)", pid, buf);
 		} else {
-			zlog(ZLOG_ALERT, "oops, unknown child (%d) exited %s. Please open a bug report (https://github.com/php/php-src/issues).", pid, buf);
+			zlog(ZLOG_WARNING, "unknown child (%d) exited %s - potentially a bug or pre exec child (e.g. s6-notifyoncheck)", pid, buf);
 		}
 	}
 }
