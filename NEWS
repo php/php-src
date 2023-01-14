@@ -48,6 +48,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix GH-10187 (Segfault in stripslashes() with arm64). (nielsdos)
+  . Fix substr_replace with slots in repl_ht being UNDEF. (nielsdos)
 
 - TSRM:
   . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
