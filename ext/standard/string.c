@@ -4141,9 +4141,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool case_sensi
 
 	/* Make sure we're dealing with strings and do the replacement. */
 	if (search_str && replace_ht) {
-		zend_argument_type_error(2, "must be of type %s when argument #1 ($search) is %s",
-			search_str ? "string" : "array", search_str ? "a string" : "an array"
-		);
+		zend_argument_type_error(2, "must be of type string when argument #1 ($search) is a string");
 		RETURN_THROWS();
 	}
 
