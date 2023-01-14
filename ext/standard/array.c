@@ -4344,13 +4344,14 @@ PHP_FUNCTION(array_pad)
 		Z_PARAM_ZVAL(pad_value)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (pad_size < Z_L(-HT_MAX_SIZE) || pad_size > Z_L(HT_MAX_SIZE)) {
+		zend_argument_value_error(2, "must not exceed the maximum allowed array size");
+		RETURN_THROWS();
+	}
+
 	/* Do some initial calculations */
 	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
 	pad_size_abs = ZEND_ABS(pad_size);
-	if (pad_size_abs < 0 || pad_size_abs - input_size > Z_L(1048576)) {
-		zend_argument_value_error(2, "must be less than or equal to 1048576");
-		RETURN_THROWS();
-	}
 
 	if (input_size >= pad_size_abs) {
 		/* Copy the original array */
