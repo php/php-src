@@ -526,7 +526,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
-			ZVAL_LONG(return_value, H->buffered);
+			ZVAL_BOOL(return_value, H->buffered);
 			break;
 
 		case PDO_ATTR_EMULATE_PREPARES:
