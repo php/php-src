@@ -90,6 +90,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
+  . Make array_pad's $length warning less confusing. (nielsdos)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.

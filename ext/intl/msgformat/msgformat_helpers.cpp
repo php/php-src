@@ -328,7 +328,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 
 	formats = mf->getFormats(count);
 
-	if (formats == NULL) {
+	if (UNEXPECTED(formats == NULL)) {
 		intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 			"Out of memory retrieving subformats", 0);
 	}
@@ -403,7 +403,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		/* Process key and retrieve type */
 		if (str_index == NULL) {
 			/* includes case where index < 0 because it's exposed as unsigned */
-			if (num_index > (zend_ulong)INT32_MAX) {
+			if (UNEXPECTED(num_index > (zend_ulong)INT32_MAX)) {
 				intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 					"Found negative or too large array key", 0);
 				continue;
@@ -477,8 +477,8 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 					int32_t tInt32 = 0;
 
 					if (Z_TYPE_P(elem) == IS_DOUBLE) {
-						if (Z_DVAL_P(elem) > (double)INT32_MAX ||
-								Z_DVAL_P(elem) < (double)INT32_MIN) {
+						if (UNEXPECTED(Z_DVAL_P(elem) > (double)INT32_MAX ||
+								Z_DVAL_P(elem) < (double)INT32_MIN)) {
 							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 								"Found PHP float with absolute value too large for "
 								"32 bit integer argument", 0);
@@ -486,8 +486,8 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 							tInt32 = (int32_t)Z_DVAL_P(elem);
 						}
 					} else if (Z_TYPE_P(elem) == IS_LONG) {
-						if (Z_LVAL_P(elem) > INT32_MAX ||
-								Z_LVAL_P(elem) < INT32_MIN) {
+						if (UNEXPECTED(Z_LVAL_P(elem) > INT32_MAX ||
+								Z_LVAL_P(elem) < INT32_MIN)) {
 							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 								"Found PHP integer with absolute value too large "
 								"for 32 bit integer argument", 0);
@@ -505,8 +505,8 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 					int64_t tInt64 = 0;
 
 					if (Z_TYPE_P(elem) == IS_DOUBLE) {
-						if (Z_DVAL_P(elem) > (double)U_INT64_MAX ||
-								Z_DVAL_P(elem) < (double)U_INT64_MIN) {
+						if (UNEXPECTED(Z_DVAL_P(elem) > (double)U_INT64_MAX ||
+								Z_DVAL_P(elem) < (double)U_INT64_MIN)) {
 							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 								"Found PHP float with absolute value too large for "
 								"64 bit integer argument", 0);
