@@ -53,6 +53,9 @@ PHP                                                                        NEWS
 - TSRM:
   . Fixed Windows shmget() wrt. IPC_PRIVATE. (Tyson Andre)
 
+- XMLWriter
+  . Fix missing check for xmlTextWriterEndElement (nielsdos)
+
 05 Jan 2023, PHP 8.1.14
 
 - Core:
