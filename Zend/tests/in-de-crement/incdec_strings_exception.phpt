@@ -47,29 +47,29 @@ Deprecated: Decrement on empty string is deprecated as non-numeric
 string(0) ""
 Deprecated: Increment on non-numeric string is deprecated
 string(1) " "
-Warning: Decrement on non-numeric string has no effect
+Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(1) " "
 Deprecated: Increment on non-numeric string is deprecated
 string(4) "199A"
-Warning: Decrement on non-numeric string has no effect
+Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(4) "199A"
 Deprecated: Increment on non-numeric string is deprecated
 string(4) "A199"
-Warning: Decrement on non-numeric string has no effect
+Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(4) "A199"
 Deprecated: Increment on non-numeric string is deprecated
 string(4) "199Z"
-Warning: Decrement on non-numeric string has no effect
+Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(4) "199Z"
 Deprecated: Increment on non-numeric string is deprecated
 string(4) "Z199"
-Warning: Decrement on non-numeric string has no effect
+Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(4) "Z199"
 Deprecated: Increment on non-numeric string is deprecated
 string(11) "Hello world"
-Warning: Decrement on non-numeric string has no effect
+Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(11) "Hello world"
 Deprecated: Increment on non-numeric string is deprecated
 string(4) "🐘"
-Warning: Decrement on non-numeric string has no effect
+Deprecated: Decrement on non-numeric string has no effect and is deprecated
 string(4) "🐘"

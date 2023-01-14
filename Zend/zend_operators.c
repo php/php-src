@@ -2629,7 +2629,7 @@ try_again:
 			break;
 		case IS_FALSE:
 		case IS_TRUE:
-			zend_error(E_WARNING, "Increment on type bool has no effect");
+			zend_error(E_WARNING, "Increment on type bool has no effect, this will change in the next major version of PHP");
 			break;
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
@@ -2691,18 +2691,24 @@ try_again:
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
 				default:
-					zend_error(E_WARNING, "Decrement on non-numeric string has no effect");
+					zend_error(E_DEPRECATED, "Decrement on non-numeric string has no effect and is deprecated");
 					if (EG(exception)) {
 						return FAILURE;
 					}
 			}
 			break;
 		case IS_NULL:
-			/* Do nothing. */
+			zend_error(E_WARNING, "Decrement on type null has no effect, this will change in the next major version of PHP");
+			if (EG(exception)) {
+				return FAILURE;
+			}
 			break;
 		case IS_FALSE:
 		case IS_TRUE:
-			zend_error(E_WARNING, "Decrement on type bool has no effect");
+			zend_error(E_WARNING, "Decrement on type bool has no effect, this will change in the next major version of PHP");
+			if (EG(exception)) {
+				return FAILURE;
+			}
 			break;
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);

@@ -18,4 +18,8 @@ foo();
 DONE
 --EXPECTF--
 Warning: Undefined variable $a in %sreg_alloc_014.php on line 4
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %sreg_alloc_014.php on line 4
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %sreg_alloc_014.php on line 4
 DONE

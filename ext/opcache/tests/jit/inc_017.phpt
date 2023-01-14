@@ -18,5 +18,5 @@ function foo() {
 var_dump(foo());
 ?>
 --EXPECT--
-Warning: Increment on bool has no effect in Unknown on line 0
+Warning: Increment on type bool has no effect, this will change in the next major version of PHP in Unknown on line 0
 bool(true)

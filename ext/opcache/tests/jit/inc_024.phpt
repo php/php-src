@@ -68,7 +68,7 @@ Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 
 Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 
 Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 string(5) "-INF0"

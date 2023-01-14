@@ -51,11 +51,11 @@ Initial value:NULL
 Result value:int(1)
 Initial value:bool(false)
 
-Warning: Increment on type bool has no effect in %s on line %d
+Warning: Increment on type bool has no effect, this will change in the next major version of PHP in %s on line %d
 Result value:bool(false)
 Initial value:bool(true)
 
-Warning: Increment on type bool has no effect in %s on line %d
+Warning: Increment on type bool has no effect, this will change in the next major version of PHP in %s on line %d
 Result value:bool(true)
 Initial value:int(0)
 Result value:int(1)
@@ -73,14 +73,16 @@ Initial value:string(1) "0"
 Result value:int(1)
 Using decrement:
 Initial value:NULL
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %s on line %d
 Result value:NULL
 Initial value:bool(false)
 
-Warning: Decrement on type bool has no effect in %s on line %d
+Warning: Decrement on type bool has no effect, this will change in the next major version of PHP in %s on line %d
 Result value:bool(false)
 Initial value:bool(true)
 
-Warning: Decrement on type bool has no effect in %s on line %d
+Warning: Decrement on type bool has no effect, this will change in the next major version of PHP in %s on line %d
 Result value:bool(true)
 Initial value:int(0)
 Result value:int(-1)
@@ -92,7 +94,7 @@ Deprecated: Decrement on empty string is deprecated as non-numeric in %s on line
 Result value:int(-1)
 Initial value:string(1) " "
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(1) " "
 Initial value:string(1) "0"
 Result value:int(-1)

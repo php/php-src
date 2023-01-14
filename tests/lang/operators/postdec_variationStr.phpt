@@ -29,35 +29,35 @@ float(0.19999999999999996)
 float(-8.7)
 --- testing: 'abc' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(3) "abc"
 --- testing: '123abc' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(6) "123abc"
 --- testing: '123e5' ---
 float(12299999)
 --- testing: '123e5xyz' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(8) "123e5xyz"
 --- testing: ' 123abc' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(7) " 123abc"
 --- testing: '123 abc' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(7) "123 abc"
 --- testing: '123abc ' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(7) "123abc "
 --- testing: '3.4a' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(4) "3.4a"
 --- testing: 'a5.9' ---
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated %s on line %d
 string(4) "a5.9"

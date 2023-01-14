@@ -22,7 +22,7 @@ foreach ($values as $value) {
 }
 ?>
 --EXPECT--
-Increment on type bool has no effect
-Decrement on type bool has no effect
-Increment on type bool has no effect
-Decrement on type bool has no effect
+Increment on type bool has no effect, this will change in the next major version of PHP
+Decrement on type bool has no effect, this will change in the next major version of PHP
+Increment on type bool has no effect, this will change in the next major version of PHP
+Decrement on type bool has no effect, this will change in the next major version of PHP

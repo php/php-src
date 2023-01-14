@@ -100,7 +100,7 @@ Deprecated: Decrement on empty string is deprecated as non-numeric in %s on line
 Result value:int(-1)
 Initial value:string(1) " "
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(1) " "
 Initial value:string(1) "0"
 Result value:int(-1)
@@ -110,25 +110,25 @@ Initial value:string(4) "1e10"
 Result value:float(9999999999)
 Initial value:string(4) "199A"
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(4) "199A"
 Initial value:string(4) "A199"
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(4) "A199"
 Initial value:string(4) "199Z"
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(4) "199Z"
 Initial value:string(4) "Z199"
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(4) "Z199"
 Initial value:string(11) "Hello world"
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(11) "Hello world"
 Initial value:string(4) "🐘"
 
-Warning: Decrement on non-numeric string has no effect in %s on line %d
+Deprecated: Decrement on non-numeric string has no effect and is deprecated in %s on line %d
 Result value:string(4) "🐘"
