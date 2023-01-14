@@ -22,7 +22,7 @@
 ; The user and group can be specified either by their name or by their numeric
 ; IDs.
 ; Note: If the user is root, the executable needs to be started with
-        --allow-to-run-as-root option to work.
+;       --allow-to-run-as-root option to work.
 ; Default Values: The user is set to master process running user by default.
 ;                 If the group is not set, the user's group is used.
 user = @php_fpm_user@
