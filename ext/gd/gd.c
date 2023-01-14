@@ -203,7 +203,7 @@ void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
 	php_gd_exgdimage_from_zobj_p(Z_OBJ_P(val))->image = image;
 }
 
-#if GD_MAJOR_VERSION > 2 || (GD_MAJOR_VERSION == 2 && (GD_MINOR_VERSION > 2 || (GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 3))
+#if GD_MAJOR_VERSION > 2 || (GD_MAJOR_VERSION == 2 && (GD_MINOR_VERSION > 2 || (GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 3)))
 static zend_object *php_gd_clone(zend_object *zobj)
 {
 	gdImagePtr oldim = php_gd_exgdimage_from_zobj_p(zobj)->image;
@@ -223,7 +223,7 @@ static void php_gd_object_minit_helper(void)
 
 	/* setting up the object handlers for the GdImage class */
 	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-#if GD_MAJOR_VERSION > 2 || (GD_MAJOR_VERSION == 2 && (GD_MINOR_VERSION > 2 || (GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 3))
+#if GD_MAJOR_VERSION > 2 || (GD_MAJOR_VERSION == 2 && (GD_MINOR_VERSION > 2 || (GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 3)))
 	php_gd_image_object_handlers.clone_obj = php_gd_clone;
 #else
     php_gd_image_object_handlers.clone_obj = NULL;
