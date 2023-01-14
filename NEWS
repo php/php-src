@@ -98,4 +98,7 @@ PHP                                                                        NEWS
   . Fixed bug #51056: blocking fread() will block even if data is available.
     (Jakub Zelenka)
 
+- XSLTProcessor:
+  . Fixed bug #69168 (DomNode::getNodePath() returns invalid path). (nielsdos)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
