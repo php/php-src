@@ -72,5 +72,5 @@ int(51)
 float(57.3)
 Cannot decrement LongCastableNoOperations
 Cannot decrement FloatCastableNoOperations
-Cannot decrement NumericCastableNoOperations
-Cannot decrement NumericCastableNoOperations
+int(51)
+float(57.3)

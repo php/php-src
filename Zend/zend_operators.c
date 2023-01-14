@@ -2634,7 +2634,7 @@ try_again:
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
-		case IS_OBJECT:
+		case IS_OBJECT: {
 			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				ZVAL_LONG(&op2, 1);
@@ -2642,7 +2642,15 @@ try_again:
 					return SUCCESS;
 				}
 			}
+			zval tmp;
+			if (Z_OBJ_HT_P(op1)->cast_object(Z_OBJ_P(op1), &tmp, _IS_NUMBER) == SUCCESS) {
+				ZEND_ASSERT(Z_TYPE(tmp) == IS_LONG || Z_TYPE(tmp) == IS_DOUBLE);
+				zval_ptr_dtor(op1);
+				ZVAL_COPY(op1, &tmp);
+				goto try_again;
+			}
 			ZEND_FALLTHROUGH;
+		}
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			zend_type_error("Cannot increment %s", zend_zval_value_name(op1));
@@ -2713,7 +2721,7 @@ try_again:
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
-		case IS_OBJECT:
+		case IS_OBJECT: {
 			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				ZVAL_LONG(&op2, 1);
@@ -2721,7 +2729,15 @@ try_again:
 					return SUCCESS;
 				}
 			}
+			zval tmp;
+			if (Z_OBJ_HT_P(op1)->cast_object(Z_OBJ_P(op1), &tmp, _IS_NUMBER) == SUCCESS) {
+				ZEND_ASSERT(Z_TYPE(tmp) == IS_LONG || Z_TYPE(tmp) == IS_DOUBLE);
+				zval_ptr_dtor(op1);
+				ZVAL_COPY(op1, &tmp);
+				goto try_again;
+			}
 			ZEND_FALLTHROUGH;
+		}
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			zend_type_error("Cannot decrement %s", zend_zval_value_name(op1));

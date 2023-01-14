@@ -72,5 +72,5 @@ int(53)
 float(59.3)
 Cannot increment LongCastableNoOperations
 Cannot increment FloatCastableNoOperations
-Cannot increment NumericCastableNoOperations
-Cannot increment NumericCastableNoOperations
+int(53)
+float(59.3)
