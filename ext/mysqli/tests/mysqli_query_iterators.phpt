@@ -151,7 +151,7 @@ array(1) {
 }
 ======
 
-Warning: main(): Data fetched with MYSQLI_USE_RESULT can be iterated only once in %s on line %d
+Warning: Data fetched with MYSQLI_USE_RESULT can be iterated only once in %s on line %d
 --- Testing STORE_RESULT ---
 array(1) {
   ["id"]=>
