@@ -49,7 +49,8 @@
 
 #if HAVE_SYS_PARAM_H
 # include <sys/param.h>
-# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || defined(__sun)
+# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || \
+     defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000)
 #  include <sys/random.h>
 # endif
 #endif
@@ -502,14 +503,27 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		}
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__))
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001 && __NetBSD_Version__ < 1000000000) || \
+  defined(__APPLE__) || defined(__GLIBC__))
+	/*
+	 * OpenBSD until there is a valid equivalent
+	 * or NetBSD before the 10.x release
+	 * falls back to arc4random_buf
+	 * giving a decent output, the main benefit
+	 * is being (relatively) failsafe.
+	 * Older macOs releases fall also into this
+	 * category for reasons explained above.
+	 */
 	arc4random_buf(bytes, size);
 #else
 	size_t read_bytes = 0;
 	ssize_t n;
-# if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || defined(__sun)
-	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
-	/* Keep reading until we get enough entropy */
+# if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || \
+  defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000)
+	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD/NetBSD getrandom(2) function
+	 * Being a syscall, implemented in the kernel, getrandom offers higher quality output
+	 * compared to the arc4random api albeit a fallback to /dev/urandom is considered.
+	 */
 	while (read_bytes < size) {
 		errno = 0;
 

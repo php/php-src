@@ -81,6 +81,7 @@ PHP                                                                        NEWS
   . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary. (timwolla)
   . Fix GH-10292 (Made the default value of the first param of srand() and
     mt_srand() nullable). (kocsismate)
+  . Enable getrandom() for NetBSD (from 10.x). (David Carlier)
 
 - Reflection:
   . Fix GH-9470 (ReflectionMethod constructor should not find private parent
