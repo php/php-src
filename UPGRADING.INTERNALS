@@ -43,6 +43,23 @@ PHP 8.3 INTERNALS UPGRADE NOTES
    - A new function php_json_validate_ex has been added to check if the
      provided C string is valid for the given depth and options.
 
+ b. ext/standard
+   - The PHPAPI php_url_encode_hash_ex() function has had its signature change
+     from:
+     PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
+     				const char *num_prefix, size_t num_prefix_len,
+     				const char *key_prefix, size_t key_prefix_len,
+     				const char *key_suffix, size_t key_suffix_len,
+     				zval *type, const char *arg_sep, int enc_type);
+     to:
+     PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
+     				const char *num_prefix, size_t num_prefix_len,
+     				const zend_string *key_prefix,
+     				zval *type, const zend_string *arg_sep, int enc_type);
+     The change to use zend_string prevent the computation of the arg_sep
+     length at each call. The key_suffix parameter was dropped as it was a
+     constant value and depended on the key_prefix parameter to not be NULL.
+
 ========================
 4. OpCode changes
 ========================
