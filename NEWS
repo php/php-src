@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fix zend_jit_find_trace() crashes. (Max Kellermann)
   . Added missing lock for EXIT_INVALIDATE in zend_jit_trace_exit. (Max Kellermann)
 
+- Phar:
+  . Fix wrong flags check for compression method in phar_object.c (nielsdos)
+
 - PHPDBG:
   . Fix undefined behaviour in phpdbg_load_module_or_extension(). (nielsdos)
   . Fix NULL pointer dereference in phpdbg_create_conditional_breal(). (nielsdos)
@@ -46,6 +49,10 @@ PHP                                                                        NEWS
   . Fix GH-10187 (Segfault in stripslashes() with arm64). (nielsdos)
   . Fixed bug GH-10214 (Incomplete validation of object syntax during
     unserialize()). (timwolla)
+  . Fix substr_replace with slots in repl_ht being UNDEF. (nielsdos)
+
+- XMLWriter
+  . Fix missing check for xmlTextWriterEndElement (nielsdos)
 
 05 Jan 2023, PHP 8.2.1
 
