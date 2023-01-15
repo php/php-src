@@ -355,7 +355,7 @@ ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) ZEND_ATTRIBUTE
 ZEND_COLD void zenderror(const char *error);
 
 /* For internal C errors */
-ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *message);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def

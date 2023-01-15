@@ -1622,7 +1622,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 	abort();
 }
 
-ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *message)
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
 {
 #ifdef HAVE_STR_ERROR_R
 	char buf[1024];
