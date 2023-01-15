@@ -50,7 +50,8 @@
 
 #if HAVE_SYS_PARAM_H
 # include <sys/param.h>
-# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || defined(__sun)
+# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || \
+     defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000)
 #  include <sys/random.h>
 # endif
 #endif
@@ -503,12 +504,14 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		}
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__) || defined(__GLIBC__))
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001 && __NetBSD_Version__ < 1000000000) || \
+  defined(__APPLE__) || defined(__GLIBC__))
 	arc4random_buf(bytes, size);
 #else
 	size_t read_bytes = 0;
 	ssize_t n;
-# if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || defined(__sun)
+# if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || \
+  defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000)
 	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
 	while (read_bytes < size) {
