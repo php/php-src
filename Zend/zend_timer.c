@@ -47,6 +47,7 @@ ZEND_API void zend_timer_init(void) /* {{{ */
 	sev.sigev_signo = SIGIO;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
+	EG(pid) = getpid();
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
 	if (timer_create(CLOCK_REALTIME, &sev, &EG(timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
@@ -80,6 +81,11 @@ void zend_timer_settime(zend_long seconds) /* {{{ }*/
 
 void zend_timer_shutdown(void) /* {{{ */
 {
+	/* Don't try to delete a timer created before a call to fork() */
+	if (EG(pid) != getpid()) {
+		return;
+	}
+
 	timer_t timer = EG(timer);
 	if (timer == (timer_t){0}) {
 		/* Don't trigger an error here because the timer may not be initialized when PHP fail early, and on threads created by PHP but not managed by it. */

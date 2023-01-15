@@ -22,6 +22,7 @@
 
 
 #include <setjmp.h>
+#include <sys/types.h>
 
 #include "zend_globals_macros.h"
 
@@ -269,6 +270,7 @@ struct _zend_executor_globals {
 
 #ifdef ZEND_TIMERS
 	timer_t timer;
+	pid_t pid;
 	struct sigaction oldact;
 #endif
 

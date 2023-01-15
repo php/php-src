@@ -753,13 +753,6 @@ static void php_apache_signal_init(apr_pool_t *pchild, server_rec *s)
 }
 #endif
 
-#ifdef ZEND_TIMERS
-static void php_apache_timers_init(apr_pool_t *pchild, server_rec *s)
-{
-	zend_timer_init();
-}
-#endif
-
 void php_ap2_register_hook(apr_pool_t *p)
 {
 	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
@@ -767,9 +760,6 @@ void php_ap2_register_hook(apr_pool_t *p)
 	ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
 #ifdef ZEND_SIGNALS
 	ap_hook_child_init(php_apache_signal_init, NULL, NULL, APR_HOOK_MIDDLE);
-#endif
-#ifdef ZEND_TIMERS
-	ap_hook_child_init(php_apache_timers_init, NULL, NULL, APR_HOOK_MIDDLE);
 #endif
 	ap_hook_child_init(php_apache_child_init, NULL, NULL, APR_HOOK_MIDDLE);
 }
