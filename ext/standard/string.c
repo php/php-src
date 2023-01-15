@@ -2196,7 +2196,7 @@ PHP_FUNCTION(substr_replace)
 				if (HT_IS_PACKED(repl_ht)) {
 					while (repl_idx < repl_ht->nNumUsed) {
 						tmp_repl = &repl_ht->arPacked[repl_idx];
-						if (repl_ht != IS_UNDEF) {
+						if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 							break;
 						}
 						repl_idx++;
@@ -2204,7 +2204,7 @@ PHP_FUNCTION(substr_replace)
 				} else {
 					while (repl_idx < repl_ht->nNumUsed) {
 						tmp_repl = &repl_ht->arData[repl_idx].val;
-						if (repl_ht != IS_UNDEF) {
+						if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 							break;
 						}
 						repl_idx++;

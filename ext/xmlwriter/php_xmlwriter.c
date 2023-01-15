@@ -448,7 +448,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 			if (retval == -1) {
 				RETURN_FALSE;
 			}
-			xmlTextWriterEndElement(ptr);
+			retval = xmlTextWriterEndElement(ptr);
 			if (retval == -1) {
 				RETURN_FALSE;
 			}
