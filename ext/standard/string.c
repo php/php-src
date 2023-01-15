@@ -2196,7 +2196,7 @@ PHP_FUNCTION(substr_replace)
 				if (HT_IS_PACKED(repl_ht)) {
 					while (repl_idx < repl_ht->nNumUsed) {
 						tmp_repl = &repl_ht->arPacked[repl_idx];
-						if (repl_ht != IS_UNDEF) {
+						if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 							break;
 						}
 						repl_idx++;
@@ -2204,7 +2204,7 @@ PHP_FUNCTION(substr_replace)
 				} else {
 					while (repl_idx < repl_ht->nNumUsed) {
 						tmp_repl = &repl_ht->arData[repl_idx].val;
-						if (repl_ht != IS_UNDEF) {
+						if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 							break;
 						}
 						repl_idx++;
@@ -4141,9 +4141,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool case_sensi
 
 	/* Make sure we're dealing with strings and do the replacement. */
 	if (search_str && replace_ht) {
-		zend_argument_type_error(2, "must be of type %s when argument #1 ($search) is %s",
-			search_str ? "string" : "array", search_str ? "a string" : "an array"
-		);
+		zend_argument_type_error(2, "must be of type string when argument #1 ($search) is a string");
 		RETURN_THROWS();
 	}
 

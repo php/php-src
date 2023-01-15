@@ -50,6 +50,7 @@
 
 #include "zend_extensions.h"
 #include "zend_compile.h"
+#include "zend_modules.h" // for INIT_FUNC_ARGS
 
 #include "Optimizer/zend_optimizer.h"
 #include "zend_accelerator_hash.h"

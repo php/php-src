@@ -19,8 +19,11 @@
 #ifndef ZEND_ENUM_H
 #define ZEND_ENUM_H
 
-#include "zend.h"
-#include "zend_types.h"
+#include "zend_compile.h" // for OBJ_PROP_NUM
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
+typedef struct _zend_class_entry zend_class_entry;
+typedef struct _zend_function_entry zend_function_entry;
 
 BEGIN_EXTERN_C()
 

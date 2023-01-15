@@ -20,8 +20,12 @@
 #ifndef ZEND_OBJECTS_API_H
 #define ZEND_OBJECTS_API_H
 
-#include "zend.h"
-#include "zend_compile.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_gc.h" // for GC_MAY_LEAK
+#include "zend_compile.h" // for ZEND_ACC_USE_GUARDS
+#include "zend.h" // for _zend_class_entry
+
+typedef struct _zend_object zend_object;
 
 #define OBJ_BUCKET_INVALID			(1<<0)
 

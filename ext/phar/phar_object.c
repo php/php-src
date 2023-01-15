@@ -3314,7 +3314,7 @@ PHP_METHOD(Phar, compressFiles)
 	}
 
 	if (!pharobj_cancompress(&phar_obj->archive->manifest)) {
-		if (flags == PHAR_FILE_COMPRESSED_GZ) {
+		if (flags == PHAR_ENT_COMPRESSED_GZ) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
 				"Cannot compress all files as Gzip, some are compressed as bzip2 and cannot be decompressed");
 		} else {

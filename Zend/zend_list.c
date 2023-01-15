@@ -19,10 +19,12 @@
 
 /* resource lists */
 
-#include "zend.h"
 #include "zend_list.h"
-#include "zend_API.h"
-#include "zend_globals.h"
+#include "zend_execute.h" // for get_active_class_name()
+#include "zend_globals.h" // for struct _zend_executor_globals
+#include "zend_globals_macros.h" // for EG()
+#include "zend_hash.h"
+#include "zend_types.h" // for zval
 
 ZEND_API int le_index_ptr;
 
