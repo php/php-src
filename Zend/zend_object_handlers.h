@@ -231,11 +231,11 @@ ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
  * Only objects with the same identity will be considered equal. */
 ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2);
 
-ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
+ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_entry *scope);
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
+ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
-ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
+ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce, zend_string *method_name, bool is_static);
 
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
 
