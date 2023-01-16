@@ -896,6 +896,13 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 static inline int accel_is_inactive(void)
 {
 #ifdef ZEND_WIN32
+	/* on Windows, we don't need kill_all_lockers() because SAPIs
+	   that work on Windows don't manage child processes (and we
+	   can't do anything about hanging threads anyway); therefore
+	   on Windows, we can simply manage this counter with atomics
+	   instead of flocks (atomics are much faster but they don't
+	   provide us with the PID of locker processes) */
+
 	if (LOCKVAL(mem_usage) == 0) {
 		return SUCCESS;
 	}
