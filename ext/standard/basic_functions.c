@@ -117,10 +117,6 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "basic_functions_arginfo.h"
 
-#if defined(HAVE_NANOSLEEP) || !defined(PHP_WIN32)
-#include <errno.h>
-#endif
-
 typedef struct _user_tick_function_entry {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;

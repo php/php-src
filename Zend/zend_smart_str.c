@@ -14,11 +14,9 @@
    +----------------------------------------------------------------------+
  */
 
+#include <zend.h>
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
-#include "zend_globals_macros.h" // for EG()
-#include "zend_globals.h" // struct _zend_executor_globals
-#include "zend_strtod.h" // for zend_gcvt()
 
 #define SMART_STR_OVERHEAD   (ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE + 1)
 #define SMART_STR_START_SIZE 256

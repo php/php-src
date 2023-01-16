@@ -20,17 +20,13 @@
 #ifndef ZEND_FIBERS_H
 #define ZEND_FIBERS_H
 
-#include "zend_API.h" // for struct zend_fcall_info
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-
-#include <stddef.h>
+#include "zend_API.h"
+#include "zend_types.h"
 
 #define ZEND_FIBER_GUARD_PAGES 1
 
 #define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
 #define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
-
-typedef struct _zend_fiber_context zend_fiber_context;
 
 BEGIN_EXTERN_C()
 

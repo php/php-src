@@ -18,8 +18,6 @@
 #define SPPRINTF_H
 
 #include "snprintf.h"
-#include "php.h" // for PHPAPI
-#include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_smart_str_public.h"
 #include "zend_smart_string_public.h"
 

@@ -36,9 +36,6 @@
 #include "spl_directory_arginfo.h"
 #include "spl_exceptions.h"
 
-#include <errno.h>
-#include <string.h> // for strerror()
-
 #define SPL_HAS_FLAG(flags, test_flag) ((flags & test_flag) ? 1 : 0)
 
 /* declare the class handlers */

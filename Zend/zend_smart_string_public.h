@@ -18,7 +18,7 @@
 #ifndef PHP_SMART_STRING_PUBLIC_H
 #define PHP_SMART_STRING_PUBLIC_H
 
-#include <stddef.h> // for size_t
+#include <sys/types.h>
 
 typedef struct {
 	char *c;

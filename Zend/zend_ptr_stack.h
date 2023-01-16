@@ -20,9 +20,6 @@
 #ifndef ZEND_PTR_STACK_H
 #define ZEND_PTR_STACK_H
 
-#include "zend_alloc.h" // for safe_perealloc()
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-
 typedef struct _zend_ptr_stack {
 	int top, max;
 	void **elements;

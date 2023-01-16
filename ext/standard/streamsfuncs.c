@@ -40,9 +40,6 @@ typedef unsigned long long php_timeout_ull;
 typedef unsigned __int64 php_timeout_ull;
 #endif
 
-#include <errno.h>
-#include <string.h> // for strerror()
-
 #define GET_CTX_OPT(stream, wrapper, name, val) (PHP_STREAM_CONTEXT(stream) && NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), wrapper, name)))
 
 static php_stream_context *decode_context_param(zval *contextresource);

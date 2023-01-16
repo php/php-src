@@ -46,10 +46,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef HAVE_NICE
-#include <errno.h>
-#endif
-
 #include <limits.h>
 
 #ifdef PHP_WIN32

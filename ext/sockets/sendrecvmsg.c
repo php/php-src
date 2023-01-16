@@ -28,8 +28,6 @@
 #include <TSRM/TSRM.h>
 #endif
 
-#include <errno.h>
-
 #define MAX_USER_BUFF_SIZE ((size_t)(100*1024*1024))
 #define DEFAULT_BUFF_SIZE 8192
 #define MAX_ARRAY_KEY_SIZE 128

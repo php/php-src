@@ -24,8 +24,6 @@
 #include "php_random.h"
 #include <math.h>
 
-#include <float.h> // for DBL_MAX
-
 /* This file implements the γ-section algorithm as published in:
  *
  * Drawing Random Floating-Point Numbers from an Interval. Frédéric

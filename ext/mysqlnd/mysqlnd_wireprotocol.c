@@ -23,7 +23,6 @@
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_debug.h"
-#include "zend_strtod.h"
 
 #define BAIL_IF_NO_MORE_DATA \
 	if (UNEXPECTED((size_t)(p - begin) > packet->header.size)) { \

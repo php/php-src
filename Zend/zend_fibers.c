@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_fibers.h"
-#include "zend_objects.h" // for zend_object_std_init()
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_ini.h"
@@ -45,9 +43,6 @@
 # include <unistd.h>
 # include <sys/mman.h>
 # include <limits.h>
-
-# include <errno.h>
-# include <string.h> // for strerror()
 
 # if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
 #  define MAP_ANONYMOUS MAP_ANON

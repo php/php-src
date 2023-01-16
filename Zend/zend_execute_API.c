@@ -18,18 +18,26 @@
    +----------------------------------------------------------------------+
 */
 
+#include <stdio.h>
+#include <signal.h>
+
+#include "zend.h"
+#include "zend_compile.h"
+#include "zend_execute.h"
 #include "zend_API.h"
+#include "zend_stack.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
+#include "zend_vm.h"
+#include "zend_float.h"
 #include "zend_fibers.h"
 #include "zend_weakrefs.h"
+#include "zend_inheritance.h"
 #include "zend_observer.h"
-
-#include <stdio.h>
-#include <signal.h>
-
+#include "zend_call_stack.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif

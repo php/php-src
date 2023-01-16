@@ -22,13 +22,10 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
+#include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 
-#include <errno.h>
-#include "sysvmsg_arginfo.h"
-
-#include <string.h> // for strerror()
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
