@@ -18,6 +18,8 @@
 #define PHP_INI_H
 
 #include "zend_ini.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "php.h" // for PHPAPI
 
 BEGIN_EXTERN_C()
 PHPAPI void config_zval_dtor(zval *zvalue);

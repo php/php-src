@@ -14,15 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php.h"
-#include "ext/standard/info.h"
-#include "zend_ini.h"
-#include "zend_ini_scanner.h"
 #include "php_ini.h"
+#include "ext/standard/info.h" // for php_info_print_*()
 #include "ext/standard/dl.h"
-#include "zend_extensions.h"
-#include "zend_highlight.h"
-#include "zend_rc_debug.h"
+#include "zend_ini_scanner.h"
+#include "zend_extensions.h" // for zend_load_extension()
 #include "SAPI.h"
 #include "php_main.h"
 #include "php_scandir.h"
