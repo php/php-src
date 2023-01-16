@@ -17,14 +17,9 @@
 #ifndef ZEND_SMART_STR_H
 #define ZEND_SMART_STR_H
 
+#include <zend.h>
+#include "zend_globals.h"
 #include "zend_smart_str_public.h"
-
-#include "zend_operators.h" // for zend_print_long_to_buf()
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-#include "zend_string.h"
-
-// forward declarations
-typedef struct _zval_struct zval;
 
 BEGIN_EXTERN_C()
 

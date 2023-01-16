@@ -17,13 +17,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_ssa.h"
-#include "zend_arena.h"
-#include "zend_optimizer_internal.h"
+#include "zend_compile.h"
 #include "zend_dfg.h"
+#include "zend_ssa.h"
 #include "zend_dump.h"
-#include "zend_inference.h" // for zend_sub_will_overflow()
-#include "zend_type_info.h" // for MAY_BE_REF
+#include "zend_inference.h"
+#include "Optimizer/zend_optimizer_internal.h"
 
 static bool dominates(const zend_basic_block *blocks, int a, int b) {
 	while (blocks[b].level > blocks[a].level) {

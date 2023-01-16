@@ -17,7 +17,7 @@
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
-#include "snprintf.h"
+#include "php.h"
 
 #include <zend_strtod.h>
 

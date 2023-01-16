@@ -28,14 +28,11 @@
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif
-
-#include "zend_signal.h"
-#include "zend_alloc.h"
-#include "zend.h" // for zend_output_debug_string(), zend_error(), ...
-
-#include <errno.h>
-#include <signal.h>
 #include <string.h>
+
+#include "zend.h"
+#include "zend_globals.h"
+#include <signal.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

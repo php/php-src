@@ -17,9 +17,6 @@
 #ifndef ZEND_SYSTEM_ID_H
 #define ZEND_SYSTEM_ID_H
 
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-#include "zend_types.h" // for ZEND_RESULT_CODE
-
 BEGIN_EXTERN_C()
 /* True global; Write-only during MINIT/startup */
 extern ZEND_API char zend_system_id[32];

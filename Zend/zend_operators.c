@@ -18,19 +18,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_operators.h"
+#include <ctype.h>
+
 #include "zend.h"
+#include "zend_operators.h"
 #include "zend_variables.h"
-#include "zend_objects.h" // for zend_objects_new()
 #include "zend_globals.h"
-#include "zend_multiply.h" // for ZEND_SIGNED_MULTIPLY_LONG()
 #include "zend_list.h"
 #include "zend_API.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
-
-#include <ctype.h>
 
 #include <locale.h>
 #ifdef HAVE_LANGINFO_H

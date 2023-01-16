@@ -16,13 +16,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_enum.h"
-#include "zend_arena.h" // ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX2
-#include "zend_API.h" // for INIT_CLASS_ENTRY_EX()
+#include "zend.h"
+#include "zend_API.h"
+#include "zend_compile.h"
 #include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
-#include "zend_extensions.h" // for zend_internal_run_time_cache_reserved_size()
-#include "zend_objects.h" // for zend_objects_new()
+#include "zend_enum.h"
+#include "zend_extensions.h"
 #include "zend_observer.h"
 
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
@@ -408,8 +408,11 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
 	zif->module = EG(current_module);
 	zif->scope = ce;
 	zif->T = ZEND_OBSERVER_ENABLED;
-	ZEND_MAP_PTR_NEW(zif->run_time_cache);
-	ZEND_MAP_PTR_SET(zif->run_time_cache, zend_arena_alloc(&CG(arena), zend_internal_run_time_cache_reserved_size()));
+    if (EG(active)) { // at run-time
+		ZEND_MAP_PTR_INIT(zif->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
+	} else {
+		ZEND_MAP_PTR_NEW(zif->run_time_cache);
+	}
 
 	if (!zend_hash_add_ptr(&ce->function_table, name, zif)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(name));

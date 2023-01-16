@@ -16,11 +16,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_call_graph.h"
-#include "zend_arena.h"
-#include "zend_bitset.h"
-#include "zend_func_info.h"
+#include "zend_compile.h"
+#include "zend_extensions.h"
+#include "Optimizer/zend_optimizer.h"
 #include "zend_optimizer_internal.h"
+#include "zend_inference.h"
+#include "zend_call_graph.h"
+#include "zend_func_info.h"
+#include "zend_inference.h"
+#include "zend_call_graph.h"
 
 static void zend_op_array_calc(zend_op_array *op_array, void *context)
 {

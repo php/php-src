@@ -18,10 +18,6 @@
 #ifndef MD5_H
 #define MD5_H
 
-#include "php.h" // for PHPAPI
-
-#include <stdint.h>
-
 PHPAPI void make_digest(char *md5str, const unsigned char *digest);
 PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len);
 

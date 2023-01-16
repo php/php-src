@@ -20,9 +20,8 @@
 
 #include "zend_smart_string_public.h"
 
-#include "zend_alloc.h" // for pefree()
-#include "zend_operators.h" // for zend_print_long_to_buf()
-#include "zend_portability.h" // for ZEND_FASTCALL
+#include <stdlib.h>
+#include <zend.h>
 
 /* wrapper */
 

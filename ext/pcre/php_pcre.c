@@ -20,7 +20,6 @@
 #include "php_pcre.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
-#include "zend_multiply.h" // for zend_safe_address_guarded()
 #include "zend_smart_str.h"
 #include "SAPI.h"
 

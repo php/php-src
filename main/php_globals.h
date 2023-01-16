@@ -17,7 +17,6 @@
 #ifndef PHP_GLOBALS_H
 #define PHP_GLOBALS_H
 
-#include "php.h" // for PHPAPI
 #include "zend_globals.h"
 
 typedef struct _php_core_globals php_core_globals;

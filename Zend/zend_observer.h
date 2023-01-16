@@ -20,15 +20,9 @@
 #ifndef ZEND_OBSERVER_H
 #define ZEND_OBSERVER_H
 
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-
-typedef struct _zend_class_entry zend_class_entry;
-typedef struct _zend_execute_data zend_execute_data;
-typedef struct _zend_fiber_context zend_fiber_context;
-typedef union  _zend_function zend_function;
-typedef struct _zend_op_array zend_op_array;
-typedef struct _zend_string zend_string;
-typedef struct _zval_struct zval;
+#include "zend.h"
+#include "zend_compile.h"
+#include "zend_fibers.h"
 
 BEGIN_EXTERN_C()
 

@@ -19,7 +19,7 @@
 #ifndef ZEND_MAP_PTR_H
 #define ZEND_MAP_PTR_H
 
-#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_portability.h"
 
 #define ZEND_MAP_PTR_KIND_PTR           0
 #define ZEND_MAP_PTR_KIND_PTR_OR_OFFSET 1
@@ -68,8 +68,6 @@
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
-
-typedef struct _zend_string zend_string;
 
 BEGIN_EXTERN_C()
 

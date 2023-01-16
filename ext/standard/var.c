@@ -28,7 +28,6 @@
 #include "php_incomplete_class.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"
-#include "zend_strtod.h" // for zend_gcvt()
 /* }}} */
 
 struct php_serialize_data {

@@ -18,12 +18,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_objects_API.h"
-#include "zend_objects.h" // for zend_objects_destroy_object()
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
 #include "zend_API.h"
+#include "zend_objects_API.h"
 #include "zend_fibers.h"
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)

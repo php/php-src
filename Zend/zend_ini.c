@@ -16,18 +16,16 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_ini.h"
 #include "zend.h"
 #include "zend_sort.h"
 #include "zend_API.h"
+#include "zend_ini.h"
 #include "zend_alloc.h"
 #include "zend_operators.h"
 #include "zend_strtod.h"
 #include "zend_modules.h"
 #include "zend_smart_str.h"
-
 #include <ctype.h>
-#include <errno.h>
 
 static HashTable *registered_zend_ini_directives;
 

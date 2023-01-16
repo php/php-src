@@ -21,16 +21,17 @@
 
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
-#include "php_globals.h" // for PG()
-#include "zend_API.h" // for ZVAL_EMPTY_STRING()
-#include "zend_arena.h"
-#include "zend_call_graph.h" // for struct _zend_func_info
-#include "zend_dump.h" // for zend_dump_op_array()
-#include "zend_inference.h" // for OP1_INFO(), ...
-#include "zend_ini.h"
-#include "zend_observer.h"
-#include "zend_virtual_cwd.h" //for IS_ABSOLUTE_PATH()
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_cfg.h"
+#include "zend_func_info.h"
+#include "zend_call_graph.h"
+#include "zend_inference.h"
+#include "zend_dump.h"
+#include "php.h"
+#include "zend_observer.h"
 
 #ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
 # define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32

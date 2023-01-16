@@ -20,8 +20,6 @@
 
 #include "phpdbg_io.h"
 
-#include <errno.h>
-
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* is easy to generalize ... but not needed for now */

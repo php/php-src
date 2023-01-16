@@ -19,13 +19,15 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend.h"
+#include "zend_execute.h"
 #include "zend_API.h"
-#include "zend_arena.h"
-#include "zend_objects.h" // for zend_objects_new()
+#include "zend_modules.h"
 #include "zend_extensions.h"
 #include "zend_constants.h"
-#include "zend_interfaces.h" // for zend_ce_stringable
+#include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_closures.h"
 #include "zend_inheritance.h"
 #include "zend_ini.h"
 #include "zend_enum.h"
@@ -2712,7 +2714,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		internal_function->prototype = NULL;
 		internal_function->attributes = NULL;
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
-			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_alloc(&CG(arena), zend_internal_run_time_cache_reserved_size()));
+			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
 			ZEND_MAP_PTR_NEW(internal_function->run_time_cache);
 		}

@@ -20,10 +20,7 @@
 #ifndef ZEND_OBJECTS_H
 #define ZEND_OBJECTS_H
 
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-
-typedef struct _zend_class_entry zend_class_entry;
-typedef struct _zend_object zend_object;
+#include "zend.h"
 
 BEGIN_EXTERN_C()
 ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce);

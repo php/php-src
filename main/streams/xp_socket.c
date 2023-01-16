@@ -25,10 +25,7 @@
 
 #ifdef AF_UNIX
 #include <sys/un.h>
-#include <string.h> // for strerror()
 #endif
-
-#include <errno.h>
 
 #ifndef MSG_DONTWAIT
 # define MSG_DONTWAIT 0

@@ -29,9 +29,6 @@
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
-#include <errno.h>
-#include <string.h> // for strerror()
-
 static ssize_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	PHPWRITE(buf, count);

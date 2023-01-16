@@ -17,8 +17,7 @@
 #ifndef ZEND_WEAKREFS_H
 #define ZEND_WEAKREFS_H
 
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-#include "zend_types.h" // for zval
+#include "zend_alloc.h"
 
 BEGIN_EXTERN_C()
 

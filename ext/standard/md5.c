@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php.h"
 #include "md5.h"
 
 PHPAPI void make_digest(char *md5str, const unsigned char *digest) /* {{{ */

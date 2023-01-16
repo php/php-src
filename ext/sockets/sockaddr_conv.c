@@ -5,7 +5,6 @@
 #ifdef PHP_WIN32
 #include "windows_common.h"
 #else
-#include <errno.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #endif

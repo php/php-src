@@ -34,8 +34,6 @@
 #include "zend_exceptions.h"
 #include "pgsql_driver_arginfo.h"
 
-#include <errno.h>
-
 static bool pgsql_handle_in_transaction(pdo_dbh_t *dbh);
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)

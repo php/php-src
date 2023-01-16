@@ -19,13 +19,11 @@
 #ifndef ZEND_CALL_STACK_H
 #define ZEND_CALL_STACK_H
 
-#include "zend_portability.h" // for zend_always_inline
-
+#include "zend.h"
+#include "zend_portability.h"
 #ifdef __APPLE__
 # include <pthread.h>
 #endif
-
-#include <stdbool.h>
 
 #ifdef ZEND_CHECK_STACK_LIMIT
 

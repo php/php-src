@@ -51,8 +51,8 @@
  * with more specialized routines when the requested size is known.
  */
 
-#include "zend_alloc.h"
 #include "zend.h"
+#include "zend_alloc.h"
 #include "zend_globals.h"
 #include "zend_operators.h"
 #include "zend_multiply.h"

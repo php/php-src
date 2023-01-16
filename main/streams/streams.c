@@ -32,9 +32,6 @@
 #include <fcntl.h>
 #include "php_streams_int.h"
 
-#include <errno.h>
-#include <string.h> // for strerror()
-
 /* {{{ resource and registration code */
 /* Global wrapper hash, copied to FG(stream_wrappers) on registration of volatile wrapper */
 static HashTable url_stream_wrappers_hash;

@@ -19,14 +19,8 @@
 #ifndef ZEND_SSA_H
 #define ZEND_SSA_H
 
+#include "zend_optimizer.h"
 #include "zend_cfg.h"
-#include "zend_compile.h" // for struct _zend_op
-#include "zend_long.h"
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-#include "zend_types.h" // for zend_result
-
-typedef struct _zend_class_entry zend_class_entry;
-typedef struct _zend_script zend_script;
 
 typedef struct _zend_ssa_range {
 	zend_long              min;

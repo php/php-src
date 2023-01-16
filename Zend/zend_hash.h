@@ -21,11 +21,8 @@
 #ifndef ZEND_HASH_H
 #define ZEND_HASH_H
 
-#include "zend_alloc.h" // for pefree()
-#include "zend_long.h"
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-#include "zend_sort.h" // for zend_sort()
-#include "zend_string.h" // for ZSTR_VAL()
+#include "zend.h"
+#include "zend_sort.h"
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
