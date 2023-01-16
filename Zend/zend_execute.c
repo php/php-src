@@ -5342,6 +5342,11 @@ ZEND_API void (ZEND_FASTCALL *zend_touch_vm_stack_data)(void *vm_stack_data) = N
 #include "zend_fibers.h" // needed by zend_vm_execute.h
 #include "zend_interfaces.h" // needed by zend_vm_execute.h
 #include "zend_objects.h" // needed by zend_vm_execute.h
+
+#ifdef HAVE_DTRACE
+#include "zend_dtrace.h" // needed by zend_vm_execute.h for DTRACE_EXCEPTION_CAUGHT()
+#endif
+
 #include "zend_vm_execute.h"
 
 ZEND_API zend_result zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler)
