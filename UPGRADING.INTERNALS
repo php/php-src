@@ -60,6 +60,11 @@ PHP 8.3 INTERNALS UPGRADE NOTES
      length at each call. The key_suffix parameter was dropped as it was a
      constant value and depended on the key_prefix parameter to not be NULL.
 
+ c. ext/mysqlnd
+   - The function mysqlnd_shutdown and its corresponding internal methods
+   mysqlnd_command::shutdown & mysqlnd_conn_data::shutdown have been removed.
+   These functions are deprecated by MySQL in favour of SHUTDOWN SQL statement.
+
 ========================
 4. OpCode changes
 ========================
