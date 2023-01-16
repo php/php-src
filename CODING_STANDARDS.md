@@ -263,6 +263,25 @@ rewritten to comply with these rules.
    codebase but should not be refactored, unless larger refactoring around that
    code is taking place.
 
+## C Headers
+
+1. Include only the headers (`*.h`) that are really needed.  Consider
+   using [iwyu](https://include-what-you-use.org/).
+
+1. Use struct/union forward declarations to eliminate `#include`
+   directives if possible.
+
+1. If some headers are needed only in some build configurations,
+   enclose them in the same `#if` that also guards the use of its
+   definitions.
+
+1. Each source file (`*.c`) should include its own header file first
+   to ensure that the header's `#includes` are complete.
+
+1. Header inclusions are ordered this way: its own header first, then
+   PHP headers, then third-party library headers, then system headers
+   (e.g. libc, POSIX).
+
 ## Testing
 
 1. Extensions should be well tested using `*.phpt` tests. Read more at
