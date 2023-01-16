@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #67244 (Wrong owner:group for listening unix socket).
     (Jakub Zelenka)
 
+- Hash:
+  . Handle exceptions from __toString in XXH3's initialization (nielsdos)
+
 - LDAP:
   . Fixed bug GH-10112 (LDAP\Connection::__construct() refers to ldap_create()).
     (cmb)
