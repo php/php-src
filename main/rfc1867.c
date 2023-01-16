@@ -21,14 +21,13 @@
  *
  */
 
-#include <stdio.h>
-#include "php.h"
-#include "php_open_temporary_file.h"
-#include "zend_globals.h"
-#include "php_globals.h"
-#include "php_variables.h"
 #include "rfc1867.h"
+#include "php_open_temporary_file.h" // for php_open_temporary_fd_ex()
+#include "php_globals.h" // for PG()
+#include "php_variables.h" // for php_register_variable_ex()
 #include "zend_smart_string.h"
+
+#include <stdio.h> // for snprintf()
 
 #ifndef DEBUG_FILE_UPLOAD
 # define DEBUG_FILE_UPLOAD 0

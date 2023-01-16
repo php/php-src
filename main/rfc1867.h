@@ -17,7 +17,8 @@
 #ifndef RFC1867_H
 #define RFC1867_H
 
-#include "SAPI.h"
+#include "php.h" // for PHPAPI
+#include "SAPI.h" // for SAPI_API
 
 #define MULTIPART_CONTENT_TYPE "multipart/form-data"
 #define MULTIPART_EVENT_START		0
