@@ -22,8 +22,12 @@
 #ifndef ZEND_SHARED_ALLOC_H
 #define ZEND_SHARED_ALLOC_H
 
-#include "zend.h"
-#include "ZendAccelerator.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_long.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h> // for size_t
 
 #if defined(__APPLE__) && defined(__MACH__) /* darwin */
 # ifdef HAVE_SHM_MMAP_POSIX
