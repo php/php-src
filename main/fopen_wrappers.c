@@ -16,9 +16,10 @@
  */
 
 /* {{{ includes */
-#include "php.h"
-#include "php_globals.h"
-#include "SAPI.h"
+#include "fopen_wrappers.h"
+#include "php_ini.h" // for PHP_INI_STAGE_*
+#include "php_globals.h" // for PG()
+#include "SAPI.h" // for SG()
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,11 +34,6 @@
 #else
 #include <sys/param.h>
 #endif
-
-#include "ext/standard/head.h"
-#include "ext/standard/php_standard.h"
-#include "zend_compile.h"
-#include "php_network.h"
 
 #if HAVE_PWD_H
 #include <pwd.h>
