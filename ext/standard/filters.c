@@ -1301,20 +1301,13 @@ static int php_convert_filter_ctor(php_convert_filter *inst,
 	inst->stub_len = 0;
 
 	if ((inst->cd = php_conv_open(conv_mode, conv_opts, persistent)) == NULL) {
-		goto out_failure;
+		if (inst->filtername != NULL) {
+			pefree(inst->filtername, persistent);
+		}
+		return FAILURE;
 	}
 
 	return SUCCESS;
-
-out_failure:
-	if (inst->cd != NULL) {
-		php_conv_dtor(inst->cd);
-		pefree(inst->cd, persistent);
-	}
-	if (inst->filtername != NULL) {
-		pefree(inst->filtername, persistent);
-	}
-	return FAILURE;
 }
 
 static void php_convert_filter_dtor(php_convert_filter *inst)
