@@ -19,24 +19,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <time.h>
-
-#include "php.h"
-#include "ZendAccelerator.h"
-#include "zend_API.h"
+#include "php.h" // for PHPAPI
+#include "zend_accelerator_module.h"
+#include "zend_accelerator_debug.h" // for zend_accel_error()
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_blacklist.h"
+#include "ZendAccelerator.h" // for ZCG()
 #include "php_ini.h"
-#include "SAPI.h"
-#include "zend_virtual_cwd.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_filestat.h"
-#include "ext/date/php_date.h"
-#include "opcache_arginfo.h"
+#include "SAPI.h" // for SG()
+#include "ext/standard/info.h" // for php_info_print_*()
+#include "ext/date/php_date.h" // for php_format_date()
+#include "opcache_arginfo.h" // for ext_functions
 
 #if HAVE_JIT
 #include "jit/zend_jit.h"
 #endif
+
+#include <time.h>
 
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
