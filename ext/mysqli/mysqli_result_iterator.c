@@ -120,7 +120,7 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 
 	if (mysqli_result_is_unbuffered(result)) {
 		if (result->unbuf->eof_reached) {
-			php_error_docref(NULL, E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
+			zend_error(E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
 			return;
 		}
 	} else {
