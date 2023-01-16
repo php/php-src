@@ -1888,7 +1888,12 @@ ldap.max_links = -1
 ;opcache.file_cache_fallback=1
 
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
-; This should improve performance, but requires appropriate OS configuration.
+; Under certain circumstances (if only a single global PHP process is
+; started from which all others fork), this can increase performance
+; by a tiny amount because TLB misses are reduced.  On the other hand, this
+; delays PHP startup, increases memory usage and degrades performance
+; under memory pressure - use with care.
+; Requires appropriate OS configuration.
 ;opcache.huge_code_pages=0
 
 ; Validate cached file permissions.
