@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php.h"
 #include "php_open_temporary_file.h"
+#include "php_globals.h" // for PG()
 
 #include <errno.h>
 #include <sys/types.h>

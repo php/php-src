@@ -17,6 +17,9 @@
 #ifndef PHP_OPEN_TEMPORARY_FILE_H
 #define PHP_OPEN_TEMPORARY_FILE_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "php.h" // for PHPAPI
+
 #define PHP_TMP_FILE_DEFAULT 0
 #define PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ON_FALLBACK (1<<0)
 #define PHP_TMP_FILE_SILENT (1<<1)
