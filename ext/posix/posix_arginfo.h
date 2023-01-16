@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b0c74c2ad41d4ae6a624f73109815fc9fe47fd1f */
+ * Stub hash: 5359511a464e0d35c7d5c4ea3320c70210b2b9a7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -164,15 +164,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_sysconf, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, conf_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_POSIX_PATHCONF)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_pathconf, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_POSIX_PATHCONF)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_fpathconf, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, file_descriptor)
 	ZEND_ARG_TYPE_INFO(0, name, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 
 ZEND_FUNCTION(posix_kill);
@@ -238,8 +242,12 @@ ZEND_FUNCTION(posix_strerror);
 ZEND_FUNCTION(posix_initgroups);
 #endif
 ZEND_FUNCTION(posix_sysconf);
+#if defined(HAVE_POSIX_PATHCONF)
 ZEND_FUNCTION(posix_pathconf);
+#endif
+#if defined(HAVE_POSIX_PATHCONF)
 ZEND_FUNCTION(posix_fpathconf);
+#endif
 
 
 static const zend_function_entry ext_functions[] = {
@@ -307,8 +315,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(posix_initgroups, arginfo_posix_initgroups)
 #endif
 	ZEND_FE(posix_sysconf, arginfo_posix_sysconf)
+#if defined(HAVE_POSIX_PATHCONF)
 	ZEND_FE(posix_pathconf, arginfo_posix_pathconf)
+#endif
+#if defined(HAVE_POSIX_PATHCONF)
 	ZEND_FE(posix_fpathconf, arginfo_posix_fpathconf)
+#endif
 	ZEND_FE_END
 };
 

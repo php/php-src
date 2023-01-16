@@ -1197,6 +1197,7 @@ PHP_FUNCTION(posix_sysconf)
 	RETURN_LONG(sysconf(conf_id));
 }
 
+#ifdef HAVE_POSIX_PATHCONF
 PHP_FUNCTION(posix_pathconf)
 {
 	zend_long name, ret;
@@ -1257,3 +1258,4 @@ PHP_FUNCTION(posix_fpathconf)
 
 	RETURN_LONG(ret);
 }
+#endif

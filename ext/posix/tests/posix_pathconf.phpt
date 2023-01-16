@@ -2,6 +2,10 @@
 Test posix_pathconf
 --EXTENSIONS--
 posix
+--SKIPIF--
+<?php
+if (!function_exists("posix_pathconf")) die("skip only platforms with posix_pathconf");
+?>
 --FILE--
 <?php
 try {
