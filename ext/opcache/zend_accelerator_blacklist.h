@@ -22,6 +22,10 @@
 #ifndef ZEND_ACCELERATOR_BLACKLIST_H
 #define ZEND_ACCELERATOR_BLACKLIST_H
 
+#include <stdbool.h>
+#include <stddef.h> // for size_t
+
+typedef struct _zval_struct zval;
 typedef struct _zend_regexp_list zend_regexp_list;
 
 typedef struct _zend_blacklist_entry {

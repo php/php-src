@@ -19,10 +19,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "main/php.h"
-#include "main/fopen_wrappers.h"
-#include "ZendAccelerator.h"
 #include "zend_accelerator_blacklist.h"
+#include "zend_accelerator_debug.h" // for zend_accel_error()
+#include "main/fopen_wrappers.h" // for expand_filepath()
+#include "ZendAccelerator.h"
 
 #ifdef ZEND_WIN32
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB|REG_ICASE)
