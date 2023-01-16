@@ -16178,11 +16178,17 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 					}
 				}
 				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_DOUBLE)) {
+					if (opline->op1_type == IS_CONST) {
+						ZEND_REGSET_INCL(regset, ZREG_R0);
+					}
 					if (ssa_op->result_def != current_var) {
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
 				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_LONG)) {
+					if (opline->op2_type == IS_CONST) {
+						ZEND_REGSET_INCL(regset, ZREG_R0);
+					}
 					if (zend_is_commutative(opline->opcode)) {
 						if (ssa_op->result_def != current_var) {
 							ZEND_REGSET_INCL(regset, ZREG_XMM0);
