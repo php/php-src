@@ -16,28 +16,27 @@
    +----------------------------------------------------------------------+
 */
 
+#include "SAPI.h"
+#include "php_content_types.h"
+#include "php_globals.h" // for PG()
+#include "php_ini.h"
+#include "php_variables.h" // for PARSE_STRING
+#include "rfc1867.h" // for destroy_uploaded_files_hash()
+
+#ifdef ZTS
+# include "TSRM.h"
+#endif
+
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#elif defined(PHP_WIN32)
+# include "win32/time.h"
+# include <locale> // for _ENABLE_PER_THREAD_LOCALE
+#endif
+
 #include <ctype.h>
 #include <sys/stat.h>
 
-#include "php.h"
-#include "SAPI.h"
-#include "php_variables.h"
-#include "php_ini.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/pageinfo.h"
-#include "ext/pcre/php_pcre.h"
-#ifdef ZTS
-#include "TSRM.h"
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#elif defined(PHP_WIN32)
-#include "win32/time.h"
-#endif
-
-#include "rfc1867.h"
-
-#include "php_content_types.h"
 
 #ifdef ZTS
 SAPI_API int sapi_globals_id;

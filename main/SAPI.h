@@ -17,12 +17,15 @@
 #ifndef SAPI_H
 #define SAPI_H
 
-#include "php.h"
-#include "zend.h"
-#include "zend_API.h"
+#include "zend_API.h" // for zend_fcall_info_cache
 #include "zend_llist.h"
-#include "zend_operators.h"
-#include <sys/stat.h>
+#include "zend_stream.h" // for zend_stat_t
+
+#ifdef PHP_WIN32
+#include "php.h" // for uid_t, gid_t (PHP's fallback definition)
+#else
+#include <sys/types.h> // for uid_t, gid_t
+#endif
 
 #define SAPI_OPTION_NO_CHDIR 1
 #define SAPI_POST_BLOCK_SIZE 0x4000
