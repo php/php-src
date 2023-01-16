@@ -22,6 +22,8 @@
 #ifndef ZEND_ACCELERATOR_DEBUG_H
 #define ZEND_ACCELERATOR_DEBUG_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
 #define ACCEL_LOG_FATAL					0
 #define ACCEL_LOG_ERROR					1
 #define ACCEL_LOG_WARNING				2

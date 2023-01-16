@@ -19,14 +19,18 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_accelerator_debug.h"
+#include "ZendAccelerator.h" // for ZCG()
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
 #ifdef ZEND_WIN32
 # include <process.h>
+#else
+# include <unistd.h> // for getpid()
 #endif
-#include "ZendAccelerator.h"
 
 static void zend_accel_error_va_args(int type, const char *format, va_list args)
 {
