@@ -19,13 +19,6 @@
 #ifndef ZEND_CFG_H
 #define ZEND_CFG_H
 
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-
-#include <stdint.h>
-
-typedef struct _zend_arena zend_arena;
-typedef struct _zend_op_array zend_op_array;
-
 /* zend_basic_block.flags */
 #define ZEND_BB_START            (1<<0)  /* first block            */
 #define ZEND_BB_FOLLOW           (1<<1)  /* follows the next block */

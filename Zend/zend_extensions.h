@@ -20,15 +20,8 @@
 #ifndef ZEND_EXTENSIONS_H
 #define ZEND_EXTENSIONS_H
 
-#include "zend_build.h" // for ZEND_TOSTR()
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-#include "zend_types.h" // for zend_result
-
-#include <stddef.h> // for size_t
-
-typedef struct _zend_execute_data zend_execute_data;
-typedef struct _zend_op_array zend_op_array;
-typedef struct _zend_llist zend_llist;
+#include "zend_compile.h"
+#include "zend_build.h"
 
 /*
 The constants below are derived from ext/opcache/ZendAccelerator.h

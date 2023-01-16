@@ -16,9 +16,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend.h"
+#include "zend_compile.h"
 #include "zend_float.h"
-#include "zend_globals.h" // struct _zend_executor_globals
-#include "zend_globals_macros.h" // for EG()
 
 ZEND_API void zend_init_fpu(void) /* {{{ */
 {

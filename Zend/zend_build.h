@@ -19,12 +19,6 @@
 #ifndef ZEND_BUILD_H
 #define ZEND_BUILD_H
 
-#ifdef PHP_WIN32
-#include "config.w32.h"
-#else
-#include "php_config.h"
-#endif
-
 #define ZEND_TOSTR_(x) #x
 #define ZEND_TOSTR(x) ZEND_TOSTR_(x)
 

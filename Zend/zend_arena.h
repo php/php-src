@@ -19,10 +19,7 @@
 #ifndef _ZEND_ARENA_H_
 #define _ZEND_ARENA_H_
 
-#include "zend_multiply.h" // for zend_safe_address()
-#include "zend.h" // for zend_error()
-
-#include <stddef.h> // for size_t
+#include "zend.h"
 
 #ifndef ZEND_TRACK_ARENA_ALLOC
 

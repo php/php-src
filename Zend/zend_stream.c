@@ -19,11 +19,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend.h"
+#include "zend_compile.h"
 #include "zend_stream.h"
-#include "zend_globals.h" // struct _zend_compiler_globals
-#include "zend_globals_macros.h" // for CG()
-#include "zend_string.h"
-#include "zend.h" // for zend_stream_open_function
 
 ZEND_DLIMPORT int isatty(int fd);
 

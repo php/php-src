@@ -17,11 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_portability.h"
+
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H
-
-#include "zend_portability.h"
-#include "zend.h" // for zend_error_noreturn()
 
 #if PHP_HAVE_BUILTIN_SMULL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 

@@ -24,8 +24,6 @@
 
 #include "zend_portability.h"
 #include "zend_long.h"
-#include "zend_type_info.h" // for MAY_BE_*
-
 #include <stdbool.h>
 
 #ifdef __SSE2__
