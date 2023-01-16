@@ -17,15 +17,16 @@
 #ifndef PHP_SYSLOG_H
 #define PHP_SYSLOG_H
 
-#include "php.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "php.h" // for PHPAPI
 
 #ifdef PHP_WIN32
-#include "win32/syslog.h"
+# include "win32/syslog.h"
 #else
-#include <php_config.h>
-#ifdef HAVE_SYSLOG_H
-#include <syslog.h>
-#endif
+# include <php_config.h>
+# ifdef HAVE_SYSLOG_H
+#  include <syslog.h>
+# endif
 #endif
 
 /* Syslog filters */

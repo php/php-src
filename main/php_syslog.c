@@ -14,14 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "php.h"
 #include "php_syslog.h"
-
-#include "zend.h"
+#include "php_globals.h" // for PG()
 #include "zend_smart_string.h"
+
+#include <stdarg.h>
 
 /*
  * The SCO OpenServer 5 Development System (not the UDK)
