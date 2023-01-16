@@ -19,9 +19,7 @@
 #ifndef ZEND_STRING_H
 #define ZEND_STRING_H
 
-#include "zend_alloc.h" // for pemalloc()
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-#include "zend_types.h" // for zend_string
+#include "zend.h"
 
 BEGIN_EXTERN_C()
 
