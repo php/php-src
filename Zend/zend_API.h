@@ -22,13 +22,13 @@
 #ifndef ZEND_API_H
 #define ZEND_API_H
 
-#include "zend_compile.h" // for zif_handler
-#include "zend_execute.h" // for get_active_function_or_method_name()
-#include "zend_globals.h" // for struct _zend_compiler_globals used by ZEND_MAP_PTR_GET_IMM()
-#include "zend_globals_macros.h" // for CG() used by ZEND_MAP_PTR_GET_IMM()
-#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_modules.h"
+#include "zend_list.h"
+#include "zend_operators.h"
+#include "zend_variables.h"
+#include "zend_execute.h"
+#include "zend_type_info.h"
 
-typedef struct _zend_module_entry zend_module_entry;
 
 BEGIN_EXTERN_C()
 

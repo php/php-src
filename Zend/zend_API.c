@@ -19,13 +19,15 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend.h"
+#include "zend_execute.h"
 #include "zend_API.h"
-#include "zend_arena.h"
-#include "zend_objects.h" // for zend_objects_new()
+#include "zend_modules.h"
 #include "zend_extensions.h"
 #include "zend_constants.h"
-#include "zend_interfaces.h" // for zend_ce_stringable
+#include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_closures.h"
 #include "zend_inheritance.h"
 #include "zend_ini.h"
 #include "zend_enum.h"

@@ -18,13 +18,13 @@
 */
 
 #include "zend_ast.h"
-#include "zend_API.h" // for array_set_zval_key
-#include "zend_arena.h"
+#include "zend_API.h"
+#include "zend_operators.h"
+#include "zend_language_parser.h"
+#include "zend_smart_str.h"
+#include "zend_exceptions.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
-#include "zend_language_parser.h" // for T_*
-#include "zend_smart_str.h"
-#include "zend_exceptions.h" // for zend_throw_error
 
 ZEND_API zend_ast_process_t zend_ast_process = NULL;
 

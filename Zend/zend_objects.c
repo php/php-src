@@ -18,14 +18,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_objects.h"
-#include "zend_objects_API.h"
-#include "zend_exceptions.h" // for zend_rethrow_exception()
-#include "zend_execute.h" // for ZEND_REF_HAS_TYPE_SOURCES
-#include "zend_types.h" // for GC_SET_REFCOUNT()
-#include "zend_weakrefs.h" // for zend_weakrefs_notify()
-#include "zend.h" // for struct _zend_class_entry
-#include "zend_API.h" // for zend_call_known_instance_method_with_0_params()
+#include "zend.h"
+#include "zend_globals.h"
+#include "zend_variables.h"
+#include "zend_API.h"
+#include "zend_interfaces.h"
+#include "zend_exceptions.h"
+#include "zend_weakrefs.h"
 
 static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {

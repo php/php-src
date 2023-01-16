@@ -20,12 +20,8 @@
 #ifndef ZEND_LIST_H
 #define ZEND_LIST_H
 
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-
-typedef struct _zend_array HashTable;
-typedef struct _zend_resource zend_resource;
-typedef struct _zend_string zend_string;
-typedef struct _zval_struct zval;
+#include "zend_hash.h"
+#include "zend_globals.h"
 
 BEGIN_EXTERN_C()
 

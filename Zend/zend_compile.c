@@ -18,23 +18,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_compile.h"
-#include "zend_API.h" // for zend_get_object_type()
-#include "zend_arena.h"
+#include <zend_language_parser.h>
+#include "zend.h"
 #include "zend_attributes.h"
+#include "zend_compile.h"
 #include "zend_constants.h"
-#include "zend_enum.h"
-#include "zend_exceptions.h" // for zend_throw_exception_ex()
-#include "zend_globals.h" // struct _zend_compiler_globals
-#include "zend_globals_macros.h" // for CG()
-#include "zend_inheritance.h" // for zend_do_link_class()
-#include "zend_language_parser.h"
+#include "zend_llist.h"
+#include "zend_API.h"
+#include "zend_exceptions.h"
+#include "zend_interfaces.h"
+#include "zend_virtual_cwd.h"
+#include "zend_multibyte.h"
 #include "zend_language_scanner.h"
-#include "zend_list.h" // for zend_init_rsrc_list()
-#include "zend_observer.h" // for zend_observer_function_declared_notify()
-#include "zend_type_info.h" // for MAY_BE_*
-#include "zend_virtual_cwd.h" // for IS_SLASH_P, DEFAULT_SLASH
-#include "zend_vm.h" // for ZEND_VM_SET_OPCODE_HANDLER()
+#include "zend_inheritance.h"
+#include "zend_vm.h"
+#include "zend_enum.h"
+#include "zend_observer.h"
+#include "zend_call_stack.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \

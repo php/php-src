@@ -19,12 +19,8 @@
 #ifndef ZEND_INTERFACES_H
 #define ZEND_INTERFACES_H
 
-#include "zend_iterators.h" // for zend_object_iterator
-#include "zend_portability.h" // for BEGIN_EXTERN_C
-
-typedef struct _zend_class_entry zend_class_entry;
-typedef struct _zend_serialize_data zend_serialize_data;
-typedef struct _zend_unserialize_data zend_unserialize_data;
+#include "zend.h"
+#include "zend_API.h"
 
 BEGIN_EXTERN_C()
 
