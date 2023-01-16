@@ -17,6 +17,9 @@
 #ifndef PHP_TICKS_H
 #define PHP_TICKS_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "php.h" // for PHPAPI
+
 int php_startup_ticks(void);
 void php_deactivate_ticks(void);
 void php_shutdown_ticks(void);

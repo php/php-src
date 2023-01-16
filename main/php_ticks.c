@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "php_ticks.h"
+#include "php_globals.h" // for PG()
 
 struct st_tick_function
 {
