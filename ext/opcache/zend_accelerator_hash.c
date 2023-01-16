@@ -21,8 +21,10 @@
 
 #include "ZendAccelerator.h"
 #include "zend_accelerator_hash.h"
-#include "zend_hash.h"
+#include "zend_accelerator_debug.h"
 #include "zend_shared_alloc.h"
+#include "ZendAccelerator.h"
+#include "Zend/zend_string.h"
 
 /* Generated on an Octa-ALPHA 300MHz CPU & 2.5GB RAM monster */
 static const uint32_t prime_numbers[] =
