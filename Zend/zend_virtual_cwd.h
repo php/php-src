@@ -19,21 +19,27 @@
 #ifndef VIRTUAL_CWD_H
 #define VIRTUAL_CWD_H
 
+#include "zend_long.h"
+#include "zend_stream.h" // for zend_stat_t
 #include "TSRM.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <ctype.h>
+#ifdef ZTS
+#include "zend.h" // for ZEND_TSRMG_FAST
+#endif
+
+#include <stddef.h> // for size_t
+#include <stdio.h> // for FILE
+#include <stdint.h>
+#include <sys/types.h> // for mode_t
 
 #ifdef HAVE_UTIME_H
 #include <utime.h>
 #endif
 
-#include <stdarg.h>
 #include <limits.h>
 
 #if HAVE_SYS_PARAM_H
-# include <sys/param.h>
+# include <sys/param.h> // for MAXPATHLEN
 #endif
 
 #ifndef MAXPATHLEN
@@ -54,19 +60,19 @@
 #endif
 
 #ifndef ZEND_WIN32
-#include <unistd.h>
-#else
-#include <direct.h>
-#endif
-
-#if defined(__osf__) || defined(_AIX)
-#include <errno.h>
+# include <fcntl.h> // for open()
+# include <stdio.h> // for fopen()
+# include <sys/stat.h> // for mkdir()
+# include <unistd.h> // for access(), getcwd(), ...
 #endif
 
 #ifdef ZEND_WIN32
 #include "win32/readdir.h"
-#include <sys/utime.h>
 #include "win32/ioutil.h"
+
+#include <ctype.h>
+#include <sys/utime.h>
+
 /* mode_t isn't defined on Windows */
 typedef unsigned short mode_t;
 
@@ -86,7 +92,7 @@ typedef unsigned short mode_t;
 
 #else
 #ifdef HAVE_DIRENT_H
-#include <dirent.h>
+#include <dirent.h> // for DIR
 #endif
 
 #define DEFAULT_SLASH '/'
