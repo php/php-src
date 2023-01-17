@@ -17,17 +17,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
 #include "zend_gdb.h"
+#include "zend_portability.h" // for zend_never_inline
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <stdint.h>
+#include <stdlib.h> // for malloc(), free()
+
+#ifdef __linux__
+# include <fcntl.h> // for open()
+# include <stdio.h> // for sprintf()
+# include <string.h> // for strstr()
+# include <unistd.h> // for read(), readlink()
+#endif
 
 #if defined(__FreeBSD__)
 # include <sys/user.h>
 # include <libutil.h>
+# include <unistd.h> // for getpid()
 #endif
 
 enum {

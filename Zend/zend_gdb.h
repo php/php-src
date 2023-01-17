@@ -20,6 +20,15 @@
 #ifndef ZEND_GDB
 #define ZEND_GDB
 
+#ifdef PHP_WIN32
+# include "zend_config.w32.h"
+#else
+# include "php_config.h" // for ZEND_API
+#endif
+
+#include <stdbool.h>
+#include <stddef.h> // for size_t
+
 ZEND_API bool zend_gdb_register_code(const void *object, size_t size);
 ZEND_API void zend_gdb_unregister_all(void);
 ZEND_API bool zend_gdb_present(void);
