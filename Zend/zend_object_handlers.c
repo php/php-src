@@ -1541,7 +1541,7 @@ undeclared_property:
 	}
 
 	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-		if (UNEXPECTED(zend_update_class_constants(ce)) != SUCCESS) {
+		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 			return NULL;
 		}
 	}
