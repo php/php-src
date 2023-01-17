@@ -17,6 +17,10 @@
 */
 
 #include "zend_cpuinfo.h"
+#include "zend_portability.h" // for ZEND_ASSERT()
+
+#include <stdbool.h>
+#include <stdint.h>
 
 typedef struct _zend_cpu_info {
 	uint32_t eax;

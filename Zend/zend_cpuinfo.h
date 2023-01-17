@@ -19,7 +19,11 @@
 #ifndef ZEND_CPU_INFO_H
 #define ZEND_CPU_INFO_H
 
-#include "zend.h"
+#ifdef PHP_WIN32
+# include "zend_config.w32.h"
+#else
+# include "php_config.h" // for ZEND_API
+#endif
 
 #define ZEND_CPU_EBX_MASK     (1<<30)
 #define ZEND_CPU_EDX_MASK     (1U<<31)
