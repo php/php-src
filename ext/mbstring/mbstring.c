@@ -4659,19 +4659,17 @@ check_operand:
 		 * 0xED followed by a byte >= 0xA0 indicates a reserved codepoint
 		 * We can check for both problems at once by generating a vector where each byte < 0xA0
 		 * is mapped to 0xE0, and each byte >= 0xA0 is mapped to 0xED
-		 * Shift the original block right by one byte, and XOR the shifted block with the bitmask
-		 * Any matches will give a 0x00 byte; do a compare with a zero vector to pick out the
-		 * bad positions, and OR them into `bad` */
+		 * Shift the original block right by one byte, and compare the shifted block with the bitmask */
 		__m128i operand2 = _mm_or_si128(_mm_slli_si128(operand, 1), _mm_srli_si128(last_block, 15));
 		__m128i mask1 = _mm_or_si128(find_e0, _mm_and_si128(_mm_set1_epi8(0xD), _mm_cmpgt_epi8(operand, over_9f)));
-		bad = _mm_or_si128(bad, _mm_cmpeq_epi8(_mm_setzero_si128(), _mm_xor_si128(operand2, mask1)));
+		bad = _mm_or_si128(bad, _mm_cmpeq_epi8(operand2, mask1));
 
 		/* Check for overlong 4-byte code units AND invalid codepoints > U+10FFFF
 		 * Similar to the previous check; 0xF0 followed by < 0x90 indicates an overlong 4-byte
 		 * code unit, and 0xF4 followed by >= 0x90 indicates a codepoint over U+10FFFF
-		 * Build the bitmask, XOR it with the shifted block, check for 0x00 bytes in the result */
+		 * Build the bitmask and compare it with the shifted block */
 		__m128i mask2 = _mm_or_si128(find_f0, _mm_and_si128(_mm_set1_epi8(0x4), _mm_cmpgt_epi8(operand, over_8f)));
-		bad = _mm_or_si128(bad, _mm_cmpeq_epi8(_mm_setzero_si128(), _mm_xor_si128(operand2, mask2)));
+		bad = _mm_or_si128(bad, _mm_cmpeq_epi8(operand2, mask2));
 
 		/* Check for overlong 2-byte code units
 		 * Any 0xC0 or 0xC1 byte can only be the first byte of an overlong 2-byte code unit
