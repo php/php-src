@@ -194,7 +194,6 @@ PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 #define mysqlnd_ping(conn)					((conn)->data)->m->ping((conn)->data)
 #define mysqlnd_kill(conn, pid)				((conn)->data)->m->kill_connection((conn)->data, (pid))
 #define mysqlnd_refresh(conn, options)		((conn)->data)->m->refresh_server((conn)->data, (options))
-#define mysqlnd_shutdown(conn, level)		((conn)->data)->m->shutdown_server((conn)->data, (level))
 #define mysqlnd_set_character_set(conn, cs)	((conn)->data)->m->set_charset((conn)->data, (cs))
 #define mysqlnd_stat(conn, msg)				((conn)->data)->m->get_server_statistics(((conn)->data), (msg))
 #define mysqlnd_options(conn, opt, value)	((conn)->data)->m->set_client_option((conn)->data, (opt), (value))
