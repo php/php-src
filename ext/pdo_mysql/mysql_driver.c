@@ -81,7 +81,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 					dbh->is_persistent);
 			} else {
 				einfo->errmsg = pestrdup(
-					"Cannot execute queries while other unbuffered queries are active. "
+					"Cannot execute queries while other unbuffered queries are active.  "
 					"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
 					"is only ever going to run against mysql, you may enable query "
 					"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
@@ -269,6 +269,7 @@ static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 			pdo_mysql_error(dbh);
 			PDO_DBG_RETURN(H->einfo.errcode ? -1 : 0);
 		} else {
+
 			/* MULTI_QUERY support - eat up all unfetched result sets */
 			MYSQL_RES* result;
 			while (mysql_more_results(H->server)) {

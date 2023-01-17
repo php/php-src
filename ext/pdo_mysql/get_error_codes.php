@@ -6,7 +6,7 @@
     while (!feof(STDIN)) {
         $line = fgets(STDIN);
 
-        if (preg_match('^\{[[:space:]]+(ER_.*)[[:space:]]+,[[:space:]]*"(.*)",[[:space:]]*"(.*)"', $line, $matches)) {
+        if (ereg('^\{[[:space:]]+(ER_.*)[[:space:]]+,[[:space:]]*"(.*)",[[:space:]]*"(.*)"', $line, $matches)) {
             $codes[$matches[1]] = $matches[2];
             $maxlen = max($maxlen, strlen($matches[1]));
         }
@@ -23,4 +23,6 @@
         printf("  case %-{$maxlen}s: return \"%s\";\n", $code, $state);
         echo "#endif\n";
     }
+
+
 ?>

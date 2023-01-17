@@ -88,7 +88,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pdo_mysql.default_socket", PDO_MYSQL_UNIX_ADDR, PHP_INI_SYSTEM, OnUpdateStringUnempty, default_socket, zend_pdo_mysql_globals, pdo_mysql_globals)
 #endif
 #if PDO_DBG_ENABLED
-	STD_PHP_INI_ENTRY("pdo_mysql.debug", NULL, PHP_INI_SYSTEM, OnUpdateString, debug, zend_pdo_mysql_globals, pdo_mysql_globals)
+	STD_PHP_INI_ENTRY("pdo_mysql.debug",	NULL, PHP_INI_SYSTEM, OnUpdateString, debug, zend_pdo_mysql_globals, pdo_mysql_globals)
 #endif
 PHP_INI_END()
 /* }}} */
@@ -131,6 +131,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 #ifdef PDO_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
+
 	return php_pdo_register_driver(&pdo_mysql_driver);
 }
 /* }}} */
