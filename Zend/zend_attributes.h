@@ -20,6 +20,13 @@
 #ifndef ZEND_ATTRIBUTES_H
 #define ZEND_ATTRIBUTES_H
 
+#include "zend.h" // for struct _zend_class_entry
+#include "zend_compile.h" // for ZEND_USER_CLASS
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+#include "zend_types.h" // for zval
+
+#include <stdint.h>
+
 #define ZEND_ATTRIBUTE_TARGET_CLASS			(1<<0)
 #define ZEND_ATTRIBUTE_TARGET_FUNCTION		(1<<1)
 #define ZEND_ATTRIBUTE_TARGET_METHOD		(1<<2)
@@ -36,6 +43,9 @@
 
 #define ZEND_ATTRIBUTE_SIZE(argc) \
 	(sizeof(zend_attribute) + sizeof(zend_attribute_arg) * (argc) - sizeof(zend_attribute_arg))
+
+typedef struct _zend_class_constant zend_class_constant;
+typedef struct _zend_property_info zend_property_info;
 
 BEGIN_EXTERN_C()
 
