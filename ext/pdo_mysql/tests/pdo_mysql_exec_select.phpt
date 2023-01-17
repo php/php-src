@@ -61,6 +61,6 @@ $db = MySQLPDOTest::factory();
 @$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
-Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active. Consider using PDOStatement::fetchAll(). Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
-[006] Expecting '1'/integer got ''/boolean when running 'INSERT INTO test(id, col1) VALUES (2, 'b')', [HY000] HY000 2014 Cannot execute queries while other unbuffered queries are active. Consider using PDOStatement::fetchAll(). Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.
+Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active. Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
+[006] Expecting '1'/integer got ''/boolean when running 'INSERT INTO test(id, col1) VALUES (2, 'b')', [HY000] HY000 2014 Cannot execute queries while other unbuffered queries are active. Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.
 done!
