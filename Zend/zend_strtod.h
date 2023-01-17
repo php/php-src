@@ -20,7 +20,10 @@
  * can be found in zend_strtod.c */
 #ifndef ZEND_STRTOD_H
 #define ZEND_STRTOD_H
-#include <zend.h>
+
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
+#include <stdbool.h>
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_freedtoa(char *s);

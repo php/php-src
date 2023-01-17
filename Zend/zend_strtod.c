@@ -186,9 +186,10 @@
  *	used for input more than STRTOD_DIGLIM digits long (default 40).
  */
 
-#include <zend_operators.h>
-#include <zend_strtod.h>
+#include "zend_strtod.h"
 #include "zend_strtod_int.h"
+#include "zend_types.h" // for ZEND_TLS
+#include "zend.h" // for zend_error_noreturn()
 
 #ifndef Long
 #define Long int32_t
@@ -203,11 +204,11 @@ static void Bug(const char *message) {
 }
 #endif
 
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef USE_LOCALE
-#include "locale.h"
+#include <locale.h>
 #endif
 
 #ifdef Honor_FLT_ROUNDS
@@ -253,7 +254,9 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #define NO_STRTOD_BIGCOMP
 #endif
 
+#ifndef NO_ERRNO
 #include "errno.h"
+#endif
 
 #ifdef Bad_float_h
 
