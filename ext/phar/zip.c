@@ -428,7 +428,6 @@ foundit:
 				PHAR_ZIP_FAIL("signatures larger than 64 KiB are not supported");
 			}
 
-			php_stream_tell(fp);
 			sigfile = php_stream_fopen_tmpfile();
 			if (!sigfile) {
 				PHAR_ZIP_FAIL("couldn't open temporary file");
