@@ -10,6 +10,7 @@ namespace {
         /**
          * @var int
          * @cvalue __BIGGEST_ALIGNMENT__
+         * @link ffi-ffi.constants.biggest-alignment
          */
         public const __BIGGEST_ALIGNMENT__ = UNKNOWN;
 
