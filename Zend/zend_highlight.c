@@ -17,13 +17,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include <zend_language_parser.h>
-#include "zend_compile.h"
 #include "zend_highlight.h"
-#include "zend_ptr_stack.h"
-#include "zend_globals.h"
-#include "zend_exceptions.h"
+#include "zend.h" // for ZEND_PUTS()
+#include "zend_exceptions.h" // for zend_clear_exception()
+#include "zend_globals.h" // for zend_php_scanner_globals
+#include "zend_globals_macros.h" // for LANG_SCNG()
+#include "zend_language_parser.h" // for T_*
+#include "zend_variables.h" // for zval_ptr_dtor_str()
 
 ZEND_API void zend_html_putc(char c)
 {

@@ -20,6 +20,7 @@
 #ifndef ZEND_HIGHLIGHT_H
 #define ZEND_HIGHLIGHT_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_result.h"
 
 #define HL_COMMENT_COLOR     "#FF8000"    /* orange */
@@ -28,6 +29,7 @@
 #define HL_STRING_COLOR      "#DD0000"    /* red */
 #define HL_KEYWORD_COLOR     "#007700"    /* green */
 
+typedef struct _zend_string zend_string;
 
 typedef struct _zend_syntax_highlighter_ini {
 	char *highlight_html;
