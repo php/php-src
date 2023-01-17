@@ -496,106 +496,127 @@ class ZipArchive implements Countable
     /**
      * @var int
      * @cvalue ZIP_OPSYS_DOS
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_DOS = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_AMIGA
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_AMIGA = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_OPENVMS
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_OPENVMS = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_UNIX
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_UNIX = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_VM_CMS
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_VM_CMS = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_ATARI_ST
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_ATARI_ST = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_OS_2
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_OS_2 = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_MACINTOSH
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_MACINTOSH = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_Z_SYSTEM
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_Z_SYSTEM = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_CPM
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_CPM = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_WINDOWS_NTFS
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_WINDOWS_NTFS = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_MVS
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_MVS = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_VSE
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_VSE = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_ACORN_RISC
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_ACORN_RISC = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_VFAT
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_VFAT = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_ALTERNATE_MVS
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_ALTERNATE_MVS = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_BEOS
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_BEOS = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_TANDEM
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_TANDEM = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_OS_400
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_OS_400 = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_OS_X
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_OS_X = UNKNOWN;
     /**
      * @var int
      * @cvalue ZIP_OPSYS_DEFAULT
+     * @link ziparchive.constants.opsys
      */
     public const OPSYS_DEFAULT = UNKNOWN;
 #endif
