@@ -17,6 +17,8 @@ $strtoupper = 'strtolower';
 var_dump(${${++$a}}('FOO') == 'foo');
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
+
+Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 bool(true)
