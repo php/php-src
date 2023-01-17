@@ -18,26 +18,23 @@
 */
 
 #include "zend.h"
-#include "zend_extensions.h"
-#include "zend_modules.h"
-#include "zend_constants.h"
-#include "zend_list.h"
-#include "zend_API.h"
-#include "zend_exceptions.h"
-#include "zend_builtin_functions.h"
-#include "zend_ini.h"
-#include "zend_vm.h"
-#include "zend_dtrace.h"
-#include "zend_virtual_cwd.h"
-#include "zend_smart_str.h"
-#include "zend_smart_string.h"
-#include "zend_cpuinfo.h"
-#include "zend_attributes.h"
-#include "zend_observer.h"
-#include "zend_fibers.h"
-#include "zend_call_stack.h"
-#include "zend_strtod.h"
-#include "Optimizer/zend_optimizer.h"
+#include "zend_attributes.h" // for zend_attributes_shutdown()
+#include "zend_builtin_functions.h" // for zend_startup_builtin_functions()
+#include "zend_cpuinfo.h" // for zend_cpu_startup()
+#include "zend_constants.h" // for ZEND_CONSTANT_DTOR
+#include "zend_errors.h" // for E_ALL, ...
+#include "zend_exceptions.h" // for zend_throw_exception_hook
+#include "zend_extensions.h" // for zend_startup_extensions_mechanism()
+#include "zend_globals.h" // for EG()
+#include "zend_ini.h" // for ZEND_INI_MH()
+#include "zend_fibers.h" // for ZEND_FIBER_DEFAULT_C_STACK_SIZE
+#include "zend_observer.h" // for zend_observer_activate()
+#include "zend_smart_str.h" // for smart_str_*()
+#include "zend_smart_string.h" // for smart_string_*()
+#include "zend_strtod.h" // for zend_startup_strtod()
+#include "zend_virtual_cwd.h" // for virtual_cwd_startup()
+#include "zend_vm.h" // for ZEND_VM_SET_OPCODE_HANDLER()
+#include "Optimizer/zend_optimizer.h" // for zend_optimizer_startup()
 
 static size_t global_map_ptr_last = 0;
 static bool startup_done = false;
