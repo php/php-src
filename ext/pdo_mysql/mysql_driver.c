@@ -82,7 +82,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 			} else {
 				einfo->errmsg = pestrdup(
 					"Cannot execute queries while other unbuffered queries are active. "
-					"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
+					"Consider using PDOStatement::fetchAll(). Alternatively, if your code "
 					"is only ever going to run against mysql, you may enable query "
 					"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
 					dbh->is_persistent);
