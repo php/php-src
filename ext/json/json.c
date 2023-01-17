@@ -303,7 +303,8 @@ PHP_FUNCTION(json_validate)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (options != 0 && options != PHP_JSON_INVALID_UTF8_IGNORE) {
+
+	if ((options != 0) && (options != PHP_JSON_INVALID_UTF8_IGNORE)) {
 		zend_argument_value_error(3, "must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)");
 		RETURN_THROWS();
 	}
@@ -314,7 +315,7 @@ PHP_FUNCTION(json_validate)
 	}
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
-
+	
 	if (depth <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
