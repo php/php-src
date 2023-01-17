@@ -466,6 +466,9 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 				case ']':
 					break;
 				case '>':
+					if (!last_index) {
+						goto error;
+					}
 					if (last_index[index_len - 1] == '-') {
 						new_index = 1;
 						index_len--;
