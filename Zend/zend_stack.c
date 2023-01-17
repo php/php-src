@@ -17,8 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
 #include "zend_stack.h"
+#include "zend_alloc.h"
 
 #define ZEND_STACK_ELEMENT(stack, n) ((void *)((char *) (stack)->elements + (stack)->size * (n)))
 
