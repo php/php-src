@@ -19,20 +19,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "ZendAccelerator.h"
 #include "zend_persist.h"
-#include "zend_extensions.h"
 #include "zend_shared_alloc.h"
-#include "zend_vm.h"
-#include "zend_constants.h"
-#include "zend_operators.h"
-#include "zend_interfaces.h"
+#include "ZendAccelerator.h"
 #include "zend_attributes.h"
+#include "zend_hash.h" // for HT_*()
+#include "zend_interfaces.h" // for zend_ce_aggregate
+#include "zend_types.h" // for zval
+#include "zend_vm.h" // for zend_vm_set_opcode_handler_ex()
 
 #ifdef HAVE_JIT
-# include "Optimizer/zend_func_info.h"
-# include "jit/zend_jit.h"
+# include "Optimizer/zend_func_info.h" // for ZEND_SET_FUNC_INFO()
+# include "jit/zend_jit.h" // for JIT_G()
 #endif
 
 #define zend_set_str_gc_flags(str) do { \

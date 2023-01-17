@@ -22,6 +22,14 @@
 #ifndef ZEND_PERSIST_H
 #define ZEND_PERSIST_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
+#include <stdint.h>
+
+typedef struct _zend_class_entry zend_class_entry;
+typedef struct _zend_error_info zend_error_info;
+typedef struct _zend_persistent_script zend_persistent_script;
+
 BEGIN_EXTERN_C()
 
 uint32_t zend_accel_script_persist_calc(zend_persistent_script *script, int for_shm);

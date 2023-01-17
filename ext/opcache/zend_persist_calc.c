@@ -19,13 +19,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "ZendAccelerator.h"
 #include "zend_persist.h"
-#include "zend_extensions.h"
 #include "zend_shared_alloc.h"
-#include "zend_operators.h"
+#include "ZendAccelerator.h"
 #include "zend_attributes.h"
+#include "zend_hash.h" // for HT_*()
+#include "zend_iterators.h" // for zend_class_iterator_funcs, zend_class_arrayaccess_funcs
+#include "zend_types.h" // for zval
 
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
