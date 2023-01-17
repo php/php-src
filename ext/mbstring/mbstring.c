@@ -4621,7 +4621,7 @@ static bool mb_fast_check_utf8(zend_string *str)
 
 check_operand:
 		/* If all 16 bytes are single-byte characters, then a number of checks can be skipped */
-		if (!_mm_movemask_epi8(_mm_cmplt_epi8(operand, _mm_setzero_si128()))) {
+		if (!_mm_movemask_epi8(operand)) {
 			/* Even if this block only contains single-byte characters, there may have been a
 			 * multi-byte character at the end of the previous block, which was supposed to
 			 * have continuation bytes in this block
@@ -4641,7 +4641,7 @@ check_operand:
 					goto finish_up_remaining_bytes;
 				}
 				operand = _mm_loadu_si128((__m128i*)p);
-				if (_mm_movemask_epi8(_mm_cmplt_epi8(operand, _mm_setzero_si128()))) {
+				if (_mm_movemask_epi8(operand)) {
 					break;
 				}
 			}
