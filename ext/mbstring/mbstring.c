@@ -4160,7 +4160,7 @@ PHP_FUNCTION(mb_send_mail)
 	zend_string *extra_cmd = NULL;
 	HashTable *headers_ht = NULL;
 	zend_string *str_headers = NULL;
-	size_t n, i;
+	size_t i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	struct {
@@ -4175,15 +4175,12 @@ PHP_FUNCTION(mb_send_mail)
 	const mbfl_encoding *tran_cs,	/* transfer text charset */
 						*head_enc,	/* header transfer encoding */
 						*body_enc;	/* body transfer encoding */
-	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
 	int err = 0;
 	HashTable ht_headers;
 	zval *s;
-	extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 
 	/* initialize */
-	mbfl_memory_device_init(&device, 0, 0);
 	mbfl_string_init(&orig_str);
 	mbfl_string_init(&conv_str);
 
@@ -4343,47 +4340,59 @@ PHP_FUNCTION(mb_send_mail)
 #define PHP_MBSTR_MAIL_MIME_HEADER2 "Content-Type: text/plain"
 #define PHP_MBSTR_MAIL_MIME_HEADER3 "; charset="
 #define PHP_MBSTR_MAIL_MIME_HEADER4 "Content-Transfer-Encoding: "
+
+	smart_str str = {0};
+	bool empty = true;
+
 	if (str_headers != NULL) {
-		p = ZSTR_VAL(str_headers);
-		n = ZSTR_LEN(str_headers);
-		mbfl_memory_device_strncat(&device, p, n);
-		if (n > 0 && p[n - 1] != '\n') {
-			mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		/* Strip trailing CRLF from `str_headers`; we will add CRLF back if necessary */
+		size_t len = ZSTR_LEN(str_headers);
+		if (ZSTR_VAL(str_headers)[len-1] == '\n') {
+			len--;
 		}
+		if (ZSTR_VAL(str_headers)[len-1] == '\r') {
+			len--;
+		}
+		smart_str_appendl(&str, ZSTR_VAL(str_headers), len);
+		empty = false;
 		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
-		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		if (!empty) {
+			smart_str_appendl(&str, line_sep, line_sep_len);
+		}
+		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
+		empty = false;
 	}
 
 	if (!suppressed_hdrs.cnt_type) {
-		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);
+		if (!empty) {
+			smart_str_appendl(&str, line_sep, line_sep_len);
+		}
+		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);
 
 		p = (char *)mbfl_encoding_preferred_mime_name(tran_cs);
 		if (p != NULL) {
-			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
-			mbfl_memory_device_strcat(&device, p);
+			smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
+			smart_str_appends(&str, p);
 		}
-		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		empty = false;
 	}
+
 	if (!suppressed_hdrs.cnt_trans_enc) {
-		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
+		if (!empty) {
+			smart_str_appendl(&str, line_sep, line_sep_len);
+		}
+		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
 		p = (char *)mbfl_encoding_preferred_mime_name(body_enc);
 		if (p == NULL) {
 			p = "7bit";
 		}
-		mbfl_memory_device_strcat(&device, p);
-		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		smart_str_appends(&str, p);
 	}
 
-	if (!PG(mail_mixed_lf_and_crlf)) {
-		mbfl_memory_device_unput(&device);
-	}
-	mbfl_memory_device_unput(&device);
-	mbfl_memory_device_output('\0', &device);
-	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);
+	str_headers = smart_str_extract(&str);
 
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
@@ -4404,7 +4413,6 @@ PHP_FUNCTION(mb_send_mail)
 		efree((void *)subject_buf);
 	}
 	zend_string_free(conv);
-	mbfl_memory_device_clear(&device);
 	zend_hash_destroy(&ht_headers);
 	if (str_headers) {
 		zend_string_release_ex(str_headers, 0);
