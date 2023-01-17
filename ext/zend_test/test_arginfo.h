@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7f239260963adbe9a2cff186d1677302bdebaa6d */
+ * Stub hash: 83b3d7beb8424627b1171a9190e06163b8a03450 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -294,6 +294,11 @@ static const zend_function_entry class_ZendTestAttribute_methods[] = {
 };
 
 
+static const zend_function_entry class_ZendTestRepeatableAttribute_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_ZendTestParameterAttribute_methods[] = {
 	ZEND_ME(ZendTestParameterAttribute, __construct, arginfo_class_ZendTestParameterAttribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -492,19 +497,19 @@ static zend_class_entry *register_class__ZendTestTrait(void)
 	zend_string_release(property_testProp_name);
 #if (PHP_VERSION_ID >= 80200)
 
-	zend_string *attribute_name_ZendTestAttribute_const_TEST_CONST_1 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, 1);
-	zend_add_class_constant_attribute(class_entry, const_TEST_CONST, attribute_name_ZendTestAttribute_const_TEST_CONST_1, 0);
-	zend_string_release(attribute_name_ZendTestAttribute_const_TEST_CONST_1);
+	zend_string *attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, 1);
+	zend_add_class_constant_attribute(class_entry, const_TEST_CONST, attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1, 0);
+	zend_string_release(attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_1);
 
-	zend_string *attribute_name_ZendTestAttribute_const_TEST_CONST_2 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, 1);
-	zend_add_class_constant_attribute(class_entry, const_TEST_CONST, attribute_name_ZendTestAttribute_const_TEST_CONST_2, 0);
-	zend_string_release(attribute_name_ZendTestAttribute_const_TEST_CONST_2);
+	zend_string *attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_2 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, 1);
+	zend_add_class_constant_attribute(class_entry, const_TEST_CONST, attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_2, 0);
+	zend_string_release(attribute_name_ZendTestRepeatableAttribute_const_TEST_CONST_2);
 #endif
 #if (PHP_VERSION_ID >= 80200)
 
-	zend_string *attribute_name_ZendTestAttribute_property_testProp_1 = zend_string_init_interned("ZendTestAttribute", sizeof("ZendTestAttribute") - 1, 1);
-	zend_add_property_attribute(class_entry, property_testProp, attribute_name_ZendTestAttribute_property_testProp_1, 0);
-	zend_string_release(attribute_name_ZendTestAttribute_property_testProp_1);
+	zend_string *attribute_name_ZendTestRepeatableAttribute_property_testProp_1 = zend_string_init_interned("ZendTestRepeatableAttribute", sizeof("ZendTestRepeatableAttribute") - 1, 1);
+	zend_add_property_attribute(class_entry, property_testProp, attribute_name_ZendTestRepeatableAttribute_property_testProp_1, 0);
+	zend_string_release(attribute_name_ZendTestRepeatableAttribute_property_testProp_1);
 
 	zend_string *attribute_name_ZendTestPropertyAttribute_property_testProp_2 = zend_string_init_interned("ZendTestPropertyAttribute", sizeof("ZendTestPropertyAttribute") - 1, 1);
 	zend_attribute *attribute_ZendTestPropertyAttribute_property_testProp_2 = zend_add_property_attribute(class_entry, property_testProp, attribute_name_ZendTestPropertyAttribute_property_testProp_2, 1);
@@ -537,8 +542,28 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	zend_attribute *attribute_Attribute_class_ZendTestAttribute_1 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttribute_1, 1);
 	zend_string_release(attribute_name_Attribute_class_ZendTestAttribute_1);
 	zval attribute_Attribute_class_ZendTestAttribute_1_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttribute_1_arg0, ZEND_ATTRIBUTE_IS_REPEATABLE);
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttribute_1_arg0, ZEND_ATTRIBUTE_TARGET_ALL);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestAttribute_1->args[0].value, &attribute_Attribute_class_ZendTestAttribute_1_arg0);
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestRepeatableAttribute(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestRepeatableAttribute", class_ZendTestRepeatableAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+#if (PHP_VERSION_ID >= 80200)
+	zend_string *attribute_name_Attribute_class_ZendTestRepeatableAttribute_1 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ZendTestRepeatableAttribute_1 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestRepeatableAttribute_1, 1);
+	zend_string_release(attribute_name_Attribute_class_ZendTestRepeatableAttribute_1);
+	zval attribute_Attribute_class_ZendTestRepeatableAttribute_1_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestRepeatableAttribute_1_arg0, ZEND_ATTRIBUTE_IS_REPEATABLE);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestRepeatableAttribute_1->args[0].value, &attribute_Attribute_class_ZendTestRepeatableAttribute_1_arg0);
 #endif
 
 	return class_entry;

@@ -54,12 +54,12 @@ namespace {
 
     trait _ZendTestTrait {
         /** @var int */
-        #[ZendTestAttribute]
-        #[ZendTestAttribute]
+        #[ZendTestRepeatableAttribute]
+        #[ZendTestRepeatableAttribute]
         public const TEST_CONST = 1;
 
         /** @var mixed */
-        #[ZendTestAttribute]
+        #[ZendTestRepeatableAttribute]
         #[ZendTestPropertyAttribute("testProp")]
         public $testProp;
 
@@ -67,9 +67,12 @@ namespace {
         public function testMethod(): bool {}
     }
 
-    #[Attribute(Attribute::TARGET_ALL|Attribute::IS_REPEATABLE)]
+    #[Attribute(Attribute::TARGET_ALL)]
     final class ZendTestAttribute {
+    }
 
+    #[Attribute(Attribute::TARGET_ALL|Attribute::IS_REPEATABLE)]
+    final class ZendTestRepeatableAttribute {
     }
 
     #[Attribute(Attribute::TARGET_PARAMETER)]

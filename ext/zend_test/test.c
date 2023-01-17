@@ -39,6 +39,7 @@ static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
+static zend_class_entry *zend_test_repeatable_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
 static zend_class_entry *zend_test_property_attribute;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
@@ -735,6 +736,9 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_internal_attribute *attr = zend_mark_internal_attribute(zend_test_attribute);
 		attr->validator = zend_attribute_validate_zendtestattribute;
 	}
+
+	zend_test_repeatable_attribute = register_class_ZendTestRepeatableAttribute();
+	zend_mark_internal_attribute(zend_test_repeatable_attribute);
 
 	zend_test_parameter_attribute = register_class_ZendTestParameterAttribute();
 	zend_mark_internal_attribute(zend_test_parameter_attribute);

@@ -11,6 +11,7 @@ class Foo {
 
 $reflectionConstant = new ReflectionClassConstant(Foo::class, "TEST_CONST");
 var_dump($reflectionConstant->getAttributes()[0]->newInstance());
+var_dump($reflectionConstant->getAttributes()[1]->newInstance());
 
 $reflectionProperty = new ReflectionProperty(Foo::class, "testProp");
 var_dump($reflectionProperty->getAttributes()[0]->newInstance());
@@ -21,9 +22,11 @@ var_dump($reflectionMethod->getAttributes()[0]->newInstance());
 
 ?>
 --EXPECTF--
-object(ZendTestAttribute)#%d (%d) {
+object(ZendTestRepeatableAttribute)#%d (%d) {
 }
-object(ZendTestAttribute)#%d (%d) {
+object(ZendTestRepeatableAttribute)#%d (%d) {
+}
+object(ZendTestRepeatableAttribute)#%d (%d) {
 }
 object(ZendTestPropertyAttribute)#%d (%d) {
   ["parameter"]=>
