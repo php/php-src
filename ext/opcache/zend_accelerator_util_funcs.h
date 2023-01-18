@@ -22,8 +22,14 @@
 #ifndef ZEND_ACCELERATOR_UTIL_FUNCS_H
 #define ZEND_ACCELERATOR_UTIL_FUNCS_H
 
-#include "zend.h"
-#include "ZendAccelerator.h"
+#include "zend_portability.h" // for BEGIN_EXTERN_C
+
+#include <stdint.h>
+
+typedef struct _zend_op_array zend_op_array;
+typedef struct _zend_persistent_script zend_persistent_script;
+typedef struct _zend_script zend_script;
+typedef struct _zend_array HashTable;
 
 BEGIN_EXTERN_C()
 

@@ -19,12 +19,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_API.h"
-#include "zend_constants.h"
-#include "zend_inheritance.h"
 #include "zend_accelerator_util_funcs.h"
-#include "zend_persist.h"
-#include "zend_shared_alloc.h"
+#include "ZendAccelerator.h"
+#include "zend_inheritance.h" // for zend_try_early_bind()
 #include "zend_observer.h"
 
 #ifdef __SSE2__
