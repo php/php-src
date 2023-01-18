@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.3
 
+- Core:
+  . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
 
 02 Feb 2023, PHP 8.2.2
 
