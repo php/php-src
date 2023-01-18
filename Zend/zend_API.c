@@ -4723,7 +4723,7 @@ ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zen
 	zend_class_entry *old_scope = EG(fake_scope);
 
 	if (UNEXPECTED(!(scope->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-		if (UNEXPECTED(zend_update_class_constants(scope)) != SUCCESS) {
+		if (UNEXPECTED(zend_update_class_constants(scope) != SUCCESS)) {
 			return FAILURE;
 		}
 	}

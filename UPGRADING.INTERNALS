@@ -65,6 +65,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
    mysqlnd_command::shutdown & mysqlnd_conn_data::shutdown have been removed.
    These functions are deprecated by MySQL in favour of SHUTDOWN SQL statement.
 
+ d. ext/pcre
+   - The function pcre_get_compiled_regex_ex has been removed.
+   Use pcre_get_compiled_regex instead.
+
 ========================
 4. OpCode changes
 ========================
