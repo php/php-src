@@ -3066,7 +3066,8 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 				 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
 			      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 				 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS
-				 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)) {
+				 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)
+				 && !(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)) {
 					vars_op_array[ssa_op->op1_def] = op_array;
 					RA_IVAL_START(ssa_op->op1_def, idx);
 					count++;
@@ -3075,7 +3076,8 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 				 && (ssa->vars[ssa_op->op2_def].use_chain >= 0
 			      || ssa->vars[ssa_op->op2_def].phi_use_chain)
 				 && ssa->vars[ssa_op->op2_def].alias == NO_ALIAS
-				 && zend_jit_var_supports_reg(ssa, ssa_op->op2_def)) {
+				 && zend_jit_var_supports_reg(ssa, ssa_op->op2_def)
+				 && !(ssa->var_info[ssa_op->op2_def].type & MAY_BE_GUARD)) {
 					vars_op_array[ssa_op->op2_def] = op_array;
 					RA_IVAL_START(ssa_op->op2_def, idx);
 					count++;
@@ -6583,7 +6585,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#ifndef ZEND_JIT_IR //???
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
 					case ZEND_MATCH:
@@ -6591,7 +6592,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
-#endif
 					case ZEND_VERIFY_RETURN_TYPE:
 						if (opline->op1_type == IS_UNUSED) {
 							/* Always throws */
@@ -6788,7 +6788,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					goto jit_failure;
 				}
 				if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
-					if (opline->opcode == ZEND_NEW && ssa_op->result_def >= 0) {
+					if (opline->opcode == ZEND_NEW && opline->result_type != IS_UNUSED) {
 						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_OBJECT, 1);
 					}
 					if (zend_jit_may_be_polymorphic_call(opline) ||
