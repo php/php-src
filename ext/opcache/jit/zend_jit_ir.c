@@ -2656,7 +2656,7 @@ static int zend_jit_invalid_this_stub(zend_jit_ctx *jit)
 		IR_NULL,
 		zend_jit_const_addr(jit, (uintptr_t)"Using $this when not in object context"));
 	zend_jit_ijmp(jit,
-		zend_jit_stub_addr(jit, jit_stub_exception_handler));
+		zend_jit_stub_addr(jit, jit_stub_exception_handler_undef));
 	return 1;
 }
 
