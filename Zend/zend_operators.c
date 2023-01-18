@@ -60,8 +60,8 @@ static _locale_t current_locale = NULL;
 /* Common code for SSE2 accelerated character case conversion */
 
 #define BLOCKCONV_INIT_RANGE(start, end) \
-	const __m128i blconv_start_minus_1 = _mm_set1_epi8((start) - 1); \
-	const __m128i blconv_end_plus_1 = _mm_set1_epi8((end) + 1);
+	const __m128i blconv_offset = _mm_set1_epi8((signed char)(SCHAR_MIN - start)); \
+	const __m128i blconv_threshold = _mm_set1_epi8(SCHAR_MIN + (end - start) + 1);
 
 #define BLOCKCONV_STRIDE sizeof(__m128i)
 
@@ -70,14 +70,12 @@ static _locale_t current_locale = NULL;
 
 #define BLOCKCONV_LOAD(input) \
 	__m128i blconv_operand = _mm_loadu_si128((__m128i*)(input)); \
-	__m128i blconv_gt = _mm_cmpgt_epi8(blconv_operand, blconv_start_minus_1); \
-	__m128i blconv_lt = _mm_cmplt_epi8(blconv_operand, blconv_end_plus_1); \
-	__m128i blconv_mingle = _mm_and_si128(blconv_gt, blconv_lt);
+	__m128i blconv_mask = _mm_cmplt_epi8(_mm_add_epi8(blconv_operand, blconv_offset), blconv_threshold);
 
-#define BLOCKCONV_FOUND() _mm_movemask_epi8(blconv_mingle)
+#define BLOCKCONV_FOUND() _mm_movemask_epi8(blconv_mask)
 
 #define BLOCKCONV_STORE(dest) \
-	__m128i blconv_add = _mm_and_si128(blconv_mingle, blconv_delta); \
+	__m128i blconv_add = _mm_and_si128(blconv_mask, blconv_delta); \
 	__m128i blconv_result = _mm_add_epi8(blconv_operand, blconv_add); \
 	_mm_storeu_si128((__m128i *)(dest), blconv_result);
 
