@@ -591,7 +591,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
 		GC_ADDREF(ref);
 		gc_adjust_threshold(gc_collect_cycles());
-		if (UNEXPECTED(GC_DELREF(ref)) == 0) {
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 			rc_dtor_func(ref);
 			return;
 		} else if (UNEXPECTED(GC_INFO(ref))) {
