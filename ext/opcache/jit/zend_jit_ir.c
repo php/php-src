@@ -10943,7 +10943,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		if (ZEND_OBSERVER_ENABLED) {
 			zend_jit_call_1(jit, IR_VOID,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_observer_fcall_begin, IR_CONST_FASTCALL_FUNC),
-				zend_jit_fp(jit));
+				rx);
 		}
 
 		// JIT: ZVAL_NULL(EX_VAR(opline->result.var));
@@ -10978,7 +10978,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		if (ZEND_OBSERVER_ENABLED) {
 			zend_jit_call_2(jit, IR_VOID,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_observer_fcall_end, IR_CONST_FASTCALL_FUNC),
-				zend_jit_fp(jit),
+				rx,
 				zend_jit_zval_addr(jit, res_addr));
 		}
 
