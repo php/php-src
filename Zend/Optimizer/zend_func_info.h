@@ -19,7 +19,7 @@
 #ifndef ZEND_FUNC_INFO_H
 #define ZEND_FUNC_INFO_H
 
-#include "zend_ssa.h"
+#include "zend_call_graph.h"
 
 /* func/cfg flags */
 #define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)  /* accesses variables by name  */
@@ -43,6 +43,7 @@
 
 typedef struct _zend_func_info zend_func_info;
 typedef struct _zend_call_info zend_call_info;
+typedef struct _zend_ssa zend_ssa;
 
 #define ZEND_FUNC_INFO(op_array) \
 	((zend_func_info*)((op_array)->reserved[zend_func_info_rid]))
