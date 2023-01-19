@@ -8894,7 +8894,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		}
 		ref = ir_fold2(&jit->ctx, IR_OPT(IR_MUL, IR_U32), ref, ir_const_u32(&jit->ctx, sizeof(zval)));
 		if (sizeof(void*) == 8) {
-			ref = ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_ADDR), ref);
+			ref = ir_fold1(&jit->ctx, IR_OPT(IR_SEXT, IR_ADDR), ref);
 		}
 		ref = ir_fold2(&jit->ctx, IR_OPT(IR_SUB, IR_ADDR), used_stack_ref, ref);
 
