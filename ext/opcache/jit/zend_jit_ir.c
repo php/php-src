@@ -1667,8 +1667,7 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 				jit->ra[src_var].flags &= ~ZREG_FORWARD;
 			}
 
-			if (jit->ra[dst_phi->ssa_var].ref) {
-				ZEND_ASSERT(jit->ra[dst_phi->ssa_var].ref != IR_NULL);
+			if (jit->ra[dst_phi->ssa_var].ref > 0) {
 				ir_insn *phi_insn = &jit->ctx.ir_base[jit->ra[dst_phi->ssa_var].ref];
 				ZEND_ASSERT(phi_insn->op == IR_PHI);
 //				ZEND_ASSERT(ir_operands_count(ctx, phi_insn) == n + 1);
