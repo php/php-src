@@ -31,6 +31,9 @@ PHP 8.3 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core
+  . Anonymous classes may now be marked as readonly.
+
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
     single resource limit.

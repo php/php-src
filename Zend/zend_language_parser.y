@@ -282,7 +282,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
-%type <num> class_modifiers class_modifier use_type backup_fn_flags
+%type <num> class_modifiers class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
@@ -599,6 +599,18 @@ class_modifiers:
 		class_modifier 					{ $$ = $1; }
 	|	class_modifiers class_modifier
 			{ $$ = zend_add_class_modifier($1, $2); if (!$$) { YYERROR; } }
+;
+
+anonymous_class_modifiers:
+		class_modifier
+			{ $$ = zend_add_anonymous_class_modifier(0, $1); if (!$$) { YYERROR; } }
+	|	anonymous_class_modifiers class_modifier
+			{ $$ = zend_add_anonymous_class_modifier($1, $2); if (!$$) { YYERROR; } }
+;
+
+anonymous_class_modifiers_optional:
+		%empty				{ $$ = 0; }
+	|	anonymous_class_modifiers	{ $$ = $1; }
 ;
 
 class_modifier:
@@ -1095,12 +1107,12 @@ non_empty_for_exprs:
 ;
 
 anonymous_class:
-        T_CLASS { $<num>$ = CG(zend_lineno); } ctor_arguments
+		anonymous_class_modifiers_optional T_CLASS { $<num>$ = CG(zend_lineno); } ctor_arguments
 		extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
 			zend_ast *decl = zend_ast_create_decl(
-				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS, $<num>2, $6, NULL,
-				$4, $5, $8, NULL, NULL);
-			$$ = zend_ast_create(ZEND_AST_NEW, decl, $3);
+				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS | $1, $<num>3, $7, NULL,
+				$5, $6, $9, NULL, NULL);
+			$$ = zend_ast_create(ZEND_AST_NEW, decl, $4);
 		}
 ;
 
