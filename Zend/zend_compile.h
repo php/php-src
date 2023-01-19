@@ -817,6 +817,7 @@ typedef enum {
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
+uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifier_target target);
 
 uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t flags);
