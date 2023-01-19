@@ -14450,6 +14450,24 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 	ir_ref exit_inputs[4];
 	uint32_t exit_inputs_count = 0;
 
+	if (!MAY_BE_HASH(op1_info) && !MAY_BE_PACKED(op1_info)) {
+		/* empty array */
+		if (exit_addr) {
+			if (exit_opcode == ZEND_JMP) {
+				zend_jit_side_exit(jit,  zend_jit_const_addr(jit, (uintptr_t)exit_addr));
+			}
+		} else {
+			zend_basic_block *bb;
+
+			ZEND_ASSERT(jit->b >= 0);
+			bb = &jit->ssa->cfg.blocks[jit->b];
+			_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, zend_jit_end(jit));
+			jit->control = IR_UNUSED;
+			jit->b = -1;
+		}
+		return 1;
+	}
+
 	// JIT: array = EX_VAR(opline->op1.var);
 	// JIT: fe_ht = Z_ARRVAL_P(array);
 	ht_ref = zend_jit_zval_ptr(jit, op1_addr);
