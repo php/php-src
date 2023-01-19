@@ -18,5 +18,8 @@ function test() {
 test();
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in Unknown on line 0
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %s on line %d
 DONE

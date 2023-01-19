@@ -37,8 +37,6 @@ object(FFI\CData:char)#%d (1) {
   ["cdata"]=>
   string(1) "a"
 }
-
-Deprecated: Increment on non-numeric string is deprecated in %s on line %d
 object(FFI\CData:char)#%d (1) {
   ["cdata"]=>
   string(1) "b"

@@ -23,8 +23,7 @@ var_dump(inc(1.1));
 var_dump(dec("5"));
 var_dump(dec(1.1));
 ?>
---EXPECTF--
-Deprecated: Increment on non-numeric string is deprecated in %s on line %d
+--EXPECT--
 string(3) "abd"
 int(6)
 float(2.1)

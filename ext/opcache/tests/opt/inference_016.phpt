@@ -19,5 +19,6 @@ try {
 }
 ?>
 --EXPECT--
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in Unknown on line 0
 NULL
 Modulo by zero
