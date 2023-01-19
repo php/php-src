@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.3
 
+- FPM:
+  . Fixed bug GHSA-54hq-v5wp-fqgv (DOS vulnerability when parsing multipart
+    request body). (Jakub Zelenka)
+
+
 02 Feb 2023, PHP 8.2.2
 
 - Core:
