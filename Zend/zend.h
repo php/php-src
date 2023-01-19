@@ -24,8 +24,8 @@
 
 #define ZEND_ENGINE_3
 
+#include "zend_error.h" // TODO remove
 #include "zend_map_ptr.h" // for ZEND_MAP_PTR_DEF()
-#include "zend_errors.h" // for E_* (as zend_error_noreturn() parameter)
 #include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_result.h"
 #include "zend_signal.h" // for ZEND_SIGNAL_[UN]BLOCK_INTERRUPTIONS()
@@ -342,16 +342,6 @@ extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
-
-ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-/* For custom format specifiers like H */
-ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...);
-/* If filename is NULL the default filename is used. */
-ZEND_API ZEND_COLD void zend_error_at(int type, zend_string *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(int type, zend_string *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
-ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message);
-ZEND_API ZEND_COLD void zend_error_zstr_at(int type, zend_string *filename, uint32_t lineno, zend_string *message);
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);

@@ -189,7 +189,7 @@
 #include "zend_strtod.h"
 #include "zend_strtod_int.h"
 #include "zend_types.h" // for ZEND_TLS
-#include "zend.h" // for zend_error_noreturn()
+#include "zend_error.h"
 
 #ifndef Long
 #define Long int32_t

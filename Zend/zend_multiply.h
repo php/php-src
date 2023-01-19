@@ -20,9 +20,9 @@
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H
 
+#include "zend_error.h"
 #include "zend_long.h"
 #include "zend_portability.h"
-#include "zend.h"
 
 #include <stdbool.h>
 

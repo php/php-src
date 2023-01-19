@@ -73,7 +73,7 @@
 #include "zend_globals.h" // for struct _zend_executor_globals
 #include "zend_globals_macros.h" // for EG()
 #include "zend_objects.h" // for zend_objects_destroy_object()
-#include "zend.h" // for zend_error()
+#include "zend_error.h"
 
 #ifndef GC_BENCH
 # define GC_BENCH 0

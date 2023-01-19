@@ -21,7 +21,7 @@
 
 #include "zend_alloc.h"
 #include "zend_multiply.h" // for zend_safe_address()
-#include "zend.h" // for zend_error()
+#include "zend_error.h"
 
 #include <stddef.h> // for size_t
 
