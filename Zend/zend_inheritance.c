@@ -17,20 +17,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_arena.h"
-#include "zend_API.h"
-#include "zend_compile.h"
-#include "zend_execute.h"
 #include "zend_inheritance.h"
-#include "zend_interfaces.h"
-#include "zend_smart_str.h"
-#include "zend_operators.h"
-#include "zend_exceptions.h"
-#include "zend_enum.h"
+#include "zend_API.h" // for zend_get_object_type_uc()
+#include "zend_arena.h"
 #include "zend_attributes.h"
+#include "zend_compile.h"
 #include "zend_constants.h"
+#include "zend_enum.h"
+#include "zend_exceptions.h"
+#include "zend_execute.h" // for zend_lookup_class_ex()
+#include "zend_interfaces.h" // for zend_ce_stringable
+#include "zend_globals.h" // for CG()
 #include "zend_observer.h"
+#include "zend_smart_str.h"
 
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
