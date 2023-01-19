@@ -18,18 +18,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stdio.h>
-
-#include "zend.h"
-#include "zend_alloc.h"
 #include "zend_compile.h"
-#include "zend_extensions.h"
 #include "zend_API.h"
-#include "zend_sort.h"
 #include "zend_constants.h"
+#include "zend_extensions.h"
+#include "zend_llist.h"
 #include "zend_observer.h"
-
-#include "zend_vm.h"
+#include "zend_vm.h" // for ZEND_VM_SET_OPCODE_HANDLER()
 
 static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array)
 {
