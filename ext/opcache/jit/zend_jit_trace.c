@@ -3067,7 +3067,11 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 				 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS
 				 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)
-				 && !(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)) {
+				 && (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
+				  || opline->opcode == ZEND_PRE_INC
+				  || opline->opcode == ZEND_PRE_DEC
+				  || opline->opcode == ZEND_POST_INC
+				  || opline->opcode == ZEND_POST_DEC)) {
 					vars_op_array[ssa_op->op1_def] = op_array;
 					RA_IVAL_START(ssa_op->op1_def, idx);
 					count++;
@@ -3583,7 +3587,10 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 						ra[use]->used_as_hint = NULL;
 						ra[use]->list_next = NULL;
 #else
-                	} else {
+					} else if ((ssa->var_info[def].type & MAY_BE_ANY) != (ssa->var_info[use].type & MAY_BE_ANY)) {
+						RA_REG_FLAGS(def) |= ZREG_LOAD;
+						RA_REG_FLAGS(use) |= ZREG_STORE;
+					} else {
 						use = phi->sources[0];
 						if (zend_jit_var_supports_reg(ssa, use)) {
 							ZEND_ASSERT(!RA_HAS_REG(use));
