@@ -17,20 +17,17 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_attributes.h"
-#include "zend_gc.h"
 #include "zend_builtin_functions.h"
+#include "zend_API.h" // for ZEND_MINIT_FUNCTION
+#include "zend_attributes.h" // for zend_add_class_attribute()
+#include "zend_closures.h" // for zend_ce_closure
 #include "zend_constants.h"
-#include "zend_ini.h"
-#include "zend_interfaces.h"
-#include "zend_exceptions.h"
+#include "zend_exceptions.h" // for zend_register_default_classes()
 #include "zend_extensions.h"
-#include "zend_closures.h"
 #include "zend_generators.h"
+#include "zend_ini.h"
+#include "zend_interfaces.h" // for zend_call_method_with_1_params()
 #include "zend_builtin_functions_arginfo.h"
-#include "zend_smart_str.h"
 
 /* }}} */
 

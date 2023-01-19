@@ -20,7 +20,10 @@
 #ifndef ZEND_BUILTIN_FUNCTIONS_H
 #define ZEND_BUILTIN_FUNCTIONS_H
 
+#include "zend_portability.h" // for BEGIN_EXTERN_C
 #include "zend_result.h"
+
+typedef struct _zval_struct zval;
 
 zend_result zend_startup_builtin_functions(void);
 
