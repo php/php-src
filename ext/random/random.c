@@ -675,7 +675,7 @@ PHP_FUNCTION(lcg_value)
 PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
-	bool seed_is_null = 1;
+	bool seed_is_null = true;
 	zend_long mode = MT_RAND_MT19937;
 	php_random_status *status = RANDOM_G(mt19937);
 	php_random_status_state_mt19937 *state = status->state;
