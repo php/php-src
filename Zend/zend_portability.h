@@ -50,17 +50,12 @@
 # define ZEND_PATHS_SEPARATOR		':'
 #endif
 
-#include "../TSRM/TSRM.h"
-
-#include <stdio.h>
 #include <assert.h>
-#include <math.h>
 
 #ifdef HAVE_UNIX_H
 # include <unix.h>
 #endif
 
-#include <stdarg.h>
 #include <stddef.h>
 
 #ifdef HAVE_DLFCN_H
@@ -72,8 +67,6 @@
 #if defined(ZEND_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
-
-#include "zend_range_check.h"
 
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__

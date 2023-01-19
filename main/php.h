@@ -32,6 +32,7 @@
 #include "zend_rc_debug.h"
 #include "zend_sort.h"
 #include "php_compat.h"
+#include "zend_range_check.h"
 
 #include "zend_API.h"
 
