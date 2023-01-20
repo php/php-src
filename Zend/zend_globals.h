@@ -38,6 +38,7 @@
 #include "zend_multiply.h"
 #include "zend_arena.h"
 #include "zend_call_stack.h"
+#include "zend_ini.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -66,7 +67,6 @@ END_EXTERN_C()
 #undef function_table
 
 typedef struct _zend_vm_stack *zend_vm_stack;
-typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
 

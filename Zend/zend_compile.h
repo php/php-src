@@ -758,8 +758,6 @@ struct _zend_execute_data {
 
 #define ZEND_EXTRA_VALUE 1
 
-#include "zend_globals.h"
-
 typedef enum _zend_compile_position {
 	ZEND_COMPILE_POSITION_AT_SHEBANG = 0,
 	ZEND_COMPILE_POSITION_AT_OPEN_TAG,

@@ -19,6 +19,8 @@
 #ifndef ZEND_CFG_H
 #define ZEND_CFG_H
 
+#include "zend_arena.h"
+
 /* zend_basic_block.flags */
 #define ZEND_BB_START            (1<<0)  /* first block            */
 #define ZEND_BB_FOLLOW           (1<<1)  /* follows the next block */

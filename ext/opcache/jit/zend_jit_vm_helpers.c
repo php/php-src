@@ -25,7 +25,6 @@
 #include "Zend/zend_API.h"
 
 #include <ZendAccelerator.h>
-#include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
 #if ZEND_JIT_TARGET_X86

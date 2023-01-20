@@ -19,11 +19,11 @@
 #include "zend_compile.h"
 #include "zend_generators.h"
 #include "zend_inference.h"
-#include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_closures.h"
 #include "zend_worklist.h"
 #include "zend_optimizer_internal.h"
+#include "zend_globals.h"
 
 /* The used range inference algorithm is described in:
  *     V. Campos, R. Rodrigues, I. de Assis Costa and F. Pereira.

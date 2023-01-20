@@ -31,7 +31,7 @@
 #include "zend_attributes.h"
 
 #ifdef HAVE_JIT
-# include "Optimizer/zend_func_info.h"
+# include "Optimizer/zend_call_graph.h"
 # include "jit/zend_jit.h"
 #endif
 

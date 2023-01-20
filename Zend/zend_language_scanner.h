@@ -20,6 +20,11 @@
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
 
+#include "zend_stack.h"
+#include "zend_ptr_stack.h"
+#include "zend_multibyte.h"
+#include "zend_globals.h"
+
 typedef struct _zend_lex_state {
 	unsigned int yy_leng;
 	unsigned char *yy_start;

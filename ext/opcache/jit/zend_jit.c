@@ -33,7 +33,6 @@
 
 #ifdef HAVE_JIT
 
-#include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_ssa.h"
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/zend_call_graph.h"

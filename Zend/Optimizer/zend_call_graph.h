@@ -20,12 +20,13 @@
 #define ZEND_CALL_GRAPH_H
 
 #include "zend_ssa.h"
-#include "zend_func_info.h"
 #include "zend_optimizer.h"
 
 typedef struct _zend_send_arg_info {
 	zend_op                *opline;
 } zend_send_arg_info;
+
+typedef struct _zend_call_info zend_call_info;
 
 struct _zend_call_info {
 	zend_op_array          *caller_op_array;
@@ -42,7 +43,7 @@ struct _zend_call_info {
 	zend_send_arg_info      arg_info[1];
 };
 
-struct _zend_func_info {
+typedef struct _zend_func_info {
 	int                     num;
 	uint32_t                flags;
 	zend_ssa                ssa;          /* Static Single Assignment Form  */
@@ -50,13 +51,15 @@ struct _zend_func_info {
 	zend_call_info         *callee_info;  /* which functions are called from this one */
 	zend_call_info        **call_map;     /* Call info associated with init/call/send opnum */
 	zend_ssa_var_info       return_info;
-};
+} zend_func_info;
 
 typedef struct _zend_call_graph {
 	int                     op_arrays_count;
 	zend_op_array         **op_arrays;
 	zend_func_info         *func_infos;
 } zend_call_graph;
+
+#include "zend_func_info.h"
 
 BEGIN_EXTERN_C()
 

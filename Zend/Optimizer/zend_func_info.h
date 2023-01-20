@@ -40,10 +40,6 @@
 #define ZEND_FUNC_JIT_ON_HOT_COUNTERS      (1<<15) /* used by JIT */
 #define ZEND_FUNC_JIT_ON_HOT_TRACE         (1<<16) /* used by JIT */
 
-
-typedef struct _zend_func_info zend_func_info;
-typedef struct _zend_call_info zend_call_info;
-
 #define ZEND_FUNC_INFO(op_array) \
 	((zend_func_info*)((op_array)->reserved[zend_func_info_rid]))
 

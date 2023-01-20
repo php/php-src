@@ -20,7 +20,6 @@
 #include "zend_cfg.h"
 #include "zend_ssa.h"
 #include "zend_inference.h"
-#include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_dump.h"
 

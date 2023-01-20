@@ -25,6 +25,7 @@
 #include "zend_hash.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
+#include "zend_globals.h"
 
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;
@@ -186,6 +187,7 @@ ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *pp, zend_class_
 ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *pp, zend_class_entry *scope, zend_ast_evaluate_ctx *ctx);
 
 /* dedicated Zend executor functions - do not use! */
+typedef struct _zend_vm_stack *zend_vm_stack;
 struct _zend_vm_stack {
 	zval *top;
 	zval *end;

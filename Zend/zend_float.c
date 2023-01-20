@@ -19,6 +19,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_float.h"
+#include "zend_globals.h"
 
 ZEND_API void zend_init_fpu(void) /* {{{ */
 {

@@ -23,7 +23,7 @@
 #define ZEND_OPTIMIZER_INTERNAL_H
 
 #include "zend_ssa.h"
-#include "zend_func_info.h"
+#include "zend_call_graph.h"
 
 #define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
 #define ZEND_OP1_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op1)

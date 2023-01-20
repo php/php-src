@@ -22,6 +22,7 @@
 #include "zend_operators.h"
 #include "zend_multibyte.h"
 #include "zend_ini.h"
+#include "zend_globals.h"
 
 static const zend_encoding *dummy_encoding_fetcher(const char *encoding_name)
 {

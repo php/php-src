@@ -22,6 +22,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_stream.h"
+#include "zend_globals.h"
 
 ZEND_DLIMPORT int isatty(int fd);
 
