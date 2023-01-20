@@ -161,7 +161,7 @@ PHP_METHOD(Random_Randomizer, getFloat)
 
 		bounds_type = ZSTR_VAL(bounds_name)[0] + ZSTR_LEN(bounds_name);
 	}
-	
+
 	switch (bounds_type) {
 	case 'C' + sizeof("ClosedOpen") - 1:
 		if (UNEXPECTED(max <= min)) {
@@ -424,7 +424,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 			mask = 0x7;
 		} else if (source_length <= 0x10) {
 			mask = 0xF;
- 		} else if (source_length <= 0x20) {
+		} else if (source_length <= 0x20) {
 			mask = 0x1F;
 		} else if (source_length <= 0x40) {
 			mask = 0x3F;
