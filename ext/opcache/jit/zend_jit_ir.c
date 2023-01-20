@@ -712,6 +712,11 @@ static void zend_jit_merge_N(zend_jit_ctx *jit, uint32_t n, ir_ref *inputs)
 	}
 }
 
+#define zend_jit_array_add(__array, __ref) do { \
+		ZEND_ASSERT(__array ## _count < sizeof(__array)/sizeof(__array[0])); \
+		__array[__array ## _count++] = __ref; \
+	} while (0)
+
 static ir_ref zend_jit_list_add(zend_jit_ctx *jit, ir_ref list, ir_ref ref)
 {
 	ir_insn *insn = &jit->ctx.ir_base[ref];
@@ -2147,7 +2152,7 @@ static void zend_jit_zval_ptr_dtor(zend_jit_ctx  *jit,
 		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT|MAY_BE_GUARD)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			if_refcounted = zend_jit_if_zval_refcounted(jit, addr);
 			zend_jit_if_false(jit, if_refcounted);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_refcounted);
 		}
 		ref = zend_jit_zval_ptr(jit, addr);
@@ -2161,7 +2166,7 @@ static void zend_jit_zval_ptr_dtor(zend_jit_ctx  *jit,
 			// zval_dtor_func(r);
 			zend_jit_zval_dtor(jit, ref, op_info, opline);
 			if (if_not_zero) {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_not_zero);
 			}
 		}
@@ -2179,7 +2184,7 @@ static void zend_jit_zval_ptr_dtor(zend_jit_ctx  *jit,
 
 				if_collectable = zend_jit_if_zval_ref_collectable(jit, ref2);
 				zend_jit_if_false(jit, if_collectable);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_collectable);
 
 				ref2 = zend_jit_zval_ref_ptr(jit, ref2);
@@ -2192,7 +2197,7 @@ static void zend_jit_zval_ptr_dtor(zend_jit_ctx  *jit,
 
 			if_may_not_leak = zend_jit_if_gc_may_not_leak(jit, ref);
 			zend_jit_if_true(jit, if_may_not_leak);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_may_not_leak);
 
 			zend_jit_call_1(jit, IR_VOID,
@@ -2201,7 +2206,7 @@ static void zend_jit_zval_ptr_dtor(zend_jit_ctx  *jit,
 		}
 
 		if (end_inputs_count) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 		}
 	}
@@ -2236,19 +2241,19 @@ static void zend_jit_obj_release(zend_jit_ctx  *jit, ir_ref ref)
 		zend_jit_const_func_addr(jit, (uintptr_t)zend_objects_store_del, IR_CONST_FASTCALL_FUNC),
 		ref);
 
-	end_inputs[end_inputs_count++] = zend_jit_end(jit);
+	zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	zend_jit_if_true(jit, if_not_zero);
 
 	if_may_not_leak = zend_jit_if_gc_may_not_leak(jit, ref);
 	zend_jit_if_true(jit, if_may_not_leak);
-	end_inputs[end_inputs_count++] = zend_jit_end(jit);
+	zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	zend_jit_if_false(jit, if_may_not_leak);
 
 	zend_jit_call_1(jit, IR_VOID,
 		zend_jit_const_func_addr(jit, (uintptr_t)gc_possible_root, IR_CONST_FASTCALL_FUNC),
 		ref);
 
-	end_inputs[end_inputs_count++] = zend_jit_end(jit);
+	zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 }
 
@@ -5599,14 +5604,14 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 		if (!zend_jit_math_long_long(jit, opline, opcode, op1_addr, op2_addr, res_addr, res_info, res_use_info, may_overflow)) {
 			return 0;
 		}
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		if (if_op1_long) {
 			zend_jit_if_false_cold(jit, if_op1_long);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 		if (if_op1_long_op2_long) {
 			zend_jit_if_false_cold(jit, if_op1_long_op2_long);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 	} else if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 		if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
@@ -5620,22 +5625,22 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					if_op1_long_op2_double = zend_jit_if_zval_type(jit, op2_addr, IS_DOUBLE);
 					zend_jit_if_false_cold(jit, if_op1_long_op2_double);
-					slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 					zend_jit_if_true(jit, if_op1_long_op2_double);
 				}
 				if (!zend_jit_math_long_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
 					return 0;
 				}
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			} else {
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			}
 			zend_jit_if_true(jit, if_op1_long_op2_long);
 		}
 		if (!zend_jit_math_long_long(jit, opline, opcode, op1_addr, op2_addr, res_addr, res_info, res_use_info, may_overflow)) {
 			return 0;
 		}
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 		if (if_op1_long) {
 			zend_jit_if_false_cold(jit, if_op1_long);
@@ -5645,7 +5650,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 				if_op1_double = zend_jit_if_zval_type(jit, op1_addr, IS_DOUBLE);
 				zend_jit_if_false_cold(jit, if_op1_double);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_op1_double);
 			}
 			if (op2_info & MAY_BE_DOUBLE) {
@@ -5656,7 +5661,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
 					return 0;
 				}
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				if (if_op1_double_op2_double) {
 					zend_jit_if_false_cold(jit, if_op1_double_op2_double);
 				}
@@ -5665,18 +5670,18 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					if_op1_double_op2_long = zend_jit_if_zval_type(jit, op2_addr, IS_LONG);
 					zend_jit_if_false_cold(jit, if_op1_double_op2_long);
-					slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 					zend_jit_if_true(jit, if_op1_double_op2_long);
 				}
 				if (!zend_jit_math_double_long(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
 					return 0;
 				}
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			} else if (if_op1_double_op2_double) {
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			}
 		} else if (if_op1_long) {
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 	} else if ((op1_info & MAY_BE_DOUBLE) &&
 	           !(op1_info & MAY_BE_LONG) &&
@@ -5685,7 +5690,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 		if (op1_info & (MAY_BE_ANY-MAY_BE_DOUBLE)) {
 			if_op1_double = zend_jit_if_zval_type(jit, op1_addr, IS_DOUBLE);
 			zend_jit_if_false_cold(jit, if_op1_double);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_op1_double);
 		}
 		if (op2_info & MAY_BE_DOUBLE) {
@@ -5696,7 +5701,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 			if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			if (if_op1_double_op2_double) {
 				zend_jit_if_false_cold(jit, if_op1_double_op2_double);
 			}
@@ -5705,15 +5710,15 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 			if (op2_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				if_op1_double_op2_long = zend_jit_if_zval_type(jit, op2_addr, IS_LONG);
 				zend_jit_if_false_cold(jit, if_op1_double_op2_long);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_op1_double_op2_long);
 			}
 			if (!zend_jit_math_double_long(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else if (if_op1_double_op2_double) {
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 	} else if ((op2_info & MAY_BE_DOUBLE) &&
 	           !(op2_info & MAY_BE_LONG) &&
@@ -5722,7 +5727,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 		if (op2_info & (MAY_BE_ANY-MAY_BE_DOUBLE)) {
 			if_op2_double = zend_jit_if_zval_type(jit, op2_addr, IS_DOUBLE);
 			zend_jit_if_false_cold(jit, if_op2_double);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_op2_double);
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
@@ -5733,7 +5738,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 			if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			if (if_op1_double_op2_double) {
 				zend_jit_if_false_cold(jit, if_op1_double_op2_double);
 			}
@@ -5742,15 +5747,15 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				if_op1_long_op2_double = zend_jit_if_zval_type(jit, op1_addr, IS_LONG);
 				zend_jit_if_false_cold(jit, if_op1_long_op2_double);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_op1_long_op2_double);
 			}
 			if (!zend_jit_math_long_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else if (if_op1_double_op2_double) {
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -5818,7 +5823,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				return 0;
 			}
 		}
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (end_inputs_count) {
@@ -6579,7 +6584,7 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 					zend_jit_stub_addr(jit, jit_stub_exception_handler_undef));
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_def);
 		}
 		if (val_info & MAY_BE_REF) {
@@ -6615,9 +6620,9 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 				if_not_zero = zend_jit_if(jit, refcount);
 				zend_jit_if_false(jit, if_not_zero);
 				zend_jit_zval_dtor(jit, ref, val_info, opline);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_not_zero);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 				zend_jit_if_false(jit, if_ref);
 
@@ -6686,7 +6691,7 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 	}
 
 	if (end_inputs_count) {
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 	}
 
@@ -6864,7 +6869,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		if (check_exception) {
 			zend_jit_check_exception(jit);
 		}
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 		if (!ref_addr) {
 			zend_jit_if_false(jit, if_ref);
@@ -6885,7 +6890,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			if_refcounted = zend_jit_if_zval_refcounted(jit, var_use_addr);
 			zend_jit_if_false(jit, if_refcounted);
-			simple_inputs[simple_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(simple_inputs, zend_jit_end(jit));
 			zend_jit_if_true_cold(jit, if_refcounted);
 		} else if (RC_MAY_BE_1(var_info)) {
 			done = 1;
@@ -6903,7 +6908,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 			if (check_exception) {
 				zend_jit_check_exception(jit);
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_not_zero);
 			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
 				ir_ref if_may_leak = zend_jit_if_gc_may_not_leak(jit, ref);
@@ -6919,7 +6924,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 				if (check_exception && (val_info & MAY_BE_UNDEF)) {
 					zend_jit_check_exception(jit);
 				}
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_may_leak);
 			}
 			if (Z_MODE(var_addr) == IS_REG || Z_MODE(res_addr) == IS_REG) {
@@ -6929,7 +6934,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 			if (check_exception && (val_info & MAY_BE_UNDEF)) {
 				zend_jit_check_exception(jit);
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else /* if (RC_MAY_BE_N(var_info)) */ {
 			zend_jit_gc_delref(jit, ref);
 			if (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
@@ -6938,10 +6943,10 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 				zend_jit_call_1(jit, IR_VOID,
 					zend_jit_const_func_addr(jit, (uintptr_t)gc_possible_root, IR_CONST_FASTCALL_FUNC),
 					ref);
-				simple_inputs[simple_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(simple_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_may_leak);
 			}
-			simple_inputs[simple_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(simple_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -6954,7 +6959,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 			return 0;
 		}
 		if (end_inputs_count) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -7341,24 +7346,24 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					if_op1_long_op2_double = zend_jit_if_zval_type(jit, op2_addr, IS_DOUBLE);
 					zend_jit_if_false_cold(jit, if_op1_long_op2_double);
-					slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 					zend_jit_if_true(jit, if_op1_long_op2_double);
 				}
 				if (!zend_jit_cmp_long_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 					return 0;
 				}
-				end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-					jit->control : zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+					jit->control : zend_jit_end(jit));
 			} else {
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			}
 			zend_jit_if_true(jit, if_op1_long_op2_long);
 		}
 		if (!zend_jit_cmp_long_long(jit, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr, skip_comparison)) {
 			return 0;
 		}
-		end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-			jit->control : zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+			jit->control : zend_jit_end(jit));
 
 		if (if_op1_long) {
 			zend_jit_if_false_cold(jit, if_op1_long);
@@ -7367,7 +7372,7 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 				if_op1_double = zend_jit_if_zval_type(jit, op1_addr, IS_DOUBLE);
 				zend_jit_if_false_cold(jit, if_op1_double);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_op1_double);
 			}
 			if (op2_info & MAY_BE_DOUBLE) {
@@ -7378,8 +7383,8 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				if (!zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 					return 0;
 				}
-				end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-					jit->control : zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+					jit->control : zend_jit_end(jit));
 				if (if_op1_double_op2_double) {
 					zend_jit_if_false_cold(jit, if_op1_double_op2_double);
 				}
@@ -7388,19 +7393,19 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					if_op1_double_op2_long = zend_jit_if_zval_type(jit, op2_addr, IS_LONG);
 					zend_jit_if_false_cold(jit, if_op1_double_op2_long);
-					slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 					zend_jit_if_true(jit, if_op1_double_op2_long);
 				}
 				if (!zend_jit_cmp_double_long(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 					return 0;
 				}
-				end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-					jit->control : zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+					jit->control : zend_jit_end(jit));
 			} else if (if_op1_double_op2_double) {
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			}
 		} else if (if_op1_long) {
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 	} else if ((op1_info & MAY_BE_DOUBLE) &&
 	           !(op1_info & MAY_BE_LONG) &&
@@ -7408,7 +7413,7 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_DOUBLE)) {
 			if_op1_double = zend_jit_if_zval_type(jit, op1_addr, IS_DOUBLE);
 			zend_jit_if_false_cold(jit, if_op1_double);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_op1_double);
 		}
 		if (op2_info & MAY_BE_DOUBLE) {
@@ -7419,8 +7424,8 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			if (!zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-				jit->control : zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+				jit->control : zend_jit_end(jit));
 			if (if_op1_double_op2_double) {
 				zend_jit_if_false_cold(jit, if_op1_double_op2_double);
 			}
@@ -7429,16 +7434,16 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				if_op1_double_op2_long = zend_jit_if_zval_type(jit, op2_addr, IS_LONG);
 				zend_jit_if_false_cold(jit, if_op1_double_op2_long);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_op1_double_op2_long);
 			}
 			if (!zend_jit_cmp_double_long(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-				jit->control : zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+				jit->control : zend_jit_end(jit));
 		} else if (if_op1_double_op2_double) {
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 	} else if ((op2_info & MAY_BE_DOUBLE) &&
 	           !(op2_info & MAY_BE_LONG) &&
@@ -7446,7 +7451,7 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 		if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_DOUBLE)) {
 			if_op2_double = zend_jit_if_zval_type(jit, op2_addr, IS_DOUBLE);
 			zend_jit_if_false_cold(jit, if_op2_double);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_op2_double);
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
@@ -7457,8 +7462,8 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			if (!zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-				jit->control : zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+				jit->control : zend_jit_end(jit));
 			if (if_op1_double_op2_double) {
 				zend_jit_if_false_cold(jit, if_op1_double_op2_double);
 			}
@@ -7467,16 +7472,16 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				if_op1_long_op2_double = zend_jit_if_zval_type(jit, op1_addr, IS_LONG);
 				zend_jit_if_false_cold(jit, if_op1_long_op2_double);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_op1_long_op2_double);
 			}
 			if (!zend_jit_cmp_long_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 				return 0;
 			}
-			end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-				jit->control : zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+				jit->control : zend_jit_end(jit));
 		} else if (if_op1_double_op2_double) {
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -7528,8 +7533,8 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			return 0;
 		}
 
-		end_inputs[end_inputs_count++] = (smart_branch_opcode && !exit_addr) ?
-			jit->control : zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
+			jit->control : zend_jit_end(jit));
 	}
 
 	if (end_inputs_count) {
@@ -7554,9 +7559,9 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				while (n) {
 					n--;
 					zend_jit_if_true(jit, end_inputs[n]);
-					merge_inputs[merge_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(merge_inputs, zend_jit_end(jit));
 					zend_jit_if_false(jit, end_inputs[n]);
-					merge_inputs[merge_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(merge_inputs, zend_jit_end(jit));
 				}
 				zend_jit_merge_N(jit, merge_inputs_count, merge_inputs);
 				_zend_jit_add_predecessor_ref(jit, label, jit->b, zend_jit_end(jit));
@@ -7949,15 +7954,15 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 			}
 			if (exit_addr) {
 				if (branch_opcode == ZEND_JMPNZ) {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				} else {
 					zend_jit_side_exit(jit,
 						zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				}
 			} else if (false_label != (uint32_t)-1) {
-				false_inputs[false_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(false_inputs, zend_jit_end(jit));
 			} else {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 			zend_jit_if_false(jit, if_type);
 		}
@@ -7978,15 +7983,15 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 			}
 			if (exit_addr) {
 				if (branch_opcode == ZEND_JMPZ) {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				} else {
 					zend_jit_side_exit(jit,
 						zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				}
 			} else if (true_label != (uint32_t)-1) {
-				true_inputs[true_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			} else {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 			if (if_type) {
 				zend_jit_if_false(jit, if_type);
@@ -8025,7 +8030,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 						ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_U32), ref),
 						ir_const_u32(&jit->ctx, IS_FALSE)));
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else if (exit_addr) {
 			if (set_bool) {
 				zend_jit_zval_ref_set_type_info(jit,
@@ -8043,19 +8048,19 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 				zend_jit_guard_not(jit, ref,
 					zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else {
 			ir_ref if_val = zend_jit_if(jit, ref);
 			zend_jit_if_true(jit, if_val);
 			if (set_bool) {
 				zend_jit_zval_set_type_info(jit, res_addr, set_bool_not ? IS_FALSE : IS_TRUE);
 			}
-			true_inputs[true_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_val);
 			if (set_bool) {
 				zend_jit_zval_set_type_info(jit, res_addr, set_bool_not ? IS_TRUE : IS_FALSE);
 			}
-			false_inputs[false_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(false_inputs, zend_jit_end(jit));
 		}
 		if (if_long) {
 			zend_jit_if_false(jit, if_long);
@@ -8093,7 +8098,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 						ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_U32), ref),
 						ir_const_u32(&jit->ctx, IS_FALSE)));
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else if (exit_addr) {
 		    if (set_bool) {
 				zend_jit_zval_ref_set_type_info(jit,
@@ -8109,19 +8114,19 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 				zend_jit_guard_not(jit, ref,
 					zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else {
 			ir_ref if_val = zend_jit_if(jit, ref);
 			zend_jit_if_true(jit, if_val);
 			if (set_bool) {
 				zend_jit_zval_set_type_info(jit, res_addr, set_bool_not ? IS_FALSE : IS_TRUE);
 			}
-			true_inputs[true_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_val);
 			if (set_bool) {
 				zend_jit_zval_set_type_info(jit, res_addr, set_bool_not ? IS_TRUE : IS_FALSE);
 			}
-			false_inputs[false_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(false_inputs, zend_jit_end(jit));
 		}
 		if (if_double) {
 			zend_jit_if_false(jit, if_double);
@@ -8152,7 +8157,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 						ir_const_u32(&jit->ctx, IS_FALSE)));
 			}
 			if (end_inputs_count) {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		} else if (exit_addr) {
 			if (set_bool) {
@@ -8170,7 +8175,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 					zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 			}
 			if (end_inputs_count) {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		} else {
 			ir_ref if_val = zend_jit_if(jit, ref);
@@ -8178,12 +8183,12 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 			if (set_bool) {
 				zend_jit_zval_set_type_info(jit, res_addr, set_bool_not ? IS_FALSE : IS_TRUE);
 			}
-			true_inputs[true_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_val);
 			if (set_bool) {
 				zend_jit_zval_set_type_info(jit, res_addr, set_bool_not ? IS_TRUE : IS_FALSE);
 			}
-			false_inputs[false_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(false_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -8245,13 +8250,13 @@ static int zend_jit_defined(zend_jit_ctx *jit, const zend_op *opline, zend_uchar
 			zend_jit_side_exit(jit,
 				zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 		} else {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	} else if (smart_branch_opcode) {
-		true_inputs[true_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(true_inputs, zend_jit_end(jit));
 	} else {
 		zend_jit_zval_set_type_info(jit, res_addr, IS_TRUE);
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	zend_jit_if_true_cold(jit, if_set2);
@@ -8275,13 +8280,13 @@ static int zend_jit_defined(zend_jit_ctx *jit, const zend_op *opline, zend_uchar
 			zend_jit_side_exit(jit,
 				zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 		} else {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	} else if (smart_branch_opcode) {
-		false_inputs[false_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(false_inputs, zend_jit_end(jit));
 	} else {
 		zend_jit_zval_set_type_info(jit, res_addr, IS_FALSE);
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	zend_jit_if_false(jit, ref2);
@@ -8301,20 +8306,20 @@ static int zend_jit_defined(zend_jit_ctx *jit, const zend_op *opline, zend_uchar
 			zend_jit_guard_not(jit, ref2,
 				zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 		}
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	} else if (smart_branch_opcode) {
 		ref2 = zend_jit_if(jit, ref2);
 		zend_jit_if_true(jit, ref2);
-		true_inputs[true_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(true_inputs, zend_jit_end(jit));
 		zend_jit_if_false(jit, ref2);
-		false_inputs[false_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(false_inputs, zend_jit_end(jit));
 	} else {
 		zend_jit_zval_ref_set_type_info(jit,
 			zend_jit_mem_zval_addr(jit, res_addr),
 			ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_U32),
 				ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_U32), ref2),
 				ir_const_u32(&jit->ctx, IS_FALSE)));
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (!smart_branch_opcode || exit_addr) {
@@ -8569,13 +8574,13 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 					zend_jit_side_exit(jit,
 						zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				} else {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			} else if (smart_branch_opcode) {
-				true_inputs[true_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			} else {
 				zend_jit_zval_set_type_info(jit, res_addr, IS_TRUE);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		} else {
 			if (exit_addr) {
@@ -8583,14 +8588,14 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 					zend_jit_side_exit(jit,
 						zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				} else {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			} else if (smart_branch_opcode) {
-				false_inputs[false_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(false_inputs, zend_jit_end(jit));
 			} else {
 				zend_jit_zval_set_type_info(jit, res_addr, IS_FALSE);
 				if (if_def) {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			}
 		}
@@ -8610,13 +8615,13 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 					zend_jit_side_exit(jit,
 						zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				} else if (end_inputs_count) {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			} else if (smart_branch_opcode) {
-				true_inputs[true_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			} else {
 				zend_jit_zval_set_type_info(jit, res_addr, IS_TRUE);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 	    } else if (!(op1_info & MAY_BE_GUARD) && !(op1_info & mask)) {
 			zend_jit_free_op(jit, opline->op1_type, opline->op1, op1_info, opline);
@@ -8625,13 +8630,13 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 					zend_jit_side_exit(jit,
 						zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				} else if (end_inputs_count) {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			} else if (smart_branch_opcode) {
-				false_inputs[false_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(false_inputs, zend_jit_end(jit));
 			} else {
 				zend_jit_zval_set_type_info(jit, res_addr, IS_FALSE);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		} else {
 			ir_ref ref;
@@ -8696,21 +8701,21 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 						zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				}
 				if (end_inputs_count) {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			} else if (smart_branch_opcode) {
 				ir_ref if_val = zend_jit_if(jit, ref);
 				zend_jit_if_true(jit, if_val);
-				true_inputs[true_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(true_inputs, zend_jit_end(jit));
 				zend_jit_if_false(jit, if_val);
-				false_inputs[false_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(false_inputs, zend_jit_end(jit));
 			} else {
 				zend_jit_zval_ref_set_type_info(jit,
 					zend_jit_mem_zval_addr(jit, res_addr),
 					ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_U32),
 						ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_U32), ref),
 						ir_const_u32(&jit->ctx, IS_FALSE)));
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 	    }
 	}
@@ -8761,19 +8766,19 @@ static int zend_jit_isset_isempty_cv(zend_jit_ctx *jit, const zend_op *opline, u
 		if (exit_addr) {
 			ZEND_ASSERT(smart_branch_opcode == ZEND_JMPZ);
 		} else if (smart_branch_opcode) {
-			true_inputs[true_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(true_inputs, zend_jit_end(jit));
 		} else {
 			zend_jit_zval_set_type_info(jit, res_addr, IS_TRUE);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	} else if (!(op1_info & (MAY_BE_ANY - MAY_BE_NULL))) {
 		if (exit_addr) {
 			ZEND_ASSERT(smart_branch_opcode == ZEND_JMPNZ);
 		} else if (smart_branch_opcode) {
-			false_inputs[false_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(false_inputs, zend_jit_end(jit));
 		} else {
 			zend_jit_zval_set_type_info(jit, res_addr, IS_FALSE);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	} else {
 		ir_ref ref = ir_fold2(&jit->ctx, IR_OPT(IR_GT, IR_U8),
@@ -8788,21 +8793,21 @@ static int zend_jit_isset_isempty_cv(zend_jit_ctx *jit, const zend_op *opline, u
 					zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 			}
 			if (end_inputs_count) {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		} else if (smart_branch_opcode) {
 			ir_ref if_val = zend_jit_if(jit, ref);
 			zend_jit_if_true(jit, if_val);
-			true_inputs[true_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_val);
-			false_inputs[false_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(false_inputs, zend_jit_end(jit));
 		} else {
 			zend_jit_zval_ref_set_type_info(jit,
 				zend_jit_mem_zval_addr(jit, res_addr),
 				ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_U32),
 					ir_fold1(&jit->ctx, IR_OPT(IR_ZEXT, IR_U32), ref),
 					ir_const_u32(&jit->ctx, IS_FALSE)));
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -9934,7 +9939,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 {
 	uint32_t arg_num = opline->op2.num;
 	zend_jit_addr arg_addr;
-	ir_ref end_inputs[5];
+	ir_ref end_inputs[8];
 	uint32_t end_inputs_count = 0;
 
 	ZEND_ASSERT((opline->opcode != ZEND_SEND_VAR_EX &&
@@ -9976,7 +9981,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 				return 0;
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_send_by_ref);
 		}
 	} else if (opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
@@ -10038,7 +10043,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 			if (op1_info & MAY_BE_REF) {
 				ir_ref if_ref = zend_jit_if_zval_type(jit, arg_addr, IS_REFERENCE);
 				zend_jit_if_true(jit, if_ref);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_false(jit, if_ref);
 			}
 
@@ -10049,7 +10054,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 				ir_const_u32(&jit->ctx, mask));
 			if_prefer_ref = zend_jit_if(jit, cond);
 			zend_jit_if_true(jit, if_prefer_ref);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_prefer_ref);
 
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
@@ -10065,7 +10070,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 					zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_only_vars_by_reference, IR_CONST_FASTCALL_FUNC),
 					zend_jit_zval_addr(jit, arg_addr));
 				zend_jit_check_exception(jit);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 
 			zend_jit_if_false(jit, if_send_by_ref);
@@ -10096,7 +10101,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 				return 0;
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_send_by_ref);
 		}
 	}
@@ -10122,11 +10127,11 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 		zend_jit_guard(jit, ref, zend_jit_stub_addr(jit, jit_stub_exception_handler));
 
 		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_undef);
 		} else {
 			if (end_inputs_count) {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 			}
 			return 1;
@@ -10143,7 +10148,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 				// JIT: if (Z_TYPE_P(arg) == IS_REFERENCE)
 				ir_ref if_ref = zend_jit_if_zval_type(jit, arg_addr, IS_REFERENCE);
 				zend_jit_if_true(jit, if_ref);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_false(jit, if_ref);
 		}
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
@@ -10204,16 +10209,16 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 				zend_jit_if_true(jit, if_refcounted);
 				// JIT: Z_ADDREF_P(arg)
 				zend_jit_gc_addref(jit, zend_jit_zval_ptr(jit, arg_addr));
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_false(jit, if_refcounted);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 
 				zend_jit_if_false(jit, if_not_zero);
 
 				// JIT: efree(ref)
 				zend_jit_efree(jit, ref, sizeof(zend_reference), op_array, opline);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 				zend_jit_if_false(jit, if_ref);
 
@@ -10242,7 +10247,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 	}
 
 	if (end_inputs_count) {
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 	}
 
@@ -11832,7 +11837,7 @@ static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_
 	zend_jit_addr ret_addr;
 	int8_t return_value_used;
 	ir_ref return_value = IR_UNUSED, ref, refcount, if_return_value_used = IR_UNUSED;
-	ir_ref end_inputs[5];
+	ir_ref end_inputs[8];
 	uint32_t end_inputs_count = 0;
 
 	ZEND_ASSERT(op_array->type != ZEND_EVAL_CODE && op_array->function_name);
@@ -11889,19 +11894,19 @@ static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_
 				if (RC_MAY_BE_N(op1_info)) {
 					ir_ref if_non_zero = zend_jit_if(jit, refcount);
 					zend_jit_if_true(jit, if_non_zero);
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 					zend_jit_if_false(jit, if_non_zero);
 				}
 				zend_jit_zval_dtor(jit, ref, op1_info, opline);
 			}
 			if (return_value_used == -1) {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		}
 	} else if (return_value_used == -1) {
 		if_return_value_used = zend_jit_if(jit, return_value);
 		zend_jit_if_false_cold(jit, if_return_value_used);
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (if_return_value_used) {
@@ -11910,7 +11915,7 @@ static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_
 
 	if (return_value_used == 0) {
 		if (end_inputs_count) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 		}
 		return 1;
@@ -11966,18 +11971,18 @@ static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_
 			// JIT: if (IS_REFCOUNTED())
 			ir_ref if_refcounted = zend_jit_if_zval_refcounted(jit, ret_addr);
 			zend_jit_if_false(jit, if_refcounted);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_refcounted);
 
 			// JIT: ADDREF
 			ref2 = zend_jit_zval_ptr(jit, ret_addr);
 			zend_jit_gc_addref(jit, ref2);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_if_false(jit, if_non_zero);
 
 			zend_jit_efree(jit, ref, sizeof(zend_reference), op_array, opline);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_if_false(jit, if_ref);
 		}
@@ -11986,11 +11991,11 @@ static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 		if (end_inputs_count) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 		}
 	} else {
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		jit->return_inputs = zend_jit_list_add_N(jit, jit->return_inputs, end_inputs_count, end_inputs);
 
 		jit->control = IR_UNUSED;
@@ -12032,7 +12037,7 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 		num_used_ref);
 	if_fit = zend_jit_if(jit, cond);
 	zend_jit_if_false_cold(jit, if_fit);
-	slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+	zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 	zend_jit_if_true(jit, if_fit);
 
 	// JIT: Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
@@ -12042,7 +12047,7 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 		idx_ref);
 	if_reference = zend_jit_if_zval_ref_type(jit, bucket_ref, ir_const_u8(&jit->ctx, IS_REFERENCE));
 	zend_jit_if_false_cold(jit, if_reference);
-	slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+	zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 	zend_jit_if_true(jit, if_reference);
 
 	// JIT: (EXPECTED(p->key == varname))
@@ -12052,7 +12057,7 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 		zend_jit_const_addr(jit, (uintptr_t)varname));
 	if_same_key = zend_jit_if(jit, cond);
 	zend_jit_if_false_cold(jit, if_same_key);
-	slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+	zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 	zend_jit_if_true(jit, if_same_key);
 
 	// JIT: GC_ADDREF(Z_PTR(p->val))
@@ -12091,26 +12096,26 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 		if_non_zero = zend_jit_if(jit, refcount);
 		if (!(op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 			zend_jit_if_true(jit, if_non_zero);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 		zend_jit_if_false(jit, if_non_zero);
 
 		zend_jit_zval_dtor(jit, ref2, op1_info, opline);
 		if (op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_non_zero);
 
 			// JIT: GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
 			if_may_not_leak = zend_jit_if_gc_may_not_leak(jit, ref2);
 			zend_jit_if_true(jit, if_may_not_leak);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_may_not_leak);
 			zend_jit_call_1(jit, IR_VOID,
 				zend_jit_const_func_addr(jit, (uintptr_t)gc_possible_root, IR_CONST_FASTCALL_FUNC),
 				ref2);
 		}
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_refcounted);
 		}
 	}
@@ -12122,7 +12127,7 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 	}
 
 	if (end_inputs_count) {
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 	}
 
@@ -12144,7 +12149,7 @@ static int zend_jit_free(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_
 			if (op1_info & MAY_BE_ARRAY) {
 				if_array = zend_jit_if_zval_type(jit, op1_addr, IS_ARRAY);
 				zend_jit_if_true(jit, if_array);
-				merge[merge_count++] = zend_jit_end(jit);
+				zend_jit_array_add(merge, zend_jit_end(jit));
 				zend_jit_if_false(jit, if_array);
 			}
 			ref = zend_jit_load_at_offset(jit, IR_U32,
@@ -12152,14 +12157,14 @@ static int zend_jit_free(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_
 			if_exists = zend_jit_if(jit,
 				ir_fold2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, ir_const_u32(&jit->ctx, -1)));
 			zend_jit_if_true(jit, if_exists);
-			merge[merge_count++] = zend_jit_end(jit);
+			zend_jit_array_add(merge, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_exists);
 
 			zend_jit_call_1(jit, IR_VOID,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_hash_iterator_del, IR_CONST_FASTCALL_FUNC),
 				ref);
 
-			merge[merge_count++] = zend_jit_end(jit);
+			zend_jit_array_add(merge, zend_jit_end(jit));
 			zend_jit_merge_N(jit, merge_count, merge);
 		}
 
@@ -12646,7 +12651,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				} else {
 					ir_ref if_fit = zend_jit_if(jit, cond);
 					zend_jit_if_false(jit, if_fit);
-					idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 					zend_jit_if_true(jit, if_fit);
 				}
 				// JIT: _ret = &_ht->arPacked[h];
@@ -12659,8 +12664,8 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						ht_ref, offsetof(zend_array, arPacked)),
 					ref);
 				if (type == BP_JIT_IS) {
-					test_zval_inputs[test_zval_inputs_count] = zend_jit_end(jit);
-					test_zval_values[test_zval_inputs_count++] = ref;
+					test_zval_values[test_zval_inputs_count] = ref;
+					zend_jit_array_add(test_zval_inputs, zend_jit_end(jit));
 				}
 			}
 		}
@@ -12694,8 +12699,8 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						end_inputs[(*end_inputs_count)++] = zend_jit_end(jit);
 						zend_jit_if_true(jit, if_found);
 					}
-					test_zval_inputs[test_zval_inputs_count] = zend_jit_end(jit);
-					test_zval_values[test_zval_inputs_count++] = ref;
+					test_zval_values[test_zval_inputs_count] = ref;
+					zend_jit_array_add(test_zval_inputs, zend_jit_end(jit));
 				} else if (not_found_exit_addr) {
 //???+					zend_jit_side_exit(jit, zend_jit_const_addr(jit, (uintptr_t)not_found_exit_addr));
 //???+					|	jmp &not_found_exit_addr
@@ -12728,7 +12733,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					} else {
 						ir_ref if_def = zend_jit_if(jit, type_ref);
 						zend_jit_if_false(jit, if_def);
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_def);
 					}
 				}
@@ -12740,7 +12745,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 //???+				} else if (type == BP_VAR_IS && result_type_guard) {
 //???+					|	jmp >7 // NOT_FOUND
 					} else {
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 					}
 				}
 				if (/*!packed_loaded ||*/ (op1_info & MAY_BE_ARRAY_NUMERIC_HASH)) {
@@ -12772,7 +12777,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					} else {
 						if_found = zend_jit_if(jit, ref);
 						zend_jit_if_false(jit, if_found);
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_found);
 					}
 					found_inputs[*found_inputs_count] = zend_jit_end(jit);
@@ -12823,7 +12828,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						found_vals[*found_inputs_count] = ref;
 						(*found_inputs_count)++;
 						zend_jit_if_false_cold(jit, if_def);
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 					}
 				}
 				if (!packed_loaded ||
@@ -12832,9 +12837,9 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					if (if_packed) {
 						zend_jit_if_false(jit, if_packed);
 						if_packed = IR_UNUSED;
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 					} if (!packed_loaded) {
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 					}
 
 					zend_jit_merge_N(jit, idx_not_found_inputs_count, idx_not_found_inputs);
@@ -12878,15 +12883,15 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					found_vals[*found_inputs_count] = ref;
 					(*found_inputs_count)++;
 					zend_jit_if_false(jit, if_def);
-					idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 				}
 				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) || packed_loaded || bad_packed_key || dim_type == IS_UNDEF) {
 					if (if_packed) {
 						zend_jit_if_false(jit, if_packed);
 						if_packed = IR_UNUSED;
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 					} else if (!packed_loaded) {
-						idx_not_found_inputs[idx_not_found_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(idx_not_found_inputs, zend_jit_end(jit));
 					}
 					zend_jit_merge_N(jit, idx_not_found_inputs_count, idx_not_found_inputs);
 					if (!op2_loaded) {
@@ -12962,8 +12967,8 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					end_inputs[(*end_inputs_count)++] = zend_jit_end(jit);
 					zend_jit_if_true(jit, if_found);
 				}
-				test_zval_inputs[test_zval_inputs_count] = zend_jit_end(jit);
-				test_zval_values[test_zval_inputs_count++] = ref;
+				test_zval_values[test_zval_inputs_count] = ref;
+				zend_jit_array_add(test_zval_inputs, zend_jit_end(jit));
 				break;
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -13352,7 +13357,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 				zend_jit_copy_zval(jit, res_addr, -1, val_addr, res_info, 1);
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -13399,7 +13404,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 					zend_jit_zval_addr(jit, op2_addr),
 					zend_jit_zval_addr(jit, res_addr));
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 
 		if (op1_info & MAY_BE_OBJECT) {
@@ -13442,7 +13447,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 					zend_jit_zval_addr(jit, res_addr));
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 
 		if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_OBJECT|may_be_string)))
@@ -13482,7 +13487,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 			}
 
 			zend_jit_zval_set_type_info(jit, res_addr, IS_NULL);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -13627,7 +13632,7 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
 		}
 		zend_jit_separate_array(jit, op1_addr, op1_info);
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL)) {
-			array_inputs[array_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(array_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -13667,7 +13672,7 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
 		zend_jit_zval_set_ptr(jit, op1_addr, ref);
 		zend_jit_zval_set_type_info(jit, op1_addr, IS_ARRAY_EX);
 		if (array_inputs_count) {
-			array_inputs[array_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(array_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -13725,13 +13730,13 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 			zend_jit_call_1(jit, IR_VOID,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_cannot_add_element, IR_CONST_FASTCALL_FUNC),
 				zend_jit_fp(jit));
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_if_true(jit, if_ok);
 			zend_jit_zval_set_ptr(jit, res_addr, ref);
 			zend_jit_zval_set_type_info(jit, res_addr, IS_INDIRECT);
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else {
 			uint32_t type;
 
@@ -13764,7 +13769,7 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 					zend_jit_merge_N(jit, end_inputs_count, end_inputs);
 					zend_jit_zval_set_type_info(jit, res_addr, IS_NULL);
 					end_inputs_count = 0;
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			} else {
 				ZEND_ASSERT(end_inputs_count == 0);
@@ -13775,7 +13780,7 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 				ref = zend_jit_phi_N(jit, found_inputs_count, found_vals);
 				zend_jit_zval_set_ptr(jit, res_addr, ref);
 				zend_jit_zval_set_type_info(jit, res_addr, IS_INDIRECT);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 
 		}
@@ -13828,7 +13833,7 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 			}
 
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_ARRAY)) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -13949,9 +13954,9 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 				arg1, arg2);
 			if_true = zend_jit_if(jit, ref);
 			zend_jit_if_true(jit, if_true);
-			true_inputs[true_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(true_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_true);
-			false_inputs[false_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(false_inputs, zend_jit_end(jit));
 		} else {
 			if (op2_info & MAY_BE_UNDEF) {
 				ir_ref end1 = IR_UNUSED;
@@ -13970,7 +13975,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 					zend_jit_merge_2(jit, end1, zend_jit_end(jit));
 				}
 			}
-			false_inputs[false_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(false_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -13996,7 +14001,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 				if (smart_branch_opcode == ZEND_JMPNZ) {
 					zend_jit_side_exit(jit, zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 				} else {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				}
 			} else if (smart_branch_opcode) {
 				if (smart_branch_opcode == ZEND_JMPZ) {
@@ -14009,7 +14014,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			} else {
 				zend_jit_zval_set_type_info(jit, res_addr, IS_TRUE);
 
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		} else {
 			ZEND_ASSERT(0); // TODO: support for empty()
@@ -14029,7 +14034,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			if (smart_branch_opcode == ZEND_JMPZ) {
 				zend_jit_side_exit(jit, zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 			} else {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		} else if (smart_branch_opcode) {
 			if (smart_branch_opcode == ZEND_JMPZ) {
@@ -14041,7 +14046,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			}
 		} else {
 			zend_jit_zval_set_type_info(jit, res_addr, IS_FALSE);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	} else {
 		ZEND_ASSERT(0); // TODO: support for empty()
@@ -14111,7 +14116,7 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_cannot_add_element, IR_CONST_FASTCALL_FUNC),
 				zend_jit_fp(jit));
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_if_true(jit, if_ok);
 			var_addr = ZEND_ADDR_REF_ZVAL(ref);
@@ -14154,7 +14159,7 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 			}
 		}
 
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_ARRAY))) {
@@ -14197,7 +14202,7 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 
 		zend_jit_free_op(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, NULL);
 
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 #ifdef ZEND_JIT_USE_RC_INFERENCE
@@ -14259,7 +14264,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_cannot_add_element, IR_CONST_FASTCALL_FUNC),
 				zend_jit_fp(jit));
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_if_true(jit, if_ok);
 			var_addr = ZEND_ADDR_REF_ZVAL(ref);
@@ -14324,7 +14329,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 						zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_assign_op_to_typed_ref, IR_CONST_FASTCALL_FUNC),
 						reference, arg2, zend_jit_const_func_addr(jit, (uintptr_t)binary_op, IR_CONST_FASTCALL_FUNC));
 
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 					zend_jit_merge_2(jit, noref_path, ref_path);
 					ref = zend_jit_phi_2(jit, ref, ref2);
@@ -14377,7 +14382,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 					ZEND_UNREACHABLE();
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -14405,7 +14410,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 			arg2,
 			zend_jit_zval_addr(jit, op3_addr),
 			zend_jit_const_func_addr(jit, (uintptr_t)binary_op, IR_CONST_FASTCALL_FUNC));
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (end_inputs_count) {
@@ -14554,13 +14559,13 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 			} else {
 				ir_ref if_fit = zend_jit_if(jit, ref);
 				zend_jit_if_false(jit, if_fit);
-				exit_inputs[exit_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(exit_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_fit);
 			}
 		} else {
 			ir_ref if_fit = zend_jit_if(jit, ref);
 			zend_jit_if_false(jit, if_fit);
-			exit_inputs[exit_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(exit_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_fit);
 		}
 
@@ -14625,13 +14630,13 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 			} else {
 				ir_ref if_fit = zend_jit_if(jit, ref);
 				zend_jit_if_false(jit, if_fit);
-				exit_inputs[exit_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(exit_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_fit);
 			}
 		} else {
 			ir_ref if_fit = zend_jit_if(jit, ref);
 			zend_jit_if_false(jit, if_fit);
-			exit_inputs[exit_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(exit_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_fit);
 		}
 
@@ -15020,7 +15025,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				} else {
 					zend_jit_zval_set_type_info(jit, res_addr, IS_NULL);
 				}
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 				zend_jit_if_true(jit, if_obj);
 			}
@@ -15070,7 +15075,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					offsetof(zend_object, ce))));
 
 		zend_jit_if_false_cold(jit, if_same);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_true(jit, if_same);
 		ir_ref offset_ref = zend_jit_load_at_offset(jit, IR_ADDR,
@@ -15085,7 +15090,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					IR_NULL));
 			if (opline->opcode == ZEND_FETCH_OBJ_W) {
 				zend_jit_if_true_cold(jit, if_dynamic);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			} else {
 				zend_jit_if_true_cold(jit, if_dynamic);
 				zend_jit_set_ex_opline(jit, opline);
@@ -15101,7 +15106,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 						obj_ref,
 						offset_ref);
 				}
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 			zend_jit_if_false(jit, if_dynamic);
 		}
@@ -15109,7 +15114,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		prop_type_ref = zend_jit_zval_ref_type(jit, prop_ref);
 		ir_ref if_def = zend_jit_if(jit, prop_type_ref);
 		zend_jit_if_false_cold(jit, if_def);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 		zend_jit_if_true(jit, if_def);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 		if (opline->opcode == ZEND_FETCH_OBJ_W
@@ -15135,7 +15140,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			zend_jit_gc_addref(jit, ref);
 			zend_jit_zval_set_ptr(jit, res_addr, ref);
 			zend_jit_zval_set_type_info(jit, res_addr, IS_OBJECT_EX);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_if_false_cold(jit, if_prop_obj);
 			zend_jit_set_ex_opline(jit, opline);
@@ -15143,7 +15148,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_readonly_property_modification_error, IR_CONST_FASTCALL_FUNC),
 				prop_info_ref);
 			zend_jit_zval_set_type_info(jit, res_addr, _IS_ERROR);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			if (flags == ZEND_FETCH_DIM_WRITE) {
 				zend_jit_if_false_cold(jit, if_readonly);
@@ -15152,7 +15157,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_check_array_promotion, IR_CONST_FASTCALL_FUNC),
 					prop_ref,
 					prop_info_ref);
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_false(jit, if_has_prop_info);
 			} else if (flags == ZEND_FETCH_REF) {
 				zend_jit_if_false_cold(jit, if_readonly);
@@ -15161,7 +15166,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					prop_ref,
 					prop_info_ref,
 					zend_jit_zval_addr(jit, res_addr));
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_false(jit, if_has_prop_info);
 			} else {
 				ZEND_ASSERT(flags == 0);
@@ -15190,7 +15195,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			prop_type_ref = zend_jit_zval_type_info(jit, prop_addr);
 			ir_ref if_def = zend_jit_if(jit, prop_type_ref);
 			zend_jit_if_false_cold(jit, if_def);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 			zend_jit_if_true(jit, if_def);
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_READONLY)) {
@@ -15203,7 +15208,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			zend_jit_gc_addref(jit, ref);
 			zend_jit_zval_set_ptr(jit, res_addr, ref);
 			zend_jit_zval_set_type_info(jit, res_addr, IS_OBJECT_EX);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_if_false_cold(jit, if_prop_obj);
 			zend_jit_set_ex_opline(jit, opline);
@@ -15211,7 +15216,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_readonly_property_modification_error, IR_CONST_FASTCALL_FUNC),
 				zend_jit_const_addr(jit, (uintptr_t)prop_info));
 			zend_jit_zval_set_type_info(jit, res_addr, _IS_ERROR);
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		} else if (opline->opcode == ZEND_FETCH_OBJ_W
 		 && (opline->extended_value & ZEND_FETCH_OBJ_FLAGS)
 		 && ZEND_TYPE_IS_SET(prop_info->type)) {
@@ -15232,7 +15237,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 						zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_check_array_promotion, IR_CONST_FASTCALL_FUNC),
 						prop_ref,
 						zend_jit_const_addr(jit, (uintptr_t)prop_info));
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 					zend_jit_if_false(jit, if_null_or_flase);
 				}
 			} else if (flags == ZEND_FETCH_REF) {
@@ -15262,7 +15267,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					prop_ref,
 					ref,
 					zend_jit_zval_addr(jit, res_addr));
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_reference);
 			} else {
 				ZEND_UNREACHABLE();
@@ -15278,7 +15283,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_info) {
 				ssa->var_info[ssa_op->result_def].indirect_reference = 1;
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	} else {
 		bool result_avoid_refcounting = 0;
@@ -15321,7 +15326,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				return 0;
 			}
 		}
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || !prop_info) {
@@ -15341,7 +15346,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_fetch_obj_is_slow, IR_CONST_FASTCALL_FUNC),
 				obj_ref);
 		}
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	zend_jit_merge_N(jit, end_inputs_count, end_inputs);
@@ -15470,7 +15475,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 					zend_jit_zval_set_type_info(jit, res_addr, IS_NULL);
 				}
 
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 				zend_jit_if_true(jit, if_obj);
 			}
@@ -15525,7 +15530,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 					offsetof(zend_object, ce))));
 
 		zend_jit_if_false_cold(jit, if_same);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_true(jit, if_same);
 		ir_ref offset_ref = zend_jit_load_at_offset(jit, IR_ADDR,
@@ -15537,13 +15542,13 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				offset_ref,
 				IR_NULL));
 		zend_jit_if_true_cold(jit, if_dynamic);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_false(jit, if_dynamic);
 		prop_ref = ir_fold2(&jit->ctx, IR_OPT(IR_ADD, IR_ADDR), obj_ref, offset_ref);
 		ir_ref if_def = zend_jit_if(jit, zend_jit_zval_ref_type(jit, prop_ref));
 		zend_jit_if_false_cold(jit, if_def);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_true(jit, if_def);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
@@ -15570,7 +15575,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				// CACHE_PTR_EX(cache_slot + 2, NULL);
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			zend_jit_if_false(jit, if_has_prop_info);
 		}
 	} else {
@@ -15591,7 +15596,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			} else {
 				ir_ref if_def = zend_jit_if(jit, zend_jit_zval_type_info(jit, prop_addr));
 				zend_jit_if_false_cold(jit, if_def);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_def);
 			}
 		}
@@ -15617,7 +15622,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				zend_jit_zval_addr(jit, val_addr),
 				RETURN_VALUE_USED(opline) ? zend_jit_zval_addr(jit, res_addr) : IR_NULL);
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -15637,7 +15642,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				/* skip FREE_OP_DATA() */
 				delayed_end_input = zend_jit_end(jit);
 			} else {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		}
 	}
@@ -15658,7 +15663,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			zend_jit_addr_offset(jit, run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
 			RETURN_VALUE_USED(opline) ? zend_jit_zval_addr(jit, res_addr) : IR_NULL);
 
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (end_inputs_count) {
@@ -15761,7 +15766,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 
 				may_throw = 1;
 
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_obj);
 			}
 		}
@@ -15820,7 +15825,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 					offsetof(zend_object, ce))));
 
 		zend_jit_if_false_cold(jit, if_same);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_true(jit, if_same);
 		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
@@ -15829,7 +15834,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 				((opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2);
 			ir_ref if_has_prop_info = zend_jit_if(jit, prop_info_ref);
 			zend_jit_if_true_cold(jit, if_has_prop_info);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 			zend_jit_if_false(jit, if_has_prop_info);
 		}
@@ -15842,7 +15847,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 				offset_ref,
 				IR_NULL));
 		zend_jit_if_true_cold(jit, if_dynamic);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_false(jit, if_dynamic);
 
@@ -15850,7 +15855,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		if (!use_prop_guard) {
 			ir_ref if_def = zend_jit_if(jit, zend_jit_zval_ref_type(jit, prop_ref));
 			zend_jit_if_false_cold(jit, if_def);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 			zend_jit_if_true(jit, if_def);
 		}
@@ -15874,7 +15879,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 				ir_ref if_def = zend_jit_if(jit,
 					zend_jit_zval_type_info(jit, prop_addr));
 				zend_jit_if_false_cold(jit, if_def);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_def);
 			}
 		}
@@ -15903,7 +15908,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 				zend_jit_zval_addr(jit, val_addr),
 				zend_jit_const_func_addr(jit, (uintptr_t)binary_op, IR_CONST_FASTCALL_FUNC));
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_merge_2(jit, noref_path, ref_path);
 			prop_ref = zend_jit_phi_2(jit, prop_ref, ref);
@@ -15928,7 +15933,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 				zend_jit_zval_addr(jit, val_addr),
 				zend_jit_const_func_addr(jit, (uintptr_t)binary_op, IR_CONST_FASTCALL_FUNC));
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -15973,7 +15978,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 				zend_jit_zval_addr(jit, val_addr),
 				zend_jit_const_func_addr(jit, (uintptr_t)binary_op, IR_CONST_FASTCALL_FUNC));
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_merge_2(jit, noref_path, ref_path);
 			prop_ref = zend_jit_phi_2(jit, prop_ref, ref);
@@ -16063,7 +16068,7 @@ long_math:
 				ZEND_UNREACHABLE();
 		}
 		if (end_inputs_count || slow_inputs_count) {
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -16084,7 +16089,7 @@ long_math:
 			zend_jit_addr_offset(jit, run_time_cache, (opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
 			zend_jit_const_func_addr(jit, (uintptr_t)binary_op, IR_CONST_FASTCALL_FUNC));
 
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (end_inputs_count) {
@@ -16188,7 +16193,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				may_throw = 1;
 
 				if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !delayed_fetch_this && !op1_indirect) {
-					end_inputs[end_inputs_count++] = zend_jit_end(jit);
+					zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				} else {
 					zend_jit_ijmp(jit, zend_jit_stub_addr(jit, jit_stub_exception_handler));
 				}
@@ -16250,7 +16255,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 					offsetof(zend_object, ce))));
 
 		zend_jit_if_false_cold(jit, if_same);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_true(jit, if_same);
 		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
@@ -16259,7 +16264,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2);
 			ir_ref if_has_prop_info = zend_jit_if(jit, prop_info_ref);
 			zend_jit_if_true_cold(jit, if_has_prop_info);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 			zend_jit_if_false(jit, if_has_prop_info);
 		}
@@ -16272,7 +16277,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				offset_ref,
 				IR_NULL));
 		zend_jit_if_true_cold(jit, if_dynamic);
-		slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 		zend_jit_if_false(jit, if_dynamic);
 
@@ -16280,7 +16285,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		if (!use_prop_guard) {
 			ir_ref if_def = zend_jit_if(jit, zend_jit_zval_ref_type(jit, prop_ref));
 			zend_jit_if_false_cold(jit, if_def);
-			slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 
 			zend_jit_if_true(jit, if_def);
 		}
@@ -16304,7 +16309,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				ir_ref if_def = zend_jit_if(jit,
 					zend_jit_zval_type_info(jit, prop_addr));
 				zend_jit_if_false_cold(jit, if_def);
-				slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_def);
 			}
 		}
@@ -16368,7 +16373,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 					ref,
 					zend_jit_zval_addr(jit, res_addr));
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 	}
 
@@ -16429,7 +16434,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				reference,
 				(opline->result_type == IS_UNUSED) ? IR_NULL : zend_jit_zval_addr(jit, res_addr));
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 			zend_jit_merge_2(jit, noref_path, ref_path);
 			prop_ref = zend_jit_phi_2(jit, prop_ref, ref);
@@ -16475,7 +16480,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 					zend_jit_zval_set_type_info(jit, res_addr, IS_LONG);
 				}
 			}
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 
 		if (var_info & (MAY_BE_ANY - MAY_BE_LONG)) {
@@ -16512,7 +16517,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				}
 			}
 
-			end_inputs[end_inputs_count++] = zend_jit_end(jit);
+			zend_jit_array_add(end_inputs, zend_jit_end(jit));
 		}
 		if (var_info & MAY_BE_LONG) {
 			zend_jit_if_true_cold(jit, if_overflow);
@@ -16584,7 +16589,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				ssa->var_info[ssa_op->result_def].type = res_info & ~MAY_BE_GUARD;
 				zend_jit_side_exit(jit, zend_jit_const_addr(jit, (uintptr_t)exit_addr));
 			} else {
-				end_inputs[end_inputs_count++] = zend_jit_end(jit);
+				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 			}
 		}
 	}
@@ -16624,7 +16629,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 			zend_jit_addr_offset(jit, run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
 			(opline->result_type == IS_UNUSED) ? IR_NULL : zend_jit_zval_addr(jit, res_addr));
 
-		end_inputs[end_inputs_count++] = zend_jit_end(jit);
+		zend_jit_array_add(end_inputs, zend_jit_end(jit));
 	}
 
 	if (end_inputs_count) {
@@ -16747,7 +16752,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					} else {
 						ir_ref if_ref = zend_jit_if_zval_type(jit, op1_addr, IS_REFERENCE);
 						zend_jit_if_false_cold(jit, if_ref);
-						slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_ref);
 					}
 
@@ -16760,7 +16765,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					} else {
 						if_long = zend_jit_if_zval_type(jit, op1_addr, IS_LONG);
 						zend_jit_if_false_cold(jit, if_long);
-						slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_long);
 					}
 
@@ -16773,7 +16778,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					} else {
 						ir_ref if_long = zend_jit_if_zval_type(jit, op1_addr, IS_LONG);
 						zend_jit_if_false_cold(jit, if_long);
-						slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_long);
 					}
 				}
@@ -16868,7 +16873,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					} else {
 						ir_ref if_ref = zend_jit_if_zval_type(jit, op1_addr, IS_STRING);
 						zend_jit_if_false_cold(jit, if_ref);
-						slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_ref);
 					}
 
@@ -16881,7 +16886,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					} else {
 						if_string = zend_jit_if_zval_type(jit, op1_addr, IS_STRING);
 						zend_jit_if_false_cold(jit, if_string);
-						slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_string);
 					}
 
@@ -16894,7 +16899,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					} else {
 						ir_ref if_string = zend_jit_if_zval_type(jit, op1_addr, IS_STRING);
 						zend_jit_if_false_cold(jit, if_string);
-						slow_inputs[slow_inputs_count++] = zend_jit_end(jit);
+						zend_jit_array_add(slow_inputs, zend_jit_end(jit));
 						zend_jit_if_true(jit, if_string);
 					}
 				}
