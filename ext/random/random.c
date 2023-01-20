@@ -557,9 +557,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 
 		if (fd < 0) {
 			errno = 0;
-# if HAVE_DEV_URANDOM
 			fd = open("/dev/urandom", O_RDONLY);
-# endif
 			if (fd < 0) {
 				if (should_throw) {
 					if (errno != 0) {
