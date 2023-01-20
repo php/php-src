@@ -15324,6 +15324,20 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 {
 	zend_jit_addr op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
 
+	if (!MAY_BE_HASH(op1_info) && !MAY_BE_PACKED(op1_info)) {
+		/* empty array */
+		if (exit_addr) {
+			if (exit_opcode == ZEND_JMP) {
+				|	jmp &exit_addr
+			} else {
+				|	jmp >3
+			}
+		} else {
+			|	jmp =>target_label
+		}
+		return 1;
+	}
+
 	|	// array = EX_VAR(opline->op1.var);
 	|	// fe_ht = Z_ARRVAL_P(array);
 	|	GET_ZVAL_PTR FCARG1a, op1_addr

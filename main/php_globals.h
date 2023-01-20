@@ -153,6 +153,7 @@ struct _php_core_globals {
 	char *request_order;
 
 	bool mail_x_header;
+	bool mail_mixed_lf_and_crlf;
 	char *mail_log;
 
 	bool in_error_log;

@@ -862,6 +862,26 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 }
 /* }}} */
 
+static bool gmp_verify_base(zend_long base, uint32_t arg_num)
+{
+	if (base && (base < 2 || base > GMP_MAX_BASE)) {
+		zend_argument_value_error(arg_num, "must be between 2 and %d", GMP_MAX_BASE);
+		return false;
+	}
+
+	return true;
+}
+
+static zend_result gmp_initialize_number(mpz_ptr gmp_number, const zend_string *arg_str, zend_long arg_l, zend_long base)
+{
+	if (arg_str) {
+		return convert_zstr_to_gmp(gmp_number, arg_str, base, 1);
+	}
+
+	mpz_set_si(gmp_number, arg_l);
+	return SUCCESS;
+}
+
 /* {{{ Initializes GMP number */
 ZEND_FUNCTION(gmp_init)
 {
@@ -876,18 +896,14 @@ ZEND_FUNCTION(gmp_init)
 		Z_PARAM_LONG(base)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		zend_argument_value_error(2, "must be between 2 and %d", GMP_MAX_BASE);
+	if (!gmp_verify_base(base, 2)) {
 		RETURN_THROWS();
 	}
 
 	INIT_GMP_RETVAL(gmp_number);
-	if (arg_str) {
-		if (convert_zstr_to_gmp(gmp_number, arg_str, base, 1) == FAILURE) {
-			RETURN_THROWS();
-		}
-	} else {
-		mpz_set_si(gmp_number, arg_l);
+
+	if (gmp_initialize_number(gmp_number, arg_str, arg_l, base) == FAILURE) {
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -2020,6 +2036,30 @@ ZEND_FUNCTION(gmp_scan1)
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
+
+ZEND_METHOD(GMP, __construct)
+{
+	zend_string *arg_str = NULL;
+	zend_long arg_l = 0;
+	zend_long base = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG(arg_str, arg_l)
+		Z_PARAM_LONG(base)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!gmp_verify_base(base, 2)) {
+		RETURN_THROWS();
+	}
+
+	return_value = ZEND_THIS;
+	mpz_ptr gmp_number = GET_GMP_FROM_ZVAL(ZEND_THIS);
+
+	if (gmp_initialize_number(gmp_number, arg_str, arg_l, base) == FAILURE) {
+		RETURN_THROWS();
+	}
+}
 
 ZEND_METHOD(GMP, __serialize)
 {

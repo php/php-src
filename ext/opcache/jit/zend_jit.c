@@ -4561,18 +4561,12 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 			}
 		}
 
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_SSA) {
-			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
-				if (info) {
-					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &info->ssa);
-				}
-			}
-		}
-
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
+				if (JIT_G(debug) & ZEND_JIT_DEBUG_SSA) {
+					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &info->ssa);
+				}
 				if (zend_jit(call_graph.op_arrays[i], &info->ssa, NULL) != SUCCESS) {
 					goto jit_failure;
 				}

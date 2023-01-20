@@ -1535,7 +1535,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					} else {
 						ssa_vars[i].alias = zend_jit_var_may_alias(op_array, ssa, i);
 					}
-					if (op_array->arg_info) {
+					if (op_array->arg_info && i < trace_buffer[1].opline - op_array->opcodes) {
 						zend_arg_info *arg_info = &op_array->arg_info[i];
 						zend_class_entry *ce;
 						uint32_t tmp = zend_fetch_arg_info_type(script, arg_info, &ce);

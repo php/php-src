@@ -30,14 +30,30 @@
 # include "timelib_config.h"
 #endif
 
-#define TIMELIB_VERSION 202203
-#define TIMELIB_EXTENDED_VERSION 20220301
-#define TIMELIB_ASCII_VERSION "2022.03"
+#define TIMELIB_VERSION 202204
+#define TIMELIB_EXTENDED_VERSION 20220401
+#define TIMELIB_ASCII_VERSION "2022.04"
 
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
 #include <inttypes.h>
+
+# ifndef HAVE_INT32_T
+#  if SIZEOF_INT == 4
+typedef int int32_t;
+#  elif SIZEOF_LONG == 4
+typedef long int int32_t;
+#  endif
+# endif
+
+# ifndef HAVE_UINT32_T
+#  if SIZEOF_INT == 4
+typedef unsigned int uint32_t;
+#  elif SIZEOF_LONG == 4
+typedef unsigned long int uint32_t;
+#  endif
+# endif
 
 #ifdef _WIN32
 # if _MSC_VER >= 1600

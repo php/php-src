@@ -194,7 +194,19 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								node->parent = nsparent;
 								node->ns = curns;
 							} else {
-								node = xmlDocCopyNode(node, domintern->document->ptr, 1);
+								/**
+								 * Upon freeing libxslt's context, every document which is not the *main* document will be freed by libxslt.
+								 * If a node of a document which is *not the main* document gets returned to userland, we'd free the node twice:
+								 * first by the cleanup of the xslt context, and then by our own refcounting mechanism.
+								 * To prevent this, we'll take a copy if the node is not from the main document.
+								 * It is important that we do not copy the node unconditionally, because that means that:
+								 *  - modifications to the node will only modify the copy, and not the original
+								 *  - accesses to the parent, path, ... will not work
+								 */
+								xsltTransformContextPtr transform_ctxt = (xsltTransformContextPtr) ctxt->context->extra;
+								if (node->doc != transform_ctxt->document->doc) {
+									node = xmlDocCopyNode(node, domintern->document->ptr, 1);
+								}
 							}
 
 							php_dom_create_object(node, &child, domintern);

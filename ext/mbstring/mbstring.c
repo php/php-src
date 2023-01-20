@@ -43,6 +43,7 @@
 #include "libmbfl/filters/mbfilter_uuencode.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
+#include "libmbfl/filters/mbfilter_utf16.h"
 #include "libmbfl/filters/mbfilter_singlebyte.h"
 #include "libmbfl/filters/translit_kana_jisx0201_jisx0208.h"
 
@@ -2994,6 +2995,24 @@ static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, 
 		data[i].in_len = in_len;
 		data[i].state = 0;
 		data[i].demerits = 0;
+
+		/* Skip byte order mark for UTF-8, UTF-16BE, or UTF-16LE */
+		if (elist[i] == &mbfl_encoding_utf8) {
+			if (in_len >= 3 && in[0] == 0xEF && in[1] == 0xBB && in[2] == 0xBF) {
+				data[i].in_len -= 3;
+				data[i].in += 3;
+			}
+		} else if (elist[i] == &mbfl_encoding_utf16be) {
+			if (in_len >= 2 && in[0] == 0xFE && in[1] == 0xFF) {
+				data[i].in_len -= 2;
+				data[i].in += 2;
+			}
+		} else if (elist[i] == &mbfl_encoding_utf16le) {
+			if (in_len >= 2 && in[0] == 0xFF && in[1] == 0xFE) {
+				data[i].in_len -= 2;
+				data[i].in += 2;
+			}
+		}
 	}
 
 	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
@@ -4299,7 +4318,9 @@ PHP_FUNCTION(mb_send_mail)
 	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid || orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
 		orig_str.encoding = mb_guess_encoding((unsigned char*)subject, subject_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
-	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, CRLF, sizeof("Subject: [PHP-jp nnnnnnnn]" CRLF) - 1);
+	const char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : CRLF;
+	size_t line_sep_len = strlen(line_sep);
+	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, line_sep, strlen("Subject: [PHP-jp nnnnnnnn]") + line_sep_len);
 	if (pstr != NULL) {
 		subject_buf = subject = (char *)pstr->val;
 	}
@@ -4337,14 +4358,14 @@ PHP_FUNCTION(mb_send_mail)
 		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
 		if (n > 0 && p[n - 1] != '\n') {
-			mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+			mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 		}
 		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 	}
 
 	if (!suppressed_hdrs.cnt_type) {
@@ -4355,7 +4376,7 @@ PHP_FUNCTION(mb_send_mail)
 			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
 			mbfl_memory_device_strcat(&device, p);
 		}
-		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 	}
 	if (!suppressed_hdrs.cnt_trans_enc) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
@@ -4364,10 +4385,12 @@ PHP_FUNCTION(mb_send_mail)
 			p = "7bit";
 		}
 		mbfl_memory_device_strcat(&device, p);
-		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
+		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
 	}
 
-	mbfl_memory_device_unput(&device);
+	if (!PG(mail_mixed_lf_and_crlf)) {
+		mbfl_memory_device_unput(&device);
+	}
 	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_output('\0', &device);
 	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);
