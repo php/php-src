@@ -675,19 +675,20 @@ PHP_FUNCTION(lcg_value)
 PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
+	bool seed_is_null = true;
 	zend_long mode = MT_RAND_MT19937;
 	php_random_status *status = RANDOM_G(mt19937);
 	php_random_status_state_mt19937 *state = status->state;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(seed)
+		Z_PARAM_LONG_OR_NULL(seed, seed_is_null)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	state->mode = mode;
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (seed_is_null) {
 		php_random_mt19937_seed_default(status->state);
 	} else {
 		php_random_algo_mt19937.seed(status, (uint64_t) seed);

@@ -88,6 +88,10 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/randomizer_additions
   . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary.
     RFC: https://wiki.php.net/rfc/randomizer_additions
+  . Changed mt_srand() and srand() to not check the number of arguments to
+    determine whether a random seed should be used. Passing null will generate
+    a random seed, 0 will use zero as the seed. The functions are now consistent
+    with Mt19937::__construct().
 
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
