@@ -955,11 +955,6 @@ static zend_object *long_castable_no_operation_object_create(zend_class_entry *c
 	return long_castable_no_operation_object_create_ex(ce, 0);
 }
 
-static inline void long_castable_no_operation_create(zval *target, zend_long l)
-{
-	ZVAL_OBJ(target, long_castable_no_operation_object_create_ex(long_castable_no_operation_ce, l));
-}
-
 static zend_result long_castable_no_operation_cast_object(zend_object *obj, zval *result, int type)
 {
 	if (type == IS_LONG) {
@@ -994,11 +989,6 @@ static zend_object* float_castable_no_operation_object_create_ex(zend_class_entr
 static zend_object *float_castable_no_operation_object_create(zend_class_entry *ce)
 {
 	return float_castable_no_operation_object_create_ex(ce, 0.0);
-}
-
-static inline void float_castable_no_operation_create(zval *target, double d)
-{
-	ZVAL_OBJ(target, float_castable_no_operation_object_create_ex(float_castable_no_operation_ce, d));
 }
 
 static zend_result float_castable_no_operation_cast_object(zend_object *obj, zval *result, int type)
@@ -1037,11 +1027,6 @@ static zend_object *numeric_castable_no_operation_object_create(zend_class_entry
 	zval tmp;
 	ZVAL_LONG(&tmp, 0);
 	return numeric_castable_no_operation_object_create_ex(ce, &tmp);
-}
-
-static inline void numeric_castable_no_operation_create(zval *target, const zval *n)
-{
-	ZVAL_OBJ(target, numeric_castable_no_operation_object_create_ex(numeric_castable_no_operation_ce, n));
 }
 
 static zend_result numeric_castable_no_operation_cast_object(zend_object *obj, zval *result, int type)
