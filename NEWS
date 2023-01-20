@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fix GH-9675 (Broken run_time_cache init for internal enum methods).
     (Petar Obradović, Bob)
+  . Fix GH-10248 (Assertion `!(zval_get_type(&(*(property))) == 10)' failed).
+    (nielsdos)
 
 - FPM:
   . Fixed bug #77106 (Missing separator in FPM FastCGI errors). (Jakub Zelenka)
