@@ -979,7 +979,8 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 		ir_ref ref = ir_insn_op(snapshot, i);
 
 		if (ref) {
-			int8_t reg = ctx->regs[snapshot_ref][i];
+			int8_t *reg_ops = ctx->regs[snapshot_ref];
+			int8_t reg = reg_ops[i];
 			ir_ref var = i - 2; // TODO: Use sparse snapshots ???
 
 			ZEND_ASSERT(var < t->exit_info[exit_point].stack_size);
