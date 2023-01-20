@@ -5066,12 +5066,10 @@ PHP_FUNCTION(mb_chr)
 /* {{{ */
 PHP_FUNCTION(mb_scrub)
 {
-	char* str;
-	size_t str_len;
-	zend_string *enc_name = NULL;
+	zend_string *str, *enc_name = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
@@ -5081,7 +5079,12 @@ PHP_FUNCTION(mb_scrub)
 		RETURN_THROWS();
 	}
 
-	RETURN_STR(php_mb_convert_encoding_ex(str, str_len, enc, enc));
+	if (enc == &mbfl_encoding_utf8 && (GC_FLAGS(str) & IS_STR_VALID_UTF8)) {
+		/* A valid UTF-8 string will not be changed by mb_scrub; so just increment the refcount and return it */
+		RETURN_STR_COPY(str);
+	}
+
+	RETURN_STR(php_mb_convert_encoding_ex(ZSTR_VAL(str), ZSTR_LEN(str), enc, enc));
 }
 /* }}} */
 
