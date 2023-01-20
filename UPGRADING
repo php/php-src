@@ -85,6 +85,8 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/randomizer_additions
   . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary.
     RFC: https://wiki.php.net/rfc/randomizer_additions
+  . Changed the default value of the first parameter ($seed) of mt_srand() and
+    srand() to be null rather than 0.
 
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
