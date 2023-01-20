@@ -1576,6 +1576,7 @@ class EvaluatedValue
      */
     public static function createFromExpression(Expr $expr, ?SimpleType $constType, ?string $cConstName, iterable $allConstInfos): EvaluatedValue
     {
+        // This visitor replaces the PHP constants by C constants. It allows direct expansion of the compiled constants, e.g. later in the pretty printer.
         $visitor = new class($allConstInfos) extends PhpParser\NodeVisitorAbstract
         {
             public array $visitedConstants = [];
@@ -1623,6 +1624,7 @@ class EvaluatedValue
 
         $evaluator = new ConstExprEvaluator(
             function (Expr $expr) use ($allConstInfos, &$isUnknownConstValue) {
+                // $expr is a ConstFetch with a name of a C macro here
                 if (!$expr instanceof Expr\ConstFetch) {
                     throw new Exception($this->getVariableTypeName() . " " . $this->getVariableLikeName() . " has an unsupported value");
                 }
@@ -1663,7 +1665,7 @@ class EvaluatedValue
         $result = $evaluator->evaluateDirectly($expr);
 
         return new EvaluatedValue(
-            $result,
+            $result, // note: we are generally not interested in the actual value of $result, unless it's a bare value, without constants
             $constType ?? SimpleType::fromValue($result),
             $cConstName === null ? $expr : new Expr\ConstFetch(new Node\Name($cConstName)),
             $visitor->visitedConstants,
@@ -1717,7 +1719,7 @@ class EvaluatedValue
                 $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
             }
         } elseif ($this->type->isArray()) {
-            if ($cExpr == '[]' && empty($this->value)) {
+            if ($cExpr == '[]') {
                 $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
             } else {
                 throw new Exception("Unimplemented default value");
@@ -1731,6 +1733,7 @@ class EvaluatedValue
 
     public function getCExpr(): ?string
     {
+        // $this->expr has all its PHP constants replaced by C constants
         $prettyPrinter = new Standard;
         $expr = $prettyPrinter->prettyPrintExpr($this->expr);
         return $expr[0] == '"' ? $expr : preg_replace('(\bnull\b)', 'NULL', str_replace('\\', '', $expr));
@@ -1974,6 +1977,7 @@ class ConstInfo extends VariableLike
         }
 
         $value = EvaluatedValue::createFromExpression($this->value, $type, $this->cValue, $allConstInfos);
+        // i.e. const NAME = UNKNOWN;, without the annotation
         if ($value->isUnknownConstValue && $this->cValue === null && $value->expr instanceof Expr\ConstFetch && $value->expr->name->__toString() == $this->name->__toString()) {
             throw new Exception("Constant " . $this->name->__toString() . " must have a @cvalue annotation");
         }
