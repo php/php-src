@@ -39,12 +39,6 @@
 
 #define ZREG_RX ZREG_IP
 
-#if defined (__CET__) && (__CET__ & 1) != 0
-# define ENDBR_PADDING 4
-#else
-# define ENDBR_PADDING 0
-#endif
-
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 # define IR_PHP_LONG       IR_I64
 # define ir_const_php_long ir_const_i64
@@ -61,6 +55,7 @@
 	((1<<ZREG_FP) | (1<<ZREG_IP))
 #endif
 
+static size_t zend_jit_trace_prologue_size = (size_t)-1;
 static uint32_t allowed_opt_flags = 0;
 static bool delayed_call_chain = 0; // TODO: remove this var (use jit->delayed_call_level) ???
 
@@ -992,7 +987,7 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 					t->stack_map[t->exit_info[exit_point].stack_offset + var].type == IS_DOUBLE);
 
 				if (ref > 0) {
-					if (reg != -1/*IR_REG_NONE*/) {
+					if (reg != ZREG_NONE) {
 						t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = reg & 0x3f; // TODO: remove magic mask ???
 					} else {
 						t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
@@ -3724,6 +3719,39 @@ static void zend_jit_setup_disasm(void)
 #endif
 }
 
+static int zend_jit_calc_trace_prologue_size(void)
+{
+	zend_jit_ctx jit;
+	void *entry;
+	size_t size;
+
+	zend_jit_init_ctx(&jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? IR_FUNCTION : 0);
+
+	if (!GCC_GLOBAL_REGS) {
+		ir_ref ref;
+		ZEND_ASSERT(jit.control);
+		ZEND_ASSERT(jit.ctx.ir_base[jit.control].op == IR_START);
+		ref = zend_jit_param(&jit, IR_ADDR, "execute_data", 1);
+		zend_jit_store_fp(&jit, ref);
+		jit.ctx.flags |= IR_FASTCALL_FUNC;
+	}
+
+	jit.ctx.flags |= IR_START_BR_TARGET;
+
+	jit.control = ir_emit3(&jit.ctx, IR_UNREACHABLE, jit.control, IR_UNUSED, jit.ctx.ir_base[1].op1);
+	jit.ctx.ir_base[1].op1 = jit.control;
+
+	entry = zend_jit_ir_compile(&jit.ctx, &size, "JIT$trace_prologue");
+	zend_jit_free_ctx(&jit);
+
+	if (!entry) {
+		return 0;
+	}
+
+	zend_jit_trace_prologue_size = size;
+	return 1;
+}
+
 static int zend_jit_setup(void)
 {
 #if defined(IR_TARGET_X86)
@@ -3880,6 +3908,9 @@ static int zend_jit_setup(void)
 	}
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_PERF_DUMP) {
 		ir_perf_jitdump_open();
+	}
+	if (!zend_jit_calc_trace_prologue_size()) {
+		return FAILURE;
 	}
 	if (!zend_jit_setup_stubs()) {
 		return FAILURE;
@@ -17775,51 +17806,10 @@ static int zend_jit_link_side_trace(const void *code, size_t size, uint32_t jmp_
 static int zend_jit_trace_link_to_root(zend_jit_ctx *jit, zend_jit_trace_info *t, const void *timeout_exit_addr)
 {
 	const void *link_addr;
-	size_t prologue_size;
 
 	/* Skip prologue. */
-	// TODO: don't hardcode this ???
-	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-		prologue_size = 0;
-#elif defined(IR_TARGET_X64)
-		// sub r4, HYBRID_SPAD
-		prologue_size = 4; // ???
-#elif defined(IR_TARGET_X86)
-		// sub r4, HYBRID_SPAD
-		prologue_size = 3; // ???
-#elif defined(IR_TARGET_AARCH64)
-		prologue_size = 0;
-#else
-		ZEND_ASSERT(0);
-#endif
-	} else if (GCC_GLOBAL_REGS) {
-		// sub r4, SPAD // stack alignment
-#if defined(IR_TARGET_X64)
-		prologue_size = 4; //???
-#elif defined(IR_TARGET_X86)
-		prologue_size = 3; //???
-#elif defined(IR_TARGET_AARCH64)
-		prologue_size = 0; //???
-#else
-		ZEND_ASSERT(0);
-#endif
-	} else {
-		// sub r4, NR_SPAD // stack alignment
-		// mov aword T2, FP // save FP
-		// mov aword T3, RX // save IP
-		// mov FP, FCARG1a
-#if defined(IR_TARGET_X64)
-		prologue_size = 17; //???
-#elif defined(IR_TARGET_X86)
-		prologue_size = 36;
-#elif defined(IR_TARGET_AARCH64)
-		prologue_size = 0; //???
-#else
-		ZEND_ASSERT(0);
-#endif
-	}
-	link_addr = (const void*)((const char*)t->code_start + prologue_size + ENDBR_PADDING);
+	ZEND_ASSERT(zend_jit_trace_prologue_size != (size_t)-1);
+	link_addr = (const void*)((const char*)t->code_start + zend_jit_trace_prologue_size);
 
 	if (timeout_exit_addr) {
 		zend_jit_check_timeout(jit, NULL, timeout_exit_addr);
