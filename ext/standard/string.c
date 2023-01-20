@@ -1246,6 +1246,51 @@ PHP_FUNCTION(str_increment)
 	RETURN_STR(incremented);
 }
 
+
+PHP_FUNCTION(str_decrement)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(str) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+	if (!zend_string_only_has_ascii_alphanumeric(str)) {
+		zend_argument_value_error(1, "must be composed only of alphanumeric ASCII characters");
+		RETURN_THROWS();
+	}
+
+	zend_string *decremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistant */ false);
+	size_t position = ZSTR_LEN(str)-1;
+	bool carry = false;
+
+	do {
+		char c = ZSTR_VAL(decremented)[position];
+		if (EXPECTED( (c > 'a' && c <= 'z') || (c > 'A' && c <= 'Z') || (c > '0' && c <= '9') )) {
+			carry = false;
+			ZSTR_VAL(decremented)[position]--;
+		} else { /* if 'a', 'A', or '0' */
+			carry = true;
+			if (c == '0') {
+				ZSTR_VAL(decremented)[position] = '9';
+			} else {
+				ZSTR_VAL(decremented)[position] += 25;
+			}
+		}
+	} while (carry && position-- > 0);
+
+	if (UNEXPECTED(carry)) {
+		zend_string_release_ex(decremented, /* persistant */ false);
+		zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+		RETURN_THROWS();
+	}
+	RETURN_STR(decremented);
+}
+
 #if defined(PHP_WIN32)
 static bool _is_basename_start(const char *start, const char *pos)
 {
