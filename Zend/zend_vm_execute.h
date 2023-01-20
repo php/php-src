@@ -6446,6 +6446,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -8790,6 +8791,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -11155,6 +11157,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -15528,6 +15531,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -16964,6 +16968,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -18289,6 +18294,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -32333,6 +32339,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -34208,6 +34215,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -36681,6 +36689,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -40849,6 +40858,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -44634,6 +44644,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
@@ -49953,6 +49964,7 @@ fetch_obj_r_fast_copy:
 #if ZEND_DEBUG
 		if (!EG(exception) && prop_info && prop_info != ZEND_WRONG_PROPERTY_INFO
 				&& ZEND_TYPE_IS_SET(prop_info->type)) {
+			ZVAL_OPT_DEREF(retval);
 			zend_verify_property_type(prop_info, retval, /* strict */ true);
 		}
 #endif
