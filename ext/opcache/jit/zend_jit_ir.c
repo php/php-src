@@ -4468,7 +4468,7 @@ static int zend_jit_spill_store(zend_jit_ctx *jit, zend_jit_addr src, zend_jit_a
 	if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
 		zend_jit_zval_set_lval(jit, dst, zend_jit_use_reg(jit, src));
 		if (set_type &&
-		    (//???Z_REG(dst) != ZREG_FP ||
+		    (Z_REG(dst) != ZREG_FP ||
 		     !JIT_G(current_frame) ||
 		     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_LONG)) {
 			zend_jit_zval_set_type_info(jit, dst, IS_LONG);
@@ -4476,7 +4476,7 @@ static int zend_jit_spill_store(zend_jit_ctx *jit, zend_jit_addr src, zend_jit_a
 	} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 		zend_jit_zval_set_dval(jit, dst, zend_jit_use_reg(jit, src));
 		if (set_type &&
-		    (//???Z_REG(dst) != ZREG_FP ||
+		    (Z_REG(dst) != ZREG_FP ||
 		     !JIT_G(current_frame) ||
 		     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_DOUBLE)) {
 			zend_jit_zval_set_type_info(jit, dst, IS_DOUBLE);
@@ -4512,8 +4512,6 @@ static int zend_jit_store_var(zend_jit_ctx *jit, uint32_t info, int var, int ssa
 	return zend_jit_spill_store(jit, src, dst, info, set_type);
 }
 
-#if 1
-//???
 static int zend_jit_store_ref(zend_jit_ctx *jit, uint32_t info, int var, int32_t src, bool set_type)
 {
 	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
@@ -4521,7 +4519,7 @@ static int zend_jit_store_ref(zend_jit_ctx *jit, uint32_t info, int var, int32_t
 	if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
 		zend_jit_zval_set_lval(jit, dst, src);
 		if (set_type &&
-		    (//???Z_REG(dst) != ZREG_FP ||
+		    (Z_REG(dst) != ZREG_FP ||
 		     !JIT_G(current_frame) ||
 		     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_LONG)) {
 			zend_jit_zval_set_type_info(jit, dst, IS_LONG);
@@ -4529,7 +4527,7 @@ static int zend_jit_store_ref(zend_jit_ctx *jit, uint32_t info, int var, int32_t
 	} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 		zend_jit_zval_set_dval(jit, dst, src);
 		if (set_type &&
-		    (//???Z_REG(dst) != ZREG_FP ||
+		    (Z_REG(dst) != ZREG_FP ||
 		     !JIT_G(current_frame) ||
 		     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_DOUBLE)) {
 			zend_jit_zval_set_type_info(jit, dst, IS_DOUBLE);
@@ -4539,7 +4537,6 @@ static int zend_jit_store_ref(zend_jit_ctx *jit, uint32_t info, int var, int32_t
 	}
 	return 1;
 }
-#endif
 
 static ir_ref zend_jit_deopt_rload(zend_jit_ctx *jit, ir_type type, int32_t reg)
 {
@@ -4582,7 +4579,7 @@ static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t 
 		} else {
 			zend_jit_zval_set_lval(jit, dst, src);
 			if (set_type &&
-			    (//???Z_REG(dst) != ZREG_FP ||
+			    (Z_REG(dst) != ZREG_FP ||
 			     !JIT_G(current_frame) ||
 			     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_LONG)) {
 				zend_jit_zval_set_type_info(jit, dst, IS_LONG);
@@ -4596,7 +4593,7 @@ static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t 
 		} else {
 			zend_jit_zval_set_dval(jit, dst, src);
 			if (set_type &&
-			    (//???Z_REG(dst) != ZREG_FP ||
+			    (Z_REG(dst) != ZREG_FP ||
 			     !JIT_G(current_frame) ||
 			     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_DOUBLE)) {
 				zend_jit_zval_set_type_info(jit, dst, IS_DOUBLE);

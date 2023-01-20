@@ -7578,24 +7578,6 @@ done:
 						}
 					}
 				}
-//???
-#if 0
-				int32_t ref = STACK_REF(stack, i);
-
-				if (ref) {
-					if (ssa && ssa->vars[i].no_val) {
-						/* pass */
-					} else {
-						uint8_t type = STACK_TYPE(stack, i);
-
-						if (!(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))
-						 && !zend_jit_store_ref(jit, 1 << type, i, ref,
-							STACK_MEM_TYPE(stack, i) != type)) {
-							goto jit_failure;
-						}
-					}
-				}
-#endif
 				CLEAR_STACK_REF(stack, i);
 			}
 		}
