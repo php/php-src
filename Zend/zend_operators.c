@@ -2493,6 +2493,19 @@ ZEND_API bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *ins
 #define UPPER_CASE 2
 #define NUMERIC 3
 
+ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str)
+{
+	const char *p = ZSTR_VAL(str);
+	const char *e = ZSTR_VAL(str) + ZSTR_LEN(str);
+	while (p < e) {
+		char c = *p++;
+		if (UNEXPECTED( c < '0' || c > 'z' || (c < 'a' && c > 'Z') || (c < 'A' && c > '9') ) ) {
+			return false;
+		}
+	}
+	return true;
+}
+
 static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 {
 	int carry=0;
@@ -2512,18 +2525,10 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 		return;
 	}
 
-	{
-		const char *p = Z_STRVAL_P(str);
-		const char *e = Z_STRVAL_P(str) + Z_STRLEN_P(str);
-		while (p < e) {
-			char c = *p++;
-			if (UNEXPECTED( c < '0' || c > 'z' || (c < 'a' && c > 'Z') || (c < 'A' && c > '9') ) ) {
-				zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
-				if (EG(exception)) {
-					return;
-				}
-				break;
-			}
+	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
+		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
+		if (EG(exception)) {
+			return;
 		}
 	}
 
