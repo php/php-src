@@ -23,6 +23,7 @@
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
+#include "zend_accelerator_debug.h"
 #include "zend_execute.h"
 #include "zend_system_id.h"
 #include "SAPI.h"
