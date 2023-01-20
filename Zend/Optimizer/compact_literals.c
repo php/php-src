@@ -264,6 +264,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_FETCH_DIM_UNSET:
 				case ZEND_FETCH_LIST_R:
 				case ZEND_FETCH_LIST_W:
+				case ZEND_FETCH_LIST_IS:
 				case ZEND_ASSIGN_DIM_OP:
 					if (opline->op1_type == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, 1);

@@ -571,6 +571,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_DIM_UNSET:
 		case ZEND_FETCH_LIST_R:
 		case ZEND_FETCH_LIST_W:
+		case ZEND_FETCH_LIST_IS:
 			if (Z_TYPE_P(val) == IS_STRING) {
 				zend_ulong index;
 
@@ -636,6 +637,7 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 				 * we want to try to replace all uses of the temporary.
 				 */
 				case ZEND_FETCH_LIST_R:
+				case ZEND_FETCH_LIST_IS:
 				case ZEND_CASE:
 				case ZEND_CASE_STRICT:
 				case ZEND_SWITCH_LONG:
@@ -648,6 +650,7 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 							/* If this opcode doesn't keep the operand alive, we're done. Check
 							 * this early, because op replacement may modify the opline. */
 							bool is_last = opline->opcode != ZEND_FETCH_LIST_R
+								&& opline->opcode != ZEND_FETCH_LIST_IS
 								&& opline->opcode != ZEND_CASE
 								&& opline->opcode != ZEND_CASE_STRICT
 								&& opline->opcode != ZEND_SWITCH_LONG

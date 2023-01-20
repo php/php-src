@@ -1508,10 +1508,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_FETCH_DIM_R:
 		case ZEND_FETCH_DIM_IS:
 		case ZEND_FETCH_LIST_R:
+		case ZEND_FETCH_LIST_IS:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
-			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST_R)) == SUCCESS) {
+			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST_R && opline->opcode != ZEND_FETCH_LIST_IS)) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
