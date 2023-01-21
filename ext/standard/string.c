@@ -48,6 +48,7 @@
 
 #ifdef __SSE2__
 #include <emmintrin.h>
+#include "Zend/zend_bitset.h"
 #endif
 
 /* this is read-only, so it's ok */
@@ -3472,15 +3473,10 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t w
 ZEND_INTRIN_SSE4_2_FUNC_DECL(zend_string *php_addslashes_sse42(zend_string *str));
 zend_string *php_addslashes_default(zend_string *str);
 
-ZEND_INTRIN_SSE4_2_FUNC_DECL(void php_stripslashes_sse42(zend_string *str));
-void php_stripslashes_default(zend_string *str);
-
 # ifdef ZEND_INTRIN_SSE4_2_FUNC_PROTO
 PHPAPI zend_string *php_addslashes(zend_string *str) __attribute__((ifunc("resolve_addslashes")));
-PHPAPI void php_stripslashes(zend_string *str) __attribute__((ifunc("resolve_stripslashes")));
 
 typedef zend_string *(*php_addslashes_func_t)(zend_string *);
-typedef void (*php_stripslashes_func_t)(zend_string *);
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
@@ -3490,25 +3486,12 @@ static php_addslashes_func_t resolve_addslashes(void) {
 	}
 	return php_addslashes_default;
 }
-
-ZEND_NO_SANITIZE_ADDRESS
-ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_stripslashes_func_t resolve_stripslashes(void) {
-	if (zend_cpu_supports_sse42()) {
-		return php_stripslashes_sse42;
-	}
-	return php_stripslashes_default;
-}
 # else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
 
 static zend_string *(*php_addslashes_ptr)(zend_string *str) = NULL;
-static void (*php_stripslashes_ptr)(zend_string *str) = NULL;
 
 PHPAPI zend_string *php_addslashes(zend_string *str) {
 	return php_addslashes_ptr(str);
-}
-PHPAPI void php_stripslashes(zend_string *str) {
-	php_stripslashes_ptr(str);
 }
 
 /* {{{ PHP_MINIT_FUNCTION */
@@ -3516,10 +3499,8 @@ PHP_MINIT_FUNCTION(string_intrin)
 {
 	if (zend_cpu_supports_sse42()) {
 		php_addslashes_ptr = php_addslashes_sse42;
-		php_stripslashes_ptr = php_stripslashes_sse42;
 	} else {
 		php_addslashes_ptr = php_addslashes_default;
-		php_stripslashes_ptr = php_stripslashes_default;
 	}
 	return SUCCESS;
 }
@@ -3872,12 +3853,8 @@ static zend_always_inline char *php_stripslashes_impl(const char *str, char *out
 	return out;
 }
 
-#if defined(ZEND_INTRIN_SSE4_2_NATIVE) || defined(ZEND_INTRIN_SSE4_2_RESOLVER)
-# ifdef ZEND_INTRIN_SSE4_2_NATIVE
+#ifdef __SSE2__
 PHPAPI void php_stripslashes(zend_string *str)
-# elif defined(ZEND_INTRIN_SSE4_2_RESOLVER)
-void php_stripslashes_sse42(zend_string *str)
-# endif
 {
 	const char *s = ZSTR_VAL(str);
 	char *t = ZSTR_VAL(str);
@@ -3928,14 +3905,8 @@ void php_stripslashes_sse42(zend_string *str)
 		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	}
 }
-#endif
-
-#ifndef ZEND_INTRIN_SSE4_2_NATIVE
-# ifdef ZEND_INTRIN_SSE4_2_RESOLVER
-void php_stripslashes_default(zend_string *str) /* {{{ */
-# else
+#else
 PHPAPI void php_stripslashes(zend_string *str)
-# endif
 {
 	const char *t = php_stripslashes_impl(ZSTR_VAL(str), ZSTR_VAL(str), ZSTR_LEN(str));
 	if (t != (ZSTR_VAL(str) + ZSTR_LEN(str))) {
@@ -3943,7 +3914,6 @@ PHPAPI void php_stripslashes(zend_string *str)
 		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	}
 }
-/* }}} */
 #endif
 /* }}} */
 
