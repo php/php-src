@@ -612,3 +612,105 @@ jobs:
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  PECL:
+    runs-on: ubuntu-20.04
+    env:
+      CC: ccache gcc
+      CXX: ccache g++
+    steps:
+      - name: git checkout PHP
+        uses: actions/checkout@v3
+        with:
+          path: php
+      - name: git checkout apcu
+        uses: actions/checkout@v3
+        with:
+          repository: krakjoe/apcu
+          path: apcu
+      - name: git checkout imagick
+        uses: actions/checkout@v3
+        with:
+          repository: Imagick/imagick
+          path: imagick
+      - name: git checkout memcached
+        uses: actions/checkout@v3
+        with:
+          repository: php-memcached-dev/php-memcached
+          path: memcached
+      - name: git checkout redis
+        uses: actions/checkout@v3
+        with:
+          repository: phpredis/phpredis
+          path: redis
+      - name: git checkout xdebug
+        uses: actions/checkout@v3
+        with:
+          repository: xdebug/xdebug
+          path: xdebug
+      - name: git checkout yaml
+        uses: actions/checkout@v3
+        with:
+          repository: php/pecl-file_formats-yaml
+          path: yaml
+      - name: apt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ccache \
+            libmemcached-dev \
+            bison \
+            re2c
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{hashFiles('php/main/php_version.h')}}"
+          append-timestamp: false
+      - name: build PHP
+        run: |
+          cd php
+          ./buildconf --force
+          ./configure \
+            --enable-option-checking=fatal \
+            --prefix=/opt/php \
+            --enable-cli \
+            --disable-all \
+            --enable-session \
+            --enable-werror
+          make -j$(/usr/bin/nproc)
+          sudo make install
+      - name: build apcu
+        run: |
+          cd apcu
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build imagick
+        run: |
+          cd imagick
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build memcached
+        run: |
+          cd memcached
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build redis
+        run: |
+          cd redis
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build xdebug
+        run: |
+          cd xdebug
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build yaml
+        run: |
+          cd yaml
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
