@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Implement GH-10217 (Use strlen() for determining the class_name length).
     (Dennis Buteyn)
 
+- Exif:
+  . Removed unneeded codepaths in exif_process_TIFF_in_JPEG(). (nielsdos)
+
 - Fileinfo:
   . Upgrade bundled libmagic to 5.43. (Anatol)
 

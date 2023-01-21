@@ -3679,11 +3679,6 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 		return;
 	}
 
-	if (length < 2) {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Missing TIFF alignment marker");
-		return;
-	}
-
 	/* set the thumbnail stuff to nothing so we can test to see if they get set up */
 	if (memcmp(CharBuf, "II", 2) == 0) {
 		ImageInfo->motorola_intel = 0;
@@ -3809,12 +3804,6 @@ static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 			return M_EOI; /* ah illegal: char after COM section not 0xFF */
 
 		fpos = php_stream_tell(ImageInfo->infile);
-
-		if (marker == 0xff) {
-			/* 0xff is legal padding, but if we get that many, something's wrong. */
-			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "To many padding bytes");
-			return false;
-		}
 
 		/* Read the length of the section. */
 		if ((lh = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {
