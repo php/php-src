@@ -1,6 +1,5 @@
 --TEST--
 Bug #80747: Providing RSA key size < 512 generates key that crash PHP
---FILE--
 --EXTENSIONS--
 openssl
 --SKIPIF--
