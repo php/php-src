@@ -5264,7 +5264,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 				ZEND_VM_C_GOTO(send_array);
 			}
 		}
-		zend_type_error("call_user_func_array(): Argument #2 ($args) must be of type array, %s given", zend_zval_type_name(args));
+		zend_type_error("call_user_func_array(): Argument #2 ($args) must be of type array, %s given", zend_zval_value_name(args));
 		FREE_OP2();
 		FREE_OP1();
 		HANDLE_EXCEPTION();
@@ -5290,7 +5290,7 @@ ZEND_VM_C_LABEL(send_array):
 					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
 				zend_type_error(
 					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
-					zend_zval_type_name(op2));
+					zend_zval_value_name(op2));
 				FREE_OP2();
 				FREE_OP1();
 				HANDLE_EXCEPTION();
@@ -8534,7 +8534,7 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 				zval_ptr_dtor(&tmp);
 			}
 			if (!EG(exception)) {
-				zend_type_error("strlen(): Argument #1 ($str) must be of type string, %s given", zend_zval_type_name(value));
+				zend_type_error("strlen(): Argument #1 ($str) must be of type string, %s given", zend_zval_value_name(value));
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		} while (0);

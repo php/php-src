@@ -2421,7 +2421,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_O
 				goto send_array;
 			}
 		}
-		zend_type_error("call_user_func_array(): Argument #2 ($args) must be of type array, %s given", zend_zval_type_name(args));
+		zend_type_error("call_user_func_array(): Argument #2 ($args) must be of type array, %s given", zend_zval_value_name(args));
 		FREE_OP(opline->op2_type, opline->op2.var);
 		FREE_OP(opline->op1_type, opline->op1.var);
 		HANDLE_EXCEPTION();
@@ -2447,7 +2447,7 @@ send_array:
 					|| !zend_parse_arg_long_weak(op2, &len, /* arg_num */ 3)) {
 				zend_type_error(
 					"array_slice(): Argument #3 ($length) must be of type ?int, %s given",
-					zend_zval_type_name(op2));
+					zend_zval_value_name(op2));
 				FREE_OP(opline->op2_type, opline->op2.var);
 				FREE_OP(opline->op1_type, opline->op1.var);
 				HANDLE_EXCEPTION();

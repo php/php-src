@@ -20,7 +20,7 @@ Class [ <user> class just_constants ] {
   @@ %s %d-%d
 
   - Constants [5] {
-    Constant [ public true BOOLEAN_CONSTANT ] { 1 }
+    Constant [ public bool BOOLEAN_CONSTANT ] { 1 }
     Constant [ public null NULL_CONSTANT ] {  }
     Constant [ public string STRING_CONSTANT ] { This is a string }
     Constant [ public int INTEGER_CONSTANT ] { 1000 }
