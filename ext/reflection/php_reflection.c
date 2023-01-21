@@ -5667,7 +5667,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 }
 /* }}} */
 
-/* {{{ Returns this property's value */
+/* {{{ Returns true if property was initialized */
 ZEND_METHOD(ReflectionProperty, isInitialized)
 {
 	reflection_object *intern;
@@ -6499,7 +6499,7 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 }
 /* }}} */
 
-/* {{{ *	   Returns the name of the attribute */
+/* {{{ Returns the name of the attribute */
 ZEND_METHOD(ReflectionAttribute, getName)
 {
 	reflection_object *intern;
@@ -6514,7 +6514,7 @@ ZEND_METHOD(ReflectionAttribute, getName)
 }
 /* }}} */
 
-/* {{{ *	   Returns the target of the attribute */
+/* {{{ Returns the target of the attribute */
 ZEND_METHOD(ReflectionAttribute, getTarget)
 {
 	reflection_object *intern;
@@ -6529,7 +6529,7 @@ ZEND_METHOD(ReflectionAttribute, getTarget)
 }
 /* }}} */
 
-/* {{{ *	   Returns true if the attribute is repeated */
+/* {{{ Returns true if the attribute is repeated */
 ZEND_METHOD(ReflectionAttribute, isRepeated)
 {
 	reflection_object *intern;
@@ -6544,7 +6544,7 @@ ZEND_METHOD(ReflectionAttribute, isRepeated)
 }
 /* }}} */
 
-/* {{{ *	   Returns the arguments passed to the attribute */
+/* {{{ Returns the arguments passed to the attribute */
 ZEND_METHOD(ReflectionAttribute, getArguments)
 {
 	reflection_object *intern;
@@ -6661,7 +6661,7 @@ static void attribute_ctor_cleanup(
 }
 /* }}} */
 
-/* {{{ *	   Returns the attribute as an object */
+/* {{{ Returns the attribute as an object */
 ZEND_METHOD(ReflectionAttribute, newInstance)
 {
 	reflection_object *intern;
