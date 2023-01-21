@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
 
+- Fiber:
+  . Fixed assembly on alpine x86. (nielsdos)
+
 - FPM:
   . Fixed bug GH-10315 (FPM unknown child alert not valid). (Jakub Zelenka)
   . Fixed bug GH-10385 (FPM successful config test early exit). (nielsdos)
