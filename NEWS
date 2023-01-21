@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-10292 (Made the default value of the first param of srand() and
     mt_srand() unknown). (kocsismate)
+  . Fix incorrect check in cs_8559_5 in map_from_unicode(). (nielsdos)
 
 02 Feb 2023, PHP 8.1.15
 
