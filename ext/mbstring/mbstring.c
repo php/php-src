@@ -1534,7 +1534,7 @@ PHP_FUNCTION(mb_output_handler)
 
 	const mbfl_encoding *encoding = MBSTRG(current_http_output_encoding);
 	if (encoding == &mbfl_encoding_pass) {
-		RETURN_STR(zend_string_copy(str));
+		RETURN_STR_COPY(str);
 	}
 
 	if (arg_status & PHP_OUTPUT_HANDLER_START) {
@@ -1574,7 +1574,7 @@ PHP_FUNCTION(mb_output_handler)
 	}
 
 	if (!MBSTRG(outconv_enabled)) {
-		RETURN_STR(zend_string_copy(str));
+		RETURN_STR_COPY(str);
 	}
 
 	mb_convert_buf buf;
