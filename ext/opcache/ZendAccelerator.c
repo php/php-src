@@ -146,9 +146,7 @@ static void preload_restart(void);
  */
 static void bzero_aligned(void *mem, size_t size)
 {
-#if defined(__x86_64__)
-	memset(mem, 0, size);
-#elif defined(__AVX__)
+#if defined(__AVX__)
 	char *p = (char*)mem;
 	char *end = p + size;
 	__m256i ymm0 = _mm256_setzero_si256();
