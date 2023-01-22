@@ -94,6 +94,7 @@ PHP                                                                        NEWS
   . Added TCP_QUICKACK constant, to give tigher control over
     ACK delays. (David Carlier)
   . Added DONTFRAGMENT support for path MTU discovery purpose. (David Carlier)
+  . Added AF_DIVERT for raw socket for divert ports. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)

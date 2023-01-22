@@ -132,6 +132,7 @@ PHP 8.3 UPGRADE NOTES
   . IP_PMTUDISC_PROBE (Linux only).
   . IP_PMTUDISC_INTERFACE (Linux only).
   . IP_PMTUDISC_OMIT (Linux only).
+  . AF_DIVERT (FreeBSD only).
 
 ========================================
 11. Changes to INI File Handling

@@ -19,6 +19,13 @@ const AF_INET = UNKNOWN;
  */
 const AF_INET6 = UNKNOWN;
 #endif
+#ifdef AF_DIVERT
+/**
+ * @var int
+ * @cvalue AF_DIVERT
+ */
+const AF_DIVERT = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SOCK_STREAM
