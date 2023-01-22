@@ -28,9 +28,9 @@ echo "Done\n";
 --EXPECTF--
 Warning: symlink(): No such file or directory in %srename_variation7-win32.php on line %d
 
-Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link), error 2) in %srename_variation7-win32.php on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link), error 2 in %srename_variation7-win32.php on line %d
 bool(false)
 
-Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link2), error 2) in %srename_variation7-win32.php on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link2), error 2 in %srename_variation7-win32.php on line %d
 bool(false)
 Done

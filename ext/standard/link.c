@@ -75,7 +75,7 @@ PHP_FUNCTION(readlink)
 
 	if (ret == -1) {
 #ifdef PHP_WIN32
-		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
+		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d", link, GetLastError());
 #else
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 #endif
