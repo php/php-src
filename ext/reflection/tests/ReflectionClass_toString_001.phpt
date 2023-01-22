@@ -349,7 +349,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
 
       - Parameters [0] {
       }
-      - Tentative return [ ?array ]
+      - Tentative return [ array ]
     }
 
     Method [ <internal:Reflection> public method getStaticPropertyValue ] {
