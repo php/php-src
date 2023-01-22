@@ -441,4 +441,19 @@ typedef bool zend_bool;
 typedef intptr_t zend_intptr_t;
 typedef uintptr_t zend_uintptr_t;
 
+/* the following headers used to be included indirectly, and we have
+ * them here only for backwards compatibility with thirdparty
+ * extensions */
+#include "php_globals.h"
+#include "php_ini.h"
+#include "zend_alloc.h"
+#include "zend_arena.h"
+#include "zend_iterators.h"
+#include "zend_multiply.h"
+#include "zend_objects.h"
+#include "zend_strtod.h"
+#include <errno.h>
+#include <float.h>
+#include <string.h>
+
 #endif
