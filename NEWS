@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
   . Fixed incorrect check condition in type inference. (nielsdos)
+  . Fix incorrect check in zend_internal_call_should_throw(). (nielsdos)
 
 - FFI:
   . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
