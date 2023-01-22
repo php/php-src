@@ -19,6 +19,6 @@ function test()
 test();
 ?>
 --EXPECT--
-Undefined variable $data
+Undefined variable $data (this will become an error in PHP 9.0)
 Trying to access array offset on value of type null
 Undefined index here: ''

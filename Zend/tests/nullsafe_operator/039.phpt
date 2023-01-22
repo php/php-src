@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Undefined variable $foo
+Undefined variable $foo (this will become an error in PHP 9.0)

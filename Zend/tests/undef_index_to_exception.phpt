@@ -42,5 +42,5 @@ array(0) {
 Undefined array key "key"
 array(0) {
 }
-Undefined global variable $test
-Undefined variable $test
+Undefined global variable $test (this will become an error in PHP 9.0)
+Undefined variable $test (this will become an error in PHP 9.0)

@@ -20,7 +20,7 @@ test();
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $x in %sinference_012.php on line 4
+Warning: Undefined variable $x (this will become an error in PHP 9.0) in %sinference_012.php on line 4
 
-Warning: Undefined variable $arr in %sinference_012.php on line 5
+Warning: Undefined variable $arr (this will become an error in PHP 9.0) in %sinference_012.php on line 5
 DONE

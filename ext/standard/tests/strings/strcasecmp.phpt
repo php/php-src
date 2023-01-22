@@ -542,7 +542,7 @@ int(-%d)
 int(-%d)
 int(-%d)
 
-Warning: Undefined variable $strS in %s on line %d
+Warning: Undefined variable $strS (this will become an error in PHP 9.0) in %s on line %d
 int(%d)
 int(-%d)
 int(-%d)

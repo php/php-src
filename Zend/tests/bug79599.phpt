@@ -23,5 +23,5 @@ try{
 }
 ?>
 --EXPECT--
-string(21) "Undefined variable $b"
-string(21) "Undefined variable $c"
+string(60) "Undefined variable $b (this will become an error in PHP 9.0)"
+string(60) "Undefined variable $c (this will become an error in PHP 9.0)"

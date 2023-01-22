@@ -22,4 +22,4 @@ try {
 }
 ?>
 --EXPECT--
-Exception: Undefined variable $a
+Exception: Undefined variable $a (this will become an error in PHP 9.0)
