@@ -3805,6 +3805,9 @@ static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 
 		fpos = php_stream_tell(ImageInfo->infile);
 
+		/* safety net in case the above algorithm change dramatically, should not trigger */
+		ZEND_ASSERT(marker != 0xff);
+
 		/* Read the length of the section. */
 		if ((lh = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {
 			EXIF_ERRLOG_CORRUPT(ImageInfo)
