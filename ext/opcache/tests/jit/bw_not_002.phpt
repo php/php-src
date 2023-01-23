@@ -17,7 +17,7 @@ function test() {
 test();
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot perform bitwise not on bool in %sbw_not_002.php:5
+Fatal error: Uncaught TypeError: Cannot perform bitwise not on true in %sbw_not_002.php:5
 Stack trace:
 #0 %sbw_not_002.php(8): test()
 #1 {main}

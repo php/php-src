@@ -2553,7 +2553,7 @@ PHP_FUNCTION(session_start)
 						break;
 					default:
 						zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
-							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_type_name(value)
+							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_value_name(value)
 						);
 						RETURN_THROWS();
 				}

@@ -667,7 +667,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 		zend_string *name;
 
 		if (Z_TYPE_P(tmp) != IS_ARRAY) {
-			zend_type_error("SoapHeader::__construct(): \"typemap\" option must be of type array, %s given", zend_zval_type_name(tmp));
+			zend_type_error("SoapHeader::__construct(): \"typemap\" option must be of type array, %s given", zend_zval_value_name(tmp));
 			return NULL;
 		}
 		ht2 = Z_ARRVAL_P(tmp);
@@ -1089,7 +1089,7 @@ PHP_METHOD(SoapServer, addFunction)
 			RETURN_THROWS();
 		}
 	} else {
-		zend_argument_type_error(1, "must be of type array|string|int, %s given", zend_zval_type_name(function_name));
+		zend_argument_type_error(1, "must be of type array|string|int, %s given", zend_zval_value_name(function_name));
 		RETURN_THROWS();
 	}
 
@@ -2414,7 +2414,7 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
 		Z_ADDREF_P(headers);
 		free_soap_headers = 1;
 	} else {
-		zend_argument_type_error(4, "must be of type SoapHeader|array|null, %s given", zend_zval_type_name(headers));
+		zend_argument_type_error(4, "must be of type SoapHeader|array|null, %s given", zend_zval_value_name(headers));
 		RETURN_THROWS();
 	}
 
@@ -2678,7 +2678,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 		zval_ptr_dtor(Z_CLIENT_DEFAULT_HEADERS_P(this_ptr));
 		ZVAL_COPY_VALUE(Z_CLIENT_DEFAULT_HEADERS_P(this_ptr), &default_headers);
 	} else {
-		zend_argument_type_error(1, "must be of type SoapHeader|array|null, %s given", zend_zval_type_name(headers));
+		zend_argument_type_error(1, "must be of type SoapHeader|array|null, %s given", zend_zval_value_name(headers));
 		RETURN_THROWS();
 	}
 	RETURN_TRUE;

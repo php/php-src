@@ -132,16 +132,16 @@ array_uintersect_uassoc(): Argument #2 must be of type array, null given
 array_uintersect_uassoc(): Argument #2 must be of type array, null given
 
 --lowercase true--
-array_uintersect_uassoc(): Argument #2 must be of type array, bool given
+array_uintersect_uassoc(): Argument #2 must be of type array, true given
 
 --lowercase false--
-array_uintersect_uassoc(): Argument #2 must be of type array, bool given
+array_uintersect_uassoc(): Argument #2 must be of type array, false given
 
 --uppercase TRUE--
-array_uintersect_uassoc(): Argument #2 must be of type array, bool given
+array_uintersect_uassoc(): Argument #2 must be of type array, true given
 
 --uppercase FALSE--
-array_uintersect_uassoc(): Argument #2 must be of type array, bool given
+array_uintersect_uassoc(): Argument #2 must be of type array, false given
 
 --empty string DQ--
 array_uintersect_uassoc(): Argument #2 must be of type array, string given

@@ -1687,7 +1687,7 @@ static ZEND_COLD void zend_ffi_pass_incompatible(zval *arg, zend_ffi_type *type,
 				zend_throw_error(zend_ffi_exception_ce, "Passing incompatible argument %d of C function '%s', expecting '%s', found '%s'", n + 1, ZSTR_VAL(EX(func)->internal_function.function_name), buf1.start, buf2.start);
 			}
 		} else {
-			zend_throw_error(zend_ffi_exception_ce, "Passing incompatible argument %d of C function '%s', expecting '%s', found PHP '%s'", n + 1, ZSTR_VAL(EX(func)->internal_function.function_name), buf1.start, zend_zval_type_name(arg));
+			zend_throw_error(zend_ffi_exception_ce, "Passing incompatible argument %d of C function '%s', expecting '%s', found PHP '%s'", n + 1, ZSTR_VAL(EX(func)->internal_function.function_name), buf1.start, zend_zval_value_name(arg));
 		}
 	}
 }
@@ -1714,7 +1714,7 @@ static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *typ
 				zend_throw_error(zend_ffi_exception_ce, "Incompatible types when assigning to type '%s' from type '%s'", buf1.start, buf2.start);
 			}
 		} else {
-			zend_throw_error(zend_ffi_exception_ce, "Incompatible types when assigning to type '%s' from PHP '%s'", buf1.start, zend_zval_type_name(arg));
+			zend_throw_error(zend_ffi_exception_ce, "Incompatible types when assigning to type '%s' from PHP '%s'", buf1.start, zend_zval_value_name(arg));
 		}
 	}
 }

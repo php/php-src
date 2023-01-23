@@ -880,7 +880,7 @@ ZEND_FUNCTION(method_exists)
 			RETURN_FALSE;
 		}
 	} else {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(klass));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(klass));
 		RETURN_THROWS();
 	}
 
@@ -942,7 +942,7 @@ ZEND_FUNCTION(property_exists)
 	} else if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 	} else {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(object));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(object));
 		RETURN_THROWS();
 	}
 

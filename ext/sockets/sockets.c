@@ -505,7 +505,7 @@ static int php_sock_array_to_fd_set(uint32_t arg_num, zval *sock_array, fd_set *
 		ZVAL_DEREF(element);
 
 		if (Z_TYPE_P(element) != IS_OBJECT || Z_OBJCE_P(element) != socket_ce) {
-			zend_argument_type_error(arg_num, "must only have elements of type Socket, %s given", zend_zval_type_name(element));
+			zend_argument_type_error(arg_num, "must only have elements of type Socket, %s given", zend_zval_value_name(element));
 			return -1;
 		}
 

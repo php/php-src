@@ -521,7 +521,7 @@ PHP_METHOD(PDO, prepare)
 	if (options && (value = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS)) != NULL) {
 		if (Z_TYPE_P(value) != IS_ARRAY) {
 			zend_type_error("PDO::ATTR_STATEMENT_CLASS value must be of type array, %s given",
-				zend_zval_type_name(value));
+				zend_zval_value_name(value));
 			RETURN_THROWS();
 		}
 		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
@@ -545,7 +545,7 @@ PHP_METHOD(PDO, prepare)
 		if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 			if (Z_TYPE_P(item) != IS_ARRAY) {
 				zend_type_error("PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
-					zend_zval_type_name(value));
+					zend_zval_value_name(value));
 				RETURN_THROWS();
 			}
 			ZVAL_COPY_VALUE(&ctor_args, item);
@@ -698,7 +698,7 @@ PDO_API bool pdo_get_long_param(zend_long *lval, zval *value)
 			}
 			ZEND_FALLTHROUGH;
 		default:
-			zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_type_name(value));
+			zend_type_error("Attribute value must be of type int for selected attribute, %s given", zend_zval_value_name(value));
 			return false;
 	}
 }
@@ -716,7 +716,7 @@ PDO_API bool pdo_get_bool_param(bool *bval, zval *value)
 			return true;
 		case IS_STRING: /* TODO Should string be allowed? */
 		default:
-			zend_type_error("Attribute value must be of type bool for selected attribute, %s given", zend_zval_type_name(value));
+			zend_type_error("Attribute value must be of type bool for selected attribute, %s given", zend_zval_value_name(value));
 			return false;
 	}
 }
@@ -812,7 +812,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			}
 			if (Z_TYPE_P(value) != IS_ARRAY) {
 				zend_type_error("PDO::ATTR_STATEMENT_CLASS value must be of type array, %s given",
-					zend_zval_type_name(value));
+					zend_zval_value_name(value));
 				return false;
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 0)) == NULL) {
@@ -840,7 +840,7 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 				if (Z_TYPE_P(item) != IS_ARRAY) {
 					zend_type_error("PDO::ATTR_STATEMENT_CLASS constructor_args must be of type ?array, %s given",
-						zend_zval_type_name(value));
+						zend_zval_value_name(value));
 					return false;
 				}
 				ZVAL_COPY(&dbh->def_stmt_ctor_args, item);

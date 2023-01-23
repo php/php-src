@@ -624,10 +624,10 @@ static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, ui
 		if (!zend_parse_arg_long_slow(val, &lval, arg_pos)) {
 			if (arg_pos == 0) {
 				zend_type_error(
-					"Number must be of type GMP|string|int, %s given", zend_zval_type_name(val));
+					"Number must be of type GMP|string|int, %s given", zend_zval_value_name(val));
 			} else {
 				zend_argument_type_error(arg_pos,
-					"must be of type GMP|string|int, %s given", zend_zval_type_name(val));
+					"must be of type GMP|string|int, %s given", zend_zval_value_name(val));
 			}
 			return FAILURE;
 		}

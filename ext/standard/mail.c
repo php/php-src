@@ -121,7 +121,7 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 			php_mail_build_headers_elems(s, key, val);
 			break;
 		default:
-			zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_type_name(val));
+			zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
 	}
 }
 
@@ -137,7 +137,7 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 			break;
 		}
 		if (Z_TYPE_P(tmp_val) != IS_STRING) {
-			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_type_name(tmp_val));
+			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_value_name(tmp_val));
 			break;
 		}
 		php_mail_build_headers_elem(s, key, tmp_val);

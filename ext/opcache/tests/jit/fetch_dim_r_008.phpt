@@ -12,5 +12,5 @@ test()[1];
 ?>
 DONE
 --EXPECTF--
-Warning: Trying to access array offset on value of type null in %sfetch_dim_r_008.php on line 3
+Warning: Trying to access array offset on null in %sfetch_dim_r_008.php on line 3
 DONE

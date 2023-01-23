@@ -50,7 +50,7 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 		if (Z_TYPE(flags) != IS_LONG) {
 			zend_error_noreturn(E_ERROR,
 				"Attribute::__construct(): Argument #1 ($flags) must be of type int, %s given",
-				zend_zval_type_name(&flags)
+				zend_zval_value_name(&flags)
 			);
 		}
 
