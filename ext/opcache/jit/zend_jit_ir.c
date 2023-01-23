@@ -144,6 +144,9 @@ typedef struct _zend_jit_ctx {
 	uint32_t             delayed_call_level;
 	int                  b;           /* current basic block number or -1 */
 	ir_ref               control;
+#ifdef ZTS
+	ir_ref               tls;
+#endif
 	ir_ref               fp;
 	ir_ref               trace_loop_ref;
 	ir_ref               return_inputs;
@@ -184,6 +187,8 @@ typedef struct _zend_jit_registers_buf {
 #define ZEND_JIT_EXIT_POINTS_SPACING   4  // push byte + short jmp = bytes
 #define ZEND_JIT_EXIT_POINTS_PER_GROUP 32 // number of continuous exit points
 
+static ir_ref zend_jit_addr_offset(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset); // for ZTS build (fix this ???)
+
 static uint32_t zend_jit_exit_point_by_addr(void *addr);
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
 
@@ -219,10 +224,36 @@ static void* zend_jit_stub_handlers[sizeof(zend_jit_stubs) / sizeof(zend_jit_stu
 #ifdef ZTS
 static ir_ref zend_jit_tls(zend_jit_ctx *jit)
 {
-	jit->control = ir_emit3(&jit->ctx, IR_OPT(IR_TLS, IR_ADDR), jit->control,
+	ZEND_ASSERT(jit->control);
+	if (jit->tls) {
+		/* Emit "TLS" once for basic block ??? */
+		ir_insn *insn;
+		ir_ref ref = jit->control;
+
+		while (1) {
+			if (ref == jit->tls) {
+				return jit->tls;
+			}
+			insn = &jit->ctx.ir_base[ref];
+			if (insn->op == IR_START
+			 || insn->op == IR_BEGIN
+			 || insn->op == IR_IF_TRUE
+			 || insn->op == IR_IF_FALSE
+			 || insn->op == IR_CASE_VAL
+			 || insn->op == IR_CASE_DEFAULT
+			 || insn->op == IR_MERGE
+			 || insn->op == IR_LOOP_BEGIN
+			 || insn->op == IR_ENTRY
+			 || insn->op == IR_CALL) {
+				break;
+			}
+			ref = insn->op1;
+		}
+	}
+	jit->control = jit->tls = ir_emit3(&jit->ctx, IR_OPT(IR_TLS, IR_ADDR), jit->control,
 		tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
 		tsrm_ls_cache_tcb_offset ? 0 : tsrm_tls_offset);
-	return jit->control;
+	return jit->tls;
 }
 #endif
 
@@ -3360,6 +3391,9 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	delayed_call_chain = 0; // TODO: remove ???
 	jit->b = -1;
 	jit->control = ir_emit0(&jit->ctx, IR_START);
+#ifdef ZTS
+	jit->tls = IR_UNUSED;
+#endif
 	jit->fp = IR_UNUSED;
 	jit->trace_loop_ref = IR_UNUSED;
 	jit->return_inputs = IR_UNUSED;
