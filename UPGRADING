@@ -68,6 +68,8 @@ PHP 8.3 UPGRADE NOTES
   . array_pad() is now only limited by the maximum number of elements an array
     can have. Before, it was only possible to add at most 1048576 elements at a
     time.
+  . password_hash() will now chain the underlying Random\RandomException
+    as the ValueError’s $previous Exception when salt generation fails.
 
 ========================================
 6. New Functions
