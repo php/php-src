@@ -605,7 +605,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 			RANDOM_G(random_fd) = fd;
 		}
 
-		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
+		read_bytes = 0;
+		while (read_bytes < size) {
 			errno = 0;
 			n = read(fd, bytes + read_bytes, size - read_bytes);
 
@@ -619,6 +620,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 				}
 				return FAILURE;
 			}
+
+			read_bytes += (size_t) n;
 		}
 	}
 #endif
