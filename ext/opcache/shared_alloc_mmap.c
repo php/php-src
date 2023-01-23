@@ -276,7 +276,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment);
 }
 
-zend_shared_memory_handlers zend_alloc_mmap_handlers = {
+const zend_shared_memory_handlers zend_alloc_mmap_handlers = {
 	create_segments,
 	detach_segment,
 	segment_type_size

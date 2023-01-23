@@ -135,7 +135,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment_shm);
 }
 
-zend_shared_memory_handlers zend_alloc_shm_handlers = {
+const zend_shared_memory_handlers zend_alloc_shm_handlers = {
 	(create_segments_t)create_segments,
 	(detach_segment_t)detach_segment,
 	segment_type_size

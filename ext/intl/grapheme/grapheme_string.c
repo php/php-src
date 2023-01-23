@@ -679,7 +679,7 @@ grapheme_extract_count_iter(UBreakIterator *bi, int32_t size, unsigned char *pst
 /* {{{ grapheme extract iter function pointer array */
 typedef int32_t (*grapheme_extract_iter)(UBreakIterator * /*bi*/, int32_t /*size*/, unsigned char * /*pstr*/, int32_t /*str_len*/);
 
-static grapheme_extract_iter grapheme_extract_iters[] = {
+static const grapheme_extract_iter grapheme_extract_iters[] = {
 	&grapheme_extract_count_iter,
 	&grapheme_extract_bytecount_iter,
 	&grapheme_extract_charcount_iter,
