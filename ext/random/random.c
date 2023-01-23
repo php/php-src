@@ -525,8 +525,6 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	 * compared to the arc4random api albeit a fallback to /dev/urandom is considered.
 	 */
 	while (read_bytes < size) {
-		errno = 0;
-
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
 
 		   bytes   read_bytes  size
@@ -536,6 +534,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		              amount_to_read
 		*/
 		size_t amount_to_read = size - read_bytes;
+
+		errno = 0;
 #  if defined(__linux__)
 		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
 #  else
