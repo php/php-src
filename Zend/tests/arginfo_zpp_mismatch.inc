@@ -10,6 +10,7 @@ function skipFunction($function): bool {
      || $function === 'zend_create_unterminated_string'
      || $function === 'zend_test_array_return'
      || $function === 'zend_leak_bytes'
+     || $function === 'zend_test_arginfo_zpp_mismatch'
         /* mess with output */
      || (is_string($function) && str_starts_with($function, 'ob_'))
      || $function === 'output_add_rewrite_var'

@@ -335,8 +335,21 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_I
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
+static ZEND_FUNCTION(zend_test_arginfo_zpp_mismatch)
+{
+	zend_long foo;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(foo);
+	ZEND_PARSE_PARAMETERS_END();
+}
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_arginfo_zpp_mismatch, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry ext_function_legacy[] = {
 	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
+	ZEND_FE(zend_test_arginfo_zpp_mismatch, arginfo_zend_test_arginfo_zpp_mismatch)
 	ZEND_FE_END
 };
 
