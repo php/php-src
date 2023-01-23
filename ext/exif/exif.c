@@ -230,10 +230,10 @@ static size_t php_strnlen(char* str, size_t maxlen) {
 /* }}} */
 
 /* {{{ error messages */
-static const char * EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
-static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
-static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
-static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
+static const char *const EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
+static const char *const EXIF_ERROR_CORRUPT   = "File structure corrupted";
+static const char *const EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
+static const char *const EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
 
 #define EXIF_ERRLOG_FILEEOF(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_FILEEOF);
 #define EXIF_ERRLOG_CORRUPT(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_CORRUPT);
@@ -244,7 +244,7 @@ static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined fi
 /* {{{ format description defines
    Describes format descriptor
 */
-static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
+static const int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
 #define NUM_FORMATS 13
 
 #define TAG_FMT_BYTE       1
@@ -3679,11 +3679,6 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 		return;
 	}
 
-	if (length < 2) {
-		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Missing TIFF alignment marker");
-		return;
-	}
-
 	/* set the thumbnail stuff to nothing so we can test to see if they get set up */
 	if (memcmp(CharBuf, "II", 2) == 0) {
 		ImageInfo->motorola_intel = 0;
@@ -3810,11 +3805,8 @@ static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 
 		fpos = php_stream_tell(ImageInfo->infile);
 
-		if (marker == 0xff) {
-			/* 0xff is legal padding, but if we get that many, something's wrong. */
-			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "To many padding bytes");
-			return false;
-		}
+		/* safety net in case the above algorithm change dramatically, should not trigger */
+		ZEND_ASSERT(marker != 0xff);
 
 		/* Read the length of the section. */
 		if ((lh = php_stream_getc(ImageInfo->infile)) == (unsigned int)EOF) {

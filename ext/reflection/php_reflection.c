@@ -2493,7 +2493,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 			break;
 
 		default:
-			zend_argument_error(reflection_exception_ptr, 1, "must be a string, an array(class, method), or a callable object, %s given", zend_zval_type_name(reference));
+			zend_argument_error(reflection_exception_ptr, 1, "must be a string, an array(class, method), or a callable object, %s given", zend_zval_value_name(reference));
 			RETURN_THROWS();
 	}
 

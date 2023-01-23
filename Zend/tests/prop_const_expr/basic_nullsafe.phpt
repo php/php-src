@@ -39,7 +39,7 @@ Warning: Attempt to read property "test" on null in %s on line %d
 NULL
 NULL
 
-Warning: Trying to access array offset on value of type null in %s on line %d
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 NULL
 Printer

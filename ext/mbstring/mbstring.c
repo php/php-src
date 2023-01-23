@@ -1534,7 +1534,7 @@ PHP_FUNCTION(mb_output_handler)
 
 	const mbfl_encoding *encoding = MBSTRG(current_http_output_encoding);
 	if (encoding == &mbfl_encoding_pass) {
-		RETURN_STR(zend_string_copy(str));
+		RETURN_STR_COPY(str);
 	}
 
 	if (arg_status & PHP_OUTPUT_HANDLER_START) {
@@ -1574,7 +1574,7 @@ PHP_FUNCTION(mb_output_handler)
 	}
 
 	if (!MBSTRG(outconv_enabled)) {
-		RETURN_STR(zend_string_copy(str));
+		RETURN_STR_COPY(str);
 	}
 
 	mb_convert_buf buf;
@@ -4160,7 +4160,7 @@ PHP_FUNCTION(mb_send_mail)
 	zend_string *extra_cmd = NULL;
 	HashTable *headers_ht = NULL;
 	zend_string *str_headers = NULL;
-	size_t n, i;
+	size_t i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	struct {
@@ -4168,22 +4168,19 @@ PHP_FUNCTION(mb_send_mail)
 		int cnt_trans_enc:1;
 	} suppressed_hdrs = { 0, 0 };
 
-	char *message_buf = NULL, *subject_buf = NULL, *p;
+	char *subject_buf = NULL, *p;
 	mbfl_string orig_str, conv_str;
 	mbfl_string *pstr;	/* pointer to mbfl string for return value */
 	enum mbfl_no_encoding;
 	const mbfl_encoding *tran_cs,	/* transfer text charset */
 						*head_enc,	/* header transfer encoding */
 						*body_enc;	/* body transfer encoding */
-	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
 	int err = 0;
 	HashTable ht_headers;
 	zval *s;
-	extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 
 	/* initialize */
-	mbfl_memory_device_init(&device, 0, 0);
 	mbfl_string_init(&orig_str);
 	mbfl_string_init(&conv_str);
 
@@ -4326,74 +4323,76 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* message body */
-	orig_str.val = (unsigned char *)message;
-	orig_str.len = message_len;
-	orig_str.encoding = MBSTRG(current_internal_encoding);
+	const mbfl_encoding *msg_enc = MBSTRG(current_internal_encoding);
 
-	if (orig_str.encoding->no_encoding == mbfl_no_encoding_invalid || orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
-		orig_str.encoding = mb_guess_encoding((unsigned char*)message, message_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+	if (msg_enc == &mbfl_encoding_pass) {
+		msg_enc = mb_guess_encoding((unsigned char*)message, message_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
 
-	pstr = NULL;
-	{
-		mbfl_string tmpstr;
-
-		if (mbfl_convert_encoding(&orig_str, &tmpstr, tran_cs) != NULL) {
-			tmpstr.encoding = &mbfl_encoding_8bit;
-			pstr = mbfl_convert_encoding(&tmpstr, &conv_str, body_enc);
-			efree(tmpstr.val);
-		}
-	}
-	if (pstr != NULL) {
-		message_buf = message = (char *)pstr->val;
-	}
+	unsigned int num_errors = 0;
+	zend_string *tmpstr = mb_fast_convert((unsigned char*)message, message_len, msg_enc, tran_cs, '?', MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR, &num_errors);
+	zend_string *conv = mb_fast_convert((unsigned char*)ZSTR_VAL(tmpstr), ZSTR_LEN(tmpstr), &mbfl_encoding_8bit, body_enc, '?', MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR, &num_errors);
+	zend_string_free(tmpstr);
+	message = ZSTR_VAL(conv);
 
 	/* other headers */
 #define PHP_MBSTR_MAIL_MIME_HEADER1 "MIME-Version: 1.0"
 #define PHP_MBSTR_MAIL_MIME_HEADER2 "Content-Type: text/plain"
 #define PHP_MBSTR_MAIL_MIME_HEADER3 "; charset="
 #define PHP_MBSTR_MAIL_MIME_HEADER4 "Content-Transfer-Encoding: "
+
+	smart_str str = {0};
+	bool empty = true;
+
 	if (str_headers != NULL) {
-		p = ZSTR_VAL(str_headers);
-		n = ZSTR_LEN(str_headers);
-		mbfl_memory_device_strncat(&device, p, n);
-		if (n > 0 && p[n - 1] != '\n') {
-			mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		/* Strip trailing CRLF from `str_headers`; we will add CRLF back if necessary */
+		size_t len = ZSTR_LEN(str_headers);
+		if (ZSTR_VAL(str_headers)[len-1] == '\n') {
+			len--;
 		}
+		if (ZSTR_VAL(str_headers)[len-1] == '\r') {
+			len--;
+		}
+		smart_str_appendl(&str, ZSTR_VAL(str_headers), len);
+		empty = false;
 		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
-		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		if (!empty) {
+			smart_str_appendl(&str, line_sep, line_sep_len);
+		}
+		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
+		empty = false;
 	}
 
 	if (!suppressed_hdrs.cnt_type) {
-		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);
+		if (!empty) {
+			smart_str_appendl(&str, line_sep, line_sep_len);
+		}
+		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1);
 
 		p = (char *)mbfl_encoding_preferred_mime_name(tran_cs);
 		if (p != NULL) {
-			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
-			mbfl_memory_device_strcat(&device, p);
+			smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
+			smart_str_appends(&str, p);
 		}
-		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		empty = false;
 	}
+
 	if (!suppressed_hdrs.cnt_trans_enc) {
-		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
+		if (!empty) {
+			smart_str_appendl(&str, line_sep, line_sep_len);
+		}
+		smart_str_appendl(&str, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
 		p = (char *)mbfl_encoding_preferred_mime_name(body_enc);
 		if (p == NULL) {
 			p = "7bit";
 		}
-		mbfl_memory_device_strcat(&device, p);
-		mbfl_memory_device_strncat(&device, line_sep, line_sep_len);
+		smart_str_appends(&str, p);
 	}
 
-	if (!PG(mail_mixed_lf_and_crlf)) {
-		mbfl_memory_device_unput(&device);
-	}
-	mbfl_memory_device_unput(&device);
-	mbfl_memory_device_output('\0', &device);
-	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);
+	str_headers = smart_str_extract(&str);
 
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
@@ -4401,11 +4400,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
 
-	if (!err && php_mail(to_r, subject, message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(!err && php_mail(to_r, subject, message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL));
 
 	if (extra_cmd) {
 		zend_string_release_ex(extra_cmd, 0);
@@ -4417,10 +4412,7 @@ PHP_FUNCTION(mb_send_mail)
 	if (subject_buf) {
 		efree((void *)subject_buf);
 	}
-	if (message_buf) {
-		efree((void *)message_buf);
-	}
-	mbfl_memory_device_clear(&device);
+	zend_string_free(conv);
 	zend_hash_destroy(&ht_headers);
 	if (str_headers) {
 		zend_string_release_ex(str_headers, 0);
@@ -5074,12 +5066,10 @@ PHP_FUNCTION(mb_chr)
 /* {{{ */
 PHP_FUNCTION(mb_scrub)
 {
-	char* str;
-	size_t str_len;
-	zend_string *enc_name = NULL;
+	zend_string *str, *enc_name = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(enc_name)
 	ZEND_PARSE_PARAMETERS_END();
@@ -5089,7 +5079,12 @@ PHP_FUNCTION(mb_scrub)
 		RETURN_THROWS();
 	}
 
-	RETURN_STR(php_mb_convert_encoding_ex(str, str_len, enc, enc));
+	if (enc == &mbfl_encoding_utf8 && (GC_FLAGS(str) & IS_STR_VALID_UTF8)) {
+		/* A valid UTF-8 string will not be changed by mb_scrub; so just increment the refcount and return it */
+		RETURN_STR_COPY(str);
+	}
+
+	RETURN_STR(php_mb_convert_encoding_ex(ZSTR_VAL(str), ZSTR_LEN(str), enc, enc));
 }
 /* }}} */
 

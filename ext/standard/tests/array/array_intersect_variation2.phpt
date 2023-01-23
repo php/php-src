@@ -147,17 +147,17 @@ array_intersect(): Argument #2 must be of type array, null given
 -- Iterator 11 --array_intersect(): Argument #2 must be of type array, null given
 array_intersect(): Argument #2 must be of type array, null given
 
--- Iterator 12 --array_intersect(): Argument #2 must be of type array, bool given
-array_intersect(): Argument #2 must be of type array, bool given
+-- Iterator 12 --array_intersect(): Argument #2 must be of type array, true given
+array_intersect(): Argument #2 must be of type array, true given
 
--- Iterator 13 --array_intersect(): Argument #2 must be of type array, bool given
-array_intersect(): Argument #2 must be of type array, bool given
+-- Iterator 13 --array_intersect(): Argument #2 must be of type array, false given
+array_intersect(): Argument #2 must be of type array, false given
 
--- Iterator 14 --array_intersect(): Argument #2 must be of type array, bool given
-array_intersect(): Argument #2 must be of type array, bool given
+-- Iterator 14 --array_intersect(): Argument #2 must be of type array, true given
+array_intersect(): Argument #2 must be of type array, true given
 
--- Iterator 15 --array_intersect(): Argument #2 must be of type array, bool given
-array_intersect(): Argument #2 must be of type array, bool given
+-- Iterator 15 --array_intersect(): Argument #2 must be of type array, false given
+array_intersect(): Argument #2 must be of type array, false given
 
 -- Iterator 16 --array_intersect(): Argument #2 must be of type array, string given
 array_intersect(): Argument #2 must be of type array, string given

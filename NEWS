@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Implement GH-10217 (Use strlen() for determining the class_name length).
     (Dennis Buteyn)
 
+- Exif:
+  . Removed unneeded codepaths in exif_process_TIFF_in_JPEG(). (nielsdos)
+
 - Fileinfo:
   . Upgrade bundled libmagic to 5.43. (Anatol)
 
@@ -91,10 +94,13 @@ PHP                                                                        NEWS
   . Added TCP_QUICKACK constant, to give tigher control over
     ACK delays. (David Carlier)
   . Added DONTFRAGMENT support for path MTU discovery purpose. (David Carlier)
+  . Added AF_DIVERT for raw socket for divert ports. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
   . Make array_pad's $length warning less confusing. (nielsdos)
+  . E_WARNING emitted by strtok in the caase both arguments are not provided when
+    starting tokenisation. (David Carlier)
   . password_hash() will now chain the original RandomException to the ValueError
     on salt generation failure. (timwolla)
 

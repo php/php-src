@@ -502,7 +502,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		}
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__) || defined(__GLIBC__))
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__))
 	arc4random_buf(bytes, size);
 #else
 	size_t read_bytes = 0;
@@ -557,9 +557,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 
 		if (fd < 0) {
 			errno = 0;
-# if HAVE_DEV_URANDOM
 			fd = open("/dev/urandom", O_RDONLY);
-# endif
 			if (fd < 0) {
 				if (should_throw) {
 					if (errno != 0) {
@@ -596,20 +594,17 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
 			errno = 0;
 			n = read(fd, bytes + read_bytes, size - read_bytes);
-			if (n <= 0) {
-				break;
-			}
-		}
 
-		if (read_bytes < size) {
-			if (should_throw) {
-				if (errno != 0) {
-					zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data: %s", strerror(errno));
-				} else {
-					zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data");
+			if (n <= 0) {
+				if (should_throw) {
+					if (errno != 0) {
+						zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data: %s", strerror(errno));
+					} else {
+						zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data");
+					}
 				}
+				return FAILURE;
 			}
-			return FAILURE;
 		}
 	}
 #endif

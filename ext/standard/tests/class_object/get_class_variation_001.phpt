@@ -127,16 +127,16 @@ Arg value:  (type: NULL)
 get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value: 1 (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, true given
 
 Arg value:  (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, false given
 
 Arg value: 1 (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, true given
 
 Arg value:  (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, false given
 
 Arg value:  (type: string)
 get_class(): Argument #1 ($object) must be of type object, string given

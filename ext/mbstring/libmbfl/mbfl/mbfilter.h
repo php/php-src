@@ -147,14 +147,6 @@ MBFLAPI extern void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd
 MBFLAPI extern int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *string);
 MBFLAPI extern const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd);
 
-
-/*
- * encoding converter
- */
-MBFLAPI extern mbfl_string *
-mbfl_convert_encoding(mbfl_string *string, mbfl_string *result, const mbfl_encoding *toenc);
-
-
 /* Lengths -1 through -16 are reserved for error return values */
 static inline int mbfl_is_error(size_t len) {
 	return len >= (size_t) -16;

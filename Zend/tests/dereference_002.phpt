@@ -70,7 +70,7 @@ array(2) {
 }
 int(1)
 
-Warning: Trying to access array offset on value of type int in %s on line %d
+Warning: Trying to access array offset on int in %s on line %d
 NULL
 
 Warning: Undefined array key 4 in %s on line %d

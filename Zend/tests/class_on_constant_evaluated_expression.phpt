@@ -7,4 +7,4 @@ An error should be generated when using ::class on a constant evaluated expressi
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use "::class" on value of type int in %s on line %d
+Fatal error: Cannot use "::class" on int in %s on line %d

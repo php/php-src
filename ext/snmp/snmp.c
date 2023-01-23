@@ -91,7 +91,7 @@ ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
 
 /* constant - can be shared among threads */
-static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
+static const oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 /* Handlers */
 static zend_object_handlers php_snmp_object_handlers;
@@ -765,7 +765,7 @@ static bool php_snmp_parse_oid(
 				return false;
 			}
 		} else {
-			memmove((char *)objid_query->vars[0].name, (char *)objid_mib, sizeof(objid_mib));
+			memmove((char *)objid_query->vars[0].name, (const char *)objid_mib, sizeof(objid_mib));
 			objid_query->vars[0].name_length = sizeof(objid_mib) / sizeof(oid);
 		}
 	} else {

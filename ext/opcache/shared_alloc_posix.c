@@ -89,7 +89,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment_posix);
 }
 
-zend_shared_memory_handlers zend_alloc_posix_handlers = {
+const zend_shared_memory_handlers zend_alloc_posix_handlers = {
 	(create_segments_t)create_segments,
 	(detach_segment_t)detach_segment,
 	segment_type_size

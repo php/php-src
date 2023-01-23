@@ -91,7 +91,7 @@ typedef struct {
 
 typedef struct _handler_entry {
 	const char                  *name;
-	zend_shared_memory_handlers *handler;
+	const zend_shared_memory_handlers *handler;
 } zend_shared_memory_handler_entry;
 
 typedef struct _zend_shared_memory_state {
@@ -197,19 +197,19 @@ const char *zend_accel_get_shared_model(void);
 void zend_accel_shared_protect(int mode);
 
 #ifdef USE_MMAP
-extern zend_shared_memory_handlers zend_alloc_mmap_handlers;
+extern const zend_shared_memory_handlers zend_alloc_mmap_handlers;
 #endif
 
 #ifdef USE_SHM
-extern zend_shared_memory_handlers zend_alloc_shm_handlers;
+extern const zend_shared_memory_handlers zend_alloc_shm_handlers;
 #endif
 
 #ifdef USE_SHM_OPEN
-extern zend_shared_memory_handlers zend_alloc_posix_handlers;
+extern const zend_shared_memory_handlers zend_alloc_posix_handlers;
 #endif
 
 #ifdef ZEND_WIN32
-extern zend_shared_memory_handlers zend_alloc_win32_handlers;
+extern const zend_shared_memory_handlers zend_alloc_win32_handlers;
 void zend_shared_alloc_create_lock(void);
 void zend_shared_alloc_lock_win32(void);
 void zend_shared_alloc_unlock_win32(void);

@@ -132,16 +132,16 @@ vprintf(): Argument #2 ($values) must be of type array, null given
 vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 12 --
-vprintf(): Argument #2 ($values) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, true given
 
 -- Iteration 13 --
-vprintf(): Argument #2 ($values) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, false given
 
 -- Iteration 14 --
-vprintf(): Argument #2 ($values) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, true given
 
 -- Iteration 15 --
-vprintf(): Argument #2 ($values) must be of type array, bool given
+vprintf(): Argument #2 ($values) must be of type array, false given
 
 -- Iteration 16 --
 vprintf(): Argument #2 ($values) must be of type array, string given

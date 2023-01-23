@@ -35,6 +35,12 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
+* Removed the HAVE_DEV_URANDOM compile time check.  HAVE_DEV_URANDOM will
+  now never be defined. Any checks relying on HAVE_DEV_URANDOM should be
+  removed.  Even with HAVE_DEV_URANDOM it was not guaranteed that
+  /dev/urandom is actually available at run time and thus a runtime
+  check needs to happen in all cases.
+
 ========================
 3. Module changes
 ========================

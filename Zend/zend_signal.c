@@ -71,7 +71,7 @@ static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void
 #define TIMEOUT_SIG SIGPROF
 #endif
 
-static int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, SIGUSR1, SIGUSR2 };
+static const int zend_sigs[] = { TIMEOUT_SIG, SIGHUP, SIGINT, SIGQUIT, SIGTERM, SIGUSR1, SIGUSR2 };
 
 #define SA_FLAGS_MASK ~(SA_NODEFER | SA_RESETHAND)
 

@@ -2228,7 +2228,7 @@ PHP_FUNCTION(pg_lo_create)
 			wanted_oid = (Oid)Z_LVAL_P(oid);
 			break;
 		default:
-			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			zend_type_error("OID value must be of type string|int, %s given", zend_zval_value_name(oid));
 			RETURN_THROWS();
 		}
 		if ((pgsql_oid = lo_create(pgsql, wanted_oid)) == InvalidOid) {
@@ -2599,7 +2599,7 @@ PHP_FUNCTION(pg_lo_import)
 			wanted_oid = (Oid)Z_LVAL_P(oid);
 			break;
 		default:
-			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			zend_type_error("OID value must be of type string|int, %s given", zend_zval_value_name(oid));
 			RETURN_THROWS();
 		}
 
@@ -4489,7 +4489,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 			err = 1;
 		}
 		if (!err && (Z_TYPE_P(val) == IS_ARRAY || Z_TYPE_P(val) == IS_OBJECT || Z_TYPE_P(val) == IS_RESOURCE)) {
-			zend_type_error("Values must be of type string|int|float|bool|null, %s given", zend_zval_type_name(val));
+			zend_type_error("Values must be of type string|int|float|bool|null, %s given", zend_zval_value_name(val));
 			err = 1;
 		}
 		if (err) {
@@ -5253,7 +5253,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				smart_str_appendl(&querystr, "NULL", sizeof("NULL")-1);
 				break;
 			default:
-				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_type_name(val));
+				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
 				goto cleanup;
 		}
 		smart_str_appendc(&querystr, ',');
@@ -5427,7 +5427,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				smart_str_appendl(querystr, "NULL", sizeof("NULL")-1);
 				break;
 			default:
-				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_type_name(val));
+				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
 				return -1;
 		}
 		smart_str_appendl(querystr, pad, pad_len);

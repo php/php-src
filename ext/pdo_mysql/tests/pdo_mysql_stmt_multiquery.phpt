@@ -100,7 +100,7 @@ Native Prepared Statements...
 
 Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near '%SSELECT label FROM test ORDER BY id ASC LIMIT 1' at line %d in %s on line %d
 
-Fatal error: Uncaught Error: Call to a member function errorInfo() on bool in %s:%d
+Fatal error: Uncaught Error: Call to a member function errorInfo() on false in %s:%d
 Stack trace:
 #0 %s(%d): mysql_stmt_multiquery_wrong_usage(Object(PDO))
 #1 {main}

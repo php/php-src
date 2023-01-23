@@ -496,7 +496,7 @@ long_dim:
 				if (member == &tmp_zv) {
 					zval_ptr_dtor_str(&tmp_zv);
 				}
-				zend_type_error("It's not possible to assign a complex type to %s, %s given", attribs ? "attributes" : "properties", zend_zval_type_name(value));
+				zend_type_error("It's not possible to assign a complex type to %s, %s given", attribs ? "attributes" : "properties", zend_zval_value_name(value));
 				return &EG(error_zval);
 		}
 	}
@@ -2605,7 +2605,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	nodep = php_libxml_import_node(node);
 
 	if (!nodep) {
-		zend_argument_type_error(1, "must be of type SimpleXMLElement|DOMNode, %s given", zend_zval_type_name(node));
+		zend_argument_type_error(1, "must be of type SimpleXMLElement|DOMNode, %s given", zend_zval_value_name(node));
 		RETURN_THROWS();
 	}
 
