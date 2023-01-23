@@ -504,7 +504,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		return FAILURE;
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001 && __NetBSD_Version__ < 1000000000) || \
-  defined(__APPLE__) || defined(__GLIBC__))
+  defined(__APPLE__))
 	/*
 	 * OpenBSD until there is a valid equivalent
 	 * or NetBSD before the 10.x release
