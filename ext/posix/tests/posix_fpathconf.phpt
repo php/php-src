@@ -2,6 +2,10 @@
 Test posix_fpathconf
 --EXTENSIONS--
 posix
+--SKIPIF--
+<?php
+if (!function_exists("posix_pathconf")) die("skip only platforms with posix_pathconf");
+?>
 --FILE--
 <?php
 var_dump(posix_fpathconf(-1, POSIX_PC_PATH_MAX));

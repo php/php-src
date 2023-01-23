@@ -83,7 +83,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	}
 
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
-	if (FAILURE == php_random_bytes_silent(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
+	if (FAILURE == php_random_bytes_throw(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
 		zend_value_error("Unable to generate salt");
 		zend_string_release_ex(buffer, 0);
 		return NULL;

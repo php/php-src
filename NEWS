@@ -81,6 +81,7 @@ PHP                                                                        NEWS
   . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary. (timwolla)
   . Fix GH-10292 (Made the default value of the first param of srand() and
     mt_srand() nullable). (kocsismate)
+  . Enable getrandom() for NetBSD (from 10.x). (David Carlier)
 
 - Reflection:
   . Fix GH-9470 (ReflectionMethod constructor should not find private parent
@@ -101,6 +102,8 @@ PHP                                                                        NEWS
   . Make array_pad's $length warning less confusing. (nielsdos)
   . E_WARNING emitted by strtok in the caase both arguments are not provided when
     starting tokenisation. (David Carlier)
+  . password_hash() will now chain the original RandomException to the ValueError
+    on salt generation failure. (timwolla)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
