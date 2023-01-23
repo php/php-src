@@ -5932,7 +5932,6 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 {
 	ir_ref ref = IR_UNUSED;
 	ir_ref res_inputs[2];
-	uint32_t slow_paths = 0;
 	ir_ref if_long1 = IR_UNUSED;
 	ir_ref if_long2 = IR_UNUSED;
 	bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
@@ -5940,12 +5939,10 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
 		if_long1 = zend_jit_if_zval_type(jit, op1_addr, IS_LONG);
 		zend_jit_if_true(jit, if_long1);
-		slow_paths++;
 	}
 	if (!same_ops && (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 		if_long2 = zend_jit_if_zval_type(jit, op2_addr, IS_LONG);
 		zend_jit_if_true(jit, if_long2);
-		slow_paths++;
 	}
 
 	if (opcode == ZEND_SL) {
