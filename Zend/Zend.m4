@@ -304,14 +304,6 @@ AC_MSG_RESULT($ZEND_SIGNALS)
 
 ])
 
-AC_MSG_CHECKING(whether /dev/urandom exists)
-if test -r "/dev/urandom" && test -c "/dev/urandom"; then
-  AC_DEFINE([HAVE_DEV_URANDOM], 1, [Define if the target system has /dev/urandom device])
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
-
 AC_ARG_ENABLE([gcc-global-regs],
   [AS_HELP_STRING([--disable-gcc-global-regs],
     [whether to enable GCC global register variables])],
