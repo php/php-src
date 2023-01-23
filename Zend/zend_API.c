@@ -101,7 +101,7 @@ ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property)
 {
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", ZSTR_VAL(property_name), zend_zval_type_name(object));
+	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", ZSTR_VAL(property_name), zend_zval_value_name(object));
 	zend_tmp_string_release(tmp_property_name);
 }
 
@@ -142,7 +142,26 @@ ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 }
 /* }}} */
 
-ZEND_API const char *zend_zval_type_name(const zval *arg) /* {{{ */
+ZEND_API const char *zend_zval_value_name(const zval *arg)
+{
+	ZVAL_DEREF(arg);
+
+	if (Z_ISUNDEF_P(arg)) {
+		return "null";
+	}
+
+	if (Z_TYPE_P(arg) == IS_OBJECT) {
+		return ZSTR_VAL(Z_OBJCE_P(arg)->name);
+	} else if (Z_TYPE_P(arg) == IS_FALSE) {
+		return "false";
+	} else if  (Z_TYPE_P(arg) == IS_TRUE) {
+		return "true";
+	}
+
+	return zend_get_type_by_const(Z_TYPE_P(arg));
+}
+
+ZEND_API const char *zend_zval_type_name(const zval *arg)
 {
 	ZVAL_DEREF(arg);
 
@@ -156,7 +175,6 @@ ZEND_API const char *zend_zval_type_name(const zval *arg) /* {{{ */
 
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
-/* }}} */
 
 /* This API exists *only* for use in gettype().
  * For anything else, you likely want zend_zval_type_name(). */
@@ -277,7 +295,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t n
 		return;
 	}
 
-	zend_argument_type_error(num, "must be %s, %s given", expected_error[expected_type], zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be %s, %s given", expected_error[expected_type], zend_zval_value_name(arg));
 }
 /* }}} */
 
@@ -287,7 +305,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(uint32_t 
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type %s, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s, %s given", name, zend_zval_value_name(arg));
 }
 /* }}} */
 
@@ -297,7 +315,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(u
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type ?%s, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type ?%s, %s given", name, zend_zval_value_name(arg));
 }
 /* }}} */
 
@@ -307,7 +325,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_error(u
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type %s|int, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s|int, %s given", name, zend_zval_value_name(arg));
 }
 /* }}} */
 
@@ -317,7 +335,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_long_or_null
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type %s|int|null, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s|int|null, %s given", name, zend_zval_value_name(arg));
 }
 /* }}} */
 
@@ -327,7 +345,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_error
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type %s|string, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s|string, %s given", name, zend_zval_value_name(arg));
 }
 /* }}} */
 
@@ -337,7 +355,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_or_nu
 		return;
 	}
 
-	zend_argument_type_error(num, "must be of type %s|string|null, %s given", name, zend_zval_type_name(arg));
+	zend_argument_type_error(num, "must be of type %s|string|null, %s given", name, zend_zval_value_name(arg));
 }
 /* }}} */
 
@@ -884,7 +902,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				if (!zend_parse_arg_object(arg, p, ce, check_null)) {
 					if (ce) {
 						if (check_null) {
-							zend_spprintf(error, 0, "must be of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_type_name(arg));
+							zend_spprintf(error, 0, "must be of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_value_name(arg));
 							return "";
 						} else {
 							return ZSTR_VAL(ce->name);
@@ -1004,7 +1022,7 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 				}
 				efree(error);
 			} else {
-				zend_argument_type_error(arg_num, "must be of type %s, %s given", expected_type, zend_zval_type_name(arg));
+				zend_argument_type_error(arg_num, "must be of type %s, %s given", expected_type, zend_zval_value_name(arg));
 			}
 		} else if (error) {
 			efree(error);

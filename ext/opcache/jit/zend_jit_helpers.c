@@ -34,7 +34,7 @@ static ZEND_COLD void zend_jit_illegal_offset(void)
 
 static ZEND_COLD void zend_jit_illegal_string_offset(zval *offset)
 {
-	zend_type_error("Cannot access offset of type %s on string", zend_zval_type_name(offset));
+	zend_type_error("Cannot access offset of type %s on string", zend_zval_value_name(offset));
 }
 
 static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
@@ -112,7 +112,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 		object = &EG(uninitialized_zval);
 	}
 	zend_throw_error(NULL, "Call to a member function %s() on %s",
-		Z_STRVAL_P(function_name), zend_zval_type_name(object));
+		Z_STRVAL_P(function_name), zend_zval_value_name(object));
 }
 
 static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call_tmp(zval *object)
@@ -2343,19 +2343,19 @@ static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 
 static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
 {
-	zend_error(E_WARNING, "Trying to access array offset on value of type %s", zend_zval_type_name(container));
+	zend_error(E_WARNING, "Trying to access array offset on %s", zend_zval_value_name(container));
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_property_read(zval *container, const char *property_name)
 {
-	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", property_name, zend_zval_type_name(container));
+	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", property_name, zend_zval_value_name(container));
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, const char *property_name)
 {
 	zend_throw_error(NULL,
 		"Attempt to modify property \"%s\" on %s",
-		property_name, zend_zval_type_name(container));
+		property_name, zend_zval_value_name(container));
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, const char *property_name)
@@ -2373,7 +2373,7 @@ static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, cons
 	}
 	zend_throw_error(NULL,
 		"Attempt to increment/decrement property \"%s\" on %s",
-		property_name, zend_zval_type_name(container));
+		property_name, zend_zval_value_name(container));
 	if (opline->op1_type == IS_VAR) {
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	}
@@ -2383,7 +2383,7 @@ static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, cons
 {
 	zend_throw_error(NULL,
 		"Attempt to assign property \"%s\" on %s",
-		property_name, zend_zval_type_name(container));
+		property_name, zend_zval_value_name(container));
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_property_assign_op(zval *container, const char *property_name)

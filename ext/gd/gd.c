@@ -4040,7 +4040,7 @@ static gdIOCtx *create_stream_context_from_zval(zval *to_zval) {
 			return NULL;
 		}
 	} else {
-		zend_argument_type_error(2, "must be a file name or a stream resource, %s given", zend_zval_type_name(to_zval));
+		zend_argument_type_error(2, "must be a file name or a stream resource, %s given", zend_zval_value_name(to_zval));
 		return NULL;
 	}
 

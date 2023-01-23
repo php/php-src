@@ -375,7 +375,6 @@ static void register_test_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 
 
-#if (PHP_VERSION_ID >= 80200)
 	zend_string *attribute_name_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
 	zend_attribute *attribute_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", sizeof("zend_test_parameter_with_attribute") - 1), 0, attribute_name_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0, 1);
 	zend_string_release(attribute_name_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0);
@@ -383,7 +382,6 @@ static void register_test_symbols(int module_number)
 	zend_string *attribute_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0_arg0_str = zend_string_init("value1", strlen("value1"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0_arg0, attribute_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0->args[0].value, &attribute_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0_arg0);
-#endif
 }
 
 static zend_class_entry *register_class__ZendTestInterface(void)
@@ -510,14 +508,12 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
-#if (PHP_VERSION_ID >= 80200)
 	zend_string *attribute_name_Attribute_class_ZendTestAttribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ZendTestAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttribute, 1);
 	zend_string_release(attribute_name_Attribute_class_ZendTestAttribute);
 	zval attribute_Attribute_class_ZendTestAttribute_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttribute_arg0, ZEND_ATTRIBUTE_TARGET_ALL);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestAttribute->args[0].value, &attribute_Attribute_class_ZendTestAttribute_arg0);
-#endif
 
 	return class_entry;
 }
@@ -536,14 +532,12 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_parameter_name);
 
-#if (PHP_VERSION_ID >= 80200)
 	zend_string *attribute_name_Attribute_class_ZendTestParameterAttribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ZendTestParameterAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestParameterAttribute, 1);
 	zend_string_release(attribute_name_Attribute_class_ZendTestParameterAttribute);
 	zval attribute_Attribute_class_ZendTestParameterAttribute_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestParameterAttribute_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestParameterAttribute->args[0].value, &attribute_Attribute_class_ZendTestParameterAttribute_arg0);
-#endif
 
 	return class_entry;
 }
@@ -562,14 +556,12 @@ static zend_class_entry *register_class_ZendTestPropertyAttribute(void)
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_parameter_name);
 
-#if (PHP_VERSION_ID >= 80200)
 	zend_string *attribute_name_Attribute_class_ZendTestPropertyAttribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ZendTestPropertyAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestPropertyAttribute, 1);
 	zend_string_release(attribute_name_Attribute_class_ZendTestPropertyAttribute);
 	zval attribute_Attribute_class_ZendTestPropertyAttribute_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestPropertyAttribute_arg0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestPropertyAttribute->args[0].value, &attribute_Attribute_class_ZendTestPropertyAttribute_arg0);
-#endif
 
 	return class_entry;
 }
@@ -580,7 +572,6 @@ static zend_class_entry *register_class_ZendTestClassWithMethodWithParameterAttr
 
 	INIT_CLASS_ENTRY(ce, "ZendTestClassWithMethodWithParameterAttribute", class_ZendTestClassWithMethodWithParameterAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-#if (PHP_VERSION_ID >= 80200)
 
 
 	zend_string *attribute_name_ZendTestParameterAttribute_ZendTestClassWithMethodWithParameterAttribute_no_override_arg0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
@@ -598,7 +589,6 @@ static zend_class_entry *register_class_ZendTestClassWithMethodWithParameterAttr
 	zend_string *attribute_ZendTestParameterAttribute_ZendTestClassWithMethodWithParameterAttribute_override_arg0_arg0_str = zend_string_init("value3", strlen("value3"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_ZendTestClassWithMethodWithParameterAttribute_override_arg0_arg0, attribute_ZendTestParameterAttribute_ZendTestClassWithMethodWithParameterAttribute_override_arg0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_ZendTestParameterAttribute_ZendTestClassWithMethodWithParameterAttribute_override_arg0->args[0].value, &attribute_ZendTestParameterAttribute_ZendTestClassWithMethodWithParameterAttribute_override_arg0_arg0);
-#endif
 
 	return class_entry;
 }
@@ -609,7 +599,6 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 
 	INIT_CLASS_ENTRY(ce, "ZendTestChildClassWithMethodWithParameterAttribute", class_ZendTestChildClassWithMethodWithParameterAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_ZendTestClassWithMethodWithParameterAttribute);
-#if (PHP_VERSION_ID >= 80200)
 
 
 	zend_string *attribute_name_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
@@ -619,7 +608,6 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 	zend_string *attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0_str = zend_string_init("value4", strlen("value4"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0, attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0->args[0].value, &attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0);
-#endif
 
 	return class_entry;
 }

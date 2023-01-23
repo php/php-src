@@ -79,7 +79,7 @@ PHP_FUNCTION(class_parents)
 	}
 
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -111,7 +111,7 @@ PHP_FUNCTION(class_implements)
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -139,7 +139,7 @@ PHP_FUNCTION(class_uses)
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
