@@ -533,12 +533,13 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		              amount_to_read
 		*/
 		size_t amount_to_read = size - read_bytes;
+		ssize_t n;
 
 		errno = 0;
 #  if defined(__linux__)
-		ssize_t n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
+		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
 #  else
-		ssize_t n = getrandom(bytes + read_bytes, amount_to_read, 0);
+		n = getrandom(bytes + read_bytes, amount_to_read, 0);
 #  endif
 
 		if (n == -1) {
