@@ -594,20 +594,17 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
 			errno = 0;
 			n = read(fd, bytes + read_bytes, size - read_bytes);
-			if (n <= 0) {
-				break;
-			}
-		}
 
-		if (read_bytes < size) {
-			if (should_throw) {
-				if (errno != 0) {
-					zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data: %s", strerror(errno));
-				} else {
-					zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data");
+			if (n <= 0) {
+				if (should_throw) {
+					if (errno != 0) {
+						zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data: %s", strerror(errno));
+					} else {
+						zend_throw_exception_ex(random_ce_Random_RandomException, 0, "Could not gather sufficient random data");
+					}
 				}
+				return FAILURE;
 			}
-			return FAILURE;
 		}
 	}
 #endif
