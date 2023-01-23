@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - GMP:
   . Properly implement GMP::__construct(). (nielsdos)
 
+- Random:
+  . Fix GH-10390 (Do not trust arc4random_buf() on glibc). (timwolla)
+
 - Standard:
   - Fixed bug GH-8086 (Introduce mail.mixed_lf_and_crlf INI). (Jakub Zelenka)
 

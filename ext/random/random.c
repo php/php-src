@@ -505,7 +505,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		}
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__) || defined(__GLIBC__))
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__))
 	arc4random_buf(bytes, size);
 #else
 	size_t read_bytes = 0;
