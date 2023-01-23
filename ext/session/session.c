@@ -306,17 +306,14 @@ static void bin_to_readable(unsigned char *in, size_t inlen, char *out, size_t o
 }
 /* }}} */
 
-#define PS_EXTRA_RAND_BYTES 60
-
 PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 {
-	unsigned char rbuf[PS_MAX_SID_LENGTH + PS_EXTRA_RAND_BYTES];
+	unsigned char rbuf[PS_MAX_SID_LENGTH];
 	zend_string *outid;
 
 	/* It would be enough to read ceil(sid_length * sid_bits_per_character / 8) bytes here.
 	 * We read sid_length bytes instead for simplicity. */
-	/* Read additional PS_EXTRA_RAND_BYTES just in case CSPRNG is not safe enough */
-	if (php_random_bytes_throw(rbuf, PS(sid_length) + PS_EXTRA_RAND_BYTES) == FAILURE) {
+	if (php_random_bytes_throw(rbuf, PS(sid_length)) == FAILURE) {
 		return NULL;
 	}
 
