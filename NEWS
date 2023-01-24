@@ -86,6 +86,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fix GH-9470 (ReflectionMethod constructor should not find private parent
     method). (ilutov)
+  . Fix GH-10259 (ReflectionClass::getStaticProperties doesn't need null return
+    type). (kocsismate)
 
 - Sockets:
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
