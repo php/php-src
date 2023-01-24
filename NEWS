@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Random:
   . Fix GH-10390 (Do not trust arc4random_buf() on glibc). (timwolla)
+  . Fix GH-10292 (Made the default value of the first param of srand() and
+    mt_srand() unknown). (kocsismate)
 
 - Standard:
   - Fixed bug GH-8086 (Introduce mail.mixed_lf_and_crlf INI). (Jakub Zelenka)
