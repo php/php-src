@@ -1375,6 +1375,8 @@ static int php_userstreamop_rewinddir(php_stream *stream, zend_off_t offset, int
 
 }
 
+/* The user stream overloads the castas parameter by accepting PHP_STREAM_FLAG_SUPPRESS_ERRORS as a bitmask
+ * If present the call is silent, otherwise it will report errors  */
 static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 {
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
@@ -1384,6 +1386,8 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	php_stream * intstream = NULL;
 	int call_result;
 	int ret = FAILURE;
+	bool report_errors = !(castas & PHP_STREAM_FLAG_SUPPRESS_ERRORS);
+	castas &= ~PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1);
 
@@ -1400,8 +1404,10 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 
 	do {
 		if (call_result == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " is not implemented!",
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " is not implemented!",
 					ZSTR_VAL(us->wrapper->ce->name));
+			}
 			break;
 		}
 		if (!zend_is_true(&retval)) {
@@ -1409,13 +1415,17 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);
 		if (!intstream) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must return a stream resource",
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must return a stream resource",
 					ZSTR_VAL(us->wrapper->ce->name));
+			}
 			break;
 		}
 		if (intstream == stream) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must not return itself",
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must not return itself",
 					ZSTR_VAL(us->wrapper->ce->name));
+			}
 			intstream = NULL;
 			break;
 		}

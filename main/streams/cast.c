@@ -187,6 +187,12 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 }
 /* }}} */
 
+static inline bool is_stream_user_stream(const php_stream *stream)
+{
+	return (strlen(stream->ops->label) == strlen("user-space"))
+		&& strncmp(stream->ops->label, "user-space", strlen("user-space")) == 0;
+}
+
 /* {{{ php_stream_cast */
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
 {
@@ -196,6 +202,10 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	/* synchronize our buffer (if possible) */
 	if (ret && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		php_stream_flush(stream);
+		/* Do special handling for user streams as they may not implement the cast method */
+		if (!show_err && is_stream_user_stream(stream)) {
+			castas |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
+		}
 		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 			zend_off_t dummy;
 
@@ -212,6 +222,11 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 				*(FILE**)ret = stream->stdiocast;
 			}
 			goto exit_success;
+		}
+
+		/* Do special handling for user streams as they may not implement the cast method */
+		if (!show_err && is_stream_user_stream(stream)) {
+			castas |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 		}
 
 		/* if the stream is a stdio stream let's give it a chance to respond
@@ -299,8 +314,14 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
 		}
 		return FAILURE;
-	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
-		goto exit_success;
+	} else if (stream->ops->cast) {
+		/* Do special handling for user streams as they may not implement the cast method */
+		if (!show_err && is_stream_user_stream(stream)) {
+			castas |= PHP_STREAM_FLAG_SUPPRESS_ERRORS;
+		}
+		if (stream->ops->cast(stream, castas, ret) == SUCCESS) {
+			goto exit_success;
+		}
 	}
 
 	if (show_err) {

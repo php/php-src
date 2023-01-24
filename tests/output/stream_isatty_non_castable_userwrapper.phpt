@@ -18,8 +18,5 @@ $fd = fopen("test://foo","r");
 var_dump(stream_isatty($fd));
 
 ?>
---EXPECTF--
-Warning: stream_isatty(): test_wrapper::stream_cast is not implemented! in %s on line %d
-
-Warning: stream_isatty(): test_wrapper::stream_cast is not implemented! in %s on line %d
+--EXPECT--
 bool(false)
