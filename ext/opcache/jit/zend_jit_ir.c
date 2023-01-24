@@ -679,6 +679,19 @@ static void zend_jit_tailcall_1(zend_jit_ctx *jit, ir_ref func, ir_ref arg1)
 	jit->ctx.ir_base[1].op1 = jit->control;
 }
 
+static void zend_jit_tailcall_2(zend_jit_ctx *jit, ir_ref func, ir_ref arg1, ir_ref arg2)
+{
+	ir_ref call = ir_emit_N(&jit->ctx, IR_TAILCALL, 4);
+	ZEND_ASSERT(jit->control);
+	ir_set_op(&jit->ctx, call, 1, jit->control);
+	ir_set_op(&jit->ctx, call, 2, func);
+	ir_set_op(&jit->ctx, call, 3, arg1);
+	ir_set_op(&jit->ctx, call, 4, arg2);
+	jit->control = call;
+	jit->control = ir_emit3(&jit->ctx, IR_UNREACHABLE, jit->control, IR_UNUSED, jit->ctx.ir_base[1].op1);
+	jit->ctx.ir_base[1].op1 = jit->control;
+}
+
 static void zend_jit_ijmp(zend_jit_ctx *jit, ir_ref addr)
 {
 	ZEND_ASSERT(jit->control);
@@ -2639,20 +2652,22 @@ static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 		zend_jit_tailcall_0(jit,
 			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
 	} else {
-ZEND_ASSERT(0);
-		if (GCC_GLOBAL_REGS) {
-//???			|	add r4, SPAD
-		} else {
-//???			|	mov FCARG2a, FP
-//???			|	mov FP, aword T2 // restore FP
-//???			|	mov RX, aword T3 // restore IP
-//???			|	add r4, NR_SPAD
-		}
-//???		|	test FCARG1d, ZEND_CALL_TOP
-//???		|	jnz >1
-//???		|	EXT_JMP zend_jit_leave_nested_func_helper, r0
-//???		|1:
-//???		|	EXT_JMP zend_jit_leave_top_func_helper, r0
+		ir_ref if_top = zend_jit_if(jit,
+			ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_U32),
+				call_info,
+				ir_const_u32(&jit->ctx, ZEND_CALL_TOP)));
+
+		zend_jit_if_false(jit, if_top);
+		zend_jit_tailcall_2(jit,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_nested_func_helper, IR_CONST_FASTCALL_FUNC),
+			call_info,
+			zend_jit_fp(jit));
+
+		zend_jit_if_true(jit, if_top);
+		zend_jit_tailcall_2(jit,
+			zend_jit_const_func_addr(jit, (uintptr_t)zend_jit_leave_top_func_helper, IR_CONST_FASTCALL_FUNC),
+			call_info,
+			zend_jit_fp(jit));
 	}
 
 	return 1;
@@ -2847,56 +2862,41 @@ static int zend_jit_leave_throw_stub(zend_jit_ctx *jit)
 	ir_ref ip, cond, if_set, long_path;
 
 	// JIT: if (opline->opcode != ZEND_HANDLE_EXCEPTION) {
+	zend_jit_store_ip(jit,
+		zend_jit_load(jit, IR_ADDR,
+			zend_jit_ex_opline_addr(jit)));
+	ip = zend_jit_ip(jit);
+	cond = ir_fold2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL),
+		zend_jit_load_at_offset(jit, IR_U8,
+			ip, offsetof(zend_op, opcode)),
+		ir_const_u8(&jit->ctx, ZEND_HANDLE_EXCEPTION));
+	if_set = zend_jit_if(jit, cond);
+	zend_jit_if_false(jit, if_set);
+
+	// JIT: EG(opline_before_exception) = opline;
+	zend_jit_store(jit,
+		ZEND_JIT_EG_ADDR(opline_before_exception),
+		ip);
+
+	long_path = zend_jit_end(jit);
+	zend_jit_if_true(jit, if_set);
+	zend_jit_merge_2(jit, long_path, zend_jit_end(jit));
+
+	// JIT: opline = EG(exception_op);
+	zend_jit_load_ip(jit,
+		ZEND_JIT_EG_ADDR(exception_op));
+
 	if (GCC_GLOBAL_REGS) {
-		zend_jit_store_ip(jit,
-			zend_jit_load(jit, IR_ADDR,
-				zend_jit_ex_opline_addr(jit)));
 		ip = zend_jit_ip(jit);
-		cond = ir_fold2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL),
-			zend_jit_load_at_offset(jit, IR_U8,
-				ip, offsetof(zend_op, opcode)),
-			ir_const_u8(&jit->ctx, ZEND_HANDLE_EXCEPTION));
-		if_set = zend_jit_if(jit, cond);
-		zend_jit_if_false(jit, if_set);
-
-		// JIT: EG(opline_before_exception) = opline;
 		zend_jit_store(jit,
-			ZEND_JIT_EG_ADDR(opline_before_exception),
+			zend_jit_ex_opline_addr(jit),
 			ip);
-
-		long_path = zend_jit_end(jit);
-		zend_jit_if_true(jit, if_set);
-		zend_jit_merge_2(jit, long_path, zend_jit_end(jit));
-
-		// JIT: opline = EG(exception_op);
-		zend_jit_store_ip(jit,
-			ZEND_JIT_EG_ADDR(exception_op));
-
-		if (GCC_GLOBAL_REGS) {
-			ip = zend_jit_ip(jit);
-			zend_jit_store(jit,
-				zend_jit_ex_opline_addr(jit),
-				ip);
-		}
 
 		// JIT: HANDLE_EXCEPTION()
 		zend_jit_ijmp(jit,
 			zend_jit_stub_addr(jit, jit_stub_exception_handler));
 	} else {
-ZEND_ASSERT(0);
-//???		|	GET_IP FCARG1a
-//???		|	cmp byte OP:FCARG1a->opcode, ZEND_HANDLE_EXCEPTION
-//???		|	je >5
-//???		|	// EG(opline_before_exception) = opline;
-//???		|	MEM_STORE_ZTS aword, executor_globals, opline_before_exception, FCARG1a, r0
-//???		|5:
-//???		|	// opline = EG(exception_op);
-//???		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
-//???		|	mov FP, aword T2 // restore FP
-//???		|	mov RX, aword T3 // restore IP
-//???		|	add r4, NR_SPAD // stack alignment
-//???		|	mov r0, 2 // ZEND_VM_LEAVE
-//???		|	ret
+		zend_jit_ret(jit, ir_const_i32(&jit->ctx, 2)); // ZEND_VM_LEAVE
 	}
 
 	return 1;
@@ -3355,7 +3355,8 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 		jit->ctx.flags |= IR_NO_STACK_COMBINE;
 		if (zend_jit_vm_kind == ZEND_VM_KIND_CALL) {
 			jit->ctx.flags |= IR_FUNCTION;
-			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 63; /* TODO: reduce stack size ??? */
+			/* Stack must be 16 byte aligned */
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 7; /* TODO: reduce stack size ??? */
 #if defined(IR_TARGET_X86)
 			jit->ctx.fixed_save_regset = (1<<3) | (1<<5) | (1<<6) | (1<<7); /* all preserved registers ??? */
 #elif defined(IR_TARGET_X64)
@@ -3475,6 +3476,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	}
 
 	ir_match(ctx);
+	ctx->flags &= ~IR_USE_FRAME_POINTER; /* don't use FRAME_POINTER even with ALLOCA, TODO: cleanup this ??? */
 	ir_assign_virtual_registers(ctx);
 	ir_compute_live_ranges(ctx);
 	ir_coalesce(ctx);
@@ -3630,115 +3632,115 @@ static void zend_jit_setup_disasm(void)
 		ir_disasm_add_symbol("ZEND_RETURN_SPEC_CV_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
 
 		ir_disasm_add_symbol("ZEND_HYBRID_HALT_LABEL", (uint64_t)(uintptr_t)zend_jit_halt_op->handler, sizeof(void*));
-
-		ir_disasm_add_symbol("zend_jit_profile_counter",            (uint64_t)(uintptr_t)&zend_jit_profile_counter, sizeof(zend_jit_profile_counter));
-
-		ir_disasm_add_symbol("zend_runtime_jit",                    (uint64_t)(uintptr_t)zend_runtime_jit, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_hot_func",                   (uint64_t)(uintptr_t)zend_jit_hot_func, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_trace_hot_root",             (uint64_t)(uintptr_t)zend_jit_trace_hot_root, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_trace_exit",                 (uint64_t)(uintptr_t)zend_jit_trace_exit, sizeof(void*));
-
-		ir_disasm_add_symbol("zend_jit_array_free",                 (uint64_t)(uintptr_t)zend_jit_array_free, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_undefined_op_helper",        (uint64_t)(uintptr_t)zend_jit_undefined_op_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_inc_typed_ref",          (uint64_t)(uintptr_t)zend_jit_pre_inc_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_dec_typed_ref",          (uint64_t)(uintptr_t)zend_jit_pre_dec_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_post_inc_typed_ref",         (uint64_t)(uintptr_t)zend_jit_post_inc_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_post_dec_typed_ref",         (uint64_t)(uintptr_t)zend_jit_post_dec_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_inc",                    (uint64_t)(uintptr_t)zend_jit_pre_inc, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_dec",                    (uint64_t)(uintptr_t)zend_jit_pre_dec, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_add_arrays_helper",          (uint64_t)(uintptr_t)zend_jit_add_arrays_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fast_assign_concat_helper",  (uint64_t)(uintptr_t)zend_jit_fast_assign_concat_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fast_concat_helper",         (uint64_t)(uintptr_t)zend_jit_fast_concat_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fast_concat_tmp_helper",     (uint64_t)(uintptr_t)zend_jit_fast_concat_tmp_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_op_to_typed_ref_tmp", (uint64_t)(uintptr_t)zend_jit_assign_op_to_typed_ref_tmp, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_op_to_typed_ref",     (uint64_t)(uintptr_t)zend_jit_assign_op_to_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_const_to_typed_ref",  (uint64_t)(uintptr_t)zend_jit_assign_const_to_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_tmp_to_typed_ref",    (uint64_t)(uintptr_t)zend_jit_assign_tmp_to_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_var_to_typed_ref",    (uint64_t)(uintptr_t)zend_jit_assign_var_to_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_cv_to_typed_ref",     (uint64_t)(uintptr_t)zend_jit_assign_cv_to_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_check_constant",             (uint64_t)(uintptr_t)zend_jit_check_constant, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_get_constant",               (uint64_t)(uintptr_t)zend_jit_get_constant, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_int_extend_stack_helper",    (uint64_t)(uintptr_t)zend_jit_int_extend_stack_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_extend_stack_helper",        (uint64_t)(uintptr_t)zend_jit_extend_stack_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_init_func_run_time_cache_helper", (uint64_t)(uintptr_t)zend_jit_init_func_run_time_cache_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_find_func_helper",           (uint64_t)(uintptr_t)zend_jit_find_func_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_find_ns_func_helper",        (uint64_t)(uintptr_t)zend_jit_find_ns_func_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_unref_helper",               (uint64_t)(uintptr_t)zend_jit_unref_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_method_call",        (uint64_t)(uintptr_t)zend_jit_invalid_method_call, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_method_call_tmp",    (uint64_t)(uintptr_t)zend_jit_invalid_method_call_tmp, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_find_method_helper",         (uint64_t)(uintptr_t)zend_jit_find_method_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_find_method_tmp_helper",     (uint64_t)(uintptr_t)zend_jit_find_method_tmp_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_push_static_metod_call_frame", (uint64_t)(uintptr_t)zend_jit_push_static_metod_call_frame, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_push_static_metod_call_frame_tmp", (uint64_t)(uintptr_t)zend_jit_push_static_metod_call_frame_tmp, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_free_trampoline_helper",     (uint64_t)(uintptr_t)zend_jit_free_trampoline_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_verify_return_slow",         (uint64_t)(uintptr_t)zend_jit_verify_return_slow, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_deprecated_helper",          (uint64_t)(uintptr_t)zend_jit_deprecated_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_copy_extra_args_helper",     (uint64_t)(uintptr_t)zend_jit_copy_extra_args_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_vm_stack_free_args_helper",  (uint64_t)(uintptr_t)zend_jit_vm_stack_free_args_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_free_extra_named_params",        (uint64_t)(uintptr_t)zend_free_extra_named_params, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_free_call_frame",            (uint64_t)(uintptr_t)zend_jit_free_call_frame, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_exception_in_interrupt_handler_helper", (uint64_t)(uintptr_t)zend_jit_exception_in_interrupt_handler_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_verify_arg_slow",            (uint64_t)(uintptr_t)zend_jit_verify_arg_slow, sizeof(void*));
-		ir_disasm_add_symbol("zend_missing_arg_error",              (uint64_t)(uintptr_t)zend_missing_arg_error, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_leave_func_helper",          (uint64_t)(uintptr_t)zend_jit_leave_func_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_leave_nested_func_helper",   (uint64_t)(uintptr_t)zend_jit_leave_nested_func_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_leave_top_func_helper",      (uint64_t)(uintptr_t)zend_jit_leave_top_func_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_global_helper",        (uint64_t)(uintptr_t)zend_jit_fetch_global_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_hash_index_lookup_rw_no_packed", (uint64_t)(uintptr_t)zend_jit_hash_index_lookup_rw_no_packed, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_hash_index_lookup_rw",       (uint64_t)(uintptr_t)zend_jit_hash_index_lookup_rw, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_hash_lookup_rw",             (uint64_t)(uintptr_t)zend_jit_hash_lookup_rw, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_symtable_find",              (uint64_t)(uintptr_t)zend_jit_symtable_find, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_symtable_lookup_w",          (uint64_t)(uintptr_t)zend_jit_symtable_lookup_w, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_symtable_lookup_rw",         (uint64_t)(uintptr_t)zend_jit_symtable_lookup_rw, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_r_helper",         (uint64_t)(uintptr_t)zend_jit_fetch_dim_r_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_is_helper",        (uint64_t)(uintptr_t)zend_jit_fetch_dim_is_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_isset_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_isset_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_rw_helper",        (uint64_t)(uintptr_t)zend_jit_fetch_dim_rw_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_w_helper",         (uint64_t)(uintptr_t)zend_jit_fetch_dim_w_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_str_offset_r_helper", (uint64_t)(uintptr_t)zend_jit_fetch_dim_str_offset_r_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_str_r_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_str_r_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_str_is_helper",    (uint64_t)(uintptr_t)zend_jit_fetch_dim_str_is_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_obj_r_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_r_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_obj_is_helper",    (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_is_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_array_access",       (uint64_t)(uintptr_t)zend_jit_invalid_array_access, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_undefined_offset",           (uint64_t)(uintptr_t)zend_jit_undefined_offset, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_undefined_key",              (uint64_t)(uintptr_t)zend_jit_undefined_key, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_zval_array_dup",             (uint64_t)(uintptr_t)zend_jit_zval_array_dup, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_prepare_assign_dim_ref",     (uint64_t)(uintptr_t)zend_jit_prepare_assign_dim_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_cannot_add_element",         (uint64_t)(uintptr_t)zend_jit_cannot_add_element, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_obj_w_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_w_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_dim_obj_rw_helper",    (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_rw_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_isset_dim_helper",           (uint64_t)(uintptr_t)zend_jit_isset_dim_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_dim_helper",          (uint64_t)(uintptr_t)zend_jit_assign_dim_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_dim_op_helper",       (uint64_t)(uintptr_t)zend_jit_assign_dim_op_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_obj_w_slow",           (uint64_t)(uintptr_t)zend_jit_fetch_obj_w_slow, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_obj_r_slow",           (uint64_t)(uintptr_t)zend_jit_fetch_obj_r_slow, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_obj_is_slow",          (uint64_t)(uintptr_t)zend_jit_fetch_obj_is_slow, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_obj_r_dynamic",        (uint64_t)(uintptr_t)zend_jit_fetch_obj_r_dynamic, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_fetch_obj_is_dynamic",       (uint64_t)(uintptr_t)zend_jit_fetch_obj_is_dynamic, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_check_array_promotion",      (uint64_t)(uintptr_t)zend_jit_check_array_promotion, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_create_typed_ref",           (uint64_t)(uintptr_t)zend_jit_create_typed_ref, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_property_write",     (uint64_t)(uintptr_t)zend_jit_invalid_property_write, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_property_read",      (uint64_t)(uintptr_t)zend_jit_invalid_property_read, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_extract_helper",             (uint64_t)(uintptr_t)zend_jit_extract_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_property_assign",    (uint64_t)(uintptr_t)zend_jit_invalid_property_assign, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_to_typed_prop",       (uint64_t)(uintptr_t)zend_jit_assign_to_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_obj_helper",          (uint64_t)(uintptr_t)zend_jit_assign_obj_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_property_assign_op", (uint64_t)(uintptr_t)zend_jit_invalid_property_assign_op, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_op_to_typed_prop",    (uint64_t)(uintptr_t)zend_jit_assign_op_to_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_assign_obj_op_helper",       (uint64_t)(uintptr_t)zend_jit_assign_obj_op_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_invalid_property_incdec",    (uint64_t)(uintptr_t)zend_jit_invalid_property_incdec, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_inc_typed_prop",             (uint64_t)(uintptr_t)zend_jit_inc_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_dec_typed_prop",             (uint64_t)(uintptr_t)zend_jit_dec_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_inc_typed_prop",         (uint64_t)(uintptr_t)zend_jit_pre_inc_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_post_inc_typed_prop",        (uint64_t)(uintptr_t)zend_jit_post_inc_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_dec_typed_prop",         (uint64_t)(uintptr_t)zend_jit_pre_dec_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_post_dec_typed_prop",        (uint64_t)(uintptr_t)zend_jit_post_dec_typed_prop, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_inc_obj_helper",         (uint64_t)(uintptr_t)zend_jit_pre_inc_obj_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_post_inc_obj_helper",        (uint64_t)(uintptr_t)zend_jit_post_inc_obj_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_pre_dec_obj_helper",         (uint64_t)(uintptr_t)zend_jit_pre_dec_obj_helper, sizeof(void*));
-		ir_disasm_add_symbol("zend_jit_post_dec_obj_helper",        (uint64_t)(uintptr_t)zend_jit_post_dec_obj_helper, sizeof(void*));
 	}
+
+	ir_disasm_add_symbol("zend_jit_profile_counter",            (uint64_t)(uintptr_t)&zend_jit_profile_counter, sizeof(zend_jit_profile_counter));
+
+	ir_disasm_add_symbol("zend_runtime_jit",                    (uint64_t)(uintptr_t)zend_runtime_jit, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_hot_func",                   (uint64_t)(uintptr_t)zend_jit_hot_func, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_trace_hot_root",             (uint64_t)(uintptr_t)zend_jit_trace_hot_root, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_trace_exit",                 (uint64_t)(uintptr_t)zend_jit_trace_exit, sizeof(void*));
+
+	ir_disasm_add_symbol("zend_jit_array_free",                 (uint64_t)(uintptr_t)zend_jit_array_free, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_undefined_op_helper",        (uint64_t)(uintptr_t)zend_jit_undefined_op_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_inc_typed_ref",          (uint64_t)(uintptr_t)zend_jit_pre_inc_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_dec_typed_ref",          (uint64_t)(uintptr_t)zend_jit_pre_dec_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_post_inc_typed_ref",         (uint64_t)(uintptr_t)zend_jit_post_inc_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_post_dec_typed_ref",         (uint64_t)(uintptr_t)zend_jit_post_dec_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_inc",                    (uint64_t)(uintptr_t)zend_jit_pre_inc, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_dec",                    (uint64_t)(uintptr_t)zend_jit_pre_dec, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_add_arrays_helper",          (uint64_t)(uintptr_t)zend_jit_add_arrays_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fast_assign_concat_helper",  (uint64_t)(uintptr_t)zend_jit_fast_assign_concat_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fast_concat_helper",         (uint64_t)(uintptr_t)zend_jit_fast_concat_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fast_concat_tmp_helper",     (uint64_t)(uintptr_t)zend_jit_fast_concat_tmp_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_op_to_typed_ref_tmp", (uint64_t)(uintptr_t)zend_jit_assign_op_to_typed_ref_tmp, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_op_to_typed_ref",     (uint64_t)(uintptr_t)zend_jit_assign_op_to_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_const_to_typed_ref",  (uint64_t)(uintptr_t)zend_jit_assign_const_to_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_tmp_to_typed_ref",    (uint64_t)(uintptr_t)zend_jit_assign_tmp_to_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_var_to_typed_ref",    (uint64_t)(uintptr_t)zend_jit_assign_var_to_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_cv_to_typed_ref",     (uint64_t)(uintptr_t)zend_jit_assign_cv_to_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_check_constant",             (uint64_t)(uintptr_t)zend_jit_check_constant, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_get_constant",               (uint64_t)(uintptr_t)zend_jit_get_constant, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_int_extend_stack_helper",    (uint64_t)(uintptr_t)zend_jit_int_extend_stack_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_extend_stack_helper",        (uint64_t)(uintptr_t)zend_jit_extend_stack_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_init_func_run_time_cache_helper", (uint64_t)(uintptr_t)zend_jit_init_func_run_time_cache_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_find_func_helper",           (uint64_t)(uintptr_t)zend_jit_find_func_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_find_ns_func_helper",        (uint64_t)(uintptr_t)zend_jit_find_ns_func_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_unref_helper",               (uint64_t)(uintptr_t)zend_jit_unref_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_method_call",        (uint64_t)(uintptr_t)zend_jit_invalid_method_call, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_method_call_tmp",    (uint64_t)(uintptr_t)zend_jit_invalid_method_call_tmp, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_find_method_helper",         (uint64_t)(uintptr_t)zend_jit_find_method_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_find_method_tmp_helper",     (uint64_t)(uintptr_t)zend_jit_find_method_tmp_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_push_static_metod_call_frame", (uint64_t)(uintptr_t)zend_jit_push_static_metod_call_frame, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_push_static_metod_call_frame_tmp", (uint64_t)(uintptr_t)zend_jit_push_static_metod_call_frame_tmp, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_free_trampoline_helper",     (uint64_t)(uintptr_t)zend_jit_free_trampoline_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_verify_return_slow",         (uint64_t)(uintptr_t)zend_jit_verify_return_slow, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_deprecated_helper",          (uint64_t)(uintptr_t)zend_jit_deprecated_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_copy_extra_args_helper",     (uint64_t)(uintptr_t)zend_jit_copy_extra_args_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_vm_stack_free_args_helper",  (uint64_t)(uintptr_t)zend_jit_vm_stack_free_args_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_free_extra_named_params",        (uint64_t)(uintptr_t)zend_free_extra_named_params, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_free_call_frame",            (uint64_t)(uintptr_t)zend_jit_free_call_frame, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_exception_in_interrupt_handler_helper", (uint64_t)(uintptr_t)zend_jit_exception_in_interrupt_handler_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_verify_arg_slow",            (uint64_t)(uintptr_t)zend_jit_verify_arg_slow, sizeof(void*));
+	ir_disasm_add_symbol("zend_missing_arg_error",              (uint64_t)(uintptr_t)zend_missing_arg_error, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_leave_func_helper",          (uint64_t)(uintptr_t)zend_jit_leave_func_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_leave_nested_func_helper",   (uint64_t)(uintptr_t)zend_jit_leave_nested_func_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_leave_top_func_helper",      (uint64_t)(uintptr_t)zend_jit_leave_top_func_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_global_helper",        (uint64_t)(uintptr_t)zend_jit_fetch_global_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_hash_index_lookup_rw_no_packed", (uint64_t)(uintptr_t)zend_jit_hash_index_lookup_rw_no_packed, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_hash_index_lookup_rw",       (uint64_t)(uintptr_t)zend_jit_hash_index_lookup_rw, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_hash_lookup_rw",             (uint64_t)(uintptr_t)zend_jit_hash_lookup_rw, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_symtable_find",              (uint64_t)(uintptr_t)zend_jit_symtable_find, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_symtable_lookup_w",          (uint64_t)(uintptr_t)zend_jit_symtable_lookup_w, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_symtable_lookup_rw",         (uint64_t)(uintptr_t)zend_jit_symtable_lookup_rw, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_r_helper",         (uint64_t)(uintptr_t)zend_jit_fetch_dim_r_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_is_helper",        (uint64_t)(uintptr_t)zend_jit_fetch_dim_is_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_isset_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_isset_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_rw_helper",        (uint64_t)(uintptr_t)zend_jit_fetch_dim_rw_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_w_helper",         (uint64_t)(uintptr_t)zend_jit_fetch_dim_w_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_str_offset_r_helper", (uint64_t)(uintptr_t)zend_jit_fetch_dim_str_offset_r_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_str_r_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_str_r_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_str_is_helper",    (uint64_t)(uintptr_t)zend_jit_fetch_dim_str_is_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_obj_r_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_r_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_obj_is_helper",    (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_is_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_array_access",       (uint64_t)(uintptr_t)zend_jit_invalid_array_access, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_undefined_offset",           (uint64_t)(uintptr_t)zend_jit_undefined_offset, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_undefined_key",              (uint64_t)(uintptr_t)zend_jit_undefined_key, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_zval_array_dup",             (uint64_t)(uintptr_t)zend_jit_zval_array_dup, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_prepare_assign_dim_ref",     (uint64_t)(uintptr_t)zend_jit_prepare_assign_dim_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_cannot_add_element",         (uint64_t)(uintptr_t)zend_jit_cannot_add_element, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_obj_w_helper",     (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_w_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_dim_obj_rw_helper",    (uint64_t)(uintptr_t)zend_jit_fetch_dim_obj_rw_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_isset_dim_helper",           (uint64_t)(uintptr_t)zend_jit_isset_dim_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_dim_helper",          (uint64_t)(uintptr_t)zend_jit_assign_dim_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_dim_op_helper",       (uint64_t)(uintptr_t)zend_jit_assign_dim_op_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_obj_w_slow",           (uint64_t)(uintptr_t)zend_jit_fetch_obj_w_slow, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_obj_r_slow",           (uint64_t)(uintptr_t)zend_jit_fetch_obj_r_slow, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_obj_is_slow",          (uint64_t)(uintptr_t)zend_jit_fetch_obj_is_slow, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_obj_r_dynamic",        (uint64_t)(uintptr_t)zend_jit_fetch_obj_r_dynamic, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_fetch_obj_is_dynamic",       (uint64_t)(uintptr_t)zend_jit_fetch_obj_is_dynamic, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_check_array_promotion",      (uint64_t)(uintptr_t)zend_jit_check_array_promotion, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_create_typed_ref",           (uint64_t)(uintptr_t)zend_jit_create_typed_ref, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_property_write",     (uint64_t)(uintptr_t)zend_jit_invalid_property_write, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_property_read",      (uint64_t)(uintptr_t)zend_jit_invalid_property_read, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_extract_helper",             (uint64_t)(uintptr_t)zend_jit_extract_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_property_assign",    (uint64_t)(uintptr_t)zend_jit_invalid_property_assign, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_to_typed_prop",       (uint64_t)(uintptr_t)zend_jit_assign_to_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_obj_helper",          (uint64_t)(uintptr_t)zend_jit_assign_obj_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_property_assign_op", (uint64_t)(uintptr_t)zend_jit_invalid_property_assign_op, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_op_to_typed_prop",    (uint64_t)(uintptr_t)zend_jit_assign_op_to_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_assign_obj_op_helper",       (uint64_t)(uintptr_t)zend_jit_assign_obj_op_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_invalid_property_incdec",    (uint64_t)(uintptr_t)zend_jit_invalid_property_incdec, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_inc_typed_prop",             (uint64_t)(uintptr_t)zend_jit_inc_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_dec_typed_prop",             (uint64_t)(uintptr_t)zend_jit_dec_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_inc_typed_prop",         (uint64_t)(uintptr_t)zend_jit_pre_inc_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_post_inc_typed_prop",        (uint64_t)(uintptr_t)zend_jit_post_inc_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_dec_typed_prop",         (uint64_t)(uintptr_t)zend_jit_pre_dec_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_post_dec_typed_prop",        (uint64_t)(uintptr_t)zend_jit_post_dec_typed_prop, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_inc_obj_helper",         (uint64_t)(uintptr_t)zend_jit_pre_inc_obj_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_post_inc_obj_helper",        (uint64_t)(uintptr_t)zend_jit_post_inc_obj_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_pre_dec_obj_helper",         (uint64_t)(uintptr_t)zend_jit_pre_dec_obj_helper, sizeof(void*));
+	ir_disasm_add_symbol("zend_jit_post_dec_obj_helper",        (uint64_t)(uintptr_t)zend_jit_post_dec_obj_helper, sizeof(void*));
 
 #ifndef ZTS
 	ir_disasm_add_symbol("EG(current_execute_data)", (uint64_t)(uintptr_t)&EG(current_execute_data), sizeof(EG(current_execute_data)));
@@ -3764,7 +3766,7 @@ static int zend_jit_calc_trace_prologue_size(void)
 	void *entry;
 	size_t size;
 
-	zend_jit_init_ctx(&jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? IR_FUNCTION : 0);
+	zend_jit_init_ctx(&jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
 
 	if (!GCC_GLOBAL_REGS) {
 		ir_ref ref;
@@ -3774,8 +3776,6 @@ static int zend_jit_calc_trace_prologue_size(void)
 		zend_jit_store_fp(&jit, ref);
 		jit.ctx.flags |= IR_FASTCALL_FUNC;
 	}
-
-	jit.ctx.flags |= IR_START_BR_TARGET;
 
 	jit.control = ir_emit3(&jit.ctx, IR_UNREACHABLE, jit.control, IR_UNUSED, jit.ctx.ir_base[1].op1);
 	jit.ctx.ir_base[1].op1 = jit.control;
@@ -4246,22 +4246,26 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 			if (!jit->control) {
 				zend_jit_begin(jit, IR_UNUSED); /* unreachable block */
 			}
-		} else if (jit->ctx.ir_base[ref].op == IR_IF) {
-			if (!jit->control) {
-				zend_jit_if_true_false_ex(jit, ref, b);
-			} else {
-				ir_ref entry_path = zend_jit_end(jit);
-				zend_jit_if_true_false_ex(jit, ref, b);
-				zend_jit_merge_2(jit, zend_jit_end(jit), entry_path);
-			}
-		} else if (jit->ctx.ir_base[ref].op == IR_SWITCH) {
-			zend_jit_case_start(jit, pred, b, ref);
 		} else {
-			if (!jit->control) {
-				ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_END || jit->ctx.ir_base[ref].op == IR_UNREACHABLE);
-				zend_jit_begin(jit, ref);
+			ir_op op = jit->ctx.ir_base[ref].op;
+
+			if (op == IR_IF) {
+				if (!jit->control) {
+					zend_jit_if_true_false_ex(jit, ref, b);
+				} else {
+					ir_ref entry_path = zend_jit_end(jit);
+					zend_jit_if_true_false_ex(jit, ref, b);
+					zend_jit_merge_2(jit, zend_jit_end(jit), entry_path);
+				}
+			} else if (op == IR_SWITCH) {
+				zend_jit_case_start(jit, pred, b, ref);
 			} else {
-				zend_jit_merge_2(jit, ref, zend_jit_end(jit));
+				if (!jit->control) {
+					ZEND_ASSERT(op == IR_END || op == IR_UNREACHABLE || op == IR_RETURN);
+					zend_jit_begin(jit, ref);
+				} else {
+					zend_jit_merge_2(jit, ref, zend_jit_end(jit));
+				}
 			}
 		}
 		bb_start = jit->control;
@@ -4295,7 +4299,7 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 						zend_jit_case_start(jit, pred, b, ref);
 						pred_refs[i] = zend_jit_end(jit);
 					} else {
-						ZEND_ASSERT(op == IR_END || op == IR_UNREACHABLE);
+						ZEND_ASSERT(op == IR_END || op == IR_UNREACHABLE || op == IR_RETURN);
 						pred_refs[i] = ref;
 					}
 				}
@@ -11849,12 +11853,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		zend_jit_tailcall_0(jit,
 			zend_jit_load(jit, IR_ADDR, zend_jit_ip(jit)));
 	} else {
-ZEND_ASSERT(0);
-//???		|	mov FP, aword T2 // restore FP
-//???		|	mov RX, aword T3 // restore IP
-//???		|	add r4, NR_SPAD // stack alignment
-//???		|	mov r0, 2 // ZEND_VM_LEAVE
-//???		|	ret
+		zend_jit_ret(jit, ir_const_i32(&jit->ctx, 2)); // ZEND_VM_LEAVE
 	}
 
 	jit->control = IR_UNUSED;
@@ -17670,7 +17669,7 @@ static int zend_jit_deoptimizer_start(zend_jit_ctx        *jit,
                                       uint32_t             trace_num,
                                       uint32_t             exit_num)
 {
-	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? IR_FUNCTION : 0);
+	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
 
 	jit->ctx.spill_base = ZREG_FP;
 
@@ -17693,7 +17692,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 {
 	ir_ref ref;
 
-	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? IR_FUNCTION : 0);
+	zend_jit_init_ctx(jit, (zend_jit_vm_kind == ZEND_VM_KIND_CALL) ? 0 : IR_START_BR_TARGET);
 
 	jit->ctx.spill_base = ZREG_FP;
 
@@ -17714,8 +17713,6 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 
 	if (parent) {
 		jit->ctx.flags |= IR_SKIP_PROLOGUE;
-	} else {
-		jit->ctx.flags |= IR_START_BR_TARGET;
 	}
 
 	if (parent) {
@@ -17810,14 +17807,14 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 		}
 	} else {
 		if (original_handler) {
-			ZEND_ASSERT(0 && "NIY");
-#if 0
-//???
-			|	mov FCARG1a, FP
-			|	mov r0, EX->func
-			|	mov r0, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
-			|	mov r0, aword [r0 + offsetof(zend_jit_op_array_trace_extension, offset)]
-			|	call aword [IP + r0]
+			ir_ref ref;
+			ir_ref addr = zend_jit_orig_opline_handler(jit);
+
+#if defined(IR_TARGET_X86)
+			addr =  ir_fold2(&jit->ctx, IR_OPT(IR_BITCAST, IR_ADDR),
+				addr, IR_CONST_FASTCALL_FUNC), // Hack to use fastcall calling convention ???
+#endif
+			ref = zend_jit_call_1(jit, IR_I32, addr, zend_jit_fp(jit));
 			if (opline &&
 			    (opline->opcode == ZEND_RETURN
 			  || opline->opcode == ZEND_RETURN_BY_REF
@@ -17827,7 +17824,6 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 			  || opline->opcode == ZEND_YIELD_FROM)) {
 				zend_jit_ret(jit, ref);
 			}
-#endif
 		}
 		zend_jit_ret(jit, ir_const_i32(&jit->ctx, 2)); // ZEND_VM_LEAVE
 	}
