@@ -2505,7 +2505,7 @@ static zend_always_inline int _zend_update_type_info(
 					UPDATE_SSA_TYPE(orig, ssa_op->op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->op1_def);
 				}
-			} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP) {
+			} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 				/* Nothing to do */
 			} else {
 				if (opline->opcode == ZEND_ASSIGN_OP && ssa_op->result_def >= 0 && (tmp & MAY_BE_RC1)) {
