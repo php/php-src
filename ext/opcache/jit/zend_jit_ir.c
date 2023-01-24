@@ -36,18 +36,12 @@
 # define ZREG_IP             28 /* IR_REG_X28 */
 # define ZREG_FIRST_FPR      32
 # define IR_REGSET_PRESERVED ((1<<19) | (1<<20) | (1<<21) | (1<<22) | (1<<23) | (1<<24) | \
-                              (1<<25) | (1<<26) | (1<<27) | (1<<29) | (1<<30)) /* all preserved registers */
+                              (1<<25) | (1<<26) | (1<<27) | (1<<28) | (1<<29) | (1<<30)) /* all preserved registers */
 #else
 # error "Unknown IR target"
 #endif
 
-#define ZREG_RX              ZREG_IP
-
-#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-# define IR_REGSET_PHP_FIXED ((1<<ZREG_FP) | (1<<ZREG_IP) | (1<<5)) /* prevent %rbp (%r5) usage */
-#else
-# define IR_REGSET_PHP_FIXED ((1<<ZREG_FP) | (1<<ZREG_IP))
-#endif
+#define ZREG_RX ZREG_IP
 
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 # define IR_PHP_LONG       IR_I64
@@ -3341,6 +3335,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 #endif
 	jit->ctx.flags |= flags | IR_OPT_FOLDING | IR_OPT_CFG | IR_OPT_CODEGEN | IR_HAS_CALLS;
 
+	jit->ctx.fixed_regset = (1<<ZREG_FP) | (1<<ZREG_IP);
 	if (!(flags & IR_FUNCTION)) {
 		jit->ctx.flags |= IR_NO_STACK_COMBINE;
 		if (zend_jit_vm_kind == ZEND_VM_KIND_CALL) {
@@ -3360,9 +3355,11 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			jit->ctx.fixed_stack_red_zone = 0;
 			jit->ctx.fixed_stack_frame_size = 0;
 #endif
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+			jit->ctx.fixed_regset |= (1<<5); /* prevent %rbp (%r5) usage */
+#endif
 		}
 	}
-	jit->ctx.fixed_regset = IR_REGSET_PHP_FIXED;
 	jit->op_array = NULL;
 	jit->ssa = NULL;
 	jit->name = NULL;
