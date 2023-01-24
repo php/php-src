@@ -1548,10 +1548,10 @@ function quoted_printable_encode(string $string): string {}
 
 /* mt_rand.c */
 
-function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+function mt_srand(int $seed = UNKNOWN, int $mode = MT_RAND_MT19937): void {}
 
 /** @alias mt_srand */
-function srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+function srand(int $seed = UNKNOWN, int $mode = MT_RAND_MT19937): void {}
 
 function rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
