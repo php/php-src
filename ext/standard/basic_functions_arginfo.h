@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 87ed2b04b9b46ce3df78d6f9d6d62bd6b2ae8fe5 */
+ * Stub hash: eb6a3a2e3cf8f62e768d5d4968606438819e6cf0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1813,7 +1813,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_quoted_printable_encode arginfo_base64_encode
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_srand, 0, 0, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seed, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO(0, seed, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "MT_RAND_MT19937")
 ZEND_END_ARG_INFO()
 
