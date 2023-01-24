@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
+  . Fixed incorrect check condition in type inference. (nielsdos)
+
+- FFI:
+  . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
 
 - GMP:
   . Properly implement GMP::__construct(). (nielsdos)
