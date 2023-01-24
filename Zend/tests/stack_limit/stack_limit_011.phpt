@@ -1,5 +1,9 @@
 --TEST--
 Stack limit 011 - Stack limit exhaustion during unwinding
+--SKIPIF--
+<?php
+if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
+?>
 --EXTENSIONS--
 zend_test
 --INI--

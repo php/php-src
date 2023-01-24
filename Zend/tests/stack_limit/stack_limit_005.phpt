@@ -1,5 +1,9 @@
 --TEST--
 Stack limit 005 - Internal stack limit check in zend_compile_expr()
+--SKIPIF--
+<?php
+if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
+?>
 --EXTENSIONS--
 zend_test
 --INI--

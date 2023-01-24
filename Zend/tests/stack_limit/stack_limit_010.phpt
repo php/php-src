@@ -4,6 +4,7 @@ Stack limit 010 - Check stack size detection against known defaults
 zend_test
 --SKIPIF--
 <?php
+if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
 if (!getenv('STACK_LIMIT_DEFAULTS_CHECK')) { die('skip STACK_LIMIT_DEFAULTS_CHECK not set'); }
 ?>
 --FILE--
