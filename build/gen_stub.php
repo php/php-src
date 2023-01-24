@@ -2263,6 +2263,14 @@ class PropertyInfo extends VariableLike
 
     protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
     {
+        if ($this->phpDocType && $this->type === null) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "/** @var " . $this->phpDocType->__toString() . " */");
+            $classSynopsisInfo->setAttribute("role", "phpdoc");
+
+            $fieldsynopsisElement->appendChild($classSynopsisInfo);
+        }
+
         parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
 
         if ($this->flags & Class_::MODIFIER_STATIC) {
@@ -2278,11 +2286,9 @@ class PropertyInfo extends VariableLike
 
     protected function addTypeToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
     {
-        $type = $this->phpDocType ?? $this->type;
-
-        if ($type) {
+        if ($this->type) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
-            $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
+            $fieldsynopsisElement->appendChild($this->type->getTypeForDoc($doc));
         }
     }
 
