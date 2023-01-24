@@ -768,6 +768,26 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	return lastSymTable;
 }
 
+static const char* zend_fiber_status_to_string(zend_fiber *fiber)
+{
+	switch (fiber->context.status) {
+		case ZEND_FIBER_STATUS_INIT:
+			return "initializing";
+			break;
+		case ZEND_FIBER_STATUS_RUNNING:
+			return "running";
+			break;
+		case ZEND_FIBER_STATUS_SUSPENDED:
+			return "suspended";
+			break;
+		case ZEND_FIBER_STATUS_DEAD:
+			return "dead";
+			break;
+	}
+
+	return "(unknown status)";
+}
+
 ZEND_METHOD(Fiber, __construct)
 {
 	zend_fcall_info fci;
@@ -846,7 +866,14 @@ ZEND_METHOD(Fiber, suspend)
 		RETURN_THROWS();
 	}
 
-	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_RUNNING && fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED)) {
+		zend_throw_error(zend_ce_fiber_error,
+			"Cannot suspend %s %s fiber",
+			((fiber->context.status == ZEND_FIBER_STATUS_INIT) ? "an" : "a"),
+			zend_fiber_status_to_string(fiber)
+		);
+		RETURN_THROWS();
+	}
 
 	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
