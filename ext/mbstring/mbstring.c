@@ -4728,8 +4728,9 @@ finish_up_remaining_bytes: ;
 	if (p == e) {
 		uint8_t remaining_bytes = ZSTR_LEN(str) & (sizeof(__m128i) - 1); /* Not including terminating null */
 
-		/* Crazy hack here... we want to use the above vectorized code to check a block of less than 16
-		 * bytes, but there is no good way to read a variable number of bytes into an XMM register
+		/* Crazy hack here for cases where 9 or more bytes are remaining...
+		 * We want to use the above vectorized code to check a block of less than 16 bytes,
+		 * but there is no good way to read a variable number of bytes into an XMM register
 		 * However, we know that these bytes are part of a zend_string, and a zend_string has some
 		 * 'header' fields which occupy the memory just before its content
 		 * And, those header fields occupy more than 16 bytes...
@@ -4744,20 +4745,17 @@ finish_up_remaining_bytes: ;
 		 * shift distance, so the compiler will choke on _mm_srli_si128(operand, shift_dist)
 		 */
 		switch (remaining_bytes) {
-		case 0:
-			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 15)), 15);
-			goto check_operand;
+		case 0: ;
+			__m128i bad_mask = _mm_set_epi8(-64, -32, -16, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+			__m128i bad = _mm_cmpeq_epi8(_mm_and_si128(last_block, bad_mask), bad_mask);
+			return _mm_movemask_epi8(bad) == 0;
 		case 1:
-			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 14)), 14);
-			goto check_operand;
 		case 2:
-			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 13)), 13);
+			operand = _mm_set_epi16(0, 0, 0, 0, 0, 0, 0, *((uint16_t*)p));
 			goto check_operand;
 		case 3:
-			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 12)), 12);
-			goto check_operand;
 		case 4:
-			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 11)), 11);
+			operand = _mm_set_epi32(0, 0, 0, *((uint32_t*)p));
 			goto check_operand;
 		case 5:
 			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 10)), 10);
@@ -4766,10 +4764,8 @@ finish_up_remaining_bytes: ;
 			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 9)), 9);
 			goto check_operand;
 		case 7:
-			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 8)), 8);
-			goto check_operand;
 		case 8:
-			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 7)), 7);
+			operand = _mm_set_epi64x(0, *((uint64_t*)p));
 			goto check_operand;
 		case 9:
 			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 6)), 6);
