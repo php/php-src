@@ -2881,7 +2881,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 		 	RA_IVAL_START(i, 0);
 			if (i < parent_vars_count
 			 && STACK_REG(parent_stack, i) != ZREG_NONE
-#ifndef ZEND_JIT_IR //???
+#ifndef ZEND_JIT_IR
 			 && STACK_REG(parent_stack, i) < ZREG_NUM
 #endif
 			 ) {
@@ -3983,7 +3983,7 @@ static int zend_jit_trace_deoptimization(
 #endif
 	}
 
-#ifndef ZEND_JIT_IR //???
+#ifndef ZEND_JIT_IR
 	if (has_unsaved_vars
 	 && (has_constants
 	  || (flags & (ZEND_JIT_EXIT_RESTORE_CALL|ZEND_JIT_EXIT_FREE_OP1|ZEND_JIT_EXIT_FREE_OP2)))) {
@@ -7824,7 +7824,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	opline = zend_jit_traces[trace_num].exit_info[exit_num].opline;
 	if (opline) {
 		if (opline == zend_jit_traces[zend_jit_traces[trace_num].root].opline) {
-#ifndef ZEND_JIT_IR //??????
+#ifndef ZEND_JIT_IR
 			/* prevent endless loop */
 			original_handler = 1;
 #else
