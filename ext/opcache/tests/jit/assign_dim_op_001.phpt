@@ -79,7 +79,7 @@ Warning: Undefined array key 2 in %s on line %d
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Illegal offset type: cannot be of type array
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
@@ -104,5 +104,5 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Illegal offset type: cannot be of type array
 Unsupported operand types: null % string

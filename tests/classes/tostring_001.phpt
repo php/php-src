@@ -118,7 +118,7 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-Illegal offset type
+Illegal offset type: cannot be of type object
 ====test8====
 test2::__toString()
 string(9) "Converted"
