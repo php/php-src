@@ -4,6 +4,7 @@ dnl Include external macro definitions before the AC_INIT to also remove
 dnl comments starting with # and empty newlines from the included files.
 dnl ----------------------------------------------------------------------------
 m4_include([build/ax_check_compile_flag.m4])
+m4_include([build/ax_check_define.m4])
 m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
 m4_include([build/libtool.m4])
@@ -274,6 +275,11 @@ if test "$ac_cv_safe_to_define___extensions__" = yes ; then
   AC_MSG_RESULT(yes)
 fi
 
+dnl wasm32-wasi builds with a specific execution model named "command"
+if test "$WASI" = "yes"; then
+  CPPFLAGS="$CPPFLAGS -mexec-model=command -Wl,--gc-sections"
+fi
+
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
 
@@ -476,6 +482,8 @@ AC_STRUCT_TIMEZONE
 PHP_MISSING_TIME_R_DECL
 PHP_MISSING_FCLOSE_DECL
 PHP_STRUCT_FLOCK
+
+AC_CHECK_DEFINE([__wasi__], [WASI="yes"], [])
 
 AC_CHECK_TYPES(socklen_t, [], [], [
   #ifdef HAVE_SYS_TYPES_H
@@ -1351,11 +1359,13 @@ else
   if test "$fiber_os" = 'mac'; then
     AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
   fi
-  AC_CHECK_HEADER(ucontext.h, [
-    AC_DEFINE([ZEND_FIBER_UCONTEXT], 1, [ ])
-  ], [
-       AC_MSG_ERROR([fibers not available on this platform])
-  ])
+  if test "$WASI" != "yes"; then
+    AC_CHECK_HEADER(ucontext.h, [
+      AC_DEFINE([ZEND_FIBER_UCONTEXT], 1, [ ])
+    ], [
+         AC_MSG_ERROR([fibers not available on this platform])
+    ])
+  fi
 fi
 
 LIBZEND_BASIC_CHECKS
@@ -1707,14 +1717,23 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        php_ini_builder.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
-       output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+       php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
+       output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
+if test "$WASI" = "yes"; then
+	 PHP_ADD_SOURCES(main, fastcgi_wasi.c network_wasi.c php_open_temporary_file_wasi.c unistd_wasi.c,)
+else
+	 PHP_ADD_SOURCES(main, php_syslog.c network.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+	 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
+fi
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
-       plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c \
+       plain_wrapper.c userspace.c transports.c mmap.c \
        glob_wrapper.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+
+if test "$WASI" != "yes"; then
+   PHP_ADD_SOURCES(main/streams, xp_socket.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+fi
 
 PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, sapi)
 PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
@@ -1756,6 +1775,10 @@ PHP_ADD_SOURCES(Zend, \
 	Optimizer/compact_vars.c \
 	Optimizer/zend_dump.c \
     , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+
+if test "$WASI" = "yes"; then
+  PHP_ADD_SOURCES(Zend, zend_wasi.c zend_fibers_wasi.c zend_virtual_cwd_wasi.c,)
+fi
 
 PHP_ADD_BUILD_DIR(main main/streams)
 PHP_ADD_BUILD_DIR(TSRM)

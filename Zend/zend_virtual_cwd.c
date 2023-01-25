@@ -1378,6 +1378,7 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 /* }}} */
 #endif
 
+#ifndef PHP_WASI
 CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 {
 	cwd_state new_state;
@@ -1411,8 +1412,9 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 	return ret;
 }
 /* }}} */
+#endif
 
-#if !defined(ZEND_WIN32)
+#if !defined(ZEND_WIN32) && !defined(PHP_WASI)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link) /* {{{ */
 {
 	cwd_state new_state;
@@ -1659,7 +1661,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	return popen_ex(command, type, CWDG(cwd).cwd, NULL);
 }
 /* }}} */
-#else /* Unix */
+#elif !defined(PHP_WASI) /* Unix */
 CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 {
 	size_t command_length;

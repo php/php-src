@@ -1191,7 +1191,7 @@ static void clear_last_error(void) {
 	}
 }
 
-#if ZEND_DEBUG
+#if ZEND_DEBUG && !defined(PHP_WASI)
 /* {{{ report_zend_debug_error_notify_cb */
 static void report_zend_debug_error_notify_cb(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
@@ -1461,11 +1461,14 @@ PHPAPI char *php_get_current_user(void)
 			return "";
 		}
 		pwd = &_pw;
+#elif defined(PHP_WASI)
+    return "";
 #else
 		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
 			return "";
 		}
 #endif
+#ifndef PHP_WASI
 		SG(request_info).current_user_length = strlen(pwd->pw_name);
 		SG(request_info).current_user = estrndup(pwd->pw_name, SG(request_info).current_user_length);
 #if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
@@ -1473,6 +1476,7 @@ PHPAPI char *php_get_current_user(void)
 #endif
 		return SG(request_info).current_user;
 #endif
+#endif // PHP_WASI
 	}
 }
 /* }}} */

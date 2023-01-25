@@ -30,7 +30,9 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifndef PHP_WASI
 #include <netdb.h>
+#endif // PHP_WASI
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -84,6 +86,7 @@
  * SUCH DAMAGE.
  */
 
+#ifndef PHP_WASI
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
 #ifdef PHP_WIN32
@@ -196,11 +199,13 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	efree(new_state.cwd);
 	return fd;
 }
+#endif // PHP_WASI
 /* }}} */
 
 /*
  *  Determine where to place temporary files.
  */
+#ifndef PHP_WASI
 PHPAPI const char* php_get_temporary_directory(void)
 {
 	/* Did we determine the temporary directory already? */
@@ -275,6 +280,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 	return PG(php_sys_temp_dir);
 #endif
 }
+#endif // PHP_WASI
 
 /* {{{ php_open_temporary_file
  *

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b0767630614e040866bd7ffdaf50dd31298a64f3 */
+ * Stub hash: 3ac35fd4af803d1fd3796c2c36ea61f2bff040ae */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -610,35 +610,41 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strptime, 0, 2, MAY_BE_ARRAY|MAY
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_GETHOSTNAME)
+#if !defined(PHP_WASI) && defined(HAVE_GETHOSTNAME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gethostname, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 #endif
 
+#if !defined(PHP_WASI)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gethostbyaddr, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if !defined(PHP_WASI)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gethostbyname, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if !defined(PHP_WASI)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gethostbynamel, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+#endif
 
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_check_record, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 0, "\"MX\"")
 ZEND_END_ARG_INFO()
 #endif
 
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 #define arginfo_checkdnsrr arginfo_dns_check_record
 #endif
 
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dns_get_record, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "DNS_ANY")
@@ -648,7 +654,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dns_get_record, 0, 1, MAY_BE_ARR
 ZEND_END_ARG_INFO()
 #endif
 
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_INFO(1, hosts)
@@ -656,7 +662,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 #define arginfo_getmxrr arginfo_dns_get_mx
 #endif
 
@@ -2369,19 +2375,25 @@ ZEND_FUNCTION(crypt);
 #if defined(HAVE_STRPTIME)
 ZEND_FUNCTION(strptime);
 #endif
-#if defined(HAVE_GETHOSTNAME)
+#if !defined(PHP_WASI) && defined(HAVE_GETHOSTNAME)
 ZEND_FUNCTION(gethostname);
 #endif
+#if !defined(PHP_WASI)
 ZEND_FUNCTION(gethostbyaddr);
+#endif
+#if !defined(PHP_WASI)
 ZEND_FUNCTION(gethostbyname);
+#endif
+#if !defined(PHP_WASI)
 ZEND_FUNCTION(gethostbynamel);
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#endif
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_FUNCTION(dns_check_record);
 #endif
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_FUNCTION(dns_get_record);
 #endif
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_FUNCTION(dns_get_mx);
 #endif
 #if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
@@ -2995,25 +3007,31 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_STRPTIME)
 	ZEND_DEP_FE(strptime, arginfo_strptime)
 #endif
-#if defined(HAVE_GETHOSTNAME)
+#if !defined(PHP_WASI) && defined(HAVE_GETHOSTNAME)
 	ZEND_FE(gethostname, arginfo_gethostname)
 #endif
+#if !defined(PHP_WASI)
 	ZEND_FE(gethostbyaddr, arginfo_gethostbyaddr)
+#endif
+#if !defined(PHP_WASI)
 	ZEND_FE(gethostbyname, arginfo_gethostbyname)
+#endif
+#if !defined(PHP_WASI)
 	ZEND_FE(gethostbynamel, arginfo_gethostbynamel)
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#endif
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	ZEND_FE(dns_check_record, arginfo_dns_check_record)
 #endif
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	ZEND_FALIAS(checkdnsrr, dns_check_record, arginfo_checkdnsrr)
 #endif
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	ZEND_FE(dns_get_record, arginfo_dns_get_record)
 #endif
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	ZEND_FE(dns_get_mx, arginfo_dns_get_mx)
 #endif
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	ZEND_FALIAS(getmxrr, dns_get_mx, arginfo_getmxrr)
 #endif
 #if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
@@ -3669,65 +3687,103 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CREDITS_FULLPAGE", PHP_CREDITS_FULLPAGE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CREDITS_QA", PHP_CREDITS_QA, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CREDITS_ALL", PHP_CREDITS_ALL, CONST_PERSISTENT);
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_EMERG", LOG_EMERG, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_ALERT", LOG_ALERT, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_CRIT", LOG_CRIT, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_ERR", LOG_ERR, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_WARNING", LOG_WARNING, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_NOTICE", LOG_NOTICE, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_INFO", LOG_INFO, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_DEBUG", LOG_DEBUG, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_KERN", LOG_KERN, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_USER", LOG_USER, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_MAIL", LOG_MAIL, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_DAEMON", LOG_DAEMON, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_AUTH", LOG_AUTH, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_SYSLOG", LOG_SYSLOG, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_LPR", LOG_LPR, CONST_PERSISTENT);
-#if defined(LOG_NEWS)
+#endif
+#if !defined(PHP_WASI) && defined(LOG_NEWS)
 	REGISTER_LONG_CONSTANT("LOG_NEWS", LOG_NEWS, CONST_PERSISTENT);
 #endif
-#if defined(LOG_UUCP)
+#if !defined(PHP_WASI) && defined(LOG_UUCP)
 	REGISTER_LONG_CONSTANT("LOG_UUCP", LOG_UUCP, CONST_PERSISTENT);
 #endif
-#if defined(LOG_CRON)
+#if !defined(PHP_WASI) && defined(LOG_CRON)
 	REGISTER_LONG_CONSTANT("LOG_CRON", LOG_CRON, CONST_PERSISTENT);
 #endif
-#if defined(LOG_AUTHPRIV)
+#if !defined(PHP_WASI) && defined(LOG_AUTHPRIV)
 	REGISTER_LONG_CONSTANT("LOG_AUTHPRIV", LOG_AUTHPRIV, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL0", LOG_LOCAL0, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL1", LOG_LOCAL1, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL2", LOG_LOCAL2, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL3", LOG_LOCAL3, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL4", LOG_LOCAL4, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL5", LOG_LOCAL5, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL6", LOG_LOCAL6, CONST_PERSISTENT);
 #endif
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WASI) && !defined(PHP_WIN32)
 	REGISTER_LONG_CONSTANT("LOG_LOCAL7", LOG_LOCAL7, CONST_PERSISTENT);
 #endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_PID", LOG_PID, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_CONS", LOG_CONS, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_ODELAY", LOG_ODELAY, CONST_PERSISTENT);
+#endif
+#if !defined(PHP_WASI)
 	REGISTER_LONG_CONSTANT("LOG_NDELAY", LOG_NDELAY, CONST_PERSISTENT);
-#if defined(LOG_NOWAIT)
+#endif
+#if !defined(PHP_WASI) && defined(LOG_NOWAIT)
 	REGISTER_LONG_CONSTANT("LOG_NOWAIT", LOG_NOWAIT, CONST_PERSISTENT);
 #endif
-#if defined(LOG_PERROR)
+#if !defined(PHP_WASI) && defined(LOG_PERROR)
 	REGISTER_LONG_CONSTANT("LOG_PERROR", LOG_PERROR, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("STR_PAD_LEFT", PHP_STR_PAD_LEFT, CONST_PERSISTENT);

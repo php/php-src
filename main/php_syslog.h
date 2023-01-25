@@ -21,6 +21,8 @@
 
 #ifdef PHP_WIN32
 #include "win32/syslog.h"
+#elif defined(PHP_WASI)
+#include "wasi/syslog.h"
 #else
 #include <php_config.h>
 #ifdef HAVE_SYSLOG_H

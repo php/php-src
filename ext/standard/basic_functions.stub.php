@@ -739,6 +739,7 @@ const CREDITS_ALL = UNKNOWN;
 
 /* error levels */
 
+#ifndef PHP_WASI
 /**
  * system unusable
  * @var int
@@ -932,6 +933,7 @@ const LOG_NOWAIT = UNKNOWN;
  * @cvalue LOG_PERROR
  */
 const LOG_PERROR = UNKNOWN;
+#endif
 #endif
 
 /* string.c */
@@ -2103,6 +2105,8 @@ function strptime(string $timestamp, string $format): array|false {}
 
 /* dns.c */
 
+#ifndef PHP_WASI
+
 #ifdef HAVE_GETHOSTNAME
 /** @refcount 1 */
 function gethostname(): string|false {}
@@ -2146,6 +2150,8 @@ function dns_get_mx(string $hostname, &$hosts, &$weights = null): bool {}
  * @alias dns_get_mx
  */
 function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
+#endif
+
 #endif
 
 /* net.c */

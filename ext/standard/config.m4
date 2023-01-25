@@ -445,20 +445,26 @@ dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
-                            datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
-                            flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
+                            datetime.c dir.c dl.c exec.c file.c filestat.c \
+                            formatted_print.c fsock.c head.c html.c image.c \
                             info.c iptc.c link.c mail.c math.c md5.c metaphone.c \
                             microtime.c pack.c pageinfo.c quot_print.c \
                             soundex.c string.c scanf.c syslog.c type.c uniqid.c url.c \
                             var.c versioning.c assert.c strnatcmp.c levenshtein.c \
-                            incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
-                            http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
+                            incomplete_class.c url_scanner_ex.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
-                            filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c,,,
+                            filters.c php_fopen_wrapper.c proc_open.c streamsfuncs.c http.c \
+                            password.c net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c \
+                            $stdlib_extra_sources,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)
+
+if test "$WASI" = "yes"; then
+   PHP_ADD_SOURCES(ext/standard, basic_functions_wasi.c exec_wasi.c file_wasi.c filestat_wasi.c flock_wasi.c mail_wasi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+else
+   PHP_ADD_SOURCES(ext/standard, dns.c flock_compat.c ftp_fopen_wrapper.c http_fopen_wrapper.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+fi
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])
