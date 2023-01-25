@@ -3,7 +3,7 @@ Test don't suppress arginfo / zpp mismatch
 --EXTENSIONS--
 zend_test
 --SKIPIF--
-<?php if (!PHP_DEBUG) die('skip debug build only'); if (extension_loaded('zend opcache')) die('skip OPcache replaces zend_execute_ex'); ?>
+<?php if (!PHP_DEBUG) die('skip debug build only'); if (extension_loaded('zend opcache') && opcache_get_status()['jit']['enabled']) die('skip sometimes skip arginfo / zpp check on JIT'); ?>
 --ENV--
 ZEND_SUPPRESS_ARGINFO_ZPP_MISMATCH=0
 --FILE--
