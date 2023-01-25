@@ -1080,6 +1080,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 
 #ifdef ZEND_INTRIN_AVX2_FUNC_PTR
 	init_check_utf8();
+	init_convert_utf16();
 #endif
 
 	return SUCCESS;

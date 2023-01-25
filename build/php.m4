@@ -2644,6 +2644,27 @@ AC_DEFUN([PHP_CHECK_BUILTIN_SADDLL_OVERFLOW], [
 ])
 
 dnl
+dnl PHP_CHECK_BUILTIN_USUB_OVERFLOW
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_USUB_OVERFLOW], [
+  AC_MSG_CHECKING([for __builtin_usub_overflow])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    unsigned int tmpvar;
+    return __builtin_usub_overflow(3, 7, &tmpvar);
+  ]])], [
+    have_builtin_usub_overflow=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_usub_overflow=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_USUB_OVERFLOW],
+   [$have_builtin_usub_overflow], [Whether the compiler supports __builtin_usub_overflow])
+])
+
+dnl
 dnl PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl
 AC_DEFUN([PHP_CHECK_BUILTIN_SSUBL_OVERFLOW], [
