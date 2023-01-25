@@ -517,7 +517,6 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	arc4random_buf(bytes, size);
 #else
 	size_t read_bytes = 0;
-	ssize_t n;
 # if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || \
   defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000)
 	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD/NetBSD getrandom(2) function
@@ -525,8 +524,6 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 	 * compared to the arc4random api albeit a fallback to /dev/urandom is considered.
 	 */
 	while (read_bytes < size) {
-		errno = 0;
-
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
 
 		   bytes   read_bytes  size
@@ -536,6 +533,9 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		              amount_to_read
 		*/
 		size_t amount_to_read = size - read_bytes;
+		ssize_t n;
+
+		errno = 0;
 #  if defined(__linux__)
 		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
 #  else
@@ -605,9 +605,10 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 			RANDOM_G(random_fd) = fd;
 		}
 
-		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
+		read_bytes = 0;
+		while (read_bytes < size) {
 			errno = 0;
-			n = read(fd, bytes + read_bytes, size - read_bytes);
+			ssize_t n = read(fd, bytes + read_bytes, size - read_bytes);
 
 			if (n <= 0) {
 				if (should_throw) {
@@ -619,6 +620,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 				}
 				return FAILURE;
 			}
+
+			read_bytes += (size_t) n;
 		}
 	}
 #endif

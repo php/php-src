@@ -404,7 +404,7 @@ class ReflectionClass implements Reflector
     public function isSubclassOf(ReflectionClass|string $class): bool {}
 
     /** @tentative-return-type */
-    public function getStaticProperties(): ?array {}
+    public function getStaticProperties(): array {}
 
     /** @tentative-return-type */
     public function getStaticPropertyValue(string $name, mixed $default = UNKNOWN): mixed {}

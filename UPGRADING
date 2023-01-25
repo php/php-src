@@ -96,6 +96,9 @@ PHP 8.3 UPGRADE NOTES
     a random seed, 0 will use zero as the seed. The functions are now consistent
     with Mt19937::__construct().
 
+- Reflection:
+  . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
+
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
 
