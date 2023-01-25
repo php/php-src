@@ -401,7 +401,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 
 	retval = zend_string_alloc(length, 0);
 
-	if (source_length > 0xFF) {
+	if (source_length > 0x100) {
 		while (total_size < length) {
 			uint64_t offset = randomizer->algo->range(randomizer->status, 0, source_length - 1);
 
