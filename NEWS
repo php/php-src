@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - GMP:
   . Properly implement GMP::__construct(). (nielsdos)
 
+- Opcache:
+  . Fix incorrect page_size check. (nielsdos)
+
 - Random:
   . Fix GH-10390 (Do not trust arc4random_buf() on glibc). (timwolla)
   . Fix GH-10292 (Made the default value of the first param of srand() and
@@ -19,6 +22,9 @@ PHP                                                                        NEWS
 
 - Standard:
   - Fixed bug GH-8086 (Introduce mail.mixed_lf_and_crlf INI). (Jakub Zelenka)
+  . Fixed bug GH-10292 (Made the default value of the first param of srand() and
+    mt_srand() unknown). (kocsismate)
+  . Fix incorrect check in cs_8559_5 in map_from_unicode(). (nielsdos)
 
 02 Feb 2023, PHP 8.2.2
 
