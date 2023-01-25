@@ -6557,6 +6557,16 @@ done:
 
 				for (i = 0; i < op_array->last_var; i++,j++) {
 					if (ra[j] && (ra[j]->flags & ZREG_LOAD) != 0) {
+						if ((ssa->var_info[j].type & MAY_BE_GUARD) != 0) {
+							uint8_t op_type;
+
+							ssa->var_info[j].type &= ~MAY_BE_GUARD;
+							op_type = concrete_type(ssa->var_info[j].type);
+							if (!zend_jit_type_guard(&dasm_state, opline, EX_NUM_TO_VAR(i), op_type)) {
+								goto jit_failure;
+							}
+							SET_STACK_TYPE(stack, i, op_type, 1);
+						}
 						SET_STACK_REG_EX(stack, i, ra[j]->reg, ZREG_LOAD);
 						if (!zend_jit_load_var(&dasm_state, ssa->var_info[j].type, i, ra[j]->reg)) {
 							goto jit_failure;
