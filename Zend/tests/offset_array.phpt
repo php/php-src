@@ -30,6 +30,14 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try{
+    $k = [];
+    $arr = ['foo'];
+    $arr[$k];
+}catch (Error $e){
+    echo $e->getMessage(), "\n";
+}
+
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -48,6 +56,7 @@ int(1)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-Illegal offset type
-Illegal offset type
+Illegal offset type: cannot be of type object
+Illegal offset type: cannot be of type array
+Illegal offset type: cannot be of type array
 Done
