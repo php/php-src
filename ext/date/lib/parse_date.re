@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2019 Derick Rethans
+ * Copyright (c) 2015-2023 Derick Rethans
  * Copyright (c) 2018 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,6 +27,7 @@
 #include "timelib_private.h"
 
 #include <ctype.h>
+#include <errno.h>
 #include <math.h>
 #include <assert.h>
 #include <limits.h>
@@ -580,7 +581,13 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 		++len;
 	}
 
+	errno = 0;
 	tmp_nr = strtoll(str, NULL, 10);
+	if (errno == ERANGE) {
+		timelib_free(str);
+		add_error(s, TIMELIB_ERR_NUMBER_OUT_OF_RANGE, "Number out of range");
+		return 0;
+	}
 
 	timelib_free(str);
 

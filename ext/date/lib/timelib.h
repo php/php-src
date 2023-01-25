@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2022 Derick Rethans
+ * Copyright (c) 2015-2023 Derick Rethans
  * Copyright (c) 2018,2021 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,9 +30,9 @@
 # include "timelib_config.h"
 #endif
 
-#define TIMELIB_VERSION 202204
-#define TIMELIB_EXTENDED_VERSION 20220401
-#define TIMELIB_ASCII_VERSION "2022.04"
+#define TIMELIB_VERSION 202205
+#define TIMELIB_EXTENDED_VERSION 20220501
+#define TIMELIB_ASCII_VERSION "2022.05"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -321,6 +321,7 @@ typedef struct _timelib_abbr_info {
 #define TIMELIB_ERR_INVALID_TZ_OFFSET          0x223
 #define TIMELIB_ERR_FORMAT_LITERAL_MISMATCH    0x224
 #define TIMELIB_ERR_MIX_ISO_WITH_NATURAL       0x225
+#define TIMELIB_ERR_NUMBER_OUT_OF_RANGE        0x226
 
 #define TIMELIB_ZONETYPE_NONE   0
 #define TIMELIB_ZONETYPE_OFFSET 1
