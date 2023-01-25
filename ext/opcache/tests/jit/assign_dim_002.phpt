@@ -161,7 +161,7 @@ array(1) {
     int(1)
   }
 }
-Illegal offset type
+Illegal offset type: cannot be of type object
 array(1) {
   [0]=>
   array(2) {
@@ -198,7 +198,7 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Illegal offset type: cannot be of type array
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 int(1)
@@ -221,7 +221,7 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Illegal offset type
+Illegal offset type: cannot be of type array
 
 Warning: Undefined variable $undef in %s on line %d
 NULL
