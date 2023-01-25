@@ -8,7 +8,7 @@ function b($a = array()[array ()]) {
 }
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Illegal offset type in %s:%d
+Fatal error: Uncaught TypeError: Illegal offset type: cannot be of type array in %s:%d
 Stack trace:
 #0 %s(%d): b()
 #1 {main}

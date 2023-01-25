@@ -2328,6 +2328,12 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
+		case IS_ARRAY:
+			zend_type_error("Illegal offset type: cannot be of type array");
+			return IS_ARRAY;
+		case IS_OBJECT:
+			 zend_type_error("Illegal offset type: cannot be of type object");
+			 return IS_OBJECT;
 		default:
 			zend_illegal_offset();
 			return IS_NULL;
@@ -2402,6 +2408,12 @@ static zend_never_inline zend_uchar slow_index_convert_w(HashTable *ht, const zv
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
+		case IS_ARRAY:
+			zend_type_error("Illegal offset type: cannot be of type array");
+			return IS_ARRAY;
+		case IS_OBJECT:
+        	 zend_type_error("Illegal offset type: cannot be of type object");
+        	 return IS_OBJECT;
 		default:
 			zend_illegal_offset();
 			return IS_NULL;
