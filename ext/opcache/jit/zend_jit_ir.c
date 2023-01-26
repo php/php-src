@@ -4625,7 +4625,7 @@ static int zend_jit_store_type(zend_jit_ctx *jit, int var, uint8_t type)
 	return 1;
 }
 
-static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t reg, bool set_type)
+static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t reg, bool in_mem, bool set_type)
 {
 	zend_jit_addr src;
 	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
@@ -4636,7 +4636,7 @@ static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t 
 		src = zend_jit_deopt_rload(jit, type, reg);
 		if (jit->ra && jit->ra[var].ref == IR_NULL) {
 			zend_jit_def_reg(jit, ZEND_ADDR_REG(var), src);
-		} else {
+		} else if (!in_mem) {
 			zend_jit_zval_set_lval(jit, dst, src);
 			if (set_type &&
 			    (Z_REG(dst) != ZREG_FP ||
@@ -4650,7 +4650,7 @@ static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t 
 		src = zend_jit_deopt_rload(jit, type, reg);
 		if (jit->ra && jit->ra[var].ref == IR_NULL) {
 			zend_jit_def_reg(jit, ZEND_ADDR_REG(var), src);
-		} else {
+		} else if (!in_mem) {
 			zend_jit_zval_set_dval(jit, dst, src);
 			if (set_type &&
 			    (Z_REG(dst) != ZREG_FP ||

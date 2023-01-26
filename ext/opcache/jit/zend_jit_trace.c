@@ -3538,6 +3538,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			if (RA_HAS_REG(i)) {
 				if ((RA_REG_FLAGS(i) & ZREG_LOAD) &&
 				    (RA_REG_FLAGS(i) & ZREG_LAST_USE) &&
+				    (i >= parent_vars_count || STACK_REG(parent_stack, i) == ZREG_NONE) &&
 				    zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0) {
 					/* skip life range with single use */
 					RA_REG_DEL(i);
@@ -3978,8 +3979,8 @@ static int zend_jit_trace_deoptimization(
 			} else {
 				uint8_t type = STACK_TYPE(parent_stack, i);
 
-				if (/*???!(STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE))
-				 && */!zend_jit_store_reg(jit, 1 << type, i, reg,
+				if (!zend_jit_store_reg(jit, 1 << type, i, reg,
+						(STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE)) != 0,
 						STACK_MEM_TYPE(parent_stack, i) != type)) {
 					return 0;
 				}
