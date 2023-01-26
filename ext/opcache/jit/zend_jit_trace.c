@@ -3199,7 +3199,6 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			for (i = 0; i < op_array->last_var; i++) {
 				SET_STACK_VAR(stack, i, j);
 				vars_op_array[j] = op_array;
-#ifndef ZEND_JIT_IR //??? SEND
 				if (ssa->vars[j].use_chain >= 0
 				 && ssa->vars[j].alias == NO_ALIAS
 				 && zend_jit_var_supports_reg(ssa, j)) {
@@ -3207,7 +3206,6 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 					RA_IVAL_FLAGS(j) = ZREG_LOAD;
 					count++;
 				}
-#endif
 				j++;
 			}
 			for (i = op_array->last_var; i < op_array->last_var + op_array->T; i++) {
@@ -3535,6 +3533,19 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			}
 		}
 #else /* ZEND_JIT_IR */
+	if (count) {
+		for (i = 0; i < ssa->vars_count; i++) {
+			if (RA_HAS_REG(i)) {
+				if ((RA_REG_FLAGS(i) & ZREG_LOAD) &&
+				    (RA_REG_FLAGS(i) & ZREG_LAST_USE) &&
+				    zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0) {
+					/* skip life range with single use */
+					RA_REG_DEL(i);
+					count--;
+				}
+			}
+		}
+	}
 	if (count) {
 #endif
 
