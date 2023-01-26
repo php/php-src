@@ -4620,8 +4620,8 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
  * A faster implementation which uses AVX2 instructions follows */
 static bool mb_fast_check_utf8_default(zend_string *str)
 {
-# ifdef __SSE2__
 	unsigned char *p = (unsigned char*)ZSTR_VAL(str);
+# ifdef __SSE2__
 	/* `e` points 1 byte past the last full 16-byte block of string content
 	 * Note that we include the terminating null byte which is included in each zend_string
 	 * as part of the content to check; this ensures that multi-byte characters which are
@@ -4810,8 +4810,82 @@ finish_up_remaining_bytes:
 
 	return true;
 # else
-	/* No SSE2 support; we might add generic UTF-8 specific validation code here later */
-	return php_mb_check_encoding(ZSTR_VAL(str), ZSTR_LEN(str), &mbfl_encoding_utf8);
+	/* This UTF-8 validation function is derived from PCRE2 */
+	size_t length = ZSTR_LEN(str);
+	/* Table of the number of extra bytes, indexed by the first byte masked with
+	0x3f. The highest number for a valid UTF-8 first byte is in fact 0x3d. */
+	static const uint8_t utf8_table[] = {
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		3,3,3,3,3,3,3,3
+	};
+
+	for (; length > 0; p++) {
+		uint32_t d;
+		unsigned char c = *p;
+		length--;
+
+		if (c < 128) {
+			/* ASCII character */
+			continue;
+		}
+
+		if (c < 0xc0) {
+			/* Isolated 10xx xxxx byte */
+			return false;
+		}
+
+		if (c >= 0xf5) {
+			return false;
+		}
+
+		uint32_t ab = utf8_table[c & 0x3f]; /* Number of additional bytes (1-3) */
+		if (length < ab) {
+			/* Missing bytes */
+			return false;
+		}
+		length -= ab;
+
+		/* Check top bits in the second byte */
+		if (((d = *(++p)) & 0xc0) != 0x80) {
+			return false;
+		}
+
+		/* For each length, check that the remaining bytes start with the 0x80 bit
+		 * set and not the 0x40 bit. Then check for an overlong sequence, and for the
+		 * excluded range 0xd800 to 0xdfff. */
+		switch (ab) {
+		case 1:
+			/* 2-byte character. No further bytes to check for 0x80. Check first byte
+			 * for for xx00 000x (overlong sequence). */
+			if ((c & 0x3e) == 0) {
+				return false;
+			}
+			break;
+
+		case 2:
+			/* 3-byte character. Check third byte for 0x80. Then check first 2 bytes for
+			 * 1110 0000, xx0x xxxx (overlong sequence) or 1110 1101, 1010 xxxx (0xd800-0xdfff) */
+			if ((*(++p) & 0xc0) != 0x80 || (c == 0xe0 && (d & 0x20) == 0) || (c == 0xed && d >= 0xa0)) {
+				return false;
+			}
+			break;
+
+		case 3:
+			/* 4-byte character. Check 3rd and 4th bytes for 0x80. Then check first 2
+			 * bytes for for 1111 0000, xx00 xxxx (overlong sequence), then check for a
+			 * character greater than 0x0010ffff (f4 8f bf bf) */
+			if ((*(++p) & 0xc0) != 0x80 || (*(++p) & 0xc0) != 0x80 || (c == 0xf0 && (d & 0x30) == 0) || (c > 0xf4 || (c == 0xf4 && d > 0x8f))) {
+				return false;
+			}
+			break;
+
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+	}
+
+	return true;
 # endif
 }
 
