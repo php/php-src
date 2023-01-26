@@ -35,8 +35,8 @@
 # define ZREG_FP             27 /* IR_REG_X27 */
 # define ZREG_IP             28 /* IR_REG_X28 */
 # define ZREG_FIRST_FPR      32
-# define IR_REGSET_PRESERVED ((1<<19) | (1<<20) | (1<<21) | (1<<22) | (1<<23) | (1<<24) | \
-                              (1<<25) | (1<<26) | (1<<27) | (1<<28) | (1<<29) | (1<<30)) /* all preserved registers */
+# define IR_REGSET_PRESERVED ((1<<19) | (1<<20) | (1<<21) | (1<<22) | (1<<23) | \
+                              (1<<24) | (1<<25) | (1<<26) | (1<<27) | (1<<28)) /* all preserved registers */
 #else
 # error "Unknown IR target"
 #endif
