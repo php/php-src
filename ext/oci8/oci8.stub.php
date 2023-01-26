@@ -954,7 +954,7 @@ function oci_unregister_taf_callback($connection): bool {}
 #[\AllowDynamicProperties]
 class OCILob {
     /** @var resource */
-    public readonly $descriptor;
+    public readonly mixed $descriptor;
 
     /**
      * @alias oci_lob_save
@@ -1086,7 +1086,7 @@ class OCILob {
 #[\AllowDynamicProperties]
 class OCICollection {
     /** @var resource */
-    public readonly $collection;
+    public readonly mixed $collection;
     /**
      * @alias oci_free_collection
      * @tentative-return-type
