@@ -15,7 +15,9 @@ var_dump(array_reduce($input, fn($carry, $value) => $carry + $value, 0));
 --EXPECTF--
 array_sum() version:
 
-Warning: Object of class DoOperationNoCast could not be converted to int|float in %s on line %d
+Warning: array_sum(): Addition is not supported on type DoOperationNoCast in %s on line %d
+
+Warning: array_sum(): Addition is not supported on type DoOperationNoCast in %s on line %d
 int(0)
 array_reduce() version:
 object(DoOperationNoCast)#5 (1) {

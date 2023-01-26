@@ -5931,6 +5931,21 @@ static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, b
 
 	ZVAL_LONG(return_value, initial);
 	ZEND_HASH_FOREACH_VAL(input, entry) {
+		/* For objects we try to cast them to a numeric type */
+		if (Z_TYPE_P(entry) == IS_OBJECT) {
+			zval dst;
+			zend_result status = Z_OBJ_HT_P(entry)->cast_object(Z_OBJ_P(entry), &dst, _IS_NUMBER);
+
+			/* Do not type error for BC */
+			if (status == FAILURE || (Z_TYPE(dst) != IS_LONG && Z_TYPE(dst) != IS_DOUBLE)) {
+				php_error_docref(NULL, E_WARNING, "%s is not supported on type %s",
+					op_name, zend_zval_type_name(entry));
+				continue;
+			}
+			op(return_value, return_value, &dst);
+			continue;
+		}
+
 		zend_result status = op(return_value, return_value, entry);
 		if (status == FAILURE) {
 			ZEND_ASSERT(EG(exception));
@@ -5951,23 +5966,6 @@ static void php_array_binop(INTERNAL_FUNCTION_PARAMETERS, const char *op_name, b
 				op_name, zend_zval_type_name(entry));
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	/* Traversal of array encountered objects that support multiplication */
-	if (Z_TYPE_P(return_value) == IS_OBJECT) {
-		/* Cannot use convert_scalar_to_number() as we don't know if the cast succeeded */
-		zval dst;
-		zend_result status = Z_OBJ_HT_P(return_value)->cast_object(Z_OBJ_P(return_value), &dst, _IS_NUMBER);
-
-		/* Do not type error for BC */
-		if (status == FAILURE || (Z_TYPE(dst) != IS_LONG && Z_TYPE(dst) != IS_DOUBLE)) {
-			zend_error(E_WARNING, "Object of class %s could not be converted to int|float",
-				ZSTR_VAL(Z_OBJCE_P(return_value)->name));
-			zval_ptr_dtor(return_value);
-			RETURN_LONG(initial);
-		}
-		zval_ptr_dtor(return_value);
-		RETURN_COPY_VALUE(&dst);
-	}
 }
 
 /* {{{ Returns the sum of the array entries */

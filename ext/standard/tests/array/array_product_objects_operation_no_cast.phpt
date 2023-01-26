@@ -15,7 +15,11 @@ var_dump(array_reduce($input, fn($carry, $value) => $carry * $value, 1));
 --EXPECTF--
 array_product() version:
 
-Warning: Object of class DoOperationNoCast could not be converted to int|float in %s on line %d
+Warning: array_product(): Multiplication is not supported on type DoOperationNoCast in %s on line %d
+
+Warning: array_product(): Multiplication is not supported on type DoOperationNoCast in %s on line %d
+
+Warning: array_product(): Multiplication is not supported on type DoOperationNoCast in %s on line %d
 int(1)
 array_reduce() version:
 object(DoOperationNoCast)#5 (1) {

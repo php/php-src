@@ -20,8 +20,8 @@ var_dump(array_reduce($input, fn($carry, $value) => $carry + $value, 0));
 --EXPECTF--
 array_sum() version:
 
-Warning: Object of class FFI\CData could not be converted to int|float in %s on line %d
-int(0)
+Warning: array_sum(): Addition is not supported on type FFI\CData in %s on line %d
+int(1)
 array_reduce() version:
 object(FFI\CData:int32_t*)#4 (1) {
   [0]=>
