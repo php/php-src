@@ -52,7 +52,9 @@
 #endif
 
 static size_t zend_jit_trace_prologue_size = (size_t)-1;
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
 static uint32_t allowed_opt_flags = 0;
+#endif
 static bool delayed_call_chain = 0; // TODO: remove this var (use jit->delayed_call_level) ???
 
 #ifdef ZTS
@@ -3341,7 +3343,11 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 		if (zend_jit_vm_kind == ZEND_VM_KIND_CALL) {
 			jit->ctx.flags |= IR_FUNCTION;
 			/* Stack must be 16 byte aligned */
+#if defined(IR_TARGET_AARCH64)
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 15; /* TODO: reduce stack size ??? */
+#else
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 7; /* TODO: reduce stack size ??? */
+#endif
 			if (GCC_GLOBAL_REGS) {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
 			} else {
