@@ -21,7 +21,7 @@ var_dump(strlen($allBytes));
 echo PHP_EOL;
 
 // Fast path: Inputs less than or equal to 256.
-for ($i = 1; $i <= \strlen($allBytes); $i *= 2) {
+for ($i = 1; $i <= strlen($allBytes); $i *= 2) {
     echo "{$i}:", PHP_EOL;
 
     $wrapper = new TestWrapperEngine($xoshiro);
@@ -34,7 +34,7 @@ for ($i = 1; $i <= \strlen($allBytes); $i *= 2) {
     var_dump($wrapper->getCount());
 
     $count = [];
-    for ($j = 0; $j < \strlen($result); $j++) {
+    for ($j = 0; $j < strlen($result); $j++) {
         $b = $result[$j];
         $count[ord($b)] ??= 0;
         $count[ord($b)]++;
@@ -57,7 +57,7 @@ $result = $r->getBytesFromString($allBytes . $allBytes, 20000);
 var_dump($wrapper->getCount());
 
 $count = [];
-for ($j = 0; $j < \strlen($result); $j++) {
+for ($j = 0; $j < strlen($result); $j++) {
     $b = $result[$j];
     $count[ord($b)] ??= 0;
     $count[ord($b)]++;
