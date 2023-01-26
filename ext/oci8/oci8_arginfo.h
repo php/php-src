@@ -1,9 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
-<<<<<<< HEAD
- * Stub hash: d8e9f7e55dce2c77242476e323d7795a97b5c862 */
-=======
- * Stub hash: e3c87c2100a1d480faad06b0149c67209fda7ed1 */
->>>>>>> f5856f4d80 (Add type declaration in stub)
+ * Stub hash: 66436b4202234c49e23f476f32ce178e756795a3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -903,17 +899,12 @@ static zend_class_entry *register_class_OCILob(void)
 
 	INIT_CLASS_ENTRY(ce, "OCILob", class_OCILob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
 	zval property_descriptor_default_value;
 	ZVAL_UNDEF(&property_descriptor_default_value);
 	zend_string *property_descriptor_name = zend_string_init("descriptor", sizeof("descriptor") - 1, 1);
 	zend_declare_typed_property(class_entry, property_descriptor_name, &property_descriptor_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release(property_descriptor_name);
-
-	zend_string *attribute_name_AllowDynamicProperties_class_OCILob = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
-	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCILob, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class_OCILob);
 
 	return class_entry;
 }
@@ -924,17 +915,12 @@ static zend_class_entry *register_class_OCICollection(void)
 
 	INIT_CLASS_ENTRY(ce, "OCICollection", class_OCICollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
 	zval property_collection_default_value;
 	ZVAL_UNDEF(&property_collection_default_value);
 	zend_string *property_collection_name = zend_string_init("collection", sizeof("collection") - 1, 1);
 	zend_declare_typed_property(class_entry, property_collection_name, &property_collection_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release(property_collection_name);
-
-	zend_string *attribute_name_AllowDynamicProperties_class_OCICollection = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
-	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCICollection, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class_OCICollection);
 
 	return class_entry;
 }
