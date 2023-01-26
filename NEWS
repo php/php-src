@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
   . Fixed incorrect check condition in type inference. (nielsdos)
   . Fix incorrect check in zend_internal_call_should_throw(). (nielsdos)
+  . arginfo / zpp validation can now be skipped on debug build with 
+    ZEND_SUPPRESS_ARGINFO_ZPP_MISMATCH=1 (zeriyoshi)
 
 - FFI:
   . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
