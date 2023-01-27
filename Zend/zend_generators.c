@@ -223,6 +223,14 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	uint32_t op_num, try_catch_offset;
 	int i;
 
+	/* Generator is running in a suspended fiber.
+	 * Will be dtor during fiber dtor */
+	if (generator->flags & ZEND_GENERATOR_IN_FIBER) {
+		/* Prevent finally blocks from yielding */
+		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
+		return;
+	}
+
 	/* leave yield from mode to properly allow finally execution */
 	if (UNEXPECTED(Z_TYPE(generator->values) != IS_UNDEF)) {
 		zval_ptr_dtor(&generator->values);
@@ -727,7 +735,8 @@ try_again:
 	}
 
 	/* Resume execution */
-	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
+	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING
+						| (EG(active_fiber) ? ZEND_GENERATOR_IN_FIBER : 0);
 	if (!ZEND_OBSERVER_ENABLED) {
 		zend_execute_ex(generator->execute_data);
 	} else {
@@ -778,6 +787,7 @@ try_again:
 		goto try_again;
 	}
 
+	generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
 	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 }
 /* }}} */
