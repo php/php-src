@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
   . Fixed incorrect check condition in type inference. (nielsdos)
   . Fix incorrect check in zend_internal_call_should_throw(). (nielsdos)
+  . Fixed overflow check in OnUpdateMemoryConsumption. (nielsdos)
+  . Fixed bug GH-9916 (Entering shutdown sequence with a fiber suspended in a
+    Generator emits an unavoidable fatal error or crashes). (Arnaud)
 
 - FFI:
   . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
