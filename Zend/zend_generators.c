@@ -787,7 +787,8 @@ try_again:
 		goto try_again;
 	}
 
-	orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
+	generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
+	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 }
 /* }}} */
 
