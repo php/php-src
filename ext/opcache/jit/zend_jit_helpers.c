@@ -493,7 +493,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_jit_illegal_offset();
 			undef_result_after_exception();
 			return;
 	}
@@ -635,7 +635,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_jit_illegal_offset();
 			undef_result_after_exception();
 			return;
 	}
@@ -737,7 +737,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_empty_or_isset_offset(dim);
+			zend_type_error("Illegal offset type in isset or empty");
 			return 0;
 	}
 
@@ -873,7 +873,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_jit_illegal_offset();
 			undef_result_after_exception();
 			return NULL;
 	}
@@ -1006,7 +1006,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_jit_illegal_offset();
 			undef_result_after_exception();
 			if (EG(opline_before_exception)
 			 && (EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
