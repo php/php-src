@@ -282,7 +282,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		} else if (flags & PHP_STREAM_CAST_TRY_HARD) {
 			php_stream *newstream;
 
-			newstream = php_stream_fopen_tmpfile();
+			newstream = php_stream_fopen_tmpfile_ex(/* emit errors */ false);
 			if (newstream) {
 				int retcopy = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL, NULL);
 

@@ -38,9 +38,13 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC);
 #define php_stream_fopen_from_pipe(file, mode)	_php_stream_fopen_from_pipe((file), (mode) STREAMS_CC)
 
+PHPAPI php_stream *_php_stream_fopen_tmpfile_ex(bool emit_errors, int dummy STREAMS_DC);
+#define php_stream_fopen_tmpfile_ex(emit_errors)	_php_stream_fopen_tmpfile_ex((emit_errors), 0 STREAMS_CC)
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC);
 #define php_stream_fopen_tmpfile()	_php_stream_fopen_tmpfile(0 STREAMS_CC)
 
+PHPAPI php_stream *_php_stream_fopen_temporary_file_ex(bool emit_errors, const char *dir, const char *pfx, zend_string **opened_path_ptr STREAMS_DC);
+#define php_stream_fopen_temporary_file_ex(emit_errors, dir, pfx, opened_path)	_php_stream_fopen_temporary_file_ex((emit_errors), (dir), (pfx), (opened_path) STREAMS_CC)
 PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, zend_string **opened_path STREAMS_DC);
 #define php_stream_fopen_temporary_file(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_CC)
 
