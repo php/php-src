@@ -1442,7 +1442,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(v
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(const zval *offset)
 {
-	zend_type_error("Illegal offset type: cannot be of type %s", zend_zval_type_name(offset));
+	zend_type_error("Illegal offset type: cannot be of type %s", zend_get_type_by_const(Z_TYPE_P(offset)));
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset(const zval *offset)
