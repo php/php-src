@@ -761,7 +761,7 @@ try_again:
 			zend_observer_fcall_end(generator->execute_data, &generator->value);
 		}
 	}
-	generator->flags &= ~(ZEND_GENERATOR_CURRENTLY_RUNNING | ZEND_GENERATOR_IN_FIBER);
+	generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 	generator->frozen_call_stack = NULL;
 	if (EXPECTED(generator->execute_data) &&
@@ -801,6 +801,7 @@ try_again:
 		goto try_again;
 	}
 
+	generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
 	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 }
 /* }}} */
