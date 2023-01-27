@@ -4725,8 +4725,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			phi = ssa->blocks[1].phis;
 			while (phi) {
 				if (RA_HAS_REG(phi->ssa_var)) {
-#if 1
-// TODO: delay load ???
 					if (RA_REG_FLAGS(phi->ssa_var) & ZREG_LOAD) {
 						uint32_t info = ssa->var_info[phi->ssa_var].type;
 
@@ -4742,9 +4740,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						SET_STACK_REF_EX(stack, phi->var, ra[phi->ssa_var].ref, ZREG_LOAD);
-					} else
-#endif
-					if (RA_REG_FLAGS(phi->ssa_var) & ZREG_STORE) {
+					} else if (RA_REG_FLAGS(phi->ssa_var) & ZREG_STORE) {
 
 						if (!zend_jit_store_var(&ctx, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, phi->ssa_var,
 								STACK_MEM_TYPE(stack, phi->var) != ssa->var_info[phi->ssa_var].type)) {
