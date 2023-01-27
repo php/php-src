@@ -271,6 +271,10 @@ struct _zend_executor_globals {
 	zend_string *filename_override;
 	zend_long lineno_override;
 
+#ifdef ZEND_DEBUG
+	bool suppress_arginfo_zpp_mismatch;
+#endif
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

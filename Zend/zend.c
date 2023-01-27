@@ -1008,6 +1008,11 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
+
+#ifdef ZEND_DEBUG
+	char *tmp = getenv("ZEND_SUPPRESS_ARGINFO_ZPP_MISMATCH");
+	EG(suppress_arginfo_zpp_mismatch) = tmp && ZEND_ATOL(tmp);
+#endif
 }
 /* }}} */
 
