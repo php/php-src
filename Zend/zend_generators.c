@@ -749,8 +749,7 @@ try_again:
 	}
 
 	/* Resume execution */
-	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING
-						| (EG(active_fiber) ? ZEND_GENERATOR_IN_FIBER : 0);
+	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
 	if (!ZEND_OBSERVER_ENABLED) {
 		zend_execute_ex(generator->execute_data);
 	} else {
@@ -801,7 +800,6 @@ try_again:
 		goto try_again;
 	}
 
-	generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
 	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 }
 /* }}} */
