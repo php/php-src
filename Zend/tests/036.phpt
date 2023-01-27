@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-Illegal offset type: cannot be of type object
+Cannot access offset of type object on array
