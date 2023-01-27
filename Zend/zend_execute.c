@@ -1440,9 +1440,9 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(v
 	zend_throw_error(NULL, "Cannot use object as array");
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(void)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(const zval *offset)
 {
-	zend_type_error("Illegal offset type");
+	zend_type_error("Illegal offset type: cannot be of type %s", zend_zval_type_name(offset));
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset(const zval *offset)
@@ -2313,14 +2313,8 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
-		case IS_ARRAY:
-			zend_type_error("Illegal offset type: cannot be of type array");
-			return IS_ARRAY;
-		case IS_OBJECT:
-			 zend_type_error("Illegal offset type: cannot be of type object");
-			 return IS_OBJECT;
 		default:
-			zend_illegal_offset();
+			zend_illegal_offset(dim);
 			return IS_NULL;
 	}
 }
@@ -2393,14 +2387,8 @@ static zend_never_inline zend_uchar slow_index_convert_w(HashTable *ht, const zv
 		case IS_TRUE:
 			value->lval = 1;
 			return IS_LONG;
-		case IS_ARRAY:
-			zend_type_error("Illegal offset type: cannot be of type array");
-			return IS_ARRAY;
-		case IS_OBJECT:
-        	 zend_type_error("Illegal offset type: cannot be of type object");
-        	 return IS_OBJECT;
 		default:
-			zend_illegal_offset();
+			zend_illegal_offset(dim);
 			return IS_NULL;
 	}
 }
@@ -2982,7 +2970,7 @@ num_key:
 		str = ZSTR_EMPTY_ALLOC();
 		goto str_key;
 	} else {
-		zend_illegal_offset();
+		zend_illegal_offset(key);
 		return 0;
 	}
 }

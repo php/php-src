@@ -7311,7 +7311,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -9508,7 +9508,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -10431,7 +10431,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -11873,7 +11873,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -19845,7 +19845,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -20285,7 +20285,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -20746,7 +20746,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -21146,7 +21146,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -24882,7 +24882,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -27174,7 +27174,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -29195,7 +29195,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -31450,7 +31450,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -42795,7 +42795,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -46395,7 +46395,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -48300,7 +48300,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
@@ -51788,7 +51788,7 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_illegal_offset();
+			zend_illegal_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
