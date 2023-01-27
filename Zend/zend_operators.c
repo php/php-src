@@ -3218,7 +3218,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num) /* {{{ */
 	} else {
 		char buf[MAX_LENGTH_OF_LONG + 1];
 		char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, num);
-		return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		zend_string *str =  zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		return str;
 	}
 }
 /* }}} */
@@ -3230,7 +3232,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_ulong_to_str(zend_ulong num)
 	} else {
 		char buf[MAX_LENGTH_OF_LONG + 1];
 		char *res = zend_print_ulong_to_buf(buf + sizeof(buf) - 1, num);
-		return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		zend_string *str =  zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		return str;
 	}
 }
 
@@ -3272,7 +3276,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_u64_to_str(uint64_t num)
 	} else {
 		char buf[20 + 1];
 		char *res = zend_print_u64_to_buf(buf + sizeof(buf) - 1, num);
-		return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		zend_string *str =  zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		return str;
 	}
 }
 
@@ -3283,7 +3289,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num)
 	} else {
 		char buf[20 + 1];
 		char *res = zend_print_i64_to_buf(buf + sizeof(buf) - 1, num);
-		return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		zend_string *str =  zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
+		GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+		return str;
 	}
 }
 
@@ -3293,7 +3301,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_double_to_str(double num)
 	/* Model snprintf precision behavior. */
 	int precision = (int) EG(precision);
 	zend_gcvt(num, precision ? precision : 1, '.', 'E', buf);
-	return zend_string_init(buf, strlen(buf), 0);
+	zend_string *str =  zend_string_init(buf, strlen(buf), 0);
+	GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
+	return str;
 }
 
 ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */

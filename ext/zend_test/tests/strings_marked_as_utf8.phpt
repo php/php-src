@@ -106,12 +106,12 @@ Known strings:
 bool(true)
 Integer cast to string:
 string(4) "2563"
-bool(false)
+bool(true)
 Float cast to string:
 string(4) "26.7"
-bool(false)
+bool(true)
 string(8) "2.0E+100"
-bool(false)
+bool(true)
 Concatenation known valid UTF-8 strings in variables:
 string(2) "fo"
 bool(false)
