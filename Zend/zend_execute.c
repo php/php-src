@@ -2324,7 +2324,7 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 			value->lval = 1;
 			return IS_LONG;
 		default:
-			zend_illegal_offset();
+			zend_illegal_array_offset(dim);
 			return IS_NULL;
 	}
 }
@@ -2398,7 +2398,7 @@ static zend_never_inline zend_uchar slow_index_convert_w(HashTable *ht, const zv
 			value->lval = 1;
 			return IS_LONG;
 		default:
-			zend_illegal_offset();
+			zend_illegal_array_offset();
 			return IS_NULL;
 	}
 }
