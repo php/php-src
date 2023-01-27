@@ -387,6 +387,21 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(uint32_t var EXECUTE_D
 	return ret;
 }
 
+static zend_always_inline zval *_get_zval_ptr_tmpvarcv(int op_type, znode_op node, int type EXECUTE_DATA_DC)
+{
+	if (op_type & (IS_TMP_VAR|IS_VAR)) {
+		if (op_type == IS_TMP_VAR) {
+			return _get_zval_ptr_tmp(node.var EXECUTE_DATA_CC);
+		} else {
+			ZEND_ASSERT(op_type == IS_VAR);
+			return _get_zval_ptr_var_deref(node.var EXECUTE_DATA_CC);
+		}
+	} else {
+		ZEND_ASSERT(op_type == IS_CV);
+		return _get_zval_ptr_cv_deref(node.var, type EXECUTE_DATA_CC);
+	}
+}
+
 static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {

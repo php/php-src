@@ -5856,58 +5856,84 @@ ZEND_VM_HOT_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED|CONST_FETCH, CONST, CACHE_SL
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CONST, CACHE_SLOT)
+ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CONST|TMPVARCV, CACHE_SLOT)
 {
 	zend_class_entry *ce, *scope;
 	zend_class_constant *c;
-	zval *value, *zv;
+	zval *value, *zv, *constant_zv;
+	zend_string *constant_name;
 	USE_OPLINE
 
 	SAVE_OPLINE();
 
 	do {
-		if (OP1_TYPE == IS_CONST) {
+		if (OP1_TYPE == IS_CONST && OP2_TYPE == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(opline->extended_value + sizeof(void*)))) {
 				value = CACHED_PTR(opline->extended_value + sizeof(void*));
 				break;
-			} else if (EXPECTED(CACHED_PTR(opline->extended_value))) {
+			}
+		}
+		if (OP1_TYPE == IS_CONST) {
+			if (EXPECTED(CACHED_PTR(opline->extended_value))) {
 				ce = CACHED_PTR(opline->extended_value);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 				if (UNEXPECTED(ce == NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					FREE_OP2();
 					HANDLE_EXCEPTION();
 				}
+				CACHE_PTR(opline->extended_value, ce);
+			}
+		} else if (OP1_TYPE == IS_UNUSED) {
+			ce = zend_fetch_class(NULL, opline->op1.num);
+			if (UNEXPECTED(ce == NULL)) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+				FREE_OP2();
+				HANDLE_EXCEPTION();
 			}
 		} else {
-			if (OP1_TYPE == IS_UNUSED) {
-				ce = zend_fetch_class(NULL, opline->op1.num);
-				if (UNEXPECTED(ce == NULL)) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				ce = Z_CE_P(EX_VAR(opline->op1.var));
-			}
-			if (EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
-				value = CACHED_PTR(opline->extended_value + sizeof(void*));
-				break;
-			}
+			ce = Z_CE_P(EX_VAR(opline->op1.var));
+		}
+		if (OP1_TYPE != IS_CONST
+			&& OP2_TYPE == IS_CONST
+			&& EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
+			value = CACHED_PTR(opline->extended_value + sizeof(void*));
+			break;
 		}
 
-		zv = zend_hash_find_known_hash(CE_CONSTANTS_TABLE(ce), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+		constant_zv = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
+			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			FREE_OP2();
+			HANDLE_EXCEPTION();
+		}
+		constant_name = Z_STR_P(constant_zv);
+		/* Magic 'class' for constant OP2 is caught at compile-time */
+		if (OP2_TYPE != IS_CONST && UNEXPECTED(zend_string_equals_literal_ci(constant_name, "class"))) {
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), ce->name);
+			FREE_OP2();
+			ZEND_VM_NEXT_OPCODE();
+		}
+		zv = OP2_TYPE == IS_CONST
+			? zend_hash_find_known_hash(CE_CONSTANTS_TABLE(ce), constant_name)
+			: zend_hash_find(CE_CONSTANTS_TABLE(ce), constant_name);
+
 		if (EXPECTED(zv != NULL)) {
 			c = Z_PTR_P(zv);
 			scope = EX(func)->op_array.scope;
 			if (!zend_verify_const_access(c, scope)) {
-				zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c)), ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+				zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c)), ZSTR_VAL(ce->name), ZSTR_VAL(constant_name));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
+				FREE_OP2();
 				HANDLE_EXCEPTION();
 			}
 
 			if (ce->ce_flags & ZEND_ACC_TRAIT) {
-				zend_throw_error(NULL, "Cannot access trait constant %s::%s directly", ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+				zend_throw_error(NULL, "Cannot access trait constant %s::%s directly", ZSTR_VAL(ce->name), ZSTR_VAL(constant_name));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
+				FREE_OP2();
 				HANDLE_EXCEPTION();
 			}
 
@@ -5916,6 +5942,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			if (ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF && ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				if (UNEXPECTED(zend_update_class_constants(ce) == FAILURE)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					FREE_OP2();
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -5923,20 +5950,25 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 				zval_update_constant_ex(value, c->ce);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					FREE_OP2();
 					HANDLE_EXCEPTION();
 				}
 			}
-			CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
+			if (OP2_TYPE == IS_CONST) {
+				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
+			}
 		} else {
 			zend_throw_error(NULL, "Undefined constant %s::%s",
-				ZSTR_VAL(ce->name), Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
+				ZSTR_VAL(ce->name), ZSTR_VAL(constant_name));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
 	} while (0);
 
 	ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), value);
 
+	FREE_OP2();
 	ZEND_VM_NEXT_OPCODE();
 }
 

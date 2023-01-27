@@ -27,13 +27,22 @@ final class TestShaEngine implements Engine
 
 final class TestWrapperEngine implements Engine
 {
+    private int $count = 0;
+
     public function __construct(private readonly Engine $engine)
     {
     }
 
     public function generate(): string
     {
+        $this->count++;
+
         return $this->engine->generate();
+    }
+
+    public function getCount(): int
+    {
+        return $this->count;
     }
 }
 
