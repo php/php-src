@@ -13,3 +13,4 @@ Fatal error: Uncaught TypeError: Cannot access offset of type array on array in 
 Stack trace:
 #0 {main}
   thrown in %sinference_002.php on line 2
+
