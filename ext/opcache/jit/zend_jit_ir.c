@@ -17152,12 +17152,44 @@ static int zend_jit_trace_opline_guard(zend_jit_ctx *jit, const zend_op *opline)
 	return 1;
 }
 
+static bool zend_jit_guard_reference(zend_jit_ctx  *jit,
+                                     const zend_op *opline,
+                                     zend_jit_addr *var_addr_ptr,
+                                     zend_jit_addr *ref_addr_ptr,
+                                     bool           add_ref_guard)
+{
+	zend_jit_addr var_addr = *var_addr_ptr;
+	const void *exit_addr = NULL;
+	ir_ref ref;
+
+	if (add_ref_guard) {
+		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+
+		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		if (!exit_addr) {
+			return 0;
+		}
+
+		ref = zend_jit_zval_type(jit, var_addr);
+		zend_jit_guard(jit,
+			ir_fold2(&jit->ctx, IR_OPT(IR_EQ, IR_BOOL), ref, ir_const_u8(&jit->ctx, IS_REFERENCE)),
+			zend_jit_const_addr(jit, (uintptr_t)exit_addr));
+	}
+
+	ref = zend_jit_zval_ptr(jit, var_addr);
+	*ref_addr_ptr = ZEND_ADDR_REF_ZVAL(ref);
+	ref = zend_jit_addr_offset(jit, ref, offsetof(zend_reference, val));
+	var_addr = ZEND_ADDR_REF_ZVAL(ref);
+	*var_addr_ptr = var_addr;
+
+	return 1;
+}
+
 static bool zend_jit_fetch_reference(zend_jit_ctx  *jit,
                                      const zend_op *opline,
                                      uint8_t        var_type,
                                      uint32_t      *var_info_ptr,
                                      zend_jit_addr *var_addr_ptr,
-                                     zend_jit_addr *ref_addr_ptr,
                                      bool           add_ref_guard,
                                      bool           add_type_guard)
 {
@@ -17189,9 +17221,6 @@ static bool zend_jit_fetch_reference(zend_jit_ctx  *jit,
 		*var_addr_ptr = var_addr;
 	} else {
 		ref = zend_jit_zval_ptr(jit, var_addr);
-		if (ref_addr_ptr) {
-			*ref_addr_ptr = ZEND_ADDR_REF_ZVAL(ref);
-		}
 		ref = zend_jit_addr_offset(jit, ref, offsetof(zend_reference, val));
 		var_addr = ZEND_ADDR_REF_ZVAL(ref);
 		*var_addr_ptr = var_addr;
