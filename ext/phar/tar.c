@@ -478,14 +478,15 @@ bail:
 			return FAILURE;
 		}
 
+		uint32_t entry_mode = phar_tar_number(hdr->mode, sizeof(hdr->mode));
 		entry.tar_type = ((old & (hdr->typeflag == '\0')) ? TAR_FILE : hdr->typeflag);
 		entry.offset = entry.offset_abs = pos; /* header_offset unused in tar */
 		entry.fp_type = PHAR_FP;
-		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
+		entry.flags = entry_mode & PHAR_ENT_PERM_MASK;
 		entry.timestamp = phar_tar_number(hdr->mtime, sizeof(hdr->mtime));
 		entry.is_persistent = myphar->is_persistent;
 
-		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry.flags)) {
+		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry_mode)) {
 			entry.tar_type = TAR_DIR;
 		}
 

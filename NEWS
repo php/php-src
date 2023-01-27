@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
 
+- Phar:
+  . Fix incorrect check in phar tar parsing. (nielsdos)
+
 - Standard:
   . Fixed bug GH-10292 (Made the default value of the first param of srand() and
     mt_srand() unknown). (kocsismate)
