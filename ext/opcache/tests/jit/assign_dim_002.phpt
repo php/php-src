@@ -161,7 +161,7 @@ array(1) {
     int(1)
   }
 }
-Illegal offset type: cannot be of type object
+Illegal offset type: cannot be of type Closure
 array(1) {
   [0]=>
   array(2) {
