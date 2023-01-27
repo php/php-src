@@ -189,8 +189,7 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 
 static inline bool is_stream_user_stream(const php_stream *stream)
 {
-	return (strlen(stream->ops->label) == strlen("user-space"))
-		&& strncmp(stream->ops->label, "user-space", strlen("user-space")) == 0;
+	return stream->ops == &php_stream_userspace_ops;
 }
 
 /* {{{ php_stream_cast */
