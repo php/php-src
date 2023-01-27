@@ -56,7 +56,7 @@ int(1)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-Illegal offset type: cannot be of type object
-Illegal offset type: cannot be of type array
-Illegal offset type: cannot be of type array
+Cannot access offset of type object on array
+Cannot access offset of type array on array
+Cannot access offset of type array on array
 Done

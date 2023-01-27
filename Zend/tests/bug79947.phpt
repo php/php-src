@@ -12,6 +12,6 @@ try {
 var_dump($array);
 ?>
 --EXPECT--
-Illegal offset type: cannot be of type array
+Cannot access offset of type array on array
 array(0) {
 }

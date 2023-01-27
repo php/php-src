@@ -1455,9 +1455,9 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(v
 	zend_throw_error(NULL, "Cannot use object as array");
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(const zval *offset)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_array_offset(const zval *offset)
 {
-	zend_type_error("Illegal offset type: cannot be of type %s", zend_get_type_by_const(Z_TYPE_P(offset)));
+	zend_type_error("Cannot access offset of type %s on array", zend_get_type_by_const(Z_TYPE_P(offset)));
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset(const zval *offset)
@@ -2329,7 +2329,7 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 			value->lval = 1;
 			return IS_LONG;
 		default:
-			zend_illegal_offset(dim);
+			zend_illegal_array_offset(dim);
 			return IS_NULL;
 	}
 }
@@ -2403,7 +2403,7 @@ static zend_never_inline zend_uchar slow_index_convert_w(HashTable *ht, const zv
 			value->lval = 1;
 			return IS_LONG;
 		default:
-			zend_illegal_offset(dim);
+			zend_illegal_array_offset(dim);
 			return IS_NULL;
 	}
 }
@@ -2985,7 +2985,7 @@ num_key:
 		str = ZSTR_EMPTY_ALLOC();
 		goto str_key;
 	} else {
-		zend_illegal_offset(key);
+		zend_illegal_array_offset(key);
 		return 0;
 	}
 }
