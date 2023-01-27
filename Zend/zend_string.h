@@ -80,6 +80,7 @@ END_EXTERN_C()
 /*---*/
 
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
+#define ZSTR_IS_VALID_UTF8(s)				(GC_FLAGS(s) & IS_STR_VALID_UTF8)
 
 #define ZSTR_EMPTY_ALLOC() zend_empty_string
 #define ZSTR_CHAR(c) zend_one_char_string[c]
