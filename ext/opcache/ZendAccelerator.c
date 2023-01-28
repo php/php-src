@@ -4788,6 +4788,7 @@ static int accel_finish_startup(void)
 	}
 
 	if (pid == -1) { /* no subprocess was needed */
+		/* The called function unlocks the shared alloc lock */
 		return accel_finish_startup_preload(false);
 	} else if (pid == 0) { /* subprocess */
 		int ret = accel_finish_startup_preload(true);
@@ -4804,6 +4805,8 @@ static int accel_finish_startup(void)
 		if (ZCSG(preload_script)) {
 			preload_load();
 		}
+
+		zend_shared_alloc_unlock();
 
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
 			return SUCCESS;
