@@ -645,6 +645,7 @@ static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
 
 	/* Forward bailout into current fiber. */
 	if (UNEXPECTED(transfer.flags & ZEND_FIBER_TRANSFER_FLAG_BAILOUT)) {
+		EG(active_fiber) = NULL;
 		zend_bailout();
 	}
 
