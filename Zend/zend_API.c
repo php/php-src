@@ -2089,7 +2089,7 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
 			break;
 		default:
-			zend_illegal_array_offset(key);
+			zend_type_error("Illegal offset type");
 			result = NULL;
 	}
 

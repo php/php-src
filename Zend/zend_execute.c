@@ -2398,7 +2398,7 @@ static zend_never_inline zend_uchar slow_index_convert_w(HashTable *ht, const zv
 			value->lval = 1;
 			return IS_LONG;
 		default:
-			zend_illegal_array_offset();
+			zend_illegal_array_offset(dim);
 			return IS_NULL;
 	}
 }
@@ -2857,7 +2857,7 @@ str_idx:
 		ZVAL_UNDEFINED_OP2();
 		goto str_idx;
 	} else {
-		zend_illegal_empty_or_isset_offset(offset);
+		zend_type_error("Illegal offset type in isset or empty");
 		return NULL;
 	}
 }
