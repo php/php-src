@@ -9,7 +9,11 @@ include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
     echo "\n--> $url: ";
-    var_dump(parse_url($url));
+    try {
+    	var_dump(parse_url($url));
+    } catch (ValueError $e) {
+	echo $e->getMessage() . "\n";
+    }
 }
 
 echo "Done";
@@ -762,7 +766,7 @@ echo "Done";
   string(9) "/blah.com"
 }
 
---> x://::abc/?: bool(false)
+--> x://::abc/?: Invalid port (abc)
 
 --> http://::?: array(3) {
   ["scheme"]=>
@@ -791,9 +795,9 @@ echo "Done";
   int(6)
 }
 
---> http://?:/: bool(false)
+--> http://?:/: Invalid host (?:/)
 
---> http://@?:/: bool(false)
+--> http://@?:/: Invalid host (?:/)
 
 --> file:///:: array(2) {
   ["scheme"]=>
@@ -884,31 +888,31 @@ echo "Done";
   string(1) "/"
 }
 
---> http:///blah.com: bool(false)
+--> http:///blah.com: Invalid host (/blah.com)
 
---> http://:80: bool(false)
+--> http://:80: Invalid host (:80)
 
---> http://user@:80: bool(false)
+--> http://user@:80: Invalid host (:80)
 
---> http://user:pass@:80: bool(false)
+--> http://user:pass@:80: Invalid host (:80)
 
---> http://:: bool(false)
+--> http://:: Invalid host (:)
 
---> http://@/: bool(false)
+--> http://@/: Invalid host (/)
 
---> http://@:/: bool(false)
+--> http://@:/: Invalid host (:/)
 
---> http://:/: bool(false)
+--> http://:/: Invalid host (:/)
 
---> http://?: bool(false)
+--> http://?: Invalid host (?)
 
---> http://#: bool(false)
+--> http://#: Invalid host (#)
 
---> http://?:: bool(false)
+--> http://?:: Invalid host (?:)
 
---> http://:?: bool(false)
+--> http://:?: Invalid host (:?)
 
---> http://blah.com:123456: bool(false)
+--> http://blah.com:123456: Invalid port (123456)
 
---> http://blah.com:abcdef: bool(false)
+--> http://blah.com:abcdef: Invalid port (abcdef)
 Done

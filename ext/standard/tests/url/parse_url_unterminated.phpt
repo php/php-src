@@ -14,13 +14,18 @@ include_once(__DIR__ . '/urls.inc');
 foreach ($urls as $url) {
     echo "\n--> $url: ";
     $str = zend_create_unterminated_string($url);
-    var_dump(parse_url($str));
-    zend_terminate_string($str);
+    try {
+    	var_dump(parse_url($str));
+    } catch (ValueError $e) {
+	echo $e->getMessage() . "\n";
+    } finally {
+    	zend_terminate_string($str);
+    }
 }
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 --> 64.246.30.37: array(1) {
   ["path"]=>
   string(12) "64.246.30.37"
@@ -768,7 +773,7 @@ echo "Done";
   string(9) "/blah.com"
 }
 
---> x://::abc/?: bool(false)
+--> x://::abc/?: Invalid port (abc)
 
 --> http://::?: array(3) {
   ["scheme"]=>
@@ -797,9 +802,9 @@ echo "Done";
   int(6)
 }
 
---> http://?:/: bool(false)
+--> http://?:/: Invalid host (?:/)
 
---> http://@?:/: bool(false)
+--> http://@?:/: Invalid host (?:/)
 
 --> file:///:: array(2) {
   ["scheme"]=>
@@ -890,31 +895,32 @@ echo "Done";
   string(1) "/"
 }
 
---> http:///blah.com: bool(false)
+--> http:///blah.com: Invalid host (%s)
 
---> http://:80: bool(false)
+--> http://:80: Invalid host (%s)
 
---> http://user@:80: bool(false)
+--> http://user@:80: Invalid host (%s)
 
---> http://user:pass@:80: bool(false)
+--> http://user:pass@:80: Invalid host (%s)
 
---> http://:: bool(false)
+--> http://:: Invalid host (%s)
 
---> http://@/: bool(false)
+--> http://@/: Invalid host (%s)
 
---> http://@:/: bool(false)
+--> http://@:/: Invalid host (%s)
 
---> http://:/: bool(false)
+--> http://:/: Invalid host (%s)
 
---> http://?: bool(false)
+--> http://?: Invalid host (%s)
 
---> http://#: bool(false)
+--> http://#: Invalid host (%s)
 
---> http://?:: bool(false)
+--> http://?:: Invalid host (%s)
 
---> http://:?: bool(false)
+--> http://:?: Invalid host (%s)
 
---> http://blah.com:123456: bool(false)
+--> http://blah.com:123456: Invalid port (%s)
 
---> http://blah.com:abcdef: bool(false)
+--> http://blah.com:abcdef: Invalid port (%s
+)
 Done

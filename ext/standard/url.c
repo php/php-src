@@ -203,10 +203,12 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 				    s += 2;
 				}
 			} else {
+				zend_value_error("Invalid port (%s)", port_buf);
 				php_url_free(ret);
 				return NULL;
 			}
 		} else if (p == pp && pp == ue) {
+			zend_value_error("Invalid path (%s)", str);
 			php_url_free(ret);
 			return NULL;
 		} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
@@ -254,6 +256,7 @@ parse_host:
 		if (!ret->port) {
 			p++;
 			if (e-p > 5) { /* port cannot be longer then 5 characters */
+				zend_value_error("Invalid port (%s)", p);
 				php_url_free(ret);
 				return NULL;
 			} else if (e - p > 0) {
@@ -266,6 +269,7 @@ parse_host:
 					*has_port = 1;
 					ret->port = (unsigned short)port;
 				} else {
+					zend_value_error("Invalid port (%s)", port_buf);
 					php_url_free(ret);
 					return NULL;
 				}
@@ -278,6 +282,7 @@ parse_host:
 
 	/* check if we have a valid host, if we don't reject the string as url */
 	if ((p-s) < 1) {
+		zend_value_error("Invalid host (%s)", s);
 		php_url_free(ret);
 		return NULL;
 	}
