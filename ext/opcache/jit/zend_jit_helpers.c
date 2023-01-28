@@ -27,6 +27,11 @@ static ZEND_COLD void undef_result_after_exception(void) {
 	}
 }
 
+static ZEND_COLD void zend_jit_illegal_empty_or_isset_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s in isset or empty", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
 static ZEND_COLD void zend_jit_illegal_offset(zval *offset)
 {
 	zend_type_error("Cannot access offset of type %s on array", zend_get_type_by_const(Z_TYPE_P(offset)));
@@ -732,7 +737,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			hval = 1;
 			goto num_index;
 		default:
-			zend_type_error("Illegal offset type in isset or empty");
+			zend_jit_illegal_empty_or_isset_offset(dim);
 			return 0;
 	}
 

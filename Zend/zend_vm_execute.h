@@ -25152,7 +25152,7 @@ num_index_dim:
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
-				zend_type_error("Illegal offset type in unset");
+				zend_illegal_unset_offset(offset);
 			}
 			break;
 		} else if (Z_ISREF_P(container)) {
@@ -27560,7 +27560,7 @@ num_index_dim:
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
-				zend_type_error("Illegal offset type in unset");
+				zend_illegal_unset_offset(offset);
 			}
 			break;
 		} else if (Z_ISREF_P(container)) {
@@ -31836,7 +31836,7 @@ num_index_dim:
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
-				zend_type_error("Illegal offset type in unset");
+				zend_illegal_unset_offset(offset);
 			}
 			break;
 		} else if (Z_ISREF_P(container)) {
@@ -43328,7 +43328,7 @@ num_index_dim:
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
-				zend_type_error("Illegal offset type in unset");
+				zend_illegal_unset_offset(offset);
 			}
 			break;
 		} else if (Z_ISREF_P(container)) {
@@ -46928,7 +46928,7 @@ num_index_dim:
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
-				zend_type_error("Illegal offset type in unset");
+				zend_illegal_unset_offset(offset);
 			}
 			break;
 		} else if (Z_ISREF_P(container)) {
@@ -52321,7 +52321,7 @@ num_index_dim:
 				key = ZSTR_EMPTY_ALLOC();
 				goto str_index_dim;
 			} else {
-				zend_type_error("Illegal offset type in unset");
+				zend_illegal_unset_offset(offset);
 			}
 			break;
 		} else if (Z_ISREF_P(container)) {

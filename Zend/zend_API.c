@@ -2046,6 +2046,11 @@ ZEND_API zend_result add_next_index_reference(zval *arg, zend_reference *ref) /*
 }
 /* }}} */
 
+ZEND_API void zend_illegal_array_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on array", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
 ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 {
 	zval *result;
@@ -2074,7 +2079,7 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			result = zend_hash_index_update(ht, zend_dval_to_lval_safe(Z_DVAL_P(key)), value);
 			break;
 		default:
-			zend_type_error("Illegal offset type");
+			zend_illegal_array_offset(key);
 			result = NULL;
 	}
 
