@@ -141,6 +141,9 @@ PHP 8.3 UPGRADE NOTES
   . IP_PMTUDISC_INTERFACE (Linux only).
   . IP_PMTUDISC_OMIT (Linux only).
   . AF_DIVERT (FreeBSD only).
+  . SOL_UDPLITE.
+  . UDPLITE_RECV_CSCOV.
+  . UDPLITE_SEND_CSCOV.
 
 ========================================
 11. Changes to INI File Handling

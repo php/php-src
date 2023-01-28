@@ -1525,6 +1525,13 @@ const SOL_TCP = UNKNOWN;
  * @cvalue IPPROTO_UDP
  */
 const SOL_UDP = UNKNOWN;
+#ifdef IPPROTO_UDPLITE
+/**
+ * @var int
+ * @cvalue IPPROTO_UDPLITE
+ */
+const SOL_UDPLITE = UNKNOWN;
+#endif
 
 #if HAVE_IPV6
 /**
@@ -1768,6 +1775,20 @@ const IP_PMTUDISC_INTERFACE = UNKNOWN;
  * @cvalue IP_PMTUDISC_OMIT
  */
 const IP_PMTUDISC_OMIT = UNKNOWN;
+#endif
+#if defined(UDPLITE_SEND_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_SEND_CSCOV
+ */
+const UDPLITE_SEND_CSCOV = UNKNOWN;
+#endif
+#if defined(UDPLITE_RECV_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_RECV_CSCOV
+ */
+const UDPLITE_RECV_CSCOV = UNKNOWN;
 #endif
 
 /**

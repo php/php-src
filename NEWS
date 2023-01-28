@@ -98,6 +98,8 @@ PHP                                                                        NEWS
     ACK delays. (David Carlier)
   . Added DONTFRAGMENT support for path MTU discovery purpose. (David Carlier)
   . Added AF_DIVERT for raw socket for divert ports. (David Carlier)
+  . Added SOL_UPDLITE, UDPLITE_RECV_CSCOV and UDPLITE_SEND_CSCOV for updlite
+    protocol support. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
