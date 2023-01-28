@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed overflow check in OnUpdateMemoryConsumption. (nielsdos)
   . Fixed bug GH-9916 (Entering shutdown sequence with a fiber suspended in a
     Generator emits an unavoidable fatal error or crashes). (Arnaud)
+  . Fixed bug GH-10437 (Segfault/assertion when using fibers in shutdown
+    function after bailout). (trowski)
 
 - FFI:
   . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
