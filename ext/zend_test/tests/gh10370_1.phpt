@@ -21,7 +21,7 @@ var_dump(sha1_file(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370' . DIRECTORY_SEPARAT
 ?>
 --EXPECT--
 bool(true)
-string(40) "34e163be8e43c5631d8b92e9c43ab0bf0fa62b9c"
+string(40) "a723ae4ec7eababff73ca961a771b794be6388d2"
 --CLEAN--
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370' . DIRECTORY_SEPARATOR . 'testfile');

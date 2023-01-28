@@ -22,8 +22,8 @@ var_dump(sha1_file(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370.tar'));
 var_dump(sha1_file(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370_out.tar'));
 ?>
 --EXPECT--
-string(40) "04929d1dee68551c74f5c9809691040d16ba854b"
-string(40) "04929d1dee68551c74f5c9809691040d16ba854b"
+string(40) "edcad8cd6c276f5e318c826ad77a5604d6a6e93d"
+string(40) "edcad8cd6c276f5e318c826ad77a5604d6a6e93d"
 --CLEAN--
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370_out.tar');
