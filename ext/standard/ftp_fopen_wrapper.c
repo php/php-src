@@ -133,7 +133,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	char *transport;
 	int transport_len;
 
-	resource = php_url_parse(path);
+	resource = php_url_parse_ex(path, strlen(path));
 	if (resource == NULL || resource->path == NULL) {
 		if (resource && presource) {
 			*presource = resource;
@@ -949,8 +949,8 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	int result;
 	char tmp_line[512];
 
-	resource_from = php_url_parse(url_from);
-	resource_to = php_url_parse(url_to);
+	resource_from = php_url_parse_ex(url_from, strlen(url_from));
+	resource_to = php_url_parse_ex(url_to, strlen(url_to));
 	/* Must be same scheme (ftp/ftp or ftps/ftps), same host, and same port
 		(or a 21/0 0/21 combination which is also "same")
 	   Also require paths to/from */

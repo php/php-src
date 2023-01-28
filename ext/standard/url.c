@@ -103,6 +103,11 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
  */
 PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port)
 {
+	return php_url_parse_ex3(str, length, false, has_port);
+}
+
+PHPAPI php_url *php_url_parse_ex3(char const *str, size_t length, bool strict, bool *has_port)
+{
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char const *s, *e, *p, *pp, *ue;
@@ -203,12 +208,16 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 				    s += 2;
 				}
 			} else {
-				zend_value_error("Invalid port (%s)", port_buf);
+				if (strict) {
+					zend_value_error("Invalid port (%s)", port_buf);
+				}
 				php_url_free(ret);
 				return NULL;
 			}
 		} else if (p == pp && pp == ue) {
-			zend_value_error("Invalid path (%s)", str);
+				if (strict) {
+					zend_value_error("Invalid path (%s)", str);
+				}
 			php_url_free(ret);
 			return NULL;
 		} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
@@ -256,7 +265,9 @@ parse_host:
 		if (!ret->port) {
 			p++;
 			if (e-p > 5) { /* port cannot be longer then 5 characters */
-				zend_value_error("Invalid port (%s)", p);
+				if (strict) {
+					zend_value_error("Invalid port (%s)", p);
+				}
 				php_url_free(ret);
 				return NULL;
 			} else if (e - p > 0) {
@@ -269,7 +280,9 @@ parse_host:
 					*has_port = 1;
 					ret->port = (unsigned short)port;
 				} else {
-					zend_value_error("Invalid port (%s)", port_buf);
+				        if (strict) {
+						zend_value_error("Invalid port (%s)", port_buf);
+					}
 					php_url_free(ret);
 					return NULL;
 				}
@@ -282,7 +295,9 @@ parse_host:
 
 	/* check if we have a valid host, if we don't reject the string as url */
 	if ((p-s) < 1) {
-		zend_value_error("Invalid host (%s)", s);
+		if (strict) {
+			zend_value_error("Invalid host (%s)", s);
+		}
 		php_url_free(ret);
 		return NULL;
 	}
@@ -340,18 +355,23 @@ PHP_FUNCTION(parse_url)
 	php_url *resource;
 	zend_long key = -1;
 	zval tmp;
-	bool has_port;
+	bool has_port, strict = true;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(key)
+		Z_PARAM_BOOL(strict)
 	ZEND_PARSE_PARAMETERS_END();
 
-	resource = php_url_parse_ex2(str, str_len, &has_port);
+	resource = php_url_parse_ex3(str, str_len, strict, &has_port);
 	if (resource == NULL) {
 		/* @todo Find a method to determine why php_url_parse_ex() failed */
-		RETURN_FALSE;
+		if (strict) {
+			RETURN_THROWS();
+		} else {
+			RETURN_FALSE;
+		}
 	}
 
 	if (key > -1) {
