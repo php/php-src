@@ -14,6 +14,7 @@ posix
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 if (posix_geteuid() !== 0) die('skip Test needs root user');
+if (getenv('SKIP_ASAN')) die('xfail Leaks memory with ASAN');
 ?>
 --FILE--
 <?php
