@@ -1887,7 +1887,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 
 ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-    zval *orig_op1 = op1;
+	zval *orig_op1 = op1;
 	zval op1_copy, op2_copy;
 
 	ZVAL_UNDEF(&op1_copy);
@@ -1955,6 +1955,11 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 		size_t op2_len = Z_STRLEN_P(op2);
 		size_t result_len = op1_len + op2_len;
 		zend_string *result_str;
+		uint32_t flags = 0;
+
+		if (ZSTR_IS_VALID_UTF8(Z_STR_P(op1)) && ZSTR_IS_VALID_UTF8(Z_STR_P(op2))) {
+			flags = IS_STR_VALID_UTF8;
+		}
 
 		if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 			zend_throw_error(NULL, "String size overflow");
@@ -1976,6 +1981,7 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 				i_zval_ptr_dtor(result);
 			}
 		}
+		GC_ADD_FLAGS(result_str, flags);
 
 		/* This has to happen first to account for the cases where result == op1 == op2 and
 		 * the realloc is done. In this case this line will also update Z_STRVAL_P(op2) to

@@ -47,8 +47,17 @@ $s = "f" . "o";
 var_dump($s);
 var_dump(zend_test_is_string_marked_as_valid_utf8($s));
 
+// The "foo" string matches with a "Foo" class which is registered by the zend_test extension.
+// That class name does not have the "valid UTF-8" flag because class names in general
+// don't have to be UTF-8. As the "foo" string here goes through the interning logic,
+// the string gets replaced by the "foo" string from the class, which does
+// not have the "valid UTF-8" flag. We therefore choose a different test case: "fxo".
+// The previous "foo" test case works because it is not interned.
 echo "Multiple concatenation known valid UTF-8 in assignment:\n";
 $s = "f" . "o" . "o";
+var_dump($s);
+var_dump(zend_test_is_string_marked_as_valid_utf8($s));
+$s = "f" . "x" . "o";
 var_dump($s);
 var_dump(zend_test_is_string_marked_as_valid_utf8($s));
 
@@ -114,16 +123,18 @@ string(8) "2.0E+100"
 bool(true)
 Concatenation known valid UTF-8 strings in variables:
 string(2) "fo"
-bool(false)
+bool(true)
 Multiple concatenation known valid UTF-8 strings in variables:
 string(3) "foo"
-bool(false)
+bool(true)
 Concatenation known valid UTF-8 in assignment:
 string(2) "fo"
-bool(false)
+bool(true)
 Multiple concatenation known valid UTF-8 in assignment:
 string(3) "foo"
 bool(false)
+string(3) "fxo"
+bool(true)
 Concatenation known valid UTF-8 string with empty string in variables:
 bool(true)
 bool(true)
@@ -131,9 +142,9 @@ Concatenation known valid UTF-8 string with empty string in assignment:
 bool(true)
 bool(true)
 Concatenation in loop:
-bool(false)
+bool(true)
 Concatenation in loop (compound assignment):
-bool(false)
+bool(true)
 Concatenation of objects:
 string(2) "zz"
-bool(false)
+bool(true)

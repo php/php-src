@@ -191,6 +191,19 @@ ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_str
 	return zend_interned_string_ht_lookup(str, &interned_strings_permanent);
 }
 
+static zend_string* ZEND_FASTCALL zend_init_string_for_interning(zend_string *str, bool persistent) {
+	uint32_t flags = 0;
+	if (ZSTR_IS_VALID_UTF8(str)) {
+		flags = IS_STR_VALID_UTF8;
+	}
+	zend_ulong h = ZSTR_H(str);
+	zend_string_delref(str);
+	str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), persistent);
+	GC_ADD_FLAGS(str, flags);
+	ZSTR_H(str) = h;
+	return str;
+}
+
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str)
 {
 	zend_string *ret;
@@ -208,10 +221,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string
 
 	ZEND_ASSERT(GC_FLAGS(str) & GC_PERSISTENT);
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 1);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, true);
 	}
 
 	return zend_add_interned_string(str, &interned_strings_permanent, IS_STR_PERMANENT);
@@ -249,10 +259,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 	}
 #endif
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, false);
 	}
 
 	ret = zend_add_interned_string(str, &CG(interned_strings), 0);

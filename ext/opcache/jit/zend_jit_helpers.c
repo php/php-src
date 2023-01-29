@@ -1633,6 +1633,11 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 	size_t op2_len = Z_STRLEN_P(op2);
 	size_t result_len = op1_len + op2_len;
 	zend_string *result_str;
+	uint32_t flags = 0;
+
+	if (ZSTR_IS_VALID_UTF8(Z_STR_P(op1)) && ZSTR_IS_VALID_UTF8(Z_STR_P(op2))) {
+		flags = IS_STR_VALID_UTF8;
+	}
 
 	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
@@ -1656,6 +1661,7 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 		memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
 	} while(0);
 
+	GC_ADD_FLAGS(result_str, flags);
 	ZVAL_NEW_STR(op1, result_str);
 	memcpy(ZSTR_VAL(result_str) + op1_len, Z_STRVAL_P(op2), op2_len);
 	ZSTR_VAL(result_str)[result_len] = '\0';
@@ -1667,6 +1673,11 @@ static void ZEND_FASTCALL zend_jit_fast_concat_helper(zval *result, zval *op1, z
 	size_t op2_len = Z_STRLEN_P(op2);
 	size_t result_len = op1_len + op2_len;
 	zend_string *result_str;
+	uint32_t flags = 0;
+
+	if (ZSTR_IS_VALID_UTF8(Z_STR_P(op1)) && ZSTR_IS_VALID_UTF8(Z_STR_P(op2))) {
+		flags = IS_STR_VALID_UTF8;
+	}
 
 	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
@@ -1674,6 +1685,7 @@ static void ZEND_FASTCALL zend_jit_fast_concat_helper(zval *result, zval *op1, z
 	}
 
 	result_str = zend_string_alloc(result_len, 0);
+	GC_ADD_FLAGS(result_str, flags);
 	memcpy(ZSTR_VAL(result_str), Z_STRVAL_P(op1), op1_len);
 
 	ZVAL_NEW_STR(result, result_str);
@@ -1689,6 +1701,11 @@ static void ZEND_FASTCALL zend_jit_fast_concat_tmp_helper(zval *result, zval *op
 	size_t op2_len = Z_STRLEN_P(op2);
 	size_t result_len = op1_len + op2_len;
 	zend_string *result_str;
+	uint32_t flags = 0;
+
+	if (ZSTR_IS_VALID_UTF8(Z_STR_P(op1)) && ZSTR_IS_VALID_UTF8(Z_STR_P(op2))) {
+		flags = IS_STR_VALID_UTF8;
+	}
 
 	if (UNEXPECTED(op1_len > SIZE_MAX - op2_len)) {
 		zend_throw_error(NULL, "String size overflow");
@@ -1710,6 +1727,7 @@ static void ZEND_FASTCALL zend_jit_fast_concat_tmp_helper(zval *result, zval *op
 		memcpy(ZSTR_VAL(result_str), ZSTR_VAL(op1_str), op1_len);
 	} while (0);
 
+	GC_ADD_FLAGS(result_str, flags);
 	ZVAL_NEW_STR(result, result_str);
 
 	memcpy(ZSTR_VAL(result_str) + op1_len, Z_STRVAL_P(op2), op2_len);
