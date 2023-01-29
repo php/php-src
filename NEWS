@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
 
+- Phar:
+  . Fix incorrect check in phar tar parsing. (nielsdos)
+
 - Random:
   . Fix GH-10390 (Do not trust arc4random_buf() on glibc). (timwolla)
   . Fix GH-10292 (Made the default value of the first param of srand() and
