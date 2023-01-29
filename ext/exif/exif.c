@@ -3171,7 +3171,7 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 	dir_start = value_ptr + maker_note->offset;
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (intptr_t)dir_start-(intptr_t)info->offset_base+maker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (intptr_t)dir_start-(intptr_t)info->offset_base+maker_note->offset+displacement));
+	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process %s @0x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (intptr_t)dir_start-(intptr_t)info->offset_base+maker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (intptr_t)dir_start-(intptr_t)info->offset_base+maker_note->offset+displacement));
 #endif
 
 	ImageInfo->sections_found |= FOUND_MAKERNOTE;
@@ -3330,7 +3330,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 #ifdef EXIF_DEBUG
 	dump_data = exif_dump_data(&dump_free, format, components, ImageInfo->motorola_intel, value_ptr);
 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE,
-		"Process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s %s",
+		"Process tag(x%04X=%s,@0x%04X + x%04X(=%d)): %s%s %s",
 		tag, exif_get_tagname_debug(tag, tag_table), offset_val+displacement, byte_count, byte_count, (components>1)&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(format), dump_data);
 	if (dump_free) {
 		efree(dump_data);
@@ -4173,7 +4173,7 @@ static bool exif_process_IFD_in_TIFF_impl(image_info_type *ImageInfo, size_t dir
 						}
 						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
-						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s @x%04X", exif_get_sectionname(sub_section_index), entry_offset);
+						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s @0x%04X", exif_get_sectionname(sub_section_index), entry_offset);
 #endif
 						exif_process_IFD_in_TIFF(ImageInfo, entry_offset, sub_section_index);
 						if (section_index!=SECTION_THUMBNAIL && entry_tag==TAG_SUB_IFD) {
