@@ -820,6 +820,16 @@ ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool s
 	return zend_verify_weak_scalar_type_hint(type_mask, arg);
 }
 
+ZEND_COLD zend_never_inline void zend_verify_class_constant_type_error(const zend_class_constant *c, const zval *constant)
+{
+	zend_string *type_str = zend_type_to_string(c->type);
+
+	zend_type_error("Cannot assign %s to class constant %s::%s of type %s",
+		zend_zval_type_name(constant), ZSTR_VAL(c->ce->name), ZSTR_VAL(c->name), ZSTR_VAL(type_str));
+
+	zend_string_release(type_str);
+}
+
 ZEND_COLD zend_never_inline void zend_verify_property_type_error(const zend_property_info *info, const zval *property)
 {
 	zend_string *type_str;
@@ -1453,6 +1463,17 @@ static ZEND_COLD void zend_verify_missing_return_type(const zend_function *zf)
 {
 	/* VERIFY_RETURN_TYPE is not emitted for "void" functions, so this is always an error. */
 	zend_verify_return_error(zf, NULL);
+}
+
+zend_bool zend_never_inline zend_verify_class_constant_type(const zend_class_constant *c, zval *constant)
+{
+	if (zend_check_type((zend_type *) &c->type, constant, NULL, NULL, /* is_return_type */ 1, /* is_internal_arg */ 0)) {
+		return 1;
+	}
+
+	zend_verify_class_constant_type_error(c, constant);
+
+	return 0;
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(void)

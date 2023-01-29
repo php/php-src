@@ -609,6 +609,10 @@ class ReflectionClassConstant implements Reflector
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
     public function isEnumCase(): bool {}
+
+    public function hasType(): bool {}
+
+    public function getType(): ?ReflectionType {}
 }
 
 /** @not-serializable */

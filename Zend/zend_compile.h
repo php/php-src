@@ -404,9 +404,11 @@ typedef struct _zend_property_info {
 
 typedef struct _zend_class_constant {
 	zval value; /* flags are stored in u2 */
+	zend_string *name;
 	zend_string *doc_comment;
 	HashTable *attributes;
 	zend_class_entry *ce;
+	zend_type type;
 } zend_class_constant;
 
 #define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)

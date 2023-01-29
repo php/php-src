@@ -1359,6 +1359,15 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 }
 /* }}} */
 
+inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
+{
+	if (!ZEND_TYPE_IS_SET(child->type)) {
+		return INHERITANCE_ERROR;
+	}
+
+	return zend_perform_covariant_type_check(child->ce, child->type, parent->ce, parent->type);
+}
+
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
 	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
@@ -1366,9 +1375,14 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 
 	if (zv != NULL) {
 		c = (zend_class_constant*)Z_PTR_P(zv);
+
 		if (UNEXPECTED((ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PPP_MASK) > (ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PPP_MASK))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(ZEND_CLASS_CONST_FLAGS(parent_const)), ZSTR_VAL(parent_const->ce->name), (ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				ZSTR_VAL(ce->name), ZSTR_VAL(name),
+				zend_visibility_string(ZEND_CLASS_CONST_FLAGS(parent_const)),
+				ZSTR_VAL(parent_const->ce->name),
+				(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PUBLIC) ? "" : " or weaker"
+			);
 		}
 
 		if (UNEXPECTED((ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_FINAL))) {
@@ -1376,6 +1390,14 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 				E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name)
 			);
+		}
+
+		if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_const->type))) {
+			if (class_constant_types_compatible(parent_const, c) == INHERITANCE_ERROR) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s must be compatible with %s::%s",
+					ZSTR_VAL(c->ce->name), ZSTR_VAL(name), ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name)
+				);
+			}
 		}
 	} else if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
