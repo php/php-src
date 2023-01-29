@@ -1277,6 +1277,9 @@ typedef struct {
 	mn_offset_mode_t offset_mode;
 } maker_note_type;
 
+/* Some maker notes (e.g. DJI info tag) require custom parsing */
+#define REQUIRES_CUSTOM_PARSING NULL
+
 /* Remember to update PHP_MINFO if updated */
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON,     "Canon",                   NULL,								0,  0,  MN_ORDER_INTEL,    MN_OFFSET_NORMAL},
@@ -1287,6 +1290,7 @@ static const maker_note_type maker_note_array[] = {
   { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", "OLYMP\x00\x01\x00",				8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL,								0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_PANASONIC, "Panasonic",               "Panasonic\x00\x00\x00",			12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { REQUIRES_CUSTOM_PARSING, "DJI",                     "[ae_dbg_info:",					13, 13, MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
   { tag_table_VND_DJI,       "DJI",                     NULL,								0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_SONY,      "SONY",                    "SONY DSC \x00\x00\x00",			12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_SONY,      "SONY",                    NULL,								0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
@@ -3165,6 +3169,12 @@ static bool exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * val
 	if (value_len < 2 || maker_note->offset >= value_len - 1) {
 		/* Do not go past the value end */
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);
+		return true;
+	}
+
+	if (UNEXPECTED(maker_note->tag_table == REQUIRES_CUSTOM_PARSING)) {
+		/* Custom parsing required, which is not implemented at this point
+		 * Return true so that other metadata can still be parsed. */
 		return true;
 	}
 
