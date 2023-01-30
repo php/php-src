@@ -259,6 +259,7 @@ static bool zend_is_commutative(uint8_t opcode)
 		opcode == ZEND_BW_AND ||
 		opcode == ZEND_BW_XOR;
 }
+#endif
 
 static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
                                               zend_ssa_range *op1_range,
@@ -338,7 +339,6 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 	}
 	return 0;
 }
-#endif
 
 static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {

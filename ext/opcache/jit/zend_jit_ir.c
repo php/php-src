@@ -6923,8 +6923,6 @@ static int zend_jit_cmp_long_long(zend_jit_ctx   *jit,
 {
 	ir_op op;
 	ir_ref op1, op2, ref;
-#if 0
-//???
 	bool result;
 
 	if (zend_jit_is_constant_cmp_long_long(opline, op1_range, op1_addr, op2_range, op2_addr, &result)) {
@@ -6935,27 +6933,18 @@ static int zend_jit_cmp_long_long(zend_jit_ctx   *jit,
 				ir_const_u32(&jit->ctx, result ? IS_TRUE : IS_FALSE));
 		}
 		if (smart_branch_opcode && !exit_addr) {
-			ZEND_ASSERT(jit->b >= 0);
-			jit->bb_end_ref[jit->b] = zend_jit_end(jit);
-			jit->control = IR_UNUSED;
-			jit->b = -1;
 			if (smart_branch_opcode == ZEND_JMPZ ||
 			    smart_branch_opcode == ZEND_JMPZ_EX) {
-				if (!result) {
-					| jmp => target_label
-				}
+				zend_jit_if_ex(jit, IR_TRUE, result ? target_label2 : target_label);
 			} else if (smart_branch_opcode == ZEND_JMPNZ ||
 			           smart_branch_opcode == ZEND_JMPNZ_EX) {
-				if (result) {
-					| jmp => target_label
-				}
+				zend_jit_if_ex(jit, IR_TRUE, result ? target_label : target_label2);
 			} else {
 				ZEND_UNREACHABLE();
 			}
 		}
 		return 1;
 	}
-#endif
 
     op = zend_jit_cmp_op(opline, smart_branch_opcode, exit_addr);
 	op1 = zend_jit_zval_lval(jit, op1_addr);
