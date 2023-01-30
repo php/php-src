@@ -2,7 +2,7 @@
 #define PHP_SOCKADR_CONV_H
 
 #include <php_network.h>
-#include "php_sockets.h" /* php_socket */
+#include "php_sockets.h"
 
 #ifndef PHP_WIN32
 # include <netinet/in.h>

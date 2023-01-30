@@ -18,7 +18,7 @@
 #define PHP_HTTP_H
 
 #include "php.h"
-#include "zend_types.h" /* for zend_string */
+#include "zend_types.h"
 #include "zend_smart_str.h"
 
 PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,

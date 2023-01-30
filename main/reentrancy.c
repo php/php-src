@@ -22,7 +22,7 @@
 #endif
 
 #include "php_reentrancy.h"
-#include "ext/random/php_random.h"                   /* for PHP_RAND_MAX */
+#include "ext/random/php_random.h"
 
 enum {
 	LOCALTIME_R,

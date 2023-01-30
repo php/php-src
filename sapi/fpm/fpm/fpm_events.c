@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 #include <errno.h>
-#include <stdlib.h> /* for putenv */
+#include <stdlib.h>
 #include <string.h>
 
 #include <php.h>

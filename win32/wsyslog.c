@@ -50,7 +50,7 @@
  *  Lift a leg, Yunie.  Luv ya forever!!!!
  */
 
-#include "php.h"				/*php specific */
+#include "php.h"
 #include "syslog.h"
 #include <stdio.h>
 #include <fcntl.h>

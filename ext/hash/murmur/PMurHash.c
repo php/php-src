@@ -70,7 +70,7 @@ on big endian machines, or a byte-by-byte read if the endianess is unknown.
 /* Find best way to ROTL */
 #if defined(_MSC_VER)
   #define FORCE_INLINE  static __forceinline
-  #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
+  #include <stdlib.h>
   #define ROTL32(x,y)  _rotl(x,y)
 #else
   #define FORCE_INLINE static inline __attribute__((always_inline))

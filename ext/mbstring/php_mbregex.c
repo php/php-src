@@ -27,7 +27,7 @@
 #include "mbstring.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
 
-#include "php_onig_compat.h" /* must come prior to the oniguruma header */
+#include "php_onig_compat.h"
 #include <oniguruma.h>
 #undef UChar
 

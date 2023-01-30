@@ -27,10 +27,10 @@
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/file.h" /* needed for context stuff */
+#include "ext/standard/file.h"
 #include "php_fileinfo.h"
 #include "fileinfo_arginfo.h"
-#include "fopen_wrappers.h" /* needed for is_url */
+#include "fopen_wrappers.h"
 #include "Zend/zend_exceptions.h"
 
 /* {{{ macros and type definitions */

@@ -6,7 +6,7 @@
 #include <TSRM.h>
 
 #include "php.h"
-#include "build-defs.h" /* for PHP_ defines */
+#include "build-defs.h"
 #include "fpm/fpm_conf.h"
 
 #define FPM_PHP_INI_TO_EXPAND \

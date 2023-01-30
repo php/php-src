@@ -6,7 +6,7 @@
 #include <alloca.h>
 #endif
 #include <sys/types.h>
-#include <sys/stat.h> /* for chmod(2) */
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

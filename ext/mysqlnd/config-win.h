@@ -8,7 +8,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 #include <sys/locking.h>
 #include <windows.h>
-#include <math.h>			/* Because of rint() */
+#include <math.h>
 #include <fcntl.h>
 #include <io.h>
 #include <malloc.h>

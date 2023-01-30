@@ -26,8 +26,8 @@
 #include "php_network.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
-#include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
-#include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
+#include "ext/standard/basic_functions.h"
+#include "ext/standard/php_string.h"
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"

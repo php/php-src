@@ -2,7 +2,7 @@
 
 #include "fpm_config.h"
 
-#include <stdlib.h> /* for exit */
+#include <stdlib.h>
 
 #include "fpm.h"
 #include "fpm_children.h"

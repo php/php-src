@@ -4,7 +4,7 @@
 #endif
 #include "sockaddr_conv.h"
 #include "conversions.h"
-#include "sendrecvmsg.h" /* for ancillary registry */
+#include "sendrecvmsg.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
 #endif

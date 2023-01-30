@@ -3,7 +3,7 @@
 #include "fpm_config.h"
 
 #ifdef HAVE_CLOCK_GETTIME
-#include <time.h> /* for CLOCK_MONOTONIC */
+#include <time.h>
 #endif
 
 #include "fpm_clock.h"

@@ -339,7 +339,7 @@ XXH_PUBLIC_API unsigned XXH_versionNumber (void);
 /* ****************************
 *  Common basic types
 ******************************/
-#include <stddef.h>   /* size_t */
+#include <stddef.h>
 typedef enum { XXH_OK=0, XXH_ERROR } XXH_errorcode;
 
 
@@ -1482,7 +1482,7 @@ static void* XXH_memcpy(void* dest, const void* src, size_t size)
     return memcpy(dest,src,size);
 }
 
-#include <limits.h>   /* ULLONG_MAX */
+#include <limits.h>
 
 
 /* *************************************
@@ -5445,7 +5445,7 @@ XXH_PUBLIC_API XXH128_hash_t XXH3_128bits_digest (const XXH3_state_t* state)
 
 /* 128-bit utility functions */
 
-#include <string.h>   /* memcmp, memcpy */
+#include <string.h>
 
 /* return : 1 is equal, 0 if different */
 /*! @ingroup xxh3_family */

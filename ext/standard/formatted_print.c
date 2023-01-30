@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#include <math.h>				/* modf() */
+#include <math.h>
 #include "php.h"
 #include "ext/standard/head.h"
 #include "php_string.h"

@@ -62,7 +62,7 @@ on big endian machines.
 /* Find best way to ROTL */
 #if defined(_MSC_VER)
   #define FORCE_INLINE  static __forceinline
-  #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
+  #include <stdlib.h>
   #define ROTL32(x,y)  _rotl(x,y)
   #define ROTL64(x,y)  _rotl64(x,y)
   #define BIG_CONSTANT(x) (x)

@@ -27,7 +27,7 @@
 #include "SAPI.h"
 #include <time.h>
 #include "php_main.h"
-#include "zend_globals.h"		/* needs ELS */
+#include "zend_globals.h"
 #include "zend_extensions.h"
 #include "zend_highlight.h"
 #ifdef HAVE_SYS_UTSNAME_H

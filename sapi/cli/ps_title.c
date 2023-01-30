@@ -51,10 +51,10 @@ extern char** environ;
 #include <stdlib.h>
 
 #ifdef HAVE_SYS_PSTAT_H
-#include <sys/pstat.h> /* for HP-UX */
+#include <sys/pstat.h>
 #endif
 #ifdef HAVE_PS_STRINGS
-#include <machine/vmparam.h> /* for old BSD */
+#include <machine/vmparam.h>
 #include <sys/exec.h>
 #endif
 #if defined(DARWIN)

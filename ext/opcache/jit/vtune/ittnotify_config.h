@@ -395,7 +395,7 @@ typedef struct ___itt_thread_info
     struct ___itt_thread_info* next;
 } __itt_thread_info;
 
-#include "ittnotify_types.h" /* For __itt_group_id definition */
+#include "ittnotify_types.h"
 
 typedef struct ___itt_api_info_20101001
 {
