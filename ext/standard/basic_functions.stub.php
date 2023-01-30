@@ -2650,7 +2650,7 @@ function fopen(string $filename, string $mode, bool $use_include_path = false, $
 function fscanf($stream, string $format, mixed &...$vars): array|int|false|null {}
 
 /** @param resource $stream */
-function fpassthru($stream): int {}
+function fpassthru($stream, ?int $length = null): int {}
 
 /** @param resource $stream */
 function ftruncate($stream, int $size): bool {}

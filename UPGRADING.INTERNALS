@@ -30,6 +30,11 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   for C99 features have been removed and therefore macro definitions
   from php_config.h have disappeared.  Do not use those feature
   macros.
+* A new _php_stream_passthru_with_length() function has been added that takes
+  a stream and a length parameter. This length parameter indicates how many
+  bytes at most may be written to the output. _php_stream_passthru() is now
+  a wrapper around _php_stream_passthru_with_length() and still behaves the
+  same as in the old implementation.
 
 ========================
 2. Build system changes

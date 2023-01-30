@@ -12,6 +12,13 @@ $f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 var_dump(gzpassthru($h));
 var_dump(gzpassthru($h));
+rewind($h);
+$result = gzpassthru($h, 10);
+echo "\n";
+var_dump($result);
+$result = gzpassthru($h);
+echo "\n";
+var_dump($result);
 gzclose($h);
 
 ?>
@@ -24,3 +31,13 @@ as it turns around
 and I know that it descends down on me
 int(176)
 int(0)
+When you'r
+int(10)
+e taught through feelings
+Destiny flying high above
+all I know is that you can realize it
+Destiny who cares
+as it turns around
+and I know that it descends down on me
+
+int(166)

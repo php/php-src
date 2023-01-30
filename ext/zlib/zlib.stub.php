@@ -244,7 +244,7 @@ function gzgetc($stream): string|false {}
  * @param resource $stream
  * @alias fpassthru
  */
-function gzpassthru($stream): int {}
+function gzpassthru($stream, ?int $length = null): int {}
 
 /**
  * @param resource $stream

@@ -1253,15 +1253,23 @@ PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval *res;
 	size_t size;
+	zend_long length;
+	bool length_is_null = true;
 	php_stream *stream;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(res)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (length_is_null) {
+		length = PHP_STREAM_COPY_ALL;
+	}
 
 	PHP_STREAM_FROM_ZVAL(stream, res);
 
-	size = php_stream_passthru(stream);
+	size = php_stream_passthru_with_length(stream, length);
 	RETURN_LONG(size);
 }
 /* }}} */

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7e67d07b6079c39a091e91dfddfbe7170067955e */
+ * Stub hash: 5d814a046c92e9a4f104e15f17a5203d0c814828 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -219,7 +219,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFileObject_fgetc arginfo_class_SplFileInfo_getType
 
-#define arginfo_class_SplFileObject_fpassthru arginfo_class_FilesystemIterator_getFlags
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_fpassthru, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fscanf, 0, 1, MAY_BE_ARRAY|MAY_BE_LONG|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)

@@ -8,7 +8,7 @@ class bug8318 extends \SplFileObject
     {
     }
 
-    public function fpassthru(): int
+    public function fpassthru(?int $length = null): int
     {
         return 0;
     }

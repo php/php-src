@@ -1419,17 +1419,22 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize)
 	return php_stream_set_option(stream, PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SET_SIZE, &newsize);
 }
 
-PHPAPI ssize_t _php_stream_passthru(php_stream * stream STREAMS_DC)
+PHPAPI ssize_t _php_stream_passthru_with_length(php_stream *stream, size_t length STREAMS_DC)
 {
 	size_t bcount = 0;
 	char buf[8192];
 	ssize_t b;
 
+	if (UNEXPECTED(length == 0)) {
+		/* Prevent misinterpretation issue with PHP_STREAM_MMAP_ALL */
+		return 0;
+	}
+
 	if (php_stream_mmap_possible(stream)) {
 		char *p;
 		size_t mapped;
 
-		p = php_stream_mmap_range(stream, php_stream_tell(stream), PHP_STREAM_MMAP_ALL, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
+		p = php_stream_mmap_range(stream, php_stream_tell(stream), length == PHP_STREAM_COPY_ALL ? PHP_STREAM_MMAP_ALL : length, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
 			do {
@@ -1445,7 +1450,7 @@ PHPAPI ssize_t _php_stream_passthru(php_stream * stream STREAMS_DC)
 		}
 	}
 
-	while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+	while ((b = php_stream_read(stream, buf, MIN(length - bcount, sizeof(buf)))) > 0) {
 		PHPWRITE(buf, b);
 		bcount += b;
 	}
@@ -1457,6 +1462,10 @@ PHPAPI ssize_t _php_stream_passthru(php_stream * stream STREAMS_DC)
 	return bcount;
 }
 
+PHPAPI ssize_t _php_stream_passthru(php_stream * stream STREAMS_DC)
+{
+	return _php_stream_passthru_with_length(stream, PHP_STREAM_COPY_ALL STREAMS_CC);
+}
 
 PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC)
 {

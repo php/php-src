@@ -480,8 +480,10 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 #define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC)
 
 /* output all data from a stream */
-PHPAPI ssize_t _php_stream_passthru(php_stream * src STREAMS_DC);
+PHPAPI ssize_t _php_stream_passthru(php_stream *src STREAMS_DC);
+PHPAPI ssize_t _php_stream_passthru_with_length(php_stream *src, size_t length STREAMS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC)
+#define php_stream_passthru_with_length(stream, length)	_php_stream_passthru_with_length((stream), (length) STREAMS_CC)
 END_EXTERN_C()
 
 #include "streams/php_stream_transport.h"

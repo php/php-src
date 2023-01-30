@@ -64,6 +64,11 @@ PHP 8.3 UPGRADE NOTES
     casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
     MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
 
+- Spl:
+  . SplFileObject::fpassthru now has an optional $length parameter which allows the user
+    to specify how many bytes at most may be copied to the output. The behaviour of this
+    parameter is identical to how the $length parameter of stream_copy_to_stream behaves.
+
 - Standard:
   . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
@@ -73,6 +78,9 @@ PHP 8.3 UPGRADE NOTES
   . strtok() raises a warning in the case token is not provided when starting tokenization.
   . password_hash() will now chain the underlying Random\RandomException
     as the ValueError’s $previous Exception when salt generation fails.
+  . fpassthru and gzpassthru now has an optional $length parameter which allows the user
+    to specify how many bytes at most may be copied to the output. The behaviour of this
+    parameter is identical to how the $length parameter of stream_copy_to_stream behaves.
 
 ========================================
 6. New Functions

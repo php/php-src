@@ -2552,15 +2552,23 @@ PHP_METHOD(SplFileObject, fgetc)
 /* {{{ Output all remaining data from a file pointer */
 PHP_METHOD(SplFileObject, fpassthru)
 {
+	zend_long length;
+	bool length_is_null = true;
+
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (length_is_null) {
+		length = PHP_STREAM_COPY_ALL;
 	}
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
+	RETURN_LONG(php_stream_passthru_with_length(intern->u.file.stream, length));
 } /* }}} */
 
 /* {{{ Implements a mostly ANSI compatible fscanf() */
