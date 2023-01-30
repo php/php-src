@@ -225,7 +225,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 	/* Generator is running in a suspended fiber.
 	 * Will be dtor during fiber dtor */
-	if (generator->flags & ZEND_GENERATOR_IN_FIBER) {
+	if (zend_generator_get_current(generator)->flags & ZEND_GENERATOR_IN_FIBER) {
 		/* Prevent finally blocks from yielding */
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 		return;
