@@ -1431,7 +1431,14 @@ static int zend_jit_set_ip(zend_jit_ctx *jit, const zend_op *target)
 
 static int zend_jit_set_ip_ex(zend_jit_ctx *jit, const zend_op *target, bool set_ip_reg)
 {
-	//???
+	if (!GCC_GLOBAL_REGS && set_ip_reg && !jit->last_valid_opline) {
+		/* Optimization to avoid duplicate constant load */
+		zend_jit_store(jit,
+			zend_jit_ex_opline_addr(jit),
+			ir_emit2(&jit->ctx, IR_OPT(IR_COPY, IR_ADDR),
+				zend_jit_const_addr(jit, (uintptr_t)target), 1));
+		return 1;
+	}
 	return zend_jit_set_ip(jit, target);
 }
 
