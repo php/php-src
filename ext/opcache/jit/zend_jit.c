@@ -4486,6 +4486,8 @@ ZEND_EXT_API void zend_jit_deactivate(void)
 
 		zend_jit_profile_counter = 0;
 	}
+
+	zend_jit_trace_free_caches();
 }
 
 static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
