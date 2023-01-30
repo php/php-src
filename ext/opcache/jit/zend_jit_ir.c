@@ -510,6 +510,13 @@ static ir_ref zend_jit_rload(zend_jit_ctx *jit, ir_type type, ir_ref reg)
 	return jit->control = ir_emit2(&jit->ctx, IR_OPT(IR_RLOAD, type), jit->control, reg);
 }
 
+static ir_ref zend_jit_rload_mem(zend_jit_ctx *jit, ir_type type, ir_ref reg)
+{
+	ZEND_ASSERT(jit->control);
+	/* op3 is used as a flag that value already stored in memory */
+	return jit->control = ir_emit3(&jit->ctx, IR_OPT(IR_RLOAD, type), jit->control, reg, 1);
+}
+
 static void zend_jit_rstore(zend_jit_ctx *jit, ir_ref val, ir_ref reg)
 {
 	ZEND_ASSERT(jit->control);
@@ -1035,14 +1042,17 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 			ZEND_ASSERT(var < t->exit_info[exit_point].stack_size);
 			if (t->stack_map[t->exit_info[exit_point].stack_offset + var].flags == ZREG_ZVAL_COPY) {
 				ZEND_ASSERT(reg != ZREG_NONE);
-				t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = reg & 0x3f; // TODO: remove magic mask ???
+				t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = IR_REG_NUM(reg);
 			} else {
 				ZEND_ASSERT(t->stack_map[t->exit_info[exit_point].stack_offset + var].type == IS_LONG ||
 					t->stack_map[t->exit_info[exit_point].stack_offset + var].type == IS_DOUBLE);
 
 				if (ref > 0) {
 					if (reg != ZREG_NONE) {
-						t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = reg & 0x3f; // TODO: remove magic mask ???
+						t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = IR_REG_NUM(reg);
+						if (reg & IR_REG_SPILL_LOAD) {
+							t->stack_map[t->exit_info[exit_point].stack_offset + var].flags |= ZREG_LOAD;
+						}
 					} else {
 						t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
 					}
@@ -17530,6 +17540,8 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 				}
 				if (ssa && ssa->vars[i].no_val) {
 					/* pass */
+				} else if (STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE)) {
+					zend_jit_rload_mem(jit, type, reg);
 				} else {
 					zend_jit_rload(jit, type, reg);
 				}
