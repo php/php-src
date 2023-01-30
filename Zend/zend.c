@@ -825,14 +825,6 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 	zend_timer_init();
 }
 /* }}} */
-
-static void zend_thread_shutdown_handler(void) { /* {{{ */
-	zend_interned_strings_dtor();
-#ifdef ZEND_TIMERS
-	zend_timer_shutdown();
-#endif
-}
-/* }}} */
 #endif
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
@@ -1036,7 +1028,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
-	tsrm_set_shutdown_handler(zend_thread_shutdown_handler);
+	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
 }
 /* }}} */
