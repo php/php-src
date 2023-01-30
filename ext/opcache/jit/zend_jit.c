@@ -4436,9 +4436,6 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 		zend_jit_perf_jitdump_close();
 	}
 #endif
-	if (JIT_G(exit_counters)) {
-		free(JIT_G(exit_counters));
-	}
 }
 
 static void zend_jit_reset_counters(void)

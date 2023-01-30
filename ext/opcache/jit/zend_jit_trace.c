@@ -7890,11 +7890,9 @@ static void zend_jit_trace_reset_caches(void)
 
 static void zend_jit_trace_free_caches(void)
 {
-#ifdef ZTS
 	if (JIT_G(exit_counters)) {
 		free(JIT_G(exit_counters));
 	}
-#endif
 }
 
 static void zend_jit_trace_restart(void)
