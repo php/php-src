@@ -2537,12 +2537,26 @@ static zend_always_inline int _zend_update_type_info(
 				} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
 					/* The return value must also satisfy the property type */
 					if (prop_info) {
-						tmp &= zend_fetch_prop_type(script, prop_info, NULL);
+						t1 = zend_fetch_prop_type(script, prop_info, NULL);
+						if ((t1 & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_LONG
+						 && (tmp & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_DOUBLE) {
+							/* DOUBLE may be auto-converted to LONG */
+							tmp |= MAY_BE_LONG;
+							tmp &= ~MAY_BE_DOUBLE;
+						}
+						tmp &= t1;
 					}
 				} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 					/* The return value must also satisfy the property type */
 					if (prop_info) {
-						tmp &= zend_fetch_prop_type(script, prop_info, NULL);
+						t1 = zend_fetch_prop_type(script, prop_info, NULL);
+						if ((t1 & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_LONG
+						 && (tmp & (MAY_BE_LONG|MAY_BE_DOUBLE)) == MAY_BE_DOUBLE) {
+							/* DOUBLE may be auto-converted to LONG */
+							tmp |= MAY_BE_LONG;
+							tmp &= ~MAY_BE_DOUBLE;
+						}
+						tmp &= t1;
 					}
 				} else {
 					if (tmp & MAY_BE_REF) {
