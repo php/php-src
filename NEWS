@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.15
+02 Feb 2023, PHP 8.1.15
 
 - Apache:
   . Fixed bug GH-9949 (Partial content on incomplete POST request). (cmb)
