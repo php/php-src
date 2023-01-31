@@ -71,8 +71,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache.memory_consumption is set below the required 8MB.\n");
 		return FAILURE;
 	}
-	if (UNEXPECTED(memsize > ZEND_ULONG_MAX / (1024 * 1024))) {
-		*p = ZEND_ULONG_MAX;
+	if (UNEXPECTED(memsize > ZEND_LONG_MAX / (1024 * 1024))) {
+		*p = ZEND_LONG_MAX;
 	} else {
 		*p = memsize * (1024 * 1024);
 	}

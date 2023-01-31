@@ -280,11 +280,11 @@ ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int ha
 	return handle;
 }
 
-ZEND_API size_t zend_internal_run_time_cache_reserved_size() {
+ZEND_API size_t zend_internal_run_time_cache_reserved_size(void) {
 	return zend_op_array_extension_handles * sizeof(void *);
 }
 
-ZEND_API void zend_init_internal_run_time_cache() {
+ZEND_API void zend_init_internal_run_time_cache(void) {
 	size_t rt_size = zend_internal_run_time_cache_reserved_size();
 	if (rt_size) {
 		size_t functions = zend_hash_num_elements(CG(function_table));

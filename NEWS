@@ -6,6 +6,15 @@ PHP                                                                        NEWS
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
   . Fixed incorrect check condition in type inference. (nielsdos)
   . Fix incorrect check in zend_internal_call_should_throw(). (nielsdos)
+  . Fixed overflow check in OnUpdateMemoryConsumption. (nielsdos)
+  . Fixed bug GH-9916 (Entering shutdown sequence with a fiber suspended in a
+    Generator emits an unavoidable fatal error or crashes). (Arnaud)
+  . Fixed bug GH-10437 (Segfault/assertion when using fibers in shutdown
+    function after bailout). (trowski)
+
+- Date:
+  . Fix GH-10152 (Custom properties of Date's child classes are not
+    serialised). (Derick)
 
 - FFI:
   . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
@@ -15,6 +24,9 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
+
+- Phar:
+  . Fix incorrect check in phar tar parsing. (nielsdos)
 
 - Random:
   . Fix GH-10390 (Do not trust arc4random_buf() on glibc). (timwolla)
@@ -551,4 +563,3 @@ PHP                                                                        NEWS
   . On Windows, the Zip extension is now built as shared library (DLL) by
     default. (cmb)
   . Implement fseek for zip stream when possible with libzip 1.9.1. (Remi)
-

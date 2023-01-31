@@ -561,6 +561,7 @@ static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
 
 	/* Forward bailout into current fiber. */
 	if (UNEXPECTED(transfer.flags & ZEND_FIBER_TRANSFER_FLAG_BAILOUT)) {
+		EG(active_fiber) = NULL;
 		zend_bailout();
 	}
 
@@ -674,8 +675,10 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 			if (lastSymTable) {
 				zval *val;
 				ZEND_HASH_FOREACH_VAL(lastSymTable, val) {
-					ZEND_ASSERT(Z_TYPE_P(val) == IS_INDIRECT);
-					zend_get_gc_buffer_add_zval(buf, Z_INDIRECT_P(val));
+					if (EXPECTED(Z_TYPE_P(val) == IS_INDIRECT)) {
+						val = Z_INDIRECT_P(val);
+					}
+					zend_get_gc_buffer_add_zval(buf, val);
 				} ZEND_HASH_FOREACH_END();
 			}
 			lastSymTable = symTable;
