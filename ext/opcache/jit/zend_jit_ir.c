@@ -1194,7 +1194,7 @@ static ir_ref zend_jit_efree(zend_jit_ctx *jit, ir_ref ptr, size_t size, const z
 	return zend_jit_call_5(jit, IR_ADDR,
 		zend_jit_const_func_addr(jit, (uintptr_t)_efree, IR_CONST_FASTCALL_FUNC),
 		ptr,
-		op_array->filename ? zend_jit_const_addr(jit, (uintptr_t)op_array->filename->val) : IR_NULL,
+		op_array && op_array->filename ? zend_jit_const_addr(jit, (uintptr_t)op_array->filename->val) : IR_NULL,
 		ir_const_u32(&jit->ctx, opline ? opline->lineno : 0),
 		IR_NULL,
 		ir_const_u32(&jit->ctx, 0));
@@ -6480,60 +6480,14 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 				refcount = zend_jit_gc_delref(jit, ref);
 				if_not_zero = zend_jit_if(jit, refcount);
 				zend_jit_if_false(jit, if_not_zero);
+				// TODO: instead of dtor() call and ADDREF above, we may call efree() and move addref at "true" path ???
+				// zend_jit_efree(jit, ref, sizeof(zend_reference), NULL, NULL);
 				zend_jit_zval_dtor(jit, ref, val_info, opline);
 				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 				zend_jit_if_true(jit, if_not_zero);
 				zend_jit_array_add(end_inputs, zend_jit_end(jit));
 
 				zend_jit_if_false(jit, if_ref);
-
-#if 0
-//???
-				zend_jit_addr ref_addr;
-				zend_reg type_reg = tmp_reg;
-
-				|	IF_ZVAL_TYPE val_addr, IS_REFERENCE, >1
-				|.cold_code
-				|1:
-				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
-				|	GET_ZVAL_PTR r2, val_addr
-				|	GC_DELREF r2
-				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
-				ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R2, 8);
-				if (!res_addr) {
-					|	ZVAL_COPY_VALUE var_addr, var_info, ref_addr, val_info, type_reg, tmp_reg
-				} else {
-					|	ZVAL_COPY_VALUE_2 var_addr, var_info, res_addr, ref_addr, val_info, type_reg, tmp_reg
-				}
-				|	je >2
-				if (tmp_reg == ZREG_R0) {
-					|	IF_NOT_REFCOUNTED ah, >3
-				} else {
-					|	IF_NOT_FLAGS Rd(tmp_reg), (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT), >3
-				}
-				|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
-
-				if (!res_addr) {
-					|	GC_ADDREF Ra(tmp_reg)
-				} else {
-					|	add dword [Ra(tmp_reg)], 2
-				}
-				|	jmp >3
-				|2:
-				if (res_addr) {
-					if (tmp_reg == ZREG_R0) {
-						|	IF_NOT_REFCOUNTED ah, >2
-					} else {
-						|	IF_NOT_FLAGS Rd(tmp_reg), (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT), >2
-					}
-					|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
-					|	GC_ADDREF Ra(tmp_reg)
-					|2:
-				}
-				|	EFREE_REFERENCE r2
-				|	jmp >3
-				|.code
-#endif
 			}
 		}
 
