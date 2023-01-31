@@ -3223,7 +3223,7 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 	} else {
 #if defined(IR_TARGET_X86)
 		addr =  ir_fold2(&jit->ctx, IR_OPT(IR_BITCAST, IR_ADDR),
-			addr, IR_CONST_FASTCALL_FUNC), // Hack to use fastcall calling convention ???
+			addr, IR_CONST_FASTCALL_FUNC), // Hack to use fastcall calling convention
 #endif
 		ref = zend_jit_call_1(jit, IR_I32, addr, zend_jit_fp(jit));
 		zend_jit_guard(jit,
@@ -3355,10 +3355,11 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 		if (zend_jit_vm_kind == ZEND_VM_KIND_CALL) {
 			jit->ctx.flags |= IR_FUNCTION;
 			/* Stack must be 16 byte aligned */
+			/* TODO: select stack size ??? */
 #if defined(IR_TARGET_AARCH64)
-			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 15; /* TODO: reduce stack size ??? */
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 15;
 #else
-			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 7; /* TODO: reduce stack size ??? */
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 7;
 #endif
 			if (GCC_GLOBAL_REGS) {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
@@ -8158,32 +8159,6 @@ static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, 
 	zend_jit_if_false_cold(jit, if_def);
 	jit->control = ir_emit1(&jit->ctx, IR_TRAP, jit->control); // NIY ???
 
-#if 0 //???
-	if (flags & ZEND_JIT_EXIT_RESTORE_CALL) {
-		if (!zend_jit_save_call_chain(Dst, -1)) {
-			return 0;
-		}
-	}
-
-	ZEND_ASSERT(opline);
-
-	if ((opline-1)->opcode != ZEND_FETCH_CONSTANT
-	 && (opline-1)->opcode != ZEND_FETCH_LIST_R
-	 && ((opline-1)->op1_type & (IS_VAR|IS_TMP_VAR))
-	 && !(flags & ZEND_JIT_EXIT_FREE_OP1)) {
-		val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline-1)->op1.var);
-
-		|	IF_NOT_ZVAL_REFCOUNTED val_addr, >2
-		|	GET_ZVAL_PTR r0, val_addr
-		|	GC_ADDREF r0
-		|2:
-	}
-
-	|	LOAD_IP_ADDR (opline - 1)
-	|	jmp ->trace_escape
-	|1:
-#endif
-
 	zend_jit_load_ip_addr(jit, opline - 1);
 	zend_jit_ijmp(jit, zend_jit_stub_addr(jit, jit_stub_trace_escape));
 
@@ -8679,18 +8654,7 @@ static int zend_jit_stack_check(zend_jit_ctx *jit, const zend_op *opline, uint32
 
 static int zend_jit_free_trampoline(zend_jit_ctx *jit, int8_t func_reg)
 {
-ZEND_ASSERT(0 && "NIY");
-#if 0
-//???
-	ir_ref func_ref = zend_jit_deopt_rload(jit, IR_ADDR, func_reg);
-
-		// JIT: if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
-	|	test dword [r0 + offsetof(zend_function, common.fn_flags)], ZEND_ACC_CALL_VIA_TRAMPOLINE
-	|	jz >1
-	|	mov FCARG1a, r0
-	|	EXT_CALL zend_jit_free_trampoline_helper, r0
-	|1:
-#endif
+	ZEND_ASSERT(0 && "NIY");
 	return 1;
 }
 
@@ -10832,7 +10796,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				func_ref, offsetof(zend_internal_function, handler));
 #if defined(IR_TARGET_X86)
 			func_ptr =  ir_fold2(&jit->ctx, IR_OPT(IR_BITCAST, IR_ADDR),
-				func_ptr, IR_CONST_FASTCALL_FUNC); // Hack to use fastcall calling convention ???
+				func_ptr, IR_CONST_FASTCALL_FUNC); // Hack to use fastcall calling convention
 #endif
 		}
 		zend_jit_call_2(jit, IR_VOID, func_ptr, rx, zend_jit_zval_addr(jit, res_addr));
@@ -17626,7 +17590,7 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 
 #if defined(IR_TARGET_X86)
 			addr =  ir_fold2(&jit->ctx, IR_OPT(IR_BITCAST, IR_ADDR),
-				addr, IR_CONST_FASTCALL_FUNC), // Hack to use fastcall calling convention ???
+				addr, IR_CONST_FASTCALL_FUNC), // Hack to use fastcall calling convention
 #endif
 			ref = zend_jit_call_1(jit, IR_I32, addr, zend_jit_fp(jit));
 			if (opline &&
