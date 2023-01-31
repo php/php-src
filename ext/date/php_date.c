@@ -716,7 +716,7 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 			/* timezone */
 			case 'I': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->is_dst : 0); break;
 			case 'p':
-				if (!localtime || strcmp(offset->abbr, "UTC") == 0 || strcmp(offset->abbr, "Z") == 0) {
+				if (!localtime || strcmp(offset->abbr, "UTC") == 0 || strcmp(offset->abbr, "Z") == 0 || strcmp(offset->abbr, "GMT+0000") == 0) {
 					length = slprintf(buffer, sizeof(buffer), "%s", "Z");
 					break;
 				}
