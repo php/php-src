@@ -3926,14 +3926,14 @@ static int zend_jit_trace_deoptimization(
 			ir_ref src;
 
 			if (type == IS_LONG) {
-				src = ir_const_php_long(&jit->ctx, (zend_long)constants[reg].i);
+				src = ir_const_php_long(&jit->ctx, (zend_long)constants[STACK_REF(parent_stack, i)].i);
 				if (jit->ra && jit->ra[i].ref == IR_NULL) {
 					zend_jit_def_reg(jit, ZEND_ADDR_REG(i), src);
 				}
 				zend_jit_zval_set_lval(jit, dst, src);
 				zend_jit_zval_set_type_info(jit, dst, IS_LONG);
 			} else if (type == IS_DOUBLE) {
-				src = ir_const_double(&jit->ctx, constants[reg].d);
+				src = ir_const_double(&jit->ctx, constants[STACK_REF(parent_stack, i)].d);
 				if (jit->ra && jit->ra[i].ref == IR_NULL) {
 					zend_jit_def_reg(jit, ZEND_ADDR_REG(i), src);
 				}
@@ -8405,9 +8405,9 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 #else
 				if (STACK_FLAGS(stack, j) == ZREG_CONST) {
 					if (type == IS_LONG) {
-						fprintf(stderr, "(" ZEND_LONG_FMT ")", (zend_long)t->constants[STACK_REG(stack, j)].i);
+						fprintf(stderr, "(" ZEND_LONG_FMT ")", (zend_long)t->constants[STACK_REF(stack, j)].i);
 					} else if (type == IS_DOUBLE) {
-						fprintf(stderr, "(%g)", t->constants[STACK_REG(stack, j)].d);
+						fprintf(stderr, "(%g)", t->constants[STACK_REF(stack, j)].d);
 					} else {
 						ZEND_ASSERT(0);
 					}
@@ -9052,9 +9052,9 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 #else
 		if (STACK_FLAGS(stack, i) == ZREG_CONST) {
 			if (STACK_TYPE(stack, i) == IS_LONG) {
-				ZVAL_LONG(EX_VAR_NUM(i), (zend_long)t->constants[STACK_REG(stack, i)].i);
+				ZVAL_LONG(EX_VAR_NUM(i), (zend_long)t->constants[STACK_REF(stack, i)].i);
 			} else if (STACK_TYPE(stack, i) == IS_DOUBLE) {
-				ZVAL_DOUBLE(EX_VAR_NUM(i), t->constants[STACK_REG(stack, i)].d);
+				ZVAL_DOUBLE(EX_VAR_NUM(i), t->constants[STACK_REF(stack, i)].d);
 			} else {
 				ZEND_UNREACHABLE();
 			}

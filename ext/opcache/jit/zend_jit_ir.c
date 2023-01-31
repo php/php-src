@@ -978,7 +978,7 @@ static void zend_jit_snapshot(zend_jit_ctx *jit, ir_ref addr)
 	}
 }
 
-static int8_t zend_jit_add_trace_const(zend_jit_trace_info *t, int64_t val)
+static int32_t zend_jit_add_trace_const(zend_jit_trace_info *t, int64_t val)
 {
 	int32_t i;
 
@@ -987,7 +987,7 @@ static int8_t zend_jit_add_trace_const(zend_jit_trace_info *t, int64_t val)
 			return i;
 		}
 	}
-	ZEND_ASSERT(i < 127); // TODO: extend possible number of constants ???
+	ZEND_ASSERT(i < 0x7fffffff);
 	t->consts_count = i + 1;
 	t->constants = erealloc(t->constants, (i + 1) * sizeof(zend_jit_exit_const));
 	t->constants[i].i = val;
@@ -1041,7 +1041,7 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 			if (t->stack_map[t->exit_info[exit_point].stack_offset + var].flags == ZREG_ZVAL_COPY) {
 				ZEND_ASSERT(reg != ZREG_NONE);
 				t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = IR_REG_NUM(reg);
-			} else {
+			} else if (t->stack_map[t->exit_info[exit_point].stack_offset + var].flags != ZREG_CONST) {
 				ZEND_ASSERT(t->stack_map[t->exit_info[exit_point].stack_offset + var].type == IS_LONG ||
 					t->stack_map[t->exit_info[exit_point].stack_offset + var].type == IS_DOUBLE);
 
@@ -1055,9 +1055,9 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 						t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
 					}
 				} else {
-					int8_t idx = zend_jit_add_trace_const(t, ctx->ir_base[ref].val.i64);
+					int32_t idx = zend_jit_add_trace_const(t, ctx->ir_base[ref].val.i64);
 					t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_CONST;
-					t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = idx;
+					t->stack_map[t->exit_info[exit_point].stack_offset + var].ref = idx;
 				}
 			}
 		}
