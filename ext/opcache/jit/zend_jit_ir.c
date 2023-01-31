@@ -7605,12 +7605,25 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 				zend_jit_zval_type(jit, op1_addr),
 				ir_const_u8(&jit->ctx, Z_TYPE_P(val)));
 		} else {
-			ir_ref op1 = zend_jit_zval_addr(jit, op1_addr);
-			ir_ref op2 = zend_jit_zval_addr(jit, op2_addr);
+			if (Z_MODE(op1_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+				if (!zend_jit_spill_store(jit, op1_addr, real_addr, op1_info, 1)) {
+					return 0;
+				}
+				op1_addr = real_addr;
+			}
+			if (Z_MODE(op2_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
+				if (!zend_jit_spill_store(jit, op2_addr, real_addr, op2_info, 1)) {
+					return 0;
+				}
+				op2_addr = real_addr;
+			}
 
 			ref = zend_jit_call_2(jit, IR_BOOL,
 				zend_jit_const_func_addr(jit, (uintptr_t)zend_is_identical, IR_CONST_FASTCALL_FUNC),
-				op1, op2);
+				zend_jit_zval_addr(jit, op1_addr),
+				zend_jit_zval_addr(jit, op2_addr));
 		}
 
 		if (!smart_branch_opcode || smart_branch_opcode == ZEND_JMPNZ_EX || smart_branch_opcode == ZEND_JMPZ_EX) {
