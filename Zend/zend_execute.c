@@ -1455,21 +1455,6 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(v
 	zend_throw_error(NULL, "Cannot use object as array");
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_empty_or_isset_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s in isset or empty", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_unset_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s on unset", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_array_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s on array", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset(const zval *offset)
 {
 	zend_type_error("Cannot access offset of type %s on string", zend_zval_type_name(offset));

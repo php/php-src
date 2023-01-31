@@ -286,7 +286,7 @@ try_again:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		zend_type_error("Illegal offset type");
+	    zend_illegal_array_offset(offset);
 		return FAILURE;
 	}
 
@@ -313,7 +313,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		zend_type_error("Illegal offset type");
+		zend_illegal_array_offset(offset);
 		return (type == BP_VAR_W || type == BP_VAR_RW) ?
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
@@ -466,7 +466,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		zend_type_error("Illegal offset type");
+		zend_illegal_array_offset(offset);
 		zval_ptr_dtor(value);
 		return;
 	}
@@ -502,7 +502,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		zend_type_error("Illegal offset type in unset");
+		zend_illegal_unset_offset(offset);
 		return;
 	}
 
@@ -566,7 +566,7 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 		spl_hash_key key;
 
 		if (get_hash_key(&key, intern, offset) == FAILURE) {
-			zend_type_error("Illegal offset type in isset or empty");
+			zend_illegal_empty_or_isset_offset(offset);
 			return 0;
 		}
 

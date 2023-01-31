@@ -333,7 +333,7 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			return Z_RES_HANDLE_P(offset);
 	}
 
-	zend_type_error("Illegal offset type");
+	zend_illegal_array_offset(offset);
 	return 0;
 }
 
