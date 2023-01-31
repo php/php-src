@@ -65,6 +65,11 @@ void zend_timer_settime(zend_long seconds) /* {{{ }*/
 {
 	timer_t timer = EG(timer);
 
+	/* Timer doesn't anymore on request shutdown. */
+	if (timer == (timer_t){0}) {
+		return;
+	}
+
 	struct itimerspec its;
 	its.it_value.tv_sec = seconds;
 	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
