@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     function after bailout). (trowski)
 
 - Date:
+  . Fix GH-10447 ('p' format specifier does not yield 'Z' for 00:00). (Derick)
   . Fix GH-10152 (Custom properties of Date's child classes are not
     serialised). (Derick)
 
