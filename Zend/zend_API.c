@@ -2046,6 +2046,21 @@ ZEND_API zend_result add_next_index_reference(zval *arg, zend_reference *ref) /*
 }
 /* }}} */
 
+void zend_illegal_empty_or_isset_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s in isset or empty", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
+void zend_illegal_unset_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on unset", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
+void zend_illegal_array_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on array", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
 ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 {
 	zval *result;
