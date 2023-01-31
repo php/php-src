@@ -5782,7 +5782,9 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 					zend_jit_set_ex_opline(jit, opline);
 					zend_jit_guard(jit, IR_FALSE,
 						zend_jit_stub_addr(jit, jit_stub_negative_shift));
-					ref = ir_const_php_long(&jit->ctx, 0); // dead code ???
+					if (Z_MODE(res_addr) == IS_REG) {
+						zend_jit_def_reg(jit, res_addr, ir_const_php_long(&jit->ctx, 0)); // dead code
+					}
 				}
 			} else {
 				ref = ir_fold2(&jit->ctx, IR_OPT(IR_SHL, IR_PHP_LONG),
@@ -5840,7 +5842,9 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 					zend_jit_set_ex_opline(jit, opline);
 					zend_jit_guard(jit, IR_FALSE,
 						zend_jit_stub_addr(jit, jit_stub_negative_shift));
-					ref = ir_const_php_long(&jit->ctx, 0); // dead code ???
+					if (Z_MODE(res_addr) == IS_REG) {
+						zend_jit_def_reg(jit, res_addr, ir_const_php_long(&jit->ctx, 0)); // dead code
+					}
 				}
 			} else {
 				ref = ir_fold2(&jit->ctx, IR_OPT(IR_SAR, IR_PHP_LONG),
@@ -5889,7 +5893,9 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 				zend_jit_set_ex_opline(jit, opline);
 				zend_jit_guard(jit, IR_FALSE,
 					zend_jit_stub_addr(jit, jit_stub_mod_by_zero));
-				ref = ir_const_php_long(&jit->ctx, 0); // dead code ???
+				if (Z_MODE(res_addr) == IS_REG) {
+					zend_jit_def_reg(jit, res_addr, ir_const_php_long(&jit->ctx, 0)); // dead code
+				}
 			} else if (zend_long_is_power_of_two(op2_lval) && op1_range && op1_range->min >= 0) {
 				ref = ir_fold2(&jit->ctx, IR_OPT(IR_AND, IR_PHP_LONG),
 					zend_jit_zval_lval(jit, op1_addr),
