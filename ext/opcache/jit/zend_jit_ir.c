@@ -85,43 +85,43 @@ static size_t tsrm_tls_offset = 0;
 #endif
 
 #define JIT_STUBS(_) \
-	_(exception_handler,              SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(exception_handler_undef,        SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(exception_handler_free_op2,     SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(exception_handler_free_op1_op2, SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(interrupt_handler,              SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(leave_function_handler,         SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(negative_shift,                 SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(mod_by_zero,                    SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(invalid_this,                   SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(undefined_function,             SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(throw_cannot_pass_by_ref,       SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(icall_throw,                    SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(leave_throw,                    SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(hybrid_runtime_jit,             SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_profile_jit,             SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_func_hot_counter,        SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_loop_hot_counter,        SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_func_trace_counter,      SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_ret_trace_counter,       SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(hybrid_loop_trace_counter,      SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
-	_(trace_halt,                     SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(trace_escape,                   SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(trace_exit,                     SP_ADJ_JIT,  SP_ADJ_VM, IR_SKIP_PROLOGUE) \
-	_(assign_const,                   SP_ADJ_RET,  SP_ADJ_ASSIGN, IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_tmp,                     SP_ADJ_RET,  SP_ADJ_ASSIGN, IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_var,                     SP_ADJ_RET,  SP_ADJ_ASSIGN, IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_cv_noref,                SP_ADJ_RET,  SP_ADJ_ASSIGN, IR_FUNCTION | IR_FASTCALL_FUNC) \
-	_(assign_cv,                      SP_ADJ_RET,  SP_ADJ_ASSIGN, IR_FUNCTION | IR_FASTCALL_FUNC) \
+	_(exception_handler,              IR_SKIP_PROLOGUE) \
+	_(exception_handler_undef,        IR_SKIP_PROLOGUE) \
+	_(exception_handler_free_op2,     IR_SKIP_PROLOGUE) \
+	_(exception_handler_free_op1_op2, IR_SKIP_PROLOGUE) \
+	_(interrupt_handler,              IR_SKIP_PROLOGUE) \
+	_(leave_function_handler,         IR_SKIP_PROLOGUE) \
+	_(negative_shift,                 IR_SKIP_PROLOGUE) \
+	_(mod_by_zero,                    IR_SKIP_PROLOGUE) \
+	_(invalid_this,                   IR_SKIP_PROLOGUE) \
+	_(undefined_function,             IR_SKIP_PROLOGUE) \
+	_(throw_cannot_pass_by_ref,       IR_SKIP_PROLOGUE) \
+	_(icall_throw,                    IR_SKIP_PROLOGUE) \
+	_(leave_throw,                    IR_SKIP_PROLOGUE) \
+	_(hybrid_runtime_jit,             IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
+	_(hybrid_profile_jit,             IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
+	_(hybrid_func_hot_counter,        IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
+	_(hybrid_loop_hot_counter,        IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
+	_(hybrid_func_trace_counter,      IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
+	_(hybrid_ret_trace_counter,       IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
+	_(hybrid_loop_trace_counter,      IR_SKIP_PROLOGUE | IR_START_BR_TARGET) \
+	_(trace_halt,                     IR_SKIP_PROLOGUE) \
+	_(trace_escape,                   IR_SKIP_PROLOGUE) \
+	_(trace_exit,                     IR_SKIP_PROLOGUE) \
+	_(assign_const,                   IR_FUNCTION | IR_FASTCALL_FUNC) \
+	_(assign_tmp,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
+	_(assign_var,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
+	_(assign_cv_noref,                IR_FUNCTION | IR_FASTCALL_FUNC) \
+	_(assign_cv,                      IR_FUNCTION | IR_FASTCALL_FUNC) \
 
-#define JIT_STUB_ID(name, offset, adjustment, flags) \
+#define JIT_STUB_ID(name, flags) \
 	jit_stub_ ## name,
 
-#define JIT_STUB_FORWARD(name, offset, adjustment, flags) \
+#define JIT_STUB_FORWARD(name, flags) \
 	static int zend_jit_ ## name ## _stub(zend_jit_ctx *jit);
 
-#define JIT_STUB(name, offset, adjustment, flags) \
-	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub, flags, offset, adjustment},
+#define JIT_STUB(name, flags) \
+	{JIT_STUB_PREFIX #name, zend_jit_ ## name ## _stub, flags},
 
 typedef enum _jit_stub_id {
 	JIT_STUBS(JIT_STUB_ID)
@@ -205,8 +205,6 @@ typedef struct _zend_jit_stub {
 	const char *name;
 	int (*stub)(zend_jit_ctx *jit);
 	uint32_t flags;
-	uint32_t offset;
-	uint32_t adjustment;
 } zend_jit_stub;
 
 JIT_STUBS(JIT_STUB_FORWARD)
@@ -3790,6 +3788,54 @@ static int zend_jit_calc_trace_prologue_size(void)
 	return 1;
 }
 
+#if !ZEND_WIN32
+static uintptr_t zend_jit_hybrid_vm_sp_adj = 0;
+
+typedef struct _Unwind_Context _Unwind_Context;
+typedef int (*_Unwind_Trace_Fn)(_Unwind_Context *, void *);
+extern int _Unwind_Backtrace(_Unwind_Trace_Fn, void *);
+extern uintptr_t _Unwind_GetCFA(_Unwind_Context *);
+
+typedef struct _zend_jit_unwind_arg {
+	int cnt;
+	uintptr_t cfa[3];
+} zend_jit_unwind_arg;
+
+static int zend_jit_unwind_cb(_Unwind_Context *ctx, void *a)
+{
+	zend_jit_unwind_arg *arg = (zend_jit_unwind_arg*)a;
+	arg->cfa[arg->cnt] = _Unwind_GetCFA(ctx);
+	arg->cnt++;
+	if (arg->cnt == 3) {
+		return 5; // _URC_END_OF_STACK
+	}
+	return 0; // _URC_NO_REASON;
+}
+
+static void ZEND_FASTCALL zend_jit_touch_vm_stack_data(void *vm_stack_data)
+{
+	zend_jit_unwind_arg arg;
+
+	memset(&arg, 0, sizeof(arg));
+	_Unwind_Backtrace(zend_jit_unwind_cb, &arg);
+	if (arg.cnt == 3) {
+		zend_jit_hybrid_vm_sp_adj = arg.cfa[2] - arg.cfa[1];
+	}
+}
+
+extern void (ZEND_FASTCALL *zend_touch_vm_stack_data)(void *vm_stack_data);
+
+static zend_never_inline void zend_jit_set_sp_adj_vm(void)
+{
+	void (ZEND_FASTCALL *orig_zend_touch_vm_stack_data)(void *);
+
+	orig_zend_touch_vm_stack_data = zend_touch_vm_stack_data;
+	zend_touch_vm_stack_data = zend_jit_touch_vm_stack_data;
+	execute_ex(NULL);                                        // set sp_adj[SP_ADJ_VM]
+	zend_touch_vm_stack_data = orig_zend_touch_vm_stack_data;
+}
+#endif
+
 static int zend_jit_setup(void)
 {
 #if defined(IR_TARGET_X86)
@@ -3915,30 +3961,10 @@ static int zend_jit_setup(void)
 # endif
 #endif
 
-#if 0//???
-    memset(sp_adj, 0, sizeof(sp_adj));
-#ifdef HAVE_GDB
-	sp_adj[SP_ADJ_RET] = sizeof(void*);
-	|.if X64WIN
-	||	sp_adj[SP_ADJ_ASSIGN] = sp_adj[SP_ADJ_RET] + 0x28;       // sub r4, 0x28
-	|.elif X64
-	||	sp_adj[SP_ADJ_ASSIGN] = sp_adj[SP_ADJ_RET] + 8;          // sub r4, 8
-	|.else
-	||	sp_adj[SP_ADJ_ASSIGN] = sp_adj[SP_ADJ_RET] + 12;         // sub r4, 12
-	|.endif
+#if !ZEND_WIN32
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		zend_jit_set_sp_adj_vm();                                // set sp_adj[SP_ADJ_VM]
-#ifndef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_VM] + HYBRID_SPAD; // sub r4, HYBRID_SPAD
-#else
-		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_VM];
-#endif
-	} else if (GCC_GLOBAL_REGS) {
-		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_RET] + SPAD;       // sub r4, SPAD
-	} else {
-		|| sp_adj[SP_ADJ_JIT] = sp_adj[SP_ADJ_RET] + NR_SPAD;    // sub r4, NR_SPAD
+		zend_jit_set_sp_adj_vm(); // set zend_jit_hybrid_vm_sp_adj
 	}
-#endif
 #endif
 
     if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
@@ -17016,8 +17042,16 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 
 			if (str) {
 				if (JIT_G(debug) & ZEND_JIT_DEBUG_GDB) {
+					uintptr_t sp_offset = 0;
+
 //					ir_mem_unprotect(entry, size);
-					ir_gdb_register(ZSTR_VAL(str), entry, size, 0, 0);
+					if (!(jit->ctx.flags & IR_FUNCTION)
+					 && zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+						sp_offset = zend_jit_hybrid_vm_sp_adj;
+					} else {
+						sp_offset = sizeof(void*);
+					}
+					ir_gdb_register(ZSTR_VAL(str), entry, size, sp_offset, 0);
 //					ir_mem_protect(entry, size);
 				}
 
