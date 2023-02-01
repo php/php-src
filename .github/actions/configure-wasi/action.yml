@@ -1,0 +1,48 @@
+name: ./configure
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+
+        ./buildconf --force
+        ./configure \
+          --host=wasm32-wasi host_alias=wasm32-musl-wasi \
+          --target=wasm32-wasi target_alias=wasm32-musl-wasi \
+          --disable-all \
+          --disable-ctype \
+          --disable-dom \
+          --disable-fiber-asm \
+          --disable-fileinfo \
+          --disable-filter \
+          --disable-flatfile \
+          --disable-huge-code-pages \
+          --disable-inifile \
+          --disable-mbregex \
+          --disable-mysqlnd-compression-support \
+          --disable-opcache \
+          --disable-opcache-jit \
+          --disable-pdo \
+          --disable-phar \
+          --disable-posix \
+          --disable-session \
+          --disable-simplexml \
+          --disable-tokenizer \
+          --disable-xml \
+          --disable-xmlreader \
+          --disable-xmlwriter \
+          --disable-zend-signals \
+          --without-cdb \
+          --without-libxml \
+          --without-openssl \
+          --without-pcre-jit \
+          --without-pear \
+          --without-sqlite3 \
+          CFLAGS="-D_WASI_EMULATED_GETPID -D_WASI_EMULATED_SIGNAL -D_WASI_EMULATED_PROCESS_CLOCKS" \
+          LDFLAGS="-lwasi-emulated-getpid -lwasi-emulated-signal -lwasi-emulated-process-clocks" \
+          ${{ inputs.configurationParameters }}

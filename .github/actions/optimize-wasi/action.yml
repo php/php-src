@@ -1,0 +1,14 @@
+name: Optimize
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+
+        /opt/bin/wasm-opt -O sapi/cli/php -o sapi/cli/php.optimized
+    - shell: bash
+      run: |
+        set -x
+
+        /opt/bin/wasm-opt -O sapi/cgi/php-cgi -o sapi/cgi/php-cgi.optimized
