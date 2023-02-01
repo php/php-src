@@ -3718,24 +3718,27 @@ static void zend_jit_trace_cleanup_stack(zend_jit_trace_stack *stack, const zend
 	}
 }
 #else
-static void zend_jit_trace_cleanup_stack(zend_jit_ctx *jit, zend_jit_trace_stack *stack, const zend_op *opline, const zend_ssa_op *ssa_op)
+static void zend_jit_trace_cleanup_stack(zend_jit_ctx *jit, zend_jit_trace_stack *stack, const zend_op *opline, const zend_ssa_op *ssa_op, const zend_ssa *ssa, const zend_op **ssa_opcodes)
 {
 	if (ssa_op->op1_use >= 0
-	 && ssa_op->op1_use_chain == -1
 	 && jit->ra[ssa_op->op1_use].ref
-	 && (jit->ra[ssa_op->op1_use].flags & ZREG_LAST_USE)) {
+	 && (jit->ra[ssa_op->op1_use].flags & ZREG_LAST_USE)
+	 && (ssa_op->op1_use_chain == -1
+	  || zend_ssa_is_no_val_use(ssa_opcodes[ssa_op->op1_use_chain], ssa->ops + ssa_op->op1_use_chain, ssa_op->op1_use))) {
 		CLEAR_STACK_REF(stack, EX_VAR_TO_NUM(opline->op1.var));
 	}
 	if (ssa_op->op2_use >= 0
-	 && ssa_op->op2_use_chain == -1
 	 && jit->ra[ssa_op->op2_use].ref
-	 && (jit->ra[ssa_op->op2_use].flags & ZREG_LAST_USE)) {
+	 && (jit->ra[ssa_op->op2_use].flags & ZREG_LAST_USE)
+	 && (ssa_op->op2_use_chain == -1
+	  || zend_ssa_is_no_val_use(ssa_opcodes[ssa_op->op2_use_chain], ssa->ops + ssa_op->op2_use_chain, ssa_op->op2_use))) {
 		CLEAR_STACK_REF(stack, EX_VAR_TO_NUM(opline->op2.var));
 	}
 	if (ssa_op->result_use >= 0
-	 && ssa_op->res_use_chain == -1
 	 && jit->ra[ssa_op->result_use].ref
-	 && (jit->ra[ssa_op->result_use].flags & ZREG_LAST_USE)) {
+	 && (jit->ra[ssa_op->result_use].flags & ZREG_LAST_USE)
+	 && (ssa_op->res_use_chain == -1
+	  || zend_ssa_is_no_val_use(ssa_opcodes[ssa_op->res_use_chain], ssa->ops + ssa_op->res_use_chain, ssa_op->result_use))) {
 		CLEAR_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var));
 	}
 }
@@ -5785,7 +5788,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifndef ZEND_JIT_IR
 								zend_jit_trace_cleanup_stack(stack, opline, ssa_op, ssa, ra);
 #else
-								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op);
+								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
 #endif
 							}
 							exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
@@ -5837,7 +5840,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifndef ZEND_JIT_IR
 								zend_jit_trace_cleanup_stack(stack, opline, ssa_op, ssa, ra);
 #else
-								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op);
+								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
 #endif
 							}
 							exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
@@ -5906,7 +5909,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifndef ZEND_JIT_IR
 								zend_jit_trace_cleanup_stack(stack, opline, ssa_op, ssa, ra);
 #else
-								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op);
+								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
 #endif
 							}
 							exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
@@ -6043,7 +6046,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifndef ZEND_JIT_IR
 								zend_jit_trace_cleanup_stack(stack, opline, ssa_op, ssa, ra);
 #else
-								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op);
+								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
 #endif
 							}
 							if (!(op1_info & MAY_BE_GUARD)
@@ -6299,7 +6302,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifndef ZEND_JIT_IR
 								zend_jit_trace_cleanup_stack(stack, opline, ssa_op, ssa, ra);
 #else
-								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op);
+								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
 #endif
 							}
 							if (ssa_op->op1_use >= 0
@@ -6790,7 +6793,7 @@ done:
 #ifndef ZEND_JIT_IR
 				zend_jit_trace_cleanup_stack(stack, opline, ssa_op, ssa, ra);
 #else
-				zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op);
+				zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
 #endif
 			}
 
