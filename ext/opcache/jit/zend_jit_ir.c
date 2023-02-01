@@ -251,6 +251,19 @@ static ir_ref zend_jit_tls(zend_jit_ctx *jit)
 }
 #endif
 
+static bool zend_jit_prefer_const_addr_load(zend_jit_ctx *jit, uintptr_t addr)
+{
+#if defined(IR_TARGET_X86)
+	return 0; /* always use immediate value */
+#elif defined(IR_TARGET_X64)
+	return addr > 0xffffffff; /* prefer loading long constant from memery */
+#elif defined(IR_TARGET_AARCH64)
+	return addr > 0xffff;
+#else
+# error "Unknown IR target"
+#endif
+}
+
 static ir_ref zend_jit_const_addr(zend_jit_ctx *jit, uintptr_t addr)
 {
 	ir_ref ref;
@@ -9068,9 +9081,8 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 		func_ref = zend_jit_const_addr(jit, (uintptr_t)func);
 	} else if (func && op_array == &func->op_array) {
 		/* recursive call */
-		if (!(func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
-//???		    || (sizeof(void*) == 8 && !IS_SIGNED_32BIT(func))) {
-
+		if (!(func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
+		 || zend_jit_prefer_const_addr_load(jit, (uintptr_t)func)) {
 			func_ref = zend_jit_load_at_offset(jit, IR_ADDR,
 				zend_jit_fp(jit), offsetof(zend_execute_data, func));
 		} else {
