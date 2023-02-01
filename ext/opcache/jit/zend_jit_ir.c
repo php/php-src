@@ -4842,6 +4842,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 {
 	ir_ref if_long = IR_UNUSED;
 	ir_ref typed_ref_path = IR_UNUSED;
+	ir_ref op1_lval_ref = IR_UNUSED;
 	ir_ref ref;
 	ir_op op;
 
@@ -4850,8 +4851,8 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		zend_jit_if_true(jit, if_long);
 	}
 	if (opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC) {
-		zend_jit_zval_set_lval(jit, res_addr,
-			zend_jit_zval_lval(jit, op1_addr));
+		op1_lval_ref = zend_jit_zval_lval(jit, op1_addr);
+		zend_jit_zval_set_lval(jit, res_addr, op1_lval_ref);
 		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
 			zend_jit_zval_set_type_info(jit, res_addr, IS_LONG);
 		}
@@ -4867,8 +4868,11 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 	} else {
 		op = may_overflow ? IR_SUB_OV : IR_SUB;
 	}
+	if (!op1_lval_ref) {
+		op1_lval_ref = zend_jit_zval_lval(jit, op1_addr);
+	}
 	ref = ir_fold2(&jit->ctx, IR_OPT(op, IR_PHP_LONG),
-		zend_jit_zval_lval(jit, op1_addr),
+		op1_lval_ref,
 		ir_const_php_long(&jit->ctx, 1));
 	if (op1_def_info & MAY_BE_LONG) {
 		zend_jit_zval_set_lval(jit, op1_def_addr, ref);
