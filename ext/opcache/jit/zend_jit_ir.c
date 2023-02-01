@@ -2336,17 +2336,8 @@ static int zend_jit_check_timeout(zend_jit_ctx *jit, const zend_op *opline, cons
 	ref = ZEND_JIT_EG_ADDR(vm_interrupt);
 	ref = zend_jit_load(jit, IR_U8, ref);
 	if (exit_addr) {
-#if 1
-		/* use IF instead of GUARD to allow jmp reordering */
-		ref = zend_jit_if(jit, ref);
-		zend_jit_if_true_cold(jit, ref);
-		zend_jit_side_exit(jit,
-			zend_jit_const_addr(jit, (uintptr_t)exit_addr));
-		zend_jit_if_false(jit, ref);
-#else
 		zend_jit_guard_not(jit, ref,
 			zend_jit_const_addr(jit, (uintptr_t)exit_addr));
-#endif
 	} else if (!opline || jit->last_valid_opline == opline) {
 		zend_jit_guard_not(jit, ref,
 			zend_jit_stub_addr(jit, jit_stub_interrupt_handler));
