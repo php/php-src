@@ -301,6 +301,12 @@ ZEND_API void destroy_zend_class(zval *zv)
 		return;
 	}
 
+	/* We don't increase the refcount for class aliases,
+	 * skip the destruction of aliases entirely. */
+	if (UNEXPECTED(Z_TYPE_INFO_P(zv) == IS_ALIAS_PTR)) {
+		return;
+	}
+
 	if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
 		zend_class_constant *c;
 		zval *p, *end;
@@ -322,6 +328,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 		}
 		return;
 	}
+
+	ZEND_ASSERT(ce->refcount > 0);
 
 	if (--ce->refcount > 0) {
 		return;
@@ -516,7 +524,7 @@ void zend_class_add_ref(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if (Z_TYPE_P(zv) != IS_ALIAS_PTR && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 		ce->refcount++;
 	}
 }
