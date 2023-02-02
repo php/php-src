@@ -10005,6 +10005,7 @@ static void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 		return;
 	}
 
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
 	zend_ast_destroy(ast);
 	*ast_ptr = zend_ast_create_constant(resolved_name,
 		!is_fully_qualified && FC(current_namespace) ? IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE : 0);
