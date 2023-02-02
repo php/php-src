@@ -1965,7 +1965,7 @@ int phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const 
 	*ext_str = NULL;
 	*ext_len = 0;
 
-	if (!filename_len || filename_len == 1) {
+	if (filename_len <= 1) {
 		return FAILURE;
 	}
 
