@@ -191,11 +191,9 @@ ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_str
 	return zend_interned_string_ht_lookup(str, &interned_strings_permanent);
 }
 
-static zend_string* ZEND_FASTCALL zend_init_string_for_interning(zend_string *str, bool persistent) {
-	uint32_t flags = 0;
-	if (ZSTR_IS_VALID_UTF8(str)) {
-		flags = IS_STR_VALID_UTF8;
-	}
+static zend_string* ZEND_FASTCALL zend_init_string_for_interning(zend_string *str, bool persistent)
+{
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(str);
 	zend_ulong h = ZSTR_H(str);
 	zend_string_delref(str);
 	str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), persistent);

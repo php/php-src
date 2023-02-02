@@ -6624,11 +6624,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CONST != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CONST == IS_CONST || IS_CONST == IS_CV) {
@@ -6725,9 +6721,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (IS_CONST != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -8702,11 +8696,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDL
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CONST != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || (IS_TMP_VAR|IS_VAR) == IS_CV) {
@@ -9134,11 +9124,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CONST != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || (IS_TMP_VAR|IS_VAR) == IS_CV) {
@@ -9235,9 +9221,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (IS_CONST != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -11086,11 +11070,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CV_HANDLER(Z
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CONST != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CV == IS_CONST || IS_CV == IS_CV) {
@@ -11518,11 +11498,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CONST != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CV == IS_CONST || IS_CV == IS_CV) {
@@ -11619,9 +11595,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (IS_CONST != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -15135,11 +15109,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CONST_HANDL
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CONST == IS_CONST || IS_CONST == IS_CV) {
@@ -15881,11 +15851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CONST == IS_CONST || IS_CONST == IS_CV) {
@@ -15982,9 +15948,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -16590,11 +16554,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_TMPVAR_HAND
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || (IS_TMP_VAR|IS_VAR) == IS_CV) {
@@ -17336,11 +17296,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || (IS_TMP_VAR|IS_VAR) == IS_CV) {
@@ -17437,9 +17393,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -18296,11 +18250,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_TMPVAR_CV_HANDLER(
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CV == IS_CONST || IS_CV == IS_CV) {
@@ -18680,11 +18630,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CV == IS_CONST || IS_CV == IS_CV) {
@@ -18781,9 +18727,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -40356,11 +40300,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CONST_HANDLER(Z
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CV != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CONST == IS_CONST || IS_CONST == IS_CV) {
@@ -42859,11 +42799,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CV != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CONST == IS_CONST || IS_CONST == IS_CV) {
@@ -42960,9 +42896,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (IS_CV != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -44186,11 +44120,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_TMPVAR_HANDLER(
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CV != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || (IS_TMP_VAR|IS_VAR) == IS_CV) {
@@ -46618,11 +46548,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CV != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST || (IS_TMP_VAR|IS_VAR) == IS_CV) {
@@ -46719,9 +46645,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (IS_CV != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
@@ -49498,11 +49422,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CV != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CV == IS_CONST || IS_CV == IS_CV) {
@@ -52029,11 +51949,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 		zend_string *op1_str = Z_STR_P(op1);
 		zend_string *op2_str = Z_STR_P(op2);
 		zend_string *str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_str, op2_str);
 
 		if (IS_CV != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
 			if (IS_CV == IS_CONST || IS_CV == IS_CV) {
@@ -52130,9 +52046,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 		memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 
-		if (ZSTR_IS_VALID_UTF8(op1_str) && ZSTR_IS_VALID_UTF8(op2_str)) {
-			GC_ADD_FLAGS(str, IS_STR_VALID_UTF8);
-		}
+		ZSTR_COPY_CONCAT_PROPERTIES_BOTH(str, op1_str, op2_str);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (IS_CV != IS_CONST) {
 			zend_string_release_ex(op1_str, 0);
