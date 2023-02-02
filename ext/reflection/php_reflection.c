@@ -3496,7 +3496,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, inNamespace)
 
 	zend_string *name = fptr->common.function_name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	RETURN_BOOL(backslash && backslash > ZSTR_VAL(name));
+	RETURN_BOOL(backslash);
 }
 /* }}} */
 
@@ -3514,7 +3514,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getNamespaceName)
 
 	zend_string *name = fptr->common.function_name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
 	}
 	RETURN_EMPTY_STRING();
@@ -3535,7 +3535,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getShortName)
 
 	zend_string *name = fptr->common.function_name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
 	}
 	RETURN_STR_COPY(name);
@@ -5363,7 +5363,7 @@ ZEND_METHOD(ReflectionClass, inNamespace)
 
 	zend_string *name = ce->name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	RETURN_BOOL(backslash && backslash > ZSTR_VAL(name));
+	RETURN_BOOL(backslash);
 }
 /* }}} */
 
@@ -5381,7 +5381,7 @@ ZEND_METHOD(ReflectionClass, getNamespaceName)
 
 	zend_string *name = ce->name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
 	}
 	RETURN_EMPTY_STRING();
@@ -5402,7 +5402,7 @@ ZEND_METHOD(ReflectionClass, getShortName)
 
 	zend_string *name = ce->name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
 	}
 	RETURN_STR_COPY(name);
