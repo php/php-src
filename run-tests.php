@@ -3817,7 +3817,7 @@ class TestFile
 {
     private string $fileName;
 
-    private array $sections = ['TEST' => ''];
+    private array $sections = [];
 
     private const ALLOWED_SECTIONS = [
         'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
@@ -3826,7 +3826,7 @@ class TestFile
         'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
         'INI', 'ENV', 'EXTENSIONS',
         'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
-        'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
+        'TEST', 'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
     ];
 
     /**
@@ -3917,25 +3917,24 @@ class TestFile
     {
         $fp = fopen($this->fileName, "rb") or error("Cannot open test file: {$this->fileName}");
 
-        if (!feof($fp)) {
-            $line = fgets($fp);
-
-            if ($line === false) {
-                throw new BorkageException("cannot read test");
-            }
-        } else {
-            throw new BorkageException("empty test [{$this->fileName}]");
-        }
-        if (strncmp('--TEST--', $line, 8)) {
-            throw new BorkageException("tests must start with --TEST-- [{$this->fileName}]");
+        if (feof($fp)) {
+            throw new BorkageException("empty test");
         }
 
-        $section = 'TEST';
-        $secfile = false;
-        $secdone = false;
+        $section = false;
 
         while (!feof($fp)) {
             $line = fgets($fp);
+
+            if ($section === false) {
+                if ($line === false) {
+                    throw new BorkageException("cannot read test");
+                }
+
+                if (rtrim($line, "\n\r") !== '--TEST--') {
+                    throw new BorkageException("test must start with --TEST--");
+                }
+            }
 
             if ($line === false) {
                 break;
@@ -3943,15 +3942,15 @@ class TestFile
 
             // Match the beginning of a section.
             if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
-                $section = (string) $r[1];
+                $section = $r[1];
 
-                if (isset($this->sections[$section]) && $this->sections[$section]) {
+                if (isset($this->sections[$section])) {
                     throw new BorkageException("duplicated $section section");
                 }
 
                 // check for unknown sections
                 if (!in_array($section, self::ALLOWED_SECTIONS)) {
-                    throw new BorkageException('Unknown section "' . $section . '"');
+                    throw new BorkageException('unknown section "' . $section . '"');
                 }
 
                 $this->sections[$section] = '';
