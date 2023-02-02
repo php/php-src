@@ -1981,11 +1981,7 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 		size_t op2_len = Z_STRLEN_P(op2);
 		size_t result_len = op1_len + op2_len;
 		zend_string *result_str;
-		uint32_t flags = 0;
-
-		if (ZSTR_IS_VALID_UTF8(Z_STR_P(op1)) && ZSTR_IS_VALID_UTF8(Z_STR_P(op2))) {
-			flags = IS_STR_VALID_UTF8;
-		}
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
 
 		if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 			zend_throw_error(NULL, "String size overflow");

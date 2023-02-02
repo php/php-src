@@ -82,6 +82,27 @@ END_EXTERN_C()
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 #define ZSTR_IS_VALID_UTF8(s)				(GC_FLAGS(s) & IS_STR_VALID_UTF8)
 
+/* These are properties, encoded as flags, that will hold on the resulting string
+ * after concatenating two strings that have these property.
+ * Example: concatenating two UTF-8 strings yields another UTF-8 string. */
+#define ZSTR_COPYABLE_CONCAT_PROPERTIES		(IS_STR_VALID_UTF8)
+
+#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s) 				(GC_FLAGS(s) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
+/* This macro returns the copyable concat properties which hold on both strings. */
+#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(s1, s2)	(GC_FLAGS(s1) & GC_FLAGS(s2) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
+
+#define ZSTR_COPY_CONCAT_PROPERTIES(out, in) do { \
+	zend_string *_out = (out); \
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES((in)); \
+	GC_ADD_FLAGS(_out, properties); \
+} while (0)
+
+#define ZSTR_COPY_CONCAT_PROPERTIES_BOTH(out, in1, in2) do { \
+	zend_string *_out = (out); \
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH((in1), (in2)); \
+	GC_ADD_FLAGS(_out, properties); \
+} while (0)
+
 #define ZSTR_EMPTY_ALLOC() zend_empty_string
 #define ZSTR_CHAR(c) zend_one_char_string[c]
 #define ZSTR_KNOWN(idx) zend_known_strings[idx]
