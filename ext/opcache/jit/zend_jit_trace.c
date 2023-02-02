@@ -2883,6 +2883,8 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			 && STACK_REG(parent_stack, i) != ZREG_NONE
 #ifndef ZEND_JIT_IR
 			 && STACK_REG(parent_stack, i) < ZREG_NUM
+#else
+			 && STACK_FLAGS(parent_stack, i) != ZREG_ZVAL_COPY
 #endif
 			 ) {
 				/* We will try to reuse register from parent trace */
@@ -4060,10 +4062,10 @@ static int zend_jit_trace_deoptimization(
 
 		ZEND_ASSERT(STACK_FLAGS(parent_stack, check2) == ZREG_ZVAL_COPY);
 		ZEND_ASSERT(reg != ZREG_NONE);
-		if (zend_jit_escape_if_undef(jit, check2, flags, opline, reg)) {
+		if (!zend_jit_escape_if_undef(jit, check2, flags, opline, reg)) {
 			return 0;
 		}
-		if (!zend_jit_restore_zval(jit, check2, reg)) {
+		if (!zend_jit_restore_zval(jit, EX_NUM_TO_VAR(check2), reg)) {
 			return 0;
 		}
 	}

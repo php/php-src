@@ -8168,18 +8168,31 @@ static int zend_jit_defined(zend_jit_ctx *jit, const zend_op *opline, zend_uchar
 
 static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, const zend_op *opline, int8_t reg)
 {
-#if ZEND_DEBUG
 	zend_jit_addr reg_addr = ZEND_ADDR_REF_ZVAL(zend_jit_deopt_rload(jit, IR_ADDR, reg));
 	ir_ref if_def = zend_jit_if(jit, zend_jit_zval_type(jit, reg_addr));
 
 	zend_jit_if_false_cold(jit, if_def);
-	jit->control = ir_emit1(&jit->ctx, IR_TRAP, jit->control); // NIY ???
+
+	if (flags & ZEND_JIT_EXIT_RESTORE_CALL) {
+		if (!zend_jit_save_call_chain(jit, -1)) {
+			return 0;
+		}
+	}
+
+	if ((opline-1)->opcode != ZEND_FETCH_CONSTANT
+	 && (opline-1)->opcode != ZEND_FETCH_LIST_R
+	 && ((opline-1)->op1_type & (IS_VAR|IS_TMP_VAR))
+	 && !(flags & ZEND_JIT_EXIT_FREE_OP1)) {
+		zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline-1)->op1.var);
+
+		zend_jit_zval_try_addref(jit, val_addr);
+	}
 
 	zend_jit_load_ip_addr(jit, opline - 1);
 	zend_jit_ijmp(jit, zend_jit_stub_addr(jit, jit_stub_trace_escape));
 
 	zend_jit_if_true(jit, if_def);
-#endif
+
 	return 1;
 }
 
