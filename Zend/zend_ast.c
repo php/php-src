@@ -834,7 +834,15 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 		case ZEND_AST_CLASS_CONST:
 		{
 			zend_string *class_name = zend_ast_get_str(ast->child[0]);
-			zend_string *const_name = zend_ast_get_str(ast->child[1]);
+			if (UNEXPECTED(zend_ast_evaluate_ex(&op2, ast->child[1], scope, &short_circuited, ctx) != SUCCESS)) {
+				return FAILURE;
+			}
+			if (UNEXPECTED(Z_TYPE(op2) != IS_STRING)) {
+				zend_invalid_class_constant_type_error(Z_TYPE(op2));
+				zval_ptr_dtor_nogc(&op2);
+				return FAILURE;
+			}
+			zend_string *const_name = Z_STR(op2);
 
 			zend_string *previous_filename;
 			zend_long previous_lineno;
@@ -852,9 +860,11 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 			if (UNEXPECTED(zv == NULL)) {
 				ZVAL_UNDEF(result);
+				zval_ptr_dtor_nogc(&op2);
 				return FAILURE;
 			}
 			ZVAL_COPY_OR_DUP(result, zv);
+			zval_ptr_dtor_nogc(&op2);
 			break;
 		}
 		case ZEND_AST_NEW:

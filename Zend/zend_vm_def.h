@@ -5922,7 +5922,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 
 		constant_zv = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
-			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			zend_invalid_class_constant_type_error(Z_TYPE_P(constant_zv));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			FREE_OP2();
 			HANDLE_EXCEPTION();

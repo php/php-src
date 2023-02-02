@@ -7203,7 +7203,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 
 		constant_zv = RT_CONSTANT(opline, opline->op2);
 		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
-			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			zend_invalid_class_constant_type_error(Z_TYPE_P(constant_zv));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 			HANDLE_EXCEPTION();
@@ -8358,7 +8358,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 
 		constant_zv = _get_zval_ptr_tmpvarcv(opline->op2_type, opline->op2, BP_VAR_R EXECUTE_DATA_CC);
 		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
-			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			zend_invalid_class_constant_type_error(Z_TYPE_P(constant_zv));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			FREE_OP(opline->op2_type, opline->op2.var);
 			HANDLE_EXCEPTION();
@@ -25011,7 +25011,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 
 		constant_zv = RT_CONSTANT(opline, opline->op2);
 		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
-			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			zend_invalid_class_constant_type_error(Z_TYPE_P(constant_zv));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 			HANDLE_EXCEPTION();
@@ -25574,7 +25574,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 
 		constant_zv = _get_zval_ptr_tmpvarcv(opline->op2_type, opline->op2, BP_VAR_R EXECUTE_DATA_CC);
 		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
-			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			zend_invalid_class_constant_type_error(Z_TYPE_P(constant_zv));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			FREE_OP(opline->op2_type, opline->op2.var);
 			HANDLE_EXCEPTION();
@@ -33999,7 +33999,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 
 		constant_zv = RT_CONSTANT(opline, opline->op2);
 		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
-			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			zend_invalid_class_constant_type_error(Z_TYPE_P(constant_zv));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 			HANDLE_EXCEPTION();
@@ -34352,7 +34352,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 
 		constant_zv = _get_zval_ptr_tmpvarcv(opline->op2_type, opline->op2, BP_VAR_R EXECUTE_DATA_CC);
 		if (UNEXPECTED(Z_TYPE_P(constant_zv) != IS_STRING)) {
-			zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(Z_TYPE_P(constant_zv)));
+			zend_invalid_class_constant_type_error(Z_TYPE_P(constant_zv));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			FREE_OP(opline->op2_type, opline->op2.var);
 			HANDLE_EXCEPTION();

@@ -894,6 +894,11 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modificati
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(zend_uchar type)
+{
+	zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(type));
+}
+
 static const zend_class_entry *resolve_single_class_type(zend_string *name, const zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return self_ce;
