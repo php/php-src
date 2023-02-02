@@ -4775,6 +4775,7 @@ static int zend_jit_load_var(zend_jit_ctx *jit, uint32_t info, int var, int ssa_
 static int zend_jit_invalidate_var_if_necessary(zend_jit_ctx *jit, zend_uchar op_type, zend_jit_addr addr, znode_op op)
 {
 	if ((op_type & (IS_TMP_VAR|IS_VAR)) && Z_MODE(addr) == IS_REG && !Z_LOAD(addr) && !Z_STORE(addr)) {
+		/* Invalidate operand type to prevent incorrect destuction by exception_handler_free_op1_op2() */
 		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
 		zend_jit_zval_set_type_info(jit, dst, IS_UNDEF);
 	}
