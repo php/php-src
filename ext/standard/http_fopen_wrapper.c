@@ -955,6 +955,13 @@ out:
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
 		}
+
+		/* It's possible that the server already sent in more data than just the headers.
+		 * We account for this by adjusting the progress counter by the difference of
+		 * already read header data and the body. */
+		if (stream->writepos > stream->readpos) {
+			php_stream_notify_progress_increment(context, stream->writepos - stream->readpos, 0);
+		}
 	}
 
 	return stream;
