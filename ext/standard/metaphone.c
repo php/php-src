@@ -103,15 +103,17 @@ static const char _codes[26] =
  * accesssing the array directly... */
 
 /* Look at the next letter in the word */
-#define Next_Letter (toupper(word[w_idx+1]))
+#define Raw_Next_Letter (word[w_idx+1])
+#define Next_Letter (toupper(Raw_Next_Letter))
 /* Look at the current letter in the word */
-#define Curr_Letter (toupper(word[w_idx]))
+#define Raw_Curr_Letter (word[w_idx])
+#define Curr_Letter (toupper(Raw_Curr_Letter))
 /* Go N letters back. */
 #define Look_Back_Letter(n)	(w_idx >= n ? toupper(word[w_idx-n]) : '\0')
 /* Previous letter.  I dunno, should this return null on failure? */
 #define Prev_Letter (Look_Back_Letter(1))
 /* Look two letters down.  It makes sure you don't walk off the string. */
-#define After_Next_Letter	(Next_Letter != '\0' ? toupper(word[w_idx+2]) \
+#define After_Next_Letter	(Raw_Next_Letter != '\0' ? toupper(word[w_idx+2]) \
 											     : '\0')
 #define Look_Ahead_Letter(n) (toupper(Lookahead((char *) word+w_idx, n)))
 
@@ -180,9 +182,9 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 
 /*-- The first phoneme has to be processed specially. --*/
 	/* Find our first letter */
-	for (; !isalpha(Curr_Letter); w_idx++) {
+	for (; !isalpha(Raw_Curr_Letter); w_idx++) {
 		/* On the off chance we were given nothing but crap... */
-		if (Curr_Letter == '\0') {
+		if (Raw_Curr_Letter == '\0') {
 			End_Phoned_Word();
 			return;
 		}
@@ -248,7 +250,7 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 
 
 	/* On to the metaphoning */
-	for (; Curr_Letter != '\0' &&
+	for (; Raw_Curr_Letter != '\0' &&
 		 (max_phonemes == 0 || Phone_Len < (size_t)max_phonemes);
 		 w_idx++) {
 		/* How many letters to skip because an eariler encoding handled
@@ -264,7 +266,7 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 		 */
 
 		/* Ignore non-alphas */
-		if (!isalpha(Curr_Letter))
+		if (!isalpha(Raw_Curr_Letter))
 			continue;
 
 		/* Drop duplicates, except CC */
