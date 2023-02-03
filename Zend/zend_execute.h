@@ -137,14 +137,31 @@ static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *v
 	}
 }
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict)
+/* Handles the garbage when using zend_assign_to_variable_delay_garbage_handling */
+static zend_always_inline void zend_assign_to_variable_handle_garbage(zend_refcounted *garbage)
+{
+	if (!garbage)
+		return;
+	if (GC_DELREF(garbage) == 0) {
+		rc_dtor_func(garbage);
+	} else { /* we need to split */
+		/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+		if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
+			gc_possible_root(garbage);
+		}
+	}
+}
+
+/* This is the same as zend_assign_to_variable() but without the garbage handling, this is left for the caller to do using zend_assign_to_variable_handle_garbage().
+ * The reason one might want to delay garbage handling is because the garbage handling might destroy the newly returned value while
+ * that value was supposed to be used in a result. Using zend_assign_to_variable() instead in that case would result in a potential use-after-free. */
+static zend_always_inline zval* zend_assign_to_variable_delay_garbage_handling(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict, zend_refcounted **garbage)
 {
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-			zend_refcounted *garbage;
-
 			if (Z_ISREF_P(variable_ptr)) {
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					*garbage = NULL;
 					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict);
 				}
 
@@ -153,21 +170,22 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 					break;
 				}
 			}
-			garbage = Z_COUNTED_P(variable_ptr);
+			*garbage = Z_COUNTED_P(variable_ptr);
 			zend_copy_to_variable(variable_ptr, value, value_type);
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else { /* we need to split */
-				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
-					gc_possible_root(garbage);
-				}
-			}
 			return variable_ptr;
 		}
 	} while (0);
 
+	*garbage = NULL;
 	zend_copy_to_variable(variable_ptr, value, value_type);
+	return variable_ptr;
+}
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict)
+{
+	zend_refcounted *garbage;
+	variable_ptr = zend_assign_to_variable_delay_garbage_handling(variable_ptr, value, value_type, strict, &garbage);
+	zend_assign_to_variable_handle_garbage(garbage);
 	return variable_ptr;
 }
 
