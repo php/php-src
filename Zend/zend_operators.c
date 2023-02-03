@@ -35,6 +35,9 @@
 # include <langinfo.h>
 #endif
 
+#ifdef ZEND_INTRIN_AVX2_NATIVE
+#include <immintrin.h>
+#endif
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif
@@ -54,7 +57,30 @@ static _locale_t current_locale = NULL;
 
 #define TYPE_PAIR(t1,t2) (((t1) << 4) | (t2))
 
-#if __SSE2__
+#ifdef ZEND_INTRIN_AVX2_NATIVE
+#define HAVE_BLOCKCONV
+
+#define BLOCKCONV_INIT_RANGE(start, end) \
+	const __m256i blconv_offset = _mm256_set1_epi8((signed char)(SCHAR_MIN - start)); \
+	const __m256i blconv_threshold = _mm256_set1_epi8(SCHAR_MIN + (end - start) + 1);
+
+#define BLOCKCONV_STRIDE sizeof(__m256i)
+
+#define BLOCKCONV_INIT_DELTA(delta) \
+	const __m256i blconv_delta = _mm256_set1_epi8(delta);
+
+#define BLOCKCONV_LOAD(input) \
+	__m256i blconv_operand = _mm256_loadu_si256((__m256i*)(input)); \
+	__m256i blconv_mask = _mm256_cmpgt_epi8(blconv_threshold, _mm256_add_epi8(blconv_operand, blconv_offset));
+
+#define BLOCKCONV_FOUND() _mm256_movemask_epi8(blconv_mask)
+
+#define BLOCKCONV_STORE(dest) \
+	__m256i blconv_add = _mm256_and_si256(blconv_mask, blconv_delta); \
+	__m256i blconv_result = _mm256_add_epi8(blconv_operand, blconv_add); \
+	_mm256_storeu_si256((__m256i*)(dest), blconv_result);
+
+#elif __SSE2__
 #define HAVE_BLOCKCONV
 
 /* Common code for SSE2 accelerated character case conversion */
