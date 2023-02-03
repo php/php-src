@@ -3429,8 +3429,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 {
 	void *entry;
 
-	if ((JIT_G(debug) & ZEND_JIT_DEBUG_IR_SRC)
-	 && (!name || (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_STUBS))) {
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_SRC) {
 		if (name) fprintf(stderr, "%s: ; after folding\n", name);
 		ir_save(ctx, stderr);
 	}
@@ -3449,8 +3448,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	ir_sccp(ctx);
 #endif
 
-	if ((JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCCP)
-	 && (!name || (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_STUBS))) {
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCCP) {
 		if (name) fprintf(stderr, "%s: ; after SCCP\n", name);
 		ir_save(ctx, stderr);
 	}
@@ -3462,8 +3460,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	ir_build_dominators_tree(ctx);
 	ir_find_loops(ctx);
 
-	if ((JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCCP)
-	 && (!name || (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_STUBS))) {
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCCP) {
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
 			ir_dump_cfg(ctx, stderr);
 		}
@@ -3472,8 +3469,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	ir_gcm(ctx);
 	ir_schedule(ctx);
 
-	if ((JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE)
-	 && (!name || (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_STUBS))) {
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE) {
 		if (name) fprintf(stderr, "%s: ; after schedule\n", name);
 		ir_save(ctx, stderr);
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
@@ -3488,8 +3484,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	ir_coalesce(ctx);
 	ir_reg_alloc(ctx);
 
-	if ((JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_REGS)
-	 && (!name || (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_STUBS))) {
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_REGS) {
 		if (name) fprintf(stderr, "%s: ; after register allocation\n", name);
 		ir_save(ctx, stderr);
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
@@ -3502,8 +3497,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 
 	ir_schedule_blocks(ctx);
 
-	if ((JIT_G(debug) & ZEND_JIT_DEBUG_IR_FINAL)
-	 && (!name || (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_STUBS))) {
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_FINAL) {
 		if (name) fprintf(stderr, "%s: ; final\n", name);
 		ir_save(ctx, stderr);
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
