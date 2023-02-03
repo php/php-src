@@ -3985,12 +3985,22 @@ static int zend_jit_setup(void)
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_PERF_DUMP) {
 		ir_perf_jitdump_open();
 	}
+
+	zend_long debug = JIT_G(debug);
+	if (!(debug & ZEND_JIT_DEBUG_ASM_STUBS)) {
+		JIT_G(debug) &= ~(ZEND_JIT_DEBUG_IR_SRC|ZEND_JIT_DEBUG_IR_FINAL|ZEND_JIT_DEBUG_IR_CFG|ZEND_JIT_DEBUG_IR_REGS|
+			ZEND_JIT_DEBUG_IR_AFTER_SCCP|ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE|ZEND_JIT_DEBUG_IR_AFTER_REGS);
+	}
+
 	if (!zend_jit_calc_trace_prologue_size()) {
+	    JIT_G(debug) = debug;
 		return FAILURE;
 	}
 	if (!zend_jit_setup_stubs()) {
+	    JIT_G(debug) = debug;
 		return FAILURE;
 	}
+	JIT_G(debug) = debug;
 
 	return SUCCESS;
 }
