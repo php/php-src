@@ -66,19 +66,19 @@ runs:
           --with-cdb \
           --enable-flatfile \
           --enable-inifile \
-          --with-tcadb \
+          $(if [ -f /etc/alpine-release ]; then echo ; else echo --with-tcadb; fi) \
           --with-lmdb \
-          --with-qdbm \
+          $(if [ -f /etc/alpine-release ]; then echo --with-gdbm; else echo --with-qdbm; fi) \
           --with-snmp \
           --with-unixODBC \
-          --with-imap \
+          $(if [ -f /etc/alpine-release ]; then echo ; else echo --with-imap; fi) \
           --with-imap-ssl \
           --with-pdo-odbc=unixODBC,/usr \
-          --with-pdo-oci=shared,instantclient,/opt/oracle/instantclient \
-          --with-oci8=shared,instantclient,/opt/oracle/instantclient \
+          $(if [ -f /etc/alpine-release ]; then echo ; else echo --with-pdo-oci=shared,instantclient,/opt/oracle/instantclient; fi) \
+          $(if [ -f /etc/alpine-release ]; then echo ; else echo --with-oci8=shared,instantclient,/opt/oracle/instantclient; fi) \
           --with-config-file-path=/etc \
           --with-config-file-scan-dir=/etc/php.d \
-          --with-pdo-firebird \
+          $(if [ -f /etc/alpine-release ]; then echo ; else echo --with-pdo-firebird; fi) \
           --with-pdo-dblib \
           --enable-werror \
           ${{ inputs.configurationParameters }}

@@ -53,6 +53,9 @@ jobs:
     container:
       image: "${{ matrix.alpine && 'alpine:3.15' || 'ubuntu:focal' }}"
     services:
+      mysql:
+        image: mysql:8
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5 -e MYSQL_ROOT_PASSWORD=rootu -e MYSQL_USER=useru -e MYSQL_PASSWORD=userp -e MYSQL_DATABASE=test --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
       mssql:
         image: mcr.microsoft.com/mssql/server:2019-latest
         env:

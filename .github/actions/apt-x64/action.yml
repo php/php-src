@@ -11,9 +11,11 @@ runs:
             apk add \
                 build-base \
                 autoconf \
+                unzip \
                 bison \
                 re2c \
                 pkgconf \
+                mysql-client \
                 aspell-dev \
                 bzip2-dev \
                 curl-dev \
@@ -36,17 +38,34 @@ runs:
                 readline-dev \
                 sqlite-dev \
                 tidyhtml-dev \
-                tzdata
+                krb5-dev \
+                gdbm-dev \
+                lmdb-dev \
+                argon2-dev \
+                enchant2-dev \
+                freetds-dev \
+                imap-dev \
+                net-snmp-dev \
+                openldap-dev \
+                unixodbc-dev \
+                postgresql14-dev \
+                tzdata \
+                musl-locales \
+                musl-locales-lang
         else
             export ENV DEBIAN_FRONTEND=noninteractive
             apt-get -y -qq update
             apt-get install -y -q \
+                build-essential \
+                autoconf \
+                unzip \
                 bison \
                 re2c \
                 locales \
                 ldap-utils \
                 openssl \
                 slapd \
+                mysql-client \
                 language-pack-de \
                 libgmp-dev \
                 libicu-dev \
@@ -57,6 +76,7 @@ runs:
                 libsasl2-dev \
                 libxpm-dev \
                 libzip-dev \
+                libbz2-dev \
                 libsqlite3-dev \
                 libwebp-dev \
                 libonig-dev \
