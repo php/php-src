@@ -78,7 +78,8 @@ static const char _codes[26] =
 };
 
 
-#define ENCODE(c) (isalpha(c) ? _codes[((toupper(c)) - 'A')] : 0)
+/* Note: these macros require an uppercase letter input! */
+#define ENCODE(c) (isalpha(c) ? _codes[((c) - 'A')] : 0)
 
 #define isvowel(c)  (ENCODE(c) & 1)		/* AEIOU */
 
