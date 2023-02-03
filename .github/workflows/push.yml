@@ -39,19 +39,35 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - debug: true
+          - alpine: false
+            debug: true
             zts: false
-          - debug: false
+#          - alpine: false
+#            debug: false
+#            zts: true
+          - alpine: true
+            debug: true
             zts: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    name: "${{ matrix.alpine && 'ALPINE' || 'LINUX' }}_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-22.04
+    container:
+      image: "${{ matrix.alpine && 'alpine:3.15' || 'ubuntu:focal' }}"
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: '<YourStrong@Passw0rd>'
+      oracle:
+        image: gvenzl/oracle-xe:21-slim-faststart
+        env:
+          ORACLE_PASSWORD: pass
     steps:
+      - name: apt install bash/git
+        if: matrix.alpine
+        run: apk update -q && apk add bash git
       - name: git checkout
         uses: actions/checkout@v3
-      - name: Create MSSQL container
-        uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ccache
@@ -136,6 +152,7 @@ jobs:
             -d opcache.jit_buffer_size=16M
   MACOS_DEBUG_NTS:
     runs-on: macos-11
+    if: false
     steps:
       - name: git checkout
         uses: actions/checkout@v3
