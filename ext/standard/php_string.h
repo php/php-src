@@ -32,7 +32,7 @@ PHP_MINIT_FUNCTION(string_intrin);
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
 #define strnatcasecmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 1)
-PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive);
+PHPAPI ZEND_ATTRIBUTE_PURE int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive);
 PHPAPI struct lconv *localeconv_r(struct lconv *out);
 PHPAPI char *php_strtoupper(char *s, size_t len);
 PHPAPI char *php_strtolower(char *s, size_t len);
@@ -46,7 +46,7 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t w
 PHPAPI void php_stripcslashes(zend_string *str);
 PHPAPI zend_string *php_basename(const char *s, size_t len, const char *suffix, size_t sufflen);
 PHPAPI size_t php_dirname(char *str, size_t len);
-PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
+PHPAPI ZEND_ATTRIBUTE_PURE char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
 PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const char *needle,
 		size_t needle_len, const char *str, size_t str_len);
 PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len, int mode);
@@ -55,12 +55,12 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_
 PHPAPI void php_implode(const zend_string *delim, HashTable *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 
-PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
-PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
+PHPAPI ZEND_ATTRIBUTE_PURE size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
+PHPAPI ZEND_ATTRIBUTE_PURE size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive);
-PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
-PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
+PHPAPI ZEND_ATTRIBUTE_PURE int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive);
+PHPAPI ZEND_ATTRIBUTE_PURE int string_natural_compare_function(zval *result, zval *op1, zval *op2);
+PHPAPI ZEND_ATTRIBUTE_PURE int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 
 PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_status *status, char *str, zend_long len);
 

@@ -75,7 +75,7 @@ static inline void scdf_add_def_to_worklist(scdf_ctx *scdf, int var_num) {
 	}
 }
 
-static inline uint32_t scdf_edge(const zend_cfg *cfg, int from, int to) {
+static inline ZEND_ATTRIBUTE_PURE uint32_t scdf_edge(const zend_cfg *cfg, int from, int to) {
 	const zend_basic_block *to_block = cfg->blocks + to;
 	int i;
 
@@ -89,7 +89,7 @@ static inline uint32_t scdf_edge(const zend_cfg *cfg, int from, int to) {
 	ZEND_UNREACHABLE();
 }
 
-static inline bool scdf_is_edge_feasible(const scdf_ctx *scdf, int from, int to) {
+static inline ZEND_ATTRIBUTE_PURE bool scdf_is_edge_feasible(const scdf_ctx *scdf, int from, int to) {
 	uint32_t edge = scdf_edge(&scdf->ssa->cfg, from, to);
 	return zend_bitset_in(scdf->feasible_edges, edge);
 }

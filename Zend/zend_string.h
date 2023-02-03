@@ -34,7 +34,7 @@ ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
 ZEND_API extern zend_string_init_existing_interned_func_t zend_string_init_existing_interned;
 
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
-ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
+ZEND_API ZEND_ATTRIBUTE_PURE zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
 ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
 
 ZEND_API zend_string *zend_string_concat2(
@@ -361,28 +361,28 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 	}
 }
 
-static zend_always_inline bool zend_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
+static zend_always_inline ZEND_ATTRIBUTE_PURE bool zend_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
 {
 	return ZSTR_LEN(s1) == s2_length && !memcmp(ZSTR_VAL(s1), s2, s2_length);
 }
 
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2);
+ZEND_API ZEND_ATTRIBUTE_PURE bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2);
 END_EXTERN_C()
 #else
-static zend_always_inline bool zend_string_equal_val(const zend_string *s1, const zend_string *s2)
+static zend_always_inline ZEND_ATTRIBUTE_PURE bool zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 #endif
 
-static zend_always_inline bool zend_string_equal_content(const zend_string *s1, const zend_string *s2)
+static zend_always_inline ZEND_ATTRIBUTE_PURE bool zend_string_equal_content(const zend_string *s1, const zend_string *s2)
 {
 	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
-static zend_always_inline bool zend_string_equals(const zend_string *s1, const zend_string *s2)
+static zend_always_inline ZEND_ATTRIBUTE_PURE bool zend_string_equals(const zend_string *s1, const zend_string *s2)
 {
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
@@ -396,12 +396,12 @@ static zend_always_inline bool zend_string_equals(const zend_string *s1, const z
 #define zend_string_equals_literal(str, literal) \
 	zend_string_equals_cstr(str, "" literal, sizeof(literal) - 1)
 
-static zend_always_inline bool zend_string_starts_with_cstr(const zend_string *str, const char *prefix, size_t prefix_length)
+static zend_always_inline ZEND_ATTRIBUTE_PURE bool zend_string_starts_with_cstr(const zend_string *str, const char *prefix, size_t prefix_length)
 {
 	return ZSTR_LEN(str) >= prefix_length && !memcmp(ZSTR_VAL(str), prefix, prefix_length);
 }
 
-static zend_always_inline bool zend_string_starts_with(const zend_string *str, const zend_string *prefix)
+static zend_always_inline ZEND_ATTRIBUTE_PURE bool zend_string_starts_with(const zend_string *str, const zend_string *prefix)
 {
 	return zend_string_starts_with_cstr(str, ZSTR_VAL(prefix), ZSTR_LEN(prefix));
 }
@@ -442,7 +442,7 @@ static zend_always_inline bool zend_string_starts_with(const zend_string *str, c
  *                  -- Ralf S. Engelschall <rse@engelschall.com>
  */
 
-static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_PURE zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
 	zend_ulong hash = Z_UL(5381);
 

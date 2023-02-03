@@ -1206,8 +1206,8 @@ END_EXTERN_C()
 /* The default value for CG(compiler_options) during eval() */
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
 
-ZEND_API bool zend_is_op_long_compatible(const zval *op);
-ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, const zval *op2);
-ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op);
+ZEND_API ZEND_ATTRIBUTE_PURE bool zend_is_op_long_compatible(const zval *op);
+ZEND_API ZEND_ATTRIBUTE_PURE bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, const zval *op2);
+ZEND_API ZEND_ATTRIBUTE_PURE bool zend_unary_op_produces_error(uint32_t opcode, const zval *op);
 
 #endif /* ZEND_COMPILE_H */

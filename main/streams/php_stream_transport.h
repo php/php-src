@@ -211,6 +211,6 @@ typedef struct _php_stream_xport_crypto_param {
 } php_stream_xport_crypto_param;
 
 BEGIN_EXTERN_C()
-PHPAPI HashTable *php_stream_xport_get_hash(void);
+PHPAPI ZEND_ATTRIBUTE_CONST HashTable *php_stream_xport_get_hash(void);
 PHPAPI php_stream_transport_factory_func php_stream_generic_socket_factory;
 END_EXTERN_C()

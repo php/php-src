@@ -183,15 +183,15 @@ void zend_shared_alloc_safe_unlock(void);
 void zend_shared_alloc_init_xlat_table(void);
 void zend_shared_alloc_destroy_xlat_table(void);
 void zend_shared_alloc_clear_xlat_table(void);
-uint32_t zend_shared_alloc_checkpoint_xlat_table(void);
+ZEND_ATTRIBUTE_PURE uint32_t zend_shared_alloc_checkpoint_xlat_table(void);
 void zend_shared_alloc_restore_xlat_table(uint32_t checkpoint);
 void zend_shared_alloc_register_xlat_entry(const void *key, const void *value);
-void *zend_shared_alloc_get_xlat_entry(const void *key);
+ZEND_ATTRIBUTE_PURE void *zend_shared_alloc_get_xlat_entry(const void *key);
 
 size_t zend_shared_alloc_get_free_memory(void);
 void zend_shared_alloc_save_state(void);
 void zend_shared_alloc_restore_state(void);
-const char *zend_accel_get_shared_model(void);
+ZEND_ATTRIBUTE_PURE const char *zend_accel_get_shared_model(void);
 
 /**
  * Memory write protection

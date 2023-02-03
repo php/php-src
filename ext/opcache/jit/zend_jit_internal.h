@@ -731,7 +731,7 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	return NULL;
 }
 
-static inline bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
+static inline bool ZEND_ATTRIBUTE_PURE zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
 {
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
 #ifdef _WIN32
@@ -751,7 +751,7 @@ static inline bool zend_jit_may_be_modified(const zend_function *func, const zen
 	return 1;
 }
 
-static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *opline)
+static zend_always_inline ZEND_ATTRIBUTE_PURE bool zend_jit_may_be_polymorphic_call(const zend_op *opline)
 {
 	if (opline->opcode == ZEND_INIT_FCALL
 	 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
@@ -835,7 +835,7 @@ static zend_always_inline uint32_t concrete_type(uint32_t value_type)
 	return floor_log2(value_type & (MAY_BE_ANY|MAY_BE_UNDEF));
 }
 
-static zend_always_inline bool is_signed(double d)
+static zend_always_inline ZEND_ATTRIBUTE_CONST bool is_signed(double d)
 {
 	return (((unsigned char*)&d)[sizeof(double)-1] & 0x80) != 0;
 }

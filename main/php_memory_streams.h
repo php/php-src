@@ -47,8 +47,8 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage, const char *tmpdir STREAMS_DC);
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, const char *buf, size_t length STREAMS_DC);
 
-PHPAPI int php_stream_mode_from_str(const char *mode);
-PHPAPI const char *_php_stream_mode_to_str(int mode);
+PHPAPI ZEND_ATTRIBUTE_PURE int php_stream_mode_from_str(const char *mode);
+PHPAPI ZEND_ATTRIBUTE_CONST const char *_php_stream_mode_to_str(int mode);
 
 END_EXTERN_C()
 

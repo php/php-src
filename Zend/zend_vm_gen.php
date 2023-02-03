@@ -2350,9 +2350,9 @@ function gen_vm_opcodes_header(
     $str .= "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n";
     $str .= "\n";
     $str .= "BEGIN_EXTERN_C()\n\n";
-    $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode);\n";
-    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);\n";
-    $str .= "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length);\n\n";
+    $str .= "ZEND_API ZEND_ATTRIBUTE_CONST const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode);\n";
+    $str .= "ZEND_API ZEND_ATTRIBUTE_CONST uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);\n";
+    $str .= "ZEND_API ZEND_ATTRIBUTE_PURE uint8_t zend_get_opcode_id(const char *name, size_t length);\n\n";
     $str .= "END_EXTERN_C()\n\n";
 
     $code_len = strlen((string) $max_opcode);

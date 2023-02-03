@@ -217,15 +217,15 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit);
-ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
+ZEND_API ZEND_ATTRIBUTE_PURE bool zend_alloc_in_memory_limit_error_reporting(void);
 
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown);
-ZEND_API bool is_zend_mm(void);
-ZEND_API bool is_zend_ptr(const void *ptr);
+ZEND_API ZEND_ATTRIBUTE_CONST bool is_zend_mm(void);
+ZEND_API ZEND_ATTRIBUTE_PURE bool is_zend_ptr(const void *ptr);
 
-ZEND_API size_t zend_memory_usage(bool real_usage);
-ZEND_API size_t zend_memory_peak_usage(bool real_usage);
+ZEND_API ZEND_ATTRIBUTE_PURE size_t zend_memory_usage(bool real_usage);
+ZEND_API ZEND_ATTRIBUTE_PURE size_t zend_memory_peak_usage(bool real_usage);
 ZEND_API void zend_memory_reset_peak_usage(void);
 
 /* fast cache for HashTables */
@@ -250,7 +250,7 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _zend_mm_alloc(zend_mm_heap 
 ZEND_API void   ZEND_FASTCALL _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_realloc2(zend_mm_heap *heap, void *p, size_t size, size_t copy_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API ZEND_ATTRIBUTE_PURE size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 #define zend_mm_alloc(heap, size)			_zend_mm_alloc((heap), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define zend_mm_free(heap, p)				_zend_mm_free((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
@@ -265,7 +265,7 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *p ZE
 #define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap);
-ZEND_API zend_mm_heap *zend_mm_get_heap(void);
+ZEND_API ZEND_ATTRIBUTE_PURE zend_mm_heap *zend_mm_get_heap(void);
 
 ZEND_API size_t zend_mm_gc(zend_mm_heap *heap);
 
@@ -273,7 +273,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap);
 #define ZEND_MM_CUSTOM_HEAP_STD   1
 #define ZEND_MM_CUSTOM_HEAP_DEBUG 2
 
-ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap);
+ZEND_API ZEND_ATTRIBUTE_PURE bool zend_mm_is_custom_heap(zend_mm_heap *new_heap);
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
                                           void  (*_free)(void*),
@@ -309,7 +309,7 @@ struct _zend_mm_storage {
 	void *data;
 };
 
-ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
+ZEND_API ZEND_ATTRIBUTE_PURE zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
 ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void *data, size_t data_size);
 
 /*
@@ -398,7 +398,7 @@ static void apc_init_heap(void)
 */
 
 #ifdef ZTS
-size_t zend_mm_globals_size(void);
+ZEND_ATTRIBUTE_CONST size_t zend_mm_globals_size(void);
 #endif
 
 END_EXTERN_C()

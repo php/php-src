@@ -56,7 +56,7 @@ BEGIN_EXTERN_C()
 
 extern ZEND_API int zend_func_info_rid;
 
-uint32_t zend_get_internal_func_info(
+ZEND_ATTRIBUTE_PURE uint32_t zend_get_internal_func_info(
 	const zend_function *callee_func, const zend_call_info *call_info, const zend_ssa *ssa);
 ZEND_API uint32_t zend_get_func_info(
 	const zend_call_info *call_info, const zend_ssa *ssa,

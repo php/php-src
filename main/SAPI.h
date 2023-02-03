@@ -195,10 +195,10 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
 
 SAPI_API int sapi_flush(void);
-SAPI_API zend_stat_t *sapi_get_stat(void);
-SAPI_API char *sapi_getenv(const char *name, size_t name_len);
+SAPI_API ZEND_ATTRIBUTE_PURE zend_stat_t *sapi_get_stat(void);
+SAPI_API ZEND_ATTRIBUTE_PURE char *sapi_getenv(const char *name, size_t name_len);
 
-SAPI_API char *sapi_get_default_content_type(void);
+SAPI_API ZEND_ATTRIBUTE_PURE char *sapi_get_default_content_type(void);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header);
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len);
 SAPI_API void sapi_activate_headers_only(void);
@@ -208,7 +208,7 @@ SAPI_API int sapi_force_http_10(void);
 
 SAPI_API int sapi_get_target_uid(uid_t *);
 SAPI_API int sapi_get_target_gid(gid_t *);
-SAPI_API double sapi_get_request_time(void);
+SAPI_API ZEND_ATTRIBUTE_PURE double sapi_get_request_time(void);
 SAPI_API void sapi_terminate_process(void);
 END_EXTERN_C()
 

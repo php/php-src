@@ -174,15 +174,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p);
 ZEND_API void ZEND_FASTCALL zend_hash_packed_del_val(HashTable *ht, zval *zv);
 
 /* Data retrieval */
-ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *key);
-ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char *key, size_t len);
-ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h);
-ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h);
+ZEND_API ZEND_ATTRIBUTE_PURE zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *key);
+ZEND_API ZEND_ATTRIBUTE_PURE zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char *key, size_t len);
+ZEND_API ZEND_ATTRIBUTE_PURE zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h);
+ZEND_API ZEND_ATTRIBUTE_PURE zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h);
 
 /* The same as zend_hash_find(), but hash value of the key must be already calculated. */
-ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, const zend_string *key);
+ZEND_API ZEND_ATTRIBUTE_PURE zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, const zend_string *key);
 
-static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, bool known_hash)
+static ZEND_ATTRIBUTE_PURE zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	if (known_hash) {
 		return zend_hash_find_known_hash(ht, key);
@@ -211,8 +211,8 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 
 
 /* Find or add NULL, if doesn't exist */
-ZEND_API zval* ZEND_FASTCALL zend_hash_lookup(HashTable *ht, zend_string *key);
-ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h);
+ZEND_API ZEND_ATTRIBUTE_PURE zval* ZEND_FASTCALL zend_hash_lookup(HashTable *ht, zend_string *key);
+ZEND_API ZEND_ATTRIBUTE_PURE zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h);
 
 #define ZEND_HASH_INDEX_LOOKUP(_ht, _h, _ret) do { \
 		if (EXPECTED(HT_IS_PACKED(_ht))) { \
@@ -294,7 +294,7 @@ ZEND_API void  zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
 
 typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
-ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered);
+ZEND_API ZEND_ATTRIBUTE_PURE int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered);
 ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 

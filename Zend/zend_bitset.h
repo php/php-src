@@ -45,7 +45,7 @@ typedef zend_ulong *zend_bitset;
 	(zend_bitset)do_alloca((n) * ZEND_BITSET_ELM_SIZE, use_heap)
 
 /* Number of trailing zero bits (0x01 -> 0; 0x40 -> 6; 0x00 -> LEN) */
-static zend_always_inline int zend_ulong_ntz(zend_ulong num)
+static zend_always_inline ZEND_ATTRIBUTE_CONST int zend_ulong_ntz(zend_ulong num)
 {
 #if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) \
 	&& SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
@@ -83,7 +83,7 @@ static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 }
 
 /* Number of leading zero bits (Undefined for zero) */
-static zend_always_inline int zend_ulong_nlz(zend_ulong num)
+static zend_always_inline ZEND_ATTRIBUTE_CONST int zend_ulong_nlz(zend_ulong num)
 {
 #if (defined(__GNUC__) || __has_builtin(__builtin_clzl)) \
 	&& SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CLZL)
@@ -165,7 +165,7 @@ static inline void zend_bitset_fill(zend_bitset set, uint32_t len)
 	memset(set, 0xff, len * ZEND_BITSET_ELM_SIZE);
 }
 
-static inline bool zend_bitset_equal(zend_bitset set1, zend_bitset set2, uint32_t len)
+static inline ZEND_ATTRIBUTE_PURE bool zend_bitset_equal(zend_bitset set1, zend_bitset set2, uint32_t len)
 {
     return memcmp(set1, set2, len * ZEND_BITSET_ELM_SIZE) == 0;
 }
@@ -232,7 +232,7 @@ static inline bool zend_bitset_subset(zend_bitset set1, zend_bitset set2, uint32
 	return 1;
 }
 
-static inline int zend_bitset_first(zend_bitset set, uint32_t len)
+static inline ZEND_ATTRIBUTE_PURE int zend_bitset_first(zend_bitset set, uint32_t len)
 {
 	uint32_t i;
 
@@ -244,7 +244,7 @@ static inline int zend_bitset_first(zend_bitset set, uint32_t len)
 	return -1; /* empty set */
 }
 
-static inline int zend_bitset_last(zend_bitset set, uint32_t len)
+static inline ZEND_ATTRIBUTE_PURE int zend_bitset_last(zend_bitset set, uint32_t len)
 {
 	uint32_t i = len;
 

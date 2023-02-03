@@ -26,7 +26,7 @@
 #define php_crc32_bulk_init() (0 ^ 0xffffffff)
 #define php_crc32_bulk_end(c) ((c) ^ 0xffffffff)
 
-PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr);
+PHPAPI ZEND_ATTRIBUTE_PURE uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr);
 
 /* Return FAILURE if stream reading fail */
 PHPAPI int php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr);

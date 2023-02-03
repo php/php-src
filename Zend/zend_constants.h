@@ -73,11 +73,11 @@ void free_zend_constant(zval *zv);
 void zend_startup_constants(void);
 void zend_shutdown_constants(void);
 void zend_register_standard_constants(void);
-ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
-ZEND_API zval *zend_get_constant(zend_string *name);
-ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
-ZEND_API zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, uint32_t flags);
-ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, zend_class_entry *scope, uint32_t flags);
+ZEND_API ZEND_ATTRIBUTE_PURE bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
+ZEND_API ZEND_ATTRIBUTE_PURE zval *zend_get_constant(zend_string *name);
+ZEND_API ZEND_ATTRIBUTE_PURE zval *zend_get_constant_str(const char *name, size_t name_len);
+ZEND_API ZEND_ATTRIBUTE_PURE zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, uint32_t flags);
+ZEND_API ZEND_ATTRIBUTE_PURE zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, zend_class_entry *scope, uint32_t flags);
 ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number);
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number);
 ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number);
@@ -89,9 +89,9 @@ ZEND_API zend_result zend_register_constant(zend_constant *c);
 void zend_copy_constants(HashTable *target, HashTable *source);
 #endif
 
-ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t name_len);
+ZEND_API ZEND_ATTRIBUTE_PURE zend_constant *_zend_get_special_const(const char *name, size_t name_len);
 
-static zend_always_inline zend_constant *zend_get_special_const(
+static zend_always_inline ZEND_ATTRIBUTE_PURE zend_constant *zend_get_special_const(
 		const char *name, size_t name_len) {
 	if (name_len == 4 || name_len == 5) {
 		return _zend_get_special_const(name, name_len);

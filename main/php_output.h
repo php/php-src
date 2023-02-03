@@ -192,10 +192,10 @@ PHPAPI int php_output_activate(void);
 PHPAPI void php_output_deactivate(void);
 
 PHPAPI void php_output_set_status(int status);
-PHPAPI int php_output_get_status(void);
+PHPAPI ZEND_ATTRIBUTE_PURE int php_output_get_status(void);
 PHPAPI void php_output_set_implicit_flush(int flush);
-PHPAPI const char *php_output_get_start_filename(void);
-PHPAPI int php_output_get_start_lineno(void);
+PHPAPI ZEND_ATTRIBUTE_PURE const char *php_output_get_start_filename(void);
+PHPAPI ZEND_ATTRIBUTE_PURE int php_output_get_start_lineno(void);
 
 PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len);
 PHPAPI size_t php_output_write(const char *str, size_t len);
@@ -211,8 +211,8 @@ PHPAPI void php_output_discard_all(void);
 
 PHPAPI int php_output_get_contents(zval *p);
 PHPAPI int php_output_get_length(zval *p);
-PHPAPI int php_output_get_level(void);
-PHPAPI php_output_handler* php_output_get_active_handler(void);
+PHPAPI ZEND_ATTRIBUTE_PURE int php_output_get_level(void);
+PHPAPI ZEND_ATTRIBUTE_PURE php_output_handler* php_output_get_active_handler(void);
 
 PHPAPI int php_output_start_default(void);
 PHPAPI int php_output_start_devnull(void);

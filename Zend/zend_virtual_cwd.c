@@ -434,7 +434,7 @@ static inline void realpath_cache_add(const char *path, size_t path_len, const c
 }
 /* }}} */
 
-static inline realpath_cache_bucket* realpath_cache_find(const char *path, size_t path_len, time_t t) /* {{{ */
+static inline ZEND_ATTRIBUTE_PURE realpath_cache_bucket* realpath_cache_find(const char *path, size_t path_len, time_t t) /* {{{ */
 {
 	zend_ulong key = realpath_cache_key(path, path_len);
 	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));

@@ -176,7 +176,7 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode);
 CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
-CWD_API int virtual_access(const char *pathname, int mode);
+CWD_API ZEND_ATTRIBUTE_PURE int virtual_access(const char *pathname, int mode);
 
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
@@ -237,10 +237,10 @@ extern virtual_cwd_globals cwd_globals;
 
 CWD_API void realpath_cache_clean(void);
 CWD_API void realpath_cache_del(const char *path, size_t path_len);
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
+CWD_API ZEND_ATTRIBUTE_PURE realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
 CWD_API zend_long realpath_cache_size(void);
 CWD_API zend_long realpath_cache_max_buckets(void);
-CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
+CWD_API ZEND_ATTRIBUTE_PURE realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #ifdef CWD_EXPORTS
 extern void virtual_cwd_main_cwd_init(uint8_t);

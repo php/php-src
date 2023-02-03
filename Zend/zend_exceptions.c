@@ -80,7 +80,7 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 }
 /* }}} */
 
-static inline zend_class_entry *i_get_exception_base(zend_object *object) /* {{{ */
+static inline ZEND_ATTRIBUTE_PURE zend_class_entry *i_get_exception_base(zend_object *object) /* {{{ */
 {
 	return instanceof_function(object->ce, zend_ce_exception) ? zend_ce_exception : zend_ce_error;
 }

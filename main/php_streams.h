@@ -306,7 +306,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
 #define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET)
 #define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence))
 
-PHPAPI zend_off_t _php_stream_tell(php_stream *stream);
+PHPAPI ZEND_ATTRIBUTE_PURE zend_off_t _php_stream_tell(php_stream *stream);
 #define php_stream_tell(stream)	_php_stream_tell((stream))
 
 PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t count);
@@ -326,7 +326,7 @@ PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_
 /* php_stream_printf macro & function require */
 #define php_stream_printf _php_stream_printf
 
-PHPAPI bool _php_stream_eof(php_stream *stream);
+PHPAPI ZEND_ATTRIBUTE_PURE bool _php_stream_eof(php_stream *stream);
 #define php_stream_eof(stream)	_php_stream_eof((stream))
 
 PHPAPI int _php_stream_getc(php_stream *stream);
@@ -603,12 +603,12 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC)
 
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
-PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(void);
+PHPAPI ZEND_ATTRIBUTE_PURE HashTable *_php_stream_get_url_stream_wrappers_hash(void);
 #define php_stream_get_url_stream_wrappers_hash()	_php_stream_get_url_stream_wrappers_hash()
-PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
-PHPAPI HashTable *_php_get_stream_filters_hash(void);
+PHPAPI ZEND_ATTRIBUTE_CONST HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
+PHPAPI ZEND_ATTRIBUTE_PURE HashTable *_php_get_stream_filters_hash(void);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash()
-PHPAPI HashTable *php_get_stream_filters_hash_global(void);
+PHPAPI ZEND_ATTRIBUTE_CONST HashTable *php_get_stream_filters_hash_global(void);
 extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 END_EXTERN_C()
 #endif
