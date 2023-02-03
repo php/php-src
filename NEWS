@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-10292 (Made the default value of the first param of srand() and
     mt_srand() unknown). (kocsismate)
   . Fix incorrect check in cs_8559_5 in map_from_unicode(). (nielsdos)
+  . Fix bug GH-9697 for reset/end/next/prev() attempting to move pointer of
+    properties table for certain internal classes such as FFI classes
 
 02 Feb 2023, PHP 8.2.2
 
