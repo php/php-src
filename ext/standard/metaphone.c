@@ -122,15 +122,13 @@ static const char _codes[26] =
 /* I probably could have just used strlen... */
 static char Lookahead(char *word, int how_far)
 {
-	char letter_ahead = '\0';	/* null by default */
 	int idx;
 	for (idx = 0; word[idx] != '\0' && idx < how_far; idx++);
 	/* Edge forward in the string... */
 
-	letter_ahead = word[idx];	/* idx will be either == to how_far or
-								 * at the end of the string
+	return  word[idx];			/* idx will be either == to how_far or
+								 * at the end of the string where ot will be null
 								 */
-	return letter_ahead;
 }
 
 
