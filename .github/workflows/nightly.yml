@@ -7,7 +7,6 @@ jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
     if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
@@ -124,7 +123,6 @@ jobs:
         debug: [true, false]
         zts: [true, false]
     name: "${{ matrix.branch.name }}_LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-latest
     container:
       image: ubuntu:20.04
     env:

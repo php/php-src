@@ -77,7 +77,6 @@ jobs:
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
     name: LINUX_X32_DEBUG_ZTS
-    runs-on: ubuntu-latest
     container:
       image: ubuntu:20.04
     env:
