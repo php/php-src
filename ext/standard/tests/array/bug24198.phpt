@@ -1,4 +1,4 @@
---TEST--n
+--TEST--
 Bug #24198 (array_merge_recursive() invalid recursion detection)
 --FILE--
 <?php

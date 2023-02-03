@@ -1,5 +1,5 @@
---TEST--Bug #64506
-PHP can not read or write file correctly if file name have special char like š
+--TEST--
+Bug #64506 - PHP can not read or write file correctly if file name have special char like š
 --SKIPIF--
 <?php
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
