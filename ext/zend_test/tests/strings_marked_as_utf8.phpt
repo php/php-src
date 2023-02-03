@@ -107,6 +107,14 @@ $s = $o . $o;
 var_dump($s);
 var_dump(zend_test_is_string_marked_as_valid_utf8($s));
 
+echo "str_repeat:\n";
+$string = "a";
+$string_concat = str_repeat($string, 100);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string = "\xff";
+$string_concat = str_repeat($string, 100);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+
 ?>
 --EXPECT--
 Empty strings:
@@ -148,3 +156,6 @@ bool(true)
 Concatenation of objects:
 string(2) "zz"
 bool(true)
+str_repeat:
+bool(true)
+bool(false)
