@@ -3376,7 +3376,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			jit->ctx.fixed_stack_frame_size = 0;
 #else
 			jit->ctx.fixed_stack_red_zone = 0;
-			jit->ctx.fixed_stack_frame_size = 0;
+			jit->ctx.fixed_stack_frame_size = 16;
 #endif
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
 			jit->ctx.fixed_regset |= (1<<5); /* prevent %rbp (%r5) usage */
