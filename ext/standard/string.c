@@ -5059,6 +5059,7 @@ PHP_FUNCTION(str_repeat)
 	/* Initialize the result string */
 	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);
 	result_len = ZSTR_LEN(input_str) * mult;
+	ZSTR_COPY_CONCAT_PROPERTIES(result, input_str);
 
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if (ZSTR_LEN(input_str) == 1) {
