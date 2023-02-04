@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fix #77894 (DOMNode::C14N() very slow on generated DOMDocuments even after
     normalisation). (nielsdos)
 
+- Streams:
+  . Implement GH-8641 (STREAM_NOTIFY_COMPLETED over HTTP never emitted).
+    (nielsdos, Jakub Zelenka)
+
 08 Jun 2023, PHP 8.3.0alpha1
 
 - CLI:

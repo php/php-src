@@ -72,6 +72,10 @@ PHP 8.3 UPGRADE NOTES
   . posix_ttyname() now raises type warnings for integers following the usual ZPP semantics
     and value warnings for invalid file descriptor integers.
 
+- Streams
+  . Streams can now emit the STREAM_NOTIFY_COMPLETED notification. This was previously
+    not implemented.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
