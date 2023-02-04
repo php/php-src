@@ -189,9 +189,11 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	}
 
 	ssize_t nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), recv_flags);
-	int err = php_socket_errno();
+
+	bool old_eof = stream->eof;
 
 	if (nr_bytes < 0) {
+		int err = php_socket_errno();
 		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			nr_bytes = 0;
 		} else {
@@ -203,6 +205,9 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 
 	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
+	}
+	if (old_eof != stream->eof) {
+		php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
 	}
 
 	return nr_bytes;
