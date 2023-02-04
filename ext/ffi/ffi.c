@@ -6592,7 +6592,7 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 				dcl->type = type; /* reset "owned" flag */
 				zend_hash_str_add_new_ptr(FFI_G(symbols), name, name_len, sym);
 			} else {
-				/* useless declarartion */
+				/* useless declaration */
 				zend_ffi_type_dtor(dcl->type);
 			}
 		}

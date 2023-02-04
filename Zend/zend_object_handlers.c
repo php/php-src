@@ -1193,7 +1193,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 	if (zobj->ce->__unset) {
 		uint32_t *guard = zend_get_property_guard(zobj, name);
 		if (!((*guard) & IN_UNSET)) {
-			/* have unseter - try with it! */
+			/* have unsetter - try with it! */
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
 			zend_std_call_unsetter(zobj, name);
 			(*guard) &= ~IN_UNSET;
