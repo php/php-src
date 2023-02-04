@@ -3823,7 +3823,7 @@ static void restore_custom_datetimezone_properties(zval *object, HashTable *myht
 	zval             *prop_val;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
-		if (date_timezone_is_internal_property(prop_name)) {
+		if (!prop_name || date_timezone_is_internal_property(prop_name)) {
 			continue;
 		}
 		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
@@ -4451,7 +4451,7 @@ static void restore_custom_dateinterval_properties(zval *object, HashTable *myht
 	zval             *prop_val;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
-		if (date_interval_is_internal_property(prop_name)) {
+		if (!prop_name || date_interval_is_internal_property(prop_name)) {
 			continue;
 		}
 		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
