@@ -2596,7 +2596,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -2695,7 +2695,7 @@ ZEND_VM_HANDLER(22, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV, SPEC(RETVAL))
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	FREE_OP1_VAR_PTR();
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */

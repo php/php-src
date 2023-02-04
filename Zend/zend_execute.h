@@ -138,7 +138,7 @@ static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *v
 }
 
 /* Handles the garbage when using zend_assign_to_variable_delay_garbage_handling */
-static zend_always_inline void zend_assign_to_variable_handle_garbage(zend_refcounted *garbage)
+static zend_always_inline void zend_handle_garbage_from_variable_assignment(zend_refcounted *garbage)
 {
 	if (!garbage)
 		return;
@@ -152,7 +152,7 @@ static zend_always_inline void zend_assign_to_variable_handle_garbage(zend_refco
 	}
 }
 
-/* This is the same as zend_assign_to_variable() but without the garbage handling, this is left for the caller to do using zend_assign_to_variable_handle_garbage().
+/* This is the same as zend_assign_to_variable() but without the garbage handling, this is left for the caller to do using zend_handle_garbage_from_variable_assignment().
  * The reason one might want to delay garbage handling is because the garbage handling might destroy the newly returned value while
  * that value was supposed to be used in a result. Using zend_assign_to_variable() instead in that case would result in a potential use-after-free. */
 static zend_always_inline zval* zend_assign_to_variable_delay_garbage_handling(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict, zend_refcounted **garbage)
@@ -185,7 +185,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 {
 	zend_refcounted *garbage;
 	variable_ptr = zend_assign_to_variable_delay_garbage_handling(variable_ptr, value, value_type, strict, &garbage);
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 	return variable_ptr;
 }
 

@@ -23483,7 +23483,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -23636,7 +23636,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -23790,7 +23790,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -23944,7 +23944,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -24042,7 +24042,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_U
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -24065,7 +24065,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_U
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -26208,7 +26208,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -26361,7 +26361,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -26515,7 +26515,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -26669,7 +26669,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -27397,7 +27397,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNU
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -27420,7 +27420,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USE
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -27487,7 +27487,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_UNU
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -27510,7 +27510,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_USE
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -27771,7 +27771,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -27924,7 +27924,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -28078,7 +28078,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -28232,7 +28232,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -30467,7 +30467,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -30620,7 +30620,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -30774,7 +30774,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -30928,7 +30928,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -31026,7 +31026,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_UNUS
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -31049,7 +31049,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_USED
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
@@ -41544,7 +41544,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -41697,7 +41697,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -41851,7 +41851,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -42005,7 +42005,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -42103,7 +42103,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_UN
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
@@ -42125,7 +42125,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_US
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
@@ -45346,7 +45346,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -45499,7 +45499,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -45653,7 +45653,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -45807,7 +45807,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -46823,7 +46823,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUS
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
@@ -46845,7 +46845,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
@@ -46897,7 +46897,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_UNUS
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
@@ -46919,7 +46919,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_USED
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
@@ -47352,7 +47352,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -47505,7 +47505,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -47659,7 +47659,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -47813,7 +47813,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -50709,7 +50709,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -50862,7 +50862,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -51016,7 +51016,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -51170,7 +51170,7 @@ try_assign_dim_array:
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-			zend_assign_to_variable_handle_garbage(garbage);
+			zend_handle_garbage_from_variable_assignment(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -51268,7 +51268,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CV_RETVAL_UNUSE
 	if (UNEXPECTED(0)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
@@ -51290,7 +51290,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CV_RETVAL_USED_
 	if (UNEXPECTED(1)) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
-	zend_assign_to_variable_handle_garbage(garbage);
+	zend_handle_garbage_from_variable_assignment(garbage);
 
 	/* zend_assign_to_variable_*() always takes care of op2, never free it! */
 
