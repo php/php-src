@@ -4116,6 +4116,8 @@ static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DAT
 
 ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf) /* {{{ */
 {
+	bool skip_current_call = (EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0 || (((zend_generator *) EX(return_value))->flags & ZEND_GENERATOR_IN_FIBER) != 0;
+
 	zend_op *opline = EX(func)->op_array.opcodes + op_num;
 	int level;
 	int do_exit;
@@ -4131,6 +4133,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 		opline->opcode == ZEND_NEW)) {
 		ZEND_ASSERT(op_num);
 		opline--;
+		skip_current_call = false;
 	}
 
 	do {
@@ -4189,7 +4192,7 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 				opline--;
 			}
 		} while (!do_exit);
-		if (call->prev_execute_data) {
+		if (skip_current_call || call->prev_execute_data) {
 			/* skip current call region */
 			level = 0;
 			do_exit = 0;
@@ -4217,6 +4220,11 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 				}
 				opline--;
 			} while (!do_exit);
+		}
+
+		if (skip_current_call) {
+			skip_current_call = false;
+			continue;
 		}
 
 		if (EXPECTED(num_args > 0)) {
