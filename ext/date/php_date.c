@@ -2813,6 +2813,7 @@ PHP_METHOD(DateTime, __unserialize)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		return;
 	}
 
 	restore_custom_datetime_properties(object, myht);
@@ -2836,6 +2837,7 @@ PHP_METHOD(DateTimeImmutable, __unserialize)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
+		return;
 	}
 
 	restore_custom_datetime_properties(object, myht);
@@ -5435,7 +5437,9 @@ PHP_METHOD(DatePeriod, __unserialize)
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+		return;
 	}
+
 	restore_custom_dateperiod_properties(object, myht);
 }
 /* }}} */
