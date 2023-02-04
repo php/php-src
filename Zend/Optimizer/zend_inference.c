@@ -2264,7 +2264,7 @@ static bool result_may_be_separated(zend_ssa *ssa, zend_ssa_op *ssa_op)
 	 && !ssa->vars[tmp_var].phi_use_chain) {
 		zend_ssa_op *use_op = &ssa->ops[ssa->vars[tmp_var].use_chain];
 
-		/* TODO: analize instructions between ssa_op and use_op */
+		/* TODO: analyze instructions between ssa_op and use_op */
 		if (use_op == ssa_op + 1) {
 			if ((use_op->op1_use == tmp_var && use_op->op1_use_chain < 0)
 			 || (use_op->op2_use == tmp_var && use_op->op2_use_chain < 0)) {

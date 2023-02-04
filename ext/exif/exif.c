@@ -3298,7 +3298,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 				 * it is faster to use a static buffer there
 				 * BUT it offers also the possibility to have
 				 * pointers read without the need to free them
-				 * explicitley before returning. */
+				 * explicitly before returning. */
 				memset(&cbuf, 0, sizeof(cbuf));
 				value_ptr = cbuf;
 			}
@@ -3477,7 +3477,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 				switch (exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel)) {
 					case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
 					case 2:
-						/* According to the information I was using, 2 measn meters.
+						/* According to the information I was using, 2 means meters.
 						   But looking at the Cannon powershot's files, inches is the only
 						   sensible value. */
 						ImageInfo->FocalplaneUnits = 25.4;

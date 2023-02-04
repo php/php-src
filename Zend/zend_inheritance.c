@@ -3005,7 +3005,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 
 		/* Normally Stringable is added during compilation. However, if it is imported from a trait,
-		 * we need to explicilty add the interface here. */
+		 * we need to explicitly add the interface here. */
 		if (ce->__tostring && !(ce->ce_flags & ZEND_ACC_TRAIT)
 			&& !zend_class_implements_interface(ce, zend_ce_stringable)) {
 			ZEND_ASSERT(ce->__tostring->common.fn_flags & ZEND_ACC_TRAIT_CLONE);
