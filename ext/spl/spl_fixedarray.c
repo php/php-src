@@ -83,6 +83,11 @@ static bool spl_fixedarray_empty(spl_fixedarray *array)
 	return true;
 }
 
+static void spl_fixedarray_illegal_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on FixedArray", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
 static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
@@ -333,7 +338,7 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			return Z_RES_HANDLE_P(offset);
 	}
 
-	zend_type_error("Illegal offset type");
+	spl_fixedarray_illegal_offset(offset);
 	return 0;
 }
 
