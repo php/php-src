@@ -1386,10 +1386,8 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	php_stream * intstream = NULL;
 	int call_result;
 	int ret = FAILURE;
-
-	int flags = castas & PHP_STREAM_CAST_MASK;
-    castas &= ~PHP_STREAM_CAST_MASK;
-	bool report_errors = !(flags & PHP_STREAM_FLAG_SUPPRESS_ERRORS);
+	bool report_errors = !(castas & PHP_STREAM_FLAG_SUPPRESS_ERRORS);
+	castas &= ~PHP_STREAM_FLAG_SUPPRESS_ERRORS;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1);
 
