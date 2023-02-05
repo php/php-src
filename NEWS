@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed incorrect bitshifting and masking in ffi bitfield. (nielsdos)
 
+- FPM:
+  . Fixed bug GH-10315 (FPM unknown child alert not valid). (Jakub Zelenka)
+
 - GMP:
   . Properly implement GMP::__construct(). (nielsdos)
 
