@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug GH-10315 (FPM unknown child alert not valid). (Jakub Zelenka)
+  . Fixed bug GH-10385 (FPM successful config test early exit). (nielsdos)
 
 - GMP:
   . Properly implement GMP::__construct(). (nielsdos)
