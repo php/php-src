@@ -166,7 +166,7 @@ int fpm_stdio_flush_child(void)
 	return write(STDERR_FILENO, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH));
 }
 
-static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, pid_t pid) /* {{{ */
 {
 	static const int max_buf_size = 1024;
 	int fd = ev->fd;
@@ -178,10 +178,10 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	int read_fail = 0, create_log_stream;
 	struct zlog_stream *log_stream;
 
-	if (!arg) {
+	if (!pid) {
 		return;
 	}
-	child = fpm_child_find((intptr_t) arg);
+	child = fpm_child_find(pid);
 	if (!child) {
 		return;
 	}
@@ -330,10 +330,10 @@ int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
 	child->fd_stdout = fd_stdout[0];
 	child->fd_stderr = fd_stderr[0];
 
-	fpm_event_set(&child->ev_stdout, child->fd_stdout, FPM_EV_READ, fpm_stdio_child_said, (void *) (intptr_t) child->pid);
+	fpm_event_set_with_pid(&child->ev_stdout, child->fd_stdout, FPM_EV_READ, fpm_stdio_child_said, child->pid);
 	fpm_event_add(&child->ev_stdout, 0);
 
-	fpm_event_set(&child->ev_stderr, child->fd_stderr, FPM_EV_READ, fpm_stdio_child_said, (void *) (intptr_t) child->pid);
+	fpm_event_set_with_pid(&child->ev_stderr, child->fd_stderr, FPM_EV_READ, fpm_stdio_child_said, child->pid);
 	fpm_event_add(&child->ev_stderr, 0);
 	return 0;
 }

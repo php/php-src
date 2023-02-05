@@ -480,11 +480,14 @@ void fpm_event_loop(int err) /* {{{ */
 
 void fpm_event_fire(struct fpm_event_s *ev) /* {{{ */
 {
-	if (!ev || !ev->callback) {
+	if (!ev || !ev->ptr_callback) {
 		return;
 	}
-
-	(*ev->callback)( (struct fpm_event_s *) ev, ev->which, ev->arg);
+	if (ev->pid) {
+		(*ev->pid_callback)( (struct fpm_event_s *) ev, ev->which, ev->pid);
+	} else {
+		(*ev->ptr_callback)( (struct fpm_event_s *) ev, ev->which, ev->arg);
+	}
 }
 /* }}} */
 
@@ -495,8 +498,22 @@ int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(st
 	}
 	memset(ev, 0, sizeof(struct fpm_event_s));
 	ev->fd = fd;
-	ev->callback = callback;
+	ev->ptr_callback = callback;
 	ev->arg = arg;
+	ev->flags = flags;
+	return 0;
+}
+/* }}} */
+
+int fpm_event_set_with_pid(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, pid_t pid), pid_t pid) /* {{{ */
+{
+	if (!ev || !callback || fd < -1) {
+		return -1;
+	}
+	memset(ev, 0, sizeof(struct fpm_event_s));
+	ev->fd = fd;
+	ev->pid_callback = callback;
+	ev->pid = pid;
 	ev->flags = flags;
 	return 0;
 }

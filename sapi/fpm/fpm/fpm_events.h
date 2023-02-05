@@ -14,11 +14,15 @@ struct fpm_event_s {
 	int fd;                   /* not set with FPM_EV_TIMEOUT */
 	struct timeval timeout;   /* next time to trigger */
 	struct timeval frequency;
-	void (*callback)(struct fpm_event_s *, short, void *);
+	union {
+		void (*ptr_callback)(struct fpm_event_s *, short, void *);
+		void (*pid_callback)(struct fpm_event_s *, short, pid_t pid);
+	};
 	void *arg;
 	int flags;
 	int index;                /* index of the fd in the ufds array */
 	short which;              /* type of event */
+	pid_t pid;
 };
 
 typedef struct fpm_event_queue_s {
@@ -41,6 +45,7 @@ void fpm_event_loop(int err);
 void fpm_event_fire(struct fpm_event_s *ev);
 int fpm_event_init_main(void);
 int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg);
+int fpm_event_set_with_pid(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, pid_t pid), pid_t pid);
 int fpm_event_add(struct fpm_event_s *ev, unsigned long int timeout);
 int fpm_event_del(struct fpm_event_s *ev);
 int fpm_event_pre_init(char *machanism);
