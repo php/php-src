@@ -19,7 +19,7 @@ include_once('common.inc');
 // EUC-JP
 $euc_jp = pack('H*', '30313233a4b3a4cecab8bbfacef3a4cfc6fccbdcb8eca4c7a4b9a1a34555432d4a50a4f2bbc8a4c3a4c6a4a4a4dea4b9a1a3c6fccbdcb8eca4cfccccc5ddbdada4a4a1a3');
 // UTF-8
-$utf8    = pack('H*', 'e288ae2045e28b856461203d2051'); // has 2 multi-byte characters: [e288ae 20 45 e28b85 64 61 20 3d 20 51]
+$utf8 = pack('H*', 'e288ae2045e28b856461203d2051'); // has 2 multi-byte characters: [e288ae 20 45 e28b85 64 61 20 3d 20 51]
 // UTF-16LE
 $utf16le = pack('H*', '1a043804400438043b043b04380446043004200069007300200043007900720069006c006c0069006300');
 
@@ -78,5 +78,5 @@ OK
 [1a04]
 [1a04]
 [1a04]
-[1a04]
+[1a04 3804]
 [1a04 3804]

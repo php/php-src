@@ -77,6 +77,12 @@ PHP                                                                        NEWS
     QPrint-encoding the input string. This previously caused strings in
     certain text encodings, especially UTF-16 and UTF-32, to be
     corrupted by mb_encode_mimeheader. (Alex Dowad)
+  . mb_strcut now extracts the requested range of bytes and no less; this is
+    a change from PHP 8.2 for all legacy text encodings which can represent the
+    same string in more than one way (such as JIS or UTF-7), and all legacy
+    text encodings which use escape sequences to select one of multiple decoding
+    modes for the following bytes (such as UTF-7, HZ, or ISO-2022-JP).
+    (Alex Dowad)
 
 - mysqli:
   . mysqli_fetch_object raises a ValueError instead of an Exception.

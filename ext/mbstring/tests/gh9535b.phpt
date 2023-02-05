@@ -8,16 +8,14 @@ mbstring
 // escape sequence to a string which would otherwise end in a non-default conversion mode
 // See https://github.com/php/php-src/pull/9562 for details on the bug
 
-// These tests were developed when fixing a different bug, but they don't pass because of
-// the bug involving the added closing escape sequences
-// When that bug is fixed, we can remove XFAIL (or combine this file with gh9535.phpt)
-
 $encodings = [
     'JIS',
     'ISO-2022-JP',
     'ISO-2022-JP-2004',
 ];
 
+// ISO-2022-JP-2004 will get one fewer character for the following string than JIS and ISO-2022-JP
+// That is because in ISO-2022-JP-2004, the opening escape sequence has 4 bytes instead of 3
 $input = '宛如繁星般宛如皎月般';
 $bytes_length = 15;
 foreach($encodings as $encoding) {
@@ -78,16 +76,14 @@ foreach($encodings as $encoding) {
 }
 
 ?>
---XFAIL--
-Discussion: https://github.com/php/php-src/pull/9562
---EXPECTF--
-JIS: 宛如繁星般
-ISO-2022-JP: 宛如繁星般
-ISO-2022-JP-2004: 宛如繁星
+--EXPECT--
+JIS: 宛如繁星般宛
+ISO-2022-JP: 宛如繁星般宛
+ISO-2022-JP-2004: 宛如繁星般
 
-JIS: 星のように月の
-ISO-2022-JP: 星のように月の
-ISO-2022-JP-2004: 星のように月の
+JIS: 星のように月のよ
+ISO-2022-JP: 星のように月のよ
+ISO-2022-JP-2004: 星のように月のよ
 
 JIS: あa
 ISO-2022-JP: あa

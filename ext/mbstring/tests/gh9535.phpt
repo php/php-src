@@ -78,8 +78,11 @@ foreach($encodings as $encoding) {
 
 echo PHP_EOL;
 
+// Here, we are cutting bytes not from a converted string, but from a plain ASCII string
+// which does not include any escape sequences
+// So ISO-2022-KR will still get two question marks
 foreach($encodings as $encoding) {
-    echo $encoding.trim(': '.mb_strcut($input, 0, $bytes_length, $encoding)).PHP_EOL;
+    echo $encoding.trim(': '.bin2hex(mb_strcut($input, 0, $bytes_length, $encoding))).PHP_EOL;
 }
 
 ?>
@@ -87,36 +90,36 @@ foreach($encodings as $encoding) {
 UTF-16: 宛如繁星般宛如
 UTF-16BE: 宛如繁星般宛如
 UTF-16LE: 宛如繁星般宛如
-UTF-7: 宛如繁星
-UTF7-IMAP: 宛如繁星
-ISO-2022-JP-MS: 宛如繁星
+UTF-7: 宛如繁星般
+UTF7-IMAP: 宛如繁星般
+ISO-2022-JP-MS: 宛如繁星般宛
 GB18030: 宛如繁星般宛如
-HZ: 宛如繁星般
-ISO-2022-KR: 宛如繁星
-ISO-2022-JP-MOBILE#KDDI: 宛如繁星
-CP50220: 宛如繁星
-CP50221: 宛如繁星
-CP50222: 宛如繁星
+HZ: 宛如繁星般宛
+ISO-2022-KR: 宛如繁星般
+ISO-2022-JP-MOBILE#KDDI: 宛如繁星般宛
+CP50220: 宛如繁星般宛
+CP50221: 宛如繁星般宛
+CP50222: 宛如繁星般宛
 
 UTF-16: 星のように月のように
 UTF-16BE: 星のように月のように
 UTF-16LE: 星のように月のように
-UTF-7: 星のように月
-UTF7-IMAP: 星のように月
-ISO-2022-JP-MS: 星のように月の
+UTF-7: 星のように月の
+UTF7-IMAP: 星のように月の
+ISO-2022-JP-MS: 星のように月のよ
 GB18030: 星のように月のように
-HZ: 星のように月のよ
+HZ: 星のように月のよう
 ISO-2022-KR: 星のように月の
-ISO-2022-JP-MOBILE#KDDI: 星のように月の
-CP50220: 星のように月の
-CP50221: 星のように月の
-CP50222: 星のように月の
+ISO-2022-JP-MOBILE#KDDI: 星のように月のよ
+CP50220: 星のように月のよ
+CP50221: 星のように月のよ
+CP50222: 星のように月のよ
 
 UTF-16: あaいb
 UTF-16BE: あaいb
 UTF-16LE: あaいb
-UTF-7: あa
-UTF7-IMAP: あa
+UTF-7: あaい
+UTF7-IMAP: あaい
 ISO-2022-JP-MS: あa
 GB18030: あaいb
 HZ: あa
@@ -154,16 +157,16 @@ CP50220: ??
 CP50221: ??
 CP50222: ??
 
-UTF-16: ??
-UTF-16BE: ??
-UTF-16LE: ??
-UTF-7: ??
-UTF7-IMAP: ??
-ISO-2022-JP-MS: ??
-GB18030: ??
-HZ: ??
-ISO-2022-KR:
-ISO-2022-JP-MOBILE#KDDI: ??
-CP50220: ??
-CP50221: ??
-CP50222: ??
+UTF-16: 3f3f
+UTF-16BE: 3f3f
+UTF-16LE: 3f3f
+UTF-7: 3f3f
+UTF7-IMAP: 3f3f
+ISO-2022-JP-MS: 3f3f
+GB18030: 3f3f
+HZ: 3f3f
+ISO-2022-KR: 1b2429433f3f
+ISO-2022-JP-MOBILE#KDDI: 3f3f
+CP50220: 3f3f
+CP50221: 3f3f
+CP50222: 3f3f
