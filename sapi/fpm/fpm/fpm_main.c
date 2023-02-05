@@ -1537,7 +1537,6 @@ int main(int argc, char *argv[])
 	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
-	int ret;
 #if ZEND_RC_DEBUG
 	bool old_rc_debug;
 #endif
@@ -1784,14 +1783,13 @@ consult the installation file that came with this distribution, or visit \n\
 	zend_rc_debug = 0;
 #endif
 
-	ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
+	enum fpm_init_return_status ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
 
 #if ZEND_RC_DEBUG
 	zend_rc_debug = old_rc_debug;
 #endif
 
-	if (ret < 0) {
-
+	if (ret == FPM_INIT_ERROR) {
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;
 			zlog(ZLOG_DEBUG, "Sending \"0\" (error) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
@@ -1799,6 +1797,9 @@ consult the installation file that came with this distribution, or visit \n\
 			close(fpm_globals.send_config_pipe[1]);
 		}
 		exit_status = FPM_EXIT_CONFIG;
+		goto out;
+	} else if (ret == FPM_INIT_EXIT_OK) {
+		exit_status = FPM_EXIT_OK;
 		goto out;
 	}
 
