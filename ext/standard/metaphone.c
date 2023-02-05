@@ -128,7 +128,7 @@ static char Lookahead(char *word, int how_far)
 	/* Edge forward in the string... */
 
 	return  word[idx];			/* idx will be either == to how_far or
-								 * at the end of the string where ot will be null
+								 * at the end of the string where it will be null
 								 */
 }
 
@@ -220,7 +220,7 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 	case 'W': {
 		char next_letter = Read_Next_Letter;
 		if (next_letter == 'R') {
-			Phonize(next_letter);
+			Phonize('R');
 			w_idx += 2;
 		} else if (next_letter == 'H' || isvowel(next_letter)) {
 			Phonize('W');
