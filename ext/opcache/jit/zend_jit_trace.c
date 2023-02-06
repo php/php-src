@@ -8385,6 +8385,13 @@ static void zend_jit_trace_reset_caches(void)
 #endif
 }
 
+static void zend_jit_trace_free_caches(void)
+{
+	if (JIT_G(exit_counters)) {
+		free(JIT_G(exit_counters));
+	}
+}
+
 static void zend_jit_trace_restart(void)
 {
 	ZEND_JIT_TRACE_NUM = 1;
