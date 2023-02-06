@@ -414,26 +414,13 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 			ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(source)[offset];
 		}
 	} else {
-		uint64_t mask;
-		if (max_offset < 0x1) {
-			mask = 0x0;
-		} else if (max_offset < 0x2) {
-			mask = 0x1;
-		} else if (max_offset < 0x4) {
-			mask = 0x3;
-		} else if (max_offset < 0x8) {
-			mask = 0x7;
-		} else if (max_offset < 0x10) {
-			mask = 0xF;
-		} else if (max_offset < 0x20) {
-			mask = 0x1F;
-		} else if (max_offset < 0x40) {
-			mask = 0x3F;
-		} else if (max_offset < 0x80) {
-			mask = 0x7F;
-		} else {
-			mask = 0xFF;
-		}
+		uint64_t mask = max_offset;
+		// Copy the top-most bit into all lower bits.
+		// Shifting by 4 is sufficient, because max_offset
+		// is guaranteed to be an 8-bit integer.
+		mask |= mask >> 1;
+		mask |= mask >> 2;
+		mask |= mask >> 4;
 
 		int failures = 0;
 		while (total_size < length) {

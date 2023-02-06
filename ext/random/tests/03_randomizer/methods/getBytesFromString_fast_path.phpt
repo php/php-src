@@ -47,6 +47,32 @@ for ($i = 1; $i <= strlen($allBytes); $i *= 2) {
     echo PHP_EOL;
 }
 
+// Test lengths that are one more than the powers of two. For these
+// the maximum offset will be a power of two and thus a minimal number
+// of bits will be set in the offset.
+for ($i = 1; ($i + 1) <= strlen($allBytes); $i *= 2) {
+    $oneMore = $i + 1;
+
+    echo "{$oneMore}:", PHP_EOL;
+
+    $wrapper = new TestWrapperEngine($xoshiro);
+    $r = new Randomizer($wrapper);
+    $result = $r->getBytesFromString(substr($allBytes, 0, $oneMore), 20000);
+
+    $count = [];
+    for ($j = 0; $j < strlen($result); $j++) {
+        $b = $result[$j];
+        $count[ord($b)] ??= 0;
+        $count[ord($b)]++;
+    }
+
+    // We expect that each possible value appears at least once, if
+    // not is is very likely that some bits were erroneously masked away.
+    var_dump(count($count));
+
+    echo PHP_EOL;
+}
+
 echo "Slow Path:", PHP_EOL;
 
 $wrapper = new TestWrapperEngine($xoshiro);
@@ -106,6 +132,30 @@ int(128)
 256:
 int(2500)
 int(256)
+
+2:
+int(2)
+
+3:
+int(3)
+
+5:
+int(5)
+
+9:
+int(9)
+
+17:
+int(17)
+
+33:
+int(33)
+
+65:
+int(65)
+
+129:
+int(129)
 
 Slow Path:
 int(20000)
