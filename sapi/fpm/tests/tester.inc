@@ -203,6 +203,19 @@ class Tester
         }
     }
 
+    static public function getCores()
+    {
+        if (str_contains(PHP_OS, 'Linux')) {
+            $cmd = 'nproc';
+        } else if (str_contains(PHP_OS, 'FreeBSD') || str_contains(PHP_OS, 'Darwin')) {
+            $cmd = 'sysctl hw.ncpus';
+        } else {
+            return 0;
+        }
+
+        return intval(exec($cmd));
+    }
+
     /**
      * @param int $backTraceIndex
      *

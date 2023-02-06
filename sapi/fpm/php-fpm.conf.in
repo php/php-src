@@ -129,11 +129,12 @@
 ;
 ; Default Value: not set
 ; Valid syntaxes are:
-;       process.cpu_list = "cpu id"                 - to bind to a single core
-;       process.cpu_list = "min cpu id-max cpu id"  - to bind to a core range
-                                                      from minimum cpu id to max
-;       process.cpu_list = "[min cpu id-max cpu id],[min cpu id-max cpu id],..."
-                                                    - to bind to multiple ranges
+;       process.cpu_list = "cpu id"                 - bind master process to cpu id
+;       process.cpu_list = "[min cpu id]-[max cpu id]"  
+                                                    - bind master process from min cpu id
+                                                      to max cpu id
+;       process.cpu_list = "[[min cpu id]-[max cpu id],[min cpu id-max cpu id],...]"
+                                                    - bind master process to cpu id ranges
                                                       separated by a comma
 
 ;;;;;;;;;;;;;;;;;;;;

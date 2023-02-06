@@ -7,14 +7,7 @@ if (!str_contains(PHP_OS, 'Linux') && !str_contains(PHP_OS, 'FreeBSD')) {
     die('skipped supported only on Linux and FreeBSD');
 }
 
-if (str_contains(PHP_OS, 'Linux')) {
-    $cmd = 'nproc';
-} else {
-    $cmd = 'sysctl hw.ncpus';
-}
-
-$nproc = intval(exec($cmd));
-if ($nproc < 4) {
+if (FPM\Tester::getCores() < 4) {
     die('skipped supported only on 4 cores or more environments');
 }
 ?>
@@ -34,7 +27,7 @@ pm.max_children = 1
 pm.start_servers = 1
 pm.min_spare_servers = 1
 pm.max_spare_servers = 1
-process.cpu_list = 0-1,2-3
+process.cpu_list = 0,2-3
 EOT;
 
 $tester = new FPM\Tester($cfg);

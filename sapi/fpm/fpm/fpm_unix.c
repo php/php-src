@@ -432,12 +432,6 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 /* }}} */
 
 #if HAVE_FPM_CPUAFFINITY
-struct fpm_cpuaffinity_conf {
-	cpu_set_t cset;
-	long min;
-	long max;
-};
-
 static long fpm_cpumax(void)
 {
 	static long cpuid = LONG_MIN;
@@ -457,58 +451,56 @@ static long fpm_cpumax(void)
 	return cpuid;
 }
 
-static void fpm_cpuaffinity_init(struct fpm_cpuaffinity_conf *c)
+static void fpm_cpuaffinity_init(cpu_set_t *c)
 {
-	CPU_ZERO(&c->cset);
+	CPU_ZERO(c);
 }
 
-static void fpm_cpuaffinity_add(struct fpm_cpuaffinity_conf *c)
+static void fpm_cpuaffinity_add(cpu_set_t *c, int min, int max)
 {
-#if defined(HAVE_FPM_CPUAFFINITY)
 	int i;
 
-	for (i = c->min; i <= c->max; i ++) {
-		if (!CPU_ISSET(i, &c->cset)) {
-			CPU_SET(i, &c->cset);
+	for (i = min; i <= max; i ++) {
+		if (!CPU_ISSET(i, c)) {
+			CPU_SET(i, c);
 		}
 	}
-#endif
 }
 
-static int fpm_cpuaffinity_set(struct fpm_cpuaffinity_conf *c)
+static int fpm_cpuaffinity_set(cpu_set_t *c)
 {
 #if defined(HAVE_SCHED_SETAFFINITY)
-	return sched_setaffinity(0, sizeof(c->cset), &c->cset);
+	return sched_setaffinity(0, sizeof(c), c);
 #elif defined(HAVE_CPUSET_SETAFFINITY)
-	return cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, sizeof(c->cset), &c->cset);
+	return cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, sizeof(c), c);
 #endif
 }
 
 static int fpm_setcpuaffinity(char *cpu_list)
 {
 	char *token, *buf;
-	struct fpm_cpuaffinity_conf fconf;
-	int r, cpumax;
+    cpu_set_t c;
+	int r, cpumax, min, max;
 
 	r = -1;
 	cpumax = fpm_cpumax();
 
-	fpm_cpuaffinity_init(&fconf);
+	fpm_cpuaffinity_init(&c);
 	token = php_strtok_r(cpu_list, ",", &buf);
 
 	while (token) {
 		char *cpu_listsep;
 
-		fconf.min = strtol(token, &cpu_listsep, 0);
-		if (errno || fconf.min < 0 || fconf.min > cpumax) {
+		min = strtol(token, &cpu_listsep, 0);
+		if (errno || min < 0 || min > cpumax) {
 			return -1;
 		}
-		fconf.max = fconf.min;
+		max = min;
 		if (*cpu_listsep == '-') {
 			if (strlen(cpu_listsep) > 1) {
 				char *err;
-				fconf.max = strtol(cpu_listsep + 1, &err, 0);
-				if (errno || *err != '\0' || fconf.max < fconf.min || fconf.max > cpumax) {
+				max = strtol(cpu_listsep + 1, &err, 0);
+				if (errno || *err != '\0' || max < min || max > cpumax) {
 					return -1;
 				}
 			} else {
@@ -516,12 +508,12 @@ static int fpm_setcpuaffinity(char *cpu_list)
 			}
 		}
 
-		fpm_cpuaffinity_add(&fconf);
+		fpm_cpuaffinity_add(&c, min, max);
 
 		token = php_strtok_r(NULL, ";", &buf);
 	}
 
-	r = fpm_cpuaffinity_set(&fconf);
+	r = fpm_cpuaffinity_set(&c);
 	return r;
 }
 #endif
@@ -552,7 +544,6 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 #if HAVE_FPM_CPUAFFINITY
 	if (wp->config->process_cpu_list) {
-
 		if (0 > fpm_setcpuaffinity(wp->config->process_cpu_list)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to fpm_setcpuaffinity(%s)", wp->config->name, wp->config->process_cpu_list);
 			return -1;
