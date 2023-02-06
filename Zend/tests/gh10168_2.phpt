@@ -7,14 +7,15 @@ $a = null;
 
 class Test
 {
-    public function __construct() {
-	    ($GLOBALS['a'] = $this) > 0;
-	    var_dump($GLOBALS['a']);
-    }
+	public function __construct() {
+		($GLOBALS['a'] = $this) > 0;
+		// Destructor called after comparison, so a will be NULL
+		var_dump($GLOBALS['a']);
+	}
 
-    function __destruct() {
-        unset($GLOBALS['a']);
-    }
+	function __destruct() {
+		unset($GLOBALS['a']);
+	}
 }
 new Test();
 new Test();
@@ -26,5 +27,6 @@ object(Test)#1 (0) {
 }
 
 Notice: Object of class Test could not be converted to int in %s on line %d
-object(Test)#1 (0) {
-}
+
+Warning: Undefined global variable $a in %s on line %d
+NULL

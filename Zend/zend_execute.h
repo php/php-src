@@ -108,6 +108,7 @@ ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret);
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 
+ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *orig_value, zend_uchar value_type, bool strict, zval *result_variable_ptr);
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict);
 
 static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
@@ -180,8 +181,7 @@ static zend_always_inline zval* zend_assign_to_two_variables(zval *result_variab
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			if (Z_ISREF_P(variable_ptr)) {
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					variable_ptr = zend_assign_to_typed_ref(variable_ptr, value, value_type, strict);
-					ZVAL_COPY(result_variable_ptr, variable_ptr);
+					variable_ptr = zend_assign_to_typed_ref_and_result(variable_ptr, value, value_type, strict, result_variable_ptr);
 					return variable_ptr;
 				}
 
