@@ -674,69 +674,6 @@ static void auto_global_dtor(zval *zv) /* {{{ */
 /* }}} */
 
 #ifdef ZTS
-static void function_copy_ctor(zval *zv) /* {{{ */
-{
-	zend_function *old_func = Z_FUNC_P(zv);
-	zend_function *func;
-
-	if (old_func->type == ZEND_USER_FUNCTION) {
-		ZEND_ASSERT(old_func->op_array.fn_flags & ZEND_ACC_IMMUTABLE);
-		return;
-	}
-	func = pemalloc(sizeof(zend_internal_function), 1);
-	Z_FUNC_P(zv) = func;
-	memcpy(func, old_func, sizeof(zend_internal_function));
-	function_add_ref(func);
-	if ((old_func->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))
-	 && old_func->common.arg_info) {
-		uint32_t i;
-		uint32_t num_args = old_func->common.num_args + 1;
-		zend_arg_info *arg_info = old_func->common.arg_info - 1;
-		zend_arg_info *new_arg_info;
-
-		if (old_func->common.fn_flags & ZEND_ACC_VARIADIC) {
-			num_args++;
-		}
-		new_arg_info = pemalloc(sizeof(zend_arg_info) * num_args, 1);
-		memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
-		for (i = 0 ; i < num_args; i++) {
-			if (ZEND_TYPE_HAS_LIST(arg_info[i].type)) {
-				zend_type_list *old_list = ZEND_TYPE_LIST(arg_info[i].type);
-				zend_type_list *new_list = pemalloc(ZEND_TYPE_LIST_SIZE(old_list->num_types), 1);
-				memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
-				ZEND_TYPE_SET_PTR(new_arg_info[i].type, new_list);
-
-				zend_type *list_type;
-				ZEND_TYPE_LIST_FOREACH(new_list, list_type) {
-					zend_string *name = zend_string_dup(ZEND_TYPE_NAME(*list_type), 1);
-					ZEND_TYPE_SET_PTR(*list_type, name);
-				} ZEND_TYPE_LIST_FOREACH_END();
-			} else if (ZEND_TYPE_HAS_NAME(arg_info[i].type)) {
-				zend_string *name = zend_string_dup(ZEND_TYPE_NAME(arg_info[i].type), 1);
-				ZEND_TYPE_SET_PTR(new_arg_info[i].type, name);
-			}
-		}
-		func->common.arg_info = new_arg_info + 1;
-	}
-	if (old_func->common.attributes) {
-		zend_attribute *old_attr;
-
-		func->common.attributes = NULL;
-
-		ZEND_HASH_PACKED_FOREACH_PTR(old_func->common.attributes, old_attr) {
-			uint32_t i;
-			zend_attribute *attr;
-
-			attr = zend_add_attribute(&func->common.attributes, old_attr->name, old_attr->argc, old_attr->flags, old_attr->offset, old_attr->lineno);
-
-			for (i = 0 ; i < old_attr->argc; i++) {
-				ZVAL_DUP(&attr->args[i].value, &old_attr->args[i].value);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-}
-/* }}} */
-
 static void auto_global_copy_ctor(zval *zv) /* {{{ */
 {
 	zend_auto_global *old_ag = (zend_auto_global *) Z_PTR_P(zv);
