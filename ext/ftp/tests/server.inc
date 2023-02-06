@@ -387,6 +387,10 @@ if ($pid) {
                 case "/bug73457":
                     fputs($s, "150 File status okay; about to open data connection.\r\n");
                     break;
+                case "gh10521":
+                    // Just a side channel for getting the received file size.
+                    fputs($s, "425 Can't open data connection (".$GLOBALS['rest_pos'].").\r\n");
+                    break;
 
                 default:
                     fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
