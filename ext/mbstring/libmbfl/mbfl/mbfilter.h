@@ -193,24 +193,4 @@ mbfl_mime_header_encode(
     const char *linefeed,
     int indent);
 
-/*
- * MIME header decode
- */
-struct mime_header_decoder_data;	/* forward declaration */
-
-MBFLAPI extern struct mime_header_decoder_data *
-mime_header_decoder_new(const mbfl_encoding *outcode);
-
-MBFLAPI extern void
-mime_header_decoder_delete(struct mime_header_decoder_data *pd);
-
-MBFLAPI extern mbfl_string *
-mime_header_decoder_result(struct mime_header_decoder_data *pd, mbfl_string *result);
-
-MBFLAPI extern mbfl_string *
-mbfl_mime_header_decode(
-    mbfl_string *string,
-    mbfl_string *result,
-    const mbfl_encoding *outcode);
-
 #endif	/* MBFL_MBFILTER_H */

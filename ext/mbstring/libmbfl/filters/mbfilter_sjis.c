@@ -2250,11 +2250,7 @@ static void mb_wchar_to_sjis_docomo(uint32_t *in, size_t len, mb_convert_buf *bu
 		/* Continue what we were doing on the previous call */
 		w = buf->state;
 		buf->state = 0;
-		if (len) {
-			goto reprocess_wchar;
-		} else {
-			goto emit_output;
-		}
+		goto reprocess_wchar;
 	}
 
 	while (len--) {
@@ -2482,11 +2478,7 @@ static void mb_wchar_to_sjis_kddi(uint32_t *in, size_t len, mb_convert_buf *buf,
 	if (buf->state) {
 		w = buf->state;
 		buf->state = 0;
-		if (len) {
-			goto reprocess_wchar;
-		} else {
-			goto emit_output;
-		}
+		goto reprocess_wchar;
 	}
 
 	while (len--) {
@@ -2793,11 +2785,7 @@ static void mb_wchar_to_sjis_sb(uint32_t *in, size_t len, mb_convert_buf *buf, b
 	if (buf->state) {
 		w = buf->state;
 		buf->state = 0;
-		if (len) {
-			goto reprocess_wchar;
-		} else {
-			goto emit_output;
-		}
+		goto reprocess_wchar;
 	}
 
 	while (len--) {
