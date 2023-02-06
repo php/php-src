@@ -223,11 +223,6 @@ const mbfl_encoding **mbfl_get_supported_encodings(void)
 	return mbfl_encoding_ptr_list;
 }
 
-const char *mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
-{
-	return mbfl_encoding_preferred_mime_name(mbfl_no2encoding(no_encoding));
-}
-
 const char *mbfl_encoding_preferred_mime_name(const mbfl_encoding *encoding)
 {
 	if (encoding->mime_name && encoding->mime_name[0] != '\0') {
