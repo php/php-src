@@ -108,6 +108,7 @@ ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret);
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 
+ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *orig_value, zend_uchar value_type, bool strict, zval *result_variable_ptr);
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict);
 
 static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
@@ -137,12 +138,22 @@ static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *v
 	}
 }
 
+static zend_always_inline void zend_handle_garbage_from_variable_assignment(zend_refcounted *garbage)
+{
+	if (GC_DELREF(garbage) == 0) {
+		rc_dtor_func(garbage);
+	} else { /* we need to split */
+		/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+		if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
+			gc_possible_root(garbage);
+		}
+	}
+}
+
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict)
 {
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-			zend_refcounted *garbage;
-
 			if (Z_ISREF_P(variable_ptr)) {
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
 					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict);
@@ -153,21 +164,42 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 					break;
 				}
 			}
-			garbage = Z_COUNTED_P(variable_ptr);
+			zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
 			zend_copy_to_variable(variable_ptr, value, value_type);
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else { /* we need to split */
-				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
-					gc_possible_root(garbage);
-				}
-			}
+			zend_handle_garbage_from_variable_assignment(garbage);
 			return variable_ptr;
 		}
 	} while (0);
 
 	zend_copy_to_variable(variable_ptr, value, value_type);
+	return variable_ptr;
+}
+
+static zend_always_inline zval* zend_assign_to_two_variables(zval *result_variable_ptr, zval *variable_ptr, zval *value, zend_uchar value_type, bool strict)
+{
+	do {
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+			if (Z_ISREF_P(variable_ptr)) {
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					variable_ptr = zend_assign_to_typed_ref_and_result(variable_ptr, value, value_type, strict, result_variable_ptr);
+					return variable_ptr;
+				}
+
+				variable_ptr = Z_REFVAL_P(variable_ptr);
+				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
+					break;
+				}
+			}
+			zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+			zend_copy_to_variable(variable_ptr, value, value_type);
+			ZVAL_COPY(result_variable_ptr, variable_ptr);
+			zend_handle_garbage_from_variable_assignment(garbage);
+			return variable_ptr;
+		}
+	} while (0);
+
+	zend_copy_to_variable(variable_ptr, value, value_type);
+	ZVAL_COPY(result_variable_ptr, variable_ptr);
 	return variable_ptr;
 }
 
