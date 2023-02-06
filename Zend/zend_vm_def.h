@@ -6073,7 +6073,7 @@ ZEND_VM_C_LABEL(num_index):
 			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else {
-			zend_illegal_offset();
+			zend_illegal_array_offset(offset);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		FREE_OP2();
