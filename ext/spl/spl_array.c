@@ -101,7 +101,7 @@ static void spl_array_illegal_empty_or_isset_offset(const zval *offset)
 
 static void spl_array_illegal_unset_offset(const zval *offset)
 {
-	zend_type_error("Cannot access offset of type %s on unset", zend_get_type_by_const(Z_TYPE_P(offset)));
+	zend_type_error("Cannot access offset of type %s in unset", zend_get_type_by_const(Z_TYPE_P(offset)));
 }
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /* {{{ */

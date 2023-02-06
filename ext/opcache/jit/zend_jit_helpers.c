@@ -27,7 +27,7 @@ static ZEND_COLD void undef_result_after_exception(void) {
 	}
 }
 
-static ZEND_COLD void zend_jit_illegal_array_offset(zval *offset)
+static ZEND_COLD void zend_jit_illegal_array_offset(const zval *offset)
 {
 	zend_type_error("Cannot access offset of type %s on array", zend_get_type_by_const(Z_TYPE_P(offset)));
 }
