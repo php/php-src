@@ -388,6 +388,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const size_t source_length = ZSTR_LEN(source);
+	const size_t max_offset = source_length - 1;
 
 	if (source_length < 1) {
 		zend_argument_value_error(1, "cannot be empty");
@@ -401,9 +402,9 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 
 	retval = zend_string_alloc(length, 0);
 
-	if (source_length > 0x100) {
+	if (max_offset > 0xff) {
 		while (total_size < length) {
-			uint64_t offset = randomizer->algo->range(randomizer->status, 0, source_length - 1);
+			uint64_t offset = randomizer->algo->range(randomizer->status, 0, max_offset);
 
 			if (EG(exception)) {
 				zend_string_free(retval);
@@ -414,21 +415,21 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		}
 	} else {
 		uint64_t mask;
-		if (source_length <= 0x1) {
+		if (max_offset < 0x1) {
 			mask = 0x0;
-		} else if (source_length <= 0x2) {
+		} else if (max_offset < 0x2) {
 			mask = 0x1;
-		} else if (source_length <= 0x4) {
+		} else if (max_offset < 0x4) {
 			mask = 0x3;
-		} else if (source_length <= 0x8) {
+		} else if (max_offset < 0x8) {
 			mask = 0x7;
-		} else if (source_length <= 0x10) {
+		} else if (max_offset < 0x10) {
 			mask = 0xF;
-		} else if (source_length <= 0x20) {
+		} else if (max_offset < 0x20) {
 			mask = 0x1F;
-		} else if (source_length <= 0x40) {
+		} else if (max_offset < 0x40) {
 			mask = 0x3F;
-		} else if (source_length <= 0x80) {
+		} else if (max_offset < 0x80) {
 			mask = 0x7F;
 		} else {
 			mask = 0xFF;
@@ -445,7 +446,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 			for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
 				uint64_t offset = (result >> (i * 8)) & mask;
 
-				if (offset >= source_length) {
+				if (offset > max_offset) {
 					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
 						zend_string_free(retval);
 						zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
