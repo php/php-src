@@ -1469,7 +1469,6 @@ PHP_FUNCTION(mb_substitute_character)
 /* {{{ Return the preferred MIME name (charset) as a string */
 PHP_FUNCTION(mb_preferred_mime_name)
 {
-	enum mbfl_no_encoding no_encoding;
 	char *name = NULL;
 	size_t name_len;
 
@@ -1477,13 +1476,13 @@ PHP_FUNCTION(mb_preferred_mime_name)
 		Z_PARAM_STRING(name, name_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	no_encoding = mbfl_name2no_encoding(name);
-	if (no_encoding == mbfl_no_encoding_invalid) {
+	const mbfl_encoding *enc = mbfl_name2encoding(name);
+	if (enc == NULL) {
 		zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", name);
 		RETURN_THROWS();
 	}
 
-	const char *preferred_name = mbfl_no2preferred_mime_name(no_encoding);
+	const char *preferred_name = mbfl_encoding_preferred_mime_name(enc);
 	if (preferred_name == NULL || *preferred_name == '\0') {
 		php_error_docref(NULL, E_WARNING, "No MIME preferred name corresponding to \"%s\"", name);
 		RETVAL_FALSE;

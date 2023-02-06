@@ -212,12 +212,6 @@ const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
 	return NULL;
 }
 
-enum mbfl_no_encoding mbfl_name2no_encoding(const char *name)
-{
-	const mbfl_encoding *encoding = mbfl_name2encoding(name);
-	return encoding ? encoding->no_encoding : mbfl_no_encoding_invalid;
-}
-
 const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
 {
 	const mbfl_encoding *encoding = mbfl_no2encoding(no_encoding);
