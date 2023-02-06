@@ -756,7 +756,8 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_hash_copy(compiler_globals->function_table, global_function_table, function_copy_ctor);
+	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL);
+	compiler_globals->copied_functions_count = zend_hash_num_elements(compiler_globals->function_table);
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->class_table, 64, NULL, ZEND_CLASS_DTOR, 1);
@@ -790,6 +791,21 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{{ */
 {
 	if (compiler_globals->function_table != GLOBAL_FUNCTION_TABLE) {
+		uint32_t n = compiler_globals->copied_functions_count;
+
+	    /* Prevent destruction of functions copied from the main process context */
+		if (zend_hash_num_elements(compiler_globals->function_table) <= n) {
+			compiler_globals->function_table->nNumUsed = 0;
+		} else {
+			Bucket *p = compiler_globals->function_table->arData;
+
+			compiler_globals->function_table->nNumOfElements -= n;
+			while (n != 0) {
+				ZVAL_UNDEF(&p->val);
+				p++;
+				n--;
+			}
+		}
 		zend_hash_destroy(compiler_globals->function_table);
 		free(compiler_globals->function_table);
 	}
