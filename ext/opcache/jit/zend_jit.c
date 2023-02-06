@@ -4759,6 +4759,13 @@ static void zend_jit_globals_ctor(zend_jit_globals *jit_globals)
 	zend_jit_trace_init_caches();
 }
 
+#ifdef ZTS
+static void zend_jit_globals_dtor(zend_jit_globals *jit_globals)
+{
+	zend_jit_trace_free_caches();
+}
+#endif
+
 static int zend_jit_parse_config_num(zend_long jit)
 {
 	if (jit == 0) {
@@ -4871,7 +4878,7 @@ ZEND_EXT_API int zend_jit_debug_config(zend_long old_val, zend_long new_val, int
 ZEND_EXT_API void zend_jit_init(void)
 {
 #ifdef ZTS
-	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, NULL);
+	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, zend_jit_globals_dtor);
 #else
 	zend_jit_globals_ctor(&jit_globals);
 #endif
@@ -5071,9 +5078,9 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 		zend_jit_perf_jitdump_close();
 	}
 #endif
-	if (JIT_G(exit_counters)) {
-		free(JIT_G(exit_counters));
-	}
+#ifndef ZTS
+	zend_jit_trace_free_caches();
+#endif
 }
 
 static void zend_jit_reset_counters(void)
