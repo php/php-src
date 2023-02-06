@@ -7,14 +7,7 @@ if (!str_contains(PHP_OS, 'Linux') && !str_contains(PHP_OS, 'FreeBSD')) {
     die('skipped supported only on Linux and FreeBSD');
 }
 
-if (str_contains(PHP_OS, 'Linux')) {
-    $cmd = 'nproc';
-} else {
-    $cmd = 'sysctl hw.ncpus';
-}
-
-$nproc = intval(exec($cmd));
-if ($nproc < 2) {
+if (FPM\Tester::getCores() < 4) {
     die('skipped supported only on multicores environments');
 }
 ?>

@@ -85,12 +85,13 @@ listen = 127.0.0.1:9000
 ;
 ; Default Value: inherits master's cpu affinity
 ; Valid syntaxes are:
-;       process.cpu_list = "cpu id"                 - to bind to a single core
-;       process.cpu_list = "min cpu id-max cpu id"  - to bind to a core range
-                                                      from minimum cpu id to max
-;       process.cpu_list = "[min cpu id-max cpu id],[min cpu id-max cpu id],..."
-                                                    - to bind to multiple ranges
-                                                      separated by a comma
+;       process.cpu_list = "cpu id"                 - bind pool process to cpu id
+;       process.cpu_list = "[min cpu id]-[max cpu id]"  
+                                                    - bind pool process from 
+                                                      min cpu id to max cpu id
+;       process.cpu_list = "[[min cpu id]-[max cpu id],[min cpu id-max cpu id],...]"
+                                                    - bind pool process to cpu id 
+                                                      ranges separated by a comma
 
 ; Set the process dumpable flag (PR_SET_DUMPABLE prctl for Linux or
 ; PROC_TRACE_CTL procctl for FreeBSD) even if the process user
