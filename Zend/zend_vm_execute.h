@@ -23480,7 +23480,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -23633,7 +23633,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -23787,7 +23787,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -23941,7 +23941,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -24038,7 +24038,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_U
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -24060,7 +24060,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_U
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -26203,7 +26203,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -26356,7 +26356,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -26510,7 +26510,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -26664,7 +26664,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -27391,7 +27391,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNU
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -27413,7 +27413,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USE
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -27479,7 +27479,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_UNU
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -27501,7 +27501,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_USE
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -27762,7 +27762,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -27915,7 +27915,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -28069,7 +28069,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -28223,7 +28223,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -30458,7 +30458,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -30611,7 +30611,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -30765,7 +30765,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -30919,7 +30919,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -31016,7 +31016,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_UNUS
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -31038,7 +31038,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_USED
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_VAR, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -41533,7 +41533,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -41686,7 +41686,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -41840,7 +41840,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -41994,7 +41994,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -42091,7 +42091,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_UN
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -42112,7 +42112,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_US
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 	}
@@ -45333,7 +45333,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -45486,7 +45486,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -45640,7 +45640,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -45794,7 +45794,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -46809,7 +46809,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUS
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -46830,7 +46830,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -46881,7 +46881,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_UNUS
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -46902,7 +46902,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_USED
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 	}
@@ -47335,7 +47335,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -47488,7 +47488,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -47642,7 +47642,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -47796,7 +47796,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -50692,7 +50692,7 @@ try_assign_dim_array:
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
 			}
@@ -50845,7 +50845,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -50999,7 +50999,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
 			}
@@ -51153,7 +51153,7 @@ try_assign_dim_array:
 			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 			}
@@ -51250,7 +51250,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CV_RETVAL_UNUSE
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(0)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	}
@@ -51271,7 +51271,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CV_RETVAL_USED_
 	variable_ptr = EX_VAR(opline->op1.var);
 
 	if (UNEXPECTED(1)) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, IS_CV, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	}

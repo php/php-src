@@ -2593,7 +2593,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				/* Using IS_CV here to trigger the refcount check and update */
-				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, OP_DATA_TYPE, IS_CV, EX_USES_STRICT_TYPES());
+				zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
 			} else {
 				zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
 			}
@@ -2691,7 +2691,7 @@ ZEND_VM_HANDLER(22, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV, SPEC(RETVAL))
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, OP2_TYPE, OP1_TYPE, EX_USES_STRICT_TYPES());
+		zend_assign_to_two_variables(EX_VAR(opline->result.var), variable_ptr, value, OP2_TYPE, EX_USES_STRICT_TYPES());
 	} else {
 		zend_assign_to_variable(variable_ptr, value, OP2_TYPE, EX_USES_STRICT_TYPES());
 	}
