@@ -3258,28 +3258,6 @@ PHP_FUNCTION(mb_encode_mimeheader)
 }
 /* }}} */
 
-/* {{{ Decodes the MIME "encoded-word" in the string */
-PHP_FUNCTION(mb_decode_mimeheader)
-{
-	char *string_val;
-	mbfl_string string, result, *ret;
-
-	string.encoding = MBSTRG(current_internal_encoding);
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(string_val, string.len)
-	ZEND_PARSE_PARAMETERS_END();
-
-	string.val = (unsigned char*)string_val;
-	mbfl_string_init(&result);
-	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding));
-	ZEND_ASSERT(ret != NULL);
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
-	efree(ret->val);
-}
-/* }}} */
-
 static zend_string* jp_kana_convert(zend_string *input, const mbfl_encoding *encoding, unsigned int mode)
 {
 	/* Each wchar may potentially expand to 2 when we perform kana conversion...
@@ -5354,7 +5332,6 @@ PHP_FUNCTION(mb_check_encoding)
 }
 /* }}} */
 
-
 static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string *enc_name,
 	const uint32_t enc_name_arg_num)
 {
@@ -5387,7 +5364,6 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 	return wchar_buf[0];
 }
 
-
 /* {{{ */
 PHP_FUNCTION(mb_ord)
 {
@@ -5419,7 +5395,6 @@ PHP_FUNCTION(mb_ord)
 	RETURN_LONG(cp);
 }
 /* }}} */
-
 
 static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint32_t enc_name_arg_num)
 {
@@ -5491,7 +5466,6 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	return ret;
 }
 
-
 /* {{{ */
 PHP_FUNCTION(mb_chr)
 {
@@ -5537,7 +5511,6 @@ PHP_FUNCTION(mb_scrub)
 	RETURN_STR(php_mb_convert_encoding_ex(ZSTR_VAL(str), ZSTR_LEN(str), enc, enc));
 }
 /* }}} */
-
 
 /* {{{ php_mb_populate_current_detect_order_list */
 static void php_mb_populate_current_detect_order_list(void)
@@ -5652,3 +5625,232 @@ static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding) /* {{{ 
 	MBSTRG(http_input_identify) = (const mbfl_encoding*)encoding;
 }
 /* }}} */
+
+static int8_t decode_base64(unsigned char c)
+{
+	if (c >= 'A' && c <= 'Z') {
+		return c - 'A';
+	} else if (c >= 'a' && c <= 'z') {
+		return c - 'a' + 26;
+	} else if (c >= '0' && c <= '9') {
+		return c - '0' + 52;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == '/') {
+		return 63;
+	}
+	return -1;
+}
+
+static int8_t qprint_map[] = {
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
+	-1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+};
+
+/* Decode MIME encoded word as defined in RFC 2047 */
+static unsigned char* mime_header_decode_encoded_word(unsigned char *p, unsigned char *e, const mbfl_encoding *outcode, mb_convert_buf *outbuf, unsigned int *state)
+{
+	if ((e - p) < 6) {
+		return NULL;
+	}
+
+	ZEND_ASSERT(p[0] == '=');
+	ZEND_ASSERT(p[1] == '?');
+	p += 2;
+
+	unsigned char *charset = p;
+	unsigned char *charset_end = memchr(charset, '?', e - charset);
+	if (charset_end == NULL) {
+		return NULL;
+	}
+
+	unsigned char *encoding = charset_end + 1;
+	p = encoding + 1;
+	if (p >= e || *p++ != '?') {
+		return NULL;
+	}
+
+	char *charset_name = estrndup((const char*)charset, charset_end - charset);
+	const mbfl_encoding *incode = mbfl_name2encoding(charset_name);
+	efree(charset_name);
+	if (incode == NULL) {
+		return NULL;
+	}
+
+	unsigned char *end_marker = (unsigned char*)zend_memnstr((const char*)p, "?=", 2, (const char*)e);
+	if (end_marker) {
+		e = end_marker;
+	} else if (p < e && *(e-1) == '?') {
+		/* If encoded word is not properly terminated, but last byte is '?',
+		 * take that as a terminator (legacy behavior) */
+		e--;
+	}
+
+	unsigned char *buf = emalloc(e - p), *bufp = buf;
+	if (*encoding == 'Q' || *encoding == 'q') {
+		/* Fill `buf` with bytes from decoding QPrint */
+		while (p < e) {
+			unsigned char c = *p++;
+			if (c == '=' && (e - p) >= 2) {
+				unsigned char c2 = *p++;
+				unsigned char c3 = *p++;
+				if (qprint_map[c2] >= 0 && qprint_map[c3] >= 0) {
+					*bufp++ = (qprint_map[c2] << 4) | (qprint_map[c3] & 0xF);
+					continue;
+				} else if (c2 == '\r') {
+					if (c3 != '\n') {
+						p--;
+					}
+					continue;
+				} else if (c2 == '\n') {
+					p--;
+					continue;
+				}
+			}
+			*bufp++ = c;
+		}
+	} else if (*encoding == 'B' || *encoding == 'b') {
+		/* Fill `buf` with bytes from decoding Base64 */
+		unsigned int bits = 0, cache = 0;
+		while (p < e) {
+			unsigned char c = *p++;
+			if (c == '\r' || c == '\n' || c == ' ' || c == '\t' || c == '=') {
+				continue;
+			}
+			int8_t decoded = decode_base64(c);
+			if (decoded == -1) {
+				*bufp++ = '?';
+				continue;
+			}
+			bits += 6;
+			cache = (cache << 6) | (decoded & 0x3F);
+			if (bits == 24) {
+				*bufp++ = (cache >> 16) & 0xFF;
+				*bufp++ = (cache >> 8) & 0xFF;
+				*bufp++ = cache & 0xFF;
+				bits = cache = 0;
+			}
+		}
+		if (bits == 18) {
+			*bufp++ = (cache >> 10) & 0xFF;
+			*bufp++ = (cache >> 2) & 0xFF;
+		} else if (bits == 12) {
+			*bufp++ = (cache >> 4) & 0xFF;
+		}
+	} else {
+		efree(buf);
+		return NULL;
+	}
+
+	size_t in_len = bufp - buf;
+	uint32_t wchar_buf[128];
+
+	bufp = buf;
+	while (in_len) {
+		size_t out_len = incode->to_wchar(&bufp, &in_len, wchar_buf, 128, state);
+		ZEND_ASSERT(out_len <= 128);
+		outcode->from_wchar(wchar_buf, out_len, outbuf, false);
+	}
+
+	efree(buf);
+	return e + 2;
+}
+
+static zend_string* mb_mime_header_decode(zend_string *input, const mbfl_encoding *outcode)
+{
+	unsigned char *p = (unsigned char*)ZSTR_VAL(input), *e = p + ZSTR_LEN(input);
+	unsigned int state = 0;
+	bool space_pending = false;
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, ZSTR_LEN(input), '?', MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR);
+
+	while (p < e) {
+		unsigned char c = *p;
+
+		if (c == '=' && *(p + 1) == '?' && (e - p) >= 6) {
+			/* Does this look like a MIME encoded word? If so, try to decode it as one */
+			unsigned char *incode_end = memchr(p + 2, '?', e - p - 2);
+			if (incode_end && (e - incode_end) >= 3) {
+				unsigned char *temp = mime_header_decode_encoded_word(p, e, outcode, &buf, &state);
+				if (temp) {
+					p = temp;
+					/* Decoding of MIME encoded word was successful;
+					 * Try to collapse a run of whitespace */
+					if (p < e && (*p == '\n' || *p == '\r')) {
+						do {
+							p++;
+						} while (p < e && (*p == '\n' || *p == '\r' || *p == '\t' || *p == ' '));
+						/* We will only actually output a space if this is not immediately followed
+						 * by another valid encoded word */
+						space_pending = true;
+					}
+					continue;
+				}
+			}
+		}
+
+		if (space_pending) {
+			uint32_t space = ' ';
+			outcode->from_wchar(&space, 1, &buf, false);
+			space_pending = false;
+		}
+
+		/* Consume a run of plain ASCII characters */
+		if (c != '\n' && c != '\r') {
+			unsigned char *end = p + 1;
+			while (end < e && (*end != '=' && *end != '\n' && *end != '\r')) {
+				end++;
+			}
+			uint32_t wchar_buf[128];
+			size_t in_len = end - p;
+			while (in_len) {
+				size_t out_len = mbfl_encoding_ascii.to_wchar(&p, &in_len, wchar_buf, 128, &state);
+				ZEND_ASSERT(out_len <= 128);
+				outcode->from_wchar(wchar_buf, out_len, &buf, false);
+			}
+		}
+		/* Collapse a run of whitespace into a single space */
+		if (p < e && (*p == '\n' || *p == '\r')) {
+			do {
+				p++;
+			} while (p < e && (*p == '\n' || *p == '\r' || *p == '\t' || *p == ' '));
+			if (p < e) {
+				/* Emulating legacy behavior of mb_decode_mimeheader here;
+				 * a run of whitespace is not converted to a space at the very
+				 * end of the input string */
+				uint32_t space = ' ';
+				outcode->from_wchar(&space, 1, &buf, false);
+			}
+		}
+	}
+
+	outcode->from_wchar(NULL, 0, &buf, true);
+
+	return mb_convert_buf_result(&buf, outcode);
+}
+
+PHP_FUNCTION(mb_decode_mimeheader)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR(mb_mime_header_decode(str, MBSTRG(current_internal_encoding)));
+}
