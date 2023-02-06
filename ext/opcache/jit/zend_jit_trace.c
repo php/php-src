@@ -5043,11 +5043,25 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 						} else {
+							bool may_overflow = (op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa);
+
+#ifdef ZEND_JIT_IR
+							if (ra
+							 && may_overflow
+							 && ((res_info & MAY_BE_GUARD)
+							 && (res_info & MAY_BE_ANY) == MAY_BE_LONG)
+							 && ((opline->opcode == ZEND_ADD
+							   && Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1)
+							  || (opline->opcode == ZEND_SUB
+							   && Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1))) {
+								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
+							}
+#endif
 							if (!zend_jit_math(&ctx, opline,
 									op1_info, op1_addr,
 									op2_info, op2_addr,
 									res_use_info, res_info, res_addr,
-									(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
+									may_overflow,
 									zend_may_throw(opline, ssa_op, op_array, ssa))) {
 								goto jit_failure;
 							}
