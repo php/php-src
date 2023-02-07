@@ -745,7 +745,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.http_input is deprecated");
 	}
 
-	if (!new_value || !ZSTR_VAL(new_value)) {
+	if (!new_value || !ZSTR_LEN(new_value)) {
 		const char *encoding = php_get_input_encoding();
 		MBSTRG(http_input_set) = 0;
 		_php_mb_ini_mbstring_http_input_set(encoding, strlen(encoding));
