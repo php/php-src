@@ -3616,11 +3616,7 @@ PHP_FUNCTION(array_slice)
 						break;
 					}
 					n++;
-					if (preserve_keys) {
-						entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), idx, zv);
-					} else {
-						entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), zv);
-					}
+					entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), idx, zv);
 					zval_add_ref(entry);
 				}
 			}
