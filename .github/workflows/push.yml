@@ -49,6 +49,7 @@ jobs:
           # GitHub has no way to query the job name (github.job is the
           # job id, not the job name)
           key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -101,6 +102,7 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-x32
         with:
@@ -131,6 +133,7 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-macos
         with:
