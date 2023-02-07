@@ -4878,7 +4878,7 @@ ZEND_EXT_API int zend_jit_debug_config(zend_long old_val, zend_long new_val, int
 ZEND_EXT_API void zend_jit_init(void)
 {
 #ifdef ZTS
-	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, zend_jit_globals_dtor);
+	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, (ts_allocate_dtor) zend_jit_globals_dtor);
 #else
 	zend_jit_globals_ctor(&jit_globals);
 #endif
