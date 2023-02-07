@@ -27,6 +27,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
 
+- PDO OCI:
+  . Fixed bug #60994 (Reading a multibyte CLOB caps at 8192 chars).
+    (Michael Voříšek)
+
 - Phar:
   . Fix incorrect check in phar tar parsing. (nielsdos)
 
