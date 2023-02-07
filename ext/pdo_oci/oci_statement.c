@@ -616,6 +616,7 @@ struct oci_lob_self {
 	OCILobLocator *lob;
 	oci_lob_env   *E;
 	ub4 offset;
+	ub1 csfrm;
 };
 
 static ssize_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
@@ -641,23 +642,34 @@ static ssize_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
 static ssize_t oci_blob_read(php_stream *stream, char *buf, size_t count)
 {
 	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
-	ub4 amt;
-	sword r;
+#if HAVE_OCILOBREAD2
+	oraub8 byte_amt = (oraub8) count;
+	oraub8 char_amt = 0;
 
-	amt = (ub4) count;
-	r = OCILobRead(self->E->svc, self->E->err, self->lob,
-		&amt, self->offset, buf, (ub4) count,
+	sword r = OCILobRead2(self->E->svc, self->E->err, self->lob,
+		&byte_amt, &char_amt, (oraub8) self->offset, buf, (oraub8) count,
+        OCI_ONE_PIECE, NULL, NULL, 0, self->csfrm);
+#else
+	ub4 byte_amt = (ub4) count;
+
+	sword r = OCILobRead(self->E->svc, self->E->err, self->lob,
+		&byte_amt, self->offset, buf, (ub4) count,
 		NULL, NULL, 0, SQLCS_IMPLICIT);
+#endif
 
 	if (r != OCI_SUCCESS && r != OCI_NEED_DATA) {
-		return (size_t)-1;
+		return (ssize_t)-1;
 	}
 
-	self->offset += amt;
-	if (amt < count) {
+#if HAVE_OCILOBREAD2
+	self->offset += self->csfrm == 0 ? byte_amt : char_amt;
+#else
+	self->offset += byte_amt;
+#endif
+	if (byte_amt < count) {
 		stream->eof = 1;
 	}
-	return amt;
+	return byte_amt;
 }
 
 static int oci_blob_close(php_stream *stream, int close_handle)
@@ -723,6 +735,8 @@ static php_stream *oci_create_lob_stream(zval *dbh, pdo_stmt_t *stmt, OCILobLoca
 	self->E = ecalloc(1, sizeof(oci_lob_env));
 	self->E->svc = self->S->H->svc;
 	self->E->err = self->S->err;
+
+	OCILobCharSetForm(self->S->H->env, self->S->err, self->lob, &self->csfrm);
 
 	stm = php_stream_alloc(&oci_blob_stream_ops, self, 0, "r+b");
 
