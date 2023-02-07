@@ -417,7 +417,8 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		uint64_t mask = max_offset;
 		// Copy the top-most bit into all lower bits.
 		// Shifting by 4 is sufficient, because max_offset
-		// is guaranteed to be an 8-bit integer.
+		// is guaranteed to fit in an 8-bit integer at this
+		// point.
 		mask |= mask >> 1;
 		mask |= mask >> 2;
 		mask |= mask >> 4;
