@@ -262,7 +262,9 @@ int fuzzer_do_request_from_buffer(
 		zend_file_handle file_handle;
 		zend_stream_init_filename(&file_handle, filename);
 		file_handle.primary_script = 1;
-		file_handle.buf = estrndup(data, data_len);
+		file_handle.buf = emalloc(data_len + ZEND_MMAP_AHEAD);
+		memcpy(file_handle.buf, data, data_len);
+		memset(file_handle.buf + data_len, 0, ZEND_MMAP_AHEAD);
 		file_handle.len = data_len;
 		/* Avoid ZEND_HANDLE_FILENAME for opcache. */
 		file_handle.type = ZEND_HANDLE_STREAM;
