@@ -1626,6 +1626,9 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 	}
 #endif // HAVE_COPY_FILE_RANGE
 
+    // If we are falling back, remove read bytes from the total size to copy
+    maxlen -= haveread;
+
 	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
 	}
