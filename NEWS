@@ -35,6 +35,9 @@ PHP                                                                        NEWS
   . Fixed JSON scanner and parser generation build.
     (Daniel Black, Jakub Zelenka)
 
+- MBString:
+  . ext/mbstring: fix new_value length check. (Max Kellermann)
+
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
 
@@ -71,7 +74,7 @@ PHP                                                                        NEWS
 - SAPI:
   . Fixed bug GHSA-54hq-v5wp-fqgv (DOS vulnerability when parsing multipart
     request body). (CVE-2023-0662) (Jakub Zelenka)
- 
+
 02 Feb 2023, PHP 8.1.15
 
 - Apache:
