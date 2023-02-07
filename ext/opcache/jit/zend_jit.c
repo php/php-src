@@ -5061,7 +5061,9 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 		zend_jit_perf_jitdump_close();
 	}
 #endif
-#ifndef ZTS
+#ifdef ZTS
+	ts_free_id(jit_globals_id);
+#else
 	zend_jit_trace_free_caches();
 #endif
 }
