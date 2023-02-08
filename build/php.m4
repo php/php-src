@@ -1870,7 +1870,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
     if test "$php_re2c_check" != "invalid"; then
       AC_MSG_RESULT([$php_re2c_version (ok)])
     else
-      AC_MSG_RESULT([$php_re2c_version])
+      AC_MSG_RESULT([$php_re2c_version (too old)])
     fi
   fi
 
