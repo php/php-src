@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fix bug GH-9697 for reset/end/next/prev() attempting to move pointer of
     properties table for certain internal classes such as FFI classes
 
+- Tidy:
+  . Fix memory leaks when attempting to open a non-existing file or a file over
+    4GB. (Girgias)
+
 02 Feb 2023, PHP 8.1.15
 
 - Apache:
