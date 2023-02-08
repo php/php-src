@@ -49,7 +49,7 @@ ZEND_API void zend_timer_init(void) /* {{{ */
 
 	EG(pid) = getpid();
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
-	if (timer_create(CLOCK_REALTIME, &sev, &EG(timer)) != 0) {
+	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
 
