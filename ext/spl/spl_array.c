@@ -12,7 +12,7 @@
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
- */
+*/
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -88,6 +88,21 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 	}
 }
 /* }}} */
+
+static void spl_array_illegal_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on ArrayObject", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
+static void spl_array_illegal_empty_or_isset_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s in isset or empty", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
+static void spl_array_illegal_unset_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s in unset", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /* {{{ */
 	return *spl_array_get_hash_table_ptr(intern);
@@ -286,7 +301,7 @@ try_again:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		zend_type_error("Illegal offset type");
+		spl_array_illegal_offset(offset);
 		return FAILURE;
 	}
 
@@ -313,7 +328,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		zend_type_error("Illegal offset type");
+		spl_array_illegal_offset(offset);
 		return (type == BP_VAR_W || type == BP_VAR_RW) ?
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
@@ -466,7 +481,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		zend_type_error("Illegal offset type");
+		spl_array_illegal_offset(offset);
 		zval_ptr_dtor(value);
 		return;
 	}
@@ -502,7 +517,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		zend_type_error("Illegal offset type in unset");
+		spl_array_illegal_unset_offset(offset);
 		return;
 	}
 
@@ -566,7 +581,7 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 		spl_hash_key key;
 
 		if (get_hash_key(&key, intern, offset) == FAILURE) {
-			zend_type_error("Illegal offset type in isset or empty");
+			spl_array_illegal_empty_or_isset_offset(offset);
 			return 0;
 		}
 
