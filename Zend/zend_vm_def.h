@@ -6098,7 +6098,7 @@ ZEND_VM_C_LABEL(num_index):
 			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else {
-			zend_illegal_array_offset(offset);
+			zend_illegal_container_offset("array", offset, BP_VAR_W);
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		FREE_OP2();
@@ -6610,7 +6610,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 				key = ZSTR_EMPTY_ALLOC();
 				ZEND_VM_C_GOTO(str_index_dim);
 			} else {
-				zend_illegal_unset_offset(offset);
+				zend_illegal_container_offset("array", offset, BP_VAR_UNSET);
 			}
 			break;
 		} else if (Z_ISREF_P(container)) {

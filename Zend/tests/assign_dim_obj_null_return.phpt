@@ -73,11 +73,11 @@ test();
 --EXPECT--
 Cannot add element to the array as the next element is already occupied
 Cannot access offset of type array on array
-Cannot access offset of type object on array
+Cannot access offset of type stdClass on array
 Cannot use a scalar value as an array
 Cannot add element to the array as the next element is already occupied
 Cannot access offset of type array on array
-Cannot access offset of type object on array
+Cannot access offset of type stdClass on array
 Cannot use a scalar value as an array
 Attempt to assign property "foo" on true
 Attempt to assign property "foo" on true

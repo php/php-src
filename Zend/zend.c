@@ -1719,6 +1719,24 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 }
 /* }}} */
 
+/* type should be one of the BP_VAR_* constants, only special messages happen for isset/empty and unset */
+ZEND_API ZEND_COLD void zend_illegal_container_offset(const char *container, const zval *offset, int type)
+{
+	switch (type) {
+		case BP_VAR_IS:
+			zend_type_error("Cannot access offset of type %s in isset or empty",
+				zend_zval_type_name(offset));
+			return;
+		case BP_VAR_UNSET:
+			zend_type_error("Cannot access offset of type %s in unset", zend_zval_type_name(offset));
+			return;
+		default:
+			zend_type_error("Cannot access offset of type %s on %s",
+				zend_zval_type_name(offset), container);
+			return;
+	}
+}
+
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 {
 	va_list va;

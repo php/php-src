@@ -161,7 +161,7 @@ array(1) {
     int(1)
   }
 }
-Cannot access offset of type object on array
+Cannot access offset of type Closure on array
 array(1) {
   [0]=>
   array(2) {
