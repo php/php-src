@@ -26,5 +26,4 @@ new Test();
 --EXPECTF--
 object(Test)#1 (0) {
 }
-object(Test)#2 (0) {
-}
+NULL

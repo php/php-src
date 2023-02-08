@@ -3602,8 +3602,13 @@ ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *ori
 	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), &value, strict);
 	variable_ptr = Z_REFVAL_P(variable_ptr);
 	if (EXPECTED(ret)) {
-		i_zval_ptr_dtor_noref(variable_ptr);
+		// The destructor must run after the variable has already been reassigned
+		// Otherwise, assigning to the variable again can cause a double free
+		// Thus we need to store the old value in a temporary slot
+		zval garbage;
+		ZVAL_COPY_VALUE(&garbage, variable_ptr);
 		ZVAL_COPY_VALUE(variable_ptr, &value);
+		i_zval_ptr_dtor_noref(&garbage);
 	} else {
 		zval_ptr_dtor_nogc(&value);
 	}
