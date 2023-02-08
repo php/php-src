@@ -1,0 +1,5 @@
+// vim:ft=javascript
+
+EXTENSION("collections", "php_collections.c collections_deque.c collections_util.c", false /*never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+PHP_COLLECTIONS="yes";
+PHP_INSTALL_HEADERS("ext/collections", "php_collections.h collections_deque.h collections_internaliterator.h collections_util.h");

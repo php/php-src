@@ -1,0 +1,5 @@
+PHP_NEW_EXTENSION(collections, php_collections.c collections_deque.c collections_util.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+PHP_INSTALL_HEADERS([ext/collections], [php_collections.h collections_deque.h collections_internaliterator.h collections_util.h])
+PHP_ADD_EXTENSION_DEP(collections, spl, true)
+PHP_ADD_EXTENSION_DEP(collections, standard, true)
+PHP_ADD_EXTENSION_DEP(collections, json)
