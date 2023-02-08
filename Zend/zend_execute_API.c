@@ -1324,7 +1324,7 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
 	if (si->si_value.sival_ptr != &EG(timer)) {
 #ifdef TIMER_DEBUG
-		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGIO received on thread %d\n", (pid_t) syscall(SYS_gettid));
+		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGRTMIN received on thread %d\n", (pid_t) syscall(SYS_gettid));
 #endif
 
 		if (EG(oldact).sa_sigaction) {
@@ -1449,9 +1449,9 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		act.sa_sigaction = zend_timeout_handler;
 		sigemptyset(&act.sa_mask);
 		act.sa_flags = SA_ONSTACK | SA_SIGINFO;
-		sigaction(SIGIO, &act, NULL);
+		sigaction(SIGRTMIN, &act, NULL);
 		sigemptyset(&sigset);
-		sigaddset(&sigset, SIGIO);
+		sigaddset(&sigset, SIGRTMIN);
 		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
 #elif defined(HAVE_SETITIMER)

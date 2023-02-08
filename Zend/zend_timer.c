@@ -38,13 +38,7 @@ ZEND_API void zend_timer_init(void) /* {{{ */
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(timer);
-	// The chosen signal must:
-	// 1. not be used internally by libc
-	// 2. be allowed to happen spuriously without consequences
-	// 3. not be commonly used by applications, this excludes SIGALRM, SIGUSR1 and SIGUSR2
-	// 4. not be used by profilers, this excludes SIGPROF
-	// 5. not be used internally by runtimes of programs that can embed PHP, this excludes SIGURG, which is used by Go
-	sev.sigev_signo = SIGIO;
+	sev.sigev_signo = SIGRTMIN;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
 	EG(pid) = getpid();
