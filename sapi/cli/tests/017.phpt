@@ -11,7 +11,7 @@ if (readline_info('done') !== NULL) {
 ?>
 --FILE--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 $ini = getenv('TEST_PHP_EXTRA_ARGS');
 $descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
 

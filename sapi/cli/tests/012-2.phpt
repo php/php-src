@@ -7,7 +7,7 @@ readline
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 // -r : behavior = CLI_DIRECT
 // -F / -R / -B / -E : behavior = PROCESS_STDIN
@@ -15,17 +15,17 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 // -s : behavior = HIGHLIGHT
 // -w : behavior = STRIP
 
-var_dump(`"$php" -n -r "echo 1;" -F some.php`);
-var_dump(`"$php" -n -r "echo 2;" -f some.php`);
-var_dump(`"$php" -n -r "echo 3;" -l`); // ignores linting
-var_dump(`"$php" -n -r "echo 4;" -R some.php`);
-var_dump(`"$php" -n -r "echo 5;" -B ""`);
-var_dump(`"$php" -n -a -B ""`);
-var_dump(`"$php" -n -r "echo 6;" -E ""`);
-var_dump(`"$php" -n -a -E ""`);
-var_dump(`"$php" -n -r "echo 7;" -s`);
-var_dump(`"$php" -n -r "echo 8;" -w`);
-var_dump(`"$php" -n -l -r "echo 9;"`);
+var_dump(`$php -n -r "echo 1;" -F some.php`);
+var_dump(`$php -n -r "echo 2;" -f some.php`);
+var_dump(`$php -n -r "echo 3;" -l`); // ignores linting
+var_dump(`$php -n -r "echo 4;" -R some.php`);
+var_dump(`$php -n -r "echo 5;" -B ""`);
+var_dump(`$php -n -a -B ""`);
+var_dump(`$php -n -r "echo 6;" -E ""`);
+var_dump(`$php -n -a -E ""`);
+var_dump(`$php -n -r "echo 7;" -s`);
+var_dump(`$php -n -r "echo 8;" -w`);
+var_dump(`$php -n -l -r "echo 9;"`);
 
 echo "Done\n";
 ?>
