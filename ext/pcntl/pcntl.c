@@ -1074,7 +1074,7 @@ static void pcntl_signal_handler(int signo)
 	}
 }
 
-void pcntl_signal_dispatch()
+void pcntl_signal_dispatch(void)
 {
 	zval params[2], *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;

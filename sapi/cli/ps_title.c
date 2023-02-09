@@ -284,7 +284,7 @@ clobber_error:
  * and the init function was called.
  * Otherwise returns NOT_AVAILABLE or NOT_INITIALIZED
  */
-int is_ps_title_available()
+int is_ps_title_available(void)
 {
 #ifdef PS_USE_NONE
     return PS_TITLE_NOT_AVAILABLE; /* disabled functionality */
