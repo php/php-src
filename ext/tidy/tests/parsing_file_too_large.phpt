@@ -4,6 +4,7 @@ Trying to parse a file that is too large (over 4GB)
 tidy
 --SKIPIF--
 <?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --INI--
