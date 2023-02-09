@@ -16,14 +16,12 @@ $file = fopen($path, 'w+');
 
 // Write over 4GB
 const MIN_FILE_SIZE = 4_294_967_295;
-$total_bytes = 0;
-$s = str_repeat("a", 10_000);
-while ($total_bytes < MIN_FILE_SIZE) {
-    $bytes_written = fwrite($file, $s);
-    if ($bytes_written === false) {
-        echo "Didn't write bytes\n";
-    }
-    $total_bytes += $bytes_written;
+
+var_dump(fseek($file, MIN_FILE_SIZE+10));
+$s = str_repeat("a", 10);
+$bytes_written = fwrite($file, $s);
+if ($bytes_written === false) {
+    echo "Didn't write bytes\n";
 }
 
 $tidy = new tidy;
@@ -51,6 +49,7 @@ $path = __DIR__ . '/too_large_test.html';
 unlink($path);
 ?>
 --EXPECT--
+int(0)
 ValueError: Input string is too long
 ValueError: Input string is too long
 ValueError: Input string is too long
