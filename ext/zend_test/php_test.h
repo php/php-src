@@ -53,6 +53,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int replace_zend_execute_ex;
 	int register_passes;
 	bool print_stderr_mshutdown;
+	zend_long limit_copy_file_range;
 	zend_test_fiber *active_fiber;
 	zend_long quantity_value;
 	zend_string *str_test;
