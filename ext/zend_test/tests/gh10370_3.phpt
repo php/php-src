@@ -14,23 +14,23 @@ zend_test.limit_copy_file_range=3584
 <?php
 /* Note: the value 3584 is chosen so that the mmap in _php_stream_copy_to_stream_ex() will mmap
  *       at an offset of a multiple of 4096, which is the standard page size in most Linux systems. */
-mkdir(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370');
+mkdir(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370_003');
 
 $input = fopen(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370.tar', 'r');
-$output = fopen(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370' . DIRECTORY_SEPARATOR . 'testfile', 'w');
+$output = fopen(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370_003' . DIRECTORY_SEPARATOR . 'testfile', 'w');
 
 var_dump(stream_copy_to_stream($input, $output, 10240, 0x200));
 
 fclose($input);
 fclose($output);
 
-var_dump(sha1_file(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370' . DIRECTORY_SEPARATOR . 'testfile'));
+var_dump(sha1_file(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370_003' . DIRECTORY_SEPARATOR . 'testfile'));
 ?>
 --EXPECT--
 int(10240)
 string(40) "a723ae4ec7eababff73ca961a771b794be6388d2"
 --CLEAN--
 <?php
-@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370' . DIRECTORY_SEPARATOR . 'testfile');
-@rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370');
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370_003' . DIRECTORY_SEPARATOR . 'testfile');
+@rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'gh10370_003');
 ?>
