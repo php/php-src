@@ -51,12 +51,16 @@ PHP                                                                        NEWS
     mt_srand() unknown). (kocsismate)
 
 - Standard:
-  - Fixed bug GH-8086 (Introduce mail.mixed_lf_and_crlf INI). (Jakub Zelenka)
+  . Fixed bug GH-8086 (Introduce mail.mixed_lf_and_crlf INI). (Jakub Zelenka)
   . Fixed bug GH-10292 (Made the default value of the first param of srand() and
     mt_srand() unknown). (kocsismate)
   . Fix incorrect check in cs_8559_5 in map_from_unicode(). (nielsdos)
   . Fix bug GH-9697 for reset/end/next/prev() attempting to move pointer of
     properties table for certain internal classes such as FFI classes
+
+- Streams:
+  . Fixed bug GH-10370 (File corruption in _php_stream_copy_to_stream_ex when
+    using copy_file_range). (nielsdos)
 
 - Tidy:
   . Fix memory leaks when attempting to open a non-existing file or a file over
@@ -572,8 +576,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-9653 (file copy between different filesystems). (David Carlier)
   . Fixed bug GH-9779 (stream_copy_to_stream fails if dest in append mode).
     (Jakub Zelenka)
-  . Fixed bug GH-10370 (File corruption in _php_stream_copy_to_stream_ex when
-    using copy_file_range). (nielsdos)
 
 - Windows:
   . Added preliminary support for (cross-)building for ARM64. (Yun Dou)
