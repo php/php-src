@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-namespace PgSql {
+namespace {
     /* libpq version */
 
     /**
@@ -412,34 +412,6 @@ namespace PgSql {
      * @cvalue PGSQL_DML_STRING
      */
     const PGSQL_DML_STRING = UNKNOWN;
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Connection
-    {
-    }
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Result
-    {
-    }
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Lob
-    {
-    }
-
-}
-
-namespace {
 
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
@@ -922,4 +894,31 @@ namespace {
      * @refcount 1
      */
     function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+}
+
+namespace PgSql {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Result
+    {
+    }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Lob
+    {
+    }
+
 }
