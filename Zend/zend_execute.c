@@ -3617,6 +3617,9 @@ ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *ori
 		}
 	} else {
 		zval_ptr_dtor_nogc(&value);
+		if (result_variable_ptr) {
+			ZVAL_UNDEF(result_variable_ptr);
+		}
 	}
 	if (value_type & (IS_VAR|IS_TMP_VAR)) {
 		if (UNEXPECTED(ref)) {
