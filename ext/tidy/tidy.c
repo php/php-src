@@ -1069,18 +1069,19 @@ PHP_FUNCTION(tidy_parse_file)
 		Z_PARAM_BOOL(use_include_path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	tidy_instantiate(tidy_ce_doc, return_value);
-	obj = Z_TIDY_P(return_value);
-
 	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
 		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 		RETURN_FALSE;
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+		zend_string_release_ex(contents, 0);
 		zend_value_error("Input string is too long");
 		RETURN_THROWS();
 	}
+
+	tidy_instantiate(tidy_ce_doc, return_value);
+	obj = Z_TIDY_P(return_value);
 
 	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
 
@@ -1372,6 +1373,7 @@ PHP_METHOD(tidy, __construct)
 		}
 
 		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+			zend_string_release_ex(contents, 0);
 			zend_value_error("Input string is too long");
 			RETURN_THROWS();
 		}
@@ -1410,6 +1412,7 @@ PHP_METHOD(tidy, parseFile)
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+		zend_string_release_ex(contents, 0);
 		zend_value_error("Input string is too long");
 		RETURN_THROWS();
 	}
