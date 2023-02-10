@@ -23,3 +23,6 @@
 **/*_arginfo.h linguist-generated
 /Zend/zend_vm_execute.h linguist-generated
 /Zend/zend_vm_opcodes.{h,c} linguist-generated
+
+# The OSS fuzz files are bunary
+/ext/date/tests/ossfuzz*.txt binary
