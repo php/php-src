@@ -1,21 +1,15 @@
 --TEST--
-GH-10168 (heap-buffer-overflow at zval_undefined_cv): assign typed static prop
+GH-10168 (heap-buffer-overflow at zval_undefined_cv): assign typed static prop by ref
 --XFAIL--
 --FILE--
 <?php
+
 class Test
 {
 	static ?Test $a = null;
 
 	public function __construct() {
-		static $i = 0;
-		$i++;
-		if ($i === 1) {
-			var_dump(self::$a = $this);
-		} else {
-			// Avoid cache slot, triggering write_property
-			var_dump(self::$a = $this);
-		}
+		var_dump(self::$a = &$this);
 	}
 
 	function __destruct() {

@@ -1,10 +1,10 @@
 --TEST--
-GH-10168 (heap-buffer-overflow at zval_undefined_cv): assign prop
+GH-10168 (heap-buffer-overflow at zval_undefined_cv): assign typed prop
 --FILE--
 <?php
 
 class Box {
-	public $storage;
+	public ?Test $storage = null;
 }
 
 $box = new Box();
