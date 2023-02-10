@@ -29,6 +29,7 @@
 #include "zend_interfaces.h"
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
+#include "test.h"
 #include "test_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
