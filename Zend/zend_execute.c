@@ -4459,7 +4459,24 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
-ZEND_API HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer)
+ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer)
+{
+	bool suspended_by_yield = false;
+
+	if (Z_TYPE_INFO(EX(This)) & ZEND_CALL_GENERATOR) {
+		ZEND_ASSERT(EX(return_value));
+
+		/* The generator object is stored in EX(return_value) */
+		zend_generator *generator = (zend_generator*) EX(return_value);
+		ZEND_ASSERT(execute_data == generator->execute_data);
+
+		suspended_by_yield = !(generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING);
+	}
+
+	return zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, suspended_by_yield);
+}
+
+ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield)
 {
 	if (!EX(func) || !ZEND_USER_CODE(EX(func)->common.type)) {
 		return NULL;
@@ -4495,8 +4512,15 @@ ZEND_API HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data
 	}
 
 	if (call) {
-		/* -1 required because we want the last run opcode, not the next to-be-run one. */
-		uint32_t op_num = execute_data->opline - op_array->opcodes - 1;
+		uint32_t op_num = execute_data->opline - op_array->opcodes;
+		if (suspended_by_yield) {
+			/* When the execution was suspended by yield, EX(opline) points to
+			 * next opline to execute. Otherwise, it points to the opline that
+			 * suspended execution. */
+			op_num--;
+			ZEND_ASSERT(EX(func)->op_array.opcodes[op_num].opcode == ZEND_YIELD
+				|| EX(func)->op_array.opcodes[op_num].opcode == ZEND_YIELD_FROM);
+		}
 		zend_unfinished_calls_gc(execute_data, call, op_num, gc_buffer);
 	}
 
