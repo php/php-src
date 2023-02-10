@@ -3554,6 +3554,13 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
 		ZEND_ASSERT(Z_TYPE_P(zval_ptr) != IS_REFERENCE);
+
+		/* clear reference before invoking the destructor, or
+		   else something inside the destructor may assign the
+		   reference again, triggering another recursive
+		   destructor call */
+		ZVAL_UNDEF(zval_ptr);
+
 		if (!GC_DELREF(ref)) {
 			rc_dtor_func(ref);
 		} else if (UNEXPECTED(GC_MAY_LEAK(ref))) {
