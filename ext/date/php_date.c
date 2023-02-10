@@ -2735,6 +2735,7 @@ PHP_METHOD(DateTime, __set_state)
 	dateobj = Z_PHPDATE_P(return_value);
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -2756,6 +2757,7 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 	dateobj = Z_PHPDATE_P(return_value);
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -2818,7 +2820,7 @@ static void restore_custom_datetime_properties(zval *object, HashTable *myht)
 	zval             *prop_val;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
-		if (date_time_is_internal_property(prop_name)) {
+		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_time_is_internal_property(prop_name)) {
 			continue;
 		}
 		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
@@ -2842,6 +2844,7 @@ PHP_METHOD(DateTime, __unserialize)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		RETURN_THROWS();
 	}
 
 	restore_custom_datetime_properties(object, myht);
@@ -2865,6 +2868,7 @@ PHP_METHOD(DateTimeImmutable, __unserialize)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
+		RETURN_THROWS();
 	}
 
 	restore_custom_datetime_properties(object, myht);
@@ -3918,7 +3922,7 @@ static void restore_custom_datetimezone_properties(zval *object, HashTable *myht
 	zval             *prop_val;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
-		if (date_timezone_is_internal_property(prop_name)) {
+		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_timezone_is_internal_property(prop_name)) {
 			continue;
 		}
 		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
@@ -4545,7 +4549,7 @@ static void restore_custom_dateinterval_properties(zval *object, HashTable *myht
 	zval             *prop_val;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
-		if (date_interval_is_internal_property(prop_name)) {
+		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_interval_is_internal_property(prop_name)) {
 			continue;
 		}
 		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
@@ -5545,7 +5549,7 @@ static void restore_custom_dateperiod_properties(zval *object, HashTable *myht)
 	zval             *prop_val;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(myht, prop_name, prop_val) {
-		if (date_period_is_internal_property(prop_name)) {
+		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_period_is_internal_property(prop_name)) {
 			continue;
 		}
 		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
