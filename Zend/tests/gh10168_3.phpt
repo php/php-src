@@ -1,5 +1,5 @@
 --TEST--
-GH-10168 (heap-buffer-overflow at zval_undefined_cv): assign typed prop
+GH-10168 (heap-buffer-overflow at zval_undefined_cv): assign typed static prop
 --XFAIL--
 --FILE--
 <?php
