@@ -2410,13 +2410,15 @@ ZEND_VM_C_LABEL(assign_object):
 					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 					if (UNEXPECTED(prop_info != NULL)) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
-						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC OPLINE_CC);
+						FREE_OP_DATA();
+						ZEND_VM_C_GOTO(exit_assign_obj);
 					} else {
 ZEND_VM_C_LABEL(fast_assign_obj):
-						value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
 						if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-							ZVAL_COPY(EX_VAR(opline->result.var), value);
+							value = zend_assign_to_two_variables(EX_VAR(opline->result.var), property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+						} else {
+							value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
 						}
 						ZEND_VM_C_GOTO(exit_assign_obj);
 					}
@@ -2522,14 +2524,14 @@ ZEND_VM_HANDLER(25, ZEND_ASSIGN_STATIC_PROP, ANY, ANY, CACHE_SLOT, SPEC(OP_DATA=
 	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
 
 	if (UNEXPECTED(ZEND_TYPE_IS_SET(prop_info->type))) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value EXECUTE_DATA_CC OPLINE_CC);
 		FREE_OP_DATA();
 	} else {
-		value = zend_assign_to_variable(prop, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
-	}
-
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			value = zend_assign_to_two_variables(EX_VAR(opline->result.var), prop, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+		} else {
+			value = zend_assign_to_variable(prop, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+		}
 	}
 
 	/* assign_static_prop has two opcodes! */

@@ -1005,7 +1005,7 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 	return i_zend_verify_property_type(info, property, strict);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value EXECUTE_DATA_DC OPLINE_DC)
 {
 	zval tmp;
 
@@ -1022,6 +1022,9 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 		return &EG(uninitialized_zval);
 	}
 
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		return zend_assign_to_two_variables(EX_VAR(opline->result.var), property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	}
 	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 }
 
@@ -3609,11 +3612,11 @@ ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *ori
 		ZVAL_COPY_VALUE(&garbage, variable_ptr);
 		ZVAL_COPY_VALUE(variable_ptr, &value);
 		i_zval_ptr_dtor_noref(&garbage);
+		if (result_variable_ptr) {
+			ZVAL_COPY_DEREF(result_variable_ptr, &value);
+		}
 	} else {
 		zval_ptr_dtor_nogc(&value);
-	}
-	if (result_variable_ptr) {
-		ZVAL_COPY(result_variable_ptr, variable_ptr);
 	}
 	if (value_type & (IS_VAR|IS_TMP_VAR)) {
 		if (UNEXPECTED(ref)) {

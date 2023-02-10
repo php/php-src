@@ -7,7 +7,7 @@ class Test
 {
     static $instances;
     public function __construct() {
-	    (self::$instances[NULL] = $this) > 0;
+	    var_dump(self::$instances[NULL] = $this);
 	    var_dump(self::$instances);
     }
 
@@ -19,14 +19,15 @@ new Test();
 new Test();
 
 ?>
---EXPECTF--
-Notice: Object of class Test could not be converted to int in %s on line %d
+--EXPECT--
+object(Test)#1 (0) {
+}
 array(1) {
   [""]=>
   object(Test)#1 (0) {
   }
 }
-
-Notice: Object of class Test could not be converted to int in %s on line %d
+object(Test)#2 (0) {
+}
 array(0) {
 }
