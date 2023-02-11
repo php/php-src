@@ -3496,7 +3496,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, inNamespace)
 
 	zend_string *name = fptr->common.function_name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	RETURN_BOOL(backslash && backslash > ZSTR_VAL(name));
+	RETURN_BOOL(backslash);
 }
 /* }}} */
 
@@ -3514,7 +3514,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getNamespaceName)
 
 	zend_string *name = fptr->common.function_name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
 	}
 	RETURN_EMPTY_STRING();
@@ -3535,7 +3535,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getShortName)
 
 	zend_string *name = fptr->common.function_name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
 	}
 	RETURN_STR_COPY(name);
@@ -5363,7 +5363,7 @@ ZEND_METHOD(ReflectionClass, inNamespace)
 
 	zend_string *name = ce->name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	RETURN_BOOL(backslash && backslash > ZSTR_VAL(name));
+	RETURN_BOOL(backslash);
 }
 /* }}} */
 
@@ -5381,7 +5381,7 @@ ZEND_METHOD(ReflectionClass, getNamespaceName)
 
 	zend_string *name = ce->name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
 	}
 	RETURN_EMPTY_STRING();
@@ -5402,7 +5402,7 @@ ZEND_METHOD(ReflectionClass, getShortName)
 
 	zend_string *name = ce->name;
 	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash && backslash > ZSTR_VAL(name)) {
+	if (backslash) {
 		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
 	}
 	RETURN_STR_COPY(name);
@@ -5667,7 +5667,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 }
 /* }}} */
 
-/* {{{ Returns this property's value */
+/* {{{ Returns true if property was initialized */
 ZEND_METHOD(ReflectionProperty, isInitialized)
 {
 	reflection_object *intern;
@@ -6499,7 +6499,7 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 }
 /* }}} */
 
-/* {{{ *	   Returns the name of the attribute */
+/* {{{ Returns the name of the attribute */
 ZEND_METHOD(ReflectionAttribute, getName)
 {
 	reflection_object *intern;
@@ -6514,7 +6514,7 @@ ZEND_METHOD(ReflectionAttribute, getName)
 }
 /* }}} */
 
-/* {{{ *	   Returns the target of the attribute */
+/* {{{ Returns the target of the attribute */
 ZEND_METHOD(ReflectionAttribute, getTarget)
 {
 	reflection_object *intern;
@@ -6529,7 +6529,7 @@ ZEND_METHOD(ReflectionAttribute, getTarget)
 }
 /* }}} */
 
-/* {{{ *	   Returns true if the attribute is repeated */
+/* {{{ Returns true if the attribute is repeated */
 ZEND_METHOD(ReflectionAttribute, isRepeated)
 {
 	reflection_object *intern;
@@ -6544,7 +6544,7 @@ ZEND_METHOD(ReflectionAttribute, isRepeated)
 }
 /* }}} */
 
-/* {{{ *	   Returns the arguments passed to the attribute */
+/* {{{ Returns the arguments passed to the attribute */
 ZEND_METHOD(ReflectionAttribute, getArguments)
 {
 	reflection_object *intern;
@@ -6661,7 +6661,7 @@ static void attribute_ctor_cleanup(
 }
 /* }}} */
 
-/* {{{ *	   Returns the attribute as an object */
+/* {{{ Returns the attribute as an object */
 ZEND_METHOD(ReflectionAttribute, newInstance)
 {
 	reflection_object *intern;
