@@ -61,6 +61,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-10370 (File corruption in _php_stream_copy_to_stream_ex when
     using copy_file_range). (nielsdos)
+  . Fixed bug GH-10548 (copy() fails on cifs mounts because of incorrect
+    copy_file_range() len). (nielsdos)
 
 - Tidy:
   . Fix memory leaks when attempting to open a non-existing file or a file over
