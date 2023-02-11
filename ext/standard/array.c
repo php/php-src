@@ -244,6 +244,25 @@ static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, in
 }
 /* }}} */
 
+static zend_always_inline int php_array_key_compare_strict_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+{
+	if (f->key == NULL) {
+		if (s->key == NULL) {
+			return (zend_long) f->h > (zend_long) s->h ? 1 : -1;
+		} else {
+			/* f's keytype is int, s's keytype is string, and int < string */
+			return -1;
+		}
+	} else {
+		if (s->key == NULL) {
+			/* f's keytype is string, s's keytype is int, and string > int */
+			return 1;
+		} else {
+			return zendi_smart_strcmp(f->key, s->key);
+		}
+	}
+}
+
 static int php_array_key_compare_string_natural_case(Bucket *a, Bucket *b) /* {{{ */
 {
 	RETURN_STABLE_SORT(a, b, php_array_key_compare_string_natural_general(a, b, 1));
@@ -312,6 +331,45 @@ static zend_always_inline int php_array_data_compare_string_unstable_i(Bucket *f
 }
 /* }}} */
 
+static zend_always_inline int php_array_data_compare_strict_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+{
+	/* We must first check for identity before using a type-juggly zend_compare.
+	 * Otherwise there would be cases which are inconsistent; e.g. `null == false`
+	 * but `null !== false` and we want the latter behaviour. */
+	if (fast_is_identical_function(&f->val, &s->val)) {
+		return 0;
+	}
+
+	uint32_t type1 = Z_TYPE(f->val);
+	uint32_t type2 = Z_TYPE(s->val);
+
+	if (type1 == type2) {
+		return zend_compare(&f->val, &s->val);
+	} else {
+		/* If the types are not equal, we will sort in a way that groups the values of the same
+		 * type together, and within those groups the values are sorted.
+		 * We determine the order of the types based on the alphabetical order (as exposed to userland!),
+		 * which is consistent with the inequality comparisons of `zend_compare` (e.g. false < object < true etc.)
+		 * Order: array, false, double (float), long (int), null, object, reference, resource, string, true.
+		 * Note that double comes before long because the name exposed to userland is float which comes alphabetically
+		 * before long. */
+		static const signed char type_to_order_mapping[] = {
+			[IS_ARRAY]     = 0,
+			[IS_FALSE]     = 1,
+			[IS_DOUBLE]    = 2,
+			[IS_LONG]      = 3,
+			[IS_NULL]      = 4,
+			[IS_OBJECT]    = 5,
+			[IS_REFERENCE] = 6,
+			[IS_RESOURCE]  = 7,
+			[IS_STRING]    = 8,
+			[IS_TRUE]      = 9,
+		};
+
+		return ZEND_NORMALIZE_BOOL(type_to_order_mapping[type1] - type_to_order_mapping[type2]);
+	}
+}
+
 static int php_array_natural_general_compare(Bucket *f, Bucket *s, int fold_case) /* {{{ */
 {
 	zend_string *tmp_str1, *tmp_str2;
@@ -349,11 +407,13 @@ DEFINE_SORT_VARIANTS(key_compare_numeric);
 DEFINE_SORT_VARIANTS(key_compare_string_case);
 DEFINE_SORT_VARIANTS(key_compare_string);
 DEFINE_SORT_VARIANTS(key_compare_string_locale);
+DEFINE_SORT_VARIANTS(key_compare_strict);
 DEFINE_SORT_VARIANTS(data_compare);
 DEFINE_SORT_VARIANTS(data_compare_numeric);
 DEFINE_SORT_VARIANTS(data_compare_string_case);
 DEFINE_SORT_VARIANTS(data_compare_string);
 DEFINE_SORT_VARIANTS(data_compare_string_locale);
+DEFINE_SORT_VARIANTS(data_compare_strict);
 DEFINE_SORT_VARIANTS(natural_compare);
 DEFINE_SORT_VARIANTS(natural_case_compare);
 
@@ -405,6 +465,14 @@ static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type, int r
 				return php_array_reverse_key_compare_string_locale;
 			} else {
 				return php_array_key_compare_string_locale;
+			}
+			break;
+
+		case PHP_SORT_STRICT:
+			if (reverse) {
+				return php_array_reverse_key_compare_strict;
+			} else {
+				return php_array_key_compare_strict;
 			}
 			break;
 
@@ -472,6 +540,14 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 			}
 			break;
 
+		case PHP_SORT_STRICT:
+			if (reverse) {
+				return php_array_reverse_data_compare_strict;
+			} else {
+				return php_array_data_compare_strict;
+			}
+			break;
+
 		case PHP_SORT_REGULAR:
 		default:
 			if (reverse) {
@@ -533,6 +609,14 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 				return php_array_reverse_data_compare_string_locale_unstable;
 			} else {
 				return php_array_data_compare_string_locale_unstable;
+			}
+			break;
+
+		case PHP_SORT_STRICT:
+			if (reverse) {
+				return php_array_reverse_data_compare_strict_unstable;
+			} else {
+				return php_array_data_compare_strict_unstable;
 			}
 			break;
 
@@ -5653,6 +5737,7 @@ PHP_FUNCTION(array_multisort)
 				case PHP_SORT_STRING:
 				case PHP_SORT_NATURAL:
 				case PHP_SORT_LOCALE_STRING:
+				case PHP_SORT_STRICT:
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
