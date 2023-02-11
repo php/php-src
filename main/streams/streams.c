@@ -1614,6 +1614,13 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 						/* not implemented by this Linux kernel */
 						break;
 
+					case EIO:
+						/* Some filesystems will cause failures if the max length is greater than the file length
+						 * in certain circumstances and configuration. In those cases the errno is EIO and we will
+						 * fall back to other methods. We cannot use stat to determine the file length upfront because
+						 * that is prone to races and outdated caching. */
+						break;
+
 					default:
 						/* unexpected I/O error - give up, no fallback */
 						*len = haveread;
