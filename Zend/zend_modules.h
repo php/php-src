@@ -77,11 +77,11 @@ struct _zend_module_entry {
 	const struct _zend_module_dep *deps;
 	const char *name;
 	const struct _zend_function_entry *functions;
-	zend_result (*module_startup_func)(INIT_FUNC_ARGS);
-	zend_result (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-	zend_result (*request_startup_func)(INIT_FUNC_ARGS);
-	zend_result (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
+	zend_result (*module_startup_func)(INIT_FUNC_ARGS); // MINIT()
+	zend_result (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS); // MSHUTDOWN()
+	zend_result (*request_startup_func)(INIT_FUNC_ARGS); // RINIT()
+	zend_result (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS); // RSHUTDOWN()
+	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS); // PHPINFO()
 	const char *version;
 	size_t globals_size;
 #ifdef ZTS
@@ -89,9 +89,9 @@ struct _zend_module_entry {
 #else
 	void* globals_ptr;
 #endif
-	void (*globals_ctor)(void *global);
-	void (*globals_dtor)(void *global);
-	zend_result (*post_deactivate_func)(void);
+	void (*globals_ctor)(void *global); // GINIT
+	void (*globals_dtor)(void *global); // GSHUTDOWN
+	zend_result (*post_deactivate_func)(void); // PRSHUTDOWN()
 	int module_started;
 	unsigned char type;
 	void *handle;

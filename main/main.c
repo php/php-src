@@ -1782,6 +1782,8 @@ zend_result php_request_startup(void)
 		/* PG(during_request_startup) = 0; */
 
 		php_hash_environment();
+		// 在 php_request_startup() 函数中，通过 zend_activate_module() 触发 RINIT()。
+		printf("\033[0;31;43m========== 请求初始化: RINIT () ==========\033[0m\n");
 		zend_activate_modules();
 		PG(modules_activated)=1;
 	} zend_catch {
@@ -1837,6 +1839,8 @@ void php_request_shutdown(void *dummy)
 
 	/* 5. Call all extensions RSHUTDOWN functions */
 	if (PG(modules_activated)) {
+		// 在 php_request_shutdown() 函数中，通过 zend_deactivate_modules() 触发 RSHUTDOWN()。
+		printf("\033[0;31;43m========== 请求终止： RSHUTDOWN () ==========\033[0m\n");
 		zend_deactivate_modules();
 	}
 
@@ -1867,6 +1871,8 @@ void php_request_shutdown(void *dummy)
 
 	/* 11. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
+		// 这个钩子很少使用。在 php_request_shutdown() 函数中，通过 zend_post_deactivate_modules()，在 RSHUTDOWN() 之后被触发。
+		printf("\033[0;31;43m========== Post 请求终止： PRSHUTDOWN () ==========\033[0m\n");
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
@@ -2196,6 +2202,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	   ahead of all other internals
 	 */
 	php_ini_register_extensions();
+	// 在 php_module_startup() 函数中，通过 zend_startup_modules() 触发 MINIT()。
+	printf("\033[0;31;43m========== 模块初始化：MINIT () ==========\033[0m\n");
 	zend_startup_modules();
 
 	/* start Zend extensions */
@@ -2353,6 +2361,8 @@ void php_module_shutdown(void)
 
 	sapi_flush();
 
+	// 在 php_module_shutdown() 函数中，由 zend_shutdown() 的 zend_destroy_modules() 中触发 MSHUTDOWN()。
+	printf("\033[0;31;43m========== 模块终止：MSHUTDOWN () ==========\033[0m\n");
 	zend_shutdown();
 
 #ifdef PHP_WIN32
