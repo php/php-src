@@ -293,6 +293,27 @@ const SO_SETFIB = UNKNOWN;
  */
 const SO_ACCEPTFILTER = UNKNOWN;
 #endif
+#ifdef SO_RERROR
+/**
+ * @var int
+ * @cvalue SO_RERROR
+ */
+const SO_RERROR = UNKNOWN;
+#endif
+#ifdef SO_SOPLICE
+/**
+ * @var int
+ * @cvalue SO_SPLICE
+ */
+const SO_SPLICE = UNKNOWN;
+#endif
+#ifdef SO_ZEROIZE
+/**
+ * @var int
+ * @cvalue SO_ZEROIZE
+ */
+const SO_ZEROIZE = UNKNOWN;
+#endif
 #ifdef SOL_FILTER
 /**
  * @var int
