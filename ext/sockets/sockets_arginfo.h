@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d02c3c772eab5d9c1310839d2464887993f8e8de */
+ * Stub hash: 2ee788183fb6f9925b3a7a8166076703319ba8c3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -431,6 +431,15 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(SO_ACCEPTFILTER)
 	REGISTER_LONG_CONSTANT("SO_ACCEPTFILTER", SO_ACCEPTFILTER, CONST_PERSISTENT);
+#endif
+#if defined(SO_RERROR)
+	REGISTER_LONG_CONSTANT("SO_RERROR", SO_RERROR, CONST_PERSISTENT);
+#endif
+#if defined(SO_SOPLICE)
+	REGISTER_LONG_CONSTANT("SO_SPLICE", SO_SPLICE, CONST_PERSISTENT);
+#endif
+#if defined(SO_ZEROIZE)
+	REGISTER_LONG_CONSTANT("SO_ZEROIZE", SO_ZEROIZE, CONST_PERSISTENT);
 #endif
 #if defined(SOL_FILTER)
 	REGISTER_LONG_CONSTANT("SOL_FILTER", SOL_FILTER, CONST_PERSISTENT);

@@ -106,6 +106,7 @@ PHP                                                                        NEWS
   . Added AF_DIVERT for raw socket for divert ports. (David Carlier)
   . Added SOL_UPDLITE, UDPLITE_RECV_CSCOV and UDPLITE_SEND_CSCOV for updlite
     protocol support. (David Carlier)
+  . Added SO_RERROR, SO_ZEROIZE and SO_SPLICE netbsd and openbsd constants.
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)

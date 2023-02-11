@@ -144,6 +144,9 @@ PHP 8.3 UPGRADE NOTES
   . SOL_UDPLITE.
   . UDPLITE_RECV_CSCOV.
   . UDPLITE_SEND_CSCOV.
+  . SO_RERROR (NetBSD only).
+  . SO_ZEROIZE (OpenBSD only).
+  . SO_SPLICE (OpenBSD only).
 
 ========================================
 11. Changes to INI File Handling
