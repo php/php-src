@@ -1073,6 +1073,11 @@ PHP_ARG_ENABLE([werror],,
     [Enable -Werror])],
   [no],
   [no])
+PHP_ARG_ENABLE([lto],,
+  [AS_HELP_STRING([--enable-lto],
+    [Enable Link Time Optimization])],
+  [no],
+  [no])
 PHP_ARG_ENABLE([memory-sanitizer],,
   [AS_HELP_STRING([--enable-memory-sanitizer],
     [Enable memory sanitizer (clang only)])],
@@ -1621,6 +1626,13 @@ if test "$PHP_MEMORY_SANITIZER" = "yes" ||
     CXXFLAGS="$CXXFLAGS -fno-omit-frame-pointer"
 fi
 
+dnl Enable LTO support for release builds.
+if test "$PHP_LTO" = "yes" && test "$PHP_DEBUG" != "yes" && test "$PHP_GCOV" != "yes"; then
+    AX_CHECK_COMPILE_FLAG([-flto],
+    [LTO_FLAGS="-flto"],
+    [AC_MSG_WARN([LTO is unsupported])])
+fi
+
 dnl
 dnl Libtool creation.
 dnl
@@ -1661,8 +1673,8 @@ PHP_CONFIGURE_PART(Generating files)
 
 CXXFLAGS_CLEAN=$CXXFLAGS
 CFLAGS_CLEAN="$CFLAGS \$(PROF_FLAGS)"
-CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
-CXXFLAGS="$CXXFLAGS $standard_libtool_flag \$(PROF_FLAGS)"
+CFLAGS="\$(CFLAGS_CLEAN) \$(LTO_FLAGS) $standard_libtool_flag"
+CXXFLAGS="$CXXFLAGS $standard_libtool_flag \$(PROF_FLAGS) \$(LTO_FLAGS)"
 
 if test "$PHP_PHAR" != "no" && test "$PHP_CLI" != "no"; then
   pharcmd=pharcmd

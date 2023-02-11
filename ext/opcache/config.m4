@@ -41,6 +41,8 @@ if test "$PHP_OPCACHE" != "no"; then
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_gdb.c jit/zend_jit_vm_helpers.c"
+    dnl LTO not compatible with global register variables
+    CFLAGS=$CFLAGS_CLEAN
 
     dnl Find out which ABI we are using.
     case $host_alias in
