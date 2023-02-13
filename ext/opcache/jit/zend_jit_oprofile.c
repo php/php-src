@@ -27,7 +27,7 @@ static void zend_jit_oprofile_register(const char *name,
                                        size_t      size)
 {
 	if (op_agent) {
-		op_write_native_code(op_agent, name, (uint64_t)(zend_uintptr_t)start, start, size);
+		op_write_native_code(op_agent, name, (uint64_t)(uintptr_t)start, start, size);
 	}
 }
 

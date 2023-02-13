@@ -774,7 +774,7 @@ static void *zend_mm_chunk_alloc(zend_mm_heap *heap, size_t size, size_t alignme
 #if ZEND_MM_STORAGE
 	if (UNEXPECTED(heap->storage)) {
 		void *ptr = heap->storage->handlers.chunk_alloc(heap->storage, size, alignment);
-		ZEND_ASSERT(((zend_uintptr_t)((char*)ptr + (alignment-1)) & (alignment-1)) == (zend_uintptr_t)ptr);
+		ZEND_ASSERT(((uintptr_t)((char*)ptr + (alignment-1)) & (alignment-1)) == (uintptr_t)ptr);
 		return ptr;
 	}
 #endif
@@ -2171,7 +2171,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 		repeated = zend_mm_find_leaks_huge(heap, list);
 		total += 1 + repeated;
 		if (repeated) {
-			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
+			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
 		}
 
 		heap->huge_list = list = list->next;
@@ -2210,7 +2210,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 							           zend_mm_find_leaks(heap, p, i + bin_pages[bin_num], &leak);
 							total += 1 + repeated;
 							if (repeated) {
-								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
+								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
 							}
 						}
 						dbg = (zend_mm_debug_info*)((char*)dbg + bin_data_size[bin_num]);
@@ -2236,7 +2236,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 					repeated = zend_mm_find_leaks(heap, p, i + pages_count, &leak);
 					total += 1 + repeated;
 					if (repeated) {
-						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
+						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
 					}
 					i += pages_count;
 				}

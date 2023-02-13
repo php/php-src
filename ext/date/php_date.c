@@ -2145,7 +2145,7 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 
 	/* Records whether this is a special relative interval that needs to be recreated from a string */
 	if (intervalobj->from_string) {
-		ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
+		ZVAL_BOOL(&zv, (bool)intervalobj->from_string);
 		zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
 		ZVAL_STR_COPY(&zv, intervalobj->date_string);
 		zend_hash_str_update(props, "date_string", strlen("date_string"), &zv);
@@ -2171,7 +2171,7 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 		ZVAL_FALSE(&zv);
 		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 	}
-	ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
+	ZVAL_BOOL(&zv, (bool)intervalobj->from_string);
 	zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
 
 #undef PHP_DATE_INTERVAL_ADD_PROPERTY

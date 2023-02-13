@@ -141,7 +141,7 @@ static inline void *zend_shared_alloc_aligned(size_t size) {
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	void *p = zend_shared_alloc(size + 64);
-	return (void *)(((zend_uintptr_t)p + 63L) & ~63L);
+	return (void *)(((uintptr_t)p + 63L) & ~63L);
 #else
 	return zend_shared_alloc(size);
 #endif

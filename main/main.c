@@ -1627,7 +1627,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 						strlcat(memory_leak_buf, relay_buf, sizeof(memory_leak_buf));
 					}
 				} else {
-					unsigned long leak_count = (zend_uintptr_t) data;
+					unsigned long leak_count = (uintptr_t) data;
 
 					snprintf(memory_leak_buf, 512, "Last leak repeated %lu time%s\n", leak_count, (leak_count>1?"s":""));
 				}

@@ -2682,7 +2682,7 @@ static void check_unrecoverable_load_failure(zend_class_entry *ce) {
 	 * a dependence on the inheritance hierarchy of this specific class. Instead we fall back to
 	 * a fatal error, as would happen if we did not allow exceptions in the first place. */
 	if (CG(unlinked_uses)
-			&& zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t)ce) == SUCCESS) {
+			&& zend_hash_index_del(CG(unlinked_uses), (zend_long)(uintptr_t)ce) == SUCCESS) {
 		zend_exception_uncaught_error(
 			"During inheritance of %s with variance dependencies", ZSTR_VAL(ce->name));
 	}
@@ -2957,7 +2957,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		}
 
 		if (CG(unlinked_uses)) {
-			zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t) ce);
+			zend_hash_index_del(CG(unlinked_uses), (zend_long)(uintptr_t) ce);
 		}
 
 		orig_linking_class = CG(current_linking_class);

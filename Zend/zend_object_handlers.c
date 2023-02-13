@@ -536,7 +536,7 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
 	uint32_t *ptr = (uint32_t*)Z_PTR_P(el);
-	if (EXPECTED(!(((zend_uintptr_t)ptr) & 1))) {
+	if (EXPECTED(!(((uintptr_t)ptr) & 1))) {
 		efree_size(ptr, sizeof(uint32_t));
 	}
 }
@@ -565,7 +565,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
 			/* mark pointer as "special" using low bit */
 			zend_hash_add_new_ptr(guards, str,
-				(void*)(((zend_uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
+				(void*)(((uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
 			zval_ptr_dtor_str(zv);
 			ZVAL_ARR(zv, guards);
 		}
@@ -574,7 +574,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		ZEND_ASSERT(guards != NULL);
 		zv = zend_hash_find(guards, member);
 		if (zv != NULL) {
-			return (uint32_t*)(((zend_uintptr_t)Z_PTR_P(zv)) & ~1);
+			return (uint32_t*)(((uintptr_t)Z_PTR_P(zv)) & ~1);
 		}
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);

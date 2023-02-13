@@ -431,7 +431,7 @@ typedef struct _zend_arg_info {
  * It's also used for the return type.
  */
 typedef struct _zend_internal_function_info {
-	zend_uintptr_t required_num_args;
+	uintptr_t required_num_args;
 	zend_type type;
 	const char *default_value;
 } zend_internal_function_info;

@@ -262,7 +262,7 @@ static const char* zend_jit_disasm_resolver(
 	((void)ud);
 # endif
 	const char *name;
-	void *a = (void*)(zend_uintptr_t)(addr);
+	void *a = (void*)(uintptr_t)(addr);
 	Dl_info info;
 
 	name = zend_jit_disasm_find_symbol(addr, offset);

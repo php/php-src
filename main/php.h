@@ -434,4 +434,10 @@ END_EXTERN_C()
 
 #include "php_reentrancy.h"
 
+/* the following typedefs are deprecated and will be removed in PHP
+ * 9.0; use the standard C99 types instead */
+typedef bool zend_bool;
+typedef intptr_t zend_intptr_t;
+typedef uintptr_t zend_uintptr_t;
+
 #endif
