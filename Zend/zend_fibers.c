@@ -670,7 +670,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	HashTable *lastSymTable = NULL;
 	zend_execute_data *ex = fiber->execute_data;
 	for (; ex; ex = ex->prev_execute_data) {
-		HashTable *symTable = zend_unfinished_execution_gc(ex, ex->call, buf);
+		HashTable *symTable = zend_unfinished_execution_gc_ex(ex, ex->call, buf, false);
 		if (symTable) {
 			if (lastSymTable) {
 				zval *val;

@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 
 - Fiber:
   . Fixed assembly on alpine x86. (nielsdos)
+  . Fixed bug GH-10496 (segfault when garbage collector is invoked inside of
+    fiber). (Bob, Arnaud)
 
 - FPM:
   . Fixed bug GH-10315 (FPM unknown child alert not valid). (Jakub Zelenka)

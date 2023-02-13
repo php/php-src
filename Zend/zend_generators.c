@@ -372,7 +372,7 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		call = zend_generator_revert_call_stack(generator->frozen_call_stack);
 	}
 
-	zend_unfinished_execution_gc(execute_data, call, gc_buffer);
+	zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, true);
 
 	if (UNEXPECTED(generator->frozen_call_stack)) {
 		zend_generator_revert_call_stack(call);
