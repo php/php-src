@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.28
 
+- Core:
+  . Fixed bug #81744 (Password_verify() always return true with some hash).
+    (CVE-2023-0567). (Tim Düsterhus)
 
 05 Jan 2023, PHP 8.0.27
 
