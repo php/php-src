@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.16
+?? ??? ????, PHP 8.1.17
 
 - Core:
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
@@ -51,6 +51,14 @@ PHP                                                                        NEWS
 - Tidy:
   . Fix memory leaks when attempting to open a non-existing file or a file over
     4GB. (Girgias)
+
+14 Feb 2023, PHP 8.1.16
+
+- Core:
+  . Fixed bug #81744 (Password_verify() always return true with some hash).
+    (CVE-2023-0567). (Tim Düsterhus)
+  . Fixed bug #81746 (1-byte array overrun in common path resolve code).
+    (CVE-2023-0568). (Niels Dossche)
 
 02 Feb 2023, PHP 8.1.15
 
