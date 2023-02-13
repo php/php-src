@@ -26,6 +26,7 @@
 #include "zend_jit_gdb.h"
 #include "zend_elf.h"
 #include "zend_gdb.h"
+#include "zend_string.h" // for ZSTR_VAL()
 
 /* DWARF definitions. */
 #define DW_CIE_VERSION  1
