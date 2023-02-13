@@ -135,6 +135,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 		} else if (
 				salt[0] == '$' &&
 				salt[1] == '2' &&
+				salt[2] != 0 &&
 				salt[3] == '$') {
 			char output[PHP_MAX_SALT_LEN + 1];
 

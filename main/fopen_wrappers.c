@@ -129,10 +129,10 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 */
 PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path)
 {
-	char resolved_name[MAXPATHLEN];
-	char resolved_basedir[MAXPATHLEN];
+	char resolved_name[MAXPATHLEN + 1];
+	char resolved_basedir[MAXPATHLEN + 1];
 	char local_open_basedir[MAXPATHLEN];
-	char path_tmp[MAXPATHLEN];
+	char path_tmp[MAXPATHLEN + 1];
 	char *path_file;
 	size_t resolved_basedir_len;
 	size_t resolved_name_len;
