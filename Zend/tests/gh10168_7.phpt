@@ -1,6 +1,5 @@
 --TEST--
 GH-10168 (heap-buffer-overflow at zval_undefined_cv): assign typed static prop by ref
---XFAIL--
 --FILE--
 <?php
 
@@ -26,6 +25,5 @@ object(Test)#1 (0) {
 }
 object(Test)#2 (0) {
 }
-object(Test)#2 (0) {
-}
+NULL
 NULL

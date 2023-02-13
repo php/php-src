@@ -546,21 +546,29 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_ptr(int op_type, zno
 	return get_zval_ptr_ptr(op_type, node, type);
 }
 
-static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr)
+static inline void zend_assign_to_variable_reference(zval *result_ptr, zval *variable_ptr, zval *value_ptr)
 {
 	zend_reference *ref;
 
 	if (EXPECTED(!Z_ISREF_P(value_ptr))) {
 		ZVAL_NEW_REF(value_ptr, value_ptr);
 	} else if (UNEXPECTED(variable_ptr == value_ptr)) {
+		if (UNEXPECTED(result_ptr)) {
+			ZVAL_COPY(result_ptr, value_ptr);
+		}
 		return;
 	}
 
+	zend_refcounted *garbage = Z_REFCOUNTED_P(variable_ptr) ? Z_COUNTED_P(variable_ptr) : NULL;
+
 	ref = Z_REF_P(value_ptr);
 	GC_ADDREF(ref);
-	if (Z_REFCOUNTED_P(variable_ptr)) {
-		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+	ZVAL_REF(variable_ptr, ref);
+	if (UNEXPECTED(result_ptr)) {
+		ZVAL_COPY(result_ptr, variable_ptr);
+	}
 
+	if (garbage != NULL) {
 		if (GC_DELREF(garbage) == 0) {
 			ZVAL_REF(variable_ptr, ref);
 			rc_dtor_func(garbage);
@@ -569,32 +577,41 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 			gc_check_possible_root(garbage);
 		}
 	}
-	ZVAL_REF(variable_ptr, ref);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_property_info *prop_info, zval *prop, zval *value_ptr EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_property_info *prop_info, zval *result_ptr, zval *prop, zval *value_ptr EXECUTE_DATA_DC)
 {
 	if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
+		if (UNEXPECTED(result_ptr)) {
+			ZVAL_COPY(result_ptr, &EG(uninitialized_zval));
+		}
 		return &EG(uninitialized_zval);
 	}
 	if (Z_ISREF_P(prop)) {
 		ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
-	zend_assign_to_variable_reference(prop, value_ptr);
+	zend_assign_to_variable_reference(result_ptr, prop, value_ptr);
 	ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	return prop;
 }
 
-static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference(zval *result_ptr, zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_error(E_NOTICE, "Only variables should be assigned by reference");
 	if (UNEXPECTED(EG(exception) != NULL)) {
+		if (UNEXPECTED(result_ptr)) {
+			ZVAL_COPY_VALUE(result_ptr, &EG(uninitialized_zval));
+		}
 		return &EG(uninitialized_zval);
 	}
 
 	/* Use IS_TMP_VAR instead of IS_VAR to avoid ISREF check */
 	Z_TRY_ADDREF_P(value_ptr);
-	return zend_assign_to_variable(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	if (UNEXPECTED(result_ptr)) {
+		return zend_assign_to_two_variables(result_ptr, variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	} else {
+		return zend_assign_to_variable(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	}
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
@@ -3251,14 +3268,15 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 	zend_fetch_property_address(variable_ptr, container, container_op_type, prop_ptr, prop_op_type,
 		cache_addr, BP_VAR_W, 0, 0 OPLINE_CC EXECUTE_DATA_CC);
 
+	zval *result_ptr = UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL;
+
 	if (EXPECTED(Z_TYPE_P(variable_ptr) == IS_INDIRECT)) {
 		variable_ptr = Z_INDIRECT_P(variable_ptr);
 		if (/*OP_DATA_TYPE == IS_VAR &&*/
 				   (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 				   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
-			variable_ptr = zend_wrong_assign_to_variable_reference(
-				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			variable_ptr = zend_wrong_assign_to_variable_reference(result_ptr, variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			zend_property_info *prop_info = NULL;
 
@@ -3270,21 +3288,21 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 			}
 
 			if (UNEXPECTED(prop_info)) {
-				variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr EXECUTE_DATA_CC);
+				variable_ptr = zend_assign_to_typed_property_reference(prop_info, result_ptr, variable_ptr, value_ptr EXECUTE_DATA_CC);
 			} else {
-				zend_assign_to_variable_reference(variable_ptr, value_ptr);
+				zend_assign_to_variable_reference(result_ptr, variable_ptr, value_ptr);
 			}
 		}
 	} else if (Z_ISERROR_P(variable_ptr)) {
-		variable_ptr = &EG(uninitialized_zval);
+		if (result_ptr) {
+			ZVAL_COPY(result_ptr, &EG(uninitialized_zval));
+		}
 	} else {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
 		zval_ptr_dtor(&variable);
-		variable_ptr = &EG(uninitialized_zval);
-	}
-
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+		if (result_ptr) {
+			ZVAL_COPY(result_ptr, &EG(uninitialized_zval));
+		}
 	}
 }
 
