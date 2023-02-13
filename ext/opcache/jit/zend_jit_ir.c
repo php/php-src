@@ -5858,8 +5858,7 @@ static int zend_jit_cmp_long_long(zend_jit_ctx   *jit,
 		if (!smart_branch_opcode ||
 		    smart_branch_opcode == ZEND_JMPZ_EX ||
 		    smart_branch_opcode == ZEND_JMPNZ_EX) {
-			jit_set_Z_TYPE_INFO(jit, res_addr,
-				ir_CONST_U32(result ? IS_TRUE : IS_FALSE));
+			jit_set_Z_TYPE_INFO(jit, res_addr, result ? IS_TRUE : IS_FALSE);
 		}
 		if (smart_branch_opcode && !exit_addr) {
 			if (smart_branch_opcode == ZEND_JMPZ ||
