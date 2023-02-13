@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81744 (Password_verify() always return true with some hash).
     (CVE-2023-0567). (Tim Düsterhus)
+  . Fixed bug #81746 (1-byte array overrun in common path resolve code). 
+    (CVE-2023-0568). (Niels Dossche)
 
 05 Jan 2023, PHP 8.0.27
 
