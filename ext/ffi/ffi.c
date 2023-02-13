@@ -2038,6 +2038,8 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 	}
 
 	switch (type->kind) {
+		case ZEND_FFI_TYPE_VOID:
+			return NULL;
 		case ZEND_FFI_TYPE_BOOL:
 		case ZEND_FFI_TYPE_CHAR:
 		case ZEND_FFI_TYPE_ENUM:
