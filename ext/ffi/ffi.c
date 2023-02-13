@@ -2832,7 +2832,11 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 		free_alloca(arg_values, arg_values_use_heap);
 	}
 
-	zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
+	if (ZEND_FFI_TYPE(type->func.ret_type)->kind != ZEND_FFI_TYPE_VOID) {
+		zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
+	} else {
+		ZVAL_NULL(return_value);
+	}
 	free_alloca(ret, ret_use_heap);
 
 exit:
