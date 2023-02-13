@@ -1640,8 +1640,14 @@ static size_t tsrm_tls_offset;
 
 #if defined (__CET__) && (__CET__ & 1) != 0
 # define ENDBR_PADDING 4
+/* Keep 16 exit points in a single code block */
+#	define ZEND_JIT_EXIT_POINTS_SPACING   8  // endbr + push byte + short jmp = bytes
+#	define ZEND_JIT_EXIT_POINTS_PER_GROUP 16 // number of continuous exit points
 #else
 # define ENDBR_PADDING 0
+/* Keep 32 exit points in a single code block */
+#	define ZEND_JIT_EXIT_POINTS_SPACING   4  // push byte + short jmp = bytes
+#	define ZEND_JIT_EXIT_POINTS_PER_GROUP 32 // number of continuous exit points
 #endif
 
 static bool reuse_ip = 0;
@@ -2605,18 +2611,16 @@ static int zend_jit_trace_escape_stub(dasm_State **Dst)
 	return 1;
 }
 
-/* Keep 32 exit points in a single code block */
-#define ZEND_JIT_EXIT_POINTS_SPACING   4  // push byte + short jmp = bytes
-#define ZEND_JIT_EXIT_POINTS_PER_GROUP 32 // number of continuous exit points
-
 static int zend_jit_trace_exit_group_stub(dasm_State **Dst, uint32_t n)
 {
 	uint32_t i;
 
 	for (i = 0; i < ZEND_JIT_EXIT_POINTS_PER_GROUP - 1; i++) {
+		|	ENDBR
 		|	push byte i
-		|	.byte 0xeb, (4*(ZEND_JIT_EXIT_POINTS_PER_GROUP-i)-6) // jmp >1
+		|	.byte 0xeb, (ZEND_JIT_EXIT_POINTS_SPACING*(ZEND_JIT_EXIT_POINTS_PER_GROUP-i)-ZEND_JIT_EXIT_POINTS_SPACING -2) // jmp >1
 	}
+	|	ENDBR
 	|	push byte i
 	|// 1:
 	|	add aword [r4], n
@@ -3126,6 +3130,7 @@ static int zend_jit_set_ip(dasm_State **Dst, const zend_op *opline)
 
 static int zend_jit_set_ip_ex(dasm_State **Dst, const zend_op *opline, bool set_ip_reg)
 {
+	|	ENDBR
 	if (last_valid_opline == opline) {
 		zend_jit_use_last_valid_opline();
 	} else if (GCC_GLOBAL_REGS && last_valid_opline) {
@@ -3214,6 +3219,7 @@ static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op
 
 static int zend_jit_trace_begin(dasm_State **Dst, uint32_t trace_num, zend_jit_trace_info *parent, uint32_t exit_num)
 {
+	|	ENDBR
 	zend_regset regset = ZEND_REGSET_SCRATCH;
 
 #if ZTS
@@ -15026,6 +15032,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					} while (count);
 					|.code
 					|3:
+					|	ENDBR
 				} else {
 					|	LOAD_ADDR FCARG1a, jumptable
 					|	EXT_CALL zend_hash_index_find, r0
@@ -15033,6 +15040,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 						return 0;
 					}
 					|3:
+					|	ENDBR
 				}
 			}
 		} else if (opline->opcode == ZEND_SWITCH_STRING) {
@@ -15074,6 +15082,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 					return 0;
 				}
 				|3:
+				|	ENDBR
 			}
 		} else if (opline->opcode == ZEND_MATCH) {
 			if (op1_info & (MAY_BE_LONG|MAY_BE_STRING)) {
