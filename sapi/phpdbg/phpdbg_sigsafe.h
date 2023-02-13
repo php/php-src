@@ -1,9 +1,11 @@
 #ifndef PHPDBG_SIGSAFE_H
 #define PHPDBG_SIGSAFE_H
 
-#define PHPDBG_SIGSAFE_MEM_SIZE (ZEND_MM_CHUNK_SIZE * 2)
+#include "zend_alloc.h"
 
-#include "zend.h"
+#include <stdbool.h>
+
+#define PHPDBG_SIGSAFE_MEM_SIZE (ZEND_MM_CHUNK_SIZE * 2)
 
 typedef struct {
 	char *mem;
