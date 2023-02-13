@@ -456,4 +456,10 @@ typedef uintptr_t zend_uintptr_t;
 #include <float.h>
 #include <string.h>
 
+/* the following typedefs are deprecated; use the standard C99 types
+ * instead */
+typedef bool zend_bool;
+typedef intptr_t zend_intptr_t;
+typedef uintptr_t zend_uintptr_t;
+
 #endif
