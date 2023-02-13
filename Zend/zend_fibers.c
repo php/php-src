@@ -644,7 +644,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 
-	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED) {
+	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL) {
 		zend_get_gc_buffer_use(buf, table, num);
 		return NULL;
 	}

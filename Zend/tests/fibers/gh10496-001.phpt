@@ -1,5 +1,5 @@
 --TEST--
-Bug GH-10496 (Segfault when garbage collector is invoked inside of fiber)
+Bug GH-10496 001 (Segfault when garbage collector is invoked inside of fiber)
 --FILE--
 <?php
 
