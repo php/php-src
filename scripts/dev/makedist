@@ -9,6 +9,11 @@
 tar="$(which gtar)"
 tar="${tar:-$(which tar)}"
 
+if [[ $($tar --version) == *"bsdtar"* ]]; then
+  echo "Found bsdtar at $tar, but this script needs GNU tar."
+  exit 1
+fi
+
 # Go to project root directory.
 cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
 
