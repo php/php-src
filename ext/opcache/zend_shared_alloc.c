@@ -593,7 +593,7 @@ const char *zend_accel_get_shared_model(void)
 	return g_shared_model;
 }
 
-void zend_accel_shared_protect(int mode)
+void zend_accel_shared_protect(bool protected)
 {
 #ifdef HAVE_MPROTECT
 	int i;
@@ -602,11 +602,7 @@ void zend_accel_shared_protect(int mode)
 		return;
 	}
 
-	if (mode) {
-		mode = PROT_READ;
-	} else {
-		mode = PROT_READ|PROT_WRITE;
-	}
+	const int mode = protected ? PROT_READ : PROT_READ|PROT_WRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode);
@@ -618,11 +614,7 @@ void zend_accel_shared_protect(int mode)
 		return;
 	}
 
-	if (mode) {
-		mode = PAGE_READONLY;
-	} else {
-		mode = PAGE_READWRITE;
-	}
+	const int mode = protected ? PAGE_READONLY : PAGE_READWRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		DWORD oldProtect;
@@ -633,19 +625,19 @@ void zend_accel_shared_protect(int mode)
 #endif
 }
 
-int zend_accel_in_shm(void *ptr)
+bool zend_accel_in_shm(void *ptr)
 {
 	int i;
 
 	if (!smm_shared_globals) {
-		return 0;
+		return false;
 	}
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		if ((char*)ptr >= (char*)ZSMMG(shared_segments)[i]->p &&
 		    (char*)ptr < (char*)ZSMMG(shared_segments)[i]->p + ZSMMG(shared_segments)[i]->end) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }

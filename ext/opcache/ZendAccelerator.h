@@ -337,14 +337,14 @@ END_EXTERN_C()
 #define SHM_PROTECT() \
 	do { \
 		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(1); \
+			zend_accel_shared_protect(true); \
 		} \
 	} while (0)
 
 #define SHM_UNPROTECT() \
 	do { \
 		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(0); \
+			zend_accel_shared_protect(false); \
 		} \
 	} while (0)
 
