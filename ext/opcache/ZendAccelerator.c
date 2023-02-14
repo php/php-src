@@ -129,7 +129,7 @@ static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 static zend_result (*orig_post_startup_cb)(void);
 
 static zend_result accel_post_startup(void);
-static int accel_finish_startup(void);
+static zend_result accel_finish_startup(void);
 
 static void preload_shutdown(void);
 static void preload_activate(void);
@@ -1165,7 +1165,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	return ret;
 }
 
-int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+zend_result validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
 	if (persistent_script->timestamp == 0) {
 		return SUCCESS; /* Don't check timestamps of preloaded scripts */
@@ -1180,12 +1180,10 @@ int validate_timestamp_and_record(zend_persistent_script *persistent_script, zen
 	}
 }
 
-int validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+zend_result validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
-	int ret;
-
 	SHM_UNPROTECT();
-	ret = validate_timestamp_and_record(persistent_script, file_handle);
+	const zend_result ret = validate_timestamp_and_record(persistent_script, file_handle);
 	SHM_PROTECT();
 
 	return ret;
@@ -1398,7 +1396,7 @@ static void zend_accel_lock_discard_script(zend_persistent_script *persistent_sc
 	zend_shared_alloc_unlock();
 }
 
-int zend_accel_invalidate(zend_string *filename, bool force)
+zend_result zend_accel_invalidate(zend_string *filename, bool force)
 {
 	zend_string *realpath;
 	zend_persistent_script *persistent_script;
@@ -2476,7 +2474,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 }
 
 #ifdef ZEND_WIN32
-static int accel_gen_uname_id(void)
+static zend_result accel_gen_uname_id(void)
 {
 	PHP_MD5_CTX ctx;
 	unsigned char digest[16];
@@ -2819,7 +2817,7 @@ static void zps_startup_failure(char *reason, char *api_reason, int (*cb)(zend_e
 	zend_llist_del_element(&zend_extensions, NULL, (int (*)(void *, void *))cb);
 }
 
-static inline int accel_find_sapi(void)
+static inline zend_result accel_find_sapi(void)
 {
 	static const char *supported_sapis[] = {
 		"apache",
@@ -2853,7 +2851,7 @@ static inline int accel_find_sapi(void)
 	return FAILURE;
 }
 
-static int zend_accel_init_shm(void)
+static zend_result zend_accel_init_shm(void)
 {
 	int i;
 	size_t accel_shared_globals_size;
@@ -3458,7 +3456,7 @@ static void accel_deactivate_now(void)
 	if OK returns SUCCESS
 	MUST call accelerator_shm_read_unlock after done lock operations
 */
-int accelerator_shm_read_lock(void)
+zend_result accelerator_shm_read_lock(void)
 {
 	if (ZCG(counted)) {
 		/* counted means we are holding read lock for SHM, so that nothing bad can happen */
@@ -4335,10 +4333,10 @@ static void preload_load(void)
 	}
 }
 
-static int accel_preload(const char *config, bool in_child)
+static zend_result accel_preload(const char *config, bool in_child)
 {
 	zend_file_handle file_handle;
-	int ret;
+	zend_result ret;
 	char *orig_open_basedir;
 	size_t orig_map_ptr_last;
 	uint32_t orig_compiler_options;
@@ -4585,10 +4583,9 @@ static void preload_send_header(sapi_header_struct *sapi_header, void *server_co
 }
 
 #ifndef ZEND_WIN32
-static int accel_finish_startup_preload(bool in_child)
+static zend_result accel_finish_startup_preload(bool in_child)
 {
-	int ret = SUCCESS;
-	int rc;
+	zend_result ret = SUCCESS;
 	int orig_error_reporting;
 
 	int (*orig_activate)(void) = sapi_module.activate;
@@ -4623,7 +4620,7 @@ static int accel_finish_startup_preload(bool in_child)
 	orig_error_reporting = EG(error_reporting);
 	EG(error_reporting) = 0;
 
-	rc = php_request_startup();
+	const zend_result rc = php_request_startup();
 
 	EG(error_reporting) = orig_error_reporting;
 
@@ -4683,7 +4680,7 @@ static int accel_finish_startup_preload(bool in_child)
 	return ret;
 }
 
-static int accel_finish_startup_preload_subprocess(pid_t *pid)
+static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 {
 	uid_t euid = geteuid();
 	if (euid != 0) {
@@ -4750,7 +4747,7 @@ static int accel_finish_startup_preload_subprocess(pid_t *pid)
 }
 #endif /* ZEND_WIN32 */
 
-static int accel_finish_startup(void)
+static zend_result accel_finish_startup(void)
 {
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
@@ -4791,7 +4788,7 @@ static int accel_finish_startup(void)
 		/* The called function unlocks the shared alloc lock */
 		return accel_finish_startup_preload(false);
 	} else if (pid == 0) { /* subprocess */
-		int ret = accel_finish_startup_preload(true);
+		const zend_result ret = accel_finish_startup_preload(true);
 
 		exit(ret == SUCCESS ? 0 : 1);
 	} else { /* parent */
