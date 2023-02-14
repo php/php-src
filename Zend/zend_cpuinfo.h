@@ -241,7 +241,7 @@ static inline int zend_cpu_supports_avx512(void) {
 	return 0;
 }
 
-static zend_always_inline int zend_cpu_supports_avx512_vbmi(void) {
+static inline int zend_cpu_supports_avx512_vbmi(void) {
 	/* TODO: avx512_vbmi use ECX of cpuid 7 */
 	return 0;
 }
