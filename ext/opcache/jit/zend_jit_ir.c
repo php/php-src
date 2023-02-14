@@ -9122,10 +9122,9 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				last_var = ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, last_var)));
 			}
 
-			ir_ref if_need = ir_IF(ir_LT(num_args, last_var));
-			ir_IF_TRUE(if_need);
-
 			ir_ref idx = ir_SUB_U32(last_var, num_args);
+			ir_ref if_need = ir_IF(ir_GT(idx, ir_CONST_U32(0)));
+			ir_IF_TRUE(if_need);
 
 			// JIT: zval *var = EX_VAR_NUM(num_args);
 			if (sizeof(void*) == 8) {
