@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.3
+?? ??? ????, PHP 8.2.4
 
 - Core:
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
@@ -69,6 +69,18 @@ PHP                                                                        NEWS
 - Tidy:
   . Fix memory leaks when attempting to open a non-existing file or a file over
     4GB. (Girgias)
+
+14 Feb 2023, PHP 8.2.3
+
+- Core:
+  . Fixed bug #81744 (Password_verify() always return true with some hash).
+    (CVE-2023-0567). (Tim Düsterhus)
+  . Fixed bug #81746 (1-byte array overrun in common path resolve code). 
+    (CVE-2023-0568). (Niels Dossche)
+
+- SAPI:
+  . Fixed bug GHSA-54hq-v5wp-fqgv (DOS vulnerability when parsing multipart
+    request body). (CVE-2023-0662) (Jakub Zelenka)
 
 02 Feb 2023, PHP 8.2.2
 
