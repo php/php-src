@@ -60,6 +60,10 @@ PHP                                                                        NEWS
   . Fixed bug #81746 (1-byte array overrun in common path resolve code).
     (CVE-2023-0568). (Niels Dossche)
 
+- SAPI:
+  . Fixed bug GHSA-54hq-v5wp-fqgv (DOS vulnerability when parsing multipart
+    request body). (CVE-2023-0662) (Jakub Zelenka)
+ 
 02 Feb 2023, PHP 8.1.15
 
 - Apache:
