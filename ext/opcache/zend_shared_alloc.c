@@ -413,32 +413,32 @@ static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, b
 
 void *zend_shared_memdup_get_put_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 1, 1, 1);
+	return _zend_shared_memdup(source, size, true, true, true);
 }
 
 void *zend_shared_memdup_put_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 1, 1);
+	return _zend_shared_memdup(source, size, false, true, true);
 }
 
 void *zend_shared_memdup_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 0, 1);
+	return _zend_shared_memdup(source, size, false, false, true);
 }
 
 void *zend_shared_memdup_get_put(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 1, 1, 0);
+	return _zend_shared_memdup(source, size, true, true, false);
 }
 
 void *zend_shared_memdup_put(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 1, 0);
+	return _zend_shared_memdup(source, size, false, true, false);
 }
 
 void *zend_shared_memdup(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 0, 0);
+	return _zend_shared_memdup(source, size, false, false, false);
 }
 
 void zend_shared_alloc_safe_unlock(void)
