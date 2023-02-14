@@ -21,7 +21,9 @@ php_admin_value[html_errors] = false
 php_admin_value[max_input_vars] = 20
 php_admin_value[max_file_uploads] = 5
 php_admin_value[max_multipart_body_parts] = 10
-php_flag[display_errors] = On
+php_admin_flag[display_errors] = On
+php_admin_flag[display_startup_errors] = On
+php_admin_flag[log_errors] = On
 EOT;
 
 $code = <<<EOT

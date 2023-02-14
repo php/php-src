@@ -19,7 +19,9 @@ pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 php_admin_value[html_errors] = false
 php_admin_value[max_file_uploads] = 5
-php_flag[display_errors] = On
+php_admin_flag[display_errors] = On
+php_admin_flag[display_startup_errors] = On
+php_admin_flag[log_errors] = On
 EOT;
 
 $code = <<<EOT
