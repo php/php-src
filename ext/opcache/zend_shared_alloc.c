@@ -60,7 +60,6 @@ zend_smm_shared_globals *smm_shared_globals;
 static MUTEX_T zts_lock;
 #endif
 int lock_file;
-static char lockfile_name[MAXPATHLEN];
 #endif
 
 static const zend_shared_memory_handler_entry handler_table[] = {
@@ -100,6 +99,7 @@ void zend_shared_alloc_create_lock(const char *lockfile_path)
 		return;
 #endif
 
+	char lockfile_name[MAXPATHLEN];
 	snprintf(lockfile_name, sizeof(lockfile_name), "%s/%sXXXXXX", lockfile_path, SEM_FILENAME_PREFIX);
 	lock_file = mkstemp(lockfile_name);
 	if (lock_file == -1) {
