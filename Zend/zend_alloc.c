@@ -396,8 +396,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 }
 
 #ifdef _WIN32
-void
-stderr_last_error(char *msg)
+static void stderr_last_error(char *msg)
 {
 	DWORD err = GetLastError();
 	char *buf = php_win32_error_to_msg(err);
