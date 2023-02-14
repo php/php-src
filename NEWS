@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #81746 (1-byte array overrun in common path resolve code). 
     (CVE-2023-0568). (Niels Dossche)
 
+- FPM
+  . Fixed bug GHSA-54hq-v5wp-fqgv (DOS vulnerability when parsing multipart
+￼   request body). (CVE-2023-0662) (Jakub Zelenka)
+
 05 Jan 2023, PHP 8.0.27
 
 - PDO/SQLite:
