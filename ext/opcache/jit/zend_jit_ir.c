@@ -2404,6 +2404,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 			jit->ctx.fixed_stack_red_zone = ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE;
 			jit->ctx.fixed_stack_frame_size = 0;
+			jit->ctx.flags |= IR_MERGE_EMPTY_ENTRIES;
 #else
 			jit->ctx.fixed_stack_red_zone = 0;
 			jit->ctx.fixed_stack_frame_size = 16;
