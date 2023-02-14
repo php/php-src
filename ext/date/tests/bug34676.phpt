@@ -10,10 +10,10 @@ $tests = array(
 
 foreach ($tests as $test) {
     $t = strtotime("2005-12-22 ". $test);
-    printf("%-10s => %s\n", $test, date(DATE_ISO8601, $t));
+    printf("%-10s => %s\n", $test, date(DATE_ATOM, $t));
 }
 
 ?>
 --EXPECT--
-noon       => 2005-12-22T12:00:00+0000
-midnight   => 2005-12-22T00:00:00+0000
+noon       => 2005-12-22T12:00:00+00:00
+midnight   => 2005-12-22T00:00:00+00:00

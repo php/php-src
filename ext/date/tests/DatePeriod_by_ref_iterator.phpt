@@ -11,7 +11,7 @@ $d = DatePeriod::__set_state( $properties );
 try {
 	foreach( $d as &$item )
 	{
-		echo $item->format(DateTime::ISO8601), "\n";
+		echo $item->format(DateTime::ATOM), "\n";
 	}
 	echo "OK\n";
 } catch (\Error $e) {

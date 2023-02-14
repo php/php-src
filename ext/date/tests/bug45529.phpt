@@ -9,13 +9,13 @@ echo $tz1->getName(), PHP_EOL;
 echo $tz2->getName(), PHP_EOL;
 $d = new DateTime('2008-01-01 12:00:00+0200');
 $d->setTimeZone($tz1);
-echo $d->format(DATE_ISO8601), PHP_EOL;
+echo $d->format(DATE_ATOM), PHP_EOL;
 $d = new DateTime('2008-01-01 12:00:00+0200');
 $d->setTimeZone($tz2);
-echo $d->format(DATE_ISO8601), PHP_EOL;
+echo $d->format(DATE_ATOM), PHP_EOL;
 ?>
 --EXPECT--
 UTC
 UTC
-2008-01-01T10:00:00+0000
-2008-01-01T10:00:00+0000
+2008-01-01T10:00:00+00:00
+2008-01-01T10:00:00+00:00

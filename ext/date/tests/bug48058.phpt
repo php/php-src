@@ -11,7 +11,7 @@ var_dump( $tran[0] );
 
 $base_time = '28 Feb 2008 12:00:00';
 $dt = date_create( "$base_time +10000000000 years" );
-echo date_format( $dt, DATE_ISO8601 );
+echo date_format( $dt, DATE_ATOM );
 ?>
 --EXPECTF--
 array(5) {
@@ -26,4 +26,4 @@ array(5) {
   ["abbr"]=>
   string(%d) "%s"
 }
-10000002008-02-28T12:00:00+0000
+10000002008-02-28T12:00:00+00:00

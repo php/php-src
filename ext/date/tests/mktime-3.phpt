@@ -18,7 +18,7 @@ foreach ($tzs as $tz) {
         if ($ret == FALSE) {
             echo "out of range\n";
         } else {
-            echo date("F ".DATE_ISO8601, $ret), "\n";
+            echo date("F ".DATE_ATOM, $ret), "\n";
         }
     }
     echo "\n";
@@ -26,32 +26,32 @@ foreach ($tzs as $tz) {
 ?>
 --EXPECT--
 America/Toronto
-Y:    0 - January 2000-01-01T01:01:01-0500
+Y:    0 - January 2000-01-01T01:01:01-05:00
 Y:   69 - out of range
-Y:   70 - January 1970-01-01T01:01:01-0500
-Y:   71 - January 1971-01-01T01:01:01-0500
-Y:   99 - January 1999-01-01T01:01:01-0500
-Y:  100 - January 2000-01-01T01:01:01-0500
+Y:   70 - January 1970-01-01T01:01:01-05:00
+Y:   71 - January 1971-01-01T01:01:01-05:00
+Y:   99 - January 1999-01-01T01:01:01-05:00
+Y:  100 - January 2000-01-01T01:01:01-05:00
 Y:  105 - out of range
 Y: 1900 - out of range
 Y: 1901 - out of range
-Y: 1902 - January 1902-01-01T01:01:01-0500
-Y: 1999 - January 1999-01-01T01:01:01-0500
-Y: 2000 - January 2000-01-01T01:01:01-0500
-Y: 2001 - January 2001-01-01T01:01:01-0500
+Y: 1902 - January 1902-01-01T01:01:01-05:00
+Y: 1999 - January 1999-01-01T01:01:01-05:00
+Y: 2000 - January 2000-01-01T01:01:01-05:00
+Y: 2001 - January 2001-01-01T01:01:01-05:00
 
 Europe/Oslo
-Y:    0 - January 2000-01-01T01:01:01+0100
+Y:    0 - January 2000-01-01T01:01:01+01:00
 Y:   69 - out of range
-Y:   70 - January 1970-01-01T01:01:01+0100
-Y:   71 - January 1971-01-01T01:01:01+0100
-Y:   99 - January 1999-01-01T01:01:01+0100
-Y:  100 - January 2000-01-01T01:01:01+0100
+Y:   70 - January 1970-01-01T01:01:01+01:00
+Y:   71 - January 1971-01-01T01:01:01+01:00
+Y:   99 - January 1999-01-01T01:01:01+01:00
+Y:  100 - January 2000-01-01T01:01:01+01:00
 Y:  105 - out of range
 Y: 1900 - out of range
 Y: 1901 - out of range
-Y: 1902 - January 1902-01-01T01:01:01+0100
-Y: 1999 - January 1999-01-01T01:01:01+0100
-Y: 2000 - January 2000-01-01T01:01:01+0100
-Y: 2001 - January 2001-01-01T01:01:01+0100
+Y: 1902 - January 1902-01-01T01:01:01+01:00
+Y: 1999 - January 1999-01-01T01:01:01+01:00
+Y: 2000 - January 2000-01-01T01:01:01+01:00
+Y: 2001 - January 2001-01-01T01:01:01+01:00
 
