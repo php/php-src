@@ -652,20 +652,85 @@ class Tester
     }
 
     /**
+     * Parse stdin and generate data for multipart config.
+     *
+     * @param array $stdin
+     * @param array $headers
+     *
+     * @return void
+     * @throws \Exception
+     */
+    private function parseStdin(array $stdin, array &$headers)
+    {
+        $parts = $stdin['parts'] ?? null;
+        if (empty($parts)) {
+            throw new \Exception('The stdin array needs to contain parts');
+        }
+        $boundary = $stdin['boundary'] ?? 'AaB03x';
+        if ( ! isset($headers['CONTENT_TYPE'])) {
+            $headers['CONTENT_TYPE'] = 'multipart/form-data; boundary=' . $boundary;
+        }
+        $count = $parts['count'] ?? null;
+        if ( ! is_null($count)) {
+            $dispositionType  = $parts['disposition'] ?? 'form-data';
+            $dispositionParam = $parts['param'] ?? 'name';
+            $namePrefix       = $parts['prefix'] ?? 'f';
+            $nameSuffix       = $parts['suffix'] ?? '';
+            $value            = $parts['value'] ?? 'test';
+            $parts            = [];
+            for ($i = 0; $i < $count; $i++) {
+                $parts[] = [
+                    'disposition' => $dispositionType,
+                    'param'       => $dispositionParam,
+                    'name'        => "$namePrefix$i$nameSuffix",
+                    'value'       => $value
+                ];
+            }
+        }
+        $out = '';
+        $nl  = "\r\n";
+        foreach ($parts as $part) {
+            if (!is_array($part)) {
+                $part = ['name' => $part];
+            } elseif ( ! isset($part['name'])) {
+                throw new \Exception('Each part has to have a name');
+            }
+            $name             = $part['name'];
+            $dispositionType  = $part['disposition'] ?? 'form-data';
+            $dispositionParam = $part['param'] ?? 'name';
+            $value            = $part['value'] ?? 'test';
+            $partHeaders          = $part['headers'] ?? [];
+
+            $out .= "--$boundary$nl";
+            $out .= "Content-disposition: $dispositionType; $dispositionParam=\"$name\"$nl";
+            foreach ($partHeaders as $headerName => $headerValue) {
+                $out .= "$headerName: $headerValue$nl";
+            }
+            $out .= $nl;
+            $out .= "$value$nl";
+        }
+        $out .= "--$boundary--$nl";
+
+        return $out;
+    }
+
+    /**
      * Execute request.
      *
-     * @param string      $query
-     * @param array       $headers
-     * @param string|null $uri
-     * @param string|null $address
-     * @param string|null $successMessage
-     * @param string|null $errorMessagereadLimit
-     * @param bool        $connKeepAlive
-     * @param string|null $scriptFilename = null
-     * @param bool        $expectError
-     * @param int         $readLimit
+     * @param string            $query
+     * @param array             $headers
+     * @param string|null       $uri
+     * @param string|null       $address
+     * @param string|null       $successMessage
+     * @param string|null       $errorMessage
+     * @param bool              $connKeepAlive
+     * @param string|null       $scriptFilename = null
+     * @param string|array|null $stdin          = null
+     * @param bool              $expectError
+     * @param int               $readLimit
      *
      * @return Response
+     * @throws \Exception
      */
     public function request(
         string $query = '',
@@ -676,12 +741,16 @@ class Tester
         string $errorMessage = null,
         bool $connKeepAlive = false,
         string $scriptFilename = null,
-        string $stdin = null,
+        string|array $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
     ): Response {
         if ($this->hasError()) {
             return new Response(null, true);
+        }
+
+        if (is_array($stdin)) {
+            $stdin = $this->parseStdin($stdin, $headers);
         }
 
         $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $stdin);

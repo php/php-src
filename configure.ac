@@ -520,6 +520,10 @@ dnl Check prctl
 PHP_CHECK_PRCTL
 dnl Check procctl
 PHP_CHECK_PROCCTL
+dnl Check AVX512
+PHP_CHECK_AVX512_SUPPORTS
+dnl Check AVX512 VBMI
+PHP_CHECK_AVX512_VBMI_SUPPORTS
 
 dnl Check for __alignof__ support in the compiler
 AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
