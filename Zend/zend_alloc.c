@@ -2957,7 +2957,7 @@ ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap)
 #if ZEND_MM_STORAGE
 	return heap->storage;
 #else
-	return NULL
+	return NULL;
 #endif
 }
 
