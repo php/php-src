@@ -55,8 +55,8 @@ ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int t
 ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data)
 {
 	int lineno;
-	const char *scope, *filename, *funcname, *classname, *prev_funcname, *prev_classname;
-	scope = filename = funcname = classname = prev_funcname = prev_classname = NULL;
+	const char *scope, *filename, *funcname, *classname, *prev_funcname, *prev_classname, *prev_scope;
+	scope = filename = funcname = classname = prev_funcname = prev_classname = prev_scope = NULL;
 
 	/* we need filename and lineno for both execute and function probes */
 	if (DTRACE_EXECUTE_ENTRY_ENABLED() || DTRACE_EXECUTE_RETURN_ENABLED()
@@ -69,7 +69,7 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data)
 		classname = get_active_class_name(&scope);
 		funcname = get_active_function_name();
 		prev_funcname = get_prev_active_function_name();
-		prev_classname = get_prev_active_class_name(&scope);
+		prev_classname = get_prev_active_class_name(&prev_scope);
 	}
 
 	if (DTRACE_EXECUTE_ENTRY_ENABLED()) {
