@@ -893,7 +893,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 }
 #endif
 
-static inline int accel_is_inactive(void)
+static inline bool accel_is_inactive(void)
 {
 #ifdef ZEND_WIN32
 	/* on Windows, we don't need kill_all_lockers() because SAPIs
@@ -904,7 +904,7 @@ static inline int accel_is_inactive(void)
 	   provide us with the PID of locker processes) */
 
 	if (LOCKVAL(mem_usage) == 0) {
-		return SUCCESS;
+		return true;
 	}
 #else
 	struct flock mem_usage_check;
@@ -916,10 +916,10 @@ static inline int accel_is_inactive(void)
 	mem_usage_check.l_pid = -1;
 	if (fcntl(lock_file, F_GETLK, &mem_usage_check) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC:  %s (%d)", strerror(errno), errno);
-		return FAILURE;
+		return false;
 	}
 	if (mem_usage_check.l_type == F_UNLCK) {
-		return SUCCESS;
+		return true;
 	}
 
 	if (ZCG(accel_directives).force_restart_timeout
@@ -928,11 +928,11 @@ static inline int accel_is_inactive(void)
 		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %ld (after " ZEND_LONG_FMT " seconds), locked by %d", (long)time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
 		kill_all_lockers(&mem_usage_check);
 
-		return FAILURE; /* next request should be able to restart it */
+		return false; /* next request should be able to restart it */
 	}
 #endif
 
-	return FAILURE;
+	return false;
 }
 
 static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf)
@@ -2687,7 +2687,7 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 	if (ZCSG(restart_pending)) {
 		zend_shared_alloc_lock();
 		if (ZCSG(restart_pending)) { /* check again, to ensure that the cache wasn't already cleaned by another process */
-			if (accel_is_inactive() == SUCCESS) {
+			if (accel_is_inactive()) {
 				zend_accel_error(ACCEL_LOG_DEBUG, "Restarting!");
 				ZCSG(restart_pending) = false;
 				switch ZCSG(restart_reason) {
