@@ -77,6 +77,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Allows W/X bits on page creation on FreeBSD despite system settings.
     (David Carlier)
+  . Added memfd api usage, on Linux, for zend_shared_alloc_create_lock()
+    to create an abstract anonymous file for the opcache's lock. (Max Kellermann)
 
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)

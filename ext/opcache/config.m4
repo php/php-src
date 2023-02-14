@@ -105,7 +105,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
   fi
 
-  AC_CHECK_FUNCS([mprotect])
+  AC_CHECK_FUNCS([mprotect memfd_create])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
