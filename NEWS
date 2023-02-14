@@ -10,7 +10,7 @@ PHP                                                                        NEWS
 
 - FPM
   . Fixed bug GHSA-54hq-v5wp-fqgv (DOS vulnerability when parsing multipart
-￼   request body). (CVE-2023-0662) (Jakub Zelenka)
+    request body). (CVE-2023-0662) (Jakub Zelenka)
 
 05 Jan 2023, PHP 8.0.27
 
