@@ -19,6 +19,13 @@
    +----------------------------------------------------------------------+
 */
 
+#if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
+# ifndef _GNU_SOURCE
+#  define _GNU_SOURCE
+# endif
+# include <sys/mman.h>
+#endif
+
 #include <errno.h>
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
@@ -79,6 +86,18 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 
 #ifdef ZTS
 	zts_lock = tsrm_mutex_alloc();
+#endif
+
+#if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
+	/* on Linux, we can use a memfd instead of a "real" file, so
+	 * we can do this without a writable filesystem and without
+	 * needing to clean up */
+	/* note: FreeBSD has memfd_create(), too, but fcntl(F_SETLKW)
+	 * on it fails with EBADF, therefore we use this only on
+	 * Linux */
+	lock_file = memfd_create("opcache_lock", MFD_CLOEXEC);
+	if (lock_file >= 0)
+		return;
 #endif
 
 	snprintf(lockfile_name, sizeof(lockfile_name), "%s/%sXXXXXX", lockfile_path, SEM_FILENAME_PREFIX);
