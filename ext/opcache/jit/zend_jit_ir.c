@@ -11518,47 +11518,49 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
                                                    ir_ref         *ht_ref,
                                                    int            *may_throw)
 {
-	ir_ref ref, refs[3], ends[3];
+	ir_ref ref = IR_UNUSED, refs[3], ends[3];
+	ir_ref array_reference_end = IR_UNUSED, array_reference_ref = IR_UNUSED;
 	int array_inputs_count = 0;
 
 	ref = jit_ZVAL_ADDR(jit, op1_addr);
 	if (op1_info & MAY_BE_REF) {
-		ir_ref if_reference, if_array;
+		ir_ref if_reference, if_array, end1, ref2;
 
-		refs[0] = ref;
 		*may_throw = 1;
 		if_reference = jit_if_Z_TYPE(jit, op1_addr, IS_REFERENCE);
 		ir_IF_FALSE(if_reference);
-		ends[0] = ir_END();
+		end1 = ir_END();
 		ir_IF_TRUE_cold(if_reference);
-		refs[1] = ir_ADD_OFFSET(jit_Z_PTR(jit, op1_addr), offsetof(zend_reference, val));
-		if_array = jit_if_Z_TYPE_ref(jit, refs[1], ir_CONST_U8(IS_ARRAY));
+		array_reference_ref = ir_ADD_OFFSET(jit_Z_PTR_ref(jit, ref), offsetof(zend_reference, val));
+		if_array = jit_if_Z_TYPE_ref(jit, array_reference_ref, ir_CONST_U8(IS_ARRAY));
 		ir_IF_TRUE(if_array);
-		ends[1] = ir_END();
+		array_reference_end = ir_END();
 		ir_IF_FALSE_cold(if_array);
 		if (opline->opcode != ZEND_FETCH_DIM_RW && opline->opcode != ZEND_ASSIGN_DIM_OP) {
 			jit_SET_EX_OPLINE(jit, opline);
 		}
-		refs[2] = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_prepare_assign_dim_ref), ref);
-		ir_GUARD(refs[2], zend_jit_stub_addr(jit, jit_stub_exception_handler_undef));
+		ref2 = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_prepare_assign_dim_ref), ref);
+		ir_GUARD(ref2, zend_jit_stub_addr(jit, jit_stub_exception_handler_undef));
 
-		// TODO: avoid double check for IS_ARRAy for array_ref_path ???
-		ends[2] = ir_END();
-		ir_MERGE_N(3, ends);
-
-		ref = ir_PHI_N(3, refs);
+		ir_MERGE_WITH(end1);
+		ref = ir_PHI_2(ref2, ref);
 		op1_addr = ZEND_ADDR_REF_ZVAL(ref);
 	}
 
-	ref = IR_UNUSED;
 	if (op1_info & MAY_BE_ARRAY) {
+		ir_ref op1_ref = ref;
+
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
 			*if_type = jit_if_Z_TYPE(jit, op1_addr, IS_ARRAY);
 			ir_IF_TRUE(*if_type);
 		}
+		if (array_reference_end) {
+			ir_MERGE_WITH(array_reference_end);
+			op1_ref = ir_PHI_2(ref, array_reference_ref);
+		}
 		// JIT: SEPARATE_ARRAY()
+		ref = jit_Z_PTR_ref(jit, op1_ref);
 		if (RC_MAY_BE_N(op1_info)) {
-			ref = jit_Z_PTR(jit, op1_addr);
 			if (RC_MAY_BE_1(op1_info)) {
 				ir_ref if_refcount_1 = ir_IF(ir_EQ(jit_GC_REFCOUNT(jit, ref), ir_CONST_U32(1)));
 				ir_IF_TRUE(if_refcount_1);
@@ -11567,9 +11569,7 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
 				array_inputs_count++;
 				ir_IF_FALSE(if_refcount_1);
 			}
-			ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_zval_array_dup), jit_ZVAL_ADDR(jit, op1_addr));
-		} else {
-			ref = jit_Z_PTR(jit, op1_addr);
+			ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_zval_array_dup), op1_ref);
 		}
 		if (array_inputs_count || (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL))) {
 			ends[array_inputs_count] = ir_END();
@@ -11580,7 +11580,7 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
 
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL)) {
 		if (*if_type) {
-			ir_IF_FALSE(*if_type);
+			ir_IF_FALSE_cold(*if_type);
 			*if_type = IR_UNUSED;
 		}
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_ARRAY))) {
