@@ -3195,7 +3195,7 @@ static void _zend_jit_fix_merges(zend_jit_ctx *jit)
 								phi++;
 							}
 							while (phi->op == IR_PHI) {
-								ir_insn_set_op(phi, k + 1, ir_insn_op(phi, j + 1));
+								ir_insn_set_op(phi, k + 2, ir_insn_op(phi, j + 2));
 								phi += 1 + ((n + 1) >> 2);
 							}
 						}
