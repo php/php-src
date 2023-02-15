@@ -1563,14 +1563,12 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 			src->writepos == src->readpos) {
 		/* both php_stream instances are backed by a file descriptor, are not filtered and the
 		 * read buffer is empty: we can use copy_file_range() */
-		int src_fd, dest_fd, dest_open_flags = 0;
-
-		/* get dest open flags to check if the stream is open in append mode */
-		php_stream_parse_fopen_modes(dest->mode, &dest_open_flags);
+		int src_fd, dest_fd, dest_open_flags;
 
 		/* copy_file_range does not work with O_APPEND */
 		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
 				php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0) == SUCCESS &&
+				/* get dest open flags to check if the stream is open in append mode */
 				php_stream_parse_fopen_modes(dest->mode, &dest_open_flags) == SUCCESS &&
 				!(dest_open_flags & O_APPEND)) {
 
