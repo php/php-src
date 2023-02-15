@@ -79,7 +79,7 @@ static const zend_shared_memory_handler_entry handler_table[] = {
 };
 
 #ifndef ZEND_WIN32
-void zend_shared_alloc_create_lock(const char *lockfile_path)
+static void zend_shared_alloc_create_lock(const char *lockfile_path)
 {
 	int val;
 
