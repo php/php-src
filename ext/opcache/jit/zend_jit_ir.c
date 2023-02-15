@@ -7464,7 +7464,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		used_stack_ref = ir_CONST_ADDR(used_stack);
 
 		if (!is_closure) {
-// TODO: used_stack_ref = ir_HARD_COPY_A(used_stack_ref); /* load constant once ??? */
+			used_stack_ref = ir_HARD_COPY_A(used_stack_ref); /* load constant once */
 
 			// JIT: if (EXPECTED(ZEND_USER_CODE(func->type))) {
 			ir_ref tmp = ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_function, type)));
