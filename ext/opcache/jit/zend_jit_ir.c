@@ -775,7 +775,7 @@ static int zend_jit_save_call_chain(zend_jit_ctx *jit, uint32_t call_level)
 	ir_STORE(jit_EX(call), rx);
 
 	jit->delayed_call_level = 0;
-	delayed_call_chain = 0; // TODO: remove ???
+	delayed_call_chain = 0;
 
 	return 1;
 }
@@ -2438,7 +2438,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->track_last_valid_opline = 0;
 	jit->reuse_ip = 0;
 	jit->delayed_call_level = 0;
-	delayed_call_chain = 0; // TODO: remove ???
+	delayed_call_chain = 0;
 	jit->b = -1;
 #ifdef ZTS
 	jit->tls = IR_UNUSED;
@@ -7447,7 +7447,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	uint32_t used_stack;
 	ir_ref used_stack_ref = IR_UNUSED;
 	bool stack_check = 1;
-	ir_ref rx, ref, if_enough_stack, cold_path = IR_UNUSED;
+	ir_ref rx, ref, top, if_enough_stack, cold_path = IR_UNUSED;
 
 	ZEND_ASSERT(func_ref != IR_NULL);
 	if (func) {
@@ -7555,17 +7555,20 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		}
 	}
 
-	// JIT: EG(vm_stack_top) += used_stack;
-	// JIT: EG(vm_stack_top) = (zval*)((char*)call + used_stack); // TODO: try this ???
 	ref = jit_EG(vm_stack_top);
-	ir_STORE(ref,
-		ir_ADD_A(
-			/* ir_LOAD() makes load forwarding and doesn't allow fusion on x86 ??? */
-			(JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) ? zend_jit_ip(jit) : ir_LOAD_A(ref),
-			used_stack_ref));
+	rx = zend_jit_ip(jit);
+#if 1
+	// JIT: EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+	// This vesions seems faster, but it generates more code ???
+	top = rx;
+#else
+	// JIT: EG(vm_stack_top) += used_stack;
+	/* ir_LOAD() makes load forwarding and doesn't allow fusion on x86 */
+	top = jit->ctx.control = ir_emit2(&jit->ctx, IR_OPT(IR_LOAD, IR_ADDR), jit->ctx.control, ref);
+#endif
+	ir_STORE(ref, ir_ADD_A(top, used_stack_ref));
 
 	// JIT: zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
-	rx = zend_jit_ip(jit);
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || opline->opcode != ZEND_INIT_METHOD_CALL) {
 		// JIT: ZEND_SET_CALL_INFO(call, 0, call_info);
 		ir_STORE(jit_CALL(rx, This.u1.type_info), ir_CONST_U32(IS_UNDEF | ZEND_CALL_NESTED_FUNCTION));
@@ -7865,7 +7868,7 @@ jit_SET_EX_OPLINE(jit, opline);
 	} else {
 		ZEND_ASSERT(call_level > 0);
 		jit->delayed_call_level = call_level;
-		delayed_call_chain = 1; // TODO: remove ???
+		delayed_call_chain = 1;
 	}
 
 	return 1;
@@ -8022,8 +8025,7 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 		}
 
 		// JIT: revert alloca
-		this_ref2 = ir_RLOAD_A(IR_REG_SP);
-		this_ref2 = ir_LOAD_A(this_ref2);
+		this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
 		ir_AFREE(ir_CONST_ADDR(0x10));
 
 		ir_GUARD(ref2, zend_jit_stub_addr(jit, jit_stub_exception_handler));
@@ -8122,7 +8124,7 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 		}
 	} else {
 		ZEND_ASSERT(call_level > 0);
-		delayed_call_chain = 1; // TODO: remove ???
+		delayed_call_chain = 1;
 		jit->delayed_call_level = call_level;
 	}
 
@@ -8206,7 +8208,7 @@ static int zend_jit_init_closure_call(zend_jit_ctx         *jit,
 		}
 	} else {
 		ZEND_ASSERT(call_level > 0);
-		delayed_call_chain = 1; // TODO: remove ???
+		delayed_call_chain = 1;
 		jit->delayed_call_level = call_level;
 	}
 
@@ -8972,8 +8974,6 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(local_func_ref, offsetof(zend_op_array, run_time_cache__ptr)));
 			} else {
 				ir_ref if_odd, run_time_cache2;
-
-				/* TODO: try avoiding this run-time load ??? */
 				ir_ref local_func_ref = func_ref ? func_ref : ir_LOAD_A(jit_CALL(rx, func));
 
 				run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(local_func_ref, offsetof(zend_op_array, run_time_cache__ptr)));
