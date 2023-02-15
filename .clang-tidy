@@ -1,0 +1,4 @@
+---
+Checks: 'bugprone-*,performance-*,readability-*,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-readability-identifier-length,-readability-else-after-return,-bugprone-reserved-identifier,-bugprone-easily-swappable-parameters,-readability-function-cognitive-complexity,-readability-isolate-declaration,-readability-magic-numbers,-readability-implicit-bool-conversion,-readability-inconsistent-declaration-parameter-name,-performance-no-int-to-ptr'
+HeaderFilterRegex: 'zend|php'
+WarningsAsErrors: true

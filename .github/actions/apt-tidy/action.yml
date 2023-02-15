@@ -1,0 +1,22 @@
+name: apt
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends \
+          bison \
+          re2c \
+          libgmp-dev \
+          libicu-dev \
+          libonig-dev \
+          libcurl4-openssl-dev \
+          libsodium-dev \
+          libargon2-0-dev \
+          libmm-dev \
+          libsnmp-dev \
+          libc-client-dev \
+          clang-tidy

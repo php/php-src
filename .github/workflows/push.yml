@@ -161,3 +161,22 @@ jobs:
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  CLANG_TIDY:
+    runs-on: ubuntu-22.04
+    env:
+      CC: gcc
+      CXX: g++
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: apt
+        uses: ./.github/actions/apt-tidy
+      - name: ./configure
+        uses: ./.github/actions/configure-tidy
+        with:
+          configurationParameters: --enable-debug --disable-zts
+      - name: clang-tidy
+        run: |
+          clang-tidy \
+            $(grep '\.lo:' Makefile |grep -v top_srcdir |cut -d: -f2) \
+            -- -I. -IZend -ITSRM -Imain
