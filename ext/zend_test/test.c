@@ -722,7 +722,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 #ifdef HAVE_COPY_FILE_RANGE
-	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range_length", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range_length, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range_times", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range_times, zend_zend_test_globals, zend_test_globals)
 #endif
 	STD_PHP_INI_ENTRY("zend_test.quantity_value", "0", PHP_INI_ALL, OnUpdateLong, quantity_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.str_test", "", PHP_INI_ALL, OnUpdateStr, str_test, zend_zend_test_globals, zend_test_globals)
@@ -962,9 +963,15 @@ PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
  */
 PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out, off64_t *off_out, size_t len, unsigned int flags)
 {
+	if (ZT_G(limit_copy_file_range_times) >= Z_L(0)) {
+		if (++ZT_G(amount_of_times_called_copy_file_range) > ZT_G(limit_copy_file_range_times)) {
+			errno = EIO;
+			return -1;
+		}
+	}
 	ssize_t (*original_copy_file_range)(int, off64_t *, int, off64_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");
-	if (ZT_G(limit_copy_file_range) >= Z_L(0)) {
-		len = ZT_G(limit_copy_file_range);
+	if (ZT_G(limit_copy_file_range_length) >= Z_L(0)) {
+		len = MIN(len, ZT_G(limit_copy_file_range_length));
 	}
 	return original_copy_file_range(fd_in, off_in, fd_out, off_out, len, flags);
 }
