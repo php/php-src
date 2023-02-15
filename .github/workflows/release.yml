@@ -1,0 +1,55 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'php-*'
+env:
+  GPG_KEY_ID: ${{ vars.GPG_KEY_ID }}
+  PHP_RELEASE_TAG: ${{ github.ref_name }}
+jobs:
+  makedist:
+    name: "Release ${{ github.ref_name }}"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Gather release metadata
+        id: metadata
+        run: |
+          if [[ $PHP_RELEASE_TAG == *"alpha"* || $PHP_RELEASE_TAG == *"beta"* || $PHP_RELEASE_TAG == *"RC"* ]]; then prerelease=true; else prerelease=false; fi
+          echo "php_release_version=${PHP_RELEASE_TAG#php-}" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$prerelease" >> $GITHUB_OUTPUT
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: apt
+        run: |
+          set -x
+          sudo apt-get update
+          sudo apt-get install bison re2c
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Update GPG key trust
+        run: echo -e "trust\n5\ny" | gpg --batch --no-tty --command-fd 0 --edit-key "$GPG_KEY_ID"
+      - name: Make distribution packages
+        run: ./scripts/dev/makedist "$PHP_RELEASE_TAG"
+      - name: Sign distribution packages
+        run: ./scripts/dev/gen_verify_stub "${{ steps.metadata.outputs.php_release_version }}" "$GPG_KEY_ID" > "$PHP_RELEASE_TAG.manifest"
+      - name: Verify signatures
+        run: |
+          gpg --verify "$PHP_RELEASE_TAG.tar.bz2.asc" "$PHP_RELEASE_TAG.tar.bz2"
+          gpg --verify "$PHP_RELEASE_TAG.tar.gz.asc" "$PHP_RELEASE_TAG.tar.gz"
+          gpg --verify "$PHP_RELEASE_TAG.tar.xz.asc" "$PHP_RELEASE_TAG.tar.xz"
+      - name: Extract release notes
+        run: |
+          php -r "preg_match('/(?<heading>(?:\d{1,2}|\?{2}) (?:[a-zA-Z]{3}|\?{3}) (?:\d{4}|\?{4}), PHP \d\.\d\.\d(?:(?:alpha|beta|RC)\d)?\n)(?<notes>.*)(?=\g<heading>|\Z|<<<)/Us', file_get_contents('NEWS'), \$matches); echo \$matches['notes'] ?? '';" > "$PHP_RELEASE_TAG.notes.txt"
+          sed -i 's/  \./  -/' "$PHP_RELEASE_TAG.notes.txt"
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: PHP ${{ steps.metadata.outputs.php_release_version }}
+          prerelease: ${{ fromJSON(steps.metadata.outputs.is_prerelease) }}
+          body_path: ${{ env.PHP_RELEASE_TAG }}.notes.txt
+          files: |
+            ${{ env.PHP_RELEASE_TAG }}.manifest
+            ${{ env.PHP_RELEASE_TAG }}.tar.*
