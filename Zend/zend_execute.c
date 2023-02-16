@@ -3525,7 +3525,7 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	}
 }
 
-ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *orig_value, zend_uchar value_type, bool strict, zval *result_variable_ptr)
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, bool strict)
 {
 	bool ret;
 	zval value;
@@ -3545,9 +3545,6 @@ ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *ori
 	} else {
 		zval_ptr_dtor_nogc(&value);
 	}
-	if (result_variable_ptr) {
-		ZVAL_COPY(result_variable_ptr, variable_ptr);
-	}
 	if (value_type & (IS_VAR|IS_TMP_VAR)) {
 		if (UNEXPECTED(ref)) {
 			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
@@ -3559,11 +3556,6 @@ ZEND_API zval* zend_assign_to_typed_ref_and_result(zval *variable_ptr, zval *ori
 		}
 	}
 	return variable_ptr;
-}
-
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, bool strict)
-{
-	return zend_assign_to_typed_ref_and_result(variable_ptr, orig_value, value_type, strict, NULL);
 }
 
 ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, bool strict) {
