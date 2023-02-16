@@ -1,14 +1,6 @@
-# Security Classification Document
+# Vulnerability Disclosure Policy
 
-*The canonical version of this document is located at <https://wiki.php.net/security>.
-Where there are discrepancies, the canonical version takes precedence.*
-
-## Meta
-
-- Authors: Release Managers
-- Date: November 2016
-- Version: 1.0.1
-- RFC: [Security Issue Classification](https://wiki.php.net/rfc/security-classification)
+*This document was originally published at <https://wiki.php.net/security>.*
 
 ## Introduction
 
@@ -118,48 +110,59 @@ We do not classify as a security issue any issue that:
 
 ## Handling issues
 
-High and medium severity fixes are merged into a security repository and
-merged before the release is tagged.
+High and medium severity fixes are merged into a private security repository,
+and then merged to the main repository before the release is tagged.
 
 Low severity fixes are merged immediately after the fix is available and
 handled like all regular bugs are handled consequently. However, release
 managers may choose to pull those fixes into the RC branch after the
-branch is created, and also backport them into security-only release
+branch is created, and also backport them into a security-only release
 branch.
 
 ## FAQ
 
-Q. How do I report a security issue?\
-A. Please report it on <https://bugs.php.net>, choosing type "Security".
-This will automatically make it private. If for some reason you can not
-do that, or need to talk to somebody about a PHP security issue that is
-not exactly a bug report, please write to security@php.net.
+### How do I report a security issue?
 
-Q. What do you consider a responsible disclosure?\
-A. Please report the issue as described above. Please communicate with
+Please report security vulnerabilities on GitHub at:
+<https://github.com/php/php-src/security/advisories/new>
+
+If for some reason you cannot use the form at GitHub, or you need to talk to
+somebody about a PHP security issue that might not be a bug report, please write
+to <security@php.net>.
+
+Vulnerability reports remain private until published. When published, you will
+be credited as a contributor, and your contribution will reflect the MITRE
+Credit System.
+
+### What do you consider a responsible disclosure?
+
+Please report the issue as described above. Please communicate with
 the developers about when the fix will be released - usually it's the
 next monthly release after the bug was reported. Some issues can take
-longer. After the fix is released (releases usually happen on Thursday)
+longer. After the fix is released (releases usually happen on Thursdays)
 please feel free to disclose the issue as you see fit.
 
-Q. What if I think it's a security issue but developers disagree?\
-A. Please read the above and try to explain to us why it fits the
+### What if I think it's a security issue but the developers disagree?
+
+Please read the above and try to explain to us why it fits the
 description.
 
-Q. What if developers still don't think it's a security issue?\
-A. We'll have to agree to disagree.
+### What if the developers still don't think it's a security issue?
 
-Q. The bug I submitted was classified as "not a security issue", you
-don't believe it's real?\
-A. It has nothing to do with the bug being real or its importance to
+We'll have to agree to disagree.
+
+### The bug I submitted was classified as "not a security issue." You don't believe it's real?
+
+It has nothing to do with the bug being real or its importance to
 you. It just means it does not fit our specific definitions for issues
 that we will handle in a special way. We fix a lot of non-security bugs
 and pull requests are always welcome.
 
-Q. But you classified bug #424242 as security issue, but not this
-one?!\
-A. Each bug usually has its aspects, if a short discussion does not
+### But you classified bug #424242 as a security issue, but not this one?!
+
+Each bug usually has its aspects, if a short discussion does not
 yield agreement we'd rather do more fixing and less arguing.
 
-Q. Do you pay bounties for security issues?\
-A. PHP is a volunteer project. We have no money, thus we can't pay them.
+### Do you pay bounties for security issues?
+
+PHP is a volunteer project. We have no money, thus we can't pay bounties.
