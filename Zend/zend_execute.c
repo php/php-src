@@ -546,7 +546,7 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_ptr(int op_type, zno
 	return get_zval_ptr_ptr(op_type, node, type);
 }
 
-static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr)
+static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr, zend_refcounted **garbage_ptr)
 {
 	zend_reference *ref;
 
@@ -559,20 +559,12 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 	ref = Z_REF_P(value_ptr);
 	GC_ADDREF(ref);
 	if (Z_REFCOUNTED_P(variable_ptr)) {
-		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
-
-		if (GC_DELREF(garbage) == 0) {
-			ZVAL_REF(variable_ptr, ref);
-			rc_dtor_func(garbage);
-			return;
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		*garbage_ptr = Z_COUNTED_P(variable_ptr);
 	}
 	ZVAL_REF(variable_ptr, ref);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_property_info *prop_info, zval *prop, zval *value_ptr EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_property_info *prop_info, zval *prop, zval *value_ptr, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
 {
 	if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
 		return &EG(uninitialized_zval);
@@ -580,12 +572,12 @@ static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_prop
 	if (Z_ISREF_P(prop)) {
 		ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
-	zend_assign_to_variable_reference(prop, value_ptr);
+	zend_assign_to_variable_reference(prop, value_ptr, garbage_ptr);
 	ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	return prop;
 }
 
-static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr, zend_refcounted **garbage_ptr OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_error(E_NOTICE, "Only variables should be assigned by reference");
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -594,7 +586,7 @@ static zend_never_inline ZEND_COLD zval *zend_wrong_assign_to_variable_reference
 
 	/* Use IS_TMP_VAR instead of IS_VAR to avoid ISREF check */
 	Z_TRY_ADDREF_P(value_ptr);
-	return zend_assign_to_variable(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	return zend_assign_to_variable_ex(variable_ptr, value_ptr, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num)
@@ -957,7 +949,7 @@ static bool zend_check_and_resolve_property_class_type(
 					if (zend_check_intersection_for_property_class_type(
 							ZEND_TYPE_LIST(*list_type), info, object_ce)) {
 						return true;
-                    }
+					}
 					continue;
 				}
 				ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
@@ -1005,7 +997,7 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 	return i_zend_verify_property_type(info, property, strict);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
 {
 	zval tmp;
 
@@ -1024,7 +1016,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 
 	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
 
-	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
 }
 
 static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
@@ -3248,6 +3240,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 {
 	zval variable, *variable_ptr = &variable;
 	void **cache_addr = (prop_op_type == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
+	zend_refcounted *garbage = NULL;
 
 	zend_fetch_property_address(variable_ptr, container, container_op_type, prop_ptr, prop_op_type,
 		cache_addr, BP_VAR_W, 0, 0 OPLINE_CC EXECUTE_DATA_CC);
@@ -3259,7 +3252,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 				   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 			variable_ptr = zend_wrong_assign_to_variable_reference(
-				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+				variable_ptr, value_ptr, &garbage OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			zend_property_info *prop_info = NULL;
 
@@ -3271,9 +3264,9 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 			}
 
 			if (UNEXPECTED(prop_info)) {
-				variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr EXECUTE_DATA_CC);
+				variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr, &garbage EXECUTE_DATA_CC);
 			} else {
-				zend_assign_to_variable_reference(variable_ptr, value_ptr);
+				zend_assign_to_variable_reference(variable_ptr, value_ptr, &garbage);
 			}
 		}
 	} else if (Z_ISERROR_P(variable_ptr)) {
@@ -3286,6 +3279,13 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+	}
+	if (garbage) {
+		if (GC_DELREF(garbage) == 0) {
+			rc_dtor_func(garbage);
+		} else {
+			gc_check_possible_root(garbage);
+		}
 	}
 }
 
