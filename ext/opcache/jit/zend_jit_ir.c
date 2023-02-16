@@ -5433,6 +5433,7 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 				if_not_zero = ir_IF(refcount);
 				ir_IF_FALSE(if_not_zero);
 				// TODO: instead of dtor() call and ADDREF above, we may call efree() and move addref at "true" path ???
+				// This is related to GH-10168 (keep this before GH-10168 is completely closed)
 				// jit_EFREE(jit, ref, sizeof(zend_reference), NULL, NULL);
 				jit_ZVAL_DTOR(jit, ref, val_info, opline);
 				ir_END_list(end_inputs);
@@ -10601,7 +10602,8 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
                                                   uint32_t      *found_inputs_count,
                                                   ir_ref        *found_inputs,
                                                   ir_ref        *found_vals,
-                                                  ir_ref        *end_inputs)
+                                                  ir_ref        *end_inputs,
+                                                  ir_ref        *not_found_inputs)
 {
 	zend_jit_addr op2_addr = OP2_ADDR();
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -10712,8 +10714,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					ir_GUARD(cond, ir_CONST_ADDR(not_found_exit_addr));
 				} else if (type == BP_VAR_RW && not_found_exit_addr) {
 					ir_GUARD(cond, ir_CONST_ADDR(not_found_exit_addr));
-//???+			} else if (type == BP_VAR_IS && result_type_guard) {
-//???+				|	jbe >7 // NOT_FOUND
+				} else if (type == BP_VAR_IS && result_type_guard) {
+					ir_ref if_fit = ir_IF(cond);
+					ir_IF_FALSE(if_fit);
+					ir_END_list(*not_found_inputs);
+					ir_IF_TRUE(if_fit);
 				} else {
 					ir_ref if_fit = ir_IF(cond);
 					ir_IF_FALSE(if_fit);
@@ -10756,10 +10761,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					}
 					test_zval_values[test_zval_inputs_count] = ref;
 					zend_jit_array_add(test_zval_inputs, ir_END());
-				} else if (not_found_exit_addr) {
-//???+					zend_jit_side_exit(jit, ir_CONST_ADDR(not_found_exit_addr));
-//???+					|	jmp &not_found_exit_addr
-				} else if (!packed_loaded) {
+				} else if (!not_found_exit_addr && !packed_loaded) {
 					ir_END_list(*end_inputs);
 				}
 				break;
@@ -10783,8 +10785,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						}
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
 						ir_GUARD(type_ref, ir_CONST_ADDR(not_found_exit_addr));
-//???+				} else if (type == BP_VAR_IS && result_type_guard) {
-//???+					|	IF_Z_TYPE r0, IS_UNDEF, >7 // NOT_FOUND
+					} else if (type == BP_VAR_IS && result_type_guard) {
+						ir_ref if_def = ir_IF(type_ref);
+						ir_IF_FALSE(if_def);
+						ir_END_list(*not_found_inputs);
+						ir_IF_TRUE(if_def);
 					} else {
 						ir_ref if_def = ir_IF(type_ref);
 						ir_IF_FALSE(if_def);
@@ -10797,8 +10802,8 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						zend_jit_side_exit(jit, ir_CONST_ADDR(exit_addr));
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
 						zend_jit_side_exit(jit, ir_CONST_ADDR(not_found_exit_addr));
-//???+				} else if (type == BP_VAR_IS && result_type_guard) {
-//???+					|	jmp >7 // NOT_FOUND
+					} else if (type == BP_VAR_IS && result_type_guard) {
+						ir_END_list(*not_found_inputs);
 					} else {
 						ir_END_list(idx_not_found_inputs);
 					}
@@ -10821,8 +10826,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						ir_GUARD(ref, ir_CONST_ADDR(exit_addr));
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
 						ir_GUARD(ref, ir_CONST_ADDR(not_found_exit_addr));
-//???+				} else if (type == BP_VAR_IS && result_type_guard) {
-//???+					|	jz >7 // NOT_FOUND
+					} else if (type == BP_VAR_IS && result_type_guard) {
+						if_found = ir_IF(ref);
+						ir_IF_FALSE(if_found);
+						ir_END_list(*not_found_inputs);
+						ir_IF_TRUE(if_found);
 					} else {
 						if_found = ir_IF(ref);
 						ir_IF_FALSE(if_found);
@@ -10851,7 +10859,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 							break;
 						case BP_VAR_IS:
 						case BP_VAR_UNSET:
-							if (!not_found_exit_addr /*&& !result_type_guard???*/) {
+							if (!not_found_exit_addr) {
 								// JIT: retval = &EG(uninitialized_zval);
 								jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 								ir_END_list(*end_inputs);
@@ -11023,8 +11031,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					ir_GUARD(ref, ir_CONST_ADDR(exit_addr));
 				} else if (type == BP_VAR_IS && not_found_exit_addr) {
 					ir_GUARD(ref, ir_CONST_ADDR(not_found_exit_addr));
-//???+			} else if (type == BP_VAR_IS && result_type_guard) {
-//???+				|	jz >7 // NOT_FOUND
+				} else if (type == BP_VAR_IS && result_type_guard) {
+					if_found = ir_IF(ref);
+					ir_IF_FALSE(if_found);
+					ir_END_list(*not_found_inputs);
+					ir_IF_TRUE(if_found);
 				} else {
 					if_found = ir_IF(ref);
 					switch (type) {
@@ -11199,6 +11210,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 	int may_throw = 0;
 	ir_ref if_type = IR_UNUSED;
 	ir_ref end_inputs = IR_UNUSED;
+	ir_ref not_found_inputs = IR_UNUSED;
 
 	orig_op1_addr = OP1_ADDR();
 	op2_addr = OP2_ADDR();
@@ -11304,7 +11316,8 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 		if (!zend_jit_fetch_dimension_address_inner(jit, opline,
 				(opline->opcode != ZEND_FETCH_DIM_IS) ? BP_VAR_R : BP_VAR_IS,
 				op1_info, op2_info, dim_type, NULL, not_found_exit_addr, exit_addr,
-				result_type_guard, ht_ref, &found_inputs_count, found_inputs, found_vals, &end_inputs)) {
+				result_type_guard, ht_ref, &found_inputs_count, found_inputs, found_vals,
+				&end_inputs, &not_found_inputs)) {
 			return 0;
 		}
 
@@ -11331,6 +11344,11 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 					(op1_info & MAY_BE_ARRAY_OF_REF) != 0, flags, op1_avoid_refcounting);
 				if (!val_addr) {
 					return 0;
+				}
+
+				if (not_found_inputs) {
+					ir_END_list(not_found_inputs);
+					ir_MERGE_list(not_found_inputs);
 				}
 
 				// ZVAL_COPY
@@ -11482,7 +11500,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 		if ((opline->op2_type & (IS_TMP_VAR|IS_VAR)) && (op1_info & MAY_BE_OBJECT)) {
 			/* Magic offsetGet() may increase refcount of the key */
 			op2_info |= MAY_BE_RCN;
-	}
+		}
 #endif
 
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
@@ -11693,7 +11711,7 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 				may_throw = 1;
 			}
 			if (!zend_jit_fetch_dimension_address_inner(jit, opline, type, op1_info, op2_info, dim_type, NULL, NULL, NULL,
-					0, ht_ref, &found_inputs_count, found_inputs, found_vals, &end_inputs)) {
+					0, ht_ref, &found_inputs_count, found_inputs, found_vals, &end_inputs, NULL)) {
 				return 0;
 			}
 
@@ -11847,7 +11865,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			}
 		}
 		if (!zend_jit_fetch_dimension_address_inner(jit, opline, BP_JIT_IS, op1_info, op2_info, dim_type, found_exit_addr, not_found_exit_addr, NULL,
-				0, ht_ref, &true_inputs_count, true_inputs, NULL, &false_inputs)) {
+				0, ht_ref, &true_inputs_count, true_inputs, NULL, &false_inputs, NULL)) {
 			return 0;
 		}
 
@@ -12047,7 +12065,7 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 			ir_ref ref;
 
 			if (!zend_jit_fetch_dimension_address_inner(jit, opline, BP_VAR_W, op1_info, op2_info, dim_type, NULL, NULL, NULL,
-					0, ht_ref, &found_inputs_count, found_inputs, found_values, &end_inputs)) {
+					0, ht_ref, &found_inputs_count, found_inputs, found_values, &end_inputs, NULL)) {
 				return 0;
 			}
 
@@ -12203,7 +12221,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 			}
 
 			if (!zend_jit_fetch_dimension_address_inner(jit, opline, BP_VAR_RW, op1_info, op2_info, dim_type, NULL, not_found_exit_addr, NULL,
-					0, ht_ref, &found_inputs_count, found_inputs, found_values, &end_inputs)) {
+					0, ht_ref, &found_inputs_count, found_inputs, found_values, &end_inputs, NULL)) {
 				return 0;
 			}
 
@@ -13379,7 +13397,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set || (prop_info->flags & ZEND_ACC_READONLY)) {
 			// Undefined property with magic __get()/__set()
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM); // TODO: use slow path ???
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
