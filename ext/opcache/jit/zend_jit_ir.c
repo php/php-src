@@ -9861,12 +9861,19 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 			zend_jit_reset_last_valid_opline(jit);
 		} else {
 			if (GCC_GLOBAL_REGS) {
-#if 1
+				/* We add extra RLOAD and RSTORE to make fusion for persistent register
+				 *     mov (%FP), %IP
+				 *     add $0x1c, %IP
+				 * The naive (commented) code leads to extra register allocation and move.
+				 *     mov (%FP), %tmp
+				 *     add $0x1c, %tmp
+				 *     mov %tmp, %FP
+				 */
+#if 0
+				zend_jit_store_ip(jit, ir_ADD_OFFSET(ir_LOAD_A(jit_EX(opline)), sizeof(zend_op)));
+#else
 				zend_jit_store_ip(jit, ir_LOAD_A(jit_EX(opline)));
 				zend_jit_store_ip(jit, ir_ADD_OFFSET(zend_jit_ip(jit), sizeof(zend_op)));
-#else
-				// TODO: this IR produces worse code on x86, becuase of missing fusion ???
-				zend_jit_store_ip(jit, ir_ADD_OFFSET(ir_LOAD_A(jit_EX(opline)), sizeof(zend_op)));
 #endif
 			} else {
 				ir_ref ref = jit_EX(opline);
