@@ -122,6 +122,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_l
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop);
 
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
+ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
 
 static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, uint8_t value_type)
 {
@@ -190,7 +191,7 @@ static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, z
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			if (Z_ISREF_P(variable_ptr)) {
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict);
+					return zend_assign_to_typed_ref_ex(variable_ptr, value, value_type, strict, garbage_ptr);
 				}
 
 				variable_ptr = Z_REFVAL_P(variable_ptr);

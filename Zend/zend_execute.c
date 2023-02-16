@@ -3589,7 +3589,7 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	}
 }
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, uint8_t value_type, bool strict)
+ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *orig_value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr)
 {
 	bool ret;
 	zval value;
@@ -3604,7 +3604,9 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ui
 	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), &value, strict);
 	variable_ptr = Z_REFVAL_P(variable_ptr);
 	if (EXPECTED(ret)) {
-		i_zval_ptr_dtor_noref(variable_ptr);
+		if (Z_REFCOUNTED_P(variable_ptr)) {
+			*garbage_ptr = Z_COUNTED_P(variable_ptr);
+		}
 		ZVAL_COPY_VALUE(variable_ptr, &value);
 	} else {
 		zval_ptr_dtor_nogc(&value);
@@ -3620,6 +3622,20 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ui
 		}
 	}
 	return variable_ptr;
+}
+
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, uint8_t value_type, bool strict)
+{
+	zend_refcounted *garbage = NULL;
+	zval *result = zend_assign_to_typed_ref_ex(variable_ptr, orig_value, value_type, strict, &garbage);
+	if (garbage) {
+		if (GC_DELREF(garbage) == 0) {
+			rc_dtor_func(garbage);
+		} else {
+			gc_check_possible_root_no_ref(garbage);
+		}
+	}
+	return result;
 }
 
 ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context) {
