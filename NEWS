@@ -10,8 +10,6 @@ PHP                                                                        NEWS
     Generator emits an unavoidable fatal error or crashes). (Arnaud)
   . Fixed bug GH-10437 (Segfault/assertion when using fibers in shutdown
     function after bailout). (trowski)
-  . Fixed bug GH-10168: use-after-free when utilizing assigned object freed
-    during assignment. (nielsdos)
   . Fixed SSA object type update for compound assignment opcodes. (nielsdos)
 
 - Curl:
