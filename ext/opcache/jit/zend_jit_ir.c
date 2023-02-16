@@ -2845,7 +2845,7 @@ static int zend_jit_calc_trace_prologue_size(void)
 	return 1;
 }
 
-#if !ZEND_WIN32
+#if !ZEND_WIN32 && !defined(IR_TARGET_AARCH64)
 static uintptr_t zend_jit_hybrid_vm_sp_adj = 0;
 
 typedef struct _Unwind_Context _Unwind_Context;
@@ -3018,7 +3018,7 @@ static int zend_jit_setup(void)
 # endif
 #endif
 
-#if !ZEND_WIN32
+#if !ZEND_WIN32 && !defined(IR_TARGET_AARCH64)
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		zend_jit_set_sp_adj_vm(); // set zend_jit_hybrid_vm_sp_adj
 	}
@@ -14930,7 +14930,11 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 //					ir_mem_unprotect(entry, size);
 					if (!(jit->ctx.flags & IR_FUNCTION)
 					 && zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+#if !ZEND_WIN32 && !defined(IR_TARGET_AARCH64)
 						sp_offset = zend_jit_hybrid_vm_sp_adj;
+#else
+						sp_offset = sizeof(void*);
+#endif
 					} else {
 						sp_offset = sizeof(void*);
 					}
