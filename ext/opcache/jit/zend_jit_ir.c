@@ -15147,7 +15147,8 @@ static bool zend_jit_fetch_indirect_var(zend_jit_ctx *jit, const zend_op *opline
 		jit_guard_Z_TYPE(jit, var_addr, IS_INDIRECT, exit_addr);
 		ref = jit_Z_PTR(jit, var_addr);
 	} else {
-		// TODO: avoid reloading ???
+		/* This LOAD of INDIRECT VAR, stored by the previous FETCH_(DIM/OBJ)_W,
+		 * is eliminated by store forwarding (S2L) */
 		ref = jit_Z_PTR(jit, var_addr);
 	}
 	*var_info_ptr &= ~MAY_BE_INDIRECT;
