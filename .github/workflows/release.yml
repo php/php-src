@@ -42,7 +42,7 @@ jobs:
           gpg --verify "$PHP_RELEASE_TAG.tar.xz.asc" "$PHP_RELEASE_TAG.tar.xz"
       - name: Extract release notes
         run: |
-          php -r "preg_match('/(?<heading>(?:\d{1,2}|\?{2}) (?:[a-zA-Z]{3}|\?{3}) (?:\d{4}|\?{4}), PHP \d\.\d\.\d(?:(?:alpha|beta|RC)\d)?\n)(?<notes>.*)(?=\g<heading>|\Z|<<<)/Us', file_get_contents('NEWS'), \$matches); echo \$matches['notes'] ?? '';" > "$PHP_RELEASE_TAG.notes.txt"
+          php -r "preg_match('/(?<heading>(?:\d{1,2}|\?{2}) (?:[a-zA-Z]{3}|\?{3}) (?:\d{4}|\?{4}), PHP \d\.\d\.\d(?:(?:alpha|beta|RC|pl)\d)?\n)(?<notes>.*)(?=\g<heading>|\Z|<<<)/Us', file_get_contents('NEWS'), \$matches); echo \$matches['notes'] ?? '';" > "$PHP_RELEASE_TAG.notes.txt"
           sed -i 's/  \./  -/' "$PHP_RELEASE_TAG.notes.txt"
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
