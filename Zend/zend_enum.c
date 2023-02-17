@@ -85,7 +85,7 @@ static void zend_verify_enum_magic_methods(zend_class_entry *ce)
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, "__serialize");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, "__unserialize");
 
-	const char *forbidden_methods[] = {
+	static const char *const forbidden_methods[] = {
 		"__sleep",
 		"__wakeup",
 		"__set_state",
