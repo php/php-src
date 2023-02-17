@@ -859,19 +859,20 @@ static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 	smart_str buf = {0};
 
 	if (op_array->function_name) {
+		smart_str_appends(&buf, JIT_PREFIX);
 		if (op_array->scope) {
-			smart_str_appends(&buf, JIT_PREFIX);
 			smart_str_appendl(&buf, ZSTR_VAL(op_array->scope->name), ZSTR_LEN(op_array->scope->name));
 			smart_str_appends(&buf, "::");
-			smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
-			smart_str_0(&buf);
-			return buf.s;
-		} else {
-			smart_str_appends(&buf, JIT_PREFIX);
-			smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
-			smart_str_0(&buf);
-			return buf.s;
 		}
+		smart_str_appendl(&buf, ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name));
+		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			smart_str_appends(&buf, ":");
+			smart_str_appendl(&buf, ZSTR_VAL(op_array->filename), ZSTR_LEN(op_array->filename));
+			smart_str_appends(&buf, ":");
+			smart_str_append_long(&buf, op_array->line_start);
+		}
+		smart_str_0(&buf);
+		return buf.s;
 	} else if (op_array->filename) {
 		smart_str_appends(&buf, JIT_PREFIX);
 		smart_str_appendl(&buf, ZSTR_VAL(op_array->filename), ZSTR_LEN(op_array->filename));
