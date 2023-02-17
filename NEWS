@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-10437 (Segfault/assertion when using fibers in shutdown
     function after bailout). (trowski)
   . Fixed SSA object type update for compound assignment opcodes. (nielsdos)
+  . Fixed language scanner generation build. (Daniel Black)
 
 - Curl:
   . Fixed deprecation warning at compile time. (Max Kellermann)
@@ -35,6 +36,10 @@ PHP                                                                        NEWS
 
 - GMP:
   . Properly implement GMP::__construct(). (nielsdos)
+
+- JSON:
+  . Fixed JSON scanner and parser generation build.
+    (Daniel Black, Jakub Zelenka)
 
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
