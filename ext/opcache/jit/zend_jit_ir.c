@@ -44,6 +44,8 @@
 
 #define ZREG_RX ZREG_IP
 
+#define OPTIMIZE_FOR_SIZE 0
+
 /* IR builder defines */
 #undef  _ir_CTX
 #define _ir_CTX                 (&jit->ctx)
@@ -7564,13 +7566,20 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 
 	ref = jit_EG(vm_stack_top);
 	rx = zend_jit_ip(jit);
-#if 1
-	// JIT: EG(vm_stack_top) = (zval*)((char*)call + used_stack);
-	// This vesions seems faster, but it generates more code ???
+#if !OPTIMIZE_FOR_SIZE
+	/* JIT: EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+	 * This vesions is longer but faster
+	 *    mov EG(vm_stack_top), %CALL
+	 *    lea size(%call), %tmp
+	 *    mov %tmp, EG(vm_stack_top)
+	 */
 	top = rx;
 #else
-	// JIT: EG(vm_stack_top) += used_stack;
-	/* ir_LOAD() makes load forwarding and doesn't allow fusion on x86 */
+	/* JIT: EG(vm_stack_top) += used_stack;
+	 * Use ir_emit() because ir_LOAD() makes load forwarding and doesn't allow load/store fusion
+	 *    mov EG(vm_stack_top), %CALL
+	 *    add $size, EG(vm_stack_top)
+	 */
 	top = jit->ctx.control = ir_emit2(&jit->ctx, IR_OPT(IR_LOAD, IR_ADDR), jit->ctx.control, ref);
 #endif
 	ir_STORE(ref, ir_ADD_A(top, used_stack_ref));
