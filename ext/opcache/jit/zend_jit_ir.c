@@ -555,9 +555,11 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 	ZEND_ASSERT(exit_point < t->exit_count);
 
 	if (t->exit_info[exit_point].flags & ZEND_JIT_EXIT_METHOD_CALL) {
-		ZEND_ASSERT(ctx->regs[snapshot_ref][n - 1] != -1 && ctx->regs[snapshot_ref][n] != -1);
-		t->exit_info[exit_point].poly_func_reg = ctx->regs[snapshot_ref][n - 1];
-		t->exit_info[exit_point].poly_this_reg = ctx->regs[snapshot_ref][n];
+		int8_t *reg_ops = ctx->regs[snapshot_ref];
+
+		ZEND_ASSERT(reg_ops[n - 1] != -1 && reg_ops[n] != -1);
+		t->exit_info[exit_point].poly_func_reg = reg_ops[n - 1];
+		t->exit_info[exit_point].poly_this_reg = reg_ops[n];
 		n -= 2;
 	}
 
