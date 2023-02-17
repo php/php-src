@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed deprecation warning at compile time. (Max Kellermann)
+  . Fixed bug GH-10270 (Unable to return CURL_READFUNC_PAUSE in readfunc
+    callback). (Pierrick Charron)
 
 - Date:
   . Fix GH-10447 ('p' format specifier does not yield 'Z' for 00:00). (Derick)
