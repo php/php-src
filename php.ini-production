@@ -425,6 +425,11 @@ max_input_time = 60
 ; How many GET/POST/COOKIE input variables may be accepted
 ;max_input_vars = 1000
 
+; How many multipart body parts (combined input variable and file uploads) may
+; be accepted.
+; Default Value: -1 (Sum of max_input_vars and max_file_uploads)
+;max_multipart_body_parts = 1500
+
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
 memory_limit = 128M
