@@ -168,29 +168,4 @@ static inline int mbfl_is_error(size_t len) {
 MBFLAPI extern mbfl_string *
 mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
-/*
- * MIME header encode
- */
-struct mime_header_encoder_data;	/* forward declaration */
-
-MBFLAPI extern struct mime_header_encoder_data *
-mime_header_encoder_new(
-    const mbfl_encoding *incode,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding);
-
-MBFLAPI extern void
-mime_header_encoder_delete(struct mime_header_encoder_data *pe);
-
-MBFLAPI extern mbfl_string *
-mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *result);
-
-MBFLAPI extern mbfl_string *
-mbfl_mime_header_encode(
-    mbfl_string *string, mbfl_string *result,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding,
-    const char *linefeed,
-    int indent);
-
 #endif	/* MBFL_MBFILTER_H */

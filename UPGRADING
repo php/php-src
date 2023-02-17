@@ -85,6 +85,14 @@ PHP 8.3 UPGRADE NOTES
     encoded words as required by RFC 2047; they are converted to spaces.
     Underscores must be encoded as "=5F" in such MIME encoded words.
     (Alex Dowad)
+  . mb_encode_mimeheader does not truncate the last couple bytes of its
+    input string; the old implementation would do this in rare cases.
+    (Alex Dowad)
+  . mb_encode_mimeheader includes QPrint-encoded zero bytes in its
+    output (as "=00") rather than dropping them. (Alex Dowad)
+  . In some rare corner cases, mb_encode_mimeheader will now transfer-encode
+    the input string where the previous implementation would just add
+    newlines. (Alex Dowad)
 
 - Standard:
   . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
