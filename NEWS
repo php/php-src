@@ -59,6 +59,8 @@ PHP                                                                        NEWS
     MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
   . mb_detect_encoding is better able to identify UTF-8 and UTF-16 strings
     with a byte-order mark. (Alex Dowad)
+  . mb_decode_mimeheader handles underscores in QPrint-encoded MIME encoded
+    words properly according to the standard (RFC 2047). (Alex Dowad)
 
 - Opcache:
   . Added start, restart and force restart time to opcache's
