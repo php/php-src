@@ -1975,7 +1975,7 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /*
 	char *ext_pos = NULL;
 	/* Array of PHAR extensions, Must be in order, starting with longest
 	 * ending with the shortest. */
-	char *phar_ext_list[] = {
+	static const char *const phar_ext_list[] = {
 		".phar.tar.bz2",
 		".phar.tar.gz",
 		".phar.php",
