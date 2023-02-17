@@ -113,7 +113,7 @@ zend_result zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* 
 }
 /* }}} */
 
-zend_result zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
+zend_result zend_optimizer_eval_strlen(zval *result, const zval *op1) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		return FAILURE;
@@ -231,7 +231,7 @@ void zend_optimizer_convert_to_free_op1(zend_op_array *op_array, zend_op *opline
 	}
 }
 
-int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
+int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv)
 {
 	int i = op_array->last_literal;
 	op_array->last_literal++;
