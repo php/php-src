@@ -78,6 +78,10 @@ PHP 8.3 UPGRADE NOTES
     casing rules for the Greek letter sigma. For mb_convert_case, conditional
     casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
     MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
+  . mb_decode_mimeheader interprets underscores in QPrint-encoded MIME
+    encoded words as required by RFC 2047; they are converted to spaces.
+    Underscores must be encoded as "=5F" in such MIME encoded words.
+    (Alex Dowad)
 
 - Standard:
   . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.

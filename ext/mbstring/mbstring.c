@@ -5705,7 +5705,10 @@ static unsigned char* mime_header_decode_encoded_word(unsigned char *p, unsigned
 		/* Fill `buf` with bytes from decoding QPrint */
 		while (p < e) {
 			unsigned char c = *p++;
-			if (c == '=' && (e - p) >= 2) {
+			if (c == '_') {
+				*bufp++ = ' ';
+				continue;
+			} else if (c == '=' && (e - p) >= 2) {
 				unsigned char c2 = *p++;
 				unsigned char c3 = *p++;
 				if (qprint_map[c2] >= 0 && qprint_map[c3] >= 0) {

@@ -52,7 +52,8 @@ PHP                                                                        NEWS
   . Added json_validate(). (Juan Morales)
 
 - MBString:
-  . mb_detect_encoding is better able to identify the correct encoding for Turkish text. (Alex Dowad)
+  . mb_detect_encoding is better able to identify the correct encoding for
+    Turkish text. (Alex Dowad)
   . mb_detect_encoding's "non-strict" mode now behaves as described in the
     documentation. Previously, it would return false if the very first byte
     of the input string was invalid in all candidate encodings. (Alex Dowad)
@@ -62,6 +63,10 @@ PHP                                                                        NEWS
     MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
   . mb_detect_encoding is better able to identify UTF-8 and UTF-16 strings
     with a byte-order mark. (Alex Dowad)
+  . mb_decode_mimeheader interprets underscores in QPrint-encoded MIME
+    encoded words as required by RFC 2047; they are converted to spaces.
+    Underscores must be encoded as "=5F" in such MIME encoded words.
+    (Alex Dowad)
 
 - Opcache:
   . Added start, restart and force restart time to opcache's
