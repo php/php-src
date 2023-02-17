@@ -779,7 +779,7 @@ TSRM_API const char *tsrm_api_name(void)
 #endif
 }/*}}}*/
 
-TSRM_API bool tsrm_is_managed_thread()
+TSRM_API bool tsrm_is_managed_thread(void)
 {/*{{{*/
 	return tsrm_tls_get() ? true : false;
 }/*}}}*/
