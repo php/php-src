@@ -6,6 +6,7 @@ tidy
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (getenv("SKIP_ASAN")) die("skip too big for asan");
 ?>
 --INI--
 memory_limit="5G"
