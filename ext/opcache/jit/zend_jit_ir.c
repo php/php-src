@@ -2416,11 +2416,15 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 		} else {
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 			jit->ctx.fixed_stack_red_zone = ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE;
-			jit->ctx.fixed_stack_frame_size = 0;
+			if (jit->ctx.fixed_stack_red_zone > 16) {
+				jit->ctx.fixed_stack_frame_size = jit->ctx.fixed_stack_red_zone - 16;
+				jit->ctx.fixed_call_stack_size = 16;
+			}
 			jit->ctx.flags |= IR_MERGE_EMPTY_ENTRIES;
 #else
 			jit->ctx.fixed_stack_red_zone = 0;
 			jit->ctx.fixed_stack_frame_size = 16;
+			jit->ctx.fixed_call_stack_size = 16;
 #endif
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
 			jit->ctx.fixed_regset |= (1<<5); /* prevent %rbp (%r5) usage */
@@ -8009,8 +8013,12 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 		ir_IF_FALSE_cold(if_found);
 		jit_SET_EX_OPLINE(jit, opline);
 
-		// JIT: alloca(sizeof(void*));
-		this_ref2 = ir_ALLOCA(ir_CONST_ADDR(0x10));
+		if (!jit->ctx.fixed_call_stack_size) {
+			// JIT: alloca(sizeof(void*));
+			this_ref2 = ir_ALLOCA(ir_CONST_ADDR(0x10));
+		} else {
+			this_ref2 = ir_HARD_COPY_A(ir_RLOAD_A(IR_REG_SP));
+		}
 		ir_STORE(this_ref2, this_ref);
 
 		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !delayed_fetch_this) {
@@ -8025,9 +8033,11 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 					this_ref2);
 		}
 
-		// JIT: revert alloca
 		this_ref2 = ir_LOAD_A(ir_RLOAD_A(IR_REG_SP));
-		ir_AFREE(ir_CONST_ADDR(0x10));
+		if (!jit->ctx.fixed_call_stack_size) {
+			// JIT: revert alloca
+			ir_AFREE(ir_CONST_ADDR(0x10));
+		}
 
 		ir_GUARD(ref2, zend_jit_stub_addr(jit, jit_stub_exception_handler));
 
@@ -9267,8 +9277,14 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 		} else {
 			/* CPU stack allocated temporary zval */
-			// JIT: alloca(sizeof(void*));
-			ir_ref ptr = ir_ALLOCA(ir_CONST_ADDR(sizeof(zval)));
+			ir_ref ptr;
+
+			if (!jit->ctx.fixed_call_stack_size) {
+				// JIT: alloca(sizeof(void*));
+				ptr = ir_ALLOCA(ir_CONST_ADDR(sizeof(zval)));
+			} else {
+				ptr = ir_HARD_COPY_A(ir_RLOAD_A(IR_REG_SP));
+			}
 			res_addr = ZEND_ADDR_REF_ZVAL(ptr);
 		}
 
@@ -9382,8 +9398,10 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				res_addr = ZEND_ADDR_REF_ZVAL(sp);
 				jit_ZVAL_PTR_DTOR(jit, res_addr, func_info, 1, opline);
 			}
-			// JIT: revert alloca
-			ir_AFREE(ir_CONST_ADDR(sizeof(zval)));
+			if (!jit->ctx.fixed_call_stack_size) {
+				// JIT: revert alloca
+				ir_AFREE(ir_CONST_ADDR(sizeof(zval)));
+			}
 		}
 
 		// JIT: if (UNEXPECTED(EG(exception) != NULL)) {
