@@ -93,7 +93,7 @@ class XSLTProcessor
      * @param DOMDocument|SimpleXMLElement $document
      * @tentative-return-type
      */
-    public function transformToXml(object $document): string|null|false {}
+    public function transformToXml(object $document): string|false {}
 
     /** @tentative-return-type */
     public function setParameter(string $namespace, array|string $name, ?string $value = null): bool {}

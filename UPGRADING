@@ -74,6 +74,10 @@ PHP 8.3 UPGRADE NOTES
   . password_hash() will now chain the underlying Random\RandomException
     as the ValueError’s $previous Exception when salt generation fails.
 
+- XSL:
+  . XSLTProcessor::transformToXml() no longer returns null if there are no children
+    in the resulting document.
+
 ========================================
 6. New Functions
 ========================================

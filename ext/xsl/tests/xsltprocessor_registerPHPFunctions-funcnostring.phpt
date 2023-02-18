@@ -22,7 +22,7 @@ var_dump($proc->transformToXml($dom));
 NULL
 
 Warning: XSLTProcessor::transformToXml(): Handler name must be a string in %s on line %d
-NULL
+string(0) ""
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09

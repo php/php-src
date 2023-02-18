@@ -19,7 +19,7 @@ var_dump($proc->transformToXml($dom));
 NULL
 
 Warning: XSLTProcessor::transformToXml(): Not allowed to call handler 'ucwords()' in %s on line %d
-NULL
+string(0) ""
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09
