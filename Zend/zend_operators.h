@@ -273,18 +273,18 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 
-ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict);
-ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict);
+ZEND_API double       ZEND_FASTCALL zval_get_double_func(const zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
 
-static zend_always_inline zend_long zval_get_long(zval *op) {
+static zend_always_inline zend_long zval_get_long(const zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, false);
 }
-static zend_always_inline zend_long zval_get_long_ex(zval *op, bool is_strict) {
+static zend_always_inline zend_long zval_get_long_ex(const zval *op, bool is_strict) {
 	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, is_strict);
 }
-static zend_always_inline double zval_get_double(zval *op) {
+static zend_always_inline double zval_get_double(const zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_DOUBLE) ? Z_DVAL_P(op) : zval_get_double_func(op);
 }
 static zend_always_inline zend_string *zval_get_string(zval *op) {
