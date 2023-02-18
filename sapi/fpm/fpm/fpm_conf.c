@@ -84,7 +84,7 @@ static char *ini_include = NULL;
 /*
  * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
  */
-static struct ini_value_parser_s ini_fpm_global_options[] = {
+static const struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "pid",                         &fpm_conf_set_string,          GO(pid_file) },
 	{ "error_log",                   &fpm_conf_set_string,          GO(error_log) },
 #ifdef HAVE_SYSLOG_H
@@ -112,7 +112,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 /*
  * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
  */
-static struct ini_value_parser_s ini_fpm_pool_options[] = {
+static const struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "prefix",                    &fpm_conf_set_string,      WPO(prefix) },
 	{ "user",                      &fpm_conf_set_string,      WPO(user) },
 	{ "group",                     &fpm_conf_set_string,      WPO(group) },
@@ -1183,11 +1183,10 @@ static int fpm_conf_process_all_pools(void)
 		/* env[], php_value[], php_admin_values[] */
 		if (!wp->config->chroot) {
 			struct key_value_s *kv;
-			char *options[] = FPM_PHP_INI_TO_EXPAND;
-			char **p;
+			static const char *const options[] = FPM_PHP_INI_TO_EXPAND;
 
 			for (kv = wp->config->php_values; kv; kv = kv->next) {
-				for (p = options; *p; p++) {
+				for (const char *const*p = options; *p; p++) {
 					if (!strcasecmp(kv->key, *p)) {
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
 					}
@@ -1197,7 +1196,7 @@ static int fpm_conf_process_all_pools(void)
 				if (!strcasecmp(kv->key, "error_log") && !strcasecmp(kv->value, "syslog")) {
 					continue;
 				}
-				for (p = options; *p; p++) {
+				for (const char *const*p = options; *p; p++) {
 					if (!strcasecmp(kv->key, *p)) {
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
 					}
@@ -1464,7 +1463,7 @@ static void fpm_conf_ini_parser_section(zval *section, void *arg) /* {{{ */
 
 static void fpm_conf_ini_parser_entry(zval *name, zval *value, void *arg) /* {{{ */
 {
-	struct ini_value_parser_s *parser;
+	const struct ini_value_parser_s *parser;
 	void *config = NULL;
 
 	int *error = (int *)arg;

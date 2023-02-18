@@ -1622,10 +1622,10 @@ static inline char *phar_strnstr(const char *buf, int buf_len, const char *searc
  */
 static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, int is_data, char **error) /* {{{ */
 {
-	const char token[] = "__HALT_COMPILER();";
-	const char zip_magic[] = "PK\x03\x04";
-	const char gz_magic[] = "\x1f\x8b\x08";
-	const char bz_magic[] = "BZh";
+	static const char token[] = "__HALT_COMPILER();";
+	static const char zip_magic[] = "PK\x03\x04";
+	static const char gz_magic[] = "\x1f\x8b\x08";
+	static const char bz_magic[] = "BZh";
 	char *pos, test = '\0';
 	int recursion_count = 3; // arbitrary limit to avoid too deep or even infinite recursion
 	const int window_size = 1024;

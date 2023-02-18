@@ -48,7 +48,7 @@ typedef struct stk_rec {
 } stk_rec;
 
 /* The reference string for digits. */
-static char ref_str[] = "0123456789ABCDEF";
+static const char ref_str[] = "0123456789ABCDEF";
 
 
 /* A special output routine for "multi-character digits."  Exactly

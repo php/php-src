@@ -208,7 +208,7 @@ typedef struct php_cli_server_http_response_status_code_pair {
 	const char *str;
 } php_cli_server_http_response_status_code_pair;
 
-static php_cli_server_http_response_status_code_pair template_map[] = {
+static const php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 405, "<h1>%s</h1><p>Requested method not allowed.</p>" },
