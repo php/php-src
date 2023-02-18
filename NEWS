@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-10801 (Named arguments in CTE functions cause a segfault).
     (nielsdos)
 
+- FPM:
+  . Fixed bug GH-10611 (fpm_env_init_main leaks environ). (nielsdos)
+
 - FTP:
   . Propagate success status of ftp_close(). (nielsdos)
 
