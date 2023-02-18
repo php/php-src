@@ -515,6 +515,12 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.fnmatch->func_name);
 	}
 
+#if LIBCURL_VERSION_NUM >= 0x075400
+	if (curl->handlers.sshhostkey) {
+		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.sshhostkey->func_name);
+	}
+#endif
+
 	zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.std_err);
 	zend_get_gc_buffer_add_zval(gc_buffer, &curl->private_data);
 
@@ -1079,6 +1085,9 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers.xferinfo = NULL;
 #endif
 	ch->handlers.fnmatch = NULL;
+#if LIBCURL_VERSION_NUM >= 0x075400
+	ch->handlers.sshhostkey = NULL;
+#endif
 	ch->clone = emalloc(sizeof(uint32_t));
 	*ch->clone = 1;
 
@@ -1267,6 +1276,16 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 		}
 		curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, (void *) ch);
 	}
+
+#if LIBCURL_VERSION_NUM >= 0x075400
+	if (source->handlers.sshhostkey) {
+		ch->handlers.sshhostkey = ecalloc(1, sizeof(php_curl_callback));
+		if (!Z_ISUNDEF(source->handlers.sshhostkey->func_name)) {
+			ZVAL_COPY(&ch->handlers.sshhostkey->func_name, &source->handlers.sshhostkey->func_name);
+		}
+		curl_easy_setopt(ch->cp, CURLOPT_SSH_HOSTKEYDATA, (void *) ch);
+	}
+#endif
 
 	ZVAL_COPY(&ch->private_data, &source->private_data);
 
@@ -3069,6 +3088,14 @@ static void _php_curl_reset_handlers(php_curl *ch)
 		efree(ch->handlers.fnmatch);
 		ch->handlers.fnmatch = NULL;
 	}
+
+#if LIBCURL_VERSION_NUM >= 0x075400
+	if (ch->handlers.sshhostkey) {
+		zval_ptr_dtor(&ch->handlers.sshhostkey->func_name);
+		efree(ch->handlers.sshhostkey);
+		ch->handlers.sshhostkey = NULL;
+	}
+#endif
 }
 /* }}} */
 
