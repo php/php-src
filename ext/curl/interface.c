@@ -775,11 +775,11 @@ static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x075400
-static size_t curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key, size_t keylen)
+static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key, size_t keylen)
 {
 	php_curl *ch = (php_curl *)clientp;
 	php_curl_callback *t = ch->handlers.sshhostkey;
-	size_t rval = 0;
+	int rval = CURLKHMATCH_MISMATCH; /* cancel connection in case of an exception */
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_ssh_hostkeyfunction() called\n");
@@ -812,9 +812,14 @@ static size_t curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *k
 		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_SSH_HOSTKEYFUNCTION");
 	} else if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		if (0 != zval_get_long(&retval)) {
-			rval = 1;
+		zend_long retval_long = zval_get_long(&retval);
+		if (retval_long == CURLKHMATCH_OK || retval_long == CURLKHMATCH_MISMATCH) {
+			rval = retval_long;
+		} else {
+			zend_value_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
 		}
+	} else {
+		zend_value_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return a return code");
 	}
 	zval_ptr_dtor(&argv[0]);
 	zval_ptr_dtor(&argv[2]);

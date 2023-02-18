@@ -1991,6 +1991,26 @@ const CURL_VERSION_CURLDEBUG = UNKNOWN;
  * @cvalue CURLOPT_SSH_KNOWNHOSTS
  */
 const CURLOPT_SSH_KNOWNHOSTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_OK
+ */
+const CURLKHMATCH_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_MISMATCH
+ */
+const CURLKHMATCH_MISMATCH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_MISSING
+ */
+const CURLKHMATCH_MISSING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_LAST
+ */
+const CURLKHMATCH_LAST = UNKNOWN;
 
 /* Available since 7.20.0 */
 /**

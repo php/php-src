@@ -26,6 +26,7 @@ var_dump(curl_setopt($ch, CURLOPT_SSH_HOSTKEYFUNCTION, function ($keytype, $key,
     var_dump($keytype);
     var_dump($key);
     var_dump($keylen);
+    return CURLKHMATCH_OK;
 }));
 curl_exec($ch);
 curl_close($ch);
