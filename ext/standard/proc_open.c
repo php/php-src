@@ -475,6 +475,12 @@ static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
 		return NULL;
 	}
 
+	if (elem_num == 1 && ZSTR_LEN(str) == 0) {
+		zend_value_error("First element must contain a non-empty program name");
+		zend_string_release(str);
+		return NULL;
+	}
+
 	if (strlen(ZSTR_VAL(str)) != ZSTR_LEN(str)) {
 		zend_value_error("Command array element %d contains a null byte", elem_num);
 		zend_string_release(str);

@@ -73,6 +73,7 @@ PHP 8.3 UPGRADE NOTES
   . strtok() raises a warning in the case token is not provided when starting tokenization.
   . password_hash() will now chain the underlying Random\RandomException
     as the ValueError’s $previous Exception when salt generation fails.
+  . proc_open() $command array must now have at least one non empty element.
 
 ========================================
 6. New Functions
