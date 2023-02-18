@@ -1217,6 +1217,17 @@ PHP_FUNCTION(curl_init)
 }
 /* }}} */
 
+static void _php_copy_callback(php_curl *ch, php_curl_callback **new_callback, php_curl_callback *source_callback, CURLoption option)
+{
+	if (source_callback) {
+		*new_callback = ecalloc(1, sizeof(php_curl_callback));
+		if (!Z_ISUNDEF(source_callback->func_name)) {
+			ZVAL_COPY(&(*new_callback)->func_name, &source_callback->func_name);
+		}
+		curl_easy_setopt(ch->cp, option, (void *) ch);
+	}
+}
+
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 {
 	if (!Z_ISUNDEF(source->handlers.write->stream)) {
@@ -1256,40 +1267,13 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA,         (void *) ch);
 
-	if (source->handlers.progress) {
-		ch->handlers.progress = ecalloc(1, sizeof(php_curl_callback));
-		if (!Z_ISUNDEF(source->handlers.progress->func_name)) {
-			ZVAL_COPY(&ch->handlers.progress->func_name, &source->handlers.progress->func_name);
-		}
-		curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, (void *) ch);
-	}
-
+	_php_copy_callback(ch, &ch->handlers.progress, source->handlers.progress, CURLOPT_PROGRESSDATA);
 #if LIBCURL_VERSION_NUM >= 0x072000
-	if (source->handlers.xferinfo) {
-		ch->handlers.xferinfo = ecalloc(1, sizeof(php_curl_callback));
-		if (!Z_ISUNDEF(source->handlers.xferinfo->func_name)) {
-			ZVAL_COPY(&ch->handlers.xferinfo->func_name, &source->handlers.xferinfo->func_name);
-		}
-		curl_easy_setopt(ch->cp, CURLOPT_XFERINFODATA, (void *) ch);
-	}
+	_php_copy_callback(ch, &ch->handlers.xferinfo, source->handlers.xferinfo, CURLOPT_XFERINFODATA);
 #endif
-
-	if (source->handlers.fnmatch) {
-		ch->handlers.fnmatch = ecalloc(1, sizeof(php_curl_callback));
-		if (!Z_ISUNDEF(source->handlers.fnmatch->func_name)) {
-			ZVAL_COPY(&ch->handlers.fnmatch->func_name, &source->handlers.fnmatch->func_name);
-		}
-		curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, (void *) ch);
-	}
-
+	_php_copy_callback(ch, &ch->handlers.fnmatch, source->handlers.fnmatch, CURLOPT_FNMATCH_DATA);
 #if LIBCURL_VERSION_NUM >= 0x075400
-	if (source->handlers.sshhostkey) {
-		ch->handlers.sshhostkey = ecalloc(1, sizeof(php_curl_callback));
-		if (!Z_ISUNDEF(source->handlers.sshhostkey->func_name)) {
-			ZVAL_COPY(&ch->handlers.sshhostkey->func_name, &source->handlers.sshhostkey->func_name);
-		}
-		curl_easy_setopt(ch->cp, CURLOPT_SSH_HOSTKEYDATA, (void *) ch);
-	}
+	_php_copy_callback(ch, &ch->handlers.sshhostkey, source->handlers.sshhostkey, CURLOPT_SSH_HOSTKEYDATA);
 #endif
 
 	ZVAL_COPY(&ch->private_data, &source->private_data);
@@ -2925,6 +2909,14 @@ PHP_FUNCTION(curl_close)
 }
 /* }}} */
 
+static void _php_curl_free_callback(php_curl_callback* callback)
+{
+	if (callback) {
+		zval_ptr_dtor(&callback->func_name);
+		efree(callback);
+	}
+}
+
 static void curl_free_obj(zend_object *object)
 {
 	php_curl *ch = curl_from_obj(object);
@@ -2989,28 +2981,13 @@ static void curl_free_obj(zend_object *object)
 	efree(ch->handlers.write_header);
 	efree(ch->handlers.read);
 
-	if (ch->handlers.progress) {
-		zval_ptr_dtor(&ch->handlers.progress->func_name);
-		efree(ch->handlers.progress);
-	}
-
+	_php_curl_free_callback(ch->handlers.progress);
 #if LIBCURL_VERSION_NUM >= 0x072000
-	if (ch->handlers.xferinfo) {
-		zval_ptr_dtor(&ch->handlers.xferinfo->func_name);
-		efree(ch->handlers.xferinfo);
-	}
+	_php_curl_free_callback(ch->handlers.xferinfo);
 #endif
-
-	if (ch->handlers.fnmatch) {
-		zval_ptr_dtor(&ch->handlers.fnmatch->func_name);
-		efree(ch->handlers.fnmatch);
-	}
-
+	_php_curl_free_callback(ch->handlers.fnmatch);
 #if LIBCURL_VERSION_NUM >= 0x075400
-	if (ch->handlers.sshhostkey) {
-		zval_ptr_dtor(&ch->handlers.sshhostkey->func_name);
-		efree(ch->handlers.sshhostkey);
-	}
+	_php_curl_free_callback(ch->handlers.sshhostkey);
 #endif
 
 	zval_ptr_dtor(&ch->postfields);
