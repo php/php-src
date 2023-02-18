@@ -70,6 +70,12 @@ typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
 
+typedef enum {
+	ZEND_MEMOIZE_NONE,
+	ZEND_MEMOIZE_COMPILE,
+	ZEND_MEMOIZE_FETCH,
+} zend_memoize_mode;
+
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
 
@@ -129,7 +135,7 @@ struct _zend_compiler_globals {
 
 	zend_stack delayed_oplines_stack;
 	HashTable *memoized_exprs;
-	int memoize_mode;
+	zend_memoize_mode memoize_mode;
 
 	void   *map_ptr_real_base;
 	void   *map_ptr_base;
