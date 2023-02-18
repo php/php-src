@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e7010f447bb1a17ecdde14bc9f390c2f498f5425 */
+ * Stub hash: e84a7dfd0da032e83af15c44fd051a6a4a7b7c01 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -1317,10 +1317,10 @@ static void register_curl_symbols(int module_number)
 #if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
 	REGISTER_LONG_CONSTANT("CURLOPT_REDIR_PROTOCOLS_STR", CURLOPT_REDIR_PROTOCOLS_STR, CONST_PERSISTENT);
 #endif
-#if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
 	REGISTER_LONG_CONSTANT("CURLOPT_WS_OPTIONS", CURLOPT_WS_OPTIONS, CONST_PERSISTENT);
 #endif
-#if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
 	REGISTER_LONG_CONSTANT("CURLWS_RAW_MODE", CURLWS_RAW_MODE, CONST_PERSISTENT);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0 */

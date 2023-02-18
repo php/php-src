@@ -1836,7 +1836,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 #if LIBCURL_VERSION_NUM >= 0x075100 /* Available since 7.81.0 */
 		case CURLOPT_MIME_OPTIONS:
 #endif
-#if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
 		case CURLOPT_WS_OPTIONS:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0 */

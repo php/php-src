@@ -3566,6 +3566,9 @@ const CURLOPT_PROTOCOLS_STR = UNKNOWN;
  * @cvalue CURLOPT_REDIR_PROTOCOLS_STR
  */
 const CURLOPT_REDIR_PROTOCOLS_STR = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
 /**
  * @var int
  * @cvalue CURLOPT_WS_OPTIONS
