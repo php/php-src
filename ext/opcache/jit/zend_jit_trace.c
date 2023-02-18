@@ -46,7 +46,7 @@ static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_fla
 	}
 }
 
-static int zend_jit_trace_startup(zend_bool reattached)
+static int zend_jit_trace_startup(bool reattached)
 {
 	if (!reattached) {
 		zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * JIT_G(max_root_traces));

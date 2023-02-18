@@ -382,11 +382,11 @@ fail:
 
 # if BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PTR
 ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length));
-ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, zend_bool strict));
+ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, bool strict));
 # endif
 # if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
 ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length));
-ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, zend_bool strict));
+ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict));
 # endif
 
 # if ZEND_INTRIN_AVX2_RESOLVER
@@ -552,7 +552,7 @@ zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t leng
 	return result;
 }
 
-zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, zend_bool strict)
+zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict)
 {
 	const unsigned char *c = str;
 	unsigned char *o;
@@ -680,7 +680,7 @@ zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length)
 	_mm512_setr4_epi32(build_dword(b0, b1, b2, b3), build_dword(b4, b5, b6, b7),			\
 			   build_dword(b8, b9, b10, b11), build_dword(b12, b13, b14, b15))
 
-zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, zend_bool strict)
+zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, bool strict)
 {
 	const unsigned char *c = str;
 	unsigned char *o;
