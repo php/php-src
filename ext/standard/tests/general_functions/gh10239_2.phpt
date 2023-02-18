@@ -13,11 +13,13 @@ var_dump(proc_get_status($p));
 var_dump(proc_get_status($p));
 ?>
 --EXPECTF--
-array(8) {
+array(9) {
   ["command"]=>
   string(5) "false"
   ["pid"]=>
   int(%d)
+  ["cached"]=>
+  bool(true)
   ["running"]=>
   bool(false)
   ["signaled"]=>
@@ -31,11 +33,13 @@ array(8) {
   ["stopsig"]=>
   int(0)
 }
-array(8) {
+array(9) {
   ["command"]=>
   string(5) "false"
   ["pid"]=>
   int(%d)
+  ["cached"]=>
+  bool(true)
   ["running"]=>
   bool(false)
   ["signaled"]=>

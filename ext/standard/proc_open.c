@@ -404,6 +404,10 @@ PHP_FUNCTION(proc_get_status)
 	running = wstatus == STILL_ACTIVE;
 	exitcode = running ? -1 : wstatus;
 
+	/* The status is always available on Windows and will always read the same,
+	 * even if the child has already exited. This is because the result stays available
+	 * until the child handle is closed. Hence no caching is used on Windows. */
+	add_assoc_bool(return_value, "cached", false);
 #elif HAVE_SYS_WAIT_H
 	wait_pid = waitpid_cached(proc, &wstatus, WNOHANG|WUNTRACED);
 
@@ -426,6 +430,8 @@ PHP_FUNCTION(proc_get_status)
 		 * looking for either does not exist or is not a child of this process */
 		running = 0;
 	}
+
+	add_assoc_bool(return_value, "cached", proc->has_stored_exit_wait_status);
 #endif
 
 	add_assoc_bool(return_value, "running", running);
