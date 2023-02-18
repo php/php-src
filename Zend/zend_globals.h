@@ -269,7 +269,7 @@ struct _zend_executor_globals {
 	zend_fiber *active_fiber;
 
 	/* Default fiber C stack size. */
-	zend_long fiber_stack_size;
+	size_t fiber_stack_size;
 
 	/* If record_errors is enabled, all emitted diagnostics will be recorded,
 	 * in addition to being processed as usual. */
