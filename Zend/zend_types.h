@@ -27,6 +27,7 @@
 #include "zend_result.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __SSE2__
 # include <mmintrin.h>
@@ -309,8 +310,8 @@ struct _zval_struct {
 		uint32_t type_info;
 		struct {
 			ZEND_ENDIAN_LOHI_3(
-				zend_uchar    type,			/* active type */
-				zend_uchar    type_flags,
+				uint8_t    type,			/* active type */
+				uint8_t    type_flags,
 				union {
 					uint16_t  extra;        /* not further specified */
 				} u)
@@ -361,10 +362,10 @@ struct _zend_array {
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_4(
-				zend_uchar    flags,
-				zend_uchar    _unused,
-				zend_uchar    nIteratorsCount,
-				zend_uchar    _unused2)
+				uint8_t    flags,
+				uint8_t    _unused,
+				uint8_t    nIteratorsCount,
+				uint8_t    _unused2)
 		} v;
 		uint32_t flags;
 	} u;
@@ -569,7 +570,7 @@ struct _zend_ast_ref {
 #define _IS_BOOL					18
 #define _IS_NUMBER					19
 
-static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
+static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }
 
@@ -638,7 +639,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_FLAGS_SHIFT				0
 #define GC_INFO_SHIFT				10
 
-static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
+static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
 }
 
@@ -1170,7 +1171,7 @@ extern ZEND_API bool zend_rc_debug;
  * Skip checks for OBJECT/NULL type to avoid interpreting the flag incorrectly. */
 # define ZEND_RC_MOD_CHECK(p) do { \
 		if (zend_rc_debug) { \
-			zend_uchar type = zval_gc_type((p)->u.type_info); \
+			uint8_t type = zval_gc_type((p)->u.type_info); \
 			if (type != IS_OBJECT && type != IS_NULL) { \
 				ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
 				ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \

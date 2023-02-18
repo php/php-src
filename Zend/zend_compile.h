@@ -24,6 +24,7 @@
 #include "zend_ast.h"
 
 #include <stdarg.h>
+#include <stdint.h>
 
 #include "zend_llist.h"
 
@@ -79,8 +80,8 @@ typedef union _znode_op {
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
-	zend_uchar op_type;
-	zend_uchar flag;
+	uint8_t op_type;
+	uint8_t flag;
 	union {
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
@@ -140,10 +141,10 @@ struct _zend_op {
 	znode_op result;
 	uint32_t extended_value;
 	uint32_t lineno;
-	zend_uchar opcode;       /* Opcodes defined in Zend/zend_vm_opcodes.h */
-	zend_uchar op1_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
-	zend_uchar op2_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
-	zend_uchar result_type;  /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	uint8_t opcode;       /* Opcodes defined in Zend/zend_vm_opcodes.h */
+	uint8_t op1_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	uint8_t op2_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	uint8_t result_type;  /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
 };
 
 
@@ -438,8 +439,8 @@ typedef struct _zend_internal_function_info {
 
 struct _zend_op_array {
 	/* Common elements */
-	zend_uchar type;
-	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+	uint8_t type;
+	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
@@ -493,8 +494,8 @@ typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 
 typedef struct _zend_internal_function {
 	/* Common elements */
-	zend_uchar type;
-	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+	uint8_t type;
+	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
@@ -515,12 +516,12 @@ typedef struct _zend_internal_function {
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
 union _zend_function {
-	zend_uchar type;	/* MUST be the first element of this struct! */
+	uint8_t type;	/* MUST be the first element of this struct! */
 	uint32_t   quick_arg_flags;
 
 	struct {
-		zend_uchar type;  /* never used */
-		zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+		uint8_t type;  /* never used */
+		uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
 		uint32_t fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
@@ -848,7 +849,7 @@ ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
-ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
+ZEND_API void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_static_vars(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
@@ -897,7 +898,7 @@ ZEND_API bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(const zend_string *name);
-ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
+ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API bool zend_is_smart_branch(const zend_op *opline);
 
 typedef bool (*zend_auto_global_callback)(zend_string *name);

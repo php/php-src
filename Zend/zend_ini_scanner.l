@@ -153,7 +153,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 static inline zend_result convert_to_number(zval *retval, const char *str, const int str_len)
 {
-	zend_uchar type;
+	uint8_t type;
 	int overflow;
 	zend_long lval;
 	double dval;

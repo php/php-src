@@ -41,7 +41,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 			zend_basic_block *succ = blocks + b->successors[i];
 
 			if (b->len != 0) {
-				zend_uchar opcode = opcodes[b->start + b->len - 1].opcode;
+				uint8_t opcode = opcodes[b->start + b->len - 1].opcode;
 				if (opcode == ZEND_MATCH) {
 					succ->flags |= ZEND_BB_TARGET;
 				} else if (opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING) {

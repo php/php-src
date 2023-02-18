@@ -19,6 +19,8 @@
 
 #include "zend_globals.h"
 
+#include <stdint.h>
+
 typedef struct _php_core_globals php_core_globals;
 
 #ifdef ZTS
@@ -65,7 +67,7 @@ struct _php_core_globals {
 	zend_long memory_limit;
 	zend_long max_input_time;
 
-	zend_uchar display_errors;
+	uint8_t display_errors;
 	bool display_startup_errors;
 	bool log_errors;
 	bool ignore_repeated_errors;

@@ -1080,13 +1080,13 @@ static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string
 			zend_long real_offset = (zend_long)ZSTR_LEN(str) + offset;
 
 			if (EXPECTED(real_offset >= 0)) {
-				return ZSTR_CHAR((zend_uchar)ZSTR_VAL(str)[real_offset]);
+				return ZSTR_CHAR((uint8_t)ZSTR_VAL(str)[real_offset]);
 			}
 		}
 		zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
 		return ZSTR_EMPTY_ALLOC();
 	} else {
-		return ZSTR_CHAR((zend_uchar)ZSTR_VAL(str)[offset]);
+		return ZSTR_CHAR((uint8_t)ZSTR_VAL(str)[offset]);
 	}
 }
 
@@ -1155,13 +1155,13 @@ try_string_offset:
 			zend_long real_offset = (zend_long)ZSTR_LEN(str) + offset;
 
 			if (real_offset >= 0) {
-				ZVAL_CHAR(result, (zend_uchar)ZSTR_VAL(str)[real_offset]);
+				ZVAL_CHAR(result, (uint8_t)ZSTR_VAL(str)[real_offset]);
 				return;
 			}
 		}
 		ZVAL_NULL(result);
 	} else {
-		ZVAL_CHAR(result, (zend_uchar)ZSTR_VAL(str)[offset]);
+		ZVAL_CHAR(result, (uint8_t)ZSTR_VAL(str)[offset]);
 	}
 }
 
@@ -1221,7 +1221,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result)
 {
-	zend_uchar c;
+	uint8_t c;
 	size_t string_len;
 	zend_long offset;
 	zend_string *s;
@@ -1310,11 +1310,11 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		}
 
 		string_len = ZSTR_LEN(tmp);
-		c = (zend_uchar)ZSTR_VAL(tmp)[0];
+		c = (uint8_t)ZSTR_VAL(tmp)[0];
 		zend_string_release(tmp);
 	} else {
 		string_len = Z_STRLEN_P(value);
-		c = (zend_uchar)Z_STRVAL_P(value)[0];
+		c = (uint8_t)Z_STRVAL_P(value)[0];
 	}
 
 
@@ -2146,7 +2146,7 @@ static void ZEND_FASTCALL zend_jit_vm_stack_free_args_helper(zend_execute_data *
 	zend_vm_stack_free_args(call);
 }
 
-static zend_always_inline zval* zend_jit_assign_to_typed_ref_helper(zend_reference *ref, zval *value, zend_uchar value_type)
+static zend_always_inline zval* zend_jit_assign_to_typed_ref_helper(zend_reference *ref, zval *value, uint8_t value_type)
 {
 	zval variable;
 

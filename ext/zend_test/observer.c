@@ -39,7 +39,7 @@ static void observer_set_user_opcode_handler(const char *opcode_names, user_opco
 	while (1) {
 		if (*e == ' ' || *e == ',' || *e == '\0') {
 			if (s) {
-				zend_uchar opcode = zend_get_opcode_id(s, e - s);
+				uint8_t opcode = zend_get_opcode_id(s, e - s);
 				if (opcode <= ZEND_VM_LAST_OPCODE) {
 					zend_set_user_opcode_handler(opcode, handler);
 				} else {

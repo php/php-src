@@ -150,7 +150,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        zend_jit_addr   var_addr,
                                        uint32_t        var_info,
                                        uint32_t        var_def_info,
-                                       zend_uchar      val_type,
+                                       uint8_t         val_type,
                                        zend_jit_addr   val_addr,
                                        uint32_t        val_info,
                                        zend_jit_addr   res_addr,
@@ -214,7 +214,7 @@ static bool zend_ival_is_last_use(const zend_lifetime_interval *ival, int use)
 	return 0;
 }
 
-static bool zend_is_commutative(zend_uchar opcode)
+static bool zend_is_commutative(uint8_t opcode)
 {
 	return
 		opcode == ZEND_ADD ||
@@ -2646,7 +2646,7 @@ static bool zend_jit_next_is_send_result(const zend_op *opline)
 	return 0;
 }
 
-static bool zend_jit_supported_binary_op(zend_uchar op, uint32_t op1_info, uint32_t op2_info)
+static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t op2_info)
 {
 	if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
 		return false;
@@ -2685,7 +2685,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	zend_lifetime_interval **ra = NULL;
 	bool is_terminated = 1; /* previous basic block is terminated by jump */
 	bool recv_emitted = 0;   /* emitted at least one RECV opcode */
-	zend_uchar smart_branch_opcode;
+	uint8_t smart_branch_opcode;
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;

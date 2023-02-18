@@ -91,7 +91,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 		goto end;
 	}
 	for (i = 0; i < num_vars; i++) {
-		zend_uchar type;
+		uint8_t type;
 		switch (types[i]) {
 			case 'd': /* Double */
 				type = MYSQL_TYPE_DOUBLE;
