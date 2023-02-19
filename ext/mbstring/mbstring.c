@@ -2446,6 +2446,9 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 			ckey = php_mb_convert_encoding(
 				ZSTR_VAL(key), ZSTR_LEN(key),
 				to_encoding, from_encodings, num_from_encodings, &ckey_len);
+			if (!ckey) {
+				continue;
+			}
 			key = zend_string_init(ckey, ckey_len, 0);
 			efree(ckey);
 		}
@@ -2457,6 +2460,12 @@ try_again:
 				cval = php_mb_convert_encoding(
 					Z_STRVAL_P(entry), Z_STRLEN_P(entry),
 					to_encoding, from_encodings, num_from_encodings, &cval_len);
+				if (!cval) {
+					if (key) {
+						zend_string_release(key);
+					}
+					continue;
+				}
 				ZVAL_STRINGL(&entry_tmp, cval, cval_len);
 				efree(cval);
 				break;
