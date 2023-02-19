@@ -4765,6 +4765,9 @@ static int accel_finish_startup(void)
 
 			ZCG(mem_checksum_skip_list) = NULL;
 			ZCG(mem_checksum_skip_list_count) = 0;
+#if ZEND_DEBUG
+			ZCG(mem_checksum_skip_list_capacity) = 0;
+#endif
 
 			if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
 				ret = FAILURE;

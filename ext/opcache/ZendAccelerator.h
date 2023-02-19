@@ -245,6 +245,13 @@ typedef struct _zend_accel_globals {
 
 	zend_accel_skip_list_entry *mem_checksum_skip_list;
 	uint32_t mem_checksum_skip_list_count;
+	/* We don't actually need the capacity because the skip list is preallocated to the right size.
+	 * We only use this in a debug build to check for bugs. If an assertion failure would ever trigger
+	 * for this field, then it's signifies a bug in the persistence code because the calculation and
+	 * actual size don't match. */
+#if ZEND_DEBUG
+	uint32_t mem_checksum_skip_list_capacity;
+#endif
 } zend_accel_globals;
 
 typedef struct _zend_string_table {

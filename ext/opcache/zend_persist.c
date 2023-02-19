@@ -93,6 +93,9 @@ static void mem_checksum_skip_list_add(void *p, uint32_t checked_area_size, uint
 	ZEND_ASSERT(ZCG(mem_checksum_skip_list) != NULL);
 	char *base_ptr = (char *) ZCG(current_persistent_script)->mem + sizeof(zend_persistent_script);
 	ZEND_ASSERT((char *) p >= base_ptr);
+#if ZEND_DEBUG
+	ZEND_ASSERT(ZCG(mem_checksum_skip_list_count) < ZCG(mem_checksum_skip_list_capacity));
+#endif
 	zend_accel_skip_list_entry *entry = &ZCG(mem_checksum_skip_list)[ZCG(mem_checksum_skip_list_count)++];
 	entry->offset = (char *) p - base_ptr;
 	entry->checked_area_size = checked_area_size;
@@ -1337,6 +1340,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	/* The skip list count is still set by the persist_calc routines, which always precedes a call to this function. */
 	ZCG(mem_checksum_skip_list) = safe_emalloc(ZCG(mem_checksum_skip_list_count), sizeof(zend_accel_skip_list_entry), 0);
+#if ZEND_DEBUG
+	ZCG(mem_checksum_skip_list_capacity) = ZCG(mem_checksum_skip_list_count);
+#endif
 	ZCG(mem_checksum_skip_list_count) = 0;
 
 	script->mem = ZCG(mem);
