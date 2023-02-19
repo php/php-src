@@ -571,10 +571,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_op *end = new_opcodes + op_array->last;
 		int offset = 0;
 
-		if (ZCG(mem_checksum_skip_list)) {
+#ifdef HAVE_JIT
+		if (ZCG(mem_checksum_skip_list) && JIT_G(on)) {
 			/* There is already one skip with 0 repetitions, so we have to subtract one */
 			mem_checksum_skip_list_add(new_opcodes, sizeof(zend_op) - sizeof(op_array->opcodes[0].handler), op_array->last - 1);
 		}
+#endif
 
 		for (; opline < end ; opline++, offset++) {
 #if ZEND_USE_ABS_CONST_ADDR

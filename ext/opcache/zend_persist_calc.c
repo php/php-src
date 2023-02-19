@@ -27,6 +27,10 @@
 #include "zend_operators.h"
 #include "zend_attributes.h"
 
+#ifdef HAVE_JIT
+#include "jit/zend_jit.h"
+#endif
+
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
 
@@ -236,7 +240,11 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 
 	zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array->opcodes);
 	ADD_SIZE(sizeof(zend_op) * op_array->last);
-	ZCG(mem_checksum_skip_list_count)++;
+#ifdef HAVE_JIT
+	if (JIT_G(on)) {
+		ZCG(mem_checksum_skip_list_count)++;
+	}
+#endif
 
 	if (op_array->filename) {
 		ADD_STRING(op_array->filename);
