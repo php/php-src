@@ -21,7 +21,7 @@ $host = curl_cli_server_start();
 $url = "{$host}/get.inc?test=";
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-var_dump(curl_setopt($ch, CURLOPT_SSH_HOSTKEYFUNCTION, function ($keytype, $key, $keylen) {
+var_dump(curl_setopt($ch, CURLOPT_SSH_HOSTKEYFUNCTION, function ($ch, $keytype, $key, $keylen) {
     // Can't really trigger this in a test
     var_dump($keytype);
     var_dump($key);

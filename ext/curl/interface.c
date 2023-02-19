@@ -812,14 +812,16 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_SSH_HOSTKEYFUNCTION");
 	} else if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		zend_long retval_long = zval_get_long(&retval);
-		if (retval_long == CURLKHMATCH_OK || retval_long == CURLKHMATCH_MISMATCH) {
-			rval = retval_long;
+		if (Z_TYPE(retval) == IS_LONG) {
+			zend_long retval_long = zval_get_long(&retval);
+			if (retval_long == CURLKHMATCH_OK || retval_long == CURLKHMATCH_MISMATCH) {
+				rval = retval_long;
+			} else {
+				zend_throw_error(NULL, "The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
+			}
 		} else {
-			zend_value_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
+			zend_type_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return an integer");
 		}
-	} else {
-		zend_value_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return a return code");
 	}
 	zval_ptr_dtor(&argv[0]);
 	zval_ptr_dtor(&argv[2]);
