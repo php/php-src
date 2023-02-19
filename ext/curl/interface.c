@@ -813,14 +813,14 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 	} else if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		if (Z_TYPE(retval) == IS_LONG) {
-			zend_long retval_long = zval_get_long(&retval);
+			zend_long retval_long = Z_LVAL(retval);
 			if (retval_long == CURLKHMATCH_OK || retval_long == CURLKHMATCH_MISMATCH) {
 				rval = retval_long;
 			} else {
 				zend_throw_error(NULL, "The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
 			}
 		} else {
-			zend_type_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return an integer");
+			zend_type_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
 		}
 	}
 	zval_ptr_dtor(&argv[0]);
