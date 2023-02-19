@@ -45,6 +45,10 @@ PHP                                                                        NEWS
 - Phar:
   . Fix incorrect check in phar tar parsing. (nielsdos)
 
+- Reflection:
+  . Fixed bug GH-10623 (Reflection::getClosureUsedVariables opcode fix with
+    variadic arguments). (nielsdos)
+
 - Standard:
   . Fixed bug GH-10292 (Made the default value of the first param of srand() and
     mt_srand() unknown). (kocsismate)
