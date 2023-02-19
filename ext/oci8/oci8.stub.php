@@ -953,7 +953,7 @@ function oci_unregister_taf_callback($connection): bool {}
 
 class OCILob {
     /** @var resource */
-    public readonly mixed $descriptor;
+    public mixed $descriptor = null;
 
     /**
      * @alias oci_lob_save
@@ -1084,7 +1084,7 @@ class OCILob {
 
 class OCICollection {
     /** @var resource */
-    public readonly mixed $collection;
+    public mixed $collection = null;
     /**
      * @alias oci_free_collection
      * @tentative-return-type
