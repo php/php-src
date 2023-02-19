@@ -36,6 +36,7 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_ssa.h"
 #include "Optimizer/zend_inference.h"
+#include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
 #if ZEND_JIT_TARGET_X86
@@ -1266,7 +1267,7 @@ static int zend_may_overflow(const zend_op *opline, const zend_ssa_op *ssa_op, c
 	}
 }
 
-ZEND_EXT_API int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
+static int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
 {
 	uint32_t flags;
 

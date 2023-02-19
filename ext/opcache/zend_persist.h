@@ -30,6 +30,5 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *ce);
 void zend_update_parent_ce(zend_class_entry *ce);
 void zend_persist_warnings_calc(uint32_t num_warnings, zend_error_info **warnings);
 zend_error_info **zend_persist_warnings(uint32_t num_warnings, zend_error_info **warnings);
-void checksum_skip_list_add(void *p);
 
 #endif /* ZEND_PERSIST_H */

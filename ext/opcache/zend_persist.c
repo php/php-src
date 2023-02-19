@@ -29,6 +29,7 @@
 #include "zend_operators.h"
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
+#include "zend_sort.h"
 
 #ifdef HAVE_JIT
 # include "Optimizer/zend_func_info.h"
@@ -87,57 +88,43 @@ static void zend_persist_op_array(zval *zv);
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
-static void checksum_skip_list_init(void)
+static void mem_checksum_skip_list_add(void *p, uint32_t checked_area_size, uint32_t repetitions)
 {
-	ZEND_ASSERT(ZCG(checksum_skip_list) == NULL);
-	ZCG(checksum_skip_list_count) = 0;
-	ZCG(checksum_skip_list_capacity) = 8;
-	ZCG(checksum_skip_list) = safe_emalloc(ZCG(checksum_skip_list_capacity), sizeof(uint32_t), 0);
+	ZEND_ASSERT(ZCG(mem_checksum_skip_list) != NULL);
+	char *base_ptr = (char *) ZCG(current_persistent_script)->mem + sizeof(zend_persistent_script);
+	ZEND_ASSERT((char *) p >= base_ptr);
+	zend_accel_skip_list_entry *entry = &ZCG(mem_checksum_skip_list)[ZCG(mem_checksum_skip_list_count)++];
+	entry->offset = (char *) p - base_ptr;
+	entry->checked_area_size = checked_area_size;
+	entry->repetitions = repetitions;
 }
 
-static void checksum_skip_list_extend(uint32_t size)
+static int mem_checksum_skip_list_compare(const zend_accel_skip_list_entry *l, const zend_accel_skip_list_entry *r)
 {
-	ZEND_ASSERT(ZCG(checksum_skip_list) != NULL);
-	ZCG(checksum_skip_list) = safe_erealloc(ZCG(checksum_skip_list), ZCG(checksum_skip_list_capacity), sizeof(uint32_t), 0);
-}
-
-void checksum_skip_list_add(void *p)
-{
-	ZEND_ASSERT(ZCG(checksum_skip_list) != NULL);
-	void *base_btr = ((char*)ZCG(current_persistent_script)->mem) + ZEND_ALIGNED_SIZE(sizeof(zend_persistent_script));
-	ZEND_ASSERT(p >= base_btr);
-	if ((ZCG(checksum_skip_list_count) + 1) >= ZCG(checksum_skip_list_capacity)) {
-		ZCG(checksum_skip_list_capacity) *= 2;
-		checksum_skip_list_extend(ZCG(checksum_skip_list_capacity));
-	}
-	ZCG(checksum_skip_list)[ZCG(checksum_skip_list_count)++] = p - base_btr;
-}
-
-static int checksum_skip_list_compare(const uint32_t *l, const uint32_t *r)
-{
-	if (*l < *r) {
+	if (l->offset < r->offset) {
 		return -1;
-	} else if (*l == *r) {
+	} else if (l->offset == r->offset) {
 		return 0;
 	} else {
 		return 1;
 	}
 }
 
-static void checksum_skip_list_swap(uint32_t *l, uint32_t *r)
+static void mem_checksum_skip_list_swap(zend_accel_skip_list_entry *l, zend_accel_skip_list_entry *r)
 {
-	uint32_t tmp = *r;
+	zend_accel_skip_list_entry tmp = *r;
 	*r = *l;
 	*l = tmp;
 }
 
-static uint32_t *checksum_skip_list_persist(void)
+static zend_accel_skip_list_entry *mem_checksum_skip_list_persist(void)
 {
-	zend_sort((void *) ZCG(checksum_skip_list), ZCG(checksum_skip_list_count), sizeof(*ZCG(checksum_skip_list)), (compare_func_t) checksum_skip_list_compare, (swap_func_t) checksum_skip_list_swap);
-	uint32_t *result = zend_shared_memdup(ZCG(checksum_skip_list), (ZCG(checksum_skip_list_count) + 1) * sizeof(uint32_t));
-	result[ZCG(checksum_skip_list_count)] = 0;
-	efree(ZCG(checksum_skip_list));
-	ZCG(checksum_skip_list) = NULL;
+	zend_sort(ZCG(mem_checksum_skip_list), ZCG(mem_checksum_skip_list_count), sizeof(zend_accel_skip_list_entry), (compare_func_t) mem_checksum_skip_list_compare, (swap_func_t) mem_checksum_skip_list_swap);
+	zend_accel_skip_list_entry *result = zend_shared_memdup(ZCG(mem_checksum_skip_list), (ZCG(mem_checksum_skip_list_count) + 1) * sizeof(zend_accel_skip_list_entry));
+	zend_accel_skip_list_entry *last_sentinel = &result[ZCG(mem_checksum_skip_list_count)];
+	last_sentinel->offset = 0;
+	last_sentinel->checked_area_size = 0;
+	last_sentinel->repetitions = 0;
 	return result;
 }
 
@@ -581,6 +568,11 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_op *end = new_opcodes + op_array->last;
 		int offset = 0;
 
+		if (ZCG(mem_checksum_skip_list)) {
+			/* There is already one skip with 0 repetitions, so we have to subtract one */
+			mem_checksum_skip_list_add(new_opcodes, sizeof(zend_op) - sizeof(op_array->opcodes[0].handler), op_array->last - 1);
+		}
+
 		for (; opline < end ; opline++, offset++) {
 #if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
@@ -814,6 +806,10 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 		return;
 	}
 	op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
+	if (ZCG(mem_checksum_skip_list)) {
+		/* There is already one skip with 0 repetitions, so we have to subtract one */
+		mem_checksum_skip_list_add(&op_array->reserved, 0, sizeof(op_array->reserved) / sizeof(op_array->reserved[0]) - 1);
+	}
 	zend_persist_op_array_ex(op_array, NULL);
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
@@ -920,8 +916,8 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		}
 		ce->inheritance_cache = NULL;
-		if (ZCG(checksum_skip_list) != NULL) {
-			checksum_skip_list_add(&ce->inheritance_cache);
+		if (ZCG(mem_checksum_skip_list)) {
+			mem_checksum_skip_list_add(&ce->inheritance_cache, 0, 0);
 		}
 
 		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
@@ -1339,6 +1335,10 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 {
 	Bucket *p;
 
+	/* The skip list count is still set by the persist_calc routines, which always precedes a call to this function. */
+	ZCG(mem_checksum_skip_list) = safe_emalloc(ZCG(mem_checksum_skip_list_count), sizeof(zend_accel_skip_list_entry), 0);
+	ZCG(mem_checksum_skip_list_count) = 0;
+
 	script->mem = ZCG(mem);
 
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
@@ -1346,8 +1346,6 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	script = zend_shared_memdup_free(script, sizeof(zend_persistent_script));
 	script->corrupted = 0;
 	ZCG(current_persistent_script) = script;
-
-	checksum_skip_list_init();
 
 	if (!for_shm) {
 		/* script is not going to be saved in SHM */
@@ -1405,7 +1403,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 #endif
 
-	script->checksum_skip_list = checksum_skip_list_persist();
+	script->mem_checksum_skip_list = mem_checksum_skip_list_persist();
+	efree(ZCG(mem_checksum_skip_list));
+	ZCG(mem_checksum_skip_list) = NULL;
 
 	script->corrupted = false;
 	ZCG(current_persistent_script) = NULL;

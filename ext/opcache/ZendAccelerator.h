@@ -109,6 +109,19 @@ typedef enum _zend_accel_restart_reason {
 	ACCEL_RESTART_USER    /* restart scheduled by opcache_reset() */
 } zend_accel_restart_reason;
 
+typedef struct _zend_accel_skip_list_entry {
+	/* The offset indicates which byte offset within the memory block must be skipped.
+	 * The size of the skip is equal to the system's pointer size. */
+	uint32_t offset;
+	/* To prevent creating a huge list with a lot of entries, we use a compression scheme
+	 * based on the following two fields. If repetitions > 0, then the checksum algorithm
+	 * will repeat `repetitions` times checksumming `checked_area_size` bytes, followed
+	 * by skipping a pointer. For example, we use this to skip the `zend_op->handler` pointer.
+	 * This allows us to only create one skip list entry per op array to handle *all* the opcodes. */
+	uint32_t checked_area_size;
+	uint32_t repetitions;
+} zend_accel_skip_list_entry;
+
 typedef struct _zend_persistent_script {
 	zend_script    script;
 	zend_long      compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
@@ -122,8 +135,10 @@ typedef struct _zend_persistent_script {
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
-	/* list of offsets relative to (mem + ZEND_ALIGNED_SIZE(sizeof(zend_persistent_script))) to be skipped in the checksum calculation */
-	uint32_t      *checksum_skip_list;
+
+	/* Some bytes must be skipped in the checksum calculation because they could've changed (legally)
+	 * since the last checksum calculation. */
+	zend_accel_skip_list_entry *mem_checksum_skip_list;
 
 	/* All entries that shouldn't be counted in the ADLER32
 	 * checksum must be declared in this struct
@@ -228,9 +243,8 @@ typedef struct _zend_accel_globals {
 	zend_string             key;
 	char                    _key[MAXPATHLEN * 8];
 
-	uint32_t               *checksum_skip_list;
-	uint32_t                checksum_skip_list_count;
-	uint32_t                checksum_skip_list_capacity;
+	zend_accel_skip_list_entry *mem_checksum_skip_list;
+	uint32_t mem_checksum_skip_list_count;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {

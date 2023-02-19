@@ -27,11 +27,6 @@
 #include "zend_operators.h"
 #include "zend_attributes.h"
 
-#ifdef HAVE_JIT
-# include "Optimizer/zend_func_info.h"
-# include "jit/zend_jit.h"
-#endif
-
 #define ADD_DUP_SIZE(m,s)  ZCG(current_persistent_script)->size += zend_shared_memdup_size((void*)m, s)
 #define ADD_SIZE(m)        ZCG(current_persistent_script)->size += ZEND_ALIGNED_SIZE(m)
 
@@ -241,6 +236,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 
 	zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array->opcodes);
 	ADD_SIZE(sizeof(zend_op) * op_array->last);
+	ZCG(mem_checksum_skip_list_count)++;
 
 	if (op_array->filename) {
 		ADD_STRING(op_array->filename);
@@ -302,36 +298,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
-
-#ifdef HAVE_JIT
-	if (JIT_G(on)) {
-		if (JIT_G(hot_loop)) {
-			zend_cfg cfg;
-
-			if (zend_jit_build_cfg(op_array, &cfg) == SUCCESS) {
-				for (uint32_t i = 0; i < cfg.blocks_count; i++) {
-					if (cfg.blocks[i].flags & ZEND_BB_REACHABLE) {
-						if (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER) {
-							// opcode.handler
-							ZCG(checksum_skip_list_count)++;
-						}
-					}
-				}
-			}
-		}
-
-		if (JIT_G(hot_func)) {
-			zend_op *opline = op_array->opcodes;
-			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-					opline++;
-				}
-			}
-			// opcode.handler
-			ZCG(checksum_skip_list_count)++;
-		}
-	}
-#endif
 }
 
 static void zend_persist_op_array_calc(zval *zv)
@@ -375,6 +341,7 @@ static void zend_persist_class_method_calc(zval *zv)
 	if (!old_op_array) {
 		ADD_SIZE(sizeof(zend_op_array));
 		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+		ZCG(mem_checksum_skip_list_count)++;
 		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
 	} else {
 		/* If op_array is shared, the function name refcount is still incremented for each use,
@@ -434,10 +401,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 
 		ADD_SIZE(sizeof(zend_class_entry));
 
-		if (ZCG(current_persistent_script)) {
-			// inheritance_cache
-			ZCG(checksum_skip_list_count)++;
-		}
+		ZCG(mem_checksum_skip_list_count)++;
 
 		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
 			ADD_INTERNED_STRING(ce->name);
@@ -612,7 +576,8 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 {
 	Bucket *p;
 
-	ZCG(checksum_skip_list_count) = 0;
+	/* Account for the final zero element that acts as a terminator. */
+	ZCG(mem_checksum_skip_list_count) = 1;
 
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;
@@ -649,10 +614,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	zend_persist_warnings_calc(
 		new_persistent_script->num_warnings, new_persistent_script->warnings);
 
-	// null terminator
-	ZCG(checksum_skip_list_count)++;
-	ADD_SIZE(ZCG(checksum_skip_list_count) * sizeof(uint32_t));
-	ZCG(checksum_skip_list_count) = 0;
+	ADD_SIZE(ZCG(mem_checksum_skip_list_count) * sizeof(zend_accel_skip_list_entry));
 
 	new_persistent_script->corrupted = false;
 

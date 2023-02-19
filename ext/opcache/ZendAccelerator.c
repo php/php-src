@@ -4763,9 +4763,8 @@ static int accel_finish_startup(void)
 			ZCG(cwd_key_len) = 0;
 			ZCG(cwd_check) = 1;
 
-			ZCG(checksum_skip_list) = NULL;
-			ZCG(checksum_skip_list_count) = 0;
-			ZCG(checksum_skip_list_capacity) = 0;
+			ZCG(mem_checksum_skip_list) = NULL;
+			ZCG(mem_checksum_skip_list_count) = 0;
 
 			if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
 				ret = FAILURE;

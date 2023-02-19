@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_persist.h"
-
 static zend_op_array dummy_op_array;
 static zend_jit_trace_info *zend_jit_traces = NULL;
 static const void **zend_jit_exit_groups = NULL;
@@ -8264,7 +8262,6 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 				if (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER) {
 					/* loop header */
 					opline = op_array->opcodes + cfg.blocks[i].start;
-					checksum_skip_list_add(&opline->handler);
 					if (!(ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_UNSUPPORTED)) {
 						opline->handler = (const void*)zend_jit_loop_trace_counter_handler;
 						if (!ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->counter) {
@@ -8289,7 +8286,6 @@ static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 			}
 		}
 
-		checksum_skip_list_add(&opline->handler);
 		if (!ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->trace_flags) {
 			/* function entry */
 			opline->handler = (const void*)zend_jit_func_trace_counter_handler;
