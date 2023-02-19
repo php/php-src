@@ -37,6 +37,7 @@ PHP                                                                        NEWS
 
 - MBString:
   . ext/mbstring: fix new_value length check. (Max Kellermann)
+  . Fix bug GH-10627 (mb_convert_encoding crashes PHP on Windows). (nielsdos)
 
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
