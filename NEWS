@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . Fix GH-10292 (Made the default value of the first param of srand() and
     mt_srand() unknown). (kocsismate)
 
+- Reflection:
+  . Fixed bug GH-10623 (Reflection::getClosureUsedVariables opcode fix with
+    variadic arguments). (nielsdos)
+
 - Standard:
   . Fixed bug GH-8086 (Introduce mail.mixed_lf_and_crlf INI). (Jakub Zelenka)
   . Fixed bug GH-10292 (Made the default value of the first param of srand() and
