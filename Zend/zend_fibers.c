@@ -394,12 +394,12 @@ ZEND_API bool zend_fiber_switch_blocked(void)
 	return zend_fiber_switch_blocking;
 }
 
-ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
+ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
 {
 	context->stack = zend_fiber_stack_allocate(stack_size);
 
 	if (UNEXPECTED(!context->stack)) {
-		return false;
+		return FAILURE;
 	}
 
 #ifdef ZEND_FIBER_UCONTEXT
@@ -438,7 +438,7 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 
 	zend_observer_fiber_init_notify(context);
 
-	return true;
+	return SUCCESS;
 }
 
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
@@ -812,7 +812,7 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-	if (!zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size))) {
+	if (zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size)) == FAILURE) {
 		RETURN_THROWS();
 	}
 

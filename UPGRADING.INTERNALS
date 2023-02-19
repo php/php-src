@@ -34,6 +34,9 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   the class table. zend_register_class_alias_ex() will not increase
   the refcount for class aliases and the cleanup function takes this
   into account.
+* The return types of the following functions have been changed from
+  `bool` to `zend_result`:
+  - zend_fiber_init_context()
 
 ========================
 2. Build system changes
