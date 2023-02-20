@@ -612,7 +612,7 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 	}
 	rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, 0, match_data, php_pcre_mctx());
 	php_pcre_free_match_data(match_data);
-	if (PCRE2_ERROR_NOMATCH != rc) {
+	if (rc >= 0) {
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
