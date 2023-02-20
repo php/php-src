@@ -742,7 +742,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.http_input is deprecated");
 	}
 
-	if (!new_value) {
+	if (!new_value || !ZSTR_LEN(new_value)) {
 		const char *encoding = php_get_input_encoding();
 		MBSTRG(http_input_set) = 0;
 		_php_mb_ini_mbstring_http_input_set(encoding, strlen(encoding));
@@ -2716,15 +2716,27 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
 		if (key) {
-			key = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), to_encoding, from_encodings, num_from_encodings);
+			zend_string *converted_key = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), to_encoding, from_encodings, num_from_encodings);
+			if (!converted_key) {
+				continue;
+			}
+			key = converted_key;
 		}
 		/* convert value */
 		ZEND_ASSERT(entry);
 try_again:
 		switch(Z_TYPE_P(entry)) {
-			case IS_STRING:
-				ZVAL_STR(&entry_tmp, php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), to_encoding, from_encodings, num_from_encodings));
+			case IS_STRING: {
+				zend_string *converted_key = php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), to_encoding, from_encodings, num_from_encodings);
+				if (!converted_key) {
+					if (key) {
+						zend_string_release(key);
+					}
+					continue;
+				}
+				ZVAL_STR(&entry_tmp, converted_key);
 				break;
+			}
 			case IS_NULL:
 			case IS_TRUE:
 			case IS_FALSE:
