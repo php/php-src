@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_build.h"
+#include "zend_result.h"
 
 #define INIT_FUNC_ARGS		int type, int module_number
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number
