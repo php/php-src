@@ -12959,7 +12959,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		type_loaded = 1;
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, 0);
 		if (opline->opcode == ZEND_FETCH_OBJ_W
-		 && (!ce ||	ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))) {
+		 && (!ce ||	ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT)))) {
 			uint32_t flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 
 			|	mov r0, EX->run_time_cache
@@ -13455,7 +13455,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 		|	mov r2, aword [r0 + opline->extended_value]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >7
-		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
 			|	cmp aword [r0 + opline->extended_value + sizeof(void*) * 2], 0
 			|	jnz >7
 		}
@@ -13928,7 +13928,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 		|	mov r2, aword [r0 + (opline+1)->extended_value]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >7
-		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
 			|	cmp aword [r0 + (opline+1)->extended_value + sizeof(void*) * 2], 0
 			|	jnz >7
 		}
@@ -14347,7 +14347,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		|	mov r2, aword [r0 + opline->extended_value]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
-		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
 			|	mov FCARG2a, aword [r0 + opline->extended_value + sizeof(void*) * 2]
 		}
 		|	mov r0, aword [r0 + opline->extended_value + sizeof(void*)]
@@ -14356,7 +14356,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 		|	IF_TYPE byte [FCARG1a + r0 + 8], IS_UNDEF, >5
 		|	add FCARG1a, r0
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, 0);
-		if (!ce || ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
 			|	test FCARG2a, FCARG2a
 			|	jnz >1
 			|.cold_code
