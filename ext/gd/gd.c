@@ -1741,6 +1741,12 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
+	/* quality must fit in an int */
+	if (quality < INT_MIN || quality > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #3 ($chunk_size) must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_FALSE;
+	}
+
 	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
 	if (file_len) {
