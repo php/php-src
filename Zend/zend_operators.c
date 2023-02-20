@@ -865,7 +865,7 @@ ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string
 	zend_error(E_DEPRECATED, "Implicit conversion from float-string \"%s\" to int loses precision", ZSTR_VAL(s));
 }
 
-ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */
+ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -935,7 +935,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API double ZEND_FASTCALL zval_get_double_func(zval *op) /* {{{ */
+ZEND_API double ZEND_FASTCALL zval_get_double_func(const zval *op) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -2304,7 +2304,7 @@ static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 0;

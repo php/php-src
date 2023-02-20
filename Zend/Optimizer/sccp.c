@@ -122,7 +122,7 @@ static void empty_partial_array(zval *zv)
 	Z_ARR_P(zv) = zend_new_array(8);
 }
 
-static void dup_partial_array(zval *dst, zval *src)
+static void dup_partial_array(zval *dst, const zval *src)
 {
 	MAKE_PARTIAL_ARRAY(dst);
 	Z_ARR_P(dst) = zend_array_dup(Z_ARR_P(src));
@@ -134,7 +134,7 @@ static void empty_partial_object(zval *zv)
 	Z_ARR_P(zv) = zend_new_array(8);
 }
 
-static void dup_partial_object(zval *dst, zval *src)
+static void dup_partial_object(zval *dst, const zval *src)
 {
 	MAKE_PARTIAL_OBJECT(dst);
 	Z_ARR_P(dst) = zend_array_dup(Z_ARR_P(src));
@@ -146,7 +146,7 @@ static inline bool value_known(zval *zv) {
 
 /* Sets new value for variable and ensures that it is lower or equal
  * the previous one in the constant propagation lattice. */
-static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
+static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, const zval *new) {
 	zval *value = &ctx->values[var];
 	if (IS_BOT(value) || IS_TOP(new)) {
 		return;
@@ -186,7 +186,7 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 #endif
 }
 
-static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, const zend_ssa_op *ssa_op) {
 	if (opline->op1_type == IS_CONST) {
 		return CT_CONSTANT_EX(ctx->scdf.op_array, opline->op1.constant);
 	} else if (ssa_op->op1_use != -1) {
@@ -196,7 +196,7 @@ static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 	}
 }
 
-static zval *get_op2_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+static zval *get_op2_value(sccp_ctx *ctx, const zend_op *opline, const zend_ssa_op *ssa_op) {
 	if (opline->op2_type == IS_CONST) {
 		return CT_CONSTANT_EX(ctx->scdf.op_array, opline->op2.constant);
 	} else if (ssa_op->op2_use != -1) {
@@ -207,7 +207,7 @@ static zval *get_op2_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 }
 
 static bool can_replace_op1(
-		const zend_op_array *op_array, zend_op *opline, zend_ssa_op *ssa_op) {
+		const zend_op_array *op_array, const zend_op *opline, const zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
@@ -441,7 +441,7 @@ static inline zend_result ct_eval_isset_dim(zval *result, uint32_t extended_valu
 	}
 }
 
-static inline zend_result ct_eval_del_array_elem(zval *result, zval *key) {
+static inline zend_result ct_eval_del_array_elem(zval *result, const zval *key) {
 	ZEND_ASSERT(IS_PARTIAL_ARRAY(result));
 
 	switch (Z_TYPE_P(key)) {
@@ -475,7 +475,7 @@ static inline zend_result ct_eval_del_array_elem(zval *result, zval *key) {
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_add_array_elem(zval *result, zval *value, const zval *key) {
 	if (!key) {
 		SEPARATE_ARRAY(result);
 		if ((value = zend_hash_next_index_insert(Z_ARR_P(result), value))) {
@@ -546,7 +546,7 @@ static inline zend_result ct_eval_add_array_unpack(zval *result, zval *array) {
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_assign_dim(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_assign_dim(zval *result, zval *value, const zval *key) {
 	switch (Z_TYPE_P(result)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -622,7 +622,7 @@ static inline zend_result ct_eval_isset_obj(zval *result, uint32_t extended_valu
 	}
 }
 
-static inline zend_result ct_eval_del_obj_prop(zval *result, zval *key) {
+static inline zend_result ct_eval_del_obj_prop(zval *result, const zval *key) {
 	ZEND_ASSERT(IS_PARTIAL_OBJECT(result));
 
 	switch (Z_TYPE_P(key)) {
@@ -636,7 +636,7 @@ static inline zend_result ct_eval_del_obj_prop(zval *result, zval *key) {
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_add_obj_prop(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_add_obj_prop(zval *result, zval *value, const zval *key) {
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
 			value = zend_symtable_update(Z_ARR_P(result), Z_STR_P(key), value);
@@ -649,7 +649,7 @@ static inline zend_result ct_eval_add_obj_prop(zval *result, zval *value, zval *
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_assign_obj(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_assign_obj(zval *result, zval *value, const zval *key) {
 	switch (Z_TYPE_P(result)) {
 		case IS_NULL:
 		case IS_FALSE:

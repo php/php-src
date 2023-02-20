@@ -1611,7 +1611,7 @@ static inline bool class_name_refers_to_active_ce(zend_string *class_name, uint3
 }
 /* }}} */
 
-uint32_t zend_get_class_fetch_type(zend_string *name) /* {{{ */
+uint32_t zend_get_class_fetch_type(const zend_string *name) /* {{{ */
 {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return ZEND_FETCH_CLASS_SELF;
@@ -8519,7 +8519,7 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-ZEND_API bool zend_is_op_long_compatible(zval *op)
+ZEND_API bool zend_is_op_long_compatible(const zval *op)
 {
 	if (Z_TYPE_P(op) == IS_ARRAY) {
 		return false;
@@ -8541,7 +8541,7 @@ ZEND_API bool zend_is_op_long_compatible(zval *op)
 	return true;
 }
 
-ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, const zval *op2) /* {{{ */
 {
 	if ((opcode == ZEND_CONCAT || opcode == ZEND_FAST_CONCAT)) {
 		/* Array to string warning. */
@@ -8614,7 +8614,7 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 }
 /* }}} */
 
-ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
+ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
 		/* BW_NOT on string does not convert the string into an integer. */

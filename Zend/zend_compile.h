@@ -896,7 +896,7 @@ ZEND_API void pass_two(zend_op_array *op_array);
 ZEND_API bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_handlers);
-uint32_t zend_get_class_fetch_type(zend_string *name);
+uint32_t zend_get_class_fetch_type(const zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API bool zend_is_smart_branch(const zend_op *opline);
 
@@ -1205,8 +1205,8 @@ END_EXTERN_C()
 /* The default value for CG(compiler_options) during eval() */
 #define ZEND_COMPILE_DEFAULT_FOR_EVAL			0
 
-ZEND_API bool zend_is_op_long_compatible(zval *op);
-ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2);
-ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op);
+ZEND_API bool zend_is_op_long_compatible(const zval *op);
+ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, const zval *op2);
+ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, const zval *op);
 
 #endif /* ZEND_COMPILE_H */

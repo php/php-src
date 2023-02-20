@@ -56,7 +56,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_left_function(zval *result, zval *op1, 
 ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2);
 
-ZEND_API bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2);
+ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2);
 
 ZEND_API zend_result ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_result ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2);
@@ -275,18 +275,18 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 
-ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict);
-ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict);
+ZEND_API double       ZEND_FASTCALL zval_get_double_func(const zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
 
-static zend_always_inline zend_long zval_get_long(zval *op) {
+static zend_always_inline zend_long zval_get_long(const zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, false);
 }
-static zend_always_inline zend_long zval_get_long_ex(zval *op, bool is_strict) {
+static zend_always_inline zend_long zval_get_long_ex(const zval *op, bool is_strict) {
 	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, is_strict);
 }
-static zend_always_inline double zval_get_double(zval *op) {
+static zend_always_inline double zval_get_double(const zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_DOUBLE) ? Z_DVAL_P(op) : zval_get_double_func(op);
 }
 static zend_always_inline zend_string *zval_get_string(zval *op) {
