@@ -63,6 +63,7 @@ PHP                                                                        NEWS
 - Tidy:
   . Fix memory leaks when attempting to open a non-existing file or a file over
     4GB. (Girgias)
+  . Add missing error check on tidyLoadConfig. (nielsdos)
 
 14 Feb 2023, PHP 8.1.16
 
