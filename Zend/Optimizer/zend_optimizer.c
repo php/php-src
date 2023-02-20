@@ -891,16 +891,19 @@ zend_function *zend_optimizer_get_called_func(
 					&op_array->scope->function_table, method_name);
 				if (fbc) {
 					bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
-					bool is_final = (fbc->common.fn_flags & ZEND_ACC_FINAL) != 0;
-					bool same_scope = fbc->common.scope == op_array->scope;
 					if (is_private) {
 						/* Only use private method if in the same scope. We can't even use it
 						 * as a prototype, as it may be overridden with changed signature. */
+						bool same_scope = fbc->common.scope == op_array->scope;
 						return same_scope ? fbc : NULL;
 					}
-					/* If the method is non-final, it may be overridden,
-					 * but only with a compatible method signature. */
-					*is_prototype = !is_final;
+					/* Prototype methods are potentially overridden. fbc still contains useful type information.
+					 * Some optimizations may not be applied, like inlining or inferring the send-mode of superfluous args.
+					 * A method cannot be overridden if the class or method is final. */
+					if ((fbc->common.fn_flags & ZEND_ACC_FINAL) == 0 &&
+						(fbc->common.scope->ce_flags & ZEND_ACC_FINAL) == 0) {
+						*is_prototype = true;
+					}
 					return fbc;
 				}
 			}
