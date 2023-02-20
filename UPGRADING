@@ -27,6 +27,10 @@ PHP 8.3 UPGRADE NOTES
   . Class constants can now be accessed dynamically using the C::{$name} syntax.
     RFC: https://wiki.php.net/rfc/dynamic_class_constant_fetch
 
+- FFI:
+  . C functions that have a return type of void now return null instead of
+    returning the following object object(FFI\CData:void) { }
+
 ========================================
 2. New Features
 ========================================
