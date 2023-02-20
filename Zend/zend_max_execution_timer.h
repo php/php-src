@@ -14,23 +14,23 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef ZEND_TIMER_H
-#define ZEND_TIMER_H
+#ifndef ZEND_MAX_EXECUTION_TIMER_H
+#define ZEND_MAX_EXECUTION_TIMER_H
 
-# ifdef ZEND_TIMERS
+# ifdef ZEND_MAX_EXECUTION_TIMERS
 
 #include "zend_long.h"
 
 /* Must be called after calls to fork() */
-ZEND_API void zend_timer_init(void);
-void zend_timer_settime(zend_long seconds);
-void zend_timer_shutdown(void);
+ZEND_API void zend_max_execution_timer_init(void);
+void zend_max_execution_timer_settime(zend_long seconds);
+void zend_max_execution_timer_shutdown(void);
 
 # else
 
-#define zend_timer_init()
-#define zend_timer_settime(seconds)
-#define zend_timer_shutdown()
+#define zend_max_execution_timer_init()
+#define zend_max_execution_timer_settime(seconds)
+#define zend_max_execution_timer_shutdown()
 
 # endif
 #endif

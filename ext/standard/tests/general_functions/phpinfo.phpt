@@ -34,7 +34,7 @@ Thread Safety => %s%A
 Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
-Zend Timers => %s
+Zend Max Execution Timers => %s
 IPv6 Support => %s
 DTrace Support => %s
 

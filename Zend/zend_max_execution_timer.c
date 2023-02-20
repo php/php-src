@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef ZEND_TIMERS
+#ifdef ZEND_MAX_EXECUTION_TIMERS
 
 #include <stdio.h>
 #include <signal.h>
@@ -33,31 +33,31 @@
 # define sigev_notify_thread_id _sigev_un._tid
 # endif
 
-ZEND_API void zend_timer_init(void) /* {{{ */
+ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
-	sev.sigev_value.sival_ptr = &EG(timer);
+	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
 	sev.sigev_signo = SIGRTMIN;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
 	EG(pid) = getpid();
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
-	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(timer)) != 0) {
+	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(max_execution_timer_timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
 
-#  ifdef TIMER_DEBUG
-		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(timer), sev.sigev_notify_thread_id);
+#  ifdef MAX_EXECUTION_TIMERS_DEBUG
+		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
 #  endif
 
 	sigaction(sev.sigev_signo, NULL, &EG(oldact));
 }
 /* }}} */
 
-void zend_timer_settime(zend_long seconds) /* {{{ }*/
+void zend_max_execution_timer_settime(zend_long seconds) /* {{{ }*/
 {
-	timer_t timer = EG(timer);
+	timer_t timer = EG(max_execution_timer_timer);
 
 	/* Timer doesn't anymore on request shutdown. */
 	if (timer == (timer_t){0}) {
@@ -68,7 +68,7 @@ void zend_timer_settime(zend_long seconds) /* {{{ }*/
 	its.it_value.tv_sec = seconds;
 	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
 
-# ifdef TIMER_DEBUG
+# ifdef MAX_EXECUTION_TIMERS_DEBUG
 	fprintf(stderr, "Setting timer %#jx on thread %d (%ld seconds)...\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
 # endif
 
@@ -78,29 +78,29 @@ void zend_timer_settime(zend_long seconds) /* {{{ }*/
 }
 /* }}} */
 
-void zend_timer_shutdown(void) /* {{{ */
+void zend_max_execution_timer_shutdown(void) /* {{{ */
 {
 	/* Don't try to delete a timer created before a call to fork() */
 	if (EG(pid) != getpid()) {
 		return;
 	}
 
-	timer_t timer = EG(timer);
+	timer_t timer = EG(max_execution_timer_timer);
 	if (timer == (timer_t){0}) {
 		/* Don't trigger an error here because the timer may not be initialized when PHP fail early, and on threads created by PHP but not managed by it. */
-# ifdef TIMER_DEBUG
+# ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Could not delete timer that has not been created on thread %d\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
 # endif
 
 		return;
 	}
 
-# ifdef TIMER_DEBUG
+# ifdef MAX_EXECUTION_TIMERS_DEBUG
 	fprintf(stderr, "Deleting timer %#jx on thread %d...\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
 # endif
 
 	int err = timer_delete(timer);
-	EG(timer) = (timer_t){0};
+	EG(max_execution_timer_timer) = (timer_t){0};
 	if (err != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not delete timer");
 	}

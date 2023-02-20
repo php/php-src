@@ -37,7 +37,7 @@
 #include "zend_multibyte.h"
 #include "zend_multiply.h"
 #include "zend_arena.h"
-#include "zend_timer.h"
+#include "zend_max_execution_timer.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -268,8 +268,8 @@ struct _zend_executor_globals {
 	uint32_t num_errors;
 	zend_error_info **errors;
 
-#ifdef ZEND_TIMERS
-	timer_t timer;
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+	timer_t max_execution_timer_timer;
 	pid_t pid;
 	struct sigaction oldact;
 #endif

@@ -35,7 +35,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_fibers.h"
-#include "zend_timer.h"
+#include "zend_max_execution_timer.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -822,7 +822,7 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 {
 	zend_copy_ini_directives();
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP);
-	zend_timer_init();
+	zend_max_execution_timer_init();
 }
 /* }}} */
 #endif
