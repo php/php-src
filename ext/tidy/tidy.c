@@ -79,14 +79,7 @@
 		_php_tidy_apply_config_array(_doc, _val_ht); \
 	} else if (_val_str) { \
 		TIDY_OPEN_BASE_DIR_CHECK(ZSTR_VAL(_val_str)); \
-		switch (tidyLoadConfig(_doc, ZSTR_VAL(_val_str))) { \
-			case -1: \
-				php_error_docref(NULL, E_WARNING, "Could not load configuration file \"%s\"", ZSTR_VAL(_val_str)); \
-				break; \
-			case 1: \
-				php_error_docref(NULL, E_NOTICE, "There were errors while parsing the configuration file \"%s\"", ZSTR_VAL(_val_str)); \
-				break; \
-		} \
+		php_tidy_load_config(_doc, ZSTR_VAL(_val_str)); \
 	}
 
 
@@ -143,9 +136,7 @@ if (php_check_open_basedir(filename)) { \
 
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
-		if (tidyLoadConfig(_doc, TG(default_config)) < 0) { \
-			php_error_docref(NULL, E_WARNING, "Unable to load Tidy configuration file at \"%s\"", TG(default_config)); \
-		} \
+		php_tidy_load_config(_doc, TG(default_config)); \
 	}
 /* }}} */
 
@@ -267,6 +258,16 @@ static void TIDY_CALL php_tidy_free(void *buf)
 static void TIDY_CALL php_tidy_panic(ctmbstr msg)
 {
 	php_error_docref(NULL, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
+}
+
+static void php_tidy_load_config(TidyDoc doc, const char *path)
+{
+	int ret = tidyLoadConfig(doc, path);
+	if (ret < 0) {
+		php_error_docref(NULL, E_WARNING, "Could not load the Tidy configuration file \"%s\"", path);
+	} else if (ret > 0) {
+		php_error_docref(NULL, E_NOTICE, "There were errors while parsing the Tidy configuration file \"%s\"", path);
+	}
 }
 
 static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
