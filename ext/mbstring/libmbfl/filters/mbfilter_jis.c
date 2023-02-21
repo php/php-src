@@ -127,7 +127,7 @@ retry:
 		} else if (c == 0x0e) {		/* "kana in" */
 			filter->status = 0x20;
 		} else if (c == 0x0f) {		/* "kana out" */
-			filter->status = 0;
+			filter->status = 0x10;
 		} else if (filter->status == 0x10 && c == 0x5c) {	/* YEN SIGN */
 			CK((*filter->output_function)(0xa5, filter->data));
 		} else if (filter->status == 0x10 && c == 0x7e) {	/* OVER LINE */
