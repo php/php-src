@@ -39,7 +39,7 @@ static void sqlite3_param_dtor(zval *data);
 static int php_sqlite3_compare_stmt_zval_free(php_sqlite3_free_list **free_list, zval *statement);
 
 /* {{{ Error Handler */
-static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
+static void php_sqlite3_error(php_sqlite3_db_object *db_obj, const char *format, ...)
 {
 	va_list arg;
 	char 	*message;
