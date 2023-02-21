@@ -23,6 +23,7 @@
 
 #include "zend.h"
 #include "zend_sort.h"
+#include "zend_type_code.h"
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
