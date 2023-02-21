@@ -7623,7 +7623,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 				}
 				op1_addr = real_addr;
 			}
-			|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
 		}
 		if (opline->op2_type != IS_CONST) {
 			if (Z_MODE(op2_addr) == IS_REG) {
@@ -7634,6 +7633,9 @@ static int zend_jit_identical(dasm_State    **Dst,
 				op2_addr = real_addr;
 			}
 			|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
+		}
+		if (opline->op1_type != IS_CONST) {
+			|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
 		}
 	}
 
