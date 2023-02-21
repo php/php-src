@@ -39,6 +39,7 @@
 #include "zend_smart_str_public.h"
 #include "zend_smart_string_public.h"
 #include "zend_signal.h"
+#include "zend_type_code.h"
 
 #define zend_sprintf sprintf
 
