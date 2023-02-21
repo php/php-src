@@ -3,7 +3,10 @@ dnl Process this file with autoconf to produce a configure script.
 dnl Include external macro definitions before the AC_INIT to also remove
 dnl comments starting with # and empty newlines from the included files.
 dnl ----------------------------------------------------------------------------
+m4_include([build/ax_require_defined.m4])
 m4_include([build/ax_check_compile_flag.m4])
+m4_include([build/ax_append_flag.m4])
+m4_include([build/ax_append_compile_flags.m4])
 m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
 m4_include([build/libtool.m4])
@@ -220,8 +223,7 @@ esac
 
 dnl Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 dnl supports it. This can help reduce the binary size and startup time.
-AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
-                       [CFLAGS="$CFLAGS -fvisibility=hidden"])
+AX_APPEND_COMPILE_FLAGS([-fvisibility=hidden])
 
 case $host_alias in
   *solaris*)
