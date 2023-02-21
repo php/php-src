@@ -112,8 +112,8 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 char accel_uname_id[32];
 #endif
 bool accel_startup_ok = false;
-static char *zps_failure_reason = NULL;
-char *zps_api_failure_reason = NULL;
+static const char *zps_failure_reason = NULL;
+const char *zps_api_failure_reason = NULL;
 bool file_cache_only = false;  /* process uses file cache only */
 #if ENABLE_FILE_CACHE_FALLBACK
 bool fallback_process = false; /* process uses file cache fallback */
@@ -2809,7 +2809,7 @@ static int accelerator_remove_cb(zend_extension *element1, zend_extension *eleme
 	return 0;
 }
 
-static void zps_startup_failure(char *reason, char *api_reason, int (*cb)(zend_extension *, zend_extension *))
+static void zps_startup_failure(const char *reason, const char *api_reason, int (*cb)(zend_extension *, zend_extension *))
 {
 	accel_startup_ok = false;
 	zps_failure_reason = reason;

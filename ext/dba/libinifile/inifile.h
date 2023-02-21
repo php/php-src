@@ -49,7 +49,7 @@ int inifile_delete_ex(inifile *dba, const key_type *key, bool *found);
 int inifile_replace(inifile *dba, const key_type *key, const val_type *val);
 int inifile_replace_ex(inifile *dba, const key_type *key, const val_type *val, bool *found);
 int inifile_append(inifile *dba, const key_type *key, const val_type *val);
-char *inifile_version(void);
+const char *inifile_version(void);
 
 key_type inifile_key_split(const char *group_name);
 char * inifile_key_string(const key_type *key);

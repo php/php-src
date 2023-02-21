@@ -80,7 +80,7 @@ typedef struct _zend_shared_segment {
     void   *p;
 } zend_shared_segment;
 
-typedef int (*create_segments_t)(size_t requested_size, zend_shared_segment ***shared_segments, int *shared_segment_count, char **error_in);
+typedef int (*create_segments_t)(size_t requested_size, zend_shared_segment ***shared_segments, int *shared_segment_count, const char **error_in);
 typedef int (*detach_segment_t)(zend_shared_segment *shared_segment);
 
 typedef struct {

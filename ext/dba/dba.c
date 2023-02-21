@@ -462,10 +462,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	dba_mode_t modenr;
 	dba_info *info, *other;
 	const dba_handler *hptr;
-	char *error = NULL;
+	const char *error = NULL;
 	int lock_mode, lock_flag = 0;
-	char *file_mode;
-	char *lock_file_mode = NULL;
+	const char *file_mode;
+	const char *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	zend_string *opened_path = NULL;
 	char *lock_name;
