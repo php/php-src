@@ -198,6 +198,9 @@ static size_t tsrm_tls_offset = 0;
 	_(trace_halt,                     IR_SKIP_PROLOGUE) \
 	_(trace_escape,                   IR_SKIP_PROLOGUE) \
 	_(trace_exit,                     IR_SKIP_PROLOGUE) \
+	_(undefined_offset,               IR_FUNCTION | IR_FASTCALL_FUNC) \
+	_(undefined_key,                  IR_FUNCTION | IR_FASTCALL_FUNC) \
+	_(cannot_add_element,             IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(assign_const,                   IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(assign_tmp,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
 	_(assign_var,                     IR_FUNCTION | IR_FASTCALL_FUNC) \
@@ -2202,6 +2205,123 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 	return 1;
 }
 
+static int zend_jit_undefined_offset_stub(zend_jit_ctx *jit)
+{
+	ir_ref opline = ir_LOAD_A(jit_EX(opline));
+	ir_ref ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, result.var)));
+	ir_ref if_const, end1, ref1;
+
+	if (sizeof(void*) == 8) {
+		ref = ir_ZEXT_A(ref);
+	}
+	jit_set_Z_TYPE_INFO_ref(jit, ir_ADD_A(jit_FP(jit), ref), ir_CONST_U32(IS_NULL));
+
+	if_const = ir_IF(ir_EQ(ir_LOAD_U8(ir_ADD_OFFSET(opline, offsetof(zend_op, op2_type))), ir_CONST_U8(IS_CONST)));
+
+	ir_IF_TRUE(if_const);
+#if ZEND_USE_ABS_CONST_ADDR
+	ref1 = ir_LOAD_A(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.zv)));
+#else
+	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.constant)));
+	if (sizeof(void*) == 8) {
+		ref = ir_SEXT_A(ref);
+	}
+	ref1 = ir_ADD_A(ref, opline);
+#endif
+
+	end1 = ir_END();
+
+	ir_IF_FALSE(if_const);
+	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.var)));
+	if (sizeof(void*) == 8) {
+		ref = ir_ZEXT_A(ref);
+	}
+	ref = ir_ADD_A(jit_FP(jit), ref);
+
+	ir_MERGE_WITH(end1);
+	ref = ir_PHI_2(ref, ref1);
+
+	ref = jit_Z_LVAL_ref(jit, ref);
+	ir_CALL_3(IR_VOID, ir_CONST_FUNC(zend_error),
+		ir_CONST_U8(E_WARNING),
+		ir_CONST_ADDR("Undefined array key " ZEND_LONG_FMT),
+		ref);
+	ir_RETURN(IR_VOID);
+
+	return 1;
+}
+
+static int zend_jit_undefined_key_stub(zend_jit_ctx *jit)
+{
+	ir_ref opline = ir_LOAD_A(jit_EX(opline));
+	ir_ref ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, result.var)));
+	ir_ref if_const, end1, ref1;
+
+	if (sizeof(void*) == 8) {
+		ref = ir_ZEXT_A(ref);
+	}
+	jit_set_Z_TYPE_INFO_ref(jit, ir_ADD_A(jit_FP(jit), ref), ir_CONST_U32(IS_NULL));
+
+	if_const = ir_IF(ir_EQ(ir_LOAD_U8(ir_ADD_OFFSET(opline, offsetof(zend_op, op2_type))), ir_CONST_U8(IS_CONST)));
+
+	ir_IF_TRUE(if_const);
+#if ZEND_USE_ABS_CONST_ADDR
+	ref1 = ir_LOAD_A(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.zv)));
+#else
+	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.constant)));
+	if (sizeof(void*) == 8) {
+		ref = ir_SEXT_A(ref);
+	}
+	ref1 = ir_ADD_A(ref, opline);
+#endif
+
+	end1 = ir_END();
+
+	ir_IF_FALSE(if_const);
+	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.var)));
+	if (sizeof(void*) == 8) {
+		ref = ir_ZEXT_A(ref);
+	}
+	ref = ir_ADD_A(jit_FP(jit), ref);
+
+	ir_MERGE_WITH(end1);
+	ref = ir_PHI_2(ref, ref1);
+
+	ref = ir_ADD_OFFSET(jit_Z_PTR_ref(jit, ref), offsetof(zend_string, val));
+	ir_CALL_3(IR_VOID, ir_CONST_FUNC(zend_error),
+		ir_CONST_U8(E_WARNING),
+		ir_CONST_ADDR("Undefined array key \"%s\""),
+		ref);
+	ir_RETURN(IR_VOID);
+
+	return 1;
+}
+
+static int zend_jit_cannot_add_element_stub(zend_jit_ctx *jit)
+{
+	ir_ref opline = ir_LOAD_A(jit_EX(opline));
+	ir_ref ref, if_result_used;
+
+	if_result_used = ir_IF(ir_AND_U8(
+		ir_LOAD_U8(ir_ADD_OFFSET(opline, offsetof(zend_op, result_type))),
+		ir_CONST_U8(IS_TMP_VAR|IS_VAR)));
+	ir_IF_TRUE(if_result_used);
+
+	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, result.var)));
+	if (sizeof(void*) == 8) {
+		ref = ir_ZEXT_A(ref);
+	}
+	jit_set_Z_TYPE_INFO_ref(jit, ir_ADD_A(jit_FP(jit), ref), ir_CONST_U32(IS_UNDEF));
+	ir_MERGE_WITH_EMPTY_FALSE(if_result_used);
+
+	ir_CALL_2(IR_VOID, ir_CONST_FUNC(zend_throw_error),
+		IR_NULL,
+		ir_CONST_ADDR("Cannot add element to the array as the next element is already occupied"));
+	ir_RETURN(IR_VOID);
+
+	return 1;
+}
+
 static int zend_jit_assign_const_stub(zend_jit_ctx *jit)
 {
 	ir_ref var = ir_PARAM(IR_ADDR, "var", 1);
@@ -2695,11 +2815,8 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_r_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_is_helper);
 	REGISTER_HELPER(zend_jit_invalid_array_access);
-	REGISTER_HELPER(zend_jit_undefined_offset);
-	REGISTER_HELPER(zend_jit_undefined_key);
 	REGISTER_HELPER(zend_jit_zval_array_dup);
 	REGISTER_HELPER(zend_jit_prepare_assign_dim_ref);
-	REGISTER_HELPER(zend_jit_cannot_add_element);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_w_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_obj_rw_helper);
 	REGISTER_HELPER(zend_jit_isset_dim_helper);
@@ -10913,7 +11030,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 							// JIT: zend_error(E_WARNING,"Undefined array key " ZEND_LONG_FMT, hval);
 							// JIT: retval = &EG(uninitialized_zval);
 							jit_SET_EX_OPLINE(jit, opline);
-							ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_offset), jit_FP(jit));
+							ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_undefined_offset, IR_CONST_FASTCALL_FUNC));
 							ir_END_list(*end_inputs);
 							break;
 						case BP_VAR_IS:
@@ -11102,7 +11219,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 							ir_IF_FALSE_cold(if_found);
 							// JIT: zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
 							jit_SET_EX_OPLINE(jit, opline);
-							ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_key), jit_FP(jit));
+							ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_undefined_key, IR_CONST_FASTCALL_FUNC));
 							ir_END_list(*end_inputs);
 							break;
 						case BP_VAR_IS:
@@ -11739,7 +11856,7 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 			if (opline->opcode != ZEND_FETCH_DIM_RW) {
 				jit_SET_EX_OPLINE(jit, opline);
 			}
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_cannot_add_element), jit_FP(jit));
+			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_CONST_FASTCALL_FUNC));
 			ir_END_list(end_inputs);
 
 			ir_IF_TRUE(if_ok);
@@ -12107,7 +12224,7 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 
 			// JIT: zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			jit_SET_EX_OPLINE(jit, opline);
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_cannot_add_element), jit_FP(jit));
+			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_CONST_FASTCALL_FUNC));
 
 			ir_END_list(end_inputs);
 
@@ -12248,7 +12365,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 			ir_IF_FALSE_cold(if_ok);
 
 			// JIT: zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_cannot_add_element), jit_FP(jit));
+			ir_CALL(IR_VOID, jit_STUB_FUNC_ADDR(jit, jit_stub_cannot_add_element, IR_CONST_FASTCALL_FUNC));
 
 			ir_END_list(end_inputs);
 
