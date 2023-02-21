@@ -4584,7 +4584,7 @@ done:
 	dasm_free(&ctx);
 #else
 	if (jit->return_inputs) {
-		ir_MERGE_list(jit->return_inputs);
+		zend_jit_common_return(jit);
 
 		bool left_frame = 0;
 		if (op_array->last_var > 100) {
