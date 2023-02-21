@@ -61,7 +61,10 @@ int fpm_status_export_to_zval(zval *status)
 
 	/* copy the scoreboard not to bother other processes */
 	scoreboard = *scoreboard_p;
-	struct fpm_scoreboard_proc_s procs[scoreboard.nprocs];
+	struct fpm_scoreboard_proc_s *procs = safe_emalloc(scoreboard.nprocs, sizeof(*procs), 0);
+	if (procs == NULL) {
+		return FAILURE;
+	}
 
 	struct fpm_scoreboard_proc_s *proc_p;
 	for(i=0; i<scoreboard.nprocs; i++) {
@@ -129,6 +132,7 @@ int fpm_status_export_to_zval(zval *status)
 		add_assoc_long(&fpm_proc_stat, "last-request-memory", procs[i].request_stage == FPM_REQUEST_ACCEPTING ? procs[i].memory : 0);
 		add_next_index_zval(&fpm_proc_stats, &fpm_proc_stat);
 	}
+	efree(procs);
 	add_assoc_zval(status, "procs", &fpm_proc_stats);
 	return 0;
 }
