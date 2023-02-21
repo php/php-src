@@ -36,7 +36,7 @@ typedef struct  {
     int shm_fd;
 } zend_shared_segment_posix;
 
-static int create_segments(size_t requested_size, zend_shared_segment_posix ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment_posix ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	zend_shared_segment_posix *shared_segment;
 	char shared_segment_name[sizeof("/ZendAccelerator.") + 20];

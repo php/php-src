@@ -50,7 +50,7 @@ typedef struct  {
     int shm_id;
 } zend_shared_segment_shm;
 
-static int create_segments(size_t requested_size, zend_shared_segment_shm ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment_shm ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	int i;
 	size_t allocate_size = 0, remaining_bytes = requested_size, seg_allocate_size;

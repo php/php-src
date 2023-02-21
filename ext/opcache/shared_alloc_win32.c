@@ -112,7 +112,7 @@ void zend_shared_alloc_unlock_win32(void)
 	ReleaseMutex(memory_mutex);
 }
 
-static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
+static int zend_shared_alloc_reattach(size_t requested_size, const char **error_in)
 {
 	int err;
 	void *wanted_mapping_base;
@@ -199,7 +199,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	return SUCCESSFULLY_REATTACHED;
 }
 
-static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	int err = 0, ret;
 	zend_shared_segment *shared_segment;
