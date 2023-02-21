@@ -147,7 +147,7 @@ asan_task:
         `#--with-pdo-firebird`
         `#--with-pdo-dblib`
         --enable-werror
-        CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
+        CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC -Wassign-enum'
         LDFLAGS='-fsanitize=undefined,address'
         CC=clang
         CXX=clang++
