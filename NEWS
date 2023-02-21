@@ -37,6 +37,10 @@ PHP                                                                        NEWS
 - GMP:
   . Properly implement GMP::__construct(). (nielsdos)
 
+- Intl:
+  . Fixed bug GH-10647 (Spoolchecker isSuspicious/areConfusable methods
+    error code's argument always returning NULL0. (Nathan Freeman)
+
 - JSON:
   . Fixed JSON scanner and parser generation build.
     (Daniel Black, Jakub Zelenka)
