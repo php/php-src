@@ -7832,7 +7832,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 		 && func
 		 && func->type == ZEND_USER_FUNCTION
 		 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
-			ref = ir_CONST_ADDR(func);
+			ref = ir_HARD_COPY_A(ir_CONST_ADDR(func)); /* load constant once */
 		    ir_STORE(cache_slot_ref, ref);
 			ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_init_func_run_time_cache_helper), ref);
 		} else {
@@ -10572,7 +10572,7 @@ static int zend_jit_zval_copy_deref(zend_jit_ctx *jit, zend_jit_addr res_addr, z
 	ptr = jit_Z_PTR(jit, val_addr);
 
 	// JIT: if (Z_OPT_REFCOUNTED_P(val)) {
-	if_refcounted = ir_IF(ir_AND_U32(val_type_info, ir_CONST_U32((IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))));
+	if_refcounted = ir_IF(ir_AND_U32(val_type_info, ir_CONST_U32(Z_TYPE_FLAGS_MASK)));
 	ir_IF_FALSE(if_refcounted);
 	merge_inputs[merge_inputs_count] = ir_END();
 #if SIZEOF_ZEND_LONG == 4
@@ -10595,7 +10595,7 @@ static int zend_jit_zval_copy_deref(zend_jit_ctx *jit, zend_jit_addr res_addr, z
 	val_type_info2 = jit_Z_TYPE_INFO_ref(jit, ref2);
 
 	// JIT:	if (Z_OPT_REFCOUNTED_P(val)) {
-	if_refcounted = ir_IF(ir_AND_U32(val_type_info2, ir_CONST_U32((IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))));
+	if_refcounted = ir_IF(ir_AND_U32(val_type_info2, ir_CONST_U32(Z_TYPE_FLAGS_MASK)));
 	ir_IF_FALSE(if_refcounted);
 	merge_inputs[merge_inputs_count] = ir_END();
 #if SIZEOF_ZEND_LONG == 4
