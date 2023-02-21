@@ -71,6 +71,7 @@ PHP                                                                        NEWS
   . Fix incorrect check in cs_8559_5 in map_from_unicode(). (nielsdos)
   . Fix bug GH-9697 for reset/end/next/prev() attempting to move pointer of
     properties table for certain internal classes such as FFI classes
+  . Fix incorrect error check in browsecap for pcre2_match(). (nielsdos)
 
 - Streams:
   . Fixed bug GH-10370 (File corruption in _php_stream_copy_to_stream_ex when
@@ -81,6 +82,7 @@ PHP                                                                        NEWS
 - Tidy:
   . Fix memory leaks when attempting to open a non-existing file or a file over
     4GB. (Girgias)
+  . Add missing error check on tidyLoadConfig. (nielsdos)
 
 14 Feb 2023, PHP 8.2.3
 
