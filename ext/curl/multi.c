@@ -523,7 +523,7 @@ static zend_function *curl_multi_get_constructor(zend_object *object) {
 	return NULL;
 }
 
-void curl_multi_free_obj(zend_object *object)
+static void curl_multi_free_obj(zend_object *object)
 {
 	php_curlm *mh = curl_multi_from_obj(object);
 
