@@ -293,7 +293,7 @@ static void dba_close_rsrc(zend_resource *rsrc)
 /* }}} */
 
 /* {{{ dba_close_pe_rsrc_deleter */
-int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
+static int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
 {
 	if (Z_RES_P(el)->ptr == pDba) {
 		if (Z_DELREF_P(el) == 0) {
@@ -318,7 +318,7 @@ static void dba_close_pe_rsrc(zend_resource *rsrc)
 /* }}} */
 
 /* {{{ PHP_INI */
-ZEND_INI_MH(OnUpdateDefaultHandler)
+static ZEND_INI_MH(OnUpdateDefaultHandler)
 {
 	const dba_handler *hptr;
 
@@ -431,7 +431,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 /* }}} */
 
 /* {{{ php_find_dbm */
-dba_info *php_dba_find(const char* path)
+static dba_info *php_dba_find(const char* path)
 {
 	zend_resource *le;
 	dba_info *info;
