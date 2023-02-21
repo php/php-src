@@ -169,7 +169,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 #endif
 
 	if (ZCG(accel_directives).memory_model && ZCG(accel_directives).memory_model[0]) {
-		char *model = ZCG(accel_directives).memory_model;
+		const char *model = ZCG(accel_directives).memory_model;
 		/* "cgi" is really "shm"... */
 		if (strncmp(ZCG(accel_directives).memory_model, "cgi", sizeof("cgi")) == 0) {
 			model = "shm";
