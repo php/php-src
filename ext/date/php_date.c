@@ -520,7 +520,7 @@ static timelib_tzinfo *php_date_parse_tzfile(const char *formal_tzname, const ti
 	return tzi;
 }
 
-timelib_tzinfo *php_date_parse_tzfile_wrapper(const char *formal_tzname, const timelib_tzdb *tzdb, int *dummy_error_code)
+static timelib_tzinfo *php_date_parse_tzfile_wrapper(const char *formal_tzname, const timelib_tzdb *tzdb, int *dummy_error_code)
 {
 	return php_date_parse_tzfile(formal_tzname, tzdb);
 }
@@ -2947,7 +2947,7 @@ PHP_FUNCTION(date_get_last_errors)
 }
 /* }}} */
 
-void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *parsed_time, timelib_error_container *error) /* {{{ */
+static void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *parsed_time, timelib_error_container *error) /* {{{ */
 {
 	zval element;
 
