@@ -2051,7 +2051,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 				postval = Z_STR_P(prop);
 
 				if (php_check_open_basedir(ZSTR_VAL(postval))) {
-					return 1;
+					return FAILURE;
 				}
 
 				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "mime", sizeof("mime")-1, 0, &rv);
