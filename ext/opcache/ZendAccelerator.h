@@ -305,7 +305,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 extern zend_accel_globals accel_globals;
 #endif
 
-extern char *zps_api_failure_reason;
+extern const char *zps_api_failure_reason;
 
 BEGIN_EXTERN_C()
 
