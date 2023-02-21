@@ -2073,7 +2073,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			struct curl_slist *slist = NULL;
 
 			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
-				char *name = NULL;
+				const char *name = NULL;
 				switch (option) {
 					case CURLOPT_HTTPHEADER:
 						name = "CURLOPT_HTTPHEADER";
