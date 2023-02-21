@@ -379,7 +379,7 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 
 	CG(encoding_declared) = 0;
 	CG(memoized_exprs) = NULL;
-	CG(memoize_mode) = 0;
+	CG(memoize_mode) = ZEND_MEMOIZE_NONE;
 }
 /* }}} */
 
@@ -2445,13 +2445,9 @@ static void zend_emit_jmp_null(znode *obj_node, uint32_t bp_type)
 	zend_stack_push(&CG(short_circuiting_opnums), &jmp_null_opnum);
 }
 
-#define ZEND_MEMOIZE_NONE 0
-#define ZEND_MEMOIZE_COMPILE 1
-#define ZEND_MEMOIZE_FETCH 2
-
 static void zend_compile_memoized_expr(znode *result, zend_ast *expr) /* {{{ */
 {
-	int memoize_mode = CG(memoize_mode);
+	const zend_memoize_mode memoize_mode = CG(memoize_mode);
 	if (memoize_mode == ZEND_MEMOIZE_COMPILE) {
 		znode memoized_result;
 
@@ -9203,7 +9199,7 @@ static void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	/* Remember expressions compiled during the initial BP_VAR_IS lookup,
 	 * to avoid double-evaluation when we compile again with BP_VAR_W. */
 	HashTable *orig_memoized_exprs = CG(memoized_exprs);
-	int orig_memoize_mode = CG(memoize_mode);
+	const zend_memoize_mode orig_memoize_mode = CG(memoize_mode);
 
 	zend_ensure_writable_variable(var_ast);
 	if (is_this_fetch(var_ast)) {
