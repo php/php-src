@@ -919,7 +919,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 			/* Reset Long Data */
 			for (i = 0; i < stmt->param_count; i++) {
 				if (stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED) {
-					stmt->param_bind[i].flags &= ~MYSQLND_PARAM_BIND_BLOB_USED;
+					stmt->param_bind[i].flags = (enum_param_bind_flags)(stmt->param_bind[i].flags & ~MYSQLND_PARAM_BIND_BLOB_USED);
 				}
 			}
 		}
@@ -1148,7 +1148,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 			/* Prevent from freeing */
 			/* Don't update is_ref, or we will leak during conversion */
 			Z_TRY_ADDREF(stmt->param_bind[i].zv);
-			stmt->param_bind[i].flags = 0;
+			stmt->param_bind[i].flags = (enum_param_bind_flags)0;
 		}
 		stmt->send_types_to_server = 1;
 	} else if (param_bind && param_bind != stmt->param_bind) {
@@ -1204,7 +1204,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 		zval_ptr_dtor(&stmt->param_bind[param_no].zv);
 		if (type == MYSQL_TYPE_LONG_BLOB) {
 			/* The client will use stmt_send_long_data */
-			stmt->param_bind[param_no].flags &= ~MYSQLND_PARAM_BIND_BLOB_USED;
+			stmt->param_bind[param_no].flags = (enum_param_bind_flags)(stmt->param_bind[param_no].flags & ~MYSQLND_PARAM_BIND_BLOB_USED);
 		}
 		ZVAL_COPY_VALUE(&stmt->param_bind[param_no].zv, zv);
 		stmt->param_bind[param_no].type = type;

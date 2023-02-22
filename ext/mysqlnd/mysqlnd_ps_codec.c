@@ -768,7 +768,7 @@ mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval * copies,
 					break;
 				case MYSQL_TYPE_LONG_BLOB:
 					if (stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED) {
-						stmt->param_bind[i].flags &= ~MYSQLND_PARAM_BIND_BLOB_USED;
+						stmt->param_bind[i].flags = (enum_param_bind_flags)(stmt->param_bind[i].flags & ~MYSQLND_PARAM_BIND_BLOB_USED);
 					} else {
 						/* send_long_data() not called, send empty string */
 						*p = php_mysqlnd_net_store_length(*p, 0);
