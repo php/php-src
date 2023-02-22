@@ -2323,7 +2323,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 
 		if (xparam->outputs.client && sock->enable_on_connect) {
 			/* remove the client bit */
-			sock->method &= ~STREAM_CRYPTO_IS_CLIENT;
+			sock->method = (php_stream_xport_crypt_method_t)(sock->method & ~STREAM_CRYPTO_IS_CLIENT);
 
 			clisockdata->method = sock->method;
 
