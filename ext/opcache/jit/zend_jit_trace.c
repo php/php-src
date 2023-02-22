@@ -7634,7 +7634,7 @@ repeat:
 	if (stop & ZEND_JIT_TRACE_HALT) {
 		ret = -1;
 	}
-	stop &= ~ZEND_JIT_TRACE_HALT;
+	stop = (zend_jit_trace_stop)(stop & ~ZEND_JIT_TRACE_HALT);
 
 	if (UNEXPECTED(trace_buffer[1].opline != orig_opline)) {
 		orig_opline = trace_buffer[1].opline;
@@ -7972,7 +7972,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 	if (stop & ZEND_JIT_TRACE_HALT) {
 		ret = -1;
 	}
-	stop &= ~ZEND_JIT_TRACE_HALT;
+	stop = (zend_jit_trace_stop)(stop & ~ZEND_JIT_TRACE_HALT);
 
 	if (UNEXPECTED(trace_buffer->start != ZEND_JIT_TRACE_START_SIDE)) {
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_START) {
