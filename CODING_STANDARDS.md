@@ -78,6 +78,11 @@ rewritten to comply with these rules.
     may need to control or free the memory, or when the memory in question needs
     to survive between multiple requests.
 
+1. The return type of "is" or "has" style functions should be `bool`,
+    which return a "yes"/"no" answer.  `zend_result` is an appropriate
+    return value for functions that perform some operation that may
+    succeed or fail.
+
 ## User functions/methods naming conventions
 
 1. Function names for user-level functions should be enclosed with in the
