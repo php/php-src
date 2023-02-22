@@ -1551,6 +1551,7 @@ PHP_SUBST_OLD(INCLUDE_PATH)
 PHP_SUBST_OLD(INSTALL_IT)
 PHP_SUBST(LFLAGS)
 PHP_SUBST(LIBTOOL)
+PHP_SUBST(LINK_SAPI)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
 PHP_SUBST_OLD(PEAR_INSTALLDIR)
@@ -1662,6 +1663,19 @@ CXXFLAGS_CLEAN=$CXXFLAGS
 CFLAGS_CLEAN="$CFLAGS \$(PROF_FLAGS)"
 CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag \$(PROF_FLAGS)"
+
+case $host_alias in
+*aix*)
+  LINK_SAPI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl \$(PHP_RPATHS)"
+  ;;
+*darwin*)
+  LINK_SAPI="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_FRAMEWORKS)"
+  ;;
+*)
+  LINK_SAPI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS)"
+  ;;
+esac
+
 
 if test "$PHP_PHAR" != "no" && test "$PHP_CLI" != "no"; then
   pharcmd=pharcmd

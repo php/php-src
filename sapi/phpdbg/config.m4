@@ -85,8 +85,7 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   BUILD_BINARY="sapi/phpdbg/phpdbg"
   BUILD_SHARED="sapi/phpdbg/libphpdbg.la"
 
-  BUILD_PHPDBG="\$(LIBTOOL) --mode=link \
-        \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
+  BUILD_PHPDBG="\$(LINK_SAPI) \
                 \$(PHP_GLOBAL_OBJS:.lo=.o) \
                 \$(PHP_BINARY_OBJS:.lo=.o) \
                 \$(PHP_PHPDBG_OBJS:.lo=.o) \
@@ -96,8 +95,7 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
                 \$(PHP_FRAMEWORKS) \
          -o \$(BUILD_BINARY)"
 
-  BUILD_PHPDBG_SHARED="\$(LIBTOOL) --mode=link \
-        \$(CC) -shared -Wl,-soname,libphpdbg.so -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
+  BUILD_PHPDBG_SHARED="\$(LINK_SAPI) \
                 \$(PHP_GLOBAL_OBJS) \
                 \$(PHP_BINARY_OBJS) \
                 \$(PHP_PHPDBG_OBJS) \
