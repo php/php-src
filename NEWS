@@ -74,6 +74,10 @@ PHP                                                                        NEWS
     4GB. (Girgias)
   . Add missing error check on tidyLoadConfig. (nielsdos)
 
+- Zlib:
+  . Fixed output_handler directive value's length which counted the string
+    terminator. (nieldos)
+
 14 Feb 2023, PHP 8.1.16
 
 - Core:
