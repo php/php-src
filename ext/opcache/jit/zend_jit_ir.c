@@ -3615,11 +3615,16 @@ static void zend_jit_type_check_undef(zend_jit_ctx  *jit,
                                       ir_ref         type,
                                       uint32_t       var,
                                       const zend_op *opline,
-                                      bool           check_exception)
+                                      bool           check_exception,
+                                      bool           in_cold_path)
 {
 	ir_ref if_def = ir_IF(type);
 
-	ir_IF_FALSE_cold(if_def);
+	if (!in_cold_path) {
+		ir_IF_FALSE_cold(if_def);
+	} else {
+		ir_IF_FALSE(if_def);
+	}
 	if (opline) {
 		jit_SET_EX_OPLINE(jit, opline);
 	}
@@ -6800,7 +6805,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 				zend_jit_type_check_undef(jit,
 					type,
 					opline->op1.var,
-					opline, 1);
+					opline, 1, 0);
 			}
 			if (set_bool) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, set_bool_not ? IS_TRUE : IS_FALSE);
@@ -11110,7 +11115,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 			case BP_VAR_W:
 				if (packed_loaded) {
 					ir_ref if_def = ir_IF(jit_Z_TYPE_ref(jit, ref));
-					ir_IF_TRUE(if_def);
+					if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) || packed_loaded || bad_packed_key || dim_type == IS_UNDEF) {
+						ir_IF_TRUE_cold(if_def);
+					} else {
+						ir_IF_TRUE(if_def);
+					}
 					ir_refs_add(found_inputs, ir_END());
 					ir_refs_add(found_vals, ref);
 					ir_IF_FALSE(if_def);
@@ -11641,12 +11650,12 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 				jit_SET_EX_OPLINE(jit, opline);
 				if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
 					may_throw = 1;
-					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op1_addr), opline->op1.var, NULL, 0);
+					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op1_addr), opline->op1.var, NULL, 0, 1);
 				}
 
 				if (op2_info & MAY_BE_UNDEF) {
 					may_throw = 1;
-					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op2_addr), opline->op2.var, NULL, 0);
+					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op2_addr), opline->op2.var, NULL, 0, 1);
 				}
 			}
 
