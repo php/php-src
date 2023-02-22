@@ -11713,9 +11713,12 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
                                                    ir_ref         *ht_ref,
                                                    int            *may_throw)
 {
-	ir_ref ref = IR_UNUSED, refs[3], ends[3];
+	ir_ref ref = IR_UNUSED;
 	ir_ref array_reference_end = IR_UNUSED, array_reference_ref = IR_UNUSED;
-	int array_inputs_count = 0;
+	ir_refs *array_inputs, *array_values;
+
+	ir_refs_init(array_inputs, 4);
+	ir_refs_init(array_values, 4);
 
 	ref = jit_ZVAL_ADDR(jit, op1_addr);
 	if (op1_info & MAY_BE_REF) {
@@ -11759,17 +11762,15 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
 			if (RC_MAY_BE_1(op1_info)) {
 				ir_ref if_refcount_1 = ir_IF(ir_EQ(jit_GC_REFCOUNT(jit, ref), ir_CONST_U32(1)));
 				ir_IF_TRUE(if_refcount_1);
-				ends[array_inputs_count] = ir_END();
-				refs[array_inputs_count] = ref;
-				array_inputs_count++;
+				ir_refs_add(array_inputs, ir_END());
+				ir_refs_add(array_values, ref);
 				ir_IF_FALSE(if_refcount_1);
 			}
 			ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_zval_array_dup), op1_ref);
 		}
-		if (array_inputs_count || (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL))) {
-			ends[array_inputs_count] = ir_END();
-			refs[array_inputs_count] = ref;
-			array_inputs_count++;
+		if (array_inputs->count || (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL))) {
+			ir_refs_add(array_inputs, ir_END());
+			ir_refs_add(array_values, ref);
 		}
 	}
 
@@ -11802,16 +11803,15 @@ static zend_jit_addr zend_jit_prepare_array_update(zend_jit_ctx   *jit,
 		ref = ir_CALL_1(IR_ADDR,
 			jit_STUB_FUNC_ADDR(jit, jit_stub_new_array, IR_CONST_FASTCALL_FUNC),
 			jit_ZVAL_ADDR(jit, op1_addr));
-		if (array_inputs_count) {
-			ends[array_inputs_count] = ir_END();
-			refs[array_inputs_count] = ref;
-			array_inputs_count++;
+		if (array_inputs->count) {
+			ir_refs_add(array_inputs, ir_END());
+			ir_refs_add(array_values, ref);
 		}
 	}
 
-	if (array_inputs_count) {
-		ir_MERGE_N(array_inputs_count, ends);
-		ref = ir_PHI_N(array_inputs_count, refs);
+	if (array_inputs->count) {
+		ir_MERGE_N(array_inputs->count, array_inputs->refs);
+		ref = ir_PHI_N(array_values->count, array_values->refs);
 	}
 
 	*ht_ref = ref;
