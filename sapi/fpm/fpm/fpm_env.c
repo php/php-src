@@ -133,7 +133,7 @@ void fpm_env_setproctitle(char *title) /* {{{ */
 }
 /* }}} */
 
-int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+zend_result fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 	char *title;
@@ -157,11 +157,11 @@ int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		setenv("HOME", wp->home, 1);
 	}
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
+static zend_result fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 
@@ -190,18 +190,18 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 		}
 	}
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_env_init_main(void)
+zend_result fpm_env_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 	char *title;
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-		if (0 > fpm_env_conf_wp(wp)) {
-			return -1;
+		if (fpm_env_conf_wp(wp) != SUCCESS) {
+			return FAILURE;
 		}
 	}
 #ifndef HAVE_SETPROCTITLE
@@ -241,7 +241,7 @@ int fpm_env_init_main(void)
 		}
 	}
 	if (first == NULL || last == NULL) {
-		return 0;
+		return SUCCESS;
 	}
 
 	fpm_env_argv_len = last - first;
@@ -255,7 +255,7 @@ int fpm_env_init_main(void)
 		}
 
 		if ((new_environ = malloc((1U + env_nb) * sizeof (char *))) == NULL) {
-			return -1;
+			return FAILURE;
 		}
 		new_environ[env_nb] = NULL;
 		while (env_nb > 0U) {
@@ -270,5 +270,5 @@ int fpm_env_init_main(void)
 	spprintf(&title, 0, "master process (%s)", fpm_globals.config);
 	fpm_env_setproctitle(title);
 	efree(title);
-	return 0;
+	return SUCCESS;
 }

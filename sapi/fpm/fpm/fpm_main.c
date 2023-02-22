@@ -1493,7 +1493,7 @@ PHP_FUNCTION(fpm_get_status) /* {{{ */
 		RETURN_THROWS();
 	}
 
-	if (fpm_status_export_to_zval(return_value)) {
+	if (fpm_status_export_to_zval(return_value) != SUCCESS) {
 		RETURN_FALSE;
 	}
 }
@@ -1549,7 +1549,7 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 
-	if (0 > fpm_signals_init_mask() || 0 > fpm_signals_block()) {
+	if (fpm_signals_init_mask() != SUCCESS || fpm_signals_block() != SUCCESS) {
 		zlog(ZLOG_WARNING, "Could die in the case of too early reload signal");
 	}
 	zlog(ZLOG_DEBUG, "Blocked some signals");

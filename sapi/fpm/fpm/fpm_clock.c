@@ -15,7 +15,7 @@
 
 static int monotonic_works;
 
-int fpm_clock_init(void)
+zend_result fpm_clock_init(void)
 {
 	struct timespec ts;
 
@@ -25,25 +25,25 @@ int fpm_clock_init(void)
 		monotonic_works = 1;
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
-int fpm_clock_get(struct timeval *tv) /* {{{ */
+zend_result fpm_clock_get(struct timeval *tv) /* {{{ */
 {
 	if (monotonic_works) {
 		struct timespec ts;
 
 		if (0 > clock_gettime(CLOCK_MONOTONIC, &ts)) {
 			zlog(ZLOG_SYSERROR, "clock_gettime() failed");
-			return -1;
+			return FAILURE;
 		}
 
 		tv->tv_sec = ts.tv_sec;
 		tv->tv_usec = ts.tv_nsec / 1000;
-		return 0;
+		return SUCCESS;
 	}
 
-	return gettimeofday(tv, 0);
+	return gettimeofday(tv, 0) == 0 ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -58,7 +58,7 @@ static clock_serv_t mach_clock;
 
 /* this code borrowed from here: http://lists.apple.com/archives/Darwin-development/2002/Mar/msg00746.html */
 /* mach_clock also should be re-initialized in child process after fork */
-int fpm_clock_init(void)
+zend_result fpm_clock_init(void)
 {
 	kern_return_t ret;
 	mach_timespec_t aTime;
@@ -67,7 +67,7 @@ int fpm_clock_init(void)
 
 	if (ret != KERN_SUCCESS) {
 		zlog(ZLOG_ERROR, "host_get_clock_service() failed: %s", mach_error_string(ret));
-		return -1;
+		return FAILURE;
 	}
 
 	/* test if it works */
@@ -75,13 +75,13 @@ int fpm_clock_init(void)
 
 	if (ret != KERN_SUCCESS) {
 		zlog(ZLOG_ERROR, "clock_get_time() failed: %s", mach_error_string(ret));
-		return -1;
+		return FAILURE;
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
-int fpm_clock_get(struct timeval *tv) /* {{{ */
+zend_result fpm_clock_get(struct timeval *tv) /* {{{ */
 {
 	kern_return_t ret;
 	mach_timespec_t aTime;
@@ -90,26 +90,26 @@ int fpm_clock_get(struct timeval *tv) /* {{{ */
 
 	if (ret != KERN_SUCCESS) {
 		zlog(ZLOG_ERROR, "clock_get_time() failed: %s", mach_error_string(ret));
-		return -1;
+		return FAILURE;
 	}
 
 	tv->tv_sec = aTime.tv_sec;
 	tv->tv_usec = aTime.tv_nsec / 1000;
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
 #else /* no clock */
 
-int fpm_clock_init(void)
+zend_result fpm_clock_init(void)
 {
-	return 0;
+	return SUCCESS;
 }
 
-int fpm_clock_get(struct timeval *tv) /* {{{ */
+zend_result fpm_clock_get(struct timeval *tv) /* {{{ */
 {
-	return gettimeofday(tv, 0);
+	return gettimeofday(tv, 0) == 0 ? SUCCESS : FAILURE;
 }
 /* }}} */
 

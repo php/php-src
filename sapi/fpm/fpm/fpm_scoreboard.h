@@ -70,8 +70,7 @@ struct fpm_scoreboard_s {
 	struct fpm_scoreboard_proc_s procs[];
 };
 
-int fpm_scoreboard_init_main(void);
-int fpm_scoreboard_init_child(struct fpm_worker_pool_s *wp);
+zend_result fpm_scoreboard_init_main(void);
 
 void fpm_scoreboard_update_begin(struct fpm_scoreboard_s *scoreboard);
 void fpm_scoreboard_update_commit(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard);
@@ -91,7 +90,7 @@ void fpm_scoreboard_free(struct fpm_worker_pool_s *wp);
 void fpm_scoreboard_child_use(struct fpm_child_s *child, pid_t pid);
 
 void fpm_scoreboard_proc_free(struct fpm_child_s *child);
-int fpm_scoreboard_proc_alloc(struct fpm_child_s *child);
+zend_result fpm_scoreboard_proc_alloc(struct fpm_child_s *child);
 
 struct fpm_scoreboard_s *fpm_scoreboard_copy(struct fpm_scoreboard_s *scoreboard, int copy_procs);
 void fpm_scoreboard_free_copy(struct fpm_scoreboard_s *scoreboard);

@@ -53,18 +53,18 @@ enum fpm_init_return_status fpm_init(int argc, char **argv, char *config, char *
 	fpm_globals.run_as_root = run_as_root;
 	fpm_globals.force_stderr = force_stderr;
 
-	if (0 > fpm_php_init_main()           ||
-	    0 > fpm_stdio_init_main()         ||
-	    0 > fpm_conf_init_main(test_conf, force_daemon) ||
-	    0 > fpm_unix_init_main()          ||
-	    0 > fpm_scoreboard_init_main()    ||
-	    0 > fpm_pctl_init_main()          ||
-	    0 > fpm_env_init_main()           ||
-	    0 > fpm_signals_init_main()       ||
-	    0 > fpm_children_init_main()      ||
-	    0 > fpm_sockets_init_main()       ||
-	    0 > fpm_worker_pool_init_main()   ||
-	    0 > fpm_event_init_main()) {
+	if (fpm_php_init_main() != SUCCESS ||
+	    fpm_stdio_init_main() != SUCCESS ||
+	    fpm_conf_init_main(test_conf, force_daemon) != SUCCESS ||
+	    fpm_unix_init_main() != SUCCESS ||
+	    fpm_scoreboard_init_main() != SUCCESS ||
+	    fpm_pctl_init_main() != SUCCESS||
+	    fpm_env_init_main() != SUCCESS ||
+	    fpm_signals_init_main() != SUCCESS ||
+	    fpm_children_init_main() != SUCCESS ||
+	    fpm_sockets_init_main() != SUCCESS ||
+	    fpm_worker_pool_init_main() != SUCCESS ||
+	    fpm_event_init_main() != SUCCESS) {
 
 		if (fpm_globals.test_successful) {
 			return FPM_INIT_EXIT_OK;
@@ -74,7 +74,7 @@ enum fpm_init_return_status fpm_init(int argc, char **argv, char *config, char *
 		}
 	}
 
-	if (0 > fpm_conf_write_pid()) {
+	if (fpm_conf_write_pid() != SUCCESS) {
 		zlog(ZLOG_ERROR, "FPM initialization failed");
 		return FPM_INIT_ERROR;
 	}

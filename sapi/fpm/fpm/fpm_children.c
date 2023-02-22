@@ -149,13 +149,13 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_globals.max_requests = wp->config->pm_max_requests;
 	fpm_globals.listening_socket = dup(wp->listening_socket);
 
-	if (0 > fpm_stdio_init_child(wp)  ||
-	    0 > fpm_log_init_child(wp)    ||
-	    0 > fpm_status_init_child(wp) ||
-	    0 > fpm_unix_init_child(wp)   ||
-	    0 > fpm_signals_init_child()  ||
-	    0 > fpm_env_init_child(wp)    ||
-	    0 > fpm_php_init_child(wp)) {
+	if (fpm_stdio_init_child(wp) != SUCCESS ||
+	    fpm_log_init_child(wp) != SUCCESS ||
+	    fpm_status_init_child(wp) != SUCCESS ||
+	    fpm_unix_init_child(wp) != SUCCESS ||
+	    fpm_signals_init_child() != SUCCESS ||
+	    fpm_env_init_child(wp) != SUCCESS ||
+	    fpm_php_init_child(wp) != SUCCESS) {
 
 		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
 		exit(FPM_EXIT_SOFTWARE);
@@ -313,21 +313,21 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 
 	if (!c) {
 		zlog(ZLOG_ERROR, "[pool %s] unable to malloc new child", wp->config->name);
-		return 0;
+		return NULL;
 	}
 
 	c->wp = wp;
 	c->fd_stdout = -1; c->fd_stderr = -1;
 
-	if (0 > fpm_stdio_prepare_pipes(c)) {
+	if (fpm_stdio_prepare_pipes(c) != SUCCESS) {
 		fpm_child_free(c);
-		return 0;
+		return NULL;
 	}
 
-	if (0 > fpm_scoreboard_proc_alloc(c)) {
+	if (fpm_scoreboard_proc_alloc(c) != SUCCESS) {
 		fpm_stdio_discard_pipes(c);
 		fpm_child_free(c);
-		return 0;
+		return NULL;
 	}
 
 	return c;
@@ -405,7 +405,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 		}
 
 		zlog(ZLOG_DEBUG, "blocking signals before child birth");
-		if (0 > fpm_signals_child_block()) {
+		if (fpm_signals_child_block() != SUCCESS) {
 			zlog(ZLOG_WARNING, "child may miss signals");
 		}
 
@@ -472,7 +472,7 @@ int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_children_init_main(void)
+zend_result fpm_children_init_main(void)
 {
 	if (fpm_global_config.emergency_restart_threshold &&
 		fpm_global_config.emergency_restart_interval) {
@@ -480,15 +480,11 @@ int fpm_children_init_main(void)
 		last_faults = malloc(sizeof(time_t) * fpm_global_config.emergency_restart_threshold);
 
 		if (!last_faults) {
-			return -1;
+			return FAILURE;
 		}
 
 		memset(last_faults, 0, sizeof(time_t) * fpm_global_config.emergency_restart_threshold);
 	}
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_children_cleanup, 0)) {
-		return -1;
-	}
-
-	return 0;
+	return fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_children_cleanup, 0);
 }

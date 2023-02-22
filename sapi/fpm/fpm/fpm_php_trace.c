@@ -50,19 +50,19 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 	fprintf(slowlog, "\n%s [pool %s] pid %d\n", buf, child->wp->config->name, (int) pid);
 
-	if (0 > fpm_trace_get_long((long) &SG(request_info).path_translated, &l)) {
+	if (fpm_trace_get_long((long) &SG(request_info).path_translated, &l) != SUCCESS) {
 		return -1;
 	}
 
 	path_translated = l;
 
-	if (0 > fpm_trace_get_strz(buf, sizeof(buf), path_translated)) {
+	if (fpm_trace_get_strz(buf, sizeof(buf), path_translated) != SUCCESS) {
 		return -1;
 	}
 
 	fprintf(slowlog, "script_filename = %s\n", buf);
 
-	if (0 > fpm_trace_get_long((long) &EG(current_execute_data), &l)) {
+	if (fpm_trace_get_long((long) &EG(current_execute_data), &l) != SUCCESS) {
 		return -1;
 	}
 
@@ -75,14 +75,14 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 		long prev;
 		uint32_t lineno = 0;
 
-		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, func), &l)) {
+		if (fpm_trace_get_long(execute_data + offsetof(zend_execute_data, func), &l) != SUCCESS) {
 			return -1;
 		}
 
 		function = l;
 
 		if (valid_ptr(function)) {
-			if (0 > fpm_trace_get_long(function + offsetof(zend_function, common.function_name), &l)) {
+			if (fpm_trace_get_long(function + offsetof(zend_function, common.function_name), &l) != SUCCESS) {
 				return -1;
 			}
 
@@ -90,7 +90,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 			if (function_name == 0) {
 				uint32_t *call_info = (uint32_t *)&l;
-				if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, This.u1.type_info), &l)) {
+				if (fpm_trace_get_long(execute_data + offsetof(zend_execute_data, This.u1.type_info), &l) != SUCCESS) {
 					return -1;
 				}
 
@@ -102,7 +102,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					ZEND_UNREACHABLE();
 				}
 			} else {
-				if (0 > fpm_trace_get_strz(buf, sizeof(buf), function_name + offsetof(zend_string, val))) {
+				if (fpm_trace_get_strz(buf, sizeof(buf), function_name + offsetof(zend_string, val)) != SUCCESS) {
 					return -1;
 				}
 
@@ -117,7 +117,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 		*buf = '\0';
 
-		if (0 > fpm_trace_get_long(execute_data + offsetof(zend_execute_data, prev_execute_data), &l)) {
+		if (fpm_trace_get_long(execute_data + offsetof(zend_execute_data, prev_execute_data), &l) != SUCCESS) {
 			return -1;
 		}
 
@@ -126,7 +126,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 		while (prev) {
 			zend_uchar *type;
 
-			if (0 > fpm_trace_get_long(prev + offsetof(zend_execute_data, func), &l)) {
+			if (fpm_trace_get_long(prev + offsetof(zend_execute_data, func), &l) != SUCCESS) {
 				return -1;
 			}
 
@@ -137,22 +137,22 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 			}
 
 			type = (zend_uchar *)&l;
-			if (0 > fpm_trace_get_long(function + offsetof(zend_function, type), &l)) {
+			if (fpm_trace_get_long(function + offsetof(zend_function, type), &l) != SUCCESS) {
 				return -1;
 			}
 
 			if (ZEND_USER_CODE(*type)) {
-				if (0 > fpm_trace_get_long(function + offsetof(zend_op_array, filename), &l)) {
+				if (fpm_trace_get_long(function + offsetof(zend_op_array, filename), &l) != SUCCESS) {
 					return -1;
 				}
 
 				file_name = l;
 
-				if (0 > fpm_trace_get_strz(buf, sizeof(buf), file_name + offsetof(zend_string, val))) {
+				if (fpm_trace_get_strz(buf, sizeof(buf), file_name + offsetof(zend_string, val)) != SUCCESS) {
 					return -1;
 				}
 
-				if (0 > fpm_trace_get_long(prev + offsetof(zend_execute_data, opline), &l)) {
+				if (fpm_trace_get_long(prev + offsetof(zend_execute_data, opline), &l) != SUCCESS) {
 					return -1;
 				}
 
@@ -160,7 +160,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					long opline = l;
 					uint32_t *lu = (uint32_t *) &l;
 
-					if (0 > fpm_trace_get_long(opline + offsetof(struct _zend_op, lineno), &l)) {
+					if (fpm_trace_get_long(opline + offsetof(struct _zend_op, lineno), &l) != SUCCESS) {
 						return -1;
 					}
 
@@ -169,7 +169,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 				break;
 			}
 
-			if (0 > fpm_trace_get_long(prev + offsetof(zend_execute_data, prev_execute_data), &l)) {
+			if (fpm_trace_get_long(prev + offsetof(zend_execute_data, prev_execute_data), &l) != SUCCESS) {
 				return -1;
 			}
 
@@ -201,15 +201,15 @@ void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 		goto done0;
 	}
 
-	if (0 > fpm_trace_ready(child->pid)) {
+	if (fpm_trace_ready(child->pid) != SUCCESS) {
 		goto done1;
 	}
 
-	if (0 > fpm_php_trace_dump(child, slowlog)) {
+	if (fpm_php_trace_dump(child, slowlog) != SUCCESS) {
 		fprintf(slowlog, "+++ dump failed\n");
 	}
 
-	if (0 > fpm_trace_close(child->pid)) {
+	if (fpm_trace_close(child->pid) != SUCCESS) {
 		goto done1;
 	}
 

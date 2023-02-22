@@ -24,25 +24,25 @@ static int fd_stderr_original = -1;
 static int fd_stdout[2];
 static int fd_stderr[2];
 
-int fpm_stdio_init_main(void)
+zend_result fpm_stdio_init_main(void)
 {
 	int fd = open("/dev/null", O_RDWR);
 
 	if (0 > fd) {
 		zlog(ZLOG_SYSERROR, "failed to init stdio: open(\"/dev/null\")");
-		return -1;
+		return FAILURE;
 	}
 
 	if (0 > dup2(fd, STDIN_FILENO) || 0 > dup2(fd, STDOUT_FILENO)) {
 		zlog(ZLOG_SYSERROR, "failed to init stdio: dup2()");
 		close(fd);
-		return -1;
+		return FAILURE;
 	}
 	close(fd);
-	return 0;
+	return SUCCESS;
 }
 
-static inline int fpm_use_error_log(void) {
+static inline bool fpm_use_error_log(void) {
 	/*
 	 * the error_log is NOT used when running in foreground
 	 * and from a tty (user looking at output).
@@ -55,25 +55,25 @@ static inline int fpm_use_error_log(void) {
 #else
 	if (fpm_global_config.daemonize) {
 #endif
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
-int fpm_stdio_init_final(void)
+zend_result fpm_stdio_init_final(void)
 {
-	if (0 > fpm_stdio_redirect_stderr_to_error_log() ||
-	    0 > fpm_stdio_redirect_stderr_to_dev_null_for_syslog()) {
+	if (fpm_stdio_redirect_stderr_to_error_log() != SUCCESS ||
+	    fpm_stdio_redirect_stderr_to_dev_null_for_syslog() != SUCCESS) {
 
-		return -1;
+		return FAILURE;
 	}
 
 	zlog_set_launched();
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_stdio_save_original_stderr(void)
+zend_result fpm_stdio_save_original_stderr(void)
 {
 	/* STDERR fd gets lost after calling fpm_stdio_init_final() (check GH-8555) so it can be saved.
 	 * It should be used only when PHP-FPM is not daemonized otherwise it might break some
@@ -82,20 +82,20 @@ int fpm_stdio_save_original_stderr(void)
 	fd_stderr_original = dup(STDERR_FILENO);
 	if (0 > fd_stderr_original) {
 		zlog(ZLOG_SYSERROR, "failed to save original STDERR fd, access.log records may appear in error_log: dup()");
-		return -1;
+		return FAILURE;
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
-int fpm_stdio_restore_original_stderr(int close_after_restore)
+zend_result fpm_stdio_restore_original_stderr(int close_after_restore)
 {
 	/* Restore original STDERR fd if it was previously saved. */
 	if (-1 != fd_stderr_original) {
 		zlog(ZLOG_DEBUG, "restoring original STDERR fd: dup2()");
 		if (0 > dup2(fd_stderr_original, STDERR_FILENO)) {
 			zlog(ZLOG_SYSERROR, "failed to restore original STDERR fd, access.log records may appear in error_log: dup2()");
-			return -1;
+			return FAILURE;
 		} else {
 			if (close_after_restore) {
 				close(fd_stderr_original);
@@ -103,10 +103,10 @@ int fpm_stdio_restore_original_stderr(int close_after_restore)
 		}
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
-int fpm_stdio_redirect_stderr_to_error_log(void)
+zend_result fpm_stdio_redirect_stderr_to_error_log(void)
 {
 	if (fpm_use_error_log()) {
 		/* prevent duping if logging to syslog */
@@ -115,15 +115,15 @@ int fpm_stdio_redirect_stderr_to_error_log(void)
 			/* there might be messages to stderr from other parts of the code, we need to log them all */
 			if (0 > dup2(fpm_globals.error_log_fd, STDERR_FILENO)) {
 				zlog(ZLOG_SYSERROR, "failed to tie stderr fd with error_log fd: dup2()");
-				return -1;
+				return FAILURE;
 			}
 		}
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
-int fpm_stdio_redirect_stderr_to_dev_null_for_syslog(void)
+zend_result fpm_stdio_redirect_stderr_to_dev_null_for_syslog(void)
 {
 	if (fpm_use_error_log()) {
 #ifdef HAVE_SYSLOG_H
@@ -134,10 +134,10 @@ int fpm_stdio_redirect_stderr_to_dev_null_for_syslog(void)
 #endif
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
-int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+zend_result fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 #ifdef HAVE_SYSLOG_H
 	if (fpm_globals.error_log_fd == ZLOG_SYSLOG) {
@@ -155,13 +155,13 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_globals.error_log_fd = -1;
 	zlog_set_fd(-1);
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
 #define FPM_STDIO_CMD_FLUSH "\0fscf"
 
-int fpm_stdio_flush_child(void)
+zend_result fpm_stdio_flush_child(void)
 {
 	return write(STDERR_FILENO, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH));
 }
@@ -287,40 +287,40 @@ stdio_read:
 }
 /* }}} */
 
-int fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
+zend_result fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
-		return 0;
+		return SUCCESS;
 	}
 
 	if (0 > pipe(fd_stdout)) {
 		zlog(ZLOG_SYSERROR, "failed to prepare the stdout pipe");
-		return -1;
+		return FAILURE;
 	}
 
 	if (0 > pipe(fd_stderr)) {
 		zlog(ZLOG_SYSERROR, "failed to prepare the stderr pipe");
 		close(fd_stdout[0]);
 		close(fd_stdout[1]);
-		return -1;
+		return FAILURE;
 	}
 
-	if (0 > fd_set_blocked(fd_stdout[0], 0) || 0 > fd_set_blocked(fd_stderr[0], 0)) {
+	if (fd_set_blocked(fd_stdout[0], 0) != SUCCESS || fd_set_blocked(fd_stderr[0], 0) != SUCCESS) {
 		zlog(ZLOG_SYSERROR, "failed to unblock pipes");
 		close(fd_stdout[0]);
 		close(fd_stdout[1]);
 		close(fd_stderr[0]);
 		close(fd_stderr[1]);
-		return -1;
+		return FAILURE;
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
+zend_result fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
-		return 0;
+		return SUCCESS;
 	}
 
 	close(fd_stdout[1]);
@@ -334,14 +334,14 @@ int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
 
 	fpm_event_set(&child->ev_stderr, child->fd_stderr, FPM_EV_READ, fpm_stdio_child_said, (void *) (intptr_t) child->pid);
 	fpm_event_add(&child->ev_stderr, 0);
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_stdio_discard_pipes(struct fpm_child_s *child) /* {{{ */
+zend_result fpm_stdio_discard_pipes(struct fpm_child_s *child) /* {{{ */
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
-		return 0;
+		return SUCCESS;
 	}
 
 	close(fd_stdout[1]);
@@ -349,7 +349,7 @@ int fpm_stdio_discard_pipes(struct fpm_child_s *child) /* {{{ */
 
 	close(fd_stdout[0]);
 	close(fd_stderr[0]);
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -367,7 +367,7 @@ void fpm_stdio_child_use_pipes(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-int fpm_stdio_open_error_log(int reopen) /* {{{ */
+zend_result fpm_stdio_open_error_log(int reopen) /* {{{ */
 {
 	int fd;
 
@@ -378,14 +378,14 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 		if (fpm_use_error_log()) {
 			zlog_set_fd(fpm_globals.error_log_fd);
 		}
-		return 0;
+		return SUCCESS;
 	}
 #endif
 
 	fd = open(fpm_global_config.error_log, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 	if (0 > fd) {
 		zlog(ZLOG_SYSERROR, "failed to open error_log (%s)", fpm_global_config.error_log);
-		return -1;
+		return FAILURE;
 	}
 
 	if (reopen) {
@@ -401,6 +401,6 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {
 		zlog(ZLOG_WARNING, "failed to change attribute of error_log");
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */

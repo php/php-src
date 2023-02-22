@@ -27,17 +27,17 @@
 #define FPM_ENV_SOCKET_SET_SIZE 128
 
 enum fpm_address_domain fpm_sockets_domain_from_address(char *addr);
-int fpm_sockets_init_main(void);
-int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq);
-int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen);
+zend_result fpm_sockets_init_main(void);
+zend_result fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq);
+zend_result fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen);
 
 
-static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
+static inline zend_result fd_set_blocked(int fd, int blocked) /* {{{ */
 {
 	int flags = fcntl(fd, F_GETFL);
 
 	if (flags < 0) {
-		return -1;
+		return FAILURE;
 	}
 
 	if (blocked) {
@@ -45,7 +45,7 @@ static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
 	} else {
 		flags |= O_NONBLOCK;
 	}
-	return fcntl(fd, F_SETFL, flags);
+	return fcntl(fd, F_SETFL, flags) == 0 ? SUCCESS : FAILURE;
 }
 /* }}} */
 

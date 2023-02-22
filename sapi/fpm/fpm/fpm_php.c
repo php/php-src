@@ -21,7 +21,7 @@
 
 static char **limit_extensions = NULL;
 
-static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
+static zend_result fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
@@ -111,7 +111,7 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 }
 /* }}} */
 
-static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
+static zend_result fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
 
@@ -127,21 +127,21 @@ static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 		}
 	}
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
+static zend_result fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (wp->listen_address_domain == FPM_AF_INET) {
 		fcgi_set_allowed_clients(wp->config->listen_allowed_clients);
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
 #if 0 /* Comment out this non used function. It could be used later. */
-static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
+static zend_result fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	char max_workers[10 + 1]; /* 4294967295 */
 	int len;
@@ -150,7 +150,7 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, max_workers, len);
 	fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  max_workers, len);
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 #endif
@@ -200,18 +200,18 @@ void fpm_php_soft_quit(void)
 	fcgi_terminate();
 }
 
-int fpm_php_init_main(void)
+zend_result fpm_php_init_main(void)
 {
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0)) {
+	if (fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0) != SUCCESS) {
 		return -1;
 	}
 	return 0;
 }
 
-int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+zend_result fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	if (0 > fpm_php_apply_defines(wp) ||
-		0 > fpm_php_set_allowed_clients(wp)) {
+	if (fpm_php_apply_defines(wp) != SUCCESS ||
+		fpm_php_set_allowed_clients(wp) != SUCCESS) {
 		return -1;
 	}
 
@@ -224,13 +224,13 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_php_limit_extensions(char *path) /* {{{ */
+bool fpm_php_limit_extensions(const char *path) /* {{{ */
 {
 	char **p;
 	size_t path_len;
 
 	if (!path || !limit_extensions) {
-		return 0; /* allowed by default */
+		return false; /* allowed by default */
 	}
 
 	p = limit_extensions;
@@ -238,9 +238,9 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 	while (p && *p) {
 		size_t ext_len = strlen(*p);
 		if (path_len > ext_len) {
-			char *path_ext = path + path_len - ext_len;
+			const char *path_ext = path + path_len - ext_len;
 			if (strcmp(*p, path_ext) == 0) {
-				return 0; /* allow as the extension has been found */
+				return false; /* allow as the extension has been found */
 			}
 		}
 		p++;
@@ -248,7 +248,7 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 
 
 	zlog(ZLOG_NOTICE, "Access to the script '%s' has been denied (see security.limit_extensions)", path);
-	return 1; /* extension not found: not allowed  */
+	return true; /* extension not found: not allowed  */
 }
 /* }}} */
 

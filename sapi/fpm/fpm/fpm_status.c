@@ -20,11 +20,11 @@ static char *fpm_status_ping_uri = NULL;
 static char *fpm_status_ping_response = NULL;
 
 
-int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
+zend_result fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (!wp || !wp->config) {
 		zlog(ZLOG_ERROR, "unable to init fpm_status because conf structure is NULL");
-		return -1;
+		return FAILURE;
 	}
 
 	if (wp->config->pm_status_path) {
@@ -34,17 +34,17 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->config->ping_path) {
 		if (!wp->config->ping_response) {
 			zlog(ZLOG_ERROR, "[pool %s] ping is set (%s) but ping.response is not set.", wp->config->name, wp->config->ping_path);
-			return -1;
+			return FAILURE;
 		}
 		fpm_status_ping_uri = strdup(wp->config->ping_path);
 		fpm_status_ping_response = strdup(wp->config->ping_response);
 	}
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_status_export_to_zval(zval *status)
+zend_result fpm_status_export_to_zval(zval *status)
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
 	zval fpm_proc_stats, fpm_proc_stat;
@@ -56,7 +56,7 @@ int fpm_status_export_to_zval(zval *status)
 	scoreboard_p = fpm_scoreboard_acquire(NULL, 1);
 	if (!scoreboard_p) {
 		zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in use.", scoreboard_p->pool);
-		return -1;
+		return FAILURE;
 	}
 
 	/* copy the scoreboard not to bother other processes */
@@ -130,7 +130,7 @@ int fpm_status_export_to_zval(zval *status)
 		add_next_index_zval(&fpm_proc_stats, &fpm_proc_stat);
 	}
 	add_assoc_zval(status, "procs", &fpm_proc_stats);
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 

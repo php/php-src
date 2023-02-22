@@ -3,6 +3,10 @@
 #ifndef FPM_EVENTS_H
 #define FPM_EVENTS_H 1
 
+#include "zend_result.h"
+
+#include <stdbool.h>
+
 #define FPM_EV_TIMEOUT  (1 << 0)
 #define FPM_EV_READ     (1 << 1)
 #define FPM_EV_PERSIST  (1 << 2)
@@ -39,12 +43,12 @@ struct fpm_event_module_s {
 
 void fpm_event_loop(int err);
 void fpm_event_fire(struct fpm_event_s *ev);
-int fpm_event_init_main(void);
-int fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg);
-int fpm_event_add(struct fpm_event_s *ev, unsigned long int timeout);
-int fpm_event_del(struct fpm_event_s *ev);
-int fpm_event_pre_init(char *machanism);
+zend_result fpm_event_init_main(void);
+zend_result fpm_event_set(struct fpm_event_s *ev, int fd, int flags, void (*callback)(struct fpm_event_s *, short, void *), void *arg);
+zend_result fpm_event_add(struct fpm_event_s *ev, unsigned long int timeout);
+zend_result fpm_event_del(struct fpm_event_s *ev);
+zend_result fpm_event_pre_init(char *machanism);
 const char *fpm_event_mechanism_name(void);
-int fpm_event_support_edge_trigger(void);
+bool fpm_event_support_edge_trigger(void);
 
 #endif

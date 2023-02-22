@@ -28,30 +28,30 @@ static void fpm_mach_vm_deallocate(void)
 	}
 }
 
-static int fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
+static zend_result fpm_mach_vm_read_page(vm_offset_t page) /* {{{ */
 {
 	kern_return_t kr;
 
 	kr = mach_vm_read(target, page, fpm_pagesize, &local_page, &local_size);
 	if (kr != KERN_SUCCESS) {
 		zlog(ZLOG_ERROR, "failed to read vm page: mach_vm_read(): %s (%d)", mach_error_string(kr), kr);
-		return -1;
+		return FAILURE;
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_trace_signal(pid_t pid) /* {{{ */
+zend_result fpm_trace_signal(pid_t pid) /* {{{ */
 {
-	if (0 > fpm_pctl_kill(pid, FPM_PCTL_STOP)) {
+	if (fpm_pctl_kill(pid, FPM_PCTL_STOP) != SUCCESS) {
 		zlog(ZLOG_SYSERROR, "failed to send SIGSTOP to %d", pid);
-		return -1;
+		return FAILURE;
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_trace_ready(pid_t pid) /* {{{ */
+zend_result fpm_trace_ready(pid_t pid) /* {{{ */
 {
 	kern_return_t kr;
 
@@ -63,32 +63,32 @@ int fpm_trace_ready(pid_t pid) /* {{{ */
 			msg = " It seems that master process does not have enough privileges to trace processes.";
 		}
 		zlog(ZLOG_ERROR, "task_for_pid() failed: %s (%d)%s", mach_error_string(kr), kr, msg);
-		return -1;
+		return FAILURE;
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_trace_close(pid_t pid) /* {{{ */
+zend_result fpm_trace_close(pid_t pid) /* {{{ */
 {
 	fpm_mach_vm_deallocate();
 	target = 0;
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
-int fpm_trace_get_long(long addr, long *data) /* {{{ */
+zend_result fpm_trace_get_long(long addr, long *data) /* {{{ */
 {
 	size_t offset = ((uintptr_t) (addr) % fpm_pagesize);
 	vm_offset_t base = (uintptr_t) (addr) - offset;
 
 	if (base != target_page_base) {
 		fpm_mach_vm_deallocate();
-		if (0 > fpm_mach_vm_read_page(base)) {
-			return -1;
+		if (fpm_mach_vm_read_page(base) != SUCCESS) {
+			return FAILURE;
 		}
 	}
 	*data = * (long *) (local_page + offset);
-	return 0;
+	return SUCCESS;
 }
 /* }}} */

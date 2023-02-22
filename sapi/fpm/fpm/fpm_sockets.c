@@ -219,7 +219,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	}
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
-		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == 0) {
+		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == SUCCESS) {
 			zlog(ZLOG_ERROR, "Another FPM instance seems to already listen on %s", ((struct sockaddr_un *) sa)->sun_path);
 			close(sock);
 			return -1;
@@ -242,7 +242,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		umask(saved_umask);
 
-		if (0 > fpm_unix_set_socket_permissions(wp, path)) {
+		if (fpm_unix_set_socket_permissions(wp, path) != SUCCESS) {
 			close(sock);
 			return -1;
 		}
@@ -418,7 +418,7 @@ static zend_result fpm_socket_setfib_init(void)
 }
 #endif
 
-int fpm_sockets_init_main(void)
+zend_result fpm_sockets_init_main(void)
 {
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
@@ -428,12 +428,12 @@ int fpm_sockets_init_main(void)
 	struct listening_socket_s *ls;
 
 	if (0 == fpm_array_init(&sockets_list, sizeof(struct listening_socket_s), 10)) {
-		return -1;
+		return FAILURE;
 	}
 
 #ifdef SO_SETFIB
 	if (fpm_socket_setfib_init() == FAILURE) {
-		return -1;
+		return FAILURE;
 	}
 #endif
 
@@ -485,15 +485,15 @@ int fpm_sockets_init_main(void)
 				break;
 
 			case FPM_AF_UNIX :
-				if (0 > fpm_unix_resolve_socket_permissions(wp)) {
-					return -1;
+				if (fpm_unix_resolve_socket_permissions(wp) != SUCCESS) {
+					return FAILURE;
 				}
 				wp->listening_socket = fpm_socket_af_unix_listening_socket(wp);
 				break;
 		}
 
 		if (wp->listening_socket == -1) {
-			return -1;
+			return FAILURE;
 		}
 
 	if (wp->listen_address_domain == FPM_AF_INET && fpm_socket_get_listening_queue(wp->listening_socket, NULL, &lq_len) >= 0) {
@@ -518,10 +518,10 @@ int fpm_sockets_init_main(void)
 		}
 	}
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_sockets_cleanup, 0)) {
-		return -1;
+	if (fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_sockets_cleanup, 0) != SUCCESS) {
+		return FAILURE;
 	}
-	return 0;
+	return SUCCESS;
 }
 
 #if HAVE_FPM_LQ
@@ -530,18 +530,18 @@ int fpm_sockets_init_main(void)
 
 #include <netinet/tcp.h>
 
-int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
+zend_result fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {
 	struct tcp_info info;
 	socklen_t len = sizeof(info);
 
 	if (0 > getsockopt(sock, IPPROTO_TCP, TCP_INFO, &info, &len)) {
 		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_INFO for socket");
-		return -1;
+		return FAILURE;
 	}
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 	if (info.__tcpi_sacked == 0) {
-		return -1;
+		return FAILURE;
 	}
 
 	if (cur_lq) {
@@ -554,7 +554,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 #else
 	/* kernel >= 2.6.24 return non-zero here, that means operation is supported */
 	if (info.tcpi_sacked == 0) {
-		return -1;
+		return FAILURE;
 	}
 
 	if (cur_lq) {
@@ -566,21 +566,21 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 	}
 #endif
 
-	return 0;
+	return SUCCESS;
 }
 
 #elif defined(HAVE_LQ_TCP_CONNECTION_INFO)
 
 #include <netinet/tcp.h>
 
-int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
+zend_result fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {
 	struct tcp_connection_info info;
 	socklen_t len = sizeof(info);
 
 	if (0 > getsockopt(sock, IPPROTO_TCP, TCP_CONNECTION_INFO, &info, &len)) {
 		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_CONNECTION_INFO for socket");
-		return -1;
+		return FAILURE;
 	}
 
 	if (cur_lq) {
@@ -591,20 +591,20 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 		*max_lq = 0;
 	}
 
-	return 0;
+	return SUCCESS;
 }
 #endif
 
 #ifdef HAVE_LQ_SO_LISTENQ
 
-int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
+zend_result fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {
 	int val;
 	socklen_t len = sizeof(val);
 
 	if (cur_lq) {
 		if (0 > getsockopt(sock, SOL_SOCKET, SO_LISTENQLEN, &val, &len)) {
-			return -1;
+			return FAILURE;
 		}
 
 		*cur_lq = val;
@@ -612,44 +612,44 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 
 	if (max_lq) {
 		if (0 > getsockopt(sock, SOL_SOCKET, SO_LISTENQLIMIT, &val, &len)) {
-			return -1;
+			return FAILURE;
 		}
 
 		*max_lq = val;
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
 #endif
 
 #else
 
-int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
+zend_result fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {
-	return -1;
+	return FAILURE;
 }
 
 #endif
 
-int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{{ */
+zend_result fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{{ */
 {
 	int fd;
 
 	if (!sock || sock->sun_family != AF_UNIX) {
-		return -1;
+		return FAILURE;
 	}
 
 	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
-		return -1;
+		return FAILURE;
 	}
 
 	if (connect(fd, (struct sockaddr *)sock, socklen) == -1) {
 		close(fd);
-		return -1;
+		return FAILURE;
 	}
 
 	close(fd);
-	return 0;
+	return SUCCESS;
 }
 /* }}} */

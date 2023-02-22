@@ -15,21 +15,21 @@ struct cleanup_s {
 
 static struct fpm_array_s cleanups = { .sz = sizeof(struct cleanup_s) };
 
-int fpm_cleanup_add(int type, void (*cleanup)(int, void *), void *arg) /* {{{ */
+zend_result fpm_cleanup_add(int type, void (*cleanup)(int, void *), void *arg) /* {{{ */
 {
 	struct cleanup_s *c;
 
 	c = fpm_array_push(&cleanups);
 
 	if (!c) {
-		return -1;
+		return FAILURE;
 	}
 
 	c->type = type;
 	c->cleanup = cleanup;
 	c->arg = arg;
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 

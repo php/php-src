@@ -3,9 +3,11 @@
 #ifndef FPM_CLOCK_H
 #define FPM_CLOCK_H 1
 
+#include "zend_result.h"
+
 #include <sys/time.h>
 
-int fpm_clock_init(void);
-int fpm_clock_get(struct timeval *tv);
+zend_result fpm_clock_init(void);
+zend_result fpm_clock_get(struct timeval *tv);
 
 #endif
