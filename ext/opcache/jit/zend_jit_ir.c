@@ -10689,90 +10689,88 @@ static int zend_jit_rope(zend_jit_ctx *jit, const zend_op *opline, uint32_t op2_
 	return 1;
 }
 
-static int zend_jit_zval_copy_deref(zend_jit_ctx *jit, zend_jit_addr res_addr, zend_jit_addr val_addr, ir_ref val_type_info)
+static int zend_jit_zval_copy_deref(zend_jit_ctx *jit, zend_jit_addr res_addr, zend_jit_addr val_addr, ir_ref type)
 {
-	ir_ref if_refcounted, if_reference, ptr, merge_inputs[4], val_type_info_inputs[4], ptr_inputs[4];
-	ir_ref ref2, ptr2, val_type_info2;
+	ir_ref if_refcounted, if_reference, if_refcounted2, ptr, val2, ptr2, type2;
+	ir_refs *merge_inputs, *types, *ptrs;
 #if SIZEOF_ZEND_LONG == 4
-	ir_ref ref, val_addr_inputs[4];
+	ir_ref val = jit_ZVAL_ADDR(jit, val_addr);
+	ir_refs *values; /* we need this only for zval.w2 copy */
 #endif
-	uint32_t merge_inputs_count = 0;
+
+	ir_refs_init(merge_inputs, 4);
+	ir_refs_init(types, 4);
+	ir_refs_init(ptrs, 4);
+#if SIZEOF_ZEND_LONG == 4
+	ir_refs_init(values, 4);
+#endif
 
 	// JIT: ptr = Z_PTR_P(val);
 	ptr = jit_Z_PTR(jit, val_addr);
 
 	// JIT: if (Z_OPT_REFCOUNTED_P(val)) {
-	if_refcounted = ir_IF(ir_AND_U32(val_type_info, ir_CONST_U32(Z_TYPE_FLAGS_MASK)));
-	ir_IF_FALSE(if_refcounted);
-	merge_inputs[merge_inputs_count] = ir_END();
+	if_refcounted = ir_IF(ir_AND_U32(type, ir_CONST_U32(Z_TYPE_FLAGS_MASK)));
+	ir_IF_FALSE_cold(if_refcounted);
+	ir_refs_add(merge_inputs, ir_END());
+	ir_refs_add(types, type);
+	ir_refs_add(ptrs, ptr);
 #if SIZEOF_ZEND_LONG == 4
-	ref = jit_ZVAL_ADDR(jit, val_addr);
-	val_addr_inputs[merge_inputs_count] = ref;
+	ir_refs_add(values, val);
 #endif
-	val_type_info_inputs[merge_inputs_count] = val_type_info;
-	ptr_inputs[merge_inputs_count] = ptr;
-	merge_inputs_count++;
 
 	ir_IF_TRUE(if_refcounted);
 
 	// JIT: if (UNEXPECTED(Z_OPT_ISREF_P(val))) {
-	if_reference = ir_IF(ir_EQ(ir_TRUNC_U8(val_type_info), ir_CONST_U8(IS_REFERENCE)));
+	if_reference = ir_IF(ir_EQ(type, ir_CONST_U32(IS_REFERENCE_EX)));
+//	if_reference = ir_IF(ir_EQ(ir_TRUNC_U8(type), ir_CONST_U8(IS_REFERENCE))); // TODO: fix IR to avoid need for extra register ???
 	ir_IF_TRUE(if_reference);
 
 	// JIT:	val = Z_REFVAL_P(val);
-	ref2 = ir_ADD_OFFSET(ptr, offsetof(zend_reference, val));
-	ptr2 = jit_Z_PTR_ref(jit, ref2);
-	val_type_info2 = jit_Z_TYPE_INFO_ref(jit, ref2);
+	val2 = ir_ADD_OFFSET(ptr, offsetof(zend_reference, val));
+	type2 = jit_Z_TYPE_INFO_ref(jit, val2);
+	ptr2 = jit_Z_PTR_ref(jit, val2);
 
 	// JIT:	if (Z_OPT_REFCOUNTED_P(val)) {
-	if_refcounted = ir_IF(ir_AND_U32(val_type_info2, ir_CONST_U32(Z_TYPE_FLAGS_MASK)));
-	ir_IF_FALSE(if_refcounted);
-	merge_inputs[merge_inputs_count] = ir_END();
+	if_refcounted2 = ir_IF(ir_AND_U32(type2, ir_CONST_U32(Z_TYPE_FLAGS_MASK)));
+	ir_IF_FALSE_cold(if_refcounted2);
+	ir_refs_add(merge_inputs, ir_END());
+	ir_refs_add(types, type2);
+	ir_refs_add(ptrs, ptr2);
 #if SIZEOF_ZEND_LONG == 4
-	val_addr_inputs[merge_inputs_count] = ref2;
+	ir_refs_add(values, val2);
 #endif
-	val_type_info_inputs[merge_inputs_count] = val_type_info2;
-	ptr_inputs[merge_inputs_count] = ptr2;
-	merge_inputs_count++;
 
-	ir_IF_TRUE(if_refcounted);
-
-	// JIT:	Z_ADDREF_P(val);
-	jit_GC_ADDREF(jit, ptr2);
-	merge_inputs[merge_inputs_count] = ir_END();
+	ir_IF_TRUE(if_refcounted2);
+	ir_MERGE_WITH_EMPTY_FALSE(if_reference);
+	type = ir_PHI_2(type2, type);
+	ptr = ir_PHI_2(ptr2, ptr);
 #if SIZEOF_ZEND_LONG == 4
-	val_addr_inputs[merge_inputs_count] = ref2;
+	val = ir_PHI_2(val2, val);
 #endif
-	val_type_info_inputs[merge_inputs_count] = val_type_info2;
-	ptr_inputs[merge_inputs_count] = ptr2;
-	merge_inputs_count++;
 
-	ir_IF_FALSE(if_reference);
 	// JIT:	Z_ADDREF_P(val);
 	jit_GC_ADDREF(jit, ptr);
-	merge_inputs[merge_inputs_count] = ir_END();
+	ir_refs_add(merge_inputs, ir_END());
+	ir_refs_add(types, type);
+	ir_refs_add(ptrs, ptr);
 #if SIZEOF_ZEND_LONG == 4
-	val_addr_inputs[merge_inputs_count] = ref;
+	ir_refs_add(values, val);
 #endif
-	val_type_info_inputs[merge_inputs_count] = val_type_info;
-	ptr_inputs[merge_inputs_count] = ptr;
-	merge_inputs_count++;
 
-	ir_MERGE_N(merge_inputs_count, merge_inputs);
+	ir_MERGE_N(merge_inputs->count, merge_inputs->refs);
+	type = ir_PHI_N(types->count, types->refs);
+	ptr = ir_PHI_N(ptrs->count, ptrs->refs);
 #if SIZEOF_ZEND_LONG == 4
-	ref = ir_PHI_N(merge_inputs_count, val_addr_inputs);
-	val_addr = ZEND_ADDR_REF_ZVAL(ref);
+	val = ir_PHI_N(values->count, values->refs);
+	val_addr = ZEND_ADDR_REF_ZVAL(val);
 #endif
-	val_type_info = ir_PHI_N(merge_inputs_count, val_type_info_inputs);
-	ptr = ir_PHI_N(merge_inputs_count, ptr_inputs);
 
 	// JIT: Z_PTR_P(res) = ptr;
 	jit_set_Z_PTR(jit, res_addr, ptr);
 #if SIZEOF_ZEND_LONG == 4
-	jit_set_Z_W2(jit, res_addr,
-		jit_Z_W2(jit, val_addr));
+	jit_set_Z_W2(jit, res_addr, jit_Z_W2(jit, val_addr));
 #endif
-	jit_set_Z_TYPE_INFO_ex(jit, res_addr, val_type_info);
+	jit_set_Z_TYPE_INFO_ex(jit, res_addr, type);
 
 	return 1;
 }
