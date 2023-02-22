@@ -3302,13 +3302,15 @@ ZEND_API zend_result zend_register_class_alias_ex(const char *name, size_t name_
 
 	lcname = zend_new_interned_string(lcname);
 
+	/* We cannot increase the refcount of an internal class during request time.
+	 * Instead of having to deal with differentiating between class types and lifetimes,
+	 * we simply don't increase the refcount of a class entry for aliases.
+	 */
 	ZVAL_ALIAS_PTR(&zv, ce);
+
 	ret = zend_hash_add(CG(class_table), lcname, &zv);
 	zend_string_release_ex(lcname, 0);
 	if (ret) {
-		if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-			ce->refcount++;
-		}
 		// avoid notifying at MINIT time
 		if (ce->type == ZEND_USER_CLASS) {
 			zend_observer_class_linked_notify(ce, lcname);

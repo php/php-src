@@ -30,6 +30,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   for C99 features have been removed and therefore macro definitions
   from php_config.h have disappeared.  Do not use those feature
   macros.
+* Internal class aliases created during request time can now exist in
+  the class table. zend_register_class_alias_ex() will not increase
+  the refcount for class aliases and the cleanup function takes this
+  into account.
 
 ========================
 2. Build system changes

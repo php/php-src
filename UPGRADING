@@ -64,6 +64,7 @@ PHP 8.3 UPGRADE NOTES
     "full" => bool
     "buffer_size" => int
     See GH-9336
+  . class_alias() now supports creating an alias of an internal class.
 
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional

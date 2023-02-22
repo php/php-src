@@ -700,15 +700,15 @@ ZEND_FUNCTION(opcache_get_status)
 		}
 
 		if (zend_hash_num_elements(&ZCSG(preload_script)->script.class_table)) {
-			zend_class_entry *ce;
+			zval *zv;
 			zend_string *key;
 
 			array_init(&scripts);
-			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ZCSG(preload_script)->script.class_table, key, ce) {
-				if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&ZCSG(preload_script)->script.class_table, key, zv) {
+				if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
 					add_next_index_str(&scripts, key);
 				} else {
-					add_next_index_str(&scripts, ce->name);
+					add_next_index_str(&scripts, Z_CE_P(zv)->name);
 				}
 			} ZEND_HASH_FOREACH_END();
 			add_assoc_zval(&statistics, "classes", &scripts);

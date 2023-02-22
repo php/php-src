@@ -1074,16 +1074,11 @@ ZEND_FUNCTION(class_alias)
 	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
 
 	if (ce) {
-		if (ce->type == ZEND_USER_CLASS) {
-			if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, 0) == SUCCESS) {
-				RETURN_TRUE;
-			} else {
-				zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(alias_name));
-				RETURN_FALSE;
-			}
+		if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, false) == SUCCESS) {
+			RETURN_TRUE;
 		} else {
-			zend_argument_value_error(1, "must be a user-defined class name, internal class name given");
-			RETURN_THROWS();
+			zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(alias_name));
+			RETURN_FALSE;
 		}
 	} else {
 		zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(class_name));
