@@ -10015,8 +10015,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				if (func
 				 && !(func->op_array.fn_flags & ZEND_ACC_CLOSURE)
 				 && ZEND_MAP_PTR_IS_OFFSET(func->op_array.run_time_cache)) {
-					|	MEM_LOAD_ZTS r2, aword, compiler_globals, map_ptr_base, r1
-					|	mov r2, aword [r2 + (uintptr_t)ZEND_MAP_PTR(func->op_array.run_time_cache)]
+					|	mov r0, EX:RX->func
+					|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
+					|	MEM_LOAD_OP_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
+					|	mov r2, aword [r2]
 				} else if ((func && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) ||
 						(JIT_G(current_frame) &&
 						 JIT_G(current_frame)->call &&
