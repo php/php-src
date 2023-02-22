@@ -1664,15 +1664,24 @@ CFLAGS_CLEAN="$CFLAGS \$(PROF_FLAGS)"
 CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag \$(PROF_FLAGS)"
 
+if test -z "$php_cxx_done"; then
+  # Link with the C compiler
+  LINK_SAPI="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS)"
+else
+  # We have at least one C++ source: we have to link with the C++
+  # compiler so the correct C++ standard library gets linked
+  LINK_SAPI="\$(CXX) \$(CXXFLAGS_CLEAN) \$(EXTRA_CXXFLAGS)"
+fi
+
 case $host_alias in
 *aix*)
-  LINK_SAPI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl \$(PHP_RPATHS)"
+  LINK_SAPI="\$(LIBTOOL) --mode=link $LINK_SAPI -export-dynamic \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl \$(PHP_RPATHS)"
   ;;
 *darwin*)
-  LINK_SAPI="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_FRAMEWORKS)"
+  LINK_SAPI="$LINK_SAPI \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_FRAMEWORKS)"
   ;;
 *)
-  LINK_SAPI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS)"
+  LINK_SAPI="\$(LIBTOOL) --mode=link $LINK_SAPI -export-dynamic \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS)"
   ;;
 esac
 
