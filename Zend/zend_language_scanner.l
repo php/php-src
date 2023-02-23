@@ -1329,7 +1329,7 @@ static zend_result check_nesting_at_end(void)
 	} while (0)
 
 #define RETURN_EXIT_NESTING_TOKEN(_token) do { \
-		if (exit_nesting(_token) && PARSER_MODE()) { \
+		if (exit_nesting(_token) != SUCCESS && PARSER_MODE()) { \
 			RETURN_TOKEN(T_ERROR); \
 		} else { \
 			RETURN_TOKEN(_token); \
@@ -1337,7 +1337,7 @@ static zend_result check_nesting_at_end(void)
 	} while(0)
 
 #define RETURN_END_TOKEN do { \
-		if (check_nesting_at_end() && PARSER_MODE()) { \
+		if (check_nesting_at_end() != SUCCESS && PARSER_MODE()) { \
 			RETURN_TOKEN(T_ERROR); \
 		} else { \
 			RETURN_TOKEN(END); \
