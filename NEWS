@@ -948,6 +948,9 @@ PHP                                                                        NEWS
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
     (Viktor Volkov)
 
+  . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
+    (Nathan Freeman)
+
 - FFI:
   . Fixed bug #79576 ("TYPE *" shows unhelpful message when type is not
     defined). (Dmitry)
