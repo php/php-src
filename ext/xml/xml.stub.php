@@ -197,11 +197,11 @@ function xml_get_current_byte_index(XMLParser $parser): int {}
 
 function xml_parser_free(XMLParser $parser): bool {}
 
-/** @param string|int $value */
+/** @param string|int|bool $value */
 function xml_parser_set_option(XMLParser $parser, int $option, $value): bool {}
 
 /** @refcount 1 */
-function xml_parser_get_option(XMLParser $parser, int $option): string|int {}
+function xml_parser_get_option(XMLParser $parser, int $option): string|int|bool {}
 
 /**
  * @strict-properties

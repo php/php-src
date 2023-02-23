@@ -1,5 +1,5 @@
 --TEST--
-xml_parser_set_option() - Test invalid parameter
+xml_parser_set_option(): Non-existent option
 --EXTENSIONS--
 xml
 --FILE--
