@@ -50,6 +50,9 @@ PHP                                                                        NEWS
   . Fixed bug #60994 (Reading a multibyte CLOB caps at 8192 chars).
     (Michael Voříšek)
 
+- PGSQL:
+  . Fix GH-10672 (pg_lo_open segfaults in the strict_types mode). (girgias)
+
 - Phar:
   . Fix incorrect check in phar tar parsing. (nielsdos)
 
