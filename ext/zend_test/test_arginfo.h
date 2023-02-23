@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 80543c60da9d2732e677375e49afc21c91bf594b */
+ * Stub hash: 8a5914eead09c2a85fd7d53d63c9597dfb3d0c30 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -379,6 +379,9 @@ static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
 static void register_test_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_STRING_CONSTANT("ZEND_CONSTANT_A", "global", CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZendSubNS\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
 
 
 	zend_string *attribute_name_ZendTestParameterAttribute_zend_test_parameter_with_attribute_arg0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);

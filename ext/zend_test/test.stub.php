@@ -6,13 +6,16 @@
  * @undocumentable
  */
 namespace {
+    require "Zend/zend_attributes.stub.php";
+
     /**
      * @var int
      * @deprecated
      */
     const ZEND_TEST_DEPRECATED = 42;
 
-    require "Zend/zend_attributes.stub.php";
+    /** @var string */
+    const ZEND_CONSTANT_A = "global";
 
     interface _ZendTestInterface
     {
@@ -199,6 +202,9 @@ namespace ZendTestNS {
 
 namespace ZendTestNS2 {
 
+    /** @var string */
+    const ZEND_CONSTANT_A = "namespaced";
+
     class Foo {
         public ZendSubNS\Foo $foo;
 
@@ -221,6 +227,9 @@ namespace ZendTestNS2 {
 }
 
 namespace ZendTestNS2\ZendSubNS {
+
+    /** @var string */
+    const ZEND_CONSTANT_A = \ZendTestNS2\ZEND_CONSTANT_A;
 
     class Foo {
         public function method(): void {}

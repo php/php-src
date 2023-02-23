@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-namespace FTP {
+namespace {
     /**
      * @var int
      * @cvalue FTPTYPE_ASCII
@@ -59,16 +59,6 @@ namespace FTP {
      */
     const FTP_MOREDATA = UNKNOWN;
 
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Connection
-    {
-    }
-}
-
-namespace {
     function ftp_connect(string $hostname, int $port = 21, int $timeout = 90): FTP\Connection|false {}
 
     #ifdef HAVE_FTP_SSL
@@ -144,4 +134,14 @@ namespace {
     /** @param int|bool $value */
     function ftp_set_option(FTP\Connection $ftp, int $option, $value): bool {}
     function ftp_get_option(FTP\Connection $ftp, int $option): int|bool {}
+}
+
+namespace FTP {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
 }
