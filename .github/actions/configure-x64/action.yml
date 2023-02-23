@@ -70,10 +70,10 @@ runs:
           --with-lmdb \
           --with-qdbm \
           --with-snmp \
-          `#--with-unixODBC` \
+          --with-unixODBC \
           --with-imap \
           --with-imap-ssl \
-          `#--with-pdo-odbc=unixODBC,/usr` \
+          --with-pdo-odbc=unixODBC,/usr \
           --with-pdo-oci=shared,instantclient,/opt/oracle/instantclient \
           --with-oci8=shared,instantclient,/opt/oracle/instantclient \
           --with-config-file-path=/etc \
