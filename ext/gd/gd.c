@@ -1720,37 +1720,34 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 {
 	zval *imgind;
 	char *file = NULL;
-	zend_long quality = 0, type = 0;
+	zend_long quality = 128, type = 1;
 	gdImagePtr im;
 	FILE *fp;
 	size_t file_len = 0;
-	int argc = ZEND_NUM_ARGS();
-	int q = -1, t = 1;
 
 	/* The quality parameter for gd2 stands for chunk size */
 
 	switch (image_type) {
 		case PHP_GDIMG_TYPE_GD:
-			if (zend_parse_parameters(argc, "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
 		case PHP_GDIMG_TYPE_GD2:
-			if (zend_parse_parameters(argc, "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	im = php_gd_libgdimageptr_from_zval_p(imgind);
-
-	if (argc >= 3) {
-		q = quality;
-		if (argc == 4) {
-			t = type;
-		}
+	/* quality must fit in an int */
+	if (quality < INT_MIN || quality > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #3 ($chunk_size) must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_FALSE;
 	}
+
+	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
 	if (file_len) {
 		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
@@ -1766,10 +1763,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				gdImageGd(im, fp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
-				if (q == -1) {
-					q = 128;
+				if (quality == -1) {
+					quality = 128;
 				}
-				gdImageGd2(im, fp, q, t);
+				gdImageGd2(im, fp, quality, type);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -1792,10 +1789,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				gdImageGd(im, tmp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
-				if (q == -1) {
-					q = 128;
+				if (quality == -1) {
+					quality = 128;
 				}
-				gdImageGd2(im, tmp, q, t);
+				gdImageGd2(im, tmp, quality, type);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
