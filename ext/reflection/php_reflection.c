@@ -7041,7 +7041,13 @@ ZEND_METHOD(ReflectionFiber, getExecutingLine)
 		prev_execute_data = fiber->execute_data->prev_execute_data;
 	}
 
-	RETURN_LONG(prev_execute_data->opline->lineno);
+	while (prev_execute_data && (!prev_execute_data->func || !ZEND_USER_CODE(prev_execute_data->func->common.type))) {
+		prev_execute_data = prev_execute_data->prev_execute_data;
+	}
+	if (prev_execute_data && prev_execute_data->func && ZEND_USER_CODE(prev_execute_data->func->common.type)) {
+		RETURN_LONG(prev_execute_data->opline->lineno);
+	}
+	RETURN_NULL();
 }
 
 ZEND_METHOD(ReflectionFiber, getExecutingFile)
@@ -7059,7 +7065,13 @@ ZEND_METHOD(ReflectionFiber, getExecutingFile)
 		prev_execute_data = fiber->execute_data->prev_execute_data;
 	}
 
-	RETURN_STR_COPY(prev_execute_data->func->op_array.filename);
+	while (prev_execute_data && (!prev_execute_data->func || !ZEND_USER_CODE(prev_execute_data->func->common.type))) {
+		prev_execute_data = prev_execute_data->prev_execute_data;
+	}
+	if (prev_execute_data && prev_execute_data->func && ZEND_USER_CODE(prev_execute_data->func->common.type)) {
+		RETURN_STR_COPY(prev_execute_data->func->op_array.filename);
+	}
+	RETURN_NULL();
 }
 
 ZEND_METHOD(ReflectionFiber, getCallable)

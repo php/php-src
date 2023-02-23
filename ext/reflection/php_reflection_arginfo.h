@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0b548ff454b1a3deb531092355c456f5dd62d97c */
+ * Stub hash: f640c1b592a7e9e7a8e92195df579bfaaa3da6dc */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -592,9 +592,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionFiber_getFiber, 0, 0, Fiber, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionFiber_getExecutingFile arginfo_class_ReflectionFunction___toString
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getExecutingFile, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionFiber_getExecutingLine arginfo_class_ReflectionAttribute_getTarget
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getExecutingLine, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getCallable, 0, 0, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()

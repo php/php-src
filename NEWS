@@ -100,6 +100,8 @@ PHP                                                                        NEWS
     method). (ilutov)
   . Fix GH-10259 (ReflectionClass::getStaticProperties doesn't need null return
     type). (kocsismate)
+  . Fix Segfault when using ReflectionFiber suspended by an internal function.
+    (danog)
 
 - Sockets:
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
