@@ -18,7 +18,7 @@ fee($a["bar"]);
 
 $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE IF EXISTS gh10672");
-pg_query($db, "CREATE TABLE gh8253 (bar text);");
+pg_query($db, "CREATE TABLE gh10672 (bar text);");
 
 // Begin a transaction
 pg_query($db, 'BEGIN');
