@@ -18,7 +18,7 @@ on:
     branches:
       - '**'
 jobs:
-  LINUX_X64:
+  LINUX_X86_64:
     strategy:
       fail-fast: false
       matrix:
@@ -27,7 +27,7 @@ jobs:
             zts: false
           - debug: false
             zts: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    name: "LINUX_X86_64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
@@ -37,9 +37,9 @@ jobs:
       - name: Create Oracle container
         uses: ./.github/actions/setup-oracle
       - name: apt
-        uses: ./.github/actions/apt-x64
+        uses: ./.github/actions/apt-x86_64
       - name: ./configure
-        uses: ./.github/actions/configure-x64
+        uses: ./.github/actions/configure-linux-x86_64
         with:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
@@ -47,9 +47,9 @@ jobs:
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
-        uses: ./.github/actions/install-linux
+        uses: ./.github/actions/install-linux-x86_64
       - name: Setup
-        uses: ./.github/actions/setup-x64
+        uses: ./.github/actions/setup-linux-x86_64
       - name: Test
         uses: ./.github/actions/test-linux
       - name: Test Tracing JIT
@@ -61,8 +61,8 @@ jobs:
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-  LINUX_X32:
-    name: LINUX_X32_DEBUG_ZTS
+  LINUX_X86:
+    name: LINUX_X86_DEBUG_ZTS
     runs-on: ubuntu-latest
     container:
       image: ubuntu:20.04
@@ -82,9 +82,9 @@ jobs:
       - name: git checkout
         uses: actions/checkout@v3
       - name: apt
-        uses: ./.github/actions/apt-x32
+        uses: ./.github/actions/apt-x86
       - name: ./configure
-        uses: ./.github/actions/configure-x32
+        uses: ./.github/actions/configure-linux-x86
         with:
           configurationParameters: >-
             --enable-debug
@@ -92,7 +92,7 @@ jobs:
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
-        uses: ./.github/actions/install-linux-x32
+        uses: ./.github/actions/install-linux-x86
       - name: Test
         uses: ./.github/actions/test-linux
       - name: Test Tracing JIT
@@ -102,7 +102,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
-  MACOS_DEBUG_NTS:
+  MACOS_X86_64_DEBUG_NTS:
     runs-on: macos-11
     steps:
       - name: git checkout
@@ -110,7 +110,7 @@ jobs:
       - name: brew
         uses: ./.github/actions/brew
       - name: ./configure
-        uses: ./.github/actions/configure-macos
+        uses: ./.github/actions/configure-macos-x86_64
         with:
           configurationParameters: --enable-debug --disable-zts
       - name: make
