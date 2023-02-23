@@ -1465,7 +1465,7 @@ static ZEND_COLD void zend_verify_missing_return_type(const zend_function *zf)
 	zend_verify_return_error(zf, NULL);
 }
 
-zend_bool zend_never_inline zend_verify_class_constant_type(const zend_class_constant *c, zval *constant)
+bool zend_never_inline zend_verify_class_constant_type(const zend_class_constant *c, zval *constant)
 {
 	if (zend_check_type((zend_type *) &c->type, constant, NULL, NULL, /* is_return_type */ 1, /* is_internal_arg */ 0)) {
 		return 1;

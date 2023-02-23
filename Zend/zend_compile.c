@@ -7716,7 +7716,7 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 
 			uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 
-			if (type_mask != MAY_BE_ANY && (type_mask & (MAY_BE_CALLABLE|MAY_BE_VOID|MAY_BE_NEVER|MAY_BE_STATIC))) {
+			if (type_mask != MAY_BE_ANY && (type_mask & (MAY_BE_CALLABLE|MAY_BE_VOID|MAY_BE_NEVER))) {
 				zend_string *type_str = zend_type_to_string(type);
 
 				zend_error_noreturn(E_COMPILE_ERROR, "Class constant %s::%s cannot have type %s",
