@@ -57,8 +57,8 @@
 #define FC(member) (CG(file_context).member)
 
 typedef struct _zend_loop_var {
-	zend_uchar opcode;
-	zend_uchar var_type;
+	uint8_t opcode;
+	uint8_t var_type;
 	uint32_t   var_num;
 	uint32_t   try_catch_offset;
 } zend_loop_var;
@@ -89,7 +89,7 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2);
+static zend_op *zend_emit_op(znode *result, uint8_t opcode, znode *op1, znode *op2);
 static bool zend_try_ct_eval_array(zval *result, zend_ast *ast);
 static void zend_eval_const_expr(zend_ast **ast_ptr);
 
@@ -213,7 +213,7 @@ void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
 typedef struct _builtin_type_info {
 	const char* name;
 	const size_t name_len;
-	const zend_uchar type;
+	const uint8_t type;
 } builtin_type_info;
 
 static const builtin_type_info builtin_types[] = {
@@ -246,7 +246,7 @@ static const confusable_type_info confusable_types[] = {
 	{NULL, 0, NULL},
 };
 
-static zend_always_inline zend_uchar zend_lookup_builtin_type_by_name(const zend_string *name) /* {{{ */
+static zend_always_inline uint8_t zend_lookup_builtin_type_by_name(const zend_string *name) /* {{{ */
 {
 	const builtin_type_info *info = &builtin_types[0];
 
@@ -659,7 +659,7 @@ void zend_stop_lexing(void)
 }
 
 static inline void zend_begin_loop(
-		zend_uchar free_opcode, const znode *loop_var, bool is_switch) /* {{{ */
+		uint8_t free_opcode, const znode *loop_var, bool is_switch) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element;
 	int parent = CG(context).current_brk_cont;
@@ -2110,7 +2110,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 
 static void zend_adjust_for_fetch_type(zend_op *opline, znode *result, uint32_t type) /* {{{ */
 {
-	zend_uchar factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
+	uint_fast8_t factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
 
 	switch (type) {
 		case BP_VAR_R:
@@ -2155,7 +2155,7 @@ static inline void zend_make_tmp_result(znode *result, zend_op *opline) /* {{{ *
 }
 /* }}} */
 
-static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
+static zend_op *zend_emit_op(znode *result, uint8_t opcode, znode *op1, znode *op2) /* {{{ */
 {
 	zend_op *opline = get_next_op();
 	opline->opcode = opcode;
@@ -2175,7 +2175,7 @@ static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode
 }
 /* }}} */
 
-static zend_op *zend_emit_op_tmp(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
+static zend_op *zend_emit_op_tmp(znode *result, uint8_t opcode, znode *op1, znode *op2) /* {{{ */
 {
 	zend_op *opline = get_next_op();
 	opline->opcode = opcode;
@@ -2255,7 +2255,7 @@ ZEND_API bool zend_is_smart_branch(const zend_op *opline) /* {{{ */
 }
 /* }}} */
 
-static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
+static inline uint32_t zend_emit_cond_jump(uint8_t opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number();
 	zend_op *opline;
@@ -2306,7 +2306,7 @@ static inline void zend_update_jump_target_to_next(uint32_t opnum_jump) /* {{{ *
 }
 /* }}} */
 
-static inline zend_op *zend_delayed_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
+static inline zend_op *zend_delayed_emit_op(znode *result, uint8_t opcode, znode *op1, znode *op2) /* {{{ */
 {
 	zend_op tmp_opline;
 
@@ -3590,7 +3590,7 @@ static uint32_t zend_compile_args(
 
 		znode arg_node;
 		zend_op *opline;
-		zend_uchar opcode;
+		uint8_t opcode;
 
 		if (arg->kind == ZEND_AST_UNPACK) {
 			if (uses_named_args) {
@@ -3769,7 +3769,7 @@ static uint32_t zend_compile_args(
 }
 /* }}} */
 
-ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
+ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
 	if (fbc) {
 		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE));
@@ -5542,9 +5542,9 @@ static void zend_compile_if(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
+static uint8_t determine_switch_jumptable_type(zend_ast_list *cases) {
 	uint32_t i;
-	zend_uchar common_type = IS_UNDEF;
+	uint8_t common_type = IS_UNDEF;
 	for (i = 0; i < cases->children; i++) {
 		zend_ast *case_ast = cases->child[i];
 		zend_ast **cond_ast = &case_ast->child[0];
@@ -5583,7 +5583,7 @@ static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
 	return common_type;
 }
 
-static bool should_use_jumptable(zend_ast_list *cases, zend_uchar jumptable_type) {
+static bool should_use_jumptable(zend_ast_list *cases, uint8_t jumptable_type) {
 	if (CG(compiler_options) & ZEND_COMPILE_NO_JUMPTABLES) {
 		return 0;
 	}
@@ -5609,7 +5609,7 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 	znode expr_node, case_node;
 	zend_op *opline;
 	uint32_t *jmpnz_opnums, opnum_default_jmp, opnum_switch = (uint32_t)-1;
-	zend_uchar jumptable_type;
+	uint8_t jumptable_type;
 	HashTable *jumptable = NULL;
 
 	zend_compile_expr(&expr_node, expr_ast);
@@ -5791,7 +5791,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 	case_node.u.op.var = get_temporary_variable();
 
 	uint32_t num_conds = count_match_conds(arms);
-	zend_uchar can_use_jumptable = can_match_use_jumptable(arms);
+	uint8_t can_use_jumptable = can_match_use_jumptable(arms);
 	bool uses_jumptable = can_use_jumptable && num_conds >= 2;
 	HashTable *jumptable = NULL;
 	uint32_t *jmpnz_opnums = NULL;
@@ -6321,7 +6321,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
-		zend_uchar type_code = zend_lookup_builtin_type_by_name(class_name);
+		uint8_t type_code = zend_lookup_builtin_type_by_name(class_name);
 
 		if (type_code != 0) {
 			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
@@ -6869,7 +6869,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
 
 		znode var_node, default_node;
-		zend_uchar opcode;
+		uint8_t opcode;
 		zend_op *opline;
 		zend_arg_info *arg_info;
 
@@ -8528,7 +8528,7 @@ ZEND_API bool zend_is_op_long_compatible(const zval *op)
 
 	if (Z_TYPE_P(op) == IS_STRING) {
 		double dval = 0;
-		zend_uchar is_num = is_numeric_str_function(Z_STR_P(op), NULL, &dval);
+		uint8_t is_num = is_numeric_str_function(Z_STR_P(op), NULL, &dval);
 		if (is_num == 0 || (is_num == IS_DOUBLE && !zend_is_long_compatible(dval, zend_dval_to_lval(dval)))) {
 			return false;
 		}
@@ -10710,7 +10710,7 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				}
 			} else if (Z_TYPE_P(container) == IS_STRING) {
 				zend_long offset;
-				zend_uchar c;
+				uint8_t c;
 				if (Z_TYPE_P(dim) == IS_LONG) {
 					offset = Z_LVAL_P(dim);
 				} else if (Z_TYPE_P(dim) != IS_STRING || is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL, 1) != IS_LONG) {
@@ -10719,7 +10719,7 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				if (offset < 0 || (size_t)offset >= Z_STRLEN_P(container)) {
 					return;
 				}
-				c = (zend_uchar) Z_STRVAL_P(container)[offset];
+				c = (uint8_t) Z_STRVAL_P(container)[offset];
 				ZVAL_CHAR(&result, c);
 			} else if (Z_TYPE_P(container) <= IS_FALSE) {
 				return; /* warning... handle at runtime */

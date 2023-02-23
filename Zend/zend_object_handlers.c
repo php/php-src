@@ -1664,7 +1664,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			object_lhs = false;
 		}
 		ZEND_ASSERT(Z_TYPE_P(value) != IS_OBJECT);
-		zend_uchar target_type = (Z_TYPE_P(value) == IS_FALSE || Z_TYPE_P(value) == IS_TRUE)
+		uint8_t target_type = (Z_TYPE_P(value) == IS_FALSE || Z_TYPE_P(value) == IS_TRUE)
 								 ? _IS_BOOL : Z_TYPE_P(value);
 		if (Z_OBJ_HT_P(object)->cast_object(Z_OBJ_P(object), &casted, target_type) == FAILURE) {
 			// TODO: Less crazy.

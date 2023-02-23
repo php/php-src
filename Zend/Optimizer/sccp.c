@@ -83,10 +83,10 @@ typedef struct _sccp_ctx {
 	zval bot;
 } sccp_ctx;
 
-#define TOP ((zend_uchar)-1)
-#define BOT ((zend_uchar)-2)
-#define PARTIAL_ARRAY ((zend_uchar)-3)
-#define PARTIAL_OBJECT ((zend_uchar)-4)
+#define TOP ((uint8_t)-1)
+#define BOT ((uint8_t)-2)
+#define PARTIAL_ARRAY ((uint8_t)-3)
+#define PARTIAL_OBJECT ((uint8_t)-4)
 #define IS_TOP(zv) (Z_TYPE_P(zv) == TOP)
 #define IS_BOT(zv) (Z_TYPE_P(zv) == BOT)
 #define IS_PARTIAL_ARRAY(zv) (Z_TYPE_P(zv) == PARTIAL_ARRAY)
@@ -314,7 +314,7 @@ static bool try_replace_op2(
 	return 0;
 }
 
-static inline zend_result ct_eval_binary_op(zval *result, zend_uchar binop, zval *op1, zval *op2) {
+static inline zend_result ct_eval_binary_op(zval *result, uint8_t binop, zval *op1, zval *op2) {
 	/* TODO: We could implement support for evaluation of + on partial arrays. */
 	if (IS_PARTIAL_ARRAY(op1) || IS_PARTIAL_ARRAY(op2)) {
 		return FAILURE;
@@ -662,7 +662,7 @@ static inline zend_result ct_eval_assign_obj(zval *result, zval *value, const zv
 	}
 }
 
-static inline zend_result ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
+static inline zend_result ct_eval_incdec(zval *result, uint8_t opcode, zval *op1) {
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
 		return FAILURE;
 	}
@@ -1843,7 +1843,7 @@ static void sccp_mark_feasible_successors(
 		case ZEND_MATCH:
 		{
 			bool strict_comparison = opline->opcode == ZEND_MATCH;
-			zend_uchar type = Z_TYPE_P(op1);
+			uint8_t type = Z_TYPE_P(op1);
 			bool correct_type =
 				(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
 				|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
@@ -2134,7 +2134,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
 						&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {
 					/* Replace with QM_ASSIGN */
-					zend_uchar old_type = opline->result_type;
+					uint8_t old_type = opline->result_type;
 					uint32_t old_var = opline->result.var;
 
 					ssa_op->result_def = -1;

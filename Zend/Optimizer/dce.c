@@ -413,7 +413,7 @@ static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_o
 static bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	zend_ssa *ssa = ctx->ssa;
 	int free_var = -1;
-	zend_uchar free_var_type;
+	uint8_t free_var_type;
 
 	if (opline->opcode == ZEND_NOP) {
 		return 0;

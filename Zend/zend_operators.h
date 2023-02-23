@@ -27,6 +27,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
@@ -88,7 +89,7 @@ static zend_always_inline bool instanceof_function(
  * could not be represented as such due to overflow. It writes 1 to oflow_info
  * if the integer is larger than ZEND_LONG_MAX and -1 if it's smaller than ZEND_LONG_MIN.
  */
-ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
+ZEND_API uint8_t ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data);
 
 ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end);
@@ -144,7 +145,7 @@ static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
-static zend_always_inline zend_uchar is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
+static zend_always_inline uint8_t is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data)
 {
 	if (*str > '9') {
@@ -153,11 +154,11 @@ static zend_always_inline zend_uchar is_numeric_string_ex(const char *str, size_
 	return _is_numeric_string_ex(str, length, lval, dval, allow_errors, oflow_info, trailing_data);
 }
 
-static zend_always_inline zend_uchar is_numeric_string(const char *str, size_t length, zend_long *lval, double *dval, bool allow_errors) {
+static zend_always_inline uint8_t is_numeric_string(const char *str, size_t length, zend_long *lval, double *dval, bool allow_errors) {
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL, NULL);
 }
 
-ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
+ZEND_API uint8_t ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval);
 
 static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)

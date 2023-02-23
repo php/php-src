@@ -54,7 +54,7 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 	}
 }
 
-zend_result zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
+zend_result zend_optimizer_eval_binary_op(zval *result, uint8_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	if (zend_binary_op_produces_error(opcode, op1, op2)) {
 		return FAILURE;
@@ -65,7 +65,7 @@ zend_result zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval 
 }
 /* }}} */
 
-zend_result zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* {{{ */
+zend_result zend_optimizer_eval_unary_op(zval *result, uint8_t opcode, zval *op1) /* {{{ */
 {
 	unary_op_type unary_op = get_unary_op(opcode);
 
@@ -620,7 +620,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 
 bool zend_optimizer_replace_by_const(zend_op_array *op_array,
                                     zend_op       *opline,
-                                    zend_uchar     type,
+                                    uint8_t        type,
                                     uint32_t       var,
                                     zval          *val)
 {

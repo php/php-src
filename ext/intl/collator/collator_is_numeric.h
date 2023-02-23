@@ -18,7 +18,8 @@
 
 #include <php.h>
 #include <unicode/uchar.h>
+#include <stdint.h>
 
-zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, bool allow_errors );
+uint8_t collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, bool allow_errors );
 
 #endif // COLLATOR_IS_NUMERIC_H

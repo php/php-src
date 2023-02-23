@@ -417,7 +417,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 /* }}} */
 
 /* {{{ php_get_display_errors_mode() helper function */
-static zend_uchar php_get_display_errors_mode(zend_string *value)
+static uint8_t php_get_display_errors_mode(zend_string *value)
 {
 	if (!value) {
 		return PHP_DISPLAY_ERRORS_STDOUT;
@@ -440,7 +440,7 @@ static zend_uchar php_get_display_errors_mode(zend_string *value)
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
 
-	zend_uchar mode = ZEND_ATOL(ZSTR_VAL(value));
+	uint8_t mode = ZEND_ATOL(ZSTR_VAL(value));
 	if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
@@ -461,7 +461,7 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
 /* {{{ PHP_INI_DISP */
 static PHP_INI_DISP(display_errors_mode)
 {
-	zend_uchar mode;
+	uint8_t mode;
 	bool cgi_or_cli;
 	zend_string *temporary_value;
 

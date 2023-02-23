@@ -22,6 +22,7 @@
 
 
 #include <setjmp.h>
+#include <stdint.h>
 
 #include "zend_globals_macros.h"
 
@@ -93,7 +94,7 @@ struct _zend_compiler_globals {
 	HashTable *auto_globals;
 
 	/* Refer to zend_yytnamerr() in zend_language_parser.y for meaning of values */
-	zend_uchar parse_error;
+	uint8_t parse_error;
 	bool in_compilation;
 	bool short_tags;
 
@@ -244,7 +245,7 @@ struct _zend_executor_globals {
 	struct _zend_module_entry *current_module;
 
 	bool active;
-	zend_uchar flags;
+	uint8_t flags;
 
 	zend_long assertions;
 

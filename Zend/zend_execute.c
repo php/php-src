@@ -734,7 +734,7 @@ static bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 		/* For an int|float union type and string value,
 		 * determine chosen type by is_numeric_string() semantics. */
 		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
-			zend_uchar type = is_numeric_str_function(Z_STR_P(arg), &lval, &dval);
+			uint8_t type = is_numeric_str_function(Z_STR_P(arg), &lval, &dval);
 			if (type == IS_LONG) {
 				zend_string_release(Z_STR_P(arg));
 				ZVAL_LONG(arg, lval);
@@ -894,7 +894,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modificati
 		ZSTR_VAL(info->ce->name), zend_get_unmangled_property_name(info->name));
 }
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(zend_uchar type)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uint8_t type)
 {
 	zend_type_error("Cannot use value of type %s as class constant name", zend_get_type_by_const(type));
 }
@@ -2287,7 +2287,7 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 	}
 }
 
-static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval *dim, zend_value *value EXECUTE_DATA_DC)
+static zend_never_inline uint8_t slow_index_convert(HashTable *ht, const zval *dim, zend_value *value EXECUTE_DATA_DC)
 {
 	switch (Z_TYPE_P(dim)) {
 		case IS_UNDEF: {
@@ -2355,7 +2355,7 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 	}
 }
 
-static zend_never_inline zend_uchar slow_index_convert_w(HashTable *ht, const zval *dim, zend_value *value EXECUTE_DATA_DC)
+static zend_never_inline uint8_t slow_index_convert_w(HashTable *ht, const zval *dim, zend_value *value EXECUTE_DATA_DC)
 {
 	switch (Z_TYPE_P(dim)) {
 		case IS_UNDEF: {
@@ -2490,7 +2490,7 @@ str_index:
 		goto try_again;
 	} else {
 		zend_value val;
-		zend_uchar t;
+		uint8_t t;
 
 		if (type != BP_VAR_W && type != BP_VAR_RW) {
 			t = slow_index_convert(ht, dim, &val EXECUTE_DATA_CC);
@@ -2630,7 +2630,7 @@ fetch_from_array:
 			}
 			if (type != BP_VAR_UNSET) {
 				HashTable *ht = zend_new_array(0);
-				zend_uchar old_type = Z_TYPE_P(container);
+				uint8_t old_type = Z_TYPE_P(container);
 
 				ZVAL_ARR(container, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
@@ -3314,7 +3314,7 @@ static zend_never_inline zend_result zend_fetch_static_property_address_ex(zval 
 	zend_class_entry *ce;
 	zend_property_info *property_info;
 
-	zend_uchar op1_type = opline->op1_type, op2_type = opline->op2_type;
+	uint8_t op1_type = opline->op1_type, op2_type = opline->op2_type;
 
 	if (EXPECTED(op2_type == IS_CONST)) {
 		zval *class_name = RT_CONSTANT(opline, opline->op2);
@@ -3471,7 +3471,7 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 		const zend_property_info *info, const zval *zv, bool strict) {
 	zend_type type = info->type;
 	uint32_t type_mask;
-	zend_uchar zv_type = Z_TYPE_P(zv);
+	uint8_t zv_type = Z_TYPE_P(zv);
 
 	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(type, zv_type))) {
 		return 1;
@@ -3587,7 +3587,7 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	}
 }
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, zend_uchar value_type, bool strict)
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, uint8_t value_type, bool strict)
 {
 	bool ret;
 	zval value;
@@ -4579,7 +4579,7 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 static void zend_swap_operands(zend_op *op) /* {{{ */
 {
 	znode_op     tmp;
-	zend_uchar   tmp_type;
+	uint8_t   tmp_type;
 
 	tmp          = op->op1;
 	tmp_type     = op->op1_type;

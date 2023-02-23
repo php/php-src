@@ -26,6 +26,8 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 
+#include <stdint.h>
+
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;
 ZEND_API extern void (*zend_execute_ex)(zend_execute_data *execute_data);
@@ -82,7 +84,7 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(const zend_property_info *info);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info);
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(zend_uchar type);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uint8_t type);
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_property_error(const zend_property_info *info);
 
@@ -118,9 +120,9 @@ ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret);
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop);
 
-ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict);
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
 
-static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
+static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, uint8_t value_type)
 {
 	zend_refcounted *ref = NULL;
 
@@ -147,7 +149,7 @@ static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *v
 	}
 }
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict)
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, uint8_t value_type, bool strict)
 {
 	do {
 		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
@@ -382,8 +384,8 @@ ZEND_API bool zend_gcc_global_regs(void);
 
 #define ZEND_USER_OPCODE_DISPATCH_TO 0x100 /* call original handler of returned opcode */
 
-ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler);
-ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
+ZEND_API int zend_set_user_opcode_handler(uint8_t opcode, user_opcode_handler_t handler);
+ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(uint8_t opcode);
 
 ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data);
 

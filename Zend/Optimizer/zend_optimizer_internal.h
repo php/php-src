@@ -25,6 +25,8 @@
 #include "zend_ssa.h"
 #include "zend_func_info.h"
 
+#include <stdint.h>
+
 #define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
 #define ZEND_OP1_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op1)
 #define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
@@ -81,8 +83,8 @@ int  zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv);
 bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
 bool zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value);
-zend_result zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2);
-zend_result zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1);
+zend_result zend_optimizer_eval_binary_op(zval *result, uint8_t opcode, zval *op1, zval *op2);
+zend_result zend_optimizer_eval_unary_op(zval *result, uint8_t opcode, zval *op1);
 zend_result zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1);
 zend_result zend_optimizer_eval_strlen(zval *result, const zval *op1);
 zend_result zend_optimizer_eval_special_func_call(
@@ -95,7 +97,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
                                     zval          *val);
 bool zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      zend_op       *opline,
-                                     zend_uchar     type,
+                                     uint8_t     type,
                                      uint32_t       var,
                                      zval          *val);
 zend_op *zend_optimizer_get_loop_var_def(const zend_op_array *op_array, zend_op *free_opline);
