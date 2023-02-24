@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     function after bailout). (trowski)
   . Fixed SSA object type update for compound assignment opcodes. (nielsdos)
   . Fixed language scanner generation build. (Daniel Black)
+  . Fixed zend_update_static_property() calling zend_update_static_property_ex()
+    misleadingly with the wrong return type. (nielsdos)
 
 - Curl:
   . Fixed deprecation warning at compile time. (Max Kellermann)
