@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39d455982dfdea9d0b9b646bc207b05f7108d1b2 */
+ * Stub hash: ae6ae27b7e077ca1f46e02d65b9c140569ee6c04 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2202,6 +2202,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+#define arginfo_List_unique arginfo_array_values
+
+#define arginfo_Assoc_unique arginfo_array_values
+
 
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
@@ -2820,6 +2824,8 @@ ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
+ZEND_FUNCTION(List_unique);
+ZEND_FUNCTION(Assoc_unique);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -3468,6 +3474,8 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
+	ZEND_NS_FALIAS("List", unique, List_unique, arginfo_List_unique)
+	ZEND_NS_FALIAS("Assoc", unique, Assoc_unique, arginfo_Assoc_unique)
 	ZEND_FE_END
 };
 

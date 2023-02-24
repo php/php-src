@@ -2,6 +2,8 @@
 
 /** @generate-class-entries */
 
+namespace {
+
 /* array.c */
 
 /**
@@ -86,6 +88,7 @@ const SORT_NATURAL = UNKNOWN;
  * @cvalue PHP_SORT_FLAG_CASE
  */
 const SORT_FLAG_CASE = UNKNOWN;
+
 
 /**
  * @var int
@@ -3530,3 +3533,19 @@ function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bo
 
 function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif
+
+}
+
+namespace List {
+    /**
+     * @compile-time-eval
+     */
+    function unique(array $array): array {}
+}
+
+namespace Assoc {
+    /**
+     * @compile-time-eval
+     */
+    function unique(array $array): array {}
+}

@@ -1,0 +1,83 @@
+--TEST--
+List\unique() and enums
+--FILE--
+<?php
+
+enum Foo {
+    case Bar;
+    case Baz;
+}
+
+$bar = Foo::Bar;
+$bar2 = Foo::Bar;
+
+var_dump(List\unique([
+    Foo::Bar,
+    Foo::Baz,
+    Foo::Baz,
+    Foo::Bar,
+]));
+
+var_dump(List\unique([
+    Foo::Bar,
+    Foo::Bar,
+    Foo::Baz,
+]));
+
+var_dump(List\unique([
+    'a' => Foo::Bar,
+    'b' => Foo::Baz,
+    'c' => Foo::Bar,
+]));
+
+var_dump(List\unique([
+    &$bar,
+    Foo::Bar,
+    &$bar2,
+    Foo::Baz,
+]));
+
+$value2 = "hello";
+$value3 = 0;
+$value4 = &$value2;
+var_dump(List\unique([
+    0,
+    &$value4,
+    &$value2,
+    "hello",
+    &$value3,
+    $value4
+]));
+
+?>
+--EXPECT--
+array(2) {
+  [0]=>
+  enum(Foo::Bar)
+  [1]=>
+  enum(Foo::Baz)
+}
+array(2) {
+  [0]=>
+  enum(Foo::Bar)
+  [1]=>
+  enum(Foo::Baz)
+}
+array(2) {
+  [0]=>
+  enum(Foo::Bar)
+  [1]=>
+  enum(Foo::Baz)
+}
+array(2) {
+  [0]=>
+  &enum(Foo::Bar)
+  [1]=>
+  enum(Foo::Baz)
+}
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  &string(5) "hello"
+}
