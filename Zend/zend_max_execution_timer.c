@@ -57,12 +57,12 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 
 void zend_max_execution_timer_settime(zend_long seconds) /* {{{ }*/
 {
-	timer_t timer = EG(max_execution_timer_timer);
-
-	/* Timer doesn't anymore on request shutdown. */
-	if (timer == (timer_t){0}) {
+	/* Timer not initialized or shutdown. */
+	if (!EG(pid)) {
 		return;
 	}
+
+	timer_t timer = EG(max_execution_timer_timer);
 
 	struct itimerspec its;
 	its.it_value.tv_sec = seconds;
@@ -85,22 +85,15 @@ void zend_max_execution_timer_shutdown(void) /* {{{ */
 		return;
 	}
 
-	timer_t timer = EG(max_execution_timer_timer);
-	if (timer == (timer_t){0}) {
-		/* Don't trigger an error here because the timer may not be initialized when PHP fail early, and on threads created by PHP but not managed by it. */
-# ifdef MAX_EXECUTION_TIMERS_DEBUG
-		fprintf(stderr, "Could not delete timer that has not been created on thread %d\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
-# endif
+	EG(pid) = 0;
 
-		return;
-	}
+	timer_t timer = EG(max_execution_timer_timer);
 
 # ifdef MAX_EXECUTION_TIMERS_DEBUG
 	fprintf(stderr, "Deleting timer %#jx on thread %d...\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
 # endif
 
 	int err = timer_delete(timer);
-	EG(max_execution_timer_timer) = (timer_t){0};
 	if (err != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not delete timer");
 	}
