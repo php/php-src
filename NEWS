@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fix bug GH-8821 (Improve line numbers for errors in constant expressions).
     (ilutov)
   . Fix bug GH-10083 (Allow comments between & and parameter). (ilutov)
+  . Fixed unknown string hash on property fetch with integer constant name.
+    (nielsdos)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
