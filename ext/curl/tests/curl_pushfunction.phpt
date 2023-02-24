@@ -4,7 +4,7 @@ Test CURLMOPT_PUSHFUNCTION
 curl
 --SKIPIF--
 <?php
-if (!getenv("RUN_CADDY_TESTS")) {
+if (!fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
     die("skip test needing Caddy");
 }
 $curl_version = curl_version();

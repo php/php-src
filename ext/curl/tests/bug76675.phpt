@@ -4,11 +4,7 @@ Bug #76675 (Segfault with H2 server push write/writeheader handlers)
 curl
 --SKIPIF--
 <?php
-$curl = curl_init();
-curl_setopt($curl, CURLOPT_URL, "https://localhost/serverpush");
-$data = curl_exec($curl);
-curl_close($curl);
-if (!$data) {
+if (!fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
     die("skip test needing Caddy");
 }
 $curl_version = curl_version();
