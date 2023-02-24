@@ -5055,6 +5055,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 				if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa) != SUCCESS) {
 					goto jit_failure;
 				}
+				info->ssa.cfg.flags |= info->flags;
 				info->flags = info->ssa.cfg.flags;
 			}
 		}
