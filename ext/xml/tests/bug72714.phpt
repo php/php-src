@@ -2,6 +2,10 @@
 Bug #72714 (_xml_startElementHandler() segmentation fault)
 --EXTENSIONS--
 xml
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE < 8) die('skip this test is for 64bit builds only');
+?>
 --FILE--
 <?php
 function startElement($parser, $name, $attribs) {
