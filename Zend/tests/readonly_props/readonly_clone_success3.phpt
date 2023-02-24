@@ -1,33 +1,37 @@
 --TEST--
-Test that __clone() unset properties
+__clone() can indirectly modify unlocked readonly properties
 --FILE--
 <?php
 
 class Foo {
     public function __construct(
-        public readonly stdClass $bar,
+        public readonly array $bar
     ) {}
 
     public function __clone()
     {
-        unset($this->bar);
+        $this->bar['bar'] = 'bar';
     }
 }
 
-$foo = new Foo(new stdClass());
-$foo2 = clone $foo;
-
-var_dump($foo);
-var_dump($foo2);
+$foo = new Foo([]);
+// First call fills the cache slot
+var_dump(clone $foo);
+var_dump(clone $foo);
 
 ?>
 --EXPECTF--
-object(Foo)#1 (%d) {
+object(Foo)#2 (%d) {
   ["bar"]=>
-  object(stdClass)#2 (%d) {
+  array(1) {
+    ["bar"]=>
+    string(3) "bar"
   }
 }
-object(Foo)#3 (%d) {
+object(Foo)#2 (%d) {
   ["bar"]=>
-  uninitialized(stdClass)
+  array(1) {
+    ["bar"]=>
+    string(3) "bar"
+  }
 }

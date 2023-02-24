@@ -1,74 +1,46 @@
 --TEST--
-Test that __clone() can write to readonly properties
+Test that __clone() unset and reassign properties
 --FILE--
 <?php
 
-class Counter
-{
-    private static int $counter = 0;
-
-    public readonly int $count;
-    private readonly int $foo;
-
-    public function __construct()
-    {
-        $this->count = ++self::$counter;
-        $this->foo = 0;
-    }
-
-    public function count(?int $count = null): static
-    {
-        $new = clone $this;
-        $new->count = $count ?? ++self::$counter;
-
-        return $new;
-    }
+class Foo {
+    public function __construct(
+        public readonly stdClass $bar,
+    ) {}
 
     public function __clone()
     {
-        if (is_a(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['class'] ?? '', self::class, true)) {
-            unset($this->count);
-        } else {
-            $this->count = ++self::$counter;
-        }
-        $this->foo = 1;
+        unset($this->bar);
+        var_dump($this);
+        $this->bar = new stdClass();
     }
 }
 
-$a = new Counter();
-var_dump($a);
+$foo = new Foo(new stdClass());
+var_dump($foo);
+$foo2 = clone $foo;
 
-var_dump(clone $a);
-
-$b = $a->count();
-var_dump($b);
-
-$c = $a->count(123);
-var_dump($c);
+var_dump($foo);
+var_dump($foo2);
 
 ?>
 --EXPECTF--
-object(Counter)#%d (2) {
-  ["count"]=>
-  int(1)
-  ["foo":"Counter":private]=>
-  int(0)
+object(Foo)#1 (%d) {
+  ["bar"]=>
+  object(stdClass)#2 (%d) {
+  }
 }
-object(Counter)#%d (2) {
-  ["count"]=>
-  int(2)
-  ["foo":"Counter":private]=>
-  int(1)
+object(Foo)#3 (%d) {
+  ["bar"]=>
+  uninitialized(stdClass)
 }
-object(Counter)#%d (2) {
-  ["count"]=>
-  int(3)
-  ["foo":"Counter":private]=>
-  int(1)
+object(Foo)#1 (%d) {
+  ["bar"]=>
+  object(stdClass)#2 (%d) {
+  }
 }
-object(Counter)#%d (2) {
-  ["count"]=>
-  int(123)
-  ["foo":"Counter":private]=>
-  int(1)
+object(Foo)#3 (%d) {
+  ["bar"]=>
+  object(stdClass)#4 (%d) {
+  }
 }

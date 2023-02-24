@@ -3167,7 +3167,6 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 							ZVAL_COPY(result, ptr);
 						} else if (Z_PROP_FLAG_P(ptr) & IS_PROP_REINITABLE) {
 							Z_PROP_FLAG_P(ptr) &= ~IS_PROP_REINITABLE;
-							ZVAL_COPY(result, ptr);
 						} else {
 							zend_readonly_property_modification_error(prop_info);
 							ZVAL_ERROR(result);
