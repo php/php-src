@@ -2364,7 +2364,7 @@ PHP_FUNCTION(pg_lo_open)
 		CHECK_PGSQL_LINK(link);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-								 "Ols", &pgsql_link, pgsql_link_ce, &oid_long, &mode) == SUCCESS) {
+								 "OlS", &pgsql_link, pgsql_link_ce, &oid_long, &mode) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
