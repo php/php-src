@@ -204,6 +204,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			ZVAL_COPY_VALUE_PROP(dst, src);
 			zval_add_ref(dst);
 			if (has_clone_method) {
+				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
 				Z_PROP_FLAG_P(dst) |= IS_PROP_REINITABLE;
 			}
 
@@ -252,6 +253,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				zval_add_ref(&new_prop);
 			}
 			if (has_clone_method) {
+				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
 				Z_PROP_FLAG_P(&new_prop) |= IS_PROP_REINITABLE;
 			}
 			if (EXPECTED(key)) {
@@ -268,11 +270,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
 			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
-				zend_property_info *prop_info = new_object->ce->properties_info_table[i];
-				if (prop_info && (prop_info->flags & ZEND_ACC_READONLY)) {
-					zval * prop = OBJ_PROP_NUM(new_object, i);
-					Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
-				}
+				zval* prop = OBJ_PROP_NUM(new_object, i);
+				/* Unconditionally remove the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
+				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
 			}
 		}
 
