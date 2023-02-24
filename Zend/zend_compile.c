@@ -2931,6 +2931,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_OBJ_R, &obj_node, &prop_node);
 	if (opline->op2_type == IS_CONST) {
 		convert_to_string(CT_CONSTANT(opline->op2));
+		zend_string_hash_val(Z_STR_P(CT_CONSTANT(opline->op2)));
 		opline->extended_value = zend_alloc_cache_slots(3);
 	}
 
