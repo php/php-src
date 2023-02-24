@@ -4735,7 +4735,7 @@ ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zen
 ZEND_API zend_result zend_update_static_property(zend_class_entry *scope, const char *name, size_t name_length, zval *value) /* {{{ */
 {
 	zend_string *key = zend_string_init(name, name_length, 0);
-	bool retval = zend_update_static_property_ex(scope, key, value);
+	zend_result retval = zend_update_static_property_ex(scope, key, value);
 	zend_string_efree(key);
 	return retval;
 }
