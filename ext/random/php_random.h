@@ -31,6 +31,8 @@
 #ifndef PHP_RANDOM_H
 # define PHP_RANDOM_H
 
+# include "zend_result.h"
+
 PHPAPI double php_combined_lcg(void);
 
 /*
@@ -198,8 +200,8 @@ static inline uint64_t php_random_pcgoneseq128xslrr64_rotr64(php_random_uint128_
 # define php_random_int_throw(min, max, result) php_random_int((min), (max), (result), 1)
 # define php_random_int_silent(min, max, result) php_random_int((min), (max), (result), 0)
 
-PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw);
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
+PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
+PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
 
 typedef struct _php_random_status_ {
 	size_t last_generated_size;
