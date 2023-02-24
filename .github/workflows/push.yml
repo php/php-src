@@ -68,8 +68,6 @@ jobs:
         uses: ./.github/actions/setup-x64
       - name: Test
         uses: ./.github/actions/test-linux
-        env:
-          RUN_CADDY_TESTS: "1"
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
