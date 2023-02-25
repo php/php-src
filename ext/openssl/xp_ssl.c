@@ -1222,7 +1222,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return FAILURE;
 	}
 
-	if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey) < 0) {
+	if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey) == 0) {
 		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
 		EVP_PKEY_free(pkey);
 		return FAILURE;
@@ -1236,7 +1236,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return FAILURE;
 	}
 
-	if (SSL_CTX_set_tmp_dh(ctx, dh) < 0) {
+	if (SSL_CTX_set_tmp_dh(ctx, dh) == 0) {
 		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
 		DH_free(dh);
 		return FAILURE;
