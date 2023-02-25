@@ -678,10 +678,16 @@ function main(): void
 
     putenv("TEST_PHP_EXECUTABLE=$php");
     $environment['TEST_PHP_EXECUTABLE'] = $php;
+    putenv("TEST_PHP_EXECUTABLE_ESCAPED=" . escapeshellarg($php));
+    $environment['TEST_PHP_EXECUTABLE_ESCAPED'] = escapeshellarg($php);
     putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
     $environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
+    putenv("TEST_PHP_CGI_EXECUTABLE_ESCAPED=" . escapeshellarg($php_cgi));
+    $environment['TEST_PHP_CGI_EXECUTABLE_ESCAPED'] = escapeshellarg($php_cgi);
     putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
     $environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
+    putenv("TEST_PHPDBG_EXECUTABLE_ESCAPED=" . escapeshellarg($phpdbg));
+    $environment['TEST_PHPDBG_EXECUTABLE_ESCAPED'] = escapeshellarg($phpdbg);
 
     if ($conf_passed !== null) {
         if (IS_WINDOWS) {
@@ -831,6 +837,7 @@ function verify_config(): void
 function write_information(): void
 {
     global $php, $php_cgi, $phpdbg, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $valgrind, $no_file_cache;
+    $php_escaped = escapeshellarg($php);
 
     // Get info from php
     $info_file = __DIR__ . '/run-test-info.php';
@@ -846,11 +853,12 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     $info_params = [];
     settings2array($ini_overwrites, $info_params);
     $info_params = settings2params($info_params);
-    $php_info = shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\"");
-    define('TESTED_PHP_VERSION', shell_exec("$php -n -r \"echo PHP_VERSION;\""));
+    $php_info = shell_exec("$php_escaped $pass_options $info_params $no_file_cache \"$info_file\"");
+    define('TESTED_PHP_VERSION', shell_exec("$php_escaped -n -r \"echo PHP_VERSION;\""));
 
     if ($php_cgi && $php != $php_cgi) {
-        $php_info_cgi = shell_exec("$php_cgi $pass_options $info_params $no_file_cache -q \"$info_file\"");
+        $php_cgi_escaped = escapeshellarg($php_cgi);
+        $php_info_cgi = shell_exec("$php_cgi_escaped $pass_options $info_params $no_file_cache -q \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
     } else {
@@ -858,7 +866,8 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     }
 
     if ($phpdbg) {
-        $phpdbg_info = shell_exec("$phpdbg $pass_options $info_params $no_file_cache -qrr \"$info_file\"");
+        $phpdbg_escaped = escapeshellarg($phpdbg);
+        $phpdbg_info = shell_exec("$phpdbg_escaped $pass_options $info_params $no_file_cache -qrr \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
     } else {
@@ -884,7 +893,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         }
         echo implode(',', $exts);
         PHP);
-    $extensionsNames = explode(',', shell_exec("$php $pass_options $info_params $no_file_cache \"$info_file\""));
+    $extensionsNames = explode(',', shell_exec("$php_escaped $pass_options $info_params $no_file_cache \"$info_file\""));
     $exts_to_test = array_unique(remap_loaded_extensions_names($extensionsNames));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -1162,6 +1171,13 @@ function system_with_timeout(
     bool $captureStdErr = true
 ) {
     global $valgrind;
+
+    // when proc_open cmd is passed as a string (without bypass_shell=true option) the cmd goes thru shell
+    // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
+    // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
+    if (IS_WINDOWS) {
+        $commandline = 'start "" /b /wait ' . $commandline;
+    }
 
     $data = '';
 
@@ -1838,6 +1854,7 @@ function run_test(string $php, $file, array $env): string
     $org_file = $file;
     $orig_php = $php;
 
+    $php = escapeshellarg($php);
     $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'] ?? null;
     $phpdbg = $env['TEST_PHPDBG_EXECUTABLE'] ?? null;
 
@@ -1898,7 +1915,7 @@ TEST $file
         if (!$php_cgi) {
             return skip_test($tested, $tested_file, $shortname, 'CGI not available');
         }
-        $php = $php_cgi . ' -C ';
+        $php = escapeshellarg($php_cgi) . ' -C ';
         $uses_cgi = true;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
@@ -1909,7 +1926,7 @@ TEST $file
     $extra_options = '';
     if ($test->hasSection('PHPDBG')) {
         if (isset($phpdbg)) {
-            $php = $phpdbg . ' -qIb';
+            $php = escapeshellarg($phpdbg) . ' -qIb';
 
             // Additional phpdbg command line options for sections that need to
             // be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.

@@ -13,7 +13,7 @@ $descriptorspec = array(
    //2 => array("file", "stderr.txt", "ab")
 );
 $pipes = [];
-$cmd = 'cmd.exe "/c START ^"^" /WAIT ' . PHP_BINARY . ' -r ^"var_dump(fgets(STDIN));"';
+$cmd = 'cmd.exe "/c START ^"^" /WAIT ' . getenv('TEST_PHP_EXECUTABLE_ESCAPED') . ' -r ^"var_dump(fgets(STDIN));"';
 $proc = proc_open($cmd, $descriptorspec, $pipes);
 var_dump(is_resource($proc));
 $pid = proc_get_status($proc)['pid'];

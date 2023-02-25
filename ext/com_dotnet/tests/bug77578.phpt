@@ -6,8 +6,8 @@ com_dotnet
 <?php
 // To actually be able to verify the crash during shutdown on Windows, we have
 // to execute a PHP subprocess, and check its exit status.
-$php = PHP_BINARY;
-$extension_dir = ini_get("extension_dir");
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+$extension_dir = escapeshellarg(ini_get("extension_dir"));
 $script = <<<SCRIPT
 if (!extension_loaded('com_dotnet')) dl('com_dotnet');
 ini_set('com.autoregister_typelib', '1');

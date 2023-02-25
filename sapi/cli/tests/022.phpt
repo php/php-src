@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) == "WIN") die("skip non windows test");
 ?>
 --FILE--
 <?php
-$php = getenv("TEST_PHP_EXECUTABLE");
+$php = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
 $socket_file = tempnam(sys_get_temp_dir(), pathinfo(__FILE__, PATHINFO_FILENAME) . '.sock');
 $test_file = __DIR__ . '/' . pathinfo(__FILE__, PATHINFO_FILENAME) . '.inc';
 if (file_exists($socket_file)) {
