@@ -353,6 +353,8 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	size_t length;
 	bool orig_display_errors;
 
+	memset(file_handle, 0, sizeof(zend_file_handle));
+
 	path_info = SG(request_info).request_uri;
 #if HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir) && path_info && '/' == path_info[0] && '~' == path_info[1]) {
