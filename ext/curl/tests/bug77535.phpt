@@ -4,7 +4,7 @@ Bug #77535 (Invalid callback, h2 server push)
 curl
 --SKIPIF--
 <?php
-if (!fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
+if (!@fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
     die("skip test needing Caddy");
 }
 $curl_version = curl_version();

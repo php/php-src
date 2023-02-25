@@ -1,10 +1,13 @@
 --TEST--
 Test CURLMOPT_PUSHFUNCTION
+-CREDITS--
+Davey Shafik
+Kévin Dunglas
 --EXTENSIONS--
 curl
 --SKIPIF--
 <?php
-if (!fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
+if (!@fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
     die("skip test needing Caddy");
 }
 $curl_version = curl_version();
@@ -14,7 +17,7 @@ if ($curl_version['version_number'] < 0x073d00) {
 ?>
 --FILE--
 <?php
-$callback = function($parent_ch, $pushed_ch, array $headers) use (&$transfers) {
+$callback = function($parent_ch, $pushed_ch, array $headers) {
 	return CURL_PUSH_OK;
 };
 
@@ -40,7 +43,6 @@ do {
         if (false !== $info && $info['msg'] == CURLMSG_DONE) {
             $handle = $info['handle'];
             if ($handle !== null) {
-                $transfers--;
 		        $responses[] = curl_multi_getcontent($info['handle']);
                 curl_multi_remove_handle($mh, $handle);
                 curl_close($handle);
