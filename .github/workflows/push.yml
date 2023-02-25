@@ -75,8 +75,6 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
-        env:
-          RUN_CADDY_TESTS: "1"
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:

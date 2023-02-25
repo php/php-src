@@ -4,5 +4,7 @@ runs:
   steps:
     - shell: bash
       run: |
-        sudo curl 'https://caddyserver.com/api/download?os=linux&arch=amd64' > /usr/bin/caddy
+        set -x
+        sudo curl 'https://caddyserver.com/api/download?os=linux&arch=amd64' -o /usr/bin/caddy
+        sudo chmod +x /usr/bin/caddy
         sudo caddy start --config ext/curl/tests/Caddyfile
