@@ -4,7 +4,9 @@ Readonly property can be reset once during cloning even after a type error
 <?php
 
 class Foo {
-    public readonly int $bar;
+    public function __construct(
+        public readonly int $bar
+    ) {}
 
     public function __clone()
     {
@@ -18,7 +20,7 @@ class Foo {
     }
 }
 
-$foo = new Foo();
+$foo = new Foo(1);
 
 var_dump(clone $foo);
 var_dump(clone $foo);
