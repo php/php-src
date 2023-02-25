@@ -115,6 +115,10 @@ PHP                                                                        NEWS
   . Added memfd api usage, on Linux, for zend_shared_alloc_create_lock()
     to create an abstract anonymous file for the opcache's lock. (Max Kellermann)
 
+- OpenSSL:
+  . Added OPENSSL_CMS_OLDMIMETYPE and PKCS7_NOOLDMIMETYPE contants to switch
+    between mime content types. (Daniel Kesselberg)
+
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
   . Added SIGINFO constant. (David Carlier)
