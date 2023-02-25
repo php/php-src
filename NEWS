@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     misleadingly with the wrong return type. (nielsdos)
   . Fix bug GH-10570 (Fixed unknown string hash on property fetch with integer
     constant name). (nielsdos)
+  . Fixed php_fopen_primary_script() call resulted on zend_destroy_file_handle()
+    freeing dangling pointers on the handle as it was uninitialized. (nielsdos)
 
 - Curl:
   . Fixed deprecation warning at compile time. (Max Kellermann)
