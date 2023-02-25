@@ -485,7 +485,7 @@ class DOMCharacterData extends DOMNode implements DOMChildNode
     public ?DOMElement $nextElementSibling;
 
     /** @tentative-return-type */
-    public function appendData(string $data): bool {}
+    public function appendData(string $data): true {}
 
     /** @return string|false */
     public function substringData(int $offset, int $count) {}
