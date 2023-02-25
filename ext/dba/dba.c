@@ -262,9 +262,11 @@ static void dba_close(dba_info *info)
 	if (info->hnd) {
 		info->hnd->close(info);
 	}
-	if (info->path) {
-		pefree(info->path, info->flags&DBA_PERSISTENT);
-	}
+	ZEND_ASSERT(info->path);
+	// Cannot use zend_string_release_ex(info->path, info->flags&DBA_PERSISTENT); as this fails GC assertion?
+	zend_string_free(info->path);
+	info->path = NULL;
+
 	if (info->fp && info->fp != info->lock.fp) {
 		if (info->flags & DBA_PERSISTENT) {
 			php_stream_pclose(info->fp);
@@ -431,7 +433,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 /* }}} */
 
 /* {{{ php_find_dbm */
-static dba_info *php_dba_find(const char* path)
+static dba_info *php_dba_find(const zend_string *path)
 {
 	zend_resource *le;
 	dba_info *info;
@@ -444,7 +446,7 @@ static dba_info *php_dba_find(const char* path)
 		}
 		if (le->type == le_db || le->type == le_pdb) {
 			info = (dba_info *)(le->ptr);
-			if (!strcmp(info->path, path)) {
+			if (zend_string_equals(path, info->path)) {
 				return (dba_info *)(le->ptr);
 			}
 		}
@@ -467,7 +469,6 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	const char *file_mode;
 	const char *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
-	zend_string *opened_path = NULL;
 	char *lock_name;
 #ifdef PHP_WIN32
 	bool restarted = 0;
@@ -724,7 +725,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 
 	info = pemalloc(sizeof(dba_info), persistent);
 	memset(info, 0, sizeof(dba_info));
-	info->path = pestrdup(ZSTR_VAL(path), persistent);
+	info->path = zend_string_dup(path, persistent);
 	info->mode = modenr;
 	info->file_permission = permission;
 	info->map_size = map_size;
@@ -753,8 +754,9 @@ restart:
 		if (is_db_lock) {
 			lock_name = ZSTR_VAL(path);
 		} else {
-			spprintf(&lock_name, 0, "%s.lck", info->path);
+			spprintf(&lock_name, 0, "%s.lck", ZSTR_VAL(info->path));
 			if (!strcmp(file_mode, "r")) {
+				zend_string *opened_path = NULL;
 				/* when in read only mode try to use existing .lck file first */
 				/* do not log errors for .lck file while in read only mode on .lck file */
 				lock_file_mode = "rb";
@@ -769,13 +771,17 @@ restart:
 			}
 		}
 		if (!info->lock.fp) {
+			zend_string *opened_path = NULL;
 			info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, &opened_path);
 			if (info->lock.fp) {
 				if (is_db_lock) {
+					ZEND_ASSERT(opened_path);
 					/* replace the path info with the real path of the opened file */
-					pefree(info->path, persistent);
-					info->path = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
+					zend_string_release_ex(info->path, persistent);
+					info->path = zend_string_dup(opened_path, persistent);
 				}
+			}
+			if (opened_path) {
 				zend_string_release_ex(opened_path, 0);
 			}
 		}
@@ -801,7 +807,7 @@ restart:
 		if (info->lock.fp && is_db_lock) {
 			info->fp = info->lock.fp; /* use the same stream for locking and database access */
 		} else {
-			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, NULL);
+			info->fp = php_stream_open_wrapper(ZSTR_VAL(info->path), file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, NULL);
 		}
 		if (!info->fp) {
 			dba_close(info);
@@ -1207,7 +1213,7 @@ PHP_FUNCTION(dba_list)
 		}
 		if (le->type == le_db || le->type == le_pdb) {
 			info = (dba_info *)(le->ptr);
-			add_index_string(return_value, i, info->path);
+			add_index_str(return_value, i, zend_string_copy(info->path));
 		}
 	}
 }
