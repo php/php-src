@@ -868,6 +868,7 @@ ZEND_FUNCTION(method_exists)
 	zend_class_entry *ce;
 	zend_function *func;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(klass)
 		Z_PARAM_STR(method_name)
@@ -930,6 +931,7 @@ ZEND_FUNCTION(property_exists)
 	zend_class_entry *ce;
 	zend_property_info *property_info;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &object, &property) == FAILURE) {
 		RETURN_THROWS();
 	}
