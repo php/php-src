@@ -4014,7 +4014,7 @@ static void preload_link(void)
 				zend_error_at(
 					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
-			} else if (preload_resolve_deps(&error, ce)) {
+			} else if (preload_resolve_deps(&error, ce) == FAILURE) {
 				zend_error_at(
 					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload unlinked class %s: %s%s",
