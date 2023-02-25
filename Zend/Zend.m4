@@ -269,12 +269,12 @@ fi
 AC_MSG_CHECKING(whether to enable zend signal handling)
 AC_MSG_RESULT($ZEND_SIGNALS)
 
-dnl By default, enable Zend Max Execution Timers only for ZTS builds
+dnl Don't enable Zend Max Execution Timers by default until PHP 8.3 to not break the ABI
 AC_ARG_ENABLE([zend-max-execution-timers],
   [AS_HELP_STRING([--enable-zend-max-execution-timers],
     [whether to enable zend max execution timers])],
     [ZEND_MAX_EXECUTION_TIMERS=$enableval],
-    [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
+    [ZEND_MAX_EXECUTION_TIMERS='no'])
 
 AS_CASE(["$host_alias"], [*linux*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
 
