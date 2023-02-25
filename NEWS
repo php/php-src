@@ -54,6 +54,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
 
+- OpenSSL:
+  . Fixed php_openssl_set_server_dh_param() DH params errors handling. (nielsdos)
+
 - PDO OCI:
   . Fixed bug #60994 (Reading a multibyte CLOB caps at 8192 chars).
     (Michael Voříšek)
