@@ -3365,11 +3365,9 @@ static zend_never_inline zend_result zend_fetch_static_property_address_ex(zval 
 		}
 		*retval = zend_std_get_static_property_with_info(ce, name, fetch_type, &property_info);
 
-		if (UNEXPECTED(op1_type != IS_CONST)) {
-			zend_tmp_string_release(tmp_name);
+		zend_tmp_string_release(tmp_name);
 
-			FREE_OP(op1_type, opline->op1.var);
-		}
+		FREE_OP(op1_type, opline->op1.var);
 	}
 
 	if (UNEXPECTED(*retval == NULL)) {
