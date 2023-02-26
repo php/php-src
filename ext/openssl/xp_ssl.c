@@ -1237,7 +1237,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return FAILURE;
 	}
 
-	if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey) < 0) {
+	if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey) == 0) {
 		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
 		EVP_PKEY_free(pkey);
 		return FAILURE;
@@ -1251,7 +1251,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return FAILURE;
 	}
 
-	if (SSL_CTX_set_tmp_dh(ctx, dh) < 0) {
+	if (SSL_CTX_set_tmp_dh(ctx, dh) == 0) {
 		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
 		DH_free(dh);
 		return FAILURE;
@@ -1320,7 +1320,10 @@ static int php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx
 		php_error_docref(NULL, E_WARNING, "rsa_key_size context option has been removed");
 	}
 
-	php_openssl_set_server_dh_param(stream, ctx);
+	if (php_openssl_set_server_dh_param(stream, ctx) == FAILURE) {
+		return FAILURE;
+	}
+
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "single_dh_use");
 	if (zv == NULL || zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
