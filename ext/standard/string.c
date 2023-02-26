@@ -5292,7 +5292,7 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		zend_argument_value_error(2, "must be between 1 and 4 (inclusive)");
+		zend_argument_value_error(2, "must be between 0 and 4 (inclusive)");
 		RETURN_THROWS();
 	}
 
