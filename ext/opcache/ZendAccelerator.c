@@ -3742,10 +3742,11 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 	do {
 		ok = 1;
 		changed = 0;
-		ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+		zend_string *const_name;
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->constants_table, const_name, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-				if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
+				if (EXPECTED(zend_update_class_constant(val, const_name, c->ce) == SUCCESS)) {
 					was_changed = changed = 1;
 				} else {
 					ok = 0;

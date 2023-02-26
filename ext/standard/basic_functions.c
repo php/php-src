@@ -596,7 +596,7 @@ PHP_FUNCTION(constant)
 
 	ZVAL_COPY_OR_DUP(return_value, c);
 	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
-		if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
+		if (UNEXPECTED(zend_update_class_constant(return_value, const_name, scope) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 	}

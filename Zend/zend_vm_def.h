@@ -5914,7 +5914,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			}
 			value = &c->value;
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				zval_update_constant_ex(value, c->ce);
+				zend_update_class_constant(value, Z_STR_P(RT_CONSTANT(opline, opline->op2)), c->ce);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					HANDLE_EXCEPTION();

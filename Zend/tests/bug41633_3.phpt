@@ -9,7 +9,7 @@ class Foo {
 echo Foo::A;
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot declare self-referencing constant Foo::B in %s:%d
+Fatal error: Uncaught Error: Cannot declare self-referencing constant Foo::A in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug41633_3.php on line %d

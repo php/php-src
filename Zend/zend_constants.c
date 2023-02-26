@@ -380,25 +380,31 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 	}
 
 	if (ret_constant && Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
-		zend_result ret;
-
-		if (IS_CONSTANT_VISITED(ret_constant)) {
-			zend_throw_error(NULL, "Cannot declare self-referencing constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-			ret_constant = NULL;
-			goto failure;
-		}
-
-		MARK_CONSTANT_VISITED(ret_constant);
-		ret = zval_update_constant_ex(ret_constant, c->ce);
-		RESET_CONSTANT_VISITED(ret_constant);
-
-		if (UNEXPECTED(ret != SUCCESS)) {
+		if (UNEXPECTED(zend_update_class_constant(ret_constant, constant_name, c->ce) != SUCCESS)) {
 			ret_constant = NULL;
 			goto failure;
 		}
 	}
 failure:
 	return ret_constant;
+}
+
+ZEND_API zend_result zend_update_class_constant(zval *const_zv, zend_string *constant_name, zend_class_entry *ce)
+{
+	if (Z_TYPE_P(const_zv) != IS_CONSTANT_AST) {
+		return SUCCESS;
+	}
+
+	if (IS_CONSTANT_VISITED(const_zv)) {
+		zend_throw_error(NULL, "Cannot declare self-referencing constant %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(constant_name));
+		return FAILURE;
+	}
+
+	MARK_CONSTANT_VISITED(const_zv);
+	zend_result result = zval_update_constant_ex(const_zv, ce);
+	RESET_CONSTANT_VISITED(const_zv);
+
+	return result;
 }
 
 ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)

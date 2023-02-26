@@ -1429,7 +1429,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 				}
 
 				val = &c->value;
-				if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(val, name, c->ce) != SUCCESS)) {
 					return FAILURE;
 				}
 			}
