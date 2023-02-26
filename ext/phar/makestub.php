@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 $s = str_replace("\r", '', file_get_contents(dirname(__FILE__) . '/shortarc.php'));
 
