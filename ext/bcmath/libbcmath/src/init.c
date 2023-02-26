@@ -29,9 +29,9 @@
 
 *************************************************************************/
 
-#include "config.h"
-#include <stdbool.h>
 #include "bcmath.h"
+#include <stdbool.h>
+#include "zend_alloc.h"
 
 /* new_num allocates a number and sets fields to known values. */
 bc_num _bc_new_num_ex(int length, int scale, bool persistent)

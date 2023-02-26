@@ -29,9 +29,9 @@
 
 *************************************************************************/
 
-#include "config.h" /* For emalloc */
 #include "bcmath.h"
 #include <stdbool.h>
+#include "zend_alloc.h"
 
 
 /* The following routines provide output for bcd numbers package

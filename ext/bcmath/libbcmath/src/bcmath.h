@@ -54,8 +54,9 @@ typedef struct bc_struct {
 #endif
 
 #include <stdbool.h>
+#include "zend_string.h"
 #include "php.h" /* Needed for safe_pemalloc() in init.c */
-#include "../../php_bcmath.h"
+#include "../../php_bcmath.h" /* Needed for BCG() macro */
 
 /* The base used in storing the numbers in n_value above.
    Currently this MUST be 10. */

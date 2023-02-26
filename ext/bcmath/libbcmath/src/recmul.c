@@ -32,8 +32,8 @@
 #include "bcmath.h"
 #include <assert.h>
 #include <stdbool.h>
-#include "config.h" /* For emalloc() */
 #include "private.h" /* For _bc_rm_leading_zeros() */
+#include "zend_alloc.h"
 
 /* Recursive vs non-recursive multiply crossover ranges. */
 #if defined(MULDIGITS)

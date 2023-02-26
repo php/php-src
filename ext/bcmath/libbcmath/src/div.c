@@ -29,10 +29,10 @@
 
 *************************************************************************/
 
-#include "config.h" /* For safe_emalloc() */
 #include "bcmath.h"
 #include "private.h"
 #include <stdbool.h>
+#include "zend_alloc.h"
 
 
 /* Some utility routines for the divide:  First a one digit multiply.

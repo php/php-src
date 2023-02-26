@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include "private.h"
+#include <string.h>
 
 
 /* Here is the full add routine that takes care of negative numbers.
