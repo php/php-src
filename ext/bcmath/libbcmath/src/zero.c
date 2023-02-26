@@ -39,30 +39,25 @@
 
 /* In some places we need to check if the number NUM is zero. */
 
-char
-bc_is_zero_for_scale (bc_num num, int scale)
+char bc_is_zero_for_scale (bc_num num, int scale)
 {
-  int  count;
-  char *nptr;
+	int  count;
+	char *nptr;
 
-  /* Quick check. */
-  if (num == BCG(_zero_)) return TRUE;
+	/* Quick check. */
+	if (num == BCG(_zero_)) return TRUE;
 
-  /* Initialize */
-  count = num->n_len + scale;
-  nptr = num->n_value;
+	/* Initialize */
+	count = num->n_len + scale;
+	nptr = num->n_value;
 
-  /* The check */
-  while ((count > 0) && (*nptr++ == 0)) count--;
+	/* The check */
+	while ((count > 0) && (*nptr++ == 0)) count--;
 
-  if (count != 0)
-    return FALSE;
-  else
-    return TRUE;
+	return count == 0;
 }
 
-char
-bc_is_zero (bc_num num)
+char bc_is_zero (bc_num num)
 {
-  return bc_is_zero_for_scale(num, num->n_scale);
+	return bc_is_zero_for_scale(num, num->n_scale);
 }

@@ -36,20 +36,18 @@ typedef enum {PLUS, MINUS} sign;
 
 typedef struct bc_struct *bc_num;
 
-typedef struct bc_struct
-    {
-      sign  n_sign;
-      int   n_len;	/* The number of digits before the decimal point. */
-      int   n_scale;	/* The number of digits after the decimal point. */
-      int   n_refs;     /* The number of pointers to this number. */
-      char *n_ptr;	/* The pointer to the actual storage.
-			   If NULL, n_value points to the inside of
-			   another number (bc_multiply...) and should
-			   not be "freed." */
-      char *n_value;	/* The number. Not zero char terminated.
-			   May not point to the same place as n_ptr as
-			   in the case of leading zeros generated. */
-    } bc_struct;
+typedef struct bc_struct {
+	sign  n_sign;
+	int   n_len;   /* The number of digits before the decimal point. */
+	int   n_scale; /* The number of digits after the decimal point. */
+	int   n_refs;  /* The number of pointers to this number. */
+	char *n_ptr;   /* The pointer to the actual storage.
+	                  If NULL, n_value points to the inside of another number
+	                  (bc_multiply...) and should not be "freed." */
+	char *n_value;  /* The number. Not zero char terminated.
+	                   May not point to the same place as n_ptr as
+	                   in the case of leading zeros generated. */
+} bc_struct;
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

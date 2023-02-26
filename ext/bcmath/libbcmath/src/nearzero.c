@@ -38,22 +38,26 @@
 
 bool bc_is_near_zero(bc_num num, int scale)
 {
-  int  count;
-  char *nptr;
+	int  count;
+	char *nptr;
 
-  /* Error checking */
-  if (scale > num->n_scale)
-    scale = num->n_scale;
+	/* Error checking */
+	if (scale > num->n_scale) {
+		scale = num->n_scale;
+	}
 
-  /* Initialize */
-  count = num->n_len + scale;
-  nptr = num->n_value;
+	/* Initialize */
+	count = num->n_len + scale;
+	nptr = num->n_value;
 
-  /* The check */
-  while ((count > 0) && (*nptr++ == 0)) count--;
+	/* The check */
+	while ((count > 0) && (*nptr++ == 0)) {
+		count--;
+	}
 
-  if (count != 0 && (count != 1 || *--nptr != 1))
-    return false;
-  else
-    return true;
+	if (count != 0 && (count != 1 || *--nptr != 1)) {
+		return false;
+	} else {
+		return true;
+	}
 }

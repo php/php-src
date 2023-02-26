@@ -42,15 +42,14 @@
    Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
    only the integer part is used.  */
 
-void
-bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
+void bc_raise(bc_num num1, bc_num num2, bc_num *result, int scale)
 {
-   bc_num temp, power;
-   long exponent;
-   int rscale;
-   int pwrscale;
-   int calcscale;
-   char neg;
+	bc_num temp, power;
+	long exponent;
+	int rscale;
+	int pwrscale;
+	int calcscale;
+	char neg;
 
 	/* Check the exponent for scale digits and convert to a long. */
 	if (num2->n_scale != 0) {
@@ -65,64 +64,56 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
 		return;
 	}
 
-   /* Special case if exponent is a zero. */
-   if (exponent == 0)
-     {
-       bc_free_num (result);
-       *result = bc_copy_num (BCG(_one_));
-       return;
-     }
+	/* Special case if exponent is a zero. */
+	if (exponent == 0) {
+		bc_free_num (result);
+		*result = bc_copy_num (BCG(_one_));
+		return;
+	}
 
-   /* Other initializations. */
-   if (exponent < 0)
-     {
-       neg = TRUE;
-       exponent = -exponent;
-       rscale = scale;
-     }
-   else
-     {
-       neg = FALSE;
-       rscale = MIN (num1->n_scale*exponent, MAX(scale, num1->n_scale));
-     }
+	/* Other initializations. */
+	if (exponent < 0) {
+		neg = TRUE;
+		exponent = -exponent;
+		rscale = scale;
+	} else {
+		neg = FALSE;
+		rscale = MIN (num1->n_scale*exponent, MAX(scale, num1->n_scale));
+	}
 
-   /* Set initial value of temp.  */
-   power = bc_copy_num (num1);
-   pwrscale = num1->n_scale;
-   while ((exponent & 1) == 0)
-     {
-       pwrscale = 2*pwrscale;
-       bc_multiply (power, power, &power, pwrscale);
-       exponent = exponent >> 1;
-     }
-   temp = bc_copy_num (power);
-   calcscale = pwrscale;
-   exponent = exponent >> 1;
+	/* Set initial value of temp. */
+	power = bc_copy_num (num1);
+	pwrscale = num1->n_scale;
+	while ((exponent & 1) == 0) {
+		pwrscale = 2*pwrscale;
+		bc_multiply (power, power, &power, pwrscale);
+		exponent = exponent >> 1;
+	}
+	temp = bc_copy_num (power);
+	calcscale = pwrscale;
+	exponent = exponent >> 1;
 
-   /* Do the calculation. */
-   while (exponent > 0)
-     {
-       pwrscale = 2*pwrscale;
-       bc_multiply (power, power, &power, pwrscale);
-       if ((exponent & 1) == 1) {
-	 calcscale = pwrscale + calcscale;
-	 bc_multiply (temp, power, &temp, calcscale);
-       }
-       exponent = exponent >> 1;
-     }
+	/* Do the calculation. */
+	while (exponent > 0) {
+		pwrscale = 2*pwrscale;
+		bc_multiply (power, power, &power, pwrscale);
+		if ((exponent & 1) == 1) {
+			calcscale = pwrscale + calcscale;
+			bc_multiply (temp, power, &temp, calcscale);
+		}
+		exponent = exponent >> 1;
+	}
 
-   /* Assign the value. */
-   if (neg)
-     {
-       bc_divide (BCG(_one_), temp, result, rscale);
-       bc_free_num (&temp);
-     }
-   else
-     {
-       bc_free_num (result);
-       *result = temp;
-       if ((*result)->n_scale > rscale)
-	 (*result)->n_scale = rscale;
-     }
-   bc_free_num (&power);
+	/* Assign the value. */
+	if (neg) {
+		bc_divide (BCG(_one_), temp, result, rscale);
+		bc_free_num (&temp);
+	} else {
+		bc_free_num (result);
+		*result = temp;
+		if ((*result)->n_scale > rscale) {
+			(*result)->n_scale = rscale;
+		}
+	}
+	bc_free_num (&power);
 }

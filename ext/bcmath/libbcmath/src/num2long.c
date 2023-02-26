@@ -39,30 +39,31 @@
 
 long bc_num2long(bc_num num)
 {
-  long val;
-  char *nptr;
-  int  index;
+	long val;
+	char *nptr;
+	int  index;
 
-  /* Extract the int value, ignore the fraction. */
-  val = 0;
-  nptr = num->n_value;
-  for (index = num->n_len; index > 0; index--) {
-    char n = *nptr++;
+	/* Extract the int value, ignore the fraction. */
+	val = 0;
+	nptr = num->n_value;
+	for (index = num->n_len; index > 0; index--) {
+		char n = *nptr++;
 
-    if (val > LONG_MAX/BASE) {
-      return 0;
-    }
-    val *= BASE;
+		if (val > LONG_MAX/BASE) {
+			return 0;
+		}
+		val *= BASE;
 
-    if (val > LONG_MAX - n) {
-      return 0;
-    }
-    val += n;
-  }
+		if (val > LONG_MAX - n) {
+			return 0;
+		}
+		val += n;
+	}
 
-  /* Return the value. */
-  if (num->n_sign == PLUS)
-    return (val);
-  else
-    return (-val);
+	/* Return the value. */
+	if (num->n_sign == PLUS) {
+		return (val);
+	} else {
+		return (-val);
+	}
 }
