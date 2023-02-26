@@ -2901,7 +2901,7 @@ int spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
 	}
 } /* }}} */
 
-void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
+static void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
 {
 	while (spl_dual_it_valid(intern) != SUCCESS) {
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
@@ -2912,7 +2912,7 @@ void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
 	spl_dual_it_fetch(intern, 0);
 } /* }}} */
 
-void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
+static void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
 {
 	if (spl_dual_it_valid(intern) == SUCCESS) {
 		spl_dual_it_next(intern, 1);
