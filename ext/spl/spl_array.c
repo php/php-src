@@ -1054,7 +1054,7 @@ static const zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_get_gc,
 };
 
-zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+static zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	zend_object_iterator *iterator = emalloc(sizeof(zend_object_iterator));
 	zend_iterator_init(iterator);
