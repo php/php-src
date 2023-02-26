@@ -29,13 +29,8 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
+#include "config.h" /* For emalloc */
 #include "bcmath.h"
-#include "private.h"
 
 
 /* The following routines provide output for bcd numbers package

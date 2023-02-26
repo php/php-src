@@ -29,9 +29,7 @@
 
 *************************************************************************/
 
-#include <config.h>
 #include "bcmath.h"
-
 
 /* Convert an integer VAL to a bc number NUM. */
 

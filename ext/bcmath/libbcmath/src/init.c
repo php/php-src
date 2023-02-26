@@ -29,13 +29,8 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
+#include "config.h"
 #include "bcmath.h"
-#include "private.h"
 
 /* new_num allocates a number and sets fields to known values. */
 bc_num _bc_new_num_ex(int length, int scale, int persistent)

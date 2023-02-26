@@ -29,13 +29,7 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
 
 /* In some places we need to check if the number NUM is zero. */
 

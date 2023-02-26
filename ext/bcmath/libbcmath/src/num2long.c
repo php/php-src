@@ -29,7 +29,6 @@
 
 *************************************************************************/
 
-#include <config.h>
 #include "bcmath.h"
 
 /* Convert a number NUM to a long.  The function returns only the integer

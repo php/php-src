@@ -29,13 +29,8 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
+#include "config.h" /* For zend_string */
 #include "bcmath.h"
-#include "private.h"
 
 /* Convert a numbers to a string.  Base 10 only.*/
 zend_string *bc_num2str_ex(bc_num num, int scale)

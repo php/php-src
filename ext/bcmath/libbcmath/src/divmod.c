@@ -29,13 +29,7 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
 
 
 /* Division *and* modulo for numbers.  This computes both NUM1 / NUM2 and

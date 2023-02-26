@@ -29,10 +29,8 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdbool.h>
 #include "bcmath.h"
-#include "private.h"
+#include <stdbool.h>
 
 /* Take the square root NUM and return it in NUM with SCALE digits
    after the decimal place. */

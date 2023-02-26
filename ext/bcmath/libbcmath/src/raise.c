@@ -29,13 +29,9 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
+#include <stdbool.h>
+#include "zend_exceptions.h" /* zend_argument_value_error() */
 
 
 /* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
@@ -49,7 +45,7 @@ void bc_raise(bc_num num1, bc_num num2, bc_num *result, int scale)
 	int rscale;
 	int pwrscale;
 	int calcscale;
-	char neg;
+	bool is_neg;
 
 	/* Check the exponent for scale digits and convert to a long. */
 	if (num2->n_scale != 0) {
@@ -73,11 +69,11 @@ void bc_raise(bc_num num1, bc_num num2, bc_num *result, int scale)
 
 	/* Other initializations. */
 	if (exponent < 0) {
-		neg = TRUE;
+		is_neg = true;
 		exponent = -exponent;
 		rscale = scale;
 	} else {
-		neg = FALSE;
+		is_neg = false;
 		rscale = MIN (num1->n_scale*exponent, MAX(scale, num1->n_scale));
 	}
 
@@ -105,7 +101,7 @@ void bc_raise(bc_num num1, bc_num num2, bc_num *result, int scale)
 	}
 
 	/* Assign the value. */
-	if (neg) {
+	if (is_neg) {
 		bc_divide (BCG(_one_), temp, result, rscale);
 		bc_free_num (&temp);
 	} else {

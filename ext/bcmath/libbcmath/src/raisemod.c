@@ -29,13 +29,9 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
+#include "config.h"
+#include "zend_result.h"
 #include "zend_exceptions.h"
 
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */

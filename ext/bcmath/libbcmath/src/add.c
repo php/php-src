@@ -29,11 +29,6 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
 
@@ -54,7 +49,7 @@ void bc_add (bc_num n1, bc_num n2, bc_num *result, int scale_min)
 	} else {
 		/* subtraction must be done. */
 		/* Compare magnitudes. */
-		cmp_res = _bc_do_compare(n1, n2, FALSE, FALSE);
+		cmp_res = _bc_do_compare(n1, n2, false, false);
 		switch (cmp_res) {
 			case -1:
 				/* n1 is less than n2, subtract n1 from n2. */

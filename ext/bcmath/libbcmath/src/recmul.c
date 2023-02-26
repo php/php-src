@@ -29,10 +29,10 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <assert.h>
 #include "bcmath.h"
-#include "private.h"
+#include <assert.h>
+#include "config.h" /* For emalloc() */
+#include "private.h" /* For _bc_rm_leading_zeros() */
 
 /* Recursive vs non-recursive multiply crossover ranges. */
 #if defined(MULDIGITS)
