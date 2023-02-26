@@ -1438,7 +1438,7 @@ PHP_FUNCTION(xml_parser_set_option)
 			break;
 		}
 		default:
-			zend_argument_value_error(2, "must be a PHP_XML_OPTION_* constant");
+			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();
 			break;
 	}
@@ -1473,7 +1473,7 @@ PHP_FUNCTION(xml_parser_get_option)
 			RETURN_STRING((char *)parser->target_encoding);
 			break;
 		default:
-			zend_argument_value_error(2, "must be a PHP_XML_OPTION_* constant");
+			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();
 	}
 }

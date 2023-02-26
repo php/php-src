@@ -5305,7 +5305,7 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		zend_argument_value_error(2, "must be between 1 and 4 (inclusive)");
+		zend_argument_value_error(2, "must be between 0 and 4 (inclusive)");
 		RETURN_THROWS();
 	}
 
@@ -5958,7 +5958,7 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if ((size_t)offset > ZSTR_LEN(s1)) {
-		zend_argument_value_error(3, "must be contained in argument #1 ($main_str)");
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
 
