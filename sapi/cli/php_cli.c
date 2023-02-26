@@ -734,6 +734,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					break;
 				}
 				behavior=PHP_MODE_LINT;
+				/* We want to set the error exit status if at least one lint failed.
+				 * If all were successful we set the exit status to 0.
+				 * We already set EG(exit_status) here such that only failures set the exit status. */
+				EG(exit_status) = 0;
 				break;
 
 			case 'q': /* do not generate HTTP headers */
@@ -962,7 +966,6 @@ do_repeat:
 		case PHP_MODE_LINT:
 			if (php_lint_script(&file_handle) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", php_self);
-				EG(exit_status) = 0;
 			} else {
 				zend_printf("Errors parsing %s\n", php_self);
 				EG(exit_status) = 255;
@@ -1131,6 +1134,12 @@ out:
 	}
 	if (translated_path) {
 		free(translated_path);
+	}
+	if (behavior == PHP_MODE_LINT && argc > php_optind && strcmp(argv[php_optind],"--")) {
+		script_file = NULL;
+		request_started = 0;
+		translated_path = NULL;
+		goto do_repeat;
 	}
 	/* Don't repeat fork()ed processes. */
 	if (--num_repeats && pid == getpid()) {

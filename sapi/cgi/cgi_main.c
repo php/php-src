@@ -2268,107 +2268,109 @@ parent_loop_end:
 			init_request_info(request);
 
 			if (!cgi && !fastcgi) {
-				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
-					switch (c) {
+				if (behavior != PHP_MODE_LINT) {
+					while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
+						switch (c) {
 
-						case 'a':	/* interactive mode */
-							printf("Interactive mode enabled\n\n");
-							fflush(stdout);
-							break;
+							case 'a':	/* interactive mode */
+								printf("Interactive mode enabled\n\n");
+								fflush(stdout);
+								break;
 
-						case 'C': /* don't chdir to the script directory */
-							SG(options) |= SAPI_OPTION_NO_CHDIR;
-							break;
+							case 'C': /* don't chdir to the script directory */
+								SG(options) |= SAPI_OPTION_NO_CHDIR;
+								break;
 
-						case 'e': /* enable extended info output */
-							CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
-							break;
+							case 'e': /* enable extended info output */
+								CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+								break;
 
-						case 'f': /* parse file */
-							if (script_file) {
-								efree(script_file);
-							}
-							script_file = estrdup(php_optarg);
-							no_headers = 1;
-							break;
+							case 'f': /* parse file */
+								if (script_file) {
+									efree(script_file);
+								}
+								script_file = estrdup(php_optarg);
+								no_headers = 1;
+								break;
 
-						case 'i': /* php info & quit */
-							if (script_file) {
-								efree(script_file);
-							}
-							if (php_request_startup() == FAILURE) {
-								SG(server_context) = NULL;
-								php_module_shutdown();
-								free(bindpath);
-								return FAILURE;
-							}
-							if (no_headers) {
+							case 'i': /* php info & quit */
+								if (script_file) {
+									efree(script_file);
+								}
+								if (php_request_startup() == FAILURE) {
+									SG(server_context) = NULL;
+									php_module_shutdown();
+									free(bindpath);
+									return FAILURE;
+								}
+								if (no_headers) {
+									SG(headers_sent) = 1;
+									SG(request_info).no_headers = 1;
+								}
+								php_print_info(0xFFFFFFFF);
+								php_request_shutdown((void *) 0);
+								fcgi_shutdown();
+								exit_status = 0;
+								goto out;
+
+							case 'l': /* syntax check mode */
+								no_headers = 1;
+								behavior = PHP_MODE_LINT;
+								break;
+
+							case 'm': /* list compiled in modules */
+								if (script_file) {
+									efree(script_file);
+								}
+								SG(headers_sent) = 1;
+								php_printf("[PHP Modules]\n");
+								print_modules();
+								php_printf("\n[Zend Modules]\n");
+								print_extensions();
+								php_printf("\n");
+								php_output_end_all();
+								fcgi_shutdown();
+								exit_status = 0;
+								goto out;
+
+							case 'q': /* do not generate HTTP headers */
+								no_headers = 1;
+								break;
+
+							case 'v': /* show php version & quit */
+								if (script_file) {
+									efree(script_file);
+								}
+								no_headers = 1;
+								if (php_request_startup() == FAILURE) {
+									SG(server_context) = NULL;
+									php_module_shutdown();
+									free(bindpath);
+									return FAILURE;
+								}
 								SG(headers_sent) = 1;
 								SG(request_info).no_headers = 1;
-							}
-							php_print_info(0xFFFFFFFF);
-							php_request_shutdown((void *) 0);
-							fcgi_shutdown();
-							exit_status = 0;
-							goto out;
+	#if ZEND_DEBUG
+								php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+	#else
+								php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+	#endif
+								php_request_shutdown((void *) 0);
+								fcgi_shutdown();
+								exit_status = 0;
+								goto out;
 
-						case 'l': /* syntax check mode */
-							no_headers = 1;
-							behavior = PHP_MODE_LINT;
-							break;
+							case 'w':
+								behavior = PHP_MODE_STRIP;
+								break;
 
-						case 'm': /* list compiled in modules */
-							if (script_file) {
-								efree(script_file);
-							}
-							SG(headers_sent) = 1;
-							php_printf("[PHP Modules]\n");
-							print_modules();
-							php_printf("\n[Zend Modules]\n");
-							print_extensions();
-							php_printf("\n");
-							php_output_end_all();
-							fcgi_shutdown();
-							exit_status = 0;
-							goto out;
+							case 'z': /* load extension file */
+								zend_load_extension(php_optarg);
+								break;
 
-						case 'q': /* do not generate HTTP headers */
-							no_headers = 1;
-							break;
-
-						case 'v': /* show php version & quit */
-							if (script_file) {
-								efree(script_file);
-							}
-							no_headers = 1;
-							if (php_request_startup() == FAILURE) {
-								SG(server_context) = NULL;
-								php_module_shutdown();
-								free(bindpath);
-								return FAILURE;
-							}
-							SG(headers_sent) = 1;
-							SG(request_info).no_headers = 1;
-#if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
-							php_request_shutdown((void *) 0);
-							fcgi_shutdown();
-							exit_status = 0;
-							goto out;
-
-						case 'w':
-							behavior = PHP_MODE_STRIP;
-							break;
-
-						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
-							break;
-
-						default:
-							break;
+							default:
+								break;
+						}
 					}
 				}
 
@@ -2512,7 +2514,6 @@ parent_loop_end:
 					PG(during_request_startup) = 0;
 					if (php_lint_script(&file_handle) == SUCCESS) {
 						zend_printf("No syntax errors detected in %s\n", ZSTR_VAL(file_handle.filename));
-						exit_status = 0;
 					} else {
 						zend_printf("Errors parsing %s\n", ZSTR_VAL(file_handle.filename));
 						exit_status = -1;
@@ -2580,6 +2581,11 @@ fastcgi_request_done:
 							continue;
 						}
 					}
+				}
+				if (behavior == PHP_MODE_LINT && argc - 1 > php_optind) {
+					php_optind++;
+					script_file = NULL;
+					continue;
 				}
 				break;
 			}
