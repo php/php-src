@@ -87,6 +87,9 @@ PHP 8.3 UPGRADE NOTES
     in a parent class or implemented interface.
     RFC: https://wiki.php.net/rfc/marking_overriden_methods
 
+- CLI
+  . It is now possible to lint multiple files.
+
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
     single resource limit.
