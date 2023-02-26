@@ -30,14 +30,15 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <stdbool.h>
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 
-int bc_str2num (bc_num *num, char *str, int scale)
+bool bc_str2num (bc_num *num, char *str, int scale)
 {
 	int digits, strscale;
 	char *ptr, *nptr;
-	char zero_int;
+	bool zero_int = false;
 
 	/* Prepare num. */
 	bc_free_num (num);
@@ -46,7 +47,7 @@ int bc_str2num (bc_num *num, char *str, int scale)
 	ptr = str;
 	digits = 0;
 	strscale = 0;
-	zero_int = FALSE;
+
 	if ( (*ptr == '+') || (*ptr == '-')) {
 		/* Skip Sign */
 		ptr++;
@@ -77,7 +78,7 @@ int bc_str2num (bc_num *num, char *str, int scale)
 	/* Adjust numbers and allocate storage and initialize fields. */
 	strscale = MIN(strscale, scale);
 	if (digits == 0) {
-		zero_int = TRUE;
+		zero_int = true;
 		digits = 1;
 	}
 	*num = bc_new_num (digits, strscale);
@@ -117,5 +118,5 @@ int bc_str2num (bc_num *num, char *str, int scale)
 		(*num)->n_sign = PLUS;
 	}
 
-	return 1;
+	return true;
 }

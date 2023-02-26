@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include <assert.h>
+#include <stdbool.h>
 #include "config.h" /* For emalloc() */
 #include "private.h" /* For _bc_rm_leading_zeros() */
 
@@ -96,7 +97,7 @@ static void _bc_simp_mul(bc_num n1, int n1len, bc_num n2, int n2len, bc_num *pro
    multiply algorithm.  Note: if sub is called, accum must
    be larger that what is being subtracted.  Also, accum and val
    must have n_scale = 0.  (e.g. they must look like integers. *) */
-static void _bc_shift_addsub (bc_num accum, bc_num val, int shift, int sub)
+static void _bc_shift_addsub (bc_num accum, bc_num val, int shift, bool sub)
 {
 	signed char *accp, *valp;
 	int  count, carry;

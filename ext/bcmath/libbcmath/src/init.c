@@ -30,10 +30,11 @@
 *************************************************************************/
 
 #include "config.h"
+#include <stdbool.h>
 #include "bcmath.h"
 
 /* new_num allocates a number and sets fields to known values. */
-bc_num _bc_new_num_ex(int length, int scale, int persistent)
+bc_num _bc_new_num_ex(int length, int scale, bool persistent)
 {
 	bc_num temp;
 	/* PHP Change: malloc() -> pemalloc(), removed free_list code */
@@ -52,7 +53,7 @@ bc_num _bc_new_num_ex(int length, int scale, int persistent)
 
 /* "Frees" a bc_num NUM.  Actually decreases reference count and only
    frees the storage if reference count is zero. */
-void _bc_free_num_ex(bc_num *num, int persistent)
+void _bc_free_num_ex(bc_num *num, bool persistent)
 {
 	if (*num == NULL) {
 		return;

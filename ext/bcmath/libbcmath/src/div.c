@@ -32,6 +32,7 @@
 #include "config.h" /* For safe_emalloc() */
 #include "bcmath.h"
 #include "private.h"
+#include <stdbool.h>
 
 
 /* Some utility routines for the divide:  First a one digit multiply.
@@ -82,7 +83,7 @@ int bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 	unsigned int  len1, len2, scale2, qdigits, extra, count;
 	unsigned int  qdig, qguess, borrow, carry;
 	unsigned char *mval;
-	char zero;
+	bool zero;
 	unsigned int  norm;
 
 	/* Test for divide by zero. */
@@ -134,9 +135,9 @@ int bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 	/* Calculate the number of quotient digits. */
 	if (len2 > len1+scale) {
 		qdigits = scale+1;
-		zero = TRUE;
+		zero = true;
 	} else {
-		zero = FALSE;
+		zero = false;
 		if (len2 > len1) {
 			/* One for the zero integer part. */
 			qdigits = scale+1;

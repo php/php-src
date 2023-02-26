@@ -31,6 +31,7 @@
 
 #include "config.h" /* For emalloc */
 #include "bcmath.h"
+#include <stdbool.h>
 
 
 /* The following routines provide output for bcd numbers package
@@ -71,7 +72,7 @@ void bc_out_long (long val, size_t size, bool space, void (*out_char)(char) )
 /* Output of a bcd number.  NUM is written in base O_BASE using OUT_CHAR
    as the routine to do the actual output of the characters. */
 
-void bc_out_num (bc_num num, int o_base, void (*out_char)(char), int leading_zero)
+void bc_out_num (bc_num num, int o_base, void (*out_char)(char), bool leading_zero)
 {
 	char *nptr;
 	int  index, fdigit;

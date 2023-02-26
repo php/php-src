@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include "private.h"
+#include <stdbool.h>
 
 /* Here is the full subtract routine that takes care of negative numbers.
    N2 is subtracted from N1 and the result placed in RESULT.  SCALE_MIN
@@ -48,7 +49,7 @@ void bc_sub(bc_num n1, bc_num n2, bc_num *result, int scale_min)
 	} else {
 		/* subtraction must be done. */
 		/* Compare magnitudes. */
-		cmp_res = _bc_do_compare (n1, n2, FALSE, FALSE);
+		cmp_res = _bc_do_compare(n1, n2, false, false);
 		switch (cmp_res) {
 			case -1:
 				/* n1 is less than n2, subtract n1 from n2. */

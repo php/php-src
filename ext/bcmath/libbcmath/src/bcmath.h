@@ -75,11 +75,6 @@ typedef struct bc_struct {
 #define MIN(a, b)      ((a)>(b)?(b):(a))
 #define ODD(a)        ((a)&1)
 
-#ifndef TRUE
-#define TRUE 1
-#define FALSE 0
-#endif
-
 #ifndef LONG_MAX
 #define LONG_MAX 0x7ffffff
 #endif
@@ -89,15 +84,15 @@ typedef struct bc_struct {
 
 void bc_init_numbers(void);
 
-bc_num _bc_new_num_ex(int length, int scale, int persistent);
+bc_num _bc_new_num_ex(int length, int scale, bool persistent);
 
-void _bc_free_num_ex(bc_num *num, int persistent);
+void _bc_free_num_ex(bc_num *num, bool persistent);
 
 bc_num bc_copy_num(bc_num num);
 
 void bc_init_num(bc_num *num);
 
-int bc_str2num(bc_num *num, char *str, int scale);
+bool bc_str2num(bc_num *num, char *str, int scale);
 
 zend_string *bc_num2str_ex(bc_num num, int scale);
 
@@ -107,9 +102,9 @@ long bc_num2long(bc_num num);
 
 int bc_compare(bc_num n1, bc_num n2);
 
-char bc_is_zero(bc_num num);
+bool bc_is_zero(bc_num num);
 
-char bc_is_zero_for_scale(bc_num num, int scale);
+bool bc_is_zero_for_scale(bc_num num, int scale);
 
 bool bc_is_near_zero(bc_num num, int scale);
 
@@ -133,7 +128,7 @@ void bc_raise(bc_num num1, bc_num num2, bc_num *resul, int scale);
 
 bool bc_sqrt(bc_num *num, int scale);
 
-void bc_out_num(bc_num num, int o_base, void (* out_char)(char), int leading_zero);
+void bc_out_num(bc_num num, int o_base, void (* out_char)(char), bool leading_zero);
 
 /* Prototypes needed for external utility routines. */
 #define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)
