@@ -55,7 +55,8 @@ typedef struct bc_struct
 #include "config.h"
 #endif
 
-#include "php.h"
+#include <stdbool.h>
+#include "php.h" /* Needed for safe_pemalloc() in init.c */
 #include "../../php_bcmath.h"
 
 /* The base used in storing the numbers in n_value above.
@@ -112,9 +113,9 @@ char bc_is_zero(bc_num num);
 
 char bc_is_zero_for_scale(bc_num num, int scale);
 
-char bc_is_near_zero(bc_num num, int scale);
+bool bc_is_near_zero(bc_num num, int scale);
 
-char bc_is_neg(bc_num num);
+bool bc_is_neg(bc_num num);
 
 void bc_add(bc_num n1, bc_num n2, bc_num *result, int scale_min);
 
@@ -132,7 +133,7 @@ int bc_raisemod(bc_num base, bc_num expo, bc_num mo, bc_num *result, int scale);
 
 void bc_raise(bc_num num1, bc_num num2, bc_num *resul, int scale);
 
-int bc_sqrt(bc_num *num, int scale);
+bool bc_sqrt(bc_num *num, int scale);
 
 void bc_out_num(bc_num num, int o_base, void (* out_char)(char), int leading_zero);
 
