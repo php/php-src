@@ -39,6 +39,7 @@ static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
+static zend_class_entry *zend_test_property_attribute;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_ns_foo_class;
@@ -444,6 +445,17 @@ static ZEND_METHOD(ZendTestParameterAttribute, __construct)
 	ZVAL_STR_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), parameter);
 }
 
+static ZEND_METHOD(ZendTestPropertyAttribute, __construct)
+{
+	zend_string *parameter;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(parameter)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_STR_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), parameter);
+}
+
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override)
 {
 	zend_string *parameter;
@@ -527,6 +539,9 @@ PHP_MINIT_FUNCTION(zend_test)
 
 		ZVAL_PSTRING(&attr->args[0].value, "value1");
 	}
+
+	zend_test_property_attribute = register_class_ZendTestPropertyAttribute();
+	zend_internal_attribute_register(zend_test_property_attribute, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 
 	zend_test_class_with_method_with_parameter_attribute = register_class_ZendTestClassWithMethodWithParameterAttribute();
 
