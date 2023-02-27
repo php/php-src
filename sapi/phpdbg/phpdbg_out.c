@@ -143,7 +143,11 @@ PHPDBG_API int phpdbg_vprint(int type, int fd, const char *strfmt, va_list args)
 		return msglen;
 	}
 
-	len = phpdbg_process_print(fd, type, msg, msglen);
+	if (UNEXPECTED(msglen == 0)) {
+		len = 0;
+	} else {
+		len = phpdbg_process_print(fd, type, msg, msglen);
+	}
 
 	if (msg) {
 		free(msg);
