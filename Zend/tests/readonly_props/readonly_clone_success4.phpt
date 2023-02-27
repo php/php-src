@@ -16,7 +16,7 @@ class Foo {
             echo $e->getMessage() . "\n";
         }
 
-        $this->bar = 1;
+        $this->bar = 2;
     }
 }
 
@@ -30,10 +30,10 @@ var_dump(clone $foo);
 Cannot assign string to property Foo::$bar of type int
 object(Foo)#%d (%d) {
   ["bar"]=>
-  int(1)
+  int(2)
 }
 Cannot assign string to property Foo::$bar of type int
 object(Foo)#%d (%d) {
   ["bar"]=>
-  int(1)
+  int(2)
 }
