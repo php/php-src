@@ -8,7 +8,7 @@ curl
 --SKIPIF--
 <?php
 if (!@fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
-    die("skip test needing Caddy");
+    die("skip test needs Caddy");
 }
 $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x073d00) {
