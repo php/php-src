@@ -2253,8 +2253,24 @@ static zend_class_entry* find_first_constant_definition(zend_class_entry *ce, ze
 }
 /* }}} */
 
-static bool do_trait_constant_check(zend_class_entry *ce, zend_class_constant *trait_constant, zend_string *name, zend_class_entry **traits, size_t current_trait) /* {{{ */
-{
+static bool emit_incompatible_trait_constant_error(
+	zend_class_entry *ce, zend_class_constant *existing_constant, zend_class_constant *trait_constant, zend_string *name,
+	zend_class_entry **traits, size_t current_trait
+) {
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"%s and %s define the same constant (%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
+		ZSTR_VAL(find_first_constant_definition(ce, traits, current_trait, name, existing_constant->ce)->name),
+		ZSTR_VAL(trait_constant->ce->name),
+		ZSTR_VAL(name),
+		ZSTR_VAL(ce->name)
+	);
+
+	return false;
+}
+
+static bool do_trait_constant_check(
+	zend_class_entry *ce, zend_class_constant *trait_constant, zend_string *name, zend_class_entry **traits, size_t current_trait
+) {
 	uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_FINAL;
 
 	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
@@ -2265,21 +2281,28 @@ static bool do_trait_constant_check(zend_class_entry *ce, zend_class_constant *t
 
 	zend_class_constant *existing_constant = Z_PTR_P(zv);
 
-	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask) ||
-	    !check_trait_property_or_constant_value_compatibility(ce, &trait_constant->value, &existing_constant->value)) {
+	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask)) {
+		return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+	}
+
+	if (ZEND_TYPE_IS_SET(trait_constant->type) != ZEND_TYPE_IS_SET(existing_constant->type)) {
+		return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+	} else if (ZEND_TYPE_IS_SET(trait_constant->type)) {
+		inheritance_status status1 = zend_perform_covariant_type_check(ce, existing_constant->type, traits[current_trait], trait_constant->type);
+		inheritance_status status2 = zend_perform_covariant_type_check(traits[current_trait], trait_constant->type, ce, existing_constant->type);
+		if (status1 == INHERITANCE_ERROR || status2 == INHERITANCE_ERROR) {
+			return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		}
+	}
+
+	if (!check_trait_property_or_constant_value_compatibility(ce, &trait_constant->value, &existing_constant->value)) {
 		/* There is an existing constant of the same name, and it conflicts with the new one, so let's throw a fatal error */
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"%s and %s define the same constant (%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
-			ZSTR_VAL(find_first_constant_definition(ce, traits, current_trait, name, existing_constant->ce)->name),
-			ZSTR_VAL(trait_constant->ce->name),
-			ZSTR_VAL(name),
-			ZSTR_VAL(ce->name));
+		return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
 	}
 
 	/* There is an existing constant which is compatible with the new one, so no need to add it */
 	return false;
 }
-/* }}} */
 
 static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
 {
