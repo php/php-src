@@ -21,6 +21,7 @@
 #define ZEND_SORT_H
 
 #include "zend_func_types.h"
+#include "zend_portability.h"
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
