@@ -2909,7 +2909,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 
 	/* Get serializer handlers */
 	for (i = 0, ser = ps_serializers; i < MAX_SERIALIZERS; i++, ser++) {
-		if (ser && ser->name) {
+		if (ser->name) {
 			smart_str_appends(&ser_handlers, ser->name);
 			smart_str_appendc(&ser_handlers, ' ');
 		}
