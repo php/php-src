@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2ee788183fb6f9925b3a7a8166076703319ba8c3 */
+ * Stub hash: e636fc791c75cffe089fdcba26d38c9dedb89b57 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -1005,6 +1005,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(TCP_QUICKACK)
 	REGISTER_LONG_CONSTANT("TCP_QUICKACK", TCP_QUICKACK, CONST_PERSISTENT);
+#endif
+#if defined(TCP_REPAIR)
+	REGISTER_LONG_CONSTANT("TCP_REPAIR", TCP_REPAIR, CONST_PERSISTENT);
 #endif
 #if defined(IP_DONTFRAG)
 	REGISTER_LONG_CONSTANT("IP_DONTFRAG", IP_DONTFRAG, CONST_PERSISTENT);

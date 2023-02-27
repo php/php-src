@@ -1741,6 +1741,13 @@ const SO_DETACH_BPF = UNKNOWN;
  */
 const TCP_QUICKACK = UNKNOWN;
 #endif
+#if defined(TCP_REPAIR)
+/**
+ * @var int
+ * @cvalue TCP_REPAIR
+ */
+const TCP_REPAIR = UNKNOWN;
+#endif
 #if defined(IP_DONTFRAG)
 /**
  * @var int
