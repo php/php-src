@@ -680,8 +680,22 @@ ZEND_API zend_result ZEND_FASTCALL zval_update_constant_ex(zval *p, zend_class_e
 		} else {
 			zval tmp;
 
+			// Increase the refcount during zend_ast_evaluate to avoid releasing the ast too early
+			// on nested calls to zval_update_constant_ex which can happen when retriggering ast
+			// evaluation during autoloading.
+			zend_ast_ref *ast_ref = Z_AST_P(p);
+			bool ast_is_refcounted = Z_REFCOUNTED_P(p);
+			if (ast_is_refcounted) {
+				GC_ADDREF(ast_ref);
+			}
 			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
+				if (ast_is_refcounted && !GC_DELREF(ast_ref)) {
+					rc_dtor_func((zend_refcounted *)ast_ref);
+				}
 				return FAILURE;
+			}
+			if (ast_is_refcounted && !GC_DELREF(ast_ref)) {
+				rc_dtor_func((zend_refcounted *)ast_ref);
 			}
 			zval_ptr_dtor_nogc(p);
 			ZVAL_COPY_VALUE(p, &tmp);
