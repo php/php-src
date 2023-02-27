@@ -153,7 +153,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
-	resource = php_url_parse(path);
+	resource = php_url_parse_ex(path, strlen(path));
 	if (resource == NULL) {
 		return NULL;
 	}
@@ -888,7 +888,7 @@ finish:
 
 			php_url_free(resource);
 			/* check for invalid redirection URLs */
-			if ((resource = php_url_parse(new_path)) == NULL) {
+			if ((resource = php_url_parse_ex(new_path, strlen(new_path))) == NULL) {
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
 				goto out;
 			}

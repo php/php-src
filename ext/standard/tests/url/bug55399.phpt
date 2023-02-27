@@ -3,8 +3,12 @@ Bug #55399 (parse_url() incorrectly treats ':' as a valid path)
 --FILE--
 <?php
 
-var_dump(parse_url(":"));
+try {
+	parse_url(":");
+} catch(ValueError $e) {
+	echo $e->getMessage();
+}
 
 ?>
 --EXPECT--
-bool(false)
+Invalid path (:)

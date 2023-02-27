@@ -9,7 +9,11 @@ include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
     echo "--> $url   : ";
-    var_dump(parse_url($url, PHP_URL_PASS));
+    try {
+    	var_dump(parse_url($url, PHP_URL_PASS));
+    } catch (ValueError $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 
 echo "Done";
@@ -88,12 +92,12 @@ echo "Done";
 --> http://x:?   : NULL
 --> x:blah.com   : NULL
 --> x:/blah.com   : NULL
---> x://::abc/?   : bool(false)
+--> x://::abc/?   : Invalid port (abc)
 --> http://::?   : NULL
 --> http://::#   : NULL
 --> x://::6.5   : NULL
---> http://?:/   : bool(false)
---> http://@?:/   : bool(false)
+--> http://?:/   : Invalid host (?:/)
+--> http://@?:/   : Invalid host (?:/)
 --> file:///:   : NULL
 --> file:///a:/   : NULL
 --> file:///ab:/   : NULL
@@ -107,18 +111,18 @@ echo "Done";
 --> /rest/Users?filter={"id":"123"}   : NULL
 --> %:x   : NULL
 --> https://example.com:0/   : NULL
---> http:///blah.com   : bool(false)
---> http://:80   : bool(false)
---> http://user@:80   : bool(false)
---> http://user:pass@:80   : bool(false)
---> http://:   : bool(false)
---> http://@/   : bool(false)
---> http://@:/   : bool(false)
---> http://:/   : bool(false)
---> http://?   : bool(false)
---> http://#   : bool(false)
---> http://?:   : bool(false)
---> http://:?   : bool(false)
---> http://blah.com:123456   : bool(false)
---> http://blah.com:abcdef   : bool(false)
+--> http:///blah.com   : Invalid host (/blah.com)
+--> http://:80   : Invalid host (:80)
+--> http://user@:80   : Invalid host (:80)
+--> http://user:pass@:80   : Invalid host (:80)
+--> http://:   : Invalid host (:)
+--> http://@/   : Invalid host (/)
+--> http://@:/   : Invalid host (:/)
+--> http://:/   : Invalid host (:/)
+--> http://?   : Invalid host (?)
+--> http://#   : Invalid host (#)
+--> http://?:   : Invalid host (?:)
+--> http://:?   : Invalid host (:?)
+--> http://blah.com:123456   : Invalid port (123456)
+--> http://blah.com:abcdef   : Invalid port (abcdef)
 Done

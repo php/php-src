@@ -9,7 +9,11 @@ include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
     echo "--> $url   : ";
-    var_dump(parse_url($url, PHP_URL_SCHEME));
+    try {
+    	var_dump(parse_url($url, PHP_URL_SCHEME));
+    } catch (ValueError $e) {
+        echo $e->getMessage() . "\n";
+    }
 
 }
 
@@ -89,12 +93,12 @@ echo "Done";
 --> http://x:?   : string(4) "http"
 --> x:blah.com   : string(1) "x"
 --> x:/blah.com   : string(1) "x"
---> x://::abc/?   : bool(false)
+--> x://::abc/?   : Invalid port (abc)
 --> http://::?   : string(4) "http"
 --> http://::#   : string(4) "http"
 --> x://::6.5   : string(1) "x"
---> http://?:/   : bool(false)
---> http://@?:/   : bool(false)
+--> http://?:/   : Invalid host (?:/)
+--> http://@?:/   : Invalid host (?:/)
 --> file:///:   : string(4) "file"
 --> file:///a:/   : string(4) "file"
 --> file:///ab:/   : string(4) "file"
@@ -108,18 +112,18 @@ echo "Done";
 --> /rest/Users?filter={"id":"123"}   : NULL
 --> %:x   : NULL
 --> https://example.com:0/   : string(5) "https"
---> http:///blah.com   : bool(false)
---> http://:80   : bool(false)
---> http://user@:80   : bool(false)
---> http://user:pass@:80   : bool(false)
---> http://:   : bool(false)
---> http://@/   : bool(false)
---> http://@:/   : bool(false)
---> http://:/   : bool(false)
---> http://?   : bool(false)
---> http://#   : bool(false)
---> http://?:   : bool(false)
---> http://:?   : bool(false)
---> http://blah.com:123456   : bool(false)
---> http://blah.com:abcdef   : bool(false)
+--> http:///blah.com   : Invalid host (/blah.com)
+--> http://:80   : Invalid host (:80)
+--> http://user@:80   : Invalid host (:80)
+--> http://user:pass@:80   : Invalid host (:80)
+--> http://:   : Invalid host (:)
+--> http://@/   : Invalid host (/)
+--> http://@:/   : Invalid host (:/)
+--> http://:/   : Invalid host (:/)
+--> http://?   : Invalid host (?)
+--> http://#   : Invalid host (#)
+--> http://?:   : Invalid host (?:)
+--> http://:?   : Invalid host (:?)
+--> http://blah.com:123456   : Invalid port (123456)
+--> http://blah.com:abcdef   : Invalid port (abcdef)
 Done

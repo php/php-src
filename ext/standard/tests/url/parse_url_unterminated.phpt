@@ -14,7 +14,7 @@ include_once(__DIR__ . '/urls.inc');
 foreach ($urls as $url) {
     echo "\n--> $url: ";
     $str = zend_create_unterminated_string($url);
-    var_dump(parse_url($str));
+    var_dump(parse_url($str, strict: false));
     zend_terminate_string($str);
 }
 
