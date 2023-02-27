@@ -135,58 +135,97 @@ struct _zend_array {
 #define HT_HASH(ht, idx) \
 	HT_HASH_EX((ht)->arHash, idx)
 
-#define HT_SIZE_TO_MASK(nTableSize) \
-	((uint32_t)(-((nTableSize) + (nTableSize))))
-#define HT_HASH_SIZE(nTableMask) \
-	(((size_t)-(uint32_t)(nTableMask)) * sizeof(uint32_t))
-#define HT_DATA_SIZE(nTableSize) \
-	((size_t)(nTableSize) * sizeof(Bucket))
-#define HT_SIZE_EX(nTableSize, nTableMask) \
-	(HT_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
-#define HT_SIZE(ht) \
-	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
-#define HT_USED_SIZE(ht) \
-	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
-#define HT_PACKED_DATA_SIZE(nTableSize) \
-	((size_t)(nTableSize) * sizeof(zval))
-#define HT_PACKED_SIZE_EX(nTableSize, nTableMask) \
-	(HT_PACKED_DATA_SIZE((nTableSize)) + HT_HASH_SIZE((nTableMask)))
-#define HT_PACKED_SIZE(ht) \
-	HT_PACKED_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
-#define HT_PACKED_USED_SIZE(ht) \
-	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(zval)))
-#ifdef __SSE2__
-# define HT_HASH_RESET(ht) do { \
-		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
-		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
-		__m128i xmm0 = _mm_setzero_si128(); \
-		xmm0 = _mm_cmpeq_epi8(xmm0, xmm0); \
-		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
-		do { \
-			_mm_storeu_si128((__m128i*)p, xmm0); \
-			_mm_storeu_si128((__m128i*)(p+16), xmm0); \
-			_mm_storeu_si128((__m128i*)(p+32), xmm0); \
-			_mm_storeu_si128((__m128i*)(p+48), xmm0); \
-			p += 64; \
-			size -= 64; \
-		} while (size != 0); \
-	} while (0)
-#else
-# define HT_HASH_RESET(ht) \
-	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE((ht)->nTableMask))
-#endif
-#define HT_HASH_RESET_PACKED(ht) do { \
-		HT_HASH(ht, -2) = HT_INVALID_IDX; \
-		HT_HASH(ht, -1) = HT_INVALID_IDX; \
-	} while (0)
-#define HT_HASH_TO_BUCKET(ht, idx) \
-	HT_HASH_TO_BUCKET_EX((ht)->arData, idx)
+static zend_always_inline uint32_t HT_SIZE_TO_MASK(uint32_t nTableSize)
+{
+	return (uint32_t)(-(nTableSize + nTableSize));
+}
 
-#define HT_SET_DATA_ADDR(ht, ptr) do { \
-		(ht)->arData = (Bucket*)(((char*)(ptr)) + HT_HASH_SIZE((ht)->nTableMask)); \
-	} while (0)
-#define HT_GET_DATA_ADDR(ht) \
-	((char*)((ht)->arData) - HT_HASH_SIZE((ht)->nTableMask))
+static zend_always_inline size_t HT_HASH_SIZE(uint32_t nTableMask)
+{
+	return ((size_t)-nTableMask) * sizeof(uint32_t);
+}
+
+static zend_always_inline size_t HT_DATA_SIZE(size_t nTableSize)
+{
+	return nTableSize * sizeof(Bucket);
+}
+
+static zend_always_inline size_t HT_SIZE_EX(size_t nTableSize, uint32_t nTableMask)
+{
+	return HT_DATA_SIZE(nTableSize) + HT_HASH_SIZE(nTableMask);
+}
+
+static zend_always_inline size_t HT_SIZE(const HashTable *ht)
+{
+	return HT_SIZE_EX(ht->nTableSize, ht->nTableMask);
+}
+
+static zend_always_inline size_t HT_USED_SIZE(const HashTable *ht)
+{
+	return HT_HASH_SIZE(ht->nTableMask) + (size_t)ht->nNumUsed * sizeof(Bucket);
+}
+
+static zend_always_inline size_t HT_PACKED_DATA_SIZE(size_t nTableSize)
+{
+	return nTableSize * sizeof(zval);
+}
+
+static zend_always_inline size_t HT_PACKED_SIZE_EX(size_t nTableSize, uint32_t nTableMask)
+{
+	return HT_PACKED_DATA_SIZE(nTableSize) + HT_HASH_SIZE(nTableMask);
+}
+
+static zend_always_inline size_t HT_PACKED_SIZE(const HashTable *ht)
+{
+	return HT_PACKED_SIZE_EX(ht->nTableSize, ht->nTableMask);
+}
+
+static zend_always_inline size_t HT_PACKED_USED_SIZE(const HashTable *ht)
+{
+	return HT_HASH_SIZE(ht->nTableMask) + (size_t)ht->nNumUsed * sizeof(zval);
+}
+
+static zend_always_inline void HT_HASH_RESET(HashTable *ht)
+{
+#ifdef __SSE2__
+	char *p = (char*)&HT_HASH(ht, (ht)->nTableMask);
+	size_t size = HT_HASH_SIZE(ht->nTableMask);
+	__m128i xmm0 = _mm_setzero_si128();
+	xmm0 = _mm_cmpeq_epi8(xmm0, xmm0);
+	ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0));
+	do {
+		_mm_storeu_si128((__m128i*)p, xmm0);
+		_mm_storeu_si128((__m128i*)(p+16), xmm0);
+		_mm_storeu_si128((__m128i*)(p+32), xmm0);
+		_mm_storeu_si128((__m128i*)(p+48), xmm0);
+		p += 64;
+		size -= 64;
+	} while (size != 0);
+#else
+	memset(&HT_HASH(ht, ht->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE(ht->nTableMask));
+#endif
+}
+
+static zend_always_inline void HT_HASH_RESET_PACKED(HashTable *ht)
+{
+	HT_HASH(ht, -2) = HT_INVALID_IDX;
+	HT_HASH(ht, -1) = HT_INVALID_IDX;
+}
+
+static zend_always_inline Bucket *HT_HASH_TO_BUCKET(HashTable *ht, size_t idx)
+{
+	return HT_HASH_TO_BUCKET_EX(ht->arData, idx);
+}
+
+static zend_always_inline void HT_SET_DATA_ADDR(HashTable *ht, const void *ptr)
+{
+	ht->arData = (Bucket*)(((char*)ptr) + HT_HASH_SIZE(ht->nTableMask));
+}
+
+static zend_always_inline void *HT_GET_DATA_ADDR(HashTable *ht)
+{
+	return (char*)(ht->arData) - HT_HASH_SIZE(ht->nTableMask);
+}
 
 typedef uint32_t HashPosition;
 
@@ -197,47 +236,72 @@ typedef struct _HashTableIterator {
 
 #define HT_FLAGS(ht) (ht)->u.flags
 
-#define HT_INVALIDATE(ht) do { \
-		HT_FLAGS(ht) = HASH_FLAG_UNINITIALIZED; \
-	} while (0)
+static zend_always_inline void HT_INVALIDATE(HashTable *ht)
+{
+	HT_FLAGS(ht) = HASH_FLAG_UNINITIALIZED;;
+}
 
-#define HT_IS_INITIALIZED(ht) \
-	((HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) == 0)
+static zend_always_inline bool HT_IS_INITIALIZED(const HashTable *ht)
+{
+	return (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) == 0;
+}
 
-#define HT_IS_PACKED(ht) \
-	((HT_FLAGS(ht) & HASH_FLAG_PACKED) != 0)
+static zend_always_inline bool HT_IS_PACKED(const HashTable *ht)
+{
+	return (HT_FLAGS(ht) & HASH_FLAG_PACKED) != 0;
+}
 
-#define HT_IS_WITHOUT_HOLES(ht) \
-	((ht)->nNumUsed == (ht)->nNumOfElements)
+static zend_always_inline bool  HT_IS_WITHOUT_HOLES(const HashTable *ht)
+{
+	return ht->nNumUsed == ht->nNumOfElements;
+}
 
-#define HT_HAS_STATIC_KEYS_ONLY(ht) \
-	((HT_FLAGS(ht) & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0)
+static zend_always_inline bool HT_HAS_STATIC_KEYS_ONLY(const HashTable *ht)
+{
+	return (HT_FLAGS(ht) & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0;
+}
 
+static zend_always_inline void HT_ALLOW_COW_VIOLATION(HashTable *ht)
+{
 #if ZEND_DEBUG
-# define HT_ALLOW_COW_VIOLATION(ht) HT_FLAGS(ht) |= HASH_FLAG_ALLOW_COW_VIOLATION
-#else
-# define HT_ALLOW_COW_VIOLATION(ht)
+	HT_FLAGS(ht) |= HASH_FLAG_ALLOW_COW_VIOLATION;
 #endif
+}
 
 #define HT_ITERATORS_COUNT(ht) (ht)->u.v.nIteratorsCount
-#define HT_ITERATORS_OVERFLOW(ht) (HT_ITERATORS_COUNT(ht) == 0xff)
-#define HT_HAS_ITERATORS(ht) (HT_ITERATORS_COUNT(ht) != 0)
 
-#define HT_SET_ITERATORS_COUNT(ht, iters) \
-	do { HT_ITERATORS_COUNT(ht) = (iters); } while (0)
-#define HT_INC_ITERATORS_COUNT(ht) \
-	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) + 1)
-#define HT_DEC_ITERATORS_COUNT(ht) \
-	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) - 1)
+static zend_always_inline bool HT_ITERATORS_OVERFLOW(const HashTable *ht)
+{
+	return HT_ITERATORS_COUNT(ht) == 0xff;
+}
+
+static zend_always_inline bool HT_HAS_ITERATORS(const HashTable *ht)
+{
+	return HT_ITERATORS_COUNT(ht) != 0;
+}
+
+static zend_always_inline void HT_SET_ITERATORS_COUNT(HashTable *ht, uint8_t iters)
+{
+	HT_ITERATORS_COUNT(ht) = iters;
+}
+
+static zend_always_inline void HT_INC_ITERATORS_COUNT(HashTable *ht)
+{
+	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) + 1);
+}
+
+static zend_always_inline void HT_DEC_ITERATORS_COUNT(HashTable *ht)
+{
+	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) - 1);
+}
 
 extern ZEND_API const HashTable zend_empty_array;
 
-#define ZVAL_EMPTY_ARRAY(z) do {						\
-		zval *__z = (z);								\
-		Z_ARR_P(__z) = (zend_array*)&zend_empty_array;	\
-		Z_TYPE_INFO_P(__z) = IS_ARRAY; \
-	} while (0)
-
+static zend_always_inline void ZVAL_EMPTY_ARRAY(zval *z)
+{
+	Z_ARR_P(z) = (zend_array*)&zend_empty_array;
+	Z_TYPE_INFO_P(z) = IS_ARRAY;
+}
 
 typedef struct _zend_hash_key {
 	zend_ulong h;
