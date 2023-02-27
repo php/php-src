@@ -3039,7 +3039,7 @@ static zend_result ZEND_FASTCALL zval_jit_update_constant_ex(zval *p, zend_class
 			// on nested calls to zval_update_constant_ex which can happen when retriggering ast
 			// evaluation during autoloading.
 			zend_ast_ref *ast_ref = Z_AST_P(p);
-			bool ast_is_refcounted = Z_REFCOUNTED_P(p);
+			bool ast_is_refcounted = !(GC_FLAGS(ast_ref) & GC_IMMUTABLE);
 			if (ast_is_refcounted) {
 				GC_ADDREF(ast_ref);
 			}
