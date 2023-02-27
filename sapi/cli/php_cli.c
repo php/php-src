@@ -632,7 +632,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				request_started = 1;
 				php_print_info(PHP_INFO_ALL & ~PHP_INFO_CREDITS);
 				php_output_end_all();
-				EG(exit_status) = (c == '?' && argc > 1 && !strchr(argv[1],  c));
+				EG(exit_status) = 0;
 				goto out;
 
 			case 'v': /* show php version & quit */
