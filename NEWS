@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Added optional support for max_execution_time in ZTS/Linux builds
     (Kévin Dunglas)
+  . Fixed use-after-free in recursive AST evaluation. (ilutov)
 
 - FTP:
   . Propagate success status of ftp_close(). (nielsdos)
