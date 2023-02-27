@@ -3185,7 +3185,7 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*\$\w+.*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|\$\w+).*$/', $value, $matches);
         } elseif ($this->name === "return" || $this->name === "var") {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)/', $value, $matches);
         }
@@ -3206,16 +3206,17 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*[\w\|\\\\\[\]]+\s*\$(\w+).*$/', $value, $matches);
+            // Allow for parsing extended types like callable(string):mixed in docblocks
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
-            preg_match('/^\s*\$(\w+).*$/', $value, $matches);
+            preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }
 
-        if (!isset($matches[1])) {
+        if (!isset($matches["name"])) {
             throw new Exception("@$this->name doesn't contain a variable name or has an invalid format \"$value\"");
         }
 
-        return $matches[1];
+        return $matches["name"];
     }
 }
 
