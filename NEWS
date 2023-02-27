@@ -67,6 +67,9 @@ PHP                                                                        NEWS
   . Fixed bug #60994 (Reading a multibyte CLOB caps at 8192 chars).
     (Michael Voříšek)
 
+- PHPDBG:
+  . Fixed bug GH-10715 (heap buffer overflow on --run option misuse). (nielsdos)
+
 - PGSQL:
   . Fix GH-10672 (pg_lo_open segfaults in the strict_types mode). (girgias)
 
