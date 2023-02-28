@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.17
+?? ??? ????, PHP 8.1.18
+
+
+16 Mar 2023, PHP 8.1.17
 
 - Core:
   . Fixed incorrect check condition in ZEND_YIELD. (nielsdos)
