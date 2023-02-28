@@ -143,6 +143,10 @@ PHP 8.3 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Intl:
+  . MIXED_NUMBERS (Spoofchecker).
+  . HIDDEN_OVERLAY (Spoofchecker).
+
 - PCNTL:
   . SIGINFO
 
