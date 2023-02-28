@@ -41,9 +41,17 @@ zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case
 	zend_object *zobj = zend_objects_new(ce);
 	ZVAL_OBJ(result, zobj);
 
-	ZVAL_STR_COPY(OBJ_PROP_NUM(zobj, 0), case_name);
+	zval *zname = OBJ_PROP_NUM(zobj, 0);
+	ZVAL_STR_COPY(zname, case_name);
+	/* ZVAL_COPY does not set Z_PROP_FLAG, this needs to be cleared to avoid leaving IS_PROP_REINITABLE set */
+	Z_PROP_FLAG_P(zname) = 0;
+
 	if (backing_value_zv != NULL) {
-		ZVAL_COPY(OBJ_PROP_NUM(zobj, 1), backing_value_zv);
+		zval *prop = OBJ_PROP_NUM(zobj, 1);
+
+		ZVAL_COPY(prop, backing_value_zv);
+		/* ZVAL_COPY does not set Z_PROP_FLAG, this needs to be cleared to avoid leaving IS_PROP_REINITABLE set */
+		Z_PROP_FLAG_P(prop) = 0;
 	}
 
 	return zobj;
@@ -179,7 +187,7 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 
 	if (ce->enum_backing_type != IS_UNDEF) {
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
-		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);	
+		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);
 	}
 
 	ce->default_object_handlers = &zend_enum_object_handlers;

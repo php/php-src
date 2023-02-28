@@ -1009,17 +1009,22 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 {
 	zval tmp;
 
-	if (UNEXPECTED(info->flags & ZEND_ACC_READONLY)) {
-		zend_readonly_property_modification_error(info);
-		return &EG(uninitialized_zval);
-	}
-
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
 
 	if (UNEXPECTED(!i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(&tmp);
 		return &EG(uninitialized_zval);
+	}
+
+	if (UNEXPECTED(info->flags & ZEND_ACC_READONLY)) {
+		if (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE) {
+			Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+		} else {
+			zval_ptr_dtor(&tmp);
+			zend_readonly_property_modification_error(info);
+			return &EG(uninitialized_zval);
+		}
 	}
 
 	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -3161,6 +3166,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
 						if (Z_TYPE_P(ptr) == IS_OBJECT) {
 							ZVAL_COPY(result, ptr);
+						} else if (Z_PROP_FLAG_P(ptr) & IS_PROP_REINITABLE) {
+							Z_PROP_FLAG_P(ptr) &= ~IS_PROP_REINITABLE;
 						} else {
 							zend_readonly_property_modification_error(prop_info);
 							ZVAL_ERROR(result);

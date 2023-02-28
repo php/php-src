@@ -615,6 +615,8 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 					 * to make sure no actual modification is possible. */
 					ZVAL_COPY(rv, retval);
 					retval = rv;
+				} else if (Z_PROP_FLAG_P(retval) & IS_PROP_REINITABLE) {
+					Z_PROP_FLAG_P(retval) &= ~IS_PROP_REINITABLE;
 				} else {
 					zend_readonly_property_modification_error(prop_info);
 					retval = &EG(uninitialized_zval);
@@ -633,7 +635,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 				}
 			}
 		}
-		if (UNEXPECTED(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
+		if (UNEXPECTED(Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT)) {
 			/* Skip __get() for uninitialized typed properties */
 			goto uninit_error;
 		}
@@ -810,13 +812,6 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
-				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
-					Z_TRY_DELREF_P(value);
-					zend_readonly_property_modification_error(prop_info);
-					variable_ptr = &EG(error_zval);
-					goto exit;
-				}
-
 				ZVAL_COPY_VALUE(&tmp, value);
 				// Increase refcount to prevent object from being released in __toString()
 				GC_ADDREF(zobj);
@@ -833,6 +828,16 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
+				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					if (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE) {
+						Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
+					} else {
+						zval_ptr_dtor(&tmp);
+						zend_readonly_property_modification_error(prop_info);
+						variable_ptr = &EG(error_zval);
+						goto exit;
+					}
+				}
 				value = &tmp;
 			}
 
@@ -841,7 +846,7 @@ found:
 				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types());
 			goto exit;
 		}
-		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
+		if (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT) {
 			/* Writes to uninitialized typed properties bypass __set(). */
 			goto write_std_property;
 		}
@@ -1069,7 +1074,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 			if (EXPECTED(!zobj->ce->__get) ||
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET) ||
-			    UNEXPECTED(prop_info && Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
+			    UNEXPECTED(prop_info && (Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT))) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 					if (UNEXPECTED(prop_info)) {
 						zend_throw_error(NULL,
@@ -1146,8 +1151,12 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
 			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY))) {
-				zend_readonly_property_unset_error(prop_info->ce, name);
-				return;
+				if (Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE) {
+					Z_PROP_FLAG_P(slot) &= ~IS_PROP_REINITABLE;
+				} else {
+					zend_readonly_property_unset_error(prop_info->ce, name);
+					return;
+				}
 			}
 			if (UNEXPECTED(Z_ISREF_P(slot)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
@@ -1164,7 +1173,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			}
 			return;
 		}
-		if (UNEXPECTED(Z_PROP_FLAG_P(slot) == IS_PROP_UNINIT)) {
+		if (UNEXPECTED(Z_PROP_FLAG_P(slot) & IS_PROP_UNINIT)) {
 			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY)
 					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "unset"))) {
 				return;
@@ -1779,7 +1788,7 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 		if (Z_TYPE_P(value) != IS_UNDEF) {
 			goto found;
 		}
-		if (UNEXPECTED(Z_PROP_FLAG_P(value) == IS_PROP_UNINIT)) {
+		if (UNEXPECTED(Z_PROP_FLAG_P(value) & IS_PROP_UNINIT)) {
 			/* Skip __isset() for uninitialized typed properties */
 			result = 0;
 			goto exit;
