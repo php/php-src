@@ -2358,14 +2358,14 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	while (entry) {
 		entry = zend_accel_inheritance_cache_find(entry, proto, parent, traits_and_interfaces, &needs_autoload);
 		if (entry) {
+			zend_shared_alloc_unlock();
+			SHM_PROTECT();
 			if (!needs_autoload) {
-				zend_shared_alloc_unlock();
-				SHM_PROTECT();
-
 				zend_map_ptr_extend(ZCSG(map_ptr_last));
 				return entry->ce;
+			} else {
+				return NULL;
 			}
-			ZEND_ASSERT(0); // entry = entry->next; // This shouldn't be posible ???
 		}
 	}
 
