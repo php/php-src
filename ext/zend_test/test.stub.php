@@ -119,7 +119,7 @@ namespace {
 
     function zend_test_array_return(): array {}
 
-    function zend_test_nullable_array_return(): ?array {}
+    function zend_test_nullable_array_return(): null|array {}
 
     function zend_test_void_return(): void {}
 

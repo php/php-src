@@ -650,11 +650,13 @@ class Type {
 
     public function getWithoutNull(): Type {
         return new Type(
-            array_filter(
-                $this->types,
-                function(SimpleType $type) {
-                    return !$type->isNull();
-                }
+            array_values(
+                array_filter(
+                    $this->types,
+                    function(SimpleType $type) {
+                        return !$type->isNull();
+                    }
+                )
             ),
             false
         );
