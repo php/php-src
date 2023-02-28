@@ -904,10 +904,9 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	for (p = val; p < endptr; ) {
-		// Can this be changed to size_t?
-		int namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
+		size_t namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
-		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
+		if (namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			return FAILURE;
 		}
@@ -2910,7 +2909,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 
 	/* Get serializer handlers */
 	for (i = 0, ser = ps_serializers; i < MAX_SERIALIZERS; i++, ser++) {
-		if (ser && ser->name) {
+		if (ser->name) {
 			smart_str_appends(&ser_handlers, ser->name);
 			smart_str_appendc(&ser_handlers, ' ');
 		}
