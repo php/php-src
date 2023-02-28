@@ -47,6 +47,8 @@ PHP                                                                        NEWS
 
 - Intl:
   . Added pattern format error infos for numfmt_set_pattern. (David Carlier)
+  . Added MIXED_NUMBERS and HIDDEN_OVERLAY constants for
+    the Spoofchecker's class. (David Carlier)
 
 - JSON:
   . Added json_validate(). (Juan Morales)
@@ -117,7 +119,8 @@ PHP                                                                        NEWS
   . Added SOL_UPDLITE, UDPLITE_RECV_CSCOV and UDPLITE_SEND_CSCOV for updlite
     protocol support. (David Carlier)
   . Added SO_RERROR, SO_ZEROIZE and SO_SPLICE netbsd and openbsd constants.
-  . Added TCP_REPAIR for quietly close a connection.
+    (David Carlier)
+  . Added TCP_REPAIR for quietly close a connection. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
