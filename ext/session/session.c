@@ -110,6 +110,8 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	/* TODO: These could be moved to MINIT and removed. These should be initialized by php_rshutdown_session_globals() always when execution is finished. */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
+	PS(session_started_filename) = NULL;
+	PS(session_started_lineno) = 0;
 	PS(in_save_handler) = 0;
 	PS(set_handler) = 0;
 	PS(mod_data) = NULL;
@@ -147,6 +149,12 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 	if (PS(mod_user_class_name)) {
 		zend_string_release(PS(mod_user_class_name));
 		PS(mod_user_class_name) = NULL;
+	}
+
+	if (PS(session_started_filename)) {
+		efree(PS(session_started_filename));
+		PS(session_started_filename) = NULL;
+		PS(session_started_lineno) = 0;
 	}
 
 	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
@@ -1490,7 +1498,11 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 
 	switch (PS(session_status)) {
 		case php_session_active:
-			php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
+			if (PS(session_started_filename)) {
+				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started (started from %s on line %u)", PS(session_started_filename), PS(session_started_lineno));
+			} else {
+				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
+			}
 			return FAILURE;
 			break;
 
@@ -1600,6 +1612,11 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 		}
 		return FAILURE;
 	}
+
+	/* Should these be set here, or in session_initialize? */
+	PS(session_started_filename) = estrdup(zend_get_executed_filename());
+	PS(session_started_lineno) = zend_get_executed_lineno();
+
 	return SUCCESS;
 }
 /* }}} */
@@ -2513,7 +2530,11 @@ PHP_FUNCTION(session_start)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
+		if (PS(session_started_filename)) {
+			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active (started from %s on line %d)", PS(session_started_filename), PS(session_started_lineno));
+		} else {
+			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
+		}
 		RETURN_TRUE;
 	}
 
