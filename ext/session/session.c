@@ -123,6 +123,16 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 }
 /* }}} */
 
+static inline void php_session_cleanup_filename(void) /* {{{ */
+{
+	if (PS(session_started_filename)) {
+		efree(PS(session_started_filename));
+		PS(session_started_filename) = NULL;
+		PS(session_started_lineno) = 0;
+	}
+}
+/* }}} */
+
 /* Dispatched by RSHUTDOWN and by php_session_destroy */
 static inline void php_rshutdown_session_globals(void) /* {{{ */
 {
@@ -151,11 +161,7 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 		PS(mod_user_class_name) = NULL;
 	}
 
-	if (PS(session_started_filename)) {
-		efree(PS(session_started_filename));
-		PS(session_started_filename) = NULL;
-		PS(session_started_lineno) = 0;
-	}
+	php_session_cleanup_filename();
 
 	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
 	/* Set session status to prevent error while restoring save handler INI value. */
@@ -1614,6 +1620,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 	}
 
 	/* Should these be set here, or in session_initialize? */
+	php_session_cleanup_filename();
 	PS(session_started_filename) = estrdup(zend_get_executed_filename());
 	PS(session_started_lineno) = zend_get_executed_lineno();
 
