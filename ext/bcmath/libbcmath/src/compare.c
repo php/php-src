@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include "bcmath.h"
 #include "private.h"
 
@@ -42,11 +43,7 @@
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
- int
-_bc_do_compare (n1, n2, use_sign, ignore_last)
-     bc_num n1, n2;
-     int use_sign;
-     int ignore_last;
+int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 {
   char *n1ptr, *n2ptr;
   int  count;
@@ -151,9 +148,7 @@ _bc_do_compare (n1, n2, use_sign, ignore_last)
 
 /* This is the "user callable" routine to compare numbers N1 and N2. */
 
-int
-bc_compare (n1, n2)
-     bc_num n1, n2;
+int bc_compare(bc_num n1, bc_num n2)
 {
-  return _bc_do_compare (n1, n2, TRUE, FALSE);
+  return _bc_do_compare (n1, n2, true, false);
 }
