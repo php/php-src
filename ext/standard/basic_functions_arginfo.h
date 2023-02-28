@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39d455982dfdea9d0b9b646bc207b05f7108d1b2 */
+ * Stub hash: 817abf90c34d4f39ae209b24f6ff54639e425041 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -760,6 +760,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_setrawcookie, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, secure, _IS_BOOL, 0, "false")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, httponly, _IS_BOOL, 0, "false")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, sameSite, SameSite, 0, "SameSite::Lax")
 ZEND_END_ARG_INFO()
 
 #define arginfo_setcookie arginfo_setrawcookie
@@ -3481,6 +3482,11 @@ static const zend_function_entry class_AssertionError_methods[] = {
 	ZEND_FE_END
 };
 
+
+static const zend_function_entry class_SameSite_methods[] = {
+	ZEND_FE_END
+};
+
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", PHP_EXTR_OVERWRITE, CONST_PERSISTENT);
@@ -4011,6 +4017,19 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "AssertionError", class_AssertionError_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_SameSite(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("SameSite", IS_UNDEF, class_SameSite_methods);
+
+	zend_enum_add_case_cstr(class_entry, "None", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Lax", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Strict", NULL);
 
 	return class_entry;
 }

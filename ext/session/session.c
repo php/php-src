@@ -46,6 +46,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
 #include "ext/random/php_random.h"
+#include "zend_enum.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
@@ -1663,6 +1664,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	zend_string *lifetime = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	bool secure = 0, secure_null = 1;
 	bool httponly = 0, httponly_null = 1;
+	zend_object *same_site_enum = NULL;
 	zend_string *ini_name;
 	zend_result result;
 	int found = 0;
@@ -1671,13 +1673,14 @@ PHP_FUNCTION(session_set_cookie_params)
 		return;
 	}
 
-	ZEND_PARSE_PARAMETERS_START(1, 5)
+	ZEND_PARSE_PARAMETERS_START(1, 6)
 		Z_PARAM_ARRAY_HT_OR_LONG(options_ht, lifetime_long)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(path)
 		Z_PARAM_STR_OR_NULL(domain)
 		Z_PARAM_BOOL_OR_NULL(secure, secure_null)
 		Z_PARAM_BOOL_OR_NULL(httponly, httponly_null)
+		Z_PARAM_OBJ_OF_CLASS(same_site_enum, SameSite_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (PS(session_status) == php_session_active) {
@@ -1711,6 +1714,12 @@ PHP_FUNCTION(session_set_cookie_params)
 
 		if (!httponly_null) {
 			zend_argument_value_error(5, "must be null when argument #1 ($lifetime_or_options) is an array");
+			RETURN_THROWS();
+		}
+		/* Use ArgumentCount error trick similar to base setcookie() function */
+		if (same_site_enum) {
+			zend_argument_count_error("session_set_cookie_params(): Expects exactly 1 arguments when argument #1 "
+				"($lifetime_or_options) is an array");
 			RETURN_THROWS();
 		}
 		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, key, value) {
@@ -1800,6 +1809,20 @@ PHP_FUNCTION(session_set_cookie_params)
 		if (result == FAILURE) {
 			RETVAL_FALSE;
 			goto cleanup;
+		}
+	}
+	if (same_site_enum) {
+		zval *case_name = zend_enum_fetch_case_name(same_site_enum);
+		samesite = zend_string_copy(Z_STR_P(case_name));
+
+		/* Verify that cookie is secure if using SameSite::None, see
+		 * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#samesitenone_requires_secure */
+		if (!secure && zend_string_equals_literal(samesite, "None")) {
+			zend_string_release(samesite);
+			zend_argument_value_error(6, "can only be SameSite::None if argument #6 ($secure) is true");
+			RETVAL_FALSE;
+			goto cleanup;
+			/* RETURN_THROWS(); */
 		}
 	}
 	if (samesite) {
