@@ -82,6 +82,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
    - The function pcre_get_compiled_regex_ex has been removed.
    Use pcre_get_compiled_regex instead.
 
+ e. ext/spl
+   - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
+     There are no functional changes.
+
 ========================
 4. OpCode changes
 ========================

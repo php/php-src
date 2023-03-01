@@ -514,7 +514,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	return (zend_object_iterator*)iterator;
 }
 
-static int spl_get_iterator_from_aggregate(zval *retval, zend_class_entry *ce, zend_object *obj) {
+static zend_result spl_get_iterator_from_aggregate(zval *retval, zend_class_entry *ce, zend_object *obj) {
 	zend_function **getiterator_cache =
 		ce->iterator_funcs_ptr ? &ce->iterator_funcs_ptr->zf_new_iterator : NULL;
 	zend_call_method_with_0_params(obj, ce, getiterator_cache, "getiterator", retval);
@@ -1301,9 +1301,9 @@ static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *
 
 #define APPENDIT_CHECK_CTOR(intern) SPL_CHECK_CTOR(intern, AppendIterator)
 
-static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more);
+static inline zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more);
 
-static inline int spl_cit_check_flags(zend_long flags)
+static inline zend_result spl_cit_check_flags(zend_long flags)
 {
 	zend_long cnt = 0;
 
@@ -1542,7 +1542,7 @@ static inline int spl_dual_it_valid(spl_dual_it_object *intern)
 	return intern->inner.iterator->funcs->valid(intern->inner.iterator);
 }
 
-static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more)
+static inline zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more)
 {
 	zval *data;
 
@@ -2874,7 +2874,7 @@ PHP_METHOD(EmptyIterator, next)
 	}
 } /* }}} */
 
-int spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
+zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
 {
 	spl_dual_it_free(intern);
 
@@ -3051,7 +3051,7 @@ PHP_METHOD(AppendIterator, getArrayIterator)
 	RETURN_COPY_DEREF(value);
 } /* }}} */
 
-PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser)
+PHPAPI zend_result spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser)
 {
 	zend_object_iterator   *iter;
 	zend_class_entry       *ce = Z_OBJCE_P(obj);
