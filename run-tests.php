@@ -686,8 +686,8 @@ function main(): void
     $environment['TEST_PHP_CGI_EXECUTABLE_ESCAPED'] = escapeshellarg($php_cgi);
     putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
     $environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
-    putenv("TEST_PHPDBG_EXECUTABLE_ESCAPED=" . escapeshellarg($phpdbg));
-    $environment['TEST_PHPDBG_EXECUTABLE_ESCAPED'] = escapeshellarg($phpdbg);
+    putenv("TEST_PHPDBG_EXECUTABLE_ESCAPED=" . escapeshellarg($phpdbg ?? ''));
+    $environment['TEST_PHPDBG_EXECUTABLE_ESCAPED'] = escapeshellarg($phpdbg ?? '');
 
     if ($conf_passed !== null) {
         if (IS_WINDOWS) {
