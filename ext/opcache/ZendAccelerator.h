@@ -112,7 +112,7 @@ typedef enum _zend_accel_restart_reason {
 typedef struct _zend_accel_skip_list_entry {
 	/* The offset indicates which byte offset within the memory block must be skipped.
 	 * The size of the skip is equal to the system's pointer size. */
-	uint32_t offset;
+	size_t offset;
 	/* To prevent creating a huge list with a lot of entries, we use a compression scheme
 	 * based on the following two fields. If repetitions > 0, then the checksum algorithm
 	 * will repeat `repetitions` times checksumming `checked_area_size` bytes, followed
