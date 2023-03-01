@@ -24,6 +24,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Add missing error checks on file writing functions. (nielsdos)
 
+- PDO ODBC:
+  . Fixed missing and inconsistent error checks on SQLAllocHandle. (nielsdos)
+
 - Phar:
   . Fixed bug GH-10766 (PharData archive created with Phar::Zip format does
     not keep files metadata (datetime)). (nielsdos)
