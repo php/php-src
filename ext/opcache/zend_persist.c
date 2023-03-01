@@ -98,7 +98,7 @@ static void mem_checksum_skip_list_add(void *p, uint32_t checked_area_size, uint
 #endif
 	zend_accel_skip_list_entry *entry = &ZCG(mem_checksum_skip_list)[ZCG(mem_checksum_skip_list_count)++];
 	entry->offset = (char *) p - base_ptr;
-	entry->checked_area_size = checked_area_size;
+	entry->checked_area_size = checked_area_size - sizeof(char*);
 	entry->repetitions = repetitions;
 }
 
@@ -574,7 +574,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #ifdef HAVE_JIT
 		if (ZCG(mem_checksum_skip_list) && JIT_G(on)) {
 			/* There is already one skip with 0 repetitions, so we have to subtract one */
-			mem_checksum_skip_list_add(new_opcodes, sizeof(zend_op) - sizeof(op_array->opcodes[0].handler), op_array->last - 1);
+			mem_checksum_skip_list_add(new_opcodes, sizeof(zend_op), op_array->last - 1);
 		}
 #endif
 
@@ -813,7 +813,7 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 	op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
 	if (ZCG(mem_checksum_skip_list)) {
 		/* There is already one skip with 0 repetitions, so we have to subtract one */
-		mem_checksum_skip_list_add(&op_array->reserved, 0, sizeof(op_array->reserved) / sizeof(op_array->reserved[0]) - 1);
+		mem_checksum_skip_list_add(&op_array->reserved, sizeof(char*), sizeof(op_array->reserved) / sizeof(op_array->reserved[0]) - 1);
 	}
 	zend_persist_op_array_ex(op_array, NULL);
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
