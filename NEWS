@@ -184,6 +184,8 @@ PHP                                                                        NEWS
   . Fix GH-11010 (parse_ini_string() now preserves formatting of unquoted
     strings starting with numbers when the INI_SCANNER_TYPED flag is
     specified). (ilutov)
+  . Fix GH-10742 (http_response_code emits no error when headers were already
+    sent). (NattyNarwhal)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
