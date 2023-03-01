@@ -1,6 +1,6 @@
 --TEST--
 Test CURLMOPT_PUSHFUNCTION
--CREDITS--
+--CREDITS--
 Davey Shafik
 Kévin Dunglas
 --EXTENSIONS--
