@@ -1,5 +1,5 @@
 --TEST--
-Readonly property cannot be reset twice during cloning
+Readonly property cannot be op-assigned twice during cloning
 --FILE--
 <?php
 
@@ -10,9 +10,9 @@ class Foo {
 
     public function __clone()
     {
-        $this->bar = 2;
+        $this->bar += 2;
         var_dump($this);
-        $this->bar = 3;
+        $this->bar += 3;
     }
 }
 
@@ -24,13 +24,21 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
-echo "done";
+try {
+    clone $foo;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
 --EXPECT--
 object(Foo)#2 (1) {
   ["bar"]=>
-  int(2)
+  int(3)
 }
 Cannot modify readonly property Foo::$bar
-done
+object(Foo)#2 (1) {
+  ["bar"]=>
+  int(3)
+}
+Cannot modify readonly property Foo::$bar

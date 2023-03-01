@@ -12242,6 +12242,17 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX, TMP1w, TMP2
 			|	b >9
 			|2:
+			|	ldr REG0w, [FCARG1x, #offsetof(zval, u2.extra)]
+			|	TST_32_WITH_CONST REG0w, IS_PROP_REINITABLE, TMP1w
+			|	beq >6
+			|	and REG0w, REG0w, #(~IS_PROP_REINITABLE)
+			|	str REG0w, [FCARG1x, #offsetof(zval, u2.extra)]
+			if (flags) {
+				|	b >3
+			} else {
+				|	b >4
+			}
+			|6:
 			|	mov FCARG1x, FCARG2x
 			|	SET_EX_OPLINE opline, REG0
 			|	EXT_CALL zend_readonly_property_modification_error, REG0
@@ -12295,12 +12306,20 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	b >9
 			|.cold_code
 			|4:
+			|	ldr REG0w, [FCARG1x, #(prop_info->offset + offsetof(zval, u2.extra))]
+			|	TST_32_WITH_CONST REG0w, IS_PROP_REINITABLE, TMP1w
+			|	beq >6
+			|	and REG0w, REG0w, #(~IS_PROP_REINITABLE)
+			|	str REG0w, [FCARG1x, #(prop_info->offset + offsetof(zval, u2.extra))]
+			|	b >4
+			|6:
 			|	LOAD_ADDR FCARG1x, prop_info
 			|	SET_EX_OPLINE opline, REG0
 			|	EXT_CALL zend_readonly_property_modification_error, REG0
 			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR, TMP1w, TMP2
 			|	b >9
 			|.code
+			|4:
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W
 		 && (opline->extended_value & ZEND_FETCH_OBJ_FLAGS)
