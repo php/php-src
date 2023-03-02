@@ -1,6 +1,5 @@
 --TEST--
 GH-10168: Assign prop ref
---XFAIL--
 --FILE--
 <?php
 
