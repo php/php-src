@@ -288,7 +288,7 @@ int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 		}
 	}
 
-	if (mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter)) {
+	if (mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0) {
 		CODE2JIS(c1,c2,s1,s2);
 		s1 -= 0x1600;
 	}
