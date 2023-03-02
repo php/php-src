@@ -467,7 +467,7 @@ int mbfilter_unicode2sjis_emoji_kddi(int c, int *s1, mbfl_convert_filter *filter
 
 		/* If none of the KDDI national flag emoji matched, then we have no way
 		 * to convert the previous codepoint... */
-		mbfl_filt_conv_illegal_output(c1, filter);
+		CK(mbfl_filt_conv_illegal_output(c1, filter));
 	}
 
 	if (c == '#' || (c >= '0' && c <= '9')) {
@@ -523,7 +523,7 @@ int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 			}
 			return 1;
 		} else {
-			(*filter->output_function)(c1, filter->data);
+			CK((*filter->output_function)(c1, filter->data));
 		}
 	} else if (filter->status == 2) {
 		int c1 = filter->cache;
@@ -539,7 +539,7 @@ int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 
 		/* If none of the SoftBank national flag emoji matched, then we have no way
 		 * to convert the previous codepoint... */
-		mbfl_filt_conv_illegal_output(c1, filter);
+		CK(mbfl_filt_conv_illegal_output(c1, filter));
 	}
 
 	if (c == '#' || (c >= '0' && c <= '9')) {
@@ -814,9 +814,9 @@ int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 		}
 	}
 
-	if ((filter->to == &mbfl_encoding_sjis_docomo && mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter)) ||
-		  (filter->to == &mbfl_encoding_sjis_kddi   && mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter)) ||
-		  (filter->to == &mbfl_encoding_sjis_sb     && mbfilter_unicode2sjis_emoji_sb(c, &s1, filter))) {
+	if ((filter->to == &mbfl_encoding_sjis_docomo && mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0) ||
+		  (filter->to == &mbfl_encoding_sjis_kddi   && mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0) ||
+		  (filter->to == &mbfl_encoding_sjis_sb     && mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) > 0)) {
 		s1 = (((s1 / 94) + 0x21) << 8) | ((s1 % 94) + 0x21);
  	}
 
@@ -850,7 +850,7 @@ int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 	} else if (filter->status == 2) {
 		/* First of a pair of Regional Indicator codepoints came at the end of a string */
 		filter->cache = filter->status = 0;
-		mbfl_filt_conv_illegal_output(c1, filter);
+		CK(mbfl_filt_conv_illegal_output(c1, filter));
 	}
 
 	if (filter->flush_function) {
