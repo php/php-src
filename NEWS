@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)
+  . Fix readonly modification check when using inc/dec operators on readonly
+    property with JIT. (ilutov)
 
 - OpenSSL:
   . Fixed php_openssl_set_server_dh_param() DH params errors handling. (nielsdos)
