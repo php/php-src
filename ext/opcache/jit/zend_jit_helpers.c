@@ -2662,6 +2662,13 @@ static ZEND_COLD zend_long _zend_jit_throw_dec_prop_error(zend_property_info *pr
 
 static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info)
 {
+	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+
+	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY))) {
+		zend_readonly_property_modification_error(prop_info);
+		return;
+	}
+
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
@@ -2685,6 +2692,13 @@ static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_i
 
 static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info)
 {
+	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+
+	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY))) {
+		zend_readonly_property_modification_error(prop_info);
+		return;
+	}
+
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
@@ -2722,6 +2736,16 @@ static void ZEND_FASTCALL zend_jit_pre_dec_typed_prop(zval *var_ptr, zend_proper
 
 static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
 {
+	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+
+	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY))) {
+		zend_readonly_property_modification_error(prop_info);
+		if (result) {
+			ZVAL_UNDEF(result);
+		}
+		return;
+	}
+
 	zend_execute_data *execute_data = EG(current_execute_data);
 
 	ZVAL_DEREF(var_ptr);
@@ -2743,6 +2767,16 @@ static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_prope
 
 static void ZEND_FASTCALL zend_jit_post_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
 {
+	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
+
+	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY))) {
+		zend_readonly_property_modification_error(prop_info);
+		if (result) {
+			ZVAL_UNDEF(result);
+		}
+		return;
+	}
+
 	zend_execute_data *execute_data = EG(current_execute_data);
 
 	ZVAL_DEREF(var_ptr);
