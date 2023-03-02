@@ -2496,7 +2496,7 @@ static void ZEND_FASTCALL zend_jit_assign_obj_helper(zend_object *zobj, zend_str
 
 	ZVAL_DEREF(value);
 	value = zobj->handlers->write_property(zobj, name, value, cache_slot);
-	if (result) {
+	if (result && value) {
 		ZVAL_COPY_DEREF(result, value);
 	}
 }

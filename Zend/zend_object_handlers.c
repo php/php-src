@@ -839,9 +839,30 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 				value = &tmp;
 			}
 
-found:
-			variable_ptr = zend_assign_to_variable(
-				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types());
+found:;
+			zend_refcounted *garbage = NULL;
+
+			variable_ptr = zend_assign_to_variable_ex(
+				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types(), &garbage);
+
+			if (garbage) {
+				if (GC_DELREF(garbage) == 0) {
+					zend_execute_data *execute_data = EG(current_execute_data);
+					// Assign to result variable before calling the destructor as it may release the object
+					if (execute_data
+					 && EX(func)
+					 && ZEND_USER_CODE(EX(func)->common.type)
+					 && EX(opline)
+					 && EX(opline)->opcode == ZEND_ASSIGN_OBJ
+					 && EX(opline)->result_type) {
+						ZVAL_COPY_DEREF(EX_VAR(EX(opline)->result.var), variable_ptr);
+						variable_ptr = NULL;
+					}
+					rc_dtor_func(garbage);
+				} else {
+					gc_check_possible_root_no_ref(garbage);
+				}
+			}
 			goto exit;
 		}
 		if (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT) {
