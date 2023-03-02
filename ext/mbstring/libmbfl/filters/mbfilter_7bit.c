@@ -76,7 +76,7 @@ int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 	if (c >= 0 && c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		mbfl_filt_conv_illegal_output(c, filter);
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 	return 0;
 }
