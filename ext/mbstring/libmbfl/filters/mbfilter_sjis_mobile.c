@@ -518,7 +518,7 @@ int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 			}
 			return 1;
 		} else {
-			(*filter->output_function)(c1, filter->data);
+			CK((*filter->output_function)(c1, filter->data));
 		}
 	} else if (filter->status == 2) {
 		int c1 = filter->cache;
