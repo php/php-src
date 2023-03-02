@@ -1145,6 +1145,7 @@ PHP                                                                        NEWS
     non-existing key). (Nikita)
   . Fixed bug #80724 (FilesystemIterator::FOLLOW_SYMLINKS remove KEY_AS_FILE
     from bitmask). (Cameron Porter)
+  . Fixed bug GH-10519 (Array Data Address Reference Issue). (Nathan Freeman)
 
 - Standard:
   . Fixed bug #81441 (gethostbyaddr('::1') returns ip instead of name after
