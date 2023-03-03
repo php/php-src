@@ -11,10 +11,28 @@ if (!$db instanceof PdoSqlite) {
     echo "Wrong class type. Should be PdoSqlite but is [" .get_class($db) . "\n";
 }
 
-$result = $db->loadExtension("/usr/lib/x86_64-linux-gnu/mod_spatialite.so");
+$extension_location = null;
+$locations = [
+    '/usr/lib/aarch64-linux-gnu/mod_spatialite.so',
+    "/usr/lib/x86_64-linux-gnu/mod_spatialite.so"
+];
+
+foreach ($locations as $location) {
+    if (file_exists($location)) {
+        $extension_location = $location;
+    }
+}
+
+// This should be in a skip
+if ($extension_location === null) {
+    echo "Failed to find mod_spatialite.so Did you install libsqlite3-mod-spatialite ?";
+    exit(-1);
+}
+
+$result = $db->loadExtension($extension_location);
 
 if ($result !== true) {
-    echo "Failed to load extension.";
+    echo "Failed to load extension mod_spatialite.so";
     exit(-1);
 }
 
