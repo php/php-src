@@ -183,6 +183,7 @@ if ($pid) {
             fputs($s, "200 OK\r\n");
 
         } elseif ($buf === "QUIT\r\n") {
+            fputs($s, "221 Bye\r\n");
             break;
 
         } elseif (preg_match("~^PORT (\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\r\n$~", $buf, $m)) {
