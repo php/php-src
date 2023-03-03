@@ -2,7 +2,7 @@
 Readonly property can be reset once during cloning
 --SKIPIF--
 <?php
-if (function_exists('opcache_get_status') && opcache_get_status()["jit"]["enabled"] ?? false) {
+if (function_exists('opcache_get_status') && (opcache_get_status()["jit"]["enabled"] ?? false)) {
     die('skip Not yet implemented for JIT');
 }
 ?>
