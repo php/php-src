@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Added optional support for max_execution_time in ZTS/Linux builds
     (Kévin Dunglas)
 
+- Opcache:
+  . Fixed build for macOS to cater with pkg-config settings. (David Carlier)
+
 16 Mar 2023, PHP 8.2.4
 
 - Core:

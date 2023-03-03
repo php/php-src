@@ -21,7 +21,7 @@
 
 #ifdef HAVE_CAPSTONE
 # define HAVE_DISASM 1
-# include <capstone/capstone.h>
+# include <capstone.h>
 # define HAVE_CAPSTONE_ITER 1
 #elif ZEND_JIT_TARGET_X86
 # define HAVE_DISASM 1
