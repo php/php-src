@@ -621,6 +621,7 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
+strerror_r \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
@@ -1682,6 +1683,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
     zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
+    zend_max_execution_timer.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \
