@@ -8,8 +8,7 @@ class Foo {
         public readonly string $bar
     ) {}
 
-    public function write()
-    {
+    public function write() {
         $this->bar = new S();
     }
 }

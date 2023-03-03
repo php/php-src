@@ -837,9 +837,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
-				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
-					Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
-				}
+				Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
 				value = &tmp;
 			}
 
