@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Added optional support for max_execution_time in ZTS/Linux builds
     (Kévin Dunglas)
 
+- FTP:
+  . Propagate success status of ftp_close(). (nielsdos)
+
 - Opcache:
   . Fixed build for macOS to cater with pkg-config settings. (David Carlier)
 
