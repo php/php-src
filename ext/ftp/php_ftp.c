@@ -1216,6 +1216,7 @@ PHP_FUNCTION(ftp_close)
 {
 	zval		*z_ftp;
 	php_ftp_object *obj;
+	bool success = true;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &z_ftp, php_ftp_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -1223,12 +1224,12 @@ PHP_FUNCTION(ftp_close)
 
 	obj = ftp_object_from_zend_object(Z_OBJ_P(z_ftp));
 	if (obj->ftp) {
-		ftp_quit(obj->ftp);
+		success = ftp_quit(obj->ftp);
 		ftp_close(obj->ftp);
 		obj->ftp = NULL;
 	}
 
-	RETURN_TRUE;
+	RETURN_BOOL(success);
 }
 /* }}} */
 
