@@ -162,7 +162,7 @@ int stack_grows_downwards(uintptr_t arg) {
     return (uintptr_t)&local < arg;
 }
 
-int main() {
+int main(void) {
     int local;
 
     f = stack_grows_downwards;
@@ -250,7 +250,7 @@ typedef union _mm_align_test {
 #define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
 #endif
 
-int main()
+int main(void)
 {
   size_t i = ZEND_MM_ALIGNMENT;
   int zeros = 0;

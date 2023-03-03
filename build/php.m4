@@ -1034,7 +1034,7 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
 #endif
 $3
 
-int main()
+int main(void)
 {
 	FILE *fp = fopen("conftestval", "w");
 	if (!fp) return(1);
@@ -1102,7 +1102,7 @@ AC_CACHE_CHECK(for type of reentrant time-related functions, ac_cv_time_r_type,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <time.h>
 
-int main() {
+int main(void) {
 char buf[27];
 struct tm t;
 time_t old = 0;
@@ -1118,7 +1118,7 @@ return (1);
 ],[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <time.h>
-int main() {
+int main(void) {
   struct tm t, *s;
   time_t old = 0;
   char buf[27], *p;
@@ -1159,7 +1159,7 @@ AC_DEFUN([PHP_DOES_PWRITE_WORK],[
 #include <errno.h>
 #include <stdlib.h>
 $1
-    int main() {
+    int main(void) {
     int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
 
     if (fd < 0) return 1;
@@ -1193,7 +1193,7 @@ AC_DEFUN([PHP_DOES_PREAD_WORK],[
 #include <errno.h>
 #include <stdlib.h>
 $1
-    int main() {
+    int main(void) {
     char buf[3];
     int fd = open("conftest_in", O_RDONLY);
     if (fd < 0) return 1;
@@ -1405,7 +1405,7 @@ struct s
   int i;
   char c[1];
 };
-int main()
+int main(void)
 {
   struct s *s = malloc(sizeof(struct s) + 3);
   s->i = 3;
@@ -1463,7 +1463,7 @@ int seeker(void *cookie, off64_t *position, int whence)
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
 
-int main() {
+int main(void) {
   struct cookiedata g = { 0 };
   FILE *fp = fopencookie(&g, "r", funcs);
 
@@ -1590,7 +1590,7 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   if test "$found" = "yes"; then
     ac_libs=$LIBS
     LIBS="$LIBS -l$2"
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() { return (0); }]])],[found=yes],[found=no],[
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main(void) { return (0); }]])],[found=yes],[found=no],[
       dnl Cross compilation.
       found=yes
     ])
@@ -1644,7 +1644,7 @@ AC_DEFUN([PHP_TEST_BUILD], [
   AC_LINK_IFELSE([AC_LANG_SOURCE([[
     $5
     char $1();
-    int main() {
+    int main(void) {
       $1();
       return 0;
     }
@@ -2296,7 +2296,7 @@ AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
 
 #define TEXT "This is the test message -- "
 
-int main()
+int main(void)
 {
   int n;
 
@@ -2818,7 +2818,7 @@ AC_DEFUN([PHP_CHECK_AVX512_SUPPORTS], [
 
   AC_LINK_IFELSE([AC_LANG_SOURCE([[
     #include <immintrin.h>
-      int main() {
+      int main(void) {
         __m512i mask = _mm512_set1_epi32(0x1);
         char out[32];
         _mm512_storeu_si512(out, _mm512_shuffle_epi8(mask, mask));
@@ -2846,7 +2846,7 @@ AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS], [
   CFLAGS="-mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mavx512vbmi $CFLAGS"
   AC_LINK_IFELSE([AC_LANG_SOURCE([[
     #include <immintrin.h>
-      int main() {
+      int main(void) {
         __m512i mask = _mm512_set1_epi32(0x1);
         char out[32];
         _mm512_storeu_si512(out, _mm512_permutexvar_epi8(mask, mask));
