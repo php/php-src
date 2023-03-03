@@ -40,6 +40,7 @@
 #include "zend_smart_string_public.h"
 #include "zend_signal.h"
 #include "zend_type_code.h"
+#include "zend_max_execution_timer.h"
 
 #define zend_sprintf sprintf
 
@@ -359,6 +360,9 @@ ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) ZEND_
 ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 
 ZEND_COLD void zenderror(const char *error);
+
+/* For internal C errors */
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def

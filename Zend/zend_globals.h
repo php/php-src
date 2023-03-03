@@ -23,6 +23,7 @@
 
 #include <setjmp.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 #include "zend_globals_macros.h"
 
@@ -39,6 +40,7 @@
 #include "zend_multiply.h"
 #include "zend_arena.h"
 #include "zend_call_stack.h"
+#include "zend_max_execution_timer.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -292,6 +294,12 @@ struct _zend_executor_globals {
 	zend_call_stack call_stack;
 	zend_long max_allowed_stack_size;
 	zend_ulong reserved_stack_size;
+#endif
+
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+	timer_t max_execution_timer_timer;
+	pid_t pid;
+	struct sigaction oldact;
 #endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];

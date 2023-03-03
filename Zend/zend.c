@@ -36,6 +36,7 @@
 #include "zend_observer.h"
 #include "zend_fibers.h"
 #include "zend_call_stack.h"
+#include "zend_max_execution_timer.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -802,6 +803,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->stack_limit = (void*)0;
 	executor_globals->stack_base = (void*)0;
 #endif
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+	executor_globals->pid = 0;
+	executor_globals->oldact = (struct sigaction){0};
+#endif
 }
 /* }}} */
 
@@ -826,6 +831,7 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 #ifdef ZEND_CHECK_STACK_LIMIT
 	zend_call_stack_init();
 #endif
+	zend_max_execution_timer_init();
 }
 /* }}} */
 #endif
@@ -1605,6 +1611,18 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 	va_end(args);
 	/* Should never reach this. */
 	abort();
+}
+
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
+{
+#ifdef HAVE_STR_ERROR_R
+	char buf[1024];
+	strerror_r(errn, buf, sizeof(buf));
+#else
+	char *buf = strerror(errn);
+#endif
+
+	zend_error_noreturn(type, "%s: %s (%d)", message, buf, errn);
 }
 
 ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
