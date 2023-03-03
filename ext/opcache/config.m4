@@ -51,18 +51,8 @@ if test "$PHP_OPCACHE" != "no"; then
     esac
   fi
 
-  if test "$PHP_OPCACHE_JIT" = "yes"; then
+  if test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "no" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-
-    AS_IF([test x"$with_capstone" = "xyes"],[
-      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
-        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
-        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
-        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-      ],[
-        AC_MSG_ERROR([capstone >= 3.0 required but not found])
-      ])
-    ])
 
    if test "$PHP_OPCACHE_JIT_IR" = "no"; then
 
@@ -94,6 +84,16 @@ if test "$PHP_OPCACHE" != "no"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
 
+    AS_IF([test x"$with_capstone" = "xyes"],[
+      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
+        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
+        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
+        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
+      ],[
+        AC_MSG_ERROR([capstone >= 3.0 required but not found])
+      ])
+    ])
+
     PHP_SUBST(DASM_FLAGS)
     PHP_SUBST(DASM_ARCH)
 
@@ -123,10 +123,9 @@ if test "$PHP_OPCACHE" != "no"; then
       ])
     fi
 
-   else
-
+  elif test "$PHP_OPCACHE_JIT_IR" = "yes"; then
+    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
-
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
 		jit/ir/ir_cfg.c	jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
 		jit/ir/ir_dump.c jit/ir/ir_disasm.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
@@ -158,6 +157,16 @@ if test "$PHP_OPCACHE" != "no"; then
         ;;
      esac
 
+    AS_IF([test x"$with_capstone" = "xyes"],[
+      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
+        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
+        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
+        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
+      ],[
+        AC_MSG_ERROR([capstone >= 3.0 required but not found])
+      ])
+    ])
+
     PHP_SUBST(IR_TARGET)
     PHP_SUBST(DASM_FLAGS)
     PHP_SUBST(DASM_ARCH)
@@ -166,17 +175,6 @@ if test "$PHP_OPCACHE" != "no"; then
     if test "$ZEND_DEBUG" = "yes"; then
       JIT_CFLAGS="${JIT_CFLAGS} -DIR_DEBUG"
     fi
-
-   fi
-
-    PKG_CHECK_MODULES([CAPSTONE], [capstone >= 3.0.0],
-        [have_capstone="yes"], [have_capstone="no"])
-    if test "$have_capstone" = "yes"; then
-        AC_DEFINE(HAVE_CAPSTONE, 1, [ ])
-        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
-        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-    fi
-
   fi
 
   AC_CHECK_FUNCS([mprotect memfd_create shm_create_largepage])

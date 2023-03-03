@@ -30,7 +30,16 @@
 # define ZREG_FP             14 /* IR_REG_R14 */
 # define ZREG_IP             15 /* IR_REG_R15 */
 # define ZREG_FIRST_FPR      16
-# define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<12) | (1<<13) | (1<<14) | (1<<15)) /* all preserved registers */
+# if defined(_WIN64)
+#  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15))
+/*
+#  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7) | (1<<12) | (1<<13) | (1<<14) | (1<<15) | \
+                               (1<<(16+6)) | (1<<(16+7)) | (1<<(16+8)) | (1<<(16+9)) | (1<<(16+10)) | \
+                               (1<<(16+11)) | (1<<(16+12)) | (1<<(16+13)) | (1<<(16+14)) | (1<<(16+15)))
+*/
+# else
+#  define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<12) | (1<<13) | (1<<14) | (1<<15)) /* all preserved registers */
+# endif
 #elif defined(IR_TARGET_AARCH64)
 # define IR_REG_SP           31 /* IR_REG_RSP */
 # define ZREG_FP             27 /* IR_REG_X27 */
@@ -2467,7 +2476,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			jit->ctx.flags |= IR_FUNCTION;
 			/* Stack must be 16 byte aligned */
 			/* TODO: select stack size ??? */
-#if defined(IR_TARGET_AARCH64)
+#if defined(IR_TARGET_AARCH64) || defined(_WIN64)
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 15;
 #else
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 7;
@@ -2476,6 +2485,9 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
 			} else {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED;
+//#ifdef _WIN64
+//				jit->ctx.fixed_save_regset &= 0xffff; // TODO: don't save FP registers ???
+//#endif
 			}
 		} else {
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
@@ -2671,6 +2683,7 @@ static int zend_jit_setup_stubs(void)
 					entry, size, (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) != 0, &jit.ctx, stderr);
 			}
 
+#ifndef _WIN32
 			if (JIT_G(debug) & ZEND_JIT_DEBUG_GDB) {
 //				ir_mem_unprotect(entry, size);
 				ir_gdb_register(zend_jit_stubs[i].name, entry, size, 0, 0);
@@ -2683,6 +2696,7 @@ static int zend_jit_setup_stubs(void)
 					ir_perf_jitdump_register(zend_jit_stubs[i].name, entry, size);
 				}
 			}
+#endif
 		}
 		zend_jit_free_ctx(&jit);
 	}
@@ -3088,13 +3102,16 @@ static int zend_jit_setup(void)
 	}
 #endif
 
-    if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
+	if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
 		zend_jit_setup_disasm();
 	}
+
+#ifndef _WIN32
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_PERF_DUMP) {
 		ir_perf_jitdump_open();
 	}
 
+#endif
 	zend_long debug = JIT_G(debug);
 	if (!(debug & ZEND_JIT_DEBUG_ASM_STUBS)) {
 		JIT_G(debug) &= ~(ZEND_JIT_DEBUG_IR_SRC|ZEND_JIT_DEBUG_IR_FINAL|ZEND_JIT_DEBUG_IR_CFG|ZEND_JIT_DEBUG_IR_REGS|
@@ -3116,13 +3133,15 @@ static int zend_jit_setup(void)
 
 static void zend_jit_shutdown_ir(void)
 {
+#ifndef _WIN32
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_PERF_DUMP) {
 		ir_perf_jitdump_close();
 	}
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_GDB) {
 		ir_gdb_unregister_all();
 	}
-    if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
+#endif
+	if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
 		ir_disasm_free();
 	}
 }
@@ -15109,6 +15128,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 					&jit->ctx, stderr);
 			}
 
+#ifndef _WIN32
 			if (str) {
 				if (JIT_G(debug) & ZEND_JIT_DEBUG_GDB) {
 					uintptr_t sp_offset = 0;
@@ -15135,6 +15155,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 					}
 				}
 			}
+#endif
 		}
 
 		if (jit->op_array) {

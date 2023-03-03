@@ -5488,10 +5488,11 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	if (!reattached) {
 		zend_jit_unprotect();
 		*dasm_ptr = dasm_buf;
-#if _WIN32
+#if defined(_WIN32) && !defined(ZEND_JIT_IR)
 		/* reserve space for global labels */
 		*dasm_ptr = (void**)*dasm_ptr + zend_lb_MAX;
 #endif
+		*dasm_ptr = (void*)ZEND_MM_ALIGNED_SIZE_EX(((size_t)(*dasm_ptr)), 16);
 		zend_jit_protect();
 	}
 

@@ -163,6 +163,7 @@ static uint32_t zend_jit_exit_point_by_addr(void *addr)
 		}
 	}
 	ZEND_ASSERT(0 && "inalid addr");
+	return 0;
 }
 #endif
 

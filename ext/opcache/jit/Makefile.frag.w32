@@ -1,3 +1,48 @@
+!if "$(IR_TARGET)" != ""
+# New IR based JIT
+
+$(BUILD_DIR)\\minilua.exe: ext\opcache\jit\ir\dynasm\minilua.c
+	@if exist $(BUILD_DIR)\\minilua.exe del $(BUILD_DIR)\\minilua.exe
+	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\minilua.exe ext\opcache\jit\ir\dynasm\minilua.c
+
+ext\opcache\jit\ir\ir_emit_x86.h: ext\opcache\jit\ir\ir_x86.dasc $(BUILD_DIR)\\minilua.exe
+	@if exist ext\opcache\jit\ir\ir_emit_x86.h del ext\opcache\jit\ir\ir_emit_x86.h
+	$(BUILD_DIR)\\minilua.exe ext/opcache/jit/ir/dynasm/dynasm.lua $(DASM_FLAGS) -o $@ ext/opcache/jit/ir/ir_x86.dasc
+
+$(BUILD_DIR)\\gen_ir_fold_hash.exe: ext\opcache\jit\ir\gen_ir_fold_hash.c ext\opcache\jit\ir\ir_strtab.c
+	@if exist $(BUILD_DIR)\\gen_ir_fold_hash.exe del $(BUILD_DIR)\\gen_ir_fold_hash.exe
+	$(PHP_CL) /D $(IR_TARGET) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /Fe$(BUILD_DIR)\\gen_ir_fold_hash.exe $**
+
+ext\opcache\jit\ir\ir_fold_hash.h: $(BUILD_DIR)\\gen_ir_fold_hash.exe ext\opcache\jit\ir\ir_fold.h ext\opcache\jit\ir\ir.h
+	@if exist ext\opcache\jit\ir\ir_fold_hash.h del ext\opcache\jit\ir\ir_fold_hash.h
+	$(BUILD_DIR)\\gen_ir_fold_hash.exe < ext\opcache\jit\ir\ir_fold.h > ext\opcache\jit\ir\ir_fold_hash.h
+
+$(BUILD_DIR)\ext\opcache\jit\ir\ir_ra.obj: \
+	ext\opcache\jit\ir\ir.h \
+	ext\opcache\jit\ir\ir_private.h \
+	ext\opcache\jit\ir\ir_x86.h
+
+$(BUILD_DIR)\ext\opcache\jit\ir\ir_emit.obj: \
+	ext\opcache\jit\ir\ir.h \
+	ext\opcache\jit\ir\ir_private.h \
+	ext\opcache\jit\ir\ir_x86.h \
+	ext\opcache\jit\ir\ir_emit_x86.h
+
+$(BUILD_DIR)\ext\opcache\jit\ir\ir.obj: \
+	ext\opcache\jit\ir\ir.h \
+	ext\opcache\jit\ir\ir_private.h \
+	ext\opcache\jit\ir\ir_fold.h \
+	ext\opcache\jit\ir\ir_fold_hash.h
+
+$(BUILD_DIR)\ext\opcache\jit\zend_jit.obj: \
+	ext\opcache\jit\zend_jit_ir.c \
+	ext\opcache\jit\zend_jit_helpers.c \
+	ext\opcache\jit\ir\ir.h \
+	ext\opcache\jit\ir\ir_builder.h
+
+!else
+# Old DynAsm based JIT
+
 $(BUILD_DIR)\\minilua.exe: ext\opcache\jit\dynasm\minilua.c
 	@if exist $(BUILD_DIR)\\minilua.exe del $(BUILD_DIR)\\minilua.exe
 	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\minilua.exe ext\opcache\jit\dynasm\minilua.c
@@ -14,3 +59,4 @@ $(BUILD_DIR)\ext\opcache\jit\zend_jit.obj: \
 	ext/opcache/jit/zend_jit_perf_dump.c \
 	ext/opcache/jit/zend_jit_trace.c \
 	ext/opcache/jit/zend_jit_vtune.c
+!endif
