@@ -951,11 +951,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DAT
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	/* assign_static_prop has two opcodes! */
@@ -991,11 +987,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DAT
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	/* assign_static_prop has two opcodes! */
@@ -1031,11 +1023,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DAT
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	/* assign_static_prop has two opcodes! */
@@ -1071,11 +1059,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DAT
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	/* assign_static_prop has two opcodes! */
@@ -1114,11 +1098,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_HA
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -23435,11 +23415,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -23573,11 +23549,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -23711,11 +23683,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -23849,11 +23817,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -23931,11 +23895,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -24087,11 +24047,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -24244,11 +24200,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -24401,11 +24353,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -24506,11 +24454,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_U
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -24539,11 +24483,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_U
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -26381,11 +26321,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -26519,11 +26455,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -26657,11 +26589,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -26795,11 +26723,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -26877,11 +26801,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -27033,11 +26953,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -27190,11 +27106,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -27347,11 +27259,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -28082,11 +27990,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNU
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -28115,11 +28019,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USE
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -28192,11 +28092,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_UNU
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -28225,11 +28121,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_USE
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -28271,11 +28163,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -28501,11 +28389,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -28657,11 +28541,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -28814,11 +28694,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -28971,11 +28847,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -30741,11 +30613,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -30879,11 +30747,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -31017,11 +30881,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -31155,11 +31015,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -31237,11 +31093,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -31393,11 +31245,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -31550,11 +31398,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -31707,11 +31551,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -31812,11 +31652,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_UNUS
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -31845,11 +31681,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_USED
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -31891,11 +31723,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -33418,11 +33246,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -33556,11 +33380,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -33694,11 +33514,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -33832,11 +33648,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -35468,11 +35280,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -35606,11 +35414,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -35744,11 +35548,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -35882,11 +35682,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -37974,11 +37770,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -38112,11 +37904,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -38250,11 +38038,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -38388,11 +38172,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -42183,11 +41963,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -42321,11 +42097,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -42459,11 +42231,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -42597,11 +42365,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -42679,11 +42443,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -42835,11 +42595,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -42992,11 +42748,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -43149,11 +42901,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -43254,11 +43002,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_UN
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -43287,11 +43031,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_US
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CONST, EX_USES_STRICT_TYPES());
@@ -46062,11 +45802,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -46200,11 +45936,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -46338,11 +46070,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -46476,11 +46204,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
@@ -46558,11 +46282,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -46714,11 +46434,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -46871,11 +46587,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -47028,11 +46740,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -48056,11 +47764,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUS
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -48089,11 +47793,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
@@ -48152,11 +47852,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_UNUS
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -48185,11 +47881,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_USED
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_VAR, EX_USES_STRICT_TYPES());
@@ -48231,11 +47923,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
@@ -48634,11 +48322,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -48790,11 +48474,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -48947,11 +48627,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -49104,11 +48780,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -49592,11 +49264,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_CV_SPEC_CV_UNUSED_HANDLE
 
 		ZVAL_UNDEF(var);
 		SAVE_OPLINE();
-		if (!GC_DELREF(garbage)) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
 		ZVAL_UNDEF(var);
@@ -51547,11 +51215,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -51685,11 +51349,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -51823,11 +51483,7 @@ free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -51961,11 +51617,7 @@ free_and_exit_assign_obj:
 
 exit_assign_obj:
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 
@@ -52043,11 +51695,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -52199,11 +51847,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -52356,11 +52000,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -52513,11 +52153,7 @@ try_assign_dim_array:
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -52618,11 +52254,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CV_RETVAL_UNUSE
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -52651,11 +52283,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_CV_RETVAL_USED_
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
@@ -52697,11 +52325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 
 

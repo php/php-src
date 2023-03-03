@@ -3281,11 +3281,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
 	}
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 }
 
@@ -3581,11 +3577,7 @@ static zend_always_inline void i_zval_ptr_dtor_noref(zval *zval_ptr) {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
 		ZEND_ASSERT(Z_TYPE_P(zval_ptr) != IS_REFERENCE);
-		if (!GC_DELREF(ref)) {
-			rc_dtor_func(ref);
-		} else if (UNEXPECTED(GC_MAY_LEAK(ref))) {
-			gc_possible_root(ref);
-		}
+		GC_DTOR_NO_REF(ref);
 	}
 }
 
@@ -3629,11 +3621,7 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *orig_value, ui
 	zend_refcounted *garbage = NULL;
 	zval *result = zend_assign_to_typed_ref_ex(variable_ptr, orig_value, value_type, strict, &garbage);
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	return result;
 }
