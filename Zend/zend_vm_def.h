@@ -2500,11 +2500,7 @@ ZEND_VM_C_LABEL(free_and_exit_assign_obj):
 	FREE_OP_DATA();
 ZEND_VM_C_LABEL(exit_assign_obj):
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 	FREE_OP2();
 	FREE_OP1();
@@ -2542,11 +2538,7 @@ ZEND_VM_HANDLER(25, ZEND_ASSIGN_STATIC_PROP, ANY, ANY, CACHE_SLOT, SPEC(OP_DATA=
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
+		GC_DTOR_NO_REF(garbage);
 	}
 
 	/* assign_static_prop has two opcodes! */
@@ -2622,11 +2614,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		if (EXPECTED(Z_ISREF_P(object_ptr))) {
@@ -2728,11 +2716,7 @@ ZEND_VM_HANDLER(22, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV, SPEC(RETVAL))
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
 		if (garbage) {
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else {
-				gc_check_possible_root_no_ref(garbage);
-			}
+			GC_DTOR_NO_REF(garbage);
 		}
 	} else {
 		value = zend_assign_to_variable(variable_ptr, value, OP2_TYPE, EX_USES_STRICT_TYPES());
@@ -2774,11 +2758,7 @@ ZEND_VM_HANDLER(30, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 
 	FREE_OP2();
@@ -2855,11 +2835,7 @@ ZEND_VM_HANDLER(33, ZEND_ASSIGN_STATIC_PROP_REF, ANY, ANY, CACHE_SLOT|SRC)
 	}
 
 	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 	}
 
 	FREE_OP_DATA();
@@ -6479,11 +6455,7 @@ ZEND_VM_HANDLER(153, ZEND_UNSET_CV, CV, UNUSED)
 
 		ZVAL_UNDEF(var);
 		SAVE_OPLINE();
-		if (!GC_DELREF(garbage)) {
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root(garbage);
-		}
+		GC_DTOR(garbage);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	} else {
 		ZVAL_UNDEF(var);
