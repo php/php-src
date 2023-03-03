@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2b1726dd5652839a37e533e20dfcf6782b3c766d */
+ * Stub hash: a39d0e3d9675fee29822c7bf491494fe5bc0b694 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ftp_connect, 0, 1, FTP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -107,7 +107,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_get, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_nb_get, 0, 3, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_nb_get, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, local_filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, remote_filename, IS_STRING, 0)
