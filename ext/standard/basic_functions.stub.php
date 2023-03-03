@@ -1185,7 +1185,10 @@ function array_filter(array $array, ?callable $callback = null, int $mode = 0): 
 
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
-/** @param string|int $key */
+/**
+ * @param string|int $key
+ * @compile-time-eval
+ */
 function array_key_exists($key, array $array): bool {}
 
 /**
@@ -1198,6 +1201,7 @@ function array_chunk(array $array, int $length, bool $preserve_keys = false): ar
 
 function array_combine(array $keys, array $values): array {}
 
+/** @compile-time-eval */
 function array_is_list(array $array): bool {}
 
 /* base64.c */
@@ -1653,7 +1657,10 @@ function pathinfo(string $path, int $flags = PATHINFO_ALL): array|string {}
 /** @refcount 1 */
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /** @alias strstr */
