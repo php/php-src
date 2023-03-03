@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.5
 
+- Core:
+  . Added optional support for max_execution_time in ZTS/Linux builds
+    (Kévin Dunglas)
 
 16 Mar 2023, PHP 8.2.4
 
