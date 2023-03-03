@@ -51,11 +51,6 @@ static const zend_rc_dtor_func_t zend_rc_dtor_func[] = {
 	[IS_CONSTANT_AST] = (zend_rc_dtor_func_t)zend_ast_ref_destroy
 };
 
-#if ZEND_GCC_VERSION >= 4006 || defined(__clang__)
-_Static_assert(sizeof(zend_rc_dtor_func) / sizeof(zend_rc_dtor_func[0]) == _IS_REGULAR_END,
-	       "zend_rc_dtor_func has the wrong size");
-#endif
-
 ZEND_API void ZEND_FASTCALL rc_dtor_func(zend_refcounted *p)
 {
 	ZEND_ASSERT(GC_TYPE(p) <= IS_CONSTANT_AST);
