@@ -480,10 +480,15 @@ static zval *spl_array_read_dimension(zend_object *object, zval *offset, int typ
 	return spl_array_read_dimension_ex(1, object, offset, type, rv);
 } /* }}} */
 
-static uint32_t spl_array_set_refcount(spl_array_object *intern, HashTable *ht, uint32_t refcount) /* {{{ */
+/*
+ * The assertion(HT_ASSERT_RC1(ht)) failed because the refcount was increased manually when intern->is_child is true.
+ * We have to set the refcount to 1 to make assertion success and restore the refcount to the original value after
+ * modifying the array when intern->is_child is true.
+ */
+static uint32_t spl_array_set_refcount(bool is_child, HashTable *ht, uint32_t refcount) /* {{{ */
 {
 	uint32_t old_refcount = 0;
-	if (intern->is_child) {
+	if (is_child) {
 		old_refcount = GC_REFCOUNT(ht);
 		GC_SET_REFCOUNT(ht, refcount);
 	}
@@ -496,7 +501,6 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	spl_array_object *intern = spl_array_from_obj(object);
 	HashTable *ht;
 	spl_hash_key key;
-	uint32_t refcount = 0;
 
 	if (check_inherited && intern->fptr_offset_set) {
 		zval tmp;
@@ -515,13 +519,15 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	Z_TRY_ADDREF_P(value);
+
+	uint32_t refcount = 0;
 	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
 		ht = spl_array_get_hash_table(intern);
-		refcount = spl_array_set_refcount(intern, ht, 1);
+		refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 		zend_hash_next_index_insert(ht, value);
 
 		if (refcount) {
-			spl_array_set_refcount(intern, ht, refcount);
+			spl_array_set_refcount(intern->is_child, ht, refcount);
 		}
 		return;
 	}
@@ -533,7 +539,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	ht = spl_array_get_hash_table(intern);
-	refcount = spl_array_set_refcount(intern, ht, 1);
+	refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 	if (key.key) {
 		zend_hash_update_ind(ht, key.key, value);
 		spl_hash_key_release(&key);
@@ -542,7 +548,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (refcount) {
-		spl_array_set_refcount(intern, ht, refcount);
+		spl_array_set_refcount(intern->is_child, ht, refcount);
 	}
 } /* }}} */
 
@@ -556,7 +562,6 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	HashTable *ht;
 	spl_array_object *intern = spl_array_from_obj(object);
 	spl_hash_key key;
-	uint32_t refcount = 0;
 
 	if (check_inherited && intern->fptr_offset_del) {
 		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_del, "offsetUnset", NULL, offset);
@@ -574,7 +579,8 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	ht = spl_array_get_hash_table(intern);
-	refcount = spl_array_set_refcount(intern, ht, 1);
+	uint32_t refcount = spl_array_set_refcount(intern->is_child, ht, 1);
+
 	if (key.key) {
 		zval *data = zend_hash_find(ht, key.key);
 		if (data) {
@@ -599,7 +605,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (refcount) {
-		spl_array_set_refcount(intern, ht, refcount);
+		spl_array_set_refcount(intern->is_child, ht, refcount);
 	}
 } /* }}} */
 
@@ -1087,9 +1093,15 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		if (Z_REFCOUNT_P(array) == 1) {
 			ZVAL_COPY(&intern->array, array);
 		} else {
+			//??? TODO: try to avoid array duplication
 			ZVAL_ARR(&intern->array, zend_array_dup(Z_ARR_P(array)));
+
 			if (intern->is_child) {
 				Z_TRY_DELREF_P(&intern->bucket->val);
+				/*
+				 * replace bucket->val with copied array, so the changes between
+				 * parent and child object can affect each other.
+				 */
 				intern->bucket->val = intern->array;
 				Z_TRY_ADDREF_P(&intern->array);
 			}
@@ -1583,8 +1595,14 @@ static void spl_instantiate_child_arg(zend_class_entry *pce, zval *retval, zval 
 {
 	object_init_ex(retval, pce);
 	spl_array_object *new_intern = Z_SPLARRAY_P(retval);
+	/*
+	 * set new_intern->is_child is true to indicate that the object was created by
+	 * RecursiveArrayIterator::getChildren() method.
+	 */
 	new_intern->is_child = true;
-	new_intern->bucket = (Bucket *)((char*)(arg1) - XtOffsetOf(Bucket, val));
+
+	/* find the bucket of parent object. */
+	new_intern->bucket = (Bucket *)((char *)(arg1) - XtOffsetOf(Bucket, val));;
 	zend_call_known_instance_method_with_2_params(pce->constructor, Z_OBJ_P(retval), NULL, arg1, arg2);
 }
 /* }}} */
