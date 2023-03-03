@@ -541,6 +541,7 @@ function imagesetbrush(GdImage $image, GdImage $brush): bool {}
 /** @refcount 1 */
 function imagecreate(int $width, int $height): GdImage|false {}
 
+/** @compile-time-eval */
 function imagetypes(): int {}
 
 /** @refcount 1 */

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 68be83247e5e142879ce1bc4340c1c5b8a8f670a */
+ * Stub hash: fb5acd027fb0f41de2315b088d2a1e14677c1355 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -747,7 +747,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagesettile, arginfo_imagesettile)
 	ZEND_FE(imagesetbrush, arginfo_imagesetbrush)
 	ZEND_FE(imagecreate, arginfo_imagecreate)
-	ZEND_FE(imagetypes, arginfo_imagetypes)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(imagetypes, arginfo_imagetypes)
 	ZEND_FE(imagecreatefromstring, arginfo_imagecreatefromstring)
 #if defined(HAVE_GD_AVIF)
 	ZEND_FE(imagecreatefromavif, arginfo_imagecreatefromavif)
