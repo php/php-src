@@ -43,6 +43,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+#include <sys/syscall.h>
+#endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
@@ -192,6 +195,7 @@ void init_executor(void) /* {{{ */
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
+	zend_max_execution_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
 
@@ -403,6 +407,7 @@ void shutdown_executor(void) /* {{{ */
 	zend_shutdown_executor_values(fast_shutdown);
 
 	zend_weakrefs_shutdown();
+	zend_max_execution_timer_shutdown();
 	zend_fiber_shutdown();
 
 	zend_try {
@@ -1314,8 +1319,27 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 /* }}} */
 
 #ifndef ZEND_WIN32
+# ifdef ZEND_MAX_EXECUTION_TIMERS
+static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
+{
+	if (si->si_value.sival_ptr != &EG(max_execution_timer_timer)) {
+#ifdef MAX_EXECUTION_TIMERS_DEBUG
+		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGRTMIN received on thread %d\n", (pid_t) syscall(SYS_gettid));
+#endif
+
+		if (EG(oldact).sa_sigaction) {
+			EG(oldact).sa_sigaction(dummy, si, uc);
+
+			return;
+		}
+		if (EG(oldact).sa_handler) EG(oldact).sa_handler(dummy);
+
+		return;
+	}
+# else
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
+# endif
 #ifndef ZTS
 	if (EG(timed_out)) {
 		/* Die on hard timeout */
@@ -1415,6 +1439,21 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
 	}
+#elif defined(ZEND_MAX_EXECUTION_TIMERS)
+	zend_max_execution_timer_settime(seconds);
+
+	if (reset_signals) {
+		sigset_t sigset;
+		struct sigaction act;
+
+		act.sa_sigaction = zend_timeout_handler;
+		sigemptyset(&act.sa_mask);
+		act.sa_flags = SA_ONSTACK | SA_SIGINFO;
+		sigaction(SIGRTMIN, &act, NULL);
+		sigemptyset(&sigset);
+		sigaddset(&sigset, SIGRTMIN);
+		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+	}
 #elif defined(HAVE_SETITIMER)
 	{
 		struct itimerval t_r;		/* timeout requested */
@@ -1480,6 +1519,8 @@ void zend_unset_timeout(void) /* {{{ */
 		}
 		tq_timer = NULL;
 	}
+#elif ZEND_MAX_EXECUTION_TIMERS
+	zend_max_execution_timer_settime(0);
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;
