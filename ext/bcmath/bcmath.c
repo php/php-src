@@ -32,6 +32,9 @@
 ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
+static PHP_MINIT_FUNCTION(bcmath);
+static PHP_MSHUTDOWN_FUNCTION(bcmath);
+static PHP_MINFO_FUNCTION(bcmath);
 
 zend_module_entry bcmath_module_entry = {
 	STANDARD_MODULE_HEADER,
