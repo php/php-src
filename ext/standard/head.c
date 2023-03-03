@@ -120,7 +120,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 
 	/* Should check value of SameSite? */
 
-	if (value == NULL || ZSTR_VAL(value) < 0 || ZSTR_LEN(value) == 0) {
+	if (value == NULL || atol(ZSTR_VAL(value)) < 0 || ZSTR_LEN(value) == 0) {
 		/*
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
