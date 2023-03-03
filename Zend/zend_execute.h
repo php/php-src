@@ -169,14 +169,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
 			zend_copy_to_variable(variable_ptr, value, value_type);
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else { /* we need to split */
-				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
-					gc_possible_root(garbage);
-				}
-			}
+			GC_DTOR_NO_REF(garbage);
 			return variable_ptr;
 		}
 	} while (0);
