@@ -31,6 +31,8 @@
 #ifndef PHP_RANDOM_H
 # define PHP_RANDOM_H
 
+# include "php.h"
+
 PHPAPI double php_combined_lcg(void);
 
 /*
