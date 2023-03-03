@@ -1579,7 +1579,15 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			}
 
 			md_ctx = EVP_MD_CTX_create();
-			EVP_VerifyInit(md_ctx, mdtype);
+			if (!md_ctx || !EVP_VerifyInit(md_ctx, mdtype)) {
+				if (md_ctx) {
+					EVP_MD_CTX_destroy(md_ctx);
+				}
+				if (error) {
+					spprintf(error, 0, "openssl signature could not be verified");
+				}
+				return FAILURE;
+			}
 			read_len = end_of_phar;
 
 			if ((size_t)read_len > sizeof(buf)) {

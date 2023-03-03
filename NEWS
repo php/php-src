@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-10766 (PharData archive created with Phar::Zip format does
     not keep files metadata (datetime)). (nielsdos)
+  . Add missing error checks on EVP_MD_CTX_create() and EVP_VerifyInit().
+    (nielsdos)
 
 16 Mar 2023, PHP 8.1.17
 
