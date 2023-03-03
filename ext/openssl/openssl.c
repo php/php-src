@@ -2716,11 +2716,13 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	if (p12 != NULL) {
 		bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 		if (bio_out != NULL) {
-
-			i2d_PKCS12_bio(bio_out, p12);
+			if (i2d_PKCS12_bio(bio_out, p12) == 0) {
+				php_openssl_store_errors();
+				php_error_docref(NULL, E_WARNING, "Error writing to file %s", file_path);
+			} else {
+				RETVAL_TRUE;
+			}
 			BIO_free(bio_out);
-
-			RETVAL_TRUE;
 		} else {
 			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
