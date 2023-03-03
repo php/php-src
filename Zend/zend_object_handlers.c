@@ -812,9 +812,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
-				if (UNEXPECTED(
-					(prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE)
-				)) {
+				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE))) {
 					Z_TRY_DELREF_P(value);
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
