@@ -30,6 +30,7 @@ if test "$PHP_ICONV" != "no"; then
       AC_MSG_CHECKING([if using GNU libiconv])
       AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <iconv.h>
+#include <stdio.h>
 int main(void) {
   printf("%d", _libiconv_version);
   return 0;
