@@ -200,22 +200,22 @@ PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *resul
 
 static inline zend_result php_random_bytes_throw(void *bytes, size_t size)
 {
-	return php_random_bytes(bytes, size, 1);
+	return php_random_bytes(bytes, size, true);
 }
 
 static inline zend_result php_random_bytes_silent(void *bytes, size_t size)
 {
-	return php_random_bytes(bytes, size, 0);
+	return php_random_bytes(bytes, size, false);
 }
 
 static inline zend_result php_random_int_throw(zend_long min, zend_long max, zend_long *result)
 {
-	return php_random_int(min, max, result, 1);
+	return php_random_int(min, max, result, true);
 }
 
 static inline zend_result php_random_int_silent(zend_long min, zend_long max, zend_long *result)
 {
-	return php_random_int(min, max, result, 0);
+	return php_random_int(min, max, result, false);
 }
 
 typedef struct _php_random_status_ {
