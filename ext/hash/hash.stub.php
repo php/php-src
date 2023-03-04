@@ -66,9 +66,6 @@ function hash_hmac_algos(): array {}
  */
 function hash_pbkdf2(string $algo, #[\SensitiveParameter] string $password, string $salt, int $iterations, int $length = 0, bool $binary = false): string {}
 
-/**
- * @compile-time-eval
- */
 function hash_equals(#[\SensitiveParameter] string $known_string, #[\SensitiveParameter] string $user_string): bool {}
 
 /**
