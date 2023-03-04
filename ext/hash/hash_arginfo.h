@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7168b9b3d1422d4f8ff9270c5de2f42988a55811 */
+ * Stub hash: 966dc874ca53f4f71bd19afa685d6106b7d70bc3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -169,9 +169,9 @@ ZEND_METHOD(HashContext, __unserialize);
 
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(hash, arginfo_hash)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hash, arginfo_hash)
 	ZEND_FE(hash_file, arginfo_hash_file)
-	ZEND_FE(hash_hmac, arginfo_hash_hmac)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hash_hmac, arginfo_hash_hmac)
 	ZEND_FE(hash_hmac_file, arginfo_hash_hmac_file)
 	ZEND_FE(hash_init, arginfo_hash_init)
 	ZEND_FE(hash_update, arginfo_hash_update)
@@ -179,10 +179,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash_update_file, arginfo_hash_update_file)
 	ZEND_FE(hash_final, arginfo_hash_final)
 	ZEND_FE(hash_copy, arginfo_hash_copy)
-	ZEND_FE(hash_algos, arginfo_hash_algos)
-	ZEND_FE(hash_hmac_algos, arginfo_hash_hmac_algos)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hash_algos, arginfo_hash_algos)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hash_hmac_algos, arginfo_hash_hmac_algos)
 	ZEND_FE(hash_pbkdf2, arginfo_hash_pbkdf2)
-	ZEND_FE(hash_equals, arginfo_hash_equals)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hash_equals, arginfo_hash_equals)
 	ZEND_FE(hash_hkdf, arginfo_hash_hkdf)
 #if defined(PHP_MHASH_BC)
 	ZEND_DEP_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
