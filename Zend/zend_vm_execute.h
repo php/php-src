@@ -5523,7 +5523,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CONST
 				zval_ptr_dtor(&tmp);
 			}
 			if (!EG(exception)) {
-				zend_type_error("strlen(): Argument #1 ($str) must be of type string, %s given", zend_zval_type_name(value));
+				zend_type_error("strlen(): Argument #1 ($string) must be of type string, %s given", zend_zval_type_name(value));
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		} while (0);
@@ -14679,7 +14679,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 				zval_ptr_dtor(&tmp);
 			}
 			if (!EG(exception)) {
-				zend_type_error("strlen(): Argument #1 ($str) must be of type string, %s given", zend_zval_type_name(value));
+				zend_type_error("strlen(): Argument #1 ($string) must be of type string, %s given", zend_zval_type_name(value));
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		} while (0);
@@ -39285,7 +39285,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 				zval_ptr_dtor(&tmp);
 			}
 			if (!EG(exception)) {
-				zend_type_error("strlen(): Argument #1 ($str) must be of type string, %s given", zend_zval_type_name(value));
+				zend_type_error("strlen(): Argument #1 ($string) must be of type string, %s given", zend_zval_type_name(value));
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		} while (0);
