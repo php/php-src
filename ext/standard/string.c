@@ -928,9 +928,6 @@ PHP_FUNCTION(explode)
 }
 /* }}} */
 
-/* {{{ An alias for implode */
-/* }}} */
-
 /* {{{ php_implode */
 PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return_value)
 {
@@ -1620,9 +1617,6 @@ PHP_FUNCTION(str_ends_with)
 		ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - ZSTR_LEN(needle),
 		ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
 }
-/* }}} */
-
-/* {{{ An alias for strstr */
 /* }}} */
 
 /* {{{ Finds position of first occurrence of a string within another */
