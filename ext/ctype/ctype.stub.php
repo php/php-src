@@ -22,9 +22,6 @@ function ctype_cntrl(mixed $text): bool {}
  */
 function ctype_digit(mixed $text): bool {}
 
-/**
- * @compile-time-eval
- */
 function ctype_lower(mixed $text): bool {}
 
 /**
@@ -47,9 +44,6 @@ function ctype_punct(mixed $text): bool {}
  */
 function ctype_space(mixed $text): bool {}
 
-/**
- * @compile-time-eval
- */
 function ctype_upper(mixed $text): bool {}
 
 /**
