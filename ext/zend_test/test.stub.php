@@ -115,6 +115,8 @@ namespace {
     function zend_get_current_func_name(): string {}
 
     function zend_call_method(string $class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
+
+    function zend_get_map_ptr_last(): int {}
 }
 
 namespace ZendTestNS {
