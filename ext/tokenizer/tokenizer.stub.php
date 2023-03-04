@@ -8,8 +8,14 @@
  */
 const TOKEN_PARSE = UNKNOWN;
 
+/**
+ * @compile-time-eval
+ */
 function token_get_all(string $code, int $flags = 0): array {}
 
+/**
+ * @compile-time-eval
+ */
 function token_name(int $id): string {}
 
 class PhpToken implements Stringable
