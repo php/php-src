@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Added optional support for max_execution_time in ZTS/Linux builds
     (Kévin Dunglas)
   . Fixed use-after-free in recursive AST evaluation. (ilutov)
+  . Fixed bug GH-8646 (Memory leak PHP FPM 8.1). (nielsdos)
 
 - FTP:
   . Propagate success status of ftp_close(). (nielsdos)
