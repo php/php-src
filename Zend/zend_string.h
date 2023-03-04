@@ -241,9 +241,7 @@ static zend_always_inline zend_string *zend_string_dup(zend_string *s, bool pers
 	if (ZSTR_IS_INTERNED(s)) {
 		return s;
 	} else {
-		zend_string *res = zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
-        ZSTR_COPY_CONCAT_PROPERTIES(res, s);
-		return res;
+		return zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
 	}
 }
 
