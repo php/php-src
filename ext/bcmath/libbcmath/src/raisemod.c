@@ -30,43 +30,32 @@
 *************************************************************************/
 
 #include "bcmath.h"
-#include "config.h"
-#include "zend_result.h"
-#include "zend_exceptions.h"
 #include <stddef.h>
 
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
-zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale)
+raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale)
 {
 	bc_num power, exponent, modulus, parity, temp;
 	size_t rscale;
 
 	/* Check the base for scale digits. */
 	if (base->n_scale != 0) {
-		/* 1st argument from PHP_FUNCTION(bcpowmod) */
-		zend_argument_value_error(1, "cannot have a fractional part");
-		return FAILURE;
+		return BASE_HAS_FRACTIONAL;
 	}
 	/* Check the exponent for scale digits. */
 	if (expo->n_scale != 0) {
-		/* 2nd argument from PHP_FUNCTION(bcpowmod) */
-		zend_argument_value_error(2, "cannot have a fractional part");
-		return FAILURE;
+		return EXPO_HAS_FRACTIONAL;
 	}
 	if (bc_is_neg(expo)) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
-		return FAILURE;
+		return EXPO_IS_NEGATIVE;
 	}
 	/* Check the modulus for scale digits. */
 	if (mod->n_scale != 0) {
-		/* 3rd argument from PHP_FUNCTION(bcpowmod) */
-		zend_argument_value_error(3, "cannot have a fractional part");
-		return FAILURE;
+		return MOD_HAS_FRACTIONAL;
 	}
 	/* Modulus cannot be 0 */
 	if (bc_is_zero(mod)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-		return FAILURE;
+		return MOD_IS_ZERO;
 	}
 
 	/* Set initial values. */
@@ -100,5 +89,5 @@ zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, s
 	bc_free_num (result);
 	bc_free_num (&parity);
 	*result = temp;
-	return SUCCESS;	/* Everything is OK. */
+	return OK;
 }

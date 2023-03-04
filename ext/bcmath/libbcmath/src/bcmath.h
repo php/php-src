@@ -124,7 +124,16 @@ int bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
 
 int bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale);
 
-zend_result bc_raisemod(bc_num base, bc_num expo, bc_num mo, bc_num *result, size_t scale);
+typedef enum {
+	OK,
+	BASE_HAS_FRACTIONAL,
+	EXPO_HAS_FRACTIONAL,
+	EXPO_IS_NEGATIVE,
+	MOD_HAS_FRACTIONAL,
+	MOD_IS_ZERO
+} raise_mod_status;
+
+raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale);
 
 void bc_raise(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
 

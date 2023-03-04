@@ -420,15 +420,15 @@ PHP_FUNCTION(bcmod)
 /* {{{ Returns the value of an arbitrary precision number raised to the power of another reduced by a modulus */
 PHP_FUNCTION(bcpowmod)
 {
-	zend_string *left, *right, *modulus;
+	zend_string *base, *exponent, *modulus;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, mod, result;
+	bc_num bc_base, bc_expo, bc_modulus, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_STR(left)
-		Z_PARAM_STR(right)
+		Z_PARAM_STR(base)
+		Z_PARAM_STR(exponent)
 		Z_PARAM_STR(modulus)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_param, scale_param_is_null)
@@ -443,34 +443,53 @@ PHP_FUNCTION(bcpowmod)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
-	bc_init_num(&mod);
+	bc_init_num(&bc_base);
+	bc_init_num(&bc_expo);
+	bc_init_num(&bc_modulus);
 	bc_init_num(&result);
 
-	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&bc_base, ZSTR_VAL(base)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&bc_expo, ZSTR_VAL(exponent)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&mod, ZSTR_VAL(modulus)) == FAILURE) {
+	if (php_str2num(&bc_modulus, ZSTR_VAL(modulus)) == FAILURE) {
 		zend_argument_value_error(3, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (bc_raisemod(first, second, mod, &result, scale) == SUCCESS) {
-		RETVAL_STR(bc_num2str_ex(result, scale));
+	raise_mod_status status = bc_raisemod(bc_base, bc_expo, bc_modulus, &result, scale);
+	switch (status) {
+		case BASE_HAS_FRACTIONAL:
+			zend_argument_value_error(1, "cannot have a fractional part");
+			goto cleanup;
+		case EXPO_HAS_FRACTIONAL:
+			zend_argument_value_error(2, "cannot have a fractional part");
+			goto cleanup;
+		case EXPO_IS_NEGATIVE:
+			zend_argument_value_error(2, "must be greater than or equal to 0");
+			goto cleanup;
+		case MOD_HAS_FRACTIONAL:
+			zend_argument_value_error(3, "cannot have a fractional part");
+			goto cleanup;
+		case MOD_IS_ZERO:
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+			goto cleanup;
+		case OK:
+			RETVAL_STR(bc_num2str_ex(result, scale));
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	cleanup: {
-		bc_free_num(&first);
-		bc_free_num(&second);
-		bc_free_num(&mod);
+		bc_free_num(&bc_base);
+		bc_free_num(&bc_expo);
+		bc_free_num(&bc_modulus);
 		bc_free_num(&result);
 	};
 }
