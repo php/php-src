@@ -30,6 +30,9 @@ echo 'DONE' . PHP_EOL;
 Answer
     <!-- init {closure}() -->
     <{closure}>
+      <!-- init array_sum() -->
+      <array_sum>
+      </array_sum>
       <!-- init var_dump() -->
       <var_dump>
 int(42)
@@ -39,6 +42,8 @@ int(42)
   <{closure}>
 Answer
     <{closure}>
+      <array_sum>
+      </array_sum>
       <var_dump>
 int(42)
       </var_dump>
@@ -47,6 +52,8 @@ int(42)
   <{closure}>
 Answer
     <{closure}>
+      <array_sum>
+      </array_sum>
       <var_dump>
 int(42)
       </var_dump>
