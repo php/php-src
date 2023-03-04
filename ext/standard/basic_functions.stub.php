@@ -2087,7 +2087,6 @@ function sys_getloadavg(): array|false {}
 
 /**
  * @return object|array<string, mixed>|false
- * @compile-time-eval
  * @refcount 1
  */
 function get_browser(?string $user_agent = null, bool $return_array = false): object|array|false {}
@@ -3288,7 +3287,6 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
 
 /**
  * @return array<string, string|array|null>
- * @compile-time-eval
  * @refcount 1
  */
 function password_get_info(string $hash): array {}
@@ -3298,14 +3296,8 @@ function password_get_info(string $hash): array {}
  */
 function password_hash(#[\SensitiveParameter] string $password, string|int|null $algo, array $options = []): string {}
 
-/**
- * @compile-time-eval
- */
 function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
 
-/**
- * @compile-time-eval
- */
 function password_verify(#[\SensitiveParameter] string $password, string $hash): bool {}
 
 /**
@@ -3594,6 +3586,9 @@ function doubleval(mixed $value): float {}
  */
 function boolval(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function strval(mixed $value): string {}
 
 /**
@@ -3601,9 +3596,6 @@ function strval(mixed $value): string {}
  */
 function is_null(mixed $value): bool {}
 
-/**
- * @compile-time-eval
- */
 function is_resource(mixed $value): bool {}
 
 /**
