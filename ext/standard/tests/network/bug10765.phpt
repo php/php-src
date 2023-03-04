@@ -4,7 +4,7 @@ setcookie() expiry time negative warning
 <?php
 setcookie('name', 'value', -1);
 ?>
---EXPECT--
+--EXPECTF--
 Warning: setcookie(): "expires" option cannot be negative in %s on line %d
 
 Warning: Cannot modify header information - headers already sent by (output started at %s:%d) in %s on line %d
