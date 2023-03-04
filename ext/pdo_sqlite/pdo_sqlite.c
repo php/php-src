@@ -25,7 +25,10 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
+#include "pdo_sqlite_arginfo.h"
 #include "zend_exceptions.h"
+
+zend_class_entry *pdosqlite_ce;
 
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_sqlite_deps[] = {
@@ -50,6 +53,8 @@ zend_module_entry pdo_sqlite_module_entry = {
 };
 /* }}} */
 
+static pdo_driver_class_entry pdosqlite_pdo_driver_class_entry;
+
 #if defined(COMPILE_DL_PDO_SQLITE) || defined(COMPILE_DL_PDO_SQLITE_EXTERNAL)
 ZEND_GET_MODULE(pdo_sqlite)
 #endif
@@ -67,6 +72,13 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_CREATE", (zend_long)SQLITE_OPEN_CREATE);
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_READONLY_STATEMENT", (zend_long)PDO_SQLITE_ATTR_READONLY_STATEMENT);
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_EXTENDED_RESULT_CODES", (zend_long)PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
+
+	pdosqlite_ce = register_class_PDOSqlite(pdo_dbh_ce);
+	pdosqlite_ce->create_object = pdo_dbh_new;
+
+	pdosqlite_pdo_driver_class_entry.driver_name = "sqlite";
+	pdosqlite_pdo_driver_class_entry.driver_ce = pdosqlite_ce;
+	pdo_register_driver_specific_class(&pdosqlite_pdo_driver_class_entry);
 
 	return php_pdo_register_driver(&pdo_sqlite_driver);
 }
