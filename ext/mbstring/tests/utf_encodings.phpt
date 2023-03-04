@@ -5,7 +5,6 @@ mbstring
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (substr(PHP_OS, 0, 3) === 'WIN' && PHP_INT_SIZE === 4) die("skip not for Windows x86");
 ?>
 --FILE--
 <?php
