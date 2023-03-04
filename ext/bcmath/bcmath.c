@@ -344,14 +344,12 @@ PHP_FUNCTION(bcdiv)
 		goto cleanup;
 	}
 
-	switch (bc_divide(first, second, &result, scale)) {
-		case 0: /* OK */
-			RETVAL_STR(bc_num2str_ex(result, scale));
-			break;
-		case -1: /* division by zero */
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-			break;
+	if (!bc_divide(first, second, &result, scale)) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+		goto cleanup;
 	}
+
+	RETVAL_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);

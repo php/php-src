@@ -72,10 +72,10 @@ static void _one_mult(unsigned char *num, size_t size, int digit, unsigned char 
 
 
 /* The full division routine. This computes N1 / N2.  It returns
-   0 if the division is ok and the result is in QUOT.  The number of
-   digits after the decimal point is SCALE. It returns -1 if division
+   true if the division is ok and the result is in QUOT.  The number of
+   digits after the decimal point is SCALE. It returns false if division
    by zero is tried.  The algorithm is found in Knuth Vol 2. p237. */
-int bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
+bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 {
 	bc_num qval;
 	unsigned char *num1, *num2;
@@ -89,7 +89,7 @@ int bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 
 	/* Test for divide by zero. */
 	if (bc_is_zero(n2)) {
-		return -1;
+		return false;
 	}
 
 	/* Test for divide by 1.  If it is we must truncate. */
@@ -254,5 +254,5 @@ int bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 	efree(num2);
 
 	/* Everything is OK. */
-	return 0;
+	return true;
 }
