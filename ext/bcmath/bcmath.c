@@ -400,14 +400,12 @@ PHP_FUNCTION(bcmod)
 		goto cleanup;
 	}
 
-	switch (bc_modulo(first, second, &result, scale)) {
-		case 0:
-			RETVAL_STR(bc_num2str_ex(result, scale));
-			break;
-		case -1:
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-			break;
+	if (!bc_modulo(first, second, &result, scale)) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		goto cleanup;
 	}
+
+	RETVAL_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);

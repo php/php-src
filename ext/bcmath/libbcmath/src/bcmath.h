@@ -120,9 +120,9 @@ void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale);
 
 int bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale);
 
-int bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
+bool bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
 
-int bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale);
+bool bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale);
 
 typedef enum {
 	OK,

@@ -30,23 +30,26 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <stdbool.h>
 #include <stddef.h>
 
 
 /* Division *and* modulo for numbers.  This computes both NUM1 / NUM2 and
    NUM1 % NUM2  and puts the results in QUOT and REM, except that if QUOT
    is NULL then that store will be omitted.
+   false is returned if divisor is 0.
+   true otherwise for success.
  */
 
-int bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale)
+bool bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale)
 {
 	bc_num quotient = NULL;
 	bc_num temp;
 	size_t rscale;
 
-	/* Check for correct numbers. */
-	if (bc_is_zero (num2)) {
-		return -1;
+	/* Cannot divide/mod by 0. */
+	if (bc_is_zero(num2)) {
+		return false;
 	}
 
 	/* Calculate final scale. */
@@ -67,14 +70,14 @@ int bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale)
 		*quot = quotient;
 	}
 
-	return 0;	/* Everything is OK. */
+	return true;
 }
 
 
 /* Modulo for numbers.  This computes NUM1 % NUM2  and puts the
    result in RESULT.   */
 
-int bc_modulo(bc_num num1, bc_num num2, bc_num *result, size_t scale)
+bool bc_modulo(bc_num num1, bc_num num2, bc_num *result, size_t scale)
 {
 	return bc_divmod(num1, num2, NULL, result, scale);
 }
