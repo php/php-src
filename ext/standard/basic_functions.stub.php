@@ -3496,10 +3496,7 @@ function var_export(mixed $value, bool $return = false): ?string {}
 
 function debug_zval_dump(mixed $value, mixed ...$values): void {}
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function serialize(mixed $value): string {}
 
 function unserialize(string $data, array $options = []): mixed {}
