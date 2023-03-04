@@ -30,36 +30,22 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include "zend_exceptions.h" /* zend_argument_value_error() */
 
 
 /* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
    Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
    only the integer part is used.  */
 
-void bc_raise(bc_num num1, bc_num num2, bc_num *result, size_t scale)
+void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 {
 	bc_num temp, power;
-	long exponent;
 	size_t rscale;
 	size_t pwrscale;
 	size_t calcscale;
 	bool is_neg;
-
-	/* Check the exponent for scale digits and convert to a long. */
-	if (num2->n_scale != 0) {
-		/* 2nd argument from PHP_FUNCTION(bcpow) */
-		zend_argument_value_error(2, "cannot have a fractional part");
-		return;
-	}
-	exponent = bc_num2long (num2);
-	if (exponent == 0 && (num2->n_len > 1 || num2->n_value[0] != 0)) {
-		/* 2nd argument from PHP_FUNCTION(bcpow) */
-		zend_argument_value_error(2, "is too large");
-		return;
-	}
 
 	/* Special case if exponent is a zero. */
 	if (exponent == 0) {
@@ -114,3 +100,20 @@ void bc_raise(bc_num num1, bc_num num2, bc_num *result, size_t scale)
 	}
 	bc_free_num (&power);
 }
+
+/* This is used internally by BCMath */
+void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale)
+{
+	/* Exponent must not have fractional part */
+	assert(expo->n_scale == 0);
+
+	long exponent = bc_num2long(expo);
+	/* Exponent must be properly convertable to long */
+	if (exponent == 0 && (expo->n_len > 1 || expo->n_value[0] != 0)) {
+		assert(false && "Exponent is not well formed in internal call");
+		//assert(exponent != 0 || (expo->n_len == 0 && expo->n_value[0] == 0));
+	}
+	//assert(exponent != 0 || (expo->n_len == 0 && expo->n_value[0] == 0));
+	bc_raise(base, exponent, result, scale);
+}
+

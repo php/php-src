@@ -501,7 +501,7 @@ PHP_FUNCTION(bcpow)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first, bc_exponent, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -521,7 +521,7 @@ PHP_FUNCTION(bcpow)
 	}
 
 	bc_init_num(&first);
-	bc_init_num(&second);
+	bc_init_num(&bc_exponent);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -529,18 +529,29 @@ PHP_FUNCTION(bcpow)
 		goto cleanup;
 	}
 
-	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&bc_exponent, ZSTR_VAL(right)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
-	bc_raise (first, second, &result, scale);
+	/* Check the exponent for scale digits and convert to a long. */
+	if (bc_exponent->n_scale != 0) {
+		zend_argument_value_error(2, "cannot have a fractional part");
+		goto cleanup;
+	}
+	long exponent = bc_num2long(bc_exponent);
+	if (exponent == 0 && (bc_exponent->n_len > 1 || bc_exponent->n_value[0] != 0)) {
+		zend_argument_value_error(2, "is too large");
+		goto cleanup;
+	}
+
+	bc_raise(first, exponent, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);
-		bc_free_num(&second);
+		bc_free_num(&bc_exponent);
 		bc_free_num(&result);
 	};
 }

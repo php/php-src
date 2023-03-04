@@ -135,7 +135,9 @@ typedef enum {
 
 raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale);
 
-void bc_raise(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
+void bc_raise(bc_num base, long exponent, bc_num *resul, size_t scale);
+
+void bc_raise_bc_exponent(bc_num base, bc_num exponent, bc_num *resul, size_t scale);
 
 bool bc_sqrt(bc_num *num, size_t scale);
 

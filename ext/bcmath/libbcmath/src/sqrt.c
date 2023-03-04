@@ -81,7 +81,7 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		bc_int2num (&guess1,(*num)->n_len);
 		bc_multiply (guess1, point5, &guess1, 0);
 		guess1->n_scale = 0;
-		bc_raise (guess, guess1, &guess, 0);
+		bc_raise_bc_exponent(guess, guess1, &guess, 0);
 		bc_free_num (&guess1);
 		cscale = 3;
 	}
