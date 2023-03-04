@@ -222,21 +222,29 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
+
+
+static int number_of_pdo_driver_class_entries = 0;
+static pdo_driver_class_entry *pdo_driver_class_entries[64];
+
+// TODO - remove this and roll it into the standard driver class entries
+void pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry)
+{
+	pdo_driver_class_entries[number_of_pdo_driver_class_entries] = driver_class_entry;
+	number_of_pdo_driver_class_entries += 1;
+}
+
+
 static
 void create_specific_pdo_object(zval *new_object, const char *driver_name)
 {
-	if (strcmp("sqlite", driver_name) == 0) {
-
-		object_init_ex(new_object, pdosqlite_ce);
-//		intern = Z_XMLREADER_P(return_value);
-//		intern->ptr = reader;
-//		printf("created pdosqlite object?\n");
-		return;
+	for (int i=0; i < number_of_pdo_driver_class_entries; i += 1) {
+		pdo_driver_class_entry *driver_class_entry = pdo_driver_class_entries[i];
+		if (strcmp(driver_class_entry->driver_name, driver_name) == 0) {
+			object_init_ex(new_object, driver_class_entry->driver_ce);
+			return;
+		}
 	}
-//'pgsql'
-//'oci'
-//'firebird'
-//'odbc'
 
 	// No specific DB implementation found
 	object_init_ex(new_object, pdo_dbh_ce);
@@ -1510,8 +1518,6 @@ void pdo_dbh_init(int module_number)
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_FWDONLY", (zend_long)PDO_CURSOR_FWDONLY);
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_SCROLL", (zend_long)PDO_CURSOR_SCROLL);
 
-	pdosqlite_ce = register_class_PDOSqlite(pdo_dbh_ce);
-	pdosqlite_ce->create_object = pdo_dbh_new;
 
 	memcpy(&pdosqlite_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdosqlite_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);

@@ -27,7 +27,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
   ], [], [$PDO_SQLITE_SHARED_LIBADD])
 
   PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
+  PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c pdo_sqlite_class.c sqlite_driver.c sqlite_statement.c,
     $ext_shared,,-I$pdo_cv_inc_path)
 
   PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)

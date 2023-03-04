@@ -215,6 +215,14 @@ typedef struct {
 
 } pdo_driver_t;
 
+// TODO - remove this separate struct, and roll it into pdo_driver_t
+typedef struct {
+	char *driver_name;
+	zend_class_entry *driver_ce;
+} pdo_driver_class_entry;
+
+void pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry);
+
 /* {{{ methods for a database handle */
 
 /* close or otherwise disconnect the database */
