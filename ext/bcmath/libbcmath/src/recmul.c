@@ -63,7 +63,7 @@ static bc_num new_sub_num(size_t length, size_t scale, char *value)
 	return temp;
 }
 
-static void _bc_simp_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod, int full_scale)
+static void _bc_simp_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod)
 {
 	char *n1ptr, *n2ptr, *pvptr;
 	char *n1end, *n2end;		/* To the end of n1 and n2. */
@@ -164,7 +164,7 @@ static void _bc_shift_addsub (bc_num accum, bc_num val, int shift, bool sub)
 
    B is the base of storage, number of digits in u1,u0 close to equal.
 */
-static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *prod, int full_scale)
+static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *prod)
 {
 	bc_num u0, u1, v0, v1;
 	bc_num m1, m2, m3, d1, d2;
@@ -176,7 +176,7 @@ static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *pr
 		|| ulen < MUL_SMALL_DIGITS
 		|| vlen < MUL_SMALL_DIGITS
 	) {
-		_bc_simp_mul (u, ulen, v, vlen, prod, full_scale);
+		_bc_simp_mul (u, ulen, v, vlen, prod);
 		return;
 	}
 
@@ -219,19 +219,19 @@ static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *pr
 	if (m1zero) {
 		m1 = bc_copy_num (BCG(_zero_));
 	} else {
-		_bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1, 0);
+		_bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1);
 	}
 
 	if (bc_is_zero(d1) || bc_is_zero(d2)) {
 		m2 = bc_copy_num (BCG(_zero_));
 	} else {
-		_bc_rec_mul (d1, d1len, d2, d2len, &m2, 0);
+		_bc_rec_mul (d1, d1len, d2, d2len, &m2);
 	}
 
 	if (bc_is_zero(u0) || bc_is_zero(v0)) {
 		m3 = bc_copy_num (BCG(_zero_));
 	} else {
-		_bc_rec_mul (u0, u0->n_len, v0, v0->n_len, &m3, 0);
+		_bc_rec_mul (u0, u0->n_len, v0, v0->n_len, &m3);
 	}
 
 	/* Initialize product */
@@ -275,7 +275,7 @@ void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
 	prod_scale = MIN(full_scale,MAX(scale,MAX(n1->n_scale,n2->n_scale)));
 
 	/* Do the multiply */
-	_bc_rec_mul (n1, len1, n2, len2, &pval, full_scale);
+	_bc_rec_mul (n1, len1, n2, len2, &pval);
 
 	/* Assign to prod and clean up the number. */
 	pval->n_sign = ( n1->n_sign == n2->n_sign ? PLUS : MINUS );
