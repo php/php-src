@@ -38,9 +38,6 @@ Foo
     <!-- init TestClass::bar() -->
     <TestClass::bar>
 Bar
-      <!-- init array_sum() -->
-      <array_sum>
-      </array_sum>
       <!-- init var_dump() -->
       <var_dump>
 int(6)
@@ -51,8 +48,6 @@ int(6)
 Foo
     <TestClass::bar>
 Bar
-      <array_sum>
-      </array_sum>
       <var_dump>
 int(6)
       </var_dump>
@@ -62,8 +57,6 @@ int(6)
 Foo
     <TestClass::bar>
 Bar
-      <array_sum>
-      </array_sum>
       <var_dump>
 int(6)
       </var_dump>
