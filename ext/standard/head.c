@@ -90,13 +90,20 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		zend_argument_value_error(1, "cannot be empty");
 		return FAILURE;
 	}
+
 	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
 		zend_argument_value_error(1, "cannot contain \"=\", " ILLEGAL_COOKIE_CHARACTER);
 		return FAILURE;
 	}
+
 	if (!url_encode && value &&
 			strpbrk(ZSTR_VAL(value), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
 		zend_argument_value_error(2, "cannot contain " ILLEGAL_COOKIE_CHARACTER);
+		return FAILURE;
+	}
+
+	if (expires < 0) {
+		php_error_docref(NULL, E_WARNING, "\"expires\" option cannot be negative");
 		return FAILURE;
 	}
 
@@ -105,11 +112,13 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			get_active_function_name());
 		return FAILURE;
 	}
+
 	if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
 		zend_value_error("%s(): \"domain\" option cannot contain " ILLEGAL_COOKIE_CHARACTER,
 			get_active_function_name());
 		return FAILURE;
 	}
+
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 	if (expires >= 253402300800) {
 		zend_value_error("%s(): \"expires\" option cannot have a year greater than 9999",
@@ -120,7 +129,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 
 	/* Should check value of SameSite? */
 
-	if (value == NULL || atol(ZSTR_VAL(value)) < 0 || ZSTR_LEN(value) == 0) {
+	if (value == NULL || ZSTR_LEN(value) == 0) {
 		/*
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
