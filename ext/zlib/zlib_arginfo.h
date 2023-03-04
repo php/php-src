@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3660ad3239f93c84b6909c36ddfcc92dd0773c70 */
+ * Stub hash: 604aecb62556abba0b3d61e0520cc369d7ec9a93 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ob_gzhandler, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -170,14 +170,14 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gzfile, arginfo_gzfile)
 	ZEND_FE(gzopen, arginfo_gzopen)
 	ZEND_FE(readgzfile, arginfo_readgzfile)
-	ZEND_FE(zlib_encode, arginfo_zlib_encode)
-	ZEND_FE(zlib_decode, arginfo_zlib_decode)
-	ZEND_FE(gzdeflate, arginfo_gzdeflate)
-	ZEND_FE(gzencode, arginfo_gzencode)
-	ZEND_FE(gzcompress, arginfo_gzcompress)
-	ZEND_FE(gzinflate, arginfo_gzinflate)
-	ZEND_FE(gzdecode, arginfo_gzdecode)
-	ZEND_FE(gzuncompress, arginfo_gzuncompress)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(zlib_encode, arginfo_zlib_encode)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(zlib_decode, arginfo_zlib_decode)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(gzdeflate, arginfo_gzdeflate)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(gzencode, arginfo_gzencode)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(gzcompress, arginfo_gzcompress)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(gzinflate, arginfo_gzinflate)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(gzdecode, arginfo_gzdecode)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(gzuncompress, arginfo_gzuncompress)
 	ZEND_FALIAS(gzwrite, fwrite, arginfo_gzwrite)
 	ZEND_FALIAS(gzputs, fwrite, arginfo_gzputs)
 	ZEND_FALIAS(gzrewind, rewind, arginfo_gzrewind)
