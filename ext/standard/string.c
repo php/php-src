@@ -955,11 +955,14 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 
 	ptr = strings = do_alloca((sizeof(*strings)) * numelems, use_heap);
 
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(glue);
+
 	ZEND_HASH_FOREACH_VAL(pieces, tmp) {
 		if (EXPECTED(Z_TYPE_P(tmp) == IS_STRING)) {
 			ptr->str = Z_STR_P(tmp);
 			len += ZSTR_LEN(ptr->str);
 			ptr->lval = 0;
+			flags &= ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(ptr->str);
 			ptr++;
 		} else if (UNEXPECTED(Z_TYPE_P(tmp) == IS_LONG)) {
 			zend_long val = Z_LVAL_P(tmp);
@@ -978,12 +981,14 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 			ptr->str = zval_get_string_func(tmp);
 			len += ZSTR_LEN(ptr->str);
 			ptr->lval = 1;
+			flags &= ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(ptr->str);
 			ptr++;
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	/* numelems cannot be 0, we checked above */
 	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(glue), len, 0);
+	GC_ADD_FLAGS(str, flags);
 	cptr = ZSTR_VAL(str) + ZSTR_LEN(str);
 	*cptr = 0;
 
