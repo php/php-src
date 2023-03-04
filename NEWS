@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed build for macOS to cater with pkg-config settings. (David Carlier)
 
+- Phar:
+  . Fixed bug GH-10766 (PharData archive created with Phar::Zip format does
+    not keep files metadata (datetime)). (nielsdos)
+
 16 Mar 2023, PHP 8.2.4
 
 - Core:
