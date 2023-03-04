@@ -13,10 +13,10 @@ $res_3 = '$1$rasmusle$rISCgZzpwk3UhDidwXvin0';
 $salt4 = '$2a$07$rasmuslerd............';
 $res_4 = '$2a$07$rasmuslerd............nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra';
 
-echo (CRYPT_STD_DES)  ? ((crypt($str, $salt1) === $res_1) ? 'STD' : 'STD - ERROR') : 'STD', "\n";
-echo (CRYPT_EXT_DES)  ? ((crypt($str, $salt2) === $res_2) ? 'EXT' : 'EXT - ERROR') : 'EXT', "\n";
-echo (CRYPT_MD5)      ? ((crypt($str, $salt3) === $res_3) ? 'MD5' : 'MD5 - ERROR') : 'MD5', "\n";
-echo (CRYPT_BLOWFISH) ? ((crypt($str, $salt4) === $res_4) ? 'BLO' : 'BLO - ERROR') : 'BLO', "\n";
+echo (crypt($str, $salt1) === $res_1) ? 'STD' : 'STD - ERROR', "\n";
+echo (crypt($str, $salt2) === $res_2) ? 'EXT' : 'EXT - ERROR', "\n";
+echo (crypt($str, $salt3) === $res_3) ? 'MD5' : 'MD5 - ERROR', "\n";
+echo (crypt($str, $salt4) === $res_4) ? 'BLO' : 'BLO - ERROR', "\n";
 
 try {
     var_dump(crypt($str));

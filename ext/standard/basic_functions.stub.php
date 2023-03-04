@@ -378,17 +378,35 @@ const PHP_ROUND_HALF_ODD = UNKNOWN;
  * @cvalue PHP_MAX_SALT_LEN
  */
 const CRYPT_SALT_LENGTH = UNKNOWN;
-/** @var int */
+/**
+ * @var int
+ * @deprecated
+ */
 const CRYPT_STD_DES = 1;
-/** @var int */
+/**
+ * @var int
+ * @deprecated
+ */
 const CRYPT_EXT_DES = 1;
-/** @var int */
+/**
+ * @var int
+ * @deprecated
+ */
 const CRYPT_MD5 = 1;
-/** @var int */
+/**
+ * @var int
+ * @deprecated
+ */
 const CRYPT_BLOWFISH = 1;
-/** @var int */
+/**
+ * @var int
+ * @deprecated
+ */
 const CRYPT_SHA256 = 1;
-/** @var int */
+/**
+ * @var int
+ * @deprecated
+ */
 const CRYPT_SHA512 = 1;
 
 /* dns.c */
