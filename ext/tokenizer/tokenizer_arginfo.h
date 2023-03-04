@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 507dea12d7e457be0a5860bf57903879c7217c36 */
+ * Stub hash: a89f03303f8a7d254509ae2bc46a36bb79a3c900 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_get_all, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
@@ -44,8 +44,8 @@ ZEND_METHOD(PhpToken, __toString);
 
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(token_get_all, arginfo_token_get_all)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(token_name, arginfo_token_name)
+	ZEND_FE(token_get_all, arginfo_token_get_all)
+	ZEND_FE(token_name, arginfo_token_name)
 	ZEND_FE_END
 };
 
