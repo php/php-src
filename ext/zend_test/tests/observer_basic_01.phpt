@@ -10,7 +10,7 @@ zend_test.observer.observe_all=1
 function bar()
 {
     echo 'Bar' . PHP_EOL;
-    var_dump(array_sum([1,2,3]));
+    var_dump(array_reduce([1, 2, 3], fn ($a, $b) => $a + $b));
 }
 
 function foo()
@@ -34,9 +34,16 @@ Foo
     <!-- init bar() -->
     <bar>
 Bar
-      <!-- init array_sum() -->
-      <array_sum>
-      </array_sum>
+      <!-- init array_reduce() -->
+      <array_reduce>
+        <!-- init {closure}() -->
+        <{closure}>
+        </{closure}>
+        <{closure}>
+        </{closure}>
+        <{closure}>
+        </{closure}>
+      </array_reduce>
       <!-- init var_dump() -->
       <var_dump>
 int(6)
@@ -47,8 +54,14 @@ int(6)
 Foo
     <bar>
 Bar
-      <array_sum>
-      </array_sum>
+      <array_reduce>
+        <{closure}>
+        </{closure}>
+        <{closure}>
+        </{closure}>
+        <{closure}>
+        </{closure}>
+      </array_reduce>
       <var_dump>
 int(6)
       </var_dump>
@@ -58,8 +71,14 @@ int(6)
 Foo
     <bar>
 Bar
-      <array_sum>
-      </array_sum>
+      <array_reduce>
+        <{closure}>
+        </{closure}>
+        <{closure}>
+        </{closure}>
+        <{closure}>
+        </{closure}>
+      </array_reduce>
       <var_dump>
 int(6)
       </var_dump>
