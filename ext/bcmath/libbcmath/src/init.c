@@ -31,10 +31,11 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include "zend_alloc.h"
 
 /* new_num allocates a number and sets fields to known values. */
-bc_num _bc_new_num_ex(int length, int scale, bool persistent)
+bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent)
 {
 	bc_num temp;
 	/* PHP Change: malloc() -> pemalloc(), removed free_list code */

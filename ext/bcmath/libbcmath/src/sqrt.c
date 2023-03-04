@@ -30,19 +30,16 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <stddef.h>
 #include <stdbool.h>
 
 /* Take the square root NUM and return it in NUM with SCALE digits
    after the decimal place. */
 
-bool bc_sqrt(bc_num *num, int scale)
+bool bc_sqrt(bc_num *num, size_t scale)
 {
-	int rscale, cmp_res;
-	int cscale;
-	bc_num guess, guess1, point5, diff;
-
 	/* Initial checks. */
-	cmp_res = bc_compare (*num, BCG(_zero_));
+	int cmp_res = bc_compare (*num, BCG(_zero_));
 	if (cmp_res < 0) {
 		return false; /* error */
 	} else {
@@ -60,6 +57,10 @@ bool bc_sqrt(bc_num *num, int scale)
 	}
 
 	/* Initialize the variables. */
+	size_t rscale;
+	size_t cscale;
+	bc_num guess, guess1, point5, diff;
+
 	rscale = MAX (scale, (*num)->n_scale);
 	bc_init_num(&guess1);
 	bc_init_num(&diff);

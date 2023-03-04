@@ -30,6 +30,7 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
 #include "private.h" /* For _bc_rm_leading_zeros() */
@@ -47,7 +48,7 @@ int mul_base_digits = MUL_BASE_DIGITS;
 
 /* Multiply utility routines */
 
-static bc_num new_sub_num(int length, int scale, char *value)
+static bc_num new_sub_num(size_t length, size_t scale, char *value)
 {
 	bc_num temp;
 
@@ -62,7 +63,7 @@ static bc_num new_sub_num(int length, int scale, char *value)
 	return temp;
 }
 
-static void _bc_simp_mul(bc_num n1, int n1len, bc_num n2, int n2len, bc_num *prod, int full_scale)
+static void _bc_simp_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod, int full_scale)
 {
 	char *n1ptr, *n2ptr, *pvptr;
 	char *n1end, *n2end;		/* To the end of n1 and n2. */
@@ -100,9 +101,9 @@ static void _bc_simp_mul(bc_num n1, int n1len, bc_num n2, int n2len, bc_num *pro
 static void _bc_shift_addsub (bc_num accum, bc_num val, int shift, bool sub)
 {
 	signed char *accp, *valp;
-	int  count, carry;
+	unsigned int carry = 0;
+	size_t count = val->n_len;
 
-	count = val->n_len;
 	if (val->n_value[0] == 0) {
 		count--;
 	}
@@ -111,7 +112,6 @@ static void _bc_shift_addsub (bc_num accum, bc_num val, int shift, bool sub)
 	/* Set up pointers and others */
 	accp = (signed char *)(accum->n_value + accum->n_len + accum->n_scale - shift - 1);
 	valp = (signed char *)(val->n_value + val->n_len - 1);
-	carry = 0;
 
 	if (sub) {
 		/* Subtraction, carry is really borrow. */
@@ -164,7 +164,7 @@ static void _bc_shift_addsub (bc_num accum, bc_num val, int shift, bool sub)
 
    B is the base of storage, number of digits in u1,u0 close to equal.
 */
-static void _bc_rec_mul(bc_num u, int ulen, bc_num v, int vlen, bc_num *prod, int full_scale)
+static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *prod, int full_scale)
 {
 	bc_num u0, u1, v0, v1;
 	bc_num m1, m2, m3, d1, d2;
@@ -262,11 +262,11 @@ static void _bc_rec_mul(bc_num u, int ulen, bc_num v, int vlen, bc_num *prod, in
    the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
    */
 
-void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, int scale)
+void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
 {
 	bc_num pval;
-	int len1, len2;
-	int full_scale, prod_scale;
+	size_t len1, len2;
+	size_t full_scale, prod_scale;
 
 	/* Initialize things. */
 	len1 = n1->n_len + n1->n_scale;

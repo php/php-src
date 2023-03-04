@@ -31,12 +31,13 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include <stddef.h>
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 
-bool bc_str2num (bc_num *num, char *str, int scale)
+bool bc_str2num (bc_num *num, char *str, size_t scale)
 {
-	int digits, strscale;
+	size_t digits, strscale;
 	char *ptr, *nptr;
 	bool zero_int = false;
 

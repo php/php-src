@@ -32,6 +32,7 @@
 #include "bcmath.h"
 #include "private.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include "zend_alloc.h"
 
 
@@ -40,7 +41,7 @@
    placed into RESULT.  It is written so that NUM and RESULT can be
    the same pointers.  */
 
-static void _one_mult(unsigned char *num, int size, int digit, unsigned char *result)
+static void _one_mult(unsigned char *num, size_t size, int digit, unsigned char *result)
 {
 	int carry, value;
 	unsigned char *nptr, *rptr;

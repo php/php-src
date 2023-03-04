@@ -31,17 +31,17 @@
 
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 #include <stdbool.h>
 
 /* Here is the full subtract routine that takes care of negative numbers.
    N2 is subtracted from N1 and the result placed in RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-void bc_sub(bc_num n1, bc_num n2, bc_num *result, int scale_min)
+void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 {
 	bc_num diff = NULL;
 	int cmp_res;
-	int res_scale;
 
 	if (n1->n_sign != n2->n_sign) {
 		diff = _bc_do_add (n1, n2, scale_min);
@@ -56,12 +56,13 @@ void bc_sub(bc_num n1, bc_num n2, bc_num *result, int scale_min)
 				diff = _bc_do_sub (n2, n1, scale_min);
 				diff->n_sign = (n2->n_sign == PLUS ? MINUS : PLUS);
 				break;
-			case  0:
+			case  0: {
 				/* They are equal! return zero! */
-				res_scale = MAX (scale_min, MAX(n1->n_scale, n2->n_scale));
+				size_t res_scale = MAX (scale_min, MAX(n1->n_scale, n2->n_scale));
 				diff = bc_new_num (1, res_scale);
 				memset (diff->n_value, 0, res_scale+1);
 				break;
+			}
 			case  1:
 				/* n2 is less than n1, subtract n2 from n1. */
 				diff = _bc_do_sub (n1, n2, scale_min);

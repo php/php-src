@@ -31,19 +31,20 @@
 
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
 
 /* Perform addition: N1 is added to N2 and the value is
    returned.  The signs of N1 and N2 are ignored.
    SCALE_MIN is to set the minimum scale of the result. */
 
-bc_num _bc_do_add(bc_num n1, bc_num n2, int scale_min)
+bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num sum;
-	int sum_scale, sum_digits;
+	size_t sum_scale, sum_digits;
 	char *n1ptr, *n2ptr, *sumptr;
-	int carry, n1bytes, n2bytes;
-	int count;
+	size_t n1bytes, n2bytes;
+	bool carry;
 
 	/* Prepare sum. */
 	sum_scale = MAX (n1->n_scale, n2->n_scale);
@@ -53,7 +54,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, int scale_min)
 	/* Zero extra digits made by scale_min. */
 	if (scale_min > sum_scale) {
 		sumptr = (char *) (sum->n_value + sum_scale + sum_digits);
-		for (count = scale_min - sum_scale; count > 0; count--) {
+		for (int count = scale_min - sum_scale; count > 0; count--) {
 			*sumptr++ = 0;
 		}
 	}
@@ -105,16 +106,16 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, int scale_min)
 	while (n1bytes-- > 0) {
 		*sumptr = *n1ptr-- + carry;
 		if (*sumptr > (BASE-1)) {
-			carry = 1;
+			carry = true;
 			*sumptr -= BASE;
 		} else {
-			carry = 0;
+			carry = false;
 		}
 		sumptr--;
 	}
 
 	/* Set final carry. */
-	if (carry == 1) {
+	if (carry) {
 		*sumptr += 1;
 	}
 
@@ -128,11 +129,11 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, int scale_min)
    returned.  The signs of N1 and N2 are ignored.  Also, N1 is
    assumed to be larger than N2.  SCALE_MIN is the minimum scale
    of the result. */
-bc_num _bc_do_sub(bc_num n1, bc_num n2, int scale_min)
+bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff;
 	int diff_scale, diff_len;
-	int min_scale, min_len;
+	size_t min_scale, min_len;
 	char *n1ptr, *n2ptr, *diffptr;
 	int borrow, count, val;
 

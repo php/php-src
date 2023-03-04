@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
 /* pn prints the number NUM in base 10. */
 
@@ -49,11 +50,10 @@ void pn(bc_num num)
 
 
 /* pv prints a character array as if it was a string of bcd digits. */
-void pv (char *name, unsigned char *num, int len)
+void pv (char *name, unsigned char *num, size_t len)
 {
-	int i;
 	printf("%s=", name);
-	for (i=0; i<len; i++){
+	for (size_t i = 0; i < len; i++){
 		printf ("%c",BCD_CHAR(num[i]));
 	}
 	printf("\n");

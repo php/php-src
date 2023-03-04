@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 #include <string.h>
 
 
@@ -38,11 +39,11 @@
    N1 is added to N2 and the result placed into RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-void bc_add (bc_num n1, bc_num n2, bc_num *result, int scale_min)
+void bc_add (bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 {
 	bc_num sum = NULL;
 	int cmp_res;
-	int res_scale;
+	size_t res_scale;
 
 	if (n1->n_sign == n2->n_sign) {
 		sum = _bc_do_add (n1, n2, scale_min);

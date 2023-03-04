@@ -30,6 +30,7 @@
 *************************************************************************/
 
 #include <stdbool.h>
+#include <stddef.h>
 #include "bcmath.h"
 #include "private.h"
 
@@ -41,7 +42,6 @@
 int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 {
 	char *n1ptr, *n2ptr;
-	int count;
 
 	/* First, compare signs. */
 	if (use_sign && n1->n_sign != n2->n_sign) {
@@ -73,7 +73,7 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 
 	/* If we get here, they have the same number of integer digits.
 	   check the integer part and the equal length part of the fraction. */
-	count = n1->n_len + MIN (n1->n_scale, n2->n_scale);
+	size_t count = n1->n_len + MIN (n1->n_scale, n2->n_scale);
 	n1ptr = n1->n_value;
 	n2ptr = n2->n_value;
 

@@ -33,12 +33,13 @@
 #include "config.h"
 #include "zend_result.h"
 #include "zend_exceptions.h"
+#include <stddef.h>
 
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
-zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
+zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale)
 {
 	bc_num power, exponent, modulus, parity, temp;
-	int rscale;
+	size_t rscale;
 
 	/* Check the base for scale digits. */
 	if (base->n_scale != 0) {

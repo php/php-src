@@ -30,25 +30,23 @@
 *************************************************************************/
 
 #include <stdbool.h>
+#include <stddef.h>
 #include "bcmath.h"
 
 /* In some places we need to check if the number NUM is almost zero.
    Specifically, all but the last digit is 0 and the last digit is 1.
    Last digit is defined by scale. */
 
-bool bc_is_near_zero(bc_num num, int scale)
+bool bc_is_near_zero(bc_num num, size_t scale)
 {
-	int  count;
-	char *nptr;
-
 	/* Error checking */
 	if (scale > num->n_scale) {
 		scale = num->n_scale;
 	}
 
 	/* Initialize */
-	count = num->n_len + scale;
-	nptr = num->n_value;
+	size_t count = num->n_len + scale;
+	const char *nptr = num->n_value;
 
 	/* The check */
 	while ((count > 0) && (*nptr++ == 0)) {

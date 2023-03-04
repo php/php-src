@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include "zend_exceptions.h" /* zend_argument_value_error() */
 
 
@@ -38,13 +39,13 @@
    Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
    only the integer part is used.  */
 
-void bc_raise(bc_num num1, bc_num num2, bc_num *result, int scale)
+void bc_raise(bc_num num1, bc_num num2, bc_num *result, size_t scale)
 {
 	bc_num temp, power;
 	long exponent;
-	int rscale;
-	int pwrscale;
-	int calcscale;
+	size_t rscale;
+	size_t pwrscale;
+	size_t calcscale;
 	bool is_neg;
 
 	/* Check the exponent for scale digits and convert to a long. */

@@ -30,10 +30,11 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <stddef.h>
 #include "zend_string.h"
 
 /* Convert a numbers to a string.  Base 10 only.*/
-zend_string *bc_num2str_ex(bc_num num, int scale)
+zend_string *bc_num2str_ex(bc_num num, size_t scale)
 {
 	zend_string *str;
 	char *sptr;
