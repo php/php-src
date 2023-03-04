@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fix bug GH-8821 (Improve line numbers for errors in constant expressions).
     (ilutov)
   . Fix bug GH-10083 (Allow comments between & and parameter). (ilutov)
+  . Zend Max Execution Timers is now enabled by default for ZTS builds on
+    Linux. (Kévin Dunglas)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
