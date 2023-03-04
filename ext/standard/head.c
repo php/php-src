@@ -104,7 +104,6 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 
 	if (expires < 0) {
 		php_error_docref(NULL, E_WARNING, "\"expires\" option cannot be negative");
-		return FAILURE;
 	}
 
 	if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
