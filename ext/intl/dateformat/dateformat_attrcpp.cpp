@@ -101,6 +101,8 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 	}
 
 	fetch_datefmt(dfo)->adoptTimeZone(timezone);
+
+	RETURN_TRUE;
 }
 
 /* {{{ Get formatter calendar type. */

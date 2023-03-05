@@ -76,6 +76,10 @@ PHP 8.3 UPGRADE NOTES
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
 
+- Intl:
+  . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
+    now returns true on sucess, previously null was returned.
+
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
     casing rules for the Greek letter sigma. For mb_convert_case, conditional
