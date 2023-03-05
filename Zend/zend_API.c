@@ -2713,8 +2713,8 @@ ZEND_END_ARG_INFO()
 ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type) /* {{{ */
 {
 	const zend_function_entry *ptr = functions;
-	zend_function function, *reg_function;
-	zend_internal_function *internal_function = (zend_internal_function *)&function;
+	zend_function function;
+	zend_internal_function *reg_function, *internal_function = (zend_internal_function *)&function;
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
@@ -2847,23 +2847,23 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		}
 
 		/* Get parameter count including variadic parameter. */
-		uint32_t num_args = reg_function->common.num_args;
-		if (reg_function->common.fn_flags & ZEND_ACC_VARIADIC) {
+		uint32_t num_args = reg_function->num_args;
+		if (reg_function->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
 
 		/* If types of arguments have to be checked */
-		if (reg_function->common.arg_info && num_args) {
+		if (reg_function->arg_info && num_args) {
 			uint32_t i;
 			for (i = 0; i < num_args; i++) {
-				zend_internal_arg_info *arg_info = &reg_function->internal_function.arg_info[i];
+				zend_internal_arg_info *arg_info = &reg_function->arg_info[i];
 				ZEND_ASSERT(arg_info->name && "Parameter must have a name");
 				if (ZEND_TYPE_IS_SET(arg_info->type)) {
-				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+				    reg_function->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 				}
 #if ZEND_DEBUG
 				for (uint32_t j = 0; j < i; j++) {
-					if (!strcmp(arg_info->name, reg_function->internal_function.arg_info[j].name)) {
+					if (!strcmp(arg_info->name, reg_function->arg_info[j].name)) {
 						zend_error_noreturn(E_CORE_ERROR,
 							"Duplicate parameter name $%s for function %s%s%s()", arg_info->name,
 							scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
@@ -2874,18 +2874,18 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		}
 
 		/* Rebuild arginfos if parameter/property types and/or a return type are used */
-		if (reg_function->common.arg_info &&
-		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
+		if (reg_function->arg_info &&
+		    (reg_function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			/* convert "const char*" class type names into "zend_string*" */
 			uint32_t i;
-			zend_arg_info *arg_info = reg_function->common.arg_info - 1;
-			zend_arg_info *new_arg_info;
+			zend_internal_arg_info *arg_info = reg_function->arg_info - 1;
+			zend_internal_arg_info *new_arg_info;
 
 			/* Treat return type as an extra argument */
 			num_args++;
-			new_arg_info = malloc(sizeof(zend_arg_info) * num_args);
-			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
-			reg_function->common.arg_info = new_arg_info + 1;
+			new_arg_info = malloc(sizeof(zend_internal_arg_info) * num_args);
+			memcpy(new_arg_info, arg_info, sizeof(zend_internal_arg_info) * num_args);
+			reg_function->arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
 				if (ZEND_TYPE_IS_COMPLEX(new_arg_info[i].type)) {
 					ZEND_ASSERT(ZEND_TYPE_HAS_NAME(new_arg_info[i].type)
@@ -2939,8 +2939,8 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 		if (scope) {
 			zend_check_magic_method_implementation(
-				scope, reg_function, lowercase_name, E_CORE_ERROR);
-			zend_add_magic_method(scope, reg_function, lowercase_name);
+				scope, (zend_function *)reg_function, lowercase_name, E_CORE_ERROR);
+			zend_add_magic_method(scope, (zend_function *)reg_function, lowercase_name);
 		}
 		ptr++;
 		count++;
