@@ -351,7 +351,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $formatter): IntlCalendar
 function datefmt_get_timezone(IntlDateFormatter $formatter): IntlTimeZone|false {}
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): ?bool {}
+function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): bool {}
 
 function datefmt_set_pattern(IntlDateFormatter $formatter, string $pattern): bool {}
 

@@ -49,6 +49,8 @@ PHP                                                                        NEWS
   . Added pattern format error infos for numfmt_set_pattern. (David Carlier)
   . Added MIXED_NUMBERS and HIDDEN_OVERLAY constants for
     the Spoofchecker's class. (David Carlier)
+  . Updated datefmt_set_timezone/IntlDateformatter::setTimezone returns type.
+    (David Carlier).
 
 - JSON:
   . Added json_validate(). (Juan Morales)

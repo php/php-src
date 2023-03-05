@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7008d442eba36e2bc468cc4a7a30eb859d10c07d */
+ * Stub hash: 136c14d9162548cd7211985ce9a5d767a90a0b99 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -310,7 +310,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_datefmt_get_timezone, 0, 1, 
 	ZEND_ARG_OBJ_INFO(0, formatter, IntlDateFormatter, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_timezone, 0, 2, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_timezone, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, formatter, IntlDateFormatter, 0)
 	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
