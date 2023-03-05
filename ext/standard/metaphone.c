@@ -78,7 +78,7 @@ static const char _codes[26] =
 };
 
 
-/* Note: these function require an uppercase letter input! */
+/* Note: these functions require an uppercase letter input! */
 static zend_always_inline char encode(char c) {
 	if (isalpha(c)) {
 		ZEND_ASSERT(c >= 'A' && c <= 'Z');
