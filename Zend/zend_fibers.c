@@ -84,6 +84,10 @@ struct _zend_fiber_stack {
 	unsigned int valgrind_stack_id;
 #endif
 
+#ifdef HAVE_PKEY_ALLOC
+        int pkey_stack_key;
+#endif
+
 #ifdef __SANITIZE_ADDRESS__
 	const void *asan_pointer;
 	size_t asan_size;
@@ -204,6 +208,7 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 	void *pointer;
 	const size_t page_size = zend_fiber_get_page_size();
 	const size_t minimum_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size;
+	const size_t fiber_guard_page_size = ZEND_FIBER_GUARD_PAGES * page_size;
 
 	if (size < minimum_stack_size) {
 		zend_throw_exception_ex(NULL, 0, "Fiber stack size is too small, it needs to be at least %zu bytes", minimum_stack_size);
@@ -227,7 +232,7 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 # if ZEND_FIBER_GUARD_PAGES
 	DWORD protect;
 
-	if (!VirtualProtect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PAGE_READWRITE | PAGE_GUARD, &protect)) {
+	if (!VirtualProtect(pointer, fiber_guard_page_size, PAGE_READWRITE | PAGE_GUARD, &protect)) {
 		DWORD err = GetLastError();
 		char *errmsg = php_win32_error_to_msg(err);
 		zend_throw_exception_ex(NULL, 0, "Fiber stack protect failed: VirtualProtect failed: [0x%08lx] %s", err, errmsg[0] ? errmsg : "Unknown");
@@ -247,7 +252,15 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 	zend_mmap_set_name(pointer, alloc_size, "zend_fiber_stack");
 
 # if ZEND_FIBER_GUARD_PAGES
-	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {
+	bool fiber_protect = false;
+#  ifdef HAVE_PKEY_ALLOC
+	int pkey_stack_key = pkey_alloc(0, PKEY_DISABLE_ACCESS);
+	if (pkey_stack_key >= 0) {
+		if (pkey_mprotect(pointer, fiber_guard_page_size, PROT_NONE, pkey_stack_key) == 0)
+			fiber_protect = true;
+	}
+#  endif
+	if (!fiber_protect && mprotect(pointer, fiber_guard_page_size, PROT_NONE) < 0) {
 		zend_throw_exception_ex(NULL, 0, "Fiber stack protect failed: mprotect failed: %s (%d)", strerror(errno), errno);
 		munmap(pointer, alloc_size);
 		return NULL;
@@ -257,8 +270,12 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 
 	zend_fiber_stack *stack = emalloc(sizeof(zend_fiber_stack));
 
-	stack->pointer = (void *) ((uintptr_t) pointer + ZEND_FIBER_GUARD_PAGES * page_size);
+	stack->pointer = (void *) ((uintptr_t) pointer + fiber_guard_page_size);
 	stack->size = stack_size;
+
+#ifdef HAVE_PKEY_ALLOC
+	stack->pkey_stack_key = pkey_stack_key;
+#endif
 
 #if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
 	/* shadow stack saves ret address only, need less space */
@@ -304,6 +321,10 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 	VirtualFree(pointer, 0, MEM_RELEASE);
 #else
 	munmap(pointer, stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
+# ifdef HAVE_PKEY_ALLOC
+	if (stack->pkey_stack_key != -1)
+		pkey_free(stack->pkey_stack_key);
+# endif
 #endif
 
 #if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
