@@ -13,5 +13,4 @@ try {
 
 ?>
 --EXPECT--
-setcookie(): "expires" option cannot be negative
---EXPECTHEADERS--
+setcookie(): "expires" option must be greater than or equal to 0
