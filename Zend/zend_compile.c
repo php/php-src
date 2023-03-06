@@ -7215,6 +7215,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 
 	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
+		op_array->scope = CG(active_class_entry);
 	}
 
 	if (is_method) {
