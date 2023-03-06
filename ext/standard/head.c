@@ -161,6 +161,8 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 
 			smart_str_appends(&buf, COOKIE_MAX_AGE);
 			smart_str_append_long(&buf, (zend_long) diff);
+		} else if (UNEXPECTED(expires < 0)) {
+			zend_value_error("%s(): \"expires\" option cannot be negative", get_active_function_name());
 		}
 	}
 
