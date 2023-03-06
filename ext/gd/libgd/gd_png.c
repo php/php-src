@@ -236,11 +236,9 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	/* check if the resolution is specified */
 	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_pHYs)) {
 		if (png_get_pHYs(png_ptr, info_ptr, &res_x, &res_y, &unit_type)) {
-			switch (unit_type) {
-			case PNG_RESOLUTION_METER:
+			if(unit_type == PNG_RESOLUTION_METER) {
 				im->res_x = DPM2DPI(res_x);
-				im->res_y = DPM2DPI(res_y);
-				break;
+            	im->res_y = DPM2DPI(res_y);
 			}
 		}
 	}
