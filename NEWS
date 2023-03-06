@@ -130,7 +130,6 @@ PHP                                                                        NEWS
   . password_hash() will now chain the original RandomException to the ValueError
     on salt generation failure. (timwolla)
   . Fix GH-10239 (proc_close after proc_get_status always returns -1). (nielsdos)
-  . Fix GH-10765 (Throw on negative setcookie expiration date). (ilutov)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
