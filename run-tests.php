@@ -675,7 +675,6 @@ function main(): void
     if (!$phpdbg) {
         $phpdbg = get_binary($php, 'phpdbg', 'sapi/phpdbg/phpdbg');
     }
-    $phpdbg = null;
 
     putenv("TEST_PHP_EXECUTABLE=$php");
     $environment['TEST_PHP_EXECUTABLE'] = $php;
