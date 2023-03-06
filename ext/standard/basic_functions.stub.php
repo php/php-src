@@ -1732,14 +1732,14 @@ function array_pad(array $array, int $length, mixed $value): array {}
 
 /**
  * @return array<int|string, int|string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_flip(array $array): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
@@ -1797,15 +1797,15 @@ function array_intersect_uassoc(array $array, ...$rest): array {}
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_key(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_ukey(array $array, ...$rest): array {}
 
@@ -1821,8 +1821,8 @@ function array_diff(array $array, array ...$arrays): array {}
 function array_udiff(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_assoc(array $array, array ...$arrays): array {}
 
@@ -1899,8 +1899,8 @@ function array_is_list(array $array): bool {}
 /* base64.c */
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function base64_encode(string $string): string {}
 
@@ -2347,8 +2347,8 @@ function wordwrap(string $string, int $width = 75, string $break = "\n", bool $c
 
 /**
  * @return array<int, string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function explode(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
@@ -2361,8 +2361,8 @@ function implode(string|array $separator, ?array $array = null): string {}
 function join(string|array $separator, ?array $array = null): string {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function strtok(string $string, ?string $token = null): string|false {}
 
@@ -2412,8 +2412,8 @@ function strrpos(string $haystack, string $needle, int $offset = 0): int|false {
 function strripos(string $haystack, string $needle, int $offset = 0): int|false {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function strrchr(string $haystack, string $needle): string|false {}
 
@@ -2427,8 +2427,8 @@ function str_starts_with(string $haystack, string $needle): bool {}
 function str_ends_with(string $haystack, string $needle): bool {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
