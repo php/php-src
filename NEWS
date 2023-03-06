@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed build for macOS to cater with pkg-config settings. (David Carlier)
+  . Fixed bug GH-8065 (opcache.consistency_checks > 0 causes segfaults in
+    PHP >= 8.1.5 in fpm context). (nielsdos)
 
 - OpenSSL:
   . Add missing error checks on file writing functions. (nielsdos)
