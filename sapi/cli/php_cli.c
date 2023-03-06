@@ -92,6 +92,8 @@
 # include "openssl/applink.c"
 #endif
 
+#include <errno.h>
+
 PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
