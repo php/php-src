@@ -259,6 +259,7 @@ static void zend_persist_zval(zval *z)
 				zend_persist_ast(GC_AST(old_ref));
 				Z_TYPE_FLAGS_P(z) = 0;
 				GC_SET_REFCOUNT(Z_COUNTED_P(z), 1);
+				GC_ADD_FLAGS(Z_COUNTED_P(z), GC_IMMUTABLE);
 				efree(old_ref);
 			}
 			break;

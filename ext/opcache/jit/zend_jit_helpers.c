@@ -3064,7 +3064,19 @@ static zend_result ZEND_FASTCALL zval_jit_update_constant_ex(zval *p, zend_class
 		} else {
 			zval tmp;
 
-			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
+			// Increase the refcount during zend_ast_evaluate to avoid releasing the ast too early
+			// on nested calls to zval_update_constant_ex which can happen when retriggering ast
+			// evaluation during autoloading.
+			zend_ast_ref *ast_ref = Z_AST_P(p);
+			bool ast_is_refcounted = !(GC_FLAGS(ast_ref) & GC_IMMUTABLE);
+			if (ast_is_refcounted) {
+				GC_ADDREF(ast_ref);
+			}
+			zend_result result = zend_ast_evaluate(&tmp, ast, scope);
+			if (ast_is_refcounted && !GC_DELREF(ast_ref)) {
+				rc_dtor_func((zend_refcounted *)ast_ref);
+			}
+			if (UNEXPECTED(result != SUCCESS)) {
 				return FAILURE;
 			}
 			zval_ptr_dtor_nogc(p);
