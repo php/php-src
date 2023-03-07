@@ -1215,3 +1215,17 @@ PHP_FUNCTION(intdiv)
 	RETURN_LONG(dividend / divisor);
 }
 /* }}} */
+
+/* {{{ Returns sum of integers, allowing overflow */
+PHP_FUNCTION(intadd)
+{
+	zend_long addend1, addend2;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(addend1)
+		Z_PARAM_LONG(addend2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(addend1 + addend2);
+}
+/* }}} */
