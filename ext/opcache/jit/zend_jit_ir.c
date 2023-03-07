@@ -2482,7 +2482,9 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			jit->ctx.flags |= IR_FUNCTION;
 			/* Stack must be 16 byte aligned */
 			/* TODO: select stack size ??? */
-#if defined(IR_TARGET_AARCH64) || defined(_WIN64)
+#if defined(IR_TARGET_AARCH64)
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 16;
+#elif defined(_WIN64)
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 15;
 #else
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 7;
