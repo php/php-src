@@ -96,6 +96,10 @@ PHP 8.3 UPGRADE NOTES
   . password_hash() will now chain the underlying Random\RandomException
     as the ValueError’s $previous Exception when salt generation fails.
   . proc_open() $command array must now have at least one non empty element.
+  . array_sum() and array_product() now warn when values in the array cannot be converted to int/float.
+    Previously arrays and objects where ignored whilst every other value was cast to int.
+    Moreover, objects that define a numeric cast (e.g. GMP) are now casted instead of ignored.
+    RFC: https://wiki.php.net/rfc/saner-array-sum-product
 
 ========================================
 6. New Functions
