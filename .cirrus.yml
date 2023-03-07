@@ -7,8 +7,10 @@ asan_task:
     image: gcc:latest
     additional_containers:
       - name: mysql
-        image: mysql:latest
+        image: mysql:8
         port: 3306
+        cpu: 1.0
+        memory: 1G
         env:
           MYSQL_ROOT_PASSWORD: "root"
           MYSQL_DATABASE: "test"
@@ -160,10 +162,10 @@ asan_task:
   tests_script:
     - export SKIP_IO_CAPTURE_TESTS=1
     - export CI_NO_IPV6=1
-    - export MYSQL_TEST_HOST=mysql
+    - export MYSQL_TEST_HOST=127.0.0.1
     - export MYSQL_TEST_USER=root
     - export MYSQL_TEST_PASSWD=root
-    - export PDO_MYSQL_TEST_DSN="mysql:host=mysql;dbname=test"
+    - export PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
     - export PDO_MYSQL_TEST_USER=root
     - export PDO_MYSQL_TEST_PASS=root
     - >-
