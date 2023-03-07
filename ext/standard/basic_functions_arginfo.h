@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c2ac556c9d2aa455b709bee66520059ae9614538 */
+ * Stub hash: 0f1e384b9c07c163242de4245e3aec3f6cc7c1b4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2996,7 +2996,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(get_browser, arginfo_get_browser)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(crc32, arginfo_crc32)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(crypt, arginfo_crypt)
+	ZEND_FE(crypt, arginfo_crypt)
 #if defined(HAVE_STRPTIME)
 	ZEND_DEP_FE(strptime, arginfo_strptime)
 #endif
