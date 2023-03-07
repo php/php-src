@@ -3232,6 +3232,9 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		charset = php_mb_get_encoding(charset_name, 2);
 		if (!charset) {
 			RETURN_THROWS();
+		} else if (charset->mime_name == NULL || charset->mime_name[0] == '\0') {
+			zend_argument_value_error(2, "\"%s\" cannot be used for MIME header encoding", ZSTR_VAL(charset_name));
+			RETURN_THROWS();
 		}
 	} else {
 		const mbfl_language *lang = mbfl_no2language(MBSTRG(language));
