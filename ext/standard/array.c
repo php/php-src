@@ -2769,8 +2769,8 @@ PHP_FUNCTION(array_fill_keys)
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
 
-#define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
-		zend_ulong __calc_size = ((zend_ulong) start - end) / lstep; \
+#define RANGE_CHECK_LONG_INIT_ARRAY(start, end, _step) do { \
+		zend_ulong __calc_size = ((zend_ulong) start - end) / (_step); \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
 			zend_value_error(\
 					"The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
@@ -2787,6 +2787,7 @@ PHP_FUNCTION(range)
 	zval *zlow, *zhigh, *user_step = NULL, tmp;
 	bool err = 0, is_step_double = false;
 	double step_double = 1.0;
+	zend_long step = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_NUMBER_OR_STR(zlow)
@@ -2798,17 +2799,25 @@ PHP_FUNCTION(range)
 	if (user_step) {
 		if (UNEXPECTED(Z_TYPE_P(user_step) == IS_DOUBLE)) {
 			step_double = Z_DVAL_P(user_step);
-			is_step_double = true;
+			/* We only want positive step values. */
+			if (step_double < 0.0) {
+				step_double *= -1;
+			}
+			step = zend_dval_to_lval(step_double);
+			if (!zend_is_long_compatible(step_double, step)) {
+				is_step_double = true;
+			}
 		} else {
-			step_double = (double) Z_LVAL_P(user_step);
+			step = Z_LVAL_P(user_step);
+			/* We only want positive step values. */
+			if (step < 0) {
+				step *= -1;
+			}
+			step_double = (double) step;
 		}
 		if (step_double == 0.0) {
 			zend_argument_value_error(3, "cannot be 0");
 			RETURN_THROWS();
-		}
-		/* We only want positive step values. */
-		if (step_double < 0.0) {
-			step_double *= -1;
 		}
 	}
 
@@ -2816,7 +2825,6 @@ PHP_FUNCTION(range)
 	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
 		int type1, type2;
 		unsigned char low, high;
-		zend_long lstep = (zend_long) step_double;
 
 		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, 0);
 		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, 0);
@@ -2831,34 +2839,34 @@ PHP_FUNCTION(range)
 		high = (unsigned char)Z_STRVAL_P(zhigh)[0];
 
 		if (low > high) {		/* Negative Steps */
-			if (low - high < lstep) {
+			if (low - high < step) {
 				err = 1;
 				goto err;
 			}
 			/* Initialize the return_value as an array. */
-			array_init_size(return_value, (uint32_t)(((low - high) / lstep) + 1));
+			array_init_size(return_value, (uint32_t)(((low - high) / step) + 1));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low >= high; low -= (unsigned int)lstep) {
+				for (; low >= high; low -= (unsigned int)step) {
 					ZEND_HASH_FILL_SET_INTERNED_STR(ZSTR_CHAR(low));
 					ZEND_HASH_FILL_NEXT();
-					if (((signed int)low - lstep) < 0) {
+					if (((signed int)low - step) < 0) {
 						break;
 					}
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) {	/* Positive Steps */
-			if (high - low < lstep) {
+			if (high - low < step) {
 				err = 1;
 				goto err;
 			}
-			array_init_size(return_value, (uint32_t)(((high - low) / lstep) + 1));
+			array_init_size(return_value, (uint32_t)(((high - low) / step) + 1));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (; low <= high; low += (unsigned int)lstep) {
+				for (; low <= high; low += (unsigned int)step) {
 					ZEND_HASH_FILL_SET_INTERNED_STR(ZSTR_CHAR(low));
 					ZEND_HASH_FILL_NEXT();
-					if (((signed int)low + lstep) > 255) {
+					if (((signed int)low + step) > 255) {
 						break;
 					}
 				}
@@ -2915,40 +2923,40 @@ double_str:
 		}
 	} else {
 		zend_long low, high;
-		/* lstep is a zend_ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
-		zend_ulong lstep;
+		/* unsigned_step is a zend_ulong so that comparisons to it don't overflow, i.e. low - high < lstep */
+		zend_ulong unsigned_step;
 		uint32_t i, size;
 long_str:
 		low = zval_get_long(zlow);
 		high = zval_get_long(zhigh);
 
-		lstep = (zend_ulong)step_double;
+		unsigned_step = (zend_ulong)step;
 
 		if (low > high) { 		/* Negative steps */
-			if ((zend_ulong)low - high < lstep) {
+			if ((zend_ulong)low - high < unsigned_step) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_LONG_INIT_ARRAY(low, high);
+			RANGE_CHECK_LONG_INIT_ARRAY(low, high, unsigned_step);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
-					ZEND_HASH_FILL_SET_LONG(low - (i * lstep));
+					ZEND_HASH_FILL_SET_LONG(low - (i * unsigned_step));
 					ZEND_HASH_FILL_NEXT();
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			if ((zend_ulong)high - low < lstep) {
+			if ((zend_ulong)high - low < unsigned_step) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_LONG_INIT_ARRAY(high, low);
+			RANGE_CHECK_LONG_INIT_ARRAY(high, low, unsigned_step);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (i = 0; i < size; ++i) {
-					ZEND_HASH_FILL_SET_LONG(low + (i * lstep));
+					ZEND_HASH_FILL_SET_LONG(low + (i * unsigned_step));
 					ZEND_HASH_FILL_NEXT();
 				}
 			} ZEND_HASH_FILL_END();

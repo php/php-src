@@ -9,9 +9,9 @@ var_dump( range(1, 5, 2.0) );
 --EXPECT--
 array(3) {
   [0]=>
-  float(1)
+  int(1)
   [1]=>
-  float(3)
+  int(3)
   [2]=>
-  float(5)
+  int(5)
 }
