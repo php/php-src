@@ -8,17 +8,13 @@
  */
 const HASH_HMAC = UNKNOWN;
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function hash(string $algo, string $data, bool $binary = false, array $options = []): string {}
 
 /** @refcount 1 */
 function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
 
 /**
- * @compile-time-eval
  * @refcount 1
  */
 function hash_hmac(string $algo, string $data, #[\SensitiveParameter] string $key, bool $binary = false): string {}
