@@ -412,6 +412,19 @@ static ZEND_METHOD(_ZendTestClass, returnsThrowable)
 	zend_throw_error(NULL, "Dummy");
 }
 
+static ZEND_METHOD(_ZendTestClass, variadicTest) {
+	int      argc;
+	zval    *args = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	(void) (args + argc);
+
+	object_init_ex(return_value, zend_get_called_scope(execute_data));
+}
+
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
