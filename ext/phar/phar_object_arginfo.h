@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 799b653b10dbdfa58747e41715700cfd5300fa4f */
+ * Stub hash: 41840da6ed7a777dfec290a67751f6e812ad91eb */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -38,7 +38,8 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_compressFil
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_decompressFiles arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_decompressFiles, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_compress, 0, 1, Phar, 1)
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
@@ -61,7 +62,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_convertToDat
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extension, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_copy, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_copy, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -70,11 +71,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_count, 0, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "COUNT_NORMAL")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_delete, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_delete, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_delMetadata arginfo_class_Phar___destruct
+#define arginfo_class_Phar_delMetadata arginfo_class_Phar_decompressFiles
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_extractTo, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
@@ -150,7 +151,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setSignatur
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, privateKey, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setStub, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setStub, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, stub)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -180,8 +181,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_getSupportedSignatures arginfo_class_Phar_getSupportedCompression
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_interceptFileFuncs, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Phar_interceptFileFuncs arginfo_class_Phar_decompressFiles
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_isValidPharFilename, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -211,7 +211,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_mungServer, 0, 1, IS_
 	ZEND_ARG_TYPE_INFO(0, variables, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_unlinkArchive, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_unlinkArchive, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -244,7 +244,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_compressFiles arginfo_class_Phar_compressFiles
 
-#define arginfo_class_PharData_decompressFiles arginfo_class_Phar___destruct
+#define arginfo_class_PharData_decompressFiles arginfo_class_Phar_decompressFiles
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_PharData_compress, 0, 1, PharData, 1)
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
@@ -265,7 +265,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_delete arginfo_class_Phar_delete
 
-#define arginfo_class_PharData_delMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharData_delMetadata arginfo_class_Phar_decompressFiles
 
 #define arginfo_class_PharData_extractTo arginfo_class_Phar_extractTo
 
@@ -327,7 +327,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_getSupportedSignatures arginfo_class_Phar_getSupportedCompression
 
-#define arginfo_class_PharData_interceptFileFuncs arginfo_class_Phar_interceptFileFuncs
+#define arginfo_class_PharData_interceptFileFuncs arginfo_class_Phar_decompressFiles
 
 #define arginfo_class_PharData_isValidPharFilename arginfo_class_Phar_isValidPharFilename
 
@@ -355,13 +355,13 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharFileInfo_chm
 	ZEND_ARG_TYPE_INFO(0, perms, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharFileInfo_compress, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PharFileInfo_compress, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, compression, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_PharFileInfo_decompress arginfo_class_Phar___destruct
+#define arginfo_class_PharFileInfo_decompress arginfo_class_Phar_decompressFiles
 
-#define arginfo_class_PharFileInfo_delMetadata arginfo_class_Phar___destruct
+#define arginfo_class_PharFileInfo_delMetadata arginfo_class_Phar_decompressFiles
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharFileInfo_getCompressedSize, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()

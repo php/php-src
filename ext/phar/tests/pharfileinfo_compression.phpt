@@ -79,12 +79,12 @@ Unknown compression type specified
 Cannot compress with Gzip compression, not possible with tar-based phar archives
 Phar entry is a directory, cannot set compression
 Phar is readonly, cannot change compression
-bool(true)
-bool(true)
-bool(true)
-bool(true)
+NULL
+NULL
+NULL
+NULL
 decompress
 Phar is readonly, cannot decompress
 Phar entry is a directory, cannot set compression
-bool(true)
-bool(true)
+NULL
+NULL

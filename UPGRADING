@@ -86,6 +86,12 @@ PHP 8.3 UPGRADE NOTES
     Underscores must be encoded as "=5F" in such MIME encoded words.
     (Alex Dowad)
 
+- Phar:
+  . Phar::delete, Phar::decompress, Phar::decompressFiles, Phar::copy,
+    Phar::delMetadata, Phar::setStub, Phar::unlinkArchive,
+    PharFileInfo::compress, PharFileInfo::decompress, PharFileInfo::delMetadata
+    no longer return true on success.
+
 - Standard:
   . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling

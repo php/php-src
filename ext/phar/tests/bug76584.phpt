@@ -19,9 +19,9 @@ var_dump($phar->extractTo(__DIR__ . '/76584'));
 echo file_get_contents(__DIR__ . '/76584/76584.txt');
 ?>
 --EXPECT--
+NULL
 bool(true)
-bool(true)
-bool(true)
+NULL
 bool(false)
 bool(true)
 This is a test file.
