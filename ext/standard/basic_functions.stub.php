@@ -1654,10 +1654,7 @@ function dirname(string $path, int $levels = 1): string {}
  */
 function pathinfo(string $path, int $flags = PATHINFO_ALL): array|string {}
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /**
