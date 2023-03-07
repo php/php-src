@@ -1520,6 +1520,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_DOUBLE_OR_NULL,	"of type ?float") \
 	_(Z_EXPECTED_NUMBER,			"of type int|float") \
 	_(Z_EXPECTED_NUMBER_OR_NULL,	"of type int|float|null") \
+	_(Z_EXPECTED_NUMBER_OR_STRING,			"of type string|int|float") \
+	_(Z_EXPECTED_NUMBER_OR_STRING_OR_NULL,	"of type string|int|float|null") \
 	_(Z_EXPECTED_ARRAY_OR_STRING,	"of type array|string") \
 	_(Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, "of type array|string|null") \
 	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
@@ -1891,6 +1893,20 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 #define Z_PARAM_NUMBER(dest) \
 	Z_PARAM_NUMBER_EX(dest, 0)
 
+#define Z_PARAM_NUMBER_OR_STR_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_number_or_str(_arg, &dest, check_null, _i))) { \
+		_expected_type = check_null ? Z_EXPECTED_NUMBER_OR_STRING_OR_NULL : Z_EXPECTED_NUMBER_OR_STRING; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_NUMBER_OR_STR(dest) \
+	Z_PARAM_NUMBER_OR_STR_EX(dest, false)
+
+#define Z_PARAM_NUMBER_OR_STR_OR_NULL(dest) \
+	Z_PARAM_NUMBER_OR_STR_EX(dest, true)
+
 /* old "o" */
 #define Z_PARAM_OBJECT_EX(dest, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \
@@ -2145,6 +2161,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest, uint32_t arg_num);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_number_or_str_slow(zval *arg, zval **dest, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num);
 
 static zend_always_inline bool zend_parse_arg_bool(const zval *arg, bool *dest, bool *is_null, bool check_null, uint32_t arg_num)
@@ -2207,6 +2224,18 @@ static zend_always_inline bool zend_parse_arg_number(zval *arg, zval **dest, boo
 		return zend_parse_arg_number_slow(arg, dest, arg_num);
 	}
 	return 1;
+}
+
+static zend_always_inline bool zend_parse_arg_number_or_str(zval *arg, zval **dest, bool check_null, uint32_t arg_num)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE || Z_TYPE_P(arg) == IS_STRING)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return zend_parse_arg_number_or_str_slow(arg, dest, arg_num);
+	}
+	return true;
 }
 
 static zend_always_inline bool zend_parse_arg_str(zval *arg, zend_string **dest, bool check_null, uint32_t arg_num)

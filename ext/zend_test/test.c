@@ -266,6 +266,50 @@ static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 	}
 }
 
+/* Tests Z_PARAM_NUMBER_OR_STR */
+static ZEND_FUNCTION(zend_number_or_string)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_STR(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
+/* Tests Z_PARAM_NUMBER_OR_STR_OR_NULL */
+static ZEND_FUNCTION(zend_number_or_string_or_null)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_STR_OR_NULL(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!input) {
+		RETURN_NULL();
+	}
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 static ZEND_FUNCTION(zend_weakmap_attach)
 {
 	zval *value;

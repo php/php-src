@@ -162,6 +162,10 @@ namespace {
     /** @param stdClass|string|null $param */
     function zend_string_or_stdclass_or_null($param): stdClass|string|null {}
 
+    function zend_number_or_string(string|int|float $param): string|int|float {}
+
+    function zend_number_or_string_or_null(string|int|float|null $param): string|int|float|null {}
+
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
 
     function zend_weakmap_attach(object $object, mixed $value): bool {}
