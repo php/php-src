@@ -2757,8 +2757,8 @@ PHP_FUNCTION(array_fill_keys)
 }
 /* }}} */
 
-#define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
-		double __calc_size = ((start - end) / step) + 1; \
+#define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end, _step) do { \
+		double __calc_size = ((start - end) / (_step)) + 1; \
 		if (__calc_size >= (double)HT_MAX_SIZE) { \
 			zend_value_error(\
 					"The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
@@ -2784,24 +2784,31 @@ PHP_FUNCTION(array_fill_keys)
 /* {{{ Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
-	zval *zlow, *zhigh, *zstep = NULL, tmp;
-	int err = 0, is_step_double = 0;
-	double step = 1.0;
+	zval *zlow, *zhigh, *user_step = NULL, tmp;
+	bool err = 0, is_step_double = false;
+	double step_double = 1.0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_NUMBER_OR_STR(zlow)
 		Z_PARAM_NUMBER_OR_STR(zhigh)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_NUMBER(zstep)
+		Z_PARAM_NUMBER(user_step)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zstep) {
-		is_step_double = Z_TYPE_P(zstep) == IS_DOUBLE;
-		step = zval_get_double(zstep);
-
+	if (user_step) {
+		if (UNEXPECTED(Z_TYPE_P(user_step) == IS_DOUBLE)) {
+			step_double = Z_DVAL_P(user_step);
+			is_step_double = true;
+		} else {
+			step_double = (double) Z_LVAL_P(user_step);
+		}
+		if (step_double == 0.0) {
+			zend_argument_value_error(3, "cannot be 0");
+			RETURN_THROWS();
+		}
 		/* We only want positive step values. */
-		if (step < 0.0) {
-			step *= -1;
+		if (step_double < 0.0) {
+			step_double *= -1;
 		}
 	}
 
@@ -2809,7 +2816,7 @@ PHP_FUNCTION(range)
 	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
 		int type1, type2;
 		unsigned char low, high;
-		zend_long lstep = (zend_long) step;
+		zend_long lstep = (zend_long) step_double;
 
 		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, 0);
 		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, 0);
@@ -2824,7 +2831,7 @@ PHP_FUNCTION(range)
 		high = (unsigned char)Z_STRVAL_P(zhigh)[0];
 
 		if (low > high) {		/* Negative Steps */
-			if (low - high < lstep || lstep <= 0) {
+			if (low - high < lstep) {
 				err = 1;
 				goto err;
 			}
@@ -2841,7 +2848,7 @@ PHP_FUNCTION(range)
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) {	/* Positive Steps */
-			if (high - low < lstep || lstep <= 0) {
+			if (high - low < lstep) {
 				err = 1;
 				goto err;
 			}
@@ -2874,29 +2881,29 @@ double_str:
 		}
 
 		if (low > high) { 		/* Negative steps */
-			if (low - high < step || step <= 0) {
+			if (low - high < step_double) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_DOUBLE_INIT_ARRAY(low, high);
+			RANGE_CHECK_DOUBLE_INIT_ARRAY(low, high, step_double);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0, element = low; i < size && element >= high; ++i, element = low - (i * step)) {
+				for (i = 0, element = low; i < size && element >= high; ++i, element = low - (i * step_double)) {
 					ZEND_HASH_FILL_SET_DOUBLE(element);
 					ZEND_HASH_FILL_NEXT();
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			if (high - low < step || step <= 0) {
+			if (high - low < step_double) {
 				err = 1;
 				goto err;
 			}
 
-			RANGE_CHECK_DOUBLE_INIT_ARRAY(high, low);
+			RANGE_CHECK_DOUBLE_INIT_ARRAY(high, low, step_double);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0, element = low; i < size && element <= high; ++i, element = low + (i * step)) {
+				for (i = 0, element = low; i < size && element <= high; ++i, element = low + (i * step_double)) {
 					ZEND_HASH_FILL_SET_DOUBLE(element);
 					ZEND_HASH_FILL_NEXT();
 				}
@@ -2915,16 +2922,7 @@ long_str:
 		low = zval_get_long(zlow);
 		high = zval_get_long(zhigh);
 
-		if (step <= 0) {
-			err = 1;
-			goto err;
-		}
-
-		lstep = (zend_ulong)step;
-		if (step <= 0) {
-			err = 1;
-			goto err;
-		}
+		lstep = (zend_ulong)step_double;
 
 		if (low > high) { 		/* Negative steps */
 			if ((zend_ulong)low - high < lstep) {
