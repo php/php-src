@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9cd92edb6d645c181b88e3864e478bbf64824722 */
+ * Stub hash: c2ac556c9d2aa455b709bee66520059ae9614538 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3241,10 +3241,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FALIAS(diskfreespace, disk_free_space, arginfo_diskfreespace)
 	ZEND_FE(realpath_cache_get, arginfo_realpath_cache_get)
 	ZEND_FE(realpath_cache_size, arginfo_realpath_cache_size)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(sprintf, arginfo_sprintf)
+	ZEND_FE(sprintf, arginfo_sprintf)
 	ZEND_FE(printf, arginfo_printf)
 	ZEND_FE(vprintf, arginfo_vprintf)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(vsprintf, arginfo_vsprintf)
+	ZEND_FE(vsprintf, arginfo_vsprintf)
 	ZEND_FE(fprintf, arginfo_fprintf)
 	ZEND_FE(vfprintf, arginfo_vfprintf)
 	ZEND_FE(fsockopen, arginfo_fsockopen)

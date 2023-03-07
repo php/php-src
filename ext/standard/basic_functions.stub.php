@@ -2966,20 +2966,14 @@ function realpath_cache_size(): int {}
 
 /* formatted_print.c */
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function sprintf(string $format, mixed ...$values): string {}
 
 function printf(string $format, mixed ...$values): int {}
 
 function vprintf(string $format, array $values): int {}
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function vsprintf(string $format, array $values): string {}
 
 /** @param resource $stream */
