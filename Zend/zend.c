@@ -1281,6 +1281,34 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 
 	zend_destroy_rsrc_list(&EG(regular_list));
 
+	/* See GH-8646: https://github.com/php/php-src/issues/8646
+	 *
+	 * Interned strings that hold class entries can get a corresponding slot in map_ptr for the CE cache.
+	 * map_ptr works like a bump allocator: there is a counter which increases to allocate the next slot in the map.
+	 *
+	 * For class name strings in non-opcache we have:
+	 *   - on startup: permanent + interned
+	 *   - on request: interned
+	 * For class name strings in opcache we have:
+	 *   - on startup: permanent + interned
+	 *   - on request: either not interned at all, which we can ignore because they won't get a CE cache entry
+	 *                 or they were already permanent + interned
+	 *                 or we get a new permanent + interned string in the opcache persistence code
+	 *
+	 * Notice that the map_ptr layout always has the permanent strings first, and the request strings after.
+	 * In non-opcache, a request string may get a slot in map_ptr, and that interned request string
+	 * gets destroyed at the end of the request. The corresponding map_ptr slot can thereafter never be used again.
+	 * This causes map_ptr to keep reallocating to larger and larger sizes.
+	 *
+	 * We solve it as follows:
+	 * We can check whether we had any interned request strings, which only happens in non-opcache.
+	 * If we have any, we reset map_ptr to the last permanent string.
+	 * We can't lose any permanent strings because of map_ptr's layout.
+	 */
+	if (zend_hash_num_elements(&CG(interned_strings)) > 0) {
+		zend_map_ptr_reset();
+	}
+
 #if GC_BENCH
 	fprintf(stderr, "GC Statistics\n");
 	fprintf(stderr, "-------------\n");

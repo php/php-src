@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39d455982dfdea9d0b9b646bc207b05f7108d1b2 */
+ * Stub hash: b0b1fb366a3ba6acfcb460e5b1ac8212c436bf2f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2920,11 +2920,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_reduce, arginfo_array_reduce)
 	ZEND_FE(array_filter, arginfo_array_filter)
 	ZEND_FE(array_map, arginfo_array_map)
-	ZEND_FE(array_key_exists, arginfo_array_key_exists)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(array_key_exists, arginfo_array_key_exists)
 	ZEND_FALIAS(key_exists, array_key_exists, arginfo_key_exists)
 	ZEND_FE(array_chunk, arginfo_array_chunk)
 	ZEND_FE(array_combine, arginfo_array_combine)
-	ZEND_FE(array_is_list, arginfo_array_is_list)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(array_is_list, arginfo_array_is_list)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(base64_encode, arginfo_base64_encode)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(base64_decode, arginfo_base64_decode)
 	ZEND_FE(constant, arginfo_constant)
@@ -3090,7 +3090,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dirname, arginfo_dirname)
 	ZEND_FE(pathinfo, arginfo_pathinfo)
 	ZEND_FE(stristr, arginfo_stristr)
-	ZEND_FE(strstr, arginfo_strstr)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strstr, arginfo_strstr)
 	ZEND_FALIAS(strchr, strstr, arginfo_strchr)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strpos, arginfo_strpos)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(stripos, arginfo_stripos)

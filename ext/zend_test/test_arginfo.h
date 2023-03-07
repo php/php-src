@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 947056bfe52d586b8a4969e3022f84e83b677e0e */
+ * Stub hash: 904f34b4921ebde937b8f08834750aa78b32b852 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -111,6 +111,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_is_string_marked_as_va
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_map_ptr_last, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -128,8 +131,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func arginfo_zend_test_void_return
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_is_object, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class__ZendTestClass_is_object arginfo_zend_get_map_ptr_last
 
 #define arginfo_class__ZendTestClass___toString arginfo_zend_get_current_func_name
 
@@ -210,6 +212,7 @@ static ZEND_FUNCTION(zend_test_zend_call_stack_get);
 static ZEND_FUNCTION(zend_test_zend_call_stack_use_all);
 #endif
 static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8);
+static ZEND_FUNCTION(zend_get_map_ptr_last);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -268,6 +271,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all)
 #endif
 	ZEND_FE(zend_test_is_string_marked_as_valid_utf8, arginfo_zend_test_is_string_marked_as_valid_utf8)
+	ZEND_FE(zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last)
 	ZEND_NS_FALIAS("ZendTestNS2", namespaced_func, ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func)
 	ZEND_NS_DEP_FALIAS("ZendTestNS2", namespaced_deprecated_func, ZendTestNS2_namespaced_deprecated_func, arginfo_ZendTestNS2_namespaced_deprecated_func)
 	ZEND_NS_FALIAS("ZendTestNS2", namespaced_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_namespaced_aliased_func)
