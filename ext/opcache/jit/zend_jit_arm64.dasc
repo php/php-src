@@ -12245,11 +12245,13 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	ldr REG0w, [FCARG1x, #offsetof(zval, u2.extra)]
 			|	TST_32_WITH_CONST REG0w, IS_PROP_REINITABLE, TMP1w
 			|	beq >6
-			|	SET_ZVAL_PTR res_addr, FCARG1x, TMP1
-			|	SET_ZVAL_TYPE_INFO res_addr, IS_INDIRECT, TMP1w, TMP2
 			|	and REG0w, REG0w, #(~IS_PROP_REINITABLE)
 			|	str REG0w, [FCARG1x, #offsetof(zval, u2.extra)]
-			|	b >9
+			if (flags) {
+				|	b >3
+			} else {
+				|	b >4
+			}
 			|6:
 			|	mov FCARG1x, FCARG2x
 			|	SET_EX_OPLINE opline, REG0
@@ -12307,12 +12309,9 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	ldr REG0w, [FCARG1x, #(prop_info->offset + offsetof(zval, u2.extra))]
 			|	TST_32_WITH_CONST REG0w, IS_PROP_REINITABLE, TMP1w
 			|	beq >6
-			|	LOAD_ZVAL_ADDR FCARG1x, prop_addr
-			|	SET_ZVAL_PTR res_addr, FCARG1x, TMP1
-			|	SET_ZVAL_TYPE_INFO res_addr, IS_INDIRECT, TMP1w, TMP2
 			|	and REG0w, REG0w, #(~IS_PROP_REINITABLE)
 			|	str REG0w, [FCARG1x, #(prop_info->offset + offsetof(zval, u2.extra))]
-			|	b >9
+			|	b >4
 			|6:
 			|	LOAD_ADDR FCARG1x, prop_info
 			|	SET_EX_OPLINE opline, REG0
@@ -12320,6 +12319,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|	SET_ZVAL_TYPE_INFO res_addr, _IS_ERROR, TMP1w, TMP2
 			|	b >9
 			|.code
+			|4:
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W
 		 && (opline->extended_value & ZEND_FETCH_OBJ_FLAGS)
