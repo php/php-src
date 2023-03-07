@@ -162,6 +162,12 @@ static uint32_t allowed_opt_flags = 0;
 static bool delayed_call_chain = 0; // TODO: remove this var (use jit->delayed_call_level) ???
 
 #ifdef ZTS
+# ifdef _WIN32
+extern uint32_t _tls_index;
+extern char *_tls_start;
+extern char *_tls_end;
+# endif
+
 static size_t tsrm_ls_cache_tcb_offset = 0;
 static size_t tsrm_tls_index = 0;
 static size_t tsrm_tls_offset = 0;
