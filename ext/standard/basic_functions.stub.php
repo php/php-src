@@ -2107,7 +2107,6 @@ function crypt(#[\SensitiveParameter] string $string, string $salt): string {}
 /**
  * @return array<string, int|string>|false
  * @deprecated
- * @compile-time-eval
  * @refcount 1
  */
 function strptime(string $timestamp, string $format): array|false {}
