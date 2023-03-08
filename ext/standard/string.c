@@ -822,6 +822,8 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
 	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
+    zend_string *tmp2;
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(delim, str);
 
 	if (p2 == NULL) {
 		ZVAL_STR_COPY(&tmp, str);
@@ -831,7 +833,9 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			do {
 				ZEND_HASH_FILL_GROW();
-				ZEND_HASH_FILL_SET_STR(zend_string_init_fast(p1, p2 - p1));
+                tmp2 = zend_string_init_fast(p1, p2 - p1);
+                GC_ADD_FLAGS(tmp2, flags);
+				ZEND_HASH_FILL_SET_STR(tmp2);
 				ZEND_HASH_FILL_NEXT();
 				p1 = p2 + ZSTR_LEN(delim);
 				p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
@@ -839,7 +843,9 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 
 			if (p1 <= endp) {
 				ZEND_HASH_FILL_GROW();
-				ZEND_HASH_FILL_SET_STR(zend_string_init_fast(p1, endp - p1));
+                tmp2 = zend_string_init_fast(p1, endp - p1);
+                GC_ADD_FLAGS(tmp2, flags);
+				ZEND_HASH_FILL_SET_STR(tmp2);
 				ZEND_HASH_FILL_NEXT();
 			}
 		} ZEND_HASH_FILL_END();
@@ -855,6 +861,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
 	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(delim, str);
 
 	if (p2 == NULL) {
 		/*
@@ -880,6 +887,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
 		for (i = 0; i < to_return; i++) { /* this checks also for to_return > 0 */
 			ZVAL_STRINGL(&tmp, positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]);
+            GC_ADD_FLAGS(Z_STR(tmp), flags);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 		efree((void *)positions);

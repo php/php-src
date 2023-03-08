@@ -142,6 +142,34 @@ var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
 $string_concat = implode('', [1, 1.0, 'a']);
 var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
 
+echo "explode:\n";
+$string = 'můj žlutý kůň';
+$firstByte = substr('ů', 0, 1); // byte present in $string, but itself it is not valid UTF-8
+$dumpUtf8ValidityArrFx = function (array $strings): void {
+    echo (implode(' ', array_map(fn ($v) => zend_test_is_string_marked_as_valid_utf8($v) ? 'true' : 'false', $strings)) ?: 'empty') . "\n";
+};
+$dumpUtf8ValidityArrFx(explode("\xff", ''));
+$dumpUtf8ValidityArrFx(explode('ů', $string));
+$dumpUtf8ValidityArrFx(explode('ů', $string . "\xff"));
+$dumpUtf8ValidityArrFx(explode('ů', $string, 1));
+$dumpUtf8ValidityArrFx(explode('ů', $string . "\xff", 1));
+$dumpUtf8ValidityArrFx(explode($firstByte, $string));
+$dumpUtf8ValidityArrFx(explode($firstByte, $string . "\xff"));
+$dumpUtf8ValidityArrFx(explode("\xff", $string));
+$dumpUtf8ValidityArrFx(explode("\xff", $string . "\xff"));
+$dumpUtf8ValidityArrFx(explode('ů', $string, -1));
+$dumpUtf8ValidityArrFx(explode('ů', $string . "\xff", -1));
+$dumpUtf8ValidityArrFx(explode($firstByte, $string, -1));
+$dumpUtf8ValidityArrFx(explode($firstByte, $string . "\xff", -1));
+$dumpUtf8ValidityArrFx(explode("\xff", $string, -1));
+$dumpUtf8ValidityArrFx(explode("\xff", $string . "\xff", -1));
+$dumpUtf8ValidityArrFx(explode('ů', $string, -2));
+$dumpUtf8ValidityArrFx(explode('ů', $string . "\xff", -2));
+$dumpUtf8ValidityArrFx(explode($firstByte, $string, -2));
+$dumpUtf8ValidityArrFx(explode($firstByte, $string . "\xff", -2));
+$dumpUtf8ValidityArrFx(explode("\xff", $string, -2));
+$dumpUtf8ValidityArrFx(explode("\xff", $string . "\xff", -2));
+
 ?>
 --EXPECT--
 Empty strings:
@@ -199,3 +227,25 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+explode:
+true
+true true true
+true false false
+true
+false
+true false false false false
+true false false false false
+false
+false true
+true true
+false false
+false false false false
+false false false false
+empty
+false
+true
+false
+false false false
+false false false
+empty
+empty
