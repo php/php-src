@@ -20,6 +20,9 @@ on:
       - '**'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.url || github.run_id }}
+  cancel-in-progress: true
 env:
   CC: ccache gcc
   CXX: ccache g++
@@ -186,7 +189,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup MySQL
         run: |
           choco install mysql -y --no-progress --params="/port:3306"

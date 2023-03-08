@@ -78,22 +78,29 @@ static const char _codes[26] =
 };
 
 
-/* Note: these macros require an uppercase letter input! */
-#define ENCODE(c) (isalpha(c) ? _codes[((c) - 'A')] : 0)
+/* Note: these functions require an uppercase letter input! */
+static zend_always_inline char encode(char c) {
+	if (isalpha(c)) {
+		ZEND_ASSERT(c >= 'A' && c <= 'Z');
+		return _codes[(c - 'A')];
+	} else {
+		return 0;
+	}
+}
 
-#define isvowel(c)  (ENCODE(c) & 1)		/* AEIOU */
+#define isvowel(c)  (encode(c) & 1)		/* AEIOU */
 
 /* These letters are passed through unchanged */
-#define NOCHANGE(c) (ENCODE(c) & 2)		/* FJMNR */
+#define NOCHANGE(c) (encode(c) & 2)		/* FJMNR */
 
 /* These form diphthongs when preceding H */
-#define AFFECTH(c)  (ENCODE(c) & 4)		/* CGPST */
+#define AFFECTH(c)  (encode(c) & 4)		/* CGPST */
 
 /* These make C and G soft */
-#define MAKESOFT(c) (ENCODE(c) & 8)		/* EIY */
+#define MAKESOFT(c) (encode(c) & 8)		/* EIY */
 
 /* These prevent GH from becoming F */
-#define NOGHTOF(c)  (ENCODE(c) & 16)	/* BDH */
+#define NOGHTOF(c)  (encode(c) & 16)	/* BDH */
 
 /*----------------------------- */
 /* end of "metachar.h"          */

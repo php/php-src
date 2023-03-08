@@ -527,6 +527,12 @@ static ZEND_FUNCTION(zend_test_zend_call_stack_use_all)
 }
 #endif /* ZEND_CHECK_STACK_LIMIT */
 
+static ZEND_FUNCTION(zend_get_map_ptr_last)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG(CG(map_ptr_last));
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
@@ -717,6 +723,110 @@ static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
 	zend_forbid_dynamic_call();
 }
 
+/* donc refers to DoOperationNoCast */
+static zend_class_entry *donc_ce;
+static zend_object_handlers donc_object_handlers;
+
+static zend_object* donc_object_create_ex(zend_class_entry* ce, zend_long l) {
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &donc_object_handlers;
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 0), l);
+	return obj;
+}
+static zend_object *donc_object_create(zend_class_entry *ce) /* {{{ */
+{
+	return donc_object_create_ex(ce, 0);
+}
+/* }}} */
+
+static inline void donc_create(zval *target, zend_long l) /* {{{ */
+{
+	ZVAL_OBJ(target, donc_object_create_ex(donc_ce, l));
+}
+
+#define IS_DONC(zval) \
+	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), donc_ce))
+
+static void donc_add(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1;
+	zend_long val_2;
+	if (IS_DONC(op1)) {
+		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
+	} else {
+		val_1 = zval_get_long(op1);
+	}
+	if (IS_DONC(op2)) {
+		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
+	} else {
+		val_2 = zval_get_long(op2);
+	}
+
+	donc_create(result, val_1 + val_2);
+}
+static void donc_mul(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1;
+	zend_long val_2;
+	if (IS_DONC(op1)) {
+		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
+	} else {
+		val_1 = zval_get_long(op1);
+	}
+	if (IS_DONC(op2)) {
+		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
+	} else {
+		val_2 = zval_get_long(op2);
+	}
+
+	donc_create(result, val_1 * val_2);
+}
+
+static zend_result donc_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2)
+{
+	zval op1_copy;
+	zend_result status;
+
+	if (result == op1) {
+		ZVAL_COPY_VALUE(&op1_copy, op1);
+		op1 = &op1_copy;
+	}
+
+	switch (opcode) {
+		case ZEND_ADD:
+			donc_add(result, op1, op2);
+			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
+			status = SUCCESS;
+			break;
+		case ZEND_MUL:
+			donc_mul(result, op1, op2);
+			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
+			status = SUCCESS;
+			break;
+		default:
+			status = FAILURE;
+			break;
+	}
+
+	if (status == SUCCESS && op1 == &op1_copy) {
+		zval_ptr_dtor(op1);
+	}
+
+	return status;
+}
+
+PHP_METHOD(DoOperationNoCast, __construct)
+{
+	zend_long l;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), l);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -777,6 +887,12 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
+
+	/* DoOperationNoCast class */
+	donc_ce = register_class_DoOperationNoCast();
+	donc_ce->create_object = donc_object_create;
+	memcpy(&donc_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	donc_object_handlers.do_operation = donc_do_operation;
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 

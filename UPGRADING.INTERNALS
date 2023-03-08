@@ -37,6 +37,8 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 * The return types of the following functions have been changed from
   `bool` to `zend_result`:
   - zend_fiber_init_context()
+* The fast_add_function() has been removed, use add_function() that will
+  call the static inline add_function_fast() instead.
 
 ========================
 2. Build system changes

@@ -1,11 +1,5 @@
 --TEST--
 __clone() can indirectly modify unlocked readonly properties
---SKIPIF--
-<?php
-if (function_exists('opcache_get_status') && (opcache_get_status()["jit"]["enabled"] ?? false)) {
-    die('skip Not yet implemented for JIT');
-}
-?>
 --FILE--
 <?php
 

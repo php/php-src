@@ -218,11 +218,6 @@ class SimpleType {
                 return new SimpleType($node->toLowerString(), true);
             }
 
-            if ($node->toLowerString() === 'true') {
-                // TODO PHP-Parser doesn't yet recognize true as a stand-alone built-in type
-                return new SimpleType($node->toLowerString(), true);
-            }
-
             if ($node->toLowerString() === 'self') {
                 throw new Exception('The exact class name must be used instead of "self"');
             }

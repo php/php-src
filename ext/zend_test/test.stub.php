@@ -117,6 +117,11 @@ namespace {
         case Baz = -1;
     }
 
+    final class DoOperationNoCast {
+        private int $val;
+        public function __construct(int $val) {}
+    }
+
     function zend_test_array_return(): array {}
 
     function zend_test_nullable_array_return(): null|array {}
@@ -183,6 +188,8 @@ namespace {
 #endif
 
     function zend_test_is_string_marked_as_valid_utf8(string $string): bool {}
+
+    function zend_get_map_ptr_last(): int {}
 }
 
 namespace ZendTestNS {
