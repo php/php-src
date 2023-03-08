@@ -23,8 +23,12 @@ var_dump( range("A", "H", 2.6) ); // Because step is fractional it tries to inte
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Range will ignore any byte after the first one
+
+Warning: range(): Argument #1 ($start) must be a single byte, subsequent bytes are ignored in %s on line %d
+
+Warning: range(): Argument #2 ($end) must be a single byte, subsequent bytes are ignored in %s on line %d
 array(2) {
   [0]=>
   string(1) "A"
@@ -32,27 +36,41 @@ array(2) {
   string(1) "B"
 }
 Range cannot operate on an empty string
+
+Warning: range(): Argument #2 ($end) must not be empty, casted to 0 in %s on line %d
+
+Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
 array(1) {
   [0]=>
   int(0)
 }
+
+Warning: range(): Argument #1 ($start) must not be empty, casted to 0 in %s on line %d
+
+Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
 array(1) {
   [0]=>
   int(0)
 }
 Mixing numeric string and character
+
+Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
 array(2) {
   [0]=>
   int(1)
   [1]=>
   int(0)
 }
+
+Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
 array(2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
+
+Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
 array(4) {
   [0]=>
   float(3.5)
@@ -63,6 +81,8 @@ array(4) {
   [3]=>
   float(0.5)
 }
+
+Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
 array(4) {
   [0]=>
   float(0)
@@ -74,6 +94,8 @@ array(4) {
   float(3)
 }
 Fractional step cannot be used on character ranges
+
+Warning: range(): Argument #3 ($step) must be of type int when generating an array of characters, inputs converted to 0 in %s on line %d
 array(1) {
   [0]=>
   float(0)

@@ -19,7 +19,11 @@ $fs = [$f1, $f2, $f3, 5.5];
 foreach ($fs as $s) {
     foreach ($fs as $e) {
         echo "range($s, $e);\n";
-        var_dump( range($s, $e) );
+        try {
+            var_dump( range($s, $e) );
+        } catch (\ValueError $e) {
+            echo $e->getMessage(), PHP_EOL;
+        }
     }
 }
 
@@ -29,80 +33,35 @@ float(NAN)
 float(NAN)
 float(NAN)
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, 5.5);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, 5.5);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, 5.5);
-array(1) {
-  [0]=>
-  float(NAN)
-}
+range(): Argument #1 ($start) must be a finite number, NAN provided
 range(5.5, NAN);
-array(1) {
-  [0]=>
-  float(5.5)
-}
+range(): Argument #2 ($end) must be a finite number, NAN provided
 range(5.5, NAN);
-array(1) {
-  [0]=>
-  float(5.5)
-}
+range(): Argument #2 ($end) must be a finite number, NAN provided
 range(5.5, NAN);
-array(1) {
-  [0]=>
-  float(5.5)
-}
+range(): Argument #2 ($end) must be a finite number, NAN provided
 range(5.5, 5.5);
 array(1) {
   [0]=>

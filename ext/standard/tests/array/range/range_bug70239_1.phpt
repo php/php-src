@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid range supplied: start=inf end=inf
+range(): Argument #1 ($start) must be a finite number, INF provided
