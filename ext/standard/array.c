@@ -2799,6 +2799,16 @@ PHP_FUNCTION(range)
 	if (user_step) {
 		if (UNEXPECTED(Z_TYPE_P(user_step) == IS_DOUBLE)) {
 			step_double = Z_DVAL_P(user_step);
+
+			if (zend_isinf(step_double)) {
+				zend_argument_value_error(3, "must be a finite number, INF provided");
+				RETURN_THROWS();
+			}
+			if (zend_isnan(step_double)) {
+				zend_argument_value_error(3, "must be a finite number, NAN provided");
+				RETURN_THROWS();
+			}
+
 			/* We only want positive step values. */
 			if (step_double < 0.0) {
 				step_double *= -1;

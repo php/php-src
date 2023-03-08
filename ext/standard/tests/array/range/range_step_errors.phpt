@@ -25,6 +25,38 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
+echo "Step cannot be INF\n";
+try {
+    var_dump( range(1.0, 7.0, 10.0**400) );
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( range(1, 7, 10.0**400) );
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( range('A', 'H', 10.0**400) );
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+echo "Step cannot be NAN\n";
+try {
+    var_dump( range(1.0, 7.0, fdiv(0, 0)) );
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( range(1, 7, fdiv(0, 0)) );
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( range('A', 'H', fdiv(0, 0)) );
+} catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Step must be within the range of input parameters\n";
 echo "-- Testing ( (low < high) && (high-low < step) ) --\n";
@@ -62,6 +94,14 @@ range(): Argument #3 ($step) cannot be 0
 range(): Argument #3 ($step) cannot be 0
 range(): Argument #3 ($step) cannot be 0
 range(): Argument #3 ($step) cannot be 0
+Step cannot be INF
+range(): Argument #3 ($step) must be a finite number, INF provided
+range(): Argument #3 ($step) must be a finite number, INF provided
+range(): Argument #3 ($step) must be a finite number, INF provided
+Step cannot be NAN
+range(): Argument #3 ($step) must be a finite number, NAN provided
+range(): Argument #3 ($step) must be a finite number, NAN provided
+range(): Argument #3 ($step) must be a finite number, NAN provided
 Step must be within the range of input parameters
 -- Testing ( (low < high) && (high-low < step) ) --
 range(): Argument #3 ($step) must not exceed the specified range
