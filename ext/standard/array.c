@@ -2784,14 +2784,14 @@ PHP_FUNCTION(array_fill_keys)
 /* {{{ Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
-	zval *zlow, *zhigh, *user_step = NULL, tmp;
+	zval *user_start, *user_end, *user_step = NULL, tmp;
 	bool err = 0, is_step_double = false;
 	double step_double = 1.0;
 	zend_long step = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_NUMBER_OR_STR(zlow)
-		Z_PARAM_NUMBER_OR_STR(zhigh)
+		Z_PARAM_NUMBER_OR_STR(user_start)
+		Z_PARAM_NUMBER_OR_STR(user_end)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_NUMBER(user_step)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2832,12 +2832,12 @@ PHP_FUNCTION(range)
 	}
 
 	/* If the range is given as strings, generate an array of characters. */
-	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
+	if (Z_TYPE_P(user_start) == IS_STRING && Z_TYPE_P(user_end) == IS_STRING && Z_STRLEN_P(user_start) >= 1 && Z_STRLEN_P(user_end) >= 1) {
 		int type1, type2;
 		unsigned char low, high;
 
-		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, 0);
-		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, 0);
+		type1 = is_numeric_string(Z_STRVAL_P(user_start), Z_STRLEN_P(user_start), NULL, NULL, 0);
+		type2 = is_numeric_string(Z_STRVAL_P(user_end), Z_STRLEN_P(user_end), NULL, NULL, 0);
 
 		if (type1 == IS_DOUBLE || type2 == IS_DOUBLE || is_step_double) {
 			goto double_str;
@@ -2845,8 +2845,8 @@ PHP_FUNCTION(range)
 			goto long_str;
 		}
 
-		low = (unsigned char)Z_STRVAL_P(zlow)[0];
-		high = (unsigned char)Z_STRVAL_P(zhigh)[0];
+		low = (unsigned char)Z_STRVAL_P(user_start)[0];
+		high = (unsigned char)Z_STRVAL_P(user_end)[0];
 
 		if (low > high) {		/* Negative Steps */
 			if (low - high < step) {
@@ -2886,12 +2886,12 @@ PHP_FUNCTION(range)
 			ZVAL_CHAR(&tmp, low);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
-	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
+	} else if (Z_TYPE_P(user_start) == IS_DOUBLE || Z_TYPE_P(user_end) == IS_DOUBLE || is_step_double) {
 		double low, high, element;
 		uint32_t i, size;
 double_str:
-		low = zval_get_double(zlow);
-		high = zval_get_double(zhigh);
+		low = zval_get_double(user_start);
+		high = zval_get_double(user_end);
 
 		if (zend_isinf(high) || zend_isinf(low)) {
 			zend_value_error("Invalid range supplied: start=%0.0f end=%0.0f", low, high);
@@ -2937,8 +2937,8 @@ double_str:
 		zend_ulong unsigned_step;
 		uint32_t i, size;
 long_str:
-		low = zval_get_long(zlow);
-		high = zval_get_long(zhigh);
+		low = zval_get_long(user_start);
+		high = zval_get_long(user_end);
 
 		unsigned_step = (zend_ulong)step;
 
