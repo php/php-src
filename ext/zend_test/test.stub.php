@@ -30,6 +30,8 @@ namespace {
         public function returnsStatic(): static {}
 
         public function returnsThrowable(): Throwable {}
+
+        static public function variadicTest(string|Iterator ...$elements) : static {}
     }
 
     class _ZendTestChildClass extends _ZendTestClass
