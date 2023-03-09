@@ -1,5 +1,10 @@
 @echo off
 
+if /i "%APPVEYOR%%GITHUB_ACTIONS%" neq "True" (
+    echo for CI only
+    exit /b 3
+)
+
 set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1
@@ -119,7 +124,7 @@ mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
 
-nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
 
