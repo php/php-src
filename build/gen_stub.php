@@ -3882,10 +3882,10 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 $arginfoType = $argType->toArginfoType();
                 if ($arginfoType->hasClassType()) {
                     $code .= sprintf(
-                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s, %s)\n",
+                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s%s)\n",
                         $argKind, $argInfo->getSendByString(), $argInfo->name,
                         $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
-                        $argInfo->getDefaultValueAsArginfoString()
+                        !$argInfo->isVariadic ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 } else {
                     $code .= sprintf(
