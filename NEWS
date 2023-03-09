@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Re-add some CTE functions that were removed from being CTE by a mistake.
     (mvorisek)
 
+- Date:
+  . Fixed bug GH-10747 (Private and protected properties in serialized Date*
+    objects throw). (Derick)
+
 - FTP:
   . Propagate success status of ftp_close(). (nielsdos)
 
