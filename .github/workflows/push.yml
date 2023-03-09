@@ -171,8 +171,10 @@ jobs:
         include:
           - x64: true
             zts: false
+            opcache: true
           - x64: false
             zts: true
+            opcache: false
     name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: windows-2019
     env:
@@ -185,6 +187,7 @@ jobs:
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
       PARALLEL: -j2
+      OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
