@@ -100,6 +100,11 @@ popd
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
 
+if /i "%APPVEYOR%%GITHUB_ACTIONS%" neq "True" (
+    echo for CI only
+    exit /b 3
+)
+
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
