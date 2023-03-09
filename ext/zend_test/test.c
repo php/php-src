@@ -413,14 +413,25 @@ static ZEND_METHOD(_ZendTestClass, returnsThrowable)
 }
 
 static ZEND_METHOD(_ZendTestClass, variadicTest) {
-	int      argc;
+	int      argc, i;
 	zval    *args = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, -1)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	(void) (args + argc);
+	for (i = 0; i < argc; i++) {
+		zval *arg = args + i;
+
+		if (Z_TYPE_P(arg) == IS_STRING) {
+			continue;
+		}
+		if (Z_TYPE_P(arg) == IS_OBJECT && instanceof_function(Z_OBJ_P(arg)->ce, zend_ce_iterator)) {
+			continue;
+		}
+
+		zend_argument_type_error(i + 1, "must be of class Iterator or a string, %s given", zend_zval_type_name(arg));
+	}
 
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
 }
