@@ -55,6 +55,7 @@ PHP                                                                        NEWS
     the Spoofchecker's class. (David Carlier)
   . Updated datefmt_set_timezone/IntlDateformatter::setTimezone returns type.
     (David Carlier).
+  . Updated IntlBreakInterator::setText return type. (David Carlier)
 
 - JSON:
   . Added json_validate(). (Juan Morales)

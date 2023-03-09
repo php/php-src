@@ -84,7 +84,9 @@ PHP 8.3 UPGRADE NOTES
 
 - Intl:
   . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
-    now returns true on sucess, previously null was returned.
+    now returns true on success, previously null was returned.
+  . IntlBreakiterator::setText() now returns false on failure, previously
+    null was returned.
 
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
