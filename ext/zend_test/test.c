@@ -431,6 +431,7 @@ static ZEND_METHOD(_ZendTestClass, variadicTest) {
 		}
 
 		zend_argument_type_error(i + 1, "must be of class Iterator or a string, %s given", zend_zval_type_name(arg));
+		RETURN_THROWS();
 	}
 
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
