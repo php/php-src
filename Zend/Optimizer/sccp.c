@@ -1646,8 +1646,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			/* We're only interested in functions with up to three arguments right now */
-			if (call->num_args > 3 || call->send_unpack || call->is_prototype) {
+			/* We're only interested in functions with up to three arguments right now.
+			 * Note that named arguments with the argument in declaration order will still work. */
+			if (call->num_args > 3 || call->send_unpack || call->is_prototype || call->named_args) {
 				SET_RESULT_BOT(result);
 				break;
 			}
