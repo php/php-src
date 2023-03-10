@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Add missing error checks on EVP_MD_CTX_create() and EVP_VerifyInit().
     (nielsdos)
 
+- SPL:
+  . Fixed bug GH-10519 (Array Data Address Reference Issue). (Nathan Freeman)
+
 16 Mar 2023, PHP 8.2.4
 
 - Core:
