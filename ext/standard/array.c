@@ -2865,6 +2865,10 @@ PHP_FUNCTION(range)
 
 			/* We only want positive step values. */
 			if (step_double < 0.0) {
+				php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be greater than 0, $step multiplied by -1");
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
 				step_double *= -1;
 			}
 			step = zend_dval_to_lval(step_double);
@@ -2875,6 +2879,10 @@ PHP_FUNCTION(range)
 			step = Z_LVAL_P(user_step);
 			/* We only want positive step values. */
 			if (step < 0) {
+				php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be greater than 0, $step multiplied by -1");
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
 				step *= -1;
 			}
 			step_double = (double) step;
