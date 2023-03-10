@@ -2972,7 +2972,7 @@ function generate_diff_external(string $diff_cmd, string $exp_file, string $outp
 {
     $retval = shell_exec("{$diff_cmd} {$exp_file} {$output_file}");
 
-    return is_string($retval) ? $retval : 'Could not run external diff tool set through PHP_TEST_DIFF_CMD environment variable';
+    return is_string($retval) ? $retval : 'Could not run external diff tool set through TEST_PHP_DIFF_CMD environment variable';
 }
 
 function generate_diff(string $wanted, ?string $wanted_re, string $output): string
