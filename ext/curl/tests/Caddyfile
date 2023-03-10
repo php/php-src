@@ -5,6 +5,8 @@
 
 localhost
 
+respond / "Caddy is up and running"
+
 # HTTP/2 Server Push
 respond /serverpush "main response"
 respond /serverpush/pushed "pushed response"

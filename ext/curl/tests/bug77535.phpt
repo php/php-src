@@ -4,9 +4,8 @@ Bug #77535 (Invalid callback, h2 server push)
 curl
 --SKIPIF--
 <?php
-if (!@fsockopen("localhost", 443, $errno, $errstr, 0.5)) {
-    die("skip test needs Caddy");
-}
+include 'skipif-nocaddy.inc';
+
 $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x073d00) {
     exit("skip: test may crash with curl < 7.61.0");
