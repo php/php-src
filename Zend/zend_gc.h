@@ -46,6 +46,10 @@ ZEND_API bool gc_enabled(void);
 ZEND_API bool gc_protect(bool protect);
 ZEND_API bool gc_protected(void);
 
+#if GC_BENCH
+void gc_bench_print(void);
+#endif
+
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
 
