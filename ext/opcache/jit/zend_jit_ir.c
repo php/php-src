@@ -3157,17 +3157,13 @@ static void zend_jit_shutdown_ir(void)
 /* PHP control flow reconstruction helpers */
 static ir_ref jit_IF_ex(zend_jit_ctx *jit, ir_ref condition, ir_ref true_block)
 {
-	ir_ref ref;
-
-	ZEND_ASSERT(jit->ctx.control);
-	ref = ir_IF(condition);
+	ir_ref ref = ir_IF(condition);
 	/* op3 is used as a temporary storage for PHP BB number to reconstruct PHP control flow.
 	 *
 	 * It's used in jit_IF_TRUE_FALSE_ex() to select IF_TRUE or IF_FALSE instructions
 	 * to start target block
 	 */
 	ir_set_op(&jit->ctx, ref, 3, true_block);
-	jit->ctx.control = ref;
 	return ref;
 }
 
@@ -3555,7 +3551,6 @@ static int zend_jit_bb_end(zend_jit_ctx *jit, int b)
 		succ = b + 1;
 	}
 	_zend_jit_add_predecessor_ref(jit, succ, b, ir_END());
-	jit->ctx.control = IR_UNUSED;
 	jit->b = -1;
 	return 1;
 }
@@ -3593,7 +3588,6 @@ static int zend_jit_cond_jmp(zend_jit_ctx *jit, const zend_op *next_opline, int 
 	ZEND_ASSERT(bb->successors_count == 2);
 	if (bb->successors[0] == bb->successors[1]) {
 		_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ir_END());
-		jit->ctx.control = IR_UNUSED;
 		jit->b = -1;
 		zend_jit_set_last_valid_opline(jit, next_opline);
 		return 1;
@@ -3604,7 +3598,6 @@ static int zend_jit_cond_jmp(zend_jit_ctx *jit, const zend_op *next_opline, int 
 	_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
 	_zend_jit_add_predecessor_ref(jit, bb->successors[1], jit->b, ref);
 
-	jit->ctx.control = IR_UNUSED;
 	jit->b = -1;
 	zend_jit_set_last_valid_opline(jit, next_opline);
 
@@ -3769,7 +3762,12 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 	if (jit->b >= 0) {
 		bb = &jit->ssa->cfg.blocks[jit->b];
 		if (bb->successors_count > 0
-		 && opline->opcode != ZEND_MATCH_ERROR) {
+		 && opline->opcode != ZEND_RETURN
+		 && opline->opcode != ZEND_RETURN_BY_REF
+		 && opline->opcode != ZEND_GENERATOR_RETURN
+		 && opline->opcode != ZEND_MATCH_ERROR
+		 && opline->opcode != ZEND_VERIFY_NEVER_TYPE) {
+			/* Add a fake control edge from UNREACHABLE to the following ENTRY */
 			int succ;
 
 			if (bb->successors_count == 1) {
@@ -3779,9 +3777,10 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 				ZEND_ASSERT(opline->opcode == ZEND_FAST_CALL);
 				succ = jit->b + 1;
 			}
-			_zend_jit_add_predecessor_ref(jit, succ, jit->b, jit->ctx.control);
+			ref = jit->ctx.insns_count - 1;
+			ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_UNREACHABLE);
+			_zend_jit_add_predecessor_ref(jit, succ, jit->b, ref);
 		}
-		jit->ctx.control = IR_UNUSED;
 		jit->b = -1;
 		zend_jit_reset_last_valid_opline(jit);
 	}
@@ -6042,18 +6041,18 @@ static ir_op zend_jit_cmp_op(const zend_op *opline)
 	return op;
 }
 
-static int zend_jit_cmp_long_long(zend_jit_ctx   *jit,
-                                  const zend_op  *opline,
-                                  zend_ssa_range *op1_range,
-                                  zend_jit_addr   op1_addr,
-                                  zend_ssa_range *op2_range,
-                                  zend_jit_addr   op2_addr,
-                                  zend_jit_addr   res_addr,
-                                  zend_uchar      smart_branch_opcode,
-                                  uint32_t        target_label,
-                                  uint32_t        target_label2,
-                                  const void     *exit_addr,
-                                  bool       skip_comparison)
+static ir_ref zend_jit_cmp_long_long(zend_jit_ctx   *jit,
+                                     const zend_op  *opline,
+                                     zend_ssa_range *op1_range,
+                                     zend_jit_addr   op1_addr,
+                                     zend_ssa_range *op2_range,
+                                     zend_jit_addr   op2_addr,
+                                     zend_jit_addr   res_addr,
+                                     zend_uchar      smart_branch_opcode,
+                                     uint32_t        target_label,
+                                     uint32_t        target_label2,
+                                     const void     *exit_addr,
+                                     bool       skip_comparison)
 {
 	ir_ref ref;
 	bool result;
@@ -6067,15 +6066,21 @@ static int zend_jit_cmp_long_long(zend_jit_ctx   *jit,
 		if (smart_branch_opcode && !exit_addr) {
 			if (smart_branch_opcode == ZEND_JMPZ ||
 			    smart_branch_opcode == ZEND_JMPZ_EX) {
-				jit_IF_ex(jit, IR_TRUE, result ? target_label2 : target_label);
+				return jit_IF_ex(jit, IR_TRUE, result ? target_label2 : target_label);
 			} else if (smart_branch_opcode == ZEND_JMPNZ ||
 			           smart_branch_opcode == ZEND_JMPNZ_EX) {
-				jit_IF_ex(jit, IR_TRUE, result ? target_label : target_label2);
+				return jit_IF_ex(jit, IR_TRUE, result ? target_label : target_label2);
 			} else {
 				ZEND_UNREACHABLE();
 			}
 		}
-		return 1;
+		if (opline->opcode != ZEND_IS_IDENTICAL
+		 && opline->opcode != ZEND_IS_NOT_IDENTICAL
+		 && opline->opcode != ZEND_CASE_STRICT) {
+			return ir_END();
+		} else {
+			return IR_NULL; /* success */
+		}
 	}
 
 	ref = ir_CMP_OP(zend_jit_cmp_op(opline), jit_Z_LVAL(jit, op1_addr), jit_Z_LVAL(jit, op2_addr));
@@ -6099,14 +6104,20 @@ static int zend_jit_cmp_long_long(zend_jit_ctx   *jit,
 			}
 		}
 	} else if (smart_branch_opcode) {
-		jit_IF_ex(jit, ref,
+		return jit_IF_ex(jit, ref,
 			(smart_branch_opcode == ZEND_JMPZ || smart_branch_opcode == ZEND_JMPZ_EX) ? target_label2 : target_label);
 	}
 
-	return 1;
+	if (opline->opcode != ZEND_IS_IDENTICAL
+	 && opline->opcode != ZEND_IS_NOT_IDENTICAL
+	 && opline->opcode != ZEND_CASE_STRICT) {
+		return ir_END();
+	} else {
+		return IR_NULL; /* success */
+	}
 }
 
-static int zend_jit_cmp_long_double(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+static ir_ref zend_jit_cmp_long_double(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
 	ir_ref ref = ir_CMP_OP(zend_jit_cmp_op(opline), ir_INT2D(jit_Z_LVAL(jit, op1_addr)), jit_Z_DVAL(jit, op2_addr));
 
@@ -6121,13 +6132,13 @@ static int zend_jit_cmp_long_double(zend_jit_ctx *jit, const zend_op *opline, ze
 			ir_GUARD_NOT(ref, ir_CONST_ADDR(exit_addr));
 		}
 	} else if (smart_branch_opcode) {
-		jit_IF_ex(jit, ref,
+		return jit_IF_ex(jit, ref,
 			(smart_branch_opcode == ZEND_JMPZ || smart_branch_opcode == ZEND_JMPZ_EX) ? target_label2 : target_label);
 	}
-	return 1;
+	return ir_END();
 }
 
-static int zend_jit_cmp_double_long(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+static ir_ref zend_jit_cmp_double_long(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
 	ir_ref ref = ir_CMP_OP(zend_jit_cmp_op(opline), jit_Z_DVAL(jit, op1_addr), ir_INT2D(jit_Z_LVAL(jit, op2_addr)));
 
@@ -6142,13 +6153,13 @@ static int zend_jit_cmp_double_long(zend_jit_ctx *jit, const zend_op *opline, ze
 			ir_GUARD_NOT(ref, ir_CONST_ADDR(exit_addr));
 		}
 	} else if (smart_branch_opcode) {
-		jit_IF_ex(jit, ref,
+		return jit_IF_ex(jit, ref,
 			(smart_branch_opcode == ZEND_JMPZ || smart_branch_opcode == ZEND_JMPZ_EX) ? target_label2 : target_label);
 	}
-	return 1;
+	return ir_END();
 }
 
-static int zend_jit_cmp_double_double(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+static ir_ref zend_jit_cmp_double_double(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
 	ir_ref ref = ir_CMP_OP(zend_jit_cmp_op(opline), jit_Z_DVAL(jit, op1_addr), jit_Z_DVAL(jit, op2_addr));
 
@@ -6171,13 +6182,19 @@ static int zend_jit_cmp_double_double(zend_jit_ctx *jit, const zend_op *opline, 
 			}
 		}
 	} else if (smart_branch_opcode) {
-		jit_IF_ex(jit, ref,
+		return jit_IF_ex(jit, ref,
 			(smart_branch_opcode == ZEND_JMPZ || smart_branch_opcode == ZEND_JMPZ_EX) ? target_label2 : target_label);
 	}
-	return 1;
+	if (opline->opcode != ZEND_IS_IDENTICAL
+	 && opline->opcode != ZEND_IS_NOT_IDENTICAL
+	 && opline->opcode != ZEND_CASE_STRICT) {
+		return ir_END();
+	} else {
+		return IR_NULL; /* success */
+	}
 }
 
-static int zend_jit_cmp_slow(zend_jit_ctx *jit, ir_ref ref, const zend_op *opline, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
+static ir_ref zend_jit_cmp_slow(zend_jit_ctx *jit, ir_ref ref, const zend_op *opline, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
 	ref = ir_CMP_OP(zend_jit_cmp_op(opline), ref, ir_CONST_I32(0));
 
@@ -6192,11 +6209,11 @@ static int zend_jit_cmp_slow(zend_jit_ctx *jit, ir_ref ref, const zend_op *oplin
 			ir_GUARD_NOT(ref, ir_CONST_ADDR(exit_addr));
 		}
 	} else if (smart_branch_opcode) {
-		jit_IF_ex(jit, ref,
+		return jit_IF_ex(jit, ref,
 			(smart_branch_opcode == ZEND_JMPZ || smart_branch_opcode == ZEND_JMPZ_EX) ? target_label2 : target_label);
 	}
 
-	return 1;
+	return ir_END();
 }
 
 static int zend_jit_cmp(zend_jit_ctx   *jit,
@@ -6215,6 +6232,7 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
                         const void     *exit_addr,
                         bool       skip_comparison)
 {
+	ir_ref ref = IR_UNUSED;
 	ir_ref if_op1_long = IR_UNUSED;
 	ir_ref if_op1_double = IR_UNUSED;
 	ir_ref if_op2_double = IR_UNUSED;
@@ -6248,20 +6266,21 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 					ir_END_list(slow_inputs);
 					ir_IF_TRUE(if_op1_long_op2_double);
 				}
-				if (!zend_jit_cmp_long_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+				ref = zend_jit_cmp_long_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+				if (!ref) {
 					return 0;
 				}
-				ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ? jit->ctx.control : ir_END());
+				ir_refs_add(end_inputs, ref);
 			} else {
 				ir_END_list(slow_inputs);
 			}
 			ir_IF_TRUE(if_op1_long_op2_long);
 		}
-		if (!zend_jit_cmp_long_long(jit, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr, skip_comparison)) {
+		ref = zend_jit_cmp_long_long(jit, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr, skip_comparison);
+		if (!ref) {
 			return 0;
 		}
-		ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-			jit->ctx.control : ir_END());
+		ir_refs_add(end_inputs, ref);
 
 		if (if_op1_long) {
 			ir_IF_FALSE_cold(if_op1_long);
@@ -6278,11 +6297,11 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 					if_op1_double_op2_double = jit_if_Z_TYPE(jit, op2_addr, IS_DOUBLE);
 					ir_IF_TRUE(if_op1_double_op2_double);
 				}
-				if (!zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+				ref = zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+				if (!ref) {
 					return 0;
 				}
-				ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-					jit->ctx.control : ir_END());
+				ir_refs_add(end_inputs, ref);
 				if (if_op1_double_op2_double) {
 					ir_IF_FALSE_cold(if_op1_double_op2_double);
 				}
@@ -6294,11 +6313,11 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 					ir_END_list(slow_inputs);
 					ir_IF_TRUE(if_op1_double_op2_long);
 				}
-				if (!zend_jit_cmp_double_long(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+				ref = zend_jit_cmp_double_long(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+				if (!ref) {
 					return 0;
 				}
-				ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-					jit->ctx.control : ir_END());
+				ir_refs_add(end_inputs, ref);
 			} else if (if_op1_double_op2_double) {
 				ir_END_list(slow_inputs);
 			}
@@ -6319,11 +6338,11 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				if_op1_double_op2_double = jit_if_Z_TYPE(jit, op2_addr, IS_DOUBLE);
 				ir_IF_TRUE(if_op1_double_op2_double);
 			}
-			if (!zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+			ref = zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+			if (!ref) {
 				return 0;
 			}
-			ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-				jit->ctx.control : ir_END());
+			ir_refs_add(end_inputs, ref);
 			if (if_op1_double_op2_double) {
 				ir_IF_FALSE_cold(if_op1_double_op2_double);
 			}
@@ -6335,11 +6354,11 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				ir_END_list(slow_inputs);
 				ir_IF_TRUE(if_op1_double_op2_long);
 			}
-			if (!zend_jit_cmp_double_long(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+			ref = zend_jit_cmp_double_long(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+			if (!ref) {
 				return 0;
 			}
-			ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-				jit->ctx.control : ir_END());
+			ir_refs_add(end_inputs, ref);
 		} else if (if_op1_double_op2_double) {
 			ir_END_list(slow_inputs);
 		}
@@ -6357,11 +6376,11 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				if_op1_double_op2_double = jit_if_Z_TYPE(jit, op1_addr, IS_DOUBLE);
 				ir_IF_TRUE(if_op1_double_op2_double);
 			}
-			if (!zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+			ref = zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+			if (!ref) {
 				return 0;
 			}
-			ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-				jit->ctx.control : ir_END());
+			ir_refs_add(end_inputs, ref);
 			if (if_op1_double_op2_double) {
 				ir_IF_FALSE_cold(if_op1_double_op2_double);
 			}
@@ -6373,11 +6392,11 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				ir_END_list(slow_inputs);
 				ir_IF_TRUE(if_op1_long_op2_double);
 			}
-			if (!zend_jit_cmp_long_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+			ref = zend_jit_cmp_long_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+			if (!ref) {
 				return 0;
 			}
-			ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-				jit->ctx.control : ir_END());
+			ir_refs_add(end_inputs, ref);
 		} else if (if_op1_double_op2_double) {
 			ir_END_list(slow_inputs);
 		}
@@ -6425,12 +6444,11 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 			zend_jit_check_exception_undef_result(jit, opline);
 		}
 
-		if (!zend_jit_cmp_slow(jit, ref, opline, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+		ref = zend_jit_cmp_slow(jit, ref, opline, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+		if (!ref) {
 			return 0;
 		}
-
-		ir_refs_add(end_inputs, (smart_branch_opcode && !exit_addr) ?
-			jit->ctx.control : ir_END());
+		ir_refs_add(end_inputs, ref);
 	}
 
 	if (end_inputs->count) {
@@ -6479,7 +6497,6 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 				ir_MERGE_list(false_inputs);
 				_zend_jit_add_predecessor_ref(jit, label2, jit->b, ir_END());
 			}
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		} else {
 			ir_MERGE_N(n, end_inputs->refs);
@@ -6506,7 +6523,7 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
                               bool       skip_comparison)
 {
 	bool always_false = 0, always_true = 0;
-	ir_ref ref;
+	ir_ref ref = IR_UNUSED;
 
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
 		ir_ref op1 = jit_ZVAL_ADDR(jit, op1_addr);
@@ -6564,7 +6581,6 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 					target_label2 : target_label;
 			}
 			_zend_jit_add_predecessor_ref(jit, label, jit->b, ir_END());
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		}
 		return 1;
@@ -6596,7 +6612,6 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 					target_label : target_label2;
 			}
 			_zend_jit_add_predecessor_ref(jit, label, jit->b, ir_END());
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		}
 		return 1;
@@ -6615,12 +6630,14 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 
 	if ((op1_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG &&
 	    (op2_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) {
-		if (!zend_jit_cmp_long_long(jit, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr, skip_comparison)) {
+		ref = zend_jit_cmp_long_long(jit, opline, op1_range, op1_addr, op2_range, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr, skip_comparison);
+		if (!ref) {
 			return 0;
 		}
 	} else if ((op1_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE &&
 	           (op2_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE) {
-		if (!zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+		ref = zend_jit_cmp_double_double(jit, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr);
+		if (!ref) {
 			return 0;
 		}
 	} else {
@@ -6700,22 +6717,18 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 				target_label = target_label2;
 				target_label2 = tmp;
 			}
-			jit_IF_ex(jit, ref,
+			ref = jit_IF_ex(jit, ref,
 				(smart_branch_opcode == ZEND_JMPZ || smart_branch_opcode == ZEND_JMPZ_EX) ? target_label2 : target_label);
 		}
 	}
 
-	if (exit_addr) {
-		/* pass */
-	} else if (smart_branch_opcode) {
+	if (smart_branch_opcode && !exit_addr) {
 		zend_basic_block *bb;
-		ir_ref ref;
 
 		ZEND_ASSERT(jit->b >= 0);
 		bb = &jit->ssa->cfg.blocks[jit->b];
 		ZEND_ASSERT(bb->successors_count == 2);
 
-		ref = jit->ctx.control;
 		if (bb->successors_count == 2 && bb->successors[0] == bb->successors[1]) {
 			ir_IF_TRUE(ref);
 			ir_MERGE_WITH_EMPTY_FALSE(ref);
@@ -6725,7 +6738,6 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 			_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
 			_zend_jit_add_predecessor_ref(jit, bb->successors[1], jit->b, ref);
 		}
-		jit->ctx.control = IR_UNUSED;
 		jit->b = -1;
 	}
 
@@ -6800,7 +6812,6 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		if (true_label != (uint32_t)-1) {
 			ZEND_ASSERT(exit_addr == NULL);
 			_zend_jit_add_predecessor_ref(jit, true_label, jit->b, ir_END());
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		}
 		return 1;
@@ -6815,7 +6826,6 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 		if (false_label != (uint32_t)-1) {
 			ZEND_ASSERT(exit_addr == NULL);
 			_zend_jit_add_predecessor_ref(jit, false_label, jit->b, ir_END());
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		}
 		return 1;
@@ -9387,12 +9397,15 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 					if (bb->successors_count > 0) {
 						int succ;
+						ir_ref ref;
 
 						ZEND_ASSERT(bb->successors_count == 1);
 						succ = bb->successors[0];
-						_zend_jit_add_predecessor_ref(jit, succ, jit->b, jit->ctx.control);
+						/* Add a fake control edge from UNREACHABLE/RETURN to the following ENTRY */
+						ref = jit->ctx.insns_count - 1;
+						ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_UNREACHABLE || jit->ctx.ir_base[ref].op == IR_RETURN);
+						_zend_jit_add_predecessor_ref(jit, succ, jit->b, ref);
 					}
-					jit->ctx.control = IR_UNUSED;
 					jit->b = -1;
 				}
 			}
@@ -9649,7 +9662,6 @@ static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const 
 		ir_MERGE_WITH_EMPTY_TRUE(if_skip_constructor);
 		jit->bb_edges[jit->bb_predecessors[next_block]] = ir_END();
 
-		jit->ctx.control = IR_UNUSED;
 		jit->b = -1;
 		zend_jit_reset_last_valid_opline(jit);
 	}
@@ -10168,7 +10180,6 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		ir_RETURN(ir_CONST_I32(2)); // ZEND_VM_LEAVE
 	}
 
-	jit->ctx.control = IR_UNUSED;
 	jit->b = -1;
 
 	return 1;
@@ -10344,7 +10355,6 @@ static int zend_jit_return(zend_jit_ctx *jit, const zend_op *opline, const zend_
 		}
 	} else {
 		ir_END_list(jit->return_inputs);
-		jit->ctx.control = IR_UNUSED;
 		jit->b = -1;
 	}
 
@@ -10659,7 +10669,6 @@ static int zend_jit_in_array(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 			(smart_branch_opcode == ZEND_JMPZ) ? target_label2 : target_label);
 		_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
 		_zend_jit_add_predecessor_ref(jit, bb->successors[1], jit->b, ref);
-		jit->ctx.control = IR_UNUSED;
 		jit->b = -1;
 	} else {
 		jit_set_Z_TYPE_INFO_ex(jit, res_addr,
@@ -12209,7 +12218,6 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 	}
 
     if (!exit_addr && smart_branch_opcode) {
-		jit->ctx.control = IR_UNUSED;
 		jit->b = -1;
     } else {
 		ir_MERGE_list(end_inputs);
@@ -12633,7 +12641,6 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 			ZEND_ASSERT(jit->b >= 0);
 			bb = &jit->ssa->cfg.blocks[jit->b];
 			_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ir_END());
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		}
 		return 1;
@@ -12939,7 +12946,6 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 				ref = ir_END();
 			}
 			_zend_jit_add_predecessor_ref(jit, bb->successors[0], jit->b, ref);
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		}
 	} else {
@@ -14654,7 +14660,6 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 				b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
 			}
 			_zend_jit_add_predecessor_ref(jit, b, jit->b, ir_END());
-			jit->ctx.control = IR_UNUSED;
 			jit->b = -1;
 		}
 	} else {
@@ -14793,13 +14798,11 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 						ir_MERGE_N(slow_inputs->count, slow_inputs->refs);
 						_zend_jit_add_predecessor_ref(jit, jit->b + 1, jit->b, ir_END());
 					}
-					jit->ctx.control = IR_UNUSED;
 					jit->b = -1;
 				}
 			} else {
 				ZEND_ASSERT(!next_opline);
 				_zend_jit_add_predecessor_ref(jit, jit->b + 1, jit->b, ir_END());
-				jit->ctx.control = IR_UNUSED;
 				jit->b = -1;
 			}
 		} else if (opline->opcode == ZEND_SWITCH_STRING) {
@@ -14904,13 +14907,11 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 						ir_MERGE_N(slow_inputs->count, slow_inputs->refs);
 						_zend_jit_add_predecessor_ref(jit, jit->b + 1, jit->b, ir_END());
 					}
-					jit->ctx.control = IR_UNUSED;
 					jit->b = -1;
 				}
 			} else {
 				ZEND_ASSERT(!next_opline);
 				_zend_jit_add_predecessor_ref(jit, jit->b + 1, jit->b, ir_END());
-				jit->ctx.control = IR_UNUSED;
 				jit->b = -1;
 			}
 		} else if (opline->opcode == ZEND_MATCH) {
@@ -15068,7 +15069,6 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					ZEND_ASSERT(jit->ctx.ir_base[ref].op3 == IR_UNUSED);
 					jit->ctx.ir_base[ref].op3 = default_input_list;
 				}
-				jit->ctx.control = IR_UNUSED;
 				jit->b = -1;
 			}
 		} else {
