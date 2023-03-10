@@ -63,7 +63,8 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	mblen_table_big5,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_big5_wchar,
-	&vtbl_wchar_big5
+	&vtbl_wchar_big5,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_cp950 = {
@@ -74,7 +75,8 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 	mblen_table_big5,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp950_wchar,
-	&vtbl_wchar_cp950
+	&vtbl_wchar_cp950,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_big5_wchar = {

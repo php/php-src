@@ -48,7 +48,8 @@ const mbfl_encoding mbfl_encoding_2022jp_kddi = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_kddi_wchar,
-	&vtbl_wchar_2022jp_kddi
+	&vtbl_wchar_2022jp_kddi,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jp_kddi_wchar = {

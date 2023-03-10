@@ -65,7 +65,8 @@ const mbfl_encoding mbfl_encoding_eucjp_win = {
 	mblen_table_eucjp,
 	0,
 	&vtbl_eucjpwin_wchar,
-	&vtbl_wchar_eucjpwin
+	&vtbl_wchar_eucjpwin,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_eucjpwin_wchar = {

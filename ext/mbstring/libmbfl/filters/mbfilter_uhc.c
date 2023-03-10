@@ -67,7 +67,8 @@ const mbfl_encoding mbfl_encoding_uhc = {
 	mblen_table_uhc,
 	0,
 	&vtbl_uhc_wchar,
-	&vtbl_wchar_uhc
+	&vtbl_wchar_uhc,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_uhc_wchar = {

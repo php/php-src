@@ -43,7 +43,8 @@ const mbfl_encoding mbfl_encoding_hz = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_hz_wchar,
-	&vtbl_wchar_hz
+	&vtbl_wchar_hz,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_hz_wchar = {

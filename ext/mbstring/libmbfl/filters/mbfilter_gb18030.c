@@ -45,7 +45,8 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_gb18030_wchar,
-	&vtbl_wchar_gb18030
+	&vtbl_wchar_gb18030,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_gb18030_wchar = {

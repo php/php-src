@@ -99,6 +99,11 @@ PHP                                                                        NEWS
 - MBString:
   . ext/mbstring: fix new_value length check. (Max Kellermann)
   . Fix bug GH-10627 (mb_convert_encoding crashes PHP on Windows). (nielsdos)
+  . Fix bug GH-10192 (mb_detect_encoding() results for UTF-7 differ between
+    PHP 8.0 and 8.1 (if UTF-7 is present in the encodings list and the string
+    contains '+' character)). (pakutoma)
+  . Fix bug GH-10648 (mb_check_encoding() returns true for incorrect but
+    interpretable ISO-2022-JP byte sequences). (pakutoma)
 
 - Opcache:
   . Fix incorrect page_size check. (nielsdos)

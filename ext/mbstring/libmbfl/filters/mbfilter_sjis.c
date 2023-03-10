@@ -67,7 +67,8 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	mblen_table_sjis,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_wchar,
-	&vtbl_wchar_sjis
+	&vtbl_wchar_sjis,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_wchar = {

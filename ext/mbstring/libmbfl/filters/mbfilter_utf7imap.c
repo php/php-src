@@ -77,9 +77,11 @@
 
 #include "mbfilter.h"
 #include "mbfilter_utf7imap.h"
+#include "utf7_helper.h"
 
 static int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_utf7imap_wchar_flush(mbfl_convert_filter *filter);
+static bool mb_check_utf7imap(unsigned char *in, size_t in_len);
 
 static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
 
@@ -91,7 +93,8 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	NULL,
 	0,
 	&vtbl_utf7imap_wchar,
-	&vtbl_wchar_utf7imap
+	&vtbl_wchar_utf7imap,
+	mb_check_utf7imap
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
@@ -436,4 +439,143 @@ static int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
 		break;
 	}
 	return 0;
+}
+
+static unsigned char decode_base64(unsigned char c)
+{
+	if (c >= 'A' && c <= 'Z') {
+		return c - 65;
+	} else if (c >= 'a' && c <= 'z') {
+		return c - 71;
+	} else if (c >= '0' && c <= '9') {
+		return c + 4;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == ',') {
+		return 63;
+	} else if (c == '-') {
+		return DASH;
+	}
+	return ILLEGAL;
+}
+
+static bool is_utf16_cp_valid(uint16_t cp, bool is_surrogate)
+{
+	if (is_surrogate) {
+		return cp >= 0xDC00 && cp <= 0xDFFF;
+	} else if (cp >= 0xDC00 && cp <= 0xDFFF) {
+		/* 2nd part of surrogate pair came unexpectedly */
+		return false;
+	} else if (cp >= 0x20 && cp <= 0x7E && cp != '&') {
+		return false;
+	}
+	return true;
+}
+
+static bool mb_check_utf7imap(unsigned char *in, size_t in_len)
+{
+	unsigned char *p = in, *e = p + in_len;
+	bool base64 = false;
+	bool is_surrogate = false;
+
+	while (p < e) {
+		if (base64) {
+			/* Base64 section */
+			unsigned char n1 = decode_base64(*p++);
+			if (is_base64_end(n1)) {
+				if (!is_base64_end_valid(n1, false, is_surrogate)) {
+					return false;
+				}
+				base64 = false;
+				continue;
+			} else if (p == e) {
+				return false;
+			}
+			unsigned char n2 = decode_base64(*p++);
+			if (is_base64_end(n2) || p == e) {
+				return false;
+			}
+			unsigned char n3 = decode_base64(*p++);
+			if (is_base64_end(n3)) {
+				return false;
+			}
+			uint16_t cp1 = (n1 << 10) | (n2 << 4) | ((n3 & 0x3C) >> 2);
+			if (!is_utf16_cp_valid(cp1, is_surrogate)) {
+				return false;
+			}
+			is_surrogate = has_surrogate(cp1, is_surrogate);
+			if (p == e) {
+				return false;
+			}
+
+			unsigned char n4 = decode_base64(*p++);
+			if (is_base64_end(n4)) {
+				if (!is_base64_end_valid(n4, n3 & 0x3, is_surrogate)) {
+					return false;
+				}
+				base64 = false;
+				continue;
+			} else if (p == e) {
+				return false;
+			}
+			unsigned char n5 = decode_base64(*p++);
+			if (is_base64_end(n5) || p == e) {
+				return false;
+			}
+			unsigned char n6 = decode_base64(*p++);
+			if (is_base64_end(n6)) {
+				return false;
+			}
+			uint16_t cp2 = (n3 << 14) | (n4 << 8) | (n5 << 2) | ((n6 & 0x30) >> 4);
+			if (!is_utf16_cp_valid(cp2, is_surrogate)) {
+				return false;
+			}
+			is_surrogate = has_surrogate(cp2, is_surrogate);
+			if (p == e) {
+				return false;
+			}
+
+			unsigned char n7 = decode_base64(*p++);
+			if (is_base64_end(n7)) {
+				if (!is_base64_end_valid(n7, n6 & 0xF, is_surrogate)) {
+					return false;
+				}
+				base64 = false;
+				continue;
+			} else if (p == e) {
+				return false;
+			}
+			unsigned char n8 = decode_base64(*p++);
+			if (is_base64_end(n8)) {
+				return false;
+			}
+			uint16_t cp3 = (n6 << 12) | (n7 << 6) | n8;
+			if (!is_utf16_cp_valid(cp3, is_surrogate)) {
+				return false;
+			}
+			is_surrogate = has_surrogate(cp3, is_surrogate);
+		} else {
+			/* ASCII text section */
+			unsigned char c = *p++;
+
+			if (c == '&') {
+				if (p == e) {
+					return false;
+				}
+				unsigned char n = decode_base64(*p);
+				if (n == DASH) {
+					p++;
+				} else if (n == ILLEGAL) {
+					return false;
+				} else {
+					base64 = true;
+				}
+			} else if (c >= 0x20 && c <= 0x7E) {
+				continue;
+			} else {
+				return false;
+			}
+		}
+	}
+	return !base64;
 }

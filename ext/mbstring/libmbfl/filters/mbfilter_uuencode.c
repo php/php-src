@@ -38,6 +38,7 @@ const mbfl_encoding mbfl_encoding_uuencode = {
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	NULL,
+	NULL,
 	NULL
 };
 

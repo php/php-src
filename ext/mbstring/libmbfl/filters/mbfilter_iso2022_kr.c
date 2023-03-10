@@ -47,7 +47,8 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022kr_wchar,
-	&vtbl_wchar_2022kr
+	&vtbl_wchar_2022kr,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
