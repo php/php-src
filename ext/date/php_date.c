@@ -582,6 +582,36 @@ PHPAPI timelib_tzinfo *get_timezone_info(void)
 	}
 	return tzi;
 }
+
+static void update_property(zend_object *object, zend_string *key, zval *prop_val)
+{
+	if (ZSTR_VAL(key)[0] == '\0') { // not public
+		const char *class_name, *prop_name;
+		size_t prop_name_len;
+
+		if (zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len) == SUCCESS) {
+			if (class_name[0] != '*') { // private
+				zend_string *cname;
+				zend_class_entry *ce;
+
+				cname = zend_string_init(class_name, strlen(class_name), 0);
+				ce = zend_lookup_class(cname);
+
+				if (ce) {
+					zend_update_property(ce, object, prop_name, prop_name_len, prop_val);
+				}
+
+				zend_string_release_ex(cname, 0);
+			} else { // protected
+				zend_update_property(object->ce, object, prop_name, prop_name_len, prop_val);
+			}
+		}
+		return;
+	}
+
+	// public
+	zend_update_property(object->ce, object, ZSTR_VAL(key), ZSTR_LEN(key), prop_val);
+}
 /* }}} */
 
 
@@ -2822,7 +2852,7 @@ static void restore_custom_datetime_properties(zval *object, HashTable *myht)
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_time_is_internal_property(prop_name)) {
 			continue;
 		}
-		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
+		update_property(Z_OBJ_P(object), prop_name, prop_val);
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -3924,7 +3954,7 @@ static void restore_custom_datetimezone_properties(zval *object, HashTable *myht
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_timezone_is_internal_property(prop_name)) {
 			continue;
 		}
-		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
+		update_property(Z_OBJ_P(object), prop_name, prop_val);
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -4551,7 +4581,7 @@ static void restore_custom_dateinterval_properties(zval *object, HashTable *myht
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_interval_is_internal_property(prop_name)) {
 			continue;
 		}
-		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
+		update_property(Z_OBJ_P(object), prop_name, prop_val);
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -5551,7 +5581,7 @@ static void restore_custom_dateperiod_properties(zval *object, HashTable *myht)
 		if (!prop_name || (Z_TYPE_P(prop_val) == IS_REFERENCE) || date_period_is_internal_property(prop_name)) {
 			continue;
 		}
-		add_property_zval_ex(object, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name), prop_val);
+		update_property(Z_OBJ_P(object), prop_name, prop_val);
 	} ZEND_HASH_FOREACH_END();
 }
 

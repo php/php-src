@@ -202,7 +202,7 @@ else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
-test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-strict-aliasing -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
+test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
 dnl Check if compiler supports -Wno-clobbered (only GCC)
 AX_CHECK_COMPILE_FLAG([-Wno-clobbered], CFLAGS="-Wno-clobbered $CFLAGS", , [-Werror])
 dnl Check for support for implicit fallthrough level 1, also add after previous CFLAGS as level 3 is enabled in -Wextra
@@ -307,7 +307,7 @@ AC_ARG_ENABLE([zend-max-execution-timers],
   [AS_HELP_STRING([--enable-zend-max-execution-timers],
     [whether to enable zend max execution timers])],
     [ZEND_MAX_EXECUTION_TIMERS=$enableval],
-    [ZEND_MAX_EXECUTION_TIMERS='no'])
+    [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
 
 AS_CASE(["$host_alias"], [*linux*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
 

@@ -1741,6 +1741,22 @@ static void zend_gc_root_tmpvars(void) {
 	}
 }
 
+#if GC_BENCH
+void gc_bench_print(void)
+{
+	fprintf(stderr, "GC Statistics\n");
+	fprintf(stderr, "-------------\n");
+	fprintf(stderr, "Runs:               %d\n", GC_G(gc_runs));
+	fprintf(stderr, "Collected:          %d\n", GC_G(collected));
+	fprintf(stderr, "Root buffer length: %d\n", GC_G(root_buf_length));
+	fprintf(stderr, "Root buffer peak:   %d\n\n", GC_G(root_buf_peak));
+	fprintf(stderr, "      Possible            Remove from  Marked\n");
+	fprintf(stderr, "        Root    Buffered     buffer     grey\n");
+	fprintf(stderr, "      --------  --------  -----------  ------\n");
+	fprintf(stderr, "ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
+}
+#endif
+
 #ifdef ZTS
 size_t zend_gc_globals_size(void)
 {

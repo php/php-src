@@ -136,7 +136,7 @@ class IntlDateFormatter
      * @tentative-return-type
      * @alias datefmt_set_timezone
      */
-    public function setTimeZone($timezone): ?bool {} // TODO return true on success
+    public function setTimeZone($timezone): bool {}
 
     /**
      * @tentative-return-type

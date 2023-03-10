@@ -737,4 +737,17 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
+#if __GNUC__ && !defined(__clang__)
+# define __DO_PRAGMA(x) _Pragma(#x)
+# define _DO_PRAGMA(x) __DO_PRAGMA(x)
+# define ZEND_CGG_DIAGNOSTIC_IGNORED_START(warning) \
+	_Pragma("GCC diagnostic push") \
+	_DO_PRAGMA(GCC diagnostic ignored warning)
+# define ZEND_CGG_DIAGNOSTIC_IGNORED_END \
+	_Pragma("GCC diagnostic pop")
+#else
+# define ZEND_CGG_DIAGNOSTIC_IGNORED_START(warning)
+# define ZEND_CGG_DIAGNOSTIC_IGNORED_END
+#endif
+
 #endif /* ZEND_PORTABILITY_H */

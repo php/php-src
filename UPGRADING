@@ -33,6 +33,8 @@ PHP 8.3 UPGRADE NOTES
     Internally, this works by caching the result on posix systems. If you want
     the old behaviour, you can check the "cached" key in the array returned by
     proc_get_status() to check whether the result was cached.
+  . Zend Max Execution Timers is now enabled by default for ZTS builds on
+    Linux.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
@@ -75,6 +77,10 @@ PHP 8.3 UPGRADE NOTES
 
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
+
+- Intl:
+  . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
+    now returns true on sucess, previously null was returned.
 
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional

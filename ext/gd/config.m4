@@ -189,7 +189,7 @@ dnl Various checks for GD features
 
     PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GD_CFLAGS))
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
-    GD_CFLAGS="-I$ext_srcdir/libgd $GD_CFLAGS"
+    GD_CFLAGS="-Wno-strict-prototypes -I$ext_srcdir/libgd $GD_CFLAGS"
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
 
     PHP_TEST_BUILD(foobar, [], [
