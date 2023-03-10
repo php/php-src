@@ -42,7 +42,8 @@ const mbfl_encoding mbfl_encoding_utf16 = {
 	NULL,
 	MBFL_ENCTYPE_MWC2,
 	&vtbl_utf16_wchar,
-	&vtbl_wchar_utf16
+	&vtbl_wchar_utf16,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_utf16be = {
@@ -53,7 +54,8 @@ const mbfl_encoding mbfl_encoding_utf16be = {
 	NULL,
 	MBFL_ENCTYPE_MWC2,
 	&vtbl_utf16be_wchar,
-	&vtbl_wchar_utf16be
+	&vtbl_wchar_utf16be,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_utf16le = {
@@ -64,7 +66,8 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	NULL,
 	MBFL_ENCTYPE_MWC2,
 	&vtbl_utf16le_wchar,
-	&vtbl_wchar_utf16le
+	&vtbl_wchar_utf16le,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_utf16_wchar = {

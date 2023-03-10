@@ -39,6 +39,7 @@ const mbfl_encoding mbfl_encoding_base64 = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
+	NULL,
 	NULL
 };
 

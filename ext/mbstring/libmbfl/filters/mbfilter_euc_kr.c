@@ -62,7 +62,8 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	mblen_table_euckr,
 	0,
 	&vtbl_euckr_wchar,
-	&vtbl_wchar_euckr
+	&vtbl_wchar_euckr,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_euckr_wchar = {

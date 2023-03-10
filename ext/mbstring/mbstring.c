@@ -3917,6 +3917,11 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const m
 {
 	mbfl_convert_filter *filter = mbfl_convert_filter_new(encoding, &mbfl_encoding_wchar, mbfl_filt_check_errors, NULL, &filter);
 
+	if (encoding->check != NULL) {
+		mbfl_convert_filter_delete(filter);
+		return encoding->check((unsigned char*)input, length);
+	}
+
 	while (length--) {
 		unsigned char c = *input++;
 		(filter->filter_function)(c, filter);

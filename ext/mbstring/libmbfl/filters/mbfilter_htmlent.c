@@ -61,7 +61,8 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_html_wchar,
-	&vtbl_wchar_html
+	&vtbl_wchar_html,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_html = {

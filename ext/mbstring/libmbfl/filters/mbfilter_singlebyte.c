@@ -78,7 +78,8 @@ static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int
 		NULL, \
 		MBFL_ENCTYPE_SBCS, \
 		&vtbl_##id##_wchar, \
-		&vtbl_wchar_##id \
+		&vtbl_wchar_##id, \
+		NULL \
 	}
 
 /* For single-byte encodings which use a conversion table */

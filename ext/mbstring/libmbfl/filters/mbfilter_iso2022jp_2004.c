@@ -43,7 +43,8 @@ const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_2004_wchar,
-	&vtbl_wchar_2022jp_2004
+	&vtbl_wchar_2022jp_2004,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar = {

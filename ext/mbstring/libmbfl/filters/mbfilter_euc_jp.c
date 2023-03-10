@@ -64,7 +64,8 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	mblen_table_eucjp,
 	0,
 	&vtbl_eucjp_wchar,
-	&vtbl_wchar_eucjp
+	&vtbl_wchar_eucjp,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_eucjp_wchar = {

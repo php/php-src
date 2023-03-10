@@ -489,6 +489,16 @@ PHP 8.1 UPGRADE NOTES
   . All GMP function now accept octal string with the leading octal prefix ("0o"/"0O")
     RFC: https://wiki.php.net/rfc/explicit_octal_notation
 
+- MBString
+  . mb_check_encoding() now checks input encoding more strictly.
+  . mb_detect_encoding() now checks input encoding more strictly
+    when strict detection is enabled.
+  . mb_convert_encoding() checks the input encoding more strictly
+    if multiple encodings are passed to from_encoding
+    and the mbstring.strict_detection INI directive is set to 1.
+    This change only affects the encoding selection,
+    not the result of the conversion.
+
 - PDO ODBC:
   . PDO::getAttributes() with PDO::ATTR_SERVER_INFO and PDO::ATTR_SERVER_VERSION
     now return values instead of throwing PDOException.

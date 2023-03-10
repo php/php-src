@@ -46,7 +46,8 @@ const mbfl_encoding mbfl_encoding_2022jpms = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jpms_wchar,
-	&vtbl_wchar_2022jpms
+	&vtbl_wchar_2022jpms,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jpms_wchar = {

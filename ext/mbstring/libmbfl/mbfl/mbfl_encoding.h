@@ -32,6 +32,7 @@
 #define MBFL_ENCODING_H
 
 #include "mbfl_defs.h"
+#include "zend.h"
 
 enum mbfl_no_encoding {
 	mbfl_no_encoding_invalid = -1,
@@ -132,6 +133,8 @@ struct mbfl_convert_vtbl {
 	void (*filter_copy)(struct _mbfl_convert_filter *src, struct _mbfl_convert_filter *dest);
 };
 
+typedef bool (*mb_check_fn)(unsigned char *in, size_t in_len);
+
 /*
  * encoding
  */
@@ -144,6 +147,7 @@ typedef struct _mbfl_encoding {
 	unsigned int flag;
 	const struct mbfl_convert_vtbl *input_filter;
 	const struct mbfl_convert_vtbl *output_filter;
+	mb_check_fn check;
 } mbfl_encoding;
 
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);

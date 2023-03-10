@@ -54,7 +54,8 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	mblen_table_sjis_mobile, /* Leading byte values used for SJIS-2004 are the same as mobile SJIS variants */
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis2004_wchar,
-	&vtbl_wchar_sjis2004
+	&vtbl_wchar_sjis2004,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
