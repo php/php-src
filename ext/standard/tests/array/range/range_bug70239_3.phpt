@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECTF--
-The supplied range exceeds the maximum array size: start=-%d end=0
+The supplied range exceeds the maximum array size: start=-%d end=0 step=1
