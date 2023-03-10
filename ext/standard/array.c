@@ -3055,7 +3055,7 @@ PHP_FUNCTION(range)
 	}
 err:
 	if (err) {
-		zend_argument_value_error(3, "must not exceed the specified range");
+		zend_argument_value_error(3, "must be less than the range spanned by argument #1 ($start) and argument #2 ($end)");
 		RETURN_THROWS();
 	}
 }

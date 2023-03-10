@@ -104,10 +104,10 @@ range(): Argument #3 ($step) must be a finite number, NAN provided
 range(): Argument #3 ($step) must be a finite number, NAN provided
 Step must be within the range of input parameters
 -- Testing ( (low < high) && (high-low < step) ) --
-range(): Argument #3 ($step) must not exceed the specified range
+range(): Argument #3 ($step) must be less than the range spanned by argument #1 ($start) and argument #2 ($end)
 -- Testing ( (low > high) && (low-high < step) ) --
-range(): Argument #3 ($step) must not exceed the specified range
+range(): Argument #3 ($step) must be less than the range spanned by argument #1 ($start) and argument #2 ($end)
 -- Testing ( (low < high) && (high-low < step) ) for characters --
-range(): Argument #3 ($step) must not exceed the specified range
+range(): Argument #3 ($step) must be less than the range spanned by argument #1 ($start) and argument #2 ($end)
 -- Testing ( (low > high) && (low-high < step) ) for characters --
-range(): Argument #3 ($step) must not exceed the specified range
+range(): Argument #3 ($step) must be less than the range spanned by argument #1 ($start) and argument #2 ($end)
