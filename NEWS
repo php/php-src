@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-8646 (Memory leak PHP FPM 8.1). (nielsdos)
   . Re-add some CTE functions that were removed from being CTE by a mistake.
     (mvorisek)
+  . Fixed bug GH-10801 (Named arguments in CTE functions cause a segfault).
+    (nielsdos)
 
 - Date:
   . Fixed bug GH-10747 (Private and protected properties in serialized Date*
