@@ -623,11 +623,13 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
     UnicodeString srcString(source, source_len);
     Formattable *fargs = ((const MessageFormat*)fmt)->parse(srcString, *count, *status);
 
-	if(U_FAILURE(*status)) {
-		return;
-	}
+    if(U_FAILURE(*status)) {
+	    return;
+    }
 
-	*args = (zval *)safe_emalloc(*count, sizeof(zval), 0);
+    *args = (zval *)safe_emalloc(*count, sizeof(zval), 0);
+    auto fargs_expr = [&]() { delete []fargs; };
+    auto fargs_cleaner = intl_cleaner<decltype(fargs_expr)>(fargs_expr);
 
     // assign formattables to varargs
     for(int32_t i = 0; i < *count; i++) {
@@ -676,5 +678,4 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
             break;
         }
     }
-	delete[] fargs;
 }
