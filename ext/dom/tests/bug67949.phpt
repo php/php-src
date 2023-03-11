@@ -78,12 +78,16 @@ array(1) {
   string(4) "test"
 }
 string(4) "test"
-bool(true)
-string(4) "data"
+
+Warning: Attempt to read property "textContent" on null in %s on line %d
+bool(false)
+NULL
 string(4) "test"
 string(4) "test"
-bool(true)
-string(4) "data"
+
+Warning: Attempt to read property "textContent" on null in %s on line %d
+bool(false)
+NULL
 string(4) "test"
 testing read_dimension with null offset
 Cannot access node list without offset

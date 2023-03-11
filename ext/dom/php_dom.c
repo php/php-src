@@ -21,6 +21,7 @@
 #endif
 
 #include "php.h"
+
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "ext/standard/php_rand.h"
 #include "php_dom.h"
@@ -1519,7 +1520,14 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 		return NULL;
 	}
 
-	ZVAL_LONG(&offset_copy, zval_get_long(offset));
+	zend_long lval;
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		ZVAL_LONG(&offset_copy, Z_LVAL_P(offset));
+	} else if (Z_TYPE_P(offset) == IS_STRING && is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), &lval, NULL, false) == IS_LONG) {
+		ZVAL_LONG(&offset_copy, lval);
+	} else {
+		return NULL;
+	}
 
 	zend_call_method_with_1_params(object, object->ce, NULL, "item", rv, &offset_copy);
 
@@ -1528,7 +1536,14 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
 {
-	zend_long offset = zval_get_long(member);
+	zend_long lval;
+	zend_long offset = -1;
+	if (Z_TYPE_P(member) == IS_LONG) {
+		offset = Z_LVAL_P(member);
+	} else if (Z_TYPE_P(member) == IS_STRING && is_numeric_string(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, false) == IS_LONG) {
+		offset = lval;
+	}
+
 	zval rv;
 
 	if (offset < 0) {
