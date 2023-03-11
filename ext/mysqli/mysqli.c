@@ -805,8 +805,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
 				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
 		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
-			/* TODO Convert this to a ValueError */
-			zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
+			zend_argument_value_error(ERROR_ARG_POS(3),
 				"must be empty when the specified class (%s) does not have a constructor",
 				ZSTR_VAL(ce->name)
 			);
