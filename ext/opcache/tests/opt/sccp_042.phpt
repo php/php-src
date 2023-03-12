@@ -37,28 +37,28 @@ $_main:
 BB0:
      ; start exit lines=[0-52]
      ; level=0
-0000 INIT_FCALL 1 96 string("print_r")
+0000 INIT_FCALL 1 %d string("print_r")
 0001 SEND_VAL array(...) 1
 0002 DO_ICALL
-0003 INIT_FCALL 1 96 string("print_r")
+0003 INIT_FCALL 1 %d string("print_r")
 0004 SEND_VAL array(...) 1
 0005 DO_ICALL
-0006 INIT_FCALL 1 96 string("print_r")
+0006 INIT_FCALL 1 %d string("print_r")
 0007 SEND_VAL array(...) 1
 0008 DO_ICALL
-0009 INIT_FCALL 1 96 string("print_r")
+0009 INIT_FCALL 1 %d string("print_r")
 0010 SEND_VAL array(...) 1
 0011 DO_ICALL
-0012 INIT_FCALL 1 96 string("print_r")
-0013 INIT_FCALL 1 96 string("array_keys")
+0012 INIT_FCALL 1 %d string("print_r")
+0013 INIT_FCALL 1 %d string("array_keys")
 0014 SEND_VAL array(...) 1
 0015 SEND_VAL bool(true) string("strict")
 0016 CHECK_UNDEF_ARGS
 0017 #5.V9 [array [long] of [long, string]] = DO_ICALL
 0018 SEND_VAR #5.V9 [array [long] of [long, string]] 1
 0019 DO_ICALL
-0020 INIT_FCALL 1 96 string("print_r")
-0021 INIT_FCALL 2 112 string("array_keys")
+0020 INIT_FCALL 1 %d string("print_r")
+0021 INIT_FCALL 2 %d string("array_keys")
 0022 SEND_VAL array(...) 1
 0023 SEND_VAL int(0) 2
 0024 SEND_VAL array(...) string("array")
@@ -66,8 +66,8 @@ BB0:
 0026 #6.V11 [array [long] of [long, string]] = DO_ICALL
 0027 SEND_VAR #6.V11 [array [long] of [long, string]] 1
 0028 DO_ICALL
-0029 INIT_FCALL 1 96 string("print_r")
-0030 INIT_FCALL 1 96 string("array_keys")
+0029 INIT_FCALL 1 %d string("print_r")
+0030 INIT_FCALL 1 %d string("array_keys")
 0031 SEND_VAL array(...) 1
 0032 SEND_VAL_EX int(0) string("test")
 0033 SEND_VAL bool(true) string("strict")
@@ -75,13 +75,13 @@ BB0:
 0035 #7.V13 [array [long] of [long, string]] = DO_ICALL
 0036 SEND_VAR #7.V13 [array [long] of [long, string]] 1
 0037 DO_ICALL
-0038 INIT_FCALL 2 112 string("mt_rand")
+0038 INIT_FCALL 2 %d string("mt_rand")
 0039 SEND_VAL int(0) 1
 0040 SEND_VAL int(10) 2
 0041 #8.V15 [long] = DO_ICALL
 0042 ASSIGN #0.CV0($generated) [undef, ref, any] -> #9.CV0($generated) [ref, any] #8.V15 [long]
-0043 INIT_FCALL 1 96 string("print_r")
-0044 INIT_FCALL 3 128 string("array_keys")
+0043 INIT_FCALL 1 %d string("print_r")
+0044 INIT_FCALL 3 %d string("array_keys")
 0045 #10.T17 [array [long] of [any]] = INIT_ARRAY 1 (packed) #9.CV0($generated) [ref, any] NEXT
 0046 SEND_VAL #10.T17 [array [long] of [any]] 1
 0047 SEND_VAR #9.CV0($generated) [ref, any] 2
