@@ -818,8 +818,11 @@ static inline zend_result ct_eval_func_call(
 	dummy_frame.opline = &dummy_opline;
 	dummy_opline.opcode = ZEND_DO_FCALL;
 
-	execute_data = safe_emalloc(num_args, sizeof(zval), ZEND_CALL_FRAME_SLOT * sizeof(zval));
-	memset(execute_data, 0, sizeof(zend_execute_data));
+	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION, func, num_args, func->common.scope);
+	execute_data->return_value = NULL;
+	execute_data->symbol_table = NULL;
+	execute_data->run_time_cache = NULL;
+	execute_data->extra_named_params = NULL;
 	execute_data->prev_execute_data = &dummy_frame;
 	EG(current_execute_data) = execute_data;
 
@@ -886,7 +889,7 @@ static inline zend_result ct_eval_func_call(
 	}
 	EG(capture_warnings_during_sccp) = 0;
 
-	efree(execute_data);
+	zend_vm_stack_free_call_frame(execute_data);
 	EG(current_execute_data) = prev_execute_data;
 	return retval;
 }
