@@ -748,7 +748,8 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 		/* just break anyway, to avoid greedy read for file://, php://memory, and php://temp */
 		if ((stream->wrapper != &php_plain_files_wrapper) &&
 			(stream->ops != &php_stream_memory_ops) &&
-			(stream->ops != &php_stream_temp_ops)) {
+			(stream->ops != &php_stream_temp_ops) &&
+			!(stream->ops == &php_stream_userspace_ops && !stream->wrapper->is_url)) {
 			break;
 		}
 	}

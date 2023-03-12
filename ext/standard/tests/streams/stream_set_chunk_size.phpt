@@ -24,45 +24,87 @@ class test_wrapper {
     }
 }
 
-var_dump(stream_wrapper_register('test', 'test_wrapper'));
+var_dump(stream_wrapper_register('testlocal', 'test_wrapper'));
+var_dump(stream_wrapper_register('testurl', 'test_wrapper', STREAM_IS_URL));
 
-$f = fopen("test://foo","r");
+foreach (['testlocal', 'testurl'] as $stream_type) {
+    $f = fopen("$stream_type://foo","r");
 
-/* when the chunk size is 1, the read buffer is skipped, but the
- * the writes are made in chunks of size 1 (business as usual)
- * This should probably be revisited */
-echo "should return previous chunk size (8192)\n";
-var_dump(stream_set_chunk_size($f, 1));
-echo "should be read without buffer (\$count == 10000)\n";
-var_dump(strlen(fread($f, 10000)));
-echo "should have no effect on writes\n";
-var_dump(fwrite($f, str_repeat('b', 3)));
+    /* when the chunk size is 1, the read buffer is skipped, but the
+     * writes are made in chunks of size 1 (business as usual)
+     * This should probably be revisited */
+    echo "should return previous chunk size (8192)\n";
+    var_dump(stream_set_chunk_size($f, 1));
+    echo "should be read without buffer (\$count == 10000)\n";
+    var_dump(strlen(fread($f, 10000)));
+    echo "should have no effect on writes\n";
+    var_dump(fwrite($f, str_repeat('b', 3)));
 
-echo "should return previous chunk size (1)\n";
-var_dump(stream_set_chunk_size($f, 100));
-echo "should elicit one read of size 100 (chunk size)\n";
-var_dump(strlen(fread($f, 250)));
-echo "should elicit one read of size 100 (chunk size)\n";
-var_dump(strlen(fread($f, 50)));
-echo "should elicit no read because there is sufficient cached data\n";
-var_dump(strlen(fread($f, 50)));
-echo "should have no effect on writes\n";
-var_dump(strlen(fwrite($f, str_repeat('b', 250))));
+    echo "should return previous chunk size (1)\n";
+    var_dump(stream_set_chunk_size($f, 100));
+    if ($stream_type === 'testurl') {
+        echo "should elicit one read of size 100 (chunk size)\n";
+        var_dump(strlen(fread($f, 250)));
+        echo "should elicit one read of size 100 (chunk size)\n";
+        var_dump(strlen(fread($f, 50)));
+        echo "should elicit no read because there is sufficient cached data\n";
+        var_dump(strlen(fread($f, 50)));
+    } else { // testlocal
+        echo "should elicit 3 reads of size 100 (chunk size)\n";
+        var_dump(strlen(fread($f, 250)));
+        echo "should not elicit a read\n";
+        var_dump(strlen(fread($f, 50)));
+        echo "should elicit a read because there is insufficient cached data\n";
+        var_dump(strlen(fread($f, 50)));
+    }
+    echo "should have no effect on writes\n";
+    var_dump(strlen(fwrite($f, str_repeat('b', 250))));
 
-echo "\nerror conditions\n";
-try {
-    stream_set_chunk_size($f, 0);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-try {
-    stream_set_chunk_size($f, -1);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo "\nerror conditions\n";
+    try {
+        stream_set_chunk_size($f, 0);
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+    try {
+        stream_set_chunk_size($f, -1);
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+
+    fclose($f);
 }
 ?>
 --EXPECT--
 bool(true)
+bool(true)
+should return previous chunk size (8192)
+int(8192)
+should be read without buffer ($count == 10000)
+read with size: 10000
+int(10000)
+should have no effect on writes
+write with size: 3
+int(3)
+should return previous chunk size (1)
+int(1)
+should elicit 3 reads of size 100 (chunk size)
+read with size: 100
+read with size: 100
+read with size: 100
+int(250)
+should not elicit a read
+int(50)
+should elicit a read because there is insufficient cached data
+read with size: 100
+int(50)
+should have no effect on writes
+write with size: 250
+int(3)
+
+error conditions
+stream_set_chunk_size(): Argument #2 ($size) must be greater than 0
+stream_set_chunk_size(): Argument #2 ($size) must be greater than 0
 should return previous chunk size (8192)
 int(8192)
 should be read without buffer ($count == 10000)
