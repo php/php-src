@@ -8385,10 +8385,10 @@ static void zend_jit_trace_reset_caches(void)
 #endif
 }
 
-static void zend_jit_trace_free_caches(void)
+static void zend_jit_trace_free_caches(zend_jit_globals *jit_globals)
 {
-	if (JIT_G(exit_counters)) {
-		free(JIT_G(exit_counters));
+	if (jit_globals->exit_counters) {
+		free(jit_globals->exit_counters);
 	}
 }
 
