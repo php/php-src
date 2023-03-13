@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f2e6a2cf2e88c3d331c9e3a3af655d144a67f0c7 */
+ * Stub hash: 155783e1858a7f24dbc1c3e810d5cffee5468bf7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ctype_alnum, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_MIXED, 0)
@@ -40,16 +40,16 @@ ZEND_FUNCTION(ctype_xdigit);
 
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_alnum, arginfo_ctype_alnum)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_alpha, arginfo_ctype_alpha)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_cntrl, arginfo_ctype_cntrl)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_digit, arginfo_ctype_digit)
+	ZEND_FE(ctype_alnum, arginfo_ctype_alnum)
+	ZEND_FE(ctype_alpha, arginfo_ctype_alpha)
+	ZEND_FE(ctype_cntrl, arginfo_ctype_cntrl)
+	ZEND_FE(ctype_digit, arginfo_ctype_digit)
 	ZEND_FE(ctype_lower, arginfo_ctype_lower)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_graph, arginfo_ctype_graph)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_print, arginfo_ctype_print)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_punct, arginfo_ctype_punct)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_space, arginfo_ctype_space)
+	ZEND_FE(ctype_graph, arginfo_ctype_graph)
+	ZEND_FE(ctype_print, arginfo_ctype_print)
+	ZEND_FE(ctype_punct, arginfo_ctype_punct)
+	ZEND_FE(ctype_space, arginfo_ctype_space)
 	ZEND_FE(ctype_upper, arginfo_ctype_upper)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ctype_xdigit, arginfo_ctype_xdigit)
+	ZEND_FE(ctype_xdigit, arginfo_ctype_xdigit)
 	ZEND_FE_END
 };
