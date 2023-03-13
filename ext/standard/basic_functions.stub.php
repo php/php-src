@@ -2290,8 +2290,8 @@ function wordwrap(string $string, int $width = 75, string $break = "\n", bool $c
 
 /**
  * @return array<int, string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function explode(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
@@ -2968,42 +2968,61 @@ function mail(string $to, string $subject, string $message, array|string $additi
 
 /* math.c */
 
+/** @compile-time-eval */
 function abs(int|float $num): int|float {}
 
+/** @compile-time-eval */
 function ceil(int|float $num): float {}
 
+/** @compile-time-eval */
 function floor(int|float $num): float {}
 
+/** @compile-time-eval */
 function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
 
+/** @compile-time-eval */
 function sin(float $num): float {}
 
+/** @compile-time-eval */
 function cos(float $num): float {}
 
+/** @compile-time-eval */
 function tan(float $num): float {}
 
+/** @compile-time-eval */
 function asin(float $num): float {}
 
+/** @compile-time-eval */
 function acos(float $num): float {}
 
+/** @compile-time-eval */
 function atan(float $num): float {}
 
+/** @compile-time-eval */
 function atanh(float $num): float {}
 
+/** @compile-time-eval */
 function atan2(float $y, float $x): float {}
 
+/** @compile-time-eval */
 function sinh(float $num): float {}
 
+/** @compile-time-eval */
 function cosh(float $num): float {}
 
+/** @compile-time-eval */
 function tanh(float $num): float {}
 
+/** @compile-time-eval */
 function asinh(float $num): float {}
 
+/** @compile-time-eval */
 function acosh(float $num): float {}
 
+/** @compile-time-eval */
 function expm1(float $num): float {}
 
+/** @compile-time-eval */
 function log1p(float $num): float {}
 
 /** @compile-time-eval */
@@ -3024,18 +3043,25 @@ function is_infinite(float $num): bool {}
 /** @compile-time-eval */
 function pow(mixed $num, mixed $exponent): int|float|object {}
 
+/** @compile-time-eval */
 function exp(float $num): float {}
 
+/** @compile-time-eval */
 function log(float $num, float $base = M_E): float {}
 
+/** @compile-time-eval */
 function log10(float $num): float {}
 
+/** @compile-time-eval */
 function sqrt(float $num): float {}
 
+/** @compile-time-eval */
 function hypot(float $x, float $y): float {}
 
+/** @compile-time-eval */
 function deg2rad(float $num): float {}
 
+/** @compile-time-eval */
 function rad2deg(float $num): float {}
 
 /** @compile-time-eval */
@@ -3065,14 +3091,26 @@ function decoct(int $num): string {}
  */
 function dechex(int $num): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function base_convert(string $num, int $from_base, int $to_base): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
 
+/**
+ * @compile-time-eval
+ */
 function fmod(float $num1, float $num2): float {}
 
+/**
+ * @compile-time-eval
+ */
 function fdiv(float $num1, float $num2): float {}
 
 /* microtime.c */
@@ -3098,11 +3136,15 @@ function getrusage(int $mode = 0): array|false {}
 
 /* pack.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function pack(string $format, mixed ...$values): string {}
 
 /**
  * @return array<int|string, mixed>|false
+ * @compile-time-eval
  * @refcount 1
  */
 function unpack(string $format, string $string, int $offset = 0): array|false {}
