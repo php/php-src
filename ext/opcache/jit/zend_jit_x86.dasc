@@ -10294,12 +10294,23 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		zend_jit_reset_last_valid_opline();
 
-		|	// fbc->internal_function.handler(call, ret);
-		|	mov FCARG1a, RX
-		if (func) {
-			|	EXT_CALL func->internal_function.handler, r0
+		|	// (zend_execute_internal ? zend_execute_internal : fbc->internal_function.handler)(call, ret);
+		if (zend_execute_internal) {
+			|.if X64
+				| // CARG2 and FCARG2a are identical
+				|	mov CARG1, RX
+			|.else
+				|	mov aword A2, FCARG2a
+				|	mov aword A1, RX
+			|.endif
+			|	EXT_CALL zend_execute_internal, r0
 		} else {
-			|	call aword [r0 + offsetof(zend_internal_function, handler)]
+			|	mov FCARG1a, RX
+			if (func) {
+				|	EXT_CALL func->internal_function.handler, r0
+			} else {
+				|	call aword [r0 + offsetof(zend_internal_function, handler)]
+			}
 		}
 
 		if (ZEND_OBSERVER_ENABLED) {

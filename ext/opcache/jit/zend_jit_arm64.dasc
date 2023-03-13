@@ -9586,13 +9586,17 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		zend_jit_reset_last_valid_opline();
 
-		|	// fbc->internal_function.handler(call, ret);
+		|	// (zend_execute_internal ? zend_execute_internal : fbc->internal_function.handler)(call, ret);
 		|	mov FCARG1x, RX
-		if (func) {
-			|	EXT_CALL func->internal_function.handler, REG0
+		if (zend_execute_internal) {
+			|	EXT_CALL zend_execute_internal, REG0
 		} else {
-			|	ldr TMP1, [REG0, #offsetof(zend_internal_function, handler)]
-			|	blr TMP1
+			if (func) {
+				|	EXT_CALL func->internal_function.handler, REG0
+			} else {
+				|	ldr TMP1, [REG0, #offsetof(zend_internal_function, handler)]
+				|	blr TMP1
+			}
 		}
 
 		if (ZEND_OBSERVER_ENABLED) {
