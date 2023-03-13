@@ -1722,14 +1722,14 @@ function array_pad(array $array, int $length, mixed $value): array {}
 
 /**
  * @return array<int|string, int|string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_flip(array $array): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
@@ -1877,8 +1877,8 @@ function array_is_list(array $array): bool {}
 /* base64.c */
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function base64_encode(string $string): string {}
 
@@ -3368,29 +3368,56 @@ function socket_set_timeout($stream, int $seconds, int $microseconds = 0): bool 
 
 /* type.c */
 
+/**
+ * @compile-time-eval
+ */
 function gettype(mixed $value): string {}
 
+/**
+ * @compile-time-eval
+ */
 function get_debug_type(mixed $value): string {}
 
 function settype(mixed &$var, string $type): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function intval(mixed $value, int $base = 10): int {}
 
+/**
+ * @compile-time-eval
+ */
 function floatval(mixed $value): float {}
 
 /** @alias floatval */
 function doubleval(mixed $value): float {}
 
+/**
+ * @compile-time-eval
+ */
 function boolval(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function strval(mixed $value): string {}
 
+/**
+ * @compile-time-eval
+ */
 function is_null(mixed $value): bool {}
 
 function is_resource(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_bool(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_int(mixed $value): bool {}
 
 /** @alias is_int */
@@ -3399,26 +3426,50 @@ function is_integer(mixed $value): bool {}
 /** @alias is_int */
 function is_long(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_float(mixed $value): bool {}
 
 /** @alias is_float */
 function is_double(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_numeric(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_string(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_array(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_object(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_scalar(mixed $value): bool {}
 
 /** @param string $callable_name */
 function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_iterable(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_countable(mixed $value): bool {}
 
 /* uniqid.c */
