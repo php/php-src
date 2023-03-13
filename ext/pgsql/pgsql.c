@@ -4137,9 +4137,8 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	src = estrdup(ZSTR_VAL(table_name));
 	tmp_name = php_strtok_r(src, ".", &tmp_name2);
 	if (!tmp_name) {
-		// TODO ValueError (empty table name)?
 		efree(src);
-		php_error_docref(NULL, E_WARNING, "The table name must be specified");
+		zend_argument_value_error(2, "The table name must be specified (%s)", ZSTR_VAL(table_name));
 		return FAILURE;
 	}
 	if (!tmp_name2 || !*tmp_name2) {
