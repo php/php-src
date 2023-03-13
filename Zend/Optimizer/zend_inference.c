@@ -3481,16 +3481,12 @@ static zend_always_inline zend_result _zend_update_type_info(
 						} else if (ssa_op->op1_use >= 0 && !ssa->var_info[ssa_op->op1_use].is_instanceof) {
 							ce = ssa->var_info[ssa_op->op1_use].ce;
 						}
-						if (prop_info) {
-							/* FETCH_OBJ_R/IS for plain property increments reference counter,
-							   so it can't be 1 */
-							if (ce && !ce->create_object && !result_may_be_separated(ssa, ssa_op)) {
-								tmp &= ~MAY_BE_RC1;
-							}
-						} else {
-							if (ce && !ce->create_object && !ce->__get && !result_may_be_separated(ssa, ssa_op)) {
-								tmp &= ~MAY_BE_RC1;
-							}
+						/* Unset properties will resort back to __get/__set */
+						if (ce
+						 && !ce->create_object
+						 && !ce->__get
+						 && !result_may_be_separated(ssa, ssa_op)) {
+							tmp &= ~MAY_BE_RC1;
 						}
 						if (opline->opcode == ZEND_FETCH_OBJ_IS) {
 							/* IS check may return null for uninitialized typed property. */
