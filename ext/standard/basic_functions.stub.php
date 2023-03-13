@@ -1738,7 +1738,10 @@ function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
  */
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect_key(array $array, array ...$arrays): array {}
 
 /**
@@ -1747,7 +1750,10 @@ function array_intersect_key(array $array, array ...$arrays): array {}
  */
 function array_intersect_ukey(array $array, ...$rest): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect(array $array, array ...$arrays): array {}
 
 /**
@@ -1756,7 +1762,10 @@ function array_intersect(array $array, array ...$arrays): array {}
  */
 function array_uintersect(array $array, ...$rest): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect_assoc(array $array, array ...$arrays): array {}
 
 /**
@@ -1778,15 +1787,15 @@ function array_intersect_uassoc(array $array, ...$rest): array {}
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_key(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_ukey(array $array, ...$rest): array {}
 
@@ -1802,8 +1811,8 @@ function array_diff(array $array, array ...$arrays): array {}
 function array_udiff(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_assoc(array $array, array ...$arrays): array {}
 
