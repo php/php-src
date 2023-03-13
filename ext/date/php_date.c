@@ -585,7 +585,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(void)
 
 static void update_property(zend_object *object, zend_string *key, zval *prop_val)
 {
-	if (ZSTR_VAL(key)[0] == '\0') { // not public
+	if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') { // not public
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
 

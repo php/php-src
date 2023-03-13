@@ -6,6 +6,7 @@ $files = [
 	'ossfuzz-55589.txt',
 	'ossfuzz-55599.txt',
 	'ossfuzz-55727.txt',
+	'ossfuzz-56931.txt',
 ];
 
 foreach ($files as $file) {
@@ -24,16 +25,23 @@ foreach ($files as $file) {
 ?>
 --EXPECTF--
 ossfuzz-55589.txt: 
-%s: unserialize(): Error at offset 39 of 39 bytes in %sunserialize-test.php on line 14
+%s: unserialize(): Error at offset 39 of 39 bytes in %sunserialize-test.php on line %d
 bool(false)
 
 
 ossfuzz-55599.txt: 
-%s: unserialize(): Error at offset 26 of 26 bytes in %sunserialize-test.php on line 14
+%s: unserialize(): Error at offset 26 of 26 bytes in %sunserialize-test.php on line %d
 Error: Invalid serialization data for DateTime object
 bool(false)
 
 
 ossfuzz-55727.txt: 
-%s: unserialize(): Error at offset 230 of 509 bytes in %sunserialize-test.php on line 14
+%s: unserialize(): Error at offset 230 of 509 bytes in %sunserialize-test.php on line %d
+bool(false)
+
+
+ossfuzz-56931.txt: 
+Notice: unserialize(): Error at offset 39 of 39 bytes in %sunserialize-test.php on line %d
+
+Deprecated: Creation of dynamic property DateInterval::$ is deprecated in %s on line %d
 bool(false)
