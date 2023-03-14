@@ -578,14 +578,22 @@ function main(): void
                     $environment['USE_TRACKED_ALLOC'] = 1;
                     $environment['SKIP_ASAN'] = 1;
                     $environment['SKIP_PERF_SENSITIVE'] = 1;
+                    $lsan_options = [];
                     if ($switch === '--msan') {
                         $environment['SKIP_MSAN'] = 1;
+                        // use_tls=0 is a workaround for MSAN crashing with "Tracer caught signal 11" (SIGSEGV),
+                        // which seems to be an issue with TLS support in newer glibc versions under virtualized
+                        // environments. Follow https://github.com/google/sanitizers/issues/1342 and
+                        // https://github.com/google/sanitizers/issues/1409 to track this issue.
+                        $lsan_options[] = 'use_tls=0';
                     }
-
                     $lsanSuppressions = __DIR__ . '/.github/lsan-suppressions.txt';
                     if (file_exists($lsanSuppressions)) {
-                        $environment['LSAN_OPTIONS'] = 'suppressions=' . $lsanSuppressions
-                            . ':print_suppressions=0';
+                        $lsan_options[] = 'suppressions=' . $lsanSuppressions;
+                        $lsan_options[] = 'print_suppressions=0';
+                    }
+                    if (!empty($lsan_options)) {
+                        $environment['LSAN_OPTIONS'] = join(':', $lsan_options);
                     }
                     break;
                 case '--repeat':
