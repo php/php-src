@@ -98,6 +98,9 @@ PHP                                                                        NEWS
   . pg_fetch_object raises a ValueError instead of an Exception.
     (David Carlier)
 
+- Phar:
+  . Fix memory leak in phar_rename_archive(). (stkeke)
+
 - Posix:
   . Added posix_sysconf. (David Carlier)
   . Added posix_pathconf. (David Carlier)

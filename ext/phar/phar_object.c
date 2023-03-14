@@ -2113,10 +2113,12 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /*
 				pphar->flags = phar->flags;
 				pphar->fp = phar->fp;
 				phar->fp = NULL;
+				/* FIX: GH-10755 Double-free issue caught by ASAN check */
+				pphar->alias = phar->alias; /* Transfer alias to pphar to */
+				phar->alias = NULL;         /* avoid being free'd twice   */
 				phar_destroy_phar_data(phar);
 				*sphar = NULL;
 				phar = pphar;
-				phar->refcount++;
 				newpath = oldpath;
 				goto its_ok;
 			}
