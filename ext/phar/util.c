@@ -574,7 +574,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 
 	phar_add_virtual_dirs(phar, path, path_len);
 	etemp.is_modified = 1;
-	etemp.timestamp = time(0);
+	etemp.timestamp = source_date_epoch_time(0);
 	etemp.is_crc_checked = 1;
 	etemp.phar = phar;
 	etemp.filename = estrndup(path, path_len);

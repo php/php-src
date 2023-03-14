@@ -427,6 +427,22 @@ static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
 }
 
+static inline time_t source_date_epoch_time(time_t *tloc)
+{
+	zend_string *str = php_getenv("SOURCE_DATE_EPOCH", sizeof("SOURCE_DATE_EPOCH")-1);
+
+	if (str) {
+		time_t t = strtoul(ZSTR_VAL(str), NULL, 10);
+
+		zend_string_release(str);
+		if (tloc) {
+			*tloc = t;
+		}
+		return t;
+	}
+	return time(tloc);
+}
+
 static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry)
 {
 	if (!entry->is_persistent) {
