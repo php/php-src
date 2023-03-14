@@ -3131,9 +3131,14 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 			if (ssa->cfg.flags & ZEND_CFG_RECV_ENTRY) {
 				if (opline->opcode == ZEND_RECV_INIT) {
-					if (opline != op_array->opcodes &&
-					    (opline-1)->opcode != ZEND_RECV_INIT) {
-						zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
+					if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
+						if (opline != op_array->opcodes && (opline-1)->opcode != ZEND_RECV_INIT) {
+							zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
+						}
+					} else {
+						if (opline != op_array->opcodes && recv_emitted) {
+							zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
+						}
 					}
 					recv_emitted = 1;
 				} else if (opline->opcode == ZEND_RECV) {
@@ -3145,24 +3150,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					} else if (recv_emitted) {
 						zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
 					} else {
-						zend_arg_info *arg_info;
-
-						if (opline->op1.num <= op_array->num_args) {
-							arg_info = &op_array->arg_info[opline->op1.num - 1];
-						} else if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
-							arg_info = &op_array->arg_info[op_array->num_args];
-						} else {
-							/* skip */
-							zend_jit_bb_start(&ctx, b);
-							zend_jit_bb_end(&ctx, b);
-							continue;
-						}
-						if (!ZEND_TYPE_IS_SET(arg_info->type)) {
-							/* skip */
-							zend_jit_bb_start(&ctx, b);
-							zend_jit_bb_end(&ctx, b);
-							continue;
-						}
 						recv_emitted = 1;
 					}
 				} else {
@@ -3180,7 +3167,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						return SUCCESS;
 					}
 				}
-
 			} else if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE &&
 			           ssa->cfg.blocks[b].len == 1 &&
 			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
@@ -3240,14 +3226,14 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 		} else if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 #ifndef ZEND_JIT_IR
 			zend_jit_reset_last_valid_opline();
-#else
-			zend_jit_reset_last_valid_opline(&ctx);
-#endif
 		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY|ZEND_BB_ENTRY)) {
-#ifndef ZEND_JIT_IR
 			zend_jit_set_last_valid_opline(op_array->opcodes + ssa->cfg.blocks[b].start);
 #else
+			zend_jit_reset_last_valid_opline(&ctx);
+		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
 			zend_jit_set_last_valid_opline(&ctx, op_array->opcodes + ssa->cfg.blocks[b].start);
+		} else if (ssa->cfg.blocks[b].flags & ZEND_BB_RECV_ENTRY) {
+			zend_jit_reset_last_valid_opline(&ctx);
 #endif
 		}
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {

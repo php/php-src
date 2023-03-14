@@ -9775,13 +9775,6 @@ static int zend_jit_recv(zend_jit_ctx *jit, const zend_op *opline, const zend_op
 		}
 	}
 
-	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-		if ((opline+1)->opcode != ZEND_RECV && (opline+1)->opcode != ZEND_RECV_INIT) {
-			jit_LOAD_IP_ADDR(jit, opline + 1);
-			zend_jit_set_last_valid_opline(jit, opline + 1);
-		}
-	}
-
 	return 1;
 }
 
@@ -9850,13 +9843,6 @@ static int zend_jit_recv_init(zend_jit_ctx *jit, const zend_op *opline, const ze
 				return 0;
 			}
 		} while (0);
-	}
-
-	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-		if (is_last) {
-			jit_LOAD_IP_ADDR(jit, opline + 1);
-			zend_jit_set_last_valid_opline(jit, opline + 1);
-		}
 	}
 
 	return 1;
@@ -15168,10 +15154,13 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 
 		if (jit->op_array) {
 			/* Only for function JIT */
-			zend_op *opline = (zend_op*)jit->op_array->opcodes;
+			const zend_op_array *op_array = jit->op_array;
+			zend_op *opline = (zend_op*)op_array->opcodes;
 
-			while (opline->opcode == ZEND_RECV) {
-				opline++;
+			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+				while (opline->opcode == ZEND_RECV) {
+					opline++;
+				}
 			}
 			opline->handler = entry;
 
