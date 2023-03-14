@@ -5984,6 +5984,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					FREE_OP2();
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -6006,7 +6007,6 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 				}
 			}
 			if (OP2_TYPE == IS_CONST) {
-				value = &c->value;
 				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
 			}
 		} else {

@@ -18,11 +18,19 @@ class A {
 }
 
 var_dump(A::ENUM_CONST);
+var_dump(A::ENUM_CONST);
+var_dump(A::CONST1);
 var_dump(A::CONST1);
 var_dump(A::CONST2);
+var_dump(A::CONST2);
+var_dump(A::CONST3);
 var_dump(A::CONST3);
 ?>
 --EXPECT--
+enum(E::Foo)
+enum(E::Foo)
+enum(E::Foo)
+enum(E::Foo)
 enum(E::Foo)
 enum(E::Foo)
 enum(E::Foo)

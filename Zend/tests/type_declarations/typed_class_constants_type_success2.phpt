@@ -19,12 +19,27 @@ class B implements Stringable {
 const C = new B();
 
 var_dump(A::CONST1);
+var_dump(A::CONST1);
+var_dump(A::CONST2);
 var_dump(A::CONST2);
 var_dump(A::CONST3);
+var_dump(A::CONST3);
 var_dump(A::CONST4);
+var_dump(A::CONST4);
+var_dump(A::CONST5);
 var_dump(A::CONST5);
 ?>
 --EXPECTF--
+object(B)#%d (%d) {
+}
+object(B)#%d (%d) {
+}
+object(B)#%d (%d) {
+}
+object(B)#%d (%d) {
+}
+object(B)#%d (%d) {
+}
 object(B)#%d (%d) {
 }
 object(B)#%d (%d) {

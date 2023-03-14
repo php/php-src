@@ -13,6 +13,14 @@ try {
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }
+
+try {
+    var_dump(A::CONST1);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 ?>
 --EXPECT--
+Cannot assign string to class constant A::CONST1 of type int
 Cannot assign string to class constant A::CONST1 of type int

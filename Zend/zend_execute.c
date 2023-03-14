@@ -822,6 +822,11 @@ ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool s
 
 ZEND_COLD zend_never_inline void zend_verify_class_constant_type_error(const zend_class_constant *c, const zval *constant)
 {
+	/* we _may_ land here in case reading already errored and runtime cache thus has not been updated (i.e. it contains a valid but unrelated info) */
+	if (EG(exception)) {
+		return;
+	}
+
 	zend_string *type_str = zend_type_to_string(c->type);
 
 	zend_type_error("Cannot assign %s to class constant %s::%s of type %s",

@@ -17,27 +17,50 @@ class A {
 }
 
 var_dump(A::CONST1);
+var_dump(A::CONST1);
+var_dump(A::CONST2);
 var_dump(A::CONST2);
 var_dump(A::CONST3);
+var_dump(A::CONST3);
+var_dump(A::CONST4);
 var_dump(A::CONST4);
 var_dump(A::CONST5);
+var_dump(A::CONST5);
+var_dump(A::CONST6);
 var_dump(A::CONST6);
 var_dump(A::CONST7);
+var_dump(A::CONST7);
+var_dump(A::CONST8);
 var_dump(A::CONST8);
 var_dump(A::CONST9);
+var_dump(A::CONST9);
 var_dump(A::CONST10);
+var_dump(A::CONST10);
+var_dump(A::CONST11);
 var_dump(A::CONST11);
 ?>
 --EXPECT--
 NULL
+NULL
+bool(false)
 bool(false)
 bool(true)
 bool(true)
+bool(true)
+bool(true)
+int(0)
 int(0)
 float(3.14)
+float(3.14)
 float(3)
+float(3)
+string(0) ""
 string(0) ""
 array(0) {
 }
+array(0) {
+}
 string(0) ""
+string(0) ""
+NULL
 NULL

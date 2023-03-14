@@ -7258,6 +7258,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -7280,7 +7281,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				}
 			}
 			if (IS_CONST == IS_CONST) {
-				value = &c->value;
 				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
 			}
 		} else {
@@ -8420,6 +8420,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -8442,7 +8443,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				}
 			}
 			if ((IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
-				value = &c->value;
 				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
 			}
 		} else {
@@ -25093,6 +25093,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -25115,7 +25116,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				}
 			}
 			if (IS_CONST == IS_CONST) {
-				value = &c->value;
 				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
 			}
 		} else {
@@ -25664,6 +25664,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -25686,7 +25687,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				}
 			}
 			if ((IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
-				value = &c->value;
 				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
 			}
 		} else {
@@ -34257,6 +34257,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -34279,7 +34280,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				}
 			}
 			if (IS_CONST == IS_CONST) {
-				value = &c->value;
 				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
 			}
 		} else {
@@ -34618,6 +34618,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
 				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
+					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -34640,7 +34641,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				}
 			}
 			if ((IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
-				value = &c->value;
 				CACHE_POLYMORPHIC_PTR(opline->extended_value, ce, value);
 			}
 		} else {
