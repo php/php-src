@@ -2114,7 +2114,8 @@ static zend_object *phar_rename_archive(phar_archive_data **sphar, char *ext) /*
 				phar_destroy_phar_data(phar);
 				*sphar = NULL;
 				phar = pphar;
-				phar->refcount++;
+				/* FIX: GH-10755 Memory leak in phar_rename_archive() */
+				/* phar->refcount++; */
 				newpath = oldpath;
 				goto its_ok;
 			}

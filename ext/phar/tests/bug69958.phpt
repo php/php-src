@@ -1,7 +1,5 @@
 --TEST--
 Phar: bug #69958: Segfault in Phar::convertToData on invalid file
---XFAIL--
-Still has memory leaks, see https://bugs.php.net/bug.php?id=70005
 --EXTENSIONS--
 phar
 --FILE--
