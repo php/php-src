@@ -100,6 +100,7 @@ PHP 8.3 UPGRADE NOTES
 - PGSQL:
   . pg_fetch_object now raises a ValueError instead of an Exception when the constructor_args
     argument is non empty with the class not having constructor.
+  . pg_insert now raises a ValueError instead of a WARNING when the table specified is invalid.
 
 - Standard:
   . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
