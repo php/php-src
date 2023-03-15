@@ -74,6 +74,10 @@ PHP                                                                        NEWS
     Underscores must be encoded as "=5F" in such MIME encoded words.
     (Alex Dowad)
 
+- mysqli:
+  . mysqli_fetch_object raises a ValueError instead of an Exception.
+    (David Carlier)
+
 - Opcache:
   . Added start, restart and force restart time to opcache's
     phpinfo section. (Mikhail Galanin)
@@ -89,6 +93,10 @@ PHP                                                                        NEWS
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
   . Added SIGINFO constant. (David Carlier)
+
+- PGSQL:
+  . pg_fetch_object raises a ValueError instead of an Exception.
+    (David Carlier)
 
 - Posix:
   . Added posix_sysconf. (David Carlier)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5ad91bb90dedb7fec90c234acf28ccf218dac494 */
+ * Stub hash: ed8e6e79f5fe167500abbfbf91fa7bc0d414a3d3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2906,7 +2906,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_intersect_uassoc, arginfo_array_intersect_uassoc)
 	ZEND_FE(array_uintersect_uassoc, arginfo_array_uintersect_uassoc)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(array_diff_key, arginfo_array_diff_key)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(array_diff_ukey, arginfo_array_diff_ukey)
+	ZEND_FE(array_diff_ukey, arginfo_array_diff_ukey)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(array_diff, arginfo_array_diff)
 	ZEND_FE(array_udiff, arginfo_array_udiff)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(array_diff_assoc, arginfo_array_diff_assoc)

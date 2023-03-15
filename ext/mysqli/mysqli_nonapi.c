@@ -762,10 +762,9 @@ PHP_FUNCTION(mysqli_poll)
 		RETURN_THROWS();
 	}
 
-	// TODO Error promotion
 	if (!r_array && !e_array) {
-		php_error_docref(NULL, E_WARNING, "No stream arrays were passed");
-		RETURN_FALSE;
+		zend_value_error("No stream arrays were passed");
+		RETURN_THROWS();
 	}
 
 	if (r_array != NULL) {

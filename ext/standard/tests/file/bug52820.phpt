@@ -12,6 +12,8 @@ curl_setopt($handle, CURLOPT_VERBOSE, true);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 if (!@curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
     die("skip fopencookie not supported on this platform");
+if (getenv('CIRRUS_CI')) die('xfail Broken on Cirrus+ARM');
+?>
 --FILE--
 <?php
 function do_stuff($url) {

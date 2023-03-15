@@ -4731,7 +4731,7 @@ static void zend_jit_globals_ctor(zend_jit_globals *jit_globals)
 #ifdef ZTS
 static void zend_jit_globals_dtor(zend_jit_globals *jit_globals)
 {
-	zend_jit_trace_free_caches();
+	zend_jit_trace_free_caches(jit_globals);
 }
 #endif
 
@@ -5058,7 +5058,7 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 #ifdef ZTS
 	ts_free_id(jit_globals_id);
 #else
-	zend_jit_trace_free_caches();
+	zend_jit_trace_free_caches(&jit_globals);
 #endif
 }
 
