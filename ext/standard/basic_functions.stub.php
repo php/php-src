@@ -1125,7 +1125,6 @@ function array_diff_key(array $array, array ...$arrays): array {}
 /**
  * @param array|callable $rest
  * @refcount 1
- * @compile-time-eval
  */
 function array_diff_ukey(array $array, ...$rest): array {}
 
