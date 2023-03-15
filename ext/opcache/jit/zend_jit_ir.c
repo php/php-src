@@ -370,16 +370,7 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 				return jit->tls;
 			}
 			insn = &jit->ctx.ir_base[ref];
-			if (insn->op == IR_START
-			 || insn->op == IR_BEGIN
-			 || insn->op == IR_IF_TRUE
-			 || insn->op == IR_IF_FALSE
-			 || insn->op == IR_CASE_VAL
-			 || insn->op == IR_CASE_DEFAULT
-			 || insn->op == IR_MERGE
-			 || insn->op == IR_LOOP_BEGIN
-			 || insn->op == IR_ENTRY
-			 || insn->op == IR_CALL) {
+			if (insn->op >= IR_START || insn->op == IR_CALL) {
 				break;
 			}
 			ref = insn->op1;
@@ -682,16 +673,7 @@ static ir_ref jit_FP(zend_jit_ctx *jit)
 				break;
 			}
 			insn = &jit->ctx.ir_base[ref];
-			if (insn->op == IR_START
-			 || insn->op == IR_BEGIN
-			 || insn->op == IR_IF_TRUE
-			 || insn->op == IR_IF_FALSE
-			 || insn->op == IR_CASE_VAL
-			 || insn->op == IR_CASE_DEFAULT
-			 || insn->op == IR_MERGE
-			 || insn->op == IR_LOOP_BEGIN
-			 || insn->op == IR_ENTRY
-			 || insn->op == IR_CALL) {
+			if (insn->op >= IR_START || insn->op == IR_CALL) {
 				jit->fp = ir_RLOAD_A(ZREG_FP);
 				break;
 			}
