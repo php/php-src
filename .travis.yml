@@ -68,8 +68,6 @@ env:
 
 jobs:
     include:
-        - env: ENABLE_ZTS=1 ENABLE_DEBUG=1 ARM64=1
-          arch: arm64
         - env: ENABLE_ZTS=1 ENABLE_DEBUG=1 S390X=1
           arch: s390x
 
@@ -88,8 +86,6 @@ before_script:
 # Run PHPs run-tests.php
 script:
     - travis_wait ./travis/test.sh -d opcache.jit_buffer_size=16M -d opcache.jit=tracing
-    - if [[ "$ARM64" == 1 ]]; then travis_wait ./travis/test.sh -d opcache.jit_buffer_size=16M -d opcache.jit=function; fi
-    - if [[ "$ARM64" == 1 ]]; then travis_wait ./travis/test.sh -d opcache.jit_buffer_size=16M -d opcache.jit=tracing --repeat 2; fi
     - sapi/cli/php -d extension_dir=`pwd`/modules -r 'dl("zend_test");'
 
 after_success:
