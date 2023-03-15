@@ -211,7 +211,7 @@ freebsd_task:
 arm_task:
   name: ARM_DEBUG_NTS
   arm_container:
-    image: gcc:10
+    image: gcc:12
     additional_containers:
       - name: mysql
         image: mysql:8
@@ -243,7 +243,7 @@ arm_task:
         libgmp-dev
         libicu-dev
         libtidy-dev
-        libenchant-dev
+        libenchant-2-dev
         libaspell-dev
         libpspell-dev
         libsasl2-dev
