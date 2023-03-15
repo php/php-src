@@ -1754,7 +1754,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureUsedVariables)
 
 		zend_op *opline = ops->opcodes + ops->num_args;
 		if (ops->fn_flags & ZEND_ACC_VARIADIC) {
-			ZEND_ASSERT(opline->opcode == ZEND_RECV_VARIADIC);
 			opline++;
 		}
 
