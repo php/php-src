@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8646 (Memory leak PHP FPM 8.1). (nielsdos)
   . Fixed bug GH-10801 (Named arguments in CTE functions cause a segfault).
     (nielsdos)
+  . Fixed bug GH-8789 (PHP 8.0.20 (ZTS) zend_signal_handler_defer crashes on
+    apache). (nielsdos)
+  . Fixed bug GH-10015 (zend_signal_handler_defer crashes on apache shutdown).
+    (nielsdos)
 
 - FPM:
   . Fixed bug GH-10611 (fpm_env_init_main leaks environ). (nielsdos)
