@@ -36,6 +36,9 @@ PHP                                                                        NEWS
   . Add missing error checks on EVP_MD_CTX_create() and EVP_VerifyInit().
     (nielsdos)
 
+- PDO ODBC:
+  . Fixed missing and inconsistent error checks on SQLAllocHandle. (nielsdos)
+
 - SPL:
   . Fixed bug GH-10519 (Array Data Address Reference Issue). (Nathan Freeman)
 
