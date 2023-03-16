@@ -91,6 +91,9 @@ PHP 8.3 UPGRADE NOTES
     encoded words as required by RFC 2047; they are converted to spaces.
     Underscores must be encoded as "=5F" in such MIME encoded words.
     (Alex Dowad)
+  . In rare cases, mb_encode_mimeheader will transfer-encode its input
+    string where it would pass it through as raw ASCII in PHP 8.2.
+    (Alex Dowad)
 
 - mysqli:
   . mysqli_fetch_object now raises a ValueError instead of an Exception when the constructor_args
