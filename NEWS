@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Add missing error checks on EVP_MD_CTX_create() and EVP_VerifyInit().
     (nielsdos)
 
+- PGSQL:
+  . Fixed typo in the array returned from pg_meta_data (extended mode).
+    (David Carlier)
+
 - SPL:
   . Fixed bug GH-10519 (Array Data Address Reference Issue). (Nathan Freeman)
 
