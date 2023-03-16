@@ -73,6 +73,10 @@ PHP                                                                        NEWS
     encoded words as required by RFC 2047; they are converted to spaces.
     Underscores must be encoded as "=5F" in such MIME encoded words.
     (Alex Dowad)
+  . mb_encode_mimeheader no longer drops NUL (zero) bytes when
+    QPrint-encoding the input string. This previously caused strings in
+    certain text encodings, especially UTF-16 and UTF-32, to be
+    corrupted by mb_encode_mimeheader. (Alex Dowad)
 
 - mysqli:
   . mysqli_fetch_object raises a ValueError instead of an Exception.
