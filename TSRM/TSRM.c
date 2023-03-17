@@ -416,10 +416,13 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 
 static void ts_free_resources(tsrm_tls_entry *thread_resources)
 {
-	for (int i = 0; i < thread_resources->count; i++) {
+	/* Need to destroy in reverse order to respect dependencies. */
+	for (int i = thread_resources->count - 1; i >= 0; i--) {
 		if (resource_types_table[i].dtor) {
 			resource_types_table[i].dtor(thread_resources->storage[i]);
 		}
+	}
+	for (int i = thread_resources->count - 1; i >= 0; i--) {
 		if (!resource_types_table[i].fast_offset) {
 			free(thread_resources->storage[i]);
 		}
