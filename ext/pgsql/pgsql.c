@@ -5798,4 +5798,66 @@ PHP_FUNCTION(pg_select)
 }
 /* }}} */
 
+#ifdef LIBPQ_HAS_PIPELINING
+PHP_FUNCTION(pg_enter_pipeline_mode)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_BOOL(PQenterPipelineMode(pgsql_handle->conn));
+}
+
+PHP_FUNCTION(pg_exit_pipeline_mode)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_BOOL(PQexitPipelineMode(pgsql_handle->conn));
+}
+
+PHP_FUNCTION(pg_pipeline_sync)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_BOOL(PQpipelineSync(pgsql_handle->conn));
+}
+
+PHP_FUNCTION(pg_pipeline_status)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_LONG(PQpipelineStatus(pgsql_handle->conn));
+}
+#endif
+
 #endif
