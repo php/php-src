@@ -2612,49 +2612,7 @@ COMMAND $cmd
         $wanted_re = preg_replace('/\r\n/', "\n", $wanted);
 
         if ($test->hasSection('EXPECTF')) {
-            // do preg_quote, but miss out any %r delimited sections
-            $temp = "";
-            $r = "%r";
-            $startOffset = 0;
-            $length = strlen($wanted_re);
-            while ($startOffset < $length) {
-                $start = strpos($wanted_re, $r, $startOffset);
-                if ($start !== false) {
-                    // we have found a start tag
-                    $end = strpos($wanted_re, $r, $start + 2);
-                    if ($end === false) {
-                        // unbalanced tag, ignore it.
-                        $end = $start = $length;
-                    }
-                } else {
-                    // no more %r sections
-                    $start = $end = $length;
-                }
-                // quote a non re portion of the string
-                $temp .= preg_quote(substr($wanted_re, $startOffset, $start - $startOffset), '/');
-                // add the re unquoted.
-                if ($end > $start) {
-                    $temp .= '(' . substr($wanted_re, $start + 2, $end - $start - 2) . ')';
-                }
-                $startOffset = $end + 2;
-            }
-            $wanted_re = $temp;
-
-            // Stick to basics
-            $wanted_re = strtr($wanted_re, [
-                '%e' => preg_quote(DIRECTORY_SEPARATOR, '/'),
-                '%s' => '[^\r\n]+',
-                '%S' => '[^\r\n]*',
-                '%a' => '.+',
-                '%A' => '.*',
-                '%w' => '\s*',
-                '%i' => '[+-]?\d+',
-                '%d' => '\d+',
-                '%x' => '[0-9a-fA-F]+',
-                '%f' => '[+-]?(?:\d+|(?=\.\d))(?:\.\d+)?(?:[Ee][+-]?\d+)?',
-                '%c' => '.',
-                '%0' => '\x00',
-            ]);
+            $wanted_re = expectf_to_regex($wanted_re);
         }
 
         if (preg_match('/^' . $wanted_re . '$/s', $output)) {
@@ -2845,6 +2803,68 @@ SH;
     return $restype[0] . 'ED';
 }
 
+function expectf_to_regex(?string $wanted): string
+{
+    $wanted_re = $wanted ?? '';
+
+    $wanted_re = preg_replace('/\r\n/', "\n", $wanted_re);
+
+    // do preg_quote, but miss out any %r delimited sections
+    $temp = "";
+    $r = "%r";
+    $startOffset = 0;
+    $length = strlen($wanted_re);
+    while ($startOffset < $length) {
+        $start = strpos($wanted_re, $r, $startOffset);
+        if ($start !== false) {
+            // we have found a start tag
+            $end = strpos($wanted_re, $r, $start + 2);
+            if ($end === false) {
+                // unbalanced tag, ignore it.
+                $end = $start = $length;
+            }
+        } else {
+            // no more %r sections
+            $start = $end = $length;
+        }
+        // quote a non re portion of the string
+        $temp .= preg_quote(substr($wanted_re, $startOffset, $start - $startOffset), '/');
+        // add the re unquoted.
+        if ($end > $start) {
+            $temp .= '(' . substr($wanted_re, $start + 2, $end - $start - 2) . ')';
+        }
+        $startOffset = $end + 2;
+    }
+    $wanted_re = $temp;
+
+    return strtr($wanted_re, [
+        '%e' => preg_quote(DIRECTORY_SEPARATOR, '/'),
+        '%s' => '[^\r\n]+',
+        '%S' => '[^\r\n]*',
+        '%a' => '.+',
+        '%A' => '.*',
+        '%w' => '\s*',
+        '%i' => '[+-]?\d+',
+        '%d' => '\d+',
+        '%x' => '[0-9a-fA-F]+',
+        '%f' => '[+-]?(?:\d+|(?=\.\d))(?:\.\d+)?(?:[Ee][+-]?\d+)?',
+        '%c' => '.',
+        '%0' => '\x00',
+    ]);
+}
+
+/**
+ * @return bool|int
+ */
+function comp_line(string $l1, string $l2, bool $is_reg)
+{
+    if ($is_reg) {
+        return preg_match('/^' . $l1 . '$/s', $l2);
+    }
+
+    return !strcmp($l1, $l2);
+}
+
 /**
  * Map "Zend OPcache" to "opcache" and convert all ext names to lowercase.
  */
@@ -2861,185 +2881,6 @@ function remap_loaded_extensions_names(array $names): array
     return $exts;
 }
 
-/**
- * @return bool|int
- */
-function comp_line(string $l1, string $l2, bool $is_reg)
-{
-    if ($is_reg) {
-        return preg_match('/^' . $l1 . '$/s', $l2);
-    }
-
-    return !strcmp($l1, $l2);
-}
-
-function count_array_diff(
-    array $ar1,
-    array $ar2,
-    bool $is_reg,
-    array $w,
-    int $idx1,
-    int $idx2,
-    int $cnt1,
-    int $cnt2,
-    int $steps
-): int {
-    $equal = 0;
-
-    while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
-        $idx1++;
-        $idx2++;
-        $equal++;
-        $steps--;
-    }
-    if (--$steps > 0) {
-        $eq1 = 0;
-        $st = $steps / 2;
-
-        for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st-- > 0; $ofs1++) {
-            $eq = @count_array_diff($ar1, $ar2, $is_reg, $w, $ofs1, $idx2, $cnt1, $cnt2, $st);
-
-            if ($eq > $eq1) {
-                $eq1 = $eq;
-            }
-        }
-
-        $eq2 = 0;
-        $st = $steps;
-
-        for ($ofs2 = $idx2 + 1; $ofs2 < $cnt2 && $st-- > 0; $ofs2++) {
-            $eq = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $ofs2, $cnt1, $cnt2, $st);
-            if ($eq > $eq2) {
-                $eq2 = $eq;
-            }
-        }
-
-        if ($eq1 > $eq2) {
-            $equal += $eq1;
-        } elseif ($eq2 > 0) {
-            $equal += $eq2;
-        }
-    }
-
-    return $equal;
-}
-
-function generate_array_diff(array $ar1, array $ar2, bool $is_reg, array $w): array
-{
-    global $context_line_count;
-    $idx1 = 0;
-    $cnt1 = @count($ar1);
-    $idx2 = 0;
-    $cnt2 = @count($ar2);
-    $diff = [];
-    $old1 = [];
-    $old2 = [];
-    $number_len = max(3, strlen((string)max($cnt1 + 1, $cnt2 + 1)));
-    $line_number_spec = '%0' . $number_len . 'd';
-
-    /** Mapping from $idx2 to $idx1, including indexes of idx2 that are identical to idx1 as well as entries that don't have matches */
-    $mapping = [];
-
-    while ($idx1 < $cnt1 && $idx2 < $cnt2) {
-        $mapping[$idx2] = $idx1;
-        if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
-            $idx1++;
-            $idx2++;
-            continue;
-        }
-
-        $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1 + 1, $idx2, $cnt1, $cnt2, 10);
-        $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2 + 1, $cnt1, $cnt2, 10);
-
-        if ($c1 > $c2) {
-            $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
-        } elseif ($c2 > 0) {
-            $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
-        } else {
-            $old1[$idx1] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
-            $old2[$idx2] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
-        }
-        $last_printed_context_line = $idx1;
-    }
-    $mapping[$idx2] = $idx1;
-
-    reset($old1);
-    $k1 = key($old1);
-    $l1 = -2;
-    reset($old2);
-    $k2 = key($old2);
-    $l2 = -2;
-    $old_k1 = -1;
-    $add_context_lines = function (int $new_k1) use (&$old_k1, &$diff, $w, $context_line_count, $number_len) {
-        if ($old_k1 >= $new_k1 || !$context_line_count) {
-            return;
-        }
-        $end = $new_k1 - 1;
-        $range_end = min($end, $old_k1 + $context_line_count);
-        if ($old_k1 >= 0) {
-            while ($old_k1 < $range_end) {
-                $diff[] = str_repeat(' ', $number_len + 2) . $w[$old_k1++];
-            }
-        }
-        if ($end - $context_line_count > $old_k1) {
-            $old_k1 = $end - $context_line_count;
-            if ($old_k1 > 0) {
-                // Add a '--' to mark sections where the common areas were truncated
-                $diff[] = '--';
-            }
-        }
-        $old_k1 = max($old_k1, 0);
-        while ($old_k1 < $end) {
-            $diff[] = str_repeat(' ', $number_len + 2) . $w[$old_k1++];
-        }
-        $old_k1 = $new_k1;
-    };
-
-    while ($k1 !== null || $k2 !== null) {
-        if ($k1 == $l1 + 1 || $k2 === null) {
-            $add_context_lines($k1);
-            $l1 = $k1;
-            $diff[] = current($old1);
-            $old_k1 = $k1;
-            $k1 = next($old1) ? key($old1) : null;
-        } elseif ($k2 == $l2 + 1 || $k1 === null) {
-            $add_context_lines($mapping[$k2]);
-            $l2 = $k2;
-            $diff[] = current($old2);
-            $k2 = next($old2) ? key($old2) : null;
-        } elseif ($k1 < $mapping[$k2]) {
-            $add_context_lines($k1);
-            $l1 = $k1;
-            $diff[] = current($old1);
-            $k1 = next($old1) ? key($old1) : null;
-        } else {
-            $add_context_lines($mapping[$k2]);
-            $l2 = $k2;
-            $diff[] = current($old2);
-            $k2 = next($old2) ? key($old2) : null;
-        }
-    }
-
-    while ($idx1 < $cnt1) {
-        $add_context_lines($idx1 + 1);
-        $diff[] = sprintf("{$line_number_spec}- ", $idx1 + 1) . $w[$idx1++];
-    }
-
-    while ($idx2 < $cnt2) {
-        if (isset($mapping[$idx2])) {
-            $add_context_lines($mapping[$idx2] + 1);
-        }
-        $diff[] = sprintf("{$line_number_spec}+ ", $idx2 + 1) . $ar2[$idx2++];
-    }
-    $add_context_lines(min($old_k1 + $context_line_count + 1, $cnt1 + 1));
-    if ($context_line_count && $old_k1 < $cnt1 + 1) {
-        // Add a '--' to mark sections where the common areas were truncated
-        $diff[] = '--';
-    }
-
-    return $diff;
-}
-
 function generate_diff_external(string $diff_cmd, string $exp_file, string $output_file): string
 {
     $retval = shell_exec("{$diff_cmd} {$exp_file} {$output_file}");
@@ -3051,10 +2892,17 @@ function generate_diff(string $wanted, ?string $wanted_re, string $output): stri
 {
     $w = explode("\n", $wanted);
     $o = explode("\n", $output);
-    $r = is_null($wanted_re) ? $w : explode("\n", $wanted_re);
-    $diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
+    $is_regex = $wanted_re !== null;
 
-    return implode(PHP_EOL, $diff);
+    $differ = new Differ(function ($expected, $new) use ($is_regex) {
+        if (!$is_regex) {
+            return $expected === $new;
+        }
+        $regex = '/^' . expectf_to_regex($expected). '$/s';
+        return preg_match($regex, $new);
+    });
+    $result = $differ->diff($w, $o);
+    return $result;
 }
 
 function error(string $message): void
@@ -4081,6 +3929,266 @@ function bless_failed_tests(array $failedTests): void
         $args[] = $test['name'];
     }
     proc_open($args, [], $pipes);
+}
+
+/*
+ * BSD 3-Clause License
+ *
+ * Copyright (c) 2002-2023, Sebastian Bergmann
+ * All rights reserved.
+ *
+ * This file is part of sebastian/diff.
+ * https://github.com/sebastianbergmann/diff
+ */
+
+final class Differ
+{
+    public const OLD = 0;
+    public const ADDED = 1;
+    public const REMOVED = 2;
+    private $outputBuilder;
+    private $isEqual;
+
+    public function __construct(callable $isEqual)
+    {
+        $this->outputBuilder = new DiffOutputBuilder;
+        $this->isEqual = $isEqual;
+    }
+
+    public function diff(array $from, array $to): string
+    {
+        $diff = $this->diffToArray($from, $to);
+
+        return $this->outputBuilder->getDiff($diff);
+    }
+
+    public function diffToArray(array $from, array $to): array
+    {
+        $fromLine = 1;
+        $toLine = 1;
+
+        [$from, $to, $start, $end] = $this->getArrayDiffParted($from, $to);
+
+        $common = $this->calculateCommonSubsequence(array_values($from), array_values($to));
+        $diff   = [];
+
+        foreach ($start as $token) {
+            $diff[] = [$token, self::OLD];
+            $fromLine++;
+            $toLine++;
+        }
+
+        reset($from);
+        reset($to);
+
+        foreach ($common as $token) {
+            while (($fromToken = reset($from)) !== $token) {
+                $diff[] = [array_shift($from), self::REMOVED, $fromLine++];
+            }
+
+            while (($toToken = reset($to)) !== $token) {
+                $diff[] = [array_shift($to), self::ADDED, $toLine++];
+            }
+
+            $diff[] = [$token, self::OLD];
+            $fromLine++;
+            $toLine++;
+
+            array_shift($from);
+            array_shift($to);
+        }
+
+        while (($token = array_shift($from)) !== null) {
+            $diff[] = [$token, self::REMOVED, $fromLine++];
+        }
+
+        while (($token = array_shift($to)) !== null) {
+            $diff[] = [$token, self::ADDED, $toLine++];
+        }
+
+        foreach ($end as $token) {
+            $diff[] = [$token, self::OLD];
+            $fromLine++;
+            $toLine++;
+        }
+
+        return $diff;
+    }
+
+    private function getArrayDiffParted(array &$from, array &$to): array
+    {
+        $start = [];
+        $end   = [];
+
+        reset($to);
+
+        foreach ($from as $k => $v) {
+            $toK = key($to);
+
+            if (($this->isEqual)($toK, $k) && ($this->isEqual)($v, $to[$k])) {
+                $start[$k] = $v;
+
+                unset($from[$k], $to[$k]);
+            } else {
+                break;
+            }
+        }
+
+        end($from);
+        end($to);
+
+        do {
+            $fromK = key($from);
+            $toK   = key($to);
+
+            if (null === $fromK || null === $toK || current($from) !== current($to)) {
+                break;
+            }
+
+            prev($from);
+            prev($to);
+
+            $end = [$fromK => $from[$fromK]] + $end;
+            unset($from[$fromK], $to[$toK]);
+        } while (true);
+
+        return [$from, $to, $start, $end];
+    }
+
+    public function calculateCommonSubsequence(array $from, array $to): array
+    {
+        $cFrom = count($from);
+        $cTo   = count($to);
+
+        if ($cFrom === 0) {
+            return [];
+        }
+
+        if ($cFrom === 1) {
+            if (in_array($from[0], $to, true)) {
+                return [$from[0]];
+            }
+
+            return [];
+        }
+
+        $i         = (int) ($cFrom / 2);
+        $fromStart = array_slice($from, 0, $i);
+        $fromEnd   = array_slice($from, $i);
+        $llB       = $this->commonSubsequenceLength($fromStart, $to);
+        $llE       = $this->commonSubsequenceLength(array_reverse($fromEnd), array_reverse($to));
+        $jMax      = 0;
+        $max       = 0;
+
+        for ($j = 0; $j <= $cTo; $j++) {
+            $m = $llB[$j] + $llE[$cTo - $j];
+
+            if ($m >= $max) {
+                $max  = $m;
+                $jMax = $j;
+            }
+        }
+
+        $toStart = array_slice($to, 0, $jMax);
+        $toEnd   = array_slice($to, $jMax);
+
+        return array_merge(
+            $this->calculateCommonSubsequence($fromStart, $toStart),
+            $this->calculateCommonSubsequence($fromEnd, $toEnd)
+        );
+    }
+
+    private function commonSubsequenceLength(array $from, array $to): array
+    {
+        $current = array_fill(0, count($to) + 1, 0);
+        $cFrom   = count($from);
+        $cTo     = count($to);
+
+        for ($i = 0; $i < $cFrom; $i++) {
+            $prev = $current;
+
+            for ($j = 0; $j < $cTo; $j++) {
+                if (($this->isEqual)($from[$i], $to[$j])) {
+                    $current[$j + 1] = $prev[$j] + 1;
+                } else {
+                    $current[$j + 1] = max($current[$j], $prev[$j + 1]);
+                }
+            }
+        }
+
+        return $current;
+    }
+}
+
+class DiffOutputBuilder
+{
+    public function getDiff(array $diffs): string
+    {
+        global $context_line_count;
+        $i = 0;
+        $string = '';
+        $number_len = max(3, strlen((string)count($diffs)));
+        $line_number_spec = '%0' . $number_len . 'd';
+        $buffer = fopen('php://memory', 'r+b');
+        while ($i < count($diffs)) {
+            // Find next difference
+            $next = $i;
+            while ($next < count($diffs)) {
+                if ($diffs[$next][1] !== Differ::OLD) {
+                    break;
+                }
+                $next++;
+            }
+            // Found no more differenciating rows, we're done
+            if ($next === count($diffs)) {
+                var_dump($i, count($diffs));
+                if (($i - 1) < count($diffs)) {
+                    fwrite($buffer, "--\n");
+                }
+                break;
+            }
+            // Print separator if necessary
+            if ($i < ($next - $context_line_count)) {
+                fwrite($buffer, "--\n");
+                $i = $next - $context_line_count;
+            }
+            // Print leading context
+            while ($i < $next) {
+                fwrite($buffer, str_repeat(' ', $number_len + 2));
+                fwrite($buffer, $diffs[$i][0]);
+                fwrite($buffer, "\n");
+                $i++;
+            }
+            // Print differences
+            while ($i < count($diffs) && $diffs[$i][1] !== Differ::OLD) {
+                fwrite($buffer, sprintf($line_number_spec, $diffs[$i][2]));
+                switch ($diffs[$i][1]) {
+                    case Differ::ADDED:
+                        fwrite($buffer, '+ ');
+                        break;
+                    case Differ::REMOVED:
+                        fwrite($buffer, '- ');
+                        break;
+                }
+                fwrite($buffer, $diffs[$i][0]);
+                fwrite($buffer, "\n");
+                $i++;
+            }
+            // Print trailing context
+            $afterContext = min($i + $context_line_count, count($diffs));
+            while ($i < $afterContext && $diffs[$i][1] === Differ::OLD) {
+                fwrite($buffer, str_repeat(' ', $number_len + 2));
+                fwrite($buffer, $diffs[$i][0]);
+                fwrite($buffer, "\n");
+                $i++;
+            }
+        }
+
+        $diff = stream_get_contents($buffer, -1, 0);
+        fclose($buffer);
+
+        return $diff;
+    }
 }
 
 main();
