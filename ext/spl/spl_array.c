@@ -73,6 +73,13 @@ typedef struct _spl_array_object {
 	zend_object       std;
 } spl_array_object;
 
+typedef struct _spl_array_iterator {
+	zend_object_iterator it;
+	zend_class_entry *ce;
+	zval value;
+	bool by_ref;
+} spl_array_iterator;
+
 static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
 	return (spl_array_object*)((char*)(obj) - XtOffsetOf(spl_array_object, std));
 }
@@ -1007,18 +1014,41 @@ static int spl_array_it_valid(zend_object_iterator *iter) /* {{{ */
 
 static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
+	spl_array_iterator *array_iter = (spl_array_iterator*)iter;
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
 	HashTable *aht = spl_array_get_hash_table(object);
 
+	zval *data;
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT) {
-		return zend_user_it_get_current_data(iter);
+		data = zend_user_it_get_current_data(iter);
 	} else {
-		zval *data = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, object));
+		data = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, object));
 		if (data && Z_TYPE_P(data) == IS_INDIRECT) {
 			data = Z_INDIRECT_P(data);
 		}
-		return data;
 	}
+	// ZEND_FE_FETCH_RW converts the value to a reference but doesn't know the source is a property.
+	// Typed properties must add a type source to the reference, and readonly properties must fail.
+	if (array_iter->by_ref
+	 && Z_TYPE_P(data) != IS_REFERENCE
+	 && Z_TYPE(object->array) == IS_OBJECT
+	 && !(object->ar_flags & (SPL_ARRAY_IS_SELF|SPL_ARRAY_USE_OTHER))) {
+		zend_string *key;
+		zend_hash_get_current_key_ex(aht, &key, NULL, spl_array_get_pos_ptr(aht, object));
+		zend_class_entry *ce = Z_OBJCE(object->array);
+		zend_property_info *prop_info = zend_get_property_info(ce, key, true);
+		if (ZEND_TYPE_IS_SET(prop_info->type)) {
+			if (prop_info->flags & ZEND_ACC_READONLY) {
+				zend_throw_error(NULL,
+					"Cannot acquire reference to readonly property %s::$%s",
+					ZSTR_VAL(prop_info->ce->name), ZSTR_VAL(key));
+				return NULL;
+			}
+			ZVAL_NEW_REF(data, data);
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), prop_info);
+		}
+	}
+	return data;
 }
 /* }}} */
 
@@ -1156,7 +1186,7 @@ static const zend_object_iterator_funcs spl_array_it_funcs = {
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	zend_user_iterator *iterator;
+	spl_array_iterator *iterator;
 	spl_array_object *array_object = Z_SPLARRAY_P(object);
 
 	if (by_ref && (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)) {
@@ -1164,7 +1194,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 		return NULL;
 	}
 
-	iterator = emalloc(sizeof(zend_user_iterator));
+	iterator = emalloc(sizeof(*iterator));
 
 	zend_iterator_init(&iterator->it);
 
@@ -1172,6 +1202,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 	iterator->it.funcs = &spl_array_it_funcs;
 	iterator->ce = ce;
 	ZVAL_UNDEF(&iterator->value);
+	iterator->by_ref = by_ref;
 
 	return &iterator->it;
 }
