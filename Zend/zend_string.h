@@ -78,6 +78,8 @@ ZEND_API extern zend_string  *zend_empty_string;
 ZEND_API extern zend_string  *zend_one_char_string[256];
 ZEND_API extern zend_string **zend_known_strings;
 
+ZEND_API bool zend_string_validate_utf8(zend_string *string);
+
 END_EXTERN_C()
 
 /* Shortcuts */
