@@ -1369,9 +1369,13 @@ TOKENS [;:,.|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
 OPTIONAL_WHITESPACE [ \n\r\t]*
-MULTI_LINE_COMMENT "/*"([^*]*"*"+)([^*/][^*]*"*"+)*"/"
-SINGLE_LINE_COMMENT "//".*[\n\r]
-HASH_COMMENT "#"(([^[].*[\n\r])|[\n\r])
+/* We don't use re2c with bounds checking, we just return 0 bytes if we read past the input.
+ * If we use wildcard matching for comments, we can read past the input, which crashes
+ * once we try to report a syntax error because the 0 bytes are not actually part of
+ * the token. We prevent this by not allowing 0 bytes, which already aren't valid anyway. */
+MULTI_LINE_COMMENT "/*"([^*\x00]*"*"+)([^*/\x00][^*\x00]*"*"+)*"/"
+SINGLE_LINE_COMMENT "//"[^\x00\n\r]*[\n\r]
+HASH_COMMENT "#"(([^[\x00][^\x00\n\r]*[\n\r])|[\n\r])
 WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_COMMENT}|{HASH_COMMENT})+
 OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_COMMENT}|{HASH_COMMENT})*
 
