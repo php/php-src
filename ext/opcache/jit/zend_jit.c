@@ -3108,36 +3108,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			continue;
 		}
 
-		if (rt_opline
-		 && (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) == 0
-		 && rt_opline == op_array->opcodes + ssa->cfg.blocks[b].start) {
-			ssa->cfg.blocks[b].flags |= ZEND_BB_ENTRY;
-		}
-
-		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
-			if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE &&
-			           ssa->cfg.blocks[b].len == 1 &&
-			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT) &&
-			           op_array->opcodes[ssa->cfg.blocks[b].start].opcode != ZEND_JMP) {
-				if (!(ssa->cfg.blocks[b].flags & (ZEND_BB_TARGET|ZEND_BB_FOLLOW))) {
-					/* don't generate code for BB with single opcode */
-					continue;
-				}
-				/* generate code without an entry point */
-			} else {
-				zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
-			}
-		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
+		if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 			if (ssa->cfg.flags & ZEND_CFG_RECV_ENTRY) {
 				if (opline->opcode == ZEND_RECV_INIT) {
 					if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE) {
 						if (opline != op_array->opcodes && (opline-1)->opcode != ZEND_RECV_INIT) {
-							zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
+							zend_jit_recv_entry(&ctx, b);
 						}
 					} else {
 						if (opline != op_array->opcodes && recv_emitted) {
-							zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
+							zend_jit_recv_entry(&ctx, b);
 						}
 					}
 					recv_emitted = 1;
@@ -3148,13 +3129,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						zend_jit_bb_end(&ctx, b);
 						continue;
 					} else if (recv_emitted) {
-						zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
+						zend_jit_recv_entry(&ctx, b);
 					} else {
 						recv_emitted = 1;
 					}
 				} else {
 					if (recv_emitted) {
-						zend_jit_entry(&ctx, ssa->cfg.blocks[b].start);
+						zend_jit_recv_entry(&ctx, b);
 					} else if (JIT_G(opt_level) < ZEND_JIT_LEVEL_INLINE &&
 					           ssa->cfg.blocks[b].len == 1 &&
 					           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
@@ -3198,6 +3179,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				}
 				phi = phi->next;
 			}
+		}
+
+		if (rt_opline
+		 && (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) == 0
+		 && rt_opline == op_array->opcodes + ssa->cfg.blocks[b].start) {
+			zend_jit_osr_entry(&ctx, b); /* OSR (On-Stack-Replacement) Entry-Point */
 		}
 #endif /* ZEND_JIT_IR */
 

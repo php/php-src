@@ -3387,31 +3387,27 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 	ZEND_ASSERT((bb->flags & ZEND_BB_REACHABLE) != 0);
 	n = bb->predecessors_count;
 
-	if (jit->ctx.control) {
-		if (n != 0) {
-			ZEND_ASSERT(jit->ctx.ir_base[jit->ctx.control].op == IR_ENTRY);
-			if (!GCC_GLOBAL_REGS) {
-				/* 2 is hardcoded reference to IR_PARAM */
-				ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
-				ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
-				jit_STORE_FP(jit, 2);
-			}
-		} else {
-			ZEND_ASSERT(jit->ctx.ir_base[jit->ctx.control].op == IR_START);
-		}
-	}
-
 	if (n == 0) {
 		/* pass */
 		ZEND_ASSERT(jit->ctx.control);
-		ZEND_ASSERT(jit->ctx.ir_base[jit->ctx.control].op == IR_START);
-		bb_start = jit->ctx.control;
-		if (!GCC_GLOBAL_REGS) {
-			ir_ref ref = ir_PARAM(IR_ADDR, "execute_data", 1);
-			jit_STORE_FP(jit, ref);
-			jit->ctx.flags |= IR_FASTCALL_FUNC;
+#if ZEND_DEBUG
+		ref = jit->ctx.control;
+		ir_insn *insn = &jit->ctx.ir_base[ref];
+		while (insn->op >= IR_CALL && insn->op <= IR_TRAP) {
+			ref = insn->op1;
+			insn = &jit->ctx.ir_base[ref];
+		}
+		ZEND_ASSERT(insn->op == IR_START);
+		ZEND_ASSERT(ref == 1);
+#endif
+		bb_start = 1;
+		if (jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY) {
+			/* prvent END/BEGIN merging */
+			jit->ctx.control = ir_emit1(&jit->ctx, IR_BEGIN, ir_END());
+			bb_start = jit->ctx.control;
 		}
 	} else if (n == 1) {
+		ZEND_ASSERT(!jit->ctx.control);
 		pred = jit->ssa->cfg.predecessors[bb->predecessor_offset];
 		ref = jit->bb_edges[jit->bb_predecessors[b]];
 		if (ref == IR_UNUSED) {
@@ -3434,7 +3430,13 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 			} else {
 				if (!jit->ctx.control) {
 					ZEND_ASSERT(op == IR_END || op == IR_UNREACHABLE || op == IR_RETURN);
-					ir_BEGIN(ref);
+					if ((jit->ssa->cfg.blocks[b].flags & ZEND_BB_RECV_ENTRY)
+					 && (jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)) {
+						/* prvent END/BEGIN merging */
+						jit->ctx.control = ir_emit1(&jit->ctx, IR_BEGIN, ref);
+					} else {
+						ir_BEGIN(ref);
+					}
 				} else {
 					ir_MERGE_WITH(ref);
 				}
@@ -3448,6 +3450,7 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 		ir_ref entry_path = IR_UNUSED;
 		ALLOCA_FLAG(use_heap);
 
+		ZEND_ASSERT(!jit->ctx.control);
 		if (jit->ctx.control) {
 			entry_path = ir_END();
 		}
@@ -3665,10 +3668,60 @@ static ir_ref zend_jit_zval_check_undef(zend_jit_ctx  *jit,
 	return ir_PHI_2(ref2, ref);
 }
 
-static int zend_jit_entry(zend_jit_ctx *jit, unsigned int label)
+static void zend_jit_recv_entry(zend_jit_ctx *jit, int b)
 {
-	ir_ENTRY(label);
-	return 1;
+	zend_basic_block *bb = &jit->ssa->cfg.blocks[b];
+	int pred;
+	ir_ref ref;
+
+	ZEND_ASSERT(bb->predecessors_count > 0);
+
+	pred = jit->bb_predecessors[b];
+	ref = jit->bb_edges[pred];
+
+	ZEND_ASSERT(ref);
+	ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_END);
+
+	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
+	ir_ENTRY(ref, bb->start);
+	if (!GCC_GLOBAL_REGS) {
+		/* 2 is hardcoded reference to IR_PARAM */
+		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
+		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
+		jit_STORE_FP(jit, 2);
+	}
+
+	ir_MERGE_WITH(ref);
+	jit->bb_edges[pred] = ir_END();
+}
+
+static void zend_jit_osr_entry(zend_jit_ctx *jit, int b)
+{
+	zend_basic_block *bb = &jit->ssa->cfg.blocks[b];
+	ir_ref ref = ir_END();
+
+	/* Insert a MERGE block with additional ENTRY input between predecessor and this one */
+	ir_ENTRY(ref, bb->start);
+	if (!GCC_GLOBAL_REGS) {
+		/* 2 is hardcoded reference to IR_PARAM */
+		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
+		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
+		jit_STORE_FP(jit, 2);
+	}
+
+	ir_MERGE_WITH(ref);
+}
+
+static ir_ref zend_jit_continue_entry(zend_jit_ctx *jit, ir_ref src, unsigned int label)
+{
+	ir_ENTRY(src, label);
+	if (!GCC_GLOBAL_REGS) {
+		/* 2 is hardcoded reference to IR_PARAM */
+		ZEND_ASSERT(jit->ctx.ir_base[2].op == IR_PARAM);
+		ZEND_ASSERT(jit->ctx.ir_base[2].op3 == 1);
+		jit_STORE_FP(jit, 2);
+	}
+	return ir_END();
 }
 
 static int zend_jit_handler(zend_jit_ctx *jit, const zend_op *opline, int may_throw)
@@ -3744,23 +3797,30 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 	if (jit->b >= 0) {
 		bb = &jit->ssa->cfg.blocks[jit->b];
 		if (bb->successors_count > 0
-		 && opline->opcode != ZEND_RETURN
-		 && opline->opcode != ZEND_RETURN_BY_REF
-		 && opline->opcode != ZEND_GENERATOR_RETURN
-		 && opline->opcode != ZEND_MATCH_ERROR
-		 && opline->opcode != ZEND_VERIFY_NEVER_TYPE) {
+		 && (opline->opcode == ZEND_DO_FCALL
+		  || opline->opcode == ZEND_DO_UCALL
+		  || opline->opcode == ZEND_DO_FCALL_BY_NAME
+		  || opline->opcode == ZEND_INCLUDE_OR_EVAL
+		  || opline->opcode == ZEND_GENERATOR_CREATE
+		  || opline->opcode == ZEND_YIELD
+		  || opline->opcode == ZEND_YIELD_FROM
+		  || opline->opcode == ZEND_FAST_CALL)) {
 			/* Add a fake control edge from UNREACHABLE to the following ENTRY */
 			int succ;
 
 			if (bb->successors_count == 1) {
 				succ = bb->successors[0];
+				ZEND_ASSERT(jit->ssa->cfg.blocks[succ].flags & ZEND_BB_ENTRY);
 			} else {
 				/* Use only the following successor of FAST_CALL */
 				ZEND_ASSERT(opline->opcode == ZEND_FAST_CALL);
 				succ = jit->b + 1;
+				/* we need an entry */
+				jit->ssa->cfg.blocks[succ].flags |= ZEND_BB_ENTRY;
 			}
 			ref = jit->ctx.insns_count - 1;
 			ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_UNREACHABLE);
+			ref = zend_jit_continue_entry(jit, ref, jit->ssa->cfg.blocks[succ].start);
 			_zend_jit_add_predecessor_ref(jit, succ, jit->b, ref);
 		}
 		jit->b = -1;
@@ -9212,15 +9272,14 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 						if (!func_ref) {
 							func_ref = ir_LOAD_A(jit_CALL(rx, func));
 						}
-						ir_ref ip = ir_LOAD_A(ir_ADD_OFFSET(	func_ref, offsetof(zend_op_array, opcodes)));
+						ir_ref ip = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, opcodes)));
 						if (num_args) {
 							ip = ir_ADD_OFFSET(ip, num_args * sizeof(zend_op));
 						}
 						jit_LOAD_IP(jit, ip);
 					}
 
-					if (GCC_GLOBAL_REGS && !trace && op_array == &func->op_array
-							&& num_args >= op_array->required_num_args) {
+					if (!trace && op_array == &func->op_array && call_num_args >= op_array->required_num_args) {
 						/* recursive call */
 						recursive_call_through_jmp = 1;
 					}
@@ -9362,33 +9421,66 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				user_path = ir_END();
 			}
 		} else {
-			if (GCC_GLOBAL_REGS) {
+			zend_basic_block *bb;
+
+			do {
 				if (recursive_call_through_jmp) {
-					// TODO: use direct jmp ???
-					ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
-//???+++				|	jmp =>num_args
-				} else {
-					ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
-				}
-			} else {
-				ir_RETURN(ir_CONST_I32(1));
-			}
-			if (func || (opline->opcode == ZEND_DO_UCALL)) {
-				if (jit->b >= 0) {
-					zend_basic_block *bb = &jit->ssa->cfg.blocks[jit->b];
+					ir_ref begin, end;
+					ir_insn *insn;
 
-					if (bb->successors_count > 0) {
-						int succ;
-						ir_ref ref;
-
-						ZEND_ASSERT(bb->successors_count == 1);
-						succ = bb->successors[0];
-						/* Add a fake control edge from UNREACHABLE/RETURN to the following ENTRY */
-						ref = jit->ctx.insns_count - 1;
-						ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_UNREACHABLE || jit->ctx.ir_base[ref].op == IR_RETURN);
-						_zend_jit_add_predecessor_ref(jit, succ, jit->b, ref);
+					/* attempt to convert direct recursive call into loop */
+					begin = jit->bb_start_ref[call_num_args];
+					ZEND_ASSERT(begin != IR_UNUSED);
+					insn = &jit->ctx.ir_base[begin];
+					if (insn->op == IR_BEGIN) {
+						end = ir_LOOP_END(begin);
+						insn = &jit->ctx.ir_base[begin];
+						insn->op = IR_LOOP_BEGIN;
+						insn->op2 = end;
+						break;
+					} else if ((insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN)
+							&& (insn->inputs_count == 0 || insn->inputs_count == 2)) {
+						end = ir_LOOP_END(begin);
+						insn = &jit->ctx.ir_base[begin];
+						insn->op = IR_LOOP_BEGIN;
+						insn->inputs_count = 3;
+						insn->op3 = end;
+						break;
+					} else if (insn->op == IR_LOOP_BEGIN && insn->inputs_count == 3) {
+						ir_MERGE_2(insn->op3, ir_LOOP_END(begin));
+						end = ir_LOOP_END(begin);
+						insn = &jit->ctx.ir_base[begin];
+						insn->op3 = end;
+						break;
 					}
+				}
+				/* fallback to indirect JMP or RETURN */
+				if (GCC_GLOBAL_REGS) {
+					ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+				} else {
+					ir_RETURN(ir_CONST_I32(1));
+				}
+			} while (0);
+
+			bb = &jit->ssa->cfg.blocks[jit->b];
+			if (bb->successors_count > 0) {
+				int succ;
+				ir_ref ref;
+
+				ZEND_ASSERT(bb->successors_count == 1);
+				succ = bb->successors[0];
+				/* Add a fake control edge from UNREACHABLE/RETURN to the following ENTRY */
+				ref = jit->ctx.insns_count - 1;
+				ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_UNREACHABLE
+					|| jit->ctx.ir_base[ref].op == IR_RETURN
+					|| jit->ctx.ir_base[ref].op == IR_LOOP_END);
+				ZEND_ASSERT(jit->ssa->cfg.blocks[succ].flags & ZEND_BB_ENTRY);
+				ref = zend_jit_continue_entry(jit, ref, jit->ssa->cfg.blocks[succ].start);
+				if (func || (opline->opcode == ZEND_DO_UCALL)) {
+					_zend_jit_add_predecessor_ref(jit, succ, jit->b, ref);
 					jit->b = -1;
+				} else {
+					user_path = ref;
 				}
 			}
 		}
@@ -9637,15 +9729,18 @@ static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const 
 
     /* override predecessors of the next block */
 	ZEND_ASSERT(jit->ssa->cfg.blocks[next_block].predecessors_count == 1);
-    if (!jit->ctx.control) {
-		jit->bb_edges[jit->bb_predecessors[next_block]] = if_skip_constructor;
+	if (!jit->ctx.control) {
+		ZEND_ASSERT(jit->bb_edges[jit->bb_predecessors[next_block]]);
+		ir_IF_TRUE(if_skip_constructor);
+		ir_MERGE_2(jit->bb_edges[jit->bb_predecessors[next_block]], ir_END());
+		jit->bb_edges[jit->bb_predecessors[next_block]] = ir_END();
 	} else {
+		ZEND_ASSERT(!jit->bb_edges[jit->bb_predecessors[next_block]]);
 		/* merge current control path with the true branch of constructor skip condition */
 		ir_MERGE_WITH_EMPTY_TRUE(if_skip_constructor);
 		jit->bb_edges[jit->bb_predecessors[next_block]] = ir_END();
 
 		jit->b = -1;
-		zend_jit_reset_last_valid_opline(jit);
 	}
 
 	return 1;
@@ -15067,6 +15162,12 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 	}
 	jit->bb_edges = zend_arena_calloc(&CG(arena), count, sizeof(ir_ref));
 
+	if (!GCC_GLOBAL_REGS) {
+		ir_ref ref = ir_PARAM(IR_ADDR, "execute_data", 1);
+		jit_STORE_FP(jit, ref);
+		jit->ctx.flags |= IR_FASTCALL_FUNC;
+	}
+
 	return 1;
 }
 
@@ -15146,10 +15247,13 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 			}
 			opline->handler = entry;
 
-			ir_ref ref = jit->ctx.ir_base[1].op2;
-			while (ref) {
-				jit->op_array->opcodes[jit->ctx.ir_base[ref].op1].handler = (char*)entry + jit->ctx.ir_base[ref].op3;
-				ref = jit->ctx.ir_base[ref].op2;
+			if (jit->ctx.entries_count) {
+				/* For all entries */
+				int i = jit->ctx.entries_count;
+				do {
+					ir_insn *insn = &jit->ctx.ir_base[jit->ctx.entries[--i]];
+					op_array->opcodes[insn->op2].handler = (char*)entry + insn->op3;
+				} while (i != 0);
 			}
 		} else {
 			/* Only for tracing JIT */
