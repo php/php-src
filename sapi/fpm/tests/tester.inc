@@ -614,21 +614,28 @@ class Tester
         array $headers = [],
         string $uri = null,
         string $scriptFilename = null,
+        string $scriptName = null,
         ?string $stdin = null
     ): array {
-        if (is_null($scriptFilename)) {
+        if (is_null($scriptFilename) && is_null($uri)) {
             $scriptFilename = $this->makeSourceFile();
+        } else {
+            if (is_null($scriptFilename)) {
+                $scriptFilename = $uri;
+            } elseif (is_null($scriptName)) {
+                $scriptName = $uri;
+            }
         }
-        if (is_null($uri)) {
-            $uri = "/" . basename($scriptFilename);
+        if (is_null($scriptName)) {
+            $scriptName = '/' . basename($scriptFilename);
         }
 
         $params = array_merge(
             [
                 'GATEWAY_INTERFACE' => 'FastCGI/1.0',
                 'REQUEST_METHOD'    => is_null($stdin) ? 'GET' : 'POST',
-                'SCRIPT_FILENAME'   => $scriptFilename ?: $uri,
-                'SCRIPT_NAME'       => $uri,
+                'SCRIPT_FILENAME'   => $scriptFilename === '' ? null : $scriptFilename,
+                'SCRIPT_NAME'       => $scriptName,
                 'QUERY_STRING'      => $query,
                 'REQUEST_URI'       => $uri . ($query ? '?' . $query : ""),
                 'DOCUMENT_URI'      => $uri,
@@ -725,6 +732,7 @@ class Tester
      * @param string|null       $errorMessage
      * @param bool              $connKeepAlive
      * @param string|null       $scriptFilename = null
+     * @param string|null       $scriptName = null
      * @param string|array|null $stdin          = null
      * @param bool              $expectError
      * @param int               $readLimit
@@ -741,6 +749,7 @@ class Tester
         string $errorMessage = null,
         bool $connKeepAlive = false,
         string $scriptFilename = null,
+        string $scriptName = null,
         string|array $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
@@ -753,7 +762,7 @@ class Tester
             $stdin = $this->parseStdin($stdin, $headers);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $stdin);
+        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin);
         $this->trace('Request params', $params);
 
         try {
@@ -1323,6 +1332,18 @@ class Tester
     public function makeSourceFile(): string
     {
         return $this->makeFile('src.php', $this->code, overwrite: false);
+    }
+
+    /**
+     * Create a source file and script name.
+     *
+     * @return string[]
+     */
+    public function createSourceFileAndScriptName(): array
+    {
+        $sourceFile = $this->makeFile('src.php', $this->code, overwrite: false);
+
+        return [$sourceFile, '/' . basename($sourceFile)];
     }
 
     /**
