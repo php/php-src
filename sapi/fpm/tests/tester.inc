@@ -586,17 +586,14 @@ class Tester
         string $scriptName = null,
         ?string $stdin = null
     ): array {
-        if (is_null($scriptFilename) && is_null($uri)) {
+        if (is_null($scriptFilename)) {
             $scriptFilename = $this->makeSourceFile();
-        } else {
-            if (is_null($scriptFilename)) {
-                $scriptFilename = $uri;
-            } elseif (is_null($scriptName)) {
-                $scriptName = $uri;
-            }
+        }
+        if (is_null($uri)) {
+            $uri = '/' . basename($scriptFilename);
         }
         if (is_null($scriptName)) {
-            $scriptName = '/' . basename($scriptFilename);
+            $scriptName = $uri;
         }
 
         $params = array_merge(
