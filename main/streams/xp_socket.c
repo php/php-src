@@ -337,7 +337,14 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 				if (sock->socket == -1) {
 					alive = 0;
-				} else if ((value == 0 && ((MSG_DONTWAIT != 0) || !sock->is_blocked)) || php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
+				} else if (
+					(
+						value == 0 &&
+						!(stream->flags & PHP_STREAM_FLAG_NO_IO) &&
+						((MSG_DONTWAIT != 0) || !sock->is_blocked)
+					) ||
+					php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0
+				) {
 					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
 #ifdef PHP_WIN32
 					int ret;
