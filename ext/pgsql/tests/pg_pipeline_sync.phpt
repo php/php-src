@@ -47,37 +47,47 @@ if (!pg_enter_pipeline_mode($db)) {
 }
 
 if (!pg_send_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time", array(1))) {
-    die('pg_send_query_params{}');
+    die('pg_send_query_params failed');
 }
 
 if (!pg_pipeline_sync($db)) {
-    die('pg_pipeline_sync{}');
+    die('pg_pipeline_sync failed');
 }
 
 if (pg_pipeline_status($db) !== PGSQL_PIPELINE_ON) {
-    die('pg_pipeline_status{}');
+    die('pg_pipeline_status failed');
 }
 
 if (!($result = pg_get_result($db))) {
-    die('pg_get_result()');
+    die('pg_get_result');
+}
+
+if (pg_result_status($result) !== PGSQL_TUPLES_OK) {
+    die('pg_result_status failed');
 }
 
 if (pg_num_rows($result) == -1) {
-    die('pg_num_rows()');
+    die('pg_num_rows failed');
 }
 
 if (!pg_fetch_row($result, null)) {
-    die('pg_fetch_row()');
+    die('pg_fetch_row failed');
 }
 
 pg_free_result($result);
-while (pg_connection_busy($db)) {
-    nb_flush($db, $db_socket);
-    nb_consume($db, $db_socket);
+
+if (pg_get_result($db) !== false) {
+    die('pg_get_result failed');
+}
+
+if (($result = pg_get_result($db)) !== false) {
+	if (pg_result_status($result) !== PGSQL_PIPELINE_SYNC) {
+		die('pg_result_status failed');
+	}
 }
 
 if (!pg_exit_pipeline_mode($db)) {
-    die('pg_exit_pipeline_mode{}');
+    die('pg_exit_pipeline_mode failed');
 }
 
 echo "OK";
