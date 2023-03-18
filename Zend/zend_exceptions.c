@@ -680,7 +680,9 @@ ZEND_METHOD(Exception, __toString)
 		}
 
 		if ((Z_OBJCE_P(exception) == zend_ce_type_error || Z_OBJCE_P(exception) == zend_ce_argument_count_error) && strstr(ZSTR_VAL(message), ", called in ")) {
-			zend_string *real_message = zend_strpprintf_unchecked(0, "%S and defined", message);
+			zval message_zv;
+			ZVAL_STR(&message_zv, message);
+			zend_string *real_message = zend_strpprintf_unchecked(0, "%Z and defined", &message_zv);
 			zend_string_release_ex(message, 0);
 			message = real_message;
 		}
@@ -688,14 +690,24 @@ ZEND_METHOD(Exception, __toString)
 		zend_string *tmp_trace = (Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace))
 			? zend_string_copy(Z_STR(trace))
 			: ZSTR_INIT_LITERAL("#0 {main}\n", false);
+
+		zval name_zv, trace_zv, file_zv, prev_str_zv;
+		ZVAL_STR(&name_zv, Z_OBJCE_P(exception)->name);
+		ZVAL_STR(&trace_zv, tmp_trace);
+		ZVAL_STR(&file_zv, file);
+		ZVAL_STR(&prev_str_zv, prev_str);
+
 		if (ZSTR_LEN(message) > 0) {
-			str = zend_strpprintf_unchecked(0, "%S: %S in %S:" ZEND_LONG_FMT "\nStack trace:\n%S%s%S",
-				Z_OBJCE_P(exception)->name, message, file, line,
-				tmp_trace, ZSTR_LEN(prev_str) ? "\n\nNext " : "", prev_str);
+			zval message_zv;
+			ZVAL_STR(&message_zv, message);
+
+			str = zend_strpprintf_unchecked(0, "%Z: %Z in %Z:" ZEND_LONG_FMT "\nStack trace:\n%Z%s%Z",
+				&name_zv, &message_zv, &file_zv, line,
+				&trace_zv, ZSTR_LEN(prev_str) ? "\n\nNext " : "", &prev_str_zv);
 		} else {
-			str = zend_strpprintf_unchecked(0, "%S in %S:" ZEND_LONG_FMT "\nStack trace:\n%S%s%S",
-				Z_OBJCE_P(exception)->name, file, line,
-				tmp_trace, ZSTR_LEN(prev_str) ? "\n\nNext " : "", prev_str);
+			str = zend_strpprintf_unchecked(0, "%Z in %Z:" ZEND_LONG_FMT "\nStack trace:\n%Z%s%Z",
+				&name_zv, &file_zv, line,
+				&trace_zv, ZSTR_LEN(prev_str) ? "\n\nNext " : "", &prev_str_zv);
 		}
 		zend_string_release_ex(tmp_trace, false);
 

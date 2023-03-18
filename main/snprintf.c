@@ -669,15 +669,6 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 					}
 					break;
 				}
-				case 'S': {
-					zend_string *str = va_arg(ap, zend_string*);
-					s_len = ZSTR_LEN(str);
-					s = ZSTR_VAL(str);
-					if (adjust_precision && (size_t)precision < s_len) {
-						s_len = precision;
-					}
-					break;
-				}
 				case 'u':
 					switch(modifier) {
 						default:
