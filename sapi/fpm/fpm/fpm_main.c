@@ -1904,6 +1904,13 @@ consult the installation file that came with this distribution, or visit \n\
 
 			php_execute_script(&file_handle);
 
+			/* Without opcache, or the first time with opcache, the file handle will be placed
+			 * in the CG(open_files) list by open_file_for_scanning(). Starting from the second
+			 * request in opcache, the file handle won't be in the list and therefore won't be destroyed for us. */
+			if (!file_handle.in_list) {
+				zend_destroy_file_handle(&file_handle);
+			}
+
 fastcgi_request_done:
 			if (EXPECTED(primary_script)) {
 				efree(primary_script);
