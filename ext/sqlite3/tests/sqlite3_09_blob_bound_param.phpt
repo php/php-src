@@ -24,7 +24,7 @@ var_dump($insert_stmt->bindValue(1, 'a', SQLITE3_TEXT));
 var_dump($insert_stmt->bindParam(2, $foo, SQLITE3_BLOB));
 $insert_stmt->execute();
 echo "Closing statement\n";
-var_dump($insert_stmt->close());
+$insert_stmt->close();
 
 echo "SELECTING results\n";
 $results = $db->query("SELECT id, quote(data) AS data FROM test ORDER BY id ASC");
@@ -35,7 +35,7 @@ while ($result = $results->fetchArray(SQLITE3_NUM))
 $results->finalize();
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -48,7 +48,6 @@ BINDING Parameter
 bool(true)
 bool(true)
 Closing statement
-bool(true)
 SELECTING results
 array(2) {
   [0]=>
@@ -57,5 +56,4 @@ array(2) {
   string(23) "X'61626364656667006869'"
 }
 Closing database
-bool(true)
 Done

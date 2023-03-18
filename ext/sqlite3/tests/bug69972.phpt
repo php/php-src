@@ -8,7 +8,7 @@ $db = new SQLite3(':memory:');
 echo "SELECTING from invalid table\n";
 $result = $db->query("SELECT * FROM non_existent_table");
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 
 // Trigger the use-after-free
@@ -20,7 +20,6 @@ SELECTING from invalid table
 
 Warning: SQLite3::query(): Unable to prepare statement: 1, no such table: non_existent_table in %sbug69972.php on line %d
 Closing database
-bool(true)
 Done
 Error Code: 0
 Error Msg:

@@ -25,7 +25,7 @@ echo "Statement result\n";
 var_dump($res->fetchArray(SQLITE3_NUM));
 
 echo "Closing DB\n";
-var_dump($db->close());
+$db->close();
 
 echo "Done\n";
 ?>
@@ -45,5 +45,4 @@ array(3) {
   int(43)
 }
 Closing DB
-bool(true)
 Done

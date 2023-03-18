@@ -32,7 +32,7 @@ while ($result = $results->fetchArray(SQLITE3_NUM))
 $results->finalize();
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -53,5 +53,4 @@ array(1) {
   string(32) "92eb5ffee6ae2fec3ad71c777531578f"
 }
 Closing database
-bool(true)
 Done

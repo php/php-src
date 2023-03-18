@@ -36,7 +36,7 @@ foreach($queryArray as $key => $query) {
 echo "Closing database\n";
 $stmt = null;
 $result = null;
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -55,5 +55,4 @@ int(2)
 Param count for query 4:
 int(1)
 Closing database
-bool(true)
 Done

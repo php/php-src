@@ -25,7 +25,7 @@ while ($result = $results->fetchArray(SQLITE3_NUM))
 }
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Check db was closed\n";
 try {
     var_dump($results->numColumns());
@@ -48,7 +48,6 @@ array(2) {
   string(1) "a"
 }
 Closing database
-bool(true)
 Check db was closed
 The SQLite3Result object has not been correctly initialised or is already closed
 Done

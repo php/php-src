@@ -41,7 +41,7 @@ echo "Getting expanded SQL statement\n";
 var_dump($stmt->getSQL(true));
 
 echo "Closing DB\n";
-var_dump($db->close());
+$db->close();
 
 echo "Done\n";
 ?>
@@ -64,5 +64,4 @@ Change binded values
 Getting expanded SQL statement
 string(25) "SELECT 'TEST', '!!!', 40;"
 Closing DB
-bool(true)
 Done

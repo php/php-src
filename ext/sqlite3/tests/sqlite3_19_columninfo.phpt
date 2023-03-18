@@ -26,7 +26,7 @@ while ($row = $result->fetchArray(SQLITE3_NUM)) {
 $result->finalize();
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -41,5 +41,4 @@ Name: id - Type: 3
 Name: time - Type: 1
 Name: id - Type: 3
 Closing database
-bool(true)
 Done

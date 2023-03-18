@@ -19,7 +19,7 @@ echo "Second Error Code: " . $db->lastErrorCode() . PHP_EOL;
 echo "Second Extended Error Code: " . $db->lastExtendedErrorCode() . PHP_EOL;
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done" . PHP_EOL;
 ?>
 --EXPECTF--
@@ -31,6 +31,5 @@ Warning: SQLite3::query(): Unable to execute statement: UNIQUE constraint failed
 Second Error Code: 19
 Second Extended Error Code: 1555
 Closing database
-bool(true)
 Done
 

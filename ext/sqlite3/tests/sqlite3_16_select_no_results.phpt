@@ -20,7 +20,7 @@ while ($result = $results->fetchArray(SQLITE3_NUM))
 $results->finalize();
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -28,5 +28,4 @@ Creating Table
 bool(true)
 SELECTING results
 Closing database
-bool(true)
 Done

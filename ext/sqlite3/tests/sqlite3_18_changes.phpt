@@ -22,7 +22,7 @@ echo "Rows Updated\n";
 var_dump($db->changes());
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -36,5 +36,4 @@ bool(true)
 Rows Updated
 int(2)
 Closing database
-bool(true)
 Done

@@ -23,7 +23,7 @@ $result = $db->query("INSERT INTO DOG VALUES (1, 'Annoying Dog', 1)");
 echo "Third (Extended) Error Code: " . $db->lastErrorCode() . PHP_EOL;
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done" . PHP_EOL;
 ?>
 --EXPECTF--
@@ -38,6 +38,5 @@ Toggling extended error codes and re-inserting a third time
 Warning: SQLite3::query(): Unable to execute statement: UNIQUE constraint failed: dog.id in %s on line %d
 Third (Extended) Error Code: 1555
 Closing database
-bool(true)
 Done
 

@@ -35,7 +35,7 @@ $stmt = $db->prepare("DELETE FROM test");
 var_dump($stmt->readOnly());
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -51,5 +51,4 @@ bool(false)
 Checking delete statement
 bool(false)
 Closing database
-bool(true)
 Done

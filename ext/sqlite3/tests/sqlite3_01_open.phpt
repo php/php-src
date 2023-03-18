@@ -8,11 +8,10 @@ sqlite3
 require_once(__DIR__ . '/new_db.inc');
 
 var_dump($db);
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECTF--
 object(SQLite3)#%d (0) {
 }
-bool(true)
 Done
