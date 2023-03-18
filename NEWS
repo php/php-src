@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     (mvorisek)
   . Fixed bug GH-10801 (Named arguments in CTE functions cause a segfault).
     (nielsdos)
+  . Fixed bug GH-8789 (PHP 8.0.20 (ZTS) zend_signal_handler_defer crashes on
+    apache). (nielsdos)
+  . Fixed bug GH-10015 (zend_signal_handler_defer crashes on apache shutdown).
+    (nielsdos)
 
 - Date:
   . Fixed bug GH-10747 (Private and protected properties in serialized Date*

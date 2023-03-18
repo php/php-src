@@ -87,8 +87,10 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 	zend_signal_queue_t *queue, *qtmp;
 
 #ifdef ZTS
-	/* A signal could hit after TSRM shutdown, in this case globals are already freed. */
-	if (tsrm_is_shutdown()) {
+	/* A signal could hit after TSRM shutdown, in this case globals are already freed.
+	 * Or it could be delivered to a thread that didn't execute PHP yet.
+	 * In the latter case we act as if SIGG(active) is false. */
+	if (tsrm_is_shutdown() || !tsrm_get_ls_cache()) {
 		/* Forward to default handler handler */
 		zend_signal_handler(signo, siginfo, context);
 		return;
@@ -180,7 +182,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	sigset_t sigset;
 	zend_signal_entry_t p_sig;
 #ifdef ZTS
-	if (tsrm_is_shutdown()) {
+	if (tsrm_is_shutdown() || !tsrm_get_ls_cache()) {
 		p_sig.flags = 0;
 		p_sig.handler = SIG_DFL;
 	} else
