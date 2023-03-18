@@ -41,6 +41,10 @@ PHP                                                                        NEWS
 - PDO ODBC:
   . Fixed missing and inconsistent error checks on SQLAllocHandle. (nielsdos)
 
+- PGSQL:
+  . Fixed typo in the array returned from pg_meta_data (extended mode).
+    (David Carlier)
+
 - SPL:
   . Fixed bug GH-10519 (Array Data Address Reference Issue). (Nathan Freeman)
 

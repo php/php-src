@@ -4243,7 +4243,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 			/* pg_type.typtype */
 			add_assoc_bool_ex(&elem, "is base", sizeof("is base") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "b"));
 			add_assoc_bool_ex(&elem, "is composite", sizeof("is composite") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "c"));
-			add_assoc_bool_ex(&elem, "is pesudo", sizeof("is pesudo") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "p"));
+			add_assoc_bool_ex(&elem, "is pseudo", sizeof("is pseudo") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "p"));
 			/* pg_description.description */
 			add_assoc_string_ex(&elem, "description", sizeof("description") - 1, PQgetvalue(pg_result, i, 8));
 		}
