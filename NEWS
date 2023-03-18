@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.6
 
+- Streams:
+  . Fixed bug GH-10406 (feof() behavior change for UNIX based socket
+    resources). (Jakub Zelenka)
 
 30 Mar 2023, PHP 8.2.5
 
