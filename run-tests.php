@@ -2895,16 +2895,15 @@ function generate_diff(string $wanted, ?string $wanted_re, string $output): stri
     $is_regex = !is_null($wanted_re);
     $r = $is_regex ? explode("\n", $wanted_re) : $w;
 
-    $differ = new Differ(function($expected, $new) use ($is_regex) {
+    $differ = new Differ(function ($expected, $new) use ($is_regex) {
         if (!$is_regex) {
             return $expected === $new;
         }
         $regex = '/^' . expectf_to_regex($expected). '$/s';
         return preg_match($regex, $new);
     });
-
-    $diffs = $differ->diff($w, $o);
-    return diff_to_string($diffs);
+    $result = $differ->diff($w, $o);
+    return $result;
 }
 
 function error(string $message): void
@@ -3933,194 +3932,263 @@ function bless_failed_tests(array $failedTests): void
     proc_open($args, [], $pipes);
 }
 
-/**
- * Implementation of the the Myers diff algorithm.
+/*
+ * This file is part of sebastian/diff.
  *
- * Myers, Eugene W. "An O (ND) difference algorithm and its variations."
- * Algorithmica 1.1 (1986): 251-266.
+ * (c) Sebastian Bergmann <sebastian@phpunit.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
-class DiffElem
+final class Differ
 {
-    const TYPE_KEEP = 0;
-    const TYPE_REMOVE = 1;
-    const TYPE_ADD = 2;
-
-    /** @var int One of the TYPE_* constants */
-    public $type;
-    /** @var string|null Is null for add operations */
-    public $old;
-    /** @var string|null Is null for remove operations */
-    public $new;
-    /** @var int|null Is null for add operations */
-    public $oldLine;
-    /** @var int|null Is null for remove operations */
-    public $newLine;
-
-    public function __construct(int $type, $old, $new, $oldLine, $newLine) {
-        $this->type = $type;
-        $this->old = $old;
-        $this->new = $new;
-        $this->oldLine = $oldLine;
-        $this->newLine = $newLine;
-    }
-}
-
-class Differ
-{
+    public const OLD = 0;
+    public const ADDED = 1;
+    public const REMOVED = 2;
+    private $outputBuilder;
     private $isEqual;
 
-    /**
-     * Create differ over the given equality relation.
-     *
-     * @param callable $isEqual Equality relation with signature function($a, $b) : bool
-     */
-    public function __construct(callable $isEqual) {
+    public function __construct(callable $isEqual)
+    {
+        $this->outputBuilder = new DiffOutputBuilder;
         $this->isEqual = $isEqual;
     }
 
-    /**
-     * Calculate diff (edit script) from $old to $new.
-     *
-     * @param array $old Original array
-     * @param array $new New array
-     *
-     * @return DiffElem[] Diff (edit script)
-     */
-    public function diff(array $old, array $new) {
-        list($trace, $x, $y) = $this->calculateTrace($old, $new);
-        return $this->extractDiff($trace, $x, $y, $old, $new);
+    public function diff(array $from, array $to): string
+    {
+        $diff = $this->diffToArray($from, $to);
+
+        return $this->outputBuilder->getDiff($diff);
     }
 
-    private function calculateTrace(array $a, array $b) {
-        $n = \count($a);
-        $m = \count($b);
-        $max = $n + $m;
-        $v = [1 => 0];
-        $trace = [];
-        for ($d = 0; $d <= $max; $d++) {
-            $trace[] = $v;
-            for ($k = -$d; $k <= $d; $k += 2) {
-                if ($k === -$d || ($k !== $d && $v[$k-1] < $v[$k+1])) {
-                    $x = $v[$k+1];
-                } else {
-                    $x = $v[$k-1] + 1;
-                }
+    public function diffToArray(array $from, array $to): array
+    {
+        $fromLine = 1;
+        $toLine = 1;
 
-                $y = $x - $k;
-                while ($x < $n && $y < $m && ($this->isEqual)($a[$x], $b[$y])) {
-                    $x++;
-                    $y++;
-                }
+        [$from, $to, $start, $end] = $this->getArrayDiffParted($from, $to);
 
-                $v[$k] = $x;
-                if ($x >= $n && $y >= $m) {
-                    return [$trace, $x, $y];
-                }
+        $common = $this->calculateCommonSubsequence(array_values($from), array_values($to));
+        $diff   = [];
+
+        foreach ($start as $token) {
+            $diff[] = [$token, self::OLD];
+            $fromLine++;
+            $toLine++;
+        }
+
+        reset($from);
+        reset($to);
+
+        foreach ($common as $token) {
+            while (($fromToken = reset($from)) !== $token) {
+                $diff[] = [array_shift($from), self::REMOVED, $fromLine++];
+            }
+
+            while (($toToken = reset($to)) !== $token) {
+                $diff[] = [array_shift($to), self::ADDED, $toLine++];
+            }
+
+            $diff[] = [$token, self::OLD];
+            $fromLine++;
+            $toLine++;
+
+            array_shift($from);
+            array_shift($to);
+        }
+
+        while (($token = array_shift($from)) !== null) {
+            $diff[] = [$token, self::REMOVED, $fromLine++];
+        }
+
+        while (($token = array_shift($to)) !== null) {
+            $diff[] = [$token, self::ADDED, $toLine++];
+        }
+
+        foreach ($end as $token) {
+            $diff[] = [$token, self::OLD];
+            $fromLine++;
+            $toLine++;
+        }
+
+        return $diff;
+    }
+
+    private function getArrayDiffParted(array &$from, array &$to): array
+    {
+        $start = [];
+        $end   = [];
+
+        reset($to);
+
+        foreach ($from as $k => $v) {
+            $toK = key($to);
+
+            if (($this->isEqual)($toK, $k) && ($this->isEqual)($v, $to[$k])) {
+                $start[$k] = $v;
+
+                unset($from[$k], $to[$k]);
+            } else {
+                break;
             }
         }
-        throw new \Exception('Should not happen');
-    }
 
-    private function extractDiff(array $trace, int $x, int $y, array $a, array $b) {
-        $result = [];
-        for ($d = \count($trace) - 1; $d >= 0; $d--) {
-            $v = $trace[$d];
-            $k = $x - $y;
+        end($from);
+        end($to);
 
-            if ($k === -$d || ($k !== $d && $v[$k-1] < $v[$k+1])) {
-                $prevK = $k + 1;
-            } else {
-                $prevK = $k - 1;
-            }
+        do {
+            $fromK = key($from);
+            $toK   = key($to);
 
-            $prevX = $v[$prevK];
-            $prevY = $prevX - $prevK;
-
-            while ($x > $prevX && $y > $prevY) {
-                $result[] = new DiffElem(DiffElem::TYPE_KEEP, $a[$x-1], $b[$y-1], $x, $y);
-                $x--;
-                $y--;
-            }
-
-            if ($d === 0) {
+            if (null === $fromK || null === $toK || current($from) !== current($to)) {
                 break;
             }
 
-            while ($x > $prevX) {
-                $result[] = new DiffElem(DiffElem::TYPE_REMOVE, $a[$x-1], null, $x, null);
-                $x--;
+            prev($from);
+            prev($to);
+
+            $end = [$fromK => $from[$fromK]] + $end;
+            unset($from[$fromK], $to[$toK]);
+        } while (true);
+
+        return [$from, $to, $start, $end];
+    }
+
+    public function calculateCommonSubsequence(array $from, array $to): array
+    {
+        $cFrom = count($from);
+        $cTo   = count($to);
+
+        if ($cFrom === 0) {
+            return [];
+        }
+
+        if ($cFrom === 1) {
+            if (in_array($from[0], $to, true)) {
+                return [$from[0]];
             }
 
-            while ($y > $prevY) {
-                $result[] = new DiffElem(DiffElem::TYPE_ADD, null, $b[$y-1], null, $y);
-                $y--;
+            return [];
+        }
+
+        $i         = (int) ($cFrom / 2);
+        $fromStart = array_slice($from, 0, $i);
+        $fromEnd   = array_slice($from, $i);
+        $llB       = $this->commonSubsequenceLength($fromStart, $to);
+        $llE       = $this->commonSubsequenceLength(array_reverse($fromEnd), array_reverse($to));
+        $jMax      = 0;
+        $max       = 0;
+
+        for ($j = 0; $j <= $cTo; $j++) {
+            $m = $llB[$j] + $llE[$cTo - $j];
+
+            if ($m >= $max) {
+                $max  = $m;
+                $jMax = $j;
             }
         }
-        return array_reverse($result);
+
+        $toStart = array_slice($to, 0, $jMax);
+        $toEnd   = array_slice($to, $jMax);
+
+        return array_merge(
+            $this->calculateCommonSubsequence($fromStart, $toStart),
+            $this->calculateCommonSubsequence($fromEnd, $toEnd)
+        );
+    }
+
+    private function commonSubsequenceLength(array $from, array $to): array
+    {
+        $current = array_fill(0, count($to) + 1, 0);
+        $cFrom   = count($from);
+        $cTo     = count($to);
+
+        for ($i = 0; $i < $cFrom; $i++) {
+            $prev = $current;
+
+            for ($j = 0; $j < $cTo; $j++) {
+                if (($this->isEqual)($from[$i], $to[$j])) {
+                    $current[$j + 1] = $prev[$j] + 1;
+                } else {
+                    $current[$j + 1] = max($current[$j], $prev[$j + 1]);
+                }
+            }
+        }
+
+        return $current;
     }
 }
 
-/**
- * @param DiffElem[] $diffs
- */
-function diff_to_string(array $diffs): string
+class DiffOutputBuilder
 {
-    global $context_line_count;
-    $i = 0;
-    $string = '';
-    $number_len = max(3, strlen((string)count($diffs)));
-    $line_number_spec = '%0' . $number_len . 'd';
-    while ($i < count($diffs)) {
-        // Find next difference
-        $next = $i;
-        while ($next < count($diffs)) {
-            if ($diffs[$next]->type !== DiffElem::TYPE_KEEP) {
+    public function getDiff(array $diffs): string
+    {
+        global $context_line_count;
+        $i = 0;
+        $string = '';
+        $number_len = max(3, strlen((string)count($diffs)));
+        $line_number_spec = '%0' . $number_len . 'd';
+        $buffer = fopen('php://memory', 'r+b');
+        while ($i < count($diffs)) {
+            // Find next difference
+            $next = $i;
+            while ($next < count($diffs)) {
+                if ($diffs[$next][1] !== Differ::OLD) {
+                    break;
+                }
+                $next++;
+            }
+            // Found no more differenciating rows, we're done
+            if ($next === count($diffs)) {
+                var_dump($i, count($diffs));
+                if (($i - 1) < count($diffs)) {
+                    fwrite($buffer, "--\n");
+                }
                 break;
             }
-            $next++;
-        }
-        // Found no more differenciating rows, we're done
-        if ($next === count($diffs)) {
-            if (($i - 1) < (count($diffs) - $context_line_count)) {
-                $string .= "--\n";
+            // Print separator if necessary
+            if ($i < ($next - $context_line_count)) {
+                fwrite($buffer, "--\n");
+                $i = $next - $context_line_count;
             }
-            break;
-        }
-        // Print separator if necessary
-        if ($i < ($next - $context_line_count)) {
-            $string .= "--\n";
-            $i = $next - $context_line_count;
-        }
-        // Print leading context
-        while ($i < $next) {
-            $string .= str_repeat(' ', $number_len + 2) . $diffs[$i]->old . "\n";
-            $i++;
-        }
-        // Print differences
-        while ($i < count($diffs) && $diffs[$i]->type !== DiffElem::TYPE_KEEP) {
-            switch ($diffs[$i]->type) {
-                case DiffElem::TYPE_ADD:
-                    $string .= sprintf($line_number_spec . '+ ', $diffs[$i]->newLine);
-                    $string .= $diffs[$i]->new;
-                    $string .= "\n";
-                    break;
-                case DiffElem::TYPE_REMOVE:
-                    $string .= sprintf($line_number_spec . '- ', $diffs[$i]->oldLine);
-                    $string .= $diffs[$i]->old;
-                    $string .= "\n";
-                    break;
+            // Print leading context
+            while ($i < $next) {
+                fwrite($buffer, str_repeat(' ', $number_len + 2));
+                fwrite($buffer, $diffs[$i][0]);
+                fwrite($buffer, "\n");
+                $i++;
             }
-            $i++;
+            // Print differences
+            while ($i < count($diffs) && $diffs[$i][1] !== Differ::OLD) {
+                fwrite($buffer, sprintf($line_number_spec, $diffs[$i][2]));
+                switch ($diffs[$i][1]) {
+                    case Differ::ADDED:
+                        fwrite($buffer, '+ ');
+                        break;
+                    case Differ::REMOVED:
+                        fwrite($buffer, '- ');
+                        break;
+                }
+                fwrite($buffer, $diffs[$i][0]);
+                fwrite($buffer, "\n");
+                $i++;
+            }
+            // Print trailing context
+            $afterContext = min($i + $context_line_count, count($diffs));
+            while ($i < $afterContext && $diffs[$i][1] === Differ::OLD) {
+                fwrite($buffer, str_repeat(' ', $number_len + 2));
+                fwrite($buffer, $diffs[$i][0]);
+                fwrite($buffer, "\n");
+                $i++;
+            }
         }
-        // Print trailing context
-        $afterContext = min($i + $context_line_count, count($diffs));
-        while ($i < $afterContext && $diffs[$i]->type === DiffElem::TYPE_KEEP) {
-            $string .= str_repeat(' ', $number_len + 2) . $diffs[$i]->old . "\n";
-            $i++;
-        }
+
+        $diff = stream_get_contents($buffer, -1, 0);
+        fclose($buffer);
+
+        return $diff;
     }
-    return $string;
 }
 
 main();
