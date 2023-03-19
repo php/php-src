@@ -432,7 +432,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	ctx.current_section_name = NULL;
 	zend_hash_init(&ctx.str_interned, 8, NULL, str_interned_dtor, persistent);
 
-	zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_RAW,
+	zend_parse_ini_file(&fh, persistent, ZEND_INI_SCANNER_RAW,
 			(zend_ini_parser_cb_t) php_browscap_parser_cb, &ctx);
 
 	/* Destroy parser context */
