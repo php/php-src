@@ -183,11 +183,11 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 	ce->interface_names = erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 
 	ce->interface_names[num_interfaces_before].name = zend_string_copy(zend_ce_unit_enum->name);
-	ce->interface_names[num_interfaces_before].lc_name = zend_string_init("unitenum", sizeof("unitenum") - 1, 0);
+	ce->interface_names[num_interfaces_before].lc_name = ZSTR_INIT_LITERAL("unitenum", 0);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
-		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);
+		ce->interface_names[num_interfaces_before + 1].lc_name = ZSTR_INIT_LITERAL("backedenum", 0);
 	}
 
 	ce->default_object_handlers = &zend_enum_object_handlers;

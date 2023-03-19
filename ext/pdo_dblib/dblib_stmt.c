@@ -243,7 +243,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 			len = snprintf(buf, sizeof(buf), "computed%d", S->computed_column_name_count);
 			col->name = zend_string_init(buf, len, 0);
 		} else {
-			col->name = zend_string_init("computed", strlen("computed"), 0);
+			col->name = ZSTR_INIT_LITERAL("computed", 0);
 		}
 
 		S->computed_column_name_count++;

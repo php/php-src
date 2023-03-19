@@ -1001,10 +1001,10 @@ static zend_object *spl_RecursiveIteratorIterator_new_ex(zend_class_entry *class
 
 	if (init_prefix) {
 		intern->prefix[0] = ZSTR_EMPTY_ALLOC();
-		intern->prefix[1] = zend_string_init("| ",  2, 0);
-		intern->prefix[2] = zend_string_init("  ",  2, 0);
-		intern->prefix[3] = zend_string_init("|-",  2, 0);
-		intern->prefix[4] = zend_string_init("\\-", 2, 0);
+		intern->prefix[1] = ZSTR_INIT_LITERAL("| ", 0);
+		intern->prefix[2] = ZSTR_INIT_LITERAL("  ", 0);
+		intern->prefix[3] = ZSTR_INIT_LITERAL("|-", 0);
+		intern->prefix[4] = ZSTR_INIT_LITERAL("\\-", 0);
 		intern->prefix[5] = ZSTR_EMPTY_ALLOC();
 
 		intern->postfix[0] = ZSTR_EMPTY_ALLOC();

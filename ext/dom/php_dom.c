@@ -403,7 +403,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 		return debug_info;
 	}
 
-	object_str = zend_string_init("(object value omitted)", sizeof("(object value omitted)")-1, 0);
+	object_str = ZSTR_INIT_LITERAL("(object value omitted)", 0);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
 		zval value;
