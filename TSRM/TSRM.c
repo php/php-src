@@ -161,6 +161,23 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 	return 1;
 }/*}}}*/
 
+static void ts_free_resources(tsrm_tls_entry *thread_resources)
+{
+	/* Need to destroy in reverse order to respect dependencies. */
+	for (int i = thread_resources->count - 1; i >= 0; i--) {
+		if (!resource_types_table[i].done) {
+			if (resource_types_table[i].dtor) {
+				resource_types_table[i].dtor(thread_resources->storage[i]);
+			}
+
+			if (!resource_types_table[i].fast_offset) {
+				free(thread_resources->storage[i]);
+			}
+		}
+	}
+
+	free(thread_resources->storage);
+}
 
 /* Shutdown TSRM (call once for the entire process) */
 TSRM_API void tsrm_shutdown(void)
@@ -183,25 +200,13 @@ TSRM_API void tsrm_shutdown(void)
 		tsrm_tls_entry *p = tsrm_tls_table[i], *next_p;
 
 		while (p) {
-			int j;
-
 			next_p = p->next;
-			for (j=0; j<p->count; j++) {
-				if (p->storage[j]) {
-					if (resource_types_table) {
-						if (!resource_types_table[j].done) {
-							if (resource_types_table[j].dtor) {
-								resource_types_table[j].dtor(p->storage[j]);
-							}
-
-							if (!resource_types_table[j].fast_offset) {
-								free(p->storage[j]);
-							}
-						}
-					}
-				}
+			if (resource_types_table) {
+				/* This call will already free p->storage for us */
+				ts_free_resources(p);
+			} else {
+				free(p->storage);
 			}
-			free(p->storage);
 			free(p);
 			p = next_p;
 		}
@@ -413,22 +418,6 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		tsrm_new_thread_end_handler(thread_id);
 	}
 }/*}}}*/
-
-static void ts_free_resources(tsrm_tls_entry *thread_resources)
-{
-	/* Need to destroy in reverse order to respect dependencies. */
-	for (int i = thread_resources->count - 1; i >= 0; i--) {
-		if (resource_types_table[i].dtor) {
-			resource_types_table[i].dtor(thread_resources->storage[i]);
-		}
-	}
-	for (int i = thread_resources->count - 1; i >= 0; i--) {
-		if (!resource_types_table[i].fast_offset) {
-			free(thread_resources->storage[i]);
-		}
-	}
-	free(thread_resources->storage);
-}
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
