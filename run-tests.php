@@ -3933,12 +3933,13 @@ function bless_failed_tests(array $failedTests): void
 }
 
 /*
+ * BSD 3-Clause License
+ *
+ * Copyright (c) 2002-2023, Sebastian Bergmann
+ * All rights reserved.
+ *
  * This file is part of sebastian/diff.
- *
- * (c) Sebastian Bergmann <sebastian@phpunit.de>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * https://github.com/sebastianbergmann/diff
  */
 
 final class Differ
