@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-10611 (fpm_env_init_main leaks environ). (nielsdos)
   . Destroy file_handle in fpm_main. (Jakub Zelenka, nielsdos)
+  . Fixed bug #74129 (Incorrect SCRIPT_NAME with apache ProxyPassMatch when
+    spaces are in path). (Jakub Zelenka)
 
 - FTP:
   . Propagate success status of ftp_close(). (nielsdos)
