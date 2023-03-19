@@ -459,10 +459,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		return ts_resource_ex(id, &thread_id);
 	} else {
 		 last_thread_resources = &tsrm_tls_table[hash_value];
-		 do {
-			if (thread_resources->thread_id == thread_id) {
-				break;
-			}
+		 while (thread_resources->thread_id != thread_id) {
 			last_thread_resources = &thread_resources->next;
 			if (thread_resources->next) {
 				thread_resources = thread_resources->next;
@@ -470,12 +467,8 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 				allocate_new_resource(&thread_resources->next, thread_id);
 				tsrm_mutex_unlock(tsmm_mutex);
 				return ts_resource_ex(id, &thread_id);
-				/*
-				 * thread_resources = thread_resources->next;
-				 * break;
-				 */
 			}
-		 } while (thread_resources);
+		 }
 	}
 
 	/* It's possible that the current thread resources are requested, and that we get here.
