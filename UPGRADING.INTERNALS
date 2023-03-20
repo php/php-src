@@ -39,6 +39,9 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   - zend_fiber_init_context()
 * The fast_add_function() has been removed, use add_function() that will
   call the static inline add_function_fast() instead.
+* The order of members of zend_op_array, zend_ssa_var, zend_ssa_var_info,
+  zend_executor_globals and php_core_globals have changed to improve
+  struct packing which reduces their size.
 
 ========================
 2. Build system changes
