@@ -1886,6 +1886,10 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
+    $retriable = true;
+    $retried = false;
+retry:
+
     $temp_filenames = null;
     $org_file = $file;
     $orig_php = $php;
@@ -1930,8 +1934,11 @@ TEST $file
 
     $tested = $test->getName();
 
-    if ($num_repeats > 1 && $test->hasSection('FILE_EXTERNAL')) {
-        return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
+    if ($test->hasSection('FILE_EXTERNAL')) {
+        $retriable = false;
+        if ($num_repeats > 1) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
+        }
     }
 
     if ($test->hasSection('CAPTURE_STDIO')) {
@@ -1957,6 +1964,7 @@ TEST $file
         }
         $php = $php_cgi . ' -C ';
         $uses_cgi = true;
+        $retriable = false;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
         }
@@ -1974,20 +1982,18 @@ TEST $file
         } else {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
         }
+        $retriable = false;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg does not support --repeat');
         }
     }
 
-    if ($num_repeats > 1) {
-        if ($test->hasSection('CLEAN')) {
-            return skip_test($tested, $tested_file, $shortname, 'Test with CLEAN might not be repeatable');
-        }
-        if ($test->hasSection('STDIN')) {
-            return skip_test($tested, $tested_file, $shortname, 'Test with STDIN might not be repeatable');
-        }
-        if ($test->hasSection('CAPTURE_STDIO')) {
-            return skip_test($tested, $tested_file, $shortname, 'Test with CAPTURE_STDIO might not be repeatable');
+    foreach (['CLEAN', 'STDIN', 'CAPTURE_STDIO'] as $section) {
+        if ($test->hasSection($section)) {
+            $retriable = false;
+            if ($num_repeats > 1) {
+                return skip_test($tested, $tested_file, $shortname, "Test with $section might not be repeatable");
+            }
         }
     }
 
@@ -2166,8 +2172,11 @@ TEST $file
         $ini = preg_replace('/{MAIL:(\S+)}/', $replacement, $ini);
         settings2array(preg_split("/[\n\r]+/", $ini), $ini_settings);
 
-        if ($num_repeats > 1 && isset($ini_settings['opcache.opt_debug_level'])) {
-            return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
+        if (isset($ini_settings['opcache.opt_debug_level'])) {
+            $retriable = false;
+            if ($num_repeats > 1) {
+                return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
+            }
         }
     }
 
@@ -2693,6 +2702,9 @@ COMMAND $cmd
                 } elseif ($test->hasSection('XLEAK')) {
                     $warn = true;
                     $info = " (warn: XLEAK section but test passes)";
+                } elseif ($retried) {
+                    $warn = true;
+                    $info = " (warn: Test passed on retry attempt)";
                 } else {
                     show_result("PASS", $tested, $tested_file, '', $temp_filenames);
                     $junit->markTestAs('PASS', $shortname, $tested);
@@ -2722,6 +2734,9 @@ COMMAND $cmd
                 } elseif ($test->hasSection('XLEAK')) {
                     $warn = true;
                     $info = " (warn: XLEAK section but test passes)";
+                } elseif ($retried) {
+                    $warn = true;
+                    $info = " (warn: Test passed on retry attempt)";
                 } else {
                     show_result("PASS", $tested, $tested_file, '', $temp_filenames);
                     $junit->markTestAs('PASS', $shortname, $tested);
@@ -2731,6 +2746,10 @@ COMMAND $cmd
         }
 
         $wanted_re = null;
+    }
+    if (!$passed && !$retried && $retriable && error_may_be_retried($output)) {
+        $retried = true;
+        goto retry;
     }
 
     // Test failed so we need to report details.
@@ -2854,6 +2873,11 @@ SH;
     $junit->markTestAs($restype, $shortname, $tested, null, $info, $diff);
 
     return $restype[0] . 'ED';
+}
+
+function error_may_be_retried(string $output): bool
+{
+    return preg_match('((timed out)|(connection refused))i', $output) === 1;
 }
 
 /**
