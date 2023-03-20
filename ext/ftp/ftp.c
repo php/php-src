@@ -867,7 +867,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 {
 	databuf_t		*data = NULL;
 	size_t			rcvd;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return 0;
@@ -964,7 +964,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	zend_long			size;
 	char			*ptr;
 	int			ch;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return 0;
@@ -2057,7 +2057,7 @@ int
 ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t path_len, ftptype_t type, zend_long resumepos)
 {
 	databuf_t		*data = NULL;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return PHP_FTP_FAILED;
@@ -2176,7 +2176,7 @@ int
 ftp_nb_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type, zend_long startpos)
 {
 	databuf_t		*data = NULL;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return 0;
