@@ -647,7 +647,7 @@ ZEND_METHOD(Exception, __toString)
 	str = ZSTR_EMPTY_ALLOC();
 
 	exception = ZEND_THIS;
-	fname = zend_string_init("gettraceasstring", sizeof("gettraceasstring")-1, 0);
+	fname = ZSTR_INIT_LITERAL("gettraceasstring", 0);
 
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && instanceof_function(Z_OBJCE_P(exception), zend_ce_throwable)) {
 		zend_string *prev_str = str;

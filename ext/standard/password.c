@@ -497,14 +497,14 @@ static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str
 #else
 		case 2:
 			{
-			zend_string *n = zend_string_init("argon2i", sizeof("argon2i")-1, 0);
+			zend_string *n = ZSTR_INIT_LITERAL("argon2i", 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;
 			}
 		case 3:
 			{
-			zend_string *n = zend_string_init("argon2id", sizeof("argon2id")-1, 0);
+			zend_string *n = ZSTR_INIT_LITERAL("argon2id", 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;

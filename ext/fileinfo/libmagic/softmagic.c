@@ -493,7 +493,7 @@ check_fmt(struct magic_set *ms, const char *fmt)
 	if (strchr(fmt, '%') == NULL)
 		return 0;
 
-	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
+	pattern = ZSTR_INIT_LITERAL("~%[-0-9\\.]*s~", 0);
 	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
 		rv = -1;
 	} else {

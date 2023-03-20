@@ -1650,7 +1650,7 @@ static void date_period_it_move_forward(zend_object_iterator *iter)
 	}
 
 	create_date_period_datetime(object->current, object->start_ce, &current_zv);
-	zend_string *property_name = zend_string_init("current", sizeof("current") - 1, 0);
+	zend_string *property_name = ZSTR_INIT_LITERAL("current", 0);
 	zend_std_write_property(&object->std, property_name, &current_zv, NULL);
 	zval_ptr_dtor(&current_zv);
 	zend_string_release(property_name);
