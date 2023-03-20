@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 
 - FTP:
   . Propagate success status of ftp_close(). (nielsdos)
+  . Fixed bug GH-10521 (ftp_get/ftp_nb_get resumepos offset is maximum 10GB).
+    (nielsdos)
 
 - Opcache:
   . Fixed build for macOS to cater with pkg-config settings. (David Carlier)
