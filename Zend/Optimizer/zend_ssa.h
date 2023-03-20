@@ -122,14 +122,14 @@ typedef struct _zend_ssa_var {
 
 typedef struct _zend_ssa_var_info {
 	uint32_t               type; /* inferred type (see zend_inference.h) */
-	unsigned char          has_range : 1;
-	unsigned char          is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
-	unsigned char          recursive : 1;
-	unsigned char          use_as_double : 1;
-	unsigned char          delayed_fetch_this : 1;
-	unsigned char          avoid_refcounting : 1;
-	unsigned char          guarded_reference : 1;
-	unsigned char          indirect_reference : 1; /* IS_INDIRECT returned by FETCH_DIM_W/FETCH_OBJ_W */
+	bool                   has_range : 1;
+	bool                   is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
+	bool                   recursive : 1;
+	bool                   use_as_double : 1;
+	bool                   delayed_fetch_this : 1;
+	bool                   avoid_refcounting : 1;
+	bool                   guarded_reference : 1;
+	bool                   indirect_reference : 1; /* IS_INDIRECT returned by FETCH_DIM_W/FETCH_OBJ_W */
 	zend_ssa_range         range;
 	zend_class_entry      *ce;
 } zend_ssa_var_info;
