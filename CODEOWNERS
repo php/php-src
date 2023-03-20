@@ -8,6 +8,7 @@
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
+/.github @iluuu1994
 /ext/opcache @iluuu1994
 /ext/random @TimWolla
 /Zend @iluuu1994
