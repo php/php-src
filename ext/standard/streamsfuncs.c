@@ -213,10 +213,6 @@ PHP_FUNCTION(stream_socket_server)
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
-	if (context) {
-		GC_ADDREF(context->res);
-	}
-
 	if (zerrno) {
 		ZEND_TRY_ASSIGN_REF_LONG(zerrno, 0);
 	}

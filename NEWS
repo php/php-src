@@ -49,6 +49,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-10519 (Array Data Address Reference Issue). (Nathan Freeman)
 
+- Standard:
+  . Fixed bug GH-10885 (stream_socket_server context leaks). (ilutov)
+
 16 Mar 2023, PHP 8.1.17
 
 - Core:
