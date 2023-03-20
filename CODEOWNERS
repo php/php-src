@@ -9,4 +9,5 @@
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 /ext/opcache @iluuu1994
+/ext/random @TimWolla
 /Zend @iluuu1994
