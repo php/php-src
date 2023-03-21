@@ -11,8 +11,8 @@
 *.stub.php @kocsismate
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
-/ext/dba @Girgias
 /ext/date @derickr
+/ext/dba @Girgias
 /ext/ffi @dstogov
 /ext/gmp @Girgias
 /ext/imap @Girgias
