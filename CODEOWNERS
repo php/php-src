@@ -11,9 +11,14 @@
 *.stub.php @kocsismate
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
+/ext/dba @Girgias
 /ext/ffi @dstogov
+/ext/gmp @Girgias
+/ext/imap @Girgias
 /ext/opcache @dstogov @iluuu1994
 /ext/random @TimWolla
+/ext/session @Girgias
+/ext/spl @Girgias
 /Zend @iluuu1994
 /Zend/Optimizer @dstogov
 /Zend/zend.* @dstogov
