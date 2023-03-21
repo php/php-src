@@ -31,3 +31,5 @@
 /Zend/zend_type*.h @dstogov
 /Zend/zend_variables.* @dstogov
 /Zend/zend_vm* @dstogov
+/build/gen_stub.php @kocsismate
+*.stub.php @kocsismate
