@@ -987,7 +987,7 @@ static zend_always_inline bool i_zend_check_property_type(const zend_property_in
 	}
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(info->type);
-	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
+	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC|MAY_BE_NEVER|MAY_BE_VOID)));
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
