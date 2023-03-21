@@ -71,7 +71,8 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	&vtbl_sjis_wchar,
 	&vtbl_wchar_sjis,
 	mb_sjis_to_wchar,
-	mb_wchar_to_sjis
+	mb_wchar_to_sjis,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_wchar = {
