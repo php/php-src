@@ -7696,7 +7696,7 @@ abort:
 				zend_jit_trace_stop_description[stop]);
 		}
 		if (!ZEND_JIT_TRACE_STOP_MAY_RECOVER(stop)
-		 || zend_jit_trace_is_bad_root(orig_opline, stop, offset)) {
+		 || (stop != ZEND_JIT_TRACE_STOP_JIT_INLINE_FUNC && zend_jit_trace_is_bad_root(orig_opline, stop, offset))) {
 			if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BLACKLIST) {
 				fprintf(stderr, "---- TRACE %d blacklisted\n",
 					trace_num);
@@ -8039,7 +8039,7 @@ abort:
 				zend_jit_trace_stop_description[stop]);
 		}
 		if (!ZEND_JIT_TRACE_STOP_MAY_RECOVER(stop)
-		 || zend_jit_trace_exit_is_bad(parent_num, exit_num)) {
+		 || (stop != ZEND_JIT_TRACE_STOP_JIT_INLINE_FUNC && zend_jit_trace_exit_is_bad(parent_num, exit_num))) {
 			zend_jit_blacklist_trace_exit(parent_num, exit_num);
 			if (JIT_G(debug) & ZEND_JIT_DEBUG_TRACE_BLACKLIST) {
 				fprintf(stderr, "---- EXIT %d/%d blacklisted\n",
