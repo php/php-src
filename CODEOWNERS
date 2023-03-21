@@ -16,8 +16,10 @@
 /ext/gmp @Girgias
 /ext/imap @Girgias
 /ext/opcache @dstogov @iluuu1994
+/ext/pgsql @devnexen
 /ext/random @TimWolla
 /ext/session @Girgias
+/ext/sockets @devnexen
 /ext/spl @Girgias
 /Zend @iluuu1994
 /Zend/Optimizer @dstogov
