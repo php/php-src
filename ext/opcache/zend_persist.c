@@ -816,6 +816,7 @@ static void zend_persist_class_constant(zval *zv)
 	}
 	c = Z_PTR_P(zv) = zend_shared_memdup_put(Z_PTR_P(zv), sizeof(zend_class_constant));
 	zend_persist_zval(&c->value);
+	zend_accel_store_interned_string(c->name);
 	ce = zend_shared_alloc_get_xlat_entry(c->ce);
 	if (ce) {
 		c->ce = ce;
@@ -840,6 +841,7 @@ static void zend_persist_class_constant(zval *zv)
 	if (c->attributes) {
 		c->attributes = zend_persist_attributes(c->attributes);
 	}
+	zend_persist_type(&c->type);
 }
 
 zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)

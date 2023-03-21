@@ -346,7 +346,7 @@ class ReflectionClass implements Reflector
     public function getReflectionConstants(?int $filter = null): array {}
 
     /** @tentative-return-type */
-    public function getConstant(string $name): mixed {}
+    public function getConstant(string $name): mixed {} // TODO throw exception when the constant doesn't exist
 
     /** @tentative-return-type */
     public function getReflectionConstant(string $name): ReflectionClassConstant|false {}

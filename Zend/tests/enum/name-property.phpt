@@ -33,14 +33,14 @@ array(1) {
 string(3) "Bar"
 array(2) {
   [0]=>
-  object(ReflectionProperty)#4 (2) {
+  object(ReflectionProperty)#3 (2) {
     ["name"]=>
     string(4) "name"
     ["class"]=>
     string(6) "IntFoo"
   }
   [1]=>
-  object(ReflectionProperty)#5 (2) {
+  object(ReflectionProperty)#4 (2) {
     ["name"]=>
     string(5) "value"
     ["class"]=>

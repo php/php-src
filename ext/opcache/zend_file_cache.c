@@ -687,17 +687,18 @@ static void zend_file_cache_serialize_class_constant(zval                     *z
 		c = Z_PTR_P(zv);
 		UNSERIALIZE_PTR(c);
 
-		ZEND_ASSERT(c->ce != NULL);
+		ZEND_ASSERT(c->ce != NULL && c->name != NULL);
 		if (!IS_SERIALIZED(c->ce)) {
 			SERIALIZE_PTR(c->ce);
 
 			zend_file_cache_serialize_zval(&c->value, script, info, buf);
-
+			SERIALIZE_STR(c->name);
 			if (c->doc_comment) {
 				SERIALIZE_STR(c->doc_comment);
 			}
 
 			SERIALIZE_ATTRIBUTES(c->attributes);
+			zend_file_cache_serialize_type(&c->type, script, info, buf);
 		}
 	}
 }
@@ -1521,16 +1522,18 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		c = Z_PTR_P(zv);
 
-		ZEND_ASSERT(c->ce != NULL);
+		ZEND_ASSERT(c->ce != NULL && c->name != NULL);
 		if (!IS_UNSERIALIZED(c->ce)) {
 			UNSERIALIZE_PTR(c->ce);
 
 			zend_file_cache_unserialize_zval(&c->value, script, buf);
+			UNSERIALIZE_STR(c->name);
 
 			if (c->doc_comment) {
 				UNSERIALIZE_STR(c->doc_comment);
 			}
 			UNSERIALIZE_ATTRIBUTES(c->attributes);
+			zend_file_cache_unserialize_type(&c->type, c->ce, script, buf);
 		}
 	}
 }

@@ -558,13 +558,13 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 /* {{{ _class_const_string */
 static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char *indent)
 {
-	if (zval_update_constant_ex(&c->value, c->ce) == FAILURE) {
+	if (zend_update_class_constant(c, &c->value, c->ce) == FAILURE) {
 		return;
 	}
 
 	const char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
 	const char *final = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_FINAL ? "final " : "";
-	const char *type = zend_zval_type_name(&c->value);
+	const char *type = ZEND_TYPE_IS_SET(c->type) ? ZSTR_VAL(zend_type_to_string(c->type)) : zend_zval_type_name(&c->value);
 	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
 		indent, final, visibility, type, name);
 	if (Z_TYPE(c->value) == IS_ARRAY) {
@@ -3921,7 +3921,10 @@ ZEND_METHOD(ReflectionClassConstant, getValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (Z_TYPE(ref->value) == IS_CONSTANT_AST) {
-		zval_update_constant_ex(&ref->value, ref->ce);
+		zend_result result = zend_update_class_constant(ref, &ref->value, ref->ce);
+		if (result == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 	ZVAL_COPY_OR_DUP(return_value, &ref->value);
 }
@@ -4727,7 +4730,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), key, constant) {
-		if (UNEXPECTED(zval_update_constant_ex(&constant->value, constant->ce) != SUCCESS)) {
+		if (UNEXPECTED(zend_update_class_constant(constant, &constant->value, constant->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 
@@ -4786,7 +4789,7 @@ ZEND_METHOD(ReflectionClass, getConstant)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	constants_table = CE_CONSTANTS_TABLE(ce);
 	ZEND_HASH_MAP_FOREACH_PTR(constants_table, c) {
-		if (UNEXPECTED(zval_update_constant_ex(&c->value, c->ce) != SUCCESS)) {
+		if (UNEXPECTED(zend_update_class_constant(c, &c->value, c->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -6987,7 +6990,7 @@ ZEND_METHOD(ReflectionEnumBackedCase, getBackingValue)
 	if (Z_TYPE(ref->value) == IS_CONSTANT_AST) {
 		zval_update_constant_ex(&ref->value, ref->ce);
 		if (EG(exception)) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

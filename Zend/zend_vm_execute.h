@@ -7255,14 +7255,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				HANDLE_EXCEPTION();
 			}
 
-			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-
-					HANDLE_EXCEPTION();
-				}
-			}
-
 			value = &c->value;
 			// Enums require loading of all class constants to build the backed enum table
 			if (ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF && ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -7273,8 +7265,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				zval_update_constant_ex(value, c->ce);
-				if (UNEXPECTED(EG(exception) != NULL)) {
+				if (UNEXPECTED(zend_update_class_constant(c, value, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 					HANDLE_EXCEPTION();
@@ -8417,14 +8408,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				HANDLE_EXCEPTION();
 			}
 
-			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					FREE_OP(opline->op2_type, opline->op2.var);
-					HANDLE_EXCEPTION();
-				}
-			}
-
 			value = &c->value;
 			// Enums require loading of all class constants to build the backed enum table
 			if (ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF && ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -8435,8 +8418,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				zval_update_constant_ex(value, c->ce);
-				if (UNEXPECTED(EG(exception) != NULL)) {
+				if (UNEXPECTED(zend_update_class_constant(c, value, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();
@@ -25090,14 +25072,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				HANDLE_EXCEPTION();
 			}
 
-			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-
-					HANDLE_EXCEPTION();
-				}
-			}
-
 			value = &c->value;
 			// Enums require loading of all class constants to build the backed enum table
 			if (ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF && ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -25108,8 +25082,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				zval_update_constant_ex(value, c->ce);
-				if (UNEXPECTED(EG(exception) != NULL)) {
+				if (UNEXPECTED(zend_update_class_constant(c, value, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 					HANDLE_EXCEPTION();
@@ -25661,14 +25634,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				HANDLE_EXCEPTION();
 			}
 
-			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					FREE_OP(opline->op2_type, opline->op2.var);
-					HANDLE_EXCEPTION();
-				}
-			}
-
 			value = &c->value;
 			// Enums require loading of all class constants to build the backed enum table
 			if (ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF && ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -25679,8 +25644,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				zval_update_constant_ex(value, c->ce);
-				if (UNEXPECTED(EG(exception) != NULL)) {
+				if (UNEXPECTED(zend_update_class_constant(c, value, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();
@@ -34254,14 +34218,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				HANDLE_EXCEPTION();
 			}
 
-			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-
-					HANDLE_EXCEPTION();
-				}
-			}
-
 			value = &c->value;
 			// Enums require loading of all class constants to build the backed enum table
 			if (ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF && ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -34272,8 +34228,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				zval_update_constant_ex(value, c->ce);
-				if (UNEXPECTED(EG(exception) != NULL)) {
+				if (UNEXPECTED(zend_update_class_constant(c, value, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 					HANDLE_EXCEPTION();
@@ -34615,14 +34570,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				HANDLE_EXCEPTION();
 			}
 
-			if (UNEXPECTED(!(c->ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-				if (UNEXPECTED(zend_update_class_constants(c->ce)) != SUCCESS) {
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					FREE_OP(opline->op2_type, opline->op2.var);
-					HANDLE_EXCEPTION();
-				}
-			}
-
 			value = &c->value;
 			// Enums require loading of all class constants to build the backed enum table
 			if (ce->ce_flags & ZEND_ACC_ENUM && ce->enum_backing_type != IS_UNDEF && ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -34633,8 +34580,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				zval_update_constant_ex(value, c->ce);
-				if (UNEXPECTED(EG(exception) != NULL)) {
+				if (UNEXPECTED(zend_update_class_constant(c, value, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();

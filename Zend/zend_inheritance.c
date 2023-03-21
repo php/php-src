@@ -1359,7 +1359,7 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 }
 /* }}} */
 
-inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
+static inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
 {
 	if (!ZEND_TYPE_IS_SET(child->type)) {
 		return INHERITANCE_ERROR;
@@ -1663,12 +1663,16 @@ static zend_always_inline bool check_trait_property_or_constant_value_compatibil
 	/* if any of the values is a constant, we try to resolve it */
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_CONSTANT_AST)) {
 		ZVAL_COPY_OR_DUP(&op1_tmp, op1);
-		zval_update_constant_ex(&op1_tmp, ce);
+		if (UNEXPECTED(zval_update_constant_ex(&op1_tmp, ce) != SUCCESS)) {
+			return false;
+		}
 		op1 = &op1_tmp;
 	}
 	if (UNEXPECTED(Z_TYPE_P(op2) == IS_CONSTANT_AST)) {
 		ZVAL_COPY_OR_DUP(&op2_tmp, op2);
-		zval_update_constant_ex(&op2_tmp, ce);
+		if (UNEXPECTED(zval_update_constant_ex(&op2_tmp, ce) != SUCCESS)) {
+			return false;
+		}
 		op2 = &op2_tmp;
 	}
 
