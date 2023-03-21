@@ -107,6 +107,7 @@ PHP 8.3 UPGRADE NOTES
     longer accepts paths containing the parent directory (`..`). Previously,
     only paths starting with `..` were disallowed. This could easily be
     circumvented by prepending `./` to the path.
+  . User exception handlers now catch exceptions during shutdown.
 
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.

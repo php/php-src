@@ -1819,6 +1819,7 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	EG(exception) = NULL;
 	ZVAL_OBJ(&params[0], old_exception);
 	ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
 
 	if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
 		zval_ptr_dtor(&retval2);
@@ -1830,6 +1831,8 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	} else {
 		EG(exception) = old_exception;
 	}
+
+	zval_ptr_dtor(&orig_user_exception_handler);
 } /* }}} */
 
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */

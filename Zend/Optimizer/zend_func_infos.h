@@ -689,6 +689,7 @@ static const func_info_t func_infos[] = {
 	F1("serialize", MAY_BE_STRING),
 	F1("xml_error_string", MAY_BE_STRING|MAY_BE_NULL),
 	F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL),
+	FN("zend_test_create_throwing_resource", MAY_BE_RESOURCE),
 	FN("zip_open", MAY_BE_RESOURCE|MAY_BE_LONG|MAY_BE_FALSE),
 	FN("zip_read", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("ob_gzhandler", MAY_BE_STRING|MAY_BE_FALSE),
