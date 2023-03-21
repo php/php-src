@@ -361,7 +361,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		}
 
 		MARK_CONSTANT_VISITED(ret_constant);
-		ret = zend_update_class_constant(c, ret_constant, c->ce);
+		ret = zend_update_class_constant(c, c->ce);
 		RESET_CONSTANT_VISITED(ret_constant);
 
 		if (UNEXPECTED(ret != SUCCESS)) {

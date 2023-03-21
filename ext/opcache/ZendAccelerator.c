@@ -3760,7 +3760,7 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-				if (EXPECTED(zend_update_class_constant(c, val, c->ce) == SUCCESS)) {
+				if (EXPECTED(zend_update_class_constant(c, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
 					ok = false;

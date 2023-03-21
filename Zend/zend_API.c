@@ -1412,15 +1412,17 @@ static zend_result update_property(zval *val, zend_property_info *prop_info) {
 	return zval_update_constant_ex(val, prop_info->ce);
 }
 
-zend_result zend_update_class_constant(zend_class_constant *c, zval *value, zend_class_entry *scope)
+ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, zend_class_entry *scope)
 {
+	ZEND_ASSERT(Z_TYPE(c->value) == IS_CONSTANT_AST);
+
 	if (EXPECTED(!ZEND_TYPE_IS_SET(c->type) || ZEND_TYPE_PURE_MASK(c->type) == MAY_BE_ANY)) {
-		return zval_update_constant_ex(value, scope);
+		return zval_update_constant_ex(&c->value, scope);
 	}
 
 	zval tmp;
 
-	ZVAL_COPY_OR_DUP(&tmp, value);
+	ZVAL_COPY(&tmp, &c->value);
 	zend_result result = zval_update_constant_ex(&tmp, scope);
 	if (result == FAILURE) {
 		zval_ptr_dtor(&tmp);
@@ -1432,9 +1434,8 @@ zend_result zend_update_class_constant(zend_class_constant *c, zval *value, zend
 		return FAILURE;
 	}
 
-	zval_ptr_dtor(value);
-	ZVAL_COPY_OR_DUP(value, &tmp);
-	zval_ptr_dtor(&tmp);
+	zval_ptr_dtor(&c->value);
+	ZVAL_COPY_VALUE(&c->value, &tmp);
 
 	return SUCCESS;
 }
@@ -1497,7 +1498,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 				}
 
 				val = &c->value;
-				if (UNEXPECTED(zend_update_class_constant(c, val, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
 					return FAILURE;
 				}
 			}
