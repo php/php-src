@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eb6dd9bae381ca8163307e8a0f54bf3983b79cb5 */
+ * Stub hash: 58ae12118458386ab204a2400966c25c833baeae */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -122,6 +122,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_fill_packed_array, 0, 
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_create_throwing_resource, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -227,6 +230,7 @@ static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8);
 static ZEND_FUNCTION(zend_get_map_ptr_last);
 static ZEND_FUNCTION(zend_test_crash);
 static ZEND_FUNCTION(zend_test_fill_packed_array);
+static ZEND_FUNCTION(zend_test_create_throwing_resource);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -289,6 +293,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last)
 	ZEND_FE(zend_test_crash, arginfo_zend_test_crash)
 	ZEND_FE(zend_test_fill_packed_array, arginfo_zend_test_fill_packed_array)
+	ZEND_FE(zend_test_create_throwing_resource, arginfo_zend_test_create_throwing_resource)
 	ZEND_NS_FALIAS("ZendTestNS2", namespaced_func, ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func)
 	ZEND_NS_DEP_FALIAS("ZendTestNS2", namespaced_deprecated_func, ZendTestNS2_namespaced_deprecated_func, arginfo_ZendTestNS2_namespaced_deprecated_func)
 	ZEND_NS_FALIAS("ZendTestNS2", namespaced_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_namespaced_aliased_func)

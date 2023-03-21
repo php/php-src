@@ -31,6 +31,7 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
 #include "zend_call_stack.h"
+#include "zend_exceptions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -52,6 +53,8 @@ static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
 static zend_class_entry *zend_test_int_enum;
 static zend_object_handlers zend_test_class_handlers;
+
+static int le_throwing_resource;
 
 static ZEND_FUNCTION(zend_test_func)
 {
@@ -910,6 +913,11 @@ static void custom_zend_execute_ex(zend_execute_data *execute_data)
 	old_zend_execute_ex(execute_data);
 }
 
+static void le_throwing_resource_dtor(zend_resource *rsrc)
+{
+	zend_throw_exception(NULL, "Throwing resource destructor called", 0);
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_test_interface = register_class__ZendTestInterface();
@@ -980,6 +988,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
+
+	le_throwing_resource = zend_register_list_destructors_ex(le_throwing_resource_dtor, NULL, "throwing resource", module_number);
 
 	return SUCCESS;
 }
@@ -1150,3 +1160,11 @@ PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out
 	return original_copy_file_range(fd_in, off_in, fd_out, off_out, len, flags);
 }
 #endif
+
+
+static PHP_FUNCTION(zend_test_create_throwing_resource)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
+	ZVAL_RES(return_value, res);
+}
