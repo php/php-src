@@ -47,7 +47,8 @@ const mbfl_encoding mbfl_encoding_hz = {
 	&vtbl_hz_wchar,
 	&vtbl_wchar_hz,
 	mb_hz_to_wchar,
-	mb_wchar_to_hz
+	mb_wchar_to_hz,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_hz_wchar = {

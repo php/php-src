@@ -68,7 +68,8 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 	&vtbl_euctw_wchar,
 	&vtbl_wchar_euctw,
 	mb_euctw_to_wchar,
-	mb_wchar_to_euctw
+	mb_wchar_to_euctw,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_euctw_wchar = {

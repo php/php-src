@@ -68,7 +68,8 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 	&vtbl_cp936_wchar,
 	&vtbl_wchar_cp936,
 	mb_cp936_to_wchar,
-	mb_wchar_to_cp936
+	mb_wchar_to_cp936,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_cp936_wchar = {

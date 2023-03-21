@@ -61,7 +61,8 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	&vtbl_cp50220_wchar,
 	&vtbl_wchar_cp50220,
 	mb_cp5022x_to_wchar,
-	mb_wchar_to_cp50220
+	mb_wchar_to_cp50220,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_cp50221 = {
@@ -74,7 +75,8 @@ const mbfl_encoding mbfl_encoding_cp50221 = {
 	&vtbl_cp50221_wchar,
 	&vtbl_wchar_cp50221,
 	mb_cp5022x_to_wchar,
-	mb_wchar_to_cp50221
+	mb_wchar_to_cp50221,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_cp50222 = {
@@ -87,7 +89,8 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 	&vtbl_cp50222_wchar,
 	&vtbl_wchar_cp50222,
 	mb_cp5022x_to_wchar,
-	mb_wchar_to_cp50222
+	mb_wchar_to_cp50222,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_cp50220_wchar = {

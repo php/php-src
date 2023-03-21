@@ -4415,6 +4415,10 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const m
 	unsigned char *in = (unsigned char*)input;
 	unsigned int state = 0;
 
+	if (encoding->check != NULL) {
+		return encoding->check(in, length);
+	}
+
 	/* If the input string is not encoded in the given encoding, there is a significant chance
 	 * that this will be seen in the first bytes. Therefore, rather than converting an entire
 	 * buffer of 128 codepoints, convert and check just a few codepoints first */
