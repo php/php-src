@@ -34,9 +34,6 @@
 } while (0)
 
 #define MAKE_NOP(opline) do { \
-	(opline)->op1.num = 0; \
-	(opline)->op2.num = 0; \
-	(opline)->result.num = 0; \
 	(opline)->opcode = ZEND_NOP; \
 	SET_UNUSED((opline)->op1); \
 	SET_UNUSED((opline)->op2); \
