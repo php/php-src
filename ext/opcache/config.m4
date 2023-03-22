@@ -86,31 +86,6 @@ if test "$PHP_OPCACHE" != "no"; then
 
     PHP_SUBST(DASM_FLAGS)
     PHP_SUBST(DASM_ARCH)
-
-    AC_MSG_CHECKING(for opagent in default path)
-    for i in /usr/local /usr; do
-      if test -r $i/include/opagent.h; then
-        OPAGENT_DIR=$i
-        AC_MSG_RESULT(found in $i)
-        break
-      fi
-    done
-    if test -z "$OPAGENT_DIR"; then
-      AC_MSG_RESULT(not found)
-    else
-      PHP_CHECK_LIBRARY(opagent, op_write_native_code,
-      [
-        AC_DEFINE(HAVE_OPROFILE,1,[ ])
-        PHP_ADD_INCLUDE($OPAGENT_DIR/include)
-        PHP_ADD_LIBRARY_WITH_PATH(opagent, $OPAGENT_DIR/$PHP_LIBDIR/oprofile, OPCACHE_SHARED_LIBADD)
-        PHP_SUBST(OPCACHE_SHARED_LIBADD)
-      ],[
-        AC_MSG_RESULT(not found)
-      ],[
-        -L$OPAGENT_DIR/$PHP_LIBDIR/oprofile
-      ])
-    fi
-
   fi
 
   AC_CHECK_FUNCS([mprotect memfd_create])
