@@ -264,6 +264,7 @@ static void dba_close(dba_info *info)
 	}
 	ZEND_ASSERT(info->path);
 	// Cannot use zend_string_release_ex(info->path, info->flags&DBA_PERSISTENT); as this fails GC assertion?
+	// Zend/zend_rc_debug.c:38: void ZEND_RC_MOD_CHECK(const zend_refcounted_h *): Assertion `(zval_gc_flags(p->u.type_info) & ((1<<7)|(1<<8))) != (1<<7)' failed.
 	zend_string_free(info->path);
 	info->path = NULL;
 
@@ -455,6 +456,16 @@ static dba_info *php_dba_find(const zend_string *path)
 	return NULL;
 }
 /* }}} */
+
+static zend_always_inline zend_string *php_dba_zend_string_dup_safe(zend_string *s, bool persistent)
+{
+	if (ZSTR_IS_INTERNED(s) && (!persistent || (GC_FLAGS(s) & IS_STR_PERSISTENT))) {
+		return s;
+	} else {
+		return zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
+	}
+}
+
 
 #define FREE_PERSISTENT_RESOURCE_KEY() if (persistent_resource_key) {zend_string_release_ex(persistent_resource_key, false);}
 
@@ -725,7 +736,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 
 	info = pemalloc(sizeof(dba_info), persistent);
 	memset(info, 0, sizeof(dba_info));
-	info->path = zend_string_dup(path, persistent);
+	info->path = php_dba_zend_string_dup_safe(path, persistent);
 	info->mode = modenr;
 	info->file_permission = permission;
 	info->map_size = map_size;
@@ -777,8 +788,8 @@ restart:
 				if (is_db_lock) {
 					ZEND_ASSERT(opened_path);
 					/* replace the path info with the real path of the opened file */
-					zend_string_release_ex(info->path, persistent);
-					info->path = zend_string_dup(opened_path, persistent);
+					zend_string_release(info->path);
+					info->path = php_dba_zend_string_dup_safe(opened_path, persistent);
 				}
 			}
 			if (opened_path) {
