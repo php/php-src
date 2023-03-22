@@ -3181,13 +3181,12 @@ static void _zend_jit_add_predecessor_ref(zend_jit_ctx *jit, int b, int pred, ir
 				ZEND_ASSERT(jit->ctx.ir_base[header].op == IR_LOOP_BEGIN);
 				if (jit->ctx.ir_base[ref].op == IR_END) {
 					jit->ctx.ir_base[ref].op = IR_LOOP_END;
-					jit->ctx.ir_base[ref].op2 = header;
 				} else if (jit->ctx.ir_base[ref].op == IR_IF) {
 					jit_IF_TRUE_FALSE_ex(jit, ref, b);
-					ref = ir_LOOP_END(header);
+					ref = ir_LOOP_END();
 				} else if (jit->ctx.ir_base[ref].op == IR_UNREACHABLE) {
 					ir_BEGIN(ref);
-					ref = ir_LOOP_END(header);
+					ref = ir_LOOP_END();
 				} else {
 					ZEND_ASSERT(0);
 				}
@@ -9403,7 +9402,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			ir_PHI_SET_OP(idx, 2, idx2);
 			ir_ref if_not_zero = ir_IF(idx2);
 			ir_IF_TRUE(if_not_zero);
-			ir_MERGE_SET_OP(loop, 2, ir_LOOP_END(loop));
+			ir_MERGE_SET_OP(loop, 2, ir_LOOP_END());
 			ir_IF_FALSE(if_not_zero);
 			ir_MERGE_WITH_EMPTY_FALSE(if_need);
 		}
@@ -9433,22 +9432,24 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					ZEND_ASSERT(begin != IR_UNUSED);
 					insn = &jit->ctx.ir_base[begin];
 					if (insn->op == IR_BEGIN) {
-						end = ir_LOOP_END(begin);
+						end = ir_LOOP_END();
 						insn = &jit->ctx.ir_base[begin];
 						insn->op = IR_LOOP_BEGIN;
 						insn->op2 = end;
 						break;
 					} else if ((insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN)
 							&& (insn->inputs_count == 0 || insn->inputs_count == 2)) {
-						end = ir_LOOP_END(begin);
+						end = ir_LOOP_END();
 						insn = &jit->ctx.ir_base[begin];
 						insn->op = IR_LOOP_BEGIN;
 						insn->inputs_count = 3;
 						insn->op3 = end;
 						break;
 					} else if (insn->op == IR_LOOP_BEGIN && insn->inputs_count == 3) {
-						ir_MERGE_2(insn->op3, ir_LOOP_END(begin));
-						end = ir_LOOP_END(begin);
+						ZEND_ASSERT(jit->ctx.ir_base[insn->op3].op == IR_LOOP_END);
+						jit->ctx.ir_base[insn->op3].op = IR_END;
+						ir_MERGE_2(insn->op3, ir_END());
+						end = ir_LOOP_END();
 						insn = &jit->ctx.ir_base[begin];
 						insn->op3 = end;
 						break;
@@ -12785,7 +12786,7 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 		// JIT: p++;
 		p2_ref = ir_ADD_OFFSET(hash_p_ref, sizeof(Bucket));
 
-		ir_MERGE_SET_OP(loop_ref, 2, ir_LOOP_END(loop_ref));
+		ir_MERGE_SET_OP(loop_ref, 2, ir_LOOP_END());
 		ir_PHI_SET_OP(hash_pos_ref, 2, pos2_ref);
 		ir_PHI_SET_OP(hash_p_ref, 2, p2_ref);
 
@@ -12847,7 +12848,7 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 		// JIT: p++;
 		p2_ref = ir_ADD_OFFSET(packed_p_ref, sizeof(zval));
 
-		ir_MERGE_SET_OP(loop_ref, 2, ir_LOOP_END(loop_ref));
+		ir_MERGE_SET_OP(loop_ref, 2, ir_LOOP_END());
 		ir_PHI_SET_OP(packed_pos_ref, 2, pos2_ref);
 		ir_PHI_SET_OP(packed_p_ref, 2, p2_ref);
 	}
@@ -15779,7 +15780,7 @@ static int zend_jit_trace_end_loop(zend_jit_ctx *jit, int loop_ref, const void *
 		zend_jit_check_timeout(jit, NULL, timeout_exit_addr);
 	}
 	ZEND_ASSERT(jit->ctx.ir_base[loop_ref].op2 == IR_UNUSED);
-	ir_MERGE_SET_OP(loop_ref, 2, ir_LOOP_END(loop_ref));
+	ir_MERGE_SET_OP(loop_ref, 2, ir_LOOP_END());
 	return 1;
 }
 
