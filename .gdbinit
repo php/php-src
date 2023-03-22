@@ -1,7 +1,12 @@
+# Load this file: '$ gdb -ix $PHPREPO/.gdbinit ...'
+# Functions starting with four underscores like "____foo" are used as helper
+# functions.
+
 define set_ts
 	set $tsrm_ls = $arg0
 end
 
+# TODO: add Usage
 document set_ts
 	set the ts resource, it is impossible for gdb to
 	call ts_resource_ex while no process is running,
@@ -23,11 +28,13 @@ define ____executor_globals
 end
 
 document ____executor_globals
-	portable way of accessing executor_globals, set $eg
+	portable way of accessing executor_globals, set as $eg
 	this also sets compiler_globals to $cg
 	ZTS detection is automatically based on ext/standard module struct
 end
 
+# print compiled variables and their values
+# $arg0: zend_execute_data*
 define print_cvs
 	if $argc == 0
 		____executor_globals
@@ -51,13 +58,14 @@ end
 
 document print_cvs
 	Prints the compiled variables and their values.
-	If a zend_execute_data pointer is set this will print the compiled
-	variables of that scope. If no parameter is used it will use
+	If a zend_execute_data pointer is set, this will print the compiled
+	variables of that scope. If no parameter is used, it will use
 	current_execute_data for scope.
 
-	usage: print_cvs [zend_execute_data *]
+	Usage: print_cvs [(zend_execute_data*)ped]
 end
 
+# arg0: zend_execute_data*
 define dump_bt
 	set $ex = $arg0
 	while $ex
@@ -146,23 +154,37 @@ define dump_bt
 end
 
 document dump_bt
-	dumps the current execution stack. usage: dump_bt executor_globals.current_execute_data
+	dumps execution stack of PHP code.
+
+	Usage: dump_bt (zend_execute_data*)ped
+	Example: dump_bt executor_globals.current_execute_data
+	See also: zbacktrace
 end
 
+# $arg0: zval*
 define printzv
 	set $ind = 1
 	____printzv $arg0 0
 end
 
 document printzv
-	prints zval contents
+	prints zval address and contents
+	Usage: printzv (zval*)pzval
 end
 
+# $arg0: zval*
+# $arg1: used for array, object, reference, indirect type
+#        0: print extra information
+#        1: NOT print extra information
 define ____printzv_contents
 	set $zvalue = $arg0
+
+	# Types are defined in zend_type_code.h
 	set $type = $zvalue->u1.v.type
 
-	# 15 == IS_INDIRECT
+	# For refcounted type, print refcount
+	# IS_STRING = 6 &&  IS_CONSTANT_AST = 11
+	# STRING, ARRAY, OBJECT, RESOURCE, REFERENCE, CONSTANT_AST
 	if $type > 5 && $type < 12
 		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
 	end
@@ -190,10 +212,13 @@ define ____printzv_contents
 	end
 	if $type == 7
 		printf "array: "
+		# if $arg1 == 0, then print array values
 		if ! $arg1
 			set $ind = $ind + 1
+			# 1: HashTable made of zval (zval*)
 			____print_ht $zvalue->value.arr 1
 			set $ind = $ind - 1
+
 			set $i = $ind
 			while $i > 0
 				printf "  "
@@ -210,6 +235,7 @@ define ____printzv_contents
 		set $zobj = $zvalue->value.obj
 		set $cname = $zobj->ce->name->val
 		printf "(%s) #%d", $cname, $handle
+		# if $arg1 == 0, then print property information
 		if ! $arg1
 			if $handlers->get_properties == &zend_std_get_properties
 				if $zobj->properties
@@ -252,6 +278,8 @@ define ____printzv_contents
 	if $type == 11
 		printf "CONSTANT_AST"
 	end
+
+	# internal types
 	if $type == 12
 		printf "indirect: "
 		____printzv $zvalue->value.zv $arg1
@@ -262,18 +290,23 @@ define ____printzv_contents
 	if $type == 15
 		printf "_ERROR"
 	end
-	if $type == 16
+	# 	_IS_BOOL = 18
+	if $type == 18
 		printf "_BOOL"
 	end
-	if $type == 17
+	# _IS_NUMBER = 19
+	if $type == 19
 		printf "_NUMBER"
 	end
-	if $type > 17
+	if $type > 19
 		printf "unknown type %d", $type
 	end
 	printf "\n"
 end
 
+# $arg0: zval*
+# $arg1: 0: print extra information; 1: not
+#        Used only for array, object, reference, indirect type
 define ____printzv
 	____executor_globals
 	set $zvalue = $arg0
@@ -281,11 +314,12 @@ define ____printzv
 	printf "[%p] ", $zvalue
 
 	set $zcontents = (zval*) $zvalue
-	if $arg1
-		____printzv_contents $zcontents $arg1
-	else
-		____printzv_contents $zcontents 0
-	end
+	____printzv_contents $zcontents $arg1
+	# if $arg1
+	# 	____printzv_contents $zcontents $arg1
+	# else
+	# 	____printzv_contents $zcontents 0
+	# end
 end
 
 define print_global_vars
@@ -296,6 +330,7 @@ end
 
 document print_global_vars
 	Prints the global variables
+	Usage: print_global_vars
 end
 
 define print_const_table
@@ -307,24 +342,39 @@ end
 
 document print_const_table
 	Dumps elements of Constants HashTable
+	Usage: print_const_table (HashTable*)pct
 	Example: print_const_table executor_globals.zend_constants
 end
 
+# arg0: (HashTable*)
+# arg1: Hash value type
+# 		0: HashTable made of pointers (void*)
+# 		1: HashTable made of zval (zval*)
+# 		2: HashTable made of strings (char*)
+# 		3: HashTable made of zend_function*
+# 		4: HashTable made of zend_constant*
 define ____print_ht
 	set $ht = (HashTable*)$arg0
+
+	# $ind is set before calling this function
 	set $n = $ind
 	while $n > 0
 		printf "  "
 		set $n = $n - 1
 	end
 
+	# HASH_FLAG_PACKED    (1<<2)
 	set $packed = $ht->u.v.flags & 4
 	if $packed
 		printf "Packed"
 	else
 		printf "Hash"
 	end
-	printf "(%d)[%p]: {\n", $ht->nNumOfElements, $ht
+	printf "(%d)[%p] ", $ht->nNumOfElements, $ht
+	printf "flags=[0x%x] ", $ht->u.v.flags
+	printf "pDestructor=["
+	output $ht->pDestructor
+	printf "]\n{\n"
 
 	set $num = $ht->nNumUsed
 	set $i = 0
@@ -336,10 +386,11 @@ define ____print_ht
 			set $h = $i
 		else
 			set $bucket = (Bucket*)($ht->arData + $i)
-			set $val = &$bucket->val
+			set $val = &($bucket->val)
 			set $key = $bucket->key
 			set $h = $bucket->h
 		end
+
 		set $n = $ind
 		if $val->u1.v.type > 0
 			while $n > 0
@@ -347,16 +398,23 @@ define ____print_ht
 				set $n = $n - 1
 			end
 			printf "[%d] ", $i
+
+			# print hash key
 			if $key
+				# for bucket, $key != 0 and is zend_string*;
 				____print_str $key->val $key->len
 				printf " => "
 			else
+				# for packed $key == 0
 				printf "%d => ", $h
 			end
+
+			# print hash value
 			if $arg1 == 0
 				printf "%p\n", $val
 			end
 			if $arg1 == 1
+				# print_ht goes here
 				set $zval = $val
 				____printzv $zval 1
 			end
@@ -378,6 +436,7 @@ define ____print_ht
 	printf "}\n"
 end
 
+# arg0: (HashTable*)
 define print_ht
 	set $ind = 0
 	____print_ht $arg0 1
@@ -385,6 +444,7 @@ end
 
 document print_ht
 	dumps elements of HashTable made of zval
+	Usage: print_ht (HashTable*)pht
 end
 
 define print_htptr
@@ -394,6 +454,7 @@ end
 
 document print_htptr
 	dumps elements of HashTable made of pointers
+	Usage: print_ht (HashTable*)pht
 end
 
 define print_htstr
@@ -403,6 +464,7 @@ end
 
 document print_htstr
 	dumps elements of HashTable made of strings
+	Usage: print_ht (HashTable*)pht
 end
 
 define print_ft
@@ -412,8 +474,10 @@ end
 
 document print_ft
 	dumps a function table (HashTable)
+	Usage: print_ft (HashTable*)pft
 end
 
+# print inheritance class information
 define ____print_inh_class
 	set $ce = $arg0
 	if $ce->ce_flags & 0x10 || $ce->ce_flags & 0x20
@@ -441,6 +505,7 @@ define ____print_inh_class
 	set $ce = $ce->parent
 end
 
+# print inheritance interface information
 define ____print_inh_iface
 	set $ce = $arg0
 	printf "interface %s", $ce->name->val
@@ -452,6 +517,7 @@ define ____print_inh_iface
 	end
 end
 
+# print zend inheritance information
 define print_inh
 	set $ce = $arg0
 	set $depth = 0
@@ -478,6 +544,11 @@ define print_inh
 		printf "}\n"
 		set $depth = $depth - 1
 	end
+end
+
+# TODO: add more information
+document print_inh
+	Usage: print_inh (zend_class_entry*)pce
 end
 
 define print_pi
@@ -517,9 +588,12 @@ end
 
 document print_pi
 	Takes a pointer to an object's property and prints the property information
-	usage: print_pi <ptr>
+	Usage: print_pi <ptr>
 end
 
+# arg0: char*, string to print
+# arg1: int, length of the string
+# arg2: int, maxlen to print
 define ____print_str
 	set $tmp = 0
 	set $str = $arg0
@@ -531,6 +605,8 @@ define ____print_str
 
 	printf "\""
 	while $tmp < $arg1 && $tmp < $maxlen
+		# print letters as is
+		# print special characters in octal (base 8)
 		if $str[$tmp] > 31 && $str[$tmp] < 127
 			printf "%c", $str[$tmp]
 		else
@@ -544,6 +620,7 @@ define ____print_str
 	printf "\""
 end
 
+# $arg0: znode*
 define printzn
 	____executor_globals
 	set $ind = 0
@@ -563,20 +640,27 @@ define printzn
 
 	printf "[%p] %s", $znode, $optype
 
+	# IS_CONST
 	if $znode->op_type == 1
 		printf ": "
 		____printzv &$znode->u.constant 0
 	end
+
+	# IS_TMP_VAR
 	if $znode->op_type == 2
 		printf ": "
 		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
 		____printzv ((union _temp_variable *)$tvar)->tmp_var 0
 	end
+
+	# IS_VAR
 	if $znode->op_type == 4
 		printf ": "
 		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
 		____printzv *$tvar->var.ptr_ptr 0
 	end
+
+	# IS_UNUSED
 	if $znode->op_type == 8
 		printf "\n"
 	end
@@ -584,20 +668,39 @@ end
 
 document printzn
 	print type and content of znode.
-	usage: printzn &opline->op1
+	Usage: printzn (znode*)pznode
 end
 
+# print znode_op information
+# $arg0: znode_op*
+define ____print_znode_op
+	set $op = $arg0
+	printf "[%p]\n", $op
+	printf "  constant=[%d] ", $op->constant
+	printf "var=[%d] ", $op->var
+	printf "num=[%d] ", $op->num
+	printf "opline_num=[%d] ", $op->opline_num
+	printf "jmp_offset=[%d]\n", $op->jmp_offset
+end
+
+document ____print_znode_op
+	Dump znode_op information
+	Usage: ____print_znode_op (znode_op*)pop
+end
+
+# op1, op2, and result are actually of znode_op type
 define printzops
 	printf "op1 => "
-	printzn &execute_data->opline.op1
+	____print_znode_op &execute_data->opline.op1
 	printf "op2 => "
-	printzn &execute_data->opline.op2
+	____print_znode_op &execute_data->opline.op2
 	printf "result => "
-	printzn &execute_data->opline.result
+	____print_znode_op &execute_data->opline.result
 end
 
 document printzops
-	dump operands of the current opline
+	Dump operands of the current opline
+	Usage: printzops
 end
 
 define print_zstr
@@ -613,8 +716,8 @@ define print_zstr
 end
 
 document print_zstr
-	print the length and contents of a zend string
-	usage: print_zstr <ptr> [max length]
+	Print the length and contents of a zend string
+	Usage: print_zstr (zend_string*)ptr [max length]
 end
 
 define zbacktrace
@@ -651,5 +754,124 @@ end
 
 document lookup_root
 	lookup a refcounted in root
-	usage: lookup_root [ptr].
+	Usage: lookup_root [ptr].
+end
+
+#### Functions to dump opline information ####
+# TODO: print more meaningful information
+# arg0: (zend_op*)
+define dump_opline
+	if $arg0
+		set $opline=$arg0
+		printf "lineno=[%d] opcode=[%d] ", $opline->lineno, $opline->opcode
+		printf "handler=["
+		output $opline->handler
+		printf "]\n"
+	else
+		printf "[ERROR] Invalid zend_op* argument is NULL\n"
+	end
+
+end
+
+document dump_opline
+	Print opline information
+	Usage: dump_opline (zend_op*)opline
+end
+
+define dump_current_opline
+	____executor_globals
+	if $eg.current_execute_data
+		dump_opline $eg.current_execute_data->opline
+	else
+		printf "[ERROR] $eg.current_execute_data is NULL\n"
+	end
+end
+
+document dump_current_opline
+	Dump currently executed opline information
+	Usage: print_executed_opline
+end
+
+# arg0: (zend_op_array*)
+define dump_op_array
+	set $ops = (zend_op_array*) $arg0
+
+	# print file name and line#
+	printf "filename = < %s:", $ops->filename.val
+	printf "%d-%d >\n", $ops->line_start, $ops->line_end
+
+	# print function name if has
+	if $ops->function_name
+		set $funcname = $ops->function_name.val
+	else
+		set $funcname = "Empty"
+	end
+	printf "func=<%s> ", $funcname
+
+	printf "type=[%d]\n", $ops->type
+
+	# dump each opline
+	set $i = 0
+	while $i < $ops->last
+		set $opline = $ops->opcodes + $i
+		printf "index=[%d] ", $i
+		dump_opline $opline
+		set $i = $i + 1
+	end
+end
+
+document dump_op_array
+	Dump opline information in an op_array
+	Usage: dump_op_array (zend_op_array*)poparray
+end
+
+define dump_current_op_array
+	____executor_globals
+	dump_op_array &($eg.current_execute_data->func->op_array)
+end
+
+document dump_current_op_array
+	Dump opline information of current function
+	Usage: dump_current_op_array
+end
+
+#### functions to set breakpoint ####
+# set breakpoint at opline->handler
+# $arg0: (zend_op*)opline
+define bp_opline
+	set $opline = $arg0
+	eval "break *%p", $opline->handler
+end
+
+document bp_opline
+	Set breakpoint at opline->handler
+	Usage: bp_opline (zend_op*)opline
+end
+
+# $arg0: (zend_op_array*)
+# set breakpoint at every opline->handler in the op_array
+define bp_op_array
+	set $ops = (zend_op_array*) $arg0
+
+	set $i = 0
+	while $i < $ops->last
+		set $opline = $ops->opcodes + $i
+		bp_opline $opline
+		set $i = $i + 1
+	end
+end
+
+document bp_op_array
+	Set breakpoint at each opline handler in op_array
+	Usage: bp_op_array (zend_op_array*)poparray
+end
+
+define bp_current_op_array
+	____executor_globals
+	bp_op_array_handler &($eg.current_execute_data->func->op_array)
+end
+
+document bp_current_op_array
+	Set breakpoint at each opline handler in current op_array
+	Usage: bp_current_op_array
 end
