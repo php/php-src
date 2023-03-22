@@ -2802,14 +2802,8 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 			return IS_DOUBLE;
 		case IS_STRING: {
 			if (Z_STRLEN_P(input) == 0) {
-				const char *arg_name = get_active_function_arg_name(arg_num);
-				php_error_docref(NULL, E_WARNING, "Argument #%d ($%s) must not be empty, casted to 0", arg_num, arg_name);
-				if (UNEXPECTED(EG(exception))) {
-					return 0;
-				}
-				*lval = 0;
-				*dval = 0.0;
-				return IS_LONG;
+				zend_argument_value_error(arg_num, "must not be empty");
+				return 0;
 			}
 			uint8_t type = is_numeric_str_function(Z_STR_P(input), lval, dval);
 			if (type == IS_DOUBLE) {
