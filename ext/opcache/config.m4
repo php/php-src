@@ -18,6 +18,12 @@ PHP_ARG_ENABLE([opcache-jit],
   [yes],
   [no])
 
+PHP_ARG_WITH([opcache-capstone],,
+  [AS_HELP_STRING([--with-opcache-capstone],
+    [support opcache JIT disassembly through capstone])],
+  [no],
+  [no])
+
 if test "$PHP_OPCACHE" != "no"; then
 
   dnl Always build as shared extension
@@ -68,13 +74,15 @@ if test "$PHP_OPCACHE" != "no"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
 
-    PKG_CHECK_MODULES([CAPSTONE], [capstone >= 3.0.0],
-        [have_capstone="yes"], [have_capstone="no"])
-    if test "$have_capstone" = "yes"; then
-        AC_DEFINE(HAVE_CAPSTONE, 1, [ ])
+    AS_IF([test x"$with_opcache_capstone" = "xyes"],[
+      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
+        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
         PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
         PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-    fi
+      ],[
+        AC_MSG_ERROR([capstone >= 3.0 required but not found])
+      ])
+    ])
 
     PHP_SUBST(DASM_FLAGS)
     PHP_SUBST(DASM_ARCH)
