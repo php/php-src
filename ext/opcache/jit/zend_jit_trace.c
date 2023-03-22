@@ -3985,9 +3985,11 @@ static int zend_jit_trace_deoptimization(
 					return 0;
 				}
 				if (stack) {
-					SET_STACK_TYPE(stack, i, type, 1);
 					if (jit->ra && jit->ra[i].ref) {
+						SET_STACK_TYPE(stack, i, type, 0);
 						SET_STACK_REF(stack, i, jit->ra[i].ref);
+					} else {
+						SET_STACK_TYPE(stack, i, type, 1);
 					}
 				}
 			}
