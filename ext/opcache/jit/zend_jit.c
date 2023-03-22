@@ -3091,6 +3091,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 		zend_jit_label(&ctx, b);
 #else /* ZEND_JIT_IR */
 
+	if (rt_opline) {
+		/* Set BB_ENTRY flag to limit register usage across the OSR ENTRY point */
+		ssa->cfg.blocks[ssa->cfg.map[rt_opline - op_array->opcodes]].flags |= ZEND_BB_ENTRY;
+	}
+
 	zend_jit_start(&ctx, op_array, ssa);
 	if (JIT_G(opt_flags) & (ZEND_JIT_REG_ALLOC_LOCAL|ZEND_JIT_REG_ALLOC_GLOBAL)) {
 		checkpoint = zend_arena_checkpoint(CG(arena));
