@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   . Fix bug GH-10083 (Allow comments between & and parameter). (ilutov)
   . Zend Max Execution Timers is now enabled by default for ZTS builds on
     Linux. (Kévin Dunglas)
+  . Fix bug GH-10469 (Disallow .. in open_basedir paths set at runtime).
+    (ilutov)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)

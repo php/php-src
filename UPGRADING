@@ -74,6 +74,10 @@ PHP 8.3 UPGRADE NOTES
     "buffer_size" => int
     See GH-9336
   . class_alias() now supports creating an alias of an internal class.
+  . Setting `open_basedir` at runtime using `ini_set('open_basedir', ...);` no
+    longer accepts paths containing the parent directory (`..`). Previously,
+    only paths starting with `..` were disallowed. This could easily be
+    circumvented by prepending `./` to the path.
 
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
