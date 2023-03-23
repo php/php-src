@@ -30,6 +30,20 @@
 
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
 
+static zend_always_inline ISC_INT64 get_isc_int64_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	ISC_INT64 ret;
+	memcpy(&ret, sqldata, sizeof(ret));
+	return ret;
+}
+
+static zend_always_inline ISC_LONG get_isc_long_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	ISC_LONG ret;
+	memcpy(&ret, sqldata, sizeof(ret));
+	return ret;
+}
+
 /* free the allocated space for passing field values to the db and back */
 static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 {
@@ -377,10 +391,10 @@ static int firebird_stmt_get_col(
 					n = *(short*)var->sqldata;
 					break;
 				case SQL_LONG:
-					n = *(ISC_LONG*)var->sqldata;
+					n = get_isc_long_from_sqldata(var->sqldata);
 					break;
 				case SQL_INT64:
-					n = *(ISC_INT64*)var->sqldata;
+					n = get_isc_int64_from_sqldata(var->sqldata);
 					break;
 				case SQL_DOUBLE:
 					break;
@@ -414,13 +428,13 @@ static int firebird_stmt_get_col(
 					ZVAL_LONG(result, *(short*)var->sqldata);
 					break;
 				case SQL_LONG:
-					ZVAL_LONG(result, *(ISC_LONG*)var->sqldata);
+					ZVAL_LONG(result, get_isc_long_from_sqldata(var->sqldata));
 					break;
 				case SQL_INT64:
 #if SIZEOF_ZEND_LONG >= 8
-					ZVAL_LONG(result, *(ISC_INT64*)var->sqldata);
+					ZVAL_LONG(result, get_isc_int64_from_sqldata(var->sqldata));
 #else
-					ZVAL_STR(result, zend_strpprintf(0, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata));
+					ZVAL_STR(result, zend_strpprintf(0, "%" LL_MASK "d", get_isc_int64_from_sqldata(var->sqldata)));
 #endif
 					break;
 				case SQL_FLOAT:
