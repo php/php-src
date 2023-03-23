@@ -112,6 +112,7 @@ PHP                                                                        NEWS
   . Added posix_pathconf. (David Carlier)
   . Added posix_fpathconf. (David Carlier)
   . Fixed zend_parse_arg_long's bool pointer argument assignment. (Cristian Rodriguez)
+  . Added posix_eaccess. (David Carlier)
 
 - Random:
   . Added Randomizer::getBytesFromString(). (Joshua Rüsweg)

@@ -713,6 +713,44 @@ PHP_FUNCTION(posix_access)
 
 	RETURN_TRUE;
 }
+
+#ifdef HAVE_EACCESS
+PHP_FUNCTION(posix_eaccess)
+{
+	zend_long mode = 0;
+	size_t filename_len, ret;
+	char *filename, *path;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	path = expand_filepath(filename, NULL);
+	if (!path) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
+	}
+
+	if (php_check_open_basedir_ex(path, 0)) {
+		efree(path);
+		POSIX_G(last_error) = EPERM;
+		RETURN_FALSE;
+	}
+
+	ret = eaccess(path, mode);
+	efree(path);
+
+	if (ret) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif
+
 /* }}} */
 
 /*
