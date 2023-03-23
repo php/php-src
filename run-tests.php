@@ -4141,7 +4141,6 @@ class DiffOutputBuilder
             }
             // Found no more differenciating rows, we're done
             if ($next === count($diffs)) {
-                var_dump($i, count($diffs));
                 if (($i - 1) < count($diffs)) {
                     fwrite($buffer, "--\n");
                 }
