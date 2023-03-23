@@ -41,13 +41,13 @@ define print_phar
 	printf "}\n"
 end
 
-document display_phar_globals
-	display phar globals
-end
-
 define display_phar_globals
 	___pharglobals
 	graph display $phar_globals.$arg0
+end
+
+document display_phar_globals
+	display phar globals
 end
 
 define print_pharfp
