@@ -43,6 +43,10 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Add missing error checks on file writing functions. (nielsdos)
 
+- PDO Firebird:
+  . Fixed bug GH-10908 (Bus error with PDO Firebird on RPI with 64 bit kernel
+    and 32 bit userland). (nielsdos)
+
 - PDO ODBC:
   . Fixed missing and inconsistent error checks on SQLAllocHandle. (nielsdos)
 
