@@ -26,7 +26,7 @@ ob_end_flush();
 *** Testing session_start() : variation ***
 string(%d) "%s"
 
-Notice: session_start(): Ignoring session_start() because a session is already active (started from %s on line %d) in %s on line %d
+Notice: session_start(): Ignoring session_start() because a session is already active in %s on line %d
 bool(true)
 string(%d) "%s"
 bool(true)

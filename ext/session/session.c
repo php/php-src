@@ -126,7 +126,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 static inline void php_session_cleanup_filename(void) /* {{{ */
 {
 	if (PS(session_started_filename)) {
-		efree(PS(session_started_filename));
+		zend_string_release(PS(session_started_filename));
 		PS(session_started_filename) = NULL;
 		PS(session_started_lineno) = 0;
 	}
@@ -1505,7 +1505,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 	switch (PS(session_status)) {
 		case php_session_active:
 			if (PS(session_started_filename)) {
-				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started (started from %s on line %u)", PS(session_started_filename), PS(session_started_lineno));
+				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started (started from %s on line %u)", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
 			} else {
 				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
 			}
@@ -1621,8 +1621,11 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 
 	/* Should these be set here, or in session_initialize? */
 	php_session_cleanup_filename();
-	PS(session_started_filename) = estrdup(zend_get_executed_filename());
-	PS(session_started_lineno) = zend_get_executed_lineno();
+	zend_string *session_started_filename = zend_get_executed_filename_ex();
+	if (session_started_filename != NULL) {
+		PS(session_started_filename) = zend_string_copy(session_started_filename);
+		PS(session_started_lineno) = zend_get_executed_lineno();
+	}
 
 	return SUCCESS;
 }
@@ -2538,7 +2541,7 @@ PHP_FUNCTION(session_start)
 
 	if (PS(session_status) == php_session_active) {
 		if (PS(session_started_filename)) {
-			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active (started from %s on line %d)", PS(session_started_filename), PS(session_started_lineno));
+			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active (started from %s on line %d)", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
 		} else {
 			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
 		}
