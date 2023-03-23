@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-10810 (Fix NUL byte terminating Exception::__toString()).
     (ilutov)
 
+- Date:
+  . Fixed bug GH-10583 (DateTime modify with tz pattern should not update
+    linked timezone). (Derick)
+
 - FPM:
   . Fixed bug GH-10611 (fpm_env_init_main leaks environ). (nielsdos)
   . Destroy file_handle in fpm_main. (Jakub Zelenka, nielsdos)
