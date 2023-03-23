@@ -107,6 +107,13 @@ $s = $o . $o;
 var_dump($s);
 var_dump(zend_test_is_string_marked_as_valid_utf8($s));
 
+echo "Rope concat:\n";
+$foo = 'f';
+$bar = 'b';
+$baz = 'a';
+$rope = "$foo$bar$baz";
+var_dump(zend_test_is_string_marked_as_valid_utf8($rope));
+
 echo "str_repeat:\n";
 $string = "a";
 $string_concat = str_repeat($string, 100);
@@ -182,6 +189,8 @@ Concatenation in loop (compound assignment):
 bool(true)
 Concatenation of objects:
 string(2) "zz"
+bool(true)
+Rope concat:
 bool(true)
 str_repeat:
 bool(true)
