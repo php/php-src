@@ -1412,7 +1412,7 @@ static zend_result update_property(zval *val, zend_property_info *prop_info) {
 	return zval_update_constant_ex(val, prop_info->ce);
 }
 
-ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, zend_class_entry *scope)
+ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const zend_string *name, zend_class_entry *scope)
 {
 	ZEND_ASSERT(Z_TYPE(c->value) == IS_CONSTANT_AST);
 
@@ -1429,7 +1429,7 @@ ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, zend_cla
 		return FAILURE;
 	}
 
-	if (UNEXPECTED(!zend_verify_class_constant_type(c, &tmp))) {
+	if (UNEXPECTED(!zend_verify_class_constant_type(c, name, &tmp))) {
 		zval_ptr_dtor(&tmp);
 		return FAILURE;
 	}
@@ -1498,7 +1498,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 				}
 
 				val = &c->value;
-				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, name, c->ce) != SUCCESS)) {
 					return FAILURE;
 				}
 			}
@@ -4593,7 +4593,6 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 	c->doc_comment = doc_comment;
 	c->attributes = NULL;
 	c->ce = ce;
-	c->name = name;
 	c->type = type;
 
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {

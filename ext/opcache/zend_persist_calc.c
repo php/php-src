@@ -393,7 +393,6 @@ static void zend_persist_class_constant_calc(zval *zv)
 		zend_shared_alloc_register_xlat_entry(c, c);
 		ADD_SIZE(sizeof(zend_class_constant));
 		zend_persist_zval_calc(&c->value);
-		ADD_INTERNED_STRING(c->name);
 		if (ZCG(accel_directives).save_comments && c->doc_comment) {
 			ADD_STRING(c->doc_comment);
 		}

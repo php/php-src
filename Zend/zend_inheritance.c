@@ -51,6 +51,9 @@ static void add_compatibility_obligation(
 static void add_property_compatibility_obligation(
 		zend_class_entry *ce, const zend_property_info *child_prop,
 		const zend_property_info *parent_prop);
+static void add_class_constant_compatibility_obligation(
+		zend_class_entry *ce, const zend_class_constant *child_const,
+		const zend_class_constant *parent_const, const zend_string *const_name);
 
 static void ZEND_COLD emit_incompatible_method_error(
 		const zend_function *child, zend_class_entry *child_scope,
@@ -1359,8 +1362,22 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 }
 /* }}} */
 
+static void emit_incompatible_class_constant_error(
+		const zend_class_constant *child, const zend_class_constant *parent, const zend_string *const_name) {
+	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"Type of %s::%s must be compatible with %s::%s of type %s",
+		ZSTR_VAL(child->ce->name),
+		ZSTR_VAL(const_name),
+		ZSTR_VAL(parent->ce->name),
+		ZSTR_VAL(const_name),
+		ZSTR_VAL(type_str));
+}
+
 static inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
 {
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(parent->type));
+
 	if (!ZEND_TYPE_IS_SET(child->type)) {
 		return INHERITANCE_ERROR;
 	}
@@ -1393,10 +1410,11 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 		}
 
 		if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_const->type))) {
-			if (class_constant_types_compatible(parent_const, c) == INHERITANCE_ERROR) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s must be compatible with %s::%s",
-					ZSTR_VAL(c->ce->name), ZSTR_VAL(name), ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name)
-				);
+			inheritance_status status = class_constant_types_compatible(parent_const, c);
+			if (status == INHERITANCE_ERROR) {
+				emit_incompatible_class_constant_error(c, parent_const, name);
+			} else if (status == INHERITANCE_UNRESOLVED) {
+				add_class_constant_compatibility_obligation(ce, c, parent_const, name);
 			}
 		}
 	} else if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE)) {
@@ -2557,7 +2575,8 @@ typedef struct {
 	enum {
 		OBLIGATION_DEPENDENCY,
 		OBLIGATION_COMPATIBILITY,
-		OBLIGATION_PROPERTY_COMPATIBILITY
+		OBLIGATION_PROPERTY_COMPATIBILITY,
+		OBLIGATION_CLASS_CONSTANT_COMPATIBILITY
 	} type;
 	union {
 		zend_class_entry *dependency_ce;
@@ -2572,6 +2591,11 @@ typedef struct {
 		struct {
 			const zend_property_info *parent_prop;
 			const zend_property_info *child_prop;
+		};
+		struct {
+			const zend_string *const_name;
+			const zend_class_constant *parent_const;
+			const zend_class_constant *child_const;
 		};
 	};
 } variance_obligation;
@@ -2648,6 +2672,18 @@ static void add_property_compatibility_obligation(
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
 
+static void add_class_constant_compatibility_obligation(
+		zend_class_entry *ce, const zend_class_constant *child_const,
+		const zend_class_constant *parent_const, const zend_string *const_name) {
+	HashTable *obligations = get_or_init_obligations_for_class(ce);
+	variance_obligation *obligation = emalloc(sizeof(variance_obligation));
+	obligation->type = OBLIGATION_CLASS_CONSTANT_COMPATIBILITY;
+	obligation->const_name = const_name;
+	obligation->child_const = child_const;
+	obligation->parent_const = parent_const;
+	zend_hash_next_index_insert_ptr(obligations, obligation);
+}
+
 static void resolve_delayed_variance_obligations(zend_class_entry *ce);
 
 static void check_variance_obligation(variance_obligation *obligation) {
@@ -2671,12 +2707,18 @@ static void check_variance_obligation(variance_obligation *obligation) {
 				&obligation->parent_fn, obligation->parent_scope, status);
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
-	} else {
-		ZEND_ASSERT(obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY);
+	} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
 		inheritance_status status =
 			property_types_compatible(obligation->parent_prop, obligation->child_prop);
 		if (status != INHERITANCE_SUCCESS) {
 			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop);
+		}
+	} else {
+		ZEND_ASSERT(obligation->type == OBLIGATION_CLASS_CONSTANT_COMPATIBILITY);
+		inheritance_status status =
+		class_constant_types_compatible(obligation->parent_const, obligation->child_const);
+		if (status != INHERITANCE_SUCCESS) {
+			emit_incompatible_class_constant_error(obligation->child_const, obligation->parent_const, obligation->const_name);
 		}
 	}
 }
@@ -3141,6 +3183,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 	zend_string *key;
 	zend_function *parent_func;
 	zend_property_info *parent_info;
+	zend_class_constant *parent_const;
 	inheritance_status overall_status = INHERITANCE_SUCCESS;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, parent_func) {
@@ -3171,6 +3214,25 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 			zend_property_info *child_info = Z_PTR_P(zv);
 			if (ZEND_TYPE_IS_SET(child_info->type)) {
 				inheritance_status status = property_types_compatible(parent_info, child_info);
+				ZEND_ASSERT(status != INHERITANCE_WARNING);
+				if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
+					return status;
+				}
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->constants_table, key, parent_const) {
+		zval *zv;
+		if ((ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE) || !ZEND_TYPE_IS_SET(parent_const->type)) {
+			continue;
+		}
+
+		zv = zend_hash_find_known_hash(&ce->constants_table, key);
+		if (zv) {
+			zend_class_constant *child_const = Z_PTR_P(zv);
+			if (ZEND_TYPE_IS_SET(child_const->type)) {
+				inheritance_status status = class_constant_types_compatible(parent_const, child_const);
 				ZEND_ASSERT(status != INHERITANCE_WARNING);
 				if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 					return status;

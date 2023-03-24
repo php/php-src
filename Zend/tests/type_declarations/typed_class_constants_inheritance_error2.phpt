@@ -11,4 +11,4 @@ class B extends A {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::CONST1 must be compatible with A::CONST1 in %s on line %d
+Fatal error: Type of B::CONST1 must be compatible with A::CONST1 of type int in %s on line %d

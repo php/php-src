@@ -404,7 +404,6 @@ typedef struct _zend_property_info {
 
 typedef struct _zend_class_constant {
 	zval value; /* flags are stored in u2 */
-	zend_string *name;
 	zend_string *doc_comment;
 	HashTable *attributes;
 	zend_class_entry *ce;

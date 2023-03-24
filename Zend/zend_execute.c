@@ -820,12 +820,12 @@ ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool s
 	return zend_verify_weak_scalar_type_hint(type_mask, arg);
 }
 
-ZEND_COLD zend_never_inline void zend_verify_class_constant_type_error(const zend_class_constant *c, const zval *constant)
+ZEND_COLD zend_never_inline void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant)
 {
 	zend_string *type_str = zend_type_to_string(c->type);
 
 	zend_type_error("Cannot assign %s to class constant %s::%s of type %s",
-		zend_zval_type_name(constant), ZSTR_VAL(c->ce->name), ZSTR_VAL(c->name), ZSTR_VAL(type_str));
+		zend_zval_type_name(constant), ZSTR_VAL(c->ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str));
 
 	zend_string_release(type_str);
 }
@@ -971,7 +971,7 @@ if (ZEND_TYPE_HAS_LIST(member_type)) {
 			return false;
 		}
 	} else if ((ZEND_TYPE_PURE_MASK(member_type) & MAY_BE_STATIC)) {
-		return instanceof_function(value_ce, scope);
+		return value_ce == scope;
 	} else {
 		const zend_class_entry *ce = zend_ce_from_type(scope, &member_type);
 		return ce && instanceof_function(value_ce, ce);
@@ -1484,10 +1484,10 @@ static zend_always_inline bool zend_check_class_constant_type(zend_class_constan
 	return zend_verify_scalar_type_hint(type_mask, constant, true, false);
 }
 
-ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_constant *c, zval *constant)
+ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_constant *c, const zend_string *name, zval *constant)
 {
 	if (!zend_check_class_constant_type(c, constant)) {
-		zend_verify_class_constant_type_error(c, constant);
+		zend_verify_class_constant_type_error(c, name, constant);
 		return 0;
 	}
 

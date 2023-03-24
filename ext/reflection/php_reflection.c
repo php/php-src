@@ -297,7 +297,7 @@ static zval *reflection_instantiate(zend_class_entry *pce, zval *object) /* {{{ 
 static void _const_string(smart_str *str, char *name, zval *value, char *indent);
 static void _function_string(smart_str *str, zend_function *fptr, zend_class_entry *scope, char* indent);
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent);
-static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char* indent);
+static void _class_const_string(smart_str *str, zend_string *name, zend_class_constant *c, char* indent);
 static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char *indent);
 static void _extension_string(smart_str *str, zend_module_entry *module, char *indent);
 static void _zend_extension_string(smart_str *str, zend_extension *extension, char *indent);
@@ -384,7 +384,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		zend_class_constant *c;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), key, c) {
-			_class_const_string(str, ZSTR_VAL(key), c, ZSTR_VAL(sub_indent));
+			_class_const_string(str, key, c, ZSTR_VAL(sub_indent));
 			if (UNEXPECTED(EG(exception))) {
 				zend_string_release(sub_indent);
 				return;
@@ -556,9 +556,9 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 /* }}} */
 
 /* {{{ _class_const_string */
-static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char *indent)
+static void _class_const_string(smart_str *str, zend_string *name, zend_class_constant *c, char *indent)
 {
-	if (zend_update_class_constant(c, c->ce) == FAILURE) {
+	if (Z_TYPE(c->value) == IS_CONSTANT_AST && zend_update_class_constant(c, name, c->ce) == FAILURE) {
 		return;
 	}
 
@@ -567,7 +567,7 @@ static void _class_const_string(smart_str *str, char *name, zend_class_constant 
 	zend_string *type_str = ZEND_TYPE_IS_SET(c->type) ? zend_type_to_string(c->type) : NULL;
 	const char *type = type_str ? ZSTR_VAL(type_str) : zend_zval_type_name(&c->value);
 	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
-		indent, final, visibility, type, name);
+		indent, final, visibility, type, ZSTR_VAL(name));
 	if (Z_TYPE(c->value) == IS_ARRAY) {
 		smart_str_appends(str, "Array");
 	} else if (Z_TYPE(c->value) == IS_OBJECT) {
@@ -3801,7 +3801,7 @@ ZEND_METHOD(ReflectionClassConstant, __toString)
 	ZVAL_DEREF(name);
 	ZEND_ASSERT(Z_TYPE_P(name) == IS_STRING);
 
-	_class_const_string(&str, Z_STRVAL_P(name), ref, "");
+	_class_const_string(&str, Z_STR_P(name), ref, "");
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
@@ -3925,8 +3925,16 @@ ZEND_METHOD(ReflectionClassConstant, getValue)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+	zval *name = reflection_prop_name(ZEND_THIS);
+	if (Z_ISUNDEF_P(name)) {
+		zend_throw_error(NULL,
+			"Typed property ReflectionClassConstant::$name "
+			"must not be accessed before initialization");
+		RETURN_THROWS();
+	}
+
 	if (Z_TYPE(ref->value) == IS_CONSTANT_AST) {
-		zend_result result = zend_update_class_constant(ref, ref->ce);
+		zend_result result = zend_update_class_constant(ref, Z_STR_P(name), ref->ce);
 		if (result == FAILURE) {
 			RETURN_THROWS();
 		}
@@ -4735,7 +4743,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), key, constant) {
-		if (UNEXPECTED(zend_update_class_constant(constant, constant->ce) != SUCCESS)) {
+		if (UNEXPECTED(Z_TYPE(constant->value) == IS_CONSTANT_AST && zend_update_class_constant(constant, key, constant->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 
@@ -4785,7 +4793,7 @@ ZEND_METHOD(ReflectionClass, getConstant)
 	zend_class_entry *ce;
 	HashTable *constants_table;
 	zend_class_constant *c;
-	zend_string *name;
+	zend_string *name, *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		RETURN_THROWS();
@@ -4793,8 +4801,8 @@ ZEND_METHOD(ReflectionClass, getConstant)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	constants_table = CE_CONSTANTS_TABLE(ce);
-	ZEND_HASH_MAP_FOREACH_PTR(constants_table, c) {
-		if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(constants_table, key, c) {
+		if (UNEXPECTED(Z_TYPE(c->value) == IS_CONSTANT_AST && zend_update_class_constant(c, key, c->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();

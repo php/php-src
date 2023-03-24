@@ -7265,7 +7265,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, constant_name, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 					HANDLE_EXCEPTION();
@@ -8418,7 +8418,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, constant_name, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();
@@ -25082,7 +25082,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, constant_name, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 					HANDLE_EXCEPTION();
@@ -25644,7 +25644,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, constant_name, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();
@@ -34228,7 +34228,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, constant_name, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 					HANDLE_EXCEPTION();
@@ -34580,7 +34580,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				}
 			}
 			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-				if (UNEXPECTED(zend_update_class_constant(c, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, constant_name, c->ce) != SUCCESS)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 					FREE_OP(opline->op2_type, opline->op2.var);
 					HANDLE_EXCEPTION();

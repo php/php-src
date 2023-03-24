@@ -720,9 +720,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			if (Z_TYPE(c->value) == IS_STRING) {
 				ZVAL_STR(&c->value, new_interned_string(Z_STR(c->value)));
 			}
-			if (c->name) {
-				c->name = new_interned_string(c->name);
-			}
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
@@ -3752,15 +3749,16 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 	bool ok, changed, was_changed = false;
 	zend_class_constant *c;
 	zval *val;
+	zend_string *key;
 
 	EG(exception) = (void*)(uintptr_t)-1; /* prevent error reporting */
 	do {
 		ok = true;
 		changed = false;
-		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-				if (EXPECTED(zend_update_class_constant(c, c->ce) == SUCCESS)) {
+				if (EXPECTED(zend_update_class_constant(c, key, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
 					ok = false;
