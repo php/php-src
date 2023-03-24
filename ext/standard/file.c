@@ -2088,7 +2088,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 			while ((*tmp != delimiter) && isspace((int)*(unsigned char *)tmp)) {
 				tmp++;
 			}
-			if (*tmp == enclosure) {
+			if (*tmp == enclosure && tmp < limit) {
 				bptr = tmp;
 			}
 		}
