@@ -44,6 +44,13 @@ static zend_always_inline ISC_LONG get_isc_long_from_sqldata(const ISC_SCHAR *sq
 	return ret;
 }
 
+static zend_always_inline double get_double_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	double ret;
+	memcpy(&ret, sqldata, sizeof(ret));
+	return ret;
+}
+
 /* free the allocated space for passing field values to the db and back */
 static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 {
@@ -402,7 +409,7 @@ static int firebird_stmt_get_col(
 			}
 
 			if ((var->sqltype & ~1) == SQL_DOUBLE) {
-				str = zend_strpprintf(0, "%.*F", -var->sqlscale, *(double*)var->sqldata);
+				str = zend_strpprintf(0, "%.*F", -var->sqlscale, get_double_from_sqldata(var->sqldata));
 			} else if (n >= 0) {
 				str = zend_strpprintf(0, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, n % f);
@@ -443,7 +450,7 @@ static int firebird_stmt_get_col(
 					break;
 				case SQL_DOUBLE:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", *(double*)var->sqldata));
+					ZVAL_STR(result, zend_strpprintf(0, "%F", get_double_from_sqldata(var->sqldata)));
 					break;
 #ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
