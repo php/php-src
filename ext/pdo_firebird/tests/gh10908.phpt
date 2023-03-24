@@ -15,11 +15,14 @@ $sql = <<<EOT
 CREATE TABLE gh10908(
   ID BIGINT NOT NULL,
   CODE VARCHAR(60) NOT NULL,
-  NUM NUMERIC(18, 3)
+  NUM NUMERIC(18, 3),
+  DBL DOUBLE PRECISION,
+  TS TIMESTAMP,
+  MYBLOB BLOB
 );
 EOT;
 $dbh->exec($sql);
-$dbh->exec("INSERT INTO gh10908 VALUES(1, 'ABC', 12.34);");
+$dbh->exec("INSERT INTO gh10908 VALUES(1, 'ABC', 12.34, 1.0, '2023-03-24 17:39', 'abcdefg');");
 
 function query_and_dump($dbh, $sql) {
     foreach ($dbh->query($sql) as $row) {
@@ -28,10 +31,13 @@ function query_and_dump($dbh, $sql) {
     }
 }
 
-query_and_dump($dbh, "SELECT CODE FROM gh10908"); // works fine
-query_and_dump($dbh, "SELECT ID   FROM gh10908"); // Used to "bus error"
-query_and_dump($dbh, "SELECT NUM  FROM gh10908"); // Used to "bus error"
-query_and_dump($dbh, "SELECT *    FROM gh10908"); // Used to "bus error"
+query_and_dump($dbh, "SELECT CODE   FROM gh10908"); // works fine
+query_and_dump($dbh, "SELECT ID     FROM gh10908"); // Used to "bus error"
+query_and_dump($dbh, "SELECT NUM    FROM gh10908"); // Used to "bus error"
+query_and_dump($dbh, "SELECT DBL    FROM gh10908"); // Used to "bus error"
+query_and_dump($dbh, "SELECT TS     FROM gh10908"); // Used to "bus error"
+query_and_dump($dbh, "SELECT MYBLOB FROM gh10908"); // Used to "bus error"
+query_and_dump($dbh, "SELECT *      FROM gh10908"); // Used to "bus error"
 
 query_and_dump($dbh, "SELECT CAST(NUM AS NUMERIC(9, 3)) FROM gh10908"); // works fine
 query_and_dump($dbh, "SELECT CAST(ID AS INTEGER)        FROM gh10908"); // works fine
@@ -61,12 +67,36 @@ Array
 
 Array
 (
+    [DBL] => 1.000000
+    [0] => 1.000000
+)
+
+Array
+(
+    [TS] => 2023-03-24 17:39:00
+    [0] => 2023-03-24 17:39:00
+)
+
+Array
+(
+    [MYBLOB] => abcdefg
+    [0] => abcdefg
+)
+
+Array
+(
     [ID] => 1
     [0] => 1
     [CODE] => ABC
     [1] => ABC
     [NUM] => 12.340
     [2] => 12.340
+    [DBL] => 1.000000
+    [3] => 1.000000
+    [TS] => 2023-03-24 17:39:00
+    [4] => 2023-03-24 17:39:00
+    [MYBLOB] => abcdefg
+    [5] => abcdefg
 )
 
 Array
