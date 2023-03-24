@@ -476,8 +476,10 @@ static int firebird_stmt_get_col(
 						fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
 					} else if (0) {
 				case SQL_TIMESTAMP:
-						ISC_TIMESTAMP timestamp = get_isc_timestamp_from_sqldata(var->sqldata);
-						isc_decode_timestamp(&timestamp, &t);
+						{
+							ISC_TIMESTAMP timestamp = get_isc_timestamp_from_sqldata(var->sqldata);
+							isc_decode_timestamp(&timestamp, &t);
+						}
 						fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
 					}
 					/* convert the timestamp into a string */
@@ -642,7 +644,10 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						return 1;
 					}
 					ISC_QUAD quad = get_isc_quad_from_sqldata(var->sqldata);
-					return firebird_bind_blob(stmt, &quad, parameter);
+					if (firebird_bind_blob(stmt, &quad, parameter) != 0) {
+						memcpy(var->sqldata, &quad, sizeof(quad));
+					}
+					return 1;
 				}
 			}
 
