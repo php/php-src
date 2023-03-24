@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
     (Nathan Freeman)
 
+- SPL:
+  . Handle indirect zvals and use up-to-date properties in
+    SplFixedArray::__serialize. (nielsdos)
+
 - Streams:
   . Fixed bug GH-10406 (feof() behavior change for UNIX based socket
     resources). (Jakub Zelenka)
