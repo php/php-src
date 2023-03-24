@@ -479,6 +479,13 @@ static zend_result php_session_initialize(void) /* {{{ */
 		php_session_decode(val);
 		zend_string_release_ex(val, 0);
 	}
+
+	php_session_cleanup_filename();
+	zend_string *session_started_filename = zend_get_executed_filename_ex();
+	if (session_started_filename != NULL) {
+		PS(session_started_filename) = zend_string_copy(session_started_filename);
+		PS(session_started_lineno) = zend_get_executed_lineno();
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -1617,14 +1624,6 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 			PS(id) = NULL;
 		}
 		return FAILURE;
-	}
-
-	/* Should these be set here, or in session_initialize? */
-	php_session_cleanup_filename();
-	zend_string *session_started_filename = zend_get_executed_filename_ex();
-	if (session_started_filename != NULL) {
-		PS(session_started_filename) = zend_string_copy(session_started_filename);
-		PS(session_started_lineno) = zend_get_executed_lineno();
 	}
 
 	return SUCCESS;
