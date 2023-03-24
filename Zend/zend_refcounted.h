@@ -70,6 +70,7 @@ typedef struct _zend_refcounted_h {
 	union {
 		uint32_t type_info;
 	} u;
+	// bool followed;
 } zend_refcounted_h;
 
 typedef struct _zend_refcounted {

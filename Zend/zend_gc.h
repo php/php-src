@@ -74,6 +74,10 @@ size_t zend_gc_globals_size(void);
 	((GC_TYPE_INFO(ref) & \
 		(GC_INFO_MASK | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))) == 0)
 
+#define Z_REFERENCE_SCANNED (1<<0)
+
+#define GC_REFERENCE_SCANNED(zv) (Z_TYPE_INFO_P((zv)) & (Z_REFERENCE_SCANNED << Z_TYPE_INFO_EXTRA_SHIFT))
+
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
 	if (EXPECTED(GC_TYPE_INFO(ref) == GC_REFERENCE)) {
@@ -119,6 +123,15 @@ static zend_always_inline void zend_get_gc_buffer_add_obj(
 		zend_get_gc_buffer_grow(gc_buffer);
 	}
 	ZVAL_OBJ(gc_buffer->cur, obj);
+	gc_buffer->cur++;
+}
+
+static zend_always_inline void zend_get_gc_buffer_add_ptr(
+		zend_get_gc_buffer *gc_buffer, void *ptr) {
+	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
+		zend_get_gc_buffer_grow(gc_buffer);
+	}
+	ZVAL_PTR(gc_buffer->cur, ptr);
 	gc_buffer->cur++;
 }
 

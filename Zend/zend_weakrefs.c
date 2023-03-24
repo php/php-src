@@ -17,6 +17,7 @@
 #include "zend.h"
 #include "zend_interfaces.h"
 #include "zend_objects_API.h"
+#include "zend_types.h"
 #include "zend_weakrefs.h"
 #include "zend_weakrefs_arginfo.h"
 
@@ -466,9 +467,79 @@ static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, int *n)
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zval *val;
 	ZEND_HASH_MAP_FOREACH_VAL(&wm->ht, val) {
-		zend_get_gc_buffer_add_zval(gc_buffer, val);
+		if (!GC_REFERENCE_SCANNED(val)) {
+			zend_get_gc_buffer_add_zval(gc_buffer, val);
+		}
 	} ZEND_HASH_FOREACH_END();
 	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
+}
+
+HashTable *zend_weakmap_get_object_entries_gc(zend_object *object, zval **table, int *n)
+{
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	const zend_ulong obj_key = zend_object_to_weakref_key(object);
+	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
+#if ZEND_DEBUG
+	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
+#endif
+	void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
+	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
+
+	if (tag == ZEND_WEAKREF_TAG_HT) {
+		HashTable *ht = ptr;
+		ZEND_HASH_MAP_FOREACH_PTR(ht, tagged_ptr) {
+			if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_MAP) {
+				zend_weakmap *wm = (zend_weakmap*) ZEND_WEAKREF_GET_PTR(tagged_ptr);
+				zval *zv = zend_hash_index_find(&wm->ht, obj_key);
+				ZEND_ASSERT(zv);
+				zend_get_gc_buffer_add_ptr(gc_buffer, zv);
+				zend_get_gc_buffer_add_obj(gc_buffer, &wm->std);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else if (tag == ZEND_WEAKREF_TAG_MAP) {
+		zend_weakmap *wm = (zend_weakmap*) ptr;
+		zval *zv = zend_hash_index_find(&wm->ht, obj_key);
+		ZEND_ASSERT(zv);
+		zend_get_gc_buffer_add_ptr(gc_buffer, zv);
+		zend_get_gc_buffer_add_obj(gc_buffer, &wm->std);
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+
+	return NULL;
+}
+
+HashTable *zend_weakmap_get_object_values_gc(zend_object *object, zval **table, int *n)
+{
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	const zend_ulong obj_key = zend_object_to_weakref_key(object);
+	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
+#if ZEND_DEBUG
+	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
+#endif
+	void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
+	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
+
+	if (tag == ZEND_WEAKREF_TAG_HT) {
+		HashTable *ht = ptr;
+		ZEND_HASH_MAP_FOREACH_PTR(ht, tagged_ptr) {
+			if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_MAP) {
+				zend_weakmap *wm = (zend_weakmap*) ZEND_WEAKREF_GET_PTR(tagged_ptr);
+				zval *zv = zend_hash_index_find(&wm->ht, obj_key);
+				ZEND_ASSERT(zv);
+				zend_get_gc_buffer_add_ptr(gc_buffer, zv);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else if (tag == ZEND_WEAKREF_TAG_MAP) {
+		zend_weakmap *wm = (zend_weakmap*) ptr;
+		zval *zv = zend_hash_index_find(&wm->ht, obj_key);
+		ZEND_ASSERT(zv);
+		zend_get_gc_buffer_add_ptr(gc_buffer, zv);
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+
 	return NULL;
 }
 
