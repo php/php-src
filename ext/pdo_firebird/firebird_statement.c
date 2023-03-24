@@ -646,8 +646,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					ISC_QUAD quad = get_isc_quad_from_sqldata(var->sqldata);
 					if (firebird_bind_blob(stmt, &quad, parameter) != 0) {
 						memcpy(var->sqldata, &quad, sizeof(quad));
+						return 1;
 					}
-					return 1;
+					return 0;
 				}
 			}
 
