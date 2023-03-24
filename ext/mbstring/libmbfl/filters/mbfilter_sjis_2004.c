@@ -67,7 +67,8 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	&vtbl_sjis2004_wchar,
 	&vtbl_wchar_sjis2004,
 	mb_sjis2004_to_wchar,
-	mb_wchar_to_sjis2004
+	mb_wchar_to_sjis2004,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
@@ -100,7 +101,8 @@ const mbfl_encoding mbfl_encoding_eucjp2004 = {
 	&vtbl_eucjp2004_wchar,
 	&vtbl_wchar_eucjp2004,
 	mb_eucjp2004_to_wchar,
-	mb_wchar_to_eucjp2004
+	mb_wchar_to_eucjp2004,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_eucjp2004_wchar = {
@@ -133,7 +135,8 @@ const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	&vtbl_2022jp_2004_wchar,
 	&vtbl_wchar_2022jp_2004,
 	mb_iso2022jp2004_to_wchar,
-	mb_wchar_to_iso2022jp2004
+	mb_wchar_to_iso2022jp2004,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar = {

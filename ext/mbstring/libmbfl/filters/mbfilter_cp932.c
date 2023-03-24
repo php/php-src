@@ -100,7 +100,8 @@ const mbfl_encoding mbfl_encoding_cp932 = {
 	&vtbl_cp932_wchar,
 	&vtbl_wchar_cp932,
 	mb_cp932_to_wchar,
-	mb_wchar_to_cp932
+	mb_wchar_to_cp932,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_cp932_wchar = {
@@ -133,7 +134,8 @@ const mbfl_encoding mbfl_encoding_sjiswin = {
 	&vtbl_sjiswin_wchar,
 	&vtbl_wchar_sjiswin,
 	mb_cp932_to_wchar,
-	mb_wchar_to_sjiswin
+	mb_wchar_to_sjiswin,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjiswin_wchar = {

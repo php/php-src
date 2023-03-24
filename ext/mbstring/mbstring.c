@@ -3001,6 +3001,18 @@ static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, 
 		return *elist;
 	}
 
+	/* If any candidate encoding have specialized validation functions, use those first
+	 * to eliminate as many candidates as possible */
+	if (strict) {
+		for (unsigned int i = 0; i < elist_size; i++) {
+			if (elist[i]->check != NULL && !elist[i]->check(in, in_len)) {
+				elist_size--;
+				memmove(&elist[i], &elist[i+1], (elist_size - i) * sizeof(mbfl_encoding*));
+				i--;
+			}
+		}
+	}
+
 	uint32_t wchar_buf[128];
 	struct conversion_data {
 		const mbfl_encoding *enc;
@@ -4509,6 +4521,10 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 	uint32_t wchar_buf[128];
 	unsigned char *in = (unsigned char*)input;
 	unsigned int state = 0;
+
+	if (encoding->check != NULL) {
+		return encoding->check(in, length);
+	}
 
 	/* If the input string is not encoded in the given encoding, there is a significant chance
 	 * that this will be seen in the first bytes. Therefore, rather than converting an entire
