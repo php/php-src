@@ -289,7 +289,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
-	
+
 	if (conn->server_version) {
 		mnd_pefree(conn->server_version, pers);
 		conn->server_version = NULL;
@@ -543,7 +543,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 		if (!port) {
 			port = 3306;
 		}
-		transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
+		if (strchr(hostname.s, ':') == NULL) {
+			transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
+		} else {
+			transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s", hostname.s);
+		}
 	}
 	DBG_INF_FMT("transport=%s", transport.s? transport.s:"OOM");
 	DBG_RETURN(transport);
@@ -727,16 +731,23 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	}
 err:
 	if (transport.s) {
+		DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, transport.s);
+		if (!conn->error_info->error_no) {
+			char * msg;
+			mnd_sprintf(&msg, 0, "%s (trying to connect via %s)",conn->error_info->error, transport.s);
+			SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
+			mnd_sprintf_free(msg);
+		}
 		mnd_sprintf_free(transport.s);
 		transport.s = NULL;
-	}
-
-	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
-	if (!conn->error_info->error_no) {
-		char * msg;
-		mnd_sprintf(&msg, 0, "%s (trying to connect via %s)",conn->error_info->error, conn->scheme.s);
-		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
-		mnd_sprintf_free(msg);
+	} else {
+		DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
+		if (!conn->error_info->error_no) {
+			char * msg;
+			mnd_sprintf(&msg, 0, "%s (trying to connect via %s)",conn->error_info->error, conn->scheme.s);
+			SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
+			mnd_sprintf_free(msg);
+		}
 	}
 
 	conn->m->free_contents(conn);
