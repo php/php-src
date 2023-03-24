@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-11222 (foreach by-ref may jump over keys during a rehash).
     (Bob)
 
+- Exif:
+  . Fixed bug GH-10834 (exif_read_data() cannot read smaller stream wrapper
+    chunk sizes). (nielsdos)
+
 - Hash:
   . Fixed bug GH-11180 (hash_file() appears to be restricted to 3 arguments).
     (nielsdos)
