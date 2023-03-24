@@ -30,25 +30,30 @@
 
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
 
+#define READ_USING_MEMCPY(type, sqldata) do { \
+		type ret; \
+		memcpy(&ret, sqldata, sizeof(ret)); \
+		return ret; \
+	} while (0);
+
 static zend_always_inline ISC_INT64 get_isc_int64_from_sqldata(const ISC_SCHAR *sqldata)
 {
-	ISC_INT64 ret;
-	memcpy(&ret, sqldata, sizeof(ret));
-	return ret;
+	READ_USING_MEMCPY(ISC_INT64, sqldata);
 }
 
 static zend_always_inline ISC_LONG get_isc_long_from_sqldata(const ISC_SCHAR *sqldata)
 {
-	ISC_LONG ret;
-	memcpy(&ret, sqldata, sizeof(ret));
-	return ret;
+	READ_USING_MEMCPY(ISC_LONG, sqldata);
 }
 
 static zend_always_inline double get_double_from_sqldata(const ISC_SCHAR *sqldata)
 {
-	double ret;
-	memcpy(&ret, sqldata, sizeof(ret));
-	return ret;
+	READ_USING_MEMCPY(double, sqldata);
+}
+
+static zend_always_inline ISC_TIMESTAMP get_isc_timestamp_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
 }
 
 /* free the allocated space for passing field values to the db and back */
@@ -466,7 +471,8 @@ static int firebird_stmt_get_col(
 						fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
 					} else if (0) {
 				case SQL_TIMESTAMP:
-						isc_decode_timestamp((ISC_TIMESTAMP*)var->sqldata, &t);
+						ISC_TIMESTAMP timestamp = get_isc_timestamp_from_sqldata(var->sqldata);
+						isc_decode_timestamp(&timestamp, &t);
 						fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
 					}
 					/* convert the timestamp into a string */
