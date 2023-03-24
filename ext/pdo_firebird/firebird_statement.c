@@ -30,7 +30,7 @@
 
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
 
-#define READ_USING_MEMCPY(type, sqldata) do { \
+#define READ_AND_RETURN_USING_MEMCPY(type, sqldata) do { \
 		type ret; \
 		memcpy(&ret, sqldata, sizeof(ret)); \
 		return ret; \
@@ -38,22 +38,27 @@
 
 static zend_always_inline ISC_INT64 get_isc_int64_from_sqldata(const ISC_SCHAR *sqldata)
 {
-	READ_USING_MEMCPY(ISC_INT64, sqldata);
+	READ_AND_RETURN_USING_MEMCPY(ISC_INT64, sqldata);
 }
 
 static zend_always_inline ISC_LONG get_isc_long_from_sqldata(const ISC_SCHAR *sqldata)
 {
-	READ_USING_MEMCPY(ISC_LONG, sqldata);
+	READ_AND_RETURN_USING_MEMCPY(ISC_LONG, sqldata);
 }
 
 static zend_always_inline double get_double_from_sqldata(const ISC_SCHAR *sqldata)
 {
-	READ_USING_MEMCPY(double, sqldata);
+	READ_AND_RETURN_USING_MEMCPY(double, sqldata);
 }
 
 static zend_always_inline ISC_TIMESTAMP get_isc_timestamp_from_sqldata(const ISC_SCHAR *sqldata)
 {
-	READ_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
+	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
+}
+
+static zend_always_inline ISC_QUAD get_isc_quad_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_QUAD, sqldata);
 }
 
 /* free the allocated space for passing field values to the db and back */
@@ -480,8 +485,10 @@ static int firebird_stmt_get_col(
 					size_t len = strftime(buf, sizeof(buf), fmt, &t);
 					ZVAL_STRINGL(result, buf, len);
 					break;
-				case SQL_BLOB:
-					return firebird_fetch_blob(stmt, colno, result, (ISC_QUAD*)var->sqldata);
+				case SQL_BLOB: {
+					ISC_QUAD quad = get_isc_quad_from_sqldata(var->sqldata);
+					return firebird_fetch_blob(stmt, colno, result, &quad);
+				}
 			}
 		}
 	}
@@ -634,7 +641,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						*var->sqlind = -1;
 						return 1;
 					}
-					return firebird_bind_blob(stmt, (ISC_QUAD*)var->sqldata, parameter);
+					ISC_QUAD quad = get_isc_quad_from_sqldata(var->sqldata);
+					return firebird_bind_blob(stmt, &quad, parameter);
 				}
 			}
 
