@@ -2,7 +2,7 @@
 GH-10907 (Unable to serialize processed SplFixedArrays in PHP 8.2.4)
 --FILE--
 <?php
-// Test without rebuilding properties
+echo "Test without rebuilding properties\n";
 $array = new SplFixedArray(2);
 $array[0] = "test value 1";
 $array[1] = "test value 2";
@@ -12,7 +12,7 @@ var_dump($array);
 
 echo "=================\n";
 
-// Test with rebuilding properties
+echo "Test with rebuilding properties\n";
 $array = new SplFixedArray(2);
 $array[0] = "test value 1";
 $array[1] = "test value 2";
@@ -23,7 +23,7 @@ var_dump($array);
 
 echo "=================\n";
 
-// Test with partially rebuilding properties
+echo "Test with partially rebuilding properties\n";
 $array = new SplFixedArray(3);
 $array[0] = "test value 1";
 var_dump($array); // Rebuilds properties
@@ -34,7 +34,7 @@ var_dump($array);
 
 echo "=================\n";
 
-// Test with adding members
+echo "Test with adding members\n";
 #[AllowDynamicProperties]
 class MySplFixedArray extends SplFixedArray {
     public string $my_string = "my_string_value";
@@ -48,6 +48,7 @@ var_dump(unserialize(serialize($array)));
 var_dump($array);
 ?>
 --EXPECT--
+Test without rebuilding properties
 string(73) "O:13:"SplFixedArray":2:{i:0;s:12:"test value 1";i:1;s:12:"test value 2";}"
 object(SplFixedArray)#2 (2) {
   [0]=>
@@ -62,6 +63,7 @@ object(SplFixedArray)#1 (2) {
   string(12) "test value 2"
 }
 =================
+Test with rebuilding properties
 object(SplFixedArray)#2 (2) {
   [0]=>
   string(12) "test value 1"
@@ -82,6 +84,7 @@ object(SplFixedArray)#2 (2) {
   string(12) "test value 2"
 }
 =================
+Test with partially rebuilding properties
 object(SplFixedArray)#1 (3) {
   [0]=>
   string(12) "test value 1"
@@ -108,6 +111,7 @@ object(SplFixedArray)#1 (3) {
   NULL
 }
 =================
+Test with adding members
 string(161) "O:15:"MySplFixedArray":5:{i:0;s:12:"test value 1";i:1;s:12:"test value 2";i:2;N;s:9:"my_string";i:0;s:19:"my_dynamic_property";s:25:"my_dynamic_property_value";}"
 object(MySplFixedArray)#1 (5) {
   ["my_string"]=>
