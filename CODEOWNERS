@@ -17,12 +17,16 @@
 /ext/ffi @dstogov
 /ext/gmp @Girgias
 /ext/imap @Girgias
+/ext/json @bukka
 /ext/opcache @dstogov @iluuu1994
+/ext/openssl @bukka
 /ext/pgsql @devnexen
 /ext/random @TimWolla
 /ext/session @Girgias
 /ext/sockets @devnexen
 /ext/spl @Girgias
+/main @bukka
+/sapi/fpm @bukka
 /Zend @iluuu1994
 /Zend/Optimizer @dstogov
 /Zend/zend.* @dstogov
