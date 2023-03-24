@@ -1,5 +1,5 @@
 # Load this file: '$ gdb -ix $PHPREPO/.gdbinit ...'
-# Functions starting with four underscores like "____foo" are used as helper
+# Functions starting with four underlines like "____foo" are used as helper
 # functions.
 
 define set_ts
