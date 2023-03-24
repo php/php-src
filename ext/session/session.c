@@ -1505,7 +1505,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 	switch (PS(session_status)) {
 		case php_session_active:
 			if (PS(session_started_filename)) {
-				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started (started from %s on line %u)", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
+				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started (started from %s on line %"PRIu32")", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
 			} else {
 				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
 			}
@@ -2541,7 +2541,7 @@ PHP_FUNCTION(session_start)
 
 	if (PS(session_status) == php_session_active) {
 		if (PS(session_started_filename)) {
-			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active (started from %s on line %d)", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
+			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active (started from %s on line %"PRIu32")", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
 		} else {
 			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
 		}
