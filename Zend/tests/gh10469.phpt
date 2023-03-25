@@ -1,22 +1,33 @@
 --TEST--
-GH-10469: Disallow open_basedir() with parent dir components (..)
+GH-10469: Disallow escaping cwd in open_basedir()
 --FILE--
 <?php
-ini_set('open_basedir', __DIR__);
+$rootDir = __DIR__;
+ini_set('open_basedir', $rootDir);
 
-$originalDir = __DIR__;
-$tmpDir = $originalDir . '/gh10469_tmp';
-@mkdir($tmpDir, 0777, true);
-chdir($tmpDir);
+$tmpDir = $rootDir . '/gh10469_tmp/a/a';
+@mkdir($rootDir . '/gh10469_tmp/a/a', 0777, true);
+
+chdir($rootDir . '/gh10469_tmp/a/a');
 ini_set('open_basedir', ini_get('open_basedir') . ':./..');
 ini_set('open_basedir', ini_get('open_basedir') . ':./../');
+ini_set('open_basedir', ini_get('open_basedir') . ':./..:');
 
-chdir($originalDir);
+chdir($rootDir . '/gh10469_tmp/a');
+ini_set('open_basedir', ini_get('open_basedir') . ':./a/../../');
+ini_set('open_basedir', ini_get('open_basedir') . ':./a/../a/.././../');
+
+ini_set('open_basedir', ini_get('open_basedir') . ':./a/../');
+ini_set('open_basedir', ini_get('open_basedir') . ':./a/../a/');
+
+chdir($rootDir);
 var_dump(ini_get('open_basedir'));
 ?>
 --CLEAN--
 <?php
+@rmdir(__DIR__ . '/gh10469_tmp/a/b');
+@rmdir(__DIR__ . '/gh10469_tmp/a');
 @rmdir(__DIR__ . '/gh10469_tmp');
 ?>
 --EXPECTF--
-string(%d) "%stests"
+string(%d) "%stests:./a/../:./a/../a/"
