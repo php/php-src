@@ -103,6 +103,18 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	assert_zend_string_eql(Result1, Result2);
 	ZEND_ASSERT(errors1 == errors2);
 
+	/* For some text encodings, we have specialized validation functions. These should always be
+	 * stricter than the conversion functions; if the conversion function receives invalid input
+	 * and emits an error marker (MBFL_BAD_INPUT), then the validation function should always
+	 * return false. However, if the conversion function does not emit any error marker, it may
+	 * still happen in some cases that the validation function returns false. */
+	if (FromEncoding->check != NULL) {
+		bool good = FromEncoding->check((unsigned char*)Data, Size);
+		if (errors1 > 0) {
+			ZEND_ASSERT(!good);
+		}
+	}
+
 	zend_string_release(Result1);
 	zend_string_release(Result2);
 	efree(ToEncodingName);
