@@ -692,17 +692,17 @@ define printzops
 	printf "op1\ttype: "
 	____print_op_type execute_data->opline.op1_type
 	printf "\t=> [%p] ", &opline->op1
-	printf "var=[%d]\n", opline->op1.var
+	printf "value=[%d]\n", opline->op1.var
 
 	printf "op2\ttype: "
 	____print_op_type execute_data->opline.op2_type
 	printf "\t=> [%p] ", &opline->op2
-	printf "var=[%d]\n", opline->op2.var
+	printf "value=[%d]\n", opline->op2.var
 
 	printf "result\ttype: "
 	____print_op_type execute_data->opline.result_type
 	printf "\t=> [%p] ", &opline->result
-	printf "var=[%d]\n", opline->result.var
+	printf "value=[%d]\n", opline->result.var
 end
 
 document printzops
