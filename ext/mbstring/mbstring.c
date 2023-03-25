@@ -3001,18 +3001,6 @@ static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, 
 		return *elist;
 	}
 
-	/* If any candidate encoding have specialized validation functions, use those first
-	 * to eliminate as many candidates as possible */
-	if (strict) {
-		for (unsigned int i = 0; i < elist_size; i++) {
-			if (elist[i]->check != NULL && !elist[i]->check(in, in_len)) {
-				elist_size--;
-				memmove(&elist[i], &elist[i+1], (elist_size - i) * sizeof(mbfl_encoding*));
-				i--;
-			}
-		}
-	}
-
 	uint32_t wchar_buf[128];
 	struct conversion_data {
 		const mbfl_encoding *enc;
@@ -3046,6 +3034,19 @@ static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, 
 			if (in_len >= 2 && in[0] == 0xFF && in[1] == 0xFE) {
 				data[i].in_len -= 2;
 				data[i].in += 2;
+			}
+		}
+	}
+
+	/* If any candidate encodings have specialized validation functions, use them
+	 * to eliminate as many candidates as possible */
+	if (strict) {
+		for (unsigned int i = 0; i < elist_size; i++) {
+			const mbfl_encoding *enc = data[i].enc;
+			if (enc->check != NULL && !enc->check(in, in_len)) {
+				elist_size--;
+				memmove(&data[i], &data[i+1], (elist_size - i) * sizeof(struct conversion_data));
+				i--;
 			}
 		}
 	}
