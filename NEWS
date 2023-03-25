@@ -71,6 +71,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-10885 (stream_socket_server context leaks). (ilutov)
   . Fixed bug GH-10052 (Browscap crashes PHP 8.1.12 on request shutdown
     (apache2)). (nielsdos)
+  . Fixed oss-fuzz #57392 (Buffer-overflow in php_fgetcsv() with \0 delimiter
+    and enclosure). (ilutov)
 
 16 Mar 2023, PHP 8.2.4
 
