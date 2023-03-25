@@ -175,7 +175,7 @@ end
 # $arg0: zval*
 # $arg1: used for array, object, reference, indirect type
 #        0: print extra information
-#        1: NOT print extra information
+#        1: Don't print extra information
 define ____printzv_contents
 	set $zvalue = $arg0
 
@@ -183,7 +183,7 @@ define ____printzv_contents
 	set $type = $zvalue->u1.v.type
 
 	# For refcounted type, print refcount
-	# IS_STRING = 6 &&  IS_CONSTANT_AST = 11
+	# IS_STRING = 6 && IS_CONSTANT_AST = 11
 	# STRING, ARRAY, OBJECT, RESOURCE, REFERENCE, CONSTANT_AST
 	if $type > 5 && $type < 12
 		printf "(refcount=%d) ", $zvalue->value.counted->gc.refcount
@@ -290,11 +290,11 @@ define ____printzv_contents
 	if $type == 15
 		printf "_ERROR"
 	end
-	# 	_IS_BOOL = 18
+
 	if $type == 18
 		printf "_BOOL"
 	end
-	# _IS_NUMBER = 19
+
 	if $type == 19
 		printf "_NUMBER"
 	end
@@ -315,11 +315,6 @@ define ____printzv
 
 	set $zcontents = (zval*) $zvalue
 	____printzv_contents $zcontents $arg1
-	# if $arg1
-	# 	____printzv_contents $zcontents $arg1
-	# else
-	# 	____printzv_contents $zcontents 0
-	# end
 end
 
 define print_global_vars
@@ -409,7 +404,7 @@ define ____print_ht
 				printf "%d => ", $h
 			end
 
-			# print hash value
+			# print hash value's pointer address (zval*)
 			if $arg1 == 0
 				printf "%p\n", $val
 			end
@@ -454,7 +449,7 @@ end
 
 document print_htptr
 	dumps elements of HashTable made of pointers
-	Usage: print_ht (HashTable*)pht
+	Usage: print_htptr (HashTable*)pht
 end
 
 define print_htstr
@@ -464,7 +459,7 @@ end
 
 document print_htstr
 	dumps elements of HashTable made of strings
-	Usage: print_ht (HashTable*)pht
+	Usage: print_htstr (HashTable*)pht
 end
 
 define print_ft
@@ -605,11 +600,11 @@ define ____print_str
 
 	printf "\""
 	while $tmp < $arg1 && $tmp < $maxlen
-		# print letters as is
-		# print special characters in octal (base 8)
 		if $str[$tmp] > 31 && $str[$tmp] < 127
+			# print ordinary letters as is
 			printf "%c", $str[$tmp]
 		else
+			# print special characters in octal (base 8)
 			printf "\\%o", $str[$tmp]
 		end
 		set $tmp = $tmp + 1
@@ -827,7 +822,11 @@ end
 
 define dump_current_op_array
 	____executor_globals
-	dump_op_array &($eg.current_execute_data->func->op_array)
+	if $eg.current_execute_data
+		dump_op_array &($eg.current_execute_data->func->op_array)
+	else
+		printf "[ERROR] $eg.current_execute_data is NULL\n"
+	end
 end
 
 document dump_current_op_array
@@ -868,7 +867,11 @@ end
 
 define bp_current_op_array
 	____executor_globals
-	bp_op_array_handler &($eg.current_execute_data->func->op_array)
+	if $eg.current_execute_data
+		bp_op_array_handler &($eg.current_execute_data->func->op_array)
+	else
+		printf "[ERROR] $eg.current_execute_data is NULL\n"
+	end
 end
 
 document bp_current_op_array
