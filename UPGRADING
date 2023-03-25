@@ -35,6 +35,10 @@ PHP 8.3 UPGRADE NOTES
     proc_get_status() to check whether the result was cached.
   . Zend Max Execution Timers is now enabled by default for ZTS builds on
     Linux.
+  . Uses of traits with static properties will now redeclare static properties
+    inherited from the parent class. This will create a separate static property
+    storage for the current class. This is analogous to adding the static
+    property to the class directly without traits.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
