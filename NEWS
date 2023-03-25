@@ -64,6 +64,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-10519 (Array Data Address Reference Issue). (Nathan Freeman)
   . Fixed bug GH-10907 (Unable to serialize processed SplFixedArrays in
     PHP 8.2.4). (nielsdos)
+  . Fixed bug GH-10844 (ArrayIterator allows modification of readonly props).
+    (ilutov)
 
 - Standard:
   . Fixed bug GH-10885 (stream_socket_server context leaks). (ilutov)
