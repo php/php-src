@@ -18,6 +18,7 @@
 /ext/gmp @Girgias
 /ext/imap @Girgias
 /ext/json @bukka
+/ext/mbstring @alexdowad
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
 /ext/pgsql @devnexen
