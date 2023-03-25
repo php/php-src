@@ -1373,7 +1373,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 			if (c != (unsigned char*)ZSTR_VAL(s)) {
 				memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
 			}
-			r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
+			r = (unsigned char*) ZSTR_VAL(res) + (c - (unsigned char*) ZSTR_VAL(s));
 			while (c < e) {
 				*r = toupper(*c);
 				r++;
@@ -1438,7 +1438,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 				if (c != (unsigned char*)ZSTR_VAL(s)) {
 					memcpy(ZSTR_VAL(res), ZSTR_VAL(s), c - (unsigned char*)ZSTR_VAL(s));
 				}
-				r = c + (ZSTR_VAL(res) - ZSTR_VAL(s));
+				r = (unsigned char*) ZSTR_VAL(res) + (c - (unsigned char*) ZSTR_VAL(s));
 				while (c < e) {
 					*r = tolower(*c);
 					r++;

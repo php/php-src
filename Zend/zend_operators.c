@@ -2760,7 +2760,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 		if (_mm_movemask_epi8(mingle)) {
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
 
 			/* Lowercase the chunk we already compared. */
 			const __m128i delta = _mm_set1_epi8('a' - 'A');
@@ -2783,7 +2783,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
 
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
 			while (p < end) {
 				*q++ = zend_tolower_ascii(*p++);
 			}
