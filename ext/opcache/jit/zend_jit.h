@@ -58,7 +58,6 @@
 
 #define ZEND_JIT_DEBUG_PERF      (1<<4)
 #define ZEND_JIT_DEBUG_PERF_DUMP (1<<5)
-#define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
 #define ZEND_JIT_DEBUG_VTUNE     (1<<7)
 
 #define ZEND_JIT_DEBUG_GDB       (1<<8)
