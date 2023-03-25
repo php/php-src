@@ -666,31 +666,43 @@ document printzn
 	Usage: printzn (znode*)pznode
 end
 
-# print znode_op information
-# $arg0: znode_op*
-define ____print_znode_op
-	set $op = $arg0
-	printf "[%p]\n", $op
-	printf "  constant=[%d] ", $op->constant
-	printf "var=[%d] ", $op->var
-	printf "num=[%d] ", $op->num
-	printf "opline_num=[%d] ", $op->opline_num
-	printf "jmp_offset=[%d]\n", $op->jmp_offset
-end
-
-document ____print_znode_op
-	Dump znode_op information
-	Usage: ____print_znode_op (znode_op*)pop
+# arg0: (uint8_t) op_type
+define ____print_op_type
+	set $op_type = (uint8_t) $arg0
+	if $op_type == 0
+		printf "IS_UNUSED"
+	end
+	if $op_type == 1
+		printf "IS_CONST"
+	end
+	if $op_type == 2
+		printf "IS_TMP_VAR"
+	end
+	if $op_type == 4
+		printf "IS_VAR"
+	end
+	if $op_type == 8
+		printf "IS_CV"
+	end
 end
 
 # op1, op2, and result are actually of znode_op type
 define printzops
-	printf "op1 => "
-	____print_znode_op &execute_data->opline.op1
-	printf "op2 => "
-	____print_znode_op &execute_data->opline.op2
-	printf "result => "
-	____print_znode_op &execute_data->opline.result
+	set $opline = (const zend_op *)execute_data->opline
+	printf "op1\ttype: "
+	____print_op_type execute_data->opline.op1_type
+	printf "\t=> [%p] ", &opline->op1
+	printf "var=[%d]\n", opline->op1.var
+
+	printf "op2\ttype: "
+	____print_op_type execute_data->opline.op2_type
+	printf "\t=> [%p] ", &opline->op2
+	printf "var=[%d]\n", opline->op2.var
+
+	printf "result\ttype: "
+	____print_op_type execute_data->opline.result_type
+	printf "\t=> [%p] ", &opline->result
+	printf "var=[%d]\n", opline->result.var
 end
 
 document printzops
