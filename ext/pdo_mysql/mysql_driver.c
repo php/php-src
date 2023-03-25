@@ -154,9 +154,11 @@ static void mysql_handle_closer(pdo_dbh_t *dbh)
 	if (H) {
 		if (H->server) {
 			mysql_close(H->server);
+			H->server = NULL;
 		}
 		if (H->einfo.errmsg) {
 			pefree(H->einfo.errmsg, dbh->is_persistent);
+			H->einfo.errmsg = NULL;
 		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
