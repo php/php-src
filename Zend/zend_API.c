@@ -4579,10 +4579,6 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 		zval_make_interned_string(value);
 	}
 
-	if (!ZSTR_IS_INTERNED(name)) {
-		name = zend_new_interned_string(zend_string_copy(name));
-	}
-
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		c = pemalloc(sizeof(zend_class_constant), 1);
 	} else {
