@@ -10,6 +10,7 @@ $tmpDir = $originalDir . '/gh10469_tmp';
 chdir($tmpDir);
 ini_set('open_basedir', ini_get('open_basedir') . ':./..');
 ini_set('open_basedir', ini_get('open_basedir') . ':./../');
+ini_set('open_basedir', ini_get('open_basedir') . ':/a/');
 
 chdir($originalDir);
 var_dump(ini_get('open_basedir'));

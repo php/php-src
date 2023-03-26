@@ -103,7 +103,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 		}
 		/* Don't allow paths with a parent dir component (..) to be set at runtime */
 		char *substr_pos = ptr;
-		while (true) {
+		while (*substr_pos) {
 			// Check if we have a .. path component
 			if (substr_pos[0] == '.'
 			 && substr_pos[1] == '.'
