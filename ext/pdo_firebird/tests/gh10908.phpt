@@ -17,12 +17,22 @@ CREATE TABLE gh10908(
   CODE VARCHAR(60) NOT NULL,
   NUM NUMERIC(18, 3),
   DBL DOUBLE PRECISION,
+  FLT FLOAT,
   TS TIMESTAMP,
-  MYBLOB BLOB
+  MYDATE DATE,
+  MYTIME TIME,
+  MYBLOB BLOB,
+  MYBINARY BINARY(2),
+  MYVARBINARY VARBINARY(2),
+  MYSMALLINT SMALLINT,
+  MYINT INT,
+  MYCHAR CHAR(10),
+  MYVARCHAR VARCHAR(5),
+  MYBOOL BOOLEAN
 );
 EOT;
 $dbh->exec($sql);
-$dbh->exec("INSERT INTO gh10908 VALUES(1, 'ABC', 12.34, 1.0, '2023-03-24 17:39', 'abcdefg');");
+$dbh->exec("INSERT INTO gh10908 VALUES(1, 'ABC', 12.34, 1.0, 2.0, '2023-03-24 17:39', '2023-03-24', '17:39', 'abcdefg', 'ab', 'a', 32767, 200000, 'azertyuiop', 'ab', false);");
 
 function query_and_dump($dbh, $sql) {
     foreach ($dbh->query($sql) as $row) {
@@ -45,6 +55,11 @@ query_and_dump($dbh, "SELECT CAST(ID AS BIGINT)         FROM gh10908"); // Used 
 
 echo "Did not crash\n";
 
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh->exec("DROP TABLE gh10908");
 ?>
 --EXPECT--
 Array
@@ -93,10 +108,30 @@ Array
     [2] => 12.340
     [DBL] => 1.000000
     [3] => 1.000000
+    [FLT] => 2.000000
+    [4] => 2.000000
     [TS] => 2023-03-24 17:39:00
-    [4] => 2023-03-24 17:39:00
+    [5] => 2023-03-24 17:39:00
+    [MYDATE] => 2023-03-24
+    [6] => 2023-03-24
+    [MYTIME] => 17:39:00
+    [7] => 17:39:00
     [MYBLOB] => abcdefg
-    [5] => abcdefg
+    [8] => abcdefg
+    [MYBINARY] => ab
+    [9] => ab
+    [MYVARBINARY] => a
+    [10] => a
+    [MYSMALLINT] => 32767
+    [11] => 32767
+    [MYINT] => 200000
+    [12] => 200000
+    [MYCHAR] => azertyuiop
+    [13] => azertyuiop
+    [MYVARCHAR] => ab
+    [14] => ab
+    [MYBOOL] => 
+    [15] => 
 )
 
 Array
@@ -118,8 +153,3 @@ Array
 )
 
 Did not crash
---CLEAN--
-<?php
-require 'testdb.inc';
-$dbh->exec("DROP TABLE gh10908");
-?>
