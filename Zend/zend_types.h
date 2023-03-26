@@ -563,28 +563,10 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define Z_COUNTED(zval)				(zval).value.counted
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
 
-#define Z_TYPE_MASK					0xff
+#define Z_TYPE_MASK					0x00ff
 #define Z_TYPE_FLAGS_MASK			0xff00
 
 #define Z_TYPE_FLAGS_SHIFT			8
-
-#define GC_TYPE_MASK				0x0000000f
-#define GC_FLAGS_MASK				0x000003f0
-#define GC_INFO_MASK				0xfffffc00
-#define GC_FLAGS_SHIFT				0
-#define GC_INFO_SHIFT				10
-
-#define GC_TYPE_INFO(p)				(p)->gc.u.type_info
-#define GC_TYPE(p)					zval_gc_type(GC_TYPE_INFO(p))
-#define GC_FLAGS(p)					zval_gc_flags(GC_TYPE_INFO(p))
-#define GC_INFO(p)					zval_gc_info(GC_TYPE_INFO(p))
-
-#define GC_ADD_FLAGS(p, flags) do { \
-		GC_TYPE_INFO(p) |= (flags) << GC_FLAGS_SHIFT; \
-	} while (0)
-#define GC_DEL_FLAGS(p, flags) do { \
-		GC_TYPE_INFO(p) &= ~((flags) << GC_FLAGS_SHIFT); \
-	} while (0)
 
 #define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
