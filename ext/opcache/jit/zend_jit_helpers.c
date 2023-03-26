@@ -3104,13 +3104,16 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 	zend_string *ret;
 	uint32_t i;
 	size_t len = 0;
-	char *target;
 
+	uint32_t flags = ZSTR_COPYABLE_CONCAT_PROPERTIES;
 	for (i = 0; i <= count; i++) {
+		flags &= ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(rope[i]);
 		len += ZSTR_LEN(rope[i]);
 	}
 	ret = zend_string_alloc(len, 0);
-	target = ZSTR_VAL(ret);
+	GC_ADD_FLAGS(ret, flags);
+
+	char *target = ZSTR_VAL(ret);
 	for (i = 0; i <= count; i++) {
 		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
 		target += ZSTR_LEN(rope[i]);
