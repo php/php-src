@@ -707,7 +707,7 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_remove_from_roots(root);
 }
 
-static void gc_scan_black(zend_refcounted *ref, gc_stack *stack, gc_stack_handle *defer_stack_handle)
+static void gc_scan_black(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht;
 	Bucket *p;
@@ -737,7 +737,6 @@ tail_call:
 							GC_REF_SET_BLACK(ref);
 							GC_STACK_PUSH(ref);
 						}
-						gc_stack_push(&defer_stack_handle->stack, &defer_stack_handle->top, (void*)value);
 					}
 					zv++;
 				}
@@ -849,7 +848,7 @@ handle_ht:
 	}
 }
 
-static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
+static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack, gc_stack_handle *defer_stack_handle)
 {
 	HashTable *ht;
 	Bucket *p;
@@ -881,6 +880,7 @@ tail_call:
 						if (Z_REFCOUNTED_P(value)) {
 							ZEND_ASSERT(!GC_REFERENCE_SCANNED(value));
 							GC_SET_REFERENCE_SCANNED(value);
+							gc_stack_push(&defer_stack_handle->stack, &defer_stack_handle->top, (void*) value);
 							ref = Z_COUNTED_P(value);
 							GC_DELREF(ref);
 							if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
@@ -1035,7 +1035,7 @@ static void gc_compact(void)
 	}
 }
 
-static void gc_mark_roots(gc_stack *stack)
+static void gc_mark_roots(gc_stack *stack, gc_stack_handle *defer_stack_handle)
 {
 	gc_root_buffer *current, *last;
 
@@ -1047,14 +1047,14 @@ static void gc_mark_roots(gc_stack *stack)
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_PURPLE)) {
 				GC_REF_SET_COLOR(current->ref, GC_GREY);
-				gc_mark_grey(current->ref, stack);
+				gc_mark_grey(current->ref, stack, defer_stack_handle);
 			}
 		}
 		current++;
 	}
 }
 
-static void gc_scan(zend_refcounted *ref, gc_stack *stack, gc_stack_handle *defer_stack_handle)
+static void gc_scan(zend_refcounted *ref, gc_stack *stack)
 {
 	HashTable *ht;
 	Bucket *p;
@@ -1075,7 +1075,7 @@ tail_call:
 			}
 			/* Split stack and reuse the tail */
 			_stack->next->prev = NULL;
-			gc_scan_black(ref, _stack->next, defer_stack_handle);
+			gc_scan_black(ref, _stack->next);
 			_stack->next->prev = _stack;
 		}
 		goto next;
@@ -1207,30 +1207,19 @@ next:
 	}
 }
 
-static void gc_scan_roots(gc_stack *stack, gc_stack *defer_stack)
+static void gc_scan_roots(gc_stack *stack)
 {
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
-	gc_stack_handle defer_stack_handle = {
-		.stack = defer_stack,
-	};
 
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
 				GC_REF_SET_COLOR(current->ref, GC_WHITE);
-				gc_scan(current->ref, stack, &defer_stack_handle);
+				gc_scan(current->ref, stack);
 			}
 		}
 		current++;
-	}
-
-	while (1) {
-		zval *value = (zval*) gc_stack_pop(&defer_stack_handle.stack, &defer_stack_handle.top);
-		if (!value) {
-			break;
-		}
-		GC_UNSET_REFERENCE_SCANNED(value);
 	}
 }
 
@@ -1259,7 +1248,7 @@ static void gc_add_garbage(zend_refcounted *ref)
 	GC_G(num_roots)++;
 }
 
-static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *stack, gc_stack_handle *defer_stack_handle)
+static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *stack)
 {
 	int count = 0;
 	HashTable *ht;
@@ -1298,6 +1287,7 @@ tail_call:
 				for (; n != 0; n--) {
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 					zval *value = (zval*) Z_PTR_P(zv);
+					// if (!GC_REF_CHECK_COLOR(Z_COUNTED_P(weakmap), GC_BLACK)) {
 					if (GC_REFERENCE_SCANNED(value) && Z_OPT_REFCOUNTED_P(value)) {
 						ref = Z_COUNTED_P(value);
 						GC_ADDREF(ref);
@@ -1305,7 +1295,6 @@ tail_call:
 							GC_REF_SET_BLACK(ref);
 							GC_STACK_PUSH(ref);
 						}
-						gc_stack_push(&defer_stack_handle->stack, &defer_stack_handle->top, (void*)value);
 					}
 					zv++;
 				}
@@ -1423,16 +1412,13 @@ handle_ht:
 	return count;
 }
 
-static int gc_collect_roots(uint32_t *flags, gc_stack *stack, gc_stack *defer_stack)
+static int gc_collect_roots(uint32_t *flags, gc_stack *stack)
 {
 	uint32_t idx, end;
 	zend_refcounted *ref;
 	int count = 0;
 	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
 	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
-	gc_stack_handle defer_stack_handle = {
-		.stack = defer_stack,
-	};
 
 	/* remove non-garbage from the list */
 	while (current != last) {
@@ -1458,17 +1444,9 @@ static int gc_collect_roots(uint32_t *flags, gc_stack *stack, gc_stack *defer_st
 		current->ref = GC_MAKE_GARBAGE(ref);
 		if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 			GC_REF_SET_BLACK(ref);
-			count += gc_collect_white(ref, flags, stack, &defer_stack_handle);
+			count += gc_collect_white(ref, flags, stack);
 		}
 		idx++;
-	}
-
-	while (1) {
-		zval *value = (zval*) gc_stack_pop(&defer_stack_handle.stack, &defer_stack_handle.top);
-		if (!value) {
-			break;
-		}
-		GC_UNSET_REFERENCE_SCANNED(value);
 	}
 
 	return count;
@@ -1622,13 +1600,15 @@ rerun_gc:
 		uint32_t idx, end;
 		gc_stack stack;
 		gc_stack defer_stack;
+		gc_stack_handle defer_stack_handle = {
+			.stack = &defer_stack,
+		};
 
 		stack.prev = NULL;
 		stack.next = NULL;
 
 		defer_stack.prev = NULL;
 		defer_stack.next = NULL;
-
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -1639,12 +1619,20 @@ rerun_gc:
 		GC_G(gc_active) = 1;
 
 		GC_TRACE("Marking roots");
-		gc_mark_roots(&stack);
+		gc_mark_roots(&stack, &defer_stack_handle);
 		GC_TRACE("Scanning roots");
-		gc_scan_roots(&stack, &defer_stack);
+		gc_scan_roots(&stack);
 
 		GC_TRACE("Collecting roots");
-		count = gc_collect_roots(&gc_flags, &stack, &defer_stack);
+		count = gc_collect_roots(&gc_flags, &stack);
+
+		while (1) {
+			zval *value = (zval*) gc_stack_pop(&defer_stack_handle.stack, &defer_stack_handle.top);
+			if (!value) {
+				break;
+			}
+			GC_UNSET_REFERENCE_SCANNED(value);
+		}
 
 		if (!GC_G(num_roots)) {
 			/* nothing to free */
