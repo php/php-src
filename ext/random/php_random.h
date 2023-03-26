@@ -65,9 +65,9 @@ PHPAPI double php_combined_lcg(void);
 	(__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
 
 # ifdef PHP_WIN32
-#  define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 # else
-#  define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 # endif
 
 # define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
