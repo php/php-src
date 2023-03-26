@@ -181,6 +181,11 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 					return NULL;
 				}
 
+				/*
+				 * xmlNewDocText function will always returns same address to the second parameter if the parameters are greater than or equal to three.
+				 * If it's text, that's fine, but if it's an object, it can cause invalid pointer because many new nodes point to the same memory address.
+				 * So we must copy the new node to avoid this situation.
+				 */
 				if (nodesc > 1) {
 					newNode = xmlCopyNode(newNode, 1);
 				}
@@ -330,11 +335,22 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
+		// first node and last node are both both parameters to DOMElement::before() method so nextsib and prevsib are null.
 		if (!parentNode->children) {
 			prevsib = nextsib = NULL;
 		} else if (afterlastchild) {
+			/*
+			 * The new node will be inserted after last node, prevsib is last node.
+			 * The first node is the parameter to DOMElement::after() if parentNode->children == prevsib is true
+			 * and prevsib does not change, otherwise prevsib is parentNode->last(first mode).
+			 */
 			prevsib = parentNode->children == prevsib ? prevsib : parentNode->last;
 		} else {
+			/*
+			 * The new node will be inserted after first node, prevsib is first node.
+			 * The first node is not the parameter to DOMElement::after() if parentNode->children == prevsib is true
+			 * and prevsib does not change otherwise prevsib is null to mean that parentNode->children is the new node.
+			 */
 			prevsib = parentNode->children == prevsib ? prevsib : NULL;
 		}
 
@@ -382,11 +398,22 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
+		// first node and last node are both both parameters to DOMElement::before() method so nextsib is null.
 		if (!parentNode->children) {
 			nextsib = NULL;
 		} else if (beforefirstchild) {
+			/*
+			 * The new node will be inserted before first node, nextsib is first node and afternextsib is last node.
+			 * The first node is not the parameter to DOMElement::before() if parentNode->children == nextsib is true
+			 * and nextsib does not change, otherwise nextsib is the last node.
+			 */
 			nextsib = parentNode->children == nextsib ? nextsib : afternextsib;
 		} else {
+			/*
+			 * The new node will be inserted before last node, prevsib is first node and nestsib is last node.
+			 * The first node is not the parameter to DOMElement::before() if parentNode->children == prevsib is true
+			 * but last node may be, so use prevsib->next to determine the value of nextsib, otherwise nextsib does not change.
+			 */
 			nextsib = parentNode->children == prevsib ? prevsib->next : nextsib;
 		}
 
