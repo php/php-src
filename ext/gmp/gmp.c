@@ -1729,7 +1729,11 @@ static void gmp_init_random(void)
 		/* Initialize */
 		gmp_randinit_mt(GMPG(rand_state));
 		/* Seed */
-		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
+		zend_long seed = 0;
+		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
+			seed = GENERATE_SEED();
+		}
+		gmp_randseed_ui(GMPG(rand_state), seed);
 
 		GMPG(rand_initialized) = 1;
 	}
