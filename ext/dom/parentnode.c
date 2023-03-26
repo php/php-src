@@ -335,7 +335,7 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
-		// first node and last node are both both parameters to DOMElement::before() method so nextsib and prevsib are null.
+		// first node and last node are both both parameters to DOMElement::after() method so nextsib and prevsib are null.
 		if (!parentNode->children) {
 			prevsib = nextsib = NULL;
 		} else if (afterlastchild) {
