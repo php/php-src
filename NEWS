@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-10521 (ftp_get/ftp_nb_get resumepos offset is maximum 10GB).
     (nielsdos)
 
+- IMAP:
+  . Fix build failure with Clang 16. (orlitzky)
+
 - MySQLnd:
   . Fixed bug GH-8979 (Possible Memory Leak with SSL-enabled MySQL
     connections). (nielsdos)
