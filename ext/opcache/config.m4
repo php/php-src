@@ -18,8 +18,8 @@ PHP_ARG_ENABLE([opcache-jit],
   [yes],
   [no])
 
-PHP_ARG_WITH([opcache-capstone],,
-  [AS_HELP_STRING([--with-opcache-capstone],
+PHP_ARG_WITH([capstone],,
+  [AS_HELP_STRING([--with-capstone],
     [support opcache JIT disassembly through capstone])],
   [no],
   [no])
@@ -74,7 +74,7 @@ if test "$PHP_OPCACHE" != "no"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
 
-    AS_IF([test x"$with_opcache_capstone" = "xyes"],[
+    AS_IF([test x"$with_capstone" = "xyes"],[
       PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
         AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
         PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
