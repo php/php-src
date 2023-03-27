@@ -70,8 +70,6 @@ PHP                                                                        NEWS
     PHP 8.2.4). (nielsdos)
   . Fixed bug GH-10844 (ArrayIterator allows modification of readonly props).
     (ilutov)
-  . Fixed bug GH-10925 (Handle indirect zvals in SplFixedArray::__serialize).
-    (nielsdos)
 
 - Standard:
   . Fixed bug GH-10885 (stream_socket_server context leaks). (ilutov)
