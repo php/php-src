@@ -22,16 +22,22 @@ class Test
 	}
 }
 
-Test::works1();
-Test::works2();
+$header = '
+typedef struct _IO_FILE FILE;
+extern FILE *stdout;
+int fprintf(FILE *, const char *, ...);
+int fflush(FILE *);
+';
+$ffi = FFI::cdef($header, 'libc.so.6');
 
-$ffi = FFI::cdef('int printf(const char *format, ...);', 'libc.so.6');
-$ffi->printf("Hello %s!\n", "world");
-
-Test::breaks();
+Test::foo();
+Test::bar();
+$ffi->fprintf($ffi->stdout, "FFI\n");
+$ffi->fflush($ffi->stdout);
+Test::baz();
 ?>
 --EXPECT--
-works1 called
-works2 called
-breaks called
-Hello world!
+foo called
+bar called
+FFI
+baz called
