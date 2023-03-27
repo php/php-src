@@ -6,6 +6,8 @@ mysqli
 <?php
 require_once('skipifconnectfailure.inc');
 ?>
+--CONFLICTS--
+all
 --FILE--
 <?php
     require_once("connect.inc");
