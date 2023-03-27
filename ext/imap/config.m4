@@ -17,6 +17,18 @@ AC_DEFUN([IMAP_LIB_CHK],[
 ])
 
 dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok, extra-libs, extra-source)
+dnl
+dnl The UW-IMAP c-client library was not originally designed to be a
+dnl shared library. The mm_foo functions are callbacks, and are required
+dnl to be implemented by the program that is linking to c-client. This
+dnl macro does the work of defining them all to no-ops for you. Note
+dnl that PHP_TEST_BUILD is a link test; the undefined symbols will only
+dnl cause problems if you actually try to link with c-client. For
+dnl example, if your test is trivial enough to be optimized out, and if
+dnl you link with --as-needed, the test/library may be omitted entirely
+dnl from the final executable. In that case linking will of course
+dnl succeed, but your luck won't necessarily apply at lower optimization
+dnl levels or systems where --as-needed is not used.
 AC_DEFUN([PHP_IMAP_TEST_BUILD], [
   PHP_TEST_BUILD([$1], [$2], [$3], [$4], [$5]
   [
