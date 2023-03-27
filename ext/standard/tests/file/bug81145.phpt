@@ -13,6 +13,8 @@ if (PHP_OS_FAMILY !== "Windows") {
     @unlink(__DIR__ . "/bug81145_src.bin");
 }
 ?>
+--CONFLICTS--
+all
 --FILE--
 <?php
 $src = __DIR__ . "/bug81145_src.bin";
