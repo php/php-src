@@ -110,8 +110,6 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 	/* TODO: These could be moved to MINIT and removed. These should be initialized by php_rshutdown_session_globals() always when execution is finished. */
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
-	PS(session_started_filename) = NULL;
-	PS(session_started_lineno) = 0;
 	PS(in_save_handler) = 0;
 	PS(set_handler) = 0;
 	PS(mod_data) = NULL;
@@ -2882,6 +2880,8 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	PS(module_number) = module_number;
 
 	PS(session_status) = php_session_none;
+	PS(session_started_filename) = NULL;
+	PS(session_started_lineno) = 0;
 	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBMM
