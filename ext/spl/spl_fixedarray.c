@@ -599,7 +599,7 @@ PHP_METHOD(SplFixedArray, __serialize)
 
 	/* members */
 	if (intern->std.properties) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(intern->std.properties, key, current) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(intern->std.properties, key, current) {
 			/* The properties hash table can also contain the array elements if the properties table was already rebuilt.
 			 * In this case we'd have a NULL key. We can't simply use the properties table in all cases because it's
 			 * potentially out of sync (missing elements, or containing removed elements) and might need a rebuild. */
