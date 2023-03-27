@@ -3982,11 +3982,11 @@ final class Differ
         reset($to);
 
         foreach ($common as $token) {
-            while (!($this->isEqual)($fromToken = reset($from), $token)) {
+            while (!($this->isEqual)(reset($from), $token)) {
                 $diff[] = [array_shift($from), self::REMOVED, $fromLine++];
             }
 
-            while (!($this->isEqual)($toToken = reset($to), $token)) {
+            while (!($this->isEqual)($token, reset($to))) {
                 $diff[] = [array_shift($to), self::ADDED, $toLine++];
             }
 
@@ -4065,8 +4065,10 @@ final class Differ
         }
 
         if ($cFrom === 1) {
-            if (in_array($from[0], $to, true)) {
-                return [$from[0]];
+            foreach ($to as $toV) {
+                if (($this->isEqual)($from[0], $toV)) {
+                    return [$from[0]];
+                }
             }
 
             return [];
