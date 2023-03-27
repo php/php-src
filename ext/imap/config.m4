@@ -247,7 +247,8 @@ if test "$PHP_IMAP" != "no"; then
     AC_LANG_PUSH(C)
     AC_CACHE_CHECK(for utf8_to_mutf7, ac_cv_utf8_to_mutf7,
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <c-client.h>]],[[
-        utf8_to_mutf7("");
+        unsigned char c = '\0';
+        utf8_to_mutf7(&c);
       ]])],[
         AC_DEFINE(HAVE_IMAP_MUTF7, 1, [ ])
         ac_cv_utf8_to_mutf7=yes
