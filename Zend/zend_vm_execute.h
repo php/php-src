@@ -7567,6 +7567,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 {
 	USE_OPLINE
 	zval *name;
+	zend_string *name_str;
 	zval *val;
 	zend_constant c;
 
@@ -7585,9 +7586,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 	}
 	/* non persistent, case sensitive */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	c.name = zend_string_copy(Z_STR_P(name));
+	name_str = zend_string_copy(Z_STR_P(name));
 
-	if (zend_register_constant(&c) == FAILURE) {
+	if (zend_register_constant(name_str, &c) == FAILURE) {
 	}
 
 

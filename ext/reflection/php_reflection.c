@@ -1040,11 +1040,13 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 	{
 		smart_str str_constants = {0};
 		zend_constant *constant;
+		zend_string *name;
 		int num_constants = 0;
 
-		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), name, constant) {
+
 			if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
-				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, indent);
+				_const_string(&str_constants, ZSTR_VAL(name), &constant->value, indent);
 				num_constants++;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -5992,6 +5994,7 @@ ZEND_METHOD(ReflectionExtension, getConstants)
 	reflection_object *intern;
 	zend_module_entry *module;
 	zend_constant *constant;
+	zend_string *name;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -5999,11 +6002,11 @@ ZEND_METHOD(ReflectionExtension, getConstants)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), name, constant) {
 		if (module->module_number == ZEND_CONSTANT_MODULE_NUMBER(constant)) {
 			zval const_val;
 			ZVAL_COPY_OR_DUP(&const_val, &constant->value);
-			zend_hash_update(Z_ARRVAL_P(return_value), constant->name, &const_val);
+			zend_hash_update(Z_ARRVAL_P(return_value), name, &const_val);
 		}
 	} ZEND_HASH_FOREACH_END();
 }

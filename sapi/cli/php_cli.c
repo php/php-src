@@ -558,16 +558,16 @@ static void cli_register_file_handles(void)
 	php_stream_to_zval(s_err, &ec.value);
 
 	Z_CONSTANT_FLAGS(ic.value) = 0;
-	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
-	zend_register_constant(&ic);
+	zend_string *stdin_name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
+	zend_register_constant(stdin_name, &ic);
 
 	Z_CONSTANT_FLAGS(oc.value) = 0;
-	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
-	zend_register_constant(&oc);
+	zend_string *stdout_name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
+	zend_register_constant(stdout_name, &oc);
 
 	Z_CONSTANT_FLAGS(ec.value) = 0;
-	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
-	zend_register_constant(&ec);
+	zend_string *stderr_name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
+	zend_register_constant(stderr_name, &ec);
 }
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
