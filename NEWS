@@ -19,6 +19,7 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-10810 (Fix NUL byte terminating Exception::__toString()).
     (ilutov)
+  . Fix potential memory corruption when mixing __callStatic() and FFI. (ilutov)
 
 - Date:
   . Fixed bug GH-10747 (Private and protected properties in serialized Date*
