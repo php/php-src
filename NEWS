@@ -81,6 +81,7 @@ PHP                                                                        NEWS
     (apache2)). (nielsdos)
   . Fixed oss-fuzz #57392 (Buffer-overflow in php_fgetcsv() with \0 delimiter
     and enclosure). (ilutov)
+  . Fixed undefined behaviour in unpack(). (nielsdos)
 
 16 Mar 2023, PHP 8.2.4
 
