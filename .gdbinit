@@ -687,20 +687,27 @@ define ____print_op_type
 end
 
 # op1, op2, and result are actually of znode_op type
+# arg0: (zend_op*) opline,
+#       if not specified, use current executed opline
 define printzops
-	set $opline = (const zend_op *)execute_data->opline
+	if $argc < 1
+		set $opline = (const zend_op *)execute_data->opline
+	else
+		set $opline = $arg0
+	end
+
 	printf "op1\ttype: "
-	____print_op_type execute_data->opline.op1_type
+	____print_op_type opline->op1_type
 	printf "\t=> [%p] ", &opline->op1
 	printf "value=[%d]\n", opline->op1.var
 
 	printf "op2\ttype: "
-	____print_op_type execute_data->opline.op2_type
+	____print_op_type opline->op2_type
 	printf "\t=> [%p] ", &opline->op2
 	printf "value=[%d]\n", opline->op2.var
 
 	printf "result\ttype: "
-	____print_op_type execute_data->opline.result_type
+	____print_op_type opline.result_type
 	printf "\t=> [%p] ", &opline->result
 	printf "value=[%d]\n", opline->result.var
 end
@@ -771,7 +778,9 @@ define dump_opline
 	if $arg0
 		set $opline=$arg0
 		printf "lineno=[%d] opcode=[%d] ", $opline->lineno, $opline->opcode
-		printf "handler=["
+		printf "opname=["
+		output zend_vm_opcodes_names[$opline->opcode]
+		printf "] handler=["
 		output $opline->handler
 		printf "]\n"
 	else
@@ -796,7 +805,7 @@ end
 
 document dump_current_opline
 	Dump currently executed opline information
-	Usage: print_executed_opline
+	Usage: dump_current_opline
 end
 
 # arg0: (zend_op_array*)
