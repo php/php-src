@@ -365,10 +365,10 @@ PHP_FUNCTION(http_response_code)
 	{
 		if (SG(headers_sent) && !SG(request_info).no_headers) {
 			const char *output_start_filename = php_output_get_start_filename();
-			uint32_t output_start_lineno = php_output_get_start_lineno();
+			int output_start_lineno = php_output_get_start_lineno();
 
 			if (output_start_filename) {
-				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent by (output started at %s:%u)", output_start_filename, output_start_lineno);
+				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent by (output started at %s:%"PRIi32")", output_start_filename, output_start_lineno);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent");
 			}
