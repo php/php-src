@@ -142,6 +142,7 @@ PHP 8.3 UPGRADE NOTES
   . Added posix_sysconf call to get runtime informations.
   . Added posix_pathconf call to get configuration value from a directory/file.
   . Added posix_fpathconf call to get configuration value from a file descriptor.
+  . Added posix_eaccess call to check the effective user id's permission for a path.
 
 - Random:
   . Added Randomizer::getBytesFromString().

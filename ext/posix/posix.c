@@ -729,7 +729,7 @@ PHP_FUNCTION(posix_eaccess)
 
 	path = expand_filepath(filename, NULL);
 	if (!path) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 
