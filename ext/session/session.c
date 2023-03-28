@@ -121,6 +121,16 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 }
 /* }}} */
 
+static inline void php_session_cleanup_filename(void) /* {{{ */
+{
+	if (PS(session_started_filename)) {
+		zend_string_release(PS(session_started_filename));
+		PS(session_started_filename) = NULL;
+		PS(session_started_lineno) = 0;
+	}
+}
+/* }}} */
+
 /* Dispatched by RSHUTDOWN and by php_session_destroy */
 static inline void php_rshutdown_session_globals(void) /* {{{ */
 {
@@ -148,6 +158,8 @@ static inline void php_rshutdown_session_globals(void) /* {{{ */
 		zend_string_release(PS(mod_user_class_name));
 		PS(mod_user_class_name) = NULL;
 	}
+
+	php_session_cleanup_filename();
 
 	/* User save handlers may end up directly here by misuse, bugs in user script, etc. */
 	/* Set session status to prevent error while restoring save handler INI value. */
@@ -464,6 +476,13 @@ static zend_result php_session_initialize(void) /* {{{ */
 		}
 		php_session_decode(val);
 		zend_string_release_ex(val, 0);
+	}
+
+	php_session_cleanup_filename();
+	zend_string *session_started_filename = zend_get_executed_filename_ex();
+	if (session_started_filename != NULL) {
+		PS(session_started_filename) = zend_string_copy(session_started_filename);
+		PS(session_started_lineno) = zend_get_executed_lineno();
 	}
 	return SUCCESS;
 }
@@ -1490,7 +1509,14 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 
 	switch (PS(session_status)) {
 		case php_session_active:
-			php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
+			if (PS(session_started_filename)) {
+				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started (started from %s on line %"PRIu32")", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
+			} else if (PS(auto_start)) {
+				/* This option can't be changed at runtime, so we can assume it's because of this */
+				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started automatically");
+			} else {
+				php_error(E_NOTICE, "Ignoring session_start() because a session has already been started");
+			}
 			return FAILURE;
 			break;
 
@@ -1600,6 +1626,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 		}
 		return FAILURE;
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -2513,7 +2540,14 @@ PHP_FUNCTION(session_start)
 	}
 
 	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
+		if (PS(session_started_filename)) {
+			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active (started from %s on line %"PRIu32")", ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
+		} else if (PS(auto_start)) {
+			/* This option can't be changed at runtime, so we can assume it's because of this */
+			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already automatically active");
+		} else {
+			php_error_docref(NULL, E_NOTICE, "Ignoring session_start() because a session is already active");
+		}
 		RETURN_TRUE;
 	}
 
@@ -2846,6 +2880,8 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	PS(module_number) = module_number;
 
 	PS(session_status) = php_session_none;
+	PS(session_started_filename) = NULL;
+	PS(session_started_lineno) = 0;
 	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBMM
