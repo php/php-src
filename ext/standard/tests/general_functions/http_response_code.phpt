@@ -33,5 +33,5 @@ bool(true)
 int(201)
 Now we've sent the headers
 
-Warning: http_response_code(): Cannot set response code - headers already sent by (output started at %s:%d) in %s on line %d
+Warning: http_response_code(): Cannot set response code - headers already sent (output started at %s:%d) in %s on line %d
 bool(false)
