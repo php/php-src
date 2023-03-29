@@ -970,13 +970,13 @@ static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zva
 		return;
 	}
 	zval tmp;
-	if (result != op1) {
-		ZVAL_ARR(&tmp, zend_array_dup(Z_ARR_P(op1)));
-	} else {
-		ZVAL_COPY_VALUE(&tmp, result);
-		SEPARATE_ARRAY(&tmp);
-	}
+	ZVAL_ARR(&tmp, zend_array_dup(Z_ARR_P(op1)));
 	zend_hash_merge(Z_ARRVAL_P(&tmp), Z_ARRVAL_P(op2), zval_add_ref, 0);
+	if (result == op1) {
+		/* When result == op1 the caller is assuming that reused when rc == 1.
+		 * Since we're not doing that (GH-10085) we need to release it. */
+		zval_ptr_dtor(result);
+	}
 	ZVAL_COPY_VALUE(result, &tmp);
 }
 /* }}} */
