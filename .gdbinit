@@ -65,6 +65,92 @@ document print_cvs
 	Usage: print_cvs [(zend_execute_data*)ped]
 end
 
+# $arg0: zend_execute_data*
+#        if not specified, try to use current execute_data
+define print_tmps
+	if $argc == 0
+		____executor_globals
+		set $ped = (zend_execute_data*) $eg.current_execute_data
+	else
+		set $ped = (zend_execute_data*) $arg0
+	end
+
+	printf "Stack frame address=[%p]\n", $ped
+
+	set $oparray = (zend_op_array*) &($ped->func.op_array)
+
+	set $tmps_count = $oparray->T
+	printf "Temporary variables count: %d\n\n", $tmps_count
+
+	set $tmps_idx = 0
+	set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
+
+	# tmps start address
+	set $tmps_start = ((zval*) $eg.current_execute_data) + \
+						$callFrameSize + $oparray->last_var
+
+	while $tmps_idx < $oparray->T
+		printf "%3u: ", $tmps_idx
+		set $tmp = $tmps_start + $tmps_idx
+		printzv $tmp
+
+		set $tmps_idx = $tmps_idx + 1
+	end
+end
+
+document print_tmps
+	Print temporary variables addresses and their values
+	Usage: print_tmps [(zend_execute_data*)ped]
+end
+
+# $arg0: (zend_op_array*)
+#        if not specified, try to use current op_array
+# This function can run even before function calling
+define ____print_literals
+	if $argc == 0
+		____executor_globals
+		set $oparray = &($eg.current_execute_data.func.op_array)
+	else
+		set $oparray = (zend_op_array*)$arg0
+	end
+
+	set $literal_count = $oparray->last_literal
+	set $literal_idx = 0
+
+	printf "Literals count: %d\n\n", $literal_count
+	while $literal_idx < $literal_count
+		set $literal = $oparray->literals + $literal_idx
+		printf "%3u: ", $literal_idx
+		printzv $literal
+
+		set $literal_idx = $literal_idx + 1
+	end
+end
+
+document ____print_literals
+	Print literal values in op_array
+	Usage: ____print_literals [(zend_op_array*) poparray]
+end
+
+# arg0: zend_execute_data*
+#       if not specified, use current execute data
+define print_literals
+	if $argc == 0
+		____executor_globals
+		set $ped = $eg.current_execute_data
+	else
+		set $ped = (zend_execute_data*) $arg0
+	end
+
+	set $oparray = &($ped->func.op_array)
+	____print_literals $oparray
+end
+
+document print_literals
+	Print literal values in zend_execute_data
+	Usage: print_literals [(zend_execute_data*) ped]
+end
+
 # arg0: zend_execute_data*
 define dump_bt
 	set $ex = $arg0
@@ -777,16 +863,14 @@ end
 define dump_opline
 	if $arg0
 		set $opline=$arg0
-		printf "lineno=[%d] opcode=[%d] ", $opline->lineno, $opline->opcode
-		printf "opname=["
-		output zend_vm_opcodes_names[$opline->opcode]
-		printf "] handler=["
+		printf "ln#=[%03d] op#=[%03d ", $opline->lineno, $opline->opcode
+		printf "%s]\t", zend_vm_opcodes_names[$opline->opcode]
+		printf "handler=["
 		output $opline->handler
 		printf "]\n"
 	else
 		printf "[ERROR] Invalid zend_op* argument is NULL\n"
 	end
-
 end
 
 document dump_opline
@@ -830,7 +914,7 @@ define dump_op_array
 	set $i = 0
 	while $i < $ops->last
 		set $opline = $ops->opcodes + $i
-		printf "index=[%d] ", $i
+		printf "%03u ", $i
 		dump_opline $opline
 		set $i = $i + 1
 	end
