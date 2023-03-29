@@ -969,12 +969,15 @@ static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zva
 		/* $a += $a */
 		return;
 	}
+	zval tmp;
 	if (result != op1) {
-		ZVAL_ARR(result, zend_array_dup(Z_ARR_P(op1)));
+		ZVAL_ARR(&tmp, zend_array_dup(Z_ARR_P(op1)));
 	} else {
-		SEPARATE_ARRAY(result);
+		ZVAL_COPY_VALUE(&tmp, result);
+		SEPARATE_ARRAY(&tmp);
 	}
-	zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
+	zend_hash_merge(Z_ARRVAL_P(&tmp), Z_ARRVAL_P(op2), zval_add_ref, 0);
+	ZVAL_COPY_VALUE(result, &tmp);
 }
 /* }}} */
 
