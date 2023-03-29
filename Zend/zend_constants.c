@@ -119,58 +119,48 @@ void zend_shutdown_constants(void)
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
 {
 	zend_constant c;
-	zend_string *name_str;
 
 	ZVAL_NULL(&c.value);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
-	name_str = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(name_str, &c);
+	zend_register_internal_constant(name, name_len, &c);
 }
 
 ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number)
 {
 	zend_constant c;
-	zend_string *name_str;
 
 	ZVAL_BOOL(&c.value, bval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
-	name_str = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(name_str, &c);
+	zend_register_internal_constant(name, name_len, &c);
 }
 
 ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number)
 {
 	zend_constant c;
-	zend_string *name_str;
 
 	ZVAL_LONG(&c.value, lval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
-	name_str = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(name_str, &c);
+	zend_register_internal_constant(name, name_len, &c);
 }
 
 
 ZEND_API void zend_register_double_constant(const char *name, size_t name_len, double dval, int flags, int module_number)
 {
 	zend_constant c;
-	zend_string *name_str;
 
 	ZVAL_DOUBLE(&c.value, dval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
-	name_str = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(name_str, &c);
+	zend_register_internal_constant(name, name_len, &c);
 }
 
 
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number)
 {
 	zend_constant c;
-	zend_string *name_str;
 
 	ZVAL_STR(&c.value, zend_string_init_interned(strval, strlen, flags & CONST_PERSISTENT));
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
-	name_str = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
-	zend_register_constant(name_str, &c);
+	zend_register_internal_constant(name, name_len, &c);
 }
 
 
@@ -576,4 +566,10 @@ ZEND_API zend_result zend_register_constant(zend_string *name, zend_constant *c)
 		zend_string_release(lowercase_name);
 	}
 	return ret;
+}
+
+ZEND_API zend_result zend_register_internal_constant(const char *name, size_t name_len, zend_constant *c) {
+	zend_string *name_str = zend_string_init_interned(name, name_len, ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
+
+	return zend_register_constant(name_str, c);
 }

@@ -511,7 +511,7 @@ ZEND_FUNCTION(define)
 register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	if (zend_register_constant(zend_string_copy(name), &c) == SUCCESS) {
+	if (zend_register_constant(name, &c) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
