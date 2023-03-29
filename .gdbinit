@@ -858,6 +858,25 @@ document lookup_root
 end
 
 #### Functions to dump opline information ####
+# arg0: zend_op_array::type
+define ____print_op_array_type
+	set $oparray_type = $arg0
+
+	if $oparray_type > 4
+		printf "Unknown Type"
+	end
+
+	if $oparray_type == 1
+		printf "Internal Function"
+	end
+	if $oparray_type == 2
+		printf "User Function"
+	end
+	if $oparray_type == 4
+		printf "Eval Code"
+	end
+end
+
 # TODO: print more meaningful information
 # arg0: (zend_op*)
 define dump_opline
@@ -904,11 +923,13 @@ define dump_op_array
 	if $ops->function_name
 		set $funcname = $ops->function_name.val
 	else
-		set $funcname = "Empty"
+		set $funcname = "$_main"
 	end
 	printf "func=<%s> ", $funcname
 
-	printf "type=[%d]\n", $ops->type
+	printf "type=[%d: ", $ops->type
+	____print_op_array_type $ops->type
+	printf "]\n"
 
 	# dump each opline
 	set $i = 0
@@ -937,6 +958,58 @@ end
 document dump_current_op_array
 	Dump opline information of current function
 	Usage: dump_current_op_array
+end
+
+# arg0: (zend_execute_data*)
+define dump_execute_data
+	set $ped = (zend_execute_data*) $arg0
+	printf "zend_execute_data [%p]\n", $ped
+
+	printf "opline: [%p]\n", $ped->opline
+	if $ped->opline
+		printf "\t"
+		dump_opline $ped->opline
+	end
+
+	printf "call: [%p]\n", $ped->call
+
+	printf "func: [%p]\n", $ped->func
+	if $ped->func
+		# print out function name and type
+		printf "\tfunction_name=<"
+		# print_zstr $ped->func.op_array.function_name
+		set $fname = $ped->func.op_array.function_name
+		if $fname
+			printf "%s", $ped->func.op_array.function_name.val
+		else
+			printf "$_main"
+		end
+
+		printf "> type=["
+		____print_op_array_type $ped->func.op_array.type
+		printf "]\n"
+	end
+
+	printf "prev_execute_data: [%p]\n", $ped->prev_execute_data
+end
+
+document dump_execute_data
+	Dump information of (zend_execute_data*) object
+	Usage: dump_execute_data (zend_execute_data*)ped
+end
+
+define dump_current_execute_data
+	____executor_globals
+	if $eg.current_execute_data
+		dump_execute_data $eg.current_execute_data
+	else
+		printf "[ERROR] $eg.current_execute_data is NULL\n"
+	end
+end
+
+document dump_current_execute_data
+	Dump information of current execute_data
+	Usage: dump_current_execute_data
 end
 
 #### functions to set breakpoint ####
