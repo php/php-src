@@ -726,6 +726,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 			&& Z_TYPE_P(elem) != IS_NULL) {
 		const char *node = "family";
 		zend_llist_add_element(&ctx->keys, &node);
+		family = 0; /* Silence compiler warning */
 		from_zval_write_int(elem, (char*)&family, ctx);
 		zend_llist_remove_tail(&ctx->keys);
 
@@ -1121,7 +1122,7 @@ static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_conte
 static void from_zval_write_controllen(const zval *elem, char *msghdr_c, ser_context *ctx)
 {
 	struct msghdr *msghdr = (struct msghdr *)msghdr_c;
-	uint32_t len;
+	uint32_t len = 0; /* Silence compiler warning */
 
 	/* controllen should be an unsigned with at least 32-bit. Let's assume
 	 * this least common denominator
