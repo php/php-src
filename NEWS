@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-10747 (Private and protected properties in serialized Date*
     objects throw). (Derick)
 
+- DOM:
+  . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
+    (Nathan Freeman)
+
 - FPM:
   . Fixed bug GH-10611 (fpm_env_init_main leaks environ). (nielsdos)
   . Destroy file_handle in fpm_main. (Jakub Zelenka, nielsdos)
