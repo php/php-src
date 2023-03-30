@@ -188,6 +188,8 @@ struct _php_stream_wrapper	{
 /* Do not close handle except it is explicitly closed by user (e.g. fclose) */
 #define PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE			0x200
 
+#define PHP_STREAM_FLAG_NO_IO						0x400
+
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
