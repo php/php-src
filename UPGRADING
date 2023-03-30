@@ -70,6 +70,10 @@ PHP 8.3 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Intl
+  . The U_MULTIPLE_DECIMAL_SEPERATORS constant had been deprecated, using
+    the U_MULTIPLE_DECIMAL_SEPARATORS instead is recommended.
+
 ========================================
 5. Changed Functions
 ========================================
