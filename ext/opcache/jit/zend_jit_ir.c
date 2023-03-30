@@ -10048,9 +10048,8 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		(JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
 		 !JIT_G(current_frame) ||
 		 !TRACE_FRAME_NO_NEED_RELEASE_THIS(JIT_G(current_frame)));
-	ir_ref call_info, ref, cold_path = IR_UNUSED;
+	ir_ref call_info = IR_UNUSED, ref, cold_path = IR_UNUSED;
 
-	call_info = ir_LOAD_U32(jit_EX(This.u1.type_info));
 	if (may_need_call_helper) {
 		if (!left_frame) {
 			left_frame = 1;
@@ -10059,6 +10058,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		    }
 		}
 		/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
+		call_info = ir_LOAD_U32(jit_EX(This.u1.type_info));
 		ref = ir_AND_U32(call_info,
 			ir_CONST_U32(ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE));
 		if (trace && trace->op != ZEND_JIT_TRACE_END) {
@@ -10117,6 +10117,9 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		}
 		if (!JIT_G(current_frame) || !TRACE_FRAME_ALWAYS_RELEASE_THIS(JIT_G(current_frame))) {
 			// JIT: if (call_info & ZEND_CALL_RELEASE_THIS)
+			if (!call_info) {
+				call_info = ir_LOAD_U32(jit_EX(This.u1.type_info));
+			}
 			if_release = ir_IF(ir_AND_U32(call_info, ir_CONST_U32(ZEND_CALL_RELEASE_THIS)));
 			ir_IF_FALSE(if_release);
 			fast_path = ir_END();
