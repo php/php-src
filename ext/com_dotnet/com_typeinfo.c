@@ -234,6 +234,7 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 						name = const_name;
 					}
 					zend_register_constant(name, &c);
+					zend_string_release(name);
 				}
 				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 			}

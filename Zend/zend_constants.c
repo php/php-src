@@ -571,5 +571,10 @@ ZEND_API zend_result zend_register_constant(zend_string *name, zend_constant *c)
 ZEND_API zend_result zend_register_internal_constant(const char *name, size_t name_len, zend_constant *c) {
 	zend_string *name_str = zend_string_init_interned(name, name_len, ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 
-	return zend_register_constant(name_str, c);
+	zend_result result = zend_register_constant(name_str, c);
+	if (result == FAILURE) {
+		zend_string_release(name_str);
+	}
+
+	return result;
 }
