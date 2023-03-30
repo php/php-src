@@ -1242,9 +1242,9 @@ PHP_FUNCTION(proc_open)
 			execvp(ZSTR_VAL(command_str), argv);
 		} else {
 			if (env.envarray) {
-				execle("/bin/sh", "sh", "-c", ZSTR_VAL(command_str), NULL, env.envarray);
+				execle("/bin/sh", "sh", "-c", "--", ZSTR_VAL(command_str), NULL, env.envarray);
 			} else {
-				execl("/bin/sh", "sh", "-c", ZSTR_VAL(command_str), NULL);
+				execl("/bin/sh", "sh", "-c", "--", ZSTR_VAL(command_str), NULL);
 			}
 		}
 
