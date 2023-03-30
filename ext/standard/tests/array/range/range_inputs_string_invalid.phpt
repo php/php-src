@@ -9,16 +9,8 @@ echo "Range will ignore any byte after the first one\n";
 var_dump( range("AA", "BB") );
 
 echo "Range cannot operate on an empty string\n";
-try {
-    var_dump( range("Z", "") );
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-try {
-    var_dump( range("", "Z") );
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump( range("Z", "") ); // Both strings are cast to int, i.e. 0
+var_dump( range("", "Z") ); // Both strings are cast to int, i.e. 0
 
 echo "Mixing numeric string and character\n";
 var_dump( range("1", "A") ); // The char is cast to an int, i.e. 0
@@ -44,8 +36,22 @@ array(2) {
   string(1) "B"
 }
 Range cannot operate on an empty string
-range(): Argument #2 ($end) must not be empty
-range(): Argument #1 ($start) must not be empty
+
+Warning: range(): Argument #2 ($end) must not be empty, casted to 0 in %s on line %d
+
+Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
+
+Warning: range(): Argument #1 ($start) must not be empty, casted to 0 in %s on line %d
+
+Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
 Mixing numeric string and character
 
 Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
