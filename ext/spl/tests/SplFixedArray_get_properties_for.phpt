@@ -71,16 +71,15 @@ array(3) {
   }
 }
 [{},{}]
-O:15:"MySplFixedArray":5:{i:0;O:8:"stdClass":0:{}i:1;O:1:"Y":0:{}s:1:"x";i:0;s:1:"y";i:0;s:1:"0";O:1:"X":0:{}}
-object(MySplFixedArray)#6 (4) {
+O:15:"MySplFixedArray":4:{i:0;O:8:"stdClass":0:{}i:1;O:1:"Y":0:{}s:1:"x";O:13:"SplFixedArray":0:{}s:1:"0";O:1:"X":0:{}}
+object(MySplFixedArray)#6 (3) {
   [0]=>
-  object(X)#9 (0) {
+  object(X)#10 (0) {
   }
   [1]=>
   object(Y)#8 (0) {
   }
   ["x"]=>
-  int(0)
-  ["y"]=>
-  int(0)
+  object(SplFixedArray)#9 (0) {
+  }
 }
