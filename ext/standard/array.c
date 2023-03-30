@@ -2839,7 +2839,7 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 PHP_FUNCTION(range)
 {
 	zval *user_start, *user_end, *user_step = NULL, tmp;
-	bool err = 0, is_step_double = false;
+	bool is_step_double = false;
 	double step_double = 1.0;
 	zend_long step = 1;
 
@@ -2944,8 +2944,7 @@ PHP_FUNCTION(range)
 
 		if (low > high) {		/* Negative Steps */
 			if (low - high < step) {
-				err = 1;
-				goto err;
+				goto boundary_error;
 			}
 			/* Initialize the return_value as an array. */
 			array_init_size(return_value, (uint32_t)(((low - high) / step) + 1));
@@ -2961,8 +2960,7 @@ PHP_FUNCTION(range)
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) {	/* Positive Steps */
 			if (high - low < step) {
-				err = 1;
-				goto err;
+				goto boundary_error;
 			}
 			array_init_size(return_value, (uint32_t)(((high - low) / step) + 1));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
@@ -2990,8 +2988,7 @@ PHP_FUNCTION(range)
 
 		if (start_double > end_double) { 		/* Negative steps */
 			if (start_double - end_double < step_double) {
-				err = 1;
-				goto err;
+				goto boundary_error;
 			}
 
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(start_double, end_double, step_double);
@@ -3004,8 +3001,7 @@ PHP_FUNCTION(range)
 			} ZEND_HASH_FILL_END();
 		} else if (end_double > start_double) { 	/* Positive steps */
 			if (end_double - start_double < step_double) {
-				err = 1;
-				goto err;
+				goto boundary_error;
 			}
 
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(end_double, start_double, step_double);
@@ -3029,8 +3025,7 @@ PHP_FUNCTION(range)
 
 		if (start_long > end_long) { 		/* Negative steps */
 			if ((zend_ulong)start_long - end_long < unsigned_step) {
-				err = 1;
-				goto err;
+				goto boundary_error;
 			}
 
 			RANGE_CHECK_LONG_INIT_ARRAY(start_long, end_long, unsigned_step);
@@ -3043,8 +3038,7 @@ PHP_FUNCTION(range)
 			} ZEND_HASH_FILL_END();
 		} else if (end_long > start_long) { 	/* Positive steps */
 			if ((zend_ulong)end_long - start_long < unsigned_step) {
-				err = 1;
-				goto err;
+				goto boundary_error;
 			}
 
 			RANGE_CHECK_LONG_INIT_ARRAY(end_long, start_long, unsigned_step);
@@ -3061,11 +3055,11 @@ PHP_FUNCTION(range)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
-err:
-	if (err) {
-		zend_argument_value_error(3, "must be less than the range spanned by argument #1 ($start) and argument #2 ($end)");
-		RETURN_THROWS();
-	}
+	return;
+
+boundary_error:
+	zend_argument_value_error(3, "must be less than the range spanned by argument #1 ($start) and argument #2 ($end)");
+	RETURN_THROWS();
 }
 /* }}} */
 
