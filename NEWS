@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.18
+?? ??? ????, PHP 8.1.19
+
+
+13 Apr 2023, PHP 8.1.18
 
 - Core:
   . Added optional support for max_execution_time in ZTS/Linux builds
