@@ -2840,6 +2840,7 @@ PHP_FUNCTION(range)
 {
 	zval *user_start, *user_end, *user_step = NULL, tmp;
 	bool is_step_double = false;
+	bool is_step_negative = false;
 	double step_double = 1.0;
 	zend_long step = 1;
 
@@ -2865,10 +2866,7 @@ PHP_FUNCTION(range)
 
 			/* We only want positive step values. */
 			if (step_double < 0.0) {
-				php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be greater than 0, $step multiplied by -1");
-				if (UNEXPECTED(EG(exception))) {
-					RETURN_THROWS();
-				}
+				is_step_negative = true;
 				step_double *= -1;
 			}
 			step = zend_dval_to_lval(step_double);
@@ -2879,10 +2877,7 @@ PHP_FUNCTION(range)
 			step = Z_LVAL_P(user_step);
 			/* We only want positive step values. */
 			if (step < 0) {
-				php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be greater than 0, $step multiplied by -1");
-				if (UNEXPECTED(EG(exception))) {
-					RETURN_THROWS();
-				}
+				is_step_negative = true;
 				step *= -1;
 			}
 			step_double = (double) step;
@@ -2942,7 +2937,8 @@ PHP_FUNCTION(range)
 		unsigned char low = (unsigned char)Z_STRVAL_P(user_start)[0];
 		unsigned char high = (unsigned char)Z_STRVAL_P(user_end)[0];
 
-		if (low > high) {		/* Negative Steps */
+		/* Decreasing char range */
+		if (low > high) {
 			if (low - high < step) {
 				goto boundary_error;
 			}
@@ -2958,7 +2954,10 @@ PHP_FUNCTION(range)
 					}
 				}
 			} ZEND_HASH_FILL_END();
-		} else if (high > low) {	/* Positive Steps */
+		} else if (high > low) { /* Increasing char range */
+			if (is_step_negative) {
+				goto negative_step_error;
+			}
 			if (high - low < step) {
 				goto boundary_error;
 			}
@@ -2986,7 +2985,8 @@ PHP_FUNCTION(range)
 		double element;
 		uint32_t i, size;
 
-		if (start_double > end_double) { 		/* Negative steps */
+		/* Decreasing float range */
+		if (start_double > end_double) {
 			if (start_double - end_double < step_double) {
 				goto boundary_error;
 			}
@@ -2999,7 +2999,10 @@ PHP_FUNCTION(range)
 					ZEND_HASH_FILL_NEXT();
 				}
 			} ZEND_HASH_FILL_END();
-		} else if (end_double > start_double) { 	/* Positive steps */
+		} else if (end_double > start_double) { /* Increasing float range */
+			if (is_step_negative) {
+				goto negative_step_error;
+			}
 			if (end_double - start_double < step_double) {
 				goto boundary_error;
 			}
@@ -3023,7 +3026,8 @@ PHP_FUNCTION(range)
 		zend_ulong unsigned_step= (zend_ulong)step;
 		uint32_t i, size;
 
-		if (start_long > end_long) { 		/* Negative steps */
+		/* Decreasing int range */
+		if (start_long > end_long) {
 			if ((zend_ulong)start_long - end_long < unsigned_step) {
 				goto boundary_error;
 			}
@@ -3036,7 +3040,10 @@ PHP_FUNCTION(range)
 					ZEND_HASH_FILL_NEXT();
 				}
 			} ZEND_HASH_FILL_END();
-		} else if (end_long > start_long) { 	/* Positive steps */
+		} else if (end_long > start_long) { /* Increasing int range */
+			if (is_step_negative) {
+				goto negative_step_error;
+			}
 			if ((zend_ulong)end_long - start_long < unsigned_step) {
 				goto boundary_error;
 			}
@@ -3056,6 +3063,10 @@ PHP_FUNCTION(range)
 		}
 	}
 	return;
+
+negative_step_error:
+	zend_argument_value_error(3, "must be greater than 0 for increasing ranges");
+	RETURN_THROWS();
 
 boundary_error:
 	zend_argument_value_error(3, "must be less than the range spanned by argument #1 ($start) and argument #2 ($end)");

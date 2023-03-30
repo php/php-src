@@ -87,7 +87,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo "Step must not be negative\n";
+echo "Step must not be negative for increasing ranges\n";
 try {
     var_dump(range('a', 'c', -1));
 } catch (\ValueError $e) {
@@ -95,11 +95,6 @@ try {
 }
 try {
     var_dump(range(1, 3, -1));
-} catch (\ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-try {
-    var_dump(range('a', 'c', -1));
 } catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -133,42 +128,7 @@ range(): Argument #3 ($step) must be less than the range spanned by argument #1 
 range(): Argument #3 ($step) must be less than the range spanned by argument #1 ($start) and argument #2 ($end)
 -- Testing ( (low > high) && (low-high < step) ) for characters --
 range(): Argument #3 ($step) must be less than the range spanned by argument #1 ($start) and argument #2 ($end)
-Step must not be negative
-
-Warning: range(): Argument #3 ($step) must be greater than 0, $step multiplied by -1 in %s on line %d
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-
-Warning: range(): Argument #3 ($step) must be greater than 0, $step multiplied by -1 in %s on line %d
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-
-Warning: range(): Argument #3 ($step) must be greater than 0, $step multiplied by -1 in %s on line %d
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-
-Warning: range(): Argument #3 ($step) must be greater than 0, $step multiplied by -1 in %s on line %d
-array(2) {
-  [0]=>
-  float(1.5)
-  [1]=>
-  float(3)
-}
+Step must not be negative for increasing ranges
+range(): Argument #3 ($step) must be greater than 0 for increasing ranges
+range(): Argument #3 ($step) must be greater than 0 for increasing ranges
+range(): Argument #3 ($step) must be greater than 0 for increasing ranges
