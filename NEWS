@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.19
 
+- DOM:
+  . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
+    (Nathan Freeman)
 
 13 Apr 2023, PHP 8.1.18
 
@@ -23,10 +26,6 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-10583 (DateTime modify with tz pattern should not update
     linked timezone). (Derick)
-
-- DOM:
-  . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
-    (Nathan Freeman)
 
 - FPM:
   . Fixed bug GH-10611 (fpm_env_init_main leaks environ). (nielsdos)
