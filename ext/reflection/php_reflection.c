@@ -4686,7 +4686,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	if (Z_TYPE(intern->obj) != IS_UNDEF && (filter & ZEND_ACC_PUBLIC) != 0) {
 		HashTable *properties = Z_OBJ_HT(intern->obj)->get_properties(Z_OBJ(intern->obj));
 		zval *prop;
-		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(properties, key, prop) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
 			_adddynproperty(prop, key, ce, return_value);
 		} ZEND_HASH_FOREACH_END();
 	}

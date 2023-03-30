@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug GH-10968 (Segfault in preg_replace_callback_array()). (ilutov)
 
+- Reflection:
+  . Fixed bug GH-10983 (State-dependant segfault in
+    ReflectionObject::getProperties). (nielsdos)
+
 - SPL:
   . Handle indirect zvals and use up-to-date properties in
     SplFixedArray::__serialize. (nielsdos)
