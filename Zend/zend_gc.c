@@ -188,13 +188,13 @@
 #define GC_HAS_DESTRUCTORS  (1<<0)
 
 /* Weak maps */
-#define GC_SET_REFERENCE_SCANNED(zv) do {								       \
+#define GC_SET_FROM_WEAKMAP_KEY(zv) do {								       \
 	zval *_z = (zv);														   \
-	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) | (Z_REFERENCE_SCANNED << Z_TYPE_INFO_EXTRA_SHIFT); \
+	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) | (Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT); \
 } while (0)
-#define GC_UNSET_REFERENCE_SCANNED(zv) do {								   \
+#define GC_UNSET_FROM_WEAKMAP_KEY(zv) do {								   \
 	zval *_z = (zv);														   \
-	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) & ~(Z_REFERENCE_SCANNED << Z_TYPE_INFO_EXTRA_SHIFT); \
+	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) & ~(Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT); \
 } while (0)
 
 /* unused buffers */
@@ -730,7 +730,7 @@ tail_call:
 				for (; n != 0; n--) {
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 					zval *value = (zval*) Z_PTR_P(zv);
-					if (GC_REFERENCE_SCANNED(value) && Z_OPT_REFCOUNTED_P(value)) {
+					if (GC_FROM_WEAKMAP_KEY(value) && Z_OPT_REFCOUNTED_P(value)) {
 						ref = Z_COUNTED_P(value);
 						GC_ADDREF(ref);
 						if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
@@ -878,8 +878,8 @@ tail_call:
 					/* Skip reference if already followed through weakmap */
 					if (!GC_REF_CHECK_COLOR(Z_COUNTED_P(weakmap), GC_GREY)) {
 						if (Z_REFCOUNTED_P(value)) {
-							ZEND_ASSERT(!GC_REFERENCE_SCANNED(value));
-							GC_SET_REFERENCE_SCANNED(value);
+							ZEND_ASSERT(!GC_FROM_WEAKMAP_KEY(value));
+							GC_SET_FROM_WEAKMAP_KEY(value);
 							gc_stack_push(&defer_stack_handle->stack, &defer_stack_handle->top, (void*) value);
 							ref = Z_COUNTED_P(value);
 							GC_DELREF(ref);
@@ -1094,7 +1094,7 @@ tail_call:
 				for (; n != 0; n--) {
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 					zval *value = (zval*) Z_PTR_P(zv);
-					if (GC_REFERENCE_SCANNED(value) && Z_OPT_REFCOUNTED_P(value)) {
+					if (GC_FROM_WEAKMAP_KEY(value) && Z_OPT_REFCOUNTED_P(value)) {
 						ref = Z_COUNTED_P(value);
 						if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 							GC_REF_SET_COLOR(ref, GC_WHITE);
@@ -1287,7 +1287,7 @@ tail_call:
 				for (; n != 0; n--) {
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 					zval *value = (zval*) Z_PTR_P(zv);
-					if (GC_REFERENCE_SCANNED(value) && Z_OPT_REFCOUNTED_P(value)) {
+					if (GC_FROM_WEAKMAP_KEY(value) && Z_OPT_REFCOUNTED_P(value)) {
 						ref = Z_COUNTED_P(value);
 						GC_ADDREF(ref);
 						if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
@@ -1630,7 +1630,7 @@ rerun_gc:
 			if (!value) {
 				break;
 			}
-			GC_UNSET_REFERENCE_SCANNED(value);
+			GC_UNSET_FROM_WEAKMAP_KEY(value);
 		}
 
 		if (!GC_G(num_roots)) {

@@ -467,7 +467,7 @@ static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, int *n)
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zval *val;
 	ZEND_HASH_MAP_FOREACH_VAL(&wm->ht, val) {
-		if (!GC_REFERENCE_SCANNED(val)) {
+		if (!GC_FROM_WEAKMAP_KEY(val)) {
 			zend_get_gc_buffer_add_zval(gc_buffer, val);
 		}
 	} ZEND_HASH_FOREACH_END();
