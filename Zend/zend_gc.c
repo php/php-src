@@ -1287,7 +1287,6 @@ tail_call:
 				for (; n != 0; n--) {
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
 					zval *value = (zval*) Z_PTR_P(zv);
-					// if (!GC_REF_CHECK_COLOR(Z_COUNTED_P(weakmap), GC_BLACK)) {
 					if (GC_REFERENCE_SCANNED(value) && Z_OPT_REFCOUNTED_P(value)) {
 						ref = Z_COUNTED_P(value);
 						GC_ADDREF(ref);
