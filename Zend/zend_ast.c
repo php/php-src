@@ -676,8 +676,8 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *as
 			if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
 			} else {
-				ZVAL_LONG(&op1, 0);
-				ret = sub_function(result, &op1, &op2);
+				ZVAL_LONG(&op1, -1);
+				ret = mul_function(result, &op1, &op2);
 				zval_ptr_dtor_nogc(&op2);
 			}
 			break;
