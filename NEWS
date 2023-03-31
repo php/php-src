@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
     (Nathan Freeman)
 
+- PCRE:
+  . Fixed bug GH-10968 (Segfault in preg_replace_callback_array()). (ilutov)
+
 - SPL:
   . Handle indirect zvals and use up-to-date properties in
     SplFixedArray::__serialize. (nielsdos)
