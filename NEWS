@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-10406 (feof() behavior change for UNIX based socket
     resources). (Jakub Zelenka)
 
-30 Mar 2023, PHP 8.2.5
+13 Apr 2023, PHP 8.2.5
 
 - Core:
   . Added optional support for max_execution_time in ZTS/Linux builds
