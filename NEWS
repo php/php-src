@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Expose time spent collecting cycles in gc_status(). (Arnaud)
   . Remove WeakMap entries whose key is only reachable through the entry value.
     (Arnaud)
+  . Resolve open_basedir paths on INI update. (ilutov)
 
 - Curl:
   . Added Curl options and constants up to (including) version 7.87.
