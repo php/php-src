@@ -558,17 +558,17 @@ static void cli_register_file_handles(void)
 	php_stream_to_zval(s_err, &ec.value);
 
 	Z_CONSTANT_FLAGS(ic.value) = 0;
-	zend_string *stdin_name = zend_string_init("STDIN", sizeof("STDIN")-1, 0);
+	zend_string *stdin_name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
 	zend_register_constant(stdin_name, &ic);
 	zend_string_release(stdin_name);
 
 	Z_CONSTANT_FLAGS(oc.value) = 0;
-	zend_string *stdout_name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 0);
+	zend_string *stdout_name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
 	zend_register_constant(stdout_name, &oc);
 	zend_string_release(stdout_name);
 
 	Z_CONSTANT_FLAGS(ec.value) = 0;
-	zend_string *stderr_name = zend_string_init("STDERR", sizeof("STDERR")-1, 0);
+	zend_string *stderr_name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	zend_register_constant(stderr_name, &ec);
 	zend_string_release(stderr_name);
 }
