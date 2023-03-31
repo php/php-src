@@ -224,6 +224,8 @@ namespace {
 
     /** @return resource */
     function zend_test_create_throwing_resource() {}
+
+    function get_open_basedir(): ?string {}
 }
 
 namespace ZendTestNS {
