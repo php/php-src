@@ -7126,7 +7126,7 @@ static uint32_t zend_add_dynamic_func_def(zend_op_array *def) {
 	return def_offset;
 }
 
-static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, bool toplevel) /* {{{ */
+static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, bool toplevel) /* {{{ */
 {
 	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
@@ -7157,11 +7157,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
 	if (toplevel) {
-		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
-			do_bind_function_error(lcname, op_array, 1);
-		}
-		zend_string_release_ex(lcname, 0);
-		return;
+		return lcname;
 	}
 
 	uint32_t func_ref = zend_add_dynamic_func_def(op_array);
@@ -7175,7 +7171,8 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		LITERAL_STR(opline->op1, zend_string_copy(lcname));
 		opline->op2.num = func_ref;
 	}
-	zend_string_release_ex(lcname, 0);
+
+	return lcname;
 }
 /* }}} */
 
@@ -7187,7 +7184,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
-	zend_string *method_lcname = NULL;
+	zend_string *lcname;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -7219,9 +7216,9 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 
 	if (is_method) {
 		bool has_body = stmt_ast != NULL;
-		method_lcname = zend_begin_method_decl(op_array, decl->name, has_body);
+		lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		zend_begin_func_decl(result, op_array, decl, toplevel);
+		lcname = zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
 			find_implicit_binds(&info, params_ast, stmt_ast);
 			compile_implicit_lexical_binds(&info, result, op_array);
@@ -7264,7 +7261,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	}
 
 	zend_compile_params(params_ast, return_type_ast,
-		is_method && zend_string_equals_literal(method_lcname, ZEND_TOSTRING_FUNC_NAME) ? IS_STRING : 0);
+		is_method && zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME) ? IS_STRING : 0);
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
@@ -7280,9 +7277,14 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	if (is_method) {
 		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
-			CG(active_class_entry), (zend_function *) op_array, method_lcname, E_COMPILE_ERROR);
-		zend_string_release_ex(method_lcname, 0);
+			CG(active_class_entry), (zend_function *) op_array, lcname, E_COMPILE_ERROR);
+	} else if (toplevel) {
+		/* Only register the function after a successful compile */
+		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
+			do_bind_function_error(lcname, op_array, true);
+		}
 	}
+	zend_string_release_ex(lcname, 0);
 
 	/* put the implicit return on the really last line */
 	CG(zend_lineno) = decl->end_lineno;
