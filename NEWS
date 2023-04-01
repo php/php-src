@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fix inconsistent float negation in constant expressions. (ilutov)
+  . Fixed bug GH-8841 (php-cli core dump calling a badly formed function).
+    (nielsdos)
 
 - DOM:
   . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
