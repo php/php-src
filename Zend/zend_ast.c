@@ -1498,6 +1498,7 @@ static ZEND_COLD void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int in
 			case ZEND_AST_USE_TRAIT:
 			case ZEND_AST_NAMESPACE:
 			case ZEND_AST_DECLARE:
+			case ZEND_AST_PROP_CAPTURE_LIST:
 				break;
 			default:
 				smart_str_appendc(str, ';');
@@ -1887,6 +1888,12 @@ simple_list:
 			smart_str_appends(str, " use(");
 			zend_ast_export_var_list(str, (zend_ast_list*)ast, indent);
 			smart_str_appendc(str, ')');
+			break;
+		case ZEND_AST_PROP_CAPTURE_LIST:
+			/* node is added to class body, and converted into a constructor during compilation */
+			smart_str_appends(str, "public function __construct(");
+			zend_ast_export_list(str, (zend_ast_list*)ast, 1, 20, indent);
+			smart_str_appends(str, ") {}");
 			break;
 		case ZEND_AST_PROP_GROUP: {
 			zend_ast *type_ast = ast->child[0];
@@ -2462,6 +2469,27 @@ simple_list:
 				smart_str_appends(str, " = ");
 				zend_ast_export_ex(str, ast->child[1], 0, indent);
 			}
+			break;
+		case ZEND_AST_PROP_CAPTURE:
+			if (ast->attr & ZEND_ACC_PPP_MASK) {
+				zend_ast_export_visibility(str, ast->attr);
+			} else {
+				smart_str_appends(str, "public ");
+			}
+			if (ast->attr & ZEND_ACC_READONLY) {
+				smart_str_appends(str, "readonly ");
+			}
+
+			if (ast->child[1] != NULL) {
+				zend_ast_export_type(str, ast->child[1], 0);
+				smart_str_appendc(str, ' ');
+			}
+
+			if (ast->attr & ZEND_PARAM_REF) {
+				smart_str_appendc(str, '&');
+			}
+			smart_str_appendc(str, '$');
+			zend_ast_export_name(str, ast->child[2], 20, indent);
 			break;
 
 		/* 4 child nodes */

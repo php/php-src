@@ -2629,7 +2629,8 @@ static inline bool zend_is_unticked_stmt(zend_ast *ast) /* {{{ */
 {
 	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL
 		|| ast->kind == ZEND_AST_PROP_DECL || ast->kind == ZEND_AST_CLASS_CONST_GROUP
-		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD;
+		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD
+		|| ast->kind == ZEND_AST_PROP_CAPTURE_LIST;
 }
 /* }}} */
 
@@ -6867,7 +6868,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
-		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
+		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY | ZEND_ACC_CAPTURED);
 
 		znode var_node, default_node;
 		uint8_t opcode;
@@ -6883,6 +6884,10 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		var_node.u.op.var = lookup_cv(name);
 
 		if (EX_VAR_TO_NUM(var_node.u.op.var) != i) {
+			if (property_flags & ZEND_ACC_CAPTURED) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of captured property $%s",
+					ZSTR_VAL(name));
+			}
 			zend_error_noreturn(E_COMPILE_ERROR, "Redefinition of parameter $%s",
 				ZSTR_VAL(name));
 		} else if (zend_string_equals_literal(name, "this")) {
@@ -6985,8 +6990,13 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				zend_alloc_cache_slots(zend_type_get_num_classes(arg_info->type));
 		}
 
-		uint32_t arg_info_flags = _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic, /* is_tentative */ 0)
-			| (property_flags ? _ZEND_IS_PROMOTED_BIT : 0);
+		uint32_t arg_info_flags = _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic, /* is_tentative */ 0);
+		if (property_flags & ZEND_ACC_CAPTURED) {
+			arg_info_flags |= _ZEND_IS_CAPTURED_BIT;
+		}
+		else if (property_flags) {
+			arg_info_flags |= _ZEND_IS_PROMOTED_BIT;
+		}
 		ZEND_TYPE_FULL_MASK(arg_info->type) |= arg_info_flags;
 		if (opcode == ZEND_RECV) {
 			opline->op2.num = type_ast ?
@@ -7013,6 +7023,10 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 					"Cannot declare variadic promoted property");
 			}
 			if (zend_hash_exists(&scope->properties_info, name)) {
+				if (property_flags & ZEND_ACC_CAPTURED) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Captured property $%s conflicts with existing property",
+						ZSTR_VAL(name));
+				}
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::$%s",
 					ZSTR_VAL(scope->name), ZSTR_VAL(name));
 			}
@@ -7050,7 +7064,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			zend_string *doc_comment =
 				doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 			zend_property_info *prop = zend_declare_typed_property(
-				scope, name, &default_value, property_flags | ZEND_ACC_PROMOTED, doc_comment, type);
+				scope, name, &default_value, property_flags | ((property_flags & ZEND_ACC_CAPTURED) ? 0 : ZEND_ACC_PROMOTED), doc_comment, type);
 			if (attributes_ast) {
 				zend_compile_attributes(
 					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, ZEND_ATTRIBUTE_TARGET_PARAMETER);
@@ -7071,7 +7085,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 	for (i = 0; i < list->children; i++) {
 		zend_ast *param_ast = list->child[i];
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
-		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
+		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY | ZEND_ACC_CAPTURED);
 		if (!flags) {
 			continue;
 		}
@@ -7565,6 +7579,74 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 
 	CG(active_op_array) = orig_op_array;
 	CG(active_class_entry) = orig_class_entry;
+}
+/* }}} */
+
+static void zend_compile_property_capture(zend_ast *ast) /* {{{ */
+{
+	zend_class_entry *ce = CG(active_class_entry);
+	if(zend_hash_str_exists(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, strlen(ZEND_CONSTRUCTOR_FUNC_NAME))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare custom constructor for anonymous class with captured properties");
+	}
+
+	zend_ast_list *capture_list = zend_ast_get_list(ast);
+	zend_ast *parameter_list_ast = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
+
+	uint32_t start_lineno = CG(zend_lineno);
+	uint32_t end_lineno = start_lineno;
+
+	for(uint32_t i = 0; i < capture_list->children; i++) {
+		zend_ast *capture_spec = capture_list->child[i];
+
+		parameter_list_ast = zend_ast_list_add(
+			parameter_list_ast,
+			zend_ast_create_ex(
+				ZEND_AST_PARAM, capture_spec->attr | ZEND_ACC_CAPTURED,
+				capture_spec->child[1], capture_spec->child[2], NULL, NULL, NULL
+			)
+		);
+
+		end_lineno = zend_ast_get_lineno(capture_spec);
+	}
+
+	zend_ast *empty_method_body = zend_ast_create_list(0, ZEND_AST_STMT_LIST);
+	CG(zend_lineno) = end_lineno;
+	zend_ast *constructor = zend_ast_create_decl(
+		ZEND_AST_METHOD, ZEND_ACC_PUBLIC, start_lineno, NULL,
+		ZSTR_INIT_LITERAL(ZEND_CONSTRUCTOR_FUNC_NAME, 0),
+		parameter_list_ast, NULL, empty_method_body, NULL, NULL
+	);
+	CG(zend_lineno) = start_lineno;
+
+	zend_compile_func_decl(NULL, constructor, 0);
+
+	/* Clean up our temporary AST, but not the parts referenced from the real AST */
+	zend_ast_list *parameter_list = zend_ast_get_list(parameter_list_ast);
+	for (uint32_t i = 0; i < parameter_list->children; i++) {
+		parameter_list->child[i]->child[0] = NULL;
+		parameter_list->child[i]->child[1] = NULL;
+	}
+	zend_ast_destroy(constructor);
+}
+/* }}} */
+
+zend_ast *zend_captured_properties_to_constructor_args(zend_ast_list *capture_list, zend_ast *constructor_args_ast) { /* {{{ */
+	if(zend_ast_get_list(constructor_args_ast)->children != 0) {
+		zend_throw_exception_ex(zend_ce_compile_error, 0,
+			"Cannot pass constructor arguments to anonymous class with captured properties");
+		return NULL;
+	}
+
+	for(uint32_t i = 0; i < capture_list->children; i++) {
+		zend_ast *capture_spec = capture_list->child[i];
+
+		constructor_args_ast = zend_ast_list_add(
+			constructor_args_ast,
+			zend_ast_create(ZEND_AST_VAR, capture_spec->child[0])
+		);
+	}
+
+	return constructor_args_ast;
 }
 /* }}} */
 
@@ -10276,6 +10358,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_METHOD:
 			zend_compile_func_decl(NULL, ast, 0);
+			break;
+		case ZEND_AST_PROP_CAPTURE_LIST:
+			zend_compile_property_capture(ast);
 			break;
 		case ZEND_AST_ENUM_CASE:
 			zend_compile_enum_case(ast);

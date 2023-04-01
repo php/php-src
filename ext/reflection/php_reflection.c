@@ -3010,6 +3010,21 @@ ZEND_METHOD(ReflectionParameter, isPromoted)
 }
 /* }}} */
 
+/* {{{ Returns this constructor parameter was generated to capture in anon class */
+ZEND_METHOD(ReflectionParameter, isCaptured)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(ZEND_ARG_IS_CAPTURED(param->arg_info));
+}
+/* }}} */
+
 /* {{{ Returns whether parameter MAY be null */
 ZEND_METHOD(ReflectionType, allowsNull)
 {
@@ -5627,6 +5642,13 @@ ZEND_METHOD(ReflectionProperty, isDefault)
 ZEND_METHOD(ReflectionProperty, isPromoted)
 {
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROMOTED);
+}
+/* }}} */
+
+/* {{{ Returns whether this property has been captured in an anon class declaration */
+ZEND_METHOD(ReflectionProperty, isCaptured)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_CAPTURED);
 }
 /* }}} */
 
