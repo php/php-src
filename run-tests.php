@@ -3982,11 +3982,11 @@ final class Differ
         reset($to);
 
         foreach ($common as $token) {
-            while (!($this->isEqual)(reset($from), $token)) {
+            while (!empty($from) && !($this->isEqual)(reset($from), $token)) {
                 $diff[] = [array_shift($from), self::REMOVED, $fromLine++];
             }
 
-            while (!($this->isEqual)($token, reset($to))) {
+            while (!empty($to) && !($this->isEqual)($token, reset($to))) {
                 $diff[] = [array_shift($to), self::ADDED, $toLine++];
             }
 
