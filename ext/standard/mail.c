@@ -136,6 +136,7 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 			zend_type_error("Header \"%s\" must only contain numeric keys, \"%s\" found", ZSTR_VAL(key), ZSTR_VAL(tmp_key));
 			break;
 		}
+		ZVAL_DEREF(tmp_val);
 		if (Z_TYPE_P(tmp_val) != IS_STRING) {
 			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_type_name(tmp_val));
 			break;
@@ -157,6 +158,7 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 			zend_type_error("Header name cannot be numeric, " ZEND_LONG_FMT " given", idx);
 			break;
 		}
+		ZVAL_DEREF(val);
 		/* https://tools.ietf.org/html/rfc2822#section-3.6 */
 		if (zend_string_equals_literal_ci(key, "orig-date")) {
 			PHP_MAIL_BUILD_HEADER_CHECK("orig-date", s, key, val);

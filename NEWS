@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug GH-10968 (Segfault in preg_replace_callback_array()). (ilutov)
 
+- Standard:
+  . Fixed bug GH-10990 (mail() throws TypeError after iterating over
+    $additional_headers array by reference). (nielsdos)
+
 13 Apr 2023, PHP 8.1.18
 
 - Core:
