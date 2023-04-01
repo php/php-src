@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fix inconsistent float negation in constant expressions. (ilutov)
+  . Fixed bug GH-8841 (php-cli core dump calling a badly formed function).
+    (nielsdos)
 
 - DOM:
   . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
@@ -15,6 +17,10 @@ PHP                                                                        NEWS
 - SPL:
   . Handle indirect zvals and use up-to-date properties in
     SplFixedArray::__serialize. (nielsdos)
+
+- Standard:
+  . Fixed bug GH-10990 (mail() throws TypeError after iterating over
+    $additional_headers array by reference). (nielsdos)
 
 - Streams:
   . Fixed bug GH-10406 (feof() behavior change for UNIX based socket

@@ -7302,11 +7302,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 	}
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
-	if (toplevel) {
-		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
-			do_bind_function_error(lcname, op_array, 1);
-		}
-	} else {
+	if (!toplevel) {
 		uint32_t func_ref = zend_add_dynamic_func_def(op_array);
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
@@ -7331,7 +7327,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
-	zend_string *lcname = NULL;
+	zend_string *lcname;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -7435,6 +7431,11 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
 			CG(active_class_entry), (zend_function *) op_array, lcname, E_COMPILE_ERROR);
+	} else if (toplevel) {
+		/* Only register the function after a successful compile */
+		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
+			do_bind_function_error(lcname, op_array, true);
+		}
 	}
 
 	/* put the implicit return on the really last line */
