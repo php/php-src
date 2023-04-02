@@ -2938,7 +2938,7 @@ static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t
 	return new_elist;
 }
 
-static unsigned int mb_estimate_encoding_demerits(uint32_t w)
+static unsigned int estimate_demerits(uint32_t w)
 {
 	/* Receive wchars decoded from input string using candidate encoding.
 	 * Give the candidate many 'demerits' for each 'rare' codepoint found,
@@ -2982,84 +2982,81 @@ static unsigned int mb_estimate_encoding_demerits(uint32_t w)
 	return 0;
 }
 
-/* When doing 'strict' detection, any string which is invalid in the candidate encoding
- * is rejected. With non-strict detection, we just continue, but apply demerits for
- * each invalid byte sequence */
-static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict)
+struct candidate {
+	const mbfl_encoding *enc;
+	const unsigned char *in;
+	size_t in_len;
+	uint64_t demerits; /* Wide bit size to prevent overflow */
+	unsigned int state;
+};
+
+static size_t init_candidate_array(struct candidate *array, size_t length, const mbfl_encoding **encodings, const unsigned char **in, size_t *in_len, size_t n, bool strict)
 {
-	if (elist_size == 0) {
-		return NULL;
-	}
-	if (elist_size == 1) {
-		if (strict) {
-			return php_mb_check_encoding((const char*)in, in_len, *elist) ? *elist : NULL;
-		} else {
-			return *elist;
+	size_t j = 0;
+
+	for (size_t i = 0; i < length; i++) {
+		const mbfl_encoding *enc = encodings[i];
+
+		/* If any candidate encodings have specialized validation functions, use them
+		 * to eliminate as many candidates as possible */
+		if (strict && enc->check != NULL) {
+			for (size_t k = 0; k < n; k++) {
+				if (!enc->check((unsigned char*)in[k], in_len[k])) {
+					goto skip_to_next;
+				}
+			}
 		}
-	}
-	if (in_len == 0) {
-		return *elist;
+
+		array[j].enc = enc;
+		array[j].state = 0;
+		array[j].demerits = 0;
+		j++;
+skip_to_next: ;
 	}
 
-	uint32_t wchar_buf[128];
-	struct conversion_data {
-		const mbfl_encoding *enc;
-		unsigned char *in;
-		size_t in_len;
-		uint64_t demerits; /* Wide bit size to prevent overflow */
-		unsigned int state;
-	};
-	/* Allocate on stack; when we return, this array is automatically freed */
-	struct conversion_data *data = alloca(elist_size * sizeof(struct conversion_data));
+	return j;
+}
 
-	for (unsigned int i = 0; i < elist_size; i++) {
-		data[i].enc = elist[i];
-		data[i].in = in;
-		data[i].in_len = in_len;
-		data[i].state = 0;
-		data[i].demerits = 0;
+static void start_string(struct candidate *array, size_t length, const unsigned char *in, size_t in_len)
+{
+	for (size_t i = 0; i < length; i++) {
+		const mbfl_encoding *enc = array[i].enc;
+
+		array[i].in = in;
+		array[i].in_len = in_len;
 
 		/* Skip byte order mark for UTF-8, UTF-16BE, or UTF-16LE */
-		if (elist[i] == &mbfl_encoding_utf8) {
+		if (enc == &mbfl_encoding_utf8) {
 			if (in_len >= 3 && in[0] == 0xEF && in[1] == 0xBB && in[2] == 0xBF) {
-				data[i].in_len -= 3;
-				data[i].in += 3;
+				array[i].in_len -= 3;
+				array[i].in += 3;
 			}
-		} else if (elist[i] == &mbfl_encoding_utf16be) {
+		} else if (enc == &mbfl_encoding_utf16be) {
 			if (in_len >= 2 && in[0] == 0xFE && in[1] == 0xFF) {
-				data[i].in_len -= 2;
-				data[i].in += 2;
+				array[i].in_len -= 2;
+				array[i].in += 2;
 			}
-		} else if (elist[i] == &mbfl_encoding_utf16le) {
+		} else if (enc == &mbfl_encoding_utf16le) {
 			if (in_len >= 2 && in[0] == 0xFF && in[1] == 0xFE) {
-				data[i].in_len -= 2;
-				data[i].in += 2;
+				array[i].in_len -= 2;
+				array[i].in += 2;
 			}
 		}
 	}
+}
 
-	/* If any candidate encodings have specialized validation functions, use them
-	 * to eliminate as many candidates as possible */
-	if (strict) {
-		for (unsigned int i = 0; i < elist_size; i++) {
-			const mbfl_encoding *enc = data[i].enc;
-			if (enc->check != NULL && !enc->check(in, in_len)) {
-				elist_size--;
-				memmove(&data[i], &data[i+1], (elist_size - i) * sizeof(struct conversion_data));
-				i--;
-			}
-		}
-	}
-
+static size_t count_demerits(struct candidate *array, size_t length, bool strict)
+{
+	uint32_t wchar_buf[128];
 	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
-	while (elist_size > 1 && finished < elist_size) {
-		unsigned int i = 0;
+
+	while ((strict || length > 1) && finished < length) {
+		for (size_t i = 0; i < length; i++) {
 try_next_encoding:
-		while (i < elist_size) {
 			/* Do we still have more input to process for this candidate encoding? */
-			if (data[i].in_len) {
-				const mbfl_encoding *enc = data[i].enc;
-				size_t out_len = enc->to_wchar(&data[i].in, &data[i].in_len, wchar_buf, 128, &data[i].state);
+			if (array[i].in_len) {
+				const mbfl_encoding *enc = array[i].enc;
+				size_t out_len = enc->to_wchar((unsigned char**)&array[i].in, &array[i].in_len, wchar_buf, 128, &array[i].state);
 				ZEND_ASSERT(out_len <= 128);
 				/* Check this batch of decoded codepoints; are there any error markers?
 				 * Also sum up the number of demerits */
@@ -3068,55 +3065,77 @@ try_next_encoding:
 					if (w == MBFL_BAD_INPUT) {
 						if (strict) {
 							/* This candidate encoding is not valid, eliminate it from consideration */
-							elist_size--;
-							memmove(&data[i], &data[i+1], (elist_size - i) * sizeof(struct conversion_data));
+							length--;
+							if (length == 0) {
+								return 0;
+							}
+							memmove(&array[i], &array[i+1], (length - i) * sizeof(struct candidate));
 							goto try_next_encoding;
 						} else {
-							data[i].demerits += 1000;
+							array[i].demerits += 1000;
 						}
 					} else {
-						data[i].demerits += mb_estimate_encoding_demerits(w);
+						array[i].demerits += estimate_demerits(w);
 					}
 				}
-				if (data[i].in_len == 0) {
+				if (array[i].in_len == 0) {
 					finished++;
 				}
 			}
-			i++;
 		}
 	}
 
-	if (strict) {
+	return length;
+}
+
+MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned char **strings, size_t *str_lengths, size_t n, const mbfl_encoding **elist, unsigned int elist_size, bool strict)
+{
+	if (elist_size == 0) {
+		return NULL;
+	}
+	if (elist_size == 1) {
+		if (strict) {
+			while (n--) {
+				if (!php_mb_check_encoding((const char*)strings[n], str_lengths[n], *elist)) {
+					return NULL;
+				}
+			}
+		}
+		return *elist;
+	}
+	if (n == 1 && *str_lengths == 0) {
+		return *elist;
+	}
+
+	/* Allocate on stack; when we return, this array is automatically freed */
+	struct candidate *array = alloca(elist_size * sizeof(struct candidate));
+	elist_size = init_candidate_array(array, elist_size, elist, strings, str_lengths, n, strict);
+
+	while (n--) {
+		start_string(array, elist_size, strings[n], str_lengths[n]);
+		elist_size = count_demerits(array, elist_size, strict);
 		if (elist_size == 0) {
 			/* All candidates were eliminated */
 			return NULL;
-		}
-		/* The above loop might have broken because there was only 1 candidate encoding left
-		 * If in strict mode, we still need to process any remaining input for that candidate */
-		if (elist_size == 1 && data[0].in_len) {
-			const mbfl_encoding *enc = data[0].enc;
-			unsigned char *in = data[0].in;
-			size_t in_len = data[0].in_len;
-			unsigned int state = data[0].state;
-			while (in_len) {
-				size_t out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
-				while (out_len) {
-					if (wchar_buf[--out_len] == MBFL_BAD_INPUT) {
-						return NULL;
-					}
-				}
-			}
 		}
 	}
 
 	/* See which remaining candidate encoding has the least demerits */
 	unsigned int best = 0;
 	for (unsigned int i = 1; i < elist_size; i++) {
-		if (data[i].demerits < data[best].demerits) {
+		if (array[i].demerits < array[best].demerits) {
 			best = i;
 		}
 	}
-	return data[best].enc;
+	return array[best].enc;
+}
+
+/* When doing 'strict' detection, any string which is invalid in the candidate encoding
+ * is rejected. With non-strict detection, we just continue, but apply demerits for
+ * each invalid byte sequence */
+static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict)
+{
+	return mb_guess_encoding_for_strings((const unsigned char**)&in, &in_len, 1, elist, elist_size, strict);
 }
 
 /* {{{ Encodings of the given string is returned (as a string) */
@@ -3382,41 +3401,62 @@ next_option:
 	RETVAL_STR(jp_kana_convert(str, enc, opt));
 }
 
-static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zval *var, bool *recursion_error) /* {{{ */
+static unsigned int mb_recursive_count_strings(zval *var)
 {
-	mbfl_string string;
-	HashTable *ht;
-	zval *entry;
-
+	unsigned int count = 0;
 	ZVAL_DEREF(var);
+
 	if (Z_TYPE_P(var) == IS_STRING) {
-		string.val = (unsigned char *)Z_STRVAL_P(var);
-		string.len = Z_STRLEN_P(var);
-		if (mbfl_encoding_detector_feed(identd, &string)) {
-			return 1; /* complete detecting */
-		}
+		count++;
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 		if (Z_REFCOUNTED_P(var)) {
 			if (Z_IS_RECURSIVE_P(var)) {
-				*recursion_error = true;
-				return 0;
+				return count;
 			}
 			Z_PROTECT_RECURSION_P(var);
 		}
 
-		ht = HASH_OF(var);
+		HashTable *ht = HASH_OF(var);
 		if (ht != NULL) {
+			zval *entry;
 			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
-				if (mb_recursive_encoder_detector_feed(identd, entry, recursion_error)) {
+				count += mb_recursive_count_strings(entry);
+			} ZEND_HASH_FOREACH_END();
+		}
+
+		if (Z_REFCOUNTED_P(var)) {
+			Z_UNPROTECT_RECURSION_P(var);
+		}
+	}
+
+	return count;
+}
+
+static bool mb_recursive_find_strings(zval *var, const unsigned char **val_list, size_t *len_list, unsigned int *count)
+{
+	ZVAL_DEREF(var);
+
+	if (Z_TYPE_P(var) == IS_STRING) {
+		val_list[*count] = (const unsigned char*)Z_STRVAL_P(var);
+		len_list[*count] = Z_STRLEN_P(var);
+		(*count)++;
+	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
+		if (Z_REFCOUNTED_P(var)) {
+			if (Z_IS_RECURSIVE_P(var)) {
+				return true;
+			}
+			Z_PROTECT_RECURSION_P(var);
+		}
+
+		HashTable *ht = HASH_OF(var);
+		if (ht != NULL) {
+			zval *entry;
+			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
+				if (mb_recursive_find_strings(entry, val_list, len_list, count)) {
 					if (Z_REFCOUNTED_P(var)) {
 						Z_UNPROTECT_RECURSION_P(var);
+						return true;
 					}
-					return 1;
-				} else if (*recursion_error) {
-					if (Z_REFCOUNTED_P(var)) {
-						Z_UNPROTECT_RECURSION_P(var);
-					}
-					return 0;
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -3425,12 +3465,12 @@ static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zv
 			Z_UNPROTECT_RECURSION_P(var);
 		}
 	}
-	return 0;
-} /* }}} */
+
+	return false;
+}
 
 static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_encoding, const mbfl_encoding* to_encoding)
 {
-	HashTable *ht;
 	zval *entry, *orig_var;
 
 	orig_var = var;
@@ -3451,7 +3491,7 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 			Z_PROTECT_RECURSION_P(var);
 		}
 
-		ht = HASH_OF(var);
+		HashTable *ht = HASH_OF(var);
 		if (ht != NULL) {
 			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
 				if (mb_recursive_convert_variable(entry, from_encoding, to_encoding)) {
@@ -3471,7 +3511,6 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 	return false;
 }
 
-/* {{{ Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
 	zval *args;
@@ -3479,11 +3518,9 @@ PHP_FUNCTION(mb_convert_variables)
 	zend_string *from_enc_str;
 	HashTable *from_enc_ht;
 	const mbfl_encoding *from_encoding, *to_encoding;
-	mbfl_encoding_detector *identd;
-	int n, argc;
+	uint32_t argc;
 	size_t elistsz;
 	const mbfl_encoding **elist;
-	bool recursion_error = false;
 
 	ZEND_PARSE_PARAMETERS_START(3, -1)
 		Z_PARAM_STR(to_enc_str)
@@ -3520,54 +3557,49 @@ PHP_FUNCTION(mb_convert_variables)
 		from_encoding = *elist;
 	} else {
 		/* auto detect */
-		from_encoding = NULL;
-		identd = mbfl_encoding_detector_new(elist, elistsz, MBSTRG(strict_detection));
-		if (identd != NULL) {
-			n = 0;
-			while (n < argc) {
-				if (mb_recursive_encoder_detector_feed(identd, &args[n], &recursion_error)) {
-					break;
-				}
-				n++;
-			}
-			from_encoding = mbfl_encoding_detector_judge(identd);
-			mbfl_encoding_detector_delete(identd);
-			if (recursion_error) {
+		unsigned int num = 0;
+		for (size_t n = 0; n < argc; n++) {
+			zval *zv = &args[n];
+			num += mb_recursive_count_strings(zv);
+		}
+		const unsigned char **val_list = (const unsigned char**)ecalloc(num, sizeof(char *));
+		size_t *len_list = (size_t*)ecalloc(num, sizeof(size_t));
+		unsigned int i = 0;
+		for (size_t n = 0; n < argc; n++) {
+			zval *zv = &args[n];
+			if (mb_recursive_find_strings(zv, val_list, len_list, &i)) {
 				efree(ZEND_VOIDP(elist));
+				efree(ZEND_VOIDP(val_list));
+				efree(len_list);
 				php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 				RETURN_FALSE;
 			}
 		}
-
+		from_encoding = mb_guess_encoding_for_strings(val_list, len_list, num, elist, elistsz, MBSTRG(strict_detection));
+		efree(ZEND_VOIDP(val_list));
+		efree(len_list);
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect encoding");
 			efree(ZEND_VOIDP(elist));
 			RETURN_FALSE;
 		}
+
 	}
 
 	efree(ZEND_VOIDP(elist));
 
 	/* convert */
-	n = 0;
-	while (n < argc) {
+	for (size_t n = 0; n < argc; n++) {
 		zval *zv = &args[n];
 		ZVAL_DEREF(zv);
-		recursion_error = mb_recursive_convert_variable(zv, from_encoding, to_encoding);
-		if (recursion_error) {
-			break;
+		if (mb_recursive_convert_variable(zv, from_encoding, to_encoding)) {
+			php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
+			RETURN_FALSE;
 		}
-		n++;
-	}
-
-	if (recursion_error) {
-		php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
-		RETURN_FALSE;
 	}
 
 	RETURN_STRING(from_encoding->name);
 }
-/* }}} */
 
 /* HTML numeric entities */
 
