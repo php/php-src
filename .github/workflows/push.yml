@@ -40,8 +40,6 @@ jobs:
       matrix:
         include:
           - debug: true
-            zts: false
-          - debug: false
             zts: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-22.04
@@ -68,6 +66,9 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
+            --enable-address-sanitizer
+            --enable-undefined-sanitizer
+            CFLAGS="-DZEND_TRACK_ARENA_ALLOC"
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -78,6 +79,7 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+          runTestsParameters: --asan
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
@@ -86,6 +88,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
+            --asan
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
