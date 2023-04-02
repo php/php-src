@@ -2207,6 +2207,9 @@ TEST $file
         } elseif (!strncasecmp('xfail', $output, 5)) {
             // Pretend we have an XFAIL section
             $test->setSection('XFAIL', ltrim(substr($output, 5)));
+        } elseif (!strncasecmp('xleak', $output, 5)) {
+            // Pretend we have an XLEAK section
+            $test->setSection('XLEAK', ltrim(substr($output, 5)));
         } elseif ($output !== '') {
             show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
             $PHP_FAILED_TESTS['BORKED'][] = [
@@ -2461,6 +2464,10 @@ TEST $file
         $cmd = $valgrind->wrapCommand($cmd, $memcheck_filename, strpos($test_file, "pcre") !== false);
     }
 
+    if ($test->hasSection('XLEAK') && isset($env['SKIP_ASAN'])) {
+        $env['LSAN_OPTIONS'] = 'detect_leaks=0';
+    }
+
     if ($DETAILED) {
         echo "
 CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
@@ -2657,7 +2664,8 @@ COMMAND $cmd
             if ($test->hasSection('XFAIL')) {
                 $warn = true;
                 $info = " (warn: XFAIL section but test passes)";
-            } elseif ($test->hasSection('XLEAK')) {
+            } elseif ($test->hasSection('XLEAK') && !isset($env['SKIP_ASAN'])) {
+                // XLEAK with ASAN completely disables LSAN so the test is expected to pass
                 $warn = true;
                 $info = " (warn: XLEAK section but test passes)";
             } else {
@@ -2694,7 +2702,8 @@ COMMAND $cmd
         if ($test->hasSection('XFAIL')) {
             $restype[] = 'XFAIL';
             $info = '  XFAIL REASON: ' . rtrim($test->getSection('XFAIL'));
-        } elseif ($test->hasSection('XLEAK')) {
+        } elseif ($test->hasSection('XLEAK') && !isset($env['SKIP_ASAN'])) {
+            // XLEAK with ASAN completely disables LSAN so the test is expected to pass
             $restype[] = 'XLEAK';
             $info = '  XLEAK REASON: ' . rtrim($test->getSection('XLEAK'));
         } else {
