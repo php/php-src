@@ -1835,7 +1835,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	EG(user_error_handler) = orig_user_error_handler;
 	EG(record_errors) = 0;
 
-	if (!op_array) {
+	if (!op_array || EG(exception)) {
 		/* compilation failed */
 		zend_free_recorded_errors();
 		if (do_bailout) {
