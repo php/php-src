@@ -2464,8 +2464,11 @@ TEST $file
         $cmd = $valgrind->wrapCommand($cmd, $memcheck_filename, strpos($test_file, "pcre") !== false);
     }
 
-    if ($test->hasSection('XLEAK') && isset($env['SKIP_ASAN'])) {
-        $env['LSAN_OPTIONS'] = 'detect_leaks=0';
+    if ($test->hasSection('XLEAK')) {
+        $env['ZEND_ALLOC_PRINT_LEAKS'] = '0';
+        if (isset($env['SKIP_ASAN'])) {
+            $env['LSAN_OPTIONS'] = 'detect_leaks=0';
+        }
     }
 
     if ($DETAILED) {
@@ -2664,7 +2667,7 @@ COMMAND $cmd
             if ($test->hasSection('XFAIL')) {
                 $warn = true;
                 $info = " (warn: XFAIL section but test passes)";
-            } elseif ($test->hasSection('XLEAK') && !isset($env['SKIP_ASAN'])) {
+            } elseif ($test->hasSection('XLEAK') && $valgrind) {
                 // XLEAK with ASAN completely disables LSAN so the test is expected to pass
                 $warn = true;
                 $info = " (warn: XLEAK section but test passes)";
@@ -2702,7 +2705,7 @@ COMMAND $cmd
         if ($test->hasSection('XFAIL')) {
             $restype[] = 'XFAIL';
             $info = '  XFAIL REASON: ' . rtrim($test->getSection('XFAIL'));
-        } elseif ($test->hasSection('XLEAK') && !isset($env['SKIP_ASAN'])) {
+        } elseif ($test->hasSection('XLEAK') && $valgrind) {
             // XLEAK with ASAN completely disables LSAN so the test is expected to pass
             $restype[] = 'XLEAK';
             $info = '  XLEAK REASON: ' . rtrim($test->getSection('XLEAK'));
