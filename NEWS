@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
     (Nathan Freeman)
+  . Fixed incorrect error handling in dom_zvals_to_fragment(). (nielsdos)
 
 - PCRE:
   . Fixed bug GH-10968 (Segfault in preg_replace_callback_array()). (ilutov)
