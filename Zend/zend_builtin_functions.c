@@ -511,8 +511,7 @@ ZEND_FUNCTION(define)
 register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	c.name = zend_string_copy(name);
-	if (zend_register_constant(&c) == SUCCESS) {
+	if (zend_register_constant(name, &c) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1480,6 +1479,7 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *val;
 		int module_number;
 		zval *modules, const_val;
+		zend_string *const_name;
 		char **module_names;
 		zend_module_entry *module;
 		int i = 1;
@@ -1494,12 +1494,7 @@ ZEND_FUNCTION(get_defined_constants)
 		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), val) {
-			if (!val->name) {
-				/* skip special constants */
-				continue;
-			}
-
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), const_name, val) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(val) == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (ZEND_CONSTANT_MODULE_NUMBER(val) > i) {
@@ -1515,22 +1510,19 @@ ZEND_FUNCTION(get_defined_constants)
 			}
 
 			ZVAL_COPY_OR_DUP(&const_val, &val->value);
-			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
+			zend_hash_add_new(Z_ARRVAL(modules[module_number]), const_name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 
 		efree(module_names);
 		efree(modules);
 	} else {
 		zend_constant *constant;
+		zend_string *const_name;
 		zval const_val;
 
-		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
-			if (!constant->name) {
-				/* skip special constants */
-				continue;
-			}
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), const_name, constant) {
 			ZVAL_COPY_OR_DUP(&const_val, &constant->value);
-			zend_hash_add_new(Z_ARRVAL_P(return_value), constant->name, &const_val);
+			zend_hash_add_new(Z_ARRVAL_P(return_value), const_name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
