@@ -833,12 +833,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 				zval_ptr_dtor_str(&val);
 			}
 			ce = stmt->fetch.cls.ce;
-			/* TODO: Make this an assertion and ensure this is true higher up? */
-			if (!ce) {
-				/* TODO Error? */
-				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "No fetch class specified");
-				return 0;
-			}
+			ZEND_ASSERT(ce && "No fetch class specified");
 			if ((flags & PDO_FETCH_SERIALIZE) == 0) {
 				if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
 					return 0;
@@ -1140,6 +1135,10 @@ static bool pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode
 			ZEND_FALLTHROUGH;
 
 		case PDO_FETCH_CLASS:
+			if (mode == PDO_FETCH_CLASS && !stmt->fetch.cls.ce) {
+				zend_argument_value_error(mode_arg_num, "must use PDO::FETCH_CLASS with a class instance");
+				return 0;
+			}
 			if (flags & PDO_FETCH_SERIALIZE) {
 				php_error_docref(NULL, E_DEPRECATED, "The PDO::FETCH_SERIALIZE mode is deprecated");
 			}
