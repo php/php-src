@@ -2290,7 +2290,10 @@ void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 
 #if ZEND_DEBUG
 	if (!silent) {
-		zend_mm_check_leaks(heap);
+		char *tmp = getenv("ZEND_ALLOC_PRINT_LEAKS");
+		if (!tmp || ZEND_ATOL(tmp)) {
+			zend_mm_check_leaks(heap);
+		}
 	}
 #endif
 

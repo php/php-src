@@ -4,7 +4,7 @@ Bug #53251 (bindtextdomain with null dir doesn't return old value)
 gettext
 --SKIPIF--
 <?php
-if (getenv('SKIP_REPEAT')) die('skip gettext leaks global state across requests');
+if (getenv('SKIP_REPEAT')) die('xleak gettext leaks global state across requests');
 ?>
 --FILE--
 <?php
