@@ -162,9 +162,8 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				newNode = dom_object_get_node(newNodeObj);
 
 				if (newNode->doc != documentNode) {
-					xmlFree(fragment);
 					php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
-					return NULL;
+					goto err;
 				}
 
 				if (newNode->parent != NULL) {
@@ -175,10 +174,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				xmlSetTreeDoc(newNode, documentNode);
 
 				if (newNode->type == XML_ATTRIBUTE_NODE) {
-					xmlFree(fragment);
-
-					php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
-					return NULL;
+					goto hierarchy_request_err;
 				}
 
 				/*
@@ -191,21 +187,16 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				}
 
 				if (!xmlAddChild(fragment, newNode)) {
-					xmlFree(fragment);
 					if (nodesc > 1) {
 						xmlFreeNode(newNode);
 					}
-
-					php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
-					return NULL;
+					goto hierarchy_request_err;
 				}
 
 				continue;
 			} else {
-				xmlFree(fragment);
-
 				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_value_name(&nodes[i]));
-				return NULL;
+				goto err;
 			}
 		} else if (Z_TYPE(nodes[i]) == IS_STRING) {
 			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
@@ -213,20 +204,22 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 			xmlSetTreeDoc(newNode, documentNode);
 
 			if (!xmlAddChild(fragment, newNode)) {
-				xmlFree(fragment);
-
-				return NULL;
+				xmlFreeNode(newNode);
+				goto hierarchy_request_err;
 			}
 		} else {
-			xmlFree(fragment);
-
 			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_value_name(&nodes[i]));
-
-			return NULL;
+			goto err;
 		}
 	}
 
 	return fragment;
+
+hierarchy_request_err:
+	php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+err:
+	xmlFreeNode(fragment);
+	return NULL;
 }
 
 static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fragment)
