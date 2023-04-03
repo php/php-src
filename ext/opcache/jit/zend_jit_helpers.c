@@ -2186,6 +2186,51 @@ static zval* ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref(zend_reference *ref, 
 	return zend_jit_assign_to_typed_ref_helper(ref, value, IS_CV);
 }
 
+static zend_always_inline zval* zend_jit_assign_to_typed_ref2_helper(zend_reference *ref, zval *value, zval *result, uint8_t value_type)
+{
+	zval variable, *ret;
+	zend_refcounted *garbage = NULL;
+
+	ZVAL_REF(&variable, ref);
+	ret = zend_assign_to_variable_ex(&variable, value, value_type, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)), &garbage);
+	ZVAL_COPY(result, ret);
+	if (garbage) {
+		GC_DTOR(garbage);
+	}
+	return ret;
+}
+
+static zval* ZEND_FASTCALL zend_jit_assign_const_to_typed_ref2(zend_reference *ref, zval *value, zval *result)
+{
+	return zend_jit_assign_to_typed_ref2_helper(ref, value, result, IS_CONST);
+}
+
+static zval* ZEND_FASTCALL zend_jit_assign_tmp_to_typed_ref2(zend_reference *ref, zval *value, zval *result)
+{
+	return zend_jit_assign_to_typed_ref2_helper(ref, value, result, IS_TMP_VAR);
+}
+
+static zval* ZEND_FASTCALL zend_jit_assign_var_to_typed_ref2(zend_reference *ref, zval *value, zval *result)
+{
+	return zend_jit_assign_to_typed_ref2_helper(ref, value, result, IS_VAR);
+}
+
+static zval* ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref2(zend_reference *ref, zval *value, zval *result)
+{
+	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		const zend_op *opline = EG(current_execute_data)->opline;
+		uint32_t var;
+		if (opline->opcode == ZEND_ASSIGN) {
+			var = opline->op2.var;
+		} else {
+			ZEND_ASSERT((opline + 1)->opcode == ZEND_OP_DATA);
+			var = (opline + 1)->op1.var;
+		}
+		zend_jit_undefined_op_helper(var);
+		value = &EG(uninitialized_zval);
+	}
+	return zend_jit_assign_to_typed_ref2_helper(ref, value, result, IS_CV);
+}
 
 static zend_property_info *zend_jit_get_prop_not_accepting_double(zend_reference *ref)
 {
@@ -2504,6 +2549,7 @@ static void ZEND_FASTCALL zend_jit_assign_obj_helper(zend_object *zobj, zend_str
 static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend_property_info *info, zval *value, zval *result)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
+	zend_refcounted *garbage = NULL;
 	zval tmp;
 
 	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
@@ -2534,9 +2580,12 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 
 	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
 
-	value = zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	value = zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), &garbage);
 	if (result) {
 		ZVAL_COPY_DEREF(result, value);
+	}
+	if (garbage) {
+		GC_DTOR(garbage);
 	}
 }
 
