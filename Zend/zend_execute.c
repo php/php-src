@@ -948,7 +948,7 @@ static bool zend_check_intersection_for_property_or_class_constant_class_type(
 
 static bool zend_check_and_resolve_property_or_class_constant_class_type(
 	const zend_class_entry *scope, zend_type member_type, const zend_class_entry *value_ce) {
-if (ZEND_TYPE_HAS_LIST(member_type)) {
+	if (ZEND_TYPE_HAS_LIST(member_type)) {
 		zend_type *list_type;
 		if (ZEND_TYPE_IS_INTERSECTION(member_type)) {
 			return zend_check_intersection_for_property_or_class_constant_class_type(
@@ -968,14 +968,21 @@ if (ZEND_TYPE_HAS_LIST(member_type)) {
 					return true;
 				}
 			} ZEND_TYPE_LIST_FOREACH_END();
+
+			if ((ZEND_TYPE_PURE_MASK(member_type) & MAY_BE_STATIC)) {
+				return value_ce == scope;
+			}
+
 			return false;
 		}
-	} else if ((ZEND_TYPE_PURE_MASK(member_type) & MAY_BE_STATIC)) {
-		return value_ce == scope;
-	} else {
+	} else if ((ZEND_TYPE_PURE_MASK(member_type) & MAY_BE_STATIC) && value_ce == scope) {
+		return true;
+	} else if (ZEND_TYPE_HAS_NAME(member_type)) {
 		const zend_class_entry *ce = zend_ce_from_type(scope, &member_type);
 		return ce && instanceof_function(value_ce, ce);
 	}
+
+	return false;
 }
 
 static zend_always_inline bool i_zend_check_property_type(const zend_property_info *info, zval *property, bool strict)

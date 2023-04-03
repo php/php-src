@@ -31,7 +31,7 @@ function reflectClassConstant($base, $constant) {
     echo "hasType():\n";
     var_dump($constInfo->hasType());
     echo "getType():\n";
-    var_dump($constInfo->getType());
+    echo $constInfo->getType() ?? "NULL";
     echo "\n**********************************\n";
 }
 
@@ -83,9 +83,7 @@ string(21) "/** My Doc comment */"
 hasType():
 bool(true)
 getType():
-object(ReflectionNamedType)#3 (0) {
-}
-
+bool
 **********************************
 **********************************
 Reflecting on class constant TestClass::PROT
@@ -118,7 +116,6 @@ hasType():
 bool(false)
 getType():
 NULL
-
 **********************************
 **********************************
 Reflecting on class constant TestClass::PRIV
@@ -151,7 +148,6 @@ hasType():
 bool(false)
 getType():
 NULL
-
 **********************************
 **********************************
 Reflecting on class constant TestClass::FINAL
@@ -184,7 +180,6 @@ hasType():
 bool(false)
 getType():
 NULL
-
 **********************************
 **********************************
 Reflecting on class constant TestClass::PRIV
@@ -217,7 +212,6 @@ hasType():
 bool(false)
 getType():
 NULL
-
 **********************************
 
 Fatal error: Uncaught ReflectionException: Constant TestClass::BAD_CONST does not exist in %s:%d

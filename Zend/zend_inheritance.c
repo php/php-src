@@ -1682,6 +1682,7 @@ static zend_always_inline bool check_trait_property_or_constant_value_compatibil
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_CONSTANT_AST)) {
 		ZVAL_COPY_OR_DUP(&op1_tmp, op1);
 		if (UNEXPECTED(zval_update_constant_ex(&op1_tmp, ce) != SUCCESS)) {
+			zval_ptr_dtor(&op1_tmp);
 			return false;
 		}
 		op1 = &op1_tmp;
@@ -1689,6 +1690,7 @@ static zend_always_inline bool check_trait_property_or_constant_value_compatibil
 	if (UNEXPECTED(Z_TYPE_P(op2) == IS_CONSTANT_AST)) {
 		ZVAL_COPY_OR_DUP(&op2_tmp, op2);
 		if (UNEXPECTED(zval_update_constant_ex(&op2_tmp, ce) != SUCCESS)) {
+			zval_ptr_dtor(&op2_tmp);
 			return false;
 		}
 		op2 = &op2_tmp;
@@ -2275,7 +2277,7 @@ static zend_class_entry* find_first_constant_definition(zend_class_entry *ce, ze
 }
 /* }}} */
 
-static bool emit_incompatible_trait_constant_error(
+static void emit_incompatible_trait_constant_error(
 	zend_class_entry *ce, zend_class_constant *existing_constant, zend_class_constant *trait_constant, zend_string *name,
 	zend_class_entry **traits, size_t current_trait
 ) {
@@ -2286,8 +2288,6 @@ static bool emit_incompatible_trait_constant_error(
 		ZSTR_VAL(name),
 		ZSTR_VAL(ce->name)
 	);
-
-	return false;
 }
 
 static bool do_trait_constant_check(
@@ -2304,22 +2304,26 @@ static bool do_trait_constant_check(
 	zend_class_constant *existing_constant = Z_PTR_P(zv);
 
 	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask)) {
-		return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		return false;
 	}
 
 	if (ZEND_TYPE_IS_SET(trait_constant->type) != ZEND_TYPE_IS_SET(existing_constant->type)) {
-		return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		return false;
 	} else if (ZEND_TYPE_IS_SET(trait_constant->type)) {
 		inheritance_status status1 = zend_perform_covariant_type_check(ce, existing_constant->type, traits[current_trait], trait_constant->type);
 		inheritance_status status2 = zend_perform_covariant_type_check(traits[current_trait], trait_constant->type, ce, existing_constant->type);
 		if (status1 == INHERITANCE_ERROR || status2 == INHERITANCE_ERROR) {
-			return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+			emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+			return false;
 		}
 	}
 
 	if (!check_trait_property_or_constant_value_compatibility(ce, &trait_constant->value, &existing_constant->value)) {
 		/* There is an existing constant of the same name, and it conflicts with the new one, so let's throw a fatal error */
-		return emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		return false;
 	}
 
 	/* There is an existing constant which is compatible with the new one, so no need to add it */
