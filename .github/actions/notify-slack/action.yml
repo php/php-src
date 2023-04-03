@@ -1,0 +1,15 @@
+name: Notify Slack
+inputs:
+  token:
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Notify Slack
+      if: always()
+      uses: ravsamhq/notify-slack-action@v1
+      with:
+        status: ${{ job.status }}
+        notify_when: 'failure'
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.token }}
