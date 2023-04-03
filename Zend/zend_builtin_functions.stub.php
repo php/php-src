@@ -205,7 +205,7 @@ function autoload_unregister_class(callable $callback): bool {}
 
 function autoload_call_class(string $class): void {}
 
-function autoload_list_class(): array {}
+function autoload_list_class(): iterable {}
 
 function autoload_register_function(callable $callback, bool $prepend = false): void {}
 

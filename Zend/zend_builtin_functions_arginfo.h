@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 338b667e68d87c6ec781721fcb5df69396c995c0 */
+ * Stub hash: ec99046df0abf2ae4db5a3b05b8996e9f7438f84 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -231,7 +231,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_call_class, 0, 1, IS_VO
 	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_autoload_list_class arginfo_func_get_args
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_autoload_list_class, 0, 0, Traversable, MAY_BE_ARRAY)
+ZEND_END_ARG_INFO()
 
 #define arginfo_autoload_register_function arginfo_autoload_register_class
 
@@ -241,8 +242,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_call_function, 0, 1, IS
 	ZEND_ARG_TYPE_INFO(0, function, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_autoload_list_function, 0, 0, Traversable, MAY_BE_ARRAY)
-ZEND_END_ARG_INFO()
+#define arginfo_autoload_list_function arginfo_autoload_list_class
 
 
 ZEND_FUNCTION(zend_version);
