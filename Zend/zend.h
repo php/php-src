@@ -247,7 +247,7 @@ typedef struct _zend_utility_functions {
 	void (*printf_to_smart_string_function)(smart_string *buf, const char *format, va_list ap);
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
 	char *(*getenv_function)(const char *name, size_t name_len);
-	zend_string *(*resolve_path_function)(zend_string *filename);
+	zend_string *(*resolve_path_function)(const zend_string *filename);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -338,7 +338,7 @@ extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handl
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
-extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
+extern ZEND_API zend_string *(*zend_resolve_path)(const zend_string *filename);
 
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);

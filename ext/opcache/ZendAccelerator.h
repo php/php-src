@@ -321,7 +321,7 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force);
 zend_result accelerator_shm_read_lock(void);
 void accelerator_shm_read_unlock(void);
 
-zend_string *accel_make_persistent_key(zend_string *path);
+zend_string *accel_make_persistent_key(const zend_string *path);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 #define IS_ACCEL_INTERNED(str) \

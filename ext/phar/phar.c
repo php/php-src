@@ -26,7 +26,7 @@
 static void destroy_phar_data(zval *zv);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-static zend_string *(*phar_save_resolve_path)(zend_string *filename);
+static zend_string *(*phar_save_resolve_path)(const zend_string *filename);
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -3286,7 +3286,7 @@ static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
 
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
 
-static zend_string *phar_resolve_path(zend_string *filename)
+static zend_string *phar_resolve_path(const zend_string *filename)
 {
 	zend_string *ret = phar_find_in_include_path(ZSTR_VAL(filename), ZSTR_LEN(filename), NULL);
 	if (!ret) {

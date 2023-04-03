@@ -239,7 +239,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_le
 }
 /* }}} */
 
-zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(const char *filename, size_t filename_len, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
 	char *path, *fname, *arch, *entry, *test;

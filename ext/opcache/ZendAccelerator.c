@@ -123,7 +123,7 @@ static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_ha
 static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
 static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
 static zend_result (*accelerator_orig_zend_stream_open_function)(zend_file_handle *handle );
-static zend_string *(*accelerator_orig_zend_resolve_path)(zend_string *filename);
+static zend_string *(*accelerator_orig_zend_resolve_path)(const zend_string *filename);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 static zend_result (*orig_post_startup_cb)(void);
@@ -1192,7 +1192,7 @@ zend_result validate_timestamp_and_record_ex(zend_persistent_script *persistent_
 /* Instead of resolving full real path name each time we need to identify file,
  * we create a key that consist from requested file name, current working
  * directory, current include_path, etc */
-zend_string *accel_make_persistent_key(zend_string *str)
+zend_string *accel_make_persistent_key(const zend_string *str)
 {
 	const char *path = ZSTR_VAL(str);
 	size_t path_length = ZSTR_LEN(str);
@@ -1359,7 +1359,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 	}
 
 	/* not use_cwd */
-	return str;
+	return (zend_string*)str;
 }
 
 /**
@@ -2517,7 +2517,7 @@ static zend_result persistent_stream_open_function(zend_file_handle *handle)
 }
 
 /* zend_resolve_path() replacement for PHP 5.3 and above */
-static zend_string* persistent_zend_resolve_path(zend_string *filename)
+static zend_string* persistent_zend_resolve_path(const zend_string *filename)
 {
 	if (!file_cache_only &&
 	    ZCG(accelerator_enabled)) {
