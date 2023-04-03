@@ -34,7 +34,7 @@ ZEND_TLS HashTable *autoloader_function_autoload_functions;
 		memmove((ht)->arData + 1, (ht)->arData, \
 			sizeof(Bucket) * ((ht)->nNumUsed - 1)); \
 		(ht)->arData[0] = tmp; \
-		if (!((ht)->u.flags & HASH_FLAG_PACKED)) { \
+		if (UNEXPECTED(!((ht)->u.flags & HASH_FLAG_PACKED))) { \
 			zend_hash_rehash(ht); \
 		} else { \
 			zend_autoload_reindex(ht); \
