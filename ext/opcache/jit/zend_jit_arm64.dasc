@@ -5743,22 +5743,31 @@ static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
 	if (opline) {
 		|	SET_EX_OPLINE opline, REG0
 	}
-	if (val_type == IS_CONST) {
-		|	EXT_CALL zend_jit_assign_const_to_typed_ref, REG0
-	} else if (val_type == IS_TMP_VAR) {
-		|	EXT_CALL zend_jit_assign_tmp_to_typed_ref, REG0
-	} else if (val_type == IS_VAR) {
-		|	EXT_CALL zend_jit_assign_var_to_typed_ref, REG0
-	} else if (val_type == IS_CV) {
-		|	EXT_CALL zend_jit_assign_cv_to_typed_ref, REG0
+	if (!res_addr) {
+		if (val_type == IS_CONST) {
+			|	EXT_CALL zend_jit_assign_const_to_typed_ref, REG0
+		} else if (val_type == IS_TMP_VAR) {
+			|	EXT_CALL zend_jit_assign_tmp_to_typed_ref, REG0
+		} else if (val_type == IS_VAR) {
+			|	EXT_CALL zend_jit_assign_var_to_typed_ref, REG0
+		} else if (val_type == IS_CV) {
+			|	EXT_CALL zend_jit_assign_cv_to_typed_ref, REG0
+		} else {
+			ZEND_UNREACHABLE();
+		}
 	} else {
-		ZEND_UNREACHABLE();
-	}
-	if (res_addr) {
-		zend_jit_addr ret_addr = ZEND_ADDR_MEM_ZVAL(ZREG_X0, 0); // RETVAL
-
-		|	ZVAL_COPY_VALUE res_addr, -1, ret_addr, -1, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
-		|	TRY_ADDREF -1, REG1w, REG2, TMP1w
+		|	LOAD_ZVAL_ADDR CARG3, res_addr
+		if (val_type == IS_CONST) {
+			|	EXT_CALL zend_jit_assign_const_to_typed_ref2, REG0
+		} else if (val_type == IS_TMP_VAR) {
+			|	EXT_CALL zend_jit_assign_tmp_to_typed_ref2, REG0
+		} else if (val_type == IS_VAR) {
+			|	EXT_CALL zend_jit_assign_var_to_typed_ref2, REG0
+		} else if (val_type == IS_CV) {
+			|	EXT_CALL zend_jit_assign_cv_to_typed_ref2, REG0
+		} else {
+			ZEND_UNREACHABLE();
+		}
 	}
 	if (check_exception) {
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
