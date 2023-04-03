@@ -46,6 +46,8 @@ PHP 8.3 UPGRADE NOTES
 
 - Core
   . Anonymous classes may now be marked as readonly.
+  . Readonly properties can now be reinitialized during cloning.
+    RFC: https://wiki.php.net/rfc/readonly_amendments
 
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
