@@ -1015,16 +1015,22 @@ static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_binop_error(const cha
 
 static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	if (result == op1 && Z_ARR_P(op1) == Z_ARR_P(op2)) {
-		/* $a += $a */
-		return;
-	}
 	if (result != op1) {
 		ZVAL_ARR(result, zend_array_dup(Z_ARR_P(op1)));
+		zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
+	} else if (Z_ARR_P(op1) == Z_ARR_P(op2)) {
+		/* $a += $a */
 	} else {
-		SEPARATE_ARRAY(result);
+		/* We have to duplicate op1 (even with refcount == 1) because it may be an element of op2
+		 * and therefore its reference counter may be increased by zend_hash_merge(). That leads to
+		 * an assertion in _zend_hash_add_or_update_i() that only allows adding elements to hash
+		 * tables with RC1. See GH-10085 and Zend/tests/gh10085*.phpt */
+		zval tmp;
+		ZVAL_ARR(&tmp, zend_array_dup(Z_ARR_P(op1)));
+		zend_hash_merge(Z_ARRVAL(tmp), Z_ARRVAL_P(op2), zval_add_ref, 0);
+		zval_ptr_dtor(result);
+		ZVAL_COPY_VALUE(result, &tmp);
 	}
-	zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
 }
 /* }}} */
 
