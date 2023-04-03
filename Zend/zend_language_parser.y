@@ -278,7 +278,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
-%type <ast> function_name non_empty_member_modifiers
+%type <ast> function_name non_empty_member_modifiers instanceof_class_or_name
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -1125,6 +1125,14 @@ new_expr:
 			{ zend_ast_with_attributes($3->child[0], $2); $$ = $3; }
 ;
 
+instanceof_class_or_name:
+		class_name_reference { $$ = $1; }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
+			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
+;
+
 expr:
 		variable
 			{ $$ = $1; }
@@ -1212,7 +1220,7 @@ expr:
 			{ $$ = zend_ast_create(ZEND_AST_GREATER_EQUAL, $1, $3); }
 	|	expr T_SPACESHIP expr
 			{ $$ = zend_ast_create_binary_op(ZEND_SPACESHIP, $1, $3); }
-	|	expr T_INSTANCEOF class_name_reference
+	|	expr T_INSTANCEOF instanceof_class_or_name
 			{ $$ = zend_ast_create(ZEND_AST_INSTANCEOF, $1, $3); }
 	|	'(' expr ')' {
 			$$ = $2;
