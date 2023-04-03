@@ -4991,6 +4991,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									res_addr = 0;
 								} else {
 									res_addr = RES_REG_ADDR();
+									if (Z_MODE(res_addr) != IS_REG
+									 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
+										send_result = 1;
+										res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+										if (!zend_jit_reuse_ip(&dasm_state)) {
+											goto jit_failure;
+										}
+									}
 								}
 								if (!zend_jit_assign_to_typed_ref(&dasm_state, opline, opline->op2_type, op2_addr, res_addr, 1)) {
 									goto jit_failure;
