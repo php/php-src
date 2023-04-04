@@ -32,7 +32,6 @@
 #include "zend_ini.h"
 #include "zend_enum.h"
 #include "zend_observer.h"
-#include "zend_rc_debug.h"
 
 #include <stdarg.h>
 
