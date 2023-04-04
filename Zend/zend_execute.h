@@ -24,7 +24,6 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_operators.h"
-#include "zend_type_code.h"
 #include "zend_variables.h"
 
 #include <stdint.h>
