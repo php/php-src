@@ -20,8 +20,6 @@
 #ifndef ZEND_MULTIBYTE_H
 #define ZEND_MULTIBYTE_H
 
-#include "zend_result.h"
-
 typedef struct _zend_encoding zend_encoding;
 
 typedef size_t (*zend_encoding_filter)(unsigned char **str, size_t *str_length, const unsigned char *buf, size_t length);

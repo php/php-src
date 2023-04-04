@@ -19,8 +19,6 @@
 #ifndef ZEND_INI_H
 #define ZEND_INI_H
 
-#include "zend_result.h"
-
 #define ZEND_INI_USER	(1<<0)
 #define ZEND_INI_PERDIR	(1<<1)
 #define ZEND_INI_SYSTEM	(1<<2)

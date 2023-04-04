@@ -24,8 +24,6 @@
 
 #include "zend_portability.h"
 #include "zend_long.h"
-#include "zend_result.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -51,6 +49,13 @@
 #endif
 
 typedef unsigned char zend_uchar;
+
+typedef enum {
+  SUCCESS =  0,
+  FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
+} ZEND_RESULT_CODE;
+
+typedef ZEND_RESULT_CODE zend_result;
 
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 # ifdef ZEND_WIN32

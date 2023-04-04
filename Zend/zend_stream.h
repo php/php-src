@@ -22,8 +22,6 @@
 #ifndef ZEND_STREAM_H
 #define ZEND_STREAM_H
 
-#include "zend_result.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
