@@ -32,7 +32,6 @@
 # define PHP_RANDOM_H
 
 # include "php.h"
-# include "zend_result.h"
 
 PHPAPI double php_combined_lcg(void);
 
