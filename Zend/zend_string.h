@@ -19,26 +19,8 @@
 #ifndef ZEND_STRING_H
 #define ZEND_STRING_H
 
-#include "zend_alloc.h"
+#include "zend.h"
 #include "zend_char.h"
-#include "zend_portability.h"
-#include "zend_refcounted.h"
-
-/* string flags (zval.value->gc.u.flags) */
-#define IS_STR_CLASS_NAME_MAP_PTR   GC_PROTECTED  /* refcount is a map_ptr offset of class_entry */
-#define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
-#define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
-#define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
-#define IS_STR_VALID_UTF8           (1<<9)        /* valid UTF-8 according to PCRE */
-
-typedef struct _zend_string zend_string;
-
-struct _zend_string {
-	zend_refcounted_h gc;
-	zend_ulong        h;                /* hash value */
-	size_t            len;
-	char              val[1];
-};
 
 BEGIN_EXTERN_C()
 
