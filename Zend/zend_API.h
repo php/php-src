@@ -22,7 +22,6 @@
 #ifndef ZEND_API_H
 #define ZEND_API_H
 
-#include "zend_char.h"
 #include "zend_modules.h"
 #include "zend_list.h"
 #include "zend_operators.h"

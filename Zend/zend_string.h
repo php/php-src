@@ -20,7 +20,6 @@
 #define ZEND_STRING_H
 
 #include "zend.h"
-#include "zend_char.h"
 
 BEGIN_EXTERN_C()
 
