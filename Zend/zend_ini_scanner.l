@@ -151,26 +151,6 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 	return type;                                                   \
 }
 
-static inline zend_result convert_to_number(zval *retval, const char *str, const int str_len)
-{
-	uint8_t type;
-	int overflow;
-	zend_long lval;
-	double dval;
-
-	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, 0, &overflow, NULL)) != 0) {
-		if (type == IS_LONG) {
-			ZVAL_LONG(retval, lval);
-			return SUCCESS;
-		} else if (type == IS_DOUBLE && !overflow) {
-			ZVAL_DOUBLE(retval, dval);
-			return SUCCESS;
-		}
-	}
-
-	return FAILURE;
-}
-
 static void zend_ini_copy_typed_value(zval *retval, const int type, const char *str, int len)
 {
 	switch (type) {
@@ -183,11 +163,6 @@ static void zend_ini_copy_typed_value(zval *retval, const int type, const char *
 			ZVAL_NULL(retval);
 			break;
 
-		case TC_NUMBER:
-			if (convert_to_number(retval, str, len) == SUCCESS) {
-				break;
-			}
-			ZEND_FALLTHROUGH;
 		default:
 			zend_ini_copy_value(retval, str, len);
 	}
