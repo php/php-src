@@ -170,6 +170,9 @@ PHP                                                                        NEWS
   . Fix GH-10239 (proc_close after proc_get_status always returns -1). (nielsdos)
   . Improve the warning message for unpack() in case not enough values were
     provided. (nielsdos)
+  . Fix GH-11010 (parse_ini_string() now preserves formatting of unquoted
+    strings starting with numbers when the INI_SCANNER_TYPED flag is
+    specified). (ilutov)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
