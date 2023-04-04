@@ -46,6 +46,11 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   constant names are only stored as keys of the global constants table.
   That's why the `zend_register_constant()` function now expects the
   constant name as its first parameter.
+* Many calls to zend_assign_to_variable have been replaced with
+  zend_assign_to_variable_ex which allows delaying the releasing of the old
+  variable value. This avoids side-effects through destructors between the
+  assignment of the variable and the assignment to the result zval in the VM
+  (i.e. it may free the new value). See GH-10168 for details.
 
 ========================
 2. Build system changes
