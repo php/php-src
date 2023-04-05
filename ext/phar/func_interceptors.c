@@ -137,10 +137,14 @@ notfound:
 				goto notfound;
 			}
 		}
-		// TODO Known sizes use string concat helper
 		/* auto-convert to phar:// */
 		if (entry[0] == '/') {
-			name = strpprintf(4096, "phar://%s%s", arch, entry);
+			ZEND_ASSERT(strlen("phar://") + arch_len + entry_len < 4096);
+			name = zend_string_concat3(
+				"phar://", strlen("phar://"),
+				arch, arch_len,
+				entry, entry_len
+			);
 		} else {
 			name = strpprintf(4096, "phar://%s/%s", arch, entry);
 		}
