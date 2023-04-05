@@ -239,7 +239,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_le
 }
 /* }}} */
 
-zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
 	char *path, *fname, *arch, *entry, *test;
@@ -272,7 +272,7 @@ zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar
 
 	efree(entry);
 
-	if (*filename == '.') {
+	if (*ZSTR_VAL(filename) == '.') {
 		size_t try_len;
 
 		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
@@ -284,8 +284,8 @@ splitted:
 			*pphar = phar;
 		}
 
-		try_len = filename_len;
-		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1);
+		try_len = ZSTR_LEN(filename);
+		test = phar_fix_filepath(estrndup(ZSTR_VAL(filename), ZSTR_LEN(filename)), &try_len, 1);
 
 		if (*test == '/') {
 			if (zend_hash_str_exists(&(phar->manifest), test + 1, try_len - 1)) {
@@ -307,7 +307,7 @@ splitted:
 
 	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%s/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
 	efree(arch);
-	ret = php_resolve_path(filename, filename_len, path);
+	ret = php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), path);
 	efree(path);
 
 	if (ret && ZSTR_LEN(ret) > 8 && !strncmp(ZSTR_VAL(ret), "phar://", 7)) {

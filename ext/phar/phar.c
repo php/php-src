@@ -3288,7 +3288,7 @@ zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type
 
 static zend_string *phar_resolve_path(zend_string *filename)
 {
-	zend_string *ret = phar_find_in_include_path(ZSTR_VAL(filename), ZSTR_LEN(filename), NULL);
+	zend_string *ret = phar_find_in_include_path(filename, NULL);
 	if (!ret) {
 		ret = phar_save_resolve_path(filename);
 	}
