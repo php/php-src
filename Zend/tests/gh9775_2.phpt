@@ -1,19 +1,21 @@
 --TEST--
-GH-9775: Enum in array_unique()
+GH-9775: Pure enum in array_unique()
 --FILE--
 <?php
 
-enum Test: string
+enum Test
 {
-    case AUTHENTICATED = 'authenticated';
-    case COURSES_ADMIN = 'courses.admin';
-    case BUNDLES_ADMIN = 'bundles.admin';
-    case COURSES_REPORTING_ACCESS = 'courses-reporting.access';
-    case B2B_DASHBOARD_ACCESS = 'b2b-dashboard.access';
-    case INSTRUCTORS_ADMIN = 'instructors.admin';
-    case USERS_ADMIN = 'users.admin';
-    case COUPONS_ADMIN = 'coupons.admin';
+    case AUTHENTICATED;
+    case COURSES_ADMIN;
+    case BUNDLES_ADMIN;
+    case COURSES_REPORTING_ACCESS;
+    case B2B_DASHBOARD_ACCESS;
+    case INSTRUCTORS_ADMIN;
+    case USERS_ADMIN;
+    case COUPONS_ADMIN;
 }
+
+$instructorsAdmin = Test::INSTRUCTORS_ADMIN;
 
 $data = [
     Test::COURSES_ADMIN,
@@ -23,7 +25,7 @@ $data = [
     Test::B2B_DASHBOARD_ACCESS,
     Test::B2B_DASHBOARD_ACCESS,
     Test::INSTRUCTORS_ADMIN,
-    Test::INSTRUCTORS_ADMIN,
+    &$instructorsAdmin,
     Test::COUPONS_ADMIN,
     Test::AUTHENTICATED,
 ];
