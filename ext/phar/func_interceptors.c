@@ -156,7 +156,6 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	zend_string *filename;
 	zend_string *contents;
 	bool use_include_path = 0;
-	php_stream *stream;
 	zend_long offset = -1;
 	zend_long maxlen;
 	bool maxlen_is_null = 1;
@@ -190,6 +189,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		}
 
 		php_stream_context *context = NULL;
+		php_stream *stream;
+
 		if (zcontext) {
 			context = php_stream_context_from_zval(zcontext, 0);
 		}
@@ -232,7 +233,6 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	zend_string *filename;
 	bool use_include_path = 0;
 	zval *zcontext = NULL;
-	php_stream *stream;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -251,7 +251,9 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 			goto skip_phar;
 		}
 
-		php_stream_context *context = php_stream_context_from_zval(zcontext, 0);;
+		php_stream *stream;
+		php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+
 		stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), "rb", 0 | REPORT_ERRORS, NULL, context);
 
 		zend_string_release_ex(name, false);
@@ -277,7 +279,6 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	size_t mode_len;
 	bool use_include_path = 0;
 	zval *zcontext = NULL;
-	php_stream *stream;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -297,7 +298,9 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 			goto skip_phar;
 		}
 
+		php_stream *stream;
 		php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+
 		stream = php_stream_open_wrapper_ex(ZSTR_VAL(name), mode, 0 | REPORT_ERRORS, NULL, context);
 
 		zend_string_release_ex(name, false);
