@@ -230,7 +230,6 @@ skip_phar:
 PHAR_FUNC(phar_readfile) /* {{{ */
 {
 	zend_string *filename;
-	int size = 0;
 	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
@@ -259,7 +258,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		if (stream == NULL) {
 			RETURN_FALSE;
 		}
-		size = php_stream_passthru(stream);
+		ssize_t size = php_stream_passthru(stream);
 		php_stream_close(stream);
 		RETURN_LONG(size);
 	}
