@@ -116,7 +116,7 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 
 	zend_string *name = NULL;
 	if (using_include_path) {
-		if (!(name = phar_find_in_include_path(ZSTR_VAL(filename), ZSTR_LEN(filename), NULL))) {
+		if (!(name = phar_find_in_include_path(filename, NULL))) {
 			/* this file is not in the phar, use the original path */
 			efree(arch);
 			return NULL;
