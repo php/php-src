@@ -27,6 +27,8 @@ PHP                                                                        NEWS
     Linux. (Kévin Dunglas)
   . Fix bug GH-10469 (Disallow .. in open_basedir paths set at runtime).
     (ilutov)
+  . Fix bug GH-10168, GH-10582 (Various segfaults with destructors and VM return
+    values). (dstogov, nielsdos, ilutov)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
