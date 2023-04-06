@@ -2788,6 +2788,10 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_cv_to_typed_ref);
+	REGISTER_HELPER(zend_jit_assign_const_to_typed_ref2);
+	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref2);
+	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref2);
+	REGISTER_HELPER(zend_jit_assign_cv_to_typed_ref2);
 	REGISTER_HELPER(zend_jit_check_constant);
 	REGISTER_HELPER(zend_jit_get_constant);
 	REGISTER_HELPER(zend_jit_int_extend_stack_helper);
@@ -5823,7 +5827,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 	}
 
 	if ((var_info & MAY_BE_REF) || ref_addr) {
-		ir_ref ref = 0, if_ref = 0, ref2, arg2, ret, if_typed, non_ref_path;
+		ir_ref ref = 0, if_ref = 0, ref2, arg2, if_typed, non_ref_path;
 		uintptr_t func;
 
 		if (!ref_addr) {
@@ -5837,17 +5841,6 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		if_typed = jit_if_TYPED_REF(jit, ref2);
 		ir_IF_TRUE_cold(if_typed);
 		jit_SET_EX_OPLINE(jit, opline);
-		if (val_type == IS_CONST) {
-			func = (uintptr_t)zend_jit_assign_const_to_typed_ref;
-		} else if (val_type == IS_TMP_VAR) {
-			func = (uintptr_t)zend_jit_assign_tmp_to_typed_ref;
-		} else if (val_type == IS_VAR) {
-			func = (uintptr_t)zend_jit_assign_var_to_typed_ref;
-		} else if (val_type == IS_CV) {
-			func = (uintptr_t)zend_jit_assign_cv_to_typed_ref;
-		} else {
-			ZEND_UNREACHABLE();
-		}
 		if (Z_MODE(val_addr) == IS_REG) {
 			ZEND_ASSERT(opline->opcode == ZEND_ASSIGN);
 			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
@@ -5858,12 +5851,32 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		} else {
 			arg2 = jit_ZVAL_ADDR(jit, val_addr);
 		}
-		ret = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(func), ref2, arg2);
-		if (res_addr) {
-			jit_ZVAL_COPY(jit,
-				res_addr,
-				-1,
-				ZEND_ADDR_REF_ZVAL(ret), -1, 1);
+		if (!res_addr) {
+			if (val_type == IS_CONST) {
+				func = (uintptr_t)zend_jit_assign_const_to_typed_ref;
+			} else if (val_type == IS_TMP_VAR) {
+				func = (uintptr_t)zend_jit_assign_tmp_to_typed_ref;
+			} else if (val_type == IS_VAR) {
+				func = (uintptr_t)zend_jit_assign_var_to_typed_ref;
+			} else if (val_type == IS_CV) {
+				func = (uintptr_t)zend_jit_assign_cv_to_typed_ref;
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(func), ref2, arg2);
+		} else {
+			if (val_type == IS_CONST) {
+				func = (uintptr_t)zend_jit_assign_const_to_typed_ref2;
+			} else if (val_type == IS_TMP_VAR) {
+				func = (uintptr_t)zend_jit_assign_tmp_to_typed_ref2;
+			} else if (val_type == IS_VAR) {
+				func = (uintptr_t)zend_jit_assign_var_to_typed_ref2;
+			} else if (val_type == IS_CV) {
+				func = (uintptr_t)zend_jit_assign_cv_to_typed_ref2;
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			ir_CALL_3(IR_ADDR, ir_CONST_FC_FUNC(func), ref2, arg2, jit_ZVAL_ADDR(jit, res_addr));
 		}
 		if (check_exception) {
 			zend_jit_check_exception(jit);
