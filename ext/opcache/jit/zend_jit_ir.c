@@ -13313,6 +13313,16 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_END_list(end_inputs);
 
 			ir_IF_FALSE_cold(if_prop_obj);
+
+			ir_ref extra_addr = ir_ADD_OFFSET(jit_ZVAL_ADDR(jit, prop_addr), offsetof(zval, u2.extra));
+			ir_ref extra = ir_LOAD_U32(extra_addr);
+			ir_ref if_reinitable = ir_IF(ir_AND_U32(extra, ir_CONST_U32(IS_PROP_REINITABLE)));
+			ir_IF_TRUE(if_reinitable);
+			ir_STORE(extra_addr, ir_AND_U32(extra, ir_CONST_U32(~IS_PROP_REINITABLE)));
+			ir_ref reinit_path = ir_END();
+
+			ir_IF_FALSE(if_reinitable);
+
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_modification_error), prop_info_ref);
 			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
@@ -13320,6 +13330,9 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 
 			if (flags == ZEND_FETCH_DIM_WRITE) {
 				ir_IF_FALSE_cold(if_readonly);
+				if (flags) {
+					ir_MERGE_WITH(reinit_path);
+				}
 				jit_SET_EX_OPLINE(jit, opline);
 				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_array_promotion),
 					prop_ref, prop_info_ref);
@@ -13327,6 +13340,9 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				ir_IF_FALSE(if_has_prop_info);
 			} else if (flags == ZEND_FETCH_REF) {
 				ir_IF_FALSE_cold(if_readonly);
+				if (flags) {
+					ir_MERGE_WITH(reinit_path);
+				}
 				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_create_typed_ref),
 					prop_ref,
 					prop_info_ref,
@@ -13334,9 +13350,14 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				ir_END_list(end_inputs);
 				ir_IF_FALSE(if_has_prop_info);
 			} else {
+				ir_ref list = reinit_path;
+
 				ZEND_ASSERT(flags == 0);
 				ir_IF_FALSE(if_has_prop_info);
-				ir_MERGE_WITH_EMPTY_FALSE(if_readonly);
+				ir_END_list(list);
+				ir_IF_FALSE(if_readonly);
+				ir_END_list(list);
+				ir_MERGE_list(list);
 			}
 		}
 	} else {
@@ -13374,11 +13395,22 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_END_list(end_inputs);
 
 			ir_IF_FALSE_cold(if_prop_obj);
+
+			ir_ref extra_addr = ir_ADD_OFFSET(jit_ZVAL_ADDR(jit, prop_addr), offsetof(zval, u2.extra));
+			ir_ref extra = ir_LOAD_U32(extra_addr);
+			ir_ref if_reinitable = ir_IF(ir_AND_U32(extra, ir_CONST_U32(IS_PROP_REINITABLE)));
+
+			ir_IF_FALSE(if_reinitable);
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_modification_error), ir_CONST_ADDR(prop_info));
 			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
 			ir_END_list(end_inputs);
-		} else if (opline->opcode == ZEND_FETCH_OBJ_W
+
+			ir_IF_TRUE(if_reinitable);
+			ir_STORE(extra_addr, ir_AND_U32(extra, ir_CONST_U32(~IS_PROP_REINITABLE)));
+		}
+
+		if (opline->opcode == ZEND_FETCH_OBJ_W
 		 && (opline->extended_value & ZEND_FETCH_OBJ_FLAGS)
 		 && ZEND_TYPE_IS_SET(prop_info->type)) {
 			uint32_t flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
@@ -13428,15 +13460,13 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 	}
 
 	if (opline->opcode == ZEND_FETCH_OBJ_W) {
-		if (!prop_info || !(prop_info->flags & ZEND_ACC_READONLY)) {
-			ZEND_ASSERT(prop_ref);
-			jit_set_Z_PTR(jit, res_addr, prop_ref);
-			jit_set_Z_TYPE_INFO(jit, res_addr, IS_INDIRECT);
-			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_info) {
-				ssa->var_info[ssa_op->result_def].indirect_reference = 1;
-			}
-			ir_END_list(end_inputs);
+		ZEND_ASSERT(prop_ref);
+		jit_set_Z_PTR(jit, res_addr, prop_ref);
+		jit_set_Z_TYPE_INFO(jit, res_addr, IS_INDIRECT);
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_info) {
+			ssa->var_info[ssa_op->result_def].indirect_reference = 1;
 		}
+		ir_END_list(end_inputs);
 	} else {
 		bool result_avoid_refcounting = 0;
 
