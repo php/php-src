@@ -9583,16 +9583,20 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 		zend_jit_reset_last_valid_opline(jit);
 
-		// JIT: fbc->internal_function.handler(call, ret);
-		if (func) {
-			func_ptr = ir_CONST_FC_FUNC(func->internal_function.handler);
+		// JIT: (zend_execute_internal ? zend_execute_internal : fbc->internal_function.handler)(call, ret);
+		if (zend_execute_internal) {
+			ir_CALL_2(IR_VOID, ir_CONST_FUNC(zend_execute_internal), rx, jit_ZVAL_ADDR(jit, res_addr));
 		} else {
-			func_ptr = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_internal_function, handler)));
+			if (func) {
+				func_ptr = ir_CONST_FC_FUNC(func->internal_function.handler);
+			} else {
+				func_ptr = ir_LOAD_A(ir_ADD_OFFSET(func_ref, offsetof(zend_internal_function, handler)));
 #if defined(IR_TARGET_X86)
-			func_ptr = ir_CAST_FC_FUNC(func_ptr);
+				func_ptr = ir_CAST_FC_FUNC(func_ptr);
 #endif
+			}
+			ir_CALL_2(IR_VOID, func_ptr, rx, jit_ZVAL_ADDR(jit, res_addr));
 		}
-		ir_CALL_2(IR_VOID, func_ptr, rx, jit_ZVAL_ADDR(jit, res_addr));
 
 		if (ZEND_OBSERVER_ENABLED) {
 			ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_observer_fcall_end),
