@@ -2666,6 +2666,7 @@ static int zend_jit_setup_stubs(void)
 		zend_jit_stub_handlers[i] = entry;
 
 		if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_PERF_DUMP)) {
+#ifdef HAVE_CAPSTONE
 			if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
 				ir_disasm_add_symbol(zend_jit_stubs[i].name, (uintptr_t)entry, size);
 			}
@@ -2673,7 +2674,7 @@ static int zend_jit_setup_stubs(void)
 				ir_disasm(zend_jit_stubs[i].name,
 					entry, size, (JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) != 0, &jit.ctx, stderr);
 			}
-
+#endif
 #ifndef _WIN32
 			if (JIT_G(debug) & ZEND_JIT_DEBUG_GDB) {
 //				ir_mem_unprotect(entry, size);
@@ -2701,6 +2702,7 @@ static int zend_jit_setup_stubs(void)
 
 static void zend_jit_setup_disasm(void)
 {
+#ifdef HAVE_CAPSTONE
 	ir_disasm_init();
 
 	if (zend_vm_kind() == ZEND_VM_KIND_HYBRID) {
@@ -2883,6 +2885,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_DATA(EG(symbol_table));
 
 	REGISTER_DATA(CG(map_ptr_base));
+#endif
 #endif
 }
 
@@ -3132,9 +3135,11 @@ static void zend_jit_shutdown_ir(void)
 		ir_gdb_unregister_all();
 	}
 #endif
+#ifdef HAVE_CAPSTONE
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
 		ir_disasm_free();
 	}
+#endif
 }
 
 /* PHP control flow reconstruction helpers */
@@ -15200,6 +15205,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 	entry = zend_jit_ir_compile(&jit->ctx, &size, str ? ZSTR_VAL(str) : NULL);
 	if (entry) {
 		if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_PERF_DUMP)) {
+#if HAVE_CAPSTONE
 			if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
 				if (str) {
 					ir_disasm_add_symbol(ZSTR_VAL(str), (uintptr_t)entry, size);
@@ -15209,7 +15215,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 					(JIT_G(debug) & ZEND_JIT_DEBUG_ASM_ADDR) != 0,
 					&jit->ctx, stderr);
 			}
-
+#endif
 #ifndef _WIN32
 			if (str) {
 				if (JIT_G(debug) & ZEND_JIT_DEBUG_GDB) {
@@ -15283,6 +15289,7 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 
 	if (entry) {
 		*dasm_ptr = (char*)entry + ZEND_MM_ALIGNED_SIZE_EX(size, 16);
+#ifdef HAVE_CAPSTONE
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
 			uint32_t i;
 			char name[32];
@@ -15292,6 +15299,7 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 				ir_disasm_add_symbol(name, (uintptr_t)entry + (i * ZEND_JIT_EXIT_POINTS_SPACING), ZEND_JIT_EXIT_POINTS_SPACING);
 			}
 		}
+#endif
 	}
 
 	return entry;

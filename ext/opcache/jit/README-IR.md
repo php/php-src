@@ -34,7 +34,7 @@ cd php-ir
 git submodule update --init --recursive
 ./buildconf --force
 mkdir install
-./configure --enable-opcache-jit-ir --prefix=`pwd`/install --with-config-file-path=`pwd`/install/etc
+./configure --enable-opcache-jit-ir --with-capstone --prefix=`pwd`/install --with-config-file-path=`pwd`/install/etc
 make
 make install
 mkdir install/etc

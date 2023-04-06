@@ -53,9 +53,6 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "no" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-
-   if test "$PHP_OPCACHE_JIT_IR" = "no"; then
-
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_gdb.c jit/zend_jit_vm_helpers.c"
 
     dnl Find out which ABI we are using.
@@ -99,36 +96,12 @@ if test "$PHP_OPCACHE" != "no"; then
 
     JIT_CFLAGS=
 
-    AC_MSG_CHECKING(for opagent in default path)
-    for i in /usr/local /usr; do
-      if test -r $i/include/opagent.h; then
-        OPAGENT_DIR=$i
-        AC_MSG_RESULT(found in $i)
-        break
-      fi
-    done
-    if test -z "$OPAGENT_DIR"; then
-      AC_MSG_RESULT(not found)
-    else
-      PHP_CHECK_LIBRARY(opagent, op_write_native_code,
-      [
-        AC_DEFINE(HAVE_OPROFILE,1,[ ])
-        PHP_ADD_INCLUDE($OPAGENT_DIR/include)
-        PHP_ADD_LIBRARY_WITH_PATH(opagent, $OPAGENT_DIR/$PHP_LIBDIR/oprofile, OPCACHE_SHARED_LIBADD)
-        PHP_SUBST(OPCACHE_SHARED_LIBADD)
-      ],[
-        AC_MSG_RESULT(not found)
-      ],[
-        -L$OPAGENT_DIR/$PHP_LIBDIR/oprofile
-      ])
-    fi
-
   elif test "$PHP_OPCACHE_JIT_IR" = "yes"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
 		jit/ir/ir_cfg.c	jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
-		jit/ir/ir_dump.c jit/ir/ir_disasm.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
+		jit/ir/ir_dump.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
 		jit/ir/ir_patch.c jit/ir/ir_emit.c"
 
     dnl Find out which ABI we are using.
@@ -162,6 +135,7 @@ if test "$PHP_OPCACHE" != "no"; then
         AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
         PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
         PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
+        ZEND_JIT_SRC+=" jit/ir/ir_disasm.c"
       ],[
         AC_MSG_ERROR([capstone >= 3.0 required but not found])
       ])
