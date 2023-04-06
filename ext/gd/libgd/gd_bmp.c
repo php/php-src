@@ -545,6 +545,7 @@ static int bmp_read_info(gdIOCtx *infile, bmp_info_t *info)
 	switch (info->len) {
 		/* For now treat Windows v4 + v5 as v3 */
 	case BMP_WINDOWS_V3:
+	case BMP_WINDOWS_V3INFO:
 	case BMP_WINDOWS_V4:
 	case BMP_WINDOWS_V5:
 		BMP_DEBUG(printf("Reading Windows Header\n"));
@@ -685,8 +686,12 @@ static int bmp_read_direct(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, b
 			BMP_DEBUG(printf("Bitfield compression isn't supported for 24-bit\n"));
 			return 1;
 		}
-		BMP_DEBUG(printf("Currently no bitfield support\n"));
-		return 1;
+		/* For 32 BPP images, the bitfields do not contain any useful information. They can be safely skipped. */
+		if (info->depth != 32) {
+			BMP_DEBUG(printf("Currently no bitfield support\n"));
+			return 1;
+		}
+
 		break;
 
 	case BMP_BI_RLE8:
