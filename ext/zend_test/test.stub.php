@@ -192,6 +192,8 @@ namespace {
     function zend_test_is_string_marked_as_valid_utf8(string $string): bool {}
 
     function zend_get_map_ptr_last(): int {}
+
+    function zend_test_fill_packed_array(array &$array): void {}
 }
 
 namespace ZendTestNS {

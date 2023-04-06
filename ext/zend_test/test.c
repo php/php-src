@@ -533,6 +533,29 @@ static ZEND_FUNCTION(zend_get_map_ptr_last)
 	RETURN_LONG(CG(map_ptr_last));
 }
 
+static ZEND_FUNCTION(zend_test_fill_packed_array)
+{
+	HashTable *parameter;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_EX(parameter, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!HT_IS_PACKED(parameter)) {
+		zend_argument_value_error(1, "must be a packed array");
+		RETURN_THROWS();
+	}
+
+	zend_hash_extend(parameter, parameter->nNumUsed + 10, true);
+	ZEND_HASH_FILL_PACKED(parameter) {
+		for (int i = 0; i < 10; i++) {
+			zval value;
+			ZVAL_LONG(&value, i);
+			ZEND_HASH_FILL_ADD(&value);
+		}
+	} ZEND_HASH_FILL_END();
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
