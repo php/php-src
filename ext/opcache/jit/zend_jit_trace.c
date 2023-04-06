@@ -5550,7 +5550,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
 										send_result = 1;
 										res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
-										if (!zend_jit_reuse_ip(&dasm_state)) {
+										if (!zend_jit_reuse_ip(&ctx)) {
 											goto jit_failure;
 										}
 									}
