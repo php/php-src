@@ -3222,10 +3222,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			zend_jit_set_last_valid_opline(op_array->opcodes + ssa->cfg.blocks[b].start);
 #else
 			zend_jit_reset_last_valid_opline(&ctx);
-		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
-			zend_jit_set_last_valid_opline(&ctx, op_array->opcodes + ssa->cfg.blocks[b].start);
 		} else if (ssa->cfg.blocks[b].flags & ZEND_BB_RECV_ENTRY) {
 			zend_jit_reset_last_valid_opline(&ctx);
+		} else if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY)) {
+			zend_jit_set_last_valid_opline(&ctx, op_array->opcodes + ssa->cfg.blocks[b].start);
 #endif
 		}
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
