@@ -10097,7 +10097,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		}
 	}
 
-	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+	if ((op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) == ZEND_ACC_CLOSURE) {
 		if (!left_frame) {
 			left_frame = 1;
 		    if (!zend_jit_leave_frame(jit)) {
