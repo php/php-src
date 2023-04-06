@@ -1517,8 +1517,8 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FILL_GROW() do { \
 		if (UNEXPECTED(__fill_idx >= __fill_ht->nTableSize)) { \
+			__fill_ht->nNumOfElements += __fill_idx - __fill_ht->nNumUsed; \
 			__fill_ht->nNumUsed = __fill_idx; \
-			__fill_ht->nNumOfElements = __fill_idx; \
 			__fill_ht->nNextFreeElement = __fill_idx; \
 			zend_hash_packed_grow(__fill_ht); \
 			__fill_val = __fill_ht->arPacked + __fill_idx; \
@@ -1557,8 +1557,8 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	} while (0)
 
 #define ZEND_HASH_FILL_FINISH() do { \
+		__fill_ht->nNumOfElements += __fill_idx - __fill_ht->nNumUsed; \
 		__fill_ht->nNumUsed = __fill_idx; \
-		__fill_ht->nNumOfElements = __fill_idx; \
 		__fill_ht->nNextFreeElement = __fill_idx; \
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)
