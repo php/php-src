@@ -314,6 +314,13 @@ const SO_SPLICE = UNKNOWN;
  */
 const SO_ZEROIZE = UNKNOWN;
 #endif
+#ifdef SO_NOSIGPIPE
+/**
+ * @var int
+ * @cvalue SO_NOSIGPIPE
+ */
+const SO_NOSIGPIPE = UNKNOWN;
+#endif
 #ifdef SOL_FILTER
 /**
  * @var int
