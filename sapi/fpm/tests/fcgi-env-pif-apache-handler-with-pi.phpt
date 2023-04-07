@@ -1,5 +1,5 @@
 --TEST--
-FPM: FastCGI env var path info fix for Apache handler basic
+FPM: FastCGI env var path info fix for Apache handler with PATH_INFO set
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
