@@ -263,9 +263,7 @@ static void dba_close(dba_info *info)
 		info->hnd->close(info);
 	}
 	ZEND_ASSERT(info->path);
-	// Cannot use zend_string_release_ex(info->path, info->flags&DBA_PERSISTENT); as this fails GC assertion?
-	// Zend/zend_rc_debug.c:38: void ZEND_RC_MOD_CHECK(const zend_refcounted_h *): Assertion `(zval_gc_flags(p->u.type_info) & ((1<<7)|(1<<8))) != (1<<7)' failed.
-	zend_string_free(info->path);
+	zend_string_release_ex(info->path, info->flags&DBA_PERSISTENT);
 	info->path = NULL;
 
 	if (info->fp && info->fp != info->lock.fp) {
@@ -459,10 +457,14 @@ static dba_info *php_dba_find(const zend_string *path)
 
 static zend_always_inline zend_string *php_dba_zend_string_dup_safe(zend_string *s, bool persistent)
 {
-	if (ZSTR_IS_INTERNED(s) && (!persistent || (GC_FLAGS(s) & IS_STR_PERSISTENT))) {
+	if (ZSTR_IS_INTERNED(s) && !persistent) {
 		return s;
 	} else {
-		return zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
+		zend_string *duplicated_str = zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), persistent);
+		if (persistent) {
+			GC_MAKE_PERSISTENT_LOCAL(duplicated_str);
+		}
+		return duplicated_str;
 	}
 }
 
