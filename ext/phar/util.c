@@ -242,8 +242,8 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_le
 zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
-	char *path, *fname, *arch, *entry, *test;
-	size_t arch_len, entry_len, fname_len;
+	char *path, *arch, *entry, *test;
+	size_t arch_len, entry_len;
 	phar_archive_data *phar;
 
 	if (pphar) {
@@ -256,17 +256,23 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 		return NULL;
 	}
 
-	fname = (char*)zend_get_executed_filename();
-	fname_len = strlen(fname);
+	zend_string *fname = zend_get_executed_filename_ex();
+	bool is_file_a_phar_wrapper = zend_string_starts_with_literal_ci(fname, "phar://");
+	size_t length_phar_protocol = strlen("phar://");
 
-	if (PHAR_G(last_phar) && !memcmp(fname, "phar://", 7) && fname_len - 7 >= PHAR_G(last_phar_name_len) && !memcmp(fname + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
+	if (
+		PHAR_G(last_phar)
+		&& is_file_a_phar_wrapper
+		&& ZSTR_LEN(fname) - length_phar_protocol >= PHAR_G(last_phar_name_len)
+		&& !memcmp(ZSTR_VAL(fname) + length_phar_protocol, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))
+	) {
 		arch = estrndup(PHAR_G(last_phar_name), PHAR_G(last_phar_name_len));
 		arch_len = PHAR_G(last_phar_name_len);
 		phar = PHAR_G(last_phar);
 		goto splitted;
 	}
 
-	if (fname_len < 7 || memcmp(fname, "phar://", 7) || SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0)) {
+	if (!is_file_a_phar_wrapper || SUCCESS != phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 1, 0)) {
 		return NULL;
 	}
 
@@ -310,7 +316,7 @@ splitted:
 	ret = php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), path);
 	efree(path);
 
-	if (ret && ZSTR_LEN(ret) > 8 && !strncmp(ZSTR_VAL(ret), "phar://", 7)) {
+	if (ret && zend_string_starts_with_literal_ci(ret, "phar://")) {
 		/* found phar:// */
 		if (SUCCESS != phar_split_fname(ZSTR_VAL(ret), ZSTR_LEN(ret), &arch, &arch_len, &entry, &entry_len, 1, 0)) {
 			return ret;

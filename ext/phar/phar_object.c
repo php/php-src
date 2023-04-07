@@ -392,21 +392,24 @@ static void phar_postprocess_ru_web(char *fname, size_t fname_len, char **entry,
  */
 PHP_METHOD(Phar, running)
 {
-	char *fname, *arch, *entry;
-	size_t fname_len, arch_len, entry_len;
+	zend_string *fname;
+	char *arch, *entry;
+	size_t arch_len, entry_len;
 	bool retphar = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &retphar) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	fname = (char*)zend_get_executed_filename();
-	fname_len = strlen(fname);
+	fname = zend_get_executed_filename_ex();
 
-	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
+	if (
+		zend_string_starts_with_literal_ci(fname, "phar://")
+		&& SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)
+	) {
 		efree(entry);
 		if (retphar) {
-			RETVAL_STRINGL(fname, arch_len + 7);
+			RETVAL_STRINGL(ZSTR_VAL(fname), arch_len + 7);
 			efree(arch);
 			return;
 		} else {
@@ -441,8 +444,9 @@ PHP_METHOD(Phar, mount)
 		RETURN_THROWS();
 	}
 
-	fname = (char*)zend_get_executed_filename();
-	fname_len = strlen(fname);
+	zend_string *zend_file_name = zend_get_executed_filename_ex();
+	fname = ZSTR_VAL(zend_file_name);
+	fname_len = ZSTR_LEN(zend_file_name);
 
 #ifdef PHP_WIN32
 	save_fname = fname;
@@ -556,8 +560,6 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	phar_request_initialize();
-	fname = (char*)zend_get_executed_filename();
-	fname_len = strlen(fname);
 
 	if (phar_open_executed_filename(alias, alias_len, &error) != SUCCESS) {
 		if (error) {
@@ -582,6 +584,10 @@ PHP_METHOD(Phar, webPhar)
 	   ) {
 		return;
 	}
+
+	zend_string *zend_file_name = zend_get_executed_filename_ex();
+	fname = ZSTR_VAL(zend_file_name);
+	fname_len = ZSTR_LEN(zend_file_name);
 
 #ifdef PHP_WIN32
 	if (memchr(fname, '\\', fname_len)) {
@@ -1274,9 +1280,9 @@ PHP_METHOD(Phar, getSupportedCompression)
 /* {{{ Completely remove a phar archive from memory and disk */
 PHP_METHOD(Phar, unlinkArchive)
 {
-	char *fname, *error, *zname, *arch, *entry;
+	char *fname, *error, *arch, *entry;
 	size_t fname_len;
-	size_t zname_len, arch_len, entry_len;
+	size_t arch_len, entry_len;
 	phar_archive_data *phar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
@@ -1298,11 +1304,13 @@ PHP_METHOD(Phar, unlinkArchive)
 		RETURN_THROWS();
 	}
 
-	zname = (char*)zend_get_executed_filename();
-	zname_len = strlen(zname);
+	zend_string *zend_file_name = zend_get_executed_filename_ex();
 
-	if (zname_len > 7 && !memcmp(zname, "phar://", 7) && SUCCESS == phar_split_fname(zname, zname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
-		if ((size_t)arch_len == fname_len && !memcmp(arch, fname, arch_len)) {
+	if (
+		zend_string_starts_with_literal_ci(zend_file_name, "phar://")
+		&& SUCCESS == phar_split_fname(ZSTR_VAL(zend_file_name), ZSTR_LEN(zend_file_name), &arch, &arch_len, &entry, &entry_len, 2, 0)
+	) {
+		if (arch_len == fname_len && !memcmp(arch, fname, arch_len)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar archive \"%s\" cannot be unlinked from within itself", fname);
 			efree(arch);
 			efree(entry);

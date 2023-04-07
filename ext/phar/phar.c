@@ -2318,24 +2318,17 @@ int phar_split_fname(const char *filename, size_t filename_len, char **arch, siz
  */
 int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* {{{ */
 {
-	char *fname;
-	php_stream *fp;
-	size_t fname_len;
-	zend_string *actual = NULL;
-	int ret;
-
 	if (error) {
 		*error = NULL;
 	}
 
-	fname = (char*)zend_get_executed_filename();
-	fname_len = strlen(fname);
+	zend_string *fname = zend_get_executed_filename_ex();
 
-	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
 		return SUCCESS;
 	}
 
-	if (!strcmp(fname, "[no active file]")) {
+	if (zend_string_equals_literal(fname, "[no active file]")) {
 		if (error) {
 			spprintf(error, 0, "cannot initialize a phar outside of PHP execution");
 		}
@@ -2349,15 +2342,17 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 		return FAILURE;
 	}
 
-	if (php_check_open_basedir(fname)) {
+	if (php_check_open_basedir(ZSTR_VAL(fname))) {
 		return FAILURE;
 	}
 
-	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, &actual);
+	zend_string *actual = NULL;
+	php_stream *fp;
+	fp = php_stream_open_wrapper(ZSTR_VAL(fname), "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, &actual);
 
 	if (!fp) {
 		if (error) {
-			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
+			spprintf(error, 0, "unable to open phar for reading \"%s\"", ZSTR_VAL(fname));
 		}
 		if (actual) {
 			zend_string_release_ex(actual, 0);
@@ -2366,11 +2361,10 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 	}
 
 	if (actual) {
-		fname = ZSTR_VAL(actual);
-		fname_len = ZSTR_LEN(actual);
+		fname = actual;
 	}
 
-	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error);
+	int ret = phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, REPORT_ERRORS, NULL, 0, error);
 
 	if (actual) {
 		zend_string_release_ex(actual, 0);
