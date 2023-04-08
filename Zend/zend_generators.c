@@ -279,13 +279,24 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 				ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[try_catch->finally_end].op1.var);
 
 			zend_generator_cleanup_unfinished_execution(generator, ex, try_catch->finally_op);
-			Z_OBJ_P(fast_call) = EG(exception);
+			zend_object *old_exception = EG(exception);
+			const zend_op *old_opline_before_exception = EG(opline_before_exception);
 			EG(exception) = NULL;
+			Z_OBJ_P(fast_call) = NULL;
 			Z_OPLINE_NUM_P(fast_call) = (uint32_t)-1;
 
 			ex->opline = &ex->func->op_array.opcodes[try_catch->finally_op];
 			generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 			zend_generator_resume(generator);
+
+			if (old_exception) {
+				EG(opline_before_exception) = old_opline_before_exception;
+				if (EG(exception)) {
+					zend_exception_set_previous(EG(exception), old_exception);
+				} else {
+					EG(exception) = old_exception;
+				}
+			}
 
 			/* TODO: If we hit another yield inside try/finally,
 			 * should we also jump to the next finally block? */
