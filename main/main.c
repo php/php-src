@@ -1951,7 +1951,7 @@ static void core_globals_dtor(php_core_globals *core_globals)
 		free(core_globals->php_binary);
 	}
 
-	php_shutdown_ticks();
+	php_shutdown_ticks(core_globals);
 }
 /* }}} */
 
