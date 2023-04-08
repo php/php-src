@@ -149,6 +149,7 @@ PHP                                                                        NEWS
   . Added SO_RERROR, SO_ZEROIZE and SO_SPLICE netbsd and openbsd constants.
     (David Carlier)
   . Added TCP_REPAIR for quietly close a connection. (David Carlier)
+  . Added SO_REUSEPORT_LB freebsd constant. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
