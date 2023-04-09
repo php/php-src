@@ -124,6 +124,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added GH-9344, pipeline mode support. (David Carlier)
   . pg_cancel use thread safe PQcancel api instead. (David Carlier)
+  . pg_trace new PGSQL_TRACE_SUPPRESS_TIMESTAMPS/PGSQL_TRACE_REGRESS_MODE
+    contants support. (David Carlier)
 
 - Phar:
   . Fix memory leak in phar_rename_archive(). (stkeke)

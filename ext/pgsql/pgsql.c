@@ -2115,13 +2115,14 @@ PHP_FUNCTION(pg_trace)
 {
 	char *z_filename, *mode = "w";
 	size_t z_filename_len, mode_len;
+	zend_long trace_mode = 0;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
 	FILE *fp = NULL;
 	php_stream *stream;
 	pgsql_link_handle *link;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|sO!", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link, pgsql_link_ce) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|sO!l", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link, pgsql_link_ce, &trace_mode) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2147,6 +2148,19 @@ PHP_FUNCTION(pg_trace)
 	}
 	php_stream_auto_cleanup(stream);
 	PQtrace(pgsql, fp);
+	if (trace_mode > 0) {
+#ifdef PQTRACE_REGRESS_MODE
+		if (!(trace_mode & (PQTRACE_SUPPRESS_TIMESTAMPS|PQTRACE_REGRESS_MODE))) {
+			zend_argument_value_error(4, "must be PGSQL_TRACE_SUPPRESS_TIMESTAMPS and/or PGSQL_TRACE_REGRESS_MODE");
+			RETURN_THROWS();
+		} else {
+			PQsetTraceFlags(pgsql, trace_mode);
+		}
+#else
+		zend_argument_value_error(4, "cannot set as trace is unsupported");
+		RETURN_THROWS();
+#endif
+	}
 	RETURN_TRUE;
 }
 /* }}} */
