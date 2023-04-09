@@ -412,6 +412,20 @@ namespace {
      * @cvalue PGSQL_DML_STRING
      */
     const PGSQL_DML_STRING = UNKNOWN;
+#ifdef PQTRACE_SUPPPRESS_TIMESTAMPS
+    /**
+     * @var int
+     * @cvalue PQTRACE_SUPPRESS_TIMESTAMPS
+     */
+    const PGSQL_TRACE_SUPPRESS_TIMESTAMPS = UNKNOWN;
+#endif
+#ifdef PQTRACE_REGRESS_MODE
+    /**
+     * @var int
+     * @cvalue PQTRACE_REGRESS_MODE
+     */
+    const PGSQL_TRACE_REGRESS_MODE = UNKNOWN;
+#endif
 
 #ifdef LIBPQ_HAS_PIPELINING
     /**
@@ -662,7 +676,7 @@ namespace {
      */
     function pg_getlastoid(PgSql\Result $result): string|int|false {}
 
-    function pg_trace(string $filename, string $mode = "w", ?PgSql\Connection $connection = null): bool {}
+    function pg_trace(string $filename, string $mode = "w", ?PgSql\Connection $connection = null, int $trace_mode = 0): bool {}
 
     function pg_untrace(?PgSql\Connection $connection = null): bool {}
 
