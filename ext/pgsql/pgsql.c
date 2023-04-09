@@ -2150,13 +2150,15 @@ PHP_FUNCTION(pg_trace)
 	PQtrace(pgsql, fp);
 	if (trace_mode > 0) {
 #ifdef PQTRACE_REGRESS_MODE
-		if (trace_mode > (PQTRACE_SUPPRESS_TIMESTAMPS|PQTRACE_REGRESS_MODE)) {
-			zend_argument_value_error(2, "must be PGSQL_TRACE_SUPPRESS_TIMESTAMPS and/or PGSQL_TRACE_REGRESS_MODE");
+		if (!(trace_mode & (PQTRACE_SUPPRESS_TIMESTAMPS|PQTRACE_REGRESS_MODE))) {
+			zend_argument_value_error(4, "must be PGSQL_TRACE_SUPPRESS_TIMESTAMPS and/or PGSQL_TRACE_REGRESS_MODE");
+			RETURN_THROWS();
 		} else {
 			PQsetTraceFlags(pgsql, trace_mode);
 		}
 #else
-		zend_argument_value_error(2, "cannot set the trace mode as it's unsupported");
+		zend_argument_value_error(4, "cannot set as trace is unsupported");
+		RETURN_THROWS();
 #endif
 	}
 	RETURN_TRUE;
