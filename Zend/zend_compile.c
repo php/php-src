@@ -10761,13 +10761,13 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_ast *name_ast;
 			zend_string *resolved_name;
 
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
+
 			if (UNEXPECTED(ast->child[1]->kind != ZEND_AST_ZVAL
 				|| Z_TYPE_P(zend_ast_get_zval(ast->child[1])) != IS_STRING)) {
 				return;
 			}
-
-			zend_eval_const_expr(&ast->child[0]);
-			zend_eval_const_expr(&ast->child[1]);
 
 			class_ast = ast->child[0];
 			name_ast = ast->child[1];
