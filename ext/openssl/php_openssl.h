@@ -80,6 +80,7 @@ struct php_openssl_errors {
 
 ZEND_BEGIN_MODULE_GLOBALS(openssl)
 	struct php_openssl_errors *errors;
+	struct php_openssl_errors *errors_mark;
 ZEND_END_MODULE_GLOBALS(openssl)
 
 #define OPENSSL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(openssl, v)
