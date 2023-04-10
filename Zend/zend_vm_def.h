@@ -1845,6 +1845,10 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, ANY, ANY, int type)
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), prop);
 	} else {
+		if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF) && !EG(exception)) {
+			/* uninitialized typed property */
+			ZVAL_NULL(prop);
+		}
 		ZVAL_INDIRECT(EX_VAR(opline->result.var), prop);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
