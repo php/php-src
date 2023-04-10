@@ -252,13 +252,13 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 }
 /* }}} */
 
-char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
+bool fpm_php_is_key_in_table(zend_string *table, char *key, size_t key_len) /* {{{ */
 {
-	zval *data, *tmp;
+	zval *data;
 	zend_string *str;
-	if (!table || !key) {
-		return NULL;
-	}
+
+	ZEND_ASSERT(table);
+	ZEND_ASSERT(key);
 
 	/* inspired from ext/standard/info.c */
 
@@ -266,16 +266,14 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 
 	/* find the table and ensure it's an array */
 	data = zend_hash_find(&EG(symbol_table), table);
-	if (!data || Z_TYPE_P(data) != IS_ARRAY) {
-		return NULL;
-	}
+	ZEND_ASSERT(data && Z_TYPE_P(data) == IS_ARRAY);
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), str, tmp) {
-		if (str && !strncmp(ZSTR_VAL(str), key, ZSTR_LEN(str))) {
-			return Z_STRVAL_P(tmp);
+	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(data), str) {
+		if (str && zend_string_equals_cstr(str, key, key_len)) {
+			return true;
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return NULL;
+	return false;
 }
 /* }}} */
