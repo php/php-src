@@ -135,7 +135,7 @@ jobs:
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
   MACOS_DEBUG_NTS:
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
       - name: git checkout
         uses: actions/checkout@v3
