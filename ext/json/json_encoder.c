@@ -31,10 +31,6 @@
 
 static const char digits[] = "0123456789abcdef";
 
-static int php_json_escape_string(
-		smart_str *buf,	const char *s, size_t len,
-		int options, php_json_encoder *encoder);
-
 static int php_json_determine_array_type(zval *val) /* {{{ */
 {
 	zend_array *myht = Z_ARRVAL_P(val);
@@ -312,7 +308,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 }
 /* }}} */
 
-static int php_json_escape_string(
+int php_json_escape_string(
 		smart_str *buf, const char *s, size_t len,
 		int options, php_json_encoder *encoder) /* {{{ */
 {
