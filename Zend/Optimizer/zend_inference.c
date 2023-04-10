@@ -3436,6 +3436,9 @@ static zend_always_inline int _zend_update_type_info(
 					tmp |= zend_fetch_prop_type(script, prop_info, &ce);
 					if (opline->result_type == IS_VAR) {
 						tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
+						if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE) {
+							tmp |= MAY_BE_UNDEF;
+						}
 					} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
 						zend_class_entry *ce = NULL;
 
@@ -3473,6 +3476,9 @@ static zend_always_inline int _zend_update_type_info(
 				zend_fetch_static_prop_info(script, op_array, ssa, opline), &ce);
 			if (opline->result_type == IS_VAR) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
+				if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE) {
+					tmp |= MAY_BE_UNDEF;
+				}
 			} else {
 				if (!result_may_be_separated(ssa, ssa_op)) {
 					tmp &= ~MAY_BE_RC1;
