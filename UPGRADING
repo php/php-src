@@ -107,6 +107,18 @@ PHP 8.3 UPGRADE NOTES
     Underscores must be encoded as "=5F" in such MIME encoded words.
   . In rare cases, mb_encode_mimeheader will transfer-encode its input
     string where it would pass it through as raw ASCII in PHP 8.2.
+  . mb_detect_encoding's "non-strict" mode now behaves as described in the
+    documentation. Previously, it would return false if the same byte
+    (for example, the first byte) of the input string was invalid in all
+    candidate encodings. More generally, it would eliminate candidate
+    encodings from consideration when an invalid byte was seen, and if the
+    same input byte eliminated all remaining encodings still under
+    consideration, it would return false. On the other hand, if all candidate
+    encodings but one were eliminated from consideration, it would return the
+    last remaining one without regard for how many encoding errors might be
+    encountered later in the string. This is different from the behavior
+    described in the documentation, which says: "If strict is set to false,
+    the closest matching encoding will be returned."
 
 - mysqli:
   . mysqli_fetch_object now raises a ValueError instead of an Exception when the constructor_args

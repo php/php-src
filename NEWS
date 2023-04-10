@@ -69,8 +69,17 @@ PHP                                                                        NEWS
   . mb_detect_encoding is better able to identify the correct encoding for
     Turkish text. (Alex Dowad)
   . mb_detect_encoding's "non-strict" mode now behaves as described in the
-    documentation. Previously, it would return false if the very first byte
-    of the input string was invalid in all candidate encodings. (Alex Dowad)
+    documentation. Previously, it would return false if the same byte
+    (for example, the first byte) of the input string was invalid in all
+    candidate encodings. More generally, it would eliminate candidate
+    encodings from consideration when an invalid byte was seen, and if the
+    same input byte eliminated all remaining encodings still under
+    consideration, it would return false. On the other hand, if all candidate
+    encodings but one were eliminated from consideration, it would return the
+    last remaining one without regard for how many encoding errors might be
+    encountered later in the string. This is different from the behavior
+    described in the documentation, which says: "If strict is set to false,
+    the closest matching encoding will be returned." (Alex Dowad)
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
     casing rules for the Greek letter sigma. For mb_convert_case, conditional
     casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
