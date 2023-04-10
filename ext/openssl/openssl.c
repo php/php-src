@@ -476,6 +476,37 @@ void php_openssl_store_errors(void)
 }
 /* }}} */
 
+/* {{{ php_openssl_errors_set_mark */
+void php_openssl_errors_set_mark(void) {
+	if (!OPENSSL_G(errors)) {
+		return;
+	}
+
+	if (!OPENSSL_G(errors_mark)) {
+		OPENSSL_G(errors_mark) = pecalloc(1, sizeof(struct php_openssl_errors), 1);
+	}
+
+	memcpy(OPENSSL_G(errors_mark), OPENSSL_G(errors), sizeof(struct php_openssl_errors));
+}
+/* }}} */
+
+/* {{{ php_openssl_errors_restore_mark */
+void php_openssl_errors_restore_mark(void) {
+	if (!OPENSSL_G(errors)) {
+		return;
+	}
+
+	struct php_openssl_errors *errors = OPENSSL_G(errors);
+
+	if (!OPENSSL_G(errors_mark)) {
+		errors->top = 0;
+		errors->bottom = 0;
+	} else {
+		memcpy(errors, OPENSSL_G(errors_mark), sizeof(struct php_openssl_errors));
+	}
+}
+/* }}} */
+
 /* openssl file path check error function */
 static void php_openssl_check_path_error(uint32_t arg_num, int type, const char *format, ...)
 {
@@ -1293,6 +1324,7 @@ PHP_GINIT_FUNCTION(openssl)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	openssl_globals->errors = NULL;
+	openssl_globals->errors_mark = NULL;
 }
 /* }}} */
 
@@ -1301,6 +1333,9 @@ PHP_GSHUTDOWN_FUNCTION(openssl)
 {
 	if (openssl_globals->errors) {
 		pefree(openssl_globals->errors, 1);
+	}
+	if (openssl_globals->errors_mark) {
+		pefree(openssl_globals->errors_mark, 1);
 	}
 }
 /* }}} */
@@ -3571,12 +3606,14 @@ static EVP_PKEY *php_openssl_pkey_from_zval(
 		}
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
 		if (public_key) {
+            php_openssl_errors_set_mark();
 			cert = php_openssl_x509_from_str(Z_STR_P(val), arg_num, false, NULL);
 
 			if (cert) {
 				free_cert = 1;
 			} else {
 				/* not a X509 certificate, try to retrieve public key */
+				php_openssl_errors_restore_mark();
 				BIO* in;
 				if (is_file) {
 					in = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));

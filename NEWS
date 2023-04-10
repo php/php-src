@@ -118,6 +118,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Added OPENSSL_CMS_OLDMIMETYPE and PKCS7_NOOLDMIMETYPE contants to switch
     between mime content types. (Daniel Kesselberg)
+  . Fixed GH-11054: Reset OpenSSL errors when using a PEM public key.
+    (Florian Moser)
 
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
