@@ -192,18 +192,22 @@ class Response
 
     /**
      * Print raw body.
+     *
+     * @param string $contentType Expect body to have specified content type.
      */
-    public function dumpBody()
+    public function dumpBody(string $contentType = 'text/html')
     {
-        var_dump($this->getBody());
+        var_dump($this->getBody($contentType));
     }
 
     /**
      * Print raw body.
+     *
+     * @param string $contentType Expect body to have specified content type.
      */
-    public function printBody()
+    public function printBody(string $contentType = 'text/html')
     {
-        echo $this->getBody() . "\n";
+        echo $this->getBody($contentType) . "\n";
     }
 
     /**
