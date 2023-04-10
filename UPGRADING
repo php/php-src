@@ -107,6 +107,10 @@ PHP 8.3 UPGRADE NOTES
     Underscores must be encoded as "=5F" in such MIME encoded words.
   . In rare cases, mb_encode_mimeheader will transfer-encode its input
     string where it would pass it through as raw ASCII in PHP 8.2.
+  . mb_encode_mimeheader no longer drops NUL (zero) bytes when
+    QPrint-encoding the input string. This previously caused strings in
+    certain text encodings, especially UTF-16 and UTF-32, to be
+    corrupted by mb_encode_mimeheader.
   . mb_detect_encoding's "non-strict" mode now behaves as described in the
     documentation. Previously, it would return false if the same byte
     (for example, the first byte) of the input string was invalid in all
