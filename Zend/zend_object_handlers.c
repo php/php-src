@@ -1064,6 +1064,8 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
 					/* Readonly property, delegate to read_property + write_property. */
 					retval = NULL;
+				} else if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
+					ZVAL_NULL(retval);
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */
