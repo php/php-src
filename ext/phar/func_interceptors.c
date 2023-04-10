@@ -41,18 +41,17 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 	}
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
-		char *arch, *entry, *fname;
-		size_t arch_len, entry_len, fname_len;
-		fname = (char*)zend_get_executed_filename();
+		char *arch, *entry;
+		size_t arch_len, entry_len;
+		zend_string *fname = zend_get_executed_filename_ex();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-
-		if (strncasecmp(fname, "phar://", 7)) {
+		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
-		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
+
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			php_stream_context *context = NULL;
 			php_stream *stream;
 			char *name;
@@ -91,15 +90,17 @@ skip_phar:
 
 static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool using_include_path)
 {
-	char *arch, *entry, *fname;
-	size_t arch_len, entry_len, fname_len;
+	char *arch, *entry;
+	size_t arch_len, entry_len;
+	zend_string *fname = zend_get_executed_filename_ex();
 
-	fname = (char*)zend_get_executed_filename();
-	if (strncasecmp(fname, "phar://", 7)) {
+	/* we are checking for existence of a file within the relative path.  Chances are good that this is
+	   retrieving something from within the phar archive */
+	if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
 		return NULL;
 	}
-	fname_len = strlen(fname);
-	if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
+
+	if (FAILURE == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 		return NULL;
 	}
 
@@ -485,22 +486,22 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 	}
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_length) && !strstr(filename, "://")) {
-		char *arch, *entry, *fname;
-		size_t arch_len, entry_len, fname_len;
+		char *arch, *entry;
+		size_t arch_len, entry_len;
+		zend_string *fname;
 		zend_stat_t sb = {0};
 		phar_entry_info *data = NULL;
 		phar_archive_data *phar;
 
-		fname = (char*)zend_get_executed_filename();
+		fname = zend_get_executed_filename_ex();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-
-		if (strncasecmp(fname, "phar://", 7)) {
+		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
-		fname_len = strlen(fname);
-		if (PHAR_G(last_phar) && fname_len - 7 >= PHAR_G(last_phar_name_len) && !memcmp(fname + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
+
+		if (PHAR_G(last_phar) && ZSTR_LEN(fname) - 7 >= PHAR_G(last_phar_name_len) && !memcmp(ZSTR_VAL(fname) + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
 			arch = estrndup(PHAR_G(last_phar_name), PHAR_G(last_phar_name_len));
 			arch_len = PHAR_G(last_phar_name_len);
 			entry = estrndup(filename, filename_length);
@@ -509,7 +510,7 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 			phar = PHAR_G(last_phar);
 			goto splitted;
 		}
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 
 			efree(entry);
 			entry = estrndup(filename, filename_length);
@@ -741,18 +742,17 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 		goto skip_phar;
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
-		char *arch, *entry, *fname;
-		size_t arch_len, entry_len, fname_len;
-		fname = (char*)zend_get_executed_filename();
+		char *arch, *entry;
+		size_t arch_len, entry_len;
+		zend_string *fname = zend_get_executed_filename_ex();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-
-		if (strncasecmp(fname, "phar://", 7)) {
+		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
-		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
+
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			phar_archive_data *phar;
 
 			efree(entry);
@@ -808,18 +808,17 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 		goto skip_phar;
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
-		char *arch, *entry, *fname;
-		size_t arch_len, entry_len, fname_len;
-		fname = (char*)zend_get_executed_filename();
+		char *arch, *entry;
+		size_t arch_len, entry_len;
+		zend_string *fname = zend_get_executed_filename_ex();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-
-		if (strncasecmp(fname, "phar://", 7)) {
+		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
-		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
+
+		if (SUCCESS == phar_split_fname(ZSTR_VAL(fname), ZSTR_LEN(fname), &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			phar_archive_data *phar;
 
 			efree(entry);
