@@ -219,7 +219,8 @@ PHP 8.2 UPGRADE NOTES
     is still accepted, but it is recommended to use the new standard variant.
 
 - MBString
-  . mb_check_encoding() now checks input encoding more strictly.
+  . mb_check_encoding() now checks input encoding more strictly for
+    certain text encodings, including ISO-2022-JP and UTF-7.
   . mb_detect_encoding() now checks input encoding more strictly
     when strict detection is enabled.
   . mb_convert_encoding() checks the input encoding more strictly
