@@ -164,7 +164,7 @@ static zend_always_inline int php_array_key_compare_numeric_unstable_i(Bucket *f
 		} else {
 			d2 = (double)(zend_long)s->h;
 		}
-		return ZEND_NORMALIZE_BOOL(d1 - d2);
+		return ZEND_THREEWAY_COMPARE(d1, d2);
 	}
 }
 /* }}} */

@@ -247,7 +247,7 @@ static int spl_ptr_pqueue_elem_cmp_long(void *x, void *y, zval *object) {
 static int spl_ptr_pqueue_elem_cmp_double(void *x, void *y, zval *object) {
 	double a = Z_DVAL(((spl_pqueue_elem*) x)->priority);
 	double b = Z_DVAL(((spl_pqueue_elem*) y)->priority);
-	return ZEND_NORMALIZE_BOOL(a - b);
+	return ZEND_THREEWAY_COMPARE(a, b);
 }
 
 static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_ctor_func ctor, spl_ptr_heap_dtor_func dtor, size_t elem_size) /* {{{ */
