@@ -31,6 +31,12 @@
 # include <mmintrin.h>
 # include <emmintrin.h>
 #endif
+#if defined(__AVX2__)
+# include <immintrin.h>
+#endif
+#if defined(__aarch64__) || defined(_M_ARM64)
+# include <arm_neon.h>
+#endif
 
 #ifdef WORDS_BIGENDIAN
 # define ZEND_ENDIAN_LOHI(lo, hi)          hi; lo;
@@ -460,7 +466,21 @@ struct _zend_array {
 	HT_PACKED_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
 #define HT_PACKED_USED_SIZE(ht) \
 	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(zval)))
-#ifdef __SSE2__
+#if defined(__AVX2__)
+# define HT_HASH_RESET(ht) do { \
+		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
+		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
+		__m256i ymm0 = _mm256_setzero_si256(); \
+		ymm0 = _mm256_cmpeq_epi64(ymm0, ymm0); \
+		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
+		do { \
+			_mm256_storeu_si256((__m256i*)p, ymm0); \
+			_mm256_storeu_si256((__m256i*)(p+32), ymm0); \
+			p += 64; \
+			size -= 64; \
+		} while (size != 0); \
+	} while (0)
+#elif defined(__SSE2__)
 # define HT_HASH_RESET(ht) do { \
 		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
 		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
@@ -472,6 +492,21 @@ struct _zend_array {
 			_mm_storeu_si128((__m128i*)(p+16), xmm0); \
 			_mm_storeu_si128((__m128i*)(p+32), xmm0); \
 			_mm_storeu_si128((__m128i*)(p+48), xmm0); \
+			p += 64; \
+			size -= 64; \
+		} while (size != 0); \
+	} while (0)
+#elif defined(__aarch64__) || defined(_M_ARM64)
+# define HT_HASH_RESET(ht) do { \
+		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
+		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
+		int32x4_t t = vdupq_n_s32(-1); \
+		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
+		do { \
+			vst1q_s32((int32_t*)p, t); \
+			vst1q_s32((int32_t*)(p+16), t); \
+			vst1q_s32((int32_t*)(p+32), t); \
+			vst1q_s32((int32_t*)(p+48), t); \
 			p += 64; \
 			size -= 64; \
 		} while (size != 0); \
