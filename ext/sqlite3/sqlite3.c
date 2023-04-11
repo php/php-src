@@ -81,7 +81,7 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, int errcode, const 
 	vspprintf(&message, 0, format, arg);
 	va_end(arg);
 
-	if (db_obj && db_obj->exception && php_sqlite3_exception_ce) {
+	if (db_obj && db_obj->exception) {
 		zend_throw_exception(php_sqlite3_exception_ce, message, errcode);
 	} else {
 		php_error_docref(NULL, E_WARNING, "%s", message);
