@@ -3,7 +3,6 @@
 #ifndef FPM_PHP_H
 #define FPM_PHP_H 1
 
-#include <stdbool.h>
 #include <TSRM.h>
 
 #include "php.h"
@@ -42,6 +41,6 @@ void fpm_php_soft_quit(void);
 int fpm_php_init_main(void);
 int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode);
 int fpm_php_limit_extensions(char *path);
-bool fpm_php_is_key_in_table(zend_string *table, char *key, size_t key_len);
+bool fpm_php_is_key_in_table(zend_string *table, const char *key, size_t key_len);
 
 #endif

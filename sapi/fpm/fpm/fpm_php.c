@@ -252,7 +252,7 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 }
 /* }}} */
 
-bool fpm_php_is_key_in_table(zend_string *table, char *key, size_t key_len) /* {{{ */
+bool fpm_php_is_key_in_table(zend_string *table, const char *key, size_t key_len) /* {{{ */
 {
 	zval *data;
 	zend_string *str;
@@ -266,7 +266,9 @@ bool fpm_php_is_key_in_table(zend_string *table, char *key, size_t key_len) /* {
 
 	/* find the table and ensure it's an array */
 	data = zend_hash_find(&EG(symbol_table), table);
-	ZEND_ASSERT(data && Z_TYPE_P(data) == IS_ARRAY);
+	if (!data || Z_TYPE_P(data) != IS_ARRAY) {
+		return NULL;
+	}
 
 	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(data), str) {
 		if (str && zend_string_equals_cstr(str, key, key_len)) {
