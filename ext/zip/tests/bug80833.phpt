@@ -37,7 +37,16 @@ $file_stream = $extract_zip->getStream("test2.txt");
 var_dump(stream_get_contents($file_stream));
 fclose($file_stream);
 
+// Archive unset before the stream
+$extract_zip->setPassword("first_password");
+$file_stream = $extract_zip->getStream("test.txt");
+unset($extract_zip);
+var_dump(stream_get_contents($file_stream));
+fclose($file_stream);
+
 // Archive close before the stream
+$extract_zip = new ZipArchive();
+$extract_zip->open(__DIR__ . "/80833.zip", ZipArchive::RDONLY);
 $extract_zip->setPassword("first_password");
 $file_stream = $extract_zip->getStream("test.txt");
 $extract_zip->close();
@@ -52,6 +61,7 @@ fclose($file_stream);
 string(22) "This is a test string."
 string(22) "This is a test string."
 string(28) "This is another test string."
+string(22) "This is a test string."
 
 Warning: stream_get_contents(): Zip stream error: Containing zip archive was closed in %s
 string(0) ""

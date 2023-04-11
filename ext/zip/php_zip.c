@@ -2903,7 +2903,7 @@ PHP_METHOD(ZipArchive, getStream)
 		RETURN_FALSE;
 	}
 
-	stream = php_stream_zip_open(intern, ZSTR_VAL(filename), mode STREAMS_CC);
+	stream = php_stream_zip_open(self, intern, ZSTR_VAL(filename), mode STREAMS_CC);
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
 	} else {

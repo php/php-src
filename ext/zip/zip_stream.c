@@ -35,6 +35,7 @@ struct php_zip_stream_data_t {
 	struct zip *za;
 	struct zip_file *zf;
 	size_t cursor;
+	zval zv;
 	php_stream *stream;
 };
 
@@ -95,12 +96,14 @@ static int php_zip_ops_close(php_stream *stream, int close_handle)
 	if (close_handle) {
 		if (self->zf) {
 			zip_fclose(self->zf);
-			self->zf = NULL;
 		}
 
 		if (self->za) {
 			zip_close(self->za);
-			self->za = NULL;
+		}
+
+		if (Z_ISUNDEF(self->zv)) {
+			zval_ptr_dtor(&self->zv);
 		}
 	}
 	efree(self);
@@ -208,7 +211,7 @@ const php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(struct zip *arch, const char *path, const char *mode STREAMS_DC)
+php_stream *php_stream_zip_open(zval *zv, struct zip *arch, const char *path, const char *mode STREAMS_DC)
 {
 	struct zip_file *zf = NULL;
 
@@ -226,10 +229,12 @@ php_stream *php_stream_zip_open(struct zip *arch, const char *path, const char *
 
 			self->za = NULL; /* to keep it open on stream close */
 			self->zf = zf;
+			ZVAL_COPY_VALUE(&self->zv, zv);
 			self->stream = NULL;
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
 			stream->orig_path = estrdup(path);
+			zval_add_ref(zv);
 		}
 	}
 
@@ -305,6 +310,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 			self->za = za;
 			self->zf = zf;
+			ZVAL_UNDEF(&self->zv);
 			self->stream = NULL;
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
