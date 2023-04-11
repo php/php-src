@@ -13,6 +13,7 @@ runs:
         apt-get install -y \
           autoconf \
           bison \
+          curl \
           g++-multilib \
           gcc-multilib \
           language-pack-de \
