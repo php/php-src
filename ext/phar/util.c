@@ -257,6 +257,10 @@ zend_string *phar_find_in_include_path(zend_string *filename, phar_archive_data 
 	}
 
 	zend_string *fname = zend_get_executed_filename_ex();
+	if (!fname) {
+		return NULL;
+	}
+
 	bool is_file_a_phar_wrapper = zend_string_starts_with_literal_ci(fname, "phar://");
 	size_t length_phar_protocol = strlen("phar://");
 
