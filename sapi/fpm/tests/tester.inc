@@ -382,26 +382,50 @@ class Tester
      * @return null|array
      * @throws \Exception
      */
-    public function testConfig($silent = false)
+    public function testConfig($silent = false, array|string|null $expectedPattern = null): ?array
     {
         $configFile = $this->createConfig();
         $cmd        = self::findExecutable() . ' -n -tt -y ' . $configFile . ' 2>&1';
         $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
+        $found = 0;
+        if ($expectedPattern !== null) {
+            $expectedPatterns = is_array($expectedPattern) ? $expectedPattern : [$expectedPattern];
+        }
         if ($code) {
             $messages = [];
             foreach ($output as $outputLine) {
                 $message    = preg_replace("/\[.+?\]/", "", $outputLine, 1);
+                if ($expectedPattern !== null) {
+                    for ($i = 0; $i < count($expectedPatterns); $i++) {
+                        $pattern = $expectedPatterns[$i];
+                        if ($pattern !== null && preg_match($pattern, $message)) {
+                            $found++;
+                            $expectedPatterns[$i] = null;
+                        }
+                    }
+                }
                 $messages[] = $message;
                 if ( ! $silent) {
                     $this->error($message, null, false);
                 }
             }
-
-            return $messages;
+        } else {
+            $messages = null;
         }
 
-        return null;
+        if ($expectedPattern !== null && $found < count($expectedPatterns)) {
+            $missingPatterns = array_filter($expectedPatterns);
+            $errorMessage = sprintf(
+                "The expected config %s %s %s not been found",
+                count($missingPatterns) > 1 ? 'patterns' : 'pattern',
+                implode(', ', $missingPatterns),
+                count($missingPatterns) > 1 ? 'have' : 'has',
+            );
+            $this->error($errorMessage);
+        }
+
+        return $messages;
     }
 
     /**
@@ -1155,9 +1179,19 @@ class Tester
                 return $address;
             }
 
-            return sys_get_temp_dir() . '/' .
-                   hash('crc32', dirname($address)) . '-' .
-                   basename($address);
+            $addressPart = hash('crc32', dirname($address)) . '-' . basename($address);
+
+            // is longer on Mac, than on Linux
+            $tmpDirAddress = sys_get_temp_dir() . '/' . $addressPart;
+                   ;
+
+            if (strlen($tmpDirAddress) <= 104) {
+                return $tmpDirAddress;
+            }
+
+            $srcRootAddress = dirname(__DIR__, 3) . '/' . $addressPart;
+
+            return $srcRootAddress;
         }
 
         return $this->getHost($type) . ':' . $port;

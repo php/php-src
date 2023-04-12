@@ -429,6 +429,9 @@ PHP 8.3 UPGRADE NOTES
     current system user. Previously, calling FFI::load() was not possible during
     preloading if the opcache.preload_user directive was set.
 
+- FPM:
+  . FPM CLI test now fails if the socket path is longer than supported by OS.
+
 - Opcache:
   . In the cli and phpdbg SAPIs, preloading does not require the
     opcache.preload_user directive to be set anymore when running as root. In

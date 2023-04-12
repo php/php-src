@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Added DOMElement::className and DOMElement::id. (nielsdos)
   . Added DOMParentNode::replaceChildren(). (nielsdos)
 
+- FPM:
+  . Added warning to log when fpm socket was not registered on the expected
+    path. (Joshua Behrens, Jakub Zelenka)
+
 - Intl:
   . Fix memory leak in MessageFormatter::format() on failure. (Girgias)
 

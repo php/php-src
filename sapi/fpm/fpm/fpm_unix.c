@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <pwd.h>
 #include <grp.h>
 
@@ -63,6 +64,33 @@ static struct passwd *fpm_unix_get_passwd(struct fpm_worker_pool_s *wp, const ch
 	return pwd;
 }
 
+static inline bool fpm_unix_check_listen_address(struct fpm_worker_pool_s *wp, const char *address, int flags)
+{
+	if (wp->listen_address_domain != FPM_AF_UNIX) {
+		return true;
+	}
+
+	struct sockaddr_un test_socket;
+	size_t address_length = strlen(address);
+	size_t socket_length = sizeof(test_socket.sun_path);
+
+	if (address_length < socket_length) {
+		return true;
+	}
+
+	zlog(
+		flags,
+		"[pool %s] cannot bind to UNIX socket '%s' as path is too long (found length: %zu, "
+			"maximal length: %zu)",
+		wp->config->name,
+		address,
+		address_length,
+		socket_length
+	);
+
+	return false;
+}
+
 static inline bool fpm_unix_check_passwd(struct fpm_worker_pool_s *wp, const char *name, int flags)
 {
 	return !name || fpm_unix_is_id(name) || fpm_unix_get_passwd(wp, name, flags);
@@ -90,6 +118,7 @@ bool fpm_unix_test_config(struct fpm_worker_pool_s *wp)
 	return (
 		fpm_unix_check_passwd(wp, config->user, ZLOG_ERROR) &&
 		fpm_unix_check_group(wp, config->group, ZLOG_ERROR) &&
+		fpm_unix_check_listen_address(wp, config->listen_address, ZLOG_SYSERROR) &&
 		fpm_unix_check_passwd(wp, config->listen_owner, ZLOG_SYSERROR) &&
 		fpm_unix_check_group(wp, config->listen_group, ZLOG_SYSERROR)
 	);
@@ -273,7 +302,7 @@ int fpm_unix_set_socket_permissions(struct fpm_worker_pool_s *wp, const char *pa
 		/* Copy the new ACL entry from config */
 		for (i=ACL_FIRST_ENTRY ; acl_get_entry(aclconf, i, &entryconf) ; i=ACL_NEXT_ENTRY) {
 			if (0 > acl_create_entry (&aclfile, &entryfile) ||
-			    0 > acl_copy_entry(entryfile, entryconf)) {
+				0 > acl_copy_entry(entryfile, entryconf)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to add entry to the ACL of the socket '%s'", wp->config->name, path);
 				acl_free(aclfile);
 				return -1;
