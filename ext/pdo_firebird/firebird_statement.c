@@ -571,9 +571,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			for (i = 0; i < sqlda->sqld; ++i) {
 				XSQLVAR *var = &sqlda->sqlvar[i];
 
-				if (
-					zend_string_starts_with_cstr_ci(param->name, var->aliasname, var->aliasname_length)
-					|| zend_string_starts_with_cstr_ci(param->name, var->sqlname, var->sqlname_length)
+				if ( (
+						var->aliasname_length
+						&& zend_string_starts_with_cstr_ci(param->name, var->aliasname, var->aliasname_length)
+					) || (
+						var->sqlname_length
+						&& zend_string_starts_with_cstr_ci(param->name, var->sqlname, var->sqlname_length)
+					)
 				) {
 					param->paramno = i;
 					break;
