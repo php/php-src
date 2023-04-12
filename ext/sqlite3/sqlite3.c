@@ -28,7 +28,6 @@
 #include <sqlite3.h>
 
 #include "zend_exceptions.h"
-#include "ext/spl/spl_exceptions.h"
 #include "SAPI.h"
 #include "sqlite3_arginfo.h"
 
@@ -416,7 +415,7 @@ PHP_METHOD(SQLite3, loadExtension)
 	}
 
 	if (extension_len == 0) {
-		php_sqlite3_error(db_obj, 0, "Empty string as an extension");
+		zend_argument_value_error(1, "cannot be empty");
 		RETURN_FALSE;
 	}
 
@@ -2363,7 +2362,7 @@ static void sqlite3_param_dtor(zval *data) /* {{{ */
 PHP_MINIT_FUNCTION(sqlite3)
 {
 	/* Register SQLite3Exception class */
-	php_sqlite3_exception_ce = register_class_SQLite3Exception(spl_ce_RuntimeException);
+	php_sqlite3_exception_ce = register_class_SQLite3Exception(zend_ce_exception);
 
 #ifdef ZTS
 	/* Refuse to load if this wasn't a threasafe library loaded */
@@ -2430,13 +2429,6 @@ PHP_MINFO_FUNCTION(sqlite3)
 }
 /* }}} */
 
-/* {{{ */
-static const zend_module_dep sqlite3_deps[] = {
-	ZEND_MOD_REQUIRED("spl")
-	ZEND_MOD_END
-};
-/* }}} */
-
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(sqlite3)
 {
@@ -2449,8 +2441,7 @@ static PHP_GINIT_FUNCTION(sqlite3)
 
 /* {{{ sqlite3_module_entry */
 zend_module_entry sqlite3_module_entry = {
-	STANDARD_MODULE_HEADER_EX,NULL,
-	sqlite3_deps,
+	STANDARD_MODULE_HEADER,
 	"sqlite3",
 	NULL,
 	PHP_MINIT(sqlite3),

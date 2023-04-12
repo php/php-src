@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ffe03d1df12ee9806bcbfcaa26818dc9177e0bd3 */
+ * Stub hash: 921426faab7267354e0a58ebe8af5f4fff23010f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -293,12 +293,12 @@ static void register_sqlite3_symbols(int module_number)
 #endif
 }
 
-static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class_entry_RuntimeException)
+static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class_entry_Exception)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Exception", class_SQLite3Exception_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
 
 	return class_entry;
 }

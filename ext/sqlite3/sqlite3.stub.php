@@ -68,7 +68,7 @@ const SQLITE3_OPEN_CREATE = UNKNOWN;
 const SQLITE3_DETERMINISTIC = UNKNOWN;
 #endif
 
-class SQLite3Exception extends \RuntimeException
+class SQLite3Exception extends \Exception
 {
 }
 
