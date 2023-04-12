@@ -402,6 +402,9 @@ PHP_METHOD(Phar, running)
 	}
 
 	fname = zend_get_executed_filename_ex();
+	if (!fname) {
+		RETURN_EMPTY_STRING();
+	}
 
 	if (
 		zend_string_starts_with_literal_ci(fname, "phar://")
@@ -445,8 +448,13 @@ PHP_METHOD(Phar, mount)
 	}
 
 	zend_string *zend_file_name = zend_get_executed_filename_ex();
-	fname = ZSTR_VAL(zend_file_name);
-	fname_len = ZSTR_LEN(zend_file_name);
+	if (UNEXPECTED(!zend_file_name)) {
+		fname = "";
+		fname_len = 0;
+	} else {
+		fname = ZSTR_VAL(zend_file_name);
+		fname_len = ZSTR_LEN(zend_file_name);
+	}
 
 #ifdef PHP_WIN32
 	save_fname = fname;
@@ -577,6 +585,10 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	zend_string *zend_file_name = zend_get_executed_filename_ex();
+	if (UNEXPECTED(!zend_file_name)) {
+		return;
+	}
+
 	fname = ZSTR_VAL(zend_file_name);
 	fname_len = ZSTR_LEN(zend_file_name);
 
@@ -1298,7 +1310,8 @@ PHP_METHOD(Phar, unlinkArchive)
 	zend_string *zend_file_name = zend_get_executed_filename_ex();
 
 	if (
-		zend_string_starts_with_literal_ci(zend_file_name, "phar://")
+		zend_file_name
+		&& zend_string_starts_with_literal_ci(zend_file_name, "phar://")
 		&& SUCCESS == phar_split_fname(ZSTR_VAL(zend_file_name), ZSTR_LEN(zend_file_name), &arch, &arch_len, &entry, &entry_len, 2, 0)
 	) {
 		if (arch_len == fname_len && !memcmp(arch, fname, arch_len)) {

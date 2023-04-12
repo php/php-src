@@ -47,7 +47,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
+		if (!fname || !zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
 
@@ -96,7 +96,7 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 
 	/* we are checking for existence of a file within the relative path.  Chances are good that this is
 	   retrieving something from within the phar archive */
-	if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
+	if (!fname || !zend_string_starts_with_literal_ci(fname, "phar://")) {
 		return NULL;
 	}
 
@@ -497,7 +497,7 @@ static void phar_file_stat(const char *filename, size_t filename_length, int typ
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
+		if (!fname || !zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
 
@@ -748,7 +748,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
+		if (!fname || !zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
 
@@ -814,7 +814,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
-		if (!zend_string_starts_with_literal_ci(fname, "phar://")) {
+		if (!fname || !zend_string_starts_with_literal_ci(fname, "phar://")) {
 			goto skip_phar;
 		}
 

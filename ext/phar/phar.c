@@ -2324,15 +2324,15 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 
 	zend_string *fname = zend_get_executed_filename_ex();
 
-	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
-		return SUCCESS;
-	}
-
-	if (zend_string_equals_literal(fname, "[no active file]")) {
+	if (!fname) {
 		if (error) {
 			spprintf(error, 0, "cannot initialize a phar outside of PHP execution");
 		}
 		return FAILURE;
+	}
+
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
+		return SUCCESS;
 	}
 
 	if (0 == zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
