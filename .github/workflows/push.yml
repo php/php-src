@@ -235,13 +235,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install \
             bison \
-            re2c \
-            locales \
-            openssl \
-            language-pack-de \
-            libsqlite3-dev \
             libonig-dev \
-            libc-client-dev \
+            libsqlite3-dev \
+            openssl \
+            re2c \
             valgrind
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -254,17 +251,17 @@ jobs:
           ./buildconf --force
           ./configure \
             --disable-debug \
-            --with-valgrind \
+            --enable-mbstring \
             --enable-opcache \
             --enable-option-checking=fatal \
+            --enable-sockets \
+            --enable-werror \
             --prefix=/usr \
             --with-config-file-scan-dir=/etc/php.d \
             --with-mysqli=mysqlnd \
-            --with-pdo-sqlite \
-            --enable-mbstring \
-            --enable-sockets \
             --with-openssl \
-            --enable-werror
+            --with-pdo-sqlite \
+            --with-valgrind
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
