@@ -299,5 +299,5 @@ jobs:
         run: >-
           php benchmark/generate_diff.php
           ${{ github.event.pull_request.head.sha }}
-          $(git merge-base ${{ github.base_ref }} ${{ github.head_ref }})
+          $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
           > $GITHUB_STEP_SUMMARY
