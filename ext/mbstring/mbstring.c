@@ -4586,6 +4586,112 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 /* If we are building an AVX2-only binary, don't compile the next function */
 #ifndef ZEND_INTRIN_AVX2_NATIVE
 
+#ifdef __aarch64__
+/* Adopted from: https://github.com/cyb70289/utf8/blob/master/lemire-neon.c
+ *
+ * MIT License
+ * 
+ * Copyright (c) 2019 Yibo Cai
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include <arm_neon.h>
+
+/* before result 16 bytes */
+struct processed_utf_bytes {
+	int8x16_t rawbytes;
+	int8x16_t high_nibbles;
+	int8x16_t carried_continuations;
+};
+
+static inline void neon_check_utf8_bytes(int8x16_t current_bytes, struct processed_utf_bytes *previous, int8x16_t *has_error) {
+	static const int8_t _nibbles[] = {
+		1, 1, 1, 1, 1, 1, 1, 1, /* 0xxx (ASCII) */
+		0, 0, 0, 0,             /* 10xx (continuation) */
+		2, 2,                   /* 110x */
+		3,                      /* 1110 */
+		4,                      /* 1111, next should be 0 (not checked here) */
+	};
+
+	/* -128 is false, index 0xC less than 0xC2, index 0xE less than 0xE1, index 0xF less than 0xF1 */
+	static const int8_t _initial_mins[] = {
+		-128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+		-128, -128,
+		0xC2, -128,
+		0xE1,
+		0xF1,
+	};
+
+	/* -128 is false, 127 is true, index 0xE less than 0xA0, index 0xF less than 0x90 */
+	static const int8_t _second_mins[] = {
+		-128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
+		-128, -128,
+		127, 127,
+		0xA0,
+		0x90,
+	};
+	struct processed_utf_bytes pb;
+	pb.rawbytes = current_bytes;
+	/* pick high nibbles (right shift 4bits) */
+	pb.high_nibbles = vreinterpretq_s8_u8(vshrq_n_u8(vreinterpretq_u8_s8(current_bytes), 4));
+	/* saturation reduction check smaller than 0xF4 */
+	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(current_bytes), vdupq_n_u8(0xF4))));
+
+	/* convert to length to first byte, not first byte is convert to 0.
+	 * overlap || underlap
+	 * carry > length && length > 0 || !(carry > length) && !(length > 0)
+	 * (carry > length) == (lengths > 0)
+	 */
+	int8x16_t initial_lengths = vqtbl1q_s8(vld1q_s8(_nibbles), vreinterpretq_u8_s8(pb.high_nibbles));
+	int8x16_t right1 = vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(vextq_s8(previous->carried_continuations, initial_lengths, 16 - 1)), vdupq_n_u8(1)));
+	int8x16_t sum = vaddq_s8(initial_lengths, right1);
+	int8x16_t right2 = vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(vextq_s8(previous->carried_continuations, sum, 16 - 2)), vdupq_n_u8(2)));
+	pb.carried_continuations = vaddq_s8(sum, right2);
+	uint8x16_t overunder = vceqq_u8(vcgtq_s8(pb.carried_continuations, initial_lengths), vcgtq_s8(initial_lengths, vdupq_n_s8(0)));
+	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(overunder));
+
+	/* check if find 0xED, not over 0x9F, check if find 0xF4, not over 0x8F */
+	int8x16_t off1_current_bytes = vextq_s8(previous->rawbytes, pb.rawbytes, 16 - 1);
+	uint8x16_t maskED = vceqq_s8(off1_current_bytes, vdupq_n_s8(0xED));
+	uint8x16_t maskF4 = vceqq_s8(off1_current_bytes, vdupq_n_s8(0xF4));
+	uint8x16_t badfollowED = vandq_u8(vcgtq_s8(current_bytes, vdupq_n_s8(0x9F)), maskED);
+	uint8x16_t badfollowF4 = vandq_u8(vcgtq_s8(current_bytes, vdupq_n_s8(0x8F)), maskF4);
+	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(vorrq_u8(badfollowED, badfollowF4)));
+
+	/* hibits   low    high
+	 * C    => < C2 && true
+	 * E    => < E1 && < A0
+	 * F    => < F1 && < 90
+	 * else => false && false
+	 */
+	int8x16_t off1_hibits = vextq_s8(previous->high_nibbles, pb.high_nibbles, 16 - 1);
+	int8x16_t initial_mins = vqtbl1q_s8(vld1q_s8(_initial_mins), vreinterpretq_u8_s8(off1_hibits));
+	uint8x16_t initial_under = vcgtq_s8(initial_mins, off1_current_bytes);
+	int8x16_t second_mins = vqtbl1q_s8(vld1q_s8(_second_mins), vreinterpretq_u8_s8(off1_hibits));
+	uint8x16_t second_under = vcgtq_s8(second_mins, current_bytes);
+	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(vandq_u8(initial_under, second_under)));
+
+	/* store previous byte */
+	*previous = pb;
+}
+#endif
+
 /* SSE2-based function for validating UTF-8 strings
  * A faster implementation which uses AVX2 instructions follows */
 static bool mb_fast_check_utf8_default(zend_string *str)
@@ -4779,6 +4885,40 @@ finish_up_remaining_bytes:
 	}
 
 	return true;
+# elif defined(__aarch64__)
+	/* The algorithm used here for UTF-8 validation is partially adapted from the
+	 * paper "Validating UTF-8 In Less Than One Instruction Per Byte", by John Keiser
+	 * and Daniel Lemire.
+	 * Ref: https://arxiv.org/pdf/2010.03090.pdf
+	 */
+	size_t i = 0;
+	size_t len = ZSTR_LEN(str);
+
+	static const int8_t _verror[] = {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1};
+
+	/* error flag vertor */
+	int8x16_t has_error = vdupq_n_s8(0);
+	struct processed_utf_bytes previous = {.rawbytes = vdupq_n_s8(0),
+		.high_nibbles = vdupq_n_s8(0),
+		.carried_continuations = vdupq_n_s8(0)};
+	if (len >= 16) {
+		for (; i <= len - 16; i += 16) {
+			int8x16_t current_bytes = vld1q_s8((int8_t *)(p + i));
+			neon_check_utf8_bytes(current_bytes, &previous, &has_error);
+		}
+	}
+
+	if (i < len) {
+		char buffer[16];
+		memset(buffer, 0, 16);
+		memcpy(buffer, p + i, len - i);
+		int8x16_t current_bytes = vld1q_s8((int8_t *)buffer);
+		neon_check_utf8_bytes(current_bytes, &previous, &has_error);
+	} else {
+		has_error = vorrq_s8(vreinterpretq_s8_u8(vcgtq_s8(previous.carried_continuations, vld1q_s8(_verror))), has_error);
+	}
+
+	return vmaxvq_u8(vreinterpretq_u8_s8(has_error)) == 0 ? true : false;
 # else
 	/* This UTF-8 validation function is derived from PCRE2 */
 	size_t length = ZSTR_LEN(str);
