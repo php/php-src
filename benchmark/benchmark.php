@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/shared.php';
 
-$commitResult = ($argv[1] ?? 'false') === 'true';
+$storeResult = ($argv[1] ?? 'false') === 'true';
 $phpCgi = $argv[2] ?? dirname(PHP_BINARY) . '/php-cgi';
 if (!file_exists($phpCgi)) {
     fwrite(STDERR, "php-cgi not found\n");
@@ -10,7 +10,7 @@ if (!file_exists($phpCgi)) {
 }
 
 function main() {
-    global $commitResult;
+    global $storeResult;
 
     $data = [];
     $data['bench.php'] = runBench();
@@ -18,17 +18,16 @@ function main() {
     $data['wordpress_6.2'] = runWordpress();
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
-    if ($commitResult) {
-        commitResult($result);
-    } else {
-        fwrite(STDOUT, $result);
+    fwrite(STDOUT, $result);
+
+    if ($storeResult) {
+        storeResult($result);
     }
 }
 
-function commitResult(string $result) {
+function storeResult(string $result) {
     $repo = __DIR__ . '/repos/data';
     cloneRepo($repo, 'git@github.com:iluuu1994/php-benchmark-data.git');
-    runCommand(['git', 'pull', '--end-of-options', 'origin'], $repo);
 
     $commitHash = getPhpSrcCommitHash();
     $dir = $repo . '/' . substr($commitHash, 0, 2) . '/' . $commitHash;
@@ -37,10 +36,6 @@ function commitResult(string $result) {
         mkdir($dir, 0755, true);
     }
     file_put_contents($summaryFile, $result);
-
-    runCommand(['git', 'add', '--end-of-options', $summaryFile], $repo);
-    runCommand(['git', 'commit', '--allow-empty', '-m', 'Add result for php/php-src@' . $commitHash, '--author', 'Benchmark <benchmark@php.net>'], $repo);
-    runCommand(['git', 'push'], $repo);
 }
 
 function getPhpSrcCommitHash(): string {
@@ -55,7 +50,7 @@ function runBench(): array {
 
 function runSymfonyDemo(): array {
     $dir = __DIR__ . '/repos/symfony-demo-2.2.3';
-    cloneRepo($dir, 'git@github.com:iluuu1994/symfony-demo-2.2.3.git');
+    cloneRepo($dir, 'https://github.com/iluuu1994/symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
     $process = runValgrindPhpCgiCommand(['-T1,1', $dir . '/public/index.php']);
@@ -64,7 +59,7 @@ function runSymfonyDemo(): array {
 
 function runWordpress(): array {
     $dir = __DIR__ . '/repos/wordpress-6.2';
-    cloneRepo($dir, 'git@github.com:iluuu1994/wordpress-6.2.git');
+    cloneRepo($dir, 'https://github.com/iluuu1994/wordpress-6.2.git');
 
     /* FIXME: It might be better to use a stable version of PHP for this command because we can't
      * easily alter the phar file */

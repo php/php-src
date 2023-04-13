@@ -223,6 +223,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: git checkout benchmarking-data
+        uses: actions/checkout@v3
+        with:
+          repository: iluuu1994/php-benchmark-data
+          ssh-key: ${{ secrets.BENCHMARK_DATA_DEPLOY_KEY }}
+          path: benchmark/repos/data
       - name: apt
         run: |
           set -x
@@ -263,15 +269,10 @@ jobs:
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-linux
-      - name: Prepare SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.BENCHMARK_DATA_DEPLOY_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          git config --global user.name "Benchmark"
-          git config --global user.email "benchmark@php.net"
       - name: Setup
         run: |
+          git config --global user.name "Benchmark"
+          git config --global user.email "benchmark@php.net"
           sudo service mysql start
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS wordpress"
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
@@ -282,6 +283,17 @@ jobs:
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Benchmark
         run: php benchmark/benchmark.php true
+      - name: Store result
+        if: github.event_name == 'push'
+        run: |
+          set -x
+          cd benchmark/repos/data
+          git add .
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Add result for ${{ github.repository }}@${{ steps.determine-commit.outputs.sha }}"
+          git push
       - name: Show diff
         if: github.event_name == 'pull_request'
         run: >-
