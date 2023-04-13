@@ -13,9 +13,9 @@ function main() {
     global $storeResult;
 
     $data = [];
-    $data['bench.php'] = runBench();
-    $data['symfony_demo'] = runSymfonyDemo();
-    $data['wordpress_6.2'] = runWordpress();
+    $data['Zend/bench.php'] = runBench();
+    $data['Symfony Demo 2.2.3'] = runSymfonyDemo();
+    $data['Wordpress 6.2'] = runWordpress();
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
     fwrite(STDOUT, $result);
