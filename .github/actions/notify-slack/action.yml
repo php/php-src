@@ -5,11 +5,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Notify Slack
-      if: always()
-      uses: ravsamhq/notify-slack-action@v1
-      with:
-        status: ${{ job.status }}
-        notify_when: 'failure'
-      env:
-        SLACK_WEBHOOK_URL: ${{ inputs.token }}
+    - shell: bash
+      run: >-
+        curl -X POST -H 'Content-type: application/json' --data '{"attachments": [{"text": "Job in *nightly* failed", "footer": "<https://github.com/php/php-src/actions/runs/${{ github.run_id }}|View Run>", "color": "danger", "mrkdwn_in": ["text"]}]}' ${{ inputs.token }}

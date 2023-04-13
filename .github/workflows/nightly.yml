@@ -33,7 +33,7 @@ jobs:
         id: set-matrix
         run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}"
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -123,7 +123,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -199,7 +199,7 @@ jobs:
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -267,7 +267,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -313,7 +313,7 @@ jobs:
         if: always()
         run: bash <(curl -s https://codecov.io/bash)
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -433,7 +433,7 @@ jobs:
             exit 1
           fi
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -516,7 +516,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -614,7 +614,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -674,7 +674,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
@@ -782,7 +782,7 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
