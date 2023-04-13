@@ -13,9 +13,12 @@ function main() {
     global $storeResult;
 
     $data = [];
-    $data['Zend/bench.php'] = runBench();
-    $data['Symfony Demo 2.2.3'] = runSymfonyDemo();
-    $data['Wordpress 6.2'] = runWordpress();
+    $data['Zend/bench.php'] = runBench(false);
+    $data['Zend/bench.php JIT'] = runBench(true);
+    $data['Symfony Demo 2.2.3'] = runSymfonyDemo(false);
+    $data['Symfony Demo 2.2.3 JIT'] = runSymfonyDemo(true);
+    $data['Wordpress 6.2'] = runWordpress(false);
+    $data['Wordpress 6.2 JIT'] = runWordpress(true);
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
     fwrite(STDOUT, $result);
@@ -43,21 +46,19 @@ function getPhpSrcCommitHash(): string {
     return $result->stdout;
 }
 
-function runBench(): array {
-    $process = runValgrindPhpCgiCommand([dirname(__DIR__) . '/Zend/bench.php']);
-    return ['instructions' => extractInstructionsFromValgrindOutput($process->stderr)];
+function runBench(bool $jit): array {
+    return runValgrindPhpCgiCommand([dirname(__DIR__) . '/Zend/bench.php'], jit: $jit);
 }
 
-function runSymfonyDemo(): array {
+function runSymfonyDemo(bool $jit): array {
     $dir = __DIR__ . '/repos/symfony-demo-2.2.3';
     cloneRepo($dir, 'https://github.com/iluuu1994/symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
-    $process = runValgrindPhpCgiCommand(['-T1,1', $dir . '/public/index.php']);
-    return ['instructions' => extractInstructionsFromValgrindOutput($process->stderr)];
+    return runValgrindPhpCgiCommand([$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 10);
 }
 
-function runWordpress(): array {
+function runWordpress(bool $jit): array {
     $dir = __DIR__ . '/repos/wordpress-6.2';
     cloneRepo($dir, 'https://github.com/iluuu1994/wordpress-6.2.git');
 
@@ -77,26 +78,35 @@ function runWordpress(): array {
 
     // Warmup
     runPhpCommand([$dir . '/index.php'], $dir);
-    $process = runValgrindPhpCgiCommand(['-T1,1', $dir . '/index.php'], $dir);
-    return ['instructions' => extractInstructionsFromValgrindOutput($process->stderr)];
+    return runValgrindPhpCgiCommand([$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 10);
 }
 
 function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {
     return runCommand([PHP_BINARY, ...$args], $cwd);
 }
 
-function runValgrindPhpCgiCommand(array $args, ?string $cwd = null): ProcessResult {
+function runValgrindPhpCgiCommand(
+    array $args,
+    ?string $cwd = null,
+    bool $jit = false,
+    int $warmup = 0,
+): array {
     global $phpCgi;
-    return runCommand([
+    $process = runCommand([
         'valgrind',
         '--tool=callgrind',
         '--dump-instr=yes',
         '--callgrind-out-file=/dev/null',
         '--',
         $phpCgi,
+        '-T' . ($warmup ? $warmup . ',' : '') . '1',
         '-d max_execution_time=0',
+        '-d opcache.enable=1',
+        '-d opcache.jit_buffer_size=' . ($jit ? '128M' : '0'),
         ...$args,
     ]);
+    $instructions = extractInstructionsFromValgrindOutput($process->stderr);
+    return ['instructions' => $instructions];
 }
 
 function extractInstructionsFromValgrindOutput(string $output): ?string {
