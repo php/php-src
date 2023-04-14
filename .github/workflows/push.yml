@@ -226,8 +226,8 @@ jobs:
       - name: git checkout benchmarking-data
         uses: actions/checkout@v3
         with:
-          repository: iluuu1994/php-benchmark-data
-          ssh-key: ${{ secrets.BENCHMARK_DATA_DEPLOY_KEY }}
+          repository: php/benchmarking-data
+          ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
           path: benchmark/repos/data
       - name: apt
         run: |

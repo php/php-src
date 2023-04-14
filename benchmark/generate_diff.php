@@ -9,7 +9,7 @@ function main(?string $headCommitHash, ?string $baseCommitHash) {
     }
 
     $repo = __DIR__ . '/repos/data';
-    cloneRepo($repo, 'git@github.com:iluuu1994/php-benchmark-data.git');
+    cloneRepo($repo, 'git@github.com:php/benchmarking-data.git');
     $headSummaryFile = $repo . '/' . substr($headCommitHash, 0, 2) . '/' . $headCommitHash . '/summary.json';
     $baseSummaryFile = $repo . '/' . substr($baseCommitHash, 0, 2) . '/' . $baseCommitHash . '/summary.json';
     if (!file_exists($headSummaryFile)) {

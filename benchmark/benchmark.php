@@ -30,7 +30,7 @@ function main() {
 
 function storeResult(string $result) {
     $repo = __DIR__ . '/repos/data';
-    cloneRepo($repo, 'git@github.com:iluuu1994/php-benchmark-data.git');
+    cloneRepo($repo, 'git@github.com:php/benchmarking-data.git');
 
     $commitHash = getPhpSrcCommitHash();
     $dir = $repo . '/' . substr($commitHash, 0, 2) . '/' . $commitHash;
@@ -52,7 +52,7 @@ function runBench(bool $jit): array {
 
 function runSymfonyDemo(bool $jit): array {
     $dir = __DIR__ . '/repos/symfony-demo-2.2.3';
-    cloneRepo($dir, 'https://github.com/iluuu1994/symfony-demo-2.2.3.git');
+    cloneRepo($dir, 'https://github.com/php/benchmarking-symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
     return runValgrindPhpCgiCommand([$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 10);
@@ -60,7 +60,7 @@ function runSymfonyDemo(bool $jit): array {
 
 function runWordpress(bool $jit): array {
     $dir = __DIR__ . '/repos/wordpress-6.2';
-    cloneRepo($dir, 'https://github.com/iluuu1994/wordpress-6.2.git');
+    cloneRepo($dir, 'https://github.com/php/benchmarking-wordpress-6.2.git');
 
     /* FIXME: It might be better to use a stable version of PHP for this command because we can't
      * easily alter the phar file */
