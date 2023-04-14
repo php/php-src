@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 921426faab7267354e0a58ebe8af5f4fff23010f */
+ * Stub hash: feabdc10872ef97add839505b6893bad0bb82879 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -299,6 +299,7 @@ static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Exception", class_SQLite3Exception_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
 }
