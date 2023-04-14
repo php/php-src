@@ -30,7 +30,7 @@
 #include "mbfilter.h"
 
 #include "mbfilter_utf8_mobile.h"
-#include "mbfilter_sjis_mobile.h"
+#include "mbfilter_cjk.h"
 
 #include "emoji2uni.h"
 
@@ -46,6 +46,66 @@ static size_t mb_utf8_kddi_b_to_wchar(unsigned char **in, size_t *in_len, uint32
 static void mb_wchar_to_utf8_kddi_b(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 static size_t mb_utf8_sb_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_utf8_sb(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+
+static int mbfilter_conv_map_tbl(int c, int *w, const unsigned short map[][3], int n)
+{
+	for (int i = 0; i < n; i++) {
+		if (map[i][0] <= c && c <= map[i][1]) {
+			*w = c - map[i][0] + map[i][2];
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static int mbfilter_conv_r_map_tbl(int c, int *w, const unsigned short map[][3], int n)
+{
+	/* Convert in reverse direction */
+	for (int i = 0; i < n; i++) {
+		if (map[i][2] <= c && c <= map[i][2] - map[i][0] + map[i][1]) {
+			*w = c + map[i][0] - map[i][2];
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static const unsigned short mbfl_docomo2uni_pua[4][3] = {
+	{0x28c2, 0x292f, 0xe63e},
+	{0x2930, 0x2934, 0xe6ac},
+	{0x2935, 0x2951, 0xe6b1},
+	{0x2952, 0x29db, 0xe6ce},
+};
+
+static const unsigned short mbfl_kddi2uni_pua[7][3] = {
+	{0x26ec, 0x2838, 0xe468},
+	{0x284c, 0x2863, 0xe5b5},
+	{0x24b8, 0x24ca, 0xe5cd},
+	{0x24cb, 0x2545, 0xea80},
+	{0x2839, 0x284b, 0xeafb},
+	{0x2546, 0x25c0, 0xeb0e},
+	{0x25c1, 0x25c6, 0xeb89},
+};
+
+static const unsigned short mbfl_kddi2uni_pua_b[8][3] = {
+	{0x24b8, 0x24f6, 0xec40},
+	{0x24f7, 0x2573, 0xec80},
+	{0x2574, 0x25b2, 0xed40},
+	{0x25b3, 0x25c6, 0xed80},
+	{0x26ec, 0x272a, 0xef40},
+	{0x272b, 0x27a7, 0xef80},
+	{0x27a8, 0x27e6, 0xf040},
+	{0x27e7, 0x2863, 0xf080},
+};
+
+static const unsigned short mbfl_sb2uni_pua[6][3] = {
+	{0x27a9, 0x2802, 0xe101},
+	{0x2808, 0x2861, 0xe201},
+	{0x2921, 0x297a, 0xe001},
+	{0x2980, 0x29cc, 0xe301},
+	{0x2a99, 0x2ae4, 0xe401},
+	{0x2af8, 0x2b35, 0xe501},
+};
 
 extern const unsigned char mblen_table_utf8[];
 
@@ -298,8 +358,8 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 		int s1, c1;
 
 		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo && mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) ||
-			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7) > 0) ||
-			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8) > 0) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_unicode2sjis_emoji_kddi_sjis(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7) > 0) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_unicode2sjis_emoji_kddi_sjis(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8) > 0) ||
 			  (filter->to->no_encoding == mbfl_no_encoding_utf8_sb && mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_sb2uni_pua, 6) > 0)) {
 			c = c1;
 		}
