@@ -19,16 +19,10 @@
  * Suite 330, Boston, MA  02111-1307  USA
  *
  * The author of this file: Rui Hirokawa <hirokawa@php.net>
- *
  */
 
 #ifndef UNICODE_TABLE_CP936_H
 #define UNICODE_TABLE_CP936_H
-
-/*
- * Unicode table
- */
-#ifdef UNICODE_TABLE_CP936_DEF
 
 /* CP936 -> Unicode, but without PUA codepoints used in CP936 and GB18030 */
 const unsigned short cp936_ucs_table[] = {
@@ -6633,42 +6627,5 @@ static const unsigned short mbfl_cp936_pua_tbl[][3] = {
 };
 
 static const int mbfl_cp936_pua_tbl_max = sizeof(mbfl_cp936_pua_tbl)/(sizeof(unsigned short)*3);
-
-#else
-
-extern const unsigned short cp936_ucs_table[];
-extern const unsigned short cp936_pua_tbl1[];
-extern const unsigned short cp936_pua_tbl2[];
-extern const unsigned short cp936_pua_tbl3[];
-
-extern const unsigned short ucs_a1_cp936_table[];
-extern const unsigned short ucs_a2_cp936_table[];
-extern const unsigned short ucs_a3_cp936_table[];
-extern const unsigned short ucs_i_cp936_table[];
-extern const unsigned short ucs_cf_cp936_table[];
-extern const unsigned short ucs_sfv_cp936_table[];
-
-extern const unsigned short ucs_ci_s_cp936_table[];
-extern const unsigned short ucs_hff_s_cp936_table[];
-
-extern const int cp936_ucs_table_size;
-extern const int ucs_a1_cp936_table_min;
-extern const int ucs_a1_cp936_table_max;
-extern const int ucs_a2_cp936_table_min;
-extern const int ucs_a2_cp936_table_max;
-extern const int ucs_a3_cp936_table_min;
-extern const int ucs_a3_cp936_table_max;
-extern const int ucs_i_cp936_table_min;
-extern const int ucs_i_cp936_table_max;
-extern const int ucs_ci_cp936_table_min;
-extern const int ucs_ci_cp936_table_max;
-extern const int ucs_cf_cp936_table_min;
-extern const int ucs_cf_cp936_table_max;
-extern const int ucs_sfv_cp936_table_min;
-extern const int ucs_sfv_cp936_table_max;
-extern const int ucs_hff_cp936_table_min;
-extern const int ucs_hff_cp936_table_max;
-
-#endif
 
 #endif /* UNICODE_TABLE_CP936_H */

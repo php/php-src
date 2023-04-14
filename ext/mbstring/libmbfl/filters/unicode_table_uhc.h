@@ -25,11 +25,6 @@
 #ifndef UNICODE_TABLE_UHC_H
 #define UNICODE_TABLE_UHC_H
 
-/*
- * Unicode table
- */
-#ifdef UNICODE_TABLE_UHC_DEF
-
 const unsigned short uhc1_ucs_table[] = {
 0xac02,0xac03,0xac05,0xac06,0xac0b,0xac0c,0xac0d,0xac0e,
 0xac0f,0xac18,0xac1e,0xac1f,0xac21,0xac22,0xac23,0xac25,
@@ -7177,43 +7172,5 @@ const unsigned short ucs_r2_uhc_table[] = {
 
 const int ucs_r2_uhc_table_min = 0xff00;
 const int ucs_r2_uhc_table_max = 0xff00 + (sizeof (ucs_r2_uhc_table) / sizeof (unsigned short));
-
-#else
-
-extern const unsigned short uhc1_ucs_table[];
-extern const unsigned short uhc2_ucs_table[];
-extern const unsigned short uhc3_ucs_table[];
-extern const unsigned short ucs_a1_uhc_table[];
-extern const unsigned short ucs_a2_uhc_table[];
-extern const unsigned short ucs_a3_uhc_table[];
-extern const unsigned short ucs_i_uhc_table[];
-extern const unsigned short ucs_s_uhc_table[];
-extern const unsigned short ucs_r1_uhc_table[];
-extern const unsigned short ucs_r2_uhc_table[];
-
-extern const int uhc1_ucs_table_size;
-extern const int uhc2_ucs_table_size;
-extern const int uhc3_ucs_table_size;
-extern const int ucs_a1_uhc_table_min;
-extern const int ucs_a1_uhc_table_max;
-extern const int ucs_a2_uhc_table_min;
-extern const int ucs_a2_uhc_table_max;
-extern const int ucs_a3_uhc_table_min;
-extern const int ucs_a3_uhc_table_max;
-extern const int ucs_i_uhc_table_min;
-extern const int ucs_i_uhc_table_max;
-extern const int ucs_s_uhc_table_min;
-extern const int ucs_s_uhc_table_max;
-extern const int ucs_r1_uhc_table_min;
-extern const int ucs_r1_uhc_table_max;
-extern const int ucs_r2_uhc_table_min;
-extern const int ucs_r2_uhc_table_max;
-
-
-
-
-#endif
-
-
 
 #endif /* UNICODE_TABLE_UHC_H */
