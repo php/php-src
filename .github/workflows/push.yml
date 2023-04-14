@@ -265,7 +265,15 @@ jobs:
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
-        uses: ./.github/actions/install-linux
+        run: |
+          set -x
+          sudo make install
+          sudo mkdir -p /etc/php.d
+          sudo chmod 777 /etc/php.d
+          echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
+          echo zend_extension=opcache.so >> /etc/php.d/opcache.ini
+          echo opcache.enable=1 >> /etc/php.d/opcache.ini
+          echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Setup
         run: |
           git config --global user.name "Benchmark"
@@ -274,10 +282,6 @@ jobs:
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS wordpress"
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
-          mkdir -p /etc/php.d
-          echo zend_extension=opcache.so >> /etc/php.d/opcache.ini
-          echo opcache.enable=1 >> /etc/php.d/opcache.ini
-          echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
       - name: Benchmark
         run: php benchmark/benchmark.php true
       - name: Store result
