@@ -223,12 +223,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: git checkout benchmarking-data
-        uses: actions/checkout@v3
-        with:
-          repository: php/benchmarking-data
-          ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
-          path: benchmark/repos/data
       - name: apt
         run: |
           set -x
@@ -282,6 +276,12 @@ jobs:
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS wordpress"
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
+      - name: git checkout benchmarking-data
+        uses: actions/checkout@v3
+        with:
+          repository: php/benchmarking-data
+          ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
+          path: benchmark/repos/data
       - name: Benchmark
         run: php benchmark/benchmark.php true
       - name: Store result
@@ -290,6 +290,10 @@ jobs:
           set -x
           cd benchmark/repos/data
           git pull --autostash
+          if [ -e ".git/MERGE_HEAD" ]; then
+            echo "Merging, can't proceed"
+            exit 1
+          fi
           git add .
           if git diff --cached --quiet; then
             exit 0
