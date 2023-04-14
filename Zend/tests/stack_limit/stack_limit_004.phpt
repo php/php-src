@@ -27,12 +27,12 @@ $callback = function (): int {
     throw new \Exception();
 };
 
-ini_set('fiber.stack_size', '400K');
+ini_set('fiber.stack_size', '1M');
 $fiber = new Fiber($callback);
 $fiber->start();
 $depth1 = $fiber->getReturn();
 
-ini_set('fiber.stack_size', '200K');
+ini_set('fiber.stack_size', '512K');
 $fiber = new Fiber($callback);
 $fiber->start();
 $depth2 = $fiber->getReturn();
