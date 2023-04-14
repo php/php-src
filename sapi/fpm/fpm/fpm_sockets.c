@@ -313,7 +313,7 @@ static int fpm_socket_af_inet_socket_by_addr(struct fpm_worker_pool_s *wp, const
 	hints.ai_socktype = SOCK_STREAM;
 
 	if ((status = getaddrinfo(addr, port, &hints, &servinfo)) != 0) {
-		zlog(ZLOG_ERROR, "getaddrinfo: %s\n", gai_strerror(status));
+		zlog(ZLOG_ERROR, "getaddrinfo: %s", gai_strerror(status));
 		return -1;
 	}
 
