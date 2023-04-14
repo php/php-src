@@ -285,6 +285,7 @@ jobs:
         run: |
           set -x
           cd benchmark/repos/data
+          git pull --autostash
           git add .
           if git diff --cached --quiet; then
             exit 0
