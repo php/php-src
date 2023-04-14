@@ -55,7 +55,7 @@ function runSymfonyDemo(bool $jit): array {
     cloneRepo($dir, 'https://github.com/php/benchmarking-symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
-    return runValgrindPhpCgiCommand([$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 10);
+    return runValgrindPhpCgiCommand([$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50);
 }
 
 function runWordpress(bool $jit): array {
@@ -78,7 +78,7 @@ function runWordpress(bool $jit): array {
 
     // Warmup
     runPhpCommand([$dir . '/index.php'], $dir);
-    return runValgrindPhpCgiCommand([$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 10);
+    return runValgrindPhpCgiCommand([$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 50);
 }
 
 function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {
