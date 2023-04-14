@@ -2219,6 +2219,8 @@ parent_loop_end:
 #ifdef HAVE_VALGRIND
 							if (warmup_repeats > 0) {
 								CALLGRIND_STOP_INSTRUMENTATION;
+								/* We're not interested in measuring startup */
+								CALLGRIND_ZERO_STATS;
 							}
 #endif
 						} else {
@@ -2427,6 +2429,12 @@ parent_loop_end:
 				}
 			} /* end !cgi && !fastcgi */
 
+#ifdef HAVE_VALGRIND
+			if (warmup_repeats == 0) {
+				CALLGRIND_START_INSTRUMENTATION;
+			}
+#endif
+
 			/* request startup only after we've done all we can to
 			 * get path_translated */
 			if (php_request_startup() == FAILURE) {
@@ -2546,6 +2554,11 @@ fastcgi_request_done:
 				SG(request_info).query_string = NULL;
 			}
 
+#ifdef HAVE_VALGRIND
+			/* We're not interested in measuring shutdown */
+			CALLGRIND_STOP_INSTRUMENTATION;
+#endif
+
 			if (!fastcgi) {
 				if (benchmark) {
 					if (warmup_repeats) {
@@ -2555,9 +2568,6 @@ fastcgi_request_done:
 							gettimeofday(&start, NULL);
 #else
 							time(&start);
-#endif
-#ifdef HAVE_VALGRIND
-							CALLGRIND_START_INSTRUMENTATION;
 #endif
 						}
 						continue;
