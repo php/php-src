@@ -104,6 +104,7 @@ function runValgrindPhpCgiCommand(
         '-d max_execution_time=0',
         '-d opcache.enable=1',
         '-d opcache.jit_buffer_size=' . ($jit ? '128M' : '0'),
+        '-d opcache.validate_timestamps=0',
         ...$args,
     ]);
     $instructions = extractInstructionsFromValgrindOutput($process->stderr);
