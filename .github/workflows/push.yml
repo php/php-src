@@ -299,7 +299,7 @@ jobs:
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m "Add result for ${{ github.repository }}@${{ steps.determine-commit.outputs.sha }}"
+          git commit -m "Add result for ${{ github.repository }}@${{ github.event.pull_request.head.sha }}"
           git push
       - name: Show diff
         if: github.event_name == 'pull_request'
