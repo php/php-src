@@ -193,6 +193,8 @@ namespace {
 
     function zend_get_map_ptr_last(): int {}
 
+    function zend_test_crash(?string $message = null): void {}
+
     function zend_test_fill_packed_array(array &$array): void {}
 }
 
