@@ -168,6 +168,8 @@ namespace {
     function zend_test_zend_ini_str(): string {}
 
     function zend_get_map_ptr_last(): int {}
+
+    function zend_test_crash(?string $message = null): void {}
 }
 
 namespace ZendTestNS {
