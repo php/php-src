@@ -3470,12 +3470,22 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			PQconsumeInput(pgsql);
 			RETVAL_LONG(PQisBusy(pgsql));
 			break;
-		case PHP_PG_ASYNC_REQUEST_CANCEL:
-			RETVAL_LONG(PQrequestCancel(pgsql));
+		case PHP_PG_ASYNC_REQUEST_CANCEL: {
+			PGcancel *c;
+			char err[256];
+			int rc;
+
+			c = PQgetCancel(pgsql);
+			RETVAL_LONG((rc = PQcancel(c, err, sizeof(err))));
+			if (rc < 0) {
+				zend_error(E_WARNING, "cannot cancel the query: %s", err);
+			}
 			while ((pgsql_result = PQgetResult(pgsql))) {
 				PQclear(pgsql_result);
 			}
+			PQfreeCancel(c);
 			break;
+		}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	if (PQsetnonblocking(pgsql, 0)) {

@@ -123,6 +123,7 @@ PHP                                                                        NEWS
   . pg_fetch_object raises a ValueError instead of an Exception.
     (David Carlier)
   . Added GH-9344, pipeline mode support. (David Carlier)
+  . pg_cancel use thread safe PQcancel api instead. (David Carlier)
 
 - Phar:
   . Fix memory leak in phar_rename_archive(). (stkeke)
