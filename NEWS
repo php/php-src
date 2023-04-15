@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     array is contained in the second). (ilutov)
   . Fixed bug GH-10737 (PHP 8.1.16 segfaults on line 597 of
     sapi/apache2handler/sapi_apache2.c). (nielsdos, ElliotNB)
+  . Fixed bug GH-11028 (Heap Buffer Overflow in zval_undefined_cv.). (nielsdos)
 
 - DOM:
   . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
