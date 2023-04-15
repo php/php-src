@@ -230,6 +230,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install \
             bison \
+            libgmp-dev \
             libonig-dev \
             libsqlite3-dev \
             openssl \
@@ -253,6 +254,7 @@ jobs:
             --enable-werror \
             --prefix=/usr \
             --with-config-file-scan-dir=/etc/php.d \
+            --with-gmp \
             --with-mysqli=mysqlnd \
             --with-openssl \
             --with-pdo-sqlite \
