@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 614310958c6e2acde46c9b7932ba894caf72d6df */
+ * Stub hash: 47eb58d644268f4fdce7a6b5007f7755ebfcb197 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -82,6 +82,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_map_ptr_last, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_crash, 0, 0, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -143,6 +147,7 @@ static ZEND_FUNCTION(zend_test_parameter_with_attribute);
 static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_get_map_ptr_last);
+static ZEND_FUNCTION(zend_test_crash);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -182,6 +187,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_FE(zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last)
+	ZEND_FE(zend_test_crash, arginfo_zend_test_crash)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
