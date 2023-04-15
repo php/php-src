@@ -305,8 +305,8 @@ jobs:
           git push
       - name: Show diff
         if: github.event_name == 'pull_request'
-        run: >-
-          php benchmark/generate_diff.php
-          ${{ github.event.pull_request.head.sha }}
-          $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          > $GITHUB_STEP_SUMMARY
+        run: |-
+          php benchmark/generate_diff.php \
+            ${{ github.sha }} \
+            $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
+            > $GITHUB_STEP_SUMMARY
