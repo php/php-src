@@ -4909,10 +4909,10 @@ finish_up_remaining_bytes:
 	}
 
 	if (i < len) {
-		char buffer[16];
+		int8_t buffer[16];
 		memset(buffer, 0, 16);
 		memcpy(buffer, p + i, len - i);
-		int8x16_t current_bytes = vld1q_s8((int8_t *)buffer);
+		int8x16_t current_bytes = vld1q_s8(buffer);
 		neon_check_utf8_bytes(current_bytes, &previous, &has_error);
 	} else {
 		has_error = vorrq_s8(vreinterpretq_s8_u8(vcgtq_s8(previous.carried_continuations, vld1q_s8(_verror))), has_error);
