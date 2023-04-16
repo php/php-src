@@ -664,18 +664,23 @@ try_again:
 			if ((digest = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest")-1)) != NULL) {
 				if (Z_TYPE_P(digest) == IS_ARRAY) {
 					char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
-					zend_long     nonce;
+					unsigned char nonce[16];
 					PHP_MD5_CTX   md5ctx;
 					unsigned char hash[16];
 
-					php_random_bytes_throw(&nonce, sizeof(nonce));
-					nonce &= 0x7fffffff;
+					if (UNEXPECTED(php_random_bytes_throw(&nonce, sizeof(nonce)) != SUCCESS)) {
+						ZEND_ASSERT(EG(exception));
+						php_stream_close(stream);
+						convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
+						convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
+						convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+						smart_str_free(&soap_headers_z);
+						smart_str_free(&soap_headers);
+						return FALSE;
+					}
 
-					PHP_MD5Init(&md5ctx);
-					snprintf(cnonce, sizeof(cnonce), ZEND_LONG_FMT, nonce);
-					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, strlen(cnonce));
-					PHP_MD5Final(hash, &md5ctx);
-					make_digest(cnonce, hash);
+					php_hash_bin2hex(cnonce, nonce, sizeof(nonce));
+					cnonce[32] = 0;
 
 					if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "nc", sizeof("nc")-1)) != NULL &&
 					    Z_TYPE_P(tmp) == IS_LONG) {
