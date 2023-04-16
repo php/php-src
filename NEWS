@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-10990 (mail() throws TypeError after iterating over
     $additional_headers array by reference). (nielsdos)
+  . Fixed bug GH-9775 (Duplicates returned by array_unique when using enums).
+    (ilutov)
 
 - Streams:
   . Fixed bug GH-10406 (feof() behavior change for UNIX based socket

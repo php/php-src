@@ -290,7 +290,27 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 
 static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
-	return zend_compare(&f->val, &s->val);
+	int result = zend_compare(&f->val, &s->val);
+	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
+	 * that would be observable via comparison operators. */
+	zval *rhs = &s->val;
+	ZVAL_DEREF(rhs);
+	if (UNEXPECTED(Z_TYPE_P(rhs) == IS_OBJECT)
+	 && result == ZEND_UNCOMPARABLE
+	 && (Z_OBJCE_P(rhs)->ce_flags & ZEND_ACC_ENUM)) {
+		zval *lhs = &f->val;
+		ZVAL_DEREF(lhs);
+		if (Z_TYPE_P(lhs) == IS_OBJECT && (Z_OBJCE_P(lhs)->ce_flags & ZEND_ACC_ENUM)) {
+			// Order doesn't matter, we just need to group the same enum values
+			uintptr_t lhs_uintptr = (uintptr_t)Z_OBJ_P(lhs);
+			uintptr_t rhs_uintptr = (uintptr_t)Z_OBJ_P(rhs);
+			return lhs_uintptr == rhs_uintptr ? 0 : (lhs_uintptr < rhs_uintptr ? -1 : 1);
+		} else {
+			// Shift enums to the end of the array
+			return -1;
+		}
+	}
+	return result;
 }
 /* }}} */
 
