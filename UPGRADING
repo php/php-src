@@ -52,6 +52,8 @@ PHP 8.3 UPGRADE NOTES
   . Anonymous classes may now be marked as readonly.
   . Readonly properties can now be reinitialized during cloning.
     RFC: https://wiki.php.net/rfc/readonly_amendments
+  . Class, interface, trait, and enum constants now support type
+    declarations. RFC: https://wiki.php.net/rfc/typed_class_constants
 
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
