@@ -465,7 +465,7 @@ static ZEND_FUNCTION(zend_get_map_ptr_last)
 
 static ZEND_FUNCTION(zend_test_crash)
 {
-	zend_string *message;
+	zend_string *message = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
