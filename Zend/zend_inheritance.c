@@ -51,6 +51,9 @@ static void add_compatibility_obligation(
 static void add_property_compatibility_obligation(
 		zend_class_entry *ce, const zend_property_info *child_prop,
 		const zend_property_info *parent_prop);
+static void add_class_constant_compatibility_obligation(
+		zend_class_entry *ce, const zend_class_constant *child_const,
+		const zend_class_constant *parent_const, const zend_string *const_name);
 
 static void ZEND_COLD emit_incompatible_method_error(
 		const zend_function *child, zend_class_entry *child_scope,
@@ -1359,6 +1362,29 @@ static void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_en
 }
 /* }}} */
 
+static void emit_incompatible_class_constant_error(
+		const zend_class_constant *child, const zend_class_constant *parent, const zend_string *const_name) {
+	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"Type of %s::%s must be compatible with %s::%s of type %s",
+		ZSTR_VAL(child->ce->name),
+		ZSTR_VAL(const_name),
+		ZSTR_VAL(parent->ce->name),
+		ZSTR_VAL(const_name),
+		ZSTR_VAL(type_str));
+}
+
+static inheritance_status class_constant_types_compatible(const zend_class_constant *parent, const zend_class_constant *child)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(parent->type));
+
+	if (!ZEND_TYPE_IS_SET(child->type)) {
+		return INHERITANCE_ERROR;
+	}
+
+	return zend_perform_covariant_type_check(child->ce, child->type, parent->ce, parent->type);
+}
+
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
 	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
@@ -1366,9 +1392,14 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 
 	if (zv != NULL) {
 		c = (zend_class_constant*)Z_PTR_P(zv);
+
 		if (UNEXPECTED((ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PPP_MASK) > (ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PPP_MASK))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(ZEND_CLASS_CONST_FLAGS(parent_const)), ZSTR_VAL(parent_const->ce->name), (ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				ZSTR_VAL(ce->name), ZSTR_VAL(name),
+				zend_visibility_string(ZEND_CLASS_CONST_FLAGS(parent_const)),
+				ZSTR_VAL(parent_const->ce->name),
+				(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PUBLIC) ? "" : " or weaker"
+			);
 		}
 
 		if (UNEXPECTED((ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_FINAL))) {
@@ -1376,6 +1407,15 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 				E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name)
 			);
+		}
+
+		if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_const->type))) {
+			inheritance_status status = class_constant_types_compatible(parent_const, c);
+			if (status == INHERITANCE_ERROR) {
+				emit_incompatible_class_constant_error(c, parent_const, name);
+			} else if (status == INHERITANCE_UNRESOLVED) {
+				add_class_constant_compatibility_obligation(ce, c, parent_const, name);
+			}
 		}
 	} else if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
@@ -1641,12 +1681,18 @@ static zend_always_inline bool check_trait_property_or_constant_value_compatibil
 	/* if any of the values is a constant, we try to resolve it */
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_CONSTANT_AST)) {
 		ZVAL_COPY_OR_DUP(&op1_tmp, op1);
-		zval_update_constant_ex(&op1_tmp, ce);
+		if (UNEXPECTED(zval_update_constant_ex(&op1_tmp, ce) != SUCCESS)) {
+			zval_ptr_dtor(&op1_tmp);
+			return false;
+		}
 		op1 = &op1_tmp;
 	}
 	if (UNEXPECTED(Z_TYPE_P(op2) == IS_CONSTANT_AST)) {
 		ZVAL_COPY_OR_DUP(&op2_tmp, op2);
-		zval_update_constant_ex(&op2_tmp, ce);
+		if (UNEXPECTED(zval_update_constant_ex(&op2_tmp, ce) != SUCCESS)) {
+			zval_ptr_dtor(&op2_tmp);
+			return false;
+		}
 		op2 = &op2_tmp;
 	}
 
@@ -2231,8 +2277,22 @@ static zend_class_entry* find_first_constant_definition(zend_class_entry *ce, ze
 }
 /* }}} */
 
-static bool do_trait_constant_check(zend_class_entry *ce, zend_class_constant *trait_constant, zend_string *name, zend_class_entry **traits, size_t current_trait) /* {{{ */
-{
+static void emit_incompatible_trait_constant_error(
+	zend_class_entry *ce, zend_class_constant *existing_constant, zend_class_constant *trait_constant, zend_string *name,
+	zend_class_entry **traits, size_t current_trait
+) {
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"%s and %s define the same constant (%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
+		ZSTR_VAL(find_first_constant_definition(ce, traits, current_trait, name, existing_constant->ce)->name),
+		ZSTR_VAL(trait_constant->ce->name),
+		ZSTR_VAL(name),
+		ZSTR_VAL(ce->name)
+	);
+}
+
+static bool do_trait_constant_check(
+	zend_class_entry *ce, zend_class_constant *trait_constant, zend_string *name, zend_class_entry **traits, size_t current_trait
+) {
 	uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_FINAL;
 
 	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
@@ -2243,21 +2303,32 @@ static bool do_trait_constant_check(zend_class_entry *ce, zend_class_constant *t
 
 	zend_class_constant *existing_constant = Z_PTR_P(zv);
 
-	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask) ||
-	    !check_trait_property_or_constant_value_compatibility(ce, &trait_constant->value, &existing_constant->value)) {
+	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask)) {
+		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		return false;
+	}
+
+	if (ZEND_TYPE_IS_SET(trait_constant->type) != ZEND_TYPE_IS_SET(existing_constant->type)) {
+		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		return false;
+	} else if (ZEND_TYPE_IS_SET(trait_constant->type)) {
+		inheritance_status status1 = zend_perform_covariant_type_check(ce, existing_constant->type, traits[current_trait], trait_constant->type);
+		inheritance_status status2 = zend_perform_covariant_type_check(traits[current_trait], trait_constant->type, ce, existing_constant->type);
+		if (status1 == INHERITANCE_ERROR || status2 == INHERITANCE_ERROR) {
+			emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+			return false;
+		}
+	}
+
+	if (!check_trait_property_or_constant_value_compatibility(ce, &trait_constant->value, &existing_constant->value)) {
 		/* There is an existing constant of the same name, and it conflicts with the new one, so let's throw a fatal error */
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"%s and %s define the same constant (%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
-			ZSTR_VAL(find_first_constant_definition(ce, traits, current_trait, name, existing_constant->ce)->name),
-			ZSTR_VAL(trait_constant->ce->name),
-			ZSTR_VAL(name),
-			ZSTR_VAL(ce->name));
+		emit_incompatible_trait_constant_error(ce, existing_constant, trait_constant, name, traits, current_trait);
+		return false;
 	}
 
 	/* There is an existing constant which is compatible with the new one, so no need to add it */
 	return false;
 }
-/* }}} */
 
 static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
 {
@@ -2508,7 +2579,8 @@ typedef struct {
 	enum {
 		OBLIGATION_DEPENDENCY,
 		OBLIGATION_COMPATIBILITY,
-		OBLIGATION_PROPERTY_COMPATIBILITY
+		OBLIGATION_PROPERTY_COMPATIBILITY,
+		OBLIGATION_CLASS_CONSTANT_COMPATIBILITY
 	} type;
 	union {
 		zend_class_entry *dependency_ce;
@@ -2523,6 +2595,11 @@ typedef struct {
 		struct {
 			const zend_property_info *parent_prop;
 			const zend_property_info *child_prop;
+		};
+		struct {
+			const zend_string *const_name;
+			const zend_class_constant *parent_const;
+			const zend_class_constant *child_const;
 		};
 	};
 } variance_obligation;
@@ -2599,6 +2676,18 @@ static void add_property_compatibility_obligation(
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
 
+static void add_class_constant_compatibility_obligation(
+		zend_class_entry *ce, const zend_class_constant *child_const,
+		const zend_class_constant *parent_const, const zend_string *const_name) {
+	HashTable *obligations = get_or_init_obligations_for_class(ce);
+	variance_obligation *obligation = emalloc(sizeof(variance_obligation));
+	obligation->type = OBLIGATION_CLASS_CONSTANT_COMPATIBILITY;
+	obligation->const_name = const_name;
+	obligation->child_const = child_const;
+	obligation->parent_const = parent_const;
+	zend_hash_next_index_insert_ptr(obligations, obligation);
+}
+
 static void resolve_delayed_variance_obligations(zend_class_entry *ce);
 
 static void check_variance_obligation(variance_obligation *obligation) {
@@ -2622,12 +2711,18 @@ static void check_variance_obligation(variance_obligation *obligation) {
 				&obligation->parent_fn, obligation->parent_scope, status);
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
-	} else {
-		ZEND_ASSERT(obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY);
+	} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
 		inheritance_status status =
 			property_types_compatible(obligation->parent_prop, obligation->child_prop);
 		if (status != INHERITANCE_SUCCESS) {
 			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop);
+		}
+	} else {
+		ZEND_ASSERT(obligation->type == OBLIGATION_CLASS_CONSTANT_COMPATIBILITY);
+		inheritance_status status =
+		class_constant_types_compatible(obligation->parent_const, obligation->child_const);
+		if (status != INHERITANCE_SUCCESS) {
+			emit_incompatible_class_constant_error(obligation->child_const, obligation->parent_const, obligation->const_name);
 		}
 	}
 }
@@ -3092,6 +3187,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 	zend_string *key;
 	zend_function *parent_func;
 	zend_property_info *parent_info;
+	zend_class_constant *parent_const;
 	inheritance_status overall_status = INHERITANCE_SUCCESS;
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, parent_func) {
@@ -3122,6 +3218,25 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 			zend_property_info *child_info = Z_PTR_P(zv);
 			if (ZEND_TYPE_IS_SET(child_info->type)) {
 				inheritance_status status = property_types_compatible(parent_info, child_info);
+				ZEND_ASSERT(status != INHERITANCE_WARNING);
+				if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
+					return status;
+				}
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->constants_table, key, parent_const) {
+		zval *zv;
+		if ((ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE) || !ZEND_TYPE_IS_SET(parent_const->type)) {
+			continue;
+		}
+
+		zv = zend_hash_find_known_hash(&ce->constants_table, key);
+		if (zv) {
+			zend_class_constant *child_const = Z_PTR_P(zv);
+			if (ZEND_TYPE_IS_SET(child_const->type)) {
+				inheritance_status status = class_constant_types_compatible(parent_const, child_const);
 				ZEND_ASSERT(status != INHERITANCE_WARNING);
 				if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 					return status;

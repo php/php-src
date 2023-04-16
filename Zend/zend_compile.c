@@ -7693,7 +7693,7 @@ static void zend_check_trait_alias_modifiers(uint32_t attr) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
+static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast)
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
@@ -7705,9 +7705,24 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast **value_ast_ptr = &const_ast->child[1];
 		zend_ast *doc_comment_ast = const_ast->child[2];
+		zend_ast *type_ast = const_ast->child[3];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
+		zend_type type = ZEND_TYPE_INIT_NONE(0);
+
+		if (type_ast) {
+			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
+
+			uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
+
+			if (type_mask != MAY_BE_ANY && (type_mask & (MAY_BE_CALLABLE|MAY_BE_VOID|MAY_BE_NEVER))) {
+				zend_string *type_str = zend_type_to_string(type);
+
+				zend_error_noreturn(E_COMPILE_ERROR, "Class constant %s::%s cannot have type %s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str));
+			}
+		}
 
 		if (UNEXPECTED((flags & ZEND_ACC_PRIVATE) && (flags & ZEND_ACC_FINAL))) {
 			zend_error_noreturn(
@@ -7717,14 +7732,21 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
-		c = zend_declare_class_constant_ex(ce, name, &value_zv, flags, doc_comment);
+
+		if (!Z_CONSTANT(value_zv) && ZEND_TYPE_IS_SET(type) && !zend_is_valid_default_value(type, &value_zv)) {
+			zend_string *type_str = zend_type_to_string(type);
+
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as value for class constant %s::%s of type %s",
+				zend_zval_type_name(&value_zv), ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str));
+		}
+
+		c = zend_declare_typed_class_constant(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (attr_ast) {
 			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
 		}
 	}
 }
-/* }}} */
 
 static void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
 {

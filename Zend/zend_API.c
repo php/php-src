@@ -1412,6 +1412,34 @@ static zend_result update_property(zval *val, zend_property_info *prop_info) {
 	return zval_update_constant_ex(val, prop_info->ce);
 }
 
+ZEND_API zend_result zend_update_class_constant(zend_class_constant *c, const zend_string *name, zend_class_entry *scope)
+{
+	ZEND_ASSERT(Z_TYPE(c->value) == IS_CONSTANT_AST);
+
+	if (EXPECTED(!ZEND_TYPE_IS_SET(c->type) || ZEND_TYPE_PURE_MASK(c->type) == MAY_BE_ANY)) {
+		return zval_update_constant_ex(&c->value, scope);
+	}
+
+	zval tmp;
+
+	ZVAL_COPY(&tmp, &c->value);
+	zend_result result = zval_update_constant_ex(&tmp, scope);
+	if (result == FAILURE) {
+		zval_ptr_dtor(&tmp);
+		return FAILURE;
+	}
+
+	if (UNEXPECTED(!zend_verify_class_constant_type(c, name, &tmp))) {
+		zval_ptr_dtor(&tmp);
+		return FAILURE;
+	}
+
+	zval_ptr_dtor(&c->value);
+	ZVAL_COPY_VALUE(&c->value, &tmp);
+
+	return SUCCESS;
+}
+
 ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
 	zend_class_mutable_data *mutable_data = NULL;
@@ -1470,7 +1498,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 				}
 
 				val = &c->value;
-				if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
+				if (UNEXPECTED(zend_update_class_constant(c, name, c->ce) != SUCCESS)) {
 					return FAILURE;
 				}
 			}
@@ -4532,7 +4560,7 @@ ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *na
 }
 /* }}} */
 
-ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int flags, zend_string *doc_comment) /* {{{ */
+ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry *ce, zend_string *name, zval *value, int flags, zend_string *doc_comment, zend_type type) /* {{{ */
 {
 	zend_class_constant *c;
 
@@ -4561,6 +4589,8 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 	c->doc_comment = doc_comment;
 	c->attributes = NULL;
 	c->ce = ce;
+	c->type = type;
+
 	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
@@ -4576,7 +4606,11 @@ ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *c
 
 	return c;
 }
-/* }}} */
+
+ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int flags, zend_string *doc_comment)
+{
+	return zend_declare_typed_class_constant(ce, name, value, flags, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE(0));
+}
 
 ZEND_API void zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value) /* {{{ */
 {

@@ -3749,15 +3749,16 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 	bool ok, changed, was_changed = false;
 	zend_class_constant *c;
 	zval *val;
+	zend_string *key;
 
 	EG(exception) = (void*)(uintptr_t)-1; /* prevent error reporting */
 	do {
 		ok = true;
 		changed = false;
-		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-				if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
+				if (EXPECTED(zend_update_class_constant(c, key, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
 					ok = false;

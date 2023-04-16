@@ -840,6 +840,7 @@ static void zend_persist_class_constant(zval *zv)
 	if (c->attributes) {
 		c->attributes = zend_persist_attributes(c->attributes);
 	}
+	zend_persist_type(&c->type);
 }
 
 zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
