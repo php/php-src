@@ -1452,6 +1452,7 @@ PHP_GINIT_FUNCTION(openssl)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	openssl_globals->errors = NULL;
+	openssl_globals->errors_mark = NULL;
 }
 /* }}} */
 
@@ -1460,6 +1461,9 @@ PHP_GSHUTDOWN_FUNCTION(openssl)
 {
 	if (openssl_globals->errors) {
 		pefree(openssl_globals->errors, 1);
+	}
+	if (openssl_globals->errors_mark) {
+		pefree(openssl_globals->errors_mark, 1);
 	}
 }
 /* }}} */
