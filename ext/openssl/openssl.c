@@ -476,9 +476,6 @@ void php_openssl_store_errors()
 
 /* {{{ php_openssl_errors_set_mark */
 void php_openssl_errors_set_mark(void) {
-	struct php_openssl_errors *errors;
-	struct php_openssl_errors *errors_mark;
-
 	if (!OPENSSL_G(errors)) {
 		return;
 	}
@@ -493,14 +490,11 @@ void php_openssl_errors_set_mark(void) {
 
 /* {{{ php_openssl_errors_restore_mark */
 void php_openssl_errors_restore_mark(void) {
-	struct php_openssl_errors *errors;
-	struct php_openssl_errors *errors_mark;
-
 	if (!OPENSSL_G(errors)) {
 		return;
 	}
 
-	errors = OPENSSL_G(errors);
+	struct php_openssl_errors *errors = OPENSSL_G(errors);
 
 	if (!OPENSSL_G(errors_mark)) {
 		errors->top = 0;
