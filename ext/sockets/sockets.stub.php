@@ -173,6 +173,13 @@ const SO_REUSEADDR = UNKNOWN;
  */
 const SO_REUSEPORT = UNKNOWN;
 #endif
+#ifdef SO_REUSEPORT_LB
+/**
+ * @var int
+ * @cvalue SO_REUSEPORT_LB
+ */
+const SO_REUSEPORT_LB = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_KEEPALIVE
@@ -292,6 +299,27 @@ const SO_SETFIB = UNKNOWN;
  * @cvalue SO_ACCEPTFILTER
  */
 const SO_ACCEPTFILTER = UNKNOWN;
+#endif
+#ifdef SO_RERROR
+/**
+ * @var int
+ * @cvalue SO_RERROR
+ */
+const SO_RERROR = UNKNOWN;
+#endif
+#ifdef SO_SOPLICE
+/**
+ * @var int
+ * @cvalue SO_SPLICE
+ */
+const SO_SPLICE = UNKNOWN;
+#endif
+#ifdef SO_ZEROIZE
+/**
+ * @var int
+ * @cvalue SO_ZEROIZE
+ */
+const SO_ZEROIZE = UNKNOWN;
 #endif
 #ifdef SOL_FILTER
 /**
@@ -1719,6 +1747,13 @@ const SO_DETACH_BPF = UNKNOWN;
  * @cvalue TCP_QUICKACK
  */
 const TCP_QUICKACK = UNKNOWN;
+#endif
+#if defined(TCP_REPAIR)
+/**
+ * @var int
+ * @cvalue TCP_REPAIR
+ */
+const TCP_REPAIR = UNKNOWN;
 #endif
 #if defined(IP_DONTFRAG)
 /**

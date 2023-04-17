@@ -32,9 +32,21 @@ jobs:
       - name: Generate Matrix
         id: set-matrix
         run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}"
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LINUX_X64:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
     strategy:
       fail-fast: false
       matrix:
@@ -47,7 +59,7 @@ jobs:
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -110,6 +122,11 @@ jobs:
             -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LINUX_X32:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -122,7 +139,7 @@ jobs:
     name: "${{ matrix.branch.name }}_LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: ubuntu:${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
     env:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
@@ -181,6 +198,11 @@ jobs:
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MACOS:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -244,9 +266,21 @@ jobs:
             -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
     if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-20.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+    runs-on: ubuntu-22.04
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -278,6 +312,11 @@ jobs:
       - name: Upload Test Coverage to Codecov.io
         if: always()
         run: bash <(curl -s https://codecov.io/bash)
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COMMUNITY:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -286,7 +325,7 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_COMMUNITY"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
     env:
       UBSAN_OPTIONS: print_stacktrace=1
       USE_ZEND_ALLOC: 0
@@ -393,15 +432,27 @@ jobs:
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   OPCACHE_VARIATION:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
     strategy:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_OPCACHE_VARIATION"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -464,6 +515,11 @@ jobs:
             -d opcache.file_cache_only=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   MSAN:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -472,7 +528,7 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_MSAN"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -557,6 +613,11 @@ jobs:
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
   LIBMYSQLCLIENT:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -567,7 +628,7 @@ jobs:
         exclude:
           - branch: { name: 'PHP-80', ref: 'PHP-8.0' }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -593,7 +654,7 @@ jobs:
       - name: Build mysql-5.7
         uses: ./.github/actions/build-libmysqlclient
         with:
-          libmysql: mysql-5.7.38-linux-glibc2.12-x86_64.tar.gz
+          libmysql: mysql-5.7.41-linux-glibc2.12-x86_64.tar.gz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-5.7
         uses: ./.github/actions/test-libmysqlclient
@@ -612,3 +673,116 @@ jobs:
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  PECL:
+    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+    env:
+      CC: ccache gcc
+      CXX: ccache g++
+    steps:
+      - name: git checkout PHP
+        uses: actions/checkout@v3
+        with:
+          path: php
+      - name: git checkout apcu
+        uses: actions/checkout@v3
+        with:
+          repository: krakjoe/apcu
+          path: apcu
+      - name: git checkout imagick
+        uses: actions/checkout@v3
+        with:
+          repository: Imagick/imagick
+          path: imagick
+      - name: git checkout memcached
+        uses: actions/checkout@v3
+        with:
+          repository: php-memcached-dev/php-memcached
+          path: memcached
+      - name: git checkout redis
+        uses: actions/checkout@v3
+        with:
+          repository: phpredis/phpredis
+          path: redis
+      - name: git checkout xdebug
+        uses: actions/checkout@v3
+        with:
+          repository: xdebug/xdebug
+          path: xdebug
+      - name: git checkout yaml
+        uses: actions/checkout@v3
+        with:
+          repository: php/pecl-file_formats-yaml
+          path: yaml
+      - name: apt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ccache \
+            libmemcached-dev \
+            bison \
+            re2c
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{hashFiles('php/main/php_version.h')}}"
+          append-timestamp: false
+      - name: build PHP
+        run: |
+          cd php
+          ./buildconf --force
+          ./configure \
+            --enable-option-checking=fatal \
+            --prefix=/opt/php \
+            --enable-cli \
+            --disable-all \
+            --enable-session \
+            --enable-werror
+          make -j$(/usr/bin/nproc)
+          sudo make install
+      - name: build apcu
+        run: |
+          cd apcu
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build imagick
+        run: |
+          cd imagick
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build memcached
+        run: |
+          cd memcached
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build redis
+        run: |
+          cd redis
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build xdebug
+        run: |
+          cd xdebug
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: build yaml
+        run: |
+          cd yaml
+          /opt/php/bin/phpize
+          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
+          make -j$(/usr/bin/nproc)
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}

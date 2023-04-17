@@ -258,9 +258,9 @@ static void detect_is_seekable(php_stdio_stream_data *self) {
 		self->is_pipe = S_ISFIFO(self->sb.st_mode);
 	}
 #elif defined(PHP_WIN32)
-	zend_uintptr_t handle = _get_osfhandle(self->fd);
+	uintptr_t handle = _get_osfhandle(self->fd);
 
-	if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
+	if (handle != (uintptr_t)INVALID_HANDLE_VALUE) {
 		DWORD file_type = GetFileType((HANDLE)handle);
 
 		self->is_seekable = !(file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR);
@@ -733,7 +733,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				return -1;
 			}
 
-			if ((zend_uintptr_t) ptrparam == PHP_STREAM_LOCK_SUPPORTED) {
+			if ((uintptr_t) ptrparam == PHP_STREAM_LOCK_SUPPORTED) {
 				return 0;
 			}
 

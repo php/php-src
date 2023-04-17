@@ -309,11 +309,12 @@ IC_METHOD(enumCharNames) {
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (convert_cp(&start, string_start, int_start) == FAILURE || convert_cp(&limit, string_limit, int_limit) == FAILURE) {
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	u_enumCharNames(start, limit, (UEnumCharNamesFn*)enumCharNames_callback, &context, nameChoice, &error);
 	INTL_CHECK_STATUS(error, NULL);
+	RETURN_TRUE;
 }
 /* }}} */
 

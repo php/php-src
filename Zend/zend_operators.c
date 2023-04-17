@@ -371,7 +371,7 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 		}
 		case IS_STRING:
 			{
-				zend_uchar type;
+				uint8_t type;
 				zend_long lval;
 				double dval;
 				bool trailing_data = false;
@@ -865,7 +865,7 @@ ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string
 	zend_error(E_DEPRECATED, "Implicit conversion from float-string \"%s\" to int loses precision", ZSTR_VAL(s));
 }
 
-ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */
+ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -891,7 +891,7 @@ try_again:
 		}
 		case IS_STRING:
 			{
-				zend_uchar type;
+				uint8_t type;
 				zend_long lval;
 				double dval;
 				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, true))) {
@@ -935,7 +935,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API double ZEND_FASTCALL zval_get_double_func(zval *op) /* {{{ */
+ZEND_API double ZEND_FASTCALL zval_get_double_func(const zval *op) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -1039,22 +1039,28 @@ static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_binop_error(const cha
 
 static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	if (result == op1 && Z_ARR_P(op1) == Z_ARR_P(op2)) {
-		/* $a += $a */
-		return;
-	}
 	if (result != op1) {
 		ZVAL_ARR(result, zend_array_dup(Z_ARR_P(op1)));
+		zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
+	} else if (Z_ARR_P(op1) == Z_ARR_P(op2)) {
+		/* $a += $a */
 	} else {
-		SEPARATE_ARRAY(result);
+		/* We have to duplicate op1 (even with refcount == 1) because it may be an element of op2
+		 * and therefore its reference counter may be increased by zend_hash_merge(). That leads to
+		 * an assertion in _zend_hash_add_or_update_i() that only allows adding elements to hash
+		 * tables with RC1. See GH-10085 and Zend/tests/gh10085*.phpt */
+		zval tmp;
+		ZVAL_ARR(&tmp, zend_array_dup(Z_ARR_P(op1)));
+		zend_hash_merge(Z_ARRVAL(tmp), Z_ARRVAL_P(op2), zval_add_ref, 0);
+		zval_ptr_dtor(result);
+		ZVAL_COPY_VALUE(result, &tmp);
 	}
-	zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
 }
 /* }}} */
 
 static zend_always_inline zend_result add_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		fast_long_add_function(result, op1, op2);
@@ -1120,7 +1126,7 @@ ZEND_API zend_result ZEND_FASTCALL add_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline zend_result sub_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		fast_long_sub_function(result, op1, op2);
@@ -1185,7 +1191,7 @@ ZEND_API zend_result ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline zend_result mul_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		zend_long overflow;
@@ -1254,7 +1260,7 @@ ZEND_API zend_result ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *o
 
 static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		if (Z_LVAL_P(op2) >= 0) {
@@ -1347,7 +1353,7 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 #define DIV_BY_ZERO 2
 static int ZEND_FASTCALL div_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
 
 	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
 		if (Z_LVAL_P(op2) == 0) {
@@ -2103,7 +2109,7 @@ ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2) /* {{{
 	d1 = zval_get_double(op1);
 	d2 = zval_get_double(op2);
 
-	return ZEND_NORMALIZE_BOOL(d1 - d2);
+	return ZEND_THREEWAY_COMPARE(d1, d2);
 }
 /* }}} */
 
@@ -2118,15 +2124,14 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
-	zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
 
 	if (type == IS_LONG) {
 		return lval > str_lval ? 1 : lval < str_lval ? -1 : 0;
 	}
 
 	if (type == IS_DOUBLE) {
-		double diff = (double) lval - str_dval;
-		return ZEND_NORMALIZE_BOOL(diff);
+		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
 	}
 
 	zend_string *lval_as_str = zend_long_to_str(lval);
@@ -2141,18 +2146,14 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 {
 	zend_long str_lval;
 	double str_dval;
-	zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
+	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
 
 	if (type == IS_LONG) {
-		double diff = dval - (double) str_lval;
-		return ZEND_NORMALIZE_BOOL(diff);
+		return ZEND_THREEWAY_COMPARE(dval, (double) str_lval);
 	}
 
 	if (type == IS_DOUBLE) {
-		if (dval == str_dval) {
-			return 0;
-		}
-		return ZEND_NORMALIZE_BOOL(dval - str_dval);
+		return ZEND_THREEWAY_COMPARE(dval, str_dval);
 	}
 
 	zend_string *dval_as_str = zend_double_to_str(dval);
@@ -2174,17 +2175,13 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				return Z_LVAL_P(op1)>Z_LVAL_P(op2)?1:(Z_LVAL_P(op1)<Z_LVAL_P(op2)?-1:0);
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
-				return ZEND_NORMALIZE_BOOL(Z_DVAL_P(op1) - (double)Z_LVAL_P(op2));
+				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), (double)Z_LVAL_P(op2));
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
-				return ZEND_NORMALIZE_BOOL((double)Z_LVAL_P(op1) - Z_DVAL_P(op2));
+				return ZEND_THREEWAY_COMPARE((double)Z_LVAL_P(op1), Z_DVAL_P(op2));
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
-				if (Z_DVAL_P(op1) == Z_DVAL_P(op2)) {
-					return 0;
-				} else {
-					return ZEND_NORMALIZE_BOOL(Z_DVAL_P(op1) - Z_DVAL_P(op2));
-				}
+				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
 				return zend_compare_arrays(op1, op2);
@@ -2304,7 +2301,7 @@ static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 }
 /* }}} */
 
-ZEND_API bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 0;
@@ -2893,7 +2890,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 		if (BLOCKCONV_FOUND()) {
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
 
 			/* Lowercase the chunk we already compared. */
 			BLOCKCONV_INIT_DELTA('a' - 'A');
@@ -2915,7 +2912,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
 
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
 			while (p < end) {
 				*q++ = zend_tolower_ascii(*p++);
 			}
@@ -2942,7 +2939,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, boo
 		if (BLOCKCONV_FOUND()) {
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char *) ZSTR_VAL(res) + (p - (unsigned char *) ZSTR_VAL(str));
 
 			/* Uppercase the chunk we already compared. */
 			BLOCKCONV_INIT_DELTA('A' - 'a');
@@ -2964,7 +2961,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, boo
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
 
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char *) ZSTR_VAL(res) + (p - (unsigned char *) ZSTR_VAL(str));
 			while (p < end) {
 				*q++ = zend_toupper_ascii(*p++);
 			}
@@ -3110,7 +3107,7 @@ ZEND_API int ZEND_FASTCALL zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3
 
 ZEND_API bool ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2) /* {{{ */
 {
-	zend_uchar ret1, ret2;
+	uint8_t ret1, ret2;
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
@@ -3158,7 +3155,7 @@ string_cmp:
 
 ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
 {
-	zend_uchar ret1, ret2;
+	uint8_t ret1, ret2;
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
@@ -3334,19 +3331,19 @@ ZEND_API zend_string* ZEND_FASTCALL zend_double_to_str(double num)
 	return str;
 }
 
-ZEND_API zend_uchar ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */
+ZEND_API uint8_t ZEND_FASTCALL is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */
 {
 	return is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), lval, dval, false);
 }
 /* }}} */
 
-ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
+ZEND_API uint8_t ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t length, zend_long *lval,
 	double *dval, bool allow_errors, int *oflow_info, bool *trailing_data) /* {{{ */
 {
 	const char *ptr;
 	int digits = 0, dp_or_e = 0;
 	double local_dval = 0.0;
-	zend_uchar type;
+	uint8_t type;
 	zend_ulong tmp_lval = 0;
 	int neg = 0;
 

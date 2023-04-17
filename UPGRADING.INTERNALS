@@ -30,6 +30,27 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   for C99 features have been removed and therefore macro definitions
   from php_config.h have disappeared.  Do not use those feature
   macros.
+* Internal class aliases created during request time can now exist in
+  the class table. zend_register_class_alias_ex() will not increase
+  the refcount for class aliases and the cleanup function takes this
+  into account.
+* The return types of the following functions have been changed from
+  `bool` to `zend_result`:
+  - zend_fiber_init_context()
+* The fast_add_function() has been removed, use add_function() that will
+  call the static inline add_function_fast() instead.
+* The order of members of zend_op_array, zend_ssa_var, zend_ssa_var_info,
+  zend_executor_globals and php_core_globals have changed to improve
+  struct packing which reduces their size.
+* The name field have been removed from the zend_constant struct. Now,
+  constant names are only stored as keys of the global constants table.
+  That's why the `zend_register_constant()` function now expects the
+  constant name as its first parameter.
+* Many calls to zend_assign_to_variable have been replaced with
+  zend_assign_to_variable_ex which allows delaying the releasing of the old
+  variable value. This avoids side-effects through destructors between the
+  assignment of the variable and the assignment to the result zval in the VM
+  (i.e. it may free the new value). See GH-10168 for details.
 
 ========================
 2. Build system changes
@@ -74,6 +95,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
  d. ext/pcre
    - The function pcre_get_compiled_regex_ex has been removed.
    Use pcre_get_compiled_regex instead.
+
+ e. ext/spl
+   - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
+     There are no functional changes.
 
 ========================
 4. OpCode changes

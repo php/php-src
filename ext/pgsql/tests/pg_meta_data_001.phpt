@@ -122,7 +122,7 @@ array(2) {
     bool(true)
     ["is composite"]=>
     bool(false)
-    ["is pesudo"]=>
+    ["is pseudo"]=>
     bool(false)
     ["description"]=>
     string(0) ""
@@ -147,7 +147,7 @@ array(2) {
     bool(true)
     ["is composite"]=>
     bool(false)
-    ["is pesudo"]=>
+    ["is pseudo"]=>
     bool(false)
     ["description"]=>
     string(0) ""

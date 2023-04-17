@@ -46,6 +46,10 @@ ZEND_API bool gc_enabled(void);
 ZEND_API bool gc_protect(bool protect);
 ZEND_API bool gc_protected(void);
 
+#if GC_BENCH
+void gc_bench_print(void);
+#endif
+
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
 
@@ -80,6 +84,14 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 		}
 		ref = Z_COUNTED_P(zv);
 	}
+	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
+		gc_possible_root(ref);
+	}
+}
+
+static zend_always_inline void gc_check_possible_root_no_ref(zend_refcounted *ref)
+{
+	ZEND_ASSERT(GC_TYPE_INFO(ref) != GC_REFERENCE);
 	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
 		gc_possible_root(ref);
 	}

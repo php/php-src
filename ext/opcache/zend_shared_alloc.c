@@ -19,6 +19,13 @@
    +----------------------------------------------------------------------+
 */
 
+#if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
+# ifndef _GNU_SOURCE
+#  define _GNU_SOURCE
+# endif
+# include <sys/mman.h>
+#endif
+
 #include <errno.h>
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
@@ -81,6 +88,18 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 	zts_lock = tsrm_mutex_alloc();
 #endif
 
+#if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
+	/* on Linux, we can use a memfd instead of a "real" file, so
+	 * we can do this without a writable filesystem and without
+	 * needing to clean up */
+	/* note: FreeBSD has memfd_create(), too, but fcntl(F_SETLKW)
+	 * on it fails with EBADF, therefore we use this only on
+	 * Linux */
+	lock_file = memfd_create("opcache_lock", MFD_CLOEXEC);
+	if (lock_file >= 0)
+		return;
+#endif
+
 	snprintf(lockfile_name, sizeof(lockfile_name), "%s/%sXXXXXX", lockfile_path, SEM_FILENAME_PREFIX);
 	lock_file = mkstemp(lockfile_name);
 	if (lock_file == -1) {
@@ -97,7 +116,7 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 }
 #endif
 
-static void no_memory_bailout(size_t allocate_size, char *error)
+static void no_memory_bailout(size_t allocate_size, const char *error)
 {
 	zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to allocate shared memory segment of %zu bytes: %s: %s (%d)", allocate_size, error?error:"unknown", strerror(errno), errno );
 }
@@ -117,7 +136,7 @@ static void copy_shared_segments(void *to, void *from, int count, int size)
 	}
 }
 
-static int zend_shared_alloc_try(const zend_shared_memory_handler_entry *he, size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int zend_shared_alloc_try(const zend_shared_memory_handler_entry *he, size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	int res;
 	g_shared_alloc_handler = he->handler;
@@ -151,7 +170,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	zend_shared_segment **tmp_shared_segments;
 	size_t shared_segments_array_size;
 	zend_smm_shared_globals tmp_shared_globals, *p_tmp_shared_globals;
-	char *error_in = NULL;
+	const char *error_in = NULL;
 	const zend_shared_memory_handler_entry *he;
 	int res = ALLOC_FAILURE;
 	int i;
@@ -169,7 +188,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 #endif
 
 	if (ZCG(accel_directives).memory_model && ZCG(accel_directives).memory_model[0]) {
-		char *model = ZCG(accel_directives).memory_model;
+		const char *model = ZCG(accel_directives).memory_model;
 		/* "cgi" is really "shm"... */
 		if (strncmp(ZCG(accel_directives).memory_model, "cgi", sizeof("cgi")) == 0) {
 			model = "shm";
@@ -355,7 +374,7 @@ void *zend_shared_alloc(size_t size)
 
 			ZSMMG(shared_segments)[i]->pos += block_size;
 			ZSMMG(shared_free) -= block_size;
-			ZEND_ASSERT(((zend_uintptr_t)retval & 0x7) == 0); /* should be 8 byte aligned */
+			ZEND_ASSERT(((uintptr_t)retval & 0x7) == 0); /* should be 8 byte aligned */
 			return retval;
 		}
 	}
@@ -413,32 +432,32 @@ static zend_always_inline void *_zend_shared_memdup(void *source, size_t size, b
 
 void *zend_shared_memdup_get_put_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 1, 1, 1);
+	return _zend_shared_memdup(source, size, true, true, true);
 }
 
 void *zend_shared_memdup_put_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 1, 1);
+	return _zend_shared_memdup(source, size, false, true, true);
 }
 
 void *zend_shared_memdup_free(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 0, 1);
+	return _zend_shared_memdup(source, size, false, false, true);
 }
 
 void *zend_shared_memdup_get_put(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 1, 1, 0);
+	return _zend_shared_memdup(source, size, true, true, false);
 }
 
 void *zend_shared_memdup_put(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 1, 0);
+	return _zend_shared_memdup(source, size, false, true, false);
 }
 
 void *zend_shared_memdup(void *source, size_t size)
 {
-	return _zend_shared_memdup(source, size, 0, 0, 0);
+	return _zend_shared_memdup(source, size, false, false, false);
 }
 
 void zend_shared_alloc_safe_unlock(void)
@@ -593,7 +612,7 @@ const char *zend_accel_get_shared_model(void)
 	return g_shared_model;
 }
 
-void zend_accel_shared_protect(int mode)
+void zend_accel_shared_protect(bool protected)
 {
 #ifdef HAVE_MPROTECT
 	int i;
@@ -602,11 +621,7 @@ void zend_accel_shared_protect(int mode)
 		return;
 	}
 
-	if (mode) {
-		mode = PROT_READ;
-	} else {
-		mode = PROT_READ|PROT_WRITE;
-	}
+	const int mode = protected ? PROT_READ : PROT_READ|PROT_WRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode);
@@ -618,11 +633,7 @@ void zend_accel_shared_protect(int mode)
 		return;
 	}
 
-	if (mode) {
-		mode = PAGE_READONLY;
-	} else {
-		mode = PAGE_READWRITE;
-	}
+	const int mode = protected ? PAGE_READONLY : PAGE_READWRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		DWORD oldProtect;
@@ -633,19 +644,19 @@ void zend_accel_shared_protect(int mode)
 #endif
 }
 
-int zend_accel_in_shm(void *ptr)
+bool zend_accel_in_shm(void *ptr)
 {
 	int i;
 
 	if (!smm_shared_globals) {
-		return 0;
+		return false;
 	}
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		if ((char*)ptr >= (char*)ZSMMG(shared_segments)[i]->p &&
 		    (char*)ptr < (char*)ZSMMG(shared_segments)[i]->p + ZSMMG(shared_segments)[i]->end) {
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }

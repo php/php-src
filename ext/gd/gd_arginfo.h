@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 68be83247e5e142879ce1bc4340c1c5b8a8f670a */
+ * Stub hash: 810838932a482065c48ab715857062c071db31fd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -265,8 +265,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd2, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO(0, chunk_size, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, chunk_size, IS_LONG, 0, "128")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "IMG_GD2_RAW")
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GD_BMP)
@@ -747,7 +747,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagesettile, arginfo_imagesettile)
 	ZEND_FE(imagesetbrush, arginfo_imagesetbrush)
 	ZEND_FE(imagecreate, arginfo_imagecreate)
-	ZEND_FE(imagetypes, arginfo_imagetypes)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(imagetypes, arginfo_imagetypes)
 	ZEND_FE(imagecreatefromstring, arginfo_imagecreatefromstring)
 #if defined(HAVE_GD_AVIF)
 	ZEND_FE(imagecreatefromavif, arginfo_imagecreatefromavif)

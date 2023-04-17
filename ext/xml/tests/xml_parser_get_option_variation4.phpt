@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-xml_parser_get_option(): Argument #2 ($option) must be a PHP_XML_OPTION_* constant
+xml_parser_get_option(): Argument #2 ($option) must be a XML_OPTION_* constant

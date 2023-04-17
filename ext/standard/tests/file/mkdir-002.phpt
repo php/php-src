@@ -24,7 +24,8 @@ var_dump(rmdir("./mkdir-002"));
 var_dump(mkdir(__DIR__."/mkdir-002", 0777));
 var_dump(mkdir(__DIR__."/mkdir-002/subdir", 0777));
 $dirname = __DIR__."/mkdir-002";
-var_dump(`ls -l $dirname`);
+$dirname_escaped = escapeshellarg($dirname);
+var_dump(`ls -l $dirname_escaped`);
 var_dump(rmdir(__DIR__."/mkdir-002/subdir"));
 var_dump(rmdir(__DIR__."/mkdir-002"));
 

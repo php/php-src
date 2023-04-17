@@ -91,7 +91,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 		goto end;
 	}
 	for (i = 0; i < num_vars; i++) {
-		zend_uchar type;
+		uint8_t type;
 		switch (types[i]) {
 			case 'd': /* Double */
 				type = MYSQL_TYPE_DOUBLE;
@@ -1799,11 +1799,11 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
 			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
-    }
-
+	}
 
 	if (attr == STMT_ATTR_UPDATE_MAX_LENGTH)
-		value = *((my_bool *)&value);
+		value = (my_bool)value;
+
 	RETURN_LONG((unsigned long)value);
 }
 /* }}} */

@@ -168,55 +168,55 @@ try {
 Write context
 
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
-Illegal offset type
-Illegal offset type
+Cannot access offset of type array on FixedArray
+Cannot access offset of type object on FixedArray
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
-Illegal offset type
-Illegal offset type
-Illegal offset type
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray
 Read context
 string(1) "a"
 string(1) "b"
 
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 string(1) "c"
-Illegal offset type
-Illegal offset type
+Cannot access offset of type array on FixedArray
+Cannot access offset of type object on FixedArray
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 string(1) "f"
 string(1) "g"
-Illegal offset type
-Illegal offset type
-Illegal offset type
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray
 isset()
 bool(true)
 bool(true)
 
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 bool(true)
-Illegal offset type
-Illegal offset type
+Cannot access offset of type array on FixedArray
+Cannot access offset of type object on FixedArray
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(true)
 bool(true)
-Illegal offset type
-Illegal offset type
-Illegal offset type
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray
 empty()
 bool(false)
 bool(false)
 
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 bool(false)
-Illegal offset type
-Illegal offset type
+Cannot access offset of type array on FixedArray
+Cannot access offset of type object on FixedArray
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(false)
 bool(false)
-Illegal offset type
-Illegal offset type
-Illegal offset type
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray
+Cannot access offset of type string on FixedArray

@@ -1187,7 +1187,7 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			}
 			retval = pemalloc(sizeof(php_conv_base64_encode), persistent);
 			if (lbchars != NULL) {
-				if (php_conv_base64_encode_ctor((php_conv_base64_encode *)retval, line_len, lbchars, lbchars_len, 1, persistent)) {
+				if (php_conv_base64_encode_ctor((php_conv_base64_encode *)retval, line_len, lbchars, lbchars_len, 1, persistent) != PHP_CONV_ERR_SUCCESS) {
 					if (lbchars != NULL) {
 						pefree(lbchars, 0);
 					}
@@ -1195,7 +1195,7 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 				}
 				pefree(lbchars, 0);
 			} else {
-				if (php_conv_base64_encode_ctor((php_conv_base64_encode *)retval, 0, NULL, 0, 0, persistent)) {
+				if (php_conv_base64_encode_ctor((php_conv_base64_encode *)retval, 0, NULL, 0, 0, persistent) != PHP_CONV_ERR_SUCCESS) {
 					goto out_failure;
 				}
 			}
@@ -1239,13 +1239,13 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			}
 			retval = pemalloc(sizeof(php_conv_qprint_encode), persistent);
 			if (lbchars != NULL) {
-				if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval, line_len, lbchars, lbchars_len, 1, opts, persistent)) {
+				if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval, line_len, lbchars, lbchars_len, 1, opts, persistent) != PHP_CONV_ERR_SUCCESS) {
 					pefree(lbchars, 0);
 					goto out_failure;
 				}
 				pefree(lbchars, 0);
 			} else {
-				if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval, 0, NULL, 0, 0, opts, persistent)) {
+				if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval, 0, NULL, 0, 0, opts, persistent) != PHP_CONV_ERR_SUCCESS) {
 					goto out_failure;
 				}
 			}
@@ -1262,13 +1262,13 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 
 			retval = pemalloc(sizeof(php_conv_qprint_decode), persistent);
 			if (lbchars != NULL) {
-				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, lbchars, lbchars_len, 1, persistent)) {
+				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, lbchars, lbchars_len, 1, persistent) != PHP_CONV_ERR_SUCCESS) {
 					pefree(lbchars, 0);
 					goto out_failure;
 				}
 				pefree(lbchars, 0);
 			} else {
-				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, NULL, 0, 0, persistent)) {
+				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, NULL, 0, 0, persistent) != PHP_CONV_ERR_SUCCESS) {
 					goto out_failure;
 				}
 			}

@@ -6,13 +6,16 @@
  * @undocumentable
  */
 namespace {
+    require "Zend/zend_attributes.stub.php";
+
     /**
      * @var int
      * @deprecated
      */
     const ZEND_TEST_DEPRECATED = 42;
 
-    require "Zend/zend_attributes.stub.php";
+    /** @var string */
+    const ZEND_CONSTANT_A = "global";
 
     interface _ZendTestInterface
     {
@@ -40,6 +43,8 @@ namespace {
         public function returnsStatic(): static {}
 
         public function returnsThrowable(): Throwable {}
+
+        static public function variadicTest(string|Iterator ...$elements) : static {}
     }
 
     class _ZendTestChildClass extends _ZendTestClass
@@ -114,9 +119,14 @@ namespace {
         case Baz = -1;
     }
 
+    final class DoOperationNoCast {
+        private int $val;
+        public function __construct(int $val) {}
+    }
+
     function zend_test_array_return(): array {}
 
-    function zend_test_nullable_array_return(): ?array {}
+    function zend_test_nullable_array_return(): null|array {}
 
     function zend_test_void_return(): void {}
 
@@ -180,6 +190,12 @@ namespace {
 #endif
 
     function zend_test_is_string_marked_as_valid_utf8(string $string): bool {}
+
+    function zend_get_map_ptr_last(): int {}
+
+    function zend_test_crash(?string $message = null): void {}
+
+    function zend_test_fill_packed_array(array &$array): void {}
 }
 
 namespace ZendTestNS {
@@ -198,6 +214,9 @@ namespace ZendTestNS {
 }
 
 namespace ZendTestNS2 {
+
+    /** @var string */
+    const ZEND_CONSTANT_A = "namespaced";
 
     class Foo {
         public ZendSubNS\Foo $foo;
@@ -221,6 +240,9 @@ namespace ZendTestNS2 {
 }
 
 namespace ZendTestNS2\ZendSubNS {
+
+    /** @var string */
+    const ZEND_CONSTANT_A = \ZendTestNS2\ZEND_CONSTANT_A;
 
     class Foo {
         public function method(): void {}

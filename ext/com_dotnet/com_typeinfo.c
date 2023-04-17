@@ -197,7 +197,7 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 		if (pTKind == TKIND_ENUM) {
 			ITypeLib_GetTypeInfo(TL, i, &TypeInfo);
 			for (j = 0; ; j++) {
-				zend_string *const_name;
+				zend_string *const_name, *name;
 
 				if (FAILED(ITypeInfo_GetVarDesc(TypeInfo, j, &pVarDesc))) {
 					break;
@@ -228,12 +228,13 @@ PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, in
 					ZVAL_LONG(&c.value, Z_LVAL(value));
 					if (mode & CONST_PERSISTENT) {
 						/* duplicate string in a persistent manner */
-						c.name = zend_string_dup(const_name, /* persistent */ true);
+						name = zend_string_dup(const_name, /* persistent */ true);
 						zend_string_release_ex(const_name, /* persistent */ false);
 					} else {
-						c.name = const_name;
+						name = const_name;
 					}
-					zend_register_constant(&c);
+					zend_register_constant(name, &c);
+					zend_string_release(name);
 				}
 				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 			}

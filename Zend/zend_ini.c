@@ -63,7 +63,7 @@ static zend_result zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stag
 		}
 		if (stage == ZEND_INI_STAGE_RUNTIME && result == FAILURE) {
 			/* runtime failure is OK */
-			return 1;
+			return FAILURE;
 		}
 		if (ini_entry->value != ini_entry->orig_value) {
 			zend_string_release(ini_entry->value);
@@ -74,7 +74,7 @@ static zend_result zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stag
 		ini_entry->orig_value = NULL;
 		ini_entry->orig_modifiable = 0;
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 

@@ -32,11 +32,13 @@ echo "Done!\n";
 ?>
 --EXPECTF--
 bool(true)
-array(8) {
+array(9) {
   ["command"]=>
   string(10) "/bin/sleep"
   ["pid"]=>
   int(%d)
+  ["cached"]=>
+  bool(false)
   ["running"]=>
   bool(true)
   ["signaled"]=>
@@ -51,11 +53,13 @@ array(8) {
   int(0)
 }
 bool(true)
-array(8) {
+array(9) {
   ["command"]=>
   string(10) "/bin/sleep"
   ["pid"]=>
   int(%d)
+  ["cached"]=>
+  bool(false)
   ["running"]=>
   bool(false)
   ["signaled"]=>

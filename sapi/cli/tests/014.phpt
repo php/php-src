@@ -5,7 +5,7 @@ syntax highlighting
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename = __DIR__."/014.test.php";
 $code = '
@@ -27,8 +27,9 @@ $o = new test;
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -s $filename`);
-var_dump(`"$php" -n -s unknown`);
+$filename_escaped = escapeshellarg($filename);
+var_dump(`$php -n -s $filename_escaped`);
+var_dump(`$php -n -s unknown`);
 
 @unlink($filename);
 

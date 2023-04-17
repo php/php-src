@@ -536,7 +536,7 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
 	uint32_t *ptr = (uint32_t*)Z_PTR_P(el);
-	if (EXPECTED(!(((zend_uintptr_t)ptr) & 1))) {
+	if (EXPECTED(!(((uintptr_t)ptr) & 1))) {
 		efree_size(ptr, sizeof(uint32_t));
 	}
 }
@@ -565,7 +565,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
 			/* mark pointer as "special" using low bit */
 			zend_hash_add_new_ptr(guards, str,
-				(void*)(((zend_uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
+				(void*)(((uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
 			zval_ptr_dtor_str(zv);
 			ZVAL_ARR(zv, guards);
 		}
@@ -574,7 +574,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		ZEND_ASSERT(guards != NULL);
 		zv = zend_hash_find(guards, member);
 		if (zv != NULL) {
-			return (uint32_t*)(((zend_uintptr_t)Z_PTR_P(zv)) & ~1);
+			return (uint32_t*)(((uintptr_t)Z_PTR_P(zv)) & ~1);
 		}
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
@@ -615,6 +615,8 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 					 * to make sure no actual modification is possible. */
 					ZVAL_COPY(rv, retval);
 					retval = rv;
+				} else if (Z_PROP_FLAG_P(retval) & IS_PROP_REINITABLE) {
+					Z_PROP_FLAG_P(retval) &= ~IS_PROP_REINITABLE;
 				} else {
 					zend_readonly_property_modification_error(prop_info);
 					retval = &EG(uninitialized_zval);
@@ -633,7 +635,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 				}
 			}
 		}
-		if (UNEXPECTED(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
+		if (UNEXPECTED(Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT)) {
 			/* Skip __get() for uninitialized typed properties */
 			goto uninit_error;
 		}
@@ -810,7 +812,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
-				if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE))) {
 					Z_TRY_DELREF_P(value);
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
@@ -833,15 +835,37 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
+				Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
 				value = &tmp;
 			}
 
-found:
-			variable_ptr = zend_assign_to_variable(
-				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types());
+found:;
+			zend_refcounted *garbage = NULL;
+
+			variable_ptr = zend_assign_to_variable_ex(
+				variable_ptr, value, IS_TMP_VAR, property_uses_strict_types(), &garbage);
+
+			if (garbage) {
+				if (GC_DELREF(garbage) == 0) {
+					zend_execute_data *execute_data = EG(current_execute_data);
+					// Assign to result variable before calling the destructor as it may release the object
+					if (execute_data
+					 && EX(func)
+					 && ZEND_USER_CODE(EX(func)->common.type)
+					 && EX(opline)
+					 && EX(opline)->opcode == ZEND_ASSIGN_OBJ
+					 && EX(opline)->result_type) {
+						ZVAL_COPY_DEREF(EX_VAR(EX(opline)->result.var), variable_ptr);
+						variable_ptr = NULL;
+					}
+					rc_dtor_func(garbage);
+				} else {
+					gc_check_possible_root_no_ref(garbage);
+				}
+			}
 			goto exit;
 		}
-		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
+		if (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT) {
 			/* Writes to uninitialized typed properties bypass __set(). */
 			goto write_std_property;
 		}
@@ -1069,7 +1093,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 			if (EXPECTED(!zobj->ce->__get) ||
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET) ||
-			    UNEXPECTED(prop_info && Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
+			    UNEXPECTED(prop_info && (Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT))) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 					if (UNEXPECTED(prop_info)) {
 						zend_throw_error(NULL,
@@ -1084,6 +1108,8 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
 					/* Readonly property, delegate to read_property + write_property. */
 					retval = NULL;
+				} else if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
+					ZVAL_NULL(retval);
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */
@@ -1146,8 +1172,12 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
 			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY))) {
-				zend_readonly_property_unset_error(prop_info->ce, name);
-				return;
+				if (Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE) {
+					Z_PROP_FLAG_P(slot) &= ~IS_PROP_REINITABLE;
+				} else {
+					zend_readonly_property_unset_error(prop_info->ce, name);
+					return;
+				}
 			}
 			if (UNEXPECTED(Z_ISREF_P(slot)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
@@ -1164,7 +1194,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			}
 			return;
 		}
-		if (UNEXPECTED(Z_PROP_FLAG_P(slot) == IS_PROP_UNINIT)) {
+		if (UNEXPECTED(Z_PROP_FLAG_P(slot) & IS_PROP_UNINIT)) {
 			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY)
 					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "unset"))) {
 				return;
@@ -1306,6 +1336,12 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	ZEND_MAP_PTR_INIT(func->run_time_cache, (void**)dummy);
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temporary variables */
+	/* EG(trampoline) is reused from other places, like FFI (e.g. zend_ffi_cdata_get_closure()) where
+	 * it is used as an internal function. It may set fields that don't belong to common, thus
+	 * modifying zend_op_array specific data, most significantly last_var. We need to reset this
+	 * value so that it doesn't contain garbage when the engine allocates space for the next stack
+	 * frame. This didn't cause any issues until now due to "lucky" structure layout. */
+	func->last_var = 0;
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
 	func->filename = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.filename : ZSTR_EMPTY_ALLOC();
 	func->line_start = (fbc->type == ZEND_USER_FUNCTION)? fbc->op_array.line_start : 0;
@@ -1664,7 +1700,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			object_lhs = false;
 		}
 		ZEND_ASSERT(Z_TYPE_P(value) != IS_OBJECT);
-		zend_uchar target_type = (Z_TYPE_P(value) == IS_FALSE || Z_TYPE_P(value) == IS_TRUE)
+		uint8_t target_type = (Z_TYPE_P(value) == IS_FALSE || Z_TYPE_P(value) == IS_TRUE)
 								 ? _IS_BOOL : Z_TYPE_P(value);
 		if (Z_OBJ_HT_P(object)->cast_object(Z_OBJ_P(object), &casted, target_type) == FAILURE) {
 			// TODO: Less crazy.
@@ -1779,7 +1815,7 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 		if (Z_TYPE_P(value) != IS_UNDEF) {
 			goto found;
 		}
-		if (UNEXPECTED(Z_PROP_FLAG_P(value) == IS_PROP_UNINIT)) {
+		if (UNEXPECTED(Z_PROP_FLAG_P(value) & IS_PROP_UNINIT)) {
 			/* Skip __isset() for uninitialized typed properties */
 			result = 0;
 			goto exit;

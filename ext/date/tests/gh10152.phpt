@@ -1,5 +1,5 @@
 --TEST--
-GH-10152: Custom properties of DateTimeImmutable child classes are not serialized
+Bug GH-10152 (Custom properties of DateTimeImmutable child classes are not serialized)
 --FILE--
 <?php
 
@@ -16,7 +16,6 @@ class MyDateTimeImmutable extends DateTimeImmutable {
 $datetime = new MyDateTimeImmutable('2022-12-22T11:26:00Z', myProperty: true);
 $serialized = serialize($datetime);
 $unserialized = unserialize($serialized);
-
 var_dump($unserialized->myProperty);
 ?>
 --EXPECT--

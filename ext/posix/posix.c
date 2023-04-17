@@ -458,7 +458,7 @@ PHP_FUNCTION(posix_ttyname)
 			RETURN_FALSE;
 		}
 	} else {
-		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
 			fd = zval_get_long(z_fd);
@@ -508,7 +508,7 @@ PHP_FUNCTION(posix_isatty)
 			RETURN_FALSE;
 		}
 	} else {
-		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
 			fd = zval_get_long(z_fd);
@@ -713,6 +713,44 @@ PHP_FUNCTION(posix_access)
 
 	RETURN_TRUE;
 }
+
+#ifdef HAVE_EACCESS
+PHP_FUNCTION(posix_eaccess)
+{
+	zend_long mode = 0;
+	size_t filename_len, ret;
+	char *filename, *path;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	path = expand_filepath(filename, NULL);
+	if (!path) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	if (php_check_open_basedir_ex(path, 0)) {
+		efree(path);
+		POSIX_G(last_error) = EPERM;
+		RETURN_FALSE;
+	}
+
+	ret = eaccess(path, mode);
+	efree(path);
+
+	if (ret) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif
+
 /* }}} */
 
 /*
@@ -1242,7 +1280,7 @@ PHP_FUNCTION(posix_fpathconf)
 			RETURN_FALSE;
 		}
 	} else {
-		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			zend_argument_type_error(1, "must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
 			RETURN_THROWS();

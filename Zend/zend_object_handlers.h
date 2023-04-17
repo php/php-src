@@ -20,6 +20,8 @@
 #ifndef ZEND_OBJECT_HANDLERS_H
 #define ZEND_OBJECT_HANDLERS_H
 
+#include <stdint.h>
+
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \
@@ -154,7 +156,7 @@ typedef zend_result (*zend_object_get_closure_t)(zend_object *obj, zend_class_en
 
 typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, int *n);
 
-typedef zend_result (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
+typedef zend_result (*zend_object_do_operation_t)(uint8_t opcode, zval *result, zval *op1, zval *op2);
 
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */

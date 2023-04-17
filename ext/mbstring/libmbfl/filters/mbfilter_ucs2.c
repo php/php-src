@@ -56,7 +56,8 @@ const mbfl_encoding mbfl_encoding_ucs2 = {
 	&vtbl_ucs2_wchar,
 	&vtbl_wchar_ucs2,
 	mb_ucs2_to_wchar,
-	mb_wchar_to_ucs2be
+	mb_wchar_to_ucs2be,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_ucs2be = {
@@ -69,7 +70,8 @@ const mbfl_encoding mbfl_encoding_ucs2be = {
 	&vtbl_ucs2be_wchar,
 	&vtbl_wchar_ucs2be,
 	mb_ucs2be_to_wchar,
-	mb_wchar_to_ucs2be
+	mb_wchar_to_ucs2be,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_ucs2le = {
@@ -82,7 +84,8 @@ const mbfl_encoding mbfl_encoding_ucs2le = {
 	&vtbl_ucs2le_wchar,
 	&vtbl_wchar_ucs2le,
 	mb_ucs2le_to_wchar,
-	mb_wchar_to_ucs2le
+	mb_wchar_to_ucs2le,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_ucs2_wchar = {

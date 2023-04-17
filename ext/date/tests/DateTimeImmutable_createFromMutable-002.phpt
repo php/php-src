@@ -14,7 +14,7 @@ var_dump( $i );
 try {
     MyDateTimeImmutable::createFromMutable( date_create_immutable( $current ) );
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -26,4 +26,4 @@ object(MyDateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-DateTimeImmutable::createFromMutable(): Argument #1 ($object) must be of type DateTime, DateTimeImmutable given
+TypeError: DateTimeImmutable::createFromMutable(): Argument #1 ($object) must be of type DateTime, DateTimeImmutable given

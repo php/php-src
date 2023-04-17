@@ -3,7 +3,7 @@ PDO_sqlite: Testing URIs with open_basedir
 --EXTENSIONS--
 pdo_sqlite
 --INI--
-open_basedir={TMP}
+open_basedir="{TMP}"
 --FILE--
 <?php
 

@@ -1819,11 +1819,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"#endif\n");
                     }
                     out($f,"#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
-                    out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n");
+                    out($f,"static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op);\n");
                     out($f,"#endif\n\n");
                     if ($kind == ZEND_VM_KIND_HYBRID) {
                         out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-                        out($f,"static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend_op* op);\n");
+                        out($f,"static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op* op);\n");
                         out($f,"#else\n");
                         out($f,"# define zend_vm_get_opcode_handler_func zend_vm_get_opcode_handler\n");
                         out($f,"#endif\n\n");
@@ -2350,9 +2350,9 @@ function gen_vm_opcodes_header(
     $str .= "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n";
     $str .= "\n";
     $str .= "BEGIN_EXTERN_C()\n\n";
-    $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);\n";
-    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n";
-    $str .= "ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length);\n\n";
+    $str .= "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode);\n";
+    $str .= "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode);\n";
+    $str .= "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length);\n\n";
     $str .= "END_EXTERN_C()\n\n";
 
     $code_len = strlen((string) $max_opcode);
@@ -2636,22 +2636,22 @@ function gen_vm($def, $skel) {
     }
     fputs($f, "};\n\n");
 
-    fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {\n");
+    fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode) {\n");
     fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
     fputs($f, "\t\treturn NULL;\n");
     fputs($f, "\t}\n");
     fputs($f, "\treturn zend_vm_opcodes_names[opcode];\n");
     fputs($f, "}\n");
 
-    fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode) {\n");
+    fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(uint8_t opcode) {\n");
     fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
     fputs($f, "\t\topcode = ZEND_NOP;\n");
     fputs($f, "\t}\n");
     fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
     fputs($f, "}\n");
 
-    fputs($f, "ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length) {\n");
-    fputs($f, "\tzend_uchar opcode;\n");
+    fputs($f, "ZEND_API uint8_t zend_get_opcode_id(const char *name, size_t length) {\n");
+    fputs($f, "\tuint8_t opcode;\n");
     fputs($f, "\tfor (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {\n");
     fputs($f, "\t\tconst char *opcode_name = zend_vm_opcodes_names[opcode];\n");
     fputs($f, "\t\tif (opcode_name && strncmp(opcode_name, name, length) == 0) {\n");
@@ -2699,7 +2699,7 @@ function gen_vm($def, $skel) {
     }
     out($f, "\t(user_opcode_handler_t)NULL\n};\n\n");
 
-    out($f, "static zend_uchar zend_user_opcodes[256] = {");
+    out($f, "static uint8_t zend_user_opcodes[256] = {");
     for ($i = 0; $i < 255; ++$i) {
         if ($i % 16 == 1) out($f, "\n\t");
         out($f, "$i,");
@@ -2791,7 +2791,7 @@ function gen_vm($def, $skel) {
     }
     out($f, "}\n\n");
     out($f, "#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
-    out($f, "static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)\n");
+    out($f, "static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)\n");
     out($f, "{\n");
     if (!ZEND_VM_SPEC) {
         out($f, "\treturn zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
@@ -2804,7 +2804,7 @@ function gen_vm($def, $skel) {
     if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
         // Generate zend_vm_get_opcode_handler_func() function
         out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID\n");
-        out($f,"static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend_op* op)\n");
+        out($f,"static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op* op)\n");
         out($f, "{\n");
         out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n");
         if (!ZEND_VM_SPEC) {
@@ -2819,7 +2819,7 @@ function gen_vm($def, $skel) {
     // Generate zend_vm_get_opcode_handler() function
     out($f, "ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* op)\n");
     out($f, "{\n");
-    out($f, "\tzend_uchar opcode = zend_user_opcodes[op->opcode];\n");
+    out($f, "\tuint8_t opcode = zend_user_opcodes[op->opcode];\n");
     if (!ZEND_VM_SPEC) {
         out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
     } else {
@@ -2836,7 +2836,7 @@ function gen_vm($def, $skel) {
     // Generate zend_vm_set_opcode_handler_ex() function
     out($f, "ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info)\n");
     out($f, "{\n");
-    out($f, "\tzend_uchar opcode = zend_user_opcodes[op->opcode];\n");
+    out($f, "\tuint8_t opcode = zend_user_opcodes[op->opcode];\n");
     if (!ZEND_VM_SPEC) {
         out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
     } else {

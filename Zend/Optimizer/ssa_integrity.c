@@ -85,7 +85,7 @@ static inline bool is_in_successors(zend_basic_block *block, int check) {
 	return 0;
 }
 
-static inline bool is_var_type(zend_uchar type) {
+static inline bool is_var_type(uint8_t type) {
 	return (type & (IS_CV|IS_VAR|IS_TMP_VAR)) != 0;
 }
 

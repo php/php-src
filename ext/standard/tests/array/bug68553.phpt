@@ -79,5 +79,5 @@ array(8) {
     NULL
   }
 }
-Illegal offset type
-Illegal offset type
+Cannot access offset of type object on array
+Cannot access offset of type array on array

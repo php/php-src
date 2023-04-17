@@ -1,5 +1,10 @@
 @echo off
 
+if /i "%APPVEYOR%%GITHUB_ACTIONS%" neq "True" (
+    echo for CI only
+    exit /b 3
+)
+
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin64 >NUL 2>NUL
@@ -18,19 +23,12 @@ if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win32 >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win64 >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
+del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-
-cd /D %APPVEYOR_BUILD_FOLDER%
+del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 
-if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
-	set BRANCH=%APPVEYOR_REPO_BRANCH:~4,3%
-) else (
-	set BRANCH=master
-)
+call %~dp0find-target-branch.bat
 set STABILITY=staging
 set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VS%-%PHP_SDK_ARCH%
 rem SDK is cached, deps info is cached as well
@@ -51,7 +49,12 @@ if %errorlevel% neq 0 exit /b 3
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 
-set CFLAGS=/W1 /WX
+rem Some undefined behavior is reported on 32-bit, this should be fixed
+if "%PLATFORM%" == "x86" (
+	set CFLAGS=/W1
+) else (
+	set CFLAGS=/W1 /WX
+)
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^

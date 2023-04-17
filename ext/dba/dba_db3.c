@@ -53,7 +53,7 @@ DBA_OPEN_FUNC(db3)
 	int gmode = 0, err;
 	int filemode = info->file_permission;
 	struct stat check_stat;
-	int s = VCWD_STAT(info->path, &check_stat);
+	int s = VCWD_STAT(ZSTR_VAL(info->path), &check_stat);
 
 	if (!s && !check_stat.st_size) {
 		info->mode = DBA_TRUNC; /* force truncate */
@@ -81,9 +81,9 @@ DBA_OPEN_FUNC(db3)
 	    dbp->set_errcall(dbp, php_dba_db3_errcall_fcn);
 		if(
 #if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1))
-			(err=dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode)) == 0) {
+			(err=dbp->open(dbp, 0, ZSTR_VAL(info->path), NULL, type, gmode, filemode)) == 0) {
 #else
-			(err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
+			(err=dbp->open(dbp, ZSTR_VAL(info->path), NULL, type, gmode, filemode)) == 0) {
 #endif
 			dba_db3_data *data;
 

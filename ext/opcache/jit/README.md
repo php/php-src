@@ -34,7 +34,7 @@ Running tests of the JIT
 ------------------------
 
 Then, to test the JIT, e.g. with opcache.jit=tracing, an example command
-based on what is used to test in Azure CI:
+based on what is used to test in CI:
 
 ```
 make test TESTS="-d opcache.jit_buffer_size=16M -d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit=tracing --repeat 2 --show-diff -j$(nproc) ext/opcache Zend"
@@ -75,7 +75,7 @@ For i386 (i.e. 32-bit): `ext/opcache/minilua ext/opcache/jit/dynasm/dynasm.lua  
 
 ### How to build 32-bit builds on x86_64 environments
 
-Refer to [../../../azure/i386](../../../azure/i386/apt.yml) for examples of
+Refer to [../../../.github/workflows/push.yml](../../../.github/workflows/push.yml) for examples of
 dependencies to install.
 
 If you are running this natively (outside of Docker or a VM):
@@ -93,7 +93,7 @@ set up prerequisites for regular development.
 ```
 sudo dpkg --add-architecture i386
 sudo apt-get update -y
-# As well as anything else from azure/i386/apt.yml that you're testing locally
+# As well as anything else from .github/actions/apt-x32/action.yml that you're testing locally
 sudo apt-get install \
     gcc-multilib g++-multilib \
     libxml2-dev:i386 \

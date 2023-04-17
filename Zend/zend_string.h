@@ -130,6 +130,8 @@ END_EXTERN_C()
 
 #define ZSTR_ALLOCA_FREE(str, use_heap) free_alloca(str, use_heap)
 
+#define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init((s), strlen(s), (persistent)))
+
 /*---*/
 
 static zend_always_inline zend_ulong zend_string_hash_val(zend_string *s)
@@ -407,6 +409,19 @@ static zend_always_inline bool zend_string_starts_with(const zend_string *str, c
 }
 
 #define zend_string_starts_with_literal(str, prefix) \
+	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
+
+static zend_always_inline bool zend_string_starts_with_cstr_ci(const zend_string *str, const char *prefix, size_t prefix_length)
+{
+	return ZSTR_LEN(str) >= prefix_length && !strncasecmp(ZSTR_VAL(str), prefix, prefix_length);
+}
+
+static zend_always_inline bool zend_string_starts_with_ci(const zend_string *str, const zend_string *prefix)
+{
+	return zend_string_starts_with_cstr_ci(str, ZSTR_VAL(prefix), ZSTR_LEN(prefix));
+}
+
+#define zend_string_starts_with_literal_ci(str, prefix) \
 	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
 
 /*

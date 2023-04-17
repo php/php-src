@@ -1253,11 +1253,10 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 #if ZEND_EXTENSIONS_SUPPORT
 	do {
 		zend_extension *new_extension;
-		zend_extension_version_info *extension_version_info;
 
-		extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "extension_version_info");
+		const zend_extension_version_info *extension_version_info = (const zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "extension_version_info");
 		if (!extension_version_info) {
-			extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "_extension_version_info");
+			extension_version_info = (const zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "_extension_version_info");
 		}
 		new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
 		if (!new_extension) {

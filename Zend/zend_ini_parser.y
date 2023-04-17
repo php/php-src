@@ -43,6 +43,7 @@ int ini_parse(void);
 #endif
 
 #define ZEND_SYSTEM_INI CG(ini_parser_unbuffered_errors)
+#define INI_ZVAL_IS_NUMBER 1
 
 static int get_int_val(zval *op) {
 	switch (Z_TYPE_P(op)) {
@@ -92,8 +93,12 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 			break;
 	}
 
-	str_len = sprintf(str_result, "%d", i_result);
-	ZVAL_NEW_STR(result, zend_string_init(str_result, str_len, ZEND_SYSTEM_INI));
+	if (INI_SCNG(scanner_mode) != ZEND_INI_SCANNER_TYPED) {
+		str_len = sprintf(str_result, "%d", i_result);
+		ZVAL_NEW_STR(result, zend_string_init(str_result, str_len, ZEND_SYSTEM_INI));
+	} else {
+		ZVAL_LONG(result, i_result);
+	}
 }
 /* }}} */
 
@@ -276,6 +281,41 @@ static void zval_ini_dtor(zval *zv)
 }
 /* }}} */
 
+static inline zend_result convert_to_number(zval *retval, const char *str, const int str_len)
+{
+	uint8_t type;
+	int overflow;
+	zend_long lval;
+	double dval;
+
+	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, 0, &overflow, NULL)) != 0) {
+		if (type == IS_LONG) {
+			ZVAL_LONG(retval, lval);
+			return SUCCESS;
+		} else if (type == IS_DOUBLE && !overflow) {
+			ZVAL_DOUBLE(retval, dval);
+			return SUCCESS;
+		}
+	}
+
+	return FAILURE;
+}
+
+static void normalize_value(zval *zv)
+{
+	if (INI_SCNG(scanner_mode) != ZEND_INI_SCANNER_TYPED) {
+		return;
+	}
+
+	if (Z_EXTRA_P(zv) == INI_ZVAL_IS_NUMBER && Z_TYPE_P(zv) == IS_STRING) {
+		zval number_rv;
+		if (convert_to_number(&number_rv, Z_STRVAL_P(zv), Z_STRLEN_P(zv)) == SUCCESS) {
+			zval_ptr_dtor(zv);
+			ZVAL_COPY_VALUE(zv, &number_rv);
+		}
+	}
+}
+
 %}
 
 %expect 0
@@ -351,7 +391,7 @@ section_string_or_value:
 ;
 
 string_or_value:
-		expr							{ $$ = $1; }
+		expr							{ $$ = $1; normalize_value(&$$); }
 	|	BOOL_TRUE						{ $$ = $1; }
 	|	BOOL_FALSE						{ $$ = $1; }
 	|	NULL_NULL						{ $$ = $1; }
@@ -412,7 +452,11 @@ constant_literal:
 constant_string:
 		TC_CONSTANT						{ zend_ini_get_constant(&$$, &$1); }
 	|	TC_RAW							{ $$ = $1; /*printf("TC_RAW: '%s'\n", Z_STRVAL($1));*/ }
-	|	TC_NUMBER						{ $$ = $1; /*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/ }
+	|	TC_NUMBER {
+			$$ = $1;
+			Z_EXTRA($$) = INI_ZVAL_IS_NUMBER;
+			/*printf("TC_NUMBER: '%s'\n", Z_STRVAL($1));*/
+		}
 	|	TC_STRING						{ $$ = $1; /*printf("TC_STRING: '%s'\n", Z_STRVAL($1));*/ }
 	|	TC_WHITESPACE					{ $$ = $1; /*printf("TC_WHITESPACE: '%s'\n", Z_STRVAL($1));*/ }
 ;

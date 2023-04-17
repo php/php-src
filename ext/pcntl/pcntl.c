@@ -58,6 +58,8 @@
 
 #include "pcntl_arginfo.h"
 
+#include "Zend/zend_max_execution_timer.h"
+
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
@@ -184,6 +186,8 @@ PHP_FUNCTION(pcntl_fork)
 	if (id == -1) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error %d", errno);
+	} else if (id == 0) {
+		zend_max_execution_timer_init();
 	}
 
 	RETURN_LONG((zend_long) id);
@@ -1074,7 +1078,7 @@ static void pcntl_signal_handler(int signo)
 	}
 }
 
-void pcntl_signal_dispatch()
+void pcntl_signal_dispatch(void)
 {
 	zval params[2], *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;

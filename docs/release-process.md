@@ -961,7 +961,7 @@ volunteers to begin the selection process for the next release managers.
    public key to a keyserver:
 
    ```shell
-   gpg --keyserver pgp.mit.edu --send-keys YOURKEYID
+   gpg --keyserver keys.openpgp.org --send-keys YOURKEYID
    gpg --keyserver keyserver.ubuntu.com --send-keys YOURKEYID
    ```
 

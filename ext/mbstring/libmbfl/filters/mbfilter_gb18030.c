@@ -49,7 +49,8 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	&vtbl_gb18030_wchar,
 	&vtbl_wchar_gb18030,
 	mb_gb18030_to_wchar,
-	mb_wchar_to_gb18030
+	mb_wchar_to_gb18030,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_gb18030_wchar = {

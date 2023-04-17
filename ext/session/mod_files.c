@@ -288,7 +288,7 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 	dir = opendir(ZSTR_VAL(dirname));
 	if (!dir) {
 		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)", ZSTR_VAL(dirname), strerror(errno), errno);
-		return (0);
+		return -1;
 	}
 
 	time(&now);
@@ -296,7 +296,7 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 	if (ZSTR_LEN(dirname) >= MAXPATHLEN) {
 		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", ZSTR_VAL(dirname));
 		closedir(dir);
-		return (0);
+		return -1;
 	}
 
 	/* Prepare buffer (dirname never changes) */
@@ -674,10 +674,8 @@ PS_CREATE_SID_FUNC(files)
 		/* Check collision */
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
 		if (data && ps_files_key_exists(data, sid) == SUCCESS) {
-			if (sid) {
-				zend_string_release_ex(sid, 0);
-				sid = NULL;
-			}
+			zend_string_release_ex(sid, 0);
+			sid = NULL;
 			if (--maxfail < 0) {
 				return NULL;
 			}

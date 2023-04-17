@@ -54,7 +54,8 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	&vtbl_2022kr_wchar,
 	&vtbl_wchar_2022kr,
 	mb_iso2022kr_to_wchar,
-	mb_wchar_to_iso2022kr
+	mb_wchar_to_iso2022kr,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022kr = {

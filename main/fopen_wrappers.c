@@ -101,11 +101,29 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 			*end = '\0';
 			end++;
 		}
-		if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\0' || IS_SLASH(ptr[2]))) {
-			/* Don't allow paths with a leading .. path component to be set at runtime */
-			efree(pathbuf);
-			return FAILURE;
+		/* Don't allow paths with a parent dir component (..) to be set at runtime */
+		char *substr_pos = ptr;
+		while (*substr_pos) {
+			// Check if we have a .. path component
+			if (substr_pos[0] == '.'
+			 && substr_pos[1] == '.'
+			 && (substr_pos[2] == '\0' || IS_SLASH(substr_pos[2]))) {
+				efree(pathbuf);
+				return FAILURE;
+			}
+			// Skip to the next path component
+			while (true) {
+				substr_pos++;
+				if (*substr_pos == '\0' || *substr_pos == DEFAULT_DIR_SEPARATOR) {
+					goto no_parent_dir_component;
+				} else if (IS_SLASH(*substr_pos)) {
+					// Also skip the slash
+					substr_pos++;
+					break;
+				}
+			}
 		}
+no_parent_dir_component:
 		if (php_check_open_basedir_ex(ptr, 0) != 0) {
 			/* At least one portion of this open_basedir is less restrictive than the prior one, FAIL */
 			efree(pathbuf);
@@ -129,10 +147,10 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 */
 PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path)
 {
-	char resolved_name[MAXPATHLEN];
-	char resolved_basedir[MAXPATHLEN];
+	char resolved_name[MAXPATHLEN + 1];
+	char resolved_basedir[MAXPATHLEN + 1];
 	char local_open_basedir[MAXPATHLEN];
-	char path_tmp[MAXPATHLEN];
+	char path_tmp[MAXPATHLEN + 1];
 	char *path_file;
 	size_t resolved_basedir_len;
 	size_t resolved_name_len;
@@ -352,6 +370,8 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	zend_string *resolved_path = NULL;
 	size_t length;
 	bool orig_display_errors;
+
+	memset(file_handle, 0, sizeof(zend_file_handle));
 
 	path_info = SG(request_info).request_uri;
 #if HAVE_PWD_H

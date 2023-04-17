@@ -485,7 +485,16 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
 #ifdef ZTS
-	php_tsrm_startup();
+	int expected_threads;
+#ifdef AP_MPMQ_MAX_THREADS
+	if (ap_mpm_query(AP_MPMQ_MAX_THREADS, &expected_threads) != APR_SUCCESS) {
+		expected_threads = 1;
+	}
+#else
+	expected_threads = 1;
+#endif
+
+	php_tsrm_startup_ex(expected_threads);
 # ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
 # endif

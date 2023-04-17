@@ -107,12 +107,46 @@ $s = $o . $o;
 var_dump($s);
 var_dump(zend_test_is_string_marked_as_valid_utf8($s));
 
+echo "Rope concat:\n";
+$foo = 'f';
+$bar = 'b';
+$baz = 'a';
+$rope = "$foo$bar$baz";
+var_dump(zend_test_is_string_marked_as_valid_utf8($rope));
+
 echo "str_repeat:\n";
 $string = "a";
 $string_concat = str_repeat($string, 100);
 var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
 $string = "\xff";
 $string_concat = str_repeat($string, 100);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+
+echo "implode:\n";
+$arr = ['a', 'b'];
+$string_concat = implode('', $arr);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('|', $arr);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('', ['c', ...$arr]);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('', [...$arr, 'c']);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('', ["\xff", ...$arr]);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('', [...$arr, "\xff"]);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode("\xff", $arr);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('', []);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode("\xff", []);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('', ['a']);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode("\xff", ['a']);
+var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
+$string_concat = implode('', [1, 1.0, 'a']);
 var_dump(zend_test_is_string_marked_as_valid_utf8($string_concat));
 
 ?>
@@ -156,6 +190,21 @@ bool(true)
 Concatenation of objects:
 string(2) "zz"
 bool(true)
+Rope concat:
+bool(true)
 str_repeat:
 bool(true)
 bool(false)
+implode:
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

@@ -31,6 +31,13 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+echo "\nEmpty program name:\n";
+try {
+     proc_open([""], $ds, $pipes);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 echo "\nBasic usage:\n";
 $proc = proc_open([$php, '-r', 'echo "Hello World!\n";'], $ds, $pipes);
 fpassthru($pipes[1]);
@@ -75,6 +82,9 @@ Command array element 1 contains a null byte
 
 Nul byte in argument:
 Command array element 2 contains a null byte
+
+Empty program name:
+First element must contain a non-empty program name
 
 Basic usage:
 Hello World!

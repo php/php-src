@@ -218,11 +218,6 @@ class SimpleType {
                 return new SimpleType($node->toLowerString(), true);
             }
 
-            if ($node->toLowerString() === 'true') {
-                // TODO PHP-Parser doesn't yet recognize true as a stand-alone built-in type
-                return new SimpleType($node->toLowerString(), true);
-            }
-
             if ($node->toLowerString() === 'self') {
                 throw new Exception('The exact class name must be used instead of "self"');
             }
@@ -650,11 +645,13 @@ class Type {
 
     public function getWithoutNull(): Type {
         return new Type(
-            array_filter(
-                $this->types,
-                function(SimpleType $type) {
-                    return !$type->isNull();
-                }
+            array_values(
+                array_filter(
+                    $this->types,
+                    function(SimpleType $type) {
+                        return !$type->isNull();
+                    }
+                )
             ),
             false
         );
@@ -931,14 +928,26 @@ abstract class AbstractConstName implements ConstOrClassConstName
 class ConstName extends AbstractConstName {
     public string $const;
 
-    public function __construct(string $const)
+    public function __construct(?Name $namespace, string $const)
     {
+        if ($namespace && ($namespace = $namespace->slice(0, -1))) {
+            $const = $namespace->toString() . '\\' . $const;
+        }
         $this->const = $const;
     }
 
     public function isClassConst(): bool
     {
         return false;
+    }
+
+    public function isUnknown(): bool
+    {
+        $name = $this->__toString();
+        if (($pos = strrpos($name, '\\')) !== false) {
+            $name = substr($name, $pos + 1);
+        }
+        return strtolower($name) === "unknown";
     }
 
     public function __toString(): string
@@ -1600,7 +1609,7 @@ class EvaluatedValue
                 if ($expr instanceof Expr\ClassConstFetch) {
                     $originatingConstName = new ClassConstName($expr->class, $expr->name->toString());
                 } else {
-                    $originatingConstName = new ConstName($expr->name->toString());
+                    $originatingConstName = new ConstName($expr->name->getAttribute('namespacedName'), $expr->name->toString());
                 }
 
                 if ($originatingConstName->isUnknown()) {
@@ -3173,7 +3182,7 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*\$\w+.*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|\$\w+).*$/', $value, $matches);
         } elseif ($this->name === "return" || $this->name === "var") {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)/', $value, $matches);
         }
@@ -3194,16 +3203,17 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*[\w\|\\\\\[\]]+\s*\$(\w+).*$/', $value, $matches);
+            // Allow for parsing extended types like callable(string):mixed in docblocks
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
-            preg_match('/^\s*\$(\w+).*$/', $value, $matches);
+            preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }
 
-        if (!isset($matches[1])) {
+        if (!isset($matches["name"])) {
             throw new Exception("@$this->name doesn't contain a variable name or has an invalid format \"$value\"");
         }
 
-        return $matches[1];
+        return $matches["name"];
     }
 }
 
@@ -3677,7 +3687,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             foreach ($stmt->consts as $const) {
                 $fileInfo->constInfos[] = parseConstLike(
                     $prettyPrinter,
-                    new ConstName($const->name->toString()),
+                    new ConstName($const->namespacedName, $const->name->toString()),
                     $const,
                     0,
                     $stmt->getDocComment(),
@@ -3920,10 +3930,10 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 $arginfoType = $argType->toArginfoType();
                 if ($arginfoType->hasClassType()) {
                     $code .= sprintf(
-                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s, %s)\n",
+                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s%s)\n",
                         $argKind, $argInfo->getSendByString(), $argInfo->name,
                         $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
-                        $argInfo->getDefaultValueAsArginfoString()
+                        !$argInfo->isVariadic ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 } else {
                     $code .= sprintf(

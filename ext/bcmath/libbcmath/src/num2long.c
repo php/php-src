@@ -30,21 +30,14 @@
 *************************************************************************/
 
 #include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
 
 /* Convert a number NUM to a long.  The function returns only the integer
    part of the number.  For numbers that are too large to represent as
    a long, this function returns a zero.  This can be detected by checking
    the NUM for zero after having a zero returned. */
 
-long
-bc_num2long (num)
-     bc_num num;
+long bc_num2long(bc_num num)
 {
   long val;
   char *nptr;

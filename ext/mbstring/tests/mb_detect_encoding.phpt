@@ -113,6 +113,17 @@ $detected = mb_detect_encoding("\x4E\x4E\xFE\xFF\x4E\x4E", ['UTF-8', 'ISO-8859-1
 if ($detected === 'UTF-16BE' || $detected === 'UTF-16LE')
     die("Don't accept a BOM in the middle of a string");
 
+echo "== CHECK FUNCTION TEST ==\n";
+
+function testCheckFn($str, $encoding, $encodings) {
+    if (mb_check_encoding($str, $encoding))
+        die("Input string " . bin2hex($str) . " should not be valid in " . $encoding);
+    if (mb_detect_encoding($str, $encodings, true) === $encoding)
+        die("mb_detect_encoding should never return " . $encoding . " for invalid input string " . bin2hex($str));
+}
+
+testCheckFn("abc + abc", "UTF-7", "UTF-7,UTF-8");
+
 echo "== TORTURE TEST ==\n";
 
 function test($strings, $encodings) {
@@ -390,5 +401,6 @@ mb_detect_encoding(): Argument #2 ($encodings) contains invalid encoding "BAD"
 string(5) "UTF-8"
 string(8) "UTF-16BE"
 string(8) "UTF-16LE"
+== CHECK FUNCTION TEST ==
 == TORTURE TEST ==
 Done!

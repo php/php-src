@@ -394,12 +394,12 @@ ZEND_API bool zend_fiber_switch_blocked(void)
 	return zend_fiber_switch_blocking;
 }
 
-ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
+ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
 {
 	context->stack = zend_fiber_stack_allocate(stack_size);
 
 	if (UNEXPECTED(!context->stack)) {
-		return false;
+		return FAILURE;
 	}
 
 #ifdef ZEND_FIBER_UCONTEXT
@@ -438,7 +438,7 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 
 	zend_observer_fiber_init_notify(context);
 
-	return true;
+	return SUCCESS;
 }
 
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
@@ -743,7 +743,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 
-	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED) {
+	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL) {
 		zend_get_gc_buffer_use(buf, table, num);
 		return NULL;
 	}
@@ -751,7 +751,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	HashTable *lastSymTable = NULL;
 	zend_execute_data *ex = fiber->execute_data;
 	for (; ex; ex = ex->prev_execute_data) {
-		HashTable *symTable = zend_unfinished_execution_gc(ex, ex->call, buf);
+		HashTable *symTable = zend_unfinished_execution_gc_ex(ex, ex->call, buf, false);
 		if (symTable) {
 			if (lastSymTable) {
 				zval *val;
@@ -812,7 +812,7 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-	if (!zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size))) {
+	if (zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size)) == FAILURE) {
 		RETURN_THROWS();
 	}
 

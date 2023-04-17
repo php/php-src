@@ -22,6 +22,8 @@
 
 
 #include <setjmp.h>
+#include <stdint.h>
+#include <sys/types.h>
 
 #include "zend_globals_macros.h"
 
@@ -38,6 +40,7 @@
 #include "zend_multiply.h"
 #include "zend_arena.h"
 #include "zend_call_stack.h"
+#include "zend_max_execution_timer.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -70,6 +73,12 @@ typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
 
+typedef enum {
+	ZEND_MEMOIZE_NONE,
+	ZEND_MEMOIZE_COMPILE,
+	ZEND_MEMOIZE_FETCH,
+} zend_memoize_mode;
+
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
 
@@ -87,7 +96,7 @@ struct _zend_compiler_globals {
 	HashTable *auto_globals;
 
 	/* Refer to zend_yytnamerr() in zend_language_parser.y for meaning of values */
-	zend_uchar parse_error;
+	uint8_t parse_error;
 	bool in_compilation;
 	bool short_tags;
 
@@ -129,7 +138,7 @@ struct _zend_compiler_globals {
 
 	zend_stack delayed_oplines_stack;
 	HashTable *memoized_exprs;
-	int memoize_mode;
+	zend_memoize_mode memoize_mode;
 
 	void   *map_ptr_real_base;
 	void   *map_ptr_base;
@@ -144,6 +153,9 @@ struct _zend_compiler_globals {
 	uint32_t rtd_key_counter;
 
 	zend_stack short_circuiting_opnums;
+#ifdef ZTS
+	uint32_t copied_functions_count;
+#endif
 };
 
 
@@ -181,22 +193,24 @@ struct _zend_executor_globals {
 
 	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
 
-	zend_long precision;
-
 	int ticks_count;
+
+	zend_long precision;
 
 	uint32_t persistent_constants_count;
 	uint32_t persistent_functions_count;
 	uint32_t persistent_classes_count;
 
-	HashTable *in_autoload;
-	bool full_tables_cleanup;
-
 	/* for extended information support */
 	bool no_extensions;
 
+	bool full_tables_cleanup;
+
 	zend_atomic_bool vm_interrupt;
 	zend_atomic_bool timed_out;
+
+	HashTable *in_autoload;
+
 	zend_long hard_timeout;
 	void *stack_base;
 	void *stack_limit;
@@ -209,19 +223,20 @@ struct _zend_executor_globals {
 	HashTable persistent_list;
 
 	int user_error_handler_error_reporting;
+	bool exception_ignore_args;
 	zval user_error_handler;
 	zval user_exception_handler;
 	zend_stack user_error_handlers_error_reporting;
 	zend_stack user_error_handlers;
 	zend_stack user_exception_handlers;
 
-	zend_error_handling_t  error_handling;
 	zend_class_entry      *exception_class;
+	zend_error_handling_t  error_handling;
+
+	int capture_warnings_during_sccp;
 
 	/* timeout support */
 	zend_long timeout_seconds;
-
-	int capture_warnings_during_sccp;
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
@@ -235,7 +250,7 @@ struct _zend_executor_globals {
 	struct _zend_module_entry *current_module;
 
 	bool active;
-	zend_uchar flags;
+	uint8_t flags;
 
 	zend_long assertions;
 
@@ -254,7 +269,6 @@ struct _zend_executor_globals {
 
 	HashTable weakrefs;
 
-	bool exception_ignore_args;
 	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;
@@ -266,7 +280,7 @@ struct _zend_executor_globals {
 	zend_fiber *active_fiber;
 
 	/* Default fiber C stack size. */
-	zend_long fiber_stack_size;
+	size_t fiber_stack_size;
 
 	/* If record_errors is enabled, all emitted diagnostics will be recorded,
 	 * in addition to being processed as usual. */
@@ -282,6 +296,12 @@ struct _zend_executor_globals {
 	zend_call_stack call_stack;
 	zend_long max_allowed_stack_size;
 	zend_ulong reserved_stack_size;
+#endif
+
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+	timer_t max_execution_timer_timer;
+	pid_t pid;
+	struct sigaction oldact;
 #endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
