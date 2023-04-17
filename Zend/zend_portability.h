@@ -140,6 +140,10 @@
 #  define __SANITIZE_ADDRESS__
 # endif
 
+# if __has_feature(undefined_behavior_sanitizer)
+#  define __SANITIZE_UNDEFINED_BEHAVIOR__
+# endif
+
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
 # endif
