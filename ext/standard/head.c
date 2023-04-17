@@ -368,7 +368,8 @@ PHP_FUNCTION(http_response_code)
 			int output_start_lineno = php_output_get_start_lineno();
 
 			if (output_start_filename) {
-				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent (output started at %s:%"PRIi32")", output_start_filename, output_start_lineno);
+				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent "
+					"(output started at %s:%d)", output_start_filename, output_start_lineno);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent");
 			}
