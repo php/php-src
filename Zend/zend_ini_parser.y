@@ -110,6 +110,7 @@ static void zend_ini_init_string(zval *result)
 	} else {
 		ZVAL_EMPTY_STRING(result);
 	}
+	Z_EXTRA_P(result) = 0;
 }
 /* }}} */
 
@@ -307,6 +308,7 @@ static void normalize_value(zval *zv)
 		return;
 	}
 
+	ZEND_ASSERT(Z_EXTRA_P(zv) == 0 || Z_EXTRA_P(zv) == INI_ZVAL_IS_NUMBER);
 	if (Z_EXTRA_P(zv) == INI_ZVAL_IS_NUMBER && Z_TYPE_P(zv) == IS_STRING) {
 		zval number_rv;
 		if (convert_to_number(&number_rv, Z_STRVAL_P(zv), Z_STRLEN_P(zv)) == SUCCESS) {
