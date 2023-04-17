@@ -509,8 +509,7 @@ void php_openssl_errors_restore_mark(void) {
 		errors->top = 0;
 		errors->bottom = 0;
 	} else {
-		errors_mark = OPENSSL_G(errors_mark);
-		memcpy(errors, errors_mark, sizeof(struct php_openssl_errors));
+		memcpy(errors, OPENSSL_G(errors_mark), sizeof(struct php_openssl_errors));
 	}
 }
 /* }}} */
