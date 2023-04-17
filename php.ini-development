@@ -396,6 +396,12 @@ zend.exception_ignore_args = Off
 ; Production Value: 0
 zend.exception_string_param_max_len = 15
 
+; Decides whether to use the dlopen(3) flag RTLD_DEEPBIND, if available, when
+; loading shared libraries.  This ensures symbol lookup will prefer symbols from
+; the shared object itself over global ones.  Conflicts with the use of custom
+; memory allocators.
+zend.dlopen_deepbind = On
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;
