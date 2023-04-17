@@ -145,6 +145,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_TYPED &&            \
 		(YYSTATE == STATE(ST_VALUE) || YYSTATE == STATE(ST_RAW))) {\
 		zend_ini_copy_typed_value(ini_lval, type, str, len);       \
+		Z_EXTRA_P(ini_lval) = 0;                                   \
 	} else {                                                       \
 		zend_ini_copy_value(ini_lval, str, len);                   \
 	}                                                              \
@@ -598,6 +599,7 @@ end_raw_value_chars:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	zend_ini_escape_string(ini_lval, yytext, yyleng, '"');
+	Z_EXTRA_P(ini_lval) = 0;
 	return TC_QUOTED_STRING;
 }
 
