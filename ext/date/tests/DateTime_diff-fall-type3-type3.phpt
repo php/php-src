@@ -2,8 +2,6 @@
 DateTime::diff() -- fall type3 type3
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-Various bugs exist
 --FILE--
 <?php
 
@@ -30,7 +28,7 @@ test_time_fall_type3_redodt_type3_dt: DIFF: 2010-11-07 00:10:20 EDT - 2010-11-07
 test_time_fall_type3_redodt_type3_redodt: DIFF: 2010-11-07 01:15:35 EDT - 2010-11-07 01:12:33 EDT = **P+0Y0M0DT0H3M2S**
 test_time_fall_type3_redodt_type3_redost: DIFF: 2010-11-07 01:14:44 EST - 2010-11-07 01:12:33 EDT = **P+0Y0M0DT1H2M11S**
 test_time_fall_type3_redodt_type3_st: DIFF: 2010-11-07 03:16:55 EST - 2010-11-07 01:12:33 EDT = **P+0Y0M0DT3H4M22S**
-test_time_fall_type3_redodt_type3_post: DIFF: 2010-11-08 19:59:59 EST - 2010-11-07 01:12:33 EDT = **P+0Y0M1DT19H47M26S**
+test_time_fall_type3_redodt_type3_post: DIFF: 2010-11-08 19:59:59 EST - 2010-11-07 01:12:33 EDT = **P+0Y0M1DT18H47M26S**
 test_time_fall_type3_redost_type3_prev: DIFF: 2010-11-06 18:38:28 EDT - 2010-11-07 01:14:44 EST = **P-0Y0M0DT7H36M16S**
 test_time_fall_type3_redost_type3_dt: DIFF: 2010-11-07 00:10:20 EDT - 2010-11-07 01:14:44 EST = **P-0Y0M0DT2H4M24S**
 test_time_fall_type3_redost_type3_redodt: DIFF: 2010-11-07 01:12:33 EDT - 2010-11-07 01:14:44 EST = **P-0Y0M0DT1H2M11S**
@@ -45,7 +43,7 @@ test_time_fall_type3_st_type3_st: DIFF: 2010-11-07 05:19:56 EST - 2010-11-07 03:
 test_time_fall_type3_st_type3_post: DIFF: 2010-11-08 19:59:59 EST - 2010-11-07 03:16:55 EST = **P+0Y0M1DT16H43M4S**
 test_time_fall_type3_post_type3_prev: DIFF: 2010-11-06 18:38:28 EDT - 2010-11-08 19:59:59 EST = **P-0Y0M2DT1H21M31S**
 test_time_fall_type3_post_type3_dt: DIFF: 2010-11-07 00:10:20 EDT - 2010-11-08 19:59:59 EST = **P-0Y0M1DT19H49M39S**
-test_time_fall_type3_post_type3_redodt: DIFF: 2010-11-07 01:12:33 EDT - 2010-11-08 19:59:59 EST = **P-0Y0M1DT19H47M26S**
+test_time_fall_type3_post_type3_redodt: DIFF: 2010-11-07 01:12:33 EDT - 2010-11-08 19:59:59 EST = **P-0Y0M1DT18H47M26S**
 test_time_fall_type3_post_type3_redost: DIFF: 2010-11-07 01:14:44 EST - 2010-11-08 19:59:59 EST = **P-0Y0M1DT18H45M15S**
 test_time_fall_type3_post_type3_st: DIFF: 2010-11-07 03:16:55 EST - 2010-11-08 19:59:59 EST = **P-0Y0M1DT16H43M4S**
 test_time_fall_type3_post_type3_post: DIFF: 2010-11-08 19:59:59 EST - 2010-11-08 18:57:55 EST = **P+0Y0M0DT1H2M4S**
