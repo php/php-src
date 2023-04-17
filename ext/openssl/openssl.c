@@ -487,10 +487,7 @@ void php_openssl_errors_set_mark(void) {
 		OPENSSL_G(errors_mark) = pecalloc(1, sizeof(struct php_openssl_errors), 1);
 	}
 
-	errors = OPENSSL_G(errors);
-	errors_mark = OPENSSL_G(errors_mark);
-
-	memcpy(errors_mark, errors, sizeof(struct php_openssl_errors));
+	memcpy(OPENSSL_G(errors_mark), OPENSSL_G(errors), sizeof(struct php_openssl_errors));
 }
 /* }}} */
 
