@@ -1651,7 +1651,6 @@ static int mbfl_filt_conv_jis2004_wchar(int c, mbfl_convert_filter *filter)
 
 		/* conversion for CJK Unified Ideographs ext.B (U+2XXXX) */
 		if (w <= 0) {
-			w1 = (s1 << 8) | s2;
 			k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
 			if (k >= 0) {
 				w = jisx0213_jis_u5_tbl[k] + 0x20000;
@@ -1718,8 +1717,7 @@ static int mbfl_filt_conv_jis2004_wchar(int c, mbfl_convert_filter *filter)
 
 			/* check for japanese chars in CJK Unified Ideographs ext.B (U+2XXXX) */
 			if (w <= 0) {
-				w1 = ((c1 + k + 94) << 8) | c2;
-				k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
+				k = mbfl_bisec_srch2(s, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
 				if (k >= 0) {
 					w = jisx0213_jis_u5_tbl[k] + 0x20000;
 				}
@@ -2165,7 +2163,7 @@ static size_t mb_iso2022jp2004_to_wchar(unsigned char **in, size_t *in_len, uint
 
 					/* Conversion for CJK Unified Ideographs ext.B (U+2XXXX) */
 					if (!w) {
-						int k = mbfl_bisec_srch2((c << 8) | c2, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
+						int k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
 						if (k >= 0) {
 							w = jisx0213_jis_u5_tbl[k] + 0x20000;
 						}
@@ -2192,7 +2190,7 @@ static size_t mb_iso2022jp2004_to_wchar(unsigned char **in, size_t *in_len, uint
 
 						/* Check for Japanese chars in CJK Unified Ideographs ext B (U+2XXXX) */
 						if (!w) {
-							k = mbfl_bisec_srch2(((c + k + 94) << 8) | c2, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
+							k = mbfl_bisec_srch2(s, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
 							if (k >= 0) {
 								w = jisx0213_jis_u5_tbl[k] + 0x20000;
 							}
@@ -7142,25 +7140,17 @@ static size_t mb_sjis2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t 
 			}
 		} else if (c >= 0xA1 && c <= 0xDF) {
 			*out++ = 0xFEC0 + c;
-		} else if (c > 0x80 && c < 0xFD && c != 0xA0) {
+		} else {
 			if (p == e) {
 				*out++ = MBFL_BAD_INPUT;
 				break;
 			}
 			unsigned char c2 = *p++;
-
-			if (c2 < 0x40 || c2 > 0xFC || c2 == 0x7F) {
-				*out++ = MBFL_BAD_INPUT;
-				continue;
-			}
-
-			unsigned int s1, s2;
-			SJIS_DECODE(c, c2, s1, s2);
-			unsigned int w1 = (s1 << 8) | s2, w = 0;
+			uint32_t w1 = sjis_mobile_decode_tbl1[c] + sjis_decode_tbl2[c2];
 
 			/* Conversion for combining characters */
-			if ((w1 >= 0x2477 && w1 <= 0x2479) || (w1 >= 0x2479 && w1 <= 0x247B) || (w1 >= 0x2577 && w1 <= 0x257E) || w1 == 0x2678 || w1 == 0x2B44 || (w1 >= 0x2B48 && w1 <= 0x2B4F) || (w1 >= 0x2B65 && w1 <= 0x2B66)) {
-				int k = mbfl_bisec_srch2(w1, jisx0213_u2_key, jisx0213_u2_tbl_len);
+			if (w1 >= 0x0170 && w1 <= 0x03F1) {
+				int k = mbfl_bisec_srch2(w1, jisx0213_u2_key_b, jisx0213_u2_tbl_len);
 				if (k >= 0) {
 					*out++ = jisx0213_u2_tbl[2*k];
 					*out++ = jisx0213_u2_tbl[2*k+1];
@@ -7169,23 +7159,24 @@ static size_t mb_sjis2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t 
 			}
 
 			/* Conversion for BMP */
-			w1 = (s1 - 0x21)*94 + s2 - 0x21;
 			if (w1 < jisx0213_ucs_table_size) {
-				w = jisx0213_ucs_table[w1];
-			}
-
-			/* Conversion for CJK Unified Ideographs extension B (U+2XXXX) */
-			if (!w) {
-				w1 = (s1 << 8) | s2;
-				int k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
-				if (k >= 0) {
-					w = jisx0213_jis_u5_tbl[k] + 0x20000;
+				uint32_t w = jisx0213_ucs_table[w1];
+				if (w) {
+					*out++ = w;
+					continue;
 				}
 			}
 
-			*out++ = w ? w : MBFL_BAD_INPUT;
-		} else {
-			*out++ = MBFL_BAD_INPUT;
+			/* Conversion for CJK Unified Ideographs extension B (U+2XXXX) */
+			int k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
+			if (k >= 0) {
+				*out++ = jisx0213_jis_u5_tbl[k] + 0x20000;
+			} else {
+				if (c == 0x80 || c == 0xA0 || c >= 0xFD) {
+					p--;
+				}
+				*out++ = MBFL_BAD_INPUT;
+			}
 		}
 	}
 
@@ -9174,7 +9165,6 @@ static size_t mb_eucjp2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 
 			/* Conversion for CJK Unified Ideographs ext.B (U+2XXXX) */
 			if (!w) {
-				w1 = (s1 << 8) | s2;
 				int k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
 				if (k >= 0) {
 					w = jisx0213_jis_u5_tbl[k] + 0x20000;
@@ -9218,7 +9208,7 @@ static size_t mb_eucjp2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t
 
 					/* Check for Japanese chars in CJK Unified Ideographs ext B (U+2XXXX) */
 					if (!w) {
-						k = mbfl_bisec_srch2(((c2 - 0x80 + k + 94) << 8) | (c3 - 0x80), jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
+						k = mbfl_bisec_srch2(s, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
 						if (k >= 0) {
 							w = jisx0213_jis_u5_tbl[k] + 0x20000;
 						}
