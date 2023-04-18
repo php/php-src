@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9397 (exif read : warnings and errors : Potentially invalid
     endianess, Illegal IFD size and Undefined index). (nielsdos)
 
+- Intl:
+  . Fixed bug GH-11071 (TZData version not displayed anymore). (Remi)
+
 - PCRE:
   . Fixed bug GH-10968 (Segfault in preg_replace_callback_array()). (ilutov)
 
