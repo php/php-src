@@ -29,12 +29,24 @@ env:
 jobs:
   LINUX_X64:
     services:
+      mysql:
+        image: mysql:8
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5 -e MYSQL_ROOT_PASSWORD=rootu -e MYSQL_USER=useru -e MYSQL_PASSWORD=userp -e MYSQL_DATABASE=test --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
       postgres:
         image: postgres
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: '<YourStrong@Passw0rd>'
+      oracle:
+        image: gvenzl/oracle-xe:21-slim-faststart
+        env:
+          ORACLE_PASSWORD: pass
     strategy:
       fail-fast: false
       matrix:
@@ -52,19 +64,6 @@ jobs:
     runs-on: ubuntu-22.04
     container:
       image: "${{ matrix.alpine && 'alpine:3.15' || 'ubuntu:focal' }}"
-    services:
-      mysql:
-        image: mysql:8
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5 -e MYSQL_ROOT_PASSWORD=rootu -e MYSQL_USER=useru -e MYSQL_PASSWORD=userp -e MYSQL_DATABASE=test --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
-      mssql:
-        image: mcr.microsoft.com/mssql/server:2019-latest
-        env:
-          ACCEPT_EULA: Y
-          SA_PASSWORD: '<YourStrong@Passw0rd>'
-      oracle:
-        image: gvenzl/oracle-xe:21-slim-faststart
-        env:
-          ORACLE_PASSWORD: pass
     steps:
       - name: apt install bash/git
         if: matrix.alpine
