@@ -4908,9 +4908,10 @@ finish_up_remaining_bytes:
 		for (; i <= len - 16; i += 16) {
 			int8x16_t current_bytes = vld1q_s8((int8_t *)(p + i));
 			/* top bit is all 0, it is ASCII */
-			if (vmaxvq_u8(vreinterpretq_u8_s8(vshrq_n_s8(current_bytes, 8))) == 0) {
+			int8x16_t is_ascii = vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(current_bytes), vdupq_n_u8(0x7F)));
+			if (vmaxvq_u8(is_ascii) == 0) {
 				int8x16_t bad = vceqq_s8(vandq_s8(previous.rawbytes, bad_mask_prev_not_ascii), bad_mask_prev_not_ascii);
-				if (vmaxvq_u8(vreinterpretq_u8_s8(bad))) {
+				if (vmaxvq_u8(vreinterpretq_u8_s8(bad)) != 0) {
 					return false;
 				}
 			}
