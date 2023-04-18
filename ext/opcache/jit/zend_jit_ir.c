@@ -2446,17 +2446,18 @@ static int zend_jit_assign_cv_stub(zend_jit_ctx *jit)
 
 static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 {
-#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
-		flags |= IR_AVX;
-	}
-#endif
 #if defined (__CET__) && (__CET__ & 1) != 0
 	flags |= IR_GEN_ENDBR;
 #endif
 	flags |= IR_OPT_FOLDING | IR_OPT_CFG | IR_OPT_CODEGEN | IR_HAS_CALLS;
 
 	ir_init(&jit->ctx, flags, 256, 1024);
+
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
+		jit->ctx.mflags |= IR_X86_AVX;
+	}
+#endif
 
 	jit->ctx.fixed_regset = (1<<ZREG_FP) | (1<<ZREG_IP);
 	if (!(flags & IR_FUNCTION)) {
