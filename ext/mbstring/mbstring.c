@@ -4895,9 +4895,6 @@ finish_up_remaining_bytes:
 	size_t len = ZSTR_LEN(str);
 
 	static const int8_t _verror[] = {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1};
-	static const int8_t _prev_not_ascii[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -16, -32, -64};
-
-	int8x16_t bad_mask_prev_not_ascii = vld1q_s8(_prev_not_ascii);
 
 	/* error flag vertor */
 	int8x16_t has_error = vdupq_n_s8(0);
@@ -4907,13 +4904,13 @@ finish_up_remaining_bytes:
 	if (len >= 16) {
 		for (; i <= len - 16; i += 16) {
 			int8x16_t current_bytes = vld1q_s8((int8_t *)(p + i));
-			/* top bit is all 0, it is ASCII */
-			int8x16_t is_ascii = vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(current_bytes), vdupq_n_u8(0x7F)));
+			/* All bytes are lower than 0x7F, it is ASCII */
+			uint8x16_t is_ascii = vqsubq_u8(vreinterpretq_u8_s8(current_bytes), vdupq_n_u8(0x7F));
 			if (vmaxvq_u8(is_ascii) == 0) {
-				int8x16_t bad = vceqq_s8(vandq_s8(previous.rawbytes, bad_mask_prev_not_ascii), bad_mask_prev_not_ascii);
-				if (vmaxvq_u8(vreinterpretq_u8_s8(bad)) != 0) {
-					return false;
-				}
+				previous.rawbytes = vdupq_n_s8(0);
+				previous.high_nibbles = vdupq_n_s8(0);
+				previous.carried_continuations = vdupq_n_s8(0);
+				continue;
 			}
 			neon_check_utf8_bytes(current_bytes, &previous, &has_error);
 		}
