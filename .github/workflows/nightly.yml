@@ -59,7 +59,7 @@ jobs:
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.ref == 'master' && !matrix.asan) && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
