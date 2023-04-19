@@ -4896,6 +4896,11 @@ finish_up_remaining_bytes:
 
 	static const int8_t _verror[] = {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1};
 
+	/* Bits mask. If single-byte characters, but there may have previous byte is multi-byte. */
+	static const int8_t _bad_mask[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -16, -32, -64};
+	/* If single-byte character of previous byte is multi-byte mask vector */
+	int8x16_t bad_mask = vld1q_s8(_bad_mask);
+
 	/* error flag vertor */
 	int8x16_t has_error = vdupq_n_s8(0);
 	struct processed_utf_bytes previous = {.rawbytes = vdupq_n_s8(0),
@@ -4907,9 +4912,18 @@ finish_up_remaining_bytes:
 			/* All bytes are lower than 0x7F, it is ASCII */
 			uint8x16_t is_ascii = vqsubq_u8(vreinterpretq_u8_s8(current_bytes), vdupq_n_u8(0x7F));
 			if (vmaxvq_u8(is_ascii) == 0) {
-				previous.rawbytes = vdupq_n_s8(0);
-				previous.high_nibbles = vdupq_n_s8(0);
-				previous.carried_continuations = vdupq_n_s8(0);
+				/* Even if this block only contains sinble-byte characters, there may have been a
+				 * multi-byte character at the end of the previous block, which was supposed to
+				 * have continuation bytes in this block
+				 * This bitmask will pick out a 2/3/4 byte character starting from the last byte of
+				 * the previous block, a 3/4 byte starting from the 2nd last, or a 4 byte starting from the 3rd last
+				 */
+				uint8x16_t bad = vceqq_s8(vandq_s8(previous.rawbytes, bad_mask), bad_mask);
+
+				if (vmaxvq_u8(bad) != 0) {
+					return false;
+				}
+
 				continue;
 			}
 			neon_check_utf8_bytes(current_bytes, &previous, &has_error);
