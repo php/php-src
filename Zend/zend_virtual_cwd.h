@@ -260,7 +260,7 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_OPEN_MODE(path, flags, mode) virtual_open(path, flags, mode)
 #define VCWD_CREAT(path, mode) virtual_creat(path, mode)
 #define VCWD_CHDIR(path) virtual_chdir(path)
-#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir)
+#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, (int (*)(const char *)) virtual_chdir)
 #define VCWD_GETWD(buf)
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path)
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname)
