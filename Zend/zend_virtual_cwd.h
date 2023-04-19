@@ -160,7 +160,7 @@ CWD_API int virtual_cwd_activate(void);
 CWD_API int virtual_cwd_deactivate(void);
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
-CWD_API int virtual_chdir(const char *path);
+CWD_API zend_result virtual_chdir(const char *path);
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path));
 CWD_API int virtual_filepath(const char *path, char **filepath);
 CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path);
