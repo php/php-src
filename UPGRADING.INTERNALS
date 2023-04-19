@@ -51,6 +51,21 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   variable value. This avoids side-effects through destructors between the
   assignment of the variable and the assignment to the result zval in the VM
   (i.e. it may free the new value). See GH-10168 for details.
+* The return types of the following functions were changed from int to
+  zend_result:
+  - open_file_for_scanning
+  - php_rfc1867_callback
+  - virtual_chdir
+  - zend_execute_scripts
+  - zend_get_module_started
+  - zend_handle_undef_args
+  - zend_list_delete
+  - zend_multibyte_parse_encoding_list
+  - zend_multibyte_set_internal_encoding
+  - zend_parse_ini_file
+  - zend_parse_ini_string
+  - zend_set_user_opcode_handler
+  - zend_ssa_inference
 
 ========================
 2. Build system changes

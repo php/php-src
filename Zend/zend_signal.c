@@ -62,7 +62,7 @@ ZEND_API zend_signal_globals_t zend_signal_globals;
 #endif
 
 static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context);
-static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*));
+static zend_result zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*));
 
 #if defined(__CYGWIN__) || defined(__PASE__)
 /* Matches zend_execute_API.c; these platforms don't support ITIMER_PROF. */
