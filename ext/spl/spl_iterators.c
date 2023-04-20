@@ -1828,6 +1828,8 @@ PHP_METHOD(CallbackFilterIterator, accept)
 
 	if (zend_call_function(fci, fcc) != SUCCESS || Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
+	} else if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
 	}
 }
 /* }}} */
