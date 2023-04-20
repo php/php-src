@@ -59,7 +59,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 {
 	php_stream *stream = NULL;
 	php_stream_transport_factory factory = NULL;
-	const char *p, *protocol = NULL;
+	const char *p, *protocol, *orig_path = NULL;
 	size_t n = 0;
 	bool failed = false;
 	bool bailout = false;
@@ -94,6 +94,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		}
 	}
 
+	orig_path = name;
 	for (p = name; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
@@ -135,6 +136,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	if (stream) {
 		zend_try {
 			php_stream_context_set(stream, context);
+			stream->orig_path = pestrdup(orig_path, persistent_id ? 1 : 0);
 
 			if ((flags & STREAM_XPORT_SERVER) == 0) {
 				/* client */
