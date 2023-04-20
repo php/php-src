@@ -966,9 +966,5 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 		return NULL;
 	}
 
-	if (flags == 0) {
-		return stream;
-	}
-
 	return stream;
 }

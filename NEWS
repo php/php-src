@@ -201,6 +201,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.
     (Jakub Zelenka)
+  . Added storing of the original path used to open xport stream.
+    (Luc Vieillescazes)
 
 - XSLTProcessor:
   . Fixed bug #69168 (DomNode::getNodePath() returns invalid path). (nielsdos)
