@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-10737 (PHP 8.1.16 segfaults on line 597 of
     sapi/apache2handler/sapi_apache2.c). (nielsdos, ElliotNB)
   . Fixed bug GH-11028 (Heap Buffer Overflow in zval_undefined_cv.). (nielsdos)
+  . Fixed bug GH-11108 (Incorrect CG(memoize_mode) state after bailout in ??=).
+    (ilutov)
 
 - Date:
   . Fixed bug where the diff() method would not return the right result around
