@@ -534,7 +534,7 @@ failure:
 static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 {
 	if (zend_hash_num_elements(&ce->properties_info) > 0) {
-		zend_property_info *existing_propinfo;
+		zend_property_info *existing_propinfo = NULL;
 		const char *unmangled_class = NULL;
 		const char *unmangled_prop;
 		size_t unmangled_prop_len;
@@ -546,21 +546,25 @@ static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 
 		if (unmangled_class == NULL) {
 			existing_propinfo = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(key));
-			if (existing_propinfo != NULL) {
-				zval_ptr_dtor_str(key);
-				ZVAL_STR_COPY(key, existing_propinfo->name);
-				return 1;
-			}
 		} else {
 			if (!strcmp(unmangled_class, "*")
 			 || !strcasecmp(unmangled_class, ZSTR_VAL(ce->name))) {
 				existing_propinfo = zend_hash_str_find_ptr(
 					&ce->properties_info, unmangled_prop, unmangled_prop_len);
-				if (existing_propinfo != NULL) {
-					zval_ptr_dtor_str(key);
-					ZVAL_STR_COPY(key, existing_propinfo->name);
-					return 1;
-				}
+			}
+		}
+
+		if (existing_propinfo != NULL) {
+			if (!(existing_propinfo->flags & ZEND_ACC_VIRTUAL)) {
+				zval_ptr_dtor_str(key);
+				ZVAL_STR_COPY(key, existing_propinfo->name);
+				return 1;
+			} else {
+				php_error_docref(NULL, E_WARNING,
+					"Cannot unserialize value for hooked property %s::$%s",
+					ZSTR_VAL(existing_propinfo->ce->name), Z_STRVAL_P(key));
+				zval_ptr_dtor_str(key);
+				return -1;
 			}
 		}
 	}

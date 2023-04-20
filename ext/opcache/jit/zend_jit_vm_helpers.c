@@ -828,7 +828,17 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					}
 				}
 				break;
-			case ZEND_FETCH_OBJ_R:
+			case ZEND_FETCH_OBJ_R: {
+				if (opline->op2_type == IS_CONST) {
+					/* Remove the SIMPLE_GET flag to avoid inlining hooks. */
+					void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF);
+					uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+					if (IS_HOOKED_PROPERTY_OFFSET(prop_offset)) {
+						CACHE_PTR_EX(cache_slot + 1, (void*)((uintptr_t)CACHED_PTR_EX(cache_slot + 1) & ~ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT)); \
+					}
+				}
+				ZEND_FALLTHROUGH;
+			}
 			case ZEND_FETCH_OBJ_W:
 			case ZEND_FETCH_OBJ_RW:
 			case ZEND_FETCH_OBJ_IS:
@@ -863,6 +873,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					prop_info = zend_get_property_info(Z_OBJCE_P(obj), prop_name, 1);
 					if (prop_info
 					 && prop_info != ZEND_WRONG_PROPERTY_INFO
+					 && !prop_info->hooks
 					 && !(prop_info->flags & ZEND_ACC_STATIC)) {
 						val = OBJ_PROP(Z_OBJ_P(obj), prop_info->offset);
 						TRACE_RECORD_VM(ZEND_JIT_TRACE_VAL_INFO, NULL, Z_TYPE_P(val), 0, 0);
