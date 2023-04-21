@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug where the diff() method would not return the right result around
     DST changeover for date/times associated with a timezone identifier. (Derick)
+  . Fixed out-of-range bug when converting to/from around the LONG_MIN unix
+    timestamp. (Derick)
 
 - DOM:
   . Fixed bug #80602 (Segfault when using DOMChildNode::before()).
