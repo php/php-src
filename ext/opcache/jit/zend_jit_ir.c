@@ -1188,7 +1188,7 @@ static void zend_jit_gen_phi(zend_jit_ctx *jit, zend_ssa_phi *phi)
 	ZEND_ASSERT(!(jit->ra[dst_var].flags & ZREG_LOAD));
 	ZEND_ASSERT(merge);
 	ZEND_ASSERT(jit->ctx.ir_base[merge].op == IR_MERGE || jit->ctx.ir_base[merge].op == IR_LOOP_BEGIN);
-	ZEND_ASSERT(n == (jit->ctx.ir_base[merge].inputs_count ? jit->ctx.ir_base[merge].inputs_count : 2));
+	ZEND_ASSERT(n == jit->ctx.ir_base[merge].inputs_count);
 
 	ref = ir_emit_N(&jit->ctx, IR_OPT(IR_PHI, type), n + 1);
 	ir_set_op(&jit->ctx, ref, 1, merge);
@@ -3267,7 +3267,7 @@ static void _zend_jit_fix_merges(zend_jit_ctx *jit)
 		if (ref) {
 			insn = &jit->ctx.ir_base[ref];
 			if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
-				n = insn->inputs_count != 0 ? insn->inputs_count : 2;
+				n = insn->inputs_count;
 				/* Remove IS_UNUSED inputs */
 				for (j = k = 0, q = r = insn->ops + 1; j < n; j++, q++) {
 					if (*q) {
@@ -3293,7 +3293,7 @@ static void _zend_jit_fix_merges(zend_jit_ctx *jit)
 						insn->op = IR_BEGIN;
 						insn->inputs_count = 0;
 					} else {
-						insn->inputs_count = (k == 2) ? 0 : k;
+						insn->inputs_count = k;
 					}
 					n2 = 1 + (n >> 2);
 					k2 = 1 + (k >> 2);
@@ -9455,10 +9455,11 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 						end = ir_LOOP_END();
 						insn = &jit->ctx.ir_base[begin];
 						insn->op = IR_LOOP_BEGIN;
+						insn->inputs_count = 2;
 						insn->op2 = end;
 						break;
 					} else if ((insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN)
-							&& (insn->inputs_count == 0 || insn->inputs_count == 2)) {
+							&& insn->inputs_count == 2) {
 						end = ir_LOOP_END();
 						insn = &jit->ctx.ir_base[begin];
 						insn->op = IR_LOOP_BEGIN;
