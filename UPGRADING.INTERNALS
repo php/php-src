@@ -66,6 +66,7 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   - zend_parse_ini_string
   - zend_set_user_opcode_handler
   - zend_ssa_inference
+* Removed unused macros PHP_FNV1_32A_INIT and PHP_FNV1A_64_INIT. See GH-11114.
 
 ========================
 2. Build system changes
