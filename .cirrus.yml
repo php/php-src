@@ -184,7 +184,7 @@ asan_task:
 freebsd_task:
   name: FREEBSD_DEBUG_NTS
   freebsd_instance:
-    image_family: freebsd-13-0
+    image_family: freebsd-13-2
   env:
     ARCH: amd64
   install_script:
