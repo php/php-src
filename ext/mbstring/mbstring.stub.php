@@ -140,7 +140,6 @@ function mb_detect_encoding(string $string, array|string|null $encodings = null,
 
 /**
  * @return array<int, string>
- * @refcount 1
  */
 function mb_list_encodings(): array {}
 

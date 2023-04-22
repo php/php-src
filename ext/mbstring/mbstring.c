@@ -1016,6 +1016,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->internal_encoding_set = 0;
 	mbstring_globals->http_output_set = 0;
 	mbstring_globals->http_input_set = 0;
+	mbstring_globals->all_encodings_list = NULL;
 }
 /* }}} */
 
@@ -1155,6 +1156,13 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 
 	MBSTRG(outconv_enabled) = false;
 	MBSTRG(outconv_state) = 0;
+
+	if (MBSTRG(all_encodings_list)) {
+		GC_DELREF(MBSTRG(all_encodings_list));
+		zend_hash_destroy(MBSTRG(all_encodings_list));
+		efree(MBSTRG(all_encodings_list));
+		MBSTRG(all_encodings_list) = NULL;
+	}
 
 #ifdef HAVE_MBREGEX
 	PHP_RSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -3205,10 +3213,22 @@ PHP_FUNCTION(mb_list_encodings)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	array_init(return_value);
-	for (const mbfl_encoding **encodings = mbfl_get_supported_encodings(); *encodings; encodings++) {
-		add_next_index_string(return_value, (*encodings)->name);
+	if (MBSTRG(all_encodings_list) == NULL) {
+		/* Initialize shared array of supported encoding names
+		 * This is done so that we can check if `mb_list_encodings()` is being
+		 * passed to other mbstring functions using a cheap pointer equality check */
+		HashTable *array = emalloc(sizeof(HashTable));
+		zend_hash_init(array, 80, NULL, zval_ptr_dtor_str, false);
+		for (const mbfl_encoding **encodings = mbfl_get_supported_encodings(); *encodings; encodings++) {
+			zval tmp;
+			ZVAL_STRING(&tmp, (*encodings)->name);
+			zend_hash_next_index_insert(array, &tmp);
+		}
+		MBSTRG(all_encodings_list) = array;
 	}
+
+	GC_ADDREF(MBSTRG(all_encodings_list));
+	RETURN_ARR(MBSTRG(all_encodings_list));
 }
 /* }}} */
 

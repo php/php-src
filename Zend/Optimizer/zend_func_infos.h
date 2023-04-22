@@ -227,7 +227,7 @@ static const func_info_t func_infos[] = {
 	F1("mb_strtoupper", MAY_BE_STRING),
 	F1("mb_strtolower", MAY_BE_STRING),
 	F1("mb_detect_encoding", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	FN("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encoding_aliases", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encode_mimeheader", MAY_BE_STRING),
 	F1("mb_decode_mimeheader", MAY_BE_STRING),
