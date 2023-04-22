@@ -159,6 +159,7 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added TCP_REPAIR for quietly close a connection. (David Carlier)
   . Added SO_REUSEPORT_LB freebsd constant. (David Carlier)
+  . Added IP_BIND_ADDRESS_NO_PORT. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)

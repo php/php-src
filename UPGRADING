@@ -235,6 +235,7 @@ PHP 8.3 UPGRADE NOTES
   . SO_SPLICE (OpenBSD only).
   . TCP_REPAIR (Linux only).
   . SO_REUSEPORT_LB (FreeBSD only).
+  . IP_BIND_ADDRESS_NO_PORT (Linux only).
 
 ========================================
 11. Changes to INI File Handling
