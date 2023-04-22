@@ -7272,6 +7272,36 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_closure_self_reference(zend_ast *ast) /* {{{ */
+{
+	zend_op_array* op_array = CG(active_op_array);
+
+	zend_string *var_name = zend_ast_get_str(ast);
+
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
+	{
+		int i;
+		for (i = 0; i < op_array->last_var; i++) {
+			if (zend_string_equals(op_array->vars[i], var_name)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use lexical variable $%s as self reference", ZSTR_VAL(var_name));
+			}
+		}
+	}
+
+	if (zend_string_equals_literal(var_name, "this")) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as self reference");
+	}
+
+	zend_op *opline;
+
+	opline = zend_emit_op(NULL, ZEND_BIND_SELF_REFERENCE, NULL, NULL);
+	opline->op1_type = IS_CV;
+	opline->op1.var = lookup_cv(var_name);
+}
+/* }}} */
+
 static void zend_compile_implicit_closure_uses(closure_info *info)
 {
 	zend_string *var_name;
@@ -7433,6 +7463,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
+	zend_ast *as_ast = decl->child[5];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
 	zend_string *lcname;
 
@@ -7518,6 +7549,11 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		zend_hash_destroy(&info.uses);
 	} else if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
+	}
+
+	if (as_ast) {
+		zend_compile_closure_self_reference(as_ast);
+		op_array->fn_flags |= ZEND_ACC_SELF_REFERENCE;
 	}
 
 	if (ast->kind == ZEND_AST_ARROW_FUNC) {

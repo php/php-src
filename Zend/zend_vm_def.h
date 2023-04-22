@@ -9476,6 +9476,20 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(203, ZEND_BIND_SELF_REFERENCE, CV, UNUSED, REF)
+{
+	USE_OPLINE
+	zval *variable_ptr;
+
+	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+
+	zend_closure_from_frame(variable_ptr, execute_data);
+
+	Z_ADDREF_P(variable_ptr);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
 {
 	USE_OPLINE
