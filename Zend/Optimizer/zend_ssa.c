@@ -698,6 +698,7 @@ add_op1_def:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
 		case ZEND_FETCH_LIST_W:
+		case ZEND_BIND_SELF_REFERENCE:
 			if (opline->op1_type == IS_CV) {
 				goto add_op1_def;
 			}
