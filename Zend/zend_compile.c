@@ -7195,7 +7195,7 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	}
 }
 
-static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast)
+static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast, zend_ast *as_ast)
 {
 	zend_ast_list *param_list = zend_ast_get_list(params_ast);
 	uint32_t i;
@@ -7208,6 +7208,9 @@ static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_a
 	for (i = 0; i < param_list->children; i++) {
 		zend_ast *param_ast = param_list->child[i];
 		zend_hash_del(&info->uses, zend_ast_get_str(param_ast->child[1]));
+	}
+	if (as_ast) {
+		zend_hash_del(&info->uses, zend_ast_get_str(as_ast));
 	}
 }
 
@@ -7498,7 +7501,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	} else {
 		lcname = zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
-			find_implicit_binds(&info, params_ast, stmt_ast);
+			find_implicit_binds(&info, params_ast, stmt_ast, as_ast);
 			compile_implicit_lexical_binds(&info, result, op_array);
 		} else if (uses_ast) {
 			zend_compile_closure_binding(result, op_array, uses_ast);

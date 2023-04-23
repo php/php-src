@@ -5,7 +5,7 @@ Testing Closure self-reference functionality: Basic
 
 $factorial = function(int $num) as $factorial {
     if($num > 1) {
-        return $num + $factorial($num - 1);
+        return $num * $factorial($num - 1);
     }
     return $num;
 };
@@ -33,7 +33,7 @@ echo (function() as $fn : string {
 
 ?>
 --EXPECTF--
-4! = 10
+4! = 24
 Hi
 Hello
 Closure
