@@ -4586,8 +4586,89 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 /* If we are building an AVX2-only binary, don't compile the next function */
 #ifndef ZEND_INTRIN_AVX2_NATIVE
 
+bool utf8_naive(const unsigned char *p, int length)
+{
+	/* This UTF-8 validation function is derived from PCRE2 */
+	/* Table of the number of extra bytes, indexed by the first byte masked with
+	0x3f. The highest number for a valid UTF-8 first byte is in fact 0x3d. */
+	static const uint8_t utf8_table[] = {
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		3,3,3,3,3,3,3,3
+	};
+
+	for (; length > 0; p++) {
+		uint32_t d;
+		unsigned char c = *p;
+		length--;
+
+		if (c < 128) {
+			/* ASCII character */
+			continue;
+		}
+
+		if (c < 0xc0) {
+			/* Isolated 10xx xxxx byte */
+			return false;
+		}
+
+		if (c >= 0xf5) {
+			return false;
+		}
+
+		uint32_t ab = utf8_table[c & 0x3f]; /* Number of additional bytes (1-3) */
+		if (length < ab) {
+			/* Missing bytes */
+			return false;
+		}
+		length -= ab;
+
+		/* Check top bits in the second byte */
+		if (((d = *(++p)) & 0xc0) != 0x80) {
+			return false;
+		}
+
+		/* For each length, check that the remaining bytes start with the 0x80 bit
+		 * set and not the 0x40 bit. Then check for an overlong sequence, and for the
+		 * excluded range 0xd800 to 0xdfff. */
+		switch (ab) {
+		case 1:
+			/* 2-byte character. No further bytes to check for 0x80. Check first byte
+			 * for for xx00 000x (overlong sequence). */
+			if ((c & 0x3e) == 0) {
+				return false;
+			}
+			break;
+
+		case 2:
+			/* 3-byte character. Check third byte for 0x80. Then check first 2 bytes for
+			 * 1110 0000, xx0x xxxx (overlong sequence) or 1110 1101, 1010 xxxx (0xd800-0xdfff) */
+			if ((*(++p) & 0xc0) != 0x80 || (c == 0xe0 && (d & 0x20) == 0) || (c == 0xed && d >= 0xa0)) {
+				return false;
+			}
+			break;
+
+		case 3:
+			/* 4-byte character. Check 3rd and 4th bytes for 0x80. Then check first 2
+			 * bytes for for 1111 0000, xx00 xxxx (overlong sequence), then check for a
+			 * character greater than 0x0010ffff (f4 8f bf bf) */
+			if ((*(++p) & 0xc0) != 0x80 || (*(++p) & 0xc0) != 0x80 || (c == 0xf0 && (d & 0x30) == 0) || (c > 0xf4 || (c == 0xf4 && d > 0x8f))) {
+				return false;
+			}
+			break;
+
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+	}
+
+	return true;
+
+}
+
 #ifdef __aarch64__
-/* Adopted from: https://github.com/cyb70289/utf8/blob/master/lemire-neon.c
+/* Adopted from range algorithm: https://github.com/cyb70289/utf8/
+ * Thanks to @cyb70289 and @easyaspi314
  *
  * MIT License
  * 
@@ -4613,82 +4694,207 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
  */
 #include <arm_neon.h>
 
-/* before result 16 bytes */
-struct processed_utf_bytes {
-	int8x16_t rawbytes;
-	int8x16_t high_nibbles;
-	int8x16_t carried_continuations;
+/*
+ * Map high nibble of "First Byte" to legal character length minus 1
+ * 0x00 ~ 0xBF --> 0
+ * 0xC0 ~ 0xDF --> 1
+ * 0xE0 ~ 0xEF --> 2
+ * 0xF0 ~ 0xFF --> 3
+ */
+static const uint8_t _first_len_tbl[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 3,
 };
 
-static inline void neon_check_utf8_bytes(int8x16_t current_bytes, struct processed_utf_bytes *previous, int8x16_t *has_error) {
-	static const int8_t _nibbles[] = {
-		1, 1, 1, 1, 1, 1, 1, 1, /* 0xxx (ASCII) */
-		0, 0, 0, 0,             /* 10xx (continuation) */
-		2, 2,                   /* 110x */
-		3,                      /* 1110 */
-		4,                      /* 1111, next should be 0 (not checked here) */
-	};
+/* Map "First Byte" to 8-th item of range table (0xC2 ~ 0xF4) */
+static const uint8_t _first_range_tbl[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8,
+};
 
-	/* -128 is false, index 0xC less than 0xC2, index 0xE less than 0xE1, index 0xF less than 0xF1 */
-	static const int8_t _initial_mins[] = {
-		-128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
-		-128, -128,
-		0xC2, -128,
-		0xE1,
-		0xF1,
-	};
+/*
+ * Range table, map range index to min and max values
+ * Index 0    : 00 ~ 7F (First Byte, ascii)
+ * Index 1,2,3: 80 ~ BF (Second, Third, Fourth Byte)
+ * Index 4    : A0 ~ BF (Second Byte after E0)
+ * Index 5    : 80 ~ 9F (Second Byte after ED)
+ * Index 6    : 90 ~ BF (Second Byte after F0)
+ * Index 7    : 80 ~ 8F (Second Byte after F4)
+ * Index 8    : C2 ~ F4 (First Byte, non ascii)
+ * Index 9~15 : illegal: u >= 255 && u <= 0
+ */
+static const uint8_t _range_min_tbl[] = {
+	0x00, 0x80, 0x80, 0x80, 0xA0, 0x80, 0x90, 0x80,
+	0xC2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+};
+static const uint8_t _range_max_tbl[] = {
+	0x7F, 0xBF, 0xBF, 0xBF, 0xBF, 0x9F, 0xBF, 0x8F,
+	0xF4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
 
-	/* -128 is false, 127 is true, index 0xE less than 0xA0, index 0xF less than 0x90 */
-	static const int8_t _second_mins[] = {
-		-128, -128, -128, -128, -128, -128, -128, -128, -128, -128,
-		-128, -128,
-		127, 127,
-		0xA0,
-		0x90,
-	};
-	struct processed_utf_bytes pb;
-	pb.rawbytes = current_bytes;
-	/* pick high nibbles (right shift 4bits) */
-	pb.high_nibbles = vreinterpretq_s8_u8(vshrq_n_u8(vreinterpretq_u8_s8(current_bytes), 4));
-	/* saturation reduction check smaller than 0xF4 */
-	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(current_bytes), vdupq_n_u8(0xF4))));
+/*
+ * This table is for fast handling four special First Bytes(E0,ED,F0,F4), after
+ * which the Second Byte are not 80~BF. It contains "range index adjustment".
+ * - The idea is to minus byte with E0, use the result(0~31) as the index to
+ *   lookup the "range index adjustment". Then add the adjustment to original
+ *   range index to get the correct range.
+ * - Range index adjustment
+ *   +------------+---------------+------------------+----------------+
+ *   | First Byte | original range| range adjustment | adjusted range |
+ *   +------------+---------------+------------------+----------------+
+ *   | E0         | 2             | 2                | 4              |
+ *   +------------+---------------+------------------+----------------+
+ *   | ED         | 2             | 3                | 5              |
+ *   +------------+---------------+------------------+----------------+
+ *   | F0         | 3             | 3                | 6              |
+ *   +------------+---------------+------------------+----------------+
+ *   | F4         | 4             | 4                | 8              |
+ *   +------------+---------------+------------------+----------------+
+ * - Below is a uint8x16x2 table, data is interleaved in NEON register. So I'm
+ *   putting it vertically. 1st column is for E0~EF, 2nd column for F0~FF.
+ */
+static const uint8_t _range_adjust_tbl[] = {
+    /* index -> 0~15  16~31 <- index */
+    /*  E0 -> */ 2,     3, /* <- F0  */
+                 0,     0,
+                 0,     0,
+                 0,     0,
+                 0,     4, /* <- F4  */
+                 0,     0,
+                 0,     0,
+                 0,     0,
+                 0,     0,
+                 0,     0,
+                 0,     0,
+                 0,     0,
+                 0,     0,
+    /*  ED -> */ 3,     0,
+                 0,     0,
+                 0,     0,
+};
 
-	/* convert to length to first byte, not first byte is convert to 0.
-	 * overlap || underlap
-	 * carry > length && length > 0 || !(carry > length) && !(length > 0)
-	 * (carry > length) == (lengths > 0)
-	 */
-	int8x16_t initial_lengths = vqtbl1q_s8(vld1q_s8(_nibbles), vreinterpretq_u8_s8(pb.high_nibbles));
-	int8x16_t right1 = vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(vextq_s8(previous->carried_continuations, initial_lengths, 16 - 1)), vdupq_n_u8(1)));
-	int8x16_t sum = vaddq_s8(initial_lengths, right1);
-	int8x16_t right2 = vreinterpretq_s8_u8(vqsubq_u8(vreinterpretq_u8_s8(vextq_s8(previous->carried_continuations, sum, 16 - 2)), vdupq_n_u8(2)));
-	pb.carried_continuations = vaddq_s8(sum, right2);
-	uint8x16_t overunder = vceqq_u8(vcgtq_s8(pb.carried_continuations, initial_lengths), vcgtq_s8(initial_lengths, vdupq_n_s8(0)));
-	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(overunder));
+bool utf8_range(const unsigned char *data, int len)
+{
+	if (len >= 16) {
+		uint8x16_t prev_input = vdupq_n_u8(0);
+		uint8x16_t prev_first_len = vdupq_n_u8(0);
 
-	/* check if find 0xED, not over 0x9F, check if find 0xF4, not over 0x8F */
-	int8x16_t off1_current_bytes = vextq_s8(previous->rawbytes, pb.rawbytes, 16 - 1);
-	uint8x16_t maskED = vceqq_s8(off1_current_bytes, vdupq_n_s8(0xED));
-	uint8x16_t maskF4 = vceqq_s8(off1_current_bytes, vdupq_n_s8(0xF4));
-	uint8x16_t badfollowED = vandq_u8(vcgtq_s8(current_bytes, vdupq_n_s8(0x9F)), maskED);
-	uint8x16_t badfollowF4 = vandq_u8(vcgtq_s8(current_bytes, vdupq_n_s8(0x8F)), maskF4);
-	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(vorrq_u8(badfollowED, badfollowF4)));
+		/* Cached tables */
+		const uint8x16_t first_len_tbl = vld1q_u8(_first_len_tbl);
+		const uint8x16_t first_range_tbl = vld1q_u8(_first_range_tbl);
+		const uint8x16_t range_min_tbl = vld1q_u8(_range_min_tbl);
+		const uint8x16_t range_max_tbl = vld1q_u8(_range_max_tbl);
+		const uint8x16x2_t range_adjust_tbl = vld2q_u8(_range_adjust_tbl);
 
-	/* hibits   low    high
-	 * C    => < C2 && true
-	 * E    => < E1 && < A0
-	 * F    => < F1 && < 90
-	 * else => false && false
-	 */
-	int8x16_t off1_hibits = vextq_s8(previous->high_nibbles, pb.high_nibbles, 16 - 1);
-	int8x16_t initial_mins = vqtbl1q_s8(vld1q_s8(_initial_mins), vreinterpretq_u8_s8(off1_hibits));
-	uint8x16_t initial_under = vcgtq_s8(initial_mins, off1_current_bytes);
-	int8x16_t second_mins = vqtbl1q_s8(vld1q_s8(_second_mins), vreinterpretq_u8_s8(off1_hibits));
-	uint8x16_t second_under = vcgtq_s8(second_mins, current_bytes);
-	*has_error = vorrq_s8(*has_error, vreinterpretq_s8_u8(vandq_u8(initial_under, second_under)));
+		/* Cached values */
+		const uint8x16_t const_1 = vdupq_n_u8(1);
+		const uint8x16_t const_2 = vdupq_n_u8(2);
+		const uint8x16_t const_e0 = vdupq_n_u8(0xE0);
 
-	/* store previous byte */
-	*previous = pb;
+		/* We use two error registers to remove a dependency. */
+		uint8x16_t error1 = vdupq_n_u8(0);
+		uint8x16_t error2 = vdupq_n_u8(0);
+
+		while (len >= 16) {
+			const uint8x16_t input = vld1q_u8(data);
+
+			/* high_nibbles = input >> 4 */
+			const uint8x16_t high_nibbles = vshrq_n_u8(input, 4);
+
+			/* first_len = legal character length minus 1 */
+			/* 0 for 00~7F, 1 for C0~DF, 2 for E0~EF, 3 for F0~FF */
+			/* first_len = first_len_tbl[high_nibbles] */
+			const uint8x16_t first_len =
+				vqtbl1q_u8(first_len_tbl, high_nibbles);
+
+			/* First Byte: set range index to 8 for bytes within 0xC0 ~ 0xFF */
+			/* range = first_range_tbl[high_nibbles] */
+			uint8x16_t range = vqtbl1q_u8(first_range_tbl, high_nibbles);
+
+			/* Second Byte: set range index to first_len */
+			/* 0 for 00~7F, 1 for C0~DF, 2 for E0~EF, 3 for F0~FF */
+			/* range |= (first_len, prev_first_len) << 1 byte */
+			range =
+				vorrq_u8(range, vextq_u8(prev_first_len, first_len, 15));
+
+			/* Third Byte: set range index to saturate_sub(first_len, 1) */
+			/* 0 for 00~7F, 0 for C0~DF, 1 for E0~EF, 2 for F0~FF */
+			uint8x16_t tmp1, tmp2;
+			/* tmp1 = (first_len, prev_first_len) << 2 bytes */
+			tmp1 = vextq_u8(prev_first_len, first_len, 14);
+			/* tmp1 = saturate_sub(tmp1, 1) */
+			tmp1 = vqsubq_u8(tmp1, const_1);
+			/* range |= tmp1 */
+			range = vorrq_u8(range, tmp1);
+
+			/* Fourth Byte: set range index to saturate_sub(first_len, 2) */
+			/* 0 for 00~7F, 0 for C0~DF, 0 for E0~EF, 1 for F0~FF */
+			/* tmp2 = (first_len, prev_first_len) << 3 bytes */
+			tmp2 = vextq_u8(prev_first_len, first_len, 13);
+			/* tmp2 = saturate_sub(tmp2, 2) */
+			tmp2 = vqsubq_u8(tmp2, const_2);
+			/* range |= tmp2 */
+			range = vorrq_u8(range, tmp2);
+
+			/*
+			 * Now we have below range indices caluclated
+			 * Correct cases:
+			 * - 8 for C0~FF
+			 * - 3 for 1st byte after F0~FF
+			 * - 2 for 1st byte after E0~EF or 2nd byte after F0~FF
+			 * - 1 for 1st byte after C0~DF or 2nd byte after E0~EF or
+			 *         3rd byte after F0~FF
+			 * - 0 for others
+			 * Error cases:
+			 *   9,10,11 if non ascii First Byte overlaps
+			 *   E.g., F1 80 C2 90 --> 8 3 10 2, where 10 indicates error
+			 */
+
+			/* Adjust Second Byte range for special First Bytes(E0,ED,F0,F4) */
+			/* See _range_adjust_tbl[] definition for details */
+			/* Overlaps lead to index 9~15, which are illegal in range table */
+			uint8x16_t shift1 = vextq_u8(prev_input, input, 15);
+			uint8x16_t pos = vsubq_u8(shift1, const_e0);
+			range = vaddq_u8(range, vqtbl2q_u8(range_adjust_tbl, pos));
+
+			/* Load min and max values per calculated range index */
+			uint8x16_t minv = vqtbl1q_u8(range_min_tbl, range);
+			uint8x16_t maxv = vqtbl1q_u8(range_max_tbl, range);
+
+			/* Check value range */
+			error1 = vorrq_u8(error1, vcltq_u8(input, minv));
+			error2 = vorrq_u8(error2, vcgtq_u8(input, maxv));
+
+			prev_input = input;
+			prev_first_len = first_len;
+
+			data += 16;
+			len -= 16;
+		}
+		/* Merge our error counters together */
+		error1 = vorrq_u8(error1, error2);
+
+		/* Delay error check till loop ends */
+		if (vmaxvq_u8(error1))
+			return false;
+
+		/* Find previous token (not 80~BF) */
+		uint32_t token4;
+		vst1q_lane_u32(&token4, vreinterpretq_u32_u8(prev_input), 3);
+
+		const int8_t *token = (const int8_t *)&token4;
+		int lookahead = 0;
+		if (token[3] > (int8_t)0xBF)
+			lookahead = 1;
+		else if (token[2] > (int8_t)0xBF)
+			lookahead = 2;
+		else if (token[1] > (int8_t)0xBF)
+			lookahead = 3;
+
+		data -= lookahead;
+		len += lookahead;
+	}
+
+	/* Check remaining bytes with naive method */
+	return utf8_naive(data, len);
 }
 #endif
 
@@ -4885,139 +5091,14 @@ finish_up_remaining_bytes:
 	}
 
 	return true;
-# elif defined(__aarch64__)
-	/* The algorithm used here for UTF-8 validation is partially adapted from the
-	 * paper "Validating UTF-8 In Less Than One Instruction Per Byte", by John Keiser
-	 * and Daniel Lemire.
-	 * Ref: https://arxiv.org/pdf/2010.03090.pdf
-	 */
-	size_t i = 0;
-	size_t len = ZSTR_LEN(str);
-
-	static const int8_t _verror[] = {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1};
-
-	/* Bits mask. If single-byte characters, but there may have previous byte is multi-byte. */
-	static const int8_t _bad_mask[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -16, -32, -64};
-	/* If single-byte character of previous byte is multi-byte mask vector */
-	int8x16_t bad_mask = vld1q_s8(_bad_mask);
-
-	/* error flag vertor */
-	int8x16_t has_error = vdupq_n_s8(0);
-	struct processed_utf_bytes previous = {.rawbytes = vdupq_n_s8(0),
-		.high_nibbles = vdupq_n_s8(0),
-		.carried_continuations = vdupq_n_s8(0)};
-	if (len >= 16) {
-		for (; i <= len - 16; i += 16) {
-			int8x16_t current_bytes = vld1q_s8((int8_t *)(p + i));
-			/* All bytes are lower than 0x7F, it is ASCII */
-			uint8x16_t is_ascii = vqsubq_u8(vreinterpretq_u8_s8(current_bytes), vdupq_n_u8(0x7F));
-			if (vmaxvq_u8(is_ascii) == 0) {
-				/* Even if this block only contains sinble-byte characters, there may have been a
-				 * multi-byte character at the end of the previous block, which was supposed to
-				 * have continuation bytes in this block
-				 * This bitmask will pick out a 2/3/4 byte character starting from the last byte of
-				 * the previous block, a 3/4 byte starting from the 2nd last, or a 4 byte starting from the 3rd last
-				 */
-				uint8x16_t bad = vceqq_s8(vandq_s8(previous.rawbytes, bad_mask), bad_mask);
-
-				if (vmaxvq_u8(bad) != 0) {
-					return false;
-				}
-
-				continue;
-			}
-			neon_check_utf8_bytes(current_bytes, &previous, &has_error);
-		}
-	}
-
-	if (i < len) {
-		int8_t buffer[16];
-		memset(buffer, 0, 16);
-		memcpy(buffer, p + i, len - i);
-		int8x16_t current_bytes = vld1q_s8(buffer);
-		neon_check_utf8_bytes(current_bytes, &previous, &has_error);
-	} else {
-		has_error = vorrq_s8(vreinterpretq_s8_u8(vcgtq_s8(previous.carried_continuations, vld1q_s8(_verror))), has_error);
-	}
-
-	return vmaxvq_u8(vreinterpretq_u8_s8(has_error)) == 0 ? true : false;
 # else
-	/* This UTF-8 validation function is derived from PCRE2 */
 	size_t length = ZSTR_LEN(str);
-	/* Table of the number of extra bytes, indexed by the first byte masked with
-	0x3f. The highest number for a valid UTF-8 first byte is in fact 0x3d. */
-	static const uint8_t utf8_table[] = {
-		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-		3,3,3,3,3,3,3,3
-	};
-
-	for (; length > 0; p++) {
-		uint32_t d;
-		unsigned char c = *p;
-		length--;
-
-		if (c < 128) {
-			/* ASCII character */
-			continue;
-		}
-
-		if (c < 0xc0) {
-			/* Isolated 10xx xxxx byte */
-			return false;
-		}
-
-		if (c >= 0xf5) {
-			return false;
-		}
-
-		uint32_t ab = utf8_table[c & 0x3f]; /* Number of additional bytes (1-3) */
-		if (length < ab) {
-			/* Missing bytes */
-			return false;
-		}
-		length -= ab;
-
-		/* Check top bits in the second byte */
-		if (((d = *(++p)) & 0xc0) != 0x80) {
-			return false;
-		}
-
-		/* For each length, check that the remaining bytes start with the 0x80 bit
-		 * set and not the 0x40 bit. Then check for an overlong sequence, and for the
-		 * excluded range 0xd800 to 0xdfff. */
-		switch (ab) {
-		case 1:
-			/* 2-byte character. No further bytes to check for 0x80. Check first byte
-			 * for for xx00 000x (overlong sequence). */
-			if ((c & 0x3e) == 0) {
-				return false;
-			}
-			break;
-
-		case 2:
-			/* 3-byte character. Check third byte for 0x80. Then check first 2 bytes for
-			 * 1110 0000, xx0x xxxx (overlong sequence) or 1110 1101, 1010 xxxx (0xd800-0xdfff) */
-			if ((*(++p) & 0xc0) != 0x80 || (c == 0xe0 && (d & 0x20) == 0) || (c == 0xed && d >= 0xa0)) {
-				return false;
-			}
-			break;
-
-		case 3:
-			/* 4-byte character. Check 3rd and 4th bytes for 0x80. Then check first 2
-			 * bytes for for 1111 0000, xx00 xxxx (overlong sequence), then check for a
-			 * character greater than 0x0010ffff (f4 8f bf bf) */
-			if ((*(++p) & 0xc0) != 0x80 || (*(++p) & 0xc0) != 0x80 || (c == 0xf0 && (d & 0x30) == 0) || (c > 0xf4 || (c == 0xf4 && d > 0x8f))) {
-				return false;
-			}
-			break;
-
-			EMPTY_SWITCH_DEFAULT_CASE();
-		}
-	}
-
-	return true;
+# if defined(__aarch64__)
+	/* use to range algorithm, if less than 16 bytes, fallback to naive algorithm. */
+	return utf8_range(p, length);
+# else
+	return utf8_naive(p, length);
+# endif /* if defined(__aarch64__) */
 # endif
 }
 
