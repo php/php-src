@@ -1722,14 +1722,14 @@ function array_pad(array $array, int $length, mixed $value): array {}
 
 /**
  * @return array<int|string, int|string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_flip(array $array): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
@@ -1738,7 +1738,10 @@ function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
  */
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect_key(array $array, array ...$arrays): array {}
 
 /**
@@ -1747,7 +1750,10 @@ function array_intersect_key(array $array, array ...$arrays): array {}
  */
 function array_intersect_ukey(array $array, ...$rest): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect(array $array, array ...$arrays): array {}
 
 /**
@@ -1756,7 +1762,10 @@ function array_intersect(array $array, array ...$arrays): array {}
  */
 function array_uintersect(array $array, ...$rest): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect_assoc(array $array, array ...$arrays): array {}
 
 /**
@@ -1778,8 +1787,8 @@ function array_intersect_uassoc(array $array, ...$rest): array {}
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_key(array $array, array ...$arrays): array {}
 
@@ -1801,8 +1810,8 @@ function array_diff(array $array, array ...$arrays): array {}
 function array_udiff(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_assoc(array $array, array ...$arrays): array {}
 
@@ -1867,8 +1876,8 @@ function array_is_list(array $array): bool {}
 /* base64.c */
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function base64_encode(string $string): string {}
 
@@ -2280,8 +2289,8 @@ function wordwrap(string $string, int $width = 75, string $break = "\n", bool $c
 
 /**
  * @return array<int, string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function explode(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
@@ -2958,42 +2967,61 @@ function mail(string $to, string $subject, string $message, array|string $additi
 
 /* math.c */
 
+/** @compile-time-eval */
 function abs(int|float $num): int|float {}
 
+/** @compile-time-eval */
 function ceil(int|float $num): float {}
 
+/** @compile-time-eval */
 function floor(int|float $num): float {}
 
+/** @compile-time-eval */
 function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
 
+/** @compile-time-eval */
 function sin(float $num): float {}
 
+/** @compile-time-eval */
 function cos(float $num): float {}
 
+/** @compile-time-eval */
 function tan(float $num): float {}
 
+/** @compile-time-eval */
 function asin(float $num): float {}
 
+/** @compile-time-eval */
 function acos(float $num): float {}
 
+/** @compile-time-eval */
 function atan(float $num): float {}
 
+/** @compile-time-eval */
 function atanh(float $num): float {}
 
+/** @compile-time-eval */
 function atan2(float $y, float $x): float {}
 
+/** @compile-time-eval */
 function sinh(float $num): float {}
 
+/** @compile-time-eval */
 function cosh(float $num): float {}
 
+/** @compile-time-eval */
 function tanh(float $num): float {}
 
+/** @compile-time-eval */
 function asinh(float $num): float {}
 
+/** @compile-time-eval */
 function acosh(float $num): float {}
 
+/** @compile-time-eval */
 function expm1(float $num): float {}
 
+/** @compile-time-eval */
 function log1p(float $num): float {}
 
 /** @compile-time-eval */
@@ -3014,18 +3042,25 @@ function is_infinite(float $num): bool {}
 /** @compile-time-eval */
 function pow(mixed $num, mixed $exponent): int|float|object {}
 
+/** @compile-time-eval */
 function exp(float $num): float {}
 
+/** @compile-time-eval */
 function log(float $num, float $base = M_E): float {}
 
+/** @compile-time-eval */
 function log10(float $num): float {}
 
+/** @compile-time-eval */
 function sqrt(float $num): float {}
 
+/** @compile-time-eval */
 function hypot(float $x, float $y): float {}
 
+/** @compile-time-eval */
 function deg2rad(float $num): float {}
 
+/** @compile-time-eval */
 function rad2deg(float $num): float {}
 
 /** @compile-time-eval */
@@ -3055,14 +3090,26 @@ function decoct(int $num): string {}
  */
 function dechex(int $num): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function base_convert(string $num, int $from_base, int $to_base): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
 
+/**
+ * @compile-time-eval
+ */
 function fmod(float $num1, float $num2): float {}
 
+/**
+ * @compile-time-eval
+ */
 function fdiv(float $num1, float $num2): float {}
 
 /* microtime.c */
@@ -3088,11 +3135,15 @@ function getrusage(int $mode = 0): array|false {}
 
 /* pack.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function pack(string $format, mixed ...$values): string {}
 
 /**
  * @return array<int|string, mixed>|false
+ * @compile-time-eval
  * @refcount 1
  */
 function unpack(string $format, string $string, int $offset = 0): array|false {}
@@ -3358,29 +3409,59 @@ function socket_set_timeout($stream, int $seconds, int $microseconds = 0): bool 
 
 /* type.c */
 
+/**
+ * @compile-time-eval
+ */
 function gettype(mixed $value): string {}
 
+/**
+ * @compile-time-eval
+ */
 function get_debug_type(mixed $value): string {}
 
 function settype(mixed &$var, string $type): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function intval(mixed $value, int $base = 10): int {}
 
+/**
+ * @compile-time-eval
+ */
 function floatval(mixed $value): float {}
 
 /** @alias floatval */
 function doubleval(mixed $value): float {}
 
+/**
+ * @compile-time-eval
+ */
 function boolval(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function strval(mixed $value): string {}
 
+/**
+ * @compile-time-eval
+ */
 function is_null(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_resource(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_bool(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_int(mixed $value): bool {}
 
 /** @alias is_int */
@@ -3389,26 +3470,50 @@ function is_integer(mixed $value): bool {}
 /** @alias is_int */
 function is_long(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_float(mixed $value): bool {}
 
 /** @alias is_float */
 function is_double(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_numeric(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_string(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_array(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_object(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_scalar(mixed $value): bool {}
 
 /** @param string $callable_name */
 function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_iterable(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_countable(mixed $value): bool {}
 
 /* uniqid.c */
