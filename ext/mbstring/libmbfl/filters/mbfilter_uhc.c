@@ -71,7 +71,8 @@ const mbfl_encoding mbfl_encoding_uhc = {
 	&vtbl_uhc_wchar,
 	&vtbl_wchar_uhc,
 	mb_uhc_to_wchar,
-	mb_wchar_to_uhc
+	mb_wchar_to_uhc,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_uhc_wchar = {

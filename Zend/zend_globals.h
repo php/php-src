@@ -193,22 +193,24 @@ struct _zend_executor_globals {
 
 	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
 
-	zend_long precision;
-
 	int ticks_count;
+
+	zend_long precision;
 
 	uint32_t persistent_constants_count;
 	uint32_t persistent_functions_count;
 	uint32_t persistent_classes_count;
 
-	HashTable *in_autoload;
-	bool full_tables_cleanup;
-
 	/* for extended information support */
 	bool no_extensions;
 
+	bool full_tables_cleanup;
+
 	zend_atomic_bool vm_interrupt;
 	zend_atomic_bool timed_out;
+
+	HashTable *in_autoload;
+
 	zend_long hard_timeout;
 	void *stack_base;
 	void *stack_limit;
@@ -221,19 +223,20 @@ struct _zend_executor_globals {
 	HashTable persistent_list;
 
 	int user_error_handler_error_reporting;
+	bool exception_ignore_args;
 	zval user_error_handler;
 	zval user_exception_handler;
 	zend_stack user_error_handlers_error_reporting;
 	zend_stack user_error_handlers;
 	zend_stack user_exception_handlers;
 
-	zend_error_handling_t  error_handling;
 	zend_class_entry      *exception_class;
+	zend_error_handling_t  error_handling;
+
+	int capture_warnings_during_sccp;
 
 	/* timeout support */
 	zend_long timeout_seconds;
-
-	int capture_warnings_during_sccp;
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
@@ -266,7 +269,6 @@ struct _zend_executor_globals {
 
 	HashTable weakrefs;
 
-	bool exception_ignore_args;
 	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;

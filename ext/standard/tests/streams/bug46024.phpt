@@ -5,7 +5,7 @@ Bug #46024 stream_select() doesn't return the correct number
 if (!getenv('TEST_PHP_EXECUTABLE_ESCAPED')) die("skip TEST_PHP_EXECUTABLE_ESCAPED not defined");
 // Terminating the process may cause a bailout while writing out the phpinfo,
 // which may leak a temporary hash table. This does not seems worth fixing.
-if (getenv('SKIP_ASAN')) die("skip Test may leak");
+if (getenv('SKIP_ASAN')) die("xleak Test may leak");
 ?>
 --FILE--
 <?php

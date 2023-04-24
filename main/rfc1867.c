@@ -49,7 +49,7 @@ static php_rfc1867_getword_t php_rfc1867_getword = php_ap_getword;
 static php_rfc1867_getword_conf_t php_rfc1867_getword_conf = php_ap_getword_conf;
 static php_rfc1867_basename_t php_rfc1867_basename = NULL;
 
-PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra) = NULL;
+PHPAPI zend_result (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra) = NULL;
 
 static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, bool override_protection);
 

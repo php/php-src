@@ -42,7 +42,7 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 		zend_string *mname;
 		zend_function *generate_method;
 
-		mname = zend_string_init("generate", strlen("generate"), 0);
+		mname = ZSTR_INIT_LITERAL("generate", 0);
 		generate_method = zend_hash_find_ptr(&engine_object->ce->function_table, mname);
 		zend_string_release(mname);
 

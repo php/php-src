@@ -71,7 +71,6 @@
 #include "zend_ini.h"
 #include "zend_dtrace.h"
 #include "zend_observer.h"
-#include "zend_rc_debug.h"
 #include "zend_system_id.h"
 
 #include "php_content_types.h"
@@ -1492,7 +1491,7 @@ PHP_FUNCTION(set_time_limit)
 
 	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
 
-	key = zend_string_init("max_execution_time", sizeof("max_execution_time")-1, 0);
+	key = ZSTR_INIT_LITERAL("max_execution_time", 0);
 	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
@@ -1953,7 +1952,7 @@ static void core_globals_dtor(php_core_globals *core_globals)
 		free(core_globals->php_binary);
 	}
 
-	php_shutdown_ticks();
+	php_shutdown_ticks(core_globals);
 }
 /* }}} */
 
@@ -2647,13 +2646,18 @@ PHPAPI void php_reserve_tsrm_memory(void)
 }
 /* }}} */
 
-/* {{{ php_tsrm_startup */
-PHPAPI bool php_tsrm_startup(void)
+PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
-	bool ret = tsrm_startup(1, 1, 0, NULL);
+	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
 	php_reserve_tsrm_memory();
 	(void)ts_resource(0);
 	return ret;
+}
+
+/* {{{ php_tsrm_startup */
+PHPAPI bool php_tsrm_startup(void)
+{
+	return php_tsrm_startup_ex(1);
 }
 /* }}} */
 #endif

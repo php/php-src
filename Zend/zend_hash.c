@@ -26,7 +26,10 @@
 # include <arm_neon.h>
 #endif
 
-#ifdef __SSE2__
+/* Prefer to use AVX2 instructions for better latency and throughput */
+#if defined(__AVX2__)
+# include <immintrin.h>
+#elif defined( __SSE2__)
 # include <mmintrin.h>
 # include <emmintrin.h>
 #endif
@@ -176,7 +179,14 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 		HT_SET_DATA_ADDR(ht, data);
 		/* Don't overwrite iterator count. */
 		ht->u.v.flags = HASH_FLAG_STATIC_KEYS;
-#ifdef __SSE2__
+#if defined(__AVX2__)
+		do {
+			__m256i ymm0 = _mm256_setzero_si256();
+			ymm0 = _mm256_cmpeq_epi64(ymm0, ymm0);
+			_mm256_storeu_si256((__m256i*)&HT_HASH_EX(data,  0), ymm0);
+			_mm256_storeu_si256((__m256i*)&HT_HASH_EX(data,  8), ymm0);
+		} while(0);
+#elif defined (__SSE2__)
 		do {
 			__m128i xmm0 = _mm_setzero_si128();
 			xmm0 = _mm_cmpeq_epi8(xmm0, xmm0);

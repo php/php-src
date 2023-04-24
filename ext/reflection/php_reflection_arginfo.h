@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f640c1b592a7e9e7a8e92195df579bfaaa3da6dc */
+ * Stub hash: 75d10a475cce503d94bd8471764adf495f0ddd34 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -414,6 +414,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant_isEnumCase arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
+#define arginfo_class_ReflectionClassConstant_hasType arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionClassConstant_getType arginfo_class_ReflectionFunctionAbstract_getTentativeReturnType
+
 #define arginfo_class_ReflectionParameter___clone arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
@@ -760,6 +764,8 @@ ZEND_METHOD(ReflectionClassConstant, getDeclaringClass);
 ZEND_METHOD(ReflectionClassConstant, getDocComment);
 ZEND_METHOD(ReflectionClassConstant, getAttributes);
 ZEND_METHOD(ReflectionClassConstant, isEnumCase);
+ZEND_METHOD(ReflectionClassConstant, hasType);
+ZEND_METHOD(ReflectionClassConstant, getType);
 ZEND_METHOD(ReflectionParameter, __construct);
 ZEND_METHOD(ReflectionParameter, __toString);
 ZEND_METHOD(ReflectionParameter, getName);
@@ -1046,6 +1052,8 @@ static const zend_function_entry class_ReflectionClassConstant_methods[] = {
 	ZEND_ME(ReflectionClassConstant, getDocComment, arginfo_class_ReflectionClassConstant_getDocComment, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, getAttributes, arginfo_class_ReflectionClassConstant_getAttributes, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, isEnumCase, arginfo_class_ReflectionClassConstant_isEnumCase, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, hasType, arginfo_class_ReflectionClassConstant_hasType, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, getType, arginfo_class_ReflectionClassConstant_getType, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

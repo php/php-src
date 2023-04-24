@@ -7,6 +7,8 @@ mysqli
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require_once('skipifconnectfailure.inc');
 ?>
+--CONFLICTS--
+all
 --INI--
 memory_limit=-1
 --FILE--

@@ -428,7 +428,7 @@ SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           random
 PRIMARY MAINTAINER   Go Kudo <zeriyoshi@php.net> (2022 - 2022)
-                     Tim Düsterhus <timwolla@php.net> (2022 - 2022)
+                     Tim Düsterhus <timwolla@php.net> (2022 - 2023)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               8.2.0

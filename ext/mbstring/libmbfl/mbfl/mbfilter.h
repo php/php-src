@@ -125,28 +125,6 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
-/*
- * encoding detector
- */
-typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
-
-typedef struct {
-	size_t num_illegalchars;
-	size_t score;
-} mbfl_encoding_detector_data;
-
-struct _mbfl_encoding_detector {
-	mbfl_convert_filter **filter_list;
-	mbfl_encoding_detector_data *filter_data;
-	int filter_list_size;
-	int strict;
-};
-
-MBFLAPI extern mbfl_encoding_detector * mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict);
-MBFLAPI extern void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd);
-MBFLAPI extern int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *string);
-MBFLAPI extern const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd);
-
 /* Lengths -1 through -16 are reserved for error return values */
 static inline int mbfl_is_error(size_t len) {
 	return len >= (size_t) -16;

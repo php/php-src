@@ -118,7 +118,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
+ZEND_API zend_result zend_user_it_valid(zend_object_iterator *_iter)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -198,7 +198,8 @@ ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **tabl
 
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
-	zend_user_it_valid,
+	// FIXME: Adjust the actual function prototype in zend_object_iterator_funcs
+	(int (*)(zend_object_iterator *)) zend_user_it_valid,
 	zend_user_it_get_current_data,
 	zend_user_it_get_current_key,
 	zend_user_it_move_forward,

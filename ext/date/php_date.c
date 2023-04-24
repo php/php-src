@@ -1650,7 +1650,7 @@ static void date_period_it_move_forward(zend_object_iterator *iter)
 	}
 
 	create_date_period_datetime(object->current, object->start_ce, &current_zv);
-	zend_string *property_name = zend_string_init("current", sizeof("current") - 1, 0);
+	zend_string *property_name = ZSTR_INIT_LITERAL("current", 0);
 	zend_std_write_property(&object->std, property_name, &current_zv, NULL);
 	zval_ptr_dtor(&current_zv);
 	zend_string_release(property_name);
@@ -3162,8 +3162,14 @@ static bool php_date_modify(zval *object, char *modify, size_t modify_len) /* {{
 		dateobj->time->us = tmp_time->us;
 	}
 
-	if (tmp_time->have_zone && tmp_time->zone_type == TIMELIB_ZONETYPE_OFFSET) {
-		timelib_set_timezone_from_offset(dateobj->time, tmp_time->z);
+	/* Reset timezone to UTC if we detect a "@<ts>" modification */
+	if (
+		tmp_time->y == 1970 && tmp_time->m == 1 && tmp_time->d == 1 &&
+		tmp_time->h == 0 && tmp_time->i == 0 && tmp_time->s == 0 && tmp_time->us == 0 &&
+		tmp_time->have_zone && tmp_time->zone_type == TIMELIB_ZONETYPE_OFFSET &&
+		tmp_time->z == 0 && tmp_time->dst == 0
+	) {
+		timelib_set_timezone_from_offset(dateobj->time, 0);
 	}
 
 	timelib_time_dtor(tmp_time);

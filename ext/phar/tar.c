@@ -1240,13 +1240,15 @@ nostub:
 			return EOF;
 		}
 #ifdef WORDS_BIGENDIAN
-# define PHAR_SET_32(var, buffer) \
-	*(uint32_t *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
-		| ((((unsigned char*)&(buffer))[2]) << 16) \
-		| ((((unsigned char*)&(buffer))[1]) << 8) \
-		| (((unsigned char*)&(buffer))[0]))
+# define PHAR_SET_32(destination, source) do { \
+        uint32_t swapped = (((((unsigned char*)&(source))[3]) << 24) \
+            | ((((unsigned char*)&(source))[2]) << 16) \
+            | ((((unsigned char*)&(source))[1]) << 8) \
+            | (((unsigned char*)&(source))[0])); \
+        memcpy(destination, &swapped, 4); \
+    } while (0);
 #else
-# define PHAR_SET_32(var, buffer) *(uint32_t *)(var) = (uint32_t) (buffer)
+# define PHAR_SET_32(destination, source) memcpy(destination, &source, 4)
 #endif
 		PHAR_SET_32(sigbuf, phar->sig_flags);
 		PHAR_SET_32(sigbuf + 4, signature_length);

@@ -8,6 +8,7 @@ snmp
 <?php
 require_once(__DIR__.'/skipif.inc');
 if (PHP_OS_FAMILY === "Windows") die("xfail fails on Windows for unknown reasons");
+if (getenv('SKIP_ASAN')) die('xfail Timeouts under ASAN');
 ?>
 --FILE--
 <?php

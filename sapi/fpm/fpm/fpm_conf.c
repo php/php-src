@@ -1877,7 +1877,7 @@ int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 		if (test_conf > 1) {
 			fpm_conf_dump();
 		}
-		zlog(ZLOG_NOTICE, "configuration file %s test is successful\n", fpm_globals.config);
+		zlog(ZLOG_NOTICE, "configuration file %s test is successful", fpm_globals.config);
 		fpm_globals.test_successful = 1;
 		return -1;
 	}

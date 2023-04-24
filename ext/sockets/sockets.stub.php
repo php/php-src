@@ -173,6 +173,13 @@ const SO_REUSEADDR = UNKNOWN;
  */
 const SO_REUSEPORT = UNKNOWN;
 #endif
+#ifdef SO_REUSEPORT_LB
+/**
+ * @var int
+ * @cvalue SO_REUSEPORT_LB
+ */
+const SO_REUSEPORT_LB = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_KEEPALIVE

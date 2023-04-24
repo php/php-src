@@ -32,8 +32,16 @@ static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  3
 static void do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
 {
 	if (*a < start) {
-		*b -= (start - *a - 1) / adj + 1;
-		*a += adj * ((start - *a - 1) / adj + 1);
+		/* We calculate 'a + 1' first as 'start - *a - 1' causes an int64_t overflows if *a is
+		 * LONG_MIN. 'start' is 0 in this context, and '0 - LONG_MIN > LONG_MAX'. */
+		timelib_sll a_plus_1 = *a + 1;
+
+		*b -= (start - a_plus_1) / adj + 1;
+
+		/* This code add the extra 'adj' separately, as otherwise this can overflow int64_t in
+		 * situations where *b is near LONG_MIN. */
+		*a += adj * ((start - a_plus_1) / adj);
+		*a += adj;
 	}
 	if (*a >= end) {
 		*b += *a / adj;
@@ -462,9 +470,15 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 	do_adjust_relative(time);
 	do_adjust_special(time);
 
-	time->sse =
-		(timelib_epoch_days_from_time(time) * SECS_PER_DAY) +
-		timelib_hms_to_seconds(time->h, time->i, time->s);
+	/* You might be wondering, why this code does this in two steps. This is because
+	 * timelib_epoch_days_from_time(time) * SECS_PER_DAY with the lowest limit of
+	 * timelib_epoch_days_from_time() is less than the range of an int64_t. This then overflows. In
+	 * order to be able to still allow for any time in that day that only halfly fits in the int64_t
+	 * range, we add the time element first, which is always positive, and then twice half the value
+	 * of the earliest day as expressed as unix timestamp. */
+	time->sse = timelib_hms_to_seconds(time->h, time->i, time->s);
+	time->sse += timelib_epoch_days_from_time(time) * (SECS_PER_DAY / 2);
+	time->sse += timelib_epoch_days_from_time(time) * (SECS_PER_DAY / 2);
 
 	// This modifies time->sse, if needed
 	do_adjust_timezone(time, tzi);

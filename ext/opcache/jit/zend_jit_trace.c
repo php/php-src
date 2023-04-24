@@ -4991,6 +4991,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									res_addr = 0;
 								} else {
 									res_addr = RES_REG_ADDR();
+									if (Z_MODE(res_addr) != IS_REG
+									 && zend_jit_trace_next_is_send_result(opline, p, frame)) {
+										send_result = 1;
+										res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
+										if (!zend_jit_reuse_ip(&dasm_state)) {
+											goto jit_failure;
+										}
+									}
 								}
 								if (!zend_jit_assign_to_typed_ref(&dasm_state, opline, opline->op2_type, op2_addr, res_addr, 1)) {
 									goto jit_failure;
@@ -7368,7 +7376,7 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 						fprintf(stderr, " op1(%sobject of class %s)", ref,
 							ZSTR_VAL(p->ce->name));
 					} else {
-						const char *type = (op1_type == 0) ? "undef" : zend_get_type_by_const(op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
+						const char *type = ((op1_type & ~IS_TRACE_INDIRECT) == 0) ? "undef" : zend_get_type_by_const(op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
 						fprintf(stderr, " op1(%s%s%s)", ref, (op1_type & IS_TRACE_PACKED) ? "packed " : "", type);
 					}
 				}
@@ -7381,7 +7389,7 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 						fprintf(stderr, " op2(%sobject of class %s)", ref,
 							ZSTR_VAL(p->ce->name));
 					} else {
-						const char *type = (op2_type == 0) ? "undef" : zend_get_type_by_const(op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
+						const char *type = ((op2_type & ~IS_TRACE_INDIRECT) == 0) ? "undef" : zend_get_type_by_const(op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
 						fprintf(stderr, " op2(%s%s)", ref, type);
 					}
 				}
@@ -7389,7 +7397,7 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 					const char *ref = (op3_type & IS_TRACE_INDIRECT) ?
 						((op3_type & IS_TRACE_REFERENCE) ? "*&" : "*") :
 						((op3_type & IS_TRACE_REFERENCE) ? "&" : "");
-					const char *type = (op3_type == 0) ? "undef" : zend_get_type_by_const(op3_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
+					const char *type = ((op3_type & ~IS_TRACE_INDIRECT) == 0) ? "undef" : zend_get_type_by_const(op3_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
 					fprintf(stderr, " op3(%s%s)", ref, type);
 				}
 			}

@@ -35,6 +35,10 @@ PHP 8.3 UPGRADE NOTES
     proc_get_status() to check whether the result was cached.
   . Zend Max Execution Timers is now enabled by default for ZTS builds on
     Linux.
+  . Uses of traits with static properties will now redeclare static properties
+    inherited from the parent class. This will create a separate static property
+    storage for the current class. This is analogous to adding the static
+    property to the class directly without traits.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
@@ -46,6 +50,10 @@ PHP 8.3 UPGRADE NOTES
 
 - Core
   . Anonymous classes may now be marked as readonly.
+  . Readonly properties can now be reinitialized during cloning.
+    RFC: https://wiki.php.net/rfc/readonly_amendments
+  . Class, interface, trait, and enum constants now support type
+    declarations. RFC: https://wiki.php.net/rfc/typed_class_constants
 
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
@@ -62,6 +70,10 @@ PHP 8.3 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Intl
+  . The U_MULTIPLE_DECIMAL_SEPERATORS constant had been deprecated, using
+    the U_MULTIPLE_DECIMAL_SEPARATORS instead is recommended.
+
 ========================================
 5. Changed Functions
 ========================================
@@ -74,23 +86,49 @@ PHP 8.3 UPGRADE NOTES
     "buffer_size" => int
     See GH-9336
   . class_alias() now supports creating an alias of an internal class.
+  . Setting `open_basedir` at runtime using `ini_set('open_basedir', ...);` no
+    longer accepts paths containing the parent directory (`..`). Previously,
+    only paths starting with `..` were disallowed. This could easily be
+    circumvented by prepending `./` to the path.
 
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
 
 - Intl:
   . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
+    now returns true on success, previously null was returned.
+  . IntlBreakiterator::setText() now returns false on failure, previously
+    null was returned.
     now returns true on sucess, previously null was returned.
+  . IntlChar::enumCharNames is now returning a boolean.
+    Previously it returned null on success and false on failure.
 
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
     casing rules for the Greek letter sigma. For mb_convert_case, conditional
     casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
-    MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE. (Alex Dowad)
+    MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE.
   . mb_decode_mimeheader interprets underscores in QPrint-encoded MIME
     encoded words as required by RFC 2047; they are converted to spaces.
     Underscores must be encoded as "=5F" in such MIME encoded words.
-    (Alex Dowad)
+  . In rare cases, mb_encode_mimeheader will transfer-encode its input
+    string where it would pass it through as raw ASCII in PHP 8.2.
+  . mb_encode_mimeheader no longer drops NUL (zero) bytes when
+    QPrint-encoding the input string. This previously caused strings in
+    certain text encodings, especially UTF-16 and UTF-32, to be
+    corrupted by mb_encode_mimeheader.
+  . mb_detect_encoding's "non-strict" mode now behaves as described in the
+    documentation. Previously, it would return false if the same byte
+    (for example, the first byte) of the input string was invalid in all
+    candidate encodings. More generally, it would eliminate candidate
+    encodings from consideration when an invalid byte was seen, and if the
+    same input byte eliminated all remaining encodings still under
+    consideration, it would return false. On the other hand, if all candidate
+    encodings but one were eliminated from consideration, it would return the
+    last remaining one without regard for how many encoding errors might be
+    encountered later in the string. This is different from the behavior
+    described in the documentation, which says: "If strict is set to false,
+    the closest matching encoding will be returned."
 
 - mysqli:
   . mysqli_fetch_object now raises a ValueError instead of an Exception when the constructor_args
@@ -130,6 +168,7 @@ PHP 8.3 UPGRADE NOTES
   . Added posix_sysconf call to get runtime informations.
   . Added posix_pathconf call to get configuration value from a directory/file.
   . Added posix_fpathconf call to get configuration value from a file descriptor.
+  . Added posix_eaccess call to check the effective user id's permission for a path.
 
 - Random:
   . Added Randomizer::getBytesFromString().
@@ -195,6 +234,7 @@ PHP 8.3 UPGRADE NOTES
   . SO_ZEROIZE (OpenBSD only).
   . SO_SPLICE (OpenBSD only).
   . TCP_REPAIR (Linux only).
+  . SO_REUSEPORT_LB (FreeBSD only).
 
 ========================================
 11. Changes to INI File Handling
