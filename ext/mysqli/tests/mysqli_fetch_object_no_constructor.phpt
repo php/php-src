@@ -32,11 +32,11 @@ require_once('skipifconnectfailure.inc');
     printf("No exception with PHP:\n");
     var_dump($obj = new mysqli_fetch_object_test(1, 2));
 
-    printf("\nException with mysqli. Note that at all other places we throws errors but no exceptions unless the error mode has been changed:\n");
+    printf("\nValueError with mysqli. Note that at all other places we throws errors but no exceptions unless the error mode has been changed:\n");
     try {
         var_dump($obj = mysqli_fetch_object($res, 'mysqli_fetch_object_test', array(1, 2)));
-    } catch (Exception $e) {
-        printf("Exception: %s\n", $e->getMessage());
+    } catch (ValueError $e) {
+        printf("ValueError: %s\n", $e->getMessage());
     }
 
     printf("\nFatal error with PHP (but no exception!):\n");
@@ -62,8 +62,8 @@ object(mysqli_fetch_object_test)#%d (%d) {
   NULL
 }
 
-Exception with mysqli. Note that at all other places we throws errors but no exceptions unless the error mode has been changed:
-Exception: mysqli_fetch_object(): Argument #3 ($constructor_args) must be empty when the specified class (mysqli_fetch_object_test) does not have a constructor
+ValueError with mysqli. Note that at all other places we throws errors but no exceptions unless the error mode has been changed:
+ValueError: mysqli_fetch_object(): Argument #3 ($constructor_args) must be empty when the specified class (mysqli_fetch_object_test) does not have a constructor
 
 Fatal error with PHP (but no exception!):
 

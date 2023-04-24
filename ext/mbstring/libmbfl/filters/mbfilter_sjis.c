@@ -130,7 +130,8 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	&vtbl_sjis_wchar,
 	&vtbl_wchar_sjis,
 	mb_sjis_to_wchar,
-	mb_wchar_to_sjis
+	mb_wchar_to_sjis,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_wchar = {
@@ -165,7 +166,8 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	&vtbl_sjis_mac_wchar,
 	&vtbl_wchar_sjis_mac,
 	mb_sjismac_to_wchar,
-	mb_wchar_to_sjismac
+	mb_wchar_to_sjismac,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
@@ -202,7 +204,8 @@ const mbfl_encoding mbfl_encoding_sjis_docomo = {
 	&vtbl_sjis_docomo_wchar,
 	&vtbl_wchar_sjis_docomo,
 	mb_sjis_docomo_to_wchar,
-	mb_wchar_to_sjis_docomo
+	mb_wchar_to_sjis_docomo,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_sjis_kddi = {
@@ -215,7 +218,8 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
 	&vtbl_sjis_kddi_wchar,
 	&vtbl_wchar_sjis_kddi,
 	mb_sjis_kddi_to_wchar,
-	mb_wchar_to_sjis_kddi
+	mb_wchar_to_sjis_kddi,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_sjis_sb = {
@@ -228,7 +232,8 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
 	&vtbl_sjis_sb_wchar,
 	&vtbl_wchar_sjis_sb,
 	mb_sjis_sb_to_wchar,
-	mb_wchar_to_sjis_sb
+	mb_wchar_to_sjis_sb,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar = {

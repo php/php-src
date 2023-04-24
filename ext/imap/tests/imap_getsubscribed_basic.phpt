@@ -7,7 +7,7 @@ imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
-if (getenv("SKIP_ASAN")) die("skip asan chokes on this: 'LeakSanitizer does not work under ptrace (strace, gdb, etc)'");
+if (getenv("SKIP_ASAN")) die("xleak asan chokes on this: 'LeakSanitizer does not work under ptrace (strace, gdb, etc)'");
 ?>
 --CONFLICTS--
 defaultmailbox

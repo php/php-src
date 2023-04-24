@@ -2016,7 +2016,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast) /* {{{ */
 	zval *zv = zend_ast_get_zval(ast);
 	if (Z_TYPE_P(zv) == IS_LONG) {
 		if (Z_LVAL_P(zv) == 0) {
-			ZVAL_NEW_STR(zv, zend_string_init("-0", sizeof("-0")-1, 0));
+			ZVAL_NEW_STR(zv, ZSTR_INIT_LITERAL("-0", 0));
 		} else {
 			ZEND_ASSERT(Z_LVAL_P(zv) > 0);
 			Z_LVAL_P(zv) *= -1;
@@ -4221,7 +4221,7 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 				/* If the original argument was named, add the new argument as named as well,
 				 * as mixing named and positional is not allowed. */
 				zend_ast *name = zend_ast_create_zval_from_str(
-					zend_string_init("description", sizeof("description") - 1, 0));
+					ZSTR_INIT_LITERAL("description", 0));
 				arg = zend_ast_create(ZEND_AST_NAMED_ARG, name, arg);
 			}
 			zend_ast_list_add((zend_ast *) args, arg);
@@ -7295,9 +7295,9 @@ static void add_stringable_interface(zend_class_entry *ce) {
 		erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 	// TODO: Add known interned strings instead?
 	ce->interface_names[ce->num_interfaces - 1].name =
-		zend_string_init("Stringable", sizeof("Stringable") - 1, 0);
+		ZSTR_INIT_LITERAL("Stringable", 0);
 	ce->interface_names[ce->num_interfaces - 1].lc_name =
-		zend_string_init("stringable", sizeof("stringable") - 1, 0);
+		ZSTR_INIT_LITERAL("stringable", 0);
 }
 
 static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, bool has_body) /* {{{ */
@@ -7409,11 +7409,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 	}
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
-	if (toplevel) {
-		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
-			do_bind_function_error(lcname, op_array, 1);
-		}
-	} else {
+	if (!toplevel) {
 		uint32_t func_ref = zend_add_dynamic_func_def(op_array);
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
@@ -7438,7 +7434,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
-	zend_string *lcname = NULL;
+	zend_string *lcname;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -7542,6 +7538,11 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
 			CG(active_class_entry), (zend_function *) op_array, lcname, E_COMPILE_ERROR);
+	} else if (toplevel) {
+		/* Only register the function after a successful compile */
+		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {
+			do_bind_function_error(lcname, op_array, true);
+		}
 	}
 
 	/* put the implicit return on the really last line */
@@ -7692,7 +7693,7 @@ static void zend_check_trait_alias_modifiers(uint32_t attr) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
+static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast)
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
@@ -7704,9 +7705,24 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast **value_ast_ptr = &const_ast->child[1];
 		zend_ast *doc_comment_ast = const_ast->child[2];
+		zend_ast *type_ast = const_ast->child[3];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
+		zend_type type = ZEND_TYPE_INIT_NONE(0);
+
+		if (type_ast) {
+			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
+
+			uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
+
+			if (type_mask != MAY_BE_ANY && (type_mask & (MAY_BE_CALLABLE|MAY_BE_VOID|MAY_BE_NEVER))) {
+				zend_string *type_str = zend_type_to_string(type);
+
+				zend_error_noreturn(E_COMPILE_ERROR, "Class constant %s::%s cannot have type %s",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str));
+			}
+		}
 
 		if (UNEXPECTED((flags & ZEND_ACC_PRIVATE) && (flags & ZEND_ACC_FINAL))) {
 			zend_error_noreturn(
@@ -7716,14 +7732,21 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast_ptr, /* allow_dynamic */ false);
-		c = zend_declare_class_constant_ex(ce, name, &value_zv, flags, doc_comment);
+
+		if (!Z_CONSTANT(value_zv) && ZEND_TYPE_IS_SET(type) && !zend_is_valid_default_value(type, &value_zv)) {
+			zend_string *type_str = zend_type_to_string(type);
+
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as value for class constant %s::%s of type %s",
+				zend_zval_type_name(&value_zv), ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(type_str));
+		}
+
+		c = zend_declare_typed_class_constant(ce, name, &value_zv, flags, doc_comment, type);
 
 		if (attr_ast) {
 			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
 		}
 	}
 }
-/* }}} */
 
 static void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
 {
@@ -10760,13 +10783,13 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_ast *name_ast;
 			zend_string *resolved_name;
 
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
+
 			if (UNEXPECTED(ast->child[1]->kind != ZEND_AST_ZVAL
 				|| Z_TYPE_P(zend_ast_get_zval(ast->child[1])) != IS_STRING)) {
 				return;
 			}
-
-			zend_eval_const_expr(&ast->child[0]);
-			zend_eval_const_expr(&ast->child[1]);
 
 			class_ast = ast->child[0];
 			name_ast = ast->child[1];

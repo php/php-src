@@ -731,9 +731,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			p->key = new_interned_string(p->key);
 		}
 		c = (zend_constant*)Z_PTR(p->val);
-		if (c->name) {
-			c->name = new_interned_string(c->name);
-		}
 		if (Z_TYPE(c->value) == IS_STRING) {
 			ZVAL_STR(&c->value, new_interned_string(Z_STR(c->value)));
 		}
@@ -2656,7 +2653,7 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 			ZCG(root_hash) = buf.st_ino;
 			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
 				if (ZCG(root_hash) != buf.st_ino) {
-					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_string *key = ZSTR_INIT_LITERAL("opcache.enable", 0);
 					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
 					zend_string_release_ex(key, 0);
 					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
@@ -2831,6 +2828,7 @@ static inline zend_result accel_find_sapi(void)
 		"uwsgi",
 		"fuzzer",
 		"frankenphp",
+		"ngx-php",
 		NULL
 	};
 	const char **sapi_name;
@@ -3751,15 +3749,16 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 	bool ok, changed, was_changed = false;
 	zend_class_constant *c;
 	zval *val;
+	zend_string *key;
 
 	EG(exception) = (void*)(uintptr_t)-1; /* prevent error reporting */
 	do {
 		ok = true;
 		changed = false;
-		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-				if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
+				if (EXPECTED(zend_update_class_constant(c, key, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
 					ok = false;
@@ -4479,7 +4478,7 @@ static zend_result accel_preload(const char *config, bool in_child)
 		script->ping_auto_globals_mask = ping_auto_globals_mask;
 
 		/* Store all functions and classes in a single pseudo-file */
-		CG(compiled_filename) = zend_string_init("$PRELOAD$", sizeof("$PRELOAD$") - 1, 0);
+		CG(compiled_filename) = ZSTR_INIT_LITERAL("$PRELOAD$", 0);
 #if ZEND_USE_ABS_CONST_ADDR
 		init_op_array(&script->script.main_op_array, ZEND_USER_FUNCTION, 1);
 #else

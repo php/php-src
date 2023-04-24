@@ -102,6 +102,12 @@ $s = $o . $o;
 $s = $s . $non_utf8;
 var_dump(zend_test_is_string_marked_as_valid_utf8($s));
 
+echo "Rope concat:\n";
+$foo = 'f';
+$bar = "\xc3";
+$baz = 'a';
+$rope = "$foo$bar$baz";
+var_dump(zend_test_is_string_marked_as_valid_utf8($rope));
 ?>
 --EXPECT--
 Integer cast to string concatenated to invalid UTF-8:
@@ -128,4 +134,6 @@ bool(false)
 Concatenation in loop (compound assignment):
 bool(false)
 Concatenation of objects:
+bool(false)
+Rope concat:
 bool(false)

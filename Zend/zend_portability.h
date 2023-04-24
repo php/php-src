@@ -750,4 +750,10 @@ extern "C++" {
 # define ZEND_CGG_DIAGNOSTIC_IGNORED_END
 #endif
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
+# define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)
+#else
+# define ZEND_STATIC_ASSERT(c, m)
+#endif
+
 #endif /* ZEND_PORTABILITY_H */

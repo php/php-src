@@ -25,6 +25,12 @@ PHP                                                                        NEWS
   . Fix bug GH-10083 (Allow comments between & and parameter). (ilutov)
   . Zend Max Execution Timers is now enabled by default for ZTS builds on
     Linux. (Kévin Dunglas)
+  . Fix bug GH-10469 (Disallow .. in open_basedir paths set at runtime).
+    (ilutov)
+  . Fix bug GH-10168, GH-10582 (Various segfaults with destructors and VM return
+    values). (dstogov, nielsdos, ilutov)
+  . Fix bug GH-10935 (Use of trait doesn't redeclare static property if class
+    has inherited it from its parent). (ilutov)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
@@ -53,6 +59,8 @@ PHP                                                                        NEWS
     the Spoofchecker's class. (David Carlier)
   . Updated datefmt_set_timezone/IntlDateformatter::setTimezone returns type.
     (David Carlier).
+  . Updated IntlBreakInterator::setText return type. (David Carlier)
+  . Updated IntlChar::enumCharNames return type. (David Carlier)
 
 - JSON:
   . Added json_validate(). (Juan Morales)
@@ -61,8 +69,17 @@ PHP                                                                        NEWS
   . mb_detect_encoding is better able to identify the correct encoding for
     Turkish text. (Alex Dowad)
   . mb_detect_encoding's "non-strict" mode now behaves as described in the
-    documentation. Previously, it would return false if the very first byte
-    of the input string was invalid in all candidate encodings. (Alex Dowad)
+    documentation. Previously, it would return false if the same byte
+    (for example, the first byte) of the input string was invalid in all
+    candidate encodings. More generally, it would eliminate candidate
+    encodings from consideration when an invalid byte was seen, and if the
+    same input byte eliminated all remaining encodings still under
+    consideration, it would return false. On the other hand, if all candidate
+    encodings but one were eliminated from consideration, it would return the
+    last remaining one without regard for how many encoding errors might be
+    encountered later in the string. This is different from the behavior
+    described in the documentation, which says: "If strict is set to false,
+    the closest matching encoding will be returned." (Alex Dowad)
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
     casing rules for the Greek letter sigma. For mb_convert_case, conditional
     casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
@@ -73,6 +90,14 @@ PHP                                                                        NEWS
     encoded words as required by RFC 2047; they are converted to spaces.
     Underscores must be encoded as "=5F" in such MIME encoded words.
     (Alex Dowad)
+  . mb_encode_mimeheader no longer drops NUL (zero) bytes when
+    QPrint-encoding the input string. This previously caused strings in
+    certain text encodings, especially UTF-16 and UTF-32, to be
+    corrupted by mb_encode_mimeheader. (Alex Dowad)
+
+- mysqli:
+  . mysqli_fetch_object raises a ValueError instead of an Exception.
+    (David Carlier)
 
 - Opcache:
   . Added start, restart and force restart time to opcache's
@@ -90,11 +115,19 @@ PHP                                                                        NEWS
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
   . Added SIGINFO constant. (David Carlier)
 
+- PGSQL:
+  . pg_fetch_object raises a ValueError instead of an Exception.
+    (David Carlier)
+
+- Phar:
+  . Fix memory leak in phar_rename_archive(). (stkeke)
+
 - Posix:
   . Added posix_sysconf. (David Carlier)
   . Added posix_pathconf. (David Carlier)
   . Added posix_fpathconf. (David Carlier)
   . Fixed zend_parse_arg_long's bool pointer argument assignment. (Cristian Rodriguez)
+  . Added posix_eaccess. (David Carlier)
 
 - Random:
   . Added Randomizer::getBytesFromString(). (Joshua Rüsweg)
@@ -125,6 +158,7 @@ PHP                                                                        NEWS
   . Added SO_RERROR, SO_ZEROIZE and SO_SPLICE netbsd and openbsd constants.
     (David Carlier)
   . Added TCP_REPAIR for quietly close a connection. (David Carlier)
+  . Added SO_REUSEPORT_LB freebsd constant. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
@@ -134,6 +168,11 @@ PHP                                                                        NEWS
   . password_hash() will now chain the original RandomException to the ValueError
     on salt generation failure. (timwolla)
   . Fix GH-10239 (proc_close after proc_get_status always returns -1). (nielsdos)
+  . Improve the warning message for unpack() in case not enough values were
+    provided. (nielsdos)
+  . Fix GH-11010 (parse_ini_string() now preserves formatting of unquoted
+    strings starting with numbers when the INI_SCANNER_TYPED flag is
+    specified). (ilutov)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.

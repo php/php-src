@@ -294,9 +294,6 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 					break;
 				}
 				zval_ptr_dtor_nogc(&c->value);
-				if (c->name) {
-					zend_string_release_ex(c->name, 0);
-				}
 				efree(c);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
@@ -572,7 +569,7 @@ ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* 
 		return zend_create_member_string(func->common.scope->name, func->common.function_name);
 	}
 
-	return func->common.function_name ? zend_string_copy(func->common.function_name) : zend_string_init("main", sizeof("main") - 1, 0);
+	return func->common.function_name ? zend_string_copy(func->common.function_name) : ZSTR_INIT_LITERAL("main", 0);
 }
 /* }}} */
 

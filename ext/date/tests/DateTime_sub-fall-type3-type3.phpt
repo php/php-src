@@ -2,8 +2,6 @@
 DateTime::sub() -- fall type3 type3
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-Various bugs exist
 --FILE--
 <?php
 
@@ -44,8 +42,8 @@ test_time_fall_type3_st_type3_redost: SUB: 2010-11-07 01:14:44 EST - P-0Y0M0DT2H
 test_time_fall_type3_st_type3_st: SUB: 2010-11-07 05:19:56 EST - P+0Y0M0DT2H3M1S = **2010-11-07 03:16:55 EST**
 test_time_fall_type3_st_type3_post: SUB: 2010-11-08 19:59:59 EST - P+0Y0M1DT16H43M4S = **2010-11-07 03:16:55 EST**
 test_time_fall_type3_post_type3_prev: SUB: 2010-11-06 18:38:28 EDT - P-0Y0M2DT1H21M31S = **2010-11-08 19:59:59 EST**
-test_time_fall_type3_post_type3_dt: SUB: 2010-11-07 00:10:20 EDT - P-0Y0M1DT20H49M39S = **2010-11-08 19:59:59 EST**
-test_time_fall_type3_post_type3_redodt: SUB: 2010-11-07 01:12:33 EDT - P-0Y0M1DT19H47M26S = **2010-11-08 19:59:59 EST**
+test_time_fall_type3_post_type3_dt: SUB: 2010-11-07 00:10:20 EDT - P-0Y0M1DT20H49M39S = **2010-11-08 20:59:59 EST**
+test_time_fall_type3_post_type3_redodt: SUB: 2010-11-07 01:12:33 EDT - P-0Y0M1DT19H47M26S = **2010-11-08 20:59:59 EST**
 test_time_fall_type3_post_type3_redost: SUB: 2010-11-07 01:14:44 EST - P-0Y0M1DT18H45M15S = **2010-11-08 19:59:59 EST**
 test_time_fall_type3_post_type3_st: SUB: 2010-11-07 03:16:55 EST - P-0Y0M1DT16H43M4S = **2010-11-08 19:59:59 EST**
 test_time_fall_type3_post_type3_post: SUB: 2010-11-08 19:59:59 EST - P+0Y0M0DT1H2M4S = **2010-11-08 18:57:55 EST**

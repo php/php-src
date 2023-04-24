@@ -64,7 +64,8 @@ const mbfl_encoding mbfl_encoding_utf8 = {
 	&vtbl_utf8_wchar,
 	&vtbl_wchar_utf8,
 	mb_utf8_to_wchar,
-	mb_wchar_to_utf8
+	mb_wchar_to_utf8,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_utf8_wchar = {

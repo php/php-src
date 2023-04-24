@@ -24,7 +24,6 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_operators.h"
-#include "zend_type_code.h"
 #include "zend_variables.h"
 
 #include <stdint.h>
@@ -122,6 +121,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_l
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, const zend_property_info *prop);
 
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
+ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
 
 static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, uint8_t value_type)
 {
@@ -168,15 +168,30 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
 			zend_copy_to_variable(variable_ptr, value, value_type);
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else { /* we need to split */
-				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
-					gc_possible_root(garbage);
+			GC_DTOR_NO_REF(garbage);
+			return variable_ptr;
+		}
+	} while (0);
+
+	zend_copy_to_variable(variable_ptr, value, value_type);
+	return variable_ptr;
+}
+
+static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, zval *value, zend_uchar value_type, bool strict, zend_refcounted **garbage_ptr)
+{
+	do {
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+			if (Z_ISREF_P(variable_ptr)) {
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					return zend_assign_to_typed_ref_ex(variable_ptr, value, value_type, strict, garbage_ptr);
+				}
+
+				variable_ptr = Z_REFVAL_P(variable_ptr);
+				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
+					break;
 				}
 			}
-			return variable_ptr;
+			*garbage_ptr = Z_COUNTED_P(variable_ptr);
 		}
 	} while (0);
 
@@ -195,8 +210,12 @@ struct _zend_vm_stack {
 	zend_vm_stack prev;
 };
 
+/* Ensure the correct alignment before slots calculation */
+ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
+                   "zval must be aligned by ZEND_MM_ALIGNMENT");
+/* A number of call frame slots (zvals) reserved for _zend_vm_stack. */
 #define ZEND_VM_STACK_HEADER_SLOTS \
-	((ZEND_MM_ALIGNED_SIZE(sizeof(struct _zend_vm_stack)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
+	((sizeof(struct _zend_vm_stack) + sizeof(zval) - 1) / sizeof(zval))
 
 #define ZEND_VM_STACK_ELEMENTS(stack) \
 	(((zval*)(stack)) + ZEND_VM_STACK_HEADER_SLOTS)
@@ -385,7 +404,7 @@ ZEND_API bool zend_gcc_global_regs(void);
 
 #define ZEND_USER_OPCODE_DISPATCH_TO 0x100 /* call original handler of returned opcode */
 
-ZEND_API int zend_set_user_opcode_handler(uint8_t opcode, user_opcode_handler_t handler);
+ZEND_API zend_result zend_set_user_opcode_handler(uint8_t opcode, user_opcode_handler_t handler);
 ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(uint8_t opcode);
 
 ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data);
@@ -400,7 +419,7 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 zval * ZEND_FASTCALL zend_handle_named_arg(
 		zend_execute_data **call_ptr, zend_string *arg_name,
 		uint32_t *arg_num_ptr, void **cache_slot);
-ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
+ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 
 #define CACHE_ADDR(num) \
 	((void**)((char*)EX(run_time_cache) + (num)))
@@ -464,6 +483,10 @@ ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS) == ZEND_ACC_HAS_READONLY_PROPS)
+
+
+ZEND_API bool zend_verify_class_constant_type(zend_class_constant *c, const zend_string *name, zval *constant);
+ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant);
 
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
 ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property);

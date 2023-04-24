@@ -125,28 +125,6 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
-/*
- * encoding detector
- */
-typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
-
-typedef struct {
-	size_t num_illegalchars;
-	size_t score;
-} mbfl_encoding_detector_data;
-
-struct _mbfl_encoding_detector {
-	mbfl_convert_filter **filter_list;
-	mbfl_encoding_detector_data *filter_data;
-	int filter_list_size;
-	int strict;
-};
-
-MBFLAPI extern mbfl_encoding_detector * mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict);
-MBFLAPI extern void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd);
-MBFLAPI extern int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *string);
-MBFLAPI extern const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd);
-
 /* Lengths -1 through -16 are reserved for error return values */
 static inline int mbfl_is_error(size_t len) {
 	return len >= (size_t) -16;
@@ -167,30 +145,5 @@ static inline int mbfl_is_error(size_t len) {
  */
 MBFLAPI extern mbfl_string *
 mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
-
-/*
- * MIME header encode
- */
-struct mime_header_encoder_data;	/* forward declaration */
-
-MBFLAPI extern struct mime_header_encoder_data *
-mime_header_encoder_new(
-    const mbfl_encoding *incode,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding);
-
-MBFLAPI extern void
-mime_header_encoder_delete(struct mime_header_encoder_data *pe);
-
-MBFLAPI extern mbfl_string *
-mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *result);
-
-MBFLAPI extern mbfl_string *
-mbfl_mime_header_encode(
-    mbfl_string *string, mbfl_string *result,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding,
-    const char *linefeed,
-    int indent);
 
 #endif	/* MBFL_MBFILTER_H */

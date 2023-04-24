@@ -22,7 +22,6 @@
 
 #include "zend_compile.h"
 #include "zend_build.h"
-#include "zend_result.h"
 
 /*
 The constants below are derived from ext/opcache/ZendAccelerator.h

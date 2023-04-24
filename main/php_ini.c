@@ -22,7 +22,6 @@
 #include "ext/standard/dl.h"
 #include "zend_extensions.h"
 #include "zend_highlight.h"
-#include "zend_rc_debug.h"
 #include "SAPI.h"
 #include "php_main.h"
 #include "php_scandir.h"

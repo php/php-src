@@ -89,6 +89,14 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 	}
 }
 
+static zend_always_inline void gc_check_possible_root_no_ref(zend_refcounted *ref)
+{
+	ZEND_ASSERT(GC_TYPE_INFO(ref) != GC_REFERENCE);
+	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
+		gc_possible_root(ref);
+	}
+}
+
 /* These APIs can be used to simplify object get_gc implementations
  * over heterogeneous structures. See zend_generator_get_gc() for
  * a usage example. */

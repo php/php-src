@@ -171,7 +171,7 @@ int fpm_status_handle_request(void) /* {{{ */
 		fpm_request_executing();
 
 		/* full status ? */
-		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
+		_GET_str = ZSTR_INIT_LITERAL("_GET", 0);
 		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;

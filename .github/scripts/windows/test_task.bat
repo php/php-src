@@ -1,5 +1,10 @@
 @echo off
 
+if /i "%APPVEYOR%%GITHUB_ACTIONS%" neq "True" (
+    echo for CI only
+    exit /b 3
+)
+
 set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1

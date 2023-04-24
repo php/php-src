@@ -169,6 +169,9 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 							failed = true;
 						}
 					}
+					if (!failed) {
+						stream->flags |= PHP_STREAM_FLAG_NO_IO;
+					}
 				}
 			}
 		} zend_catch {

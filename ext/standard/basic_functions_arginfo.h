@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 87494cb9126aefff143d4f55db9e282d8a30f4a2 */
+ * Stub hash: 3cf991d65784e12ca4e8155898f24885d7f894ed */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3409,7 +3409,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(boolval, arginfo_boolval)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strval, arginfo_strval)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_null, arginfo_is_null)
-	ZEND_FE(is_resource, arginfo_is_resource)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_resource, arginfo_is_resource)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_bool, arginfo_is_bool)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_int, arginfo_is_int)
 	ZEND_FALIAS(is_integer, is_int, arginfo_is_integer)

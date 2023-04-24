@@ -38,7 +38,7 @@ typedef struct dba_lock {
 typedef struct dba_info {
 	/* public */
 	void *dbf;               /* ptr to private data or whatever */
-	char *path;
+	zend_string *path;
 	dba_mode_t mode;
 	php_stream *fp;  /* this is the database stream for builtin handlers */
 	int fd;

@@ -154,9 +154,11 @@ static void mysql_handle_closer(pdo_dbh_t *dbh)
 	if (H) {
 		if (H->server) {
 			mysql_close(H->server);
+			H->server = NULL;
 		}
 		if (H->einfo.errmsg) {
 			pefree(H->einfo.errmsg, dbh->is_persistent);
+			H->einfo.errmsg = NULL;
 		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
@@ -356,7 +358,7 @@ static bool mysql_handle_begin(pdo_dbh_t *dbh)
 	PDO_DBG_ENTER("mysql_handle_begin");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 
-	command = zend_string_init("START TRANSACTION", strlen("START TRANSACTION"), 0);
+	command = ZSTR_INIT_LITERAL("START TRANSACTION", 0);
 	return_value = mysql_handle_doer(dbh, command);
 	zend_string_release_ex(command, 0);
 	PDO_DBG_RETURN(0 <= return_value);

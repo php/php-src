@@ -1036,17 +1036,8 @@ testValidString('+' . encode('AB', 'ASCII') . '-+' . encode('CD', 'ASCII') . '-'
 // (Just trying to be exhaustive here)
 testValidString('+' . encode('AB', 'ASCII') . '-!+' . encode('CD', 'ASCII') . '-', "\x00A\x00B\x00!\x00C\x00D", 'UTF-7', 'UTF-16BE', false);
 
-// + section terminated by a non-Base64 ASCII character which is NOT -
-for ($i = 0; $i < 128; $i++) {
-  if ($i >= ord('A') && $i <= ord('Z'))
-    continue;
-  if ($i >= ord('a') && $i <= ord('z'))
-    continue;
-  if ($i >= ord('0') && $i <= ord('9'))
-    continue;
-  if ($i == ord('+') || $i == ord('/') || $i == ord('-') || $i == ord('\\') || $i == ord('~'))
-    continue;
-  $char = chr($i);
+// + section terminated by a non-Base64 direct character which is NOT -
+foreach (str_split(" \t\r\n'(),.:?!\"#$%&*;<=>@[]^_`{|}\x00") as $char) {
   testValidString('+' . encode("\x12\x34", 'UTF-16BE') . $char, "\x00\x00\x12\x34\x00\x00\x00" . $char, 'UTF-7', 'UTF-32BE', false);
 }
 
@@ -1083,6 +1074,9 @@ testInvalidString('+' . rawEncode("\x00.\x00.\xD8\x01\xD9\x02") . '-', "\x00\x00
 // First half of surrogate pair appearing at end of string
 testInvalidString('+' . rawEncode("\xD8\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 testInvalidString('+' . rawEncode("\xD8\x01"), "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString("+999999uJ", "\xEF\x9F\x9F\xE7\xB7\xB7%", 'UTF-7', 'UTF-8');
+testInvalidString("+999euJ", "\xEF\x9F\x9F\xE5\xBA\xB8%", "UTF-7", "UTF-8");
+testInvalidString("+euJ", "\xE7\xAB\xA2%", "UTF-7", "UTF-8");
 
 // Truncated string
 testInvalidString('+' . rawEncode("\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');

@@ -51,7 +51,8 @@ const mbfl_encoding mbfl_encoding_2022jpms = {
 	&vtbl_2022jpms_wchar,
 	&vtbl_wchar_2022jpms,
 	mb_iso2022jpms_to_wchar,
-	mb_wchar_to_iso2022jpms
+	mb_wchar_to_iso2022jpms,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jpms_wchar = {

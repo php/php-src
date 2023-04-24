@@ -71,7 +71,8 @@ const mbfl_encoding mbfl_encoding_2022jp_kddi = {
 	&vtbl_2022jp_kddi_wchar,
 	&vtbl_wchar_2022jp_kddi,
 	mb_iso2022jp_kddi_to_wchar,
-	mb_wchar_to_iso2022jp_kddi
+	mb_wchar_to_iso2022jp_kddi,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_2022jp_kddi_wchar = {

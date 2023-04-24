@@ -67,6 +67,8 @@ MBSTRING_API size_t php_mb_mbchar_bytes(const char *s, const mbfl_encoding *enc)
 MBSTRING_API size_t php_mb_stripos(bool mode, zend_string *haystack, zend_string *needle, zend_long offset, const mbfl_encoding *enc);
 MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding);
 
+MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned char **strings, size_t *str_lengths, size_t n, const mbfl_encoding **elist, unsigned int elist_size, bool strict);
+
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
 	const mbfl_encoding *internal_encoding;

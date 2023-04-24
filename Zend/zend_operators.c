@@ -1039,16 +1039,22 @@ static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_binop_error(const cha
 
 static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	if (result == op1 && Z_ARR_P(op1) == Z_ARR_P(op2)) {
-		/* $a += $a */
-		return;
-	}
 	if (result != op1) {
 		ZVAL_ARR(result, zend_array_dup(Z_ARR_P(op1)));
+		zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
+	} else if (Z_ARR_P(op1) == Z_ARR_P(op2)) {
+		/* $a += $a */
 	} else {
-		SEPARATE_ARRAY(result);
+		/* We have to duplicate op1 (even with refcount == 1) because it may be an element of op2
+		 * and therefore its reference counter may be increased by zend_hash_merge(). That leads to
+		 * an assertion in _zend_hash_add_or_update_i() that only allows adding elements to hash
+		 * tables with RC1. See GH-10085 and Zend/tests/gh10085*.phpt */
+		zval tmp;
+		ZVAL_ARR(&tmp, zend_array_dup(Z_ARR_P(op1)));
+		zend_hash_merge(Z_ARRVAL(tmp), Z_ARRVAL_P(op2), zval_add_ref, 0);
+		zval_ptr_dtor(result);
+		ZVAL_COPY_VALUE(result, &tmp);
 	}
-	zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
 }
 /* }}} */
 
@@ -2103,7 +2109,7 @@ ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2) /* {{{
 	d1 = zval_get_double(op1);
 	d2 = zval_get_double(op2);
 
-	return ZEND_NORMALIZE_BOOL(d1 - d2);
+	return ZEND_THREEWAY_COMPARE(d1, d2);
 }
 /* }}} */
 
@@ -2125,8 +2131,7 @@ static int compare_long_to_string(zend_long lval, zend_string *str) /* {{{ */
 	}
 
 	if (type == IS_DOUBLE) {
-		double diff = (double) lval - str_dval;
-		return ZEND_NORMALIZE_BOOL(diff);
+		return ZEND_THREEWAY_COMPARE((double) lval, str_dval);
 	}
 
 	zend_string *lval_as_str = zend_long_to_str(lval);
@@ -2144,15 +2149,11 @@ static int compare_double_to_string(double dval, zend_string *str) /* {{{ */
 	uint8_t type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &str_lval, &str_dval, 0);
 
 	if (type == IS_LONG) {
-		double diff = dval - (double) str_lval;
-		return ZEND_NORMALIZE_BOOL(diff);
+		return ZEND_THREEWAY_COMPARE(dval, (double) str_lval);
 	}
 
 	if (type == IS_DOUBLE) {
-		if (dval == str_dval) {
-			return 0;
-		}
-		return ZEND_NORMALIZE_BOOL(dval - str_dval);
+		return ZEND_THREEWAY_COMPARE(dval, str_dval);
 	}
 
 	zend_string *dval_as_str = zend_double_to_str(dval);
@@ -2174,17 +2175,13 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				return Z_LVAL_P(op1)>Z_LVAL_P(op2)?1:(Z_LVAL_P(op1)<Z_LVAL_P(op2)?-1:0);
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
-				return ZEND_NORMALIZE_BOOL(Z_DVAL_P(op1) - (double)Z_LVAL_P(op2));
+				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), (double)Z_LVAL_P(op2));
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
-				return ZEND_NORMALIZE_BOOL((double)Z_LVAL_P(op1) - Z_DVAL_P(op2));
+				return ZEND_THREEWAY_COMPARE((double)Z_LVAL_P(op1), Z_DVAL_P(op2));
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
-				if (Z_DVAL_P(op1) == Z_DVAL_P(op2)) {
-					return 0;
-				} else {
-					return ZEND_NORMALIZE_BOOL(Z_DVAL_P(op1) - Z_DVAL_P(op2));
-				}
+				return ZEND_THREEWAY_COMPARE(Z_DVAL_P(op1), Z_DVAL_P(op2));
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
 				return zend_compare_arrays(op1, op2);
@@ -2893,7 +2890,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 		if (BLOCKCONV_FOUND()) {
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
 
 			/* Lowercase the chunk we already compared. */
 			BLOCKCONV_INIT_DELTA('a' - 'A');
@@ -2915,7 +2912,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
 
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char*) ZSTR_VAL(res) + (p - (unsigned char*) ZSTR_VAL(str));
 			while (p < end) {
 				*q++ = zend_tolower_ascii(*p++);
 			}
@@ -2942,7 +2939,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, boo
 		if (BLOCKCONV_FOUND()) {
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char *) ZSTR_VAL(str));
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char *) ZSTR_VAL(res) + (p - (unsigned char *) ZSTR_VAL(str));
 
 			/* Uppercase the chunk we already compared. */
 			BLOCKCONV_INIT_DELTA('A' - 'a');
@@ -2964,7 +2961,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, boo
 			zend_string *res = zend_string_alloc(length, persistent);
 			memcpy(ZSTR_VAL(res), ZSTR_VAL(str), p - (unsigned char*) ZSTR_VAL(str));
 
-			unsigned char *q = p + (ZSTR_VAL(res) - ZSTR_VAL(str));
+			unsigned char *q = (unsigned char *) ZSTR_VAL(res) + (p - (unsigned char *) ZSTR_VAL(str));
 			while (p < end) {
 				*q++ = zend_toupper_ascii(*p++);
 			}
