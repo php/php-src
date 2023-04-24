@@ -1,0 +1,50 @@
+# GitHub Action for PHP with extensions
+name: Apple macOS Release
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  apple:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [macos-10.15, macos-11, macos-latest]
+        php-versions: ['7.4', '8.0', '8.1', '8.2']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup PHP, with composer and extensions
+        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: pecl
+          extensions: curl, fileinfo, mbstring, openssl, simplexml, dom, sockets, sodium, ffi, opcache
+      - name: Brew install
+        run: brew install automake
+      - name: Build ext-%EXTNAME%
+        run: |
+          phpize
+          ./configure
+          make
+          make install
+      - name: Get runner environment variables
+        id: runner
+        uses: TheTechsTech/action-environment-info@v1.0.5
+      - name: Create binary archive
+        id: archive
+        run: |
+          tar -zcvf ext_%EXTNAME%-${{ github.ref_name }}_php${{ matrix.php-versions }}_macos-${{steps.runner.outputs.version}}.tgz "$(php-config --extension-dir)"/%EXTNAME%.so
+          echo "OS_LIB=$(php-config --extension-dir)" >> $GITHUB_OUTPUT
+      - name: Upload the binary artifacts
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ext_%EXTNAME%-${{ github.ref_name }}_php${{ matrix.php-versions }}_macos-${{steps.runner.outputs.version}}.tgz
+          asset_name: ext_%EXTNAME%-${{ github.ref_name }}_php${{ matrix.php-versions }}_macos-${{steps.runner.outputs.version}}.tgz
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+          body: "macos binary - ${{ steps.archive.outputs.OS_LIB }}/%EXTNAME%.so"

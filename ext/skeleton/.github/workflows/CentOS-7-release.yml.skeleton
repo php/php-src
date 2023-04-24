@@ -1,0 +1,58 @@
+name: CentOS 7 Release
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  centos_7:
+    name: PHP
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['74', '80', '81', '82']
+    runs-on: ubuntu-latest
+    container: centos:7
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install PHP and Build tools
+        run: |
+          yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm https://rpms.remirepo.net/enterprise/remi-release-7.rpm -y
+          yum update -y
+          yum-config-manager --disable 'remi-php*' && yum-config-manager --enable remi-php${{ matrix.php-versions }}
+          yum install git make gcc gcc-c++ binutils glibc-devel autoconf libtool bison re2c automake libxml2-devel sudo php-devel which php-pear -y
+      - name: Build ext-%EXTNAME%
+        run: |
+          phpize
+          ./configure --with-%EXTNAME%=$(readlink -f `pwd`/%DEPS%)
+          make
+          make install
+      - name: Setup rpm
+        id: setup-rpm
+        run: |
+          mkdir -p .rpmpkg/"$(php-config --extension-dir)"
+          cp -f modules/%EXTNAME%.so .rpmpkg/"$(php-config --extension-dir)"
+          chmod +x ./cmd/os_codename.sh
+          echo "OS_CODENAME=$(./cmd/os_codename.sh)" >> $GITHUB_OUTPUT
+      - name: Create rpm package
+        id: build-rpm-action
+        uses: jiro4989/build-rpm-action@v2
+        with:
+          summary: '%DEPS% PHP wrapper.'
+          package: ext_%EXTNAME%-php${{ matrix.php-versions }}_${{ steps.setup-rpm.outputs.OS_CODENAME }}
+          package_root: .rpmpkg
+          maintainer: github@maintainer
+          version: ${{ github.ref }} # refs/tags/v*.*.*
+          arch: 'x86_64'
+          desc: '%EXTNAME% provides access to underlying %DEPS% functions.'
+      - name: Upload the rpm binary artifacts
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./*.rpm
+          asset_name: ext_%EXTNAME%_php${{ matrix.php-versions }}-${{ github.event.release.tag_name  }}_centos7
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+          body: ext_%EXTNAME%_php${{ matrix.php-versions }}-${{ github.event.release.tag_name }} for ${{ steps.setup-rpm.outputs.OS_CODENAME }}

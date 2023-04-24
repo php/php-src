@@ -1,0 +1,63 @@
+name: Ubuntu Release
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  multi:
+    name: ${{ matrix.operating-system }} CI - PHP ${{ matrix.php-versions }}-${{ matrix.threads }}
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-20.04, ubuntu-22.04]
+        php-versions: ['7.4', '8.0', '8.1', '8.2']
+        threads: [ts, nts]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+        env:
+          phpts: ${{ matrix.threads }} # specify ts or nts
+      - name: Build ext-%EXTNAME%
+        run: |
+          phpize
+          ./configure --with-%EXTNAME%=$(readlink -f `pwd`/%DEPS%)
+          make
+          sudo make install
+      - name: Setup deb
+        id: setup-deb
+        run: |
+          mkdir -p .debpkg/"$(php-config --extension-dir)"
+          cp -f modules/%EXTNAME%.so .debpkg/"$(php-config --extension-dir)"
+          chmod +x ./cmd/os_codename.sh
+          echo "OS_CODENAME=$(sudo ./cmd/os_codename.sh)" >> $GITHUB_OUTPUT
+        # mkdir -p .debpkg/DEBIAN
+        # echo -e 'echo "extension=%EXTNAME%.so" >> "$(php -r 'echo php_ini_loaded_file();')"' > .debpkg/DEBIAN/postinst
+        # chmod +x .debpkg/DEBIAN/postinst
+      - name: Create deb package
+        id: build-deb-action
+        uses: jiro4989/build-deb-action@v2
+        with:
+          package: ext-%EXTNAME%
+          package_root: .debpkg
+          maintainer: github@maintainer
+          version: ${{ github.ref }} # refs/tags/v*.*.*
+          arch: 'amd64'
+          depends: 'php-common'
+          desc: '%EXTNAME% provides access to underlying %DEPS% functions.'
+      - name: Upload the deb binary artifacts
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{steps.build-deb-action.outputs.file_name}}
+          asset_name: ext_%EXTNAME%_${{ github.event.release.tag_name }}_php${{ matrix.php-versions }}_${{ matrix.threads }}_${{ matrix.operating-system }}_amd64.deb
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: false
+          body: ${{steps.build-deb-action.outputs.file_name}} for ${{ steps.setup-deb.outputs.OS_CODENAME }}
