@@ -901,10 +901,18 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 		RETURN_TRUE;
 	}
 
-	/* Copy array, so the in-place modifications will not be visible to the callback function */
-	arr = zend_array_dup(arr);
+	/* Copy array, so the in-place modifications will not be visible to the callback function.
+	 * Unless there are no other references since we know for sure it won't be visible. */
+	bool in_place = zend_may_modify_arg_in_place(array);
+	if (!in_place) {
+		arr = zend_array_dup(arr);
+	}
 
 	zend_hash_sort(arr, compare_func, renumber);
+
+	if (in_place) {
+		GC_ADDREF(arr);
+	}
 
 	zval garbage;
 	ZVAL_COPY_VALUE(&garbage, array);
@@ -3866,10 +3874,17 @@ static zend_always_inline void php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM
 		}
 	}
 
-	/* copy first array */
+	/* copy first array if necessary */
 	arg = args;
-	dest = zend_array_dup(Z_ARRVAL_P(arg));
+	bool in_place = zend_may_modify_arg_in_place(arg);
+	if (in_place) {
+		dest = Z_ARRVAL_P(arg);
+	} else {
+		dest = zend_array_dup(Z_ARRVAL_P(arg));
+	}
+
 	ZVAL_ARR(return_value, dest);
+
 	if (recursive) {
 		for (i = 1; i < argc; i++) {
 			arg = args + i;
@@ -3880,6 +3895,10 @@ static zend_always_inline void php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM
 			arg = args + i;
 			zend_hash_merge(dest, Z_ARRVAL_P(arg), zval_add_ref, 1);
 		}
+	}
+
+	if (in_place) {
+		GC_ADDREF(dest);
 	}
 }
 /* }}} */
@@ -3945,22 +3964,34 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 
 	arg = args;
 	src  = Z_ARRVAL_P(arg);
-	/* copy first array */
-	array_init_size(return_value, count);
-	dest = Z_ARRVAL_P(return_value);
+	/* copy first array if necessary */
+	bool in_place = false;
 	if (HT_IS_PACKED(src)) {
-		zend_hash_real_init_packed(dest);
-		ZEND_HASH_FILL_PACKED(dest) {
-			ZEND_HASH_PACKED_FOREACH_VAL(src, src_entry) {
-				if (UNEXPECTED(Z_ISREF_P(src_entry) &&
-					Z_REFCOUNT_P(src_entry) == 1)) {
-					src_entry = Z_REFVAL_P(src_entry);
-				}
-				Z_TRY_ADDREF_P(src_entry);
-				ZEND_HASH_FILL_ADD(src_entry);
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FILL_END();
+		/* Note: If it has holes, it might get sequentialized */
+		if (HT_IS_WITHOUT_HOLES(src) && zend_may_modify_arg_in_place(arg)) {
+			dest = src;
+			in_place = true;
+			ZVAL_ARR(return_value, dest);
+		} else {
+			array_init_size(return_value, count);
+			dest = Z_ARRVAL_P(return_value);
+
+			zend_hash_real_init_packed(dest);
+			ZEND_HASH_FILL_PACKED(dest) {
+				ZEND_HASH_PACKED_FOREACH_VAL(src, src_entry) {
+					if (UNEXPECTED(Z_ISREF_P(src_entry) &&
+						Z_REFCOUNT_P(src_entry) == 1)) {
+						src_entry = Z_REFVAL_P(src_entry);
+					}
+					Z_TRY_ADDREF_P(src_entry);
+					ZEND_HASH_FILL_ADD(src_entry);
+				} ZEND_HASH_FOREACH_END();
+			} ZEND_HASH_FILL_END();
+		}
 	} else {
+		array_init_size(return_value, count);
+		dest = Z_ARRVAL_P(return_value);
+
 		zend_string *string_key;
 		zend_hash_real_init_mixed(dest);
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
@@ -3986,6 +4017,10 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 			arg = args + i;
 			php_array_merge(dest, Z_ARRVAL_P(arg));
 		}
+	}
+
+	if (in_place) {
+		GC_ADDREF(dest);
 	}
 }
 /* }}} */
@@ -4594,7 +4629,12 @@ PHP_FUNCTION(array_unique)
 
 	cmp = php_get_data_compare_func_unstable(sort_type, 0);
 
-	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
+	bool in_place = zend_may_modify_arg_in_place(array);
+	if (in_place) {
+		RETVAL_ARR(Z_ARRVAL_P(array));
+	} else {
+		RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
+	}
 
 	/* create and sort array with pointers to the target_hash buckets */
 	arTmp = pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
@@ -4640,6 +4680,10 @@ PHP_FUNCTION(array_unique)
 		}
 	}
 	pefree(arTmp, GC_FLAGS(Z_ARRVAL_P(array)) & IS_ARRAY_PERSISTENT);
+
+	if (in_place) {
+		Z_ADDREF_P(return_value);
+	}
 }
 /* }}} */
 
@@ -4764,6 +4808,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	zend_fcall_info *fci_key = NULL, *fci_data;
 	zend_fcall_info_cache *fci_key_cache = NULL, *fci_data_cache;
 	PHP_ARRAY_CMP_FUNC_VARS;
+	bool in_place = false;
 
 	bucket_compare_func_t intersect_key_compare_func;
 	bucket_compare_func_t intersect_data_compare_func;
@@ -4890,8 +4935,13 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 	}
 
-	/* copy the argument array */
-	RETVAL_ARR(zend_array_dup(Z_ARRVAL(args[0])));
+	/* copy the argument array if necessary */
+	in_place = zend_may_modify_arg_in_place(&args[0]);
+	if (in_place) {
+		RETVAL_ARR(Z_ARRVAL_P(&args[0]));
+	} else {
+		RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(&args[0])));
+	}
 
 	/* go through the lists and look for common values */
 	while (Z_TYPE(ptrs[0]->val) != IS_UNDEF) {
@@ -5002,6 +5052,10 @@ out:
 
 	efree(ptrs);
 	efree(lists);
+
+	if (in_place) {
+		Z_ADDREF_P(return_value);
+	}
 }
 /* }}} */
 
