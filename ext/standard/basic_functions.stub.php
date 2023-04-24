@@ -3449,6 +3449,9 @@ function strval(mixed $value): string {}
  */
 function is_null(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_resource(mixed $value): bool {}
 
 /**
