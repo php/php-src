@@ -1507,4 +1507,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	do { ZVAL_COPY_OR_DUP(z, v); Z_PROP_FLAG_P(z) = Z_PROP_FLAG_P(v); } while (0)
 
 
+static zend_always_inline bool zend_may_modify_arg_in_place(const zval *arg)
+{
+	return Z_REFCOUNTED_P(arg) && !(GC_FLAGS(Z_COUNTED_P(arg)) & (GC_IMMUTABLE | GC_PERSISTENT)) && Z_REFCOUNT_P(arg) == 1;
+}
+
 #endif /* ZEND_TYPES_H */
