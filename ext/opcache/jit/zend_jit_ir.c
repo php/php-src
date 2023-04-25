@@ -271,6 +271,7 @@ typedef struct _zend_jit_ctx {
 	ir_ref               trace_loop_ref;
 	ir_ref               return_inputs;
 	const zend_op_array *op_array;
+	const zend_op_array *current_op_array;
 	zend_ssa            *ssa;
 	zend_string         *name;
 	ir_ref              *bb_start_ref;      /* PHP BB -> IR ref mapping */
@@ -1076,6 +1077,20 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 		return;
 	}
 	ZEND_ASSERT(jit->ra && jit->ra[var].ref == IR_NULL);
+	/* Disable CSE for temporary variables */
+	if (val > 0 && jit->ssa->vars[var].var >= jit->current_op_array->last_var) {
+		ir_insn *insn = &jit->ctx.ir_base[val];
+		ir_op op = insn->op;
+
+		if (op <= IR_LAST_FOLDABLE_OP && jit->ctx.prev_insn_chain[op]) {
+			ZEND_ASSERT(jit->ctx.prev_insn_chain[op] == val);
+			if (insn->prev_insn_offset) {
+				jit->ctx.prev_insn_chain[op] = val - (ir_ref)(uint32_t)insn->prev_insn_offset;
+			} else {
+				jit->ctx.prev_insn_chain[op] = IR_UNUSED;
+			}
+		}
+	}
 	/* Negative "var" has special meaning for IR */
 	val = ir_bind(&jit->ctx, -EX_NUM_TO_VAR(jit->ssa->vars[var].var), val);
 	jit->ra[var].ref = val;
@@ -2503,6 +2518,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->ctx.snapshot_create = (ir_snapshot_create_t)jit_SNAPSHOT;
 
 	jit->op_array = NULL;
+	jit->current_op_array = NULL;
 	jit->ssa = NULL;
 	jit->name = NULL;
 	jit->last_valid_opline = NULL;
@@ -2518,8 +2534,6 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->fp = IR_UNUSED;
 	jit->trace_loop_ref = IR_UNUSED;
 	jit->return_inputs = IR_UNUSED;
-	jit->op_array = NULL;
-	jit->ssa = NULL;
 	jit->bb_start_ref = NULL;
 	jit->bb_predecessors = NULL;
 	jit->bb_edges = NULL;
@@ -15209,7 +15223,7 @@ static int zend_jit_start(zend_jit_ctx *jit, const zend_op_array *op_array, zend
 
 	jit->ctx.spill_base = ZREG_FP;
 
-	jit->op_array = op_array;
+	jit->op_array = jit->current_op_array = op_array;
 	jit->ssa = ssa;
 	jit->bb_start_ref = zend_arena_calloc(&CG(arena), ssa->cfg.blocks_count * 2, sizeof(ir_ref));
 	jit->bb_predecessors = jit->bb_start_ref + ssa->cfg.blocks_count;
@@ -15722,8 +15736,8 @@ static int zend_jit_deoptimizer_start(zend_jit_ctx        *jit,
 
 	jit->ctx.spill_base = ZREG_FP;
 
-	jit->op_array = NULL;//op_array;
-	jit->ssa = NULL;//ssa;
+	jit->op_array = NULL;
+	jit->ssa = NULL;
 	jit->name = zend_string_copy(name);
 
 	jit->ctx.flags |= IR_SKIP_PROLOGUE;
@@ -15743,7 +15757,8 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 
 	jit->ctx.spill_base = ZREG_FP;
 
-	jit->op_array = NULL;//op_array;
+	jit->op_array = NULL;
+	jit->current_op_array = op_array;
 	jit->ssa = ssa;
 	jit->name = zend_string_copy(name);
 

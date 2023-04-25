@@ -7186,6 +7186,9 @@ done:
 				TRACE_FRAME_SET_THIS_CHECKED(call);
 			}
 			op_array = (zend_op_array*)p->op_array;
+#ifdef ZEND_JIT_IR
+			ctx.current_op_array = op_array;
+#endif
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			op_array_ssa = &jit_extension->func_info.ssa;
@@ -7229,6 +7232,9 @@ done:
 			}
 		} else if (p->op == ZEND_JIT_TRACE_BACK) {
 			op_array = (zend_op_array*)p->op_array;
+#ifdef ZEND_JIT_IR
+			ctx.current_op_array = op_array;
+#endif
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			op_array_ssa = &jit_extension->func_info.ssa;
