@@ -32,6 +32,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug GH-10968 (Segfault in preg_replace_callback_array()). (ilutov)
 
+- PGSQL:
+  . Fixed parameter parsing of pg_lo_export(). (kocsismate)
+
 - Standard:
   . Fixed bug GH-10990 (mail() throws TypeError after iterating over
     $additional_headers array by reference). (nielsdos)
