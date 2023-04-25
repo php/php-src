@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.6
+?? ??? ????, PHP 8.2.7
+
+
+11 May 2023, PHP 8.2.6
 
 - Core:
   . Fix inconsistent float negation in constant expressions. (ilutov)
