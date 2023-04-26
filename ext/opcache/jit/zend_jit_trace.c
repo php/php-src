@@ -3987,7 +3987,11 @@ static int zend_jit_trace_deoptimization(
 				if (stack) {
 					if (jit->ra && jit->ra[i].ref) {
 						SET_STACK_TYPE(stack, i, type, 0);
-						SET_STACK_REF(stack, i, jit->ra[i].ref);
+						if ((STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE)) != 0) {
+							SET_STACK_REF_EX(stack, i, jit->ra[i].ref, ZREG_LOAD);
+						} else {
+							SET_STACK_REF(stack, i, jit->ra[i].ref);
+						}
 					} else {
 						SET_STACK_TYPE(stack, i, type, 1);
 					}
@@ -7550,14 +7554,11 @@ done:
 				int32_t ref = STACK_REF(stack, i);
 
 				if (ref) {
-					if (ref < 0) {
-						uint8_t type = STACK_TYPE(stack, i);
+					uint8_t type = STACK_TYPE(stack, i);
 
-						if (!(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))
-						 && !zend_jit_store_ref(jit, 1 << type, i, ref,
-							STACK_MEM_TYPE(stack, i) != type)) {
-							goto jit_failure;
-						}
+					if (!(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))
+					 && !zend_jit_store_ref(jit, 1 << type, i, ref, STACK_MEM_TYPE(stack, i) != type)) {
+						goto jit_failure;
 					}
 				}
 				CLEAR_STACK_REF(stack, i);
