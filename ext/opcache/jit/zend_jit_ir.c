@@ -4242,10 +4242,34 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		 || (opline->result_type != IS_UNUSED && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) ==  (MAY_BE_DOUBLE|MAY_BE_GUARD))) {
 			int32_t exit_point;
 			const void *exit_addr;
+			zend_jit_trace_stack *stack;
+			uint32_t old_res_info = 0;
 
-			exit_point = zend_jit_trace_get_exit_point(opline, 0);
+			stack = JIT_G(current_frame)->stack;
+			if (opline->result_type != IS_UNUSED) {
+				old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
+				if (opline->opcode == ZEND_PRE_INC) {
+					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG, 0);
+				}
+			}
+			exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
 			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-			ir_GUARD(ir_OVERFLOW(ref), ir_CONST_ADDR(exit_addr));
+			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+			    opline->result_type != IS_UNUSED) {
+				if_overflow = ir_IF(ir_OVERFLOW(ref));
+				ir_IF_FALSE_cold(if_overflow);
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
+				jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
+				ir_IF_TRUE(if_overflow);
+			} else {
+				ir_GUARD(ir_OVERFLOW(ref), ir_CONST_ADDR(exit_addr));
+			}
+			if (opline->result_type != IS_UNUSED) {
+				SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
+			}
 		} else {
 			if_overflow = ir_IF(ir_OVERFLOW(ref));
 			ir_IF_FALSE(if_overflow);
