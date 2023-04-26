@@ -1001,11 +1001,23 @@ optimize_jmpnz:
 							|| (opline->opcode == ZEND_MATCH && (type == IS_LONG || type == IS_STRING));
 
 						if (!correct_type) {
-							removed_ops++;
-							MAKE_NOP(opline);
-							opline->extended_value = 0;
-							take_successor_ex(ssa, block_num, block, block->successors[block->successors_count - 1]);
-							goto optimize_nop;
+							if (opline->opcode != ZEND_MATCH) {
+								removed_ops++;
+								MAKE_NOP(opline);
+								opline->extended_value = 0;
+								take_successor_ex(ssa, block_num, block, block->successors[block->successors_count - 1]);
+								goto optimize_nop;
+							} else {
+								/* Match doesn't have a fallback chain, so we need to jump directly to the default branch. */
+								uint32_t target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
+								opline->opcode = ZEND_JMP;
+								opline->extended_value = 0;
+								SET_UNUSED(opline->op1);
+								ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
+								SET_UNUSED(opline->op2);
+								take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+								goto optimize_jmp;
+							}
 						} else {
 							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
 							zval *jmp_zv = type == IS_LONG
