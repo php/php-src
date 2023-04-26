@@ -7488,14 +7488,15 @@ done:
 			zend_ssa_phi *phi = ssa->blocks[1].phis;
 
 			while (phi) {
-				if (RA_HAS_REG(phi->ssa_var)
-				 && RA_HAS_REG(phi->sources[1])
+				if (RA_HAS_REG(phi->sources[1])
 				 && STACK_MEM_TYPE(stack, phi->var) != STACK_TYPE(stack, phi->var)
-				 && (RA_REG_FLAGS(phi->ssa_var) & (ZREG_LOAD|ZREG_STORE)) == 0
 				 && (RA_REG_FLAGS(phi->sources[1]) & (ZREG_LOAD|ZREG_STORE)) == 0) {
-					/* Store actual type to memory to avoid deoptimization mistakes */
-					/* TODO: Alternatively, we may try to update alredy generated deoptimization info */
-					zend_jit_store_var_type(&ctx, phi->var, STACK_TYPE(stack, phi->var));
+
+					if (!RA_HAS_REG(phi->ssa_var)
+					 || (RA_REG_FLAGS(phi->ssa_var) & (ZREG_LOAD|ZREG_STORE)) == 0) {
+						/* Store actual type to memory to avoid deoptimization mistakes */
+						zend_jit_store_var_type(&ctx, phi->var, STACK_TYPE(stack, phi->var));
+					}
 				}
 				phi = phi->next;
 			}
