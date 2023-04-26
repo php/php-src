@@ -496,7 +496,7 @@ carry_on:
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Mounting of %s to %s within phar %s failed", path, actual, arch);
 		}
 
-		if (entry && path && path == entry) {
+		if (entry && path == entry) {
 			efree(entry);
 		}
 
