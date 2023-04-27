@@ -2660,7 +2660,7 @@ PHP_FUNCTION(pg_lo_export)
 
 	/* allow string to handle large OID value correctly */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-								 "rlP", &pgsql_link, pgsql_link_ce, &oid_long, &file_out) == SUCCESS) {
+								 "OlP", &pgsql_link, pgsql_link_ce, &oid_long, &file_out) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
