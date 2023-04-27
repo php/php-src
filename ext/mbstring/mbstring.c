@@ -4873,8 +4873,9 @@ bool utf8_range(const unsigned char *data, int len)
 		error1 = vorrq_u8(error1, error2);
 
 		/* Delay error check till loop ends */
-		if (vmaxvq_u8(error1))
+		if (vmaxvq_u8(error1)) {
 			return false;
+		}
 
 		/* Find previous token (not 80~BF) */
 		uint32_t token4;
@@ -4882,12 +4883,13 @@ bool utf8_range(const unsigned char *data, int len)
 
 		const int8_t *token = (const int8_t *)&token4;
 		int lookahead = 0;
-		if (token[3] > (int8_t)0xBF)
+		if (token[3] > (int8_t)0xBF) {
 			lookahead = 1;
-		else if (token[2] > (int8_t)0xBF)
+		} else if (token[2] > (int8_t)0xBF) {
 			lookahead = 2;
-		else if (token[1] > (int8_t)0xBF)
+		} else if (token[1] > (int8_t)0xBF) {
 			lookahead = 3;
+		}
 
 		data -= lookahead;
 		len += lookahead;
