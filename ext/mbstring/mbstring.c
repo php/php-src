@@ -1348,7 +1348,7 @@ PHP_FUNCTION(mb_http_output)
 }
 /* }}} */
 
-/* {{{ Sets the current detect_order or Return the current detect_order as a array */
+/* {{{ Sets the current detect_order or Return the current detect_order as an array */
 PHP_FUNCTION(mb_detect_order)
 {
 	zend_string *order_str = NULL;
@@ -4828,7 +4828,7 @@ finish_up_remaining_bytes:
 		switch (ab) {
 		case 1:
 			/* 2-byte character. No further bytes to check for 0x80. Check first byte
-			 * for for xx00 000x (overlong sequence). */
+			 * for xx00 000x (overlong sequence). */
 			if ((c & 0x3e) == 0) {
 				return false;
 			}
@@ -4844,7 +4844,7 @@ finish_up_remaining_bytes:
 
 		case 3:
 			/* 4-byte character. Check 3rd and 4th bytes for 0x80. Then check first 2
-			 * bytes for for 1111 0000, xx00 xxxx (overlong sequence), then check for a
+			 * bytes for 1111 0000, xx00 xxxx (overlong sequence), then check for a
 			 * character greater than 0x0010ffff (f4 8f bf bf) */
 			if ((*(++p) & 0xc0) != 0x80 || (*(++p) & 0xc0) != 0x80 || (c == 0xf0 && (d & 0x30) == 0) || (c > 0xf4 || (c == 0xf4 && d > 0x8f))) {
 				return false;

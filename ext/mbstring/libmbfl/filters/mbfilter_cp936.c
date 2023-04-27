@@ -22,7 +22,7 @@
  *
  */
 /*
- * the source code included in this files was separated from mbfilter_cn.c
+ * the source code included in this file was separated from mbfilter_cn.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
