@@ -2587,9 +2587,6 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	}
 
 	ir_build_cfg(ctx);
-#if 0
-	ir_remove_unreachable_blocks(ctx);
-#endif
 	ir_build_dominators_tree(ctx);
 	ir_find_loops(ctx);
 
