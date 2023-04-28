@@ -14,6 +14,7 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [Pull requests](#pull-requests)
 * [Filing bugs](#filing-bugs)
 * [Feature requests](#feature-requests)
+* [Technical resources](#technical-resources)
 * [Writing tests](#writing-tests)
 * [Writing documentation](#writing-documentation)
 * [Getting help](#getting-help)
@@ -84,6 +85,30 @@ repository. Mailing list subscription is explained on the
 You may also want to read
 [The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
+
+## Technical resources
+
+There are a number of technical resources on php-src. Unfortunately, they are
+scattered across different websites, and often outdated. Nonetheless, they can
+provide a good starting point for learning about the fundamentals of the code
+base.
+
+* https://www.phpinternalsbook.com/
+* https://www.npopov.com/
+  * [Internal value representation](https://www.npopov.com/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html), [part 2](https://www.npopov.com/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html)
+  * [HashTable implementation](https://www.npopov.com/2014/12/22/PHPs-new-hashtable-implementation.html)
+  * [Zend Virtual Machine](https://www.npopov.com/2017/04/14/PHP-7-Virtual-machine.html)
+  * [How opcache works](https://www.npopov.com/2021/10/13/How-opcache-works.html)
+  * [The opcache optimizer](https://www.npopov.com/2022/05/22/The-opcache-optimizer.html)
+* https://wiki.php.net/internals
+  * [Objects](https://wiki.php.net/internals/engine/objects)
+* https://qa.php.net/
+  * [Writing tests](https://qa.php.net/write-test.php)
+  * [Running tests](https://qa.php.net/running-tests.php)
+  * [PHPT structure](https://qa.php.net/phpt_details.php)
+* https://phpinternals.net/
+  * [Implementing new operator](https://phpinternals.net/articles/implementing_a_range_operator_into_php), [part 2](https://phpinternals.net/articles/a_reimplementation_of_the_range_operator)
+  * [Opcode extending](https://phpinternals.net/articles/implementing_new_language_constructs_via_opcode_extending)
 
 ## Writing tests
 
