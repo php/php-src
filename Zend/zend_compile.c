@@ -8124,12 +8124,6 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 		zend_string *old_name = zend_ast_get_str(old_name_ast);
 		zend_string *new_name, *lookup_name;
 
-		/* Check that we are not attempting to alias a built-in type */
-		if (type == ZEND_SYMBOL_CLASS && zend_is_reserved_class_name(old_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot alias '%s' as it is a built-in type", ZSTR_VAL(old_name));
-		}
-
 		if (new_name_ast) {
 			new_name = zend_string_copy(zend_ast_get_str(new_name_ast));
 		} else {
