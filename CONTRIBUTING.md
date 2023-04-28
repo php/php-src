@@ -96,6 +96,8 @@ base.
 * https://www.phpinternalsbook.com/
 * https://www.npopov.com/
 * https://wiki.php.net/internals
+* https://qa.php.net/phpt_details.php
+* https://phpinternals.net/
 * https://blog.ircmaxell.com/categories/PHP/
 
 ## Writing tests
