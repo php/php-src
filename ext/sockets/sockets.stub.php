@@ -642,6 +642,13 @@ const IP_MULTICAST_TTL = UNKNOWN;
  * @cvalue IP_MULTICAST_LOOP
  */
 const IP_MULTICAST_LOOP = UNKNOWN;
+#ifdef IP_BIND_ADDRESS_NO_PORT
+/**
+ * @var int
+ * @cvalue IP_BIND_ADDRESS_NO_PORT
+ */
+const IP_BIND_ADDRESS_NO_PORT = UNKNOWN;
+#endif
 #if HAVE_IPV6
 /**
  * @var int

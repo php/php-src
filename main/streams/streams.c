@@ -469,7 +469,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 				the cookie_closer unsets the fclose_stdiocast flags, so
 				we can be sure that we only reach here when PHP code calls
 				php_stream_free.
-				Lets let the cookie code clean it all up.
+				Let's let the cookie code clean it all up.
 			 */
 			stream->in_free = 0;
 			return fclose(stream->stdiocast);
@@ -839,7 +839,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 	}
 
 	/* if the stream doesn't directly support stat-ing, return with failure.
-	 * We could try and emulate this by casting to a FD and fstat-ing it,
+	 * We could try and emulate this by casting to an FD and fstat-ing it,
 	 * but since the fd might not represent the actual underlying content
 	 * this would give bogus results. */
 	if (stream->ops->stat == NULL) {
@@ -1503,7 +1503,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		return result;
 	}
 
-	/* avoid many reallocs by allocating a good sized chunk to begin with, if
+	/* avoid many reallocs by allocating a good-sized chunk to begin with, if
 	 * we can.  Note that the stream may be filtered, in which case the stat
 	 * result may be inaccurate, as the filter may inflate or deflate the
 	 * number of bytes that we can read.  In order to avoid an upsize followed

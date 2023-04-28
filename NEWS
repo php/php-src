@@ -118,6 +118,7 @@ PHP                                                                        NEWS
 - PGSQL:
   . pg_fetch_object raises a ValueError instead of an Exception.
     (David Carlier)
+  . Added GH-9344, pipeline mode support. (David Carlier)
 
 - Phar:
   . Fix memory leak in phar_rename_archive(). (stkeke)
@@ -159,6 +160,7 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added TCP_REPAIR for quietly close a connection. (David Carlier)
   . Added SO_REUSEPORT_LB freebsd constant. (David Carlier)
+  . Added IP_BIND_ADDRESS_NO_PORT. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)

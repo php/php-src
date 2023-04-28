@@ -90,7 +90,7 @@ END_EXTERN_C()
  * The only exceptions to this rule are that stream implementations can use
  * the php_stream->abstract pointer to hold their context, and streams
  * opened via stream_open_wrappers can use the zval ptr in
- * php_stream->wrapperdata to hold meta data for php scripts to
+ * php_stream->wrapperdata to hold metadata for php scripts to
  * retrieve using file_get_wrapper_data(). */
 
 typedef struct _php_stream php_stream;
@@ -199,7 +199,7 @@ struct _php_stream  {
 	php_stream_filter_chain readfilters, writefilters;
 
 	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
-	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
+	void *wrapperthis;		/* convenience pointer for an instance of a wrapper */
 	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
 	uint8_t is_persistent:1;
@@ -290,7 +290,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 #define PHP_STREAM_FREE_CALL_DTOR			1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM		2 /* pefree(stream) */
-#define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close it's underlying handle */
+#define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close its underlying handle */
 #define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
 #define PHP_STREAM_FREE_PERSISTENT			16 /* manually freeing a persistent connection */
 #define PHP_STREAM_FREE_IGNORE_ENCLOSING	32 /* don't close the enclosing stream instead */
@@ -441,7 +441,7 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize);
 #define php_stream_truncate_set_size(stream, size)	_php_stream_truncate_set_size((stream), (size))
 END_EXTERN_C()
 
-#define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add meta data information */
+#define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add metadata information */
 #define php_stream_populate_meta_data(stream, zv)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_META_DATA_API, 0, zv) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
 /* Check if the stream is still "live"; for sockets/pipes this means the socket

@@ -22,7 +22,7 @@
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
 /ext/pgsql @devnexen
-/ext/random @TimWolla
+/ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
 /ext/sockets @devnexen
 /ext/spl @Girgias
