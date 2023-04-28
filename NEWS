@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     values). (dstogov, nielsdos, ilutov)
   . Fix bug GH-10935 (Use of trait doesn't redeclare static property if class
     has inherited it from its parent). (ilutov)
+  . Fix bug GH-11154 (Negative indices on empty array don't affect next chosen
+    index). (ColinHDev)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
