@@ -10,7 +10,6 @@ $a[] = "after -5";
 var_dump($a);
 ?>
 --EXPECT--
-bool(true)
 array(2) {
   [-5]=>
   string(2) "-5"
