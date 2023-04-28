@@ -407,7 +407,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 		/*
 		 * If we're restoring INI values, we shouldn't reset the timer.
 		 * Otherwise, the timer is active when PHP is idle, such as the
-		 * the CLI web server or CGI. Running a script will re-activate
+		 * CLI web server or CGI. Running a script will re-activate
 		 * the timeout, so it's not needed to do so at script end.
 		 */
 		zend_set_timeout(EG(timeout_seconds), 0);
@@ -1022,7 +1022,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		origin = ZSTR_VAL(replace_origin);
 	}
 
-	/* origin and buffer available, so lets come up with the error message */
+	/* origin and buffer available, so let's come up with the error message */
 	if (docref && docref[0] == '#') {
 		docref_target = strchr(docref, '#');
 		docref = NULL;

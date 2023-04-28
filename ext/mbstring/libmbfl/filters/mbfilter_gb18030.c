@@ -22,7 +22,7 @@
  *
  */
 /*
- * the source code included in this files was separated from mbfilter_cp936.c
+ * the source code included in this file was separated from mbfilter_cp936.c
  * by rui hirokawa <hirokawa@php.net> on 11 Aug 2011.
  *
  */

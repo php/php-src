@@ -354,7 +354,7 @@ PHP_FUNCTION(juliantojd)
 
 /* {{{ heb_number_to_chars*/
 /*
-caution: the Hebrew format produces non unique result.
+caution: the Hebrew format produces non-unique result.
 for example both: year '5' and year '5000' produce 'ה'.
 use the numeric one for calculations.
  */

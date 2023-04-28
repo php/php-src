@@ -207,7 +207,7 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 				zval_ptr_dtor_nogc(val);
 
 				/* do not output the error message to the screen,
-				 this helps us to to avoid "information disclosure" */
+				 this helps us to avoid "information disclosure" */
 				if (!PG(display_errors)) {
 					php_error_docref(NULL, E_WARNING, "Input variable nesting level exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
 				}

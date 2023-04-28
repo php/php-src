@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter_iso2022_jp_ms.c
+ * The source code included in this file was separated from mbfilter_iso2022_jp_ms.c
  * by Rui Hirokawa <hirokawa@php.net> on 25 July 2011.
  *
  */
