@@ -2167,7 +2167,7 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 		if (mime_type) {
 			smart_str_appendl_ex(&buffer, "Content-Type: ", sizeof("Content-Type: ") - 1, 1);
 			smart_str_appends_ex(&buffer, mime_type, 1);
-			if (strncmp(mime_type, "text/", 5) == 0 && strcmp(mime_type, "text/event-stream") != 0) {
+			if (strncmp(mime_type, "text/", 5) == 0) {
 				smart_str_appends_ex(&buffer, "; charset=UTF-8", 1);
 			}
 			smart_str_appendl_ex(&buffer, "\r\n", 2, 1);

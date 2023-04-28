@@ -371,7 +371,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len)
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
 	if (*mimetype != NULL) {
-		if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
+		if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL && strcmp(*mimetype, "text/event-stream") != 0) {
 			newlen = len + (sizeof(";charset=")-1) + strlen(charset);
 			newtype = emalloc(newlen + 1);
 	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
