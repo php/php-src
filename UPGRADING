@@ -39,6 +39,8 @@ PHP 8.3 UPGRADE NOTES
     inherited from the parent class. This will create a separate static property
     storage for the current class. This is analogous to adding the static
     property to the class directly without traits.
+  . Assigning a value to a negative index n in an empty array will now make sure that
+    the next index is n+1 and no longer default to 0.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
