@@ -95,6 +95,10 @@ base.
 
 * https://www.phpinternalsbook.com/
 * https://www.npopov.com/
+  * [Internal value representation](https://www.npopov.com/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html), [part 2](https://www.npopov.com/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html)
+  * [HashTable implementation](https://www.npopov.com/2014/12/22/PHPs-new-hashtable-implementation.html)
+  * [Zend Virtual Machine](https://www.npopov.com/2017/04/14/PHP-7-Virtual-machine.html)
+  * [How opcache works](https://www.npopov.com/2021/10/13/How-opcache-works.html), [opcache optimizer](https://www.npopov.com/2022/05/22/The-opcache-optimizer.html)
 * https://wiki.php.net/internals
 * https://qa.php.net/phpt_details.php
 * https://phpinternals.net/
