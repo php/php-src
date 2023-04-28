@@ -3,7 +3,7 @@ Test empty arrays with first added index being negative
 --FILE--
 <?php
 
-$a = array();
+$a = [];
 $a[-5] = "-5";
 $a[] = "after -5";
 
