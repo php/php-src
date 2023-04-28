@@ -2854,6 +2854,12 @@ static int zend_jit_align_func(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_align_stub(dasm_State **Dst)
+{
+	|.align 16
+	return 1;
+}
+
 static int zend_jit_prologue(dasm_State **Dst)
 {
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
