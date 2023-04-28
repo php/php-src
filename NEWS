@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed parameter parsing of pg_lo_export(). (kocsismate)
 
+- Standard:
+  . Fixed bug GH-11138 (move_uploaded_file() emits open_basedir warning for
+    source file). (ilutov)
+
 11 May 2023, PHP 8.1.19
 
 - Core:
