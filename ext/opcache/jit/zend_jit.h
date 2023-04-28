@@ -76,7 +76,6 @@
 
 #define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debugger flags can't be changed at run-time */
 
-#define ZEND_JIT_TRACE_MAX_LENGTH        1024 /* max length of single trace */
 #define ZEND_JIT_TRACE_MAX_EXITS          512 /* max number of side exits per trace */
 
 #define ZEND_JIT_TRACE_MAX_FUNCS           30 /* max number of different functions in a single trace */
@@ -115,6 +114,7 @@ typedef struct _zend_jit_globals {
 	zend_long   max_recursive_calls;   /* max number of recursive inlined call unrolls */
 	zend_long   max_recursive_returns; /* max number of recursive inlined return unrolls */
 	zend_long   max_polymorphic_calls; /* max number of inlined polymorphic calls */
+	zend_long   max_trace_length; 	   /* max length of a single trace */
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 
