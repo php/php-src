@@ -30,13 +30,13 @@ HEADER)) {
     }
 }
 ?>
---EXPECT--
+--EXPECTF--
 HTTP/1.1 200 OK
-Host: localhost
+Host: %s
 Date: %s
 Connection: close
-X-Powered-By: %s
-Content-type: text/event-stream
+X-Powered-By: PHP/%s
+Content-Type: text/event-stream
 
 data: 0
 
