@@ -97,7 +97,7 @@ PHP 8.3 UPGRADE NOTES
   . Changed DOMCharacterData::appendData() tentative return type to true.
 
 - Intl:
-  . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone)
+  . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
     now returns true on success, previously null was returned.
   . IntlBreakiterator::setText() now returns false on failure, previously
     null was returned.
