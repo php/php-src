@@ -14,6 +14,7 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [Pull requests](#pull-requests)
 * [Filing bugs](#filing-bugs)
 * [Feature requests](#feature-requests)
+* [Technical resources](#technical-resources)
 * [Writing tests](#writing-tests)
 * [Writing documentation](#writing-documentation)
 * [Getting help](#getting-help)
@@ -84,6 +85,18 @@ repository. Mailing list subscription is explained on the
 You may also want to read
 [The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
+
+## Technical resources
+
+There are a number of technical resources on php-src. Unfortunately, they are
+scattered across different websites, and often outdated. Nonetheless, they can
+provide a good starting point for learning about the fundamentals of the code
+base.
+
+* https://www.phpinternalsbook.com/
+* https://www.npopov.com/
+* https://wiki.php.net/internals
+* https://blog.ircmaxell.com/categories/PHP/
 
 ## Writing tests
 
