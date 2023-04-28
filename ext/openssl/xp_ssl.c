@@ -44,6 +44,8 @@
 #undef X509_NAME
 #undef X509_CERT_PAIR
 #undef X509_EXTENSIONS
+#else
+#include <arpa/inet.h>
 #endif
 
 /* Flags for determining allowed stream crypto methods */
@@ -109,6 +111,21 @@
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
 	ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
+
+/* Used for IPv6 Address peer verification */
+#define EXPAND_IPV6_ADDRESS(_str, _bytes) \
+	do { \
+		snprintf(_str, 39, "%X:%X:%X:%X:%X:%X:%X:%X", \
+			_bytes[0] << 8 | _bytes[1], \
+			_bytes[2] << 8 | _bytes[3], \
+			_bytes[4] << 8 | _bytes[5], \
+			_bytes[6] << 8 | _bytes[7], \
+			_bytes[8] << 8 | _bytes[9], \
+			_bytes[10] << 8 | _bytes[11], \
+			_bytes[12] << 8 | _bytes[13], \
+			_bytes[14] << 8 | _bytes[15] \
+		); \
+	} while(0)
 
 #if PHP_OPENSSL_API_VERSION < 0x10100
 static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
@@ -416,10 +433,17 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 {
 	int i, len;
 	unsigned char *cert_name = NULL;
-	char ipbuffer[64];
+	char ipbuffer[64], ipv6_expanded[40];
+    unsigned char ipv6[16];
 
 	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
 	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
+
+	/* detect if subject name is an IPv6 address and expand once if required */
+	ipv6_expanded[0] = 0;
+	if (inet_pton(AF_INET6,subject_name,&ipv6)) {
+    	EXPAND_IPV6_ADDRESS(ipv6_expanded, ipv6);
+    }
 
 	for (i = 0; i < alt_name_count; i++) {
 		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
@@ -458,11 +482,15 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 
 					return 1;
 				}
+			} else if (san->d.ip->length == 16 && strlen(ipv6_expanded) >= 15) { /* shortest expanded IPv6 address is 0:0:0:0:0:0:0:0 */
+				ipbuffer[0] = 0;
+				EXPAND_IPV6_ADDRESS(ipbuffer, san->d.iPAddress->data);
+				if (strcasecmp((const char*)ipv6_expanded, (const char*)ipbuffer) == 0) {
+					sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
+
+					return 1;
+				}
 			}
-			/* No, we aren't bothering to check IPv6 addresses. Why?
-			 * Because IP SAN names are officially deprecated and are
-			 * not allowed by CAs starting in 2015. Deal with it.
-			 */
 		}
 	}
 
