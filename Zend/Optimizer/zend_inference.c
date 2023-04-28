@@ -2950,6 +2950,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 				if (t1 & (MAY_BE_RC1|MAY_BE_REF)) {
 					tmp |= MAY_BE_RCN;
 				}
+				if ((t1 & (MAY_BE_ARRAY|MAY_BE_STRING)) && (t1 & MAY_BE_RC1) && !(t1 & (MAY_BE_UNDEF|MAY_BE_REF)) && ssa_vars[ssa_op->op1_def].no_val && !ssa_vars[ssa_op->op1_def].alias) {
+					/* implicit move may make value undef */
+					tmp |= MAY_BE_UNDEF;
+				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 				COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->op1_def);
 			}
@@ -2991,6 +2995,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_SEND_FUNC_ARG:
 			if (ssa_op->op1_def >= 0) {
 				tmp = (t1 & MAY_BE_UNDEF)|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+				if (opline->opcode == ZEND_SEND_VAR_EX && (t1 & (MAY_BE_ARRAY|MAY_BE_STRING)) && (t1 & MAY_BE_RC1) && !(t1 & (MAY_BE_UNDEF|MAY_BE_REF)) && ssa_vars[ssa_op->op1_def].no_val && !ssa_vars[ssa_op->op1_def].alias) {
+					/* implicit move may make value undef */
+					tmp |= MAY_BE_UNDEF;
+				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
 			break;

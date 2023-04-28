@@ -159,6 +159,7 @@ void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);
 void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int b);
 void zend_ssa_rename_var_uses(zend_ssa *ssa, int old_var, int new_var, bool update_types);
 void zend_ssa_remove_block_from_cfg(zend_ssa *ssa, int b);
+void zend_ssa_replace_op1_def_op1_use(zend_ssa *ssa, zend_ssa_op *ssa_op);
 
 static zend_always_inline void _zend_ssa_remove_def(zend_ssa_var *var)
 {

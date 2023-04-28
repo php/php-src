@@ -703,6 +703,10 @@ add_op1_def:
 			}
 			break;
 		case ZEND_SEND_VAR:
+			if (opline->op1_type == IS_CV && ((build_flags & ZEND_SSA_RC_INFERENCE) || opline->op2_type == IS_UNUSED)) {
+				goto add_op1_def;
+			}
+			break;
 		case ZEND_CAST:
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
@@ -1680,3 +1684,13 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 	old_var->phi_use_chain = NULL;
 }
 /* }}} */
+
+void zend_ssa_replace_op1_def_op1_use(zend_ssa *ssa, zend_ssa_op *ssa_op)
+{
+	int op1_new = ssa_op->op1_use;
+	ZEND_ASSERT(op1_new >= 0);
+	ZEND_ASSERT(ssa_op->op1_def >= 0);
+	/* zend_ssa_rename_var_uses() clear use_chain & phi_use_chain for us */
+	zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, op1_new, true);
+	zend_ssa_remove_op1_def(ssa, ssa_op);
+}
