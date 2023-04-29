@@ -5,6 +5,7 @@ xml
 --SKIPIF--
 <?php
 if (!defined("LIBXML_VERSION")) die('skip libxml2 test');
+if (LIBXML_VERSION < 21100) die('skip libxml2 test variant for version >= 2.11');
 ?>
 --FILE--
 <?php
@@ -84,11 +85,11 @@ foreach ($xmls as $desc => $xml) {
 ?>
 --EXPECTF--
 CDATA
-<DATA> at line 2, col %d (byte 9)
-</DATA> at line 9, col %d (byte 55)
+<DATA> at line 2, col %d (byte 50)
+</DATA> at line 9, col %d (byte 96)
 Comment
-<DATA> at line 2, col %d (byte 9)
-</DATA> at line 9, col %d (byte 55)
+<DATA> at line 2, col %d (byte 50)
+</DATA> at line 9, col %d (byte 96)
 Text
-<DATA> at line 2, col %d (byte 9)
-</DATA> at line 9, col %d (byte 55)
+<DATA> at line 2, col %d (byte 50)
+</DATA> at line 9, col %d (byte 96)
