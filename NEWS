@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-11189 (Exceeding memory limit in zend_hash_do_resize leaves
     the array in an invalid state). (Bob)
 
+- LibXML:
+  . Fixed bug GH-11160 (Few tests failed building with new libxml 2.11.0).
+    (nielsdos)
+
 - Opcache:
   . Fixed bug GH-11134 (Incorrect match default branch optimization). (ilutov)
   . Fixed too wide OR and AND range inference. (nielsdos)
