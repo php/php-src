@@ -4586,7 +4586,7 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 /* If we are building an AVX2-only binary, don't compile the next function */
 #ifndef ZEND_INTRIN_AVX2_NATIVE
 
-bool utf8_naive(const unsigned char *p, int length)
+bool utf8_naive(const unsigned char *p, size_t length)
 {
 	/* This UTF-8 validation function is derived from PCRE2 */
 	/* Table of the number of extra bytes, indexed by the first byte masked with
@@ -4771,7 +4771,7 @@ static const uint8_t _range_adjust_tbl[] = {
                  0,     0,
 };
 
-bool utf8_range(const unsigned char *data, int len)
+bool utf8_range(const unsigned char *data, size_t len)
 {
 	if (len >= 16) {
 		uint8x16_t prev_input = vdupq_n_u8(0);
