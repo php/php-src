@@ -28,12 +28,7 @@ static inline gmp_object *php_gmp_object_from_zend_object(zend_object *zobj) {
 PHP_GMP_API zend_class_entry *php_gmp_class_entry(void);
 
 /* GMP and MPIR use different datatypes on different platforms */
-#ifdef _WIN64
-typedef zend_long gmp_long;
-typedef zend_ulong gmp_ulong;
-#else
 typedef long gmp_long;
 typedef unsigned long gmp_ulong;
-#endif
 
 #endif
