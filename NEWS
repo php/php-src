@@ -153,6 +153,10 @@ PHP                                                                        NEWS
   . Fix Segfault when using ReflectionFiber suspended by an internal function.
     (danog)
 
+- SAPI:
+  . Fixed GH-11141 (Could not open input file: should be sent to stderr).
+    (nielsdos)
+
 - Sockets:
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
     over socket binding for a cpu core. (David Carlier)

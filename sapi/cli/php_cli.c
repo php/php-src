@@ -574,7 +574,7 @@ static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *scri
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
-		php_printf("Could not open input file: %s\n", script_file);
+		fprintf(stderr, "Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}
 
