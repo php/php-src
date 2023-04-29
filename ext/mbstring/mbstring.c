@@ -4863,6 +4863,21 @@ bool utf8_range(const unsigned char *data, size_t len)
 			error1 = vorrq_u8(error1, vcltq_u8(input, minv));
 			error2 = vorrq_u8(error2, vcgtq_u8(input, maxv));
 
+			/* Merge the error vectors */
+			uint8x16_t error = vorrq_u8(error1, error2);
+
+			/*
+			 * Take the max of each adjacent element, selecting the errors (0xFF) into
+			 * the low 8 elements of the vector. The upper bits are ignored.
+			 */
+			uint8x16_t error_paired = vpmaxq_u8(error, error);
+			/* Extract the raw bit pattern of the low 8 elements. */
+			uint64_t error_raw = vgetq_lane_u64(vreinterpretq_u64_u8(error_paired), 0);
+			/* If any bits are nonzero, there is an error. */
+			if (error_raw != 0) {
+				return false;
+			}
+
 			prev_input = input;
 			prev_first_len = first_len;
 
