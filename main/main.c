@@ -2107,7 +2107,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
+		fprintf(stderr, "\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
 	php_win32_signal_ctrl_handler_init();
@@ -2166,7 +2166,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	 * (this uses configuration parameters from php.ini)
 	 */
 	if (php_init_stream_wrappers(module_number) == FAILURE)	{
-		php_printf("PHP:  Unable to initialize stream url wrappers.\n");
+		fprintf(stderr, "PHP:  Unable to initialize stream url wrappers.\n");
 		return FAILURE;
 	}
 
@@ -2180,7 +2180,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 
 	/* startup extensions statically compiled in */
 	if (php_register_internal_extensions_func() == FAILURE) {
-		php_printf("Unable to start builtin modules\n");
+		fprintf(stderr, "Unable to start builtin modules\n");
 		return FAILURE;
 	}
 
