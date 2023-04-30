@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - CLI:
   . Added pdeathsig to builtin server to terminate workers when the master
     process is killed. (ilutov)
+  . Fixed bug GH-11104 (STDIN/STDOUT/STDERR is not available for CLI without
+    a script). (nielsdos)
 
 - Core:
   . Fixed bug GH-9388 (Improve unset property and __get type incompatibility
