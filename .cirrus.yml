@@ -62,7 +62,7 @@ arm_task:
         libgmp-dev
         libicu-dev
         libtidy-dev
-        libenchant-dev
+        libenchant-2-dev
         libaspell-dev
         libpspell-dev
         libsasl2-dev
