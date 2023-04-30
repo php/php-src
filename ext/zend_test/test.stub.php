@@ -196,6 +196,8 @@ namespace {
     function zend_test_crash(?string $message = null): void {}
 
     function zend_test_fill_packed_array(array &$array): void {}
+
+    function zend_get_array_ptr(array $array): int {}
 }
 
 namespace ZendTestNS {

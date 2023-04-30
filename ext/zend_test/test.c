@@ -435,6 +435,17 @@ static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8)
 	RETURN_BOOL(ZSTR_IS_VALID_UTF8(str));
 }
 
+static ZEND_FUNCTION(zend_get_array_ptr)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_ARRAY(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG((zend_long) Z_ARR_P(v));
+}
+
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
