@@ -39,12 +39,15 @@
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
 #include "win32/time.h"
+#include <Ws2tcpip.h>
 #include <Wincrypt.h>
 /* These are from Wincrypt.h, they conflict with OpenSSL */
 #undef X509_NAME
 #undef X509_CERT_PAIR
 #undef X509_EXTENSIONS
-#else
+#endif
+
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 
@@ -441,9 +444,11 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 
 	/* detect if subject name is an IPv6 address and expand once if required */
 	ipv6_expanded[0] = 0;
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
 	if (inet_pton(AF_INET6,subject_name,&ipv6)) {
     	EXPAND_IPV6_ADDRESS(ipv6_expanded, ipv6);
     }
+#endif
 
 	for (i = 0; i < alt_name_count; i++) {
 		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
