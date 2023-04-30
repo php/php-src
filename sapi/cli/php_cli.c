@@ -951,9 +951,7 @@ do_repeat:
 		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (script_file) {
-				cli_register_file_handles();
-			}
+			cli_register_file_handles();
 
 			if (interactive) {
 				EG(exit_status) = cli_shell_callbacks.cli_shell_run();
