@@ -4793,6 +4793,151 @@ bool utf8_range(const unsigned char *data, size_t len)
 		uint8x16_t error1 = vdupq_n_u8(0);
 		uint8x16_t error2 = vdupq_n_u8(0);
 
+		while (len >= 64) {
+			const uint8x16_t input_1 = vld1q_u8(data);
+			const uint8x16_t input_2 = vld1q_u8(data + 16);
+			const uint8x16_t input_3 = vld1q_u8(data + 32);
+			const uint8x16_t input_4 = vld1q_u8(data + 48);
+
+			/* high_nibbles = input >> 4 */
+			const uint8x16_t high_nibbles_1 = vshrq_n_u8(input_1, 4);
+			const uint8x16_t high_nibbles_2 = vshrq_n_u8(input_2, 4);
+			const uint8x16_t high_nibbles_3 = vshrq_n_u8(input_3, 4);
+			const uint8x16_t high_nibbles_4 = vshrq_n_u8(input_4, 4);
+
+			/* first_len = legal character length minus 1 */
+			/* 0 for 00~7F, 1 for C0~DF, 2 for E0~EF, 3 for F0~FF */
+			/* first_len = first_len_tbl[high_nibbles] */
+			const uint8x16_t first_len_1 = vqtbl1q_u8(first_len_tbl, high_nibbles_1);
+			const uint8x16_t first_len_2 = vqtbl1q_u8(first_len_tbl, high_nibbles_2);
+			const uint8x16_t first_len_3 = vqtbl1q_u8(first_len_tbl, high_nibbles_3);
+			const uint8x16_t first_len_4 = vqtbl1q_u8(first_len_tbl, high_nibbles_4);
+
+			/* First Byte: set range index to 8 for bytes within 0xC0 ~ 0xFF */
+			/* range = first_range_tbl[high_nibbles] */
+			uint8x16_t range_1 = vqtbl1q_u8(first_range_tbl, high_nibbles_1);
+			uint8x16_t range_2 = vqtbl1q_u8(first_range_tbl, high_nibbles_2);
+			uint8x16_t range_3 = vqtbl1q_u8(first_range_tbl, high_nibbles_3);
+			uint8x16_t range_4 = vqtbl1q_u8(first_range_tbl, high_nibbles_4);
+
+			/* Second Byte: set range index to first_len */
+			/* 0 for 00~7F, 1 for C0~DF, 2 for E0~EF, 3 for F0~FF */
+			/* range |= (first_len, prev_first_len) << 1 byte */
+			range_1 = vorrq_u8(range_1, vextq_u8(prev_first_len, first_len_1, 15));
+			range_2 = vorrq_u8(range_2, vextq_u8(first_len_1, first_len_2, 15));
+			range_3 = vorrq_u8(range_3, vextq_u8(first_len_2, first_len_3, 15));
+			range_4 = vorrq_u8(range_4, vextq_u8(first_len_3, first_len_4, 15));
+
+			/* Third Byte: set range index to saturate_sub(first_len, 1) */
+			/* 0 for 00~7F, 0 for C0~DF, 1 for E0~EF, 2 for F0~FF */
+			uint8x16_t tmp1_1, tmp1_2, tmp1_3, tmp1_4;
+			/* tmp1 = (first_len, prev_first_len) << 2 bytes */
+			tmp1_1 = vextq_u8(prev_first_len, first_len_1, 14);
+			tmp1_2 = vextq_u8(first_len_1, first_len_2, 14);
+			tmp1_3 = vextq_u8(first_len_2, first_len_3, 14);
+			tmp1_4 = vextq_u8(first_len_3, first_len_4, 14);
+			/* tmp1 = saturate_sub(tmp1, 1) */
+			tmp1_1 = vqsubq_u8(tmp1_1, const_1);
+			tmp1_2 = vqsubq_u8(tmp1_2, const_1);
+			tmp1_3 = vqsubq_u8(tmp1_3, const_1);
+			tmp1_4 = vqsubq_u8(tmp1_4, const_1);
+			/* range |= tmp1 */
+			range_1 = vorrq_u8(range_1, tmp1_1);
+			range_2 = vorrq_u8(range_2, tmp1_2);
+			range_3 = vorrq_u8(range_3, tmp1_3);
+			range_4 = vorrq_u8(range_4, tmp1_4);
+
+			uint8x16_t tmp2_1, tmp2_2, tmp2_3, tmp2_4;
+			/* Fourth Byte: set range index to saturate_sub(first_len, 2) */
+			/* 0 for 00~7F, 0 for C0~DF, 0 for E0~EF, 1 for F0~FF */
+			/* tmp2 = (first_len, prev_first_len) << 3 bytes */
+			tmp2_1 = vextq_u8(prev_first_len, first_len_1, 13);
+			tmp2_2 = vextq_u8(first_len_1, first_len_2, 13);
+			tmp2_3 = vextq_u8(first_len_2, first_len_3, 13);
+			tmp2_4 = vextq_u8(first_len_3, first_len_4, 13);
+			/* tmp2 = saturate_sub(tmp2, 2) */
+			tmp2_1 = vqsubq_u8(tmp2_1, const_2);
+			tmp2_2 = vqsubq_u8(tmp2_2, const_2);
+			tmp2_3 = vqsubq_u8(tmp2_3, const_2);
+			tmp2_4 = vqsubq_u8(tmp2_4, const_2);
+			/* range |= tmp2 */
+			range_1 = vorrq_u8(range_1, tmp2_1);
+			range_2 = vorrq_u8(range_2, tmp2_2);
+			range_3 = vorrq_u8(range_3, tmp2_3);
+			range_4 = vorrq_u8(range_4, tmp2_4);
+
+			/*
+			 * Now we have below range indices caluclated
+			 * Correct cases:
+			 * - 8 for C0~FF
+			 * - 3 for 1st byte after F0~FF
+			 * - 2 for 1st byte after E0~EF or 2nd byte after F0~FF
+			 * - 1 for 1st byte after C0~DF or 2nd byte after E0~EF or
+			 *         3rd byte after F0~FF
+			 * - 0 for others
+			 * Error cases:
+			 *   9,10,11 if non ascii First Byte overlaps
+			 *   E.g., F1 80 C2 90 --> 8 3 10 2, where 10 indicates error
+			 */
+
+			/* Adjust Second Byte range for special First Bytes(E0,ED,F0,F4) */
+			/* See _range_adjust_tbl[] definition for details */
+			/* Overlaps lead to index 9~15, which are illegal in range table */
+			uint8x16_t shift1_1 = vextq_u8(prev_input, input_1, 15);
+			uint8x16_t shift1_2 = vextq_u8(input_1, input_2, 15);
+			uint8x16_t shift1_3 = vextq_u8(input_2, input_3, 15);
+			uint8x16_t shift1_4 = vextq_u8(input_3, input_4, 15);
+			uint8x16_t pos_1 = vsubq_u8(shift1_1, const_e0);
+			uint8x16_t pos_2 = vsubq_u8(shift1_2, const_e0);
+			uint8x16_t pos_3 = vsubq_u8(shift1_3, const_e0);
+			uint8x16_t pos_4 = vsubq_u8(shift1_4, const_e0);
+			range_1 = vaddq_u8(range_1, vqtbl2q_u8(range_adjust_tbl, pos_1));
+			range_2 = vaddq_u8(range_2, vqtbl2q_u8(range_adjust_tbl, pos_2));
+			range_3 = vaddq_u8(range_3, vqtbl2q_u8(range_adjust_tbl, pos_3));
+			range_4 = vaddq_u8(range_4, vqtbl2q_u8(range_adjust_tbl, pos_4));
+
+			/* Load min and max values per calculated range index */
+			uint8x16_t minv_1 = vqtbl1q_u8(range_min_tbl, range_1);
+			uint8x16_t minv_2 = vqtbl1q_u8(range_min_tbl, range_2);
+			uint8x16_t minv_3 = vqtbl1q_u8(range_min_tbl, range_3);
+			uint8x16_t minv_4 = vqtbl1q_u8(range_min_tbl, range_4);
+			uint8x16_t maxv_1 = vqtbl1q_u8(range_max_tbl, range_1);
+			uint8x16_t maxv_2 = vqtbl1q_u8(range_max_tbl, range_2);
+			uint8x16_t maxv_3 = vqtbl1q_u8(range_max_tbl, range_3);
+			uint8x16_t maxv_4 = vqtbl1q_u8(range_max_tbl, range_4);
+
+			/* Check value range */
+			error1 = vorrq_u8(error1, vcltq_u8(input_1, minv_1));
+			error2 = vorrq_u8(error2, vcgtq_u8(input_1, maxv_1));
+			error1 = vorrq_u8(error1, vcltq_u8(input_2, minv_2));
+			error2 = vorrq_u8(error2, vcgtq_u8(input_2, maxv_2));
+			error1 = vorrq_u8(error1, vcltq_u8(input_3, minv_3));
+			error2 = vorrq_u8(error2, vcgtq_u8(input_3, maxv_3));
+			error1 = vorrq_u8(error1, vcltq_u8(input_4, minv_4));
+			error2 = vorrq_u8(error2, vcgtq_u8(input_4, maxv_4));
+
+			/* Merge the error vectors */
+			uint8x16_t error = vorrq_u8(error1, error2);
+
+			/*
+			 * Take the max of each adjacent element, selecting the errors (0xFF) into
+			 * the low 8 elements of the vector. The upper bits are ignored.
+			 */
+			uint8x16_t error_paired = vpmaxq_u8(error, error);
+			/* Extract the raw bit pattern of the low 8 elements. */
+			uint64_t error_raw = vgetq_lane_u64(vreinterpretq_u64_u8(error_paired), 0);
+			/* If any bits are nonzero, there is an error. */
+			if (error_raw != 0) {
+				return false;
+			}
+
+			prev_input = input_4;
+			prev_first_len = first_len_4;
+
+			data += 64;
+			len -= 64;
+		}
+
 		while (len >= 16) {
 			const uint8x16_t input = vld1q_u8(data);
 
@@ -4884,6 +5029,7 @@ bool utf8_range(const unsigned char *data, size_t len)
 			data += 16;
 			len -= 16;
 		}
+
 		/* Merge our error counters together */
 		error1 = vorrq_u8(error1, error2);
 
