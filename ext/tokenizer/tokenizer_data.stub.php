@@ -314,6 +314,11 @@ const T_GLOBAL = UNKNOWN;
 const T_STATIC = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_NAMEOF
+ */
+const T_NAMEOF = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_ABSTRACT
  */
 const T_ABSTRACT = UNKNOWN;

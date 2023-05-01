@@ -125,6 +125,7 @@ echo token_name(T_THROW), "\n";
 echo token_name(T_TRY), "\n";
 echo token_name(T_CLONE), "\n";
 echo token_name(T_HALT_COMPILER), "\n";
+echo token_name(T_NAMEOF), "\n";
 
 echo token_name(-1), "\n";
 echo token_name(0x8000000F), "\n";
@@ -249,6 +250,7 @@ T_THROW
 T_TRY
 T_CLONE
 T_HALT_COMPILER
+T_NAMEOF
 UNKNOWN
 UNKNOWN
 Done

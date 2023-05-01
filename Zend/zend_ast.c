@@ -1994,6 +1994,8 @@ simple_list:
 			FUNC_OP("empty");
 		case ZEND_AST_ISSET:
 			FUNC_OP("isset");
+		case ZEND_AST_NAMEOF:
+			FUNC_OP("nameof");
 		case ZEND_AST_SILENCE:
 			PREFIX_OP("@", 240, 241);
 		case ZEND_AST_SHELL_EXEC:
