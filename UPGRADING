@@ -141,8 +141,11 @@ PHP 8.3 UPGRADE NOTES
   . pg_insert now raises a ValueError instead of a WARNING when the table specified is invalid.
 
 - Standard:
-  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
+  . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
+  . unserialize() now emits a new E_WARNING if the input contains unconsumed
+    bytes.
+    RFC: https://wiki.php.net/rfc/unserialize_warn_on_trailing_data
   . array_pad() is now only limited by the maximum number of elements an array
     can have. Before, it was only possible to add at most 1048576 elements at a
     time.
