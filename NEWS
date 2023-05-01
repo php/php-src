@@ -18,8 +18,6 @@ PHP                                                                        NEWS
   . Fix inconsistent float negation in constant expressions. (ilutov)
   . Fixed bug GH-8841 (php-cli core dump calling a badly formed function).
     (nielsdos)
-  . Fixed bug GH-10085 (Assertion when adding two arrays with += where the first
-    array is contained in the second). (ilutov)
   . Fixed bug GH-10737 (PHP 8.1.16 segfaults on line 597 of
     sapi/apache2handler/sapi_apache2.c). (nielsdos, ElliotNB)
   . Fixed bug GH-11028 (Heap Buffer Overflow in zval_undefined_cv.). (nielsdos)
