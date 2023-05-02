@@ -2043,8 +2043,9 @@ static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
 		zend_op *op = call->arg_info[i].opline;
 		zend_ssa_op *this_ssa_op = &ssa->ops[op - op_array->opcodes];
 
+		/* Not necessary to check ZEND_SEND_VAR_EX, because compile time calls don't support ZEND_SEND_VAR_EX. */
 		if (op->opcode == ZEND_SEND_VAR && this_ssa_op->op1_def >= 0) {
-			zend_ssa_replace_op1_def_op1_use(ssa, this_ssa_op);
+			zend_ssa_replace_op1_def_by_op1_use(ssa, this_ssa_op);
 		}
 
 		zend_ssa_remove_instr(ssa, op, this_ssa_op);
@@ -2200,7 +2201,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				return 0;
 			}
 
-			if (opline->opcode == ZEND_SEND_VAR) {
+			if (opline->opcode == ZEND_SEND_VAR || opline->opcode == ZEND_SEND_VAR_EX) {
 				return 0;
 			}
 
@@ -2348,8 +2349,8 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 			zend_ssa_op *ssa_op = &ssa->ops[use];
 			/* Removing the def in try_remove_definition() may reduce optimisation opportunities.
 			 * We want to keep the no_val definition until we actually replace it with a constant. */
-			if (opline->opcode == ZEND_SEND_VAR && ssa_op->op1_use == i && ssa_op->op1_def >= 0) {
-				zend_ssa_replace_op1_def_op1_use(ssa, ssa_op);
+			if ((opline->opcode == ZEND_SEND_VAR || opline->opcode == ZEND_SEND_VAR_EX) && ssa_op->op1_use == i && ssa_op->op1_def >= 0) {
+				zend_ssa_replace_op1_def_by_op1_use(ssa, ssa_op);
 				opline->extended_value = 0;
 			}
 			if (try_replace_op1(ctx, opline, ssa_op, i, value)) {

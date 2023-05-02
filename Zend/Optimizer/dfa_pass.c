@@ -467,7 +467,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 							zend_ssa_var *var = ssa->vars + var_num;
 
 							if (ssa_op->op1_def >= 0) {
-								zend_ssa_replace_op1_def_op1_use(ssa, ssa_op);
+								zend_ssa_replace_op1_def_by_op1_use(ssa, ssa_op);
 							}
 
 							zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);

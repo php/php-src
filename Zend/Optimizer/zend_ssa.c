@@ -1685,7 +1685,7 @@ void zend_ssa_rename_var_uses(zend_ssa *ssa, int old, int new, bool update_types
 }
 /* }}} */
 
-void zend_ssa_replace_op1_def_op1_use(zend_ssa *ssa, zend_ssa_op *ssa_op)
+void zend_ssa_replace_op1_def_by_op1_use(zend_ssa *ssa, zend_ssa_op *ssa_op)
 {
 	int op1_new = ssa_op->op1_use;
 	ZEND_ASSERT(op1_new >= 0);
