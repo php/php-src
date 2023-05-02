@@ -255,7 +255,7 @@ ZEND_API const HashTable zend_empty_array = {
 	.nNumOfElements = 0,
 	.nTableSize = HT_MIN_SIZE,
 	.nInternalPointer = 0,
-	.nNextFreeElement = 0,
+	.nNextFreeElement = ZEND_LONG_MIN,
 	.pDestructor = ZVAL_PTR_DTOR
 };
 
