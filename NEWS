@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed parameter parsing of pg_lo_export(). (kocsismate)
 
+- SPL:
+  . Fixed bug GH-11178 (Segmentation fault in spl_array_it_get_current_data
+    (PHP 8.1.18)). (nielsdos)
+
 - Standard:
   . Fixed bug GH-11138 (move_uploaded_file() emits open_basedir warning for
     source file). (ilutov)
