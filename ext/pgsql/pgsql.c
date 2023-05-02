@@ -112,6 +112,10 @@ char pgsql_libpq_version[16];
 #define PQfreemem free
 #endif
 
+#if PG_VERSION_NUM < 120000
+#define PQERRORS_SQLSTATE 0
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 static PHP_GINIT_FUNCTION(pgsql);
 
@@ -2821,7 +2825,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 
 	pgsql = link->conn;
 
-	if (verbosity & (PQERRORS_TERSE|PQERRORS_DEFAULT|PQERRORS_VERBOSE)) {
+	if (verbosity & (PQERRORS_TERSE|PQERRORS_DEFAULT|PQERRORS_VERBOSE|PQERRORS_SQLSTATE)) {
 		RETURN_LONG(PQsetErrorVerbosity(pgsql, verbosity));
 	} else {
 		RETURN_FALSE;

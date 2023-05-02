@@ -183,6 +183,19 @@ namespace {
      * @cvalue PQERRORS_VERBOSE
      */
     const PGSQL_ERRORS_VERBOSE = UNKNOWN;
+    #if PGVERSION_NUM > 110000
+    /**
+     * @var int
+     * @cvalue PQERRORS_SQLSTATE
+     */
+    const PGSQL_ERRORS_SQLSTATE = UNKNOWN;
+    #else
+    /**
+     * @var int
+     * @cvalue PQERRORS_TERSE
+     */
+    const PGSQL_ERRORS_SQLSTATE = UNKNOWN;
+    #endif
 
     /* For lo_seek() */
 
