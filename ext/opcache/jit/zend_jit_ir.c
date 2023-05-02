@@ -5198,7 +5198,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			ir_ref zero_path = 0;
 
 			ref = jit_Z_LVAL(jit, op2_addr);
-			if (!op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
+			if ((op2_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) || !op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
 				ir_ref if_ok = ir_IF(ref);
 				ir_IF_FALSE(if_ok);
 				jit_SET_EX_OPLINE(jit, opline);
