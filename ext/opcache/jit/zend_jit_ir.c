@@ -8094,7 +8094,15 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 		// JIT: if (CACHED_PTR(opline->result.num))
 		cache_slot_ref = ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), opline->result.num);
 		func_ref = ir_LOAD_A(cache_slot_ref);
-		if_func = ir_IF(func_ref);
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+		 && func
+		 && (func->common.fn_flags & ZEND_ACC_IMMUTABLE)
+		 && opline->opcode != ZEND_INIT_FCALL) {
+			/* Called func may be changed because of recompilation. See ext/opcache/tests/jit/init_fcall_003.phpt */
+			if_func = ir_IF(ir_EQ(func_ref, ir_CONST_ADDR(func)));
+		} else {
+			if_func = ir_IF(func_ref);
+		}
 		ir_IF_FALSE_cold(if_func);
 		if (opline->opcode == ZEND_INIT_FCALL
 		 && func
