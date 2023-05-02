@@ -4829,7 +4829,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				op2_reg = Z_REG(op2_addr);
 			}
 
-			if (!op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
+			if ((op2_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) || !op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
 				|	cbz Rx(op2_reg), >1
 				|.cold_code
 				|1:
