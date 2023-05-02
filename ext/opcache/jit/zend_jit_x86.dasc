@@ -9392,8 +9392,28 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|	// if (CACHED_PTR(opline->result.num))
 		|	mov r2, EX->run_time_cache
 		|	mov r0, aword [r2 + opline->result.num]
-		|	test r0, r0
-		|	jz >1
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+		 && func
+		 && (func->common.fn_flags & ZEND_ACC_IMMUTABLE)
+		 && opline->opcode != ZEND_INIT_FCALL) {
+			/* Called func may be changed because of recompilation. See ext/opcache/tests/jit/init_fcall_003.phpt */
+			|   .if X64
+			||		if (!IS_SIGNED_32BIT(func)) {
+			|			mov64 r1, ((ptrdiff_t)func)
+			|			cmp r0, r1
+			||		} else {
+			|			cmp r0, func
+			||		}
+			|	.else
+			|		cmp r0, func
+			|	.endif
+			|	jnz >1
+			|.cold_code
+			|1:
+		} else {
+			|	test r0, r0
+			|	jz >1
+		}
 		|.cold_code
 		|1:
 		if (opline->opcode == ZEND_INIT_FCALL
