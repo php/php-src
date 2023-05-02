@@ -94,6 +94,7 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 	dasm_init(&dasm_state, DASM_MAXSECTION);
 	dasm_setupglobal(&dasm_state, dasm_labels, zend_lb_MAX);
 	dasm_setup(&dasm_state, dasm_actions);
+	zend_jit_align_stub(&dasm_state);
 	zend_jit_trace_exit_group_stub(&dasm_state, n);
 
 	sprintf(name, "jit$$trace_exit_%d", n);
