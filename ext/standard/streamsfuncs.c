@@ -33,11 +33,13 @@
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 typedef unsigned long long php_timeout_ull;
+#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
 #else
 #include "win32/select.h"
 #include "win32/sockets.h"
 #include "win32/console.h"
 typedef unsigned __int64 php_timeout_ull;
+#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
 #endif
 
 #define GET_CTX_OPT(stream, wrapper, name, val) (PHP_STREAM_CONTEXT(stream) && NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), wrapper, name)))
@@ -134,14 +136,21 @@ PHP_FUNCTION(stream_socket_client)
 	}
 
 	/* prepare the timeout value for use */
-	conv = (php_timeout_ull) (timeout * 1000000.0);
+	struct timeval *tv_pointer;
+	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
+		tv_pointer = NULL;
+	} else {
+		conv = (php_timeout_ull) (timeout * 1000000.0);
 #ifdef PHP_WIN32
-	tv.tv_sec = (long)(conv / 1000000);
-	tv.tv_usec =(long)(conv % 1000000);
+		tv.tv_sec = (long)(conv / 1000000);
+		tv.tv_usec = (long)(conv % 1000000);
 #else
-	tv.tv_sec = conv / 1000000;
-	tv.tv_usec = conv % 1000000;
+		tv.tv_sec = conv / 1000000;
+		tv.tv_usec = conv % 1000000;
 #endif
+		tv_pointer = &tv;
+	}
+
 	if (zerrno) {
 		ZEND_TRY_ASSIGN_REF_LONG(zerrno, 0);
 	}
@@ -152,7 +161,7 @@ PHP_FUNCTION(stream_socket_client)
 	stream = php_stream_xport_create(ZSTR_VAL(host), ZSTR_LEN(host), REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | (flags & PHP_STREAM_CLIENT_CONNECT ? STREAM_XPORT_CONNECT : 0) |
 			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
-			hashkey, &tv, context, &errstr, &err);
+			hashkey, tv_pointer, context, &errstr, &err);
 
 
 	if (stream == NULL) {
@@ -275,19 +284,25 @@ PHP_FUNCTION(stream_socket_accept)
 	php_stream_from_zval(stream, zstream);
 
 	/* prepare the timeout value for use */
-	conv = (php_timeout_ull) (timeout * 1000000.0);
+	struct timeval *tv_pointer;
+	if (timeout < 0.0 || timeout >= (double) PHP_TIMEOUT_ULL_MAX / 1000000.0) {
+		tv_pointer = NULL;
+	} else {
+		conv = (php_timeout_ull) (timeout * 1000000.0);
 #ifdef PHP_WIN32
-	tv.tv_sec = (long)(conv / 1000000);
-	tv.tv_usec = (long)(conv % 1000000);
+		tv.tv_sec = (long)(conv / 1000000);
+		tv.tv_usec = (long)(conv % 1000000);
 #else
-	tv.tv_sec = conv / 1000000;
-	tv.tv_usec = conv % 1000000;
+		tv.tv_sec = conv / 1000000;
+		tv.tv_usec = conv % 1000000;
 #endif
+		tv_pointer = &tv;
+	}
 
 	if (0 == php_stream_xport_accept(stream, &clistream,
 				zpeername ? &peername : NULL,
 				NULL, NULL,
-				&tv, &errstr
+				tv_pointer, &errstr
 				) && clistream) {
 
 		if (peername) {
