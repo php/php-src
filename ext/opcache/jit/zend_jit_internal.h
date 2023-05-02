@@ -359,6 +359,7 @@ zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSION_EXIT,    "return from recursive function") \
 	_(BLACK_LIST,        "trace blacklisted") \
 	_(INNER_LOOP,        "inner loop")                     /* trace it */ \
+	_(JIT_INLINE_FUNC,   "JIT inlined function and skip current trace") /* trace inlined function */ \
 	_(COMPILED_LOOP,     "compiled loop") \
 	_(TRAMPOLINE,        "trampoline call") \
 	_(BAD_FUNC,          "bad function call") \
@@ -383,8 +384,9 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_TRACE_STOP_DONE(ret) \
 	(ret < ZEND_JIT_TRACE_STOP_ERROR)
 
+/* restart to trace an inner loop or inlined function */
 #define ZEND_JIT_TRACE_STOP_REPEAT(ret) \
-	(ret == ZEND_JIT_TRACE_STOP_INNER_LOOP)
+	(ret == ZEND_JIT_TRACE_STOP_INNER_LOOP || ret == ZEND_JIT_TRACE_STOP_JIT_INLINE_FUNC)
 
 #define ZEND_JIT_TRACE_STOP_MAY_RECOVER(ret) \
 	(ret <= ZEND_JIT_TRACE_STOP_COMPILER_ERROR)
