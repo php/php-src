@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-11152 (Unable to alias namespaces containing reserved class
     names). (ilutov)
+  . Fixed bug GH-9068 (Conditional jump or move depends on uninitialised
+    value(s)). (nielsdos)
 
 - Opcache:
   . Fixed bug GH-11134 (Incorrect match default branch optimization). (ilutov)
@@ -13,9 +15,18 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed parameter parsing of pg_lo_export(). (kocsismate)
 
+- SPL:
+  . Fixed bug GH-11178 (Segmentation fault in spl_array_it_get_current_data
+    (PHP 8.1.18)). (nielsdos)
+
 - Standard:
   . Fixed bug GH-11138 (move_uploaded_file() emits open_basedir warning for
     source file). (ilutov)
+
+- Streams:
+  . Fixed bug GH-11175 (Stream Socket Timeout). (nielsdos)
+  . Fixed bug GH-11177 (ASAN UndefinedBehaviorSanitizer when timeout = -1
+    passed to stream_socket_accept/stream_socket_client). (nielsdos)
 
 11 May 2023, PHP 8.2.6
 

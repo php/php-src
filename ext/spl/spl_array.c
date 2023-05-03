@@ -989,7 +989,8 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 		zend_hash_get_current_key_ex(aht, &key, NULL, spl_array_get_pos_ptr(aht, object));
 		zend_class_entry *ce = Z_OBJCE(object->array);
 		zend_property_info *prop_info = zend_get_property_info(ce, key, true);
-		if (ZEND_TYPE_IS_SET(prop_info->type)) {
+		ZEND_ASSERT(prop_info != ZEND_WRONG_PROPERTY_INFO);
+		if (EXPECTED(prop_info != NULL) && ZEND_TYPE_IS_SET(prop_info->type)) {
 			if (prop_info->flags & ZEND_ACC_READONLY) {
 				zend_throw_error(NULL,
 					"Cannot acquire reference to readonly property %s::$%s",
