@@ -100,6 +100,7 @@ base.
   * [Zend Virtual Machine](https://www.npopov.com/2017/04/14/PHP-7-Virtual-machine.html)
   * [How opcache works](https://www.npopov.com/2021/10/13/How-opcache-works.html), [opcache optimizer](https://www.npopov.com/2022/05/22/The-opcache-optimizer.html)
 * https://wiki.php.net/internals
+  * [Objects](https://wiki.php.net/internals/engine/objects)
 * https://qa.php.net/phpt_details.php
 * https://phpinternals.net/
 * https://blog.ircmaxell.com/categories/PHP/
