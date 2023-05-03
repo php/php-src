@@ -101,8 +101,12 @@ base.
   * [How opcache works](https://www.npopov.com/2021/10/13/How-opcache-works.html), [opcache optimizer](https://www.npopov.com/2022/05/22/The-opcache-optimizer.html)
 * https://wiki.php.net/internals
   * [Objects](https://wiki.php.net/internals/engine/objects)
-* https://qa.php.net/phpt_details.php
-* https://phpinternals.net/
+* https://qa.php.net/
+  * [Writing tests](https://qa.php.net/write-test.php), [running tests][https://qa.php.net/running-tests.php]
+  * [PHPT structure](https://qa.php.net/phpt_details.php)
+* https://phpinternals.net/ - parser related articles
+  * [Implementing new operator](https://phpinternals.net/articles/implementing_a_range_operator_into_php), [part 2](https://phpinternals.net/articles/a_reimplementation_of_the_range_operator)
+  * [Opcode extending](https://phpinternals.net/articles/implementing_new_language_constructs_via_opcode_extending)
 * https://blog.ircmaxell.com/categories/PHP/
 
 ## Writing tests
