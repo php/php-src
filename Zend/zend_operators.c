@@ -41,6 +41,9 @@
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif
+#if defined(__aarch64__) || defined(_M_ARM64)
+#include <arm_neon.h>
+#endif
 
 #if defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
 /* This performance improvement of tolower() on Windows gives 10-18% on bench.php */
@@ -105,7 +108,30 @@ static _locale_t current_locale = NULL;
 	__m128i blconv_result = _mm_add_epi8(blconv_operand, blconv_add); \
 	_mm_storeu_si128((__m128i *)(dest), blconv_result);
 
-#endif /* __SSE2__ */
+#elif defined(__aarch64__) || defined(_M_ARM64)
+#define HAVE_BLOCKCONV
+
+#define BLOCKCONV_INIT_RANGE(start, end) \
+	const int8x16_t blconv_offset = vdupq_n_s8((signed char)(SCHAR_MIN - start)); \
+	const int8x16_t blconv_threshold = vdupq_n_s8(SCHAR_MIN + (end - start) + 1);
+
+#define BLOCKCONV_STRIDE sizeof(int8x16_t)
+
+#define BLOCKCONV_INIT_DELTA(delta) \
+	const int8x16_t blconv_delta = vdupq_n_s8(delta);
+
+#define BLOCKCONV_LOAD(input) \
+	int8x16_t blconv_operand = vld1q_s8((const int8_t*)(input)); \
+	uint8x16_t blconv_mask = vcltq_s8(vaddq_s8(blconv_operand, blconv_offset), blconv_threshold);
+
+#define BLOCKCONV_FOUND() vmaxvq_u8(blconv_mask)
+
+#define BLOCKCONV_STORE(dest) \
+	int8x16_t blconv_add = vandq_s8(vreinterpretq_s8_u8(blconv_mask), blconv_delta); \
+	int8x16_t blconv_result = vaddq_s8(blconv_operand, blconv_add); \
+	vst1q_s8((int8_t *)(dest), blconv_result);
+
+#endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 ZEND_API const unsigned char zend_tolower_map[256] = {
 0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
