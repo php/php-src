@@ -17,7 +17,12 @@ $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->exec('CREATE TABLE test(id int)');
 $db->exec('INSERT INTO test VALUES(1)');
-switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+
+$database = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+if ('odbc' === $database && 'MySQL' === $db->getAttribute(PDO::ATTR_SERVER_INFO))
+    $database = 'mysql';
+
+switch ($database) {
     case 'dblib':
         $sql = 'SELECT TOP :limit * FROM test';
         break;
