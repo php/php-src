@@ -2490,9 +2490,8 @@ PHP_FUNCTION(pg_lo_read)
 		RETURN_FALSE;
 	}
 
-	/* TODO Use truncate API? */
-	ZSTR_LEN(buf) = nbytes;
-	ZSTR_VAL(buf)[ZSTR_LEN(buf)] = '\0';
+	ZSTR_VAL(buf)[nbytes] = '\0';
+	buf = zend_string_truncate(buf, nbytes, 0);
 	RETURN_NEW_STR(buf);
 }
 /* }}} */
