@@ -18,9 +18,13 @@ include __DIR__ . DIRECTORY_SEPARATOR . 'global_fallback_doesnt_repeat_autoloadi
 
 ?>
 --EXPECT--
+First file START
 function loader called with bar\foo
 I am foo in global namespace.
 I am foo in global namespace.
 I am foo in global namespace.
 I am foo in global namespace.
+First file END
+Second file START
 I am foo in global namespace.
+Second file END

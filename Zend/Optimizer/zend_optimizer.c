@@ -856,7 +856,13 @@ zend_function *zend_optimizer_get_called_func(
 					return func;
 				} else if ((func = zend_hash_find_ptr(EG(function_table), Z_STR_P(function_name))) != NULL) {
 					if (func->type == ZEND_INTERNAL_FUNCTION) {
-						return func;
+						/* For ZEND_INIT_NS_FCALL_BY_NAME, the function may be the "fake" pass function
+						 * to indicate that the global function should be used instead */
+						if (UNEXPECTED(func == (zend_function *) &zend_pass_function)) {
+							return NULL;
+						} else {
+							return func;
+						}
 					} else if (func->type == ZEND_USER_FUNCTION &&
 					           func->op_array.filename &&
 					           func->op_array.filename == op_array->filename) {
