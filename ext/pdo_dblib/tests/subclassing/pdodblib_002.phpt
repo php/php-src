@@ -14,7 +14,10 @@ echo "PdoDblib class exists.\n";
 
 $db = Pdo::connect('dblib::memory:');
 
-$db = PDOTest::factory();
+
+if (!$db instanceof PdoDblib) {
+    echo "Wrong class type. Should be PdoDblib but is [" . get_class($db) . "\n";
+}
 
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10))');
 $db->exec("INSERT INTO test VALUES(1, 'A')");

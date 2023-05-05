@@ -1,5 +1,5 @@
 --TEST--
-PDOSqlite create through PDO::connect
+PDOSqlite create through PDO::connect and function define.
 --EXTENSIONS--
 pdo
 --FILE--
@@ -15,7 +15,7 @@ echo "PdoSqlite class exists.\n";
 $db = Pdo::connect('sqlite::memory:');
 
 if (!$db instanceof PdoSqlite) {
-    echo "Wrong class type. Should be PdoSqlite but is [" .get_class($db) . "\n";
+    echo "Wrong class type. Should be PdoSqlite but is [" . get_class($db) . "\n";
 }
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
