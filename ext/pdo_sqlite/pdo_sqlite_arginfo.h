@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 67ac1b8b7e4ff45e18f8bfcd4d458ab0961b0d4c */
+ * Stub hash: 949c01f6e018c7abeb29f2ed699e98ed2c0553a9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOSqlite_createFunction, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, function_name, IS_STRING, 0)
@@ -22,12 +22,26 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOSqlite_openBlob, 0, 3, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PDO::SQLITE_OPEN_READONLY")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOSqlite_createAggregate, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, step, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, finalize, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, numArgs, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOSqlite_createCollation, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(PDOSqlite, createFunction);
 #if !defined(SQLITE_OMIT_LOAD_EXTENSION)
 ZEND_METHOD(PDOSqlite, loadExtension);
 #endif
 ZEND_METHOD(PDOSqlite, openBlob);
+ZEND_METHOD(PDOSqlite, createAggregate);
+ZEND_METHOD(PDOSqlite, createCollation);
 
 
 static const zend_function_entry class_PDOSqlite_methods[] = {
@@ -36,6 +50,8 @@ static const zend_function_entry class_PDOSqlite_methods[] = {
 	ZEND_ME(PDOSqlite, loadExtension, arginfo_class_PDOSqlite_loadExtension, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_ME(PDOSqlite, openBlob, arginfo_class_PDOSqlite_openBlob, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOSqlite, createAggregate, arginfo_class_PDOSqlite_createAggregate, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOSqlite, createCollation, arginfo_class_PDOSqlite_createCollation, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
