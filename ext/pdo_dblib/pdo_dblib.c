@@ -27,9 +27,13 @@
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
+#include "pdo_dblib_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 static PHP_GINIT_FUNCTION(dblib);
+
+zend_class_entry *pdodblib_ce;
+static pdo_driver_class_entry pdodblib_pdo_driver_class_entry;
 
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -200,6 +204,13 @@ PHP_MINIT_FUNCTION(pdo_dblib)
 	if (FAIL == dbinit()) {
 		return FAILURE;
 	}
+
+	pdodblib_ce = register_class_PDODBLIB(pdo_dbh_ce);
+	pdodblib_ce->create_object = pdo_dbh_new;
+
+	pdodblib_pdo_driver_class_entry.driver_name = "dblib";
+	pdodblib_pdo_driver_class_entry.driver_ce = pdodblib_ce;
+	pdo_register_driver_specific_class(&pdodblib_pdo_driver_class_entry);
 
 	if (FAILURE == php_pdo_register_driver(&pdo_dblib_driver)) {
 		return FAILURE;
