@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9e4de4487e2652b510d91a903ce7267b089a83c1 */
+ * Stub hash: 67ac1b8b7e4ff45e18f8bfcd4d458ab0961b0d4c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOSqlite_createFunction, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, function_name, IS_STRING, 0)
