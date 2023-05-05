@@ -1,0 +1,25 @@
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: 0b4ccc19bba532b56c7b6936a01bfccc4a7bea79 */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOMySql_getWarningCount, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+
+ZEND_METHOD(PDOMySql, getWarningCount);
+
+
+static const zend_function_entry class_PDOMySql_methods[] = {
+	ZEND_ME(PDOMySql, getWarningCount, arginfo_class_PDOMySql_getWarningCount, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_PDOMySql(zend_class_entry *class_entry_PDO)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "PDOMySql", class_PDOMySql_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}
