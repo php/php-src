@@ -68,6 +68,9 @@ PHP 8.3 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- $_SERVER['SERVER_SOFTWARE'] value from the built-in CLI server changed
+  to make it compliant with RFC3875.
+
 ========================================
 4. Deprecated Functionality
 ========================================
