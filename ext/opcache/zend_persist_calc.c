@@ -399,6 +399,7 @@ static void zend_persist_class_constant_calc(zval *zv)
 		if (c->attributes) {
 			zend_persist_attributes_calc(c->attributes);
 		}
+		zend_persist_type_calc(&c->type);
 	}
 }
 

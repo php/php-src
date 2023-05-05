@@ -154,7 +154,7 @@ static void *find_prefered_mmap_base(size_t requested_size)
 }
 #endif
 
-static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	zend_shared_segment *shared_segment;
 	int flags = PROT_READ | PROT_WRITE, fd = -1;
@@ -276,7 +276,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment);
 }
 
-zend_shared_memory_handlers zend_alloc_mmap_handlers = {
+const zend_shared_memory_handlers zend_alloc_mmap_handlers = {
 	create_segments,
 	detach_segment,
 	segment_type_size

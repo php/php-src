@@ -650,14 +650,14 @@ static uint64_t zend_ffi_bit_field_read(void *ptr, zend_ffi_field *field) /* {{{
 	/* Read partial prefix byte */
 	if (pos != 0) {
 		size_t num_bits = 8 - pos;
-		mask = ((1U << num_bits) - 1U) << pos;
+		mask = (1U << num_bits) - 1U;
 		val = (*p++ >> pos) & mask;
 		insert_pos += num_bits;
 	}
 
 	/* Read full bytes */
 	while (p < last_p) {
-		val |= *p++ << insert_pos;
+		val |= (uint64_t) *p++ << insert_pos;
 		insert_pos += 8;
 	}
 
@@ -665,7 +665,7 @@ static uint64_t zend_ffi_bit_field_read(void *ptr, zend_ffi_field *field) /* {{{
 	if (p == last_p) {
 		size_t num_bits = last_bit % 8 + 1;
 		mask = (1U << num_bits) - 1U;
-		val |= (*p & mask) << insert_pos;
+		val |= (uint64_t) (*p & mask) << insert_pos;
 	}
 
 	return val;
@@ -1107,7 +1107,7 @@ static zval *zend_ffi_cdata_get(zend_object *obj, zend_string *member, int read_
 
 	if (UNEXPECTED(!zend_string_equals_literal(member, "cdata"))) {
 		zend_throw_error(zend_ffi_exception_ce, "Only 'cdata' property may be read");
-		return &EG(uninitialized_zval);;
+		return &EG(uninitialized_zval);
 	}
 
 	zend_ffi_cdata_to_zval(cdata, cdata->ptr, type, BP_VAR_R, rv, 0, 0, 0);
@@ -1123,13 +1123,13 @@ static zval *zend_ffi_cdata_set(zend_object *obj, zend_string *member, zval *val
 #if 0
 	if (UNEXPECTED(!cdata->ptr)) {
 		zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-		return &EG(uninitialized_zval);;
+		return &EG(uninitialized_zval);
 	}
 #endif
 
 	if (UNEXPECTED(!zend_string_equals_literal(member, "cdata"))) {
 		zend_throw_error(zend_ffi_exception_ce, "Only 'cdata' property may be set");
-		return &EG(uninitialized_zval);;
+		return &EG(uninitialized_zval);
 	}
 
 	zend_ffi_zval_to_cdata(cdata->ptr, type, value);
@@ -1687,7 +1687,7 @@ static ZEND_COLD void zend_ffi_pass_incompatible(zval *arg, zend_ffi_type *type,
 				zend_throw_error(zend_ffi_exception_ce, "Passing incompatible argument %d of C function '%s', expecting '%s', found '%s'", n + 1, ZSTR_VAL(EX(func)->internal_function.function_name), buf1.start, buf2.start);
 			}
 		} else {
-			zend_throw_error(zend_ffi_exception_ce, "Passing incompatible argument %d of C function '%s', expecting '%s', found PHP '%s'", n + 1, ZSTR_VAL(EX(func)->internal_function.function_name), buf1.start, zend_zval_type_name(arg));
+			zend_throw_error(zend_ffi_exception_ce, "Passing incompatible argument %d of C function '%s', expecting '%s', found PHP '%s'", n + 1, ZSTR_VAL(EX(func)->internal_function.function_name), buf1.start, zend_zval_value_name(arg));
 		}
 	}
 }
@@ -1714,7 +1714,7 @@ static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *typ
 				zend_throw_error(zend_ffi_exception_ce, "Incompatible types when assigning to type '%s' from type '%s'", buf1.start, buf2.start);
 			}
 		} else {
-			zend_throw_error(zend_ffi_exception_ce, "Incompatible types when assigning to type '%s' from PHP '%s'", buf1.start, zend_zval_type_name(arg));
+			zend_throw_error(zend_ffi_exception_ce, "Incompatible types when assigning to type '%s' from PHP '%s'", buf1.start, zend_zval_value_name(arg));
 		}
 	}
 }
@@ -1838,7 +1838,7 @@ static zend_object* zend_ffi_add(zend_ffi_cdata *base_cdata, zend_ffi_type *base
 }
 /* }}} */
 
-static zend_result zend_ffi_cdata_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_result zend_ffi_cdata_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_long offset;
 
@@ -2038,6 +2038,8 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 	}
 
 	switch (type->kind) {
+		case ZEND_FFI_TYPE_VOID:
+			return NULL;
 		case ZEND_FFI_TYPE_BOOL:
 		case ZEND_FFI_TYPE_CHAR:
 		case ZEND_FFI_TYPE_ENUM:
@@ -2648,7 +2650,7 @@ again:
 				zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(arg);
 
 				if (zend_ffi_is_compatible_type(type, ZEND_FFI_TYPE(cdata->type))) {
-					*pass_type = zend_ffi_make_fake_struct_type(type);;
+					*pass_type = zend_ffi_make_fake_struct_type(type);
 					arg_values[n] = cdata->ptr;
 					break;
 				}
@@ -2830,7 +2832,11 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 		free_alloca(arg_values, arg_values_use_heap);
 	}
 
-	zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
+	if (ZEND_FFI_TYPE(type->func.ret_type)->kind != ZEND_FFI_TYPE_VOID) {
+		zend_ffi_cdata_to_zval(NULL, ret, ZEND_FFI_TYPE(type->func.ret_type), BP_VAR_R, return_value, 0, 1, 0);
+	} else {
+		ZVAL_NULL(return_value);
+	}
 	free_alloca(ret, ret_use_heap);
 
 exit:
@@ -5532,7 +5538,7 @@ static const zend_ffi_type zend_ffi_type_long_double = {.kind=ZEND_FFI_TYPE_LONG
 
 static const zend_ffi_type zend_ffi_type_ptr = {.kind=ZEND_FFI_TYPE_POINTER, .size=sizeof(void*), .align=_Alignof(void*), .pointer.type = (zend_ffi_type*)&zend_ffi_type_void};
 
-const struct {
+static const struct {
 	const char *name;
 	const zend_ffi_type *type;
 } zend_ffi_types[] = {
@@ -5770,7 +5776,7 @@ void zend_ffi_resolve_typedef(const char *name, size_t name_len, zend_ffi_dcl *d
 	if (FFI_G(symbols)) {
 		sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 		if (sym && sym->kind == ZEND_FFI_SYM_TYPE) {
-			dcl->type = ZEND_FFI_TYPE(sym->type);;
+			dcl->type = ZEND_FFI_TYPE(sym->type);
 			if (sym->is_const) {
 				dcl->attr |= ZEND_FFI_ATTR_CONST;
 			}
@@ -6592,7 +6598,7 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 				dcl->type = type; /* reset "owned" flag */
 				zend_hash_str_add_new_ptr(FFI_G(symbols), name, name_len, sym);
 			} else {
-				/* useless declarartion */
+				/* useless declaration */
 				zend_ffi_type_dtor(dcl->type);
 			}
 		}

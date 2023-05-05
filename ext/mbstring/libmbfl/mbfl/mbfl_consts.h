@@ -44,7 +44,10 @@
 /* Marker for an erroneous input byte (or sequence of bytes) */
 #define MBFL_BAD_INPUT (-1)
 
-#define MBFL_QPRINT_STS_MIME_HEADER 0x1000000
-#define MBFL_BASE64_STS_MIME_HEADER 0x1000000
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE 0
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR 1
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG 2
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY 3
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8 4 /* For internal use only; deliberately uses invalid UTF-8 byte sequence as error marker */
 
 #endif /* MBFL_CONSTS_H */

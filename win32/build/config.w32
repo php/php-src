@@ -228,8 +228,8 @@ STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
 ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
-	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
-	zend_constants.c zend_exceptions.c \
+	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_call_stack.c \
+	zend_compile.c zend_constants.c zend_exceptions.c \
 	zend_execute_API.c zend_highlight.c \
 	zend_llist.c zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
@@ -302,6 +302,9 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 }
 
 AC_DEFINE('HAVE_STRNLEN', 1);
+
+AC_DEFINE('ZEND_STACK_GROWS_DOWNWARDS', 1)
+AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");

@@ -112,8 +112,8 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 char accel_uname_id[32];
 #endif
 bool accel_startup_ok = false;
-static char *zps_failure_reason = NULL;
-char *zps_api_failure_reason = NULL;
+static const char *zps_failure_reason = NULL;
+const char *zps_api_failure_reason = NULL;
 bool file_cache_only = false;  /* process uses file cache only */
 #if ENABLE_FILE_CACHE_FALLBACK
 bool fallback_process = false; /* process uses file cache fallback */
@@ -129,7 +129,7 @@ static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 static zend_result (*orig_post_startup_cb)(void);
 
 static zend_result accel_post_startup(void);
-static int accel_finish_startup(void);
+static zend_result accel_finish_startup(void);
 
 static void preload_shutdown(void);
 static void preload_activate(void);
@@ -549,7 +549,7 @@ zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 	STRTAB_COLLISION(s) = *hash_slot;
 	*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
 	GC_SET_REFCOUNT(s, 2);
-	GC_TYPE_INFO(s) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
+	GC_TYPE_INFO(s) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT)| (ZSTR_IS_VALID_UTF8(str) ? IS_STR_VALID_UTF8 : 0);
 	ZSTR_H(s) = h;
 	ZSTR_LEN(s) = ZSTR_LEN(str);
 	memcpy(ZSTR_VAL(s), ZSTR_VAL(str), ZSTR_LEN(s) + 1);
@@ -731,9 +731,6 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			p->key = new_interned_string(p->key);
 		}
 		c = (zend_constant*)Z_PTR(p->val);
-		if (c->name) {
-			c->name = new_interned_string(c->name);
-		}
 		if (Z_TYPE(c->value) == IS_STRING) {
 			ZVAL_STR(&c->value, new_interned_string(Z_STR(c->value)));
 		}
@@ -893,11 +890,18 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 }
 #endif
 
-static inline int accel_is_inactive(void)
+static inline bool accel_is_inactive(void)
 {
 #ifdef ZEND_WIN32
+	/* on Windows, we don't need kill_all_lockers() because SAPIs
+	   that work on Windows don't manage child processes (and we
+	   can't do anything about hanging threads anyway); therefore
+	   on Windows, we can simply manage this counter with atomics
+	   instead of flocks (atomics are much faster but they don't
+	   provide us with the PID of locker processes) */
+
 	if (LOCKVAL(mem_usage) == 0) {
-		return SUCCESS;
+		return true;
 	}
 #else
 	struct flock mem_usage_check;
@@ -909,10 +913,10 @@ static inline int accel_is_inactive(void)
 	mem_usage_check.l_pid = -1;
 	if (fcntl(lock_file, F_GETLK, &mem_usage_check) == -1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "UpdateC:  %s (%d)", strerror(errno), errno);
-		return FAILURE;
+		return false;
 	}
 	if (mem_usage_check.l_type == F_UNLCK) {
-		return SUCCESS;
+		return true;
 	}
 
 	if (ZCG(accel_directives).force_restart_timeout
@@ -921,11 +925,11 @@ static inline int accel_is_inactive(void)
 		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %ld (after " ZEND_LONG_FMT " seconds), locked by %d", (long)time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
 		kill_all_lockers(&mem_usage_check);
 
-		return FAILURE; /* next request should be able to restart it */
+		return false; /* next request should be able to restart it */
 	}
 #endif
 
-	return FAILURE;
+	return false;
 }
 
 static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf)
@@ -1158,7 +1162,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	return ret;
 }
 
-int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+zend_result validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
 	if (persistent_script->timestamp == 0) {
 		return SUCCESS; /* Don't check timestamps of preloaded scripts */
@@ -1173,12 +1177,10 @@ int validate_timestamp_and_record(zend_persistent_script *persistent_script, zen
 	}
 }
 
-int validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+zend_result validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
-	int ret;
-
 	SHM_UNPROTECT();
-	ret = validate_timestamp_and_record(persistent_script, file_handle);
+	const zend_result ret = validate_timestamp_and_record(persistent_script, file_handle);
 	SHM_PROTECT();
 
 	return ret;
@@ -1391,7 +1393,7 @@ static void zend_accel_lock_discard_script(zend_persistent_script *persistent_sc
 	zend_shared_alloc_unlock();
 }
 
-int zend_accel_invalidate(zend_string *filename, bool force)
+zend_result zend_accel_invalidate(zend_string *filename, bool force)
 {
 	zend_string *realpath;
 	zend_persistent_script *persistent_script;
@@ -1500,11 +1502,11 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	ZCG(mem) = zend_arena_alloc(&CG(arena), memory_used + 64);
-	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+	ZCG(mem) = (void*)(((uintptr_t)ZCG(mem) + 63L) & ~63L);
 #elif ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT
 	/* Align to 8-byte boundary */
 	ZCG(mem) = zend_arena_alloc(&CG(arena), memory_used + 8);
-	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 7L) & ~7L);
+	ZCG(mem) = (void*)(((uintptr_t)ZCG(mem) + 7L) & ~7L);
 #else
 	ZCG(mem) = zend_arena_alloc(&CG(arena), memory_used);
 #endif
@@ -2353,18 +2355,18 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
-	entry = ce->inheritance_cache;
+	entry = proto->inheritance_cache;
 	while (entry) {
-		entry = zend_accel_inheritance_cache_find(entry, ce, parent, traits_and_interfaces, &needs_autoload);
+		entry = zend_accel_inheritance_cache_find(entry, proto, parent, traits_and_interfaces, &needs_autoload);
 		if (entry) {
+			zend_shared_alloc_unlock();
+			SHM_PROTECT();
 			if (!needs_autoload) {
-				zend_shared_alloc_unlock();
-				SHM_PROTECT();
-
 				zend_map_ptr_extend(ZCSG(map_ptr_last));
 				return entry->ce;
+			} else {
+				return NULL;
 			}
-			ZEND_ASSERT(0); // entry = entry->next; // This shouldn't be possible ???
 		}
 	}
 
@@ -2403,7 +2405,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 
 #if ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT
 	/* Align to 8-byte boundary */
-	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 7L) & ~7L);
+	ZCG(mem) = (void*)(((uintptr_t)ZCG(mem) + 7L) & ~7L);
 #endif
 
 	memset(ZCG(mem), 0, size);
@@ -2469,7 +2471,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 }
 
 #ifdef ZEND_WIN32
-static int accel_gen_uname_id(void)
+static zend_result accel_gen_uname_id(void)
 {
 	PHP_MD5_CTX ctx;
 	unsigned char digest[16];
@@ -2651,7 +2653,7 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 			ZCG(root_hash) = buf.st_ino;
 			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
 				if (ZCG(root_hash) != buf.st_ino) {
-					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_string *key = ZSTR_INIT_LITERAL("opcache.enable", 0);
 					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
 					zend_string_release_ex(key, 0);
 					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
@@ -2680,7 +2682,7 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 	if (ZCSG(restart_pending)) {
 		zend_shared_alloc_lock();
 		if (ZCSG(restart_pending)) { /* check again, to ensure that the cache wasn't already cleaned by another process */
-			if (accel_is_inactive() == SUCCESS) {
+			if (accel_is_inactive()) {
 				zend_accel_error(ACCEL_LOG_DEBUG, "Restarting!");
 				ZCSG(restart_pending) = false;
 				switch ZCSG(restart_reason) {
@@ -2804,7 +2806,7 @@ static int accelerator_remove_cb(zend_extension *element1, zend_extension *eleme
 	return 0;
 }
 
-static void zps_startup_failure(char *reason, char *api_reason, int (*cb)(zend_extension *, zend_extension *))
+static void zps_startup_failure(const char *reason, const char *api_reason, int (*cb)(zend_extension *, zend_extension *))
 {
 	accel_startup_ok = false;
 	zps_failure_reason = reason;
@@ -2812,7 +2814,7 @@ static void zps_startup_failure(char *reason, char *api_reason, int (*cb)(zend_e
 	zend_llist_del_element(&zend_extensions, NULL, (int (*)(void *, void *))cb);
 }
 
-static inline int accel_find_sapi(void)
+static inline zend_result accel_find_sapi(void)
 {
 	static const char *supported_sapis[] = {
 		"apache",
@@ -2826,6 +2828,7 @@ static inline int accel_find_sapi(void)
 		"uwsgi",
 		"fuzzer",
 		"frankenphp",
+		"ngx-php",
 		NULL
 	};
 	const char **sapi_name;
@@ -2846,7 +2849,7 @@ static inline int accel_find_sapi(void)
 	return FAILURE;
 }
 
-static int zend_accel_init_shm(void)
+static zend_result zend_accel_init_shm(void)
 {
 	int i;
 	size_t accel_shared_globals_size;
@@ -3037,7 +3040,7 @@ static void accel_move_code_to_huge_pages(void)
 		int ret;
 
 		while (1) {
-			ret = fscanf(f, "%lx-%lx %4s %lx %9s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
+			ret = fscanf(f, "%lx-%lx %4s %lx %9s %lu %s\n", &start, &end, perm, &offset, dev, &inode, name);
 			if (ret == 7) {
 				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
 					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
@@ -3205,7 +3208,7 @@ static zend_result accel_post_startup(void)
 			size_t page_size;
 
 			page_size = zend_get_page_size();
-			if (!page_size && (page_size & (page_size - 1))) {
+			if (!page_size || (page_size & (page_size - 1))) {
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
 				abort();
 			}
@@ -3451,7 +3454,7 @@ static void accel_deactivate_now(void)
 	if OK returns SUCCESS
 	MUST call accelerator_shm_read_unlock after done lock operations
 */
-int accelerator_shm_read_lock(void)
+zend_result accelerator_shm_read_lock(void)
 {
 	if (ZCG(counted)) {
 		/* counted means we are holding read lock for SHM, so that nothing bad can happen */
@@ -3746,15 +3749,16 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 	bool ok, changed, was_changed = false;
 	zend_class_constant *c;
 	zval *val;
+	zend_string *key;
 
 	EG(exception) = (void*)(uintptr_t)-1; /* prevent error reporting */
 	do {
 		ok = true;
 		changed = false;
-		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, key, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-				if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
+				if (EXPECTED(zend_update_class_constant(c, key, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
 					ok = false;
@@ -4009,7 +4013,7 @@ static void preload_link(void)
 				zend_error_at(
 					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
-			} else if (preload_resolve_deps(&error, ce)) {
+			} else if (preload_resolve_deps(&error, ce) == FAILURE) {
 				zend_error_at(
 					E_WARNING, ce->info.user.filename, ce->info.user.line_start,
 					"Can't preload unlinked class %s: %s%s",
@@ -4328,10 +4332,10 @@ static void preload_load(void)
 	}
 }
 
-static int accel_preload(const char *config, bool in_child)
+static zend_result accel_preload(const char *config, bool in_child)
 {
 	zend_file_handle file_handle;
-	int ret;
+	zend_result ret;
 	char *orig_open_basedir;
 	size_t orig_map_ptr_last;
 	uint32_t orig_compiler_options;
@@ -4412,6 +4416,8 @@ static int accel_preload(const char *config, bool in_child)
 
 		if (PG(auto_globals_jit)) {
 			ping_auto_globals_mask = zend_accel_get_auto_globals();
+		} else {
+			ping_auto_globals_mask = 0;
 		}
 
 		if (EG(zend_constants)) {
@@ -4472,7 +4478,7 @@ static int accel_preload(const char *config, bool in_child)
 		script->ping_auto_globals_mask = ping_auto_globals_mask;
 
 		/* Store all functions and classes in a single pseudo-file */
-		CG(compiled_filename) = zend_string_init("$PRELOAD$", sizeof("$PRELOAD$") - 1, 0);
+		CG(compiled_filename) = ZSTR_INIT_LITERAL("$PRELOAD$", 0);
 #if ZEND_USE_ABS_CONST_ADDR
 		init_op_array(&script->script.main_op_array, ZEND_USER_FUNCTION, 1);
 #else
@@ -4576,10 +4582,9 @@ static void preload_send_header(sapi_header_struct *sapi_header, void *server_co
 }
 
 #ifndef ZEND_WIN32
-static int accel_finish_startup_preload(bool in_child)
+static zend_result accel_finish_startup_preload(bool in_child)
 {
-	int ret = SUCCESS;
-	int rc;
+	zend_result ret = SUCCESS;
 	int orig_error_reporting;
 
 	int (*orig_activate)(void) = sapi_module.activate;
@@ -4614,7 +4619,7 @@ static int accel_finish_startup_preload(bool in_child)
 	orig_error_reporting = EG(error_reporting);
 	EG(error_reporting) = 0;
 
-	rc = php_request_startup();
+	const zend_result rc = php_request_startup();
 
 	EG(error_reporting) = orig_error_reporting;
 
@@ -4674,7 +4679,7 @@ static int accel_finish_startup_preload(bool in_child)
 	return ret;
 }
 
-static int accel_finish_startup_preload_subprocess(pid_t *pid)
+static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 {
 	uid_t euid = geteuid();
 	if (euid != 0) {
@@ -4741,7 +4746,7 @@ static int accel_finish_startup_preload_subprocess(pid_t *pid)
 }
 #endif /* ZEND_WIN32 */
 
-static int accel_finish_startup(void)
+static zend_result accel_finish_startup(void)
 {
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
@@ -4779,9 +4784,10 @@ static int accel_finish_startup(void)
 	}
 
 	if (pid == -1) { /* no subprocess was needed */
+		/* The called function unlocks the shared alloc lock */
 		return accel_finish_startup_preload(false);
 	} else if (pid == 0) { /* subprocess */
-		int ret = accel_finish_startup_preload(true);
+		const zend_result ret = accel_finish_startup_preload(true);
 
 		exit(ret == SUCCESS ? 0 : 1);
 	} else { /* parent */
@@ -4795,6 +4801,8 @@ static int accel_finish_startup(void)
 		if (ZCSG(preload_script)) {
 			preload_load();
 		}
+
+		zend_shared_alloc_unlock();
 
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
 			return SUCCESS;

@@ -55,7 +55,7 @@ typedef struct _zend_file_handle {
 	} handle;
 	zend_string       *filename;
 	zend_string       *opened_path;
-	zend_uchar        type; /* packed zend_stream_type */
+	uint8_t           type; /* packed zend_stream_type */
 	bool              primary_script;
 	bool              in_list; /* added into CG(open_file) */
 	char              *buf;

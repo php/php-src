@@ -4,7 +4,7 @@ Test posix_getpwuid() function : error conditions
 posix
 --SKIPIF--
 <?php
-if (getenv('SKIP_ASAN')) die('skip LSan crashes when firebird is loaded');
+if (getenv('SKIP_ASAN')) die('xleak LSan crashes when firebird is loaded');
 ?>
 --FILE--
 <?php

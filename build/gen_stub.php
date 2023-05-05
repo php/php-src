@@ -218,11 +218,6 @@ class SimpleType {
                 return new SimpleType($node->toLowerString(), true);
             }
 
-            if ($node->toLowerString() === 'true') {
-                // TODO PHP-Parser doesn't yet recognize true as a stand-alone built-in type
-                return new SimpleType($node->toLowerString(), true);
-            }
-
             if ($node->toLowerString() === 'self') {
                 throw new Exception('The exact class name must be used instead of "self"');
             }
@@ -650,11 +645,13 @@ class Type {
 
     public function getWithoutNull(): Type {
         return new Type(
-            array_filter(
-                $this->types,
-                function(SimpleType $type) {
-                    return !$type->isNull();
-                }
+            array_values(
+                array_filter(
+                    $this->types,
+                    function(SimpleType $type) {
+                        return !$type->isNull();
+                    }
+                )
             ),
             false
         );
@@ -931,14 +928,26 @@ abstract class AbstractConstName implements ConstOrClassConstName
 class ConstName extends AbstractConstName {
     public string $const;
 
-    public function __construct(string $const)
+    public function __construct(?Name $namespace, string $const)
     {
+        if ($namespace && ($namespace = $namespace->slice(0, -1))) {
+            $const = $namespace->toString() . '\\' . $const;
+        }
         $this->const = $const;
     }
 
     public function isClassConst(): bool
     {
         return false;
+    }
+
+    public function isUnknown(): bool
+    {
+        $name = $this->__toString();
+        if (($pos = strrpos($name, '\\')) !== false) {
+            $name = substr($name, $pos + 1);
+        }
+        return strtolower($name) === "unknown";
     }
 
     public function __toString(): string
@@ -1566,48 +1575,94 @@ class EvaluatedValue
     /** @var mixed */
     public $value;
     public SimpleType $type;
-    public ?string $cConstValue;
+    public Expr $expr;
     public bool $isUnknownConstValue;
-    public ?ConstInfo $originatingConst;
+    /** @var ConstInfo[] */
+    public array $originatingConsts;
 
     /**
      * @param iterable<ConstInfo> $allConstInfos
      */
     public static function createFromExpression(Expr $expr, ?SimpleType $constType, ?string $cConstName, iterable $allConstInfos): EvaluatedValue
     {
-        $originatingConst = null;
-        $isUnknownConstValue = null;
+        // This visitor replaces the PHP constants by C constants. It allows direct expansion of the compiled constants, e.g. later in the pretty printer.
+        $visitor = new class($allConstInfos) extends PhpParser\NodeVisitorAbstract
+        {
+            public array $visitedConstants = [];
+            /** @var iterable<ConstInfo> */
+            public iterable $allConstInfos;
 
-        $evaluator = new ConstExprEvaluator(
-            function (Expr $expr) use ($allConstInfos, &$constType, &$originatingConst, &$isUnknownConstValue) {
+            /**
+             * @param iterable<ConstInfo> $allConstInfos
+             */
+            public function __construct(iterable $allConstInfos)
+            {
+                $this->allConstInfos = $allConstInfos;
+            }
+
+            public function enterNode(Node $expr)
+            {
                 if (!$expr instanceof Expr\ConstFetch && !$expr instanceof Expr\ClassConstFetch) {
-                    throw new Exception($this->getVariableTypeName() . " " . $this->getVariableLikeName() . " has an unsupported value");
+                    return;
                 }
 
                 if ($expr instanceof Expr\ClassConstFetch) {
                     $originatingConstName = new ClassConstName($expr->class, $expr->name->toString());
                 } else {
-                    $originatingConstName = new ConstName($expr->name->toString());
+                    $originatingConstName = new ConstName($expr->name->getAttribute('namespacedName'), $expr->name->toString());
                 }
 
                 if ($originatingConstName->isUnknown()) {
-                    $originatingConst = null;
-                    $isUnknownConstValue = true;
+                    return;
+                }
 
+                foreach ($this->allConstInfos as $const) {
+                    if ($originatingConstName->equals($const->name)) {
+                        $this->visitedConstants[] = $const;
+                        return $const->getValue($this->allConstInfos)->expr;
+                    }
+                }
+            }
+        };
+
+        $nodeTraverser = new PhpParser\NodeTraverser;
+        $nodeTraverser->addVisitor($visitor);
+        $expr = $nodeTraverser->traverse([$expr])[0];
+
+        $isUnknownConstValue = false;
+
+        $evaluator = new ConstExprEvaluator(
+            function (Expr $expr) use ($allConstInfos, &$isUnknownConstValue) {
+                // $expr is a ConstFetch with a name of a C macro here
+                if (!$expr instanceof Expr\ConstFetch) {
+                    throw new Exception($this->getVariableTypeName() . " " . $this->getVariableLikeName() . " has an unsupported value");
+                }
+
+                $constName = $expr->name->__toString();
+                if (strtolower($constName) === "unknown") {
+                    $isUnknownConstValue = true;
                     return null;
                 }
 
                 foreach ($allConstInfos as $const) {
-                    if (!$originatingConstName->equals($const->name)) {
+                    if ($constName != $const->cValue) {
                         continue;
                     }
 
-                    if ($constType === null && $const->phpDocType) {
+                    if ($const->phpDocType) {
                         $constType = $const->phpDocType->tryToSimpleType();
+                        if ($constType->isBool()) {
+                            return true;
+                        } elseif ($constType->isInt()) {
+                            return 1;
+                        } elseif ($constType->isFloat()) {
+                            return M_PI;
+                        } elseif ($constType->isString()) {
+                            return $const->name;
+                        } elseif ($constType->isArray()) {
+                            return [];
+                        }
                     }
-
-                    $originatingConst = $const;
-                    $isUnknownConstValue = false;
 
                     return null;
                 }
@@ -1619,83 +1674,78 @@ class EvaluatedValue
         $result = $evaluator->evaluateDirectly($expr);
 
         return new EvaluatedValue(
-            $result,
-            $constType ?: SimpleType::fromValue($result),
-            $cConstName,
-            $originatingConst,
-            (bool) $isUnknownConstValue
+            $result, // note: we are generally not interested in the actual value of $result, unless it's a bare value, without constants
+            $constType ?? SimpleType::fromValue($result),
+            $cConstName === null ? $expr : new Expr\ConstFetch(new Node\Name($cConstName)),
+            $visitor->visitedConstants,
+            $isUnknownConstValue
         );
     }
 
     public static function null(): EvaluatedValue
     {
-        return new self(null, SimpleType::null(), null, null, false);
+        return new self(null, SimpleType::null(), new Expr\ConstFetch(new Node\Name('null')), [], false);
     }
 
     /**
      * @param mixed $value
+     * @param ConstInfo[] $originatingConsts
      */
-    private function __construct($value, SimpleType $type, ?string $cConstName, ?ConstInfo $originatingConst, bool $isUnknownConstValue)
+    private function __construct($value, SimpleType $type, Expr $expr, array $originatingConsts, bool $isUnknownConstValue)
     {
         $this->value = $value;
         $this->type = $type;
-        $this->cConstValue = $cConstName;
-        $this->originatingConst = $originatingConst;
+        $this->expr = $expr;
+        $this->originatingConsts = $originatingConsts;
         $this->isUnknownConstValue = $isUnknownConstValue;
     }
 
-    /**
-     * @param iterable<ConstInfo> $allConstInfos
-     */
-    public function initializeZval(string $zvalName, iterable $allConstInfos): string
+    public function initializeZval(string $zvalName): string
     {
-        $cConstValue = $this->getCConstValue($allConstInfos);
+        $cExpr = $this->getCExpr();
 
         $code = "\tzval $zvalName;\n";
 
         if ($this->type->isNull()) {
             $code .= "\tZVAL_NULL(&$zvalName);\n";
         } elseif ($this->type->isBool()) {
-            $code .= "\t" . ($this->value ? 'ZVAL_TRUE' : 'ZVAL_FALSE') . "(&$zvalName);\n";
+            if ($cExpr == 'true') {
+                $code .= "\tZVAL_TRUE(&$zvalName);\n";
+            } elseif ($cExpr == 'false') {
+                $code .= "\tZVAL_FALSE(&$zvalName);\n";
+            } else {
+                $code .= "\tZVAL_BOOL(&$zvalName, $cExpr);\n";
+            }
         } elseif ($this->type->isInt()) {
-            $code .= "\tZVAL_LONG(&$zvalName, " . ($cConstValue ?: $this->value) . ");\n";
+            $code .= "\tZVAL_LONG(&$zvalName, $cExpr);\n";
         } elseif ($this->type->isFloat()) {
-            $code .= "\tZVAL_DOUBLE(&$zvalName, " . ($cConstValue ?: $this->value) . ");\n";
+            $code .= "\tZVAL_DOUBLE(&$zvalName, $cExpr);\n";
         } elseif ($this->type->isString()) {
-            if (!$cConstValue && $this->value === "") {
+            if ($cExpr === '""') {
                 $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
             } else {
-                $constValue = $cConstValue ?: '"' . addslashes($this->value) . '"';
-                $code .= "\tzend_string *{$zvalName}_str = zend_string_init($constValue, strlen($constValue), 1);\n";
+                $code .= "\tzend_string *{$zvalName}_str = zend_string_init($cExpr, strlen($cExpr), 1);\n";
                 $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
             }
         } elseif ($this->type->isArray()) {
-            if (!$cConstValue && empty($this->value)) {
+            if ($cExpr == '[]') {
                 $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
             } else {
                 throw new Exception("Unimplemented default value");
             }
         } else {
-            throw new Exception("Invalid default value");
+            throw new Exception("Invalid default value: " . print_r($this->type, true));
         }
 
         return $code;
     }
 
-    /**
-     * @param iterable<ConstInfo> $allConstInfos
-     */
-    public function getCConstValue(iterable $allConstInfos): ?string
+    public function getCExpr(): ?string
     {
-        if ($this->cConstValue) {
-            return $this->cConstValue;
-        }
-
-        if ($this->originatingConst) {
-            return $this->originatingConst->getValue($allConstInfos)->getCConstValue($allConstInfos);
-        }
-
-        return null;
+        // $this->expr has all its PHP constants replaced by C constants
+        $prettyPrinter = new Standard;
+        $expr = $prettyPrinter->prettyPrintExpr($this->expr);
+        return $expr[0] == '"' ? $expr : preg_replace('(\bnull\b)', 'NULL', str_replace('\\', '', $expr));
     }
 }
 
@@ -1911,8 +1961,10 @@ class ConstInfo extends VariableLike
             return null;
         }
 
-        if ($value->originatingConst) {
-            return $value->originatingConst->getFieldSynopsisValueString($allConstInfos);
+        if ($value->originatingConsts) {
+            return implode("\n", array_map(function (ConstInfo $const) use ($allConstInfos) {
+                return $const->getFieldSynopsisValueString($allConstInfos);
+            }, $value->originatingConsts));
         }
 
         return $this->valueString;
@@ -1934,7 +1986,8 @@ class ConstInfo extends VariableLike
         }
 
         $value = EvaluatedValue::createFromExpression($this->value, $type, $this->cValue, $allConstInfos);
-        if ($value->isUnknownConstValue && !$value->cConstValue) {
+        // i.e. const NAME = UNKNOWN;, without the annotation
+        if ($value->isUnknownConstValue && $this->cValue === null && $value->expr instanceof Expr\ConstFetch && $value->expr->name->__toString() == $this->name->__toString()) {
             throw new Exception("Constant " . $this->name->__toString() . " must have a @cvalue annotation");
         }
 
@@ -1965,7 +2018,7 @@ class ConstInfo extends VariableLike
     {
         $constName = str_replace('\\', '\\\\', $this->name->__toString());
         $constValue = $value->value;
-        $cConstValue = $value->getCConstValue($allConstInfos);
+        $cExpr = $value->getCExpr();
 
         $flags = "CONST_PERSISTENT";
         if ($this->phpVersionIdMinimumCompatibility !== null && $this->phpVersionIdMinimumCompatibility < 80000) {
@@ -1980,19 +2033,19 @@ class ConstInfo extends VariableLike
         }
 
         if ($value->type->isBool()) {
-            return "\tREGISTER_BOOL_CONSTANT(\"$constName\", " . ($cConstValue ?: ($constValue ? "true" : "false")) . ", $flags);\n";
+            return "\tREGISTER_BOOL_CONSTANT(\"$constName\", " . ($cExpr ?: ($constValue ? "true" : "false")) . ", $flags);\n";
         }
 
         if ($value->type->isInt()) {
-            return "\tREGISTER_LONG_CONSTANT(\"$constName\", " . ($cConstValue ?: (int) $constValue) . ", $flags);\n";
+            return "\tREGISTER_LONG_CONSTANT(\"$constName\", " . ($cExpr ?: (int) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isFloat()) {
-            return "\tREGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cConstValue ?: (float) $constValue) . ", $flags);\n";
+            return "\tREGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cExpr ?: (float) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isString()) {
-            return "\tREGISTER_STRING_CONSTANT(\"$constName\", " . ($cConstValue ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
+            return "\tREGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
         }
 
         throw new Exception("Unimplemented constant type");}
@@ -2025,35 +2078,35 @@ class ConstInfo extends VariableLike
 
     private function getValueAssertion(EvaluatedValue $value): string
     {
-        if ($value->isUnknownConstValue || $value->originatingConst || $value->cConstValue === null) {
+        if ($value->isUnknownConstValue || $value->originatingConsts || $this->cValue === null) {
             return "";
         }
 
-        $cConstValue = $value->cConstValue;
+        $cExpr = $value->getCExpr();
         $constValue = $value->value;
 
         if ($value->type->isNull()) {
-            return "\tZEND_ASSERT($cConstValue == NULL);\n";
+            return "\tZEND_ASSERT($cExpr == NULL);\n";
         }
 
         if ($value->type->isBool()) {
             $cValue = $constValue ? "true" : "false";
-            return "\tZEND_ASSERT($cConstValue == $cValue);\n";
+            return "\tZEND_ASSERT($cExpr == $cValue);\n";
         }
 
         if ($value->type->isInt()) {
             $cValue = (int) $constValue;
-            return "\tZEND_ASSERT($cConstValue == $cValue);\n";
+            return "\tZEND_ASSERT($cExpr == $cValue);\n";
         }
 
         if ($value->type->isFloat()) {
             $cValue = (float) $constValue;
-            return "\tZEND_ASSERT($cConstValue == $cValue);\n";
+            return "\tZEND_ASSERT($cExpr == $cValue);\n";
         }
 
         if ($value->type->isString()) {
             $cValue = '"' . addslashes($constValue) . '"';
-            return "\tZEND_ASSERT(strcmp($cConstValue, $cValue) == 0);\n";
+            return "\tZEND_ASSERT(strcmp($cExpr, $cValue) == 0);\n";
         }
 
         throw new Exception("Unimplemented constant type");
@@ -2170,7 +2223,7 @@ class PropertyInfo extends VariableLike
             $defaultValue = EvaluatedValue::null();
         } else {
             $defaultValue = EvaluatedValue::createFromExpression($this->defaultValue, null, null, $allConstInfos);
-            if ($defaultValue->isUnknownConstValue || ($defaultValue->originatingConst && $defaultValue->getCConstValue($allConstInfos) === null)) {
+            if ($defaultValue->isUnknownConstValue || ($defaultValue->originatingConsts && $defaultValue->getCExpr() === null)) {
                 echo "Skipping code generation for property $this->name, because it has an unknown constant default value\n";
                 return "";
             }
@@ -2220,7 +2273,7 @@ class PropertyInfo extends VariableLike
         if ($this->defaultValue === null && $this->type !== null) {
             $code .= "\tzval $zvalName;\n\tZVAL_UNDEF(&$zvalName);\n";
         } else {
-            $code .= $defaultValue->initializeZval($zvalName, $allConstInfos);
+            $code .= $defaultValue->initializeZval($zvalName);
         }
 
         $code .= "\tzend_string *property_{$propertyName}_name = zend_string_init(\"$propertyName\", sizeof(\"$propertyName\") - 1, 1);\n";
@@ -2314,7 +2367,7 @@ class EnumCaseInfo {
             $value = EvaluatedValue::createFromExpression($this->value, null, null, $allConstInfos);
 
             $zvalName = "enum_case_{$escapedName}_value";
-            $code = "\n" . $value->initializeZval($zvalName, $allConstInfos);
+            $code = "\n" . $value->initializeZval($zvalName);
             $code .= "\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", &$zvalName);\n";
         }
 
@@ -2334,11 +2387,14 @@ class AttributeInfo {
     }
 
     /** @param iterable<ConstInfo> $allConstInfos */
-    public function generateCode(string $invocation, string $nameSuffix, iterable $allConstInfos): string {
+    public function generateCode(string $invocation, string $nameSuffix, iterable $allConstInfos, ?int $phpVersionIdMinimumCompatibility): string {
+        $php82MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_82_VERSION_ID;
         /* see ZEND_KNOWN_STRINGS in Zend/strings.h */
-        static $knowns = [
-            "SensitiveParameter" => "ZEND_STR_SENSITIVEPARAMETER",
-        ];
+        $knowns = [];
+        if ($php82MinimumCompatibility) {
+            $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
+        }
+
         $code = "\n";
         $escapedAttributeName = strtr($this->class, '\\', '_');
         if (isset($knowns[$escapedAttributeName])) {
@@ -2351,7 +2407,7 @@ class AttributeInfo {
         foreach ($this->args as $i => $arg) {
             $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
             $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
-            $code .= $value->initializeZval($zvalName, $allConstInfos);
+            $code .= $value->initializeZval($zvalName);
             $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
             if ($arg->name) {
                 $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
@@ -2454,8 +2510,8 @@ class ClassInfo {
 
         $code = '';
 
+        $php80MinimumCompatibility = $this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_80_VERSION_ID;
         $php81MinimumCompatibility = $this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_81_VERSION_ID;
-        $php82MinimumCompatibility = $this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_82_VERSION_ID;
 
         if ($this->type === "enum" && !$php81MinimumCompatibility) {
             $code .= "#if (PHP_VERSION_ID >= " . PHP_81_VERSION_ID . ")\n";
@@ -2522,27 +2578,27 @@ class ClassInfo {
         }
 
         if (!empty($this->attributes)) {
-            if (!$php82MinimumCompatibility) {
-                $code .= "\n#if (PHP_VERSION_ID >= " . PHP_82_VERSION_ID . ")";
+            if (!$php80MinimumCompatibility) {
+                $code .= "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")";
             }
 
             foreach ($this->attributes as $attribute) {
-                $code .= $attribute->generateCode("zend_add_class_attribute(class_entry", "class_$escapedName", $allConstInfos);
+                $code .= $attribute->generateCode("zend_add_class_attribute(class_entry", "class_$escapedName", $allConstInfos, $this->phpVersionIdMinimumCompatibility);
             }
 
-            if (!$php82MinimumCompatibility) {
+            if (!$php80MinimumCompatibility) {
                 $code .= "#endif\n";
             }
         }
 
-        if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $allConstInfos, $this->cond)) {
-            if (!$php82MinimumCompatibility) {
-                $code .= "#if (PHP_VERSION_ID >= " . PHP_82_VERSION_ID . ")\n";
+        if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond)) {
+            if (!$php80MinimumCompatibility) {
+                $code .= "#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")\n";
             }
 
             $code .= "\n" . $attributeInitializationCode;
 
-            if (!$php82MinimumCompatibility) {
+            if (!$php80MinimumCompatibility) {
                 $code .= "#endif\n";
             }
         }
@@ -2700,17 +2756,18 @@ class ClassInfo {
         }
         $classSynopsisInfo->appendChild(new DOMText("\n    "));
 
-        /** @var Name[] $parentsWithInheritedConstants */
+        /** @var array<string, Name> $parentsWithInheritedConstants */
         $parentsWithInheritedConstants = [];
-        /** @var Name[] $parentsWithInheritedProperties */
+        /** @var array<string, Name> $parentsWithInheritedProperties */
         $parentsWithInheritedProperties = [];
-        /** @var Name[] $parentsWithInheritedMethods */
+        /** @var array<int, array{name: Name, types: int[]}> $parentsWithInheritedMethods */
         $parentsWithInheritedMethods = [];
 
         $this->collectInheritedMembers(
             $parentsWithInheritedConstants,
             $parentsWithInheritedProperties,
             $parentsWithInheritedMethods,
+            $this->hasConstructor(),
             $classMap
         );
 
@@ -2800,14 +2857,21 @@ class ClassInfo {
             $classSynopsis->appendChild($classSynopsisInfo);
 
             foreach ($parentsWithInheritedMethods as $parent) {
-                $classSynopsis->appendChild(new DOMText("\n    "));
-                $parentReference = self::getClassSynopsisReference($parent);
-                $escapedParentName = addslashes($parent->__toString());
-                $includeElement = $this->createIncludeElement(
-                    $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='$escapedParentName')])"
-                );
-                $classSynopsis->appendChild($includeElement);
+                $parentName = $parent["name"];
+                $parentMethodsynopsisTypes = $parent["types"];
+
+                $parentReference = self::getClassSynopsisReference($parentName);
+                $escapedParentName = addslashes($parentName->__toString());
+
+                foreach ($parentMethodsynopsisTypes as $parentMethodsynopsisType) {
+                    $classSynopsis->appendChild(new DOMText("\n    "));
+                    $includeElement = $this->createIncludeElement(
+                        $doc,
+                        "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:{$parentMethodsynopsisType}[@role='$escapedParentName'])"
+                    );
+
+                    $classSynopsis->appendChild($includeElement);
+                }
             }
         }
 
@@ -2865,39 +2929,54 @@ class ClassInfo {
     }
 
     /**
-     * @param Name[] $parentsWithInheritedConstants
-     * @param Name[] $parentsWithInheritedProperties
-     * @param Name[] $parentsWithInheritedMethods
+     * @param array<string, Name> $parentsWithInheritedConstants
+     * @param array<string, Name> $parentsWithInheritedProperties
+     * @param array<string, array{name: Name, types: int[]}> $parentsWithInheritedMethods
      * @param array<string, ClassInfo> $classMap
      */
     private function collectInheritedMembers(
         array &$parentsWithInheritedConstants,
         array &$parentsWithInheritedProperties,
         array &$parentsWithInheritedMethods,
+        bool $hasConstructor,
         array $classMap
     ): void {
         foreach ($this->extends as $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
+            $parentName = $parent->toString();
+
             if (!$parentInfo) {
-                throw new Exception("Missing parent class " . $parent->toString());
+                throw new Exception("Missing parent class $parentName");
             }
 
-            if (!empty($parentInfo->constInfos) && !isset($parentsWithInheritedConstants[$parent->toString()])) {
-                $parentsWithInheritedConstants[$parent->toString()] = $parent;
+            if (!empty($parentInfo->constInfos) && !isset($parentsWithInheritedConstants[$parentName])) {
+                $parentsWithInheritedConstants[] = $parent;
             }
 
-            if (!empty($parentInfo->propertyInfos) && !isset($parentsWithInheritedProperties[$parent->toString()])) {
-                $parentsWithInheritedProperties[$parent->toString()] = $parent;
+            if (!empty($parentInfo->propertyInfos) && !isset($parentsWithInheritedProperties[$parentName])) {
+                $parentsWithInheritedProperties[$parentName] = $parent;
             }
 
-            if (!isset($parentsWithInheritedMethods[$parent->toString()]) && $parentInfo->hasMethods()) {
-                $parentsWithInheritedMethods[$parent->toString()] = $parent;
+            if (!$hasConstructor && $parentInfo->hasNonPrivateConstructor()) {
+                $parentsWithInheritedMethods[$parentName]["name"] = $parent;
+                $parentsWithInheritedMethods[$parentName]["types"][] = "constructorsynopsis";
+            }
+
+            if ($parentInfo->hasMethods()) {
+                $parentsWithInheritedMethods[$parentName]["name"] = $parent;
+                $parentsWithInheritedMethods[$parentName]["types"][] = "methodsynopsis";
+            }
+
+            if ($parentInfo->hasDestructor()) {
+                $parentsWithInheritedMethods[$parentName]["name"] = $parent;
+                $parentsWithInheritedMethods[$parentName]["types"][] = "destructorsynopsis";
             }
 
             $parentInfo->collectInheritedMembers(
                 $parentsWithInheritedConstants,
                 $parentsWithInheritedProperties,
                 $parentsWithInheritedMethods,
+                $hasConstructor,
                 $classMap
             );
         }
@@ -2919,6 +2998,7 @@ class ClassInfo {
                 $parentsWithInheritedConstants,
                 $unusedParentsWithInheritedProperties,
                 $unusedParentsWithInheritedMethods,
+                $hasConstructor,
                 $classMap
             );
         }
@@ -2928,6 +3008,17 @@ class ClassInfo {
     {
         foreach ($this->funcInfos as $funcInfo) {
             if ($funcInfo->name->isConstructor()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasNonPrivateConstructor(): bool
+    {
+        foreach ($this->funcInfos as $funcInfo) {
+            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Class_::MODIFIER_PRIVATE)) {
                 return true;
             }
         }
@@ -3091,7 +3182,7 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*\$\w+.*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*(?:[{(]|\$\w+).*$/', $value, $matches);
         } elseif ($this->name === "return" || $this->name === "var") {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)/', $value, $matches);
         }
@@ -3112,16 +3203,17 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*[\w\|\\\\\[\]]+\s*\$(\w+).*$/', $value, $matches);
+            // Allow for parsing extended types like callable(string):mixed in docblocks
+            preg_match('/^\s*(?<type>[\w\|\\\\]+(?<parens>\((?<inparens>(?:(?&parens)|[^(){}[\]]*+))++\)|\{(?&inparens)\}|\[(?&inparens)\])*+(?::(?&type))?)\s*\$(?<name>\w+).*$/', $value, $matches);
         } elseif ($this->name === "prefer-ref") {
-            preg_match('/^\s*\$(\w+).*$/', $value, $matches);
+            preg_match('/^\s*\$(?<name>\w+).*$/', $value, $matches);
         }
 
-        if (!isset($matches[1])) {
+        if (!isset($matches["name"])) {
             throw new Exception("@$this->name doesn't contain a variable name or has an invalid format \"$value\"");
         }
 
-        return $matches[1];
+        return $matches["name"];
     }
 }
 
@@ -3595,7 +3687,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             foreach ($stmt->consts as $const) {
                 $fileInfo->constInfos[] = parseConstLike(
                     $prettyPrinter,
-                    new ConstName($const->name->toString()),
+                    new ConstName($const->namespacedName, $const->name->toString()),
                     $const,
                     0,
                     $stmt->getDocComment(),
@@ -3838,10 +3930,10 @@ function funcInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): string {
                 $arginfoType = $argType->toArginfoType();
                 if ($arginfoType->hasClassType()) {
                     $code .= sprintf(
-                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s, %s)\n",
+                        "\tZEND_%s_OBJ_TYPE_MASK(%s, %s, %s, %s%s)\n",
                         $argKind, $argInfo->getSendByString(), $argInfo->name,
                         $arginfoType->toClassTypeString(), $arginfoType->toTypeMask(),
-                        $argInfo->getDefaultValueAsArginfoString()
+                        !$argInfo->isVariadic ? ", " . $argInfo->getDefaultValueAsArginfoString() : ""
                     );
                 } else {
                     $code .= sprintf(
@@ -3960,12 +4052,12 @@ function generateArgInfoCode(
         }
     }
 
-    $php82MinimumCompatibility = $fileInfo->generateLegacyArginfoForPhpVersionId === null || $fileInfo->generateLegacyArginfoForPhpVersionId >= PHP_82_VERSION_ID;
+    $php80MinimumCompatibility = $fileInfo->generateLegacyArginfoForPhpVersionId === null || $fileInfo->generateLegacyArginfoForPhpVersionId >= PHP_80_VERSION_ID;
 
     if ($fileInfo->generateClassEntries) {
-        if ($attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, $allConstInfos, null)) {
-            if (!$php82MinimumCompatibility) {
-                $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_82_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
+        if ($attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos, $allConstInfos, $fileInfo->generateLegacyArginfoForPhpVersionId, null)) {
+            if (!$php80MinimumCompatibility) {
+                $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
             }
         }
 
@@ -4034,11 +4126,11 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
 /**
  * @param iterable<FuncInfo> $funcInfos
  */
-function generateAttributeInitialization(iterable $funcInfos, iterable $allConstInfos, ?string $parentCond = null): string {
+function generateAttributeInitialization(iterable $funcInfos, iterable $allConstInfos, ?int $phpVersionIdMinimumCompatibility, ?string $parentCond = null): string {
     return generateCodeWithConditions(
         $funcInfos,
         "",
-        static function (FuncInfo $funcInfo) use ($allConstInfos) {
+        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility) {
             $code = null;
 
             foreach ($funcInfo->args as $index => $arg) {
@@ -4049,7 +4141,7 @@ function generateAttributeInitialization(iterable $funcInfos, iterable $allConst
                 }
 
                 foreach ($arg->attributes as $attribute) {
-                    $code .= $attribute->generateCode("zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index", "{$funcInfo->name->getMethodSynopsisFilename()}_arg{$index}", $allConstInfos);
+                    $code .= $attribute->generateCode("zend_add_parameter_attribute(zend_hash_str_find_ptr($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", sizeof(\"" . $funcInfo->name->getNameForAttributes() . "\") - 1), $index", "{$funcInfo->name->getMethodSynopsisFilename()}_arg{$index}", $allConstInfos, $phpVersionIdMinimumCompatibility);
                 }
             }
 
@@ -4059,14 +4151,14 @@ function generateAttributeInitialization(iterable $funcInfos, iterable $allConst
     );
 }
 
-/** @param FuncInfo<string, FuncInfo> $funcInfos */
-function generateOptimizerInfo(array $funcInfos): string {
+/** @param array<string, FuncInfo> $funcMap */
+function generateOptimizerInfo(array $funcMap): string {
 
     $code = "/* This is a generated file, edit the .stub.php files instead. */\n\n";
 
     $code .= "static const func_info_t func_infos[] = {\n";
 
-    $code .= generateCodeWithConditions($funcInfos, "", static function (FuncInfo $funcInfo) {
+    $code .= generateCodeWithConditions($funcMap, "", static function (FuncInfo $funcInfo) {
         return $funcInfo->getOptimizerInfo();
     });
 
@@ -4262,16 +4354,18 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:(classref|exceptionref)\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<phpdoc:(classref|exceptionref)\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns:phpdoc="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                 ],
                 [
                     "&$1",
                     "<phpdoc:$1 xml:id=\"$4\" xmlns:phpdoc=\"$2\" xmlns=\"$3\">",
                     "<phpdoc:$1 xml:id=\"$5\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xi=\"$4\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xlink=\"$4\" xmlns:xi=\"$5\">",
+                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$5\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$5\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
                 ],
                 $replacedXml
@@ -4495,8 +4589,8 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    "/<refentry\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<refentry\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    '/<refentry\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<refentry\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                 ],
                 [
                     "&$1",
@@ -4687,7 +4781,6 @@ $aliasMap = [];
 
 foreach ($fileInfos as $fileInfo) {
     foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
-        /** @var FuncInfo $funcInfo */
         $funcMap[$funcInfo->name->__toString()] = $funcInfo;
 
         // TODO: Don't use aliasMap for methodsynopsis?

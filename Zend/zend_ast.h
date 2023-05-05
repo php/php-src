@@ -161,7 +161,6 @@ enum _zend_ast_kind {
 	ZEND_AST_CATCH,
 	ZEND_AST_PROP_GROUP,
 	ZEND_AST_PROP_ELEM,
-	ZEND_AST_CONST_ELEM,
 
 	// Pseudo node for initializing enums
 	ZEND_AST_CONST_ENUM_INIT,
@@ -170,6 +169,7 @@ enum _zend_ast_kind {
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
 	ZEND_AST_ENUM_CASE,
+	ZEND_AST_CONST_ELEM,
 
 	/* 5 child nodes */
 	ZEND_AST_PARAM = 5 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -208,7 +208,6 @@ typedef struct _zend_ast_decl {
 	uint32_t start_lineno;
 	uint32_t end_lineno;
 	uint32_t flags;
-	unsigned char *lex_pos;
 	zend_string *doc_comment;
 	zend_string *name;
 	zend_ast *child[5];
@@ -352,6 +351,9 @@ static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
+		return Z_LINENO_P(zv);
+	} else if (ast->kind == ZEND_AST_CONSTANT) {
+		zval *zv = &((zend_ast_zval *) ast)->val;
 		return Z_LINENO_P(zv);
 	} else {
 		return ast->lineno;

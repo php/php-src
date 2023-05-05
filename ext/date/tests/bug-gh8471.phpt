@@ -44,7 +44,7 @@ try {
 
 ?>
 --EXPECTF--
-The DateTime object has not been correctly initialized by its constructor
-The DateTimeInterface object has not been correctly initialized by its constructor
-The DateTimeImmutable object has not been correctly initialized by its constructor
-The DateTimeInterface object has not been correctly initialized by its constructor
+Object of type DateTime has not been correctly initialized by calling parent::__construct() in its constructor
+Object of type DateTime has not been correctly initialized by calling parent::__construct() in its constructor
+Object of type DateTimeImmutable has not been correctly initialized by calling parent::__construct() in its constructor
+Object of type DateTimeImmutable has not been correctly initialized by calling parent::__construct() in its constructor

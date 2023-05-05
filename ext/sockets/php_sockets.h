@@ -126,7 +126,7 @@ enum sockopt_return {
 };
 
 PHP_SOCKETS_API char *sockets_strerror(int error);
-PHP_SOCKETS_API int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock);
+PHP_SOCKETS_API bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock);
 
 #else
 #define phpext_sockets_ptr NULL

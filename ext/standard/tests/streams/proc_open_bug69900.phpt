@@ -1,5 +1,7 @@
 --TEST--
 Bug #69900 Commandline input/output weird behaviour with STDIO
+--CONFLICTS--
+all
 --FILE--
 <?php
 
@@ -23,7 +25,7 @@ file_put_contents($fl, $test_content);
 $descriptorspec = array(0 => array("pipe", "r"),1 => array("pipe", "w"));
 $pipes = array();
 
-$process = proc_open(PHP_BINARY.' -n -f ' . $fl, $descriptorspec, $pipes, NULL, NULL, array("blocking_pipes" => true));
+$process = proc_open(getenv('TEST_PHP_EXECUTABLE_ESCAPED').' -n -f ' . escapeshellarg($fl), $descriptorspec, $pipes, NULL, NULL, array("blocking_pipes" => true));
 
 $moreThanLimit = 0;
 for($i = 0; $i < 10; $i++){

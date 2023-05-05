@@ -450,7 +450,7 @@ static int X509_get_signature_nid(const X509 *x)
 	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NULL_RETURN(ZEND_LONG_EXCEEDS_INT(_var), _name)
 
 /* {{{ php_openssl_store_errors */
-void php_openssl_store_errors()
+void php_openssl_store_errors(void)
 {
 	struct php_openssl_errors *errors;
 	int error_code = ERR_get_error();
@@ -1672,7 +1672,7 @@ cleanup:
 PHP_FUNCTION(openssl_spki_export)
 {
 	size_t spkstr_len;
-	char *spkstr, * spkstr_cleaned = NULL, * s = NULL;
+	char *spkstr, * spkstr_cleaned = NULL;
 	int spkstr_cleaned_len;
 
 	EVP_PKEY *pkey = NULL;
@@ -1726,9 +1726,6 @@ cleanup:
 	EVP_PKEY_free(pkey);
 	if (spkstr_cleaned != NULL) {
 		efree(spkstr_cleaned);
-	}
-	if (s != NULL) {
-		efree(s);
 	}
 }
 /* }}} */
@@ -2600,11 +2597,13 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	if (p12 != NULL) {
 		bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 		if (bio_out != NULL) {
-
-			i2d_PKCS12_bio(bio_out, p12);
+			if (i2d_PKCS12_bio(bio_out, p12) == 0) {
+				php_openssl_store_errors();
+				php_error_docref(NULL, E_WARNING, "Error writing to file %s", file_path);
+			} else {
+				RETVAL_TRUE;
+			}
 			BIO_free(bio_out);
-
-			RETVAL_TRUE;
 		} else {
 			php_openssl_store_errors();
 			php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
@@ -5288,7 +5287,11 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 			}
 
 			if (p7bout) {
-				PEM_write_bio_PKCS7(p7bout, p7);
+				if (PEM_write_bio_PKCS7(p7bout, p7) == 0) {
+					php_error_docref(NULL, E_WARNING, "Failed to write PKCS7 to file");
+					php_openssl_store_errors();
+					RETVAL_FALSE;
+				}
 			}
 		}
 	} else {
@@ -5873,7 +5876,11 @@ PHP_FUNCTION(openssl_cms_verify)
 			}
 
 			if (p7bout) {
-				PEM_write_bio_CMS(p7bout, cms);
+				if (PEM_write_bio_CMS(p7bout, cms) == 0) {
+					php_error_docref(NULL, E_WARNING, "Failed to write CMS to file");
+					php_openssl_store_errors();
+					RETVAL_FALSE;
+				}
 			}
 		}
 	} else {

@@ -37,11 +37,15 @@
 #include "zend_weakrefs.h"
 #include "zend_inheritance.h"
 #include "zend_observer.h"
+#include "zend_call_stack.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+#include <sys/syscall.h>
 #endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
@@ -195,6 +199,7 @@ void init_executor(void) /* {{{ */
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 
+	zend_max_execution_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
 
@@ -289,9 +294,6 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 					break;
 				}
 				zval_ptr_dtor_nogc(&c->value);
-				if (c->name) {
-					zend_string_release_ex(c->name, 0);
-				}
 				efree(c);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
@@ -412,6 +414,7 @@ void shutdown_executor(void) /* {{{ */
 	zend_shutdown_executor_values(fast_shutdown);
 
 	zend_weakrefs_shutdown();
+	zend_max_execution_timer_shutdown();
 	zend_fiber_shutdown();
 
 	zend_try {
@@ -566,7 +569,7 @@ ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* 
 		return zend_create_member_string(func->common.scope->name, func->common.function_name);
 	}
 
-	return func->common.function_name ? zend_string_copy(func->common.function_name) : zend_string_init("main", sizeof("main") - 1, 0);
+	return func->common.function_name ? zend_string_copy(func->common.function_name) : ZSTR_INIT_LITERAL("main", 0);
 }
 /* }}} */
 
@@ -692,7 +695,19 @@ ZEND_API zend_result ZEND_FASTCALL zval_update_constant_with_ctx(zval *p, zend_c
 			zval tmp;
 			bool short_circuited;
 
-			if (UNEXPECTED(zend_ast_evaluate_ex(&tmp, ast, scope, &short_circuited, ctx) != SUCCESS)) {
+			// Increase the refcount during zend_ast_evaluate to avoid releasing the ast too early
+			// on nested calls to zval_update_constant_ex which can happen when retriggering ast
+			// evaluation during autoloading.
+			zend_ast_ref *ast_ref = Z_AST_P(p);
+			bool ast_is_refcounted = !(GC_FLAGS(ast_ref) & GC_IMMUTABLE);
+			if (ast_is_refcounted) {
+				GC_ADDREF(ast_ref);
+			}
+			zend_result result = zend_ast_evaluate_ex(&tmp, ast, scope, &short_circuited, ctx) != SUCCESS;
+			if (ast_is_refcounted && !GC_DELREF(ast_ref)) {
+				rc_dtor_func((zend_refcounted *)ast_ref);
+			}
+			if (UNEXPECTED(result != SUCCESS)) {
 				return FAILURE;
 			}
 			zval_ptr_dtor_nogc(p);
@@ -1114,7 +1129,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	if (key) {
 		lc_name = key;
 	} else {
-		if (name == NULL || !ZSTR_LEN(name)) {
+		if (!ZSTR_LEN(name)) {
 			return NULL;
 		}
 
@@ -1140,7 +1155,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 					ALLOC_HASHTABLE(CG(unlinked_uses));
 					zend_hash_init(CG(unlinked_uses), 0, NULL, NULL, 0);
 				}
-				zend_hash_index_add_empty_element(CG(unlinked_uses), (zend_long)(zend_uintptr_t)ce);
+				zend_hash_index_add_empty_element(CG(unlinked_uses), (zend_long)(uintptr_t)ce);
 				return ce;
 			}
 			return NULL;
@@ -1366,8 +1381,35 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 /* }}} */
 
 #ifndef ZEND_WIN32
+# ifdef ZEND_MAX_EXECUTION_TIMERS
+static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
+{
+#ifdef ZTS
+	if (!tsrm_is_managed_thread()) {
+		fprintf(stderr, "zend_timeout_handler() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
+
+		return;
+	}
+#endif
+
+	if (si->si_value.sival_ptr != &EG(max_execution_timer_timer)) {
+#ifdef MAX_EXECUTION_TIMERS_DEBUG
+		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGRTMIN received on thread %d\n", (pid_t) syscall(SYS_gettid));
+#endif
+
+		if (EG(oldact).sa_sigaction) {
+			EG(oldact).sa_sigaction(dummy, si, uc);
+
+			return;
+		}
+		if (EG(oldact).sa_handler) EG(oldact).sa_handler(dummy);
+
+		return;
+	}
+# else
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
+# endif
 #ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
 		fprintf(stderr, "zend_timeout_handler() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
@@ -1473,6 +1515,21 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
 	}
+#elif defined(ZEND_MAX_EXECUTION_TIMERS)
+	zend_max_execution_timer_settime(seconds);
+
+	if (reset_signals) {
+		sigset_t sigset;
+		struct sigaction act;
+
+		act.sa_sigaction = zend_timeout_handler;
+		sigemptyset(&act.sa_mask);
+		act.sa_flags = SA_ONSTACK | SA_SIGINFO;
+		sigaction(SIGRTMIN, &act, NULL);
+		sigemptyset(&sigset);
+		sigaddset(&sigset, SIGRTMIN);
+		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+	}
 #elif defined(HAVE_SETITIMER)
 	{
 		struct itimerval t_r;		/* timeout requested */
@@ -1538,6 +1595,8 @@ void zend_unset_timeout(void) /* {{{ */
 		}
 		tq_timer = NULL;
 	}
+#elif ZEND_MAX_EXECUTION_TIMERS
+	zend_max_execution_timer_settime(0);
 #elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;

@@ -6,22 +6,21 @@ output_handler=
 <?php
 
     $php = getenv('TEST_PHP_EXECUTABLE');
+    $php_escaped = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
     $tmpfile = tempnam(__DIR__, 'phpt');
     $args = ' -n ';
 
     /* Regular Data Test */
-    passthru($php . $args . ' -r " echo \"HELLO\"; "');
+    passthru($php_escaped . $args . ' -r " echo \"HELLO\"; "');
 
     echo "\n";
 
     /* Binary Data Test */
-
+    $cmd = $php_escaped . $args . ' -r ' . escapeshellarg("readfile(@getenv('TEST_PHP_EXECUTABLE'));");
     if (substr(PHP_OS, 0, 3) != 'WIN') {
-        $cmd = $php . $args . ' -r \"readfile(@getenv(\'\\\'\'TEST_PHP_EXECUTABLE\'\\\'\')); \"';
-        $cmd = $php . $args . ' -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
+        $cmd = $php_escaped . $args . ' -r ' . escapeshellarg('passthru("'.$cmd.'");') . ' > '.escapeshellarg($tmpfile);
     } else {
-        $cmd = $php . $args . ' -r \"readfile(@getenv(\\\\\\"TEST_PHP_EXECUTABLE\\\\\\")); \"';
-        $cmd = $php . $args . ' -r " passthru(\''.$cmd.'\');" > '.$tmpfile ;
+        $cmd = $php_escaped . $args . ' -r ' . "\"passthru('".addslashes($cmd)."');\"" . ' > '.escapeshellarg($tmpfile);
     }
     exec($cmd);
 

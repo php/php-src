@@ -30,6 +30,7 @@
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
+#include "zend_call_stack.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -367,7 +368,7 @@ static ZEND_FUNCTION(zend_call_method)
 			return;
 		}
 	} else {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(class_or_object));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(class_or_object));
 		return;
 	}
 
@@ -423,6 +424,17 @@ static ZEND_FUNCTION(zend_test_zend_ini_str)
 	RETURN_STR(ZT_G(str_test));
 }
 
+static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(ZSTR_IS_VALID_UTF8(str));
+}
+
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -454,6 +466,111 @@ static ZEND_FUNCTION(zend_test_parameter_with_attribute)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(1);
+}
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+static ZEND_FUNCTION(zend_test_zend_call_stack_get)
+{
+	zend_call_stack stack;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (zend_call_stack_get(&stack)) {
+		zend_string *str;
+
+		array_init(return_value);
+
+		str = strpprintf(0, "%p", stack.base);
+		add_assoc_str(return_value, "base", str);
+
+		str = strpprintf(0, "0x%zx", stack.max_size);
+		add_assoc_str(return_value, "max_size", str);
+
+		str = strpprintf(0, "%p", zend_call_stack_position());
+		add_assoc_str(return_value, "position", str);
+
+		str = strpprintf(0, "%p", EG(stack_limit));
+		add_assoc_str(return_value, "EG(stack_limit)", str);
+
+		return;
+	}
+
+	RETURN_NULL();
+}
+
+zend_long (*volatile zend_call_stack_use_all_fun)(void *limit);
+
+static zend_long zend_call_stack_use_all(void *limit)
+{
+	if (zend_call_stack_overflowed(limit)) {
+		return 1;
+	}
+
+	return 1 + zend_call_stack_use_all_fun(limit);
+}
+
+static ZEND_FUNCTION(zend_test_zend_call_stack_use_all)
+{
+	zend_call_stack stack;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (!zend_call_stack_get(&stack)) {
+		return;
+	}
+
+	zend_call_stack_use_all_fun = zend_call_stack_use_all;
+
+	void *limit = zend_call_stack_limit(stack.base, stack.max_size, 4096);
+
+	RETURN_LONG(zend_call_stack_use_all(limit));
+}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
+static ZEND_FUNCTION(zend_get_map_ptr_last)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG(CG(map_ptr_last));
+}
+
+static ZEND_FUNCTION(zend_test_crash)
+{
+	zend_string *message = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		php_printf("%s", ZSTR_VAL(message));
+	}
+
+	char *invalid = (char *) 1;
+	php_printf("%s", invalid);
+}
+
+static ZEND_FUNCTION(zend_test_fill_packed_array)
+{
+	HashTable *parameter;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_EX(parameter, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!HT_IS_PACKED(parameter)) {
+		zend_argument_value_error(1, "must be a packed array");
+		RETURN_THROWS();
+	}
+
+	zend_hash_extend(parameter, parameter->nNumUsed + 10, true);
+	ZEND_HASH_FILL_PACKED(parameter) {
+		for (int i = 0; i < 10; i++) {
+			zval value;
+			ZVAL_LONG(&value, i);
+			ZEND_HASH_FILL_ADD(&value);
+		}
+	} ZEND_HASH_FILL_END();
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
@@ -539,6 +656,31 @@ static ZEND_METHOD(_ZendTestClass, returnsThrowable)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	zend_throw_error(NULL, "Dummy");
+}
+
+static ZEND_METHOD(_ZendTestClass, variadicTest) {
+	int      argc, i;
+	zval    *args = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	for (i = 0; i < argc; i++) {
+		zval *arg = args + i;
+
+		if (Z_TYPE_P(arg) == IS_STRING) {
+			continue;
+		}
+		if (Z_TYPE_P(arg) == IS_OBJECT && instanceof_function(Z_OBJ_P(arg)->ce, zend_ce_iterator)) {
+			continue;
+		}
+
+		zend_argument_type_error(i + 1, "must be of class Iterator or a string, %s given", zend_zval_type_name(arg));
+		RETURN_THROWS();
+	}
+
+	object_init_ex(return_value, zend_get_called_scope(execute_data));
 }
 
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable)
@@ -646,10 +788,117 @@ static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
 	zend_forbid_dynamic_call();
 }
 
+/* donc refers to DoOperationNoCast */
+static zend_class_entry *donc_ce;
+static zend_object_handlers donc_object_handlers;
+
+static zend_object* donc_object_create_ex(zend_class_entry* ce, zend_long l) {
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &donc_object_handlers;
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 0), l);
+	return obj;
+}
+static zend_object *donc_object_create(zend_class_entry *ce) /* {{{ */
+{
+	return donc_object_create_ex(ce, 0);
+}
+/* }}} */
+
+static inline void donc_create(zval *target, zend_long l) /* {{{ */
+{
+	ZVAL_OBJ(target, donc_object_create_ex(donc_ce, l));
+}
+
+#define IS_DONC(zval) \
+	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), donc_ce))
+
+static void donc_add(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1;
+	zend_long val_2;
+	if (IS_DONC(op1)) {
+		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
+	} else {
+		val_1 = zval_get_long(op1);
+	}
+	if (IS_DONC(op2)) {
+		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
+	} else {
+		val_2 = zval_get_long(op2);
+	}
+
+	donc_create(result, val_1 + val_2);
+}
+static void donc_mul(zval *result, zval *op1, zval *op2)
+{
+	zend_long val_1;
+	zend_long val_2;
+	if (IS_DONC(op1)) {
+		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
+	} else {
+		val_1 = zval_get_long(op1);
+	}
+	if (IS_DONC(op2)) {
+		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
+	} else {
+		val_2 = zval_get_long(op2);
+	}
+
+	donc_create(result, val_1 * val_2);
+}
+
+static zend_result donc_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2)
+{
+	zval op1_copy;
+	zend_result status;
+
+	if (result == op1) {
+		ZVAL_COPY_VALUE(&op1_copy, op1);
+		op1 = &op1_copy;
+	}
+
+	switch (opcode) {
+		case ZEND_ADD:
+			donc_add(result, op1, op2);
+			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
+			status = SUCCESS;
+			break;
+		case ZEND_MUL:
+			donc_mul(result, op1, op2);
+			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
+			status = SUCCESS;
+			break;
+		default:
+			status = FAILURE;
+			break;
+	}
+
+	if (status == SUCCESS && op1 == &op1_copy) {
+		zval_ptr_dtor(op1);
+	}
+
+	return status;
+}
+
+PHP_METHOD(DoOperationNoCast, __construct)
+{
+	zend_long l;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), l);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
+#ifdef HAVE_COPY_FILE_RANGE
+	STD_PHP_INI_ENTRY("zend_test.limit_copy_file_range", "-1", PHP_INI_ALL, OnUpdateLong, limit_copy_file_range, zend_zend_test_globals, zend_test_globals)
+#endif
 	STD_PHP_INI_ENTRY("zend_test.quantity_value", "0", PHP_INI_ALL, OnUpdateLong, quantity_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.str_test", "", PHP_INI_ALL, OnUpdateStr, str_test, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.not_empty_str_test", "val", PHP_INI_ALL, OnUpdateStrNotEmpty, not_empty_str_test, zend_zend_test_globals, zend_test_globals)
@@ -687,60 +936,11 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_parameter_attribute = register_class_ZendTestParameterAttribute();
 	zend_mark_internal_attribute(zend_test_parameter_attribute);
 
-	{
-		zend_attribute *attr;
-
-		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", sizeof("zend_test_parameter_with_attribute") - 1),
-			0,
-			zend_test_parameter_attribute->name,
-			1
-		);
-
-		ZVAL_PSTRING(&attr->args[0].value, "value1");
-	}
-
 	zend_test_property_attribute = register_class_ZendTestPropertyAttribute();
 	zend_mark_internal_attribute(zend_test_property_attribute);
 
 	zend_test_class_with_method_with_parameter_attribute = register_class_ZendTestClassWithMethodWithParameterAttribute();
-
-	{
-		zend_attribute *attr;
-
-		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(&zend_test_class_with_method_with_parameter_attribute->function_table, "no_override", sizeof("no_override") - 1),
-			0,
-			zend_test_parameter_attribute->name,
-			1
-		);
-
-		ZVAL_PSTRING(&attr->args[0].value, "value2");
-
-		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(&zend_test_class_with_method_with_parameter_attribute->function_table, "override", sizeof("override") - 1),
-			0,
-			zend_test_parameter_attribute->name,
-			1
-		);
-
-		ZVAL_PSTRING(&attr->args[0].value, "value3");
-	}
-
 	zend_test_child_class_with_method_with_parameter_attribute = register_class_ZendTestChildClassWithMethodWithParameterAttribute(zend_test_class_with_method_with_parameter_attribute);
-
-	{
-		zend_attribute *attr;
-
-		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(&zend_test_child_class_with_method_with_parameter_attribute->function_table, "override", sizeof("override") - 1),
-			0,
-			zend_test_parameter_attribute->name,
-			1
-		);
-
-		ZVAL_PSTRING(&attr->args[0].value, "value4");
-	}
 
 	zend_test_forbid_dynamic_call = register_class_ZendTestForbidDynamicCall();
 
@@ -752,6 +952,12 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
+
+	/* DoOperationNoCast class */
+	donc_ce = register_class_DoOperationNoCast();
+	donc_ce->create_object = donc_object_create;
+	memcpy(&donc_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	donc_object_handlers.do_operation = donc_do_operation;
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
@@ -930,3 +1136,17 @@ PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
 
     va_end(args);
 }
+
+#ifdef HAVE_COPY_FILE_RANGE
+/**
+ * This function allows us to simulate early return of copy_file_range by setting the limit_copy_file_range ini setting.
+ */
+PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out, off64_t *off_out, size_t len, unsigned int flags)
+{
+	ssize_t (*original_copy_file_range)(int, off64_t *, int, off64_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");
+	if (ZT_G(limit_copy_file_range) >= Z_L(0)) {
+		len = ZT_G(limit_copy_file_range);
+	}
+	return original_copy_file_range(fd_in, off_in, fd_out, off_out, len, flags);
+}
+#endif

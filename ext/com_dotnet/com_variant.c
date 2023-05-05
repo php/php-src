@@ -95,7 +95,7 @@ bogus:
 static void php_com_variant_from_zval_ex(VARIANT *v, zval *z, int codepage, VARTYPE vt)
 {
 	php_com_dotnet_object *obj;
-	zend_uchar ztype = IS_NULL;
+	uint8_t ztype = IS_NULL;
 
 	if (z) {
 		ZVAL_DEREF(z);

@@ -30,22 +30,14 @@
 *************************************************************************/
 
 #include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
-
 
 /* Here is the full subtract routine that takes care of negative numbers.
    N2 is subtracted from N1 and the result placed in RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-void
-bc_sub (n1, n2, result, scale_min)
-     bc_num n1, n2, *result;
-     int scale_min;
+void bc_sub(bc_num n1, bc_num n2, bc_num *result, int scale_min)
 {
   bc_num diff = NULL;
   int cmp_res;

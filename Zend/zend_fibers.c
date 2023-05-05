@@ -25,6 +25,8 @@
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
 #include "zend_mmap.h"
+#include "zend_compile.h"
+#include "zend_closures.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -108,6 +110,10 @@ typedef struct _zend_fiber_vm_state {
 	uint32_t jit_trace_num;
 	JMP_BUF *bailout;
 	zend_fiber *active_fiber;
+#ifdef ZEND_CHECK_STACK_LIMIT
+	void *stack_base;
+	void *stack_limit;
+#endif
 } zend_fiber_vm_state;
 
 static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *state)
@@ -121,6 +127,10 @@ static zend_always_inline void zend_fiber_capture_vm_state(zend_fiber_vm_state *
 	state->jit_trace_num = EG(jit_trace_num);
 	state->bailout = EG(bailout);
 	state->active_fiber = EG(active_fiber);
+#ifdef ZEND_CHECK_STACK_LIMIT
+	state->stack_base = EG(stack_base);
+	state->stack_limit = EG(stack_limit);
+#endif
 }
 
 static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *state)
@@ -134,6 +144,10 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 	EG(jit_trace_num) = state->jit_trace_num;
 	EG(bailout) = state->bailout;
 	EG(active_fiber) = state->active_fiber;
+#ifdef ZEND_CHECK_STACK_LIMIT
+	EG(stack_base) = state->stack_base;
+	EG(stack_limit) = state->stack_limit;
+#endif
 }
 
 #ifdef ZEND_FIBER_UCONTEXT
@@ -189,8 +203,12 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 {
 	void *pointer;
 	const size_t page_size = zend_fiber_get_page_size();
+	const size_t minimum_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size;
 
-	ZEND_ASSERT(size >= page_size + ZEND_FIBER_GUARD_PAGES * page_size);
+	if (size < minimum_stack_size) {
+		zend_throw_exception_ex(NULL, 0, "Fiber stack size is too small, it needs to be at least %zu bytes", minimum_stack_size);
+		return NULL;
+	}
 
 	const size_t stack_size = (size + page_size - 1) / page_size * page_size;
 	const size_t alloc_size = stack_size + ZEND_FIBER_GUARD_PAGES * page_size;
@@ -294,6 +312,31 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 
 	efree(stack);
 }
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+ZEND_API void* zend_fiber_stack_limit(zend_fiber_stack *stack)
+{
+	zend_ulong reserve = EG(reserved_stack_size);
+
+#ifdef __APPLE__
+	/* On Apple Clang, the stack probing function ___chkstk_darwin incorrectly
+	 * probes a location that is twice the entered function's stack usage away
+	 * from the stack pointer, when using an alternative stack.
+	 * https://openradar.appspot.com/radar?id=5497722702397440
+	 */
+	reserve = reserve * 2;
+#endif
+
+	/* stack->pointer is the end of the stack */
+	return (int8_t*)stack->pointer + reserve;
+}
+
+ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack)
+{
+	return (void*)((uintptr_t)stack->pointer + stack->size);
+}
+#endif
+
 #ifdef ZEND_FIBER_UCONTEXT
 static ZEND_NORETURN void zend_fiber_trampoline(void)
 #else
@@ -351,12 +394,12 @@ ZEND_API bool zend_fiber_switch_blocked(void)
 	return zend_fiber_switch_blocking;
 }
 
-ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
+ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size)
 {
 	context->stack = zend_fiber_stack_allocate(stack_size);
 
 	if (UNEXPECTED(!context->stack)) {
-		return false;
+		return FAILURE;
 	}
 
 #ifdef ZEND_FIBER_UCONTEXT
@@ -395,7 +438,7 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 
 	zend_observer_fiber_init_notify(context);
 
-	return true;
+	return SUCCESS;
 }
 
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
@@ -535,6 +578,11 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		EG(jit_trace_num) = 0;
 		EG(error_reporting) = error_reporting;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+		EG(stack_base) = zend_fiber_stack_base(fiber->context.stack);
+		EG(stack_limit) = zend_fiber_stack_limit(fiber->context.stack);
+#endif
+
 		fiber->fci.retval = &fiber->result;
 
 		zend_call_function(&fiber->fci, &fiber->fci_cache);
@@ -597,6 +645,7 @@ static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
 
 	/* Forward bailout into current fiber. */
 	if (UNEXPECTED(transfer.flags & ZEND_FIBER_TRANSFER_FLAG_BAILOUT)) {
+		EG(active_fiber) = NULL;
 		zend_bailout();
 	}
 
@@ -694,9 +743,32 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	zend_get_gc_buffer_add_zval(buf, &fiber->fci.function_name);
 	zend_get_gc_buffer_add_zval(buf, &fiber->result);
 
+	if (fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL) {
+		zend_get_gc_buffer_use(buf, table, num);
+		return NULL;
+	}
+
+	HashTable *lastSymTable = NULL;
+	zend_execute_data *ex = fiber->execute_data;
+	for (; ex; ex = ex->prev_execute_data) {
+		HashTable *symTable = zend_unfinished_execution_gc_ex(ex, ex->call, buf, false);
+		if (symTable) {
+			if (lastSymTable) {
+				zval *val;
+				ZEND_HASH_FOREACH_VAL(lastSymTable, val) {
+					if (EXPECTED(Z_TYPE_P(val) == IS_INDIRECT)) {
+						val = Z_INDIRECT_P(val);
+					}
+					zend_get_gc_buffer_add_zval(buf, val);
+				} ZEND_HASH_FOREACH_END();
+			}
+			lastSymTable = symTable;
+		}
+	}
+
 	zend_get_gc_buffer_use(buf, table, num);
 
-	return NULL;
+	return lastSymTable;
 }
 
 ZEND_METHOD(Fiber, __construct)
@@ -740,7 +812,7 @@ ZEND_METHOD(Fiber, start)
 		RETURN_THROWS();
 	}
 
-	if (!zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size))) {
+	if (zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size)) == FAILURE) {
 		RETURN_THROWS();
 	}
 

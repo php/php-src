@@ -6,7 +6,7 @@ posix
 pcntl
 --INI--
 opcache.enable_cli=1
-opcache.file_cache={TMP}
+opcache.file_cache="{TMP}"
 opcache.log_verbosity_level=2
 opcache.interned_strings_buffer=8
 --SKIPIF--

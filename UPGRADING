@@ -19,21 +19,65 @@ PHP 8.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Programs that were very close to overflowing the call stack may now throw an
+    Error when using more than
+    `zend.max_allowed_stack_size-zend.reserved_stack_size` bytes of stack
+    (`fiber.stack_size-zend.reserved_stack_size` for fibers).
+  . Class constants can now be accessed dynamically using the C::{$name} syntax.
+    RFC: https://wiki.php.net/rfc/dynamic_class_constant_fetch
+  . Executing proc_get_status() multiple times will now always return the right
+    value on posix systems. Previously, only the first call of the function
+    returned the right value. Executing proc_close() after proc_get_status() will
+    now also return the right exit code. Previously this would return -1.
+    Internally, this works by caching the result on posix systems. If you want
+    the old behaviour, you can check the "cached" key in the array returned by
+    proc_get_status() to check whether the result was cached.
+  . Zend Max Execution Timers is now enabled by default for ZTS builds on
+    Linux.
+  . Uses of traits with static properties will now redeclare static properties
+    inherited from the parent class. This will create a separate static property
+    storage for the current class. This is analogous to adding the static
+    property to the class directly without traits.
+  . Assigning a negative index n to an empty array will now make sure that the
+    next index is n+1 instead of 0.
+
+- FFI:
+  . C functions that have a return type of void now return null instead of
+    returning the following object object(FFI\CData:void) { }
+
 ========================================
 2. New Features
 ========================================
 
+- Core
+  . Anonymous classes may now be marked as readonly.
+  . Readonly properties can now be reinitialized during cloning.
+    RFC: https://wiki.php.net/rfc/readonly_amendments
+  . Class, interface, trait, and enum constants now support type
+    declarations. RFC: https://wiki.php.net/rfc/typed_class_constants
+
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
     single resource limit.
+  . posix_isatty() now raises type warnings for integers following the usual ZPP semantics
+  . posix_ttyname() now raises type warnings for integers following the usual ZPP semantics
+    and value warnings for invalid file descriptor integers.
 
 ========================================
 3. Changes in SAPI modules
 ========================================
 
+- $_SERVER['SERVER_SOFTWARE'] value from the built-in CLI server changed
+  to make it compliant with RFC3875.
+
 ========================================
 4. Deprecated Functionality
 ========================================
+
+- Intl
+  . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
+    the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
 
 ========================================
 5. Changed Functions
@@ -46,10 +90,78 @@ PHP 8.3 UPGRADE NOTES
     "full" => bool
     "buffer_size" => int
     See GH-9336
+  . class_alias() now supports creating an alias of an internal class.
+  . Setting `open_basedir` at runtime using `ini_set('open_basedir', ...);` no
+    longer accepts paths containing the parent directory (`..`). Previously,
+    only paths starting with `..` were disallowed. This could easily be
+    circumvented by prepending `./` to the path.
+
+- Dom:
+  . Changed DOMCharacterData::appendData() tentative return type to true.
+
+- Intl:
+  . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
+    now returns true on success, previously null was returned.
+  . IntlBreakiterator::setText() now returns false on failure, previously
+    null was returned.
+    now returns true on sucess, previously null was returned.
+  . IntlChar::enumCharNames is now returning a boolean.
+    Previously it returned null on success and false on failure.
+
+- MBString:
+  . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
+    casing rules for the Greek letter sigma. For mb_convert_case, conditional
+    casing only applies to MB_CASE_LOWER and MB_CASE_TITLE modes, not to
+    MB_CASE_LOWER_SIMPLE and MB_CASE_TITLE_SIMPLE.
+  . mb_decode_mimeheader interprets underscores in QPrint-encoded MIME
+    encoded words as required by RFC 2047; they are converted to spaces.
+    Underscores must be encoded as "=5F" in such MIME encoded words.
+  . In rare cases, mb_encode_mimeheader will transfer-encode its input
+    string where it would pass it through as raw ASCII in PHP 8.2.
+  . mb_encode_mimeheader no longer drops NUL (zero) bytes when
+    QPrint-encoding the input string. This previously caused strings in
+    certain text encodings, especially UTF-16 and UTF-32, to be
+    corrupted by mb_encode_mimeheader.
+  . mb_detect_encoding's "non-strict" mode now behaves as described in the
+    documentation. Previously, it would return false if the same byte
+    (for example, the first byte) of the input string was invalid in all
+    candidate encodings. More generally, it would eliminate candidate
+    encodings from consideration when an invalid byte was seen, and if the
+    same input byte eliminated all remaining encodings still under
+    consideration, it would return false. On the other hand, if all candidate
+    encodings but one were eliminated from consideration, it would return the
+    last remaining one without regard for how many encoding errors might be
+    encountered later in the string. This is different from the behavior
+    described in the documentation, which says: "If strict is set to false,
+    the closest matching encoding will be returned."
+
+- mysqli:
+  . mysqli_fetch_object now raises a ValueError instead of an Exception when the constructor_args
+    argument is non empty with the class not having constructor.
+  . mysqli_poll now raises a ValueError when the read nor error arguments are passed.
+
+- PGSQL:
+  . pg_fetch_object now raises a ValueError instead of an Exception when the constructor_args
+    argument is non empty with the class not having constructor.
+  . pg_insert now raises a ValueError instead of a WARNING when the table specified is invalid.
 
 - Standard:
-  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
+  . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
+  . unserialize() now emits a new E_WARNING if the input contains unconsumed
+    bytes.
+    RFC: https://wiki.php.net/rfc/unserialize_warn_on_trailing_data
+  . array_pad() is now only limited by the maximum number of elements an array
+    can have. Before, it was only possible to add at most 1048576 elements at a
+    time.
+  . strtok() raises a warning in the case token is not provided when starting tokenization.
+  . password_hash() will now chain the underlying Random\RandomException
+    as the ValueError’s $previous Exception when salt generation fails.
+  . proc_open() $command array must now have at least one non empty element.
+  . array_sum() and array_product() now warn when values in the array cannot be converted to int/float.
+    Previously arrays and objects where ignored whilst every other value was cast to int.
+    Moreover, objects that define a numeric cast (e.g. GMP) are now casted instead of ignored.
+    RFC: https://wiki.php.net/rfc/saner-array-sum-product
 
 ========================================
 6. New Functions
@@ -62,10 +174,22 @@ PHP 8.3 UPGRADE NOTES
 
 - Posix:
   . Added posix_sysconf call to get runtime informations.
+  . Added posix_pathconf call to get configuration value from a directory/file.
+  . Added posix_fpathconf call to get configuration value from a file descriptor.
+  . Added posix_eaccess call to check the effective user id's permission for a path.
 
 - Random:
   . Added Randomizer::getBytesFromString().
     RFC: https://wiki.php.net/rfc/randomizer_additions
+  . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary.
+    RFC: https://wiki.php.net/rfc/randomizer_additions
+  . Changed mt_srand() and srand() to not check the number of arguments to
+    determine whether a random seed should be used. Passing null will generate
+    a random seed, 0 will use zero as the seed. The functions are now consistent
+    with Mt19937::__construct().
+
+- Reflection:
+  . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
 
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
@@ -86,21 +210,68 @@ PHP 8.3 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Intl:
+  . MIXED_NUMBERS (Spoofchecker).
+  . HIDDEN_OVERLAY (Spoofchecker).
+
 - PCNTL:
   . SIGINFO
 
+- PGSQL:
+  . PGSQL_TRACE_SUPPRESS_TIMESTAMPS.
+  . PGSQL_TRACE_REGRESS_MODE.
+
 - Posix:
-  . POSIX_SC_ARG_MAX
-  . POSIX_SC_PAGESIZE
-  . POSIX_SC_NPROCESSORS_CONF
-  . POSIX_SC_NPROCESSORS_ONLN
+  . POSIX_SC_ARG_MAX.
+  . POSIX_SC_PAGESIZE.
+  . POSIX_SC_NPROCESSORS_CONF.
+  . POSIX_SC_NPROCESSORS_ONLN.
 
 - Sockets:
   . SO_ATTACH_REUSEPORT_CBPF (Linux only).
+  . TCP_QUICKACK (Linux only).
+  . IP_DONTFRAG (FreeBSD only).
+  . IP_MTU_DISCOVER (Linux only).
+  . IP_PMTUDISC_DO (Linux only).
+  . IP_PMTUDISC_DONT (Linux only).
+  . IP_PMTUDISC_WANT (Linux only).
+  . IP_PMTUDISC_PROBE (Linux only).
+  . IP_PMTUDISC_INTERFACE (Linux only).
+  . IP_PMTUDISC_OMIT (Linux only).
+  . AF_DIVERT (FreeBSD only).
+  . SOL_UDPLITE.
+  . UDPLITE_RECV_CSCOV.
+  . UDPLITE_SEND_CSCOV.
+  . SO_RERROR (NetBSD only).
+  . SO_ZEROIZE (OpenBSD only).
+  . SO_SPLICE (OpenBSD only).
+  . TCP_REPAIR (Linux only).
+  . SO_REUSEPORT_LB (FreeBSD only).
+  . IP_BIND_ADDRESS_NO_PORT (Linux only).
 
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- zend.max_allowed_stack_size
+  . New INI directive to set the maximum allowed stack size. Possible
+    values are `0` (detect the process or thread maximum stack size), `-1`
+    (no limit), or a positive number of bytes. The default is `0`. When it
+    is not possible to detect the the process or thread maximum stack size,
+    a known system default is used. Setting this value too high has the same
+    effect as disabling the stack size limit. Fibers use fiber.stack_size
+    as maximum allowed stack size. An Error is thrown when the process call
+    stack exceeds `zend.max_allowed_stack_size-zend.reserved_stack_size`
+    bytes, to prevent stack-overflow-induced segmentation faults, with
+    the goal of making debugging easier. The stack size increases during
+    uncontrolled recursions involving internal functions or the magic methods
+    __toString, __clone, __sleep, __destruct.  This is not related to stack
+    buffer overflows, and is not a security feature.
+
+- zend.reserved_stack_size
+  . New INI directive to set the reserved stack size, in bytes. This is
+    subtracted from the max allowed stack size, as a buffer, when checking the
+    stack size.
 
 ========================================
 12. Windows Support
@@ -109,6 +280,13 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+- Core:
+  . An Error is now thrown when the process call stack exceeds a certain size,
+    to prevent stack-overflow-induced segmentation faults, with the goal of
+    making debugging easier. The maximum allowed stack size is controlled
+    by the INI directives zend.max_allowed_stack_size, zend.reserved_stack_size,
+    and fiber.stack_size.
 
 - FFI:
   . FFI::load() is now allowed during preloading when opcache.preload_user is the

@@ -12,6 +12,5 @@ $(BUILD_DIR)\ext\opcache\jit\zend_jit.obj: \
 	ext/opcache/jit/zend_jit_disasm.c \
 	ext/opcache/jit/zend_jit_gdb.c \
 	ext/opcache/jit/zend_jit_perf_dump.c \
-	ext/opcache/jit/zend_jit_oprofile.c \
 	ext/opcache/jit/zend_jit_trace.c \
 	ext/opcache/jit/zend_jit_vtune.c

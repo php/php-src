@@ -132,7 +132,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	}
 }
 
-ZEND_API void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num)
+ZEND_API void zend_dump_var(const zend_op_array *op_array, uint8_t var_type, int var_num)
 {
 	if (var_type == IS_CV && var_num < op_array->last_var) {
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
@@ -348,7 +348,7 @@ static void zend_dump_ssa_var_info(const zend_ssa *ssa, int ssa_var_num, uint32_
 		dump_flags);
 }
 
-ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
+ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, uint8_t var_type, int var_num, uint32_t dump_flags)
 {
 	if (ssa_var_num >= 0) {
 		fprintf(stderr, "#%d.", ssa_var_num);

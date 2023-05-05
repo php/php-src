@@ -433,6 +433,11 @@ max_input_time = 60
 ; How many GET/POST/COOKIE input variables may be accepted
 ;max_input_vars = 1000
 
+; How many multipart body parts (combined input variable and file uploads) may
+; be accepted.
+; Default Value: -1 (Sum of max_input_vars and max_file_uploads)
+;max_multipart_body_parts = 1500
+
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
 memory_limit = 128M
@@ -1104,6 +1109,10 @@ smtp_port = 25
 
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
 mail.add_x_header = Off
+
+; Use mixed LF and CRLF line separators to keep compatibility with some
+; RFC 2822 non conformant MTA.
+mail.mixed_lf_and_crlf = Off
 
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
@@ -1906,7 +1915,12 @@ ldap.max_links = -1
 ;opcache.file_cache_fallback=1
 
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
-; This should improve performance, but requires appropriate OS configuration.
+; Under certain circumstances (if only a single global PHP process is
+; started from which all others fork), this can increase performance
+; by a tiny amount because TLB misses are reduced.  On the other hand, this
+; delays PHP startup, increases memory usage and degrades performance
+; under memory pressure - use with care.
+; Requires appropriate OS configuration.
 ;opcache.huge_code_pages=0
 
 ; Validate cached file permissions.

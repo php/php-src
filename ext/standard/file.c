@@ -675,7 +675,7 @@ parse_eol:
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		}
 
-		/* handle any left overs of files without new lines */
+		/* handle any leftovers of files without new lines */
 		if (s != e) {
 			p = e;
 			goto parse_eol;
@@ -1539,8 +1539,9 @@ PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
 	php_stream_statbuf src_s, dest_s;
+	int src_stat_flags = (src_flg & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
 
-	switch (php_stream_stat_path_ex(src, 0, &src_s, ctx)) {
+	switch (php_stream_stat_path_ex(src, src_stat_flags, &src_s, ctx)) {
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
@@ -1970,7 +1971,7 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 			while ((*tmp != delimiter) && isspace((int)*(unsigned char *)tmp)) {
 				tmp++;
 			}
-			if (*tmp == enclosure) {
+			if (*tmp == enclosure && tmp < limit) {
 				bptr = tmp;
 			}
 		}

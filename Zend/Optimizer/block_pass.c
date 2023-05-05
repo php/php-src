@@ -256,6 +256,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
+			case ZEND_MATCH_ERROR:
+				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+					src = VAR_SOURCE(opline->op1);
+					VAR_SOURCE(opline->op1) = NULL;
+				}
+				break;
+
 			case ZEND_FREE:
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
@@ -512,7 +519,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								break;
 							case ZEND_IS_SMALLER:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									zend_uchar tmp_type;
+									uint8_t tmp_type;
 									uint32_t tmp;
 
 									src->opcode = ZEND_IS_SMALLER_OR_EQUAL;
@@ -530,7 +537,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								break;
 							case ZEND_IS_SMALLER_OR_EQUAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									zend_uchar tmp_type;
+									uint8_t tmp_type;
 									uint32_t tmp;
 
 									src->opcode = ZEND_IS_SMALLER;
@@ -624,13 +631,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_JMPNZ_EX:
 				while (1) {
 					if (opline->op1_type == IS_CONST) {
-						if (zend_is_true(&ZEND_OP1_LITERAL(opline)) ==
-						    (opline->opcode == ZEND_JMPZ_EX)) {
+						bool is_jmpz_ex = opline->opcode == ZEND_JMPZ_EX;
+						if (zend_is_true(&ZEND_OP1_LITERAL(opline)) == is_jmpz_ex) {
 
 							++(*opt_count);
 							opline->opcode = ZEND_QM_ASSIGN;
 							zval_ptr_dtor_nogc(&ZEND_OP1_LITERAL(opline));
-							ZVAL_BOOL(&ZEND_OP1_LITERAL(opline), opline->opcode == ZEND_JMPZ_EX);
+							ZVAL_BOOL(&ZEND_OP1_LITERAL(opline), is_jmpz_ex);
 							opline->op2.num = 0;
 							block->successors_count = 1;
 							block->successors[0] = block->successors[1];

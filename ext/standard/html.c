@@ -477,7 +477,7 @@ static inline int map_from_unicode(unsigned code, enum entity_charset charset, u
 			*res = 0xF0; /* numero sign */
 		} else if (code == 0xA7) {
 			*res = 0xFD; /* section sign */
-		} else if (code >= 0x0401 && code <= 0x044F) {
+		} else if (code >= 0x0401 && code <= 0x045F) {
 			if (code == 0x040D || code == 0x0450 || code == 0x045D)
 				return FAILURE;
 			*res = code - 0x360;
@@ -712,9 +712,9 @@ static inline int process_named_entity_html(const char **buf, const char **start
 	*start = *buf;
 
 	/* "&" is represented by a 0x26 in all supported encodings. That means
-	 * the byte after represents a character or is the leading byte of an
+	 * the byte after represents a character or is the leading byte of a
 	 * sequence of 8-bit code units. If in the ranges below, it represents
-	 * necessarily a alpha character because none of the supported encodings
+	 * necessarily an alpha character because none of the supported encodings
 	 * has an overlap with ASCII in the leading byte (only on the second one) */
 	while ((**buf >= 'a' && **buf <= 'z') ||
 			(**buf >= 'A' && **buf <= 'Z') ||

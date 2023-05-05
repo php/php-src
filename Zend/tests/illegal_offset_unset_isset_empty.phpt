@@ -22,6 +22,6 @@ try {
 
 ?>
 --EXPECT--
-Illegal offset type in unset
-Illegal offset type in isset or empty
-Illegal offset type in isset or empty
+Cannot access offset of type array in unset
+Cannot access offset of type array in isset or empty
+Cannot access offset of type array in isset or empty

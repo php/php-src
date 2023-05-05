@@ -346,7 +346,7 @@ class ReflectionClass implements Reflector
     public function getReflectionConstants(?int $filter = null): array {}
 
     /** @tentative-return-type */
-    public function getConstant(string $name): mixed {}
+    public function getConstant(string $name): mixed {} // TODO throw exception when the constant doesn't exist
 
     /** @tentative-return-type */
     public function getReflectionConstant(string $name): ReflectionClassConstant|false {}
@@ -404,7 +404,7 @@ class ReflectionClass implements Reflector
     public function isSubclassOf(ReflectionClass|string $class): bool {}
 
     /** @tentative-return-type */
-    public function getStaticProperties(): ?array {}
+    public function getStaticProperties(): array {}
 
     /** @tentative-return-type */
     public function getStaticPropertyValue(string $name, mixed $default = UNKNOWN): mixed {}
@@ -609,6 +609,10 @@ class ReflectionClassConstant implements Reflector
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
     public function isEnumCase(): bool {}
+
+    public function hasType(): bool {}
+
+    public function getType(): ?ReflectionType {}
 }
 
 /** @not-serializable */
@@ -874,9 +878,9 @@ final class ReflectionFiber
 
     public function getFiber(): Fiber {}
 
-    public function getExecutingFile(): string {}
+    public function getExecutingFile(): ?string {}
 
-    public function getExecutingLine(): int {}
+    public function getExecutingLine(): ?int {}
 
     public function getCallable(): callable {}
 

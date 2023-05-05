@@ -36,15 +36,25 @@ foreach( $strings_with_nulls as $string )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : with embedded nulls in the strings ***
 
 --- Iteration 1 ---
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 --- Iteration 2 ---
@@ -82,9 +92,17 @@ bool(false)
 --- Iteration 6 ---
 string(11) "hello	world"
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
+
+Warning: strtok(): Both arguments must be provided when starting tokenization in %s on line %d
 bool(false)
 
 --- Iteration 7 ---

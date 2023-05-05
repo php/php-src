@@ -51,6 +51,8 @@
 #error Use PHP OCI8 2.2 for your version of PHP
 #elif PHP_MAJOR_VERSION == 8 && PHP_MINOR_VERSION < 1
 #error Use PHP OCI8 3.0 for your version of PHP
+#elif PHP_MAJOR_VERSION == 8 && PHP_MINOR_VERSION < 2
+#error Use PHP OCI8 3.2 for your version of PHP
 #endif
 
 #include "php_oci8.h"

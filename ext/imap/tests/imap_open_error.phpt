@@ -8,7 +8,7 @@ imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
-if (getenv("SKIP_ASAN")) die("skip leak sanitizer crashes");
+if (getenv("SKIP_ASAN")) die("xleak leak sanitizer crashes");
 ?>
 --FILE--
 <?php

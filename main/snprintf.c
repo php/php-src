@@ -421,7 +421,7 @@ typedef struct buf_area buffy;
  *      bep points to the end-of-buffer+1
  * While using this macro, note that the nextb pointer is NOT updated.
  *
- * NOTE: Evaluation of the c argument should not have any side-effects
+ * NOTE: Evaluation of the c argument should not have any side effects
  */
 #define INS_CHAR(c, sp, bep, cc) \
 	{                            \
@@ -580,8 +580,8 @@ static size_t format_converter(buffy * odp, const char *fmt, va_list ap) /* {{{ 
 					} else if (*fmt == '*') {
 						precision = va_arg(ap, int);
 						fmt++;
-						if (precision < 0)
-							precision = 0;
+						if (precision < -1)
+							precision = -1;
 					} else
 						precision = 0;
 				} else

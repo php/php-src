@@ -150,7 +150,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        zend_jit_addr   var_addr,
                                        uint32_t        var_info,
                                        uint32_t        var_def_info,
-                                       zend_uchar      val_type,
+                                       uint8_t         val_type,
                                        zend_jit_addr   val_addr,
                                        uint32_t        val_info,
                                        zend_jit_addr   res_addr,
@@ -214,7 +214,7 @@ static bool zend_ival_is_last_use(const zend_lifetime_interval *ival, int use)
 	return 0;
 }
 
-static bool zend_is_commutative(zend_uchar opcode)
+static bool zend_is_commutative(uint8_t opcode)
 {
 	return
 		opcode == ZEND_ADD ||
@@ -720,9 +720,6 @@ static int zend_jit_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int 
 # include "jit/zend_jit_gdb.h"
 # include "jit/zend_jit_perf_dump.c"
 #endif
-#ifdef HAVE_OPROFILE
-# include "jit/zend_jit_oprofile.c"
-#endif
 
 #include "Zend/zend_cpuinfo.h"
 
@@ -898,7 +895,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	size_t size;
 	int ret;
 	void *entry;
-#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
+#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
 	zend_string *str = NULL;
 #endif
 
@@ -1009,9 +1006,9 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		}
 	}
 
-#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
+#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
 	if (!name) {
-		if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_OPROFILE|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_VTUNE|ZEND_JIT_DEBUG_PERF_DUMP)) {
+		if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_VTUNE|ZEND_JIT_DEBUG_PERF_DUMP)) {
 			str = zend_jit_func_name(op_array);
 			if (str) {
 				name = ZSTR_VAL(str);
@@ -1059,14 +1056,6 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	}
 #endif
 
-#ifdef HAVE_OPROFILE
-	if (JIT_G(debug) & ZEND_JIT_DEBUG_OPROFILE) {
-		zend_jit_oprofile_register(
-			name,
-			entry,
-			size);
-	}
-#endif
 
 #ifdef HAVE_PERFTOOLS
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_PERF_DUMP)) {
@@ -1096,7 +1085,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	}
 #endif
 
-#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_OPROFILE) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
+#if defined(HAVE_DISASM) || defined(HAVE_GDB) || defined(HAVE_PERFTOOLS) || defined(HAVE_VTUNE)
 	if (str) {
 		zend_string_release(str);
 	}
@@ -2646,7 +2635,7 @@ static bool zend_jit_next_is_send_result(const zend_op *opline)
 	return 0;
 }
 
-static bool zend_jit_supported_binary_op(zend_uchar op, uint32_t op1_info, uint32_t op2_info)
+static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t op2_info)
 {
 	if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
 		return false;
@@ -2685,7 +2674,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	zend_lifetime_interval **ra = NULL;
 	bool is_terminated = 1; /* previous basic block is terminated by jump */
 	bool recv_emitted = 0;   /* emitted at least one RECV opcode */
-	zend_uchar smart_branch_opcode;
+	uint8_t smart_branch_opcode;
 	uint32_t target_label, target_label2;
 	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info;
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
@@ -4259,7 +4248,7 @@ static int ZEND_FASTCALL zend_runtime_jit(void)
 			/* perform real JIT for this function */
 			zend_real_jit_func(op_array, NULL, NULL);
 		} zend_catch {
-			do_bailout = 0;
+			do_bailout = true;
 		} zend_end_try();
 
 		zend_jit_protect();
@@ -4561,18 +4550,12 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 			}
 		}
 
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_SSA) {
-			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
-				if (info) {
-					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &info->ssa);
-				}
-			}
-		}
-
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
+				if (JIT_G(debug) & ZEND_JIT_DEBUG_SSA) {
+					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &info->ssa);
+				}
 				if (zend_jit(call_graph.op_arrays[i], &info->ssa, NULL) != SUCCESS) {
 					goto jit_failure;
 				}
@@ -4713,6 +4696,7 @@ static int zend_jit_make_stubs(void)
 
 	for (i = 0; i < sizeof(zend_jit_stubs)/sizeof(zend_jit_stubs[0]); i++) {
 		dasm_setup(&dasm_state, dasm_actions);
+		zend_jit_align_stub(&dasm_state);
 		if (!zend_jit_stubs[i].stub(&dasm_state)) {
 			return 0;
 		}
@@ -4733,6 +4717,13 @@ static void zend_jit_globals_ctor(zend_jit_globals *jit_globals)
 	memset(jit_globals, 0, sizeof(zend_jit_globals));
 	zend_jit_trace_init_caches();
 }
+
+#ifdef ZTS
+static void zend_jit_globals_dtor(zend_jit_globals *jit_globals)
+{
+	zend_jit_trace_free_caches(jit_globals);
+}
+#endif
 
 static int zend_jit_parse_config_num(zend_long jit)
 {
@@ -4846,7 +4837,7 @@ ZEND_EXT_API int zend_jit_debug_config(zend_long old_val, zend_long new_val, int
 ZEND_EXT_API void zend_jit_init(void)
 {
 #ifdef ZTS
-	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, NULL);
+	jit_globals_id = ts_allocate_id(&jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, (ts_allocate_dtor) zend_jit_globals_dtor);
 #else
 	zend_jit_globals_ctor(&jit_globals);
 #endif
@@ -4911,14 +4902,6 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	zend_jit_gdb_init();
 #endif
 
-#ifdef HAVE_OPROFILE
-	if (JIT_G(debug) & ZEND_JIT_DEBUG_OPROFILE) {
-		if (!zend_jit_oprofile_startup()) {
-			// TODO: error reporting and cleanup ???
-			return FAILURE;
-		}
-	}
-#endif
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	zend_write_protect = pthread_jit_write_protect_supported_np();
 #endif
@@ -5033,12 +5016,6 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 		fprintf(stderr, "\nJIT memory usage: %td\n", (ptrdiff_t)((char*)*dasm_ptr - (char*)dasm_buf));
 	}
 
-#ifdef HAVE_OPROFILE
-	if (JIT_G(debug) & ZEND_JIT_DEBUG_OPROFILE) {
-		zend_jit_oprofile_shutdown();
-	}
-#endif
-
 #ifdef HAVE_GDB
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_GDB) {
 		zend_jit_gdb_unregister();
@@ -5054,9 +5031,11 @@ ZEND_EXT_API void zend_jit_shutdown(void)
 		zend_jit_perf_jitdump_close();
 	}
 #endif
-	if (JIT_G(exit_counters)) {
-		free(JIT_G(exit_counters));
-	}
+#ifdef ZTS
+	ts_free_id(jit_globals_id);
+#else
+	zend_jit_trace_free_caches(&jit_globals);
+#endif
 }
 
 static void zend_jit_reset_counters(void)

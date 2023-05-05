@@ -19,12 +19,21 @@ $hungarian = "Árvíztűrő tükörfúrógép";
 
 echo "== BASIC TEST ==\n";
 
-print("SJIS: " . mb_detect_encoding($sjis, 'SJIS') . "\n");
-print("JIS: " . mb_detect_encoding($jis, 'JIS') . "\n");
-print("EUC-JP: " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS') . "\n");
-print("EUC-JP: " . mb_detect_encoding($euc_jp, 'JIS,EUC-JP') . "\n");
-print("UTF-8: " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
-print("UTF-8: " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
+print("Empty String: " . mb_detect_encoding('') . "\n");
+print("Bad ASCII (non-strict): " . mb_detect_encoding("\xDD\x92", ['ASCII', 'UTF-8'], false) . "\n");
+print("Bad ASCII (strict): " . mb_detect_encoding("\xDD\x92", ['ASCII', 'UTF-8'], true) . "\n");
+print("Bad ASCII/UTF-8, with more errors for ASCII (non-strict): " . mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], false) . "\n");
+print("Bad ASCII/UTF-8, with more errors for ASCII (strict): " . var_export(mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], true), true) . "\n");
+
+print("SJIS: " . mb_detect_encoding($sjis, 'SJIS', true) . "\n");
+print("JIS: " . mb_detect_encoding($jis, 'JIS', true) . "\n");
+print("EUC-JP (strict): " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS', true) . "\n");
+print("EUC-JP (non-strict): " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS', false) . "\n");
+print("EUC-JP (fewer choices): " . mb_detect_encoding($euc_jp, 'JIS,EUC-JP') . "\n");
+print("UTF-8, polish string 1 (strict): " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1', true) . "\n");
+print("UTF-8, polish string 1 (non-strict): " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1', false) . "\n");
+print("UTF-8, polish string 2 (strict): " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1', true) . "\n");
+print("UTF-8, polish string 2 (non-strict): " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1', false) . "\n");
 
 echo "== ARRAY ENCODING LIST ==\n";
 
@@ -91,6 +100,30 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
+echo "== BOM TEST ==\n";
+
+$str = chr(239).chr(187).chr(191).chr(195).chr(180); // UTF-8 BOM followed by ô
+var_dump(mb_detect_encoding($str, ['UTF-8', 'ISO-8859-1'], true));
+// U+4E4E is the Chinese character 乎; normally it would be impossible to distinguish UTF-16LE from UTF-16BE
+// But the BOM can tell us which one it is
+var_dump(mb_detect_encoding("\xFE\xFF\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true));
+var_dump(mb_detect_encoding("\xFF\xFE\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true));
+// However, a BOM should only appear at the beginning of the string
+$detected = mb_detect_encoding("\x4E\x4E\xFE\xFF\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true);
+if ($detected === 'UTF-16BE' || $detected === 'UTF-16LE')
+    die("Don't accept a BOM in the middle of a string");
+
+echo "== CHECK FUNCTION TEST ==\n";
+
+function testCheckFn($str, $encoding, $encodings) {
+    if (mb_check_encoding($str, $encoding))
+        die("Input string " . bin2hex($str) . " should not be valid in " . $encoding);
+    if (mb_detect_encoding($str, $encodings, true) === $encoding)
+        die("mb_detect_encoding should never return " . $encoding . " for invalid input string " . bin2hex($str));
+}
+
+testCheckFn("abc + abc", "UTF-7", "UTF-7,UTF-8");
+
 echo "== TORTURE TEST ==\n";
 
 function test($strings, $encodings) {
@@ -149,6 +182,7 @@ $jpEncodings = [
 test($jpStrings, $jpEncodings);
 
 $cnStrings = [
+    // Headline randomly picked from Chinese news
     "日本宫内厅宣布，真子公主和小室圭将在10月26日完婚。",
     // The Dream of Red Mansions
     "此开卷第一回也。作者自云曾历过一番梦幻之后，故将真事隐去，而借“通灵”说此《石头记》一书也",
@@ -312,17 +346,38 @@ test($czechStrings, $czechEncodings);
 
 test([$hungarian], ['UTF-8', 'UTF-16', 'Windows-1252']);
 
+$turkishStrings = [
+    // Random junk indiscriminately copied from randomly picked Wikipedia articles
+    "Samsun 19 Mayıs Stadyumu, Samsun'un Tekkeköy ilçesinde bulunan akıllı çok amaçlı stadyumdur. 33.919 koltuk kapasitesiyle Samsunspor'un iç saha maçlarına ev sahipliği yapmaktadır. Toplu Konut İdaresi tarafından yaptırılan ve 2017'de tamamlanan stadyum adını Mustafa Kemal'in Samsun'a çıktığı gün olan 19 Mayıs'tan almaktadır. İlk olarak Nisan 2011'de duyurulan proje 3 Aralık 2012'de Toplu Konut İdaresince yapılan ve Ali Acar İnşaat'ın kazandığı ihale ile resmiyete dökülmüş, 4 Ağustos 2013 tarihindeki temel atma töreni ile de inşa aşamasına geçilmiştir. İnşaatın başlangıç tarihinden itibaren en geç 800 gün içerisinde tamamlanması taahhüt edilse de UEFA'nın standartlarına uyum sağlamak için projede yenileme yapılması, çatının inşasıyla sorumlu şirketin iflas etmesi gibi sebeplerle tamamlanma süresi birkaç kez sarkmıştır. Bu bağlamda, ilk etapta 2014-15 sezonunda hazır hâle geleceği açıklanan stadyumun açılışı önce 2015-16, daha sonra 2016-17 sezonu başına ertelense de bu hedefler de yakalanamamıştır.",
+    "Lütf-i Celil (Osmanlı Türkçesi: ﻟﻄﻒ ﺟﻠﻴﻞ Anlamı: \"İlahi Lütuf\"), Osmanlı Donanması'nın Lütf-i Celil sınıfının öncü gemisi olan zırhlı savaş gemisidir. Başlangıçta Osmanlı İmparatorluğu'na bağlı özerk bir devlet olan Mısır Hidivliği tarafından sipariş edilen Lütf-i Celil, Osmanlı hükûmetinin Mısır'ı gemiyi teslim etmeye zorlaması ile Fransa'daki Forges et Chantiers de la Gironde tersanesinde yapım aşamasındayken Osmanlılara devredildi. Lütf-i Celil, 1877'de 93 Harbi sırasında aktif görevde bulundu ve Rus güçlerinin Tuna'yı geçmesini önlemek için operasyonlarda bulundu. 11 Mayıs'ta devriye gezerken bir Rus topçu bataryasıyla çatışmaya girdi.",
+    "Çoğu tarihçinin kanısına göre, ABD'nin üçüncü başkanı Jefferson, karısının ölümünün ardından kölesi Sally Hemings ile 38 yıl süren ilişkisi sırasında onun altı çocuğunun babası olmuştur.",
+    "2011 İran drama filmi Bir Ayrılık, 61. Berlin Film Festivali'nde Altın Ayı kazanarak, bu ödülü alan ilk İran filmi oldu.",
+    "Josef Bringas, isyan eden general Nikiforos Fokas'a karşı Konstantinopolis'e birlikler getirdi; asilerin Boğaziçi'ni geçmelerini engellemek için tüm gemileri tuttu; Nikiforos'un babası Bardas'ı rehin aldı ama başarılı olamadı."
+];
+// ISO-8859-9 and Windows-1254 are very similar and we can't really distinguish them from each other
+// But both of them should be distinguishable from UTF-8
+test($turkishStrings, ['UTF-8', 'UTF-16', 'ISO-8859-9']);
+test($turkishStrings, ['UTF-8', 'Windows-1254']);
+
 echo "Done!\n";
 
 ?>
 --EXPECT--
 == BASIC TEST ==
+Empty String: ASCII
+Bad ASCII (non-strict): UTF-8
+Bad ASCII (strict): UTF-8
+Bad ASCII/UTF-8, with more errors for ASCII (non-strict): UTF-8
+Bad ASCII/UTF-8, with more errors for ASCII (strict): false
 SJIS: SJIS
 JIS: JIS
-EUC-JP: EUC-JP
-EUC-JP: EUC-JP
-UTF-8: UTF-8
-UTF-8: UTF-8
+EUC-JP (strict): EUC-JP
+EUC-JP (non-strict): EUC-JP
+EUC-JP (fewer choices): EUC-JP
+UTF-8, polish string 1 (strict): UTF-8
+UTF-8, polish string 1 (non-strict): UTF-8
+UTF-8, polish string 2 (strict): UTF-8
+UTF-8, polish string 2 (non-strict): UTF-8
 == ARRAY ENCODING LIST ==
 JIS: JIS
 EUC-JP: EUC-JP
@@ -342,5 +397,10 @@ SJIS: SJIS
 INT: EUC-JP
 EUC-JP: EUC-JP
 mb_detect_encoding(): Argument #2 ($encodings) contains invalid encoding "BAD"
+== BOM TEST ==
+string(5) "UTF-8"
+string(8) "UTF-16BE"
+string(8) "UTF-16LE"
+== CHECK FUNCTION TEST ==
 == TORTURE TEST ==
 Done!

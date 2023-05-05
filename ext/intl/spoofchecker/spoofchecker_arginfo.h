@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eb2f5a660053b4a38858045968b746bdb3be072e */
+ * Stub hash: 6ebcb47ddc86a03b0543702b2529e05222a6ad93 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -148,6 +148,22 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_string *const_SINGLE_SCRIPT_RESTRICTIVE_name = zend_string_init_interned("SINGLE_SCRIPT_RESTRICTIVE", sizeof("SINGLE_SCRIPT_RESTRICTIVE") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_SINGLE_SCRIPT_RESTRICTIVE_name, &const_SINGLE_SCRIPT_RESTRICTIVE_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_SINGLE_SCRIPT_RESTRICTIVE_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+
+	zval const_MIXED_NUMBERS_value;
+	ZVAL_LONG(&const_MIXED_NUMBERS_value, USPOOF_MIXED_NUMBERS);
+	zend_string *const_MIXED_NUMBERS_name = zend_string_init_interned("MIXED_NUMBERS", sizeof("MIXED_NUMBERS") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MIXED_NUMBERS_name, &const_MIXED_NUMBERS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MIXED_NUMBERS_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 62
+
+	zval const_HIDDEN_OVERLAY_value;
+	ZVAL_LONG(&const_HIDDEN_OVERLAY_value, USPOOF_HIDDEN_OVERLAY);
+	zend_string *const_HIDDEN_OVERLAY_name = zend_string_init_interned("HIDDEN_OVERLAY", sizeof("HIDDEN_OVERLAY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_HIDDEN_OVERLAY_name, &const_HIDDEN_OVERLAY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_HIDDEN_OVERLAY_name);
 #endif
 
 	return class_entry;

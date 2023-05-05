@@ -1182,7 +1182,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 	int validate, recover, resolve_externals, keep_blanks, substitute_ent;
 	int resolved_path_len;
 	int old_error_reporting = 0;
-	char *directory=NULL, resolved_path[MAXPATHLEN];
+	char *directory=NULL, resolved_path[MAXPATHLEN + 1];
 
 	if (id != NULL) {
 		intern = Z_DOMOBJ_P(id);

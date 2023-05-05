@@ -1847,8 +1847,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
 				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
 		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
-			/* TODO Convert this to a ValueError */
-			zend_argument_error(zend_ce_exception, 3,
+			zend_argument_value_error(3,
 				"must be empty when the specified class (%s) does not have a constructor",
 				ZSTR_VAL(ce->name)
 			);
@@ -2116,13 +2115,14 @@ PHP_FUNCTION(pg_trace)
 {
 	char *z_filename, *mode = "w";
 	size_t z_filename_len, mode_len;
+	zend_long trace_mode = 0;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
 	FILE *fp = NULL;
 	php_stream *stream;
 	pgsql_link_handle *link;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|sO!", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link, pgsql_link_ce) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|sO!l", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link, pgsql_link_ce, &trace_mode) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2148,6 +2148,19 @@ PHP_FUNCTION(pg_trace)
 	}
 	php_stream_auto_cleanup(stream);
 	PQtrace(pgsql, fp);
+	if (trace_mode > 0) {
+#ifdef PQTRACE_REGRESS_MODE
+		if (!(trace_mode & (PQTRACE_SUPPRESS_TIMESTAMPS|PQTRACE_REGRESS_MODE))) {
+			zend_argument_value_error(4, "must be PGSQL_TRACE_SUPPRESS_TIMESTAMPS and/or PGSQL_TRACE_REGRESS_MODE");
+			RETURN_THROWS();
+		} else {
+			PQsetTraceFlags(pgsql, trace_mode);
+		}
+#else
+		zend_argument_value_error(4, "cannot set as trace is unsupported");
+		RETURN_THROWS();
+#endif
+	}
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2228,7 +2241,7 @@ PHP_FUNCTION(pg_lo_create)
 			wanted_oid = (Oid)Z_LVAL_P(oid);
 			break;
 		default:
-			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			zend_type_error("OID value must be of type string|int, %s given", zend_zval_value_name(oid));
 			RETURN_THROWS();
 		}
 		if ((pgsql_oid = lo_create(pgsql, wanted_oid)) == InvalidOid) {
@@ -2338,7 +2351,7 @@ PHP_FUNCTION(pg_lo_open)
 		CHECK_PGSQL_LINK(link);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-								 "Ols", &pgsql_link, pgsql_link_ce, &oid_long, &mode) == SUCCESS) {
+								 "OlS", &pgsql_link, pgsql_link_ce, &oid_long, &mode) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
@@ -2477,9 +2490,8 @@ PHP_FUNCTION(pg_lo_read)
 		RETURN_FALSE;
 	}
 
-	/* TODO Use truncate API? */
-	ZSTR_LEN(buf) = nbytes;
-	ZSTR_VAL(buf)[ZSTR_LEN(buf)] = '\0';
+	ZSTR_VAL(buf)[nbytes] = '\0';
+	buf = zend_string_truncate(buf, nbytes, 0);
 	RETURN_NEW_STR(buf);
 }
 /* }}} */
@@ -2599,7 +2611,7 @@ PHP_FUNCTION(pg_lo_import)
 			wanted_oid = (Oid)Z_LVAL_P(oid);
 			break;
 		default:
-			zend_type_error("OID value must be of type string|int, %s given", zend_zval_type_name(oid));
+			zend_type_error("OID value must be of type string|int, %s given", zend_zval_value_name(oid));
 			RETURN_THROWS();
 		}
 
@@ -2634,7 +2646,7 @@ PHP_FUNCTION(pg_lo_export)
 
 	/* allow string to handle large OID value correctly */
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
-								 "rlP", &pgsql_link, pgsql_link_ce, &oid_long, &file_out) == SUCCESS) {
+								 "OlP", &pgsql_link, pgsql_link_ce, &oid_long, &file_out) == SUCCESS) {
 		if (oid_long <= (zend_long)InvalidOid) {
 			zend_value_error("Invalid OID value passed");
 			RETURN_THROWS();
@@ -3471,12 +3483,22 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			PQconsumeInput(pgsql);
 			RETVAL_LONG(PQisBusy(pgsql));
 			break;
-		case PHP_PG_ASYNC_REQUEST_CANCEL:
-			RETVAL_LONG(PQrequestCancel(pgsql));
+		case PHP_PG_ASYNC_REQUEST_CANCEL: {
+			PGcancel *c;
+			char err[256];
+			int rc;
+
+			c = PQgetCancel(pgsql);
+			RETVAL_LONG((rc = PQcancel(c, err, sizeof(err))));
+			if (rc < 0) {
+				zend_error(E_WARNING, "cannot cancel the query: %s", err);
+			}
 			while ((pgsql_result = PQgetResult(pgsql))) {
 				PQclear(pgsql_result);
 			}
+			PQfreeCancel(c);
 			break;
+		}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	if (PQsetnonblocking(pgsql, 0)) {
@@ -4138,9 +4160,8 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	src = estrdup(ZSTR_VAL(table_name));
 	tmp_name = php_strtok_r(src, ".", &tmp_name2);
 	if (!tmp_name) {
-		// TODO ValueError (empty table name)?
 		efree(src);
-		php_error_docref(NULL, E_WARNING, "The table name must be specified");
+		zend_argument_value_error(2, "must be specified (%s)", ZSTR_VAL(table_name));
 		return FAILURE;
 	}
 	if (!tmp_name2 || !*tmp_name2) {
@@ -4217,7 +4238,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 			/* pg_type.typtype */
 			add_assoc_bool_ex(&elem, "is base", sizeof("is base") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "b"));
 			add_assoc_bool_ex(&elem, "is composite", sizeof("is composite") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "c"));
-			add_assoc_bool_ex(&elem, "is pesudo", sizeof("is pesudo") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "p"));
+			add_assoc_bool_ex(&elem, "is pseudo", sizeof("is pseudo") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "p"));
 			/* pg_description.description */
 			add_assoc_string_ex(&elem, "description", sizeof("description") - 1, PQgetvalue(pg_result, i, 8));
 		}
@@ -4489,7 +4510,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 			err = 1;
 		}
 		if (!err && (Z_TYPE_P(val) == IS_ARRAY || Z_TYPE_P(val) == IS_OBJECT || Z_TYPE_P(val) == IS_RESOURCE)) {
-			zend_type_error("Values must be of type string|int|float|bool|null, %s given", zend_zval_type_name(val));
+			zend_type_error("Values must be of type string|int|float|bool|null, %s given", zend_zval_value_name(val));
 			err = 1;
 		}
 		if (err) {
@@ -5253,7 +5274,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				smart_str_appendl(&querystr, "NULL", sizeof("NULL")-1);
 				break;
 			default:
-				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_type_name(val));
+				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
 				goto cleanup;
 		}
 		smart_str_appendc(&querystr, ',');
@@ -5427,7 +5448,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				smart_str_appendl(querystr, "NULL", sizeof("NULL")-1);
 				break;
 			default:
-				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_type_name(val));
+				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_value_name(val));
 				return -1;
 		}
 		smart_str_appendl(querystr, pad, pad_len);
@@ -5799,5 +5820,67 @@ PHP_FUNCTION(pg_select)
 	return;
 }
 /* }}} */
+
+#ifdef LIBPQ_HAS_PIPELINING
+PHP_FUNCTION(pg_enter_pipeline_mode)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_BOOL(PQenterPipelineMode(pgsql_handle->conn));
+}
+
+PHP_FUNCTION(pg_exit_pipeline_mode)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_BOOL(PQexitPipelineMode(pgsql_handle->conn));
+}
+
+PHP_FUNCTION(pg_pipeline_sync)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_BOOL(PQpipelineSync(pgsql_handle->conn));
+}
+
+PHP_FUNCTION(pg_pipeline_status)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_LONG(PQpipelineStatus(pgsql_handle->conn));
+}
+#endif
 
 #endif

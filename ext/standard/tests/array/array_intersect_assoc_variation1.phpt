@@ -146,17 +146,17 @@ array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
 -- Iteration 11 --array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
 array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
 
--- Iteration 12 --array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
+-- Iteration 12 --array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
+array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
 
--- Iteration 13 --array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
+-- Iteration 13 --array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
+array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
 
--- Iteration 14 --array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
+-- Iteration 14 --array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
+array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
 
--- Iteration 15 --array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, bool given
+-- Iteration 15 --array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
+array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
 
 -- Iteration 16 --array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
 array_intersect_assoc(): Argument #1 ($array) must be of type array, string given

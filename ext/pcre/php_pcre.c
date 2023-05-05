@@ -910,25 +910,6 @@ PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture
 }
 /* }}} */
 
-/* {{{ pcre_get_compiled_regex_ex */
-PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *compile_options)
-{
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
-
-	if (preg_options) {
-		*preg_options = pce ? pce->preg_options : 0;
-	}
-	if (compile_options) {
-		*compile_options = pce ? pce->compile_options : 0;
-	}
-	if (capture_count) {
-		*capture_count = pce ? pce->capture_count : 0;
-	}
-
-	return pce ? pce->re : NULL;
-}
-/* }}} */
-
 /* XXX For the cases where it's only about match yes/no and no capture
 		required, perhaps just a minimum sized data would suffice. */
 PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre2_code *re)
@@ -2457,7 +2438,12 @@ PHP_FUNCTION(preg_replace_callback_array)
 	}
 
 	if (subject_ht) {
-		RETURN_ARR(subject_ht);
+		RETVAL_ARR(subject_ht);
+		// Unset the type_flags of immutable arrays to prevent the VM from performing refcounting
+		if (GC_FLAGS(subject_ht) & IS_ARRAY_IMMUTABLE) {
+			Z_TYPE_FLAGS_P(return_value) = 0;
+		}
+		return;
 	} else {
 		RETURN_STR(subject_str);
 	}

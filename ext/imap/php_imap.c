@@ -525,11 +525,9 @@ PHP_RINIT_FUNCTION(imap)
 }
 /* }}} */
 
-/* {{{ PHP_RSHUTDOWN_FUNCTION */
-PHP_RSHUTDOWN_FUNCTION(imap)
+static void free_errorlist(void)
 {
 	ERRORLIST *ecur = NIL;
-	STRINGLIST *acur = NIL;
 
 	if (IMAPG(imap_errorstack) != NIL) {
 		/* output any remaining errors at their original error level */
@@ -545,6 +543,11 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		mail_free_errorlist(&IMAPG(imap_errorstack));
 		IMAPG(imap_errorstack) = NIL;
 	}
+}
+
+static void free_stringlist(void)
+{
+	STRINGLIST *acur = NIL;
 
 	if (IMAPG(imap_alertstack) != NIL) {
 		/* output any remaining alerts at E_NOTICE level */
@@ -560,6 +563,13 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		mail_free_stringlist(&IMAPG(imap_alertstack));
 		IMAPG(imap_alertstack) = NIL;
 	}
+}
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+PHP_RSHUTDOWN_FUNCTION(imap)
+{
+	free_errorlist();
+	free_stringlist();
 	return SUCCESS;
 }
 /* }}} */
@@ -812,7 +822,7 @@ PHP_FUNCTION(imap_append)
 	}
 
 	if (internal_date) {
-		zend_string *regex  = zend_string_init("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
+		zend_string *regex  = ZSTR_INIT_LITERAL("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", 0);
 		pcre_cache_entry *pce;				/* Compiled regex */
 		zval *subpats = NULL;				/* Parts (not used) */
 		int global = 0;
@@ -3007,7 +3017,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 			if (Z_TYPE_P(data) != IS_ARRAY) {
 				zend_argument_type_error(2, "individual body must be of type array, %s given",
-					zend_zval_type_name(data));
+					zend_zval_value_name(data));
 				goto done;
 			}
 			if (zend_hash_num_elements(Z_ARRVAL_P(data)) == 0) {

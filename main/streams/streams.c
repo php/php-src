@@ -469,7 +469,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 				the cookie_closer unsets the fclose_stdiocast flags, so
 				we can be sure that we only reach here when PHP code calls
 				php_stream_free.
-				Lets let the cookie code clean it all up.
+				Let's let the cookie code clean it all up.
 			 */
 			stream->in_free = 0;
 			return fclose(stream->stdiocast);
@@ -839,7 +839,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 	}
 
 	/* if the stream doesn't directly support stat-ing, return with failure.
-	 * We could try and emulate this by casting to a FD and fstat-ing it,
+	 * We could try and emulate this by casting to an FD and fstat-ing it,
 	 * but since the fd might not represent the actual underlying content
 	 * this would give bogus results. */
 	if (stream->ops->stat == NULL) {
@@ -1503,7 +1503,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		return result;
 	}
 
-	/* avoid many reallocs by allocating a good sized chunk to begin with, if
+	/* avoid many reallocs by allocating a good-sized chunk to begin with, if
 	 * we can.  Note that the stream may be filtered, in which case the stat
 	 * result may be inaccurate, as the filter may inflate or deflate the
 	 * number of bytes that we can read.  In order to avoid an upsize followed
@@ -1615,6 +1615,13 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 						/* not implemented by this Linux kernel */
 						break;
 
+					case EIO:
+						/* Some filesystems will cause failures if the max length is greater than the file length
+						 * in certain circumstances and configuration. In those cases the errno is EIO and we will
+						 * fall back to other methods. We cannot use stat to determine the file length upfront because
+						 * that is prone to races and outdated caching. */
+						break;
+
 					default:
 						/* unexpected I/O error - give up, no fallback */
 						*len = haveread;
@@ -1635,8 +1642,21 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 		char *p;
 
 		do {
-			size_t chunk_size = (maxlen == 0 || maxlen > PHP_STREAM_MMAP_MAX) ? PHP_STREAM_MMAP_MAX : maxlen;
-			size_t mapped;
+			/* We must not modify maxlen here, because otherwise the file copy fallback below can fail */
+			size_t chunk_size, must_read, mapped;
+			if (maxlen == 0) {
+				/* Unlimited read */
+				must_read = chunk_size = PHP_STREAM_MMAP_MAX;
+			} else {
+				must_read = maxlen - haveread;
+				if (must_read >= PHP_STREAM_MMAP_MAX) {
+					chunk_size = PHP_STREAM_MMAP_MAX;
+				} else {
+					/* In case the length we still have to read from the file could be smaller than the file size,
+					 * chunk_size must not get bigger the size we're trying to read. */
+					chunk_size = must_read;
+				}
+			}
 
 			p = php_stream_mmap_range(src, php_stream_tell(src), chunk_size, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
@@ -1651,6 +1671,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 				didwrite = php_stream_write(dest, p, mapped);
 				if (didwrite < 0) {
 					*len = haveread;
+					php_stream_mmap_unmap(src);
 					return FAILURE;
 				}
 
@@ -1667,9 +1688,10 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 				if (mapped < chunk_size) {
 					return SUCCESS;
 				}
+				/* If we're not reading as much as possible, so a bounded read */
 				if (maxlen != 0) {
-					maxlen -= mapped;
-					if (maxlen == 0) {
+					must_read -= mapped;
+					if (must_read == 0) {
 						return SUCCESS;
 					}
 				}

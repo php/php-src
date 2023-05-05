@@ -95,6 +95,10 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 		EG(current_execute_data) = execute_data;
 		EG(jit_trace_num) = 0;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+		EG(stack_base) = zend_fiber_stack_base(fiber->context.stack);
+		EG(stack_limit) = zend_fiber_stack_limit(fiber->context.stack);
+#endif
 		fiber->fci.retval = &retval;
 
 		zend_call_function(&fiber->fci, &fiber->fci_cache);

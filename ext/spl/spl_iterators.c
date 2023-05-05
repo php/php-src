@@ -514,7 +514,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	return (zend_object_iterator*)iterator;
 }
 
-static int spl_get_iterator_from_aggregate(zval *retval, zend_class_entry *ce, zend_object *obj) {
+static zend_result spl_get_iterator_from_aggregate(zval *retval, zend_class_entry *ce, zend_object *obj) {
 	zend_function **getiterator_cache =
 		ce->iterator_funcs_ptr ? &ce->iterator_funcs_ptr->zf_new_iterator : NULL;
 	zend_call_method_with_0_params(obj, ce, getiterator_cache, "getiterator", retval);
@@ -1001,10 +1001,10 @@ static zend_object *spl_RecursiveIteratorIterator_new_ex(zend_class_entry *class
 
 	if (init_prefix) {
 		intern->prefix[0] = ZSTR_EMPTY_ALLOC();
-		intern->prefix[1] = zend_string_init("| ",  2, 0);
-		intern->prefix[2] = zend_string_init("  ",  2, 0);
-		intern->prefix[3] = zend_string_init("|-",  2, 0);
-		intern->prefix[4] = zend_string_init("\\-", 2, 0);
+		intern->prefix[1] = ZSTR_INIT_LITERAL("| ", 0);
+		intern->prefix[2] = ZSTR_INIT_LITERAL("  ", 0);
+		intern->prefix[3] = ZSTR_INIT_LITERAL("|-", 0);
+		intern->prefix[4] = ZSTR_INIT_LITERAL("\\-", 0);
 		intern->prefix[5] = ZSTR_EMPTY_ALLOC();
 
 		intern->postfix[0] = ZSTR_EMPTY_ALLOC();
@@ -1301,9 +1301,9 @@ static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *
 
 #define APPENDIT_CHECK_CTOR(intern) SPL_CHECK_CTOR(intern, AppendIterator)
 
-static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more);
+static inline zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more);
 
-static inline int spl_cit_check_flags(zend_long flags)
+static inline zend_result spl_cit_check_flags(zend_long flags)
 {
 	zend_long cnt = 0;
 
@@ -1542,7 +1542,7 @@ static inline int spl_dual_it_valid(spl_dual_it_object *intern)
 	return intern->inner.iterator->funcs->valid(intern->inner.iterator);
 }
 
-static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more)
+static inline zend_result spl_dual_it_fetch(spl_dual_it_object *intern, int check_more)
 {
 	zval *data;
 
@@ -1822,6 +1822,8 @@ PHP_METHOD(CallbackFilterIterator, accept)
 	zend_call_known_fcc(fcc, return_value, 3, params, NULL);
 	if (Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
+	} else if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
 	}
 }
 /* }}} */
@@ -2874,7 +2876,7 @@ PHP_METHOD(EmptyIterator, next)
 	}
 } /* }}} */
 
-int spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
+zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
 {
 	spl_dual_it_free(intern);
 
@@ -2901,7 +2903,7 @@ int spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
 	}
 } /* }}} */
 
-void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
+static void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
 {
 	while (spl_dual_it_valid(intern) != SUCCESS) {
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
@@ -2912,7 +2914,7 @@ void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
 	spl_dual_it_fetch(intern, 0);
 } /* }}} */
 
-void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
+static void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
 {
 	if (spl_dual_it_valid(intern) == SUCCESS) {
 		spl_dual_it_next(intern, 1);
@@ -3051,7 +3053,7 @@ PHP_METHOD(AppendIterator, getArrayIterator)
 	RETURN_COPY_DEREF(value);
 } /* }}} */
 
-PHPAPI int spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser)
+PHPAPI zend_result spl_iterator_apply(zval *obj, spl_iterator_apply_func_t apply_func, void *puser)
 {
 	zend_object_iterator   *iter;
 	zend_class_entry       *ce = Z_OBJCE_P(obj);

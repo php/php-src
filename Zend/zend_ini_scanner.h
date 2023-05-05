@@ -27,9 +27,9 @@
 
 BEGIN_EXTERN_C()
 ZEND_COLD int zend_ini_scanner_get_lineno(void);
-ZEND_COLD char *zend_ini_scanner_get_filename(void);
+ZEND_COLD const char *zend_ini_scanner_get_filename(void);
 zend_result zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode);
-zend_result zend_ini_prepare_string_for_scanning(char *str, int scanner_mode);
+zend_result zend_ini_prepare_string_for_scanning(const char *str, int scanner_mode);
 int ini_lex(zval *ini_lval);
 void shutdown_ini_scanner(void);
 END_EXTERN_C()

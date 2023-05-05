@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6949e2c795288f9615222b1fd496768ab20eb7c5 */
+ * Stub hash: ce0bc9fd067a6598f66a65a9159674392e6cac4d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -549,6 +549,8 @@ ZEND_METHOD(DateTime, __wakeup);
 ZEND_METHOD(DateTime, __set_state);
 ZEND_METHOD(DateTime, createFromImmutable);
 ZEND_METHOD(DateTime, createFromInterface);
+ZEND_METHOD(DateTime, modify);
+ZEND_METHOD(DateTime, sub);
 ZEND_METHOD(DateTimeImmutable, __construct);
 ZEND_METHOD(DateTimeImmutable, __serialize);
 ZEND_METHOD(DateTimeImmutable, __unserialize);
@@ -570,6 +572,7 @@ ZEND_METHOD(DateTimeZone, __unserialize);
 ZEND_METHOD(DateTimeZone, __wakeup);
 ZEND_METHOD(DateTimeZone, __set_state);
 ZEND_METHOD(DateInterval, __construct);
+ZEND_METHOD(DateInterval, createFromDateString);
 ZEND_METHOD(DateInterval, __serialize);
 ZEND_METHOD(DateInterval, __unserialize);
 ZEND_METHOD(DateInterval, __wakeup);
@@ -663,9 +666,9 @@ static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_ME_MAPPING(createFromFormat, date_create_from_format, arginfo_class_DateTime_createFromFormat, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(getLastErrors, date_get_last_errors, arginfo_class_DateTime_getLastErrors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(format, date_format, arginfo_class_DateTime_format, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(modify, date_modify, arginfo_class_DateTime_modify, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, modify, arginfo_class_DateTime_modify, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(add, date_add, arginfo_class_DateTime_add, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(sub, date_sub, arginfo_class_DateTime_sub, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, sub, arginfo_class_DateTime_sub, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getTimezone, date_timezone_get, arginfo_class_DateTime_getTimezone, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setTimezone, date_timezone_set, arginfo_class_DateTime_setTimezone, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getOffset, date_offset_get, arginfo_class_DateTime_getOffset, ZEND_ACC_PUBLIC)
@@ -724,7 +727,7 @@ static const zend_function_entry class_DateTimeZone_methods[] = {
 
 static const zend_function_entry class_DateInterval_methods[] = {
 	ZEND_ME(DateInterval, __construct, arginfo_class_DateInterval___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(createFromDateString, date_interval_create_from_date_string, arginfo_class_DateInterval_createFromDateString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DateInterval, createFromDateString, arginfo_class_DateInterval_createFromDateString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(format, date_interval_format, arginfo_class_DateInterval_format, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __serialize, arginfo_class_DateInterval___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __unserialize, arginfo_class_DateInterval___unserialize, ZEND_ACC_PUBLIC)
@@ -745,6 +748,51 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_ME(DatePeriod, __wakeup, arginfo_class_DatePeriod___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, __set_state, arginfo_class_DatePeriod___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DatePeriod, getIterator, arginfo_class_DatePeriod_getIterator, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateError_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateObjectError_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateRangeError_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateInvalidTimeZoneException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateInvalidOperationException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateMalformedStringException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateMalformedIntervalStringException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateMalformedPeriodStringException_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1080,6 +1128,105 @@ static zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry
 	zend_string *property_include_end_date_name = zend_string_init("include_end_date", sizeof("include_end_date") - 1, 1);
 	zend_declare_typed_property(class_entry, property_include_end_date_name, &property_include_end_date_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_include_end_date_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateError", class_DateError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateObjectError(zend_class_entry *class_entry_DateError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateObjectError", class_DateObjectError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateError);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateRangeError(zend_class_entry *class_entry_DateRangeError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateRangeError", class_DateRangeError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateRangeError);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateException", class_DateException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateInvalidTimeZoneException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateInvalidTimeZoneException", class_DateInvalidTimeZoneException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateInvalidOperationException(zend_class_entry *class_entry_DateException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateInvalidOperationException", class_DateInvalidOperationException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateMalformedStringException(zend_class_entry *class_entry_DateException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateMalformedStringException", class_DateMalformedStringException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateMalformedIntervalStringException(zend_class_entry *class_entry_DateException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateMalformedIntervalStringException", class_DateMalformedIntervalStringException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateMalformedPeriodStringException(zend_class_entry *class_entry_DateException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateMalformedPeriodStringException", class_DateMalformedPeriodStringException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
 }

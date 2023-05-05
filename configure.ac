@@ -128,7 +128,9 @@ PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
-AC_PROG_CC_C99
+
+dnl AC_PROG_CC_C99 is obsolete with autoconf >= 2.70 yet necessary for <= 2.69.
+m4_version_prereq([2.70],,[AC_PROG_CC_C99])
 AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
@@ -162,7 +164,7 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs.
 PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([0.13.4])
+PHP_PROG_RE2C([1.0.3])
 PHP_PROG_PHP()
 
 PHP_ARG_ENABLE([re2c-cgoto],
@@ -502,6 +504,8 @@ dnl Check __builtin_saddl_overflow
 PHP_CHECK_BUILTIN_SADDL_OVERFLOW
 dnl Check __builtin_saddll_overflow
 PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
+dnl Check __builtin_usub_overflow
+PHP_CHECK_BUILTIN_USUB_OVERFLOW
 dnl Check __builtin_ssubl_overflow
 PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl Check __builtin_ssubll_overflow
@@ -510,10 +514,16 @@ dnl Check __builtin_cpu_init
 PHP_CHECK_BUILTIN_CPU_INIT
 dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
+dnl Check __builtin_frame_address
+PHP_CHECK_BUILTIN_FRAME_ADDRESS
 dnl Check prctl
 PHP_CHECK_PRCTL
 dnl Check procctl
 PHP_CHECK_PROCCTL
+dnl Check AVX512
+PHP_CHECK_AVX512_SUPPORTS
+dnl Check AVX512 VBMI
+PHP_CHECK_AVX512_VBMI_SUPPORTS
 
 dnl Check for __alignof__ support in the compiler
 AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
@@ -626,6 +636,7 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
+strerror_r \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
@@ -770,7 +781,7 @@ PHP_ARG_WITH([valgrind],
   [whether to enable valgrind support],
   [AS_HELP_STRING([--with-valgrind],
     [Enable valgrind support])],
-  [yes],
+  [no],
   [no])
 
 if test "$PHP_VALGRIND" != "no"; then
@@ -1701,7 +1712,7 @@ PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_C
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_compile.c zend_constants.c zend_dtrace.c \
+    zend_alloc.c zend_call_stack.c zend_compile.c zend_constants.c zend_dtrace.c \
     zend_execute_API.c zend_highlight.c zend_llist.c \
     zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
@@ -1712,6 +1723,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
     zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
+    zend_max_execution_timer.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter_ja.c
+ * The source code included in this file was separated from mbfilter_ja.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
@@ -68,7 +68,8 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	&vtbl_eucjp_wchar,
 	&vtbl_wchar_eucjp,
 	mb_eucjp_to_wchar,
-	mb_wchar_to_eucjp
+	mb_wchar_to_eucjp,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_eucjp_wchar = {

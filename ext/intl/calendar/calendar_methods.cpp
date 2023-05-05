@@ -50,7 +50,7 @@ using icu::Locale;
 	}
 
 #define ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(argument, zpp_arg_position) \
-	if (argument < INT32_MIN || argument > INT32_MAX) { \
+	if (UNEXPECTED(argument < INT32_MIN || argument > INT32_MAX)) { \
 		zend_argument_value_error(getThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
 			"must be between %d and %d", INT32_MIN, INT32_MAX); \
 		RETURN_THROWS(); \
@@ -96,7 +96,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 
 	Calendar *cal = Calendar::createInstance(timeZone,
 		Locale::createFromName(locale_str), status);
-	if (cal == NULL) {
+	if (UNEXPECTED(cal == NULL)) {
 		delete timeZone;
 		intl_error_set(NULL, status, "Error creating ICU Calendar object", 0);
 		RETURN_NULL();
@@ -637,7 +637,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time_zone)
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	TimeZone *tz = co->ucal->getTimeZone().clone();
-	if (tz == NULL) {
+	if (UNEXPECTED(tz == NULL)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_MEMORY_ALLOCATION_ERROR,
 			"intlcal_get_time_zone: could not clone TimeZone", 0);
 		RETURN_FALSE;
@@ -1000,7 +1000,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 
 	cal = Calendar::createInstance(timeZone,
 		Locale::createFromName(locale_str), status);
-	if (cal == NULL) {
+	if (UNEXPECTED(cal == NULL)) {
 		delete timeZone;
 		intl_error_set(NULL, status, "intlcal_from_date_time: "
 				"error creating ICU Calendar object", 0);
@@ -1045,7 +1045,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
-	if (date > (double)U_INT64_MAX || date < (double)U_INT64_MIN) {
+	if (UNEXPECTED(date > (double)U_INT64_MAX || date < (double)U_INT64_MIN)) {
 		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_to_date_time: The calendar date is out of the "
 			"range for a 64-bit integer", 0);

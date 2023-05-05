@@ -102,11 +102,15 @@ ZEND_API void zend_interned_strings_init(void)
 	str = zend_string_alloc(sizeof("")-1, 1);
 	ZSTR_VAL(str)[0] = '\000';
 	zend_empty_string = zend_new_interned_string_permanent(str);
+	GC_ADD_FLAGS(zend_empty_string, IS_STR_VALID_UTF8);
 
 	s[1] = 0;
 	for (i = 0; i < 256; i++) {
 		s[0] = i;
 		zend_one_char_string[i] = zend_new_interned_string_permanent(zend_string_init(s, 1, 1));
+		if (i < 0x80) {
+			GC_ADD_FLAGS(zend_one_char_string[i], IS_STR_VALID_UTF8);
+		}
 	}
 
 	/* known strings */
@@ -114,6 +118,7 @@ ZEND_API void zend_interned_strings_init(void)
 	for (i = 0; i < (sizeof(known_strings) / sizeof(known_strings[0])) - 1; i++) {
 		str = zend_string_init(known_strings[i], strlen(known_strings[i]), 1);
 		zend_known_strings[i] = zend_new_interned_string_permanent(str);
+		GC_ADD_FLAGS(zend_known_strings[i], IS_STR_VALID_UTF8);
 	}
 }
 
@@ -186,6 +191,17 @@ ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_str
 	return zend_interned_string_ht_lookup(str, &interned_strings_permanent);
 }
 
+static zend_string* ZEND_FASTCALL zend_init_string_for_interning(zend_string *str, bool persistent)
+{
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(str);
+	zend_ulong h = ZSTR_H(str);
+	zend_string_delref(str);
+	str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), persistent);
+	GC_ADD_FLAGS(str, flags);
+	ZSTR_H(str) = h;
+	return str;
+}
+
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str)
 {
 	zend_string *ret;
@@ -203,10 +219,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string
 
 	ZEND_ASSERT(GC_FLAGS(str) & GC_PERSISTENT);
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 1);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, true);
 	}
 
 	return zend_add_interned_string(str, &interned_strings_permanent, IS_STR_PERMANENT);
@@ -244,10 +257,7 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 	}
 #endif
 	if (GC_REFCOUNT(str) > 1) {
-		zend_ulong h = ZSTR_H(str);
-		zend_string_delref(str);
-		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-		ZSTR_H(str) = h;
+		str = zend_init_string_for_interning(str, false);
 	}
 
 	ret = zend_add_interned_string(str, &CG(interned_strings), 0);
@@ -370,10 +380,27 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 # define I_REPLACE_SONAME_FNNAME_ZU(soname, fnname) _vgr00000ZU_ ## soname ## _ ## fnname
 #endif
 
-ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(const zend_string *s1, const zend_string *s2)
+/* See GH-9068 */
+#if defined(__GNUC__) && (__GNUC__ >= 11 || defined(__clang__)) && __has_attribute(no_caller_saved_registers)
+# define NO_CALLER_SAVED_REGISTERS __attribute__((no_caller_saved_registers))
+# ifndef __clang__
+#  pragma GCC push_options
+#  pragma GCC target ("general-regs-only")
+#  define POP_OPTIONS
+# endif
+#else
+# define NO_CALLER_SAVED_REGISTERS
+#endif
+
+ZEND_API bool ZEND_FASTCALL NO_CALLER_SAVED_REGISTERS I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
+
+#ifdef POP_OPTIONS
+# pragma GCC pop_options
+# undef POP_OPTIONS
+#endif
 
 #if defined(__GNUC__) && defined(__i386__)
 ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)

@@ -591,7 +591,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	if (GC_G(gc_enabled) && !GC_G(gc_active)) {
 		GC_ADDREF(ref);
 		gc_adjust_threshold(gc_collect_cycles());
-		if (UNEXPECTED(GC_DELREF(ref)) == 0) {
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 			rc_dtor_func(ref);
 			return;
 		} else if (UNEXPECTED(GC_INFO(ref))) {
@@ -1740,6 +1740,22 @@ static void zend_gc_root_tmpvars(void) {
 		}
 	}
 }
+
+#if GC_BENCH
+void gc_bench_print(void)
+{
+	fprintf(stderr, "GC Statistics\n");
+	fprintf(stderr, "-------------\n");
+	fprintf(stderr, "Runs:               %d\n", GC_G(gc_runs));
+	fprintf(stderr, "Collected:          %d\n", GC_G(collected));
+	fprintf(stderr, "Root buffer length: %d\n", GC_G(root_buf_length));
+	fprintf(stderr, "Root buffer peak:   %d\n\n", GC_G(root_buf_peak));
+	fprintf(stderr, "      Possible            Remove from  Marked\n");
+	fprintf(stderr, "        Root    Buffered     buffer     grey\n");
+	fprintf(stderr, "      --------  --------  -----------  ------\n");
+	fprintf(stderr, "ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
+}
+#endif
 
 #ifdef ZTS
 size_t zend_gc_globals_size(void)

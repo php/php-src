@@ -1,4 +1,4 @@
 EXTENSION("random", "random.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 PHP_RANDOM="yes";
-ADD_SOURCES(configure_module_dirname, "engine_combinedlcg.c engine_mt19937.c engine_pcgoneseq128xslrr64.c engine_xoshiro256starstar.c engine_secure.c engine_user.c randomizer.c", "random");
+ADD_SOURCES(configure_module_dirname, "csprng.c engine_combinedlcg.c engine_mt19937.c engine_pcgoneseq128xslrr64.c engine_xoshiro256starstar.c engine_secure.c engine_user.c gammasection.c randomizer.c", "random");
 PHP_INSTALL_HEADERS("ext/random", "php_random.h");

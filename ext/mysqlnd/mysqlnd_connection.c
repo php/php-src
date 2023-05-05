@@ -289,7 +289,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
-	
+
 	if (conn->server_version) {
 		mnd_pefree(conn->server_version, pers);
 		conn->server_version = NULL;
@@ -1041,17 +1041,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 	DBG_ENTER("mysqlnd_conn_data::refresh");
 	DBG_INF_FMT("conn=%" PRIu64 " options=%u", conn->thread_id, options);
 	DBG_RETURN(conn->command->refresh(conn, options));
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_conn_data::shutdown */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint8_t level)
-{
-	DBG_ENTER("mysqlnd_conn_data::shutdown");
-	DBG_INF_FMT("conn=%" PRIu64 " level=%u", conn->thread_id, level);
-	DBG_RETURN(conn->command->shutdown(conn, level));
 }
 /* }}} */
 
@@ -1954,7 +1943,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 
 	MYSQLND_METHOD(mysqlnd_conn_data, stmt_init),
 
-	MYSQLND_METHOD(mysqlnd_conn_data, shutdown),
 	MYSQLND_METHOD(mysqlnd_conn_data, refresh),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, ping),

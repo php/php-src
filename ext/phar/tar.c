@@ -478,14 +478,15 @@ bail:
 			return FAILURE;
 		}
 
+		uint32_t entry_mode = phar_tar_number(hdr->mode, sizeof(hdr->mode));
 		entry.tar_type = ((old & (hdr->typeflag == '\0')) ? TAR_FILE : hdr->typeflag);
 		entry.offset = entry.offset_abs = pos; /* header_offset unused in tar */
 		entry.fp_type = PHAR_FP;
-		entry.flags = phar_tar_number(hdr->mode, sizeof(hdr->mode)) & PHAR_ENT_PERM_MASK;
+		entry.flags = entry_mode & PHAR_ENT_PERM_MASK;
 		entry.timestamp = phar_tar_number(hdr->mtime, sizeof(hdr->mtime));
 		entry.is_persistent = myphar->is_persistent;
 
-		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry.flags)) {
+		if (old && entry.tar_type == TAR_FILE && S_ISDIR(entry_mode)) {
 			entry.tar_type = TAR_DIR;
 		}
 
@@ -1239,13 +1240,15 @@ nostub:
 			return EOF;
 		}
 #ifdef WORDS_BIGENDIAN
-# define PHAR_SET_32(var, buffer) \
-	*(uint32_t *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
-		| ((((unsigned char*)&(buffer))[2]) << 16) \
-		| ((((unsigned char*)&(buffer))[1]) << 8) \
-		| (((unsigned char*)&(buffer))[0]))
+# define PHAR_SET_32(destination, source) do { \
+        uint32_t swapped = (((((unsigned char*)&(source))[3]) << 24) \
+            | ((((unsigned char*)&(source))[2]) << 16) \
+            | ((((unsigned char*)&(source))[1]) << 8) \
+            | (((unsigned char*)&(source))[0])); \
+        memcpy(destination, &swapped, 4); \
+    } while (0);
 #else
-# define PHAR_SET_32(var, buffer) *(uint32_t *)(var) = (uint32_t) (buffer)
+# define PHAR_SET_32(destination, source) memcpy(destination, &source, 4)
 #endif
 		PHAR_SET_32(sigbuf, phar->sig_flags);
 		PHAR_SET_32(sigbuf + 4, signature_length);

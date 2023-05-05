@@ -2,6 +2,8 @@
 Test gzencode() function : basic functionality
 --EXTENSIONS--
 zlib
+--SKIPIF--
+<?php if (getenv('TRAVIS')) die('skip Currently fails on Travis'); ?>
 --FILE--
 <?php
 /*

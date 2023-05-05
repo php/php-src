@@ -355,7 +355,7 @@ ps_fetch_bit(zval * zv, const MYSQLND_FIELD * const field, const unsigned int pa
 
 
 /* {{{ _mysqlnd_init_ps_fetch_subsystem */
-void _mysqlnd_init_ps_fetch_subsystem()
+void _mysqlnd_init_ps_fetch_subsystem(void)
 {
 	memset(mysqlnd_ps_fetch_functions, 0, sizeof(mysqlnd_ps_fetch_functions));
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].func		= ps_fetch_null;
@@ -691,7 +691,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 					/*
 					  User hasn't sent anything, we will send empty string.
 					  Empty string has length of 0, encoded in 1 byte. No real
-					  data will follows after it.
+					  data will follow after it.
 					*/
 					(*data_size)++;
 				}

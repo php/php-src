@@ -39,7 +39,7 @@ static void sqlite3_param_dtor(zval *data);
 static int php_sqlite3_compare_stmt_zval_free(php_sqlite3_free_list **free_list, zval *statement);
 
 /* {{{ Error Handler */
-static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
+static void php_sqlite3_error(php_sqlite3_db_object *db_obj, const char *format, ...)
 {
 	va_list arg;
 	char 	*message;
@@ -1234,7 +1234,7 @@ PHP_METHOD(SQLite3, openBlob)
 {
 	php_sqlite3_db_object *db_obj;
 	zval *object = ZEND_THIS;
-	char *table, *column, *dbname = "main", *mode = "rb";
+	const char *table, *column, *dbname = "main", *mode = "rb";
 	size_t table_len, column_len, dbname_len;
 	zend_long rowid, flags = SQLITE_OPEN_READONLY, sqlite_flags = 0;
 	sqlite3_blob *blob = NULL;
@@ -1338,7 +1338,7 @@ PHP_METHOD(SQLite3, backup)
 {
 	php_sqlite3_db_object *source_obj;
 	php_sqlite3_db_object *destination_obj;
-	char *source_dbname = "main", *destination_dbname = "main";
+	const char *source_dbname = "main", *destination_dbname = "main";
 	size_t source_dbname_length, destination_dbname_length;
 	zval *source_zval = ZEND_THIS;
 	zval *destination_zval;

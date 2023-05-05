@@ -2,21 +2,19 @@
 Bug #60120 (proc_open hangs when data in stdin/out/err is getting larger or equal to 2048)
 --SKIPIF--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 if (!$php) {
     die("skip No php executable defined\n");
 }
+if (PHP_OS_FAMILY === 'Windows') die('skip not for Windows');
 ?>
 --FILE--
 <?php
 
 error_reporting(E_ALL);
 
-$php = getenv('TEST_PHP_EXECUTABLE');
-if (!$php) {
-    die("No php executable defined\n");
-}
-$cmd = 'php -r "fwrite(STDOUT, $in = file_get_contents(\'php://stdin\')); fwrite(STDERR, $in);"';
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+$cmd = $php . ' -r "\$in = file_get_contents(\'php://stdin\'); fwrite(STDOUT, \$in); fwrite(STDERR, \$in);"';
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));
 $stdin = str_repeat('*', 2049 );
 
@@ -32,6 +30,7 @@ $stdinOffset = 0;
 
 unset($pipes[0]);
 
+$procOutput = [];
 while ($pipes || $writePipes) {
     $r = $pipes;
     $w = $writePipes;
@@ -48,6 +47,8 @@ while ($pipes || $writePipes) {
         $written = fwrite($writePipes[0], substr($stdin, $stdinOffset), 8192);
         if (false !== $written) {
             $stdinOffset += $written;
+        } else {
+            die('Failed to write to pipe');
         }
         if ($stdinOffset >= $stdinLen) {
             fclose($writePipes[0]);
@@ -58,10 +59,19 @@ while ($pipes || $writePipes) {
     foreach ($r as $pipe) {
         $type = array_search($pipe, $pipes);
         $data = fread($pipe, 8192);
-        if (false === $data || feof($pipe)) {
+        if (feof($pipe)) {
             fclose($pipe);
             unset($pipes[$type]);
+        } elseif (false === $data) {
+            die('Failed to read from pipe');
+        } else {
+            $procOutput[$type] = ($procOutput[$type] ?? '') . $data;
         }
+    }
+}
+foreach ($procOutput as $output) {
+    if ($output !== $stdin) {
+        die('Output does not match input: ' . $output);
     }
 }
 echo "OK.";

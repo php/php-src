@@ -146,7 +146,37 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill sigsetjmp)
+AC_CHECK_FUNCS(getpid kill sigsetjmp pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack gettid)
+
+dnl Test whether the stack grows downwards
+dnl Assumes contiguous stack
+AC_MSG_CHECKING(whether the stack grows downwards)
+
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdint.h>
+
+int (*volatile f)(uintptr_t);
+
+int stack_grows_downwards(uintptr_t arg) {
+    int local;
+    return (uintptr_t)&local < arg;
+}
+
+int main(void) {
+    int local;
+
+    f = stack_grows_downwards;
+    return f((uintptr_t)&local) ? 0 : 1;
+}
+]])], [
+  AC_DEFINE([ZEND_STACK_GROWS_DOWNWARDS], 1, [Define if the stack grows downwards])
+  AC_DEFINE([ZEND_CHECK_STACK_LIMIT], 1, [Define if checking the stack limit is supported])
+  AC_MSG_RESULT(yes)
+], [
+  AC_MSG_RESULT(no)
+], [
+  AC_MSG_RESULT(no)
+])
 
 ZEND_CHECK_FLOAT_PRECISION
 ])
@@ -172,7 +202,7 @@ else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
-test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-strict-aliasing -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
+test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
 dnl Check if compiler supports -Wno-clobbered (only GCC)
 AX_CHECK_COMPILE_FLAG([-Wno-clobbered], CFLAGS="-Wno-clobbered $CFLAGS", , [-Werror])
 dnl Check for support for implicit fallthrough level 1, also add after previous CFLAGS as level 3 is enabled in -Wextra
@@ -220,7 +250,7 @@ typedef union _mm_align_test {
 #define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
 #endif
 
-int main()
+int main(void)
 {
   size_t i = ZEND_MM_ALIGNMENT;
   int zeros = 0;
@@ -272,15 +302,29 @@ fi
 AC_MSG_CHECKING(whether to enable zend signal handling)
 AC_MSG_RESULT($ZEND_SIGNALS)
 
-])
+dnl Don't enable Zend Max Execution Timers by default until PHP 8.3 to not break the ABI
+AC_ARG_ENABLE([zend-max-execution-timers],
+  [AS_HELP_STRING([--enable-zend-max-execution-timers],
+    [whether to enable zend max execution timers])],
+    [ZEND_MAX_EXECUTION_TIMERS=$enableval],
+    [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
 
-AC_MSG_CHECKING(whether /dev/urandom exists)
-if test -r "/dev/urandom" && test -c "/dev/urandom"; then
-  AC_DEFINE([HAVE_DEV_URANDOM], 1, [Define if the target system has /dev/urandom device])
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
+AS_CASE(["$host_alias"], [*linux*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
+
+PHP_CHECK_FUNC(timer_create, rt)
+if test "$ac_cv_func_timer_create" != "yes"; then
+  ZEND_MAX_EXECUTION_TIMERS='no'
 fi
+
+if test "$ZEND_MAX_EXECUTION_TIMERS" = "yes"; then
+  AC_DEFINE(ZEND_MAX_EXECUTION_TIMERS, 1, [Use zend max execution timers])
+  CFLAGS="$CFLAGS -DZEND_MAX_EXECUTION_TIMERS"
+fi
+
+AC_MSG_CHECKING(whether to enable zend max execution timers)
+AC_MSG_RESULT($ZEND_MAX_EXECUTION_TIMERS)
+
+])
 
 AC_ARG_ENABLE([gcc-global-regs],
   [AS_HELP_STRING([--disable-gcc-global-regs],

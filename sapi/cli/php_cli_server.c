@@ -208,7 +208,7 @@ typedef struct php_cli_server_http_response_status_code_pair {
 	const char *str;
 } php_cli_server_http_response_status_code_pair;
 
-static php_cli_server_http_response_status_code_pair template_map[] = {
+static const php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 405, "<h1>%s</h1><p>Requested method not allowed.</p>" },
@@ -270,10 +270,10 @@ static bool php_cli_server_get_system_time(char *buf) {
 
 	gettimeofday(&tv, NULL);
 
-	/* TODO: should be checked for NULL tm/return value */
-	php_localtime_r(&tv.tv_sec, &tm);
-	php_asctime_r(&tm, buf);
-	return true;
+	if (!php_localtime_r(&tv.tv_sec, &tm)) {
+		return false;
+	}
+	return php_asctime_r(&tm, buf) != NULL;
 }
 #endif
 
@@ -696,7 +696,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 		}
 	}
 	{
-		zend_string *tmp = strpprintf(0, "PHP %s Development Server", PHP_VERSION);
+		zend_string *tmp = strpprintf(0, "PHP/%s (Development Server)", PHP_VERSION);
 		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_SOFTWARE", strlen("SERVER_SOFTWARE"), tmp);
 		zend_string_release_ex(tmp, /* persistent */ false);
 	}
@@ -865,7 +865,6 @@ static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct time
 	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, tv);
 } /* }}} */
 
-// TODO Return value is unused, refactor?
 static zend_result php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, zend_result(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
 {
 	zend_result retval = SUCCESS;
@@ -1786,8 +1785,10 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 	php_cli_server_client *client = parser->data;
 	client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
 	php_cli_server_request_translate_vpath(&client->request, client->server->document_root, client->server->document_root_len);
-	{
-		const char *vpath = client->request.vpath, *end = vpath + client->request.vpath_len, *p = end;
+	if (client->request.vpath) {
+		const char *vpath = client->request.vpath;
+		const char *end = vpath + client->request.vpath_len;
+		const char *p = end;
 		client->request.ext = end;
 		client->request.ext_len = 0;
 		while (p > vpath) {
@@ -2214,10 +2215,9 @@ static void php_cli_server_request_shutdown(php_cli_server *server, php_cli_serv
 }
 /* }}} */
 
-// TODO Use bool, return value is strange
-static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
-	int decline = 0;
+	bool decline = false;
 	zend_file_handle zfd;
 	char *old_cwd;
 
@@ -2253,7 +2253,6 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 }
 /* }}} */
 
-// TODO Return FAILURE on error? Or voidify as return value of function not checked
 static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	int is_static_file  = 0;
@@ -2269,7 +2268,7 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 	if (server->router || !is_static_file) {
 		if (FAILURE == php_cli_server_request_startup(server, client)) {
 			php_cli_server_request_shutdown(server, client);
-			return SUCCESS;
+			return FAILURE;
 		}
 	}
 
@@ -2610,8 +2609,7 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 				return php_cli_server_send_error_page(server, client, 501);
 			}
 			php_cli_server_poller_remove(&server->poller, POLLIN, client->sock);
-			php_cli_server_dispatch(server, client);
-			return SUCCESS;
+			return php_cli_server_dispatch(server, client);
 		case 0:
 			php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
 			return SUCCESS;
@@ -2657,7 +2655,6 @@ typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 	zend_result(*whandler)(php_cli_server*, php_cli_server_client*);
 } php_cli_server_do_event_for_each_fd_callback_params;
 
-// TODO return FAILURE on failure???
 static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
@@ -2677,12 +2674,12 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 				efree(errstr);
 			}
 			pefree(sa, 1);
-			return SUCCESS;
+			return FAILURE;
 		}
 		if (SUCCESS != php_set_sock_blocking(client_sock, 0)) {
 			pefree(sa, 1);
 			closesocket(client_sock);
-			return SUCCESS;
+			return FAILURE;
 		}
 		client = pemalloc(sizeof(php_cli_server_client), 1);
 
@@ -2717,10 +2714,11 @@ static void php_cli_server_do_event_for_each_fd(php_cli_server *server,
 		whandler
 	};
 
-	php_cli_server_poller_iter_on_active(&server->poller, &params, php_cli_server_do_event_for_each_fd_callback);
+	if (SUCCESS != php_cli_server_poller_iter_on_active(&server->poller, &params, php_cli_server_do_event_for_each_fd_callback)) {
+		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to poll event");
+	}
 } /* }}} */
 
-// TODO Return value of function is not used
 static zend_result php_cli_server_do_event_loop(php_cli_server *server) /* {{{ */
 {
 	zend_result retval = SUCCESS;
@@ -2763,7 +2761,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 {
 	char *php_optarg = NULL;
 	int php_optind = 1;
-	int c;
+	int c, r;
 	const char *server_bind_address = NULL;
 	extern const opt_struct OPTIONS[];
 	const char *document_root = NULL;
@@ -2841,6 +2839,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	sapi_module.phpinfo_as_text = 0;
 
 	{
+		r = 0;
 		bool ipv6 = strchr(server.host, ':');
 		php_cli_server_logf(
 			PHP_CLI_SERVER_LOG_PROCESS,
@@ -2859,7 +2858,9 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 
 	zend_signal_init();
 
-	php_cli_server_do_event_loop(&server);
+	if (SUCCESS != php_cli_server_do_event_loop(&server)) {
+		r = 1;
+	}
 	php_cli_server_dtor(&server);
-	return 0;
+	return r;
 } /* }}} */

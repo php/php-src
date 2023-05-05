@@ -46,6 +46,55 @@
 
 size_t fpm_pagesize;
 
+
+static inline bool fpm_unix_is_id(const char* name)
+{
+	return strlen(name) == strspn(name, "0123456789");
+}
+
+static struct passwd *fpm_unix_get_passwd(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	struct passwd *pwd = getpwnam(name);
+	if (!pwd) {
+		zlog(flags, "[pool %s] cannot get uid for user '%s'", wp->config->name, name);
+		return NULL;
+	}
+
+	return pwd;
+}
+
+static inline bool fpm_unix_check_passwd(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	return !name || fpm_unix_is_id(name) || fpm_unix_get_passwd(wp, name, flags);
+}
+
+static struct group *fpm_unix_get_group(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	struct group *group = getgrnam(name);
+	if (!group) {
+		zlog(flags, "[pool %s] cannot get gid for group '%s'", wp->config->name, name);
+		return NULL;
+	}
+
+	return group;
+}
+
+static inline bool fpm_unix_check_group(struct fpm_worker_pool_s *wp, const char *name, int flags)
+{
+	return !name || fpm_unix_is_id(name) || fpm_unix_get_group(wp, name, flags);
+}
+
+bool fpm_unix_test_config(struct fpm_worker_pool_s *wp)
+{
+	struct fpm_worker_pool_config_s *config = wp->config;
+	return (
+		fpm_unix_check_passwd(wp, config->user, ZLOG_ERROR) &&
+		fpm_unix_check_group(wp, config->group, ZLOG_ERROR) &&
+		fpm_unix_check_passwd(wp, config->listen_owner, ZLOG_SYSERROR) &&
+		fpm_unix_check_group(wp, config->listen_group, ZLOG_SYSERROR)
+	);
+}
+
 int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct fpm_worker_pool_config_s *c = wp->config;
@@ -105,11 +154,10 @@ int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 				if ((end = strchr(p, ','))) {
 					*end++ = 0;
 				}
-				pwd = getpwnam(p);
+				pwd = fpm_unix_get_passwd(wp, p, ZLOG_SYSERROR);
 				if (pwd) {
 					zlog(ZLOG_DEBUG, "[pool %s] user '%s' have uid=%d", wp->config->name, p, pwd->pw_uid);
 				} else {
-					zlog(ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, p);
 					acl_free(acl);
 					efree(tmp);
 					return -1;
@@ -138,11 +186,10 @@ int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 				if ((end = strchr(p, ','))) {
 					*end++ = 0;
 				}
-				grp = getgrnam(p);
+				grp = fpm_unix_get_group(wp, p, ZLOG_SYSERROR);
 				if (grp) {
 					zlog(ZLOG_DEBUG, "[pool %s] group '%s' have gid=%d", wp->config->name, p, grp->gr_gid);
 				} else {
-					zlog(ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, p);
 					acl_free(acl);
 					efree(tmp);
 					return -1;
@@ -175,14 +222,13 @@ int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 #endif
 
 	if (c->listen_owner && *c->listen_owner) {
-		if (strlen(c->listen_owner) == strspn(c->listen_owner, "0123456789")) {
+		if (fpm_unix_is_id(c->listen_owner)) {
 			wp->socket_uid = strtoul(c->listen_owner, 0, 10);
 		} else {
 			struct passwd *pwd;
 
-			pwd = getpwnam(c->listen_owner);
+			pwd = fpm_unix_get_passwd(wp, c->listen_owner, ZLOG_SYSERROR);
 			if (!pwd) {
-				zlog(ZLOG_SYSERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, c->listen_owner);
 				return -1;
 			}
 
@@ -192,14 +238,13 @@ int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 	if (c->listen_group && *c->listen_group) {
-		if (strlen(c->listen_group) == strspn(c->listen_group, "0123456789")) {
+		if (fpm_unix_is_id(c->listen_group)) {
 			wp->socket_gid = strtoul(c->listen_group, 0, 10);
 		} else {
 			struct group *grp;
 
-			grp = getgrnam(c->listen_group);
+			grp = fpm_unix_get_group(wp, c->listen_group, ZLOG_SYSERROR);
 			if (!grp) {
-				zlog(ZLOG_SYSERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, c->listen_group);
 				return -1;
 			}
 			wp->socket_gid = grp->gr_gid;
@@ -279,7 +324,7 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (is_root) {
 		if (wp->config->user && *wp->config->user) {
-			if (strlen(wp->config->user) == strspn(wp->config->user, "0123456789")) {
+			if (fpm_unix_is_id(wp->config->user)) {
 				wp->set_uid = strtoul(wp->config->user, 0, 10);
 				pwd = getpwuid(wp->set_uid);
 				if (pwd) {
@@ -289,9 +334,8 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 			} else {
 				struct passwd *pwd;
 
-				pwd = getpwnam(wp->config->user);
+				pwd = fpm_unix_get_passwd(wp, wp->config->user, ZLOG_ERROR);
 				if (!pwd) {
-					zlog(ZLOG_ERROR, "[pool %s] cannot get uid for user '%s'", wp->config->name, wp->config->user);
 					return -1;
 				}
 
@@ -304,14 +348,13 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 		}
 
 		if (wp->config->group && *wp->config->group) {
-			if (strlen(wp->config->group) == strspn(wp->config->group, "0123456789")) {
+			if (fpm_unix_is_id(wp->config->group)) {
 				wp->set_gid = strtoul(wp->config->group, 0, 10);
 			} else {
 				struct group *grp;
 
-				grp = getgrnam(wp->config->group);
+				grp = fpm_unix_get_group(wp, wp->config->group, ZLOG_ERROR);
 				if (!grp) {
-					zlog(ZLOG_ERROR, "[pool %s] cannot get gid for group '%s'", wp->config->name, wp->config->group);
 					return -1;
 				}
 				wp->set_gid = grp->gr_gid;

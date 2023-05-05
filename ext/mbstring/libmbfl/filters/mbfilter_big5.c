@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter_tw.c
+ * The source code included in this file was separated from mbfilter_tw.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
@@ -69,7 +69,8 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	&vtbl_big5_wchar,
 	&vtbl_wchar_big5,
 	mb_big5_to_wchar,
-	mb_wchar_to_big5
+	mb_wchar_to_big5,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_cp950 = {
@@ -82,7 +83,8 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 	&vtbl_cp950_wchar,
 	&vtbl_wchar_cp950,
 	mb_cp950_to_wchar,
-	mb_wchar_to_cp950
+	mb_wchar_to_cp950,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_big5_wchar = {
@@ -391,19 +393,28 @@ static size_t mb_big5_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 
+	e--; /* Stop the main loop 1 byte short of the end of the input */
+
 	while (p < e && out < limit) {
 		unsigned char c = *p++;
 
 		if (c <= 0x7F) {
 			*out++ = c;
-		} else if (c > 0xA0 && c <= 0xF9 && c != 0xC8 && p < e) {
+		} else if (c > 0xA0 && c <= 0xF9) {
+			/* We don't need to check p < e here; it's not possible that this pointer dereference
+			 * will be outside the input string, because of e-- above */
 			unsigned char c2 = *p++;
 
 			if ((c2 >= 0x40 && c2 <= 0x7E) || (c2 >= 0xA1 && c2 <= 0xFE)) {
-				unsigned int w = ((c - 0xA1)*157) + c2 - ((c2 <= 0x7E) ? 0x40 : 0xA1 - 0x3F);
-				w = (w < big5_ucs_table_size) ? big5_ucs_table[w] : 0;
-				if (!w)
+				unsigned int w = (c - 0xA1)*157 + c2 - ((c2 <= 0x7E) ? 0x40 : 0xA1 - 0x3F);
+				ZEND_ASSERT(w < big5_ucs_table_size);
+				w = big5_ucs_table[w];
+				if (!w) {
+					if (c == 0xC8) {
+						p--;
+					}
 					w = MBFL_BAD_INPUT;
+				}
 				*out++ = w;
 			} else {
 				*out++ = MBFL_BAD_INPUT;
@@ -413,7 +424,13 @@ static size_t mb_big5_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 		}
 	}
 
-	*in_len = e - p;
+	/* Finish up last byte of input string if there is one */
+	if (p == e && out < limit) {
+		unsigned char c = *p++;
+		*out++ = (c <= 0x7F) ? c : MBFL_BAD_INPUT;
+	}
+
+	*in_len = e - p + 1;
 	*in = p;
 	return out - buf;
 }

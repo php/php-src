@@ -12,7 +12,7 @@
  *  -------------------------------------------------  *
  *  |  0  |  4  |  8  |  12 |  16 |  20 |  24 |  28 |  *
  *  -------------------------------------------------  *
- *  |    TOC    |    R14    |    R15    |    R16    |  *
+ *  |    R13    |    R14    |    R15    |    R16    |  *
  *  -------------------------------------------------  *
  *  -------------------------------------------------  *
  *  |  8  |  9  |  10 |  11 |  12 |  13 |  14 |  15 |  *
@@ -61,7 +61,7 @@
  *  -------------------------------------------------  *
  *  | 224 | 228 | 232 | 236 | 240 | 244 | 248 | 252 |  *
  *  -------------------------------------------------  *
- *  | TOC saved |    FCTX   |    DATA   |           |  *
+ *  |    FCTX   |    DATA   |           |           |  *
  *  -------------------------------------------------  *
  *                                                     *
 
@@ -77,19 +77,19 @@ _make_fcontext:
 
     ; reserve space for context-data on context-stack
     ; including 64 byte of linkage + parameter area (R1  16 == 0)
-    subi  r3, r3, 248
+    subi  r3, r3, 240
 
     ; third arg of make_fcontext() == address of context-function
     stw  r5, 176(r3)
 
     ; set back-chain to zero
-    li   %r0, 0
-    std  %r0, 184(%r3)
+    li   r0, 0
+    std  r0, 184(r3)
 
     ; compute address of returned transfer_t
-    addi %r0, %r3, 232
-    mr   %r4, %r0
-    std  %r4, 152(%r3)
+    addi r0, r3, 224
+    mr   r4, r0
+    std  r4, 152(r3)
 
     ; load LR
     mflr  r0

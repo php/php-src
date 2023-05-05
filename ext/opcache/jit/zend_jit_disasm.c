@@ -21,7 +21,7 @@
 
 #ifdef HAVE_CAPSTONE
 # define HAVE_DISASM 1
-# include <capstone/capstone.h>
+# include <capstone.h>
 # define HAVE_CAPSTONE_ITER 1
 #elif ZEND_JIT_TARGET_X86
 # define HAVE_DISASM 1
@@ -262,7 +262,7 @@ static const char* zend_jit_disasm_resolver(
 	((void)ud);
 # endif
 	const char *name;
-	void *a = (void*)(zend_uintptr_t)(addr);
+	void *a = (void*)(uintptr_t)(addr);
 	Dl_info info;
 
 	name = zend_jit_disasm_find_symbol(addr, offset);
@@ -659,6 +659,10 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_cv_to_typed_ref);
+	REGISTER_HELPER(zend_jit_assign_const_to_typed_ref2);
+	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref2);
+	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref2);
+	REGISTER_HELPER(zend_jit_assign_cv_to_typed_ref2);
 	REGISTER_HELPER(zend_jit_pre_inc_typed_ref);
 	REGISTER_HELPER(zend_jit_pre_dec_typed_ref);
 	REGISTER_HELPER(zend_jit_post_inc_typed_ref);

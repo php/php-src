@@ -1,4 +1,4 @@
-.TH @program_prefix@php\-config 1 "2022" "The PHP Group" "Scripting Language"
+.TH @program_prefix@php\-config 1 "2023" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@php\-config \- get information about PHP configuration and compile options
 .SH SYNOPSIS

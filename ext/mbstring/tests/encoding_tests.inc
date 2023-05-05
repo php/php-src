@@ -3,6 +3,26 @@
 // Common code for tests which focus on conversion and verification of text
 // in some specific encoding
 
+// Test failed limit. If you want to execute all tests, set to -1.
+$testFailedLimit = 1000;
+// Test failed counter
+$testFailedCounter = 0;
+
+// Count tests failed. If tests failed are more than $testFailedLimit, stop testing.
+function testFailedIncrement() {
+    global $testFailedCounter, $testFailedLimit;
+
+    // $testFailedLimit is -1, no limit.
+    if ($testFailedLimit === -1)
+        return;
+
+    $testFailedCounter++;
+    if ($testFailedCounter < $testFailedLimit)
+        return;
+
+    die("=== Failed test " . $testFailedLimit . " times exceeded, stop testing ===");
+}
+
 // Read a file with one character and its equivalent Unicode codepoint on each
 // line, delimited by tabs
 function readConversionTable($path, &$from, &$to, $utf32 = false) {
@@ -51,27 +71,33 @@ function dbgPrint($str) {
 
 function identifyValidString($goodString, $encoding) {
     $result = mb_check_encoding($goodString, $encoding);
-    if (!$result)
-        die("mb_check_encoding failed on good $encoding string: " . dbgPrint($goodString));
+    if (!$result) {
+        echo "mb_check_encoding failed on good $encoding string: " . dbgPrint($goodString) . PHP_EOL;
+        testFailedIncrement();
+    }
 }
 
 function identifyInvalidString($badString, $encoding) {
     $result = mb_check_encoding($badString, $encoding);
     if ($result)
-        die("mb_check_encoding passed on bad $encoding string: " . dbgPrint($badString));
+        echo "mb_check_encoding passed on bad $encoding string: " . dbgPrint($badString) . PHP_EOL;
 }
 
 function testConversion($fromString, $toString, $fromEncoding, $toEncoding) {
     $result = mb_convert_encoding($fromString, $toEncoding, $fromEncoding);
-    if ($result !== $toString)
-        die("mb_convert_encoding not working on $fromEncoding input: " . dbgPrint($fromString) . "\nExpected $toEncoding: " . dbgPrint($toString) . "\nActually got: " . dbgPrint($result));
+    if ($result !== $toString) {
+        echo "mb_convert_encoding not working on $fromEncoding input: " . dbgPrint($fromString) . "\nExpected $toEncoding: " . dbgPrint($toString) . "\nActually got: " . dbgPrint($result) . PHP_EOL;
+        testFailedIncrement();
+    }
 }
 
 function testValidConversion($fromString, $toString, $fromEncoding, $toEncoding) {
     $illegalChars = mb_get_info('illegal_chars');
     testConversion($fromString, $toString, $fromEncoding, $toEncoding);
-    if (mb_get_info('illegal_chars') !== $illegalChars)
-        die("mb_convert_encoding incremented illegal_chars on valid $fromEncoding string: " . dbgPrint($fromString) . " when converting to $toEncoding");
+    if (mb_get_info('illegal_chars') !== $illegalChars) {
+        echo "mb_convert_encoding incremented illegal_chars on valid $fromEncoding string: " . dbgPrint($fromString) . " when converting to $toEncoding" . PHP_EOL;
+        testFailedIncrement();
+    }
 }
 
 function convertValidString($fromString, $toString, $fromEncoding, $toEncoding, $bothWays = true) {
@@ -83,8 +109,10 @@ function convertValidString($fromString, $toString, $fromEncoding, $toEncoding, 
 function convertInvalidString($fromString, $toString, $fromEncoding, $toEncoding) {
     $illegalChars = mb_get_info('illegal_chars');
     testConversion($fromString, $toString, $fromEncoding, $toEncoding);
-    if (mb_get_info('illegal_chars') <= $illegalChars)
-        die("mb_convert_encoding did not increment illegal_chars on invalid $fromEncoding string: " . dbgPrint($fromString) . " when converting to $toEncoding");
+    if (mb_get_info('illegal_chars') <= $illegalChars) {
+        echo "mb_convert_encoding did not increment illegal_chars on invalid $fromEncoding string: " . dbgPrint($fromString) . " when converting to $toEncoding" . PHP_EOL;
+        testFailedIncrement();
+    }
 }
 
 function testValidString($fromString, $toString, $fromEncoding, $toEncoding, $bothWays = true) {

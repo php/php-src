@@ -83,7 +83,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	}
 
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
-	if (FAILURE == php_random_bytes_silent(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
+	if (FAILURE == php_random_bytes_throw(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
 		zend_value_error("Unable to generate salt");
 		zend_string_release_ex(buffer, 0);
 		return NULL;
@@ -497,14 +497,14 @@ static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str
 #else
 		case 2:
 			{
-			zend_string *n = zend_string_init("argon2i", sizeof("argon2i")-1, 0);
+			zend_string *n = ZSTR_INIT_LITERAL("argon2i", 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;
 			}
 		case 3:
 			{
-			zend_string *n = zend_string_init("argon2id", sizeof("argon2id")-1, 0);
+			zend_string *n = ZSTR_INIT_LITERAL("argon2id", 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;

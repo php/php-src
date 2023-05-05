@@ -71,6 +71,18 @@ class Spoofchecker
      * @cvalue USPOOF_SINGLE_SCRIPT_RESTRICTIVE
      */
     public const SINGLE_SCRIPT_RESTRICTIVE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue USPOOF_MIXED_NUMBERS
+     */
+    public const MIXED_NUMBERS = UNKNOWN;
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 62
+    /**
+     * @var int
+     * @cvalue USPOOF_HIDDEN_OVERLAY
+     */
+    public const HIDDEN_OVERLAY = UNKNOWN;
 #endif
 
     public function __construct() {}

@@ -31,7 +31,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t);
 static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
 
 /*
@@ -829,19 +829,21 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	uint32_t cops = CG(compiler_options);
 	zend_string *bp_code;
 
-	switch (param->type) {
-	    case STR_PARAM:
-		case NUMERIC_FUNCTION_PARAM:
-		case METHOD_PARAM:
-		case NUMERIC_METHOD_PARAM:
-		case FILE_PARAM:
-		case ADDR_PARAM:
-		    /* do nothing */
-		break;
+	if (param) {
+		switch (param->type) {
+			case STR_PARAM:
+			case NUMERIC_FUNCTION_PARAM:
+			case METHOD_PARAM:
+			case NUMERIC_METHOD_PARAM:
+			case FILE_PARAM:
+			case ADDR_PARAM:
+				/* do nothing */
+			break;
 
-		default:
-			phpdbg_error("Invalid parameter type for conditional breakpoint");
-			return;
+			default:
+				phpdbg_error("Invalid parameter type for conditional breakpoint");
+				return;
+		}
 	}
 
 	PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_COND);
@@ -1007,7 +1009,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 	return (phpdbg_breakbase_t *) brake;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t opcode) /* {{{ */
 {
 	const char *opname = zend_get_opcode_name(opcode);
 

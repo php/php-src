@@ -39,15 +39,14 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 	int callers_limit = child->wp->config->request_slowlog_trace_depth;
 	pid_t pid = child->pid;
 	struct timeval tv;
-	static const int buf_size = 1024;
-	char buf[buf_size];
+	char buf[1024];
 	long execute_data;
 	long path_translated;
 	long l;
 
 	gettimeofday(&tv, 0);
 
-	zlog_print_time(&tv, buf, buf_size);
+	zlog_print_time(&tv, buf, sizeof(buf));
 
 	fprintf(slowlog, "\n%s [pool %s] pid %d\n", buf, child->wp->config->name, (int) pid);
 
@@ -57,7 +56,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 	path_translated = l;
 
-	if (0 > fpm_trace_get_strz(buf, buf_size, path_translated)) {
+	if (0 > fpm_trace_get_strz(buf, sizeof(buf), path_translated)) {
 		return -1;
 	}
 
@@ -103,7 +102,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					ZEND_UNREACHABLE();
 				}
 			} else {
-				if (0 > fpm_trace_get_strz(buf, buf_size, function_name + offsetof(zend_string, val))) {
+				if (0 > fpm_trace_get_strz(buf, sizeof(buf), function_name + offsetof(zend_string, val))) {
 					return -1;
 				}
 
@@ -149,7 +148,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 				file_name = l;
 
-				if (0 > fpm_trace_get_strz(buf, buf_size, file_name + offsetof(zend_string, val))) {
+				if (0 > fpm_trace_get_strz(buf, sizeof(buf), file_name + offsetof(zend_string, val))) {
 					return -1;
 				}
 

@@ -16,10 +16,67 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 
 * zend_class_entry now possesses a default_object_handlers field, which
   provides a default object handler when create_object() is not overriding it.
+* Custom Fiber implementations have to initialize EG(stack_limit) and
+  EG(stack_base).
+* EG(opline_before_exception) may now be null if the VM throws an exception
+  before executing any opline.
+* Many C header files have been cleaned up and include dependencies
+  have been reduced.  Many headers which used to be always included by
+  Zend headers (e.g. "errno.h") are no longer implied, and this may
+  break the build of third-party extensions which relied on this
+  implementation detail.  Those extensions may need to add the missing
+  #include lines.
+* Since version 8, PHP requires a C99 compiler.  Configure-time checks
+  for C99 features have been removed and therefore macro definitions
+  from php_config.h have disappeared.  Do not use those feature
+  macros.
+* Internal class aliases created during request time can now exist in
+  the class table. zend_register_class_alias_ex() will not increase
+  the refcount for class aliases and the cleanup function takes this
+  into account.
+* The return types of the following functions have been changed from
+  `bool` to `zend_result`:
+  - zend_fiber_init_context()
+* The fast_add_function() has been removed, use add_function() that will
+  call the static inline add_function_fast() instead.
+* The order of members of zend_op_array, zend_ssa_var, zend_ssa_var_info,
+  zend_executor_globals and php_core_globals have changed to improve
+  struct packing which reduces their size.
+* The name field have been removed from the zend_constant struct. Now,
+  constant names are only stored as keys of the global constants table.
+  That's why the `zend_register_constant()` function now expects the
+  constant name as its first parameter.
+* Many calls to zend_assign_to_variable have been replaced with
+  zend_assign_to_variable_ex which allows delaying the releasing of the old
+  variable value. This avoids side-effects through destructors between the
+  assignment of the variable and the assignment to the result zval in the VM
+  (i.e. it may free the new value). See GH-10168 for details.
+* The return types of the following functions were changed from int to
+  zend_result:
+  - open_file_for_scanning
+  - php_rfc1867_callback
+  - virtual_chdir
+  - zend_execute_scripts
+  - zend_get_module_started
+  - zend_handle_undef_args
+  - zend_list_delete
+  - zend_multibyte_parse_encoding_list
+  - zend_multibyte_set_internal_encoding
+  - zend_parse_ini_file
+  - zend_parse_ini_string
+  - zend_set_user_opcode_handler
+  - zend_ssa_inference
+* Removed unused macros PHP_FNV1_32A_INIT and PHP_FNV1A_64_INIT. See GH-11114.
 
 ========================
 2. Build system changes
 ========================
+
+* Removed the HAVE_DEV_URANDOM compile time check.  HAVE_DEV_URANDOM will
+  now never be defined. Any checks relying on HAVE_DEV_URANDOM should be
+  removed.  Even with HAVE_DEV_URANDOM it was not guaranteed that
+  /dev/urandom is actually available at run time and thus a runtime
+  check needs to happen in all cases.
 
 ========================
 3. Module changes
@@ -28,6 +85,37 @@ PHP 8.3 INTERNALS UPGRADE NOTES
  a. ext/json
    - A new function php_json_validate_ex has been added to check if the
      provided C string is valid for the given depth and options.
+
+ b. ext/standard
+   - The PHPAPI php_url_encode_hash_ex() function has had its signature change
+     from:
+     PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
+     				const char *num_prefix, size_t num_prefix_len,
+     				const char *key_prefix, size_t key_prefix_len,
+     				const char *key_suffix, size_t key_suffix_len,
+     				zval *type, const char *arg_sep, int enc_type);
+     to:
+     PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
+     				const char *num_prefix, size_t num_prefix_len,
+     				const zend_string *key_prefix,
+     				zval *type, const zend_string *arg_sep, int enc_type);
+     The change to use zend_string prevent the computation of the arg_sep
+     length at each call. The key_suffix parameter was dropped as it was a
+     constant value and depended on the key_prefix parameter to not be NULL.
+
+ c. ext/mysqlnd
+   - The function mysqlnd_shutdown and its corresponding internal methods
+   mysqlnd_command::shutdown & mysqlnd_conn_data::shutdown have been removed.
+   These functions are deprecated by MySQL in favour of SHUTDOWN SQL statement.
+
+ d. ext/pcre
+   - The function pcre_get_compiled_regex_ex has been removed.
+   Use pcre_get_compiled_regex instead.
+
+ e. ext/spl
+   - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
+     There are no functional changes.
+
 ========================
 4. OpCode changes
 ========================
@@ -35,3 +123,6 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+* SAPIs that may execute in alternative stacks have to set EG(stack_limit) and
+  EG(stack_base)

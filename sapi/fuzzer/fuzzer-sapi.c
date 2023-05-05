@@ -144,7 +144,8 @@ int fuzzer_init_php(const char *extra_ini)
 	if (extra_ini) {
 		ini_len += extra_ini_len + 1;
 	}
-	char *p = fuzzer_module.ini_entries = malloc(ini_len + 1);
+	char *p = malloc(ini_len + 1);
+	fuzzer_module.ini_entries = p;
 	memcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
 	p += sizeof(HARDCODED_INI) - 1;
 	if (extra_ini) {
@@ -234,7 +235,7 @@ int fuzzer_shutdown_php(void)
 	php_module_shutdown();
 	sapi_shutdown();
 
-	free(fuzzer_module.ini_entries);
+	free((void *)fuzzer_module.ini_entries);
 	return SUCCESS;
 }
 
@@ -261,7 +262,9 @@ int fuzzer_do_request_from_buffer(
 		zend_file_handle file_handle;
 		zend_stream_init_filename(&file_handle, filename);
 		file_handle.primary_script = 1;
-		file_handle.buf = estrndup(data, data_len);
+		file_handle.buf = emalloc(data_len + ZEND_MMAP_AHEAD);
+		memcpy(file_handle.buf, data, data_len);
+		memset(file_handle.buf + data_len, 0, ZEND_MMAP_AHEAD);
 		file_handle.len = data_len;
 		/* Avoid ZEND_HANDLE_FILENAME for opcache. */
 		file_handle.type = ZEND_HANDLE_STREAM;

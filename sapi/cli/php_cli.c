@@ -558,16 +558,13 @@ static void cli_register_file_handles(void)
 	php_stream_to_zval(s_err, &ec.value);
 
 	Z_CONSTANT_FLAGS(ic.value) = 0;
-	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
-	zend_register_constant(&ic);
+	zend_register_internal_constant("STDIN", sizeof("STDIN")-1, &ic);
 
 	Z_CONSTANT_FLAGS(oc.value) = 0;
-	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
-	zend_register_constant(&oc);
+	zend_register_internal_constant("STDOUT", sizeof("STDOUT")-1, &oc);
 
 	Z_CONSTANT_FLAGS(ec.value) = 0;
-	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
-	zend_register_constant(&ec);
+	zend_register_internal_constant("STDERR", sizeof("STDERR")-1, &ec);
 }
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
@@ -632,7 +629,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				request_started = 1;
 				php_print_info(PHP_INFO_ALL & ~PHP_INFO_CREDITS);
 				php_output_end_all();
-				EG(exit_status) = (c == '?' && argc > 1 && !strchr(argv[1],  c));
+				EG(exit_status) = 0;
 				goto out;
 
 			case 'v': /* show php version & quit */
@@ -954,9 +951,7 @@ do_repeat:
 		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (script_file) {
-				cli_register_file_handles();
-			}
+			cli_register_file_handles();
 
 			if (interactive) {
 				EG(exit_status) = cli_shell_callbacks.cli_shell_run();

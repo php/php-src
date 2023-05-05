@@ -42,6 +42,11 @@ class Response
     private $expectInvalid;
 
     /**
+     * @var bool
+     */
+    private bool $debugOutputted = false;
+
+    /**
      * @param string|array|null $data
      * @param bool              $expectInvalid
      */
@@ -71,9 +76,9 @@ class Response
             $body = implode("\n", $body);
         }
 
-        if (!$this->checkIfValid()) {
+        if ( ! $this->checkIfValid()) {
             $this->error('Response is invalid');
-        } elseif (!$this->checkDefaultHeaders($contentType)) {
+        } elseif ( ! $this->checkDefaultHeaders($contentType)) {
             $this->error('Response default headers not found');
         } elseif ($body !== $this->rawBody) {
             if ($multiLine) {
@@ -146,6 +151,57 @@ class Response
     }
 
     /**
+     * Expect error pattern in the response.
+     *
+     * @param string $errorMessagePattern Expected error message RegExp patter.
+     *
+     * @return Response
+     */
+    public function expectErrorPattern(string $errorMessagePattern): Response
+    {
+        $errorData = $this->getErrorData();
+        if (preg_match($errorMessagePattern, $errorData) === 0) {
+            $this->error(
+                "The expected error pattern $errorMessagePattern does not match the returned error '$errorData'"
+            );
+            $this->debugOutput();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Expect response status.
+     *
+     * @param string|null $status Expected status.
+     *
+     * @return Response
+     */
+    public function expectStatus(string|null $status): Response {
+        $headers = $this->getHeaders();
+        if (is_null($status) && !isset($headers['status'])) {
+            return $this;
+        }
+        if (!is_null($status) && !isset($headers['status'])) {
+            $this->error('Status is expected but not supplied');
+        } elseif ($status !== $headers['status']) {
+            $statusMessage = $status === null ? "expected not to be set": "expected to be $status";
+            $this->error("Status is $statusMessage but the actual value is {$headers['status']}");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Expect response status not to be set.
+     *
+     * @return Response
+     */
+    public function expectNoStatus(): Response {
+        return $this->expectStatus(null);
+    }
+
+    /**
      * Expect no error in the response.
      *
      * @return Response
@@ -198,6 +254,8 @@ class Response
         echo "----------------- ERR -----------------\n";
         echo $this->data['err_response'] . "\n";
         echo "---------------------------------------\n\n";
+
+        $this->debugOutputted = true;
     }
 
     /**
@@ -357,8 +415,11 @@ class Response
      *
      * @return bool
      */
-    private function error($message): bool
+    private function error(string $message): bool
     {
+        if ( ! $this->debugOutputted) {
+            $this->debugOutput();
+        }
         echo "ERROR: $message\n";
 
         return false;

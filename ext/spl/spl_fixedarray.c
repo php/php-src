@@ -83,6 +83,11 @@ static bool spl_fixedarray_empty(spl_fixedarray *array)
 	return true;
 }
 
+static void spl_fixedarray_illegal_offset(const zval *offset)
+{
+	zend_type_error("Cannot access offset of type %s on FixedArray", zend_get_type_by_const(Z_TYPE_P(offset)));
+}
+
 static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
@@ -333,7 +338,7 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			return Z_RES_HANDLE_P(offset);
 	}
 
-	zend_type_error("Illegal offset type");
+	spl_fixedarray_illegal_offset(offset);
 	return 0;
 }
 
@@ -581,8 +586,8 @@ PHP_METHOD(SplFixedArray, __serialize)
 		RETURN_THROWS();
 	}
 
-	uint32_t num_properties =
-		intern->std.properties ? zend_hash_num_elements(intern->std.properties) : 0;
+	HashTable *ht = zend_std_get_properties(&intern->std);
+	uint32_t num_properties = zend_hash_num_elements(ht);
 	array_init_size(return_value, intern->array.size + num_properties);
 
 	/* elements */
@@ -593,12 +598,15 @@ PHP_METHOD(SplFixedArray, __serialize)
 	}
 
 	/* members */
-	if (intern->std.properties) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(intern->std.properties, key, current) {
-			zend_hash_add(Z_ARRVAL_P(return_value), key, current);
+	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(ht, key, current) {
+		/* If the properties table was already rebuild, it will also contain the
+		 * array elements. The array elements are already added in the above loop.
+		 * We can detect array elements by the fact that their key == NULL. */
+		if (key != NULL) {
+			zend_hash_add_new(Z_ARRVAL_P(return_value), key, current);
 			Z_TRY_ADDREF_P(current);
-		} ZEND_HASH_FOREACH_END();
-	}
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 PHP_METHOD(SplFixedArray, __unserialize)
@@ -922,7 +930,7 @@ static const zend_object_iterator_funcs spl_fixedarray_it_funcs = {
 	NULL, /* get_gc */
 };
 
-zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
+static zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	spl_fixedarray_it *iterator;
 
