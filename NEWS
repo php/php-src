@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     source file). (ilutov)
 
 - Streams:
+  . Fixed bug GH-10031 ([Stream] STREAM_NOTIFY_PROGRESS over HTTP emitted
+    irregularly for last chunk of data). (nielsdos)
   . Fixed bug GH-11175 (Stream Socket Timeout). (nielsdos)
   . Fixed bug GH-11177 (ASAN UndefinedBehaviorSanitizer when timeout = -1
     passed to stream_socket_accept/stream_socket_client). (nielsdos)
