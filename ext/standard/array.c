@@ -1233,7 +1233,7 @@ PHP_FUNCTION(min)
 		}
 	} else {
 		/* mixed min ( mixed $value1 , mixed $value2 [, mixed $value3... ] ) */
-		zval *min, result;
+		zval *min;
 		uint32_t i;
 
 		min = &args[0];
@@ -1283,9 +1283,6 @@ PHP_FUNCTION(min)
 				if (zend_compare(&args[i], min) < 0) {
 					min = &args[i];
 				}
-				if (Z_TYPE(result) == IS_TRUE) {
-					min = &args[i];
-				}
 			}
 		}
 
@@ -1323,7 +1320,7 @@ PHP_FUNCTION(max)
 		}
 	} else {
 		/* mixed max ( mixed $value1 , mixed $value2 [, mixed $value3... ] ) */
-		zval *max, result;
+		zval *max;
 		uint32_t i;
 
 		max = &args[0];
@@ -1370,8 +1367,7 @@ PHP_FUNCTION(max)
 		} else {
 			for (i = 1; i < argc; i++) {
 				generic_compare:
-				is_smaller_or_equal_function(&result, &args[i], max);
-				if (Z_TYPE(result) == IS_FALSE) {
+				if (zend_compare(&args[i], max) > 0) {
 					max = &args[i];
 				}
 			}
