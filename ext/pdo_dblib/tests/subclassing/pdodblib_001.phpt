@@ -18,31 +18,32 @@ echo "PdoDblib class exists.\n";
 
 $db = new PdoDblib($dsn, $user, $pass);
 
-$db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
+$db->query('drop table if exists #foobar;');
 
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');
+$db->query("create table #foobar(name varchar(32)); ");
+$db->query("insert into #foobar values('PHP');");
+$db->query("insert into #foobar values('PHP6');");
 
-foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
+foreach ($db->query('SELECT name FROM #foobar') as $row) {
     var_dump($row);
 }
 
-$db->query('DROP TABLE foobar');
+$db->query('drop table #foobar;');
 
 echo "Fin.";
 ?>
 --EXPECT--
-PdoSqlite class exists.
+PdoDblib class exists.
 array(2) {
-  ["testing(name)"]=>
-  string(3) "php"
+  ["name"]=>
+  string(3) "PHP"
   [0]=>
-  string(3) "php"
+  string(3) "PHP"
 }
 array(2) {
-  ["testing(name)"]=>
-  string(4) "php6"
+  ["name"]=>
+  string(4) "PHP6"
   [0]=>
-  string(4) "php6"
+  string(4) "PHP6"
 }
 Fin.
