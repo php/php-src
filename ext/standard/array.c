@@ -1280,7 +1280,9 @@ PHP_FUNCTION(min)
 		} else {
 			for (i = 1; i < argc; i++) {
 				generic_compare:
-				is_smaller_function(&result, &args[i], min);
+				if (zend_compare(&args[i], min) < 0) {
+					min = &args[i];
+				}
 				if (Z_TYPE(result) == IS_TRUE) {
 					min = &args[i];
 				}
