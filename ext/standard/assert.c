@@ -167,7 +167,6 @@ PHP_FUNCTION(assert)
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
 		}
 
-		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&retval);
 	}
 
