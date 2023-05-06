@@ -5,7 +5,7 @@ pdo_mysql
 --FILE--
 <?php
 
-require_once __DIR__ . "/../config_functions.php";
+require_once __DIR__ . "/../config_functions.inc";
 
 if (class_exists(PdoMySql::class) === false) {
     echo "PdoMySql class does not exist.\n";

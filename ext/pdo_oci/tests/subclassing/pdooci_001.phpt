@@ -5,7 +5,7 @@ pdo_oci
 --FILE--
 <?php
 
-require_once __DIR__ . "/../config_functions.php";
+require_once __DIR__ . "/../config_functions.inc";
 
 if (class_exists(PdoOci::class) === false) {
     echo "PdoOci class does not exist.\n";
