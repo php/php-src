@@ -28,6 +28,11 @@
 #ifdef ZTS
 #include <TSRM/TSRM.h>
 #endif
+#include "pdo_oci_arginfo.h"
+
+zend_class_entry *pdooci_ce;
+
+static pdo_driver_class_entry pdooci_pdo_driver_class_entry;
 
 /* {{{ pdo_oci_module_entry */
 
@@ -93,6 +98,13 @@ PHP_MINIT_FUNCTION(pdo_oci)
 
 	// Defer OCI init to PHP_RINIT_FUNCTION because with php-fpm,
 	// NLS_LANG is not yet available here.
+
+	pdooci_ce = register_class_PDOOci(pdo_dbh_ce);
+	pdooci_ce->create_object = pdo_dbh_new;
+
+	pdooci_pdo_driver_class_entry.driver_name = "oci";
+	pdooci_pdo_driver_class_entry.driver_ce = pdooci_ce;
+	pdo_register_driver_specific_class(&pdooci_pdo_driver_class_entry);
 
 #ifdef ZTS
 	pdo_oci_env_mutex = tsrm_mutex_alloc();
