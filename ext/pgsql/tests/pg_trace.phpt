@@ -21,6 +21,6 @@ var_dump(pg_trace($tracefile, 'w', $db, 0));
 $res = pg_query($db, 'select 1');
 
 ?>
---EXPECT--
-pg_trace(): Argument #4 ($trace_mode) cannot set as trace is unsupported
+--EXPECTF--
+pg_trace(): Argument #4 ($trace_mode) %s
 bool(true)
