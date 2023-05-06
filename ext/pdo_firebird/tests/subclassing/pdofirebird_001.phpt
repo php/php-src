@@ -18,13 +18,7 @@ echo "PDOFirebird class exists.\n";
 
 $db = new PDOFirebird($dsn, $user, $pass);
 
-try {
-    $db->query('DROP TABLE foobar');
-} catch (\Exception $e) {
-    // TODO - find the 'not exists' syntax.
-}
-
-$db->query('CREATE TABLE foobar (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
+$db->query('RECREATE TABLE foobar (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
 $db->query("INSERT INTO foobar VALUES (1, 'PHP')");
 $db->query("INSERT INTO foobar VALUES (2, 'PHP6')");
 
