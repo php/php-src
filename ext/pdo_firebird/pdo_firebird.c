@@ -66,6 +66,9 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 		return FAILURE;
 	}
 
+	pdofirebird_ce = register_class_PDOFirebird(pdo_dbh_ce);
+	pdofirebird_ce->create_object = pdo_dbh_new;
+
 	pdofirebird_pdo_driver_class_entry.driver_name = "firebird";
 	pdofirebird_pdo_driver_class_entry.driver_ce = pdofirebird_ce;
 	pdo_register_driver_specific_class(&pdofirebird_pdo_driver_class_entry);
