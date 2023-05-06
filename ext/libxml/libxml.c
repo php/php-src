@@ -516,6 +516,8 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
 		} else {
 			php_error_docref(NULL, level, "%s in Entity, line: %d", msg, parser->input->line);
 		}
+	} else {
+		php_error_docref(NULL, E_WARNING, "%s", msg);
 	}
 }
 
