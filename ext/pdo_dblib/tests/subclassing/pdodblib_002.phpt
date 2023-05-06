@@ -5,6 +5,8 @@ pdo
 --FILE--
 <?php
 
+require_once __DIR__ . "/../config_functions.php";
+
 if (class_exists(PdoDblib::class) === false) {
     echo "PdoDblib class does not exist.\n";
     exit(-1);
@@ -12,40 +14,40 @@ if (class_exists(PdoDblib::class) === false) {
 
 echo "PdoDblib class exists.\n";
 
-$db = Pdo::connect('dblib::memory:');
+[$dsn, $user, $pass] = getDsnUserAndPassword();
 
+$db = Pdo::connect($dsn, $user, $pass);
 
 if (!$db instanceof PdoDblib) {
     echo "Wrong class type. Should be PdoDblib but is [" . get_class($db) . "\n";
 }
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10))');
-$db->exec("INSERT INTO test VALUES(1, 'A')");
-$db->exec("INSERT INTO test VALUES(2, 'B')");
-$db->exec("INSERT INTO test VALUES(3, 'C')");
+$db->query('drop table if exists #test;');
 
-$stmt = $db->prepare('SELECT * from test');
-$stmt->execute();
+$db->query("create table #test(name varchar(32)); ");
+$db->query("insert into #test values('PHP');");
+$db->query("insert into #test values('PHP6');");
 
-var_dump($stmt->fetchAll(PDO::FETCH_OBJ));
+foreach ($db->query('SELECT name FROM #test') as $row) {
+    var_dump($row);
+}
 
-
-$db->query('DROP TABLE foobar');
+$db->query('drop table #test;');
 
 echo "Fin.";
 ?>
 --EXPECT--
 PdoDblib class exists.
 array(2) {
-  ["testing(name)"]=>
-  string(3) "php"
+  ["name"]=>
+  string(3) "PHP"
   [0]=>
-  string(3) "php"
+  string(3) "PHP"
 }
 array(2) {
-  ["testing(name)"]=>
-  string(4) "php6"
+  ["name"]=>
+  string(4) "PHP6"
   [0]=>
-  string(4) "php6"
+  string(4) "PHP6"
 }
 Fin.
