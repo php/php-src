@@ -5,7 +5,7 @@ pdo_odbc
 --FILE--
 <?php
 
-require_once __DIR__ . "/../config_functions.php";
+require_once __DIR__ . "/../config_functions.inc";
 
 if (class_exists(PdoOdbc::class) === false) {
     echo "PdoOdbc class does not exist.\n";

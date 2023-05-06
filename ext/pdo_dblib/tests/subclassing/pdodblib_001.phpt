@@ -5,7 +5,7 @@ pdo
 --FILE--
 <?php
 
-require_once __DIR__ . "/../config_functions.php";
+require_once __DIR__ . "/../config_functions.inc";
 
 if (class_exists(PdoDblib::class) === false) {
     echo "PdoDblib class does not exist.\n";

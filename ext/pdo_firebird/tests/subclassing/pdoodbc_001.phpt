@@ -5,7 +5,7 @@ pdo_firebird
 --FILE--
 <?php
 
-require_once __DIR__ . "/../config_functions.php";
+require_once __DIR__ . "/../config_functions.inc";
 
 if (class_exists(PDOFirebird::class) === false) {
     echo "PDOFirebird class does not exist.\n";
