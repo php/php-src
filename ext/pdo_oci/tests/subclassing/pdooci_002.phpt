@@ -23,7 +23,7 @@ if (!$db instanceof PdoOci) {
 }
 
 $db->query('DROP TABLE IF EXISTS test');
-$db->exec('CREATE TABLE IF NOT EXISTS test(id int NOT NULL PRIMARY KEY, name VARCHAR(10))');
+$db->exec('CREATE TABLE IF NOT EXISTS test(id NUMBER NOT NULL PRIMARY KEY, name VARCHAR2(10))');
 $db->exec("INSERT INTO test VALUES(1, 'A')");
 $db->exec("INSERT INTO test VALUES(2, 'B')");
 $db->exec("INSERT INTO test VALUES(3, 'C')");
@@ -37,21 +37,21 @@ $db->query('DROP TABLE test');
 echo "Fin.";
 ?>
 --EXPECT--
-PdoMysql class exists.
+PdoOci class exists.
 array(2) {
-  ["name"]=>
+  ["NAME"]=>
   string(1) "A"
   [0]=>
   string(1) "A"
 }
 array(2) {
-  ["name"]=>
+  ["NAME"]=>
   string(1) "B"
   [0]=>
   string(1) "B"
 }
 array(2) {
-  ["name"]=>
+  ["NAME"]=>
   string(1) "C"
   [0]=>
   string(1) "C"
