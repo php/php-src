@@ -26,6 +26,7 @@
 /ext/session @Girgias
 /ext/sockets @devnexen
 /ext/spl @Girgias
+/ext/standard @bukka
 /main @bukka
 /sapi/fpm @bukka
 /Zend @iluuu1994
