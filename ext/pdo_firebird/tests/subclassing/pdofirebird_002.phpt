@@ -22,13 +22,7 @@ if (!$db instanceof PDOFirebird) {
     echo "Wrong class type. Should be PdoOdbc but is [" . get_class($db) . "\n";
 }
 
-try {
-    $db->query('DROP TABLE test');
-} catch (\Exception $e) {
-    // TODO - find the 'not exists' syntax.
-}
-
-$db->query('CREATE TABLE test (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
+$db->query('RECREATE TABLE test (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
 
 $db->exec("INSERT INTO test VALUES(1, 'A')");
 $db->exec("INSERT INTO test VALUES(2, 'B')");
