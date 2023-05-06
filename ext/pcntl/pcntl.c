@@ -1295,7 +1295,7 @@ PHP_FUNCTION(pcntl_forkx)
 	zend_long flags;
 	pid_t pid;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 

@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-11134 (Incorrect match default branch optimization). (ilutov)
   . Fixed too wide OR and AND range inference. (nielsdos)
 
+- PCNTL:
+  . Fixed maximum argument count of pcntl_forkx(). (nielsdos)
+
 - PGSQL:
   . Fixed parameter parsing of pg_lo_export(). (kocsismate)
 
