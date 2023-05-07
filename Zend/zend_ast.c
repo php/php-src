@@ -1063,8 +1063,8 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = ZEND_AST_ZVAL;
 		new->attr = ast->attr;
 		ZVAL_COPY(&new->val, zend_ast_get_zval(ast));
+		Z_LINENO(new->val) = zend_ast_get_lineno(ast);
 		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
-		// Lineno gets copied with ZVAL_COPY
 	} else if (ast->kind == ZEND_AST_CONSTANT) {
 		zend_ast_zval *new = (zend_ast_zval*)buf;
 		new->kind = ZEND_AST_CONSTANT;
