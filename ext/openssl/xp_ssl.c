@@ -118,7 +118,7 @@
 /* Used for IPv6 Address peer verification */
 #define EXPAND_IPV6_ADDRESS(_str, _bytes) \
 	do { \
-		snprintf(_str, 39, "%X:%X:%X:%X:%X:%X:%X:%X", \
+		snprintf(_str, 40, "%X:%X:%X:%X:%X:%X:%X:%X", \
 			_bytes[0] << 8 | _bytes[1], \
 			_bytes[2] << 8 | _bytes[3], \
 			_bytes[4] << 8 | _bytes[5], \
