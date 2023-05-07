@@ -725,11 +725,7 @@ class Type {
             }
         } else {
             $type = $this->types[0];
-            if ($type->isBuiltin && strtolower($type->name) === "true") {
-                $name = "bool";
-            } else {
-                $name = $type->name;
-            }
+            $name = $type->name;
 
             $typeElement = $doc->createElement('type', $name);
         }
