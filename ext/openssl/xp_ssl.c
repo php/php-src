@@ -436,17 +436,20 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 {
 	int i, len;
 	unsigned char *cert_name = NULL;
-	char ipbuffer[64], ipv6_expanded[40];
-    unsigned char ipv6[16];
+	char ipbuffer[64];
 
 	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
 	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
 
-	/* detect if subject name is an IPv6 address and expand once if required */
-	ipv6_expanded[0] = 0;
 #if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+	/* detect if subject name is an IPv6 address and expand once if required */
+    char subject_name_ipv6_expanded[40];
+    unsigned char ipv6[16];
+    bool subject_name_is_ipv6 = false;
+    subject_name_ipv6_expanded[0] = 0;
 	if (inet_pton(AF_INET6,subject_name,&ipv6)) {
-    	EXPAND_IPV6_ADDRESS(ipv6_expanded, ipv6);
+    	EXPAND_IPV6_ADDRESS(subject_name_ipv6_expanded, ipv6);
+    	subject_name_is_ipv6 = true;
     }
 #endif
 
@@ -487,15 +490,18 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 
 					return 1;
 				}
-			} else if (san->d.ip->length == 16 && strlen(ipv6_expanded) >= 15) { /* shortest expanded IPv6 address is 0:0:0:0:0:0:0:0 */
+			}
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+			else if (san->d.ip->length == 16 && subject_name_is_ipv6) {
 				ipbuffer[0] = 0;
 				EXPAND_IPV6_ADDRESS(ipbuffer, san->d.iPAddress->data);
-				if (strcasecmp((const char*)ipv6_expanded, (const char*)ipbuffer) == 0) {
+				if (strcasecmp((const char*)subject_name_ipv6_expanded, (const char*)ipbuffer) == 0) {
 					sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
 
 					return 1;
 				}
 			}
+#endif
 		}
 	}
 
