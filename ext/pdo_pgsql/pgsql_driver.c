@@ -604,8 +604,7 @@ static bool pgsql_handle_rollback(pdo_dbh_t *dbh)
 	return ret;
 }
 
-/* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
+void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -715,10 +714,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
+{
+	pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -812,11 +816,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
-
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
+{
+	pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+void pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -907,10 +915,16 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
+{
+	pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+}
+/* }}} */
+
+void pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -982,11 +996,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
 		RETURN_FALSE;
 	}
 }
+
+/* {{{ Returns true if the copy worked fine or false if error */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
+{
+	pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-
-/* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBCreate)
+void pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1011,10 +1029,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBCreate)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
+
+/* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBCreate)
+{
+	pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen)
+void pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1062,10 +1085,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
+
+/* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen)
+{
+	pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink)
+void pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1097,10 +1125,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
+
+/* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink)
+{
+	pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Get asynchronous notification */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
+void pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1177,10 +1210,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
 
 	PQfreemem(pgsql_notify);
 }
+
+/* {{{ Get asynchronous notification */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
+{
+	pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Get backend(server) pid */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
+void pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1193,6 +1231,12 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	RETURN_LONG(PQbackendPID(H->server));
+}
+
+/* {{{ Get backend(server) pid */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
+{
+	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

@@ -1,16 +1,79 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7aa8f420e9fb24633be2f72a061b32f4d9207620 */
+ * Stub hash: 72f5729365dc3f7ae888e96b612ef9b236da2135 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOPgSql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOPgSql_copyFromArray, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, rows, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\"\\t\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nullAs, IS_STRING, 0, "\"\\\\\\\\N\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fields, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOPgSql_copyFromFile, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\"\\t\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nullAs, IS_STRING, 0, "\"\\\\\\\\N\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fields, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_PDOPgSql_copyToArray, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\"\\t\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nullAs, IS_STRING, 0, "\"\\\\\\\\N\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fields, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_PDOPgSql_copyToFile arginfo_class_PDOPgSql_copyFromFile
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_PDOPgSql_lobCreate, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOPgSql_lobOpen, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, oid, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 0, "\"rb\"")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOPgSql_lobUnlink, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, oid, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_PDOPgSql_getNotify, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fetchMode, IS_LONG, 0, "PDO::FETCH_USE_DEFAULT")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeoutMilliseconds, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDOPgSql_getPid, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(PDOPgSql, escapeIdentifier);
+ZEND_METHOD(PDOPgSql, copyFromArray);
+ZEND_METHOD(PDOPgSql, copyFromFile);
+ZEND_METHOD(PDOPgSql, copyToArray);
+ZEND_METHOD(PDOPgSql, copyToFile);
+ZEND_METHOD(PDOPgSql, lobCreate);
+ZEND_METHOD(PDOPgSql, lobOpen);
+ZEND_METHOD(PDOPgSql, lobUnlink);
+ZEND_METHOD(PDOPgSql, getNotify);
+ZEND_METHOD(PDOPgSql, getPid);
 
 
 static const zend_function_entry class_PDOPgSql_methods[] = {
 	ZEND_ME(PDOPgSql, escapeIdentifier, arginfo_class_PDOPgSql_escapeIdentifier, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, copyFromArray, arginfo_class_PDOPgSql_copyFromArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, copyFromFile, arginfo_class_PDOPgSql_copyFromFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, copyToArray, arginfo_class_PDOPgSql_copyToArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, copyToFile, arginfo_class_PDOPgSql_copyToFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, lobCreate, arginfo_class_PDOPgSql_lobCreate, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, lobOpen, arginfo_class_PDOPgSql_lobOpen, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, lobUnlink, arginfo_class_PDOPgSql_lobUnlink, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, getNotify, arginfo_class_PDOPgSql_getNotify, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOPgSql, getPid, arginfo_class_PDOPgSql_getPid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -21,6 +84,42 @@ static zend_class_entry *register_class_PDOPgSql(zend_class_entry *class_entry_P
 	INIT_CLASS_ENTRY(ce, "PDOPgSql", class_PDOPgSql_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+	zval const_ATTR_DISABLE_PREPARES_value;
+	ZVAL_LONG(&const_ATTR_DISABLE_PREPARES_value, PDO_PGSQL_ATTR_DISABLE_PREPARES);
+	zend_string *const_ATTR_DISABLE_PREPARES_name = zend_string_init_interned("ATTR_DISABLE_PREPARES", sizeof("ATTR_DISABLE_PREPARES") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ATTR_DISABLE_PREPARES_name, &const_ATTR_DISABLE_PREPARES_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ATTR_DISABLE_PREPARES_name);
+
+	zval const_TRANSACTION_IDLE_value;
+	ZVAL_LONG(&const_TRANSACTION_IDLE_value, PGSQL_TRANSACTION_IDLE);
+	zend_string *const_TRANSACTION_IDLE_name = zend_string_init_interned("TRANSACTION_IDLE", sizeof("TRANSACTION_IDLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TRANSACTION_IDLE_name, &const_TRANSACTION_IDLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TRANSACTION_IDLE_name);
+
+	zval const_TRANSACTION_ACTIVE_value;
+	ZVAL_LONG(&const_TRANSACTION_ACTIVE_value, PGSQL_TRANSACTION_ACTIVE);
+	zend_string *const_TRANSACTION_ACTIVE_name = zend_string_init_interned("TRANSACTION_ACTIVE", sizeof("TRANSACTION_ACTIVE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TRANSACTION_ACTIVE_name, &const_TRANSACTION_ACTIVE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TRANSACTION_ACTIVE_name);
+
+	zval const_TRANSACTION_INTRANS_value;
+	ZVAL_LONG(&const_TRANSACTION_INTRANS_value, PGSQL_TRANSACTION_INTRANS);
+	zend_string *const_TRANSACTION_INTRANS_name = zend_string_init_interned("TRANSACTION_INTRANS", sizeof("TRANSACTION_INTRANS") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TRANSACTION_INTRANS_name, &const_TRANSACTION_INTRANS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TRANSACTION_INTRANS_name);
+
+	zval const_TRANSACTION_INERROR_value;
+	ZVAL_LONG(&const_TRANSACTION_INERROR_value, PGSQL_TRANSACTION_INERROR);
+	zend_string *const_TRANSACTION_INERROR_name = zend_string_init_interned("TRANSACTION_INERROR", sizeof("TRANSACTION_INERROR") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TRANSACTION_INERROR_name, &const_TRANSACTION_INERROR_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TRANSACTION_INERROR_name);
+
+	zval const_TRANSACTION_UNKNOWN_value;
+	ZVAL_LONG(&const_TRANSACTION_UNKNOWN_value, PGSQL_TRANSACTION_UNKNOWN);
+	zend_string *const_TRANSACTION_UNKNOWN_name = zend_string_init_interned("TRANSACTION_UNKNOWN", sizeof("TRANSACTION_UNKNOWN") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TRANSACTION_UNKNOWN_name, &const_TRANSACTION_UNKNOWN_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TRANSACTION_UNKNOWN_name);
 
 	return class_entry;
 }

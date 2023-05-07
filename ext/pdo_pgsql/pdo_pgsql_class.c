@@ -30,25 +30,6 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 
-///* {{{ proto string PDO::mysqlGetWarningCount()
-//    Returns the number of SQL warnings during the execution of the last statement
-//*/
-//PHP_METHOD(PDOMySql, getWarningCount)
-//{
-//	pdo_dbh_t *dbh;
-//	pdo_mysql_db_handle *H;
-//
-//	dbh = Z_PDO_DBH_P(ZEND_THIS);
-//	PDO_CONSTRUCT_CHECK;
-//
-//	H = (pdo_mysql_db_handle *)dbh->driver_data;
-//	RETURN_LONG(mysql_warning_count(H->server));
-//}
-///* }}} */
-
-
-
-//
 //static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_literal) /* {{{ */ {
 //	zend_string *from = NULL;
 //	zval *pgsql_link = NULL;
@@ -131,7 +112,67 @@ PHP_METHOD(PDOPgSql, escapeIdentifier)
 /* }}} */
 
 
+/* {{{ Returns true if the copy worked fine or false if error */
+PHP_METHOD(PDOPgSql, copyFromArray)
+{
+	pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
 
 
+/* {{{ Returns true if the copy worked fine or false if error */
+PHP_METHOD(PDOPgSql, copyFromFile)
+{
+	pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
 
+/* {{{ Returns true if the copy worked fine or false if error */
+PHP_METHOD(PDOPgSql, copyToFile)
+{
+	pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
+}
+/* }}} */
+
+/* {{{ Returns true if the copy worked fine or false if error */
+PHP_METHOD(PDOPgSql, copyToArray)
+{
+	pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
+PHP_METHOD(PDOPgSql, lobCreate)
+{
+	pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
+PHP_METHOD(PDOPgSql, lobOpen)
+{
+	pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
+PHP_METHOD(PDOPgSql, lobUnlink)
+{
+	pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ Get asynchronous notification */
+PHP_METHOD(PDOPgSql, getNotify)
+{
+	pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ Get backend(server) pid */
+PHP_METHOD(PDOPgSql, getPid)
+{
+	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
