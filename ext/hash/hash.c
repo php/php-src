@@ -450,7 +450,7 @@ PHP_FUNCTION(hash_file)
 	bool raw_output = 0;
 	HashTable *args = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(algo)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_OPTIONAL
