@@ -34,8 +34,6 @@ ZEND_DECLARE_MODULE_GLOBALS(assert)
 
 #define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
-#define SAFE_STRING(s) ((s)?(s):"")
-
 PHPAPI zend_class_entry *assertion_error_ce;
 
 static PHP_INI_MH(OnChangeCallback) /* {{{ */
@@ -151,9 +149,12 @@ PHP_FUNCTION(assert)
 		zval args[4];
 		zval retval;
 		uint32_t lineno = zend_get_executed_lineno();
-		const char *filename = zend_get_executed_filename();
+		zend_string *filename = zend_get_executed_filename_ex();
+		if (UNEXPECTED(!filename)) {
+			filename = ZSTR_KNOWN(ZEND_STR_UNKNOWN_CAPITALIZED);
+		}
 
-		ZVAL_STRING(&args[0], SAFE_STRING(filename));
+		ZVAL_STR(&args[0], filename);
 		ZVAL_LONG(&args[1], lineno);
 		ZVAL_NULL(&args[2]);
 
@@ -166,7 +167,6 @@ PHP_FUNCTION(assert)
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
 		}
 
-		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&retval);
 	}
 
