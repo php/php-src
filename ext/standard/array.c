@@ -1249,7 +1249,7 @@ PHP_FUNCTION(min)
 						min_lval = Z_LVAL(args[i]);
 						min = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_DOUBLE) {
+				} else if (Z_TYPE(args[i]) == IS_DOUBLE && ((zend_long)(double) min_lval == min_lval)) {
 					min_dval = (double) min_lval;
 					goto double_compare;
 				} else {
@@ -1268,7 +1268,7 @@ PHP_FUNCTION(min)
 						min_dval = Z_DVAL(args[i]);
 						min = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_LONG) {
+				} else if (Z_TYPE(args[i]) == IS_LONG && ((zend_long)(double) Z_LVAL(args[i]) == Z_LVAL(args[i]))) {
 					if (min_dval > (double)Z_LVAL(args[i])) {
 						min_dval = (double)Z_LVAL(args[i]);
 						min = &args[i];
@@ -1336,7 +1336,7 @@ PHP_FUNCTION(max)
 						max_lval = Z_LVAL(args[i]);
 						max = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_DOUBLE) {
+				} else if (Z_TYPE(args[i]) == IS_DOUBLE && ((zend_long)(double) max_lval == max_lval)) {
 					max_dval = (double) max_lval;
 					goto double_compare;
 				} else {
@@ -1355,7 +1355,7 @@ PHP_FUNCTION(max)
 						max_dval = Z_DVAL(args[i]);
 						max = &args[i];
 					}
-				} else if (Z_TYPE(args[i]) == IS_LONG) {
+				} else if (Z_TYPE(args[i]) == IS_LONG && ((zend_long)(double) Z_LVAL(args[i]) == Z_LVAL(args[i]))) {
 					if (max_dval < (double)Z_LVAL(args[i])) {
 						max_dval = (double)Z_LVAL(args[i]);
 						max = &args[i];
