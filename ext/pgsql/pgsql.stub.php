@@ -469,7 +469,7 @@ namespace {
 
     function pg_connect_poll(PgSql\Connection $connection): int {}
 
-    function pg_close(?PgSql\Connection $connection = null): bool {}
+    function pg_close(?PgSql\Connection $connection = null): true {}
 
     /** @refcount 1 */
     function pg_dbname(?PgSql\Connection $connection = null): string {}
@@ -691,7 +691,7 @@ namespace {
 
     function pg_trace(string $filename, string $mode = "w", ?PgSql\Connection $connection = null, int $trace_mode = 0): bool {}
 
-    function pg_untrace(?PgSql\Connection $connection = null): bool {}
+    function pg_untrace(?PgSql\Connection $connection = null): true {}
 
     /**
      * @param PgSql\Connection $connection

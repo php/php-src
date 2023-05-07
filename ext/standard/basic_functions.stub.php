@@ -1574,9 +1574,9 @@ function count(Countable|array $value, int $mode = COUNT_NORMAL): int {}
 /** @alias count */
 function sizeof(Countable|array $value, int $mode = COUNT_NORMAL): int {}
 
-function natsort(array &$array): bool {}
+function natsort(array &$array): true {}
 
-function natcasesort(array &$array): bool {}
+function natcasesort(array &$array): true {}
 
 function asort(array &$array, int $flags = SORT_REGULAR): true {}
 
@@ -1584,7 +1584,7 @@ function arsort(array &$array, int $flags = SORT_REGULAR): true {}
 
 function sort(array &$array, int $flags = SORT_REGULAR): true {}
 
-function rsort(array &$array, int $flags = SORT_REGULAR): bool {}
+function rsort(array &$array, int $flags = SORT_REGULAR): true {}
 
 function usort(array &$array, callable $callback): true {}
 

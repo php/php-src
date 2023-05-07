@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a79a697fa8c1ab2513bde03e0c2367d0caaec7d8 */
+ * Stub hash: 659db99d46c15b508e992d55a1e421f48b51f6e3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -36,17 +36,19 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_get_quick_print, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_quick_print, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_quick_print, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_snmp_set_enum_print arginfo_snmp_set_quick_print
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_snmp_set_oid_numeric_print arginfo_snmp_set_oid_output_format
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_numeric_print, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_snmp2_get arginfo_snmpget
 
@@ -103,7 +105,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp3_set, 0, 10, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, retries, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_valueretrieval, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_valueretrieval, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

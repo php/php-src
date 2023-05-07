@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 73f82e392f5adf146b9b8dfb39496b3ce8465115 */
+ * Stub hash: 0d2bffd95e986b632f5fd1afbf8f6464e6bc8759 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -88,7 +88,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sizeof arginfo_count
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_natsort, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_natsort, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
@@ -100,10 +100,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sort arginfo_krsort
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rsort, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SORT_REGULAR")
-ZEND_END_ARG_INFO()
+#define arginfo_rsort arginfo_krsort
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_usort, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
@@ -189,9 +186,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_range, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_MASK(0, step, MAY_BE_LONG|MAY_BE_DOUBLE, "1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shuffle, 0, 1, IS_TRUE, 0)
-	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_shuffle arginfo_natsort
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_pop, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)

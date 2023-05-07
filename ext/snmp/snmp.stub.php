@@ -125,11 +125,11 @@ function snmpset(string $hostname, string $community, array|string $object_id, a
 
 function snmp_get_quick_print(): bool {}
 
-function snmp_set_quick_print(bool $enable): bool {}
+function snmp_set_quick_print(bool $enable): true {}
 
-function snmp_set_enum_print(bool $enable): bool {}
+function snmp_set_enum_print(bool $enable): true {}
 
-function snmp_set_oid_output_format(int $format): bool {}
+function snmp_set_oid_output_format(int $format): true {}
 
 /** @alias snmp_set_oid_output_format */
 function snmp_set_oid_numeric_print(int $format): bool {}
@@ -175,7 +175,7 @@ function snmp3_set(
     array|string $object_id, array|string $type, array|string $value,
     int $timeout = -1, int $retries = -1): bool {}
 
-function snmp_set_valueretrieval(int $method): bool {}
+function snmp_set_valueretrieval(int $method): true {}
 
 function snmp_get_valueretrieval(): int {}
 
