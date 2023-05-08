@@ -33,6 +33,9 @@ if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INT
 
 set CFLAGS=/W1 /WX
 
+patch --binary %DEPS_DIR%\include\net-snmp\net-snmp-config.h -i %~dp0net-snmp-config.h.patch.bin
+if %errorlevel% neq 0 exit /b 3
+
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
 	--disable-debug-pack ^
