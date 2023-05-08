@@ -2035,7 +2035,6 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		}
 
 		/* Main IO loop. */
-		bool old_eof = stream->eof;
 		do {
 			struct timeval cur_time, elapsed_time, left_time;
 
@@ -2143,9 +2142,6 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 		/* Tell PHP if we read / wrote bytes. */
 		if (nr_bytes > 0) {
 			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
-		}
-		if (old_eof != stream->eof) {
-			php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
 		}
 
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
