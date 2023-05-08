@@ -3699,7 +3699,7 @@ PHP_METHOD(Phar, offsetSet)
 {
 	char *fname, *cont_str = NULL;
 	size_t fname_len, cont_len;
-	zval *zresource;
+	zval *zresource = NULL;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "pr", &fname, &fname_len, &zresource) == FAILURE
 	&& zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &fname, &fname_len, &cont_str, &cont_len) == FAILURE) {
