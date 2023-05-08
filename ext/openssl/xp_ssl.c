@@ -447,7 +447,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
     unsigned char ipv6[16];
     bool subject_name_is_ipv6 = false;
     subject_name_ipv6_expanded[0] = 0;
-	if (inet_pton(AF_INET6,subject_name,&ipv6)) {
+	if (inet_pton(AF_INET6, subject_name, &ipv6)) {
     	EXPAND_IPV6_ADDRESS(subject_name_ipv6_expanded, ipv6);
     	subject_name_is_ipv6 = true;
     }
