@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed parameter parsing of pg_lo_export(). (kocsismate)
 
+- Soap:
+  . Fixed bug GH-8426 (make test fail while soap extension build). (nielsdos)
+
 - SPL:
   . Fixed bug GH-11178 (Segmentation fault in spl_array_it_get_current_data
     (PHP 8.1.18)). (nielsdos)
