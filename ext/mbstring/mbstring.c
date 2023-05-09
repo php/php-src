@@ -4788,6 +4788,7 @@ bool utf8_range(const unsigned char *data, size_t len)
 		const uint8x16_t const_1 = vdupq_n_u8(1);
 		const uint8x16_t const_2 = vdupq_n_u8(2);
 		const uint8x16_t const_e0 = vdupq_n_u8(0xE0);
+		const uint8x16_t const_7f = vdupq_n_u8(0x7F);
 
 		/* We use two error registers to remove a dependency. */
 		uint8x16_t error1 = vdupq_n_u8(0);
@@ -4798,6 +4799,29 @@ bool utf8_range(const unsigned char *data, size_t len)
 			const uint8x16_t input_2 = vld1q_u8(data + 16);
 			const uint8x16_t input_3 = vld1q_u8(data + 32);
 			const uint8x16_t input_4 = vld1q_u8(data + 48);
+
+			uint64_t ascii_paired = vgetq_lane_u64(vreinterpretq_u64_u8(prev_first_len), 0);
+			if (ascii_paired == 0) {
+				uint8x16_t is_ascii_0 = vorrq_u8(input_1, input_2);
+				is_ascii_0 = vorrq_u8(is_ascii_0, input_3);
+				is_ascii_0 = vorrq_u8(is_ascii_0, input_4);
+
+				uint8x16_t is_ascii = vqsubq_u8(is_ascii_0, const_7f);
+				uint64_t is_ascii_paired = vgetq_lane_u64(vreinterpretq_u64_u8(is_ascii), 0);
+
+				/* ascii */
+				if (is_ascii_paired == 0) {
+					const uint8x16_t high_nibbles_4 = vshrq_n_u8(input_4, 4);
+					const uint8x16_t first_len_4 = vqtbl1q_u8(first_len_tbl, high_nibbles_4);
+
+					prev_input = input_4;
+					prev_first_len = first_len_4;
+
+					data += 64;
+					len -= 64;
+					continue;
+				}
+			}
 
 			/* high_nibbles = input >> 4 */
 			const uint8x16_t high_nibbles_1 = vshrq_n_u8(input_1, 4);
@@ -4947,8 +4971,7 @@ bool utf8_range(const unsigned char *data, size_t len)
 			/* first_len = legal character length minus 1 */
 			/* 0 for 00~7F, 1 for C0~DF, 2 for E0~EF, 3 for F0~FF */
 			/* first_len = first_len_tbl[high_nibbles] */
-			const uint8x16_t first_len =
-				vqtbl1q_u8(first_len_tbl, high_nibbles);
+			const uint8x16_t first_len = vqtbl1q_u8(first_len_tbl, high_nibbles);
 
 			/* First Byte: set range index to 8 for bytes within 0xC0 ~ 0xFF */
 			/* range = first_range_tbl[high_nibbles] */
@@ -4957,8 +4980,7 @@ bool utf8_range(const unsigned char *data, size_t len)
 			/* Second Byte: set range index to first_len */
 			/* 0 for 00~7F, 1 for C0~DF, 2 for E0~EF, 3 for F0~FF */
 			/* range |= (first_len, prev_first_len) << 1 byte */
-			range =
-				vorrq_u8(range, vextq_u8(prev_first_len, first_len, 15));
+			range = vorrq_u8(range, vextq_u8(prev_first_len, first_len, 15));
 
 			/* Third Byte: set range index to saturate_sub(first_len, 1) */
 			/* 0 for 00~7F, 0 for C0~DF, 1 for E0~EF, 2 for F0~FF */
@@ -5033,8 +5055,9 @@ bool utf8_range(const unsigned char *data, size_t len)
 		/* Merge our error counters together */
 		error1 = vorrq_u8(error1, error2);
 
+		uint64_t error_raw_last = vgetq_lane_u64(vreinterpretq_u64_u8(error1), 0);
 		/* Delay error check till loop ends */
-		if (vmaxvq_u8(error1)) {
+		if (error_raw_last != 0) {
 			return false;
 		}
 
