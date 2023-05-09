@@ -5,6 +5,10 @@ openssl
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
+$packed = str_repeat(chr(0), 15) . chr(1);
+if (@inet_ntop($packed) === false) {
+    die("skip no IPv6 support");
+}
 ?>
 --FILE--
 <?php
@@ -12,7 +16,7 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'san_ipv6_peer_matching.pem.tmp';
 $san = 'IP:2001:db8:85a3:8d3:1319:8a2e:370:7348';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://[::1]:64321";
+    $serverUri = "ssl://[::1]:64324";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
@@ -27,7 +31,7 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://[::1]:64321";
+    $serverUri = "ssl://[::1]:64324";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => false,
@@ -60,5 +64,5 @@ Warning: stream_socket_client(): Unable to locate peer certificate CN in %s on l
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
-Warning: stream_socket_client(): Unable to connect to ssl://[::1]:64321 (Unknown error) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://[::1]:64324 (Unknown error) in %s on line %d
 bool(false)
