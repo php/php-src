@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     value(s)). (nielsdos)
   . Fixed bug GH-11189 (Exceeding memory limit in zend_hash_do_resize leaves
     the array in an invalid state). (Bob)
+  . Fixed bug GH-11063 (Compilation error on old GCC versions). (ingamedeo)
 
 - Hash:
   . Fixed bug GH-11180 (hash_file() appears to be restricted to 3 arguments).
