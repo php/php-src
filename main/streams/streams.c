@@ -2315,7 +2315,6 @@ PHPAPI php_stream_context *php_stream_context_alloc(void)
 	php_stream_context *context;
 
 	context = ecalloc(1, sizeof(php_stream_context));
-	context->notifier = NULL;
 	array_init(&context->options);
 
 	context->res = zend_register_resource(context, php_le_stream_context());
