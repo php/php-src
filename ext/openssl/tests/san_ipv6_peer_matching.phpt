@@ -5,9 +5,8 @@ openssl
 --SKIPIF--
 <?php
 if (!function_exists("proc_open")) die("skip no proc_open");
-$packed = str_repeat(chr(0), 15) . chr(1);
-if (@inet_ntop($packed) === false) {
-    die("skip no IPv6 support");
+if (getenv("CI_NO_IPV6") || !defined("AF_INET6")) {
+    die('skip no IPv6 support');
 }
 ?>
 --FILE--
