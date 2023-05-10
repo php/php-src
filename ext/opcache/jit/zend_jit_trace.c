@@ -4648,10 +4648,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					}
 					SET_STACK_REG_EX(stack, i, ra[i]->reg, ZREG_LOAD);
 #else
-					if (!zend_jit_load_var(&ctx, ssa->var_info[i].type, i, i)) {
-						goto jit_failure;
+					if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
+						if (!zend_jit_load_var(&ctx, ssa->var_info[i].type, i, i)) {
+							goto jit_failure;
+						}
+						SET_STACK_REF_EX(stack, i, ra[i].ref, ZREG_LOAD);
+					} else {
+						SET_STACK_REF_EX(stack, i, IR_NULL, ZREG_LOAD);
 					}
-					SET_STACK_REF_EX(stack, i, ra[i].ref, ZREG_LOAD);
 #endif
 				}
 			}
