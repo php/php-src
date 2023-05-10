@@ -1,22 +1,22 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d747e7b5989c18169e67d9a9d70256583fffd8e */
+ * Stub hash: 3196c51fa9e9e41288572b42bbd74c5f8698a7de */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, stylesheet, DOMDocument|SimpleXMLElement, 0, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_XSLTProcessor_transformToDoc, 0, 1, DOMDocument, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, document, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, document, DOMDocument|SimpleXMLElement, 0, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, returnClass, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_transformToUri, 0, 2, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, document, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, document, DOMDocument|SimpleXMLElement, 0, NULL)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_XSLTProcessor_transformToXml, 0, 1, MAY_BE_STRING|MAY_BE_NULL|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, document, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, document, DOMDocument|SimpleXMLElement, 0, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_setParameter, 0, 2, _IS_BOOL, 0)

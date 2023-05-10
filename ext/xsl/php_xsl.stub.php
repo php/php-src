@@ -71,29 +71,17 @@ const LIBEXSLT_DOTTED_VERSION = UNKNOWN;
 
 class XSLTProcessor
 {
-    /**
-     * @param DOMDocument|SimpleXMLElement $stylesheet
-     * @tentative-return-type
-     */
-    public function importStylesheet(object $stylesheet): bool {}
+    /** @tentative-return-type */
+    public function importStylesheet(DOMDocument|SimpleXMLElement $stylesheet): bool {}
 
-    /**
-     * @param DOMDocument|SimpleXMLElement $document
-     * @tentative-return-type
-     */
-    public function transformToDoc(object $document, ?string $returnClass = null): DOMDocument|false {}
+    /** @tentative-return-type */
+    public function transformToDoc(DOMDocument|SimpleXMLElement $document, ?string $returnClass = null): DOMDocument|false {}
 
-    /**
-     * @param DOMDocument|SimpleXMLElement $document
-     * @tentative-return-type
-     */
-    public function transformToUri(object $document, string $uri): int {}
+    /** @tentative-return-type */
+    public function transformToUri(DOMDocument|SimpleXMLElement $document, string $uri): int {}
 
-    /**
-     * @param DOMDocument|SimpleXMLElement $document
-     * @tentative-return-type
-     */
-    public function transformToXml(object $document): string|null|false {}
+    /** @tentative-return-type */
+    public function transformToXml(DOMDocument|SimpleXMLElement $document): string|null|false {}
 
     /** @tentative-return-type */
     public function setParameter(string $namespace, array|string $name, ?string $value = null): bool {}
