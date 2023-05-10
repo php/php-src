@@ -1091,11 +1091,33 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 		ir_op op = insn->op;
 
 		if (op <= IR_LAST_FOLDABLE_OP && jit->ctx.prev_insn_chain[op]) {
-			ZEND_ASSERT(jit->ctx.prev_insn_chain[op] == val);
-			if (insn->prev_insn_offset) {
-				jit->ctx.prev_insn_chain[op] = val - (ir_ref)(uint32_t)insn->prev_insn_offset;
+			if (jit->ctx.prev_insn_chain[op] == val) {
+				if (insn->prev_insn_offset) {
+					jit->ctx.prev_insn_chain[op] = val - (ir_ref)(uint32_t)insn->prev_insn_offset;
+				} else {
+					jit->ctx.prev_insn_chain[op] = IR_UNUSED;
+				}
 			} else {
-				jit->ctx.prev_insn_chain[op] = IR_UNUSED;
+				ir_ref prev = jit->ctx.prev_insn_chain[op];
+				ir_ref tmp;
+
+				while (prev) {
+					insn = &jit->ctx.ir_base[prev];
+					if (!insn->prev_insn_offset) {
+						break;
+					}
+					tmp = prev - (ir_ref)(uint32_t)insn->prev_insn_offset;
+					if (tmp == val) {
+						ir_ref offset = jit->ctx.ir_base[tmp].prev_insn_offset;
+
+						if (!offset || prev - tmp + offset > 0xffff) {
+							insn->prev_insn_offset = 0;
+						} else {
+							insn->prev_insn_offset = prev - tmp + offset;
+						}
+					}
+					prev = tmp;
+				}
 			}
 		}
 	}
