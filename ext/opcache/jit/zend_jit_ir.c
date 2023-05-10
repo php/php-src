@@ -3537,6 +3537,10 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 	jit->b = b;
 	jit->bb_start_ref[b] = bb_start;
 
+	if ((bb->flags & ZEND_BB_ENTRY) || (bb->idom >= 0 && jit->bb_start_ref[bb->idom] < jit->ctx.fold_cse_limit)) {
+		jit->ctx.fold_cse_limit = bb_start;
+	}
+
 	return 1;
 }
 
