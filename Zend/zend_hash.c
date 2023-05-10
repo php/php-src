@@ -1312,7 +1312,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 						}
 					}
 				} else {
-					uint32_t iter_pos = zend_hash_iterators_lower_pos(ht, 0);
+					uint32_t iter_pos = zend_hash_iterators_lower_pos(ht, i + 1);
 
 					while (++i < ht->nNumUsed) {
 						p++;
