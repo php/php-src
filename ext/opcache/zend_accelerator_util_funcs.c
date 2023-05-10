@@ -282,8 +282,9 @@ void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persist
 			zval *lcname = RT_CONSTANT(opline, opline->op1);
 			early_binding->lcname = zend_string_copy(Z_STR_P(lcname));
 			early_binding->rtd_key = zend_string_copy(Z_STR_P(lcname + 1));
-			early_binding->lc_parent_name =
-				zend_string_copy(Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+			early_binding->lc_parent_name = opline->op2_type != IS_UNUSED
+				? zend_string_copy(Z_STR_P(RT_CONSTANT(opline, opline->op2)))
+				: NULL;
 			early_binding->cache_slot = (uint32_t) -1;
 			early_binding++;
 		}
@@ -328,7 +329,9 @@ void zend_accel_free_delayed_early_binding_list(zend_persistent_script *persiste
 			zend_early_binding *early_binding = &persistent_script->early_bindings[i];
 			zend_string_release(early_binding->lcname);
 			zend_string_release(early_binding->rtd_key);
-			zend_string_release(early_binding->lc_parent_name);
+			if (early_binding->lc_parent_name) {
+				zend_string_release(early_binding->lc_parent_name);
+			}
 		}
 		efree(persistent_script->early_bindings);
 		persistent_script->early_bindings = NULL;
@@ -357,10 +360,13 @@ static void zend_accel_do_delayed_early_binding(
 			zval *zv = zend_hash_find_known_hash(EG(class_table), early_binding->rtd_key);
 			if (zv) {
 				zend_class_entry *orig_ce = Z_CE_P(zv);
-				zend_class_entry *parent_ce =
-					zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1);
-				if (parent_ce) {
-					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
+				if (early_binding->lc_parent_name) {
+					zend_class_entry *parent_ce = zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1);
+					if (parent_ce) {
+						ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
+					}
+				} else {
+					ce = zend_try_early_bind(orig_ce, NULL, early_binding->lcname, zv);
 				}
 			}
 		}

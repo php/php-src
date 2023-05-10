@@ -584,7 +584,9 @@ static void zend_persist_early_bindings_calc(
 		zend_early_binding *early_binding = &early_bindings[i];
 		ADD_INTERNED_STRING(early_binding->lcname);
 		ADD_INTERNED_STRING(early_binding->rtd_key);
-		ADD_INTERNED_STRING(early_binding->lc_parent_name);
+		if (early_binding->lc_parent_name) {
+			ADD_INTERNED_STRING(early_binding->lc_parent_name);
+		}
 	}
 }
 

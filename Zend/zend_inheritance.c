@@ -3184,6 +3184,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 /* Check whether early binding is prevented due to unresolved types in inheritance checks. */
 static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
 {
+	if (parent_ce == NULL) {
+		return INHERITANCE_SUCCESS;
+	}
+
 	zend_string *key;
 	zend_function *parent_func;
 	zend_property_info *parent_info;
@@ -3278,7 +3282,9 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 	zend_class_entry *orig_linking_class;
 	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 
-	UPDATE_IS_CACHEABLE(parent_ce);
+	if (parent_ce) {
+		UPDATE_IS_CACHEABLE(parent_ce);
+	}
 	if (is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
 			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent_ce, NULL);
@@ -3321,7 +3327,9 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 				zend_begin_record_errors();
 			}
 
-			zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
+			if (parent_ce) {
+				zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
+			}
 			if (parent_ce && parent_ce->num_interfaces) {
 				zend_do_inherit_interfaces(ce, parent_ce);
 			}

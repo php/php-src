@@ -8098,7 +8098,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		zend_add_literal_string(&key);
 
 		opline->opcode = ZEND_DECLARE_CLASS;
-		if (extends_ast && toplevel
+		if (toplevel
 			 && (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING)
 				/* We currently don't early-bind classes that implement interfaces or use traits */
 			 && !ce->num_interfaces && !ce->num_traits

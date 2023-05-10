@@ -1306,7 +1306,9 @@ static zend_early_binding *zend_persist_early_bindings(
 		for (uint32_t i = 0; i < num_early_bindings; i++) {
 			zend_accel_store_interned_string(early_bindings[i].lcname);
 			zend_accel_store_interned_string(early_bindings[i].rtd_key);
-			zend_accel_store_interned_string(early_bindings[i].lc_parent_name);
+			if (early_bindings[i].lc_parent_name) {
+				zend_accel_store_interned_string(early_bindings[i].lc_parent_name);
+			}
 		}
 	}
 	return early_bindings;

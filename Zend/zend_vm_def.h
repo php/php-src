@@ -7791,7 +7791,7 @@ ZEND_VM_HANDLER(144, ZEND_DECLARE_CLASS, CONST, ANY)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
+ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST|UNUSED)
 {
 	USE_OPLINE
 
@@ -7801,7 +7801,7 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 		zval *zv = zend_hash_find_known_hash(EG(class_table), Z_STR_P(lcname + 1));
 		if (zv) {
 			SAVE_OPLINE();
-			ce = zend_bind_class_in_slot(zv, lcname, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+			ce = zend_bind_class_in_slot(zv, lcname, OP2_TYPE == IS_CONST ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
 			if (!ce) {
 				HANDLE_EXCEPTION();
 			}
