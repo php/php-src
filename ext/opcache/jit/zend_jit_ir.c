@@ -11569,7 +11569,8 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 	op2_addr = OP2_ADDR();
 
 	if (opline->opcode != ZEND_FETCH_DIM_IS
-	 && JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+	 && JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+	 && !has_concrete_type(op1_info)) {
 		int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
