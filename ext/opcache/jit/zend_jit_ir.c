@@ -518,7 +518,9 @@ static void jit_SNAPSHOT(zend_jit_ctx *jit, ir_ref addr)
 			}
 
 			snapshot_size = stack_size;
-			while (snapshot_size > 0 && !STACK_REF(stack, snapshot_size - 1)) {
+			while (snapshot_size > 0
+			 && (!STACK_REF(stack, snapshot_size - 1)
+			  || (STACK_FLAGS(stack, snapshot_size) & (/*ZREG_LOAD|*/ZREG_STORE)))) {
 				snapshot_size--;
 			}
 			if (snapshot_size || n) {
@@ -528,7 +530,10 @@ static void jit_SNAPSHOT(zend_jit_ctx *jit, ir_ref addr)
 				for (i = 0; i < snapshot_size; i++) {
 					ir_ref ref = STACK_REF(stack, i);
 
-					ZEND_ASSERT(STACK_REF(stack, i) != IR_NULL);
+					ZEND_ASSERT(ref != IR_NULL);
+					if (ref && (STACK_FLAGS(stack, i) & (/*ZREG_LOAD|*/ZREG_STORE))) {
+						ref = IR_UNUSED;
+					}
 					ir_SNAPSHOT_SET_OP(snapshot, i + 1, ref);
 				}
 				if (n) {
