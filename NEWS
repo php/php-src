@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-11160 (Few tests failed building with new libxml 2.11.0).
     (nielsdos)
 
+- MBString:
+  . Fix bug GH-11217 (Segfault in mb_strrpos / mb_strripos when using negative
+    offset and ASCII encoding). (ilutov)
+
 - Opcache:
   . Fixed bug GH-11134 (Incorrect match default branch optimization). (ilutov)
   . Fixed too wide OR and AND range inference. (nielsdos)

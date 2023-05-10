@@ -594,7 +594,7 @@ mbfl_strpos(
 	const unsigned char *offset_pointer;
 
 	if (haystack->encoding->no_encoding != mbfl_no_encoding_utf8) {
-		mbfl_string_init(&_haystack_u8);
+		mbfl_string_init_set(&_haystack_u8, haystack->encoding);
 		haystack_u8 = mbfl_convert_encoding(haystack, &_haystack_u8, &mbfl_encoding_utf8);
 		if (haystack_u8 == NULL) {
 			result = MBFL_ERROR_ENCODING;
@@ -605,7 +605,7 @@ mbfl_strpos(
 	}
 
 	if (needle->encoding->no_encoding != mbfl_no_encoding_utf8) {
-		mbfl_string_init(&_needle_u8);
+		mbfl_string_init_set(&_needle_u8, needle->encoding);
 		needle_u8 = mbfl_convert_encoding(needle, &_needle_u8, &mbfl_encoding_utf8);
 		if (needle_u8 == NULL) {
 			result = MBFL_ERROR_ENCODING;
