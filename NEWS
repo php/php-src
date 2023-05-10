@@ -35,6 +35,8 @@ PHP                                                                        NEWS
     has inherited it from its parent). (ilutov)
   . Fix bug GH-11154 (Negative indices on empty array don't affect next chosen
     index). (ColinHDev)
+  . Fix bug GH-8846 (Implement delayed early binding for classes without
+    parents). (ilutov)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)

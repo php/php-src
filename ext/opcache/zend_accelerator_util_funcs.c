@@ -357,9 +357,10 @@ static void zend_accel_do_delayed_early_binding(
 			zval *zv = zend_hash_find_known_hash(EG(class_table), early_binding->rtd_key);
 			if (zv) {
 				zend_class_entry *orig_ce = Z_CE_P(zv);
-				zend_class_entry *parent_ce =
-					zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1);
-				if (parent_ce) {
+				zend_class_entry *parent_ce = !(orig_ce->ce_flags & ZEND_ACC_LINKED)
+					? zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1)
+					: NULL;
+				if (parent_ce || (orig_ce->ce_flags & ZEND_ACC_LINKED)) {
 					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
 				}
 			}

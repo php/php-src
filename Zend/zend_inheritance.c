@@ -3276,8 +3276,17 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 	inheritance_status status;
 	zend_class_entry *proto = NULL;
 	zend_class_entry *orig_linking_class;
-	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		ZEND_ASSERT(ce->parent == NULL);
+		if (UNEXPECTED(!register_early_bound_ce(delayed_early_binding, lcname, ce))) {
+			return NULL;
+		}
+		zend_observer_class_linked_notify(ce, lcname);
+		return ce;
+	}
+
+	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	UPDATE_IS_CACHEABLE(parent_ce);
 	if (is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {

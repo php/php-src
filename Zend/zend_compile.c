@@ -8057,8 +8057,11 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 				ce->ce_flags |= ZEND_ACC_LINKED;
 				zend_observer_class_linked_notify(ce, lcname);
 				return;
+			} else {
+				goto link_unbound;
 			}
 		} else if (!extends_ast) {
+link_unbound:
 			/* Link unbound simple class */
 			zend_build_properties_info_table(ce);
 			ce->ce_flags |= ZEND_ACC_LINKED;
@@ -8098,11 +8101,17 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		zend_add_literal_string(&key);
 
 		opline->opcode = ZEND_DECLARE_CLASS;
-		if (extends_ast && toplevel
+		if (toplevel
 			 && (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING)
 				/* We currently don't early-bind classes that implement interfaces or use traits */
 			 && !ce->num_interfaces && !ce->num_traits
 		) {
+			if (!extends_ast) {
+				/* Use empty string for classes without parents to avoid new handler, and special
+				 * handling of zend_early_binding. */
+				opline->op2_type = IS_CONST;
+				LITERAL_STR(opline->op2, ZSTR_EMPTY_ALLOC());
+			}
 			CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
 			opline->opcode = ZEND_DECLARE_CLASS_DELAYED;
 			opline->extended_value = zend_alloc_cache_slot();
