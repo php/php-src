@@ -112,6 +112,10 @@ mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter)
 
 	if (c < 0x80) {
 		s = c;
+	} else if (c == 0x406) {	/* CYRILLIC CAPITAL LETTER BYELORUSSIAN-UKRAINIAN I */
+		s = 0x49;
+	} else if (c == 0x456) {	/* CYRILLIC SMALL LETTER BYELORUSSIAN-UKRAINIAN I */
+		s = 0x69;
 	} else {
 		s = -1;
 		n = cp866_ucs_table_len-1;
