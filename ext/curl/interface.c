@@ -378,6 +378,26 @@ PHP_MINFO_FUNCTION(curl)
 }
 /* }}} */
 
+static void *zend_curl_malloc(size_t size) {
+	return emalloc(size);
+}
+
+static void zend_curl_free(void *ptr) {
+	efree(ptr);
+}
+
+static void *zend_curl_realloc(void *ptr, size_t size) {
+	return erealloc(ptr, size);
+}
+
+static char *zend_curl_strdup(const char *s) {
+	return estrdup(s);
+}
+
+static void *zend_curl_calloc(size_t nmemb, size_t size) {
+	return ecalloc(nmemb, size);
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(curl)
 {
@@ -403,7 +423,7 @@ PHP_MINIT_FUNCTION(curl)
 	}
 #endif
 
-	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
+	if (curl_global_init_mem(CURL_GLOBAL_DEFAULT, zend_curl_malloc, zend_curl_free, zend_curl_realloc, zend_curl_strdup, zend_curl_calloc) != CURLE_OK) {
 		return FAILURE;
 	}
 
