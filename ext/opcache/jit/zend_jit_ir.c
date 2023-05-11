@@ -13591,6 +13591,10 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		ir_END_list(end_inputs);
 	}
 
+	if (op1_avoid_refcounting) {
+		SET_STACK_REG(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
+	}
+
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE || !prop_info) {
 		ir_MERGE_list(slow_inputs);
 		jit_SET_EX_OPLINE(jit, opline);

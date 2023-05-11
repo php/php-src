@@ -6817,7 +6817,7 @@ done:
 			}
 #else
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
-			 && STACK_FLAGS(stack, EX_VAR_TO_NUM(opline->op1.var)) & ZREG_ZVAL_ADDREF) {
+			 && STACK_FLAGS(stack, EX_VAR_TO_NUM(opline->op1.var)) & (ZREG_ZVAL_ADDREF|ZREG_THIS)) {
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 			}
 
