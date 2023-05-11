@@ -383,7 +383,9 @@ static void *zend_curl_malloc(size_t size) {
 }
 
 static void zend_curl_free(void *ptr) {
-	efree(ptr);
+	if (ptr) {
+		efree(ptr);
+	}
 }
 
 static void *zend_curl_realloc(void *ptr, size_t size) {
