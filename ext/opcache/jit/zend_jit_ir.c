@@ -1085,7 +1085,9 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 		return;
 	}
 	ZEND_ASSERT(jit->ra && jit->ra[var].ref == IR_NULL);
+
 	/* Disable CSE for temporary variables */
+	/* TODO: This is a workarounf to fix ext/standard/tests/strings/htmlentities20.phpt failure with tracing JIT ??? */
 	if (val > 0 && jit->ssa->vars[var].var >= jit->current_op_array->last_var) {
 		ir_insn *insn = &jit->ctx.ir_base[val];
 		ir_op op = insn->op;
@@ -1121,6 +1123,7 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 			}
 		}
 	}
+
 	/* Negative "var" has special meaning for IR */
 	val = ir_bind(&jit->ctx, -EX_NUM_TO_VAR(jit->ssa->vars[var].var), val);
 	jit->ra[var].ref = val;
