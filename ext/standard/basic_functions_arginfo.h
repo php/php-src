@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d2bffd95e986b632f5fd1afbf8f6464e6bc8759 */
+ * Stub hash: 42ac385ba7fd2013563332627160686acb46d04f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2923,8 +2923,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(base64_encode, arginfo_base64_encode)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(base64_decode, arginfo_base64_decode)
 	ZEND_FE(constant, arginfo_constant)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ip2long, arginfo_ip2long)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(long2ip, arginfo_long2ip)
+	ZEND_FE(ip2long, arginfo_ip2long)
+	ZEND_FE(long2ip, arginfo_long2ip)
 	ZEND_FE(getenv, arginfo_getenv)
 #if defined(HAVE_PUTENV)
 	ZEND_FE(putenv, arginfo_putenv)
@@ -3042,10 +3042,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(syslog, arginfo_syslog)
 #endif
 #if defined(HAVE_INET_NTOP)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(inet_ntop, arginfo_inet_ntop)
+	ZEND_FE(inet_ntop, arginfo_inet_ntop)
 #endif
 #if defined(HAVE_INET_PTON)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(inet_pton, arginfo_inet_pton)
+	ZEND_FE(inet_pton, arginfo_inet_pton)
 #endif
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(metaphone, arginfo_metaphone)
 	ZEND_FE(header, arginfo_header)

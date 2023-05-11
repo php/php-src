@@ -1913,15 +1913,9 @@ function base64_decode(string $string, bool $strict = false): string|false {}
 
 function constant(string $name): mixed {}
 
-/**
- * @compile-time-eval
- */
 function ip2long(string $ip): int|false {}
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function long2ip(int $ip): string|false {}
 
 /**
@@ -2219,18 +2213,12 @@ function syslog(int $priority, string $message): true {} // TODO make return typ
 #endif
 
 #ifdef HAVE_INET_NTOP
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function inet_ntop(string $ip): string|false {}
 #endif
 
 #ifdef HAVE_INET_PTON
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function inet_pton(string $ip): string|false {}
 #endif
 
