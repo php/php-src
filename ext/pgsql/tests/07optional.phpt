@@ -19,6 +19,7 @@ if (function_exists('pg_set_error_verbosity')) {
     pg_set_error_verbosity($db, PGSQL_ERRORS_TERSE);
     pg_set_error_verbosity($db, PGSQL_ERRORS_DEFAULT);
     pg_set_error_verbosity($db, PGSQL_ERRORS_VERBOSE);
+    pg_set_error_verbosity($db, PGSQL_ERRORS_SQLSTATE);
 }
 echo "OK";
 ?>

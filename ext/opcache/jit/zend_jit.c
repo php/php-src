@@ -4696,6 +4696,7 @@ static int zend_jit_make_stubs(void)
 
 	for (i = 0; i < sizeof(zend_jit_stubs)/sizeof(zend_jit_stubs[0]); i++) {
 		dasm_setup(&dasm_state, dasm_actions);
+		zend_jit_align_stub(&dasm_state);
 		if (!zend_jit_stubs[i].stub(&dasm_state)) {
 			return 0;
 		}

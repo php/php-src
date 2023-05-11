@@ -1257,7 +1257,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 	}
 
 	if (is_dir) {
-		if (!path_len || path_len == 1) {
+		if (path_len <= 1) {
 			return NULL;
 		}
 		path_len--;

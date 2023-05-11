@@ -1636,7 +1636,7 @@ zend_result php_openssl_setup_crypto(php_stream *stream,
 	ERR_clear_error();
 
 	/* We need to do slightly different things based on client/server method
-	 * so lets remember which method was selected */
+	 * so let's remember which method was selected */
 	sslsock->is_client = cparam->inputs.method & STREAM_CRYPTO_IS_CLIENT;
 	method_flags = cparam->inputs.method & ~STREAM_CRYPTO_IS_CLIENT;
 

@@ -567,7 +567,7 @@ finish:
 	 * interprets the RFC literally and establishes a keep-alive connection,
 	 * unless the user specifically requests something else by specifying a
 	 * Connection header in the context options. Send that header even for
-	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
+	 * HTTP/1.0 to avoid issues when the server respond with an HTTP/1.1
 	 * keep-alive response, which is the preferred response type. */
 	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
 		smart_str_appends(&req_buf, "Connection: close\r\n");
@@ -954,6 +954,13 @@ out:
 
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
+		}
+
+		/* It's possible that the server already sent in more data than just the headers.
+		 * We account for this by adjusting the progress counter by the difference of
+		 * already read header data and the body. */
+		if (stream->writepos > stream->readpos) {
+			php_stream_notify_progress_increment(context, stream->writepos - stream->readpos, 0);
 		}
 	}
 

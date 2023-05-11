@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - CLI:
   . Added pdeathsig to builtin server to terminate workers when the master
     process is killed. (ilutov)
+  . Fixed bug GH-11104 (STDIN/STDOUT/STDERR is not available for CLI without
+    a script). (nielsdos)
 
 - Core:
   . Fixed bug GH-9388 (Improve unset property and __get type incompatibility
@@ -31,6 +33,8 @@ PHP                                                                        NEWS
     values). (dstogov, nielsdos, ilutov)
   . Fix bug GH-10935 (Use of trait doesn't redeclare static property if class
     has inherited it from its parent). (ilutov)
+  . Fix bug GH-11154 (Negative indices on empty array don't affect next chosen
+    index). (ColinHDev)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
@@ -111,6 +115,12 @@ PHP                                                                        NEWS
   . Added memfd api usage, on Linux, for zend_shared_alloc_create_lock()
     to create an abstract anonymous file for the opcache's lock. (Max Kellermann)
 
+- OpenSSL:
+  . Added OPENSSL_CMS_OLDMIMETYPE and PKCS7_NOOLDMIMETYPE contants to switch
+    between mime content types. (Daniel Kesselberg)
+  . Fixed GH-11054: Reset OpenSSL errors when using a PEM public key.
+    (Florian Moser)
+
 - PCNTL:
   . SA_ONSTACK is now set for pcntl_signal. (Kévin Dunglas)
   . Added SIGINFO constant. (David Carlier)
@@ -118,6 +128,11 @@ PHP                                                                        NEWS
 - PGSQL:
   . pg_fetch_object raises a ValueError instead of an Exception.
     (David Carlier)
+  . Added GH-9344, pipeline mode support. (David Carlier)
+  . pg_cancel use thread safe PQcancel api instead. (David Carlier)
+  . pg_trace new PGSQL_TRACE_SUPPRESS_TIMESTAMPS/PGSQL_TRACE_REGRESS_MODE
+    contants support. (David Carlier)
+  . pg_set_error_verbosity adding PGSQL_ERRORS_STATE constant. (David Carlier)
 
 - Phar:
   . Fix memory leak in phar_rename_archive(). (stkeke)
@@ -144,6 +159,10 @@ PHP                                                                        NEWS
   . Fix Segfault when using ReflectionFiber suspended by an internal function.
     (danog)
 
+- SAPI:
+  . Fixed GH-11141 (Could not open input file: should be sent to stderr).
+    (nielsdos)
+
 - Sockets:
   . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
     over socket binding for a cpu core. (David Carlier)
@@ -159,9 +178,12 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added TCP_REPAIR for quietly close a connection. (David Carlier)
   . Added SO_REUSEPORT_LB freebsd constant. (David Carlier)
+  . Added IP_BIND_ADDRESS_NO_PORT. (David Carlier)
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING. (timwolla)
+  . unserialize() now emits a new E_WARNING if the input contains unconsumed
+    bytes. (timwolla)
   . Make array_pad's $length warning less confusing. (nielsdos)
   . E_WARNING emitted by strtok in the caase both arguments are not provided when
     starting tokenisation. (David Carlier)
@@ -173,6 +195,8 @@ PHP                                                                        NEWS
   . Fix GH-11010 (parse_ini_string() now preserves formatting of unquoted
     strings starting with numbers when the INI_SCANNER_TYPED flag is
     specified). (ilutov)
+  . Fix GH-10742 (http_response_code emits no error when headers were already
+    sent). (NattyNarwhal)
 
 - Streams:
   . Fixed bug #51056: blocking fread() will block even if data is available.

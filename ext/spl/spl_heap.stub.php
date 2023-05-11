@@ -23,7 +23,7 @@ class SplPriorityQueue implements Iterator, Countable
     /** @tentative-return-type */
     public function compare(mixed $priority1, mixed $priority2): int {}
 
-    /** @return bool */
+    /** @return true */
     public function insert(mixed $value, mixed $priority) {} // TODO make return type void
 
     /** @tentative-return-type */

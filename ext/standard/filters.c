@@ -939,7 +939,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					ps++, icnt--;
 					break;
 				} else if (!inst->lbchars && lb_cnt == 0 && *ps == '\n') {
-					/* auto-detect line endings, looks like unix-lineendings, not to spec, but it is seem in the wild, a lot */
+					/* auto-detect line endings, looks like unix-lineendings, not to spec, but it is seen in the wild, a lot */
 					lb_cnt = lb_ptr = 0;
 					scan_stat = 0;
 					ps++, icnt--;

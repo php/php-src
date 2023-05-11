@@ -39,6 +39,8 @@ PHP 8.3 UPGRADE NOTES
     inherited from the parent class. This will create a separate static property
     storage for the current class. This is analogous to adding the static
     property to the class directly without traits.
+  . Assigning a negative index n to an empty array will now make sure that the
+    next index is n+1 instead of 0.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
@@ -66,13 +68,16 @@ PHP 8.3 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- $_SERVER['SERVER_SOFTWARE'] value from the built-in CLI server changed
+  to make it compliant with RFC3875.
+
 ========================================
 4. Deprecated Functionality
 ========================================
 
 - Intl
-  . The U_MULTIPLE_DECIMAL_SEPERATORS constant had been deprecated, using
-    the U_MULTIPLE_DECIMAL_SEPARATORS instead is recommended.
+  . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
+    the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
 
 ========================================
 5. Changed Functions
@@ -141,8 +146,11 @@ PHP 8.3 UPGRADE NOTES
   . pg_insert now raises a ValueError instead of a WARNING when the table specified is invalid.
 
 - Standard:
-  . E_NOTICEs emitted by unserialized() have been promoted to E_WARNING.
+  . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
+  . unserialize() now emits a new E_WARNING if the input contains unconsumed
+    bytes.
+    RFC: https://wiki.php.net/rfc/unserialize_warn_on_trailing_data
   . array_pad() is now only limited by the maximum number of elements an array
     can have. Before, it was only possible to add at most 1048576 elements at a
     time.
@@ -206,14 +214,23 @@ PHP 8.3 UPGRADE NOTES
   . MIXED_NUMBERS (Spoofchecker).
   . HIDDEN_OVERLAY (Spoofchecker).
 
+- OpenSSL:
+  . OPENSSL_CMS_OLDMIMETYPE
+  . PKCS7_NOOLDMIMETYPE
+
 - PCNTL:
   . SIGINFO
 
+- PGSQL:
+  . PGSQL_TRACE_SUPPRESS_TIMESTAMPS.
+  . PGSQL_TRACE_REGRESS_MODE.
+  . PGSQL_ERRORS_SQLSTATE.
+
 - Posix:
-  . POSIX_SC_ARG_MAX
-  . POSIX_SC_PAGESIZE
-  . POSIX_SC_NPROCESSORS_CONF
-  . POSIX_SC_NPROCESSORS_ONLN
+  . POSIX_SC_ARG_MAX.
+  . POSIX_SC_PAGESIZE.
+  . POSIX_SC_NPROCESSORS_CONF.
+  . POSIX_SC_NPROCESSORS_ONLN.
 
 - Sockets:
   . SO_ATTACH_REUSEPORT_CBPF (Linux only).
@@ -235,6 +252,7 @@ PHP 8.3 UPGRADE NOTES
   . SO_SPLICE (OpenBSD only).
   . TCP_REPAIR (Linux only).
   . SO_REUSEPORT_LB (FreeBSD only).
+  . IP_BIND_ADDRESS_NO_PORT (Linux only).
 
 ========================================
 11. Changes to INI File Handling

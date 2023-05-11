@@ -49,7 +49,7 @@
 # define EWOULDBLOCK EAGAIN
 #endif
 
-/* This is a work around for GCC bug 69602: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69602 */
+/* This is a workaround for GCC bug 69602: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69602 */
 #if EAGAIN != EWOULDBLOCK
 # define PHP_IS_TRANSIENT_ERROR(err) (err == EAGAIN || err == EWOULDBLOCK)
 #else

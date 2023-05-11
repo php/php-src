@@ -590,7 +590,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		}
 	} /* end provided path */
 
-	/* check in calling scripts' current working directory as a fall back case
+	/* check in calling scripts' current working directory as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
@@ -670,7 +670,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 
 	/* check in provided path */
 	/* append the calling scripts' current working directory
-	 * as a fall back case
+	 * as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
@@ -806,7 +806,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 			fdtest = VCWD_OPEN(filepath, O_RDONLY);
 			if (fdtest != -1) {
 				/* return a relative file path if for any reason
-				 * we cannot cannot getcwd() and the requested,
+				 * we cannot getcwd() and the requested,
 				 * relatively referenced file is accessible */
 				copy_len = path_len > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : path_len;
 				if (real_path) {

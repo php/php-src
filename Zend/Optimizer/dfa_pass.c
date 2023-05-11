@@ -938,32 +938,41 @@ optimize_jmpnz:
 							|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
 							|| (opline->opcode == ZEND_MATCH && (type == IS_LONG || type == IS_STRING));
 
-						if (!correct_type) {
+						/* Switch statements have a fallback chain for loose comparison. In those
+						 * cases the SWITCH_* instruction is a NOP. Match does strict comparison and
+						 * thus jumps to the default branch on mismatched types, so we need to
+						 * convert MATCH to a jmp. */
+						if (!correct_type && opline->opcode != ZEND_MATCH) {
 							removed_ops++;
 							MAKE_NOP(opline);
 							opline->extended_value = 0;
 							take_successor_ex(ssa, block_num, block, block->successors[block->successors_count - 1]);
 							goto optimize_nop;
-						} else {
+						}
+
+						uint32_t target;
+						if (correct_type) {
 							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
 							zval *jmp_zv = type == IS_LONG
 								? zend_hash_index_find(jmptable, Z_LVAL_P(zv))
 								: zend_hash_find(jmptable, Z_STR_P(zv));
 
-							uint32_t target;
 							if (jmp_zv) {
 								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
 							} else {
 								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
 							}
-							opline->opcode = ZEND_JMP;
-							opline->extended_value = 0;
-							SET_UNUSED(opline->op1);
-							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
-							SET_UNUSED(opline->op2);
-							take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
-							goto optimize_jmp;
+						} else {
+							ZEND_ASSERT(opline->opcode == ZEND_MATCH);
+							target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
 						}
+						opline->opcode = ZEND_JMP;
+						opline->extended_value = 0;
+						SET_UNUSED(opline->op1);
+						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
+						SET_UNUSED(opline->op2);
+						take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+						goto optimize_jmp;
 					}
 					break;
 				case ZEND_NOP:

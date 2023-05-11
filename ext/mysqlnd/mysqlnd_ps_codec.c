@@ -691,7 +691,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 					/*
 					  User hasn't sent anything, we will send empty string.
 					  Empty string has length of 0, encoded in 1 byte. No real
-					  data will follows after it.
+					  data will follow after it.
 					*/
 					(*data_size)++;
 				}

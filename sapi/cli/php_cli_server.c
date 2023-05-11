@@ -696,7 +696,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 		}
 	}
 	{
-		zend_string *tmp = strpprintf(0, "PHP %s Development Server", PHP_VERSION);
+		zend_string *tmp = strpprintf(0, "PHP/%s (Development Server)", PHP_VERSION);
 		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_SOFTWARE", strlen("SERVER_SOFTWARE"), tmp);
 		zend_string_release_ex(tmp, /* persistent */ false);
 	}

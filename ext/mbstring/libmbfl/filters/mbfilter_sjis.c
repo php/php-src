@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter_ja.c
+ * The source code included in this file was separated from mbfilter_ja.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
@@ -1400,8 +1400,8 @@ process_codepoint: ;
 						/* This might be a valid transcoding hint sequence */
 						int index = 3;
 
-resume_transcoding_hint:
 						if (buf->state) {
+resume_transcoding_hint:
 							i = buf->state >> 24;
 							index = (buf->state >> 16) & 0xFF;
 							buf->state = 0;

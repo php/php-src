@@ -76,7 +76,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	if (persistent_id) {
 		switch(php_stream_from_persistent_id(persistent_id, &stream)) {
 			case PHP_STREAM_PERSISTENT_SUCCESS:
-				/* use a 0 second timeout when checking if the socket
+				/* use a 0-second timeout when checking if the socket
 				 * has already died */
 				if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL)) {
 					return stream;

@@ -574,7 +574,7 @@ static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *scri
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
-		php_printf("Could not open input file: %s\n", script_file);
+		fprintf(stderr, "Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}
 
@@ -951,9 +951,7 @@ do_repeat:
 		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (script_file) {
-				cli_register_file_handles();
-			}
+			cli_register_file_handles();
 
 			if (interactive) {
 				EG(exit_status) = cli_shell_callbacks.cli_shell_run();

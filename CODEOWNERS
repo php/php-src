@@ -22,10 +22,11 @@
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
 /ext/pgsql @devnexen
-/ext/random @TimWolla
+/ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
 /ext/sockets @devnexen
 /ext/spl @Girgias
+/ext/standard @bukka
 /main @bukka
 /sapi/fpm @bukka
 /Zend @iluuu1994
