@@ -3872,6 +3872,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_IS_IDENTICAL:
 					case ZEND_IS_NOT_IDENTICAL:
 					case ZEND_CASE_STRICT:
+						res_addr = RES_REG_ADDR();
 						if ((opline->result_type & IS_TMP_VAR)
 						 && (i + 1) <= end
 						 && ((opline+1)->opcode == ZEND_JMPZ
@@ -3886,6 +3887,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							smart_branch_opcode = (opline+1)->opcode;
 							target_label = ssa->cfg.blocks[b].successors[0];
 							target_label2 = ssa->cfg.blocks[b].successors[1];
+#ifdef ZEND_JIT_IR
+							/* For EX variant write into the result of EX opcode. */
+							if ((opline+1)->opcode == ZEND_JMPZ_EX
+									|| (opline+1)->opcode == ZEND_JMPNZ_EX) {
+								res_addr = OP_REG_ADDR(opline + 1, result_type, result, result_def);
+							}
+#endif
 						} else {
 							smart_branch_opcode = 0;
 							target_label = target_label2 = (uint32_t)-1;
@@ -3893,7 +3901,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_identical(&ctx, opline,
 								OP1_INFO(), OP1_RANGE(), OP1_REG_ADDR(),
 								OP2_INFO(), OP2_RANGE(), OP2_REG_ADDR(),
-								RES_REG_ADDR(),
+								res_addr,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL, 0)) {
