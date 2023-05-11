@@ -7760,7 +7760,16 @@ static int zend_jit_stack_check(zend_jit_ctx *jit, const zend_op *opline, uint32
 
 static int zend_jit_free_trampoline(zend_jit_ctx *jit, int8_t func_reg)
 {
-	ZEND_ASSERT(0 && "NIY");
+	// JIT: if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
+	ir_ref func = ir_RLOAD_A(func_reg);
+	ir_ref if_trampoline = ir_IF(ir_AND_U32(
+		ir_LOAD_U32(ir_ADD_OFFSET(func, offsetof(zend_function, common.fn_flags))),
+		ir_CONST_U32(ZEND_ACC_CALL_VIA_TRAMPOLINE)));
+
+	ir_IF_TRUE(if_trampoline);
+	ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_free_trampoline_helper), func);
+	ir_MERGE_WITH_EMPTY_FALSE(if_trampoline);
+
 	return 1;
 }
 
@@ -11550,7 +11559,11 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 		}
 	}
 
-	if (type == BP_JIT_IS && (op1_info & MAY_BE_ARRAY) && (op2_info & (MAY_BE_LONG|MAY_BE_STRING))) {
+	if (type == BP_JIT_IS
+	 && (op1_info & MAY_BE_ARRAY)
+	 && (op2_info & (MAY_BE_LONG|MAY_BE_STRING))
+	 && test_zval_inputs->count) {
+
 		ir_MERGE_N(test_zval_inputs->count, test_zval_inputs->refs);
 		ref = ir_PHI_N(test_zval_values->count, test_zval_values->refs);
 
@@ -15466,16 +15479,13 @@ static int zend_jit_scalar_type_guard(zend_jit_ctx *jit, const zend_op *opline, 
 
 static bool zend_jit_noref_guard(zend_jit_ctx *jit, const zend_op *opline, zend_jit_addr var_addr)
 {
-	ZEND_ASSERT(0 && "NIY");
-#if 0
-	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+	uint32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 	if (!exit_addr) {
 		return 0;
 	}
-	|	IF_ZVAL_TYPE var_addr, IS_REFERENCE, &exit_addr
-#endif
+	ir_GUARD(ir_NE(jit_Z_TYPE(jit, var_addr), ir_CONST_U8(IS_REFERENCE)), ir_CONST_ADDR(exit_addr));
 
 	return 1;
 }

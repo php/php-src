@@ -7803,7 +7803,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 			NULL,
 #else
 			zend_jit_traces[trace_num].constants,
-			-1,
+			zend_jit_traces[trace_num].exit_info[exit_num].poly_func_reg,
 #endif
 			0)) {
 		goto jit_failure;
