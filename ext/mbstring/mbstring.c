@@ -1816,7 +1816,6 @@ static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 		return mb_fast_strlen_utf8((unsigned char*)ZSTR_VAL(string), ZSTR_LEN(string));
 	}
 
-
 	uint32_t wchar_buf[128];
 	unsigned char *in = (unsigned char*)ZSTR_VAL(string);
 	size_t in_len = ZSTR_LEN(string);
@@ -3006,19 +3005,24 @@ static size_t init_candidate_array(struct candidate *array, size_t length, const
 	for (size_t i = 0; i < length; i++) {
 		const mbfl_encoding *enc = encodings[i];
 
+		array[j].enc = enc;
+		array[j].state = 0;
+		array[j].demerits = 0;
+
 		/* If any candidate encodings have specialized validation functions, use them
 		 * to eliminate as many candidates as possible */
-		if (strict && enc->check != NULL) {
+		if (enc->check != NULL) {
 			for (size_t k = 0; k < n; k++) {
 				if (!enc->check((unsigned char*)in[k], in_len[k])) {
-					goto skip_to_next;
+					if (strict) {
+						goto skip_to_next;
+					} else {
+						array[j].demerits += 500;
+					}
 				}
 			}
 		}
 
-		array[j].enc = enc;
-		array[j].state = 0;
-		array[j].demerits = 0;
 		/* This multiplier can optionally be used to make candidate encodings listed
 		 * first more likely to be chosen. It is a weight factor which multiplies
 		 * the number of demerits counted for each candidate. */

@@ -78,6 +78,13 @@ echo mb_detect_encoding($test, ['UTF-8', 'ISO-8859-1']), "\n"; // Should be UTF-
 echo mb_detect_encoding('abc', ['UUENCODE', 'UTF-8']), "\n";
 echo mb_detect_encoding('abc', ['UUENCODE', 'QPrint', 'HTML-ENTITIES', 'Base64', '7bit', '8bit', 'SJIS']), "\n";
 
+// This test case courtesy of Adrien Foulon
+// It depends on the below use of '+' being recognized as invalid UTF-7
+$css = 'input[type="radio"]:checked + img {
+    border: 5px solid #0083ca;
+}';
+echo mb_detect_encoding($css, mb_list_encodings(), true), "\n";
+
 echo "== DETECT ORDER ==\n";
 
 mb_detect_order('auto');
@@ -400,6 +407,7 @@ UTF-8
 UTF-8
 UTF-8
 SJIS
+UTF-8
 == DETECT ORDER ==
 JIS: JIS
 EUC-JP: EUC-JP
