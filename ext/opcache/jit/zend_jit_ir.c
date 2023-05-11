@@ -16139,6 +16139,11 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 			    !zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, ssa->ops + use, NULL)) {
 				return 0;
 			}
+			/* Quick workaround to disable register allocation for unsupported operand */
+			// TODO: Find a general solution ???
+			if (op_array->opcodes[use].opcode == ZEND_FETCH_DIM_R) {
+				return 0;
+			}
 			use = zend_ssa_next_use(ssa->ops, var, use);
 		} while (use >= 0);
 	}
