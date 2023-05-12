@@ -2170,10 +2170,7 @@ function hrtime(bool $as_number = false): array|int|float|false {}
 
 /* md5.c */
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function md5(string $string, bool $binary = false): string {}
 
 /** @refcount 1 */
@@ -2193,10 +2190,7 @@ function getlastmod(): int|false {}
 
 /* sha1.c */
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function sha1(string $string, bool $binary = false): string {}
 
 /** @refcount 1 */
@@ -2224,10 +2218,7 @@ function inet_pton(string $ip): string|false {}
 
 /* metaphone.c */
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */
@@ -2501,10 +2492,7 @@ function str_replace(array|string $search, array|string $replace, string|array $
  */
 function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function hebrev(string $string, int $max_chars_per_line = 0): string {}
 
 /**
@@ -2544,9 +2532,6 @@ function str_repeat(string $string, int $times): string {}
  */
 function count_chars(string $string, int $mode = 0): array|string {}
 
-/**
- * @compile-time-eval
- */
 function strnatcmp(string $string1, string $string2): int {}
 
 /**
@@ -3322,10 +3307,7 @@ function quoted_printable_encode(string $string): string {}
 
 /* soundex.c */
 
-/**
- * @compile-time-eval
- * @refcount 1
- */
+/** @refcount 1 */
 function soundex(string $string): string {}
 
 /* streamsfuncs.c */

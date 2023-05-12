@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 42ac385ba7fd2013563332627160686acb46d04f */
+ * Stub hash: 73241fe3664a9191b3a23973538a12fdf4932333 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3023,14 +3023,14 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftok, arginfo_ftok)
 #endif
 	ZEND_FE(hrtime, arginfo_hrtime)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(md5, arginfo_md5)
+	ZEND_FE(md5, arginfo_md5)
 	ZEND_FE(md5_file, arginfo_md5_file)
 	ZEND_FE(getmyuid, arginfo_getmyuid)
 	ZEND_FE(getmygid, arginfo_getmygid)
 	ZEND_FE(getmypid, arginfo_getmypid)
 	ZEND_FE(getmyinode, arginfo_getmyinode)
 	ZEND_FE(getlastmod, arginfo_getlastmod)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(sha1, arginfo_sha1)
+	ZEND_FE(sha1, arginfo_sha1)
 	ZEND_FE(sha1_file, arginfo_sha1_file)
 #if defined(HAVE_SYSLOG_H)
 	ZEND_FE(openlog, arginfo_openlog)
@@ -3047,7 +3047,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_INET_PTON)
 	ZEND_FE(inet_pton, arginfo_inet_pton)
 #endif
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(metaphone, arginfo_metaphone)
+	ZEND_FE(metaphone, arginfo_metaphone)
 	ZEND_FE(header, arginfo_header)
 	ZEND_FE(header_remove, arginfo_header_remove)
 	ZEND_FE(setrawcookie, arginfo_setrawcookie)
@@ -3113,7 +3113,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(stripslashes, arginfo_stripslashes)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_replace, arginfo_str_replace)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_ireplace, arginfo_str_ireplace)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hebrev, arginfo_hebrev)
+	ZEND_FE(hebrev, arginfo_hebrev)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(nl2br, arginfo_nl2br)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strip_tags, arginfo_strip_tags)
 	ZEND_FE(setlocale, arginfo_setlocale)
@@ -3121,7 +3121,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_getcsv, arginfo_str_getcsv)
 	ZEND_FE(str_repeat, arginfo_str_repeat)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(count_chars, arginfo_count_chars)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strnatcmp, arginfo_strnatcmp)
+	ZEND_FE(strnatcmp, arginfo_strnatcmp)
 	ZEND_FE(localeconv, arginfo_localeconv)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strnatcasecmp, arginfo_strnatcasecmp)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(substr_count, arginfo_substr_count)
@@ -3344,7 +3344,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(quoted_printable_decode, arginfo_quoted_printable_decode)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(quoted_printable_encode, arginfo_quoted_printable_encode)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(soundex, arginfo_soundex)
+	ZEND_FE(soundex, arginfo_soundex)
 	ZEND_FE(stream_select, arginfo_stream_select)
 	ZEND_FE(stream_context_create, arginfo_stream_context_create)
 	ZEND_FE(stream_context_set_params, arginfo_stream_context_set_params)
