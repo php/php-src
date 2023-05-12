@@ -2540,9 +2540,6 @@ function strnatcmp(string $string1, string $string2): int {}
  */
 function localeconv(): array {}
 
-/**
- * @compile-time-eval
- */
 function strnatcasecmp(string $string1, string $string2): int {}
 
 /**
