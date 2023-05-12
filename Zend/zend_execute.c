@@ -1190,7 +1190,7 @@ static zend_always_inline bool zend_check_type_slow(
 	 * because this case is already checked at compile-time. */
 }
 
-static zend_always_inline bool zend_check_type(
+zend_always_inline bool zend_check_type(
 		zend_type *type, zval *arg, void **cache_slot, zend_class_entry *scope,
 		bool is_return_type, bool is_internal)
 {
