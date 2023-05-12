@@ -3,9 +3,11 @@ Observer: Basic observability of userland methods
 --EXTENSIONS--
 zend_test
 --SKIPIF--
+<?php
 if (function_exists('opcache_get_status') && opcache_get_status()) {
     die ('xfail Result /w opcache is deoptimized/different - tracked in GH-10782');
 }
+?>
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
