@@ -203,3 +203,22 @@ zval *zend_collection_read_item(zend_object *object, zval *offset)
 
 	return value;
 }
+
+void zend_collection_unset_item(zend_object *object, zval *offset)
+{
+	zval rv;
+	zval *value_prop;
+	zend_class_entry *ce = object->ce;
+
+	if (!key_type_allowed(ce, offset)) {
+		return;
+	}
+
+	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+
+	if (Z_TYPE_P(offset) == IS_STRING) {
+		zend_hash_del(HASH_OF(value_prop), Z_STR_P(offset));
+	} else {
+		zend_hash_index_del(HASH_OF(value_prop), Z_LVAL_P(offset));
+	}
+}

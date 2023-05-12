@@ -1425,6 +1425,8 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset) /* {{{
 		zend_call_known_instance_method_with_1_params(funcs->zf_offsetunset, object, NULL, &tmp_offset);
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_collection)) {
+		zend_collection_unset_item(object, offset);
 	} else {
 	    zend_bad_array_access(ce);
 	}
