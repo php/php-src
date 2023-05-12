@@ -26,6 +26,10 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_object_handlers zend_collection_object_handlers;
+extern ZEND_API zend_class_entry *zend_ce_collection;
+
+void zend_register_collection_ce(void);
+void zend_collection_add_interfaces(zend_class_entry *ce);
 
 void zend_collection_register_handlers(zend_class_entry *ce);
 void zend_collection_register_props(zend_class_entry *ce);

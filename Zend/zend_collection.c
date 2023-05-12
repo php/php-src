@@ -18,8 +18,50 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_collection_arginfo.h"
+#include "zend_execute.h"
 
+ZEND_API zend_class_entry *zend_ce_collection;
 ZEND_API zend_object_handlers zend_collection_object_handlers;
+
+static int zend_implement_collection(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	if (class_type->ce_flags & ZEND_ACC_COLLECTION) {
+		return SUCCESS;
+	}
+
+	zend_error_noreturn(E_ERROR, "Non-collection class %s cannot implement interface %s",
+		ZSTR_VAL(class_type->name),
+		ZSTR_VAL(interface->name));
+
+	return FAILURE;
+}
+
+void zend_register_collection_ce(void)
+{
+	zend_ce_collection = register_class_Collection();
+	zend_ce_collection->interface_gets_implemented = zend_implement_collection;
+
+	memcpy(&zend_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_collection_object_handlers.clone_obj = NULL;
+	zend_collection_object_handlers.compare = zend_objects_not_comparable;
+}
+
+void zend_collection_add_interfaces(zend_class_entry *ce)
+{
+	uint32_t num_interfaces_before = ce->num_interfaces;
+
+	ce->num_interfaces++;
+
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES));
+
+	ce->interface_names = erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+
+	ce->interface_names[num_interfaces_before].name = zend_string_copy(zend_ce_collection->name);
+	ce->interface_names[num_interfaces_before].lc_name = ZSTR_INIT_LITERAL("collection", 0);
+
+	ce->default_object_handlers = &zend_collection_object_handlers;
+}
 
 void zend_collection_register_handlers(zend_class_entry *ce)
 {

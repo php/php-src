@@ -9084,6 +9084,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	if (ce->ce_flags & ZEND_ACC_COLLECTION) {
 		zend_compile_collection_key_type(ce, collection_key_type_ast);
 		zend_compile_collection_item_type(ce, collection_item_type_ast);
+		zend_collection_add_interfaces(ce);
 		zend_collection_register_handlers(ce);
 		zend_collection_register_props(ce);
 	}
