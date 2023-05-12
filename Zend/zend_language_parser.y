@@ -164,6 +164,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_TRAIT         "'trait'"
 %token <ident> T_INTERFACE     "'interface'"
 %token <ident> T_ENUM          "'enum'"
+%token <ident> T_COLLECTION    "'collection'"
 %token <ident> T_EXTENDS       "'extends'"
 %token <ident> T_IMPLEMENTS    "'implements'"
 %token <ident> T_NAMESPACE     "'namespace'"
