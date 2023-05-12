@@ -34,6 +34,7 @@
 #include "zend_inheritance.h"
 #include "zend_vm.h"
 #include "zend_enum.h"
+#include "zend_collection.h"
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
@@ -9083,6 +9084,8 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	if (ce->ce_flags & ZEND_ACC_COLLECTION) {
 		zend_compile_collection_key_type(ce, collection_key_type_ast);
 		zend_compile_collection_item_type(ce, collection_item_type_ast);
+		zend_collection_register_handlers(ce);
+		zend_collection_register_props(ce);
 	}
 
 	zend_compile_stmt(stmt_ast);
