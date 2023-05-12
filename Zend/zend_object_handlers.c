@@ -1237,6 +1237,8 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 		}
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_collection)) {
+		return zend_collection_has_item(object, offset);
 	} else {
 	    zend_bad_array_access(ce);
 		return 0;

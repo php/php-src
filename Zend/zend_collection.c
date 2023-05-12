@@ -162,6 +162,27 @@ static int key_type_allowed(zend_class_entry *ce, zval *offset)
 	return true;
 }
 
+int zend_collection_has_item(zend_object *object, zval *offset)
+{
+	zval rv;
+	zval *value_prop;
+	zend_class_entry *ce = object->ce;
+
+	if (!key_type_allowed(ce, offset)) {
+		return false;
+	}
+
+	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+
+	if (Z_TYPE_P(offset) == IS_STRING) {
+		return zend_hash_find(HASH_OF(value_prop), Z_STR_P(offset)) != NULL;
+	} else {
+		return zend_hash_index_find(HASH_OF(value_prop), Z_LVAL_P(offset)) != NULL;
+	}
+
+	return false;
+}
+
 zval *zend_collection_read_item(zend_object *object, zval *offset)
 {
 	zval rv;
