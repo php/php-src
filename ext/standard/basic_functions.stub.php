@@ -2517,7 +2517,6 @@ function parse_str(string $string, &$result): void {}
 
 /**
  * @return array<int, string|null>
- * @compile-time-eval
  * @refcount 1
  */
 function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array {}
@@ -2566,7 +2565,6 @@ function str_shuffle(string $string): string {}
 
 /**
  * @return array<int, string>|int
- * @compile-time-eval
  * @refcount 1
  */
 function str_word_count(string $string, int $format = 0, ?string $characters = null): array|int {}

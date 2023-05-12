@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cfbdb855e191dabc886dd86297d1ae1aef370d7c */
+ * Stub hash: 9cc9c0954bd7032d363ce9a531be621274b9a7e2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3118,7 +3118,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strip_tags, arginfo_strip_tags)
 	ZEND_FE(setlocale, arginfo_setlocale)
 	ZEND_FE(parse_str, arginfo_parse_str)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_getcsv, arginfo_str_getcsv)
+	ZEND_FE(str_getcsv, arginfo_str_getcsv)
 	ZEND_FE(str_repeat, arginfo_str_repeat)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(count_chars, arginfo_count_chars)
 	ZEND_FE(strnatcmp, arginfo_strnatcmp)
@@ -3129,7 +3129,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sscanf, arginfo_sscanf)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_rot13, arginfo_str_rot13)
 	ZEND_FE(str_shuffle, arginfo_str_shuffle)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_word_count, arginfo_str_word_count)
+	ZEND_FE(str_word_count, arginfo_str_word_count)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_split, arginfo_str_split)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strpbrk, arginfo_strpbrk)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(substr_compare, arginfo_substr_compare)
