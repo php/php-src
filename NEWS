@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed line number of JMP instruction over else block. (ilutov)
   . Fixed use-of-uninitialized-value with ??= on assert. (ilutov)
 
+- OpenSSL
+  . Added support for additional EC parameters in openssl_pkey_new. (Eno-CN)
+
 06 Jul 2023, PHP 8.3.0alpha3
 
 - Core:
