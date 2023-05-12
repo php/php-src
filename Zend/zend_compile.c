@@ -8946,12 +8946,48 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	zend_type_release(type, 0);
 }
 
+static void zend_compile_collection_key_type(zend_class_entry *ce, zend_ast *collection_key_type_ast)
+{
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
+	zend_type type = zend_compile_typename(collection_key_type_ast, 0);
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
+	if (ZEND_TYPE_IS_COMPLEX(type) || (type_mask != MAY_BE_LONG && type_mask != MAY_BE_STRING)) {
+		zend_string *type_string = zend_type_to_string(type);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Collection key type must be int or string, %s given",
+			ZSTR_VAL(type_string));
+	}
+	if (type_mask == MAY_BE_LONG) {
+		ce->collection_key_type = IS_LONG;
+	} else {
+		ZEND_ASSERT(type_mask == MAY_BE_STRING);
+		ce->collection_key_type = IS_STRING;
+	}
+	zend_type_release(type, 0);
+}
+
+static void zend_compile_collection_item_type(zend_class_entry *ce, zend_ast *collection_item_type_ast)
+{
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
+	zend_type type = zend_compile_typename(collection_item_type_ast, 0);
+
+	if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_NEVER|MAY_BE_CALLABLE)) {
+		zend_string *str = zend_type_to_string(type);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Collection item type cannot have type %s", ZSTR_VAL(str));
+	}
+
+	ce->collection_item_type = type;
+}
+
 static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ */
 {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
+	zend_ast *collection_key_type_ast = decl->child[3];
+	zend_ast *collection_item_type_ast = decl->child[4];
 	zend_ast *enum_backing_type_ast = decl->child[4];
 	zend_string *name, *lcname;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
@@ -9028,7 +9064,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	CG(active_class_entry) = ce;
 
-	if (decl->child[3]) {
+	if (decl->child[3] && !(ce->ce_flags & ZEND_ACC_COLLECTION)) {
 		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
 	}
 
@@ -9042,6 +9078,11 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		}
 		zend_enum_add_interfaces(ce);
 		zend_enum_register_props(ce);
+	}
+
+	if (ce->ce_flags & ZEND_ACC_COLLECTION) {
+		zend_compile_collection_key_type(ce, collection_key_type_ast);
+		zend_compile_collection_item_type(ce, collection_item_type_ast);
 	}
 
 	zend_compile_stmt(stmt_ast);

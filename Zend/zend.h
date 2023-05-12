@@ -218,10 +218,13 @@ struct _zend_class_entry {
 	zend_trait_precedence **trait_precedences;
 	HashTable *attributes;
 
+	zend_string *doc_comment;
+
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
 
-	zend_string *doc_comment;
+	uint32_t collection_key_type;
+	zend_type collection_item_type;
 
 	union {
 		struct {
