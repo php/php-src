@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-14267 (opcache.jit=off does not allow enabling JIT at runtime).
     (ilutov)
   . Fixed TLS access in JIT on FreeBSD/amd64. (Arnaud)
+  . Fixed bug GH-11188 (Error when building TSRM in ARM64). (nielsdos)
 
 - Soap:
   . Fixed bug #47925 (PHPClient can't decompress response). (nielsdos)
