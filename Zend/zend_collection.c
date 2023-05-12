@@ -145,3 +145,40 @@ void zend_collection_add_item(zend_object *object, zval *offset, zval *value)
 	}
 
 }
+
+static int key_type_allowed(zend_class_entry *ce, zval *offset)
+{
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
+
+	if (ce->collection_key_type != Z_TYPE_P(offset)) {
+		zend_type_error(
+			"Key type %s of element does not match collection key type %s",
+			offset ? zend_zval_type_name(offset) : zend_get_type_by_const(IS_NULL),
+			zend_get_type_by_const(ce->collection_key_type)
+		);
+		return false;
+	}
+
+	return true;
+}
+
+zval *zend_collection_read_item(zend_object *object, zval *offset)
+{
+	zval rv;
+	zval *value_prop, *value;
+	zend_class_entry *ce = object->ce;
+
+	if (!key_type_allowed(ce, offset)) {
+		return NULL;
+	}
+
+	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+
+	if (Z_TYPE_P(offset) == IS_STRING) {
+		value = zend_hash_find(HASH_OF(value_prop), Z_STR_P(offset));
+	} else {
+		value = zend_hash_index_find(HASH_OF(value_prop), Z_LVAL_P(offset));
+	}
+
+	return value;
+}

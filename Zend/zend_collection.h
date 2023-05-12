@@ -35,6 +35,7 @@ void zend_collection_register_handlers(zend_class_entry *ce);
 void zend_collection_register_props(zend_class_entry *ce);
 
 void zend_collection_add_item(zend_object *object, zval *offset, zval *value);
+zval *zend_collection_read_item(zend_object *object, zval *offset);
 
 END_EXTERN_C()
 
