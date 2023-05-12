@@ -150,10 +150,13 @@ TSRM_API const char *tsrm_api_name(void);
 
 #if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__MUSL__) || defined(__HAIKU__)
 # define TSRM_TLS_MODEL_ATTR
+# define TSRM_TLS_MODEL_DEFAULT
 #elif __PIC__
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
+# define TSRM_TLS_MODEL_INITIAL_EXEC
 #else
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("local-exec")))
+# define TSRM_TLS_MODEL_LOCAL_EXEC
 #endif
 
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
