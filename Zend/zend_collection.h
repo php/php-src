@@ -34,6 +34,8 @@ void zend_collection_add_interfaces(zend_class_entry *ce);
 void zend_collection_register_handlers(zend_class_entry *ce);
 void zend_collection_register_props(zend_class_entry *ce);
 
+void zend_collection_add_item(zend_object *object, zval *offset, zval *value);
+
 END_EXTERN_C()
 
 #endif /* ZEND_COLLECTION_H */

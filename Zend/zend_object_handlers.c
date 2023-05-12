@@ -26,6 +26,7 @@
 #include "zend_objects_API.h"
 #include "zend_object_handlers.h"
 #include "zend_interfaces.h"
+#include "zend_collection.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_compile.h"
@@ -1205,6 +1206,8 @@ ZEND_API void zend_std_write_dimension(zend_object *object, zval *offset, zval *
 		zend_call_known_instance_method_with_2_params(funcs->zf_offsetset, object, NULL, &tmp_offset, value);
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_collection)) {
+		zend_collection_add_item(object, offset, value);
 	} else {
 	    zend_bad_array_access(ce);
 	}
