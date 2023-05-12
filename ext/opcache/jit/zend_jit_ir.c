@@ -4197,7 +4197,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 	if (opline->opcode == ZEND_POST_INC || opline->opcode == ZEND_POST_DEC) {
 		op1_lval_ref = jit_Z_LVAL(jit, op1_addr);
 		jit_set_Z_LVAL(jit, res_addr, op1_lval_ref);
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+		if (Z_MODE(res_addr) != IS_REG) {
 			jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 		}
 	}
@@ -4259,7 +4259,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
 			jit_set_Z_LVAL(jit, res_addr, ref);
-			if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+			if (Z_MODE(res_addr) != IS_REG) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 			}
 		}
@@ -4293,7 +4293,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 				if_overflow = ir_IF(ir_OVERFLOW(ref));
 				ir_IF_FALSE_cold(if_overflow);
 				jit_set_Z_LVAL(jit, res_addr, ref);
-				if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+				if (Z_MODE(res_addr) != IS_REG) {
 					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 				}
 				jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
@@ -4310,7 +4310,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 			    opline->result_type != IS_UNUSED) {
 				jit_set_Z_LVAL(jit, res_addr, ref);
-				if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+				if (Z_MODE(res_addr) != IS_REG) {
 					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 				}
 			}
@@ -4382,7 +4382,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
 			jit_set_Z_LVAL(jit, res_addr, ref);
-			if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+			if (Z_MODE(res_addr) != IS_REG) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 			}
 		}
@@ -4585,8 +4585,8 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 	if ((res_info & MAY_BE_ANY) != MAY_BE_DOUBLE) {
 		jit_set_Z_LVAL(jit, res_addr, ref);
 
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
-			if (Z_MODE(op1_addr) != IS_MEM_ZVAL || !zend_jit_same_addr(op1_addr, res_addr)) {
+		if (Z_MODE(res_addr) != IS_REG) {
+			if (!zend_jit_same_addr(op1_addr, res_addr)) {
 				if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
 					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 				}
@@ -4688,7 +4688,7 @@ static int zend_jit_math_long_double(zend_jit_ctx   *jit,
 	ref = ir_BINARY_OP_D(op, ir_INT2D(op1), op2);
 	jit_set_Z_DVAL(jit, res_addr, ref);
 
-	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+	if (Z_MODE(res_addr) != IS_REG) {
 		if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
 			jit_set_Z_TYPE_INFO(jit, res_addr, IS_DOUBLE);
 		}
@@ -4722,8 +4722,8 @@ static int zend_jit_math_double_long(zend_jit_ctx   *jit,
 	ref = ir_BINARY_OP_D(op, op1, ir_INT2D(op2));
 	jit_set_Z_DVAL(jit, res_addr, ref);
 
-	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
-		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || !zend_jit_same_addr(op1_addr, res_addr)) {
+	if (Z_MODE(res_addr) != IS_REG) {
+		if (!zend_jit_same_addr(op1_addr, res_addr)) {
 			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_DOUBLE);
 			}
@@ -4759,8 +4759,8 @@ static int zend_jit_math_double_double(zend_jit_ctx   *jit,
 	ref = ir_BINARY_OP_D(op, op1, op2);
 	jit_set_Z_DVAL(jit, res_addr, ref);
 
-	if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
-		if (Z_MODE(op1_addr) != IS_MEM_ZVAL || !zend_jit_same_addr(op1_addr, res_addr)) {
+	if (Z_MODE(res_addr) != IS_REG) {
+		if (!zend_jit_same_addr(op1_addr, res_addr)) {
 			if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_DOUBLE);
 			}
@@ -5285,8 +5285,8 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			jit->delay_refs = res_inputs;
 		}
 		jit_set_Z_LVAL(jit, res_addr, ref);
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
-			if (Z_MODE(op1_addr) != IS_MEM_ZVAL || !zend_jit_same_addr(op1_addr, res_addr)) {
+		if (Z_MODE(res_addr) != IS_REG) {
+			if (!zend_jit_same_addr(op1_addr, res_addr)) {
 				if ((res_use_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_GUARD)) != MAY_BE_LONG) {
 					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 				}
@@ -10740,7 +10740,7 @@ static int zend_jit_strlen(zend_jit_ctx *jit, const zend_op *opline, uint32_t op
 		len = Z_STRLEN_P(zv);
 
 		jit_set_Z_LVAL(jit, res_addr, ir_CONST_LONG(len));
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+		if (Z_MODE(res_addr) != IS_REG) {
 			jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 		} else if (!zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, MAY_BE_LONG)) {
 			return 0;
@@ -10777,7 +10777,7 @@ static int zend_jit_count(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1
 		count = zend_hash_num_elements(Z_ARRVAL_P(zv));
 
 		jit_set_Z_LVAL(jit, res_addr, ir_CONST_LONG(count));
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+		if (Z_MODE(res_addr) != IS_REG) {
 			jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
 		} else if (!zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, MAY_BE_LONG)) {
 			return 0;
@@ -11759,7 +11759,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 
 				// ZVAL_COPY
 				jit_ZVAL_COPY(jit, res_addr, -1, val_addr, res_info, !result_avoid_refcounting);
-				if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+				if (Z_MODE(res_addr) != IS_REG) {
 				} else if (!zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, res_info)) {
 					return 0;
 				}
