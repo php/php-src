@@ -2033,7 +2033,7 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 		size_t op2_len = ZSTR_LEN(op2_string);
 		size_t result_len = op1_len + op2_len;
 		zend_string *result_str;
-		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(Z_STR_P(op1), Z_STR_P(op2));
+		uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(op1_string, op2_string);
 
 		if (UNEXPECTED(op1_len > ZSTR_MAX_LEN - op2_len)) {
 			if (free_op1_string) zend_string_release(op1_string);
