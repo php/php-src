@@ -675,14 +675,12 @@ static int mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 							return 0;
 						}
 						s2 = 0;
-						if (s >= 0x043e && s <= 0x0441) {
-							s2 = 0xf87a;
-						} else if (s == 0x03b1 || s == 0x03b7) {
+						if (s == 0x03b1 || s == 0x03b7) {
 							s2 = 0xf87f;
 						} else if (s == 0x04b8 || s == 0x04b9 || s == 0x04c4) {
 							s2 = 0x20dd;
 						} else if (s == 0x1ed9 || s == 0x1eda || s == 0x1ee8 || s == 0x1ef3 ||
-								   (s >= 0x1ef5 && s <= 0x1efb) || s == 0x1f05 || s == 0x1f06 ||
+								   (s >= 0x1ef5 && s <= 0x1efb) ||
 								   s == 0x1f18 || (s >= 0x1ff2 && s <= 0x20a5)) {
 							s2 = 0xf87e;
 						}
@@ -1172,7 +1170,12 @@ static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 					}
 				}
 
-				if (w >= 0x340 && w <= 0x523) {
+				if (w == 0x340) {
+					*out++ = 0x1F100;
+					goto next_iteration;
+				}
+
+				if (w >= 0x35A && w <= 0x523 && w != 0x409 && w != 0x439) {
 					for (int i = 0; i < code_tbl_m_len; i++) {
 						if (w == code_tbl_m[i][0]) {
 							int n = 5;
@@ -1205,14 +1208,13 @@ static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 								p -= 2;
 								goto finished;
 							}
+							if (w == 0x3B1 || w == 0x3B7) {
+								w2 += 0x10000;
+							}
 							*out++ = w2;
-							if (w >= 0x43E && w <= 0x441) {
-								*out++ = 0xF87A;
-							} else if (w == 0x3B1 || w == 0x3B7) {
-								*out++ = 0xF87F;
-							} else if (w == 0x4B8 || w == 0x4B9 || w == 0x4C4) {
+							if (w == 0x4B8 || w == 0x4B9 || w == 0x4C4) {
 								*out++ = 0x20DD;
-							} else if (w == 0x1ED9 || w == 0x1EDA || w == 0x1EE8 || w == 0x1EF3 || (w >= 0x1EF5 && w <= 0x1EFB) || w == 0x1F05 || w == 0x1F06 || w == 0x1F18 || (w >= 0x1FF2 && w <= 0x20A5)) {
+							} else if (w == 0x1EE8 || w == 0x1EF3 || (w >= 0x1EF5 && w <= 0x1EFA) || w == 0x1F18 || (w >= 0x1FF2 && w <= 0x20A5)) {
 								*out++ = 0xF87E;
 							}
 							goto next_iteration;
@@ -1335,6 +1337,19 @@ process_codepoint: ;
 			s = ucs_i_jis_table[w - ucs_i_jis_table_min];
 		} else if (w >= ucs_r_jis_table_min && w < ucs_r_jis_table_max) {
 			s = ucs_r_jis_table[w - ucs_r_jis_table_min];
+		}
+
+		if (w >= 0x1F100) {
+			if (w == 0x1F100) {
+				s = 0x2971;
+				goto found_kuten_code;
+			} else if (w == 0x1F136) {
+				s = 0x2B2C;
+				goto found_kuten_code;
+			} else if (w == 0x1F13C) {
+				s = 0x2B26;
+				goto found_kuten_code;
+			}
 		}
 
 		if (w >= 0x2000) {
