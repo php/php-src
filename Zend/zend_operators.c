@@ -1940,7 +1940,7 @@ ZEND_API zend_result ZEND_FASTCALL shift_right_function(zval *result, zval *op1,
 ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
     zval *orig_op1 = op1;
-	zend_string *op1_string, *op2_string = NULL;
+	zend_string *op1_string, *op2_string;
 	bool free_op1_string = false;
 	bool free_op2_string = false;
 
@@ -1968,48 +1968,49 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 			if (result == op1) {
 				if (UNEXPECTED(op1 == op2)) {
 					op2_string = op1_string;
+					goto has_op2_string;
 				}
 			}
 		}
 	} while (0);
 	do {
-		if (!op2_string) {
-			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				op2_string = Z_STR_P(op2);
-			} else {
-				if (Z_ISREF_P(op2)) {
-					op2 = Z_REFVAL_P(op2);
-					if (Z_TYPE_P(op2) == IS_STRING) {
-						op2_string = Z_STR_P(op2);
-						break;
-					}
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			op2_string = Z_STR_P(op2);
+		} else {
+			if (Z_ISREF_P(op2)) {
+				op2 = Z_REFVAL_P(op2);
+				if (Z_TYPE_P(op2) == IS_STRING) {
+					op2_string = Z_STR_P(op2);
+					break;
 				}
-				/* hold an additional reference because a userland function could free this */
-				if (!free_op1_string) {
-					op1_string = zend_string_copy(op1_string);
-					free_op1_string = true;
-				}
-				ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_CONCAT);
-				op2_string = zval_get_string_func(op2);
-				if (UNEXPECTED(EG(exception))) {
-					zend_string_release(op1_string);
-					zend_string_release(op2_string);
-					if (orig_op1 != result) {
-						ZVAL_UNDEF(result);
-					}
-					return FAILURE;
-				}
-				free_op2_string = true;
 			}
+			/* hold an additional reference because a userland function could free this */
+			if (!free_op1_string) {
+				op1_string = zend_string_copy(op1_string);
+				free_op1_string = true;
+			}
+			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_CONCAT);
+			op2_string = zval_get_string_func(op2);
+			if (UNEXPECTED(EG(exception))) {
+				zend_string_release(op1_string);
+				zend_string_release(op2_string);
+				if (orig_op1 != result) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+			free_op2_string = true;
 		}
 	} while (0);
 
+has_op2_string:;
 	if (UNEXPECTED(ZSTR_LEN(op1_string) == 0)) {
 		if (EXPECTED(free_op2_string || result != op2)) {
 			if (result == orig_op1) {
 				i_zval_ptr_dtor(result);
 			}
 			if (free_op2_string) {
+				/* transfer ownership of op2_string */
 				ZVAL_STR(result, op2_string);
 				free_op2_string = false;
 			} else {
@@ -2022,6 +2023,7 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 				i_zval_ptr_dtor(result);
 			}
 			if (free_op1_string) {
+				/* transfer ownership of op1_string */
 				ZVAL_STR(result, op1_string);
 				free_op1_string = false;
 			} else {
@@ -2047,6 +2049,7 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 
 		if (result == op1) {
 			if (free_op1_string) {
+				/* op1_string will be used as the result, so we should not free it */
 				i_zval_ptr_dtor(result);
 				free_op1_string = false;
 			}
@@ -2054,9 +2057,11 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 			result_str = zend_string_extend(op1_string, result_len, 0);
 			/* account for the case where result_str == op1_string == op2_string and the realloc is done */
 			if (op1_string == op2_string) {
-				if (free_op2_string) zend_string_release(op2_string);
+				if (free_op2_string) {
+					zend_string_release(op2_string);
+					free_op2_string = false;
+				}
 				op2_string = result_str;
-				free_op2_string = false;
 			}
 		} else {
 			result_str = zend_string_alloc(result_len, 0);
