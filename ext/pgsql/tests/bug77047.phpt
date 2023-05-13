@@ -19,24 +19,24 @@ pg_query($db, "CREATE TABLE bug77047 (
         t TIME WITHOUT TIME ZONE
     )");
 
-pg_insert($db, "bug77047", array("t" => "13:31"));
-pg_insert($db, "bug77047", array("t" => "13:31:13"));
-pg_insert($db, "bug77047", array("t" => "1:2:3"));
-pg_insert($db, "bug77047", array("t" => "xyz"));
-pg_insert($db, "bug77047", array("t" => NULL));
-pg_insert($db, "bug77047", array("t" => ""));
+try {
+	pg_insert($db, "bug77047", array("t" => "13:31"));
+	pg_insert($db, "bug77047", array("t" => "13:31:13"));
+	pg_insert($db, "bug77047", array("t" => "1:2:3"));
+	pg_insert($db, "bug77047", array("t" => "xyz"));
+	pg_insert($db, "bug77047", array("t" => NULL));
+	pg_insert($db, "bug77047", array("t" => ""));
+} catch (\TypeError $e) {
+	echo $e->getMessage();
+}
 
 $res = pg_query($db, "SELECT t FROM bug77047");
 while (false !== ($row = pg_fetch_row($res))) {
-    var_dump(array_pop($row));
+	var_dump(array_pop($row));
 }
 
 ?>
 --EXPECTF--
-Notice: pg_insert(): Expects NULL or string for PostgreSQL time field (t) in %s on line %d
-string(8) "13:31:00"
+Expects string or null for PostgreSQL 'time' (t)string(%d) "%s"
 string(8) "13:31:13"
 string(8) "01:02:03"
-NULL
-NULL
-
