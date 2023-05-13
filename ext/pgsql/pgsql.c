@@ -417,6 +417,8 @@ static PHP_GINIT_FUNCTION(pgsql)
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	zend_hash_init(&pgsql_globals->connections, 0, NULL, NULL, 1);
+	zend_hash_init(&pgsql_globals->meta, 0, NULL, NULL, 1);
+	zend_hash_init(&pgsql_globals->meta_extended, 0, NULL, NULL, 1);
 }
 
 static void php_libpq_version(char *buf, size_t len)
@@ -483,6 +485,8 @@ PHP_MINIT_FUNCTION(pgsql)
 PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
 	UNREGISTER_INI_ENTRIES();
+	zend_hash_destroy(&PGG(meta));
+	zend_hash_destroy(&PGG(meta_extended));
 	zend_hash_destroy(&PGG(connections));
 
 	return SUCCESS;
@@ -4147,9 +4151,8 @@ PHP_FUNCTION(pg_flush)
 
 /* {{{ php_pgsql_meta_data
  * table_name must not be empty
- * TODO: Add meta_data cache for better performance
  */
-PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string *table_name, zval *meta, bool extended)
+PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, zend_string *table_name, zval *meta, bool extended)
 {
 	PGresult *pg_result;
 	char *src, *tmp_name, *tmp_name2 = NULL;
@@ -4157,9 +4160,24 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	smart_str querystr = {0};
 	size_t new_len;
 	int i, num_rows;
-	zval elem;
+	zval elem, *tmp, *nelem;
+	HashTable *zmeta;
+
+	const char pg_cache_field[] = "pg_meta_data_cached";
 
 	ZEND_ASSERT(ZSTR_LEN(table_name) != 0);
+
+	zmeta = (extended ? &PGG(meta_extended) : &PGG(meta));
+
+	if ((tmp = zend_hash_find(zmeta, table_name)) != NULL) {
+		ZVAL_COPY_VALUE(meta, tmp);
+		nelem = zend_hash_str_find(Z_ARR_P(meta), pg_cache_field, sizeof(pg_cache_field) - 1);
+		ZEND_ASSERT(nelem != NULL);
+		if (Z_TYPE_INFO_P(nelem) == IS_FALSE) {
+			ZVAL_BOOL(nelem, true);
+		}
+		return SUCCESS;
+	}
 
 	src = estrdup(ZSTR_VAL(table_name));
 	tmp_name = php_strtok_r(src, ".", &tmp_name2);
@@ -4250,7 +4268,14 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 		name = PQgetvalue(pg_result,i,0);
 		add_assoc_zval(meta, name, &elem);
 	}
+
+	add_assoc_bool_ex(meta, pg_cache_field, sizeof(pg_cache_field) - 1, false);
+
+	tmp = (zval *)safe_emalloc(1, sizeof(zval), 0);
+	ZVAL_COPY(tmp, meta);
+	zend_hash_add(zmeta, table_name, tmp);
 	PQclear(pg_result);
+	efree(tmp);
 
 	return SUCCESS;
 }
@@ -4459,7 +4484,7 @@ static zend_string *php_pgsql_add_quotes(zend_string *src)
 /* {{{ php_pgsql_convert
  * check and convert array values (fieldname=>value pair) for sql
  */
-PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *table_name, const zval *values, zval *result, zend_ulong opt)
+PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, zend_string *table_name, const zval *values, zval *result, zend_ulong opt)
 {
 	zend_string *field = NULL;
 	zval meta, *def, *type, *not_null, *has_default, *is_enum, *val, new_val;
@@ -5198,7 +5223,7 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const z
 /* }}} */
 
 /* {{{ php_pgsql_insert */
-PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *table, zval *var_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, zend_string *table, zval *var_array, zend_ulong opt, zend_string **sql)
 {
 	zval *val, converted;
 	char buf[256];
@@ -5466,7 +5491,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 /* }}} */
 
 /* {{{ php_pgsql_update */
-PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const zend_string *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, zend_string *table, zval *var_array, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
 	zval var_converted, ids_converted;
 	smart_str querystr = {0};
@@ -5577,7 +5602,7 @@ PHP_FUNCTION(pg_update)
 /* }}} */
 
 /* {{{ php_pgsql_delete */
-PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const zend_string *table, zval *ids_array, zend_ulong opt, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, zend_string *table, zval *ids_array, zend_ulong opt, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};
@@ -5715,7 +5740,7 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 /* }}} */
 
 /* {{{ php_pgsql_select */
-PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
+PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, zend_string *table, zval *ids_array, zval *ret_array, zend_ulong opt, long result_type, zend_string **sql)
 {
 	zval ids_converted;
 	smart_str querystr = {0};

@@ -16,8 +16,8 @@ $meta = pg_meta_data($db, $table_name);
 
 var_dump($meta);
 ?>
---EXPECT--
-array(3) {
+--EXPECTF--
+array(4) {
   ["num"]=>
   array(7) {
     ["num"]=>
@@ -69,4 +69,6 @@ array(3) {
     ["is enum"]=>
     bool(false)
   }
+  ["pg_meta_data_cached"]=>
+  bool(%s)
 }
