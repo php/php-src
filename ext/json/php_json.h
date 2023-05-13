@@ -97,6 +97,8 @@ PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+PHP_JSON_API zend_string *php_json_encode_string(const char *s, size_t len, int options);
+
 PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth);
 PHP_JSON_API zend_result php_json_encode(smart_str *buf, zval *val, int options);
 PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth);
