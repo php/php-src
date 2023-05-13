@@ -922,28 +922,28 @@ namespace {
      * @return array<string, array>|false
      * @refcount 1
      */
-    function pg_meta_data(PgSql\Connection $connection, string $table_name, bool $extended = false): array|false {}
+    function pg_meta_data(PgSql\Connection $connection, string $table_name, bool $extended = false, bool $invalcache = false): array|false {}
 
     /**
      * @return array<string, mixed>|false
      * @refcount 1
      */
-    function pg_convert(PgSql\Connection $connection, string $table_name, array $values, int $flags = 0): array|false {}
+    function pg_convert(PgSql\Connection $connection, string $table_name, array $values, int $flags = 0, bool $invalcache = false): array|false {}
 
     /** @refcount 1 */
-    function pg_insert(PgSql\Connection $connection, string $table_name, array $values, int $flags = PGSQL_DML_EXEC): PgSql\Result|string|bool {}
+    function pg_insert(PgSql\Connection $connection, string $table_name, array $values, int $flags = PGSQL_DML_EXEC, bool $invalcache = false): PgSql\Result|string|bool {}
 
     /** @refcount 1 */
-    function pg_update(PgSql\Connection $connection, string $table_name, array $values, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
+    function pg_update(PgSql\Connection $connection, string $table_name, array $values, array $conditions, int $flags = PGSQL_DML_EXEC, bool $invalcache = false): string|bool {}
 
     /** @refcount 1 */
-    function pg_delete(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
+    function pg_delete(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, bool $invalcache = false): string|bool {}
 
     /**
      * @return array<int, array>|string|false
      * @refcount 1
      */
-    function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+    function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC, bool $invalcache = false): array|string|false {}
 
 #ifdef LIBPQ_HAS_PIPELINING
     function pg_enter_pipeline_mode(PgSql\Connection $connection): bool {}
