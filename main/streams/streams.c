@@ -566,7 +566,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			if (justread < 0 && stream->writepos == stream->readpos) {
 				efree(chunk_buf);
 				retval = FAILURE;
-				goto out;
+				goto out_check_eof;
 			} else if (justread > 0) {
 				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 0, 0);
 
@@ -638,7 +638,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					stream->eof = 1;
 					efree(chunk_buf);
 					retval = FAILURE;
-					goto out;
+					goto out_is_eof;
 			}
 
 			if (justread <= 0) {
@@ -647,7 +647,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		}
 
 		efree(chunk_buf);
-		retval = SUCCESS;
+		return SUCCESS;
 	} else {
 		/* is there enough data in the buffer ? */
 		if (stream->writepos - stream->readpos < (zend_off_t)size) {
@@ -675,15 +675,18 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					);
 			if (justread < 0) {
 				retval = FAILURE;
-				goto out;
+				goto out_check_eof;
 			}
 			stream->writepos += justread;
+			retval = SUCCESS;
+			goto out_check_eof;
 		}
-		retval = SUCCESS;
+		return SUCCESS;
 	}
 
-out:
+out_check_eof:
 	if (old_eof != stream->eof) {
+out_is_eof:
 		php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
 	}
 	return retval;
@@ -1136,7 +1139,6 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 {
 	ssize_t didwrite = 0;
 	ssize_t retval;
-	bool old_eof = stream->eof;
 
 	/* if we have a seekable stream we need to ensure that data is written at the
 	 * current stream->position. This means invalidating the read buffer and then
@@ -1146,6 +1148,8 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position);
 	}
+
+	bool old_eof = stream->eof;
 
 	while (count > 0) {
 		ssize_t justwrote = stream->ops->write(stream, buf, count);
