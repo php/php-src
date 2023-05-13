@@ -103,6 +103,21 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
+PHP_JSON_API zend_string *php_json_encode_string(const char *s, size_t len, int options)
+{
+	smart_str buf = {0};
+	php_json_encoder encoder;
+
+	php_json_encode_init(&encoder);
+
+	if (php_json_escape_string(&buf, s, len, options, &encoder) == FAILURE) {
+		smart_str_free(&buf);
+		return NULL;
+	}
+
+	return smart_str_extract(&buf);
+}
+
 PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth) /* {{{ */
 {
 	php_json_encoder encoder;
