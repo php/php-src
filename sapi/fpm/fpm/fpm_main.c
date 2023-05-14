@@ -1909,19 +1909,16 @@ consult the installation file that came with this distribution, or visit \n\
 					}
 				} zend_catch {
 				} zend_end_try();
-				/* we want to serve more requests if this is fastcgi
-				 * so cleanup and continue, request shutdown is
-				 * handled later */
+				/* We want to serve more requests if this is fastcgi so cleanup and continue,
+				 * request shutdown is handled later. */
+			} else {
+				fpm_request_executing();
 
-				goto fastcgi_request_done;
+				/* Reset exit status from the previous execution */
+				EG(exit_status) = 0;
+
+				php_execute_script(&file_handle);
 			}
-
-			fpm_request_executing();
-
-			/* Reset exit status from the previous execution */
-			EG(exit_status) = 0;
-
-			php_execute_script(&file_handle);
 
 			/* Without opcache, or the first time with opcache, the file handle will be placed
 			 * in the CG(open_files) list by open_file_for_scanning(). Starting from the second
