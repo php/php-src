@@ -18,7 +18,6 @@ var_dump(
     DATE_RFC3339_EXTENDED   === DateTimeImmutable::RFC3339_EXTENDED,
     DATE_RSS                === DateTimeImmutable::RSS,
     DATE_W3C                === DateTimeImmutable::W3C
-
 );
 
 ?>
