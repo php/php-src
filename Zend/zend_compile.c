@@ -7195,7 +7195,7 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	}
 }
 
-static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast)
+static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast, zend_ast *as_ast)
 {
 	zend_ast_list *param_list = zend_ast_get_list(params_ast);
 	uint32_t i;
@@ -7208,6 +7208,9 @@ static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_a
 	for (i = 0; i < param_list->children; i++) {
 		zend_ast *param_ast = param_list->child[i];
 		zend_hash_del(&info->uses, zend_ast_get_str(param_ast->child[1]));
+	}
+	if (as_ast) {
+		zend_hash_del(&info->uses, zend_ast_get_str(as_ast));
 	}
 }
 
@@ -7269,6 +7272,36 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 
 		zend_compile_static_var_common(var_name, &zv, mode);
 	}
+}
+/* }}} */
+
+static void zend_compile_closure_self_reference(zend_ast *ast) /* {{{ */
+{
+	zend_op_array* op_array = CG(active_op_array);
+
+	zend_string *var_name = zend_ast_get_str(ast);
+
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
+	{
+		int i;
+		for (i = 0; i < op_array->last_var; i++) {
+			if (zend_string_equals(op_array->vars[i], var_name)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use lexical variable $%s as self reference", ZSTR_VAL(var_name));
+			}
+		}
+	}
+
+	if (zend_string_equals_literal(var_name, "this")) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as self reference");
+	}
+
+	zend_op *opline;
+
+	opline = zend_emit_op(NULL, ZEND_BIND_SELF_REFERENCE, NULL, NULL);
+	opline->op1_type = IS_CV;
+	opline->op1.var = lookup_cv(var_name);
 }
 /* }}} */
 
@@ -7433,6 +7466,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
+	zend_ast *as_ast = decl->child[5];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
 	zend_string *lcname;
 
@@ -7467,7 +7501,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	} else {
 		lcname = zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
-			find_implicit_binds(&info, params_ast, stmt_ast);
+			find_implicit_binds(&info, params_ast, stmt_ast, as_ast);
 			compile_implicit_lexical_binds(&info, result, op_array);
 		} else if (uses_ast) {
 			zend_compile_closure_binding(result, op_array, uses_ast);
@@ -7518,6 +7552,11 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		zend_hash_destroy(&info.uses);
 	} else if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
+	}
+
+	if (as_ast) {
+		zend_compile_closure_self_reference(as_ast);
+		op_array->fn_flags |= ZEND_ACC_SELF_REFERENCE;
 	}
 
 	if (ast->kind == ZEND_AST_ARROW_FUNC) {

@@ -149,7 +149,7 @@ ZEND_METHOD(Closure, call)
 	ZVAL_UNDEF(&closure_result);
 	fci.retval = &closure_result;
 
-	if (closure->func.common.fn_flags & ZEND_ACC_GENERATOR) {
+	if (closure->func.common.fn_flags & (ZEND_ACC_GENERATOR | ZEND_ACC_SELF_REFERENCE)) {
 		zval new_closure;
 		zend_create_closure(&new_closure, &closure->func, newclass, closure->called_scope, newthis);
 		closure = (zend_closure *) Z_OBJ(new_closure);
