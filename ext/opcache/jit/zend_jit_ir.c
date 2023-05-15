@@ -15416,6 +15416,12 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 		} else {
 			/* Only for tracing JIT */
 			zend_jit_trace_add_code(entry, size);
+
+#if ZEND_JIT_SUPPORT_CLDEMOTE
+			if (cpu_support_cldemote) {
+				shared_cacheline_demote((uintptr_t)entry, size);
+			}
+#endif
 		}
 	}
 
