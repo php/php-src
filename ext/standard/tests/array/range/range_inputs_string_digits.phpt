@@ -1,5 +1,5 @@
 --TEST--
-Test range() function digits
+Test range() function with string digits
 --FILE--
 <?php
 echo "Only digits\n";
