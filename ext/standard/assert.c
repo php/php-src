@@ -195,7 +195,7 @@ PHP_FUNCTION(assert_options)
 	zval *value = NULL;
 	zend_long what;
 	bool oldint;
-	int ac = ZEND_NUM_ARGS();
+	uint32_t ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
