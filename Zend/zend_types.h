@@ -550,7 +550,7 @@ typedef uint32_t HashPosition;
 typedef struct _HashTableIterator {
 	HashTable    *ht;
 	HashPosition  pos;
-	uint32_t      next_copy;
+	uint32_t      next_copy; // circular linked list via index into EG(ht_iterators)
 } HashTableIterator;
 
 struct _zend_object {
