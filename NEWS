@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-11134 (Incorrect match default branch optimization). (ilutov)
   . Fixed too wide OR and AND range inference. (nielsdos)
+  . Fixed bug GH-11245 (In some specific cases SWITCH with one default
+    statement will cause segfault). (nielsdos)
 
 - PGSQL:
   . Fixed parameter parsing of pg_lo_export(). (kocsismate)
