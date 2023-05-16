@@ -167,18 +167,19 @@ char** save_ps_args(int argc, char** argv)
             end_of_area = argv[i] + strlen(argv[i]);
         }
 
+        if (non_contiguous_area != 0) {
+            goto clobber_error;
+        }
+
         /*
          * check for contiguous environ strings following argv
          */
-        for (i = 0; (non_contiguous_area == 0) && (environ[i] != NULL); i++)
+        for (i = 0; environ[i] != NULL; i++)
         {
-            if (end_of_area + 1 != environ[i])
-                non_contiguous_area = 1;
-            end_of_area = environ[i] + strlen(environ[i]);
+            if (end_of_area + 1 == environ[i]) {
+                end_of_area = environ[i] + strlen(environ[i]);
+            }
         }
-
-        if (non_contiguous_area != 0)
-            goto clobber_error;
 
         ps_buffer = argv[0];
         ps_buffer_size = end_of_area - argv[0];
