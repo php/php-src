@@ -257,54 +257,54 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				break;
 
 			case ZEND_FREE:
-				src = VAR_SOURCE(opline->op1);
-				if (!src) {
-					break;
-				}
 				/* Note: Only remove the source if the source is local to this block.
 				 * If it's not local, then the other blocks successors must also eventually either FREE or consume the temporary,
 				 * hence removing the temporary is not safe in the general case unless specified otherwise.
 				 * The source's result can also not be removed in such a case because that would cause a memory leak. */
 				if (opline->op1_type == IS_TMP_VAR) {
-					switch (src->opcode) {
-						case ZEND_BOOL:
-						case ZEND_BOOL_NOT:
-							/* T = BOOL(X), FREE(T) => T = BOOL(X) */
-							/* The remaining BOOL is removed by a separate optimization */
-							/* The source is a bool, no source removals take place, so can be done non-locally. */
-							VAR_SOURCE(opline->op1) = NULL;
-							MAKE_NOP(opline);
-							++(*opt_count);
-							break;
-						case ZEND_ASSIGN:
-						case ZEND_ASSIGN_DIM:
-						case ZEND_ASSIGN_OBJ:
-						case ZEND_ASSIGN_STATIC_PROP:
-						case ZEND_ASSIGN_OP:
-						case ZEND_ASSIGN_DIM_OP:
-						case ZEND_ASSIGN_OBJ_OP:
-						case ZEND_ASSIGN_STATIC_PROP_OP:
-						case ZEND_PRE_INC:
-						case ZEND_PRE_DEC:
-						case ZEND_PRE_INC_OBJ:
-						case ZEND_PRE_DEC_OBJ:
-						case ZEND_PRE_INC_STATIC_PROP:
-						case ZEND_PRE_DEC_STATIC_PROP:
-							if (src < op_array->opcodes + block->start || src > op_array->opcodes + block->len) {
+					src = VAR_SOURCE(opline->op1);
+					if (src) {
+						switch (src->opcode) {
+							case ZEND_BOOL:
+							case ZEND_BOOL_NOT:
+								/* T = BOOL(X), FREE(T) => T = BOOL(X) */
+								/* The remaining BOOL is removed by a separate optimization */
+								/* The source is a bool, no source removals take place, so can be done non-locally. */
+								VAR_SOURCE(opline->op1) = NULL;
+								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
-							}
-							src->result_type = IS_UNUSED;
-							VAR_SOURCE(opline->op1) = NULL;
-							MAKE_NOP(opline);
-							++(*opt_count);
-							break;
-						default:
-							break;
+							case ZEND_ASSIGN:
+							case ZEND_ASSIGN_DIM:
+							case ZEND_ASSIGN_OBJ:
+							case ZEND_ASSIGN_STATIC_PROP:
+							case ZEND_ASSIGN_OP:
+							case ZEND_ASSIGN_DIM_OP:
+							case ZEND_ASSIGN_OBJ_OP:
+							case ZEND_ASSIGN_STATIC_PROP_OP:
+							case ZEND_PRE_INC:
+							case ZEND_PRE_DEC:
+							case ZEND_PRE_INC_OBJ:
+							case ZEND_PRE_DEC_OBJ:
+							case ZEND_PRE_INC_STATIC_PROP:
+							case ZEND_PRE_DEC_STATIC_PROP:
+								if (src < op_array->opcodes + block->start || src > op_array->opcodes + block->len) {
+									break;
+								}
+								src->result_type = IS_UNUSED;
+								VAR_SOURCE(opline->op1) = NULL;
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
+							default:
+								break;
+						}
 					}
 				} else if (opline->op1_type == IS_VAR) {
+					src = VAR_SOURCE(opline->op1);
 					/* V = OP, FREE(V) => OP. NOP */
 					if (src >= op_array->opcodes + block->start && src <= op_array->opcodes + block->len &&
-						src->opcode != ZEND_FETCH_R &&
+					    src->opcode != ZEND_FETCH_R &&
 					    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
 					    src->opcode != ZEND_FETCH_DIM_R &&
 					    src->opcode != ZEND_FETCH_OBJ_R &&
