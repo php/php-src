@@ -1,5 +1,5 @@
 --TEST--
-Test range() function with integer inputs and float step
+Test range() function with non finite numbers
 --INI--
 serialize_precision=14
 --FILE--

@@ -4,6 +4,8 @@ Test range() function with null as argument.
 serialize_precision=14
 --FILE--
 <?php
+echo "range(null, null)\n";
+var_dump( range(null, null) );
 
 echo "null with int boundary\n";
 var_dump( range(null, 5) );
@@ -20,6 +22,15 @@ var_dump( range('e', null) );
 echo "Done\n";
 ?>
 --EXPECTF--
+range(null, null)
+
+Deprecated: range(): Passing null to parameter #1 ($start) of type string|int|float is deprecated in %s on line %d
+
+Deprecated: range(): Passing null to parameter #2 ($end) of type string|int|float is deprecated in %s on line %d
+array(1) {
+  [0]=>
+  int(0)
+}
 null with int boundary
 
 Deprecated: range(): Passing null to parameter #1 ($start) of type string|int|float is deprecated in %s on line %d
