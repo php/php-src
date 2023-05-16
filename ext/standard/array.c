@@ -2781,6 +2781,12 @@ PHP_FUNCTION(array_fill_keys)
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
 
+/* Process input for the range() function
+ * 0 on exceptions
+ * IS_LONG if only interpretable as int
+ * IS_DOUBLE if only interpretable as float
+ * IS_STRING if only interpretable as string
+ * IS_ARRAY (as IS_LONG < IS_STRING < IS_ARRAY) for ambiguity of single byte strings which contains a digit */
 static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend_long /* restrict */ *lval, double /* restrict */ *dval)
 {
 	switch (Z_TYPE_P(input)) {
@@ -2801,6 +2807,14 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 			}
 			return IS_DOUBLE;
 		case IS_STRING: {
+			/* Process strings:
+			 * - Empty strings are converted to 0 with a diagnostic
+			 * - Check if string is numeric and store the values in passed pointer
+			 * - If numeric float, this means it cannot be a numeric string with only one byte GOTO IS_DOUBLE
+			 * - If numeric int, check it is one byte or not
+			 *   - If it one byte, return IS_ARRAY as IS_LONG < IS_STRING < IS_ARRAY
+			 *   - If not should only be interpreted as int, return IS_LONG;
+			 * - Otherwise is a string and return IS_STRING */
 			if (Z_STRLEN_P(input) == 0) {
 				const char *arg_name = get_active_function_arg_name(arg_num);
 				php_error_docref(NULL, E_WARNING, "Argument #%d ($%s) must not be empty, casted to 0", arg_num, arg_name);
@@ -2817,7 +2831,11 @@ static uint8_t php_range_process_input(const zval *input, uint32_t arg_num, zend
 			}
 			if (type == IS_LONG) {
 				*dval = (double) *lval;
-				return IS_LONG;
+				if (Z_STRLEN_P(input) == 1) {
+					return IS_ARRAY;
+				} else {
+					return IS_LONG;
+				}
 			}
 			if (Z_STRLEN_P(input) != 1) {
 				const char *arg_name = get_active_function_arg_name(arg_num);
@@ -2905,15 +2923,20 @@ PHP_FUNCTION(range)
 	}
 
 	/* If the range is given as strings, generate an array of characters. */
-	if (start_type == IS_STRING || end_type == IS_STRING) {
-		if (UNEXPECTED(start_type != end_type)) {
-			if (start_type != IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Argument #1 ($start) must be a string if argument #2 ($end)"
-					" is a string, argument #2 ($end) converted to 0");
+	if (start_type >= IS_STRING || end_type >= IS_STRING) {
+		/* If one of the inputs is NOT a string */
+		if (UNEXPECTED(start_type + end_type < 2*IS_STRING)) {
+			if (start_type < IS_STRING) {
+				if (end_type != IS_ARRAY) {
+					php_error_docref(NULL, E_WARNING, "Argument #1 ($start) must be a string if"
+						" argument #2 ($end) is a string, argument #2 ($end) converted to 0");
+				}
 				end_type = IS_LONG;
-			} else {
-				php_error_docref(NULL, E_WARNING, "Argument #2 ($end) must be a string if argument #1 ($start)"
-					" is a string, argument #1 ($start) converted to 0");
+			} else if (end_type < IS_STRING) {
+				if (start_type != IS_ARRAY) {
+					php_error_docref(NULL, E_WARNING, "Argument #2 ($end) must be a string if"
+						" argument #1 ($start) is a string, argument #1 ($start) converted to 0");
+				}
 				start_type = IS_LONG;
 			}
 			if (UNEXPECTED(EG(exception))) {
@@ -2923,8 +2946,11 @@ PHP_FUNCTION(range)
 		}
 
 		if (is_step_double) {
-			php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be of type int when generating an array"
-				" of characters, inputs converted to 0");
+			/* Only emit warning if one of the input is not a numeric digit */
+			if (start_type == IS_STRING || end_type == IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Argument #3 ($step) must be of type int when generating an array"
+					" of characters, inputs converted to 0");
+			}
 			if (UNEXPECTED(EG(exception))) {
 				RETURN_THROWS();
 			}

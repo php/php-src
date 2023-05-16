@@ -1,5 +1,5 @@
 --TEST--
-Test range() function with basic/expected string inputs
+Test range() function with unexpected string inputs
 --INI--
 serialize_precision=14
 --FILE--
@@ -12,9 +12,7 @@ echo "Range cannot operate on an empty string\n";
 var_dump( range("Z", "") ); // Both strings are cast to int, i.e. 0
 var_dump( range("", "Z") ); // Both strings are cast to int, i.e. 0
 
-echo "Mixing numeric string and character\n";
-var_dump( range("1", "A") ); // The char is cast to an int, i.e. 0
-var_dump( range("?", "1") ); // The char is cast to an int, i.e. 0
+echo "Mixing numeric float string and character\n";
 var_dump( range("3.5", "A") ); // The char is cast to a float, i.e. 0
 var_dump( range("?", "3.5") ); // The char is cast to a float, i.e. 0
 
@@ -52,23 +50,7 @@ array(1) {
   [0]=>
   int(0)
 }
-Mixing numeric string and character
-
-Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
-array(2) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(0)
-}
-
-Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
-array(2) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-}
+Mixing numeric float string and character
 
 Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
 array(4) {
