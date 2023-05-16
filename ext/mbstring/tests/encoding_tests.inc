@@ -148,6 +148,12 @@ function testAllValidChars($charMap, $fromEncoding, $toEncoding, $bothWays = tru
         }
 
         testValidString($fromString, $toString, $fromEncoding, $toEncoding, $bothWays);
+
+        $strLen = mb_strlen($fromString, $fromEncoding);
+        if ($strLen !== mb_strlen($toString, $toEncoding)) {
+            echo "Length of $fromEncoding string '" . bin2hex($fromString) . "' was different than expected; mb_strlen returned $strLen" . PHP_EOL;
+            testFailedIncrement();
+        }
     }
 }
 
