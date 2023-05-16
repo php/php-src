@@ -1660,6 +1660,9 @@ function array_unshift(array &$array, mixed ...$values): int {}
 
 function array_splice(array &$array, int $offset, ?int $length = null, mixed $replacement = []): array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_slice(array $array, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
 
 /**
@@ -1708,14 +1711,21 @@ function array_values(array $array): array {}
 
 /**
  * @return array<int|string, int>
+ * @compile-time-eval
  * @refcount 1
  */
 function array_count_values(array $array): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_reverse(array $array, bool $preserve_keys = false): array {}
 
 function array_pad(array $array, int $length, mixed $value): array {}
@@ -1844,8 +1854,14 @@ function array_multisort(&$array, &...$rest): bool {}
 /** @return int|string|array<int, int|string> */
 function array_rand(array $array, int $num = 1): int|string|array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_sum(array $array): int|float {}
 
+/**
+ * @compile-time-eval
+ */
 function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
@@ -1866,8 +1882,14 @@ function array_key_exists($key, array $array): bool {}
  */
 function key_exists($key, array $array): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function array_chunk(array $array, int $length, bool $preserve_keys = false): array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_combine(array $keys, array $values): array {}
 
 /** @compile-time-eval */
@@ -2033,6 +2055,7 @@ function parse_ini_file(string $filename, bool $process_sections = false, int $s
 
 /**
  * @return array<int|string, bool|int|float|string|array|null>|false
+ * @compile-time-eval
  * @refcount 1
  */
 function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
@@ -2261,8 +2284,14 @@ function bin2hex(string $string): string {}
  */
 function hex2bin(string $string): string|false {}
 
+/**
+ * @compile-time-eval
+ */
 function strspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
+/**
+ * @compile-time-eval
+ */
 function strcspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
 #ifdef HAVE_NL_LANGINFO
@@ -2284,7 +2313,10 @@ function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
 /** @compile-time-eval */
 function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function wordwrap(string $string, int $width = 75, string $break = "\n", bool $cut_long_words = false): string {}
 
 /**
@@ -2302,7 +2334,10 @@ function implode(string|array $separator, ?array $array = null): string {}
 /** @alias implode */
 function join(string|array $separator, ?array $array = null): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strtok(string $string, ?string $token = null): string|false {}
 
 /** @compile-time-eval */
@@ -2323,7 +2358,10 @@ function dirname(string $path, int $levels = 1): string {}
  */
 function pathinfo(string $path, int $flags = PATHINFO_ALL): array|string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /**
@@ -2347,7 +2385,10 @@ function strrpos(string $haystack, string $needle, int $offset = 0): int|false {
 /** @compile-time-eval */
 function strripos(string $haystack, string $needle, int $offset = 0): int|false {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strrchr(string $haystack, string $needle): string|false {}
 
 /** @compile-time-eval */
@@ -2359,16 +2400,25 @@ function str_starts_with(string $haystack, string $needle): bool {}
 /** @compile-time-eval */
 function str_ends_with(string $haystack, string $needle): bool {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
 /** @compile-time-eval */
 function substr(string $string, int $offset, ?int $length = null): string {}
 
-/** @return string|array<int|string, string> */
+/**
+ * @return string|array<int|string, string>
+ * @compile-time-eval
+ */
 function substr_replace(array|string $string, array|string $replace, array|int $offset, array|int|null $length = null): string|array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function quotemeta(string $string): string {}
 
 /** @compile-time-eval */
@@ -2392,6 +2442,9 @@ function lcfirst(string $string): string {}
  */
 function ucwords(string $string, string $separators = " \t\r\n\f\v"): string {}
 
+/**
+ * @compile-time-eval
+ */
 function strtr(string $string, string|array $from, ?string $to = null): string {}
 
 /**
@@ -2403,14 +2456,26 @@ function strrev(string $string): string {}
 /** @param float $percent */
 function similar_text(string $string1, string $string2, &$percent = null): int {}
 
+/**
+ * @compile-time-eval
+ */
 function addcslashes(string $string, string $characters): string {}
 
+/**
+ * @compile-time-eval
+ */
 function addslashes(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function stripcslashes(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function stripslashes(string $string): string {}
 
 /**
@@ -2430,9 +2495,15 @@ function str_ireplace(array|string $search, array|string $replace, string|array 
 /** @refcount 1 */
 function hebrev(string $string, int $max_chars_per_line = 0): string {}
 
+/**
+ * @compile-time-eval
+ */
 function nl2br(string $string, bool $use_xhtml = true): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
 
 /**
@@ -2455,6 +2526,7 @@ function str_repeat(string $string, int $times): string {}
 
 /**
  * @return array<int, int>|string
+ * @compile-time-eval
  * @refcount 1
  */
 function count_chars(string $string, int $mode = 0): array|string {}
@@ -2469,6 +2541,9 @@ function localeconv(): array {}
 
 function strnatcasecmp(string $string1, string $string2): int {}
 
+/**
+ * @compile-time-eval
+ */
 function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int {}
 
 function str_pad(string $string, int $length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
@@ -2479,7 +2554,10 @@ function str_pad(string $string, int $length, string $pad_string = " ", int $pad
  */
 function sscanf(string $string, string $format, mixed &...$vars): array|int|null {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function str_rot13(string $string): string {}
 
 /** @refcount 1 */
@@ -2497,18 +2575,26 @@ function str_word_count(string $string, int $format = 0, ?string $characters = n
  */
 function str_split(string $string, int $length = 1): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strpbrk(string $string, string $characters): string|false {}
 
+/**
+ * @compile-time-eval
+ */
 function substr_compare(string $haystack, string $needle, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
 
 /**
+ * @compile-time-eval
  * @refcount 1
  * @deprecated
  */
 function utf8_encode(string $string): string {}
 
 /**
+ * @compile-time-eval
  * @refcount 1
  * @deprecated
  */
@@ -2883,10 +2969,16 @@ function http_build_query(array|object $data, string $numeric_prefix = "", ?stri
 
 /* image.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function image_type_to_mime_type(int $image_type): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function image_type_to_extension(int $image_type, bool $include_dot = true): string|false {}
 
 /**
@@ -3165,6 +3257,9 @@ function password_needs_rehash(string $hash, string|int|null $algo, array $optio
 
 function password_verify(#[\SensitiveParameter] string $password, string $hash): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function password_algos(): array {}
 
 /* proc_open.c */
@@ -3193,10 +3288,16 @@ function proc_get_status($process): array {}
 
 /* quot_print.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function quoted_printable_decode(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function quoted_printable_encode(string $string): string {}
 
 /* soundex.c */
@@ -3527,6 +3628,7 @@ function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 
 /**
  * @return int|string|array<string, int|string>|null|false
+ * @compile-time-eval
  * @refcount 1
  */
 function parse_url(string $url, int $component = -1): int|string|array|null|false {}
@@ -3592,10 +3694,16 @@ function stream_filter_register(string $filter_name, string $class): bool {}
 
 /* uuencode.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function convert_uuencode(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function convert_uudecode(string $string): string|false {}
 
 /* var.c */
