@@ -177,7 +177,7 @@ PHP_FUNCTION(assert)
 			zend_exception_error(EG(exception), E_ERROR);
 		}
 	} else if (ASSERTG(warning)) {
-		php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion failed");
+		php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion");
 	}
 
 	if (ASSERTG(bail)) {
