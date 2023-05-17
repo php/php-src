@@ -1634,7 +1634,7 @@ static void jit_FREE_OP(zend_jit_ctx  *jit,
 
 static void jit_OBJ_RELEASE(zend_jit_ctx  *jit, ir_ref ref)
 {
-	ir_ref end_inputs = IS_UNDEF;
+	ir_ref end_inputs = IR_UNUSED;
     ir_ref if_not_zero, if_may_not_leak;
 
 	// JIT: if (GC_DELREF(obj) == 0) {
