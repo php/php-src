@@ -9972,27 +9972,24 @@ static void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	zend_string *class_name;
 	int fetch_type;
 
-	if (class_ast->kind != ZEND_AST_ZVAL) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Dynamic class names are not allowed in compile-time class constant references");
-	}
+	if (class_ast->kind == ZEND_AST_ZVAL) {
+		class_name = zend_ast_get_str(class_ast);
+		fetch_type = zend_get_class_fetch_type(class_name);
 
-	class_name = zend_ast_get_str(class_ast);
-	fetch_type = zend_get_class_fetch_type(class_name);
+		if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"\"static::\" is not allowed in compile-time constants");
+		}
 
-	if (ZEND_FETCH_CLASS_STATIC == fetch_type) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"\"static::\" is not allowed in compile-time constants");
-	}
+		if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
+			zend_string *tmp = zend_resolve_class_name_ast(class_ast);
 
-	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
-		zend_string *tmp = zend_resolve_class_name_ast(class_ast);
-
-		zend_string_release_ex(class_name, 0);
-		if (tmp != class_name) {
-			zval *zv = zend_ast_get_zval(class_ast);
-			ZVAL_STR(zv, tmp);
-			class_ast->attr = ZEND_NAME_FQ;
+			zend_string_release_ex(class_name, 0);
+			if (tmp != class_name) {
+				zval *zv = zend_ast_get_zval(class_ast);
+				ZVAL_STR(zv, tmp);
+				class_ast->attr = ZEND_NAME_FQ;
+			}
 		}
 	}
 
@@ -10004,27 +10001,24 @@ static void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
 	zend_ast *class_ast = ast->child[0];
-	if (class_ast->kind != ZEND_AST_ZVAL) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"(expression)::class cannot be used in constant expressions");
-	}
+	if (class_ast->kind == ZEND_AST_ZVAL) {
+		zend_string *class_name = zend_ast_get_str(class_ast);
+		uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 
-	zend_string *class_name = zend_ast_get_str(class_ast);
-	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
-
-	switch (fetch_type) {
-		case ZEND_FETCH_CLASS_SELF:
-		case ZEND_FETCH_CLASS_PARENT:
-			/* For the const-eval representation store the fetch type instead of the name. */
-			zend_string_release(class_name);
-			ast->child[0] = NULL;
-			ast->attr = fetch_type;
-			return;
-		case ZEND_FETCH_CLASS_STATIC:
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"static::class cannot be used for compile-time class name resolution");
-			return;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		switch (fetch_type) {
+			case ZEND_FETCH_CLASS_SELF:
+			case ZEND_FETCH_CLASS_PARENT:
+				/* For the const-eval representation store the fetch type instead of the name. */
+				zend_string_release(class_name);
+				ast->child[0] = NULL;
+				ast->attr = fetch_type;
+				return;
+			case ZEND_FETCH_CLASS_STATIC:
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"static::class cannot be used for compile-time class name resolution");
+				return;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
 	}
 }
 

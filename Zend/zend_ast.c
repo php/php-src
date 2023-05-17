@@ -527,6 +527,18 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 	return r;
 }
 
+static zend_string *zend_ast_get_class_name(zval *class_name)
+{
+	if (Z_TYPE_P(class_name) == IS_OBJECT) {
+		return Z_OBJCE_P(class_name)->name;
+	} else if (Z_TYPE_P(class_name) == IS_STRING) {
+		return Z_STR_P(class_name);
+	} else {
+		zend_throw_error(NULL, "Class name must be a valid object or a string");
+		return NULL;
+	}
+}
+
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
@@ -605,21 +617,34 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			}
 			break;
 		case ZEND_AST_CLASS_NAME:
-			if (!scope) {
-				zend_throw_error(NULL, "Cannot use \"self\" when no class scope is active");
-				return FAILURE;
-			}
-			if (ast->attr == ZEND_FETCH_CLASS_SELF) {
-				ZVAL_STR_COPY(result, scope->name);
-			} else if (ast->attr == ZEND_FETCH_CLASS_PARENT) {
-				if (!scope->parent) {
-					zend_throw_error(NULL,
-						"Cannot use \"parent\" when current class scope has no parent");
+			if (!ast->child[0]) {
+				if (!scope) {
+					zend_throw_error(NULL, "Cannot use \"self\" when no class scope is active");
 					return FAILURE;
 				}
-				ZVAL_STR_COPY(result, scope->parent->name);
+				if (ast->attr == ZEND_FETCH_CLASS_SELF) {
+					ZVAL_STR_COPY(result, scope->name);
+				} else if (ast->attr == ZEND_FETCH_CLASS_PARENT) {
+					if (!scope->parent) {
+						zend_throw_error(NULL,
+							"Cannot use \"parent\" when current class scope has no parent");
+						return FAILURE;
+					}
+					ZVAL_STR_COPY(result, scope->parent->name);
+				} else {
+					ZEND_ASSERT(0 && "Should have errored during compilation");
+				}
 			} else {
-				ZEND_ASSERT(0 && "Should have errored during compilation");
+				if (UNEXPECTED(zend_ast_evaluate_ex(&op1, ast->child[0], scope, &short_circuited, ctx) != SUCCESS)) {
+					return FAILURE;
+				}
+				if (Z_TYPE(op1) != IS_OBJECT) {
+					zend_type_error("Cannot use \"::class\" on %s", zend_zval_value_name(&op1));
+					zval_ptr_dtor_nogc(&op1);
+					return FAILURE;
+				}
+				ZVAL_STR_COPY(result, Z_OBJCE(op1)->name);
+				zval_ptr_dtor_nogc(&op1);
 			}
 			break;
 		case ZEND_AST_AND:
@@ -833,12 +858,21 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 		}
 		case ZEND_AST_CLASS_CONST:
 		{
-			zend_string *class_name = zend_ast_get_str(ast->child[0]);
+			if (UNEXPECTED(zend_ast_evaluate_ex(&op1, ast->child[0], scope, &short_circuited, ctx) != SUCCESS)) {
+				return FAILURE;
+			}
+			zend_string *class_name = zend_ast_get_class_name(&op1);
+			if (!class_name) {
+				zval_ptr_dtor_nogc(&op1);
+				return FAILURE;
+			}
+
 			if (UNEXPECTED(zend_ast_evaluate_ex(&op2, ast->child[1], scope, &short_circuited, ctx) != SUCCESS)) {
 				return FAILURE;
 			}
 			if (UNEXPECTED(Z_TYPE(op2) != IS_STRING)) {
 				zend_invalid_class_constant_type_error(Z_TYPE(op2));
+				zval_ptr_dtor_nogc(&op1);
 				zval_ptr_dtor_nogc(&op2);
 				return FAILURE;
 			}
@@ -860,10 +894,12 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 			if (UNEXPECTED(zv == NULL)) {
 				ZVAL_UNDEF(result);
+				zval_ptr_dtor_nogc(&op1);
 				zval_ptr_dtor_nogc(&op2);
 				return FAILURE;
 			}
 			ZVAL_COPY_OR_DUP(result, zv);
+			zval_ptr_dtor_nogc(&op1);
 			zval_ptr_dtor_nogc(&op2);
 			break;
 		}
