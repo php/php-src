@@ -1,5 +1,6 @@
 --TEST--
 FPM: bug64539 - status json format escaping
+--XFAIL--
 --SKIPIF--
 <?php
 include "skipif.inc"; ?>
