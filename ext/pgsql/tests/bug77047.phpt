@@ -20,23 +20,30 @@ pg_query($db, "CREATE TABLE bug77047 (
     )");
 
 try {
-	pg_insert($db, "bug77047", array("t" => "13:31"));
-	pg_insert($db, "bug77047", array("t" => "13:31:13"));
-	pg_insert($db, "bug77047", array("t" => "1:2:3"));
-	pg_insert($db, "bug77047", array("t" => "xyz"));
-	pg_insert($db, "bug77047", array("t" => NULL));
-	pg_insert($db, "bug77047", array("t" => ""));
+    pg_insert($db, "bug77047", array("t" => "13:31"));
 } catch (\TypeError $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
+pg_insert($db, "bug77047", array("t" => "13:31:13"));
+pg_insert($db, "bug77047", array("t" => "1:2:3"));
+try {
+    pg_insert($db, "bug77047", array("t" => "xyz"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
+pg_insert($db, "bug77047", array("t" => NULL));
+pg_insert($db, "bug77047", array("t" => ""));
 
 $res = pg_query($db, "SELECT t FROM bug77047");
 while (false !== ($row = pg_fetch_row($res))) {
-	var_dump(array_pop($row));
+    var_dump(array_pop($row));
 }
 
 ?>
 --EXPECTF--
-Expects string or null for PostgreSQL 'time' (t)string(%d) "%s"
+pg_insert(): Field "t" must be of type string|null, time given
+string(8) "13:31:00"
 string(8) "13:31:13"
 string(8) "01:02:03"
+NULL
+NULL

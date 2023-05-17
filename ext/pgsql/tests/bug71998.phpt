@@ -60,7 +60,7 @@ foreach ($ips as $ip) {
     $r = true;
     try {
     	@pg_insert($db, 'tmp_statistics', $data);
-    } catch (\TypeError $e) {
+    } catch (\ValueError $e) {
         $r = false;
     }
 
