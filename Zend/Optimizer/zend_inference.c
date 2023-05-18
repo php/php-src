@@ -74,12 +74,34 @@
 	} \
 } while (0)
 
+#ifdef SYM_RANGE
+# define STORE_CURRENT_SYM recursion_stack[recursion_stack_idx].current_sym = sym_p
+#else
+# define STORE_CURRENT_SYM
+#endif
+
 #define CHECK_SCC_VAR(var2) \
 	do { \
 		if (!ssa->vars[var2].no_val) { \
 			if (dfs[var2] < 0) { \
-				zend_ssa_check_scc_var(op_array, ssa, var2, index, dfs, root, stack); \
+				/* Need to come back from "recursion" */ \
+				recursion_stack[recursion_stack_idx].var = var; \
+				recursion_stack[recursion_stack_idx].current_use = use; \
+				recursion_stack[recursion_stack_idx].current_phi = p; \
+				STORE_CURRENT_SYM; \
+				recursion_stack_idx++; \
+				/* "Recurse" on next var */ \
+				var = var2; \
+				use = ssa->vars[var].use_chain; \
+				p = ssa->vars[var].phi_use_chain; \
+				sym_p = ssa->vars[var].sym_use_chain; \
+				dfs[var] = *index; \
+				(*index)++; \
+				root[var] = var; \
+				goto recurse; \
 			} \
+			/* Because the use, p, sym_p variables will remain the same from the last iteration,
+			 * this will correctly execute after coming back from the "recursion". */ \
 			if (ssa->vars[var2].scc < 0 && dfs[root[var]] >= dfs[root[var2]]) { \
 				root[var] = root[var2]; \
 			} \
@@ -146,19 +168,23 @@
 	} while (0)
 
 
-#define FOR_EACH_VAR_USAGE(_var, MACRO) \
+#define FOR_EACH_VAR_USAGE_EX(_var, MACRO) \
 	do { \
-		zend_ssa_phi *p = ssa->vars[_var].phi_use_chain; \
-		int use = ssa->vars[_var].use_chain; \
 		while (use >= 0) { \
 			FOR_EACH_DEFINED_VAR(use, MACRO); \
 			use = zend_ssa_next_use(ssa->ops, _var, use); \
 		} \
-		p = ssa->vars[_var].phi_use_chain; \
 		while (p) { \
 			MACRO(p->ssa_var); \
 			p = zend_ssa_next_use_phi(ssa, _var, p); \
 		} \
+	} while (0)
+
+#define FOR_EACH_VAR_USAGE(_var, MACRO) \
+	do { \
+		int use = ssa->vars[_var].use_chain; \
+		zend_ssa_phi *p = ssa->vars[_var].phi_use_chain; \
+		FOR_EACH_VAR_USAGE_EX(_var, MACRO); \
 	} while (0)
 
 static inline bool add_will_overflow(zend_long a, zend_long b) {
@@ -172,41 +198,71 @@ static inline bool sub_will_overflow(zend_long a, zend_long b) {
 }
 #endif
 
+typedef struct {
+	int var;
+	int current_use;
+	const zend_ssa_phi *current_phi;
+#ifdef SYM_RANGE
+	const zend_ssa_phi *current_sym;
+#endif
+} scc_recursion_entry;
+
 static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa, int var, int *index, int *dfs, int *root, zend_worklist_stack *stack) /* {{{ */
 {
-#ifdef SYM_RANGE
-	zend_ssa_phi *p;
-#endif
+	ALLOCA_FLAG(recursion_stack_use_heap);
+	/* Manual recursion stack that tracks to which variable the recursion should "return" to.
+	 * The number of elements cannot be greater than the variable count because every time a variable is visited it is marked and won't be visited again.
+	 * Each recursion consists of three/four stack elements: (variable, current use chain iterator, current phi node iterator, optionally current sym use chain iterator). */
+	scc_recursion_entry *recursion_stack = do_alloca(sizeof(scc_recursion_entry) * ssa->vars_count, recursion_stack_use_heap);
+	uint32_t recursion_stack_idx = 1;
 
 	dfs[var] = *index;
 	(*index)++;
 	root[var] = var;
 
-	FOR_EACH_VAR_USAGE(var, CHECK_SCC_VAR);
-
+	recursion_stack[0].var = var;
+	recursion_stack[0].current_use = ssa->vars[var].use_chain;
+	recursion_stack[0].current_phi = ssa->vars[var].phi_use_chain;
 #ifdef SYM_RANGE
-	/* Process symbolic control-flow constraints */
-	p = ssa->vars[var].sym_use_chain;
-	while (p) {
-		CHECK_SCC_VAR(p->ssa_var);
-		p = p->sym_use_chain;
-	}
+	recursion_stack[0].current_sym = ssa->vars[var].sym_use_chain;
+#endif
+	do {
+		recursion_stack_idx--;
+		var = recursion_stack[recursion_stack_idx].var;
+		int use = recursion_stack[recursion_stack_idx].current_use;
+		const zend_ssa_phi *p = recursion_stack[recursion_stack_idx].current_phi;
+#ifdef SYM_RANGE
+		const zend_ssa_phi *sym_p = recursion_stack[recursion_stack_idx].current_sym;
 #endif
 
-	if (root[var] == var) {
-		ssa->vars[var].scc = ssa->sccs;
-		while (stack->len > 0) {
-			int var2 = zend_worklist_stack_peek(stack);
-			if (dfs[var2] <= dfs[var]) {
-				break;
-			}
-			zend_worklist_stack_pop(stack);
-			ssa->vars[var2].scc = ssa->sccs;
+recurse:;
+		FOR_EACH_VAR_USAGE_EX(var, CHECK_SCC_VAR);
+
+#ifdef SYM_RANGE
+		/* Process symbolic control-flow constraints */
+		while (sym_p) {
+			CHECK_SCC_VAR(sym_p->ssa_var);
+			sym_p = sym_p->sym_use_chain;
 		}
-		ssa->sccs++;
-	} else {
-		zend_worklist_stack_push(stack, var);
-	}
+#endif
+
+		if (root[var] == var) {
+			ssa->vars[var].scc = ssa->sccs;
+			while (stack->len > 0) {
+				int var2 = zend_worklist_stack_peek(stack);
+				if (dfs[var2] <= dfs[var]) {
+					break;
+				}
+				zend_worklist_stack_pop(stack);
+				ssa->vars[var2].scc = ssa->sccs;
+			}
+			ssa->sccs++;
+		} else {
+			zend_worklist_stack_push(stack, var);
+		}
+	} while (recursion_stack_idx > 0);
+
+	free_alloca(recursion_stack, recursion_stack_use_heap);
 }
 /* }}} */
 
