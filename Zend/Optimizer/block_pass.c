@@ -259,8 +259,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_FREE:
 				/* Note: Only remove the source if the source is local to this block.
 				 * If it's not local, then the other blocks successors must also eventually either FREE or consume the temporary,
-				 * hence removing the temporary is not safe in the general case unless specified otherwise.
-				 * The source's result can also not be removed in such a case because that would cause a memory leak. */
+				 * hence removing the temporary is not safe in the general case, especially when other consumers are not FREE.
+				 * A FREE may not be removed without also removing the source's result, because otherwise that would cause a memory leak. */
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					if (src) {
@@ -269,7 +269,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							case ZEND_BOOL_NOT:
 								/* T = BOOL(X), FREE(T) => T = BOOL(X) */
 								/* The remaining BOOL is removed by a separate optimization */
-								/* The source is a bool, no source removals take place, so can be done non-locally. */
+								/* The source is a bool, no source removals take place, so this may be done non-locally. */
 								VAR_SOURCE(opline->op1) = NULL;
 								MAKE_NOP(opline);
 								++(*opt_count);
