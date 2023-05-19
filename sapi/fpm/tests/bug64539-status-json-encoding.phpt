@@ -1,6 +1,5 @@
 --TEST--
 FPM: bug64539 - status json format escaping
---XFAIL--
 --SKIPIF--
 <?php
 include "skipif.inc"; ?>
@@ -33,8 +32,7 @@ $responses = $tester
         ['query' => 'a=b"c'],
         ['uri' => '/status', 'query' => 'full&json', 'delay' => 100000],
     ]);
-$data = json_decode($responses[1]->getBody('application/json'), true);
-var_dump(explode('?', $data['processes'][0]['request uri'])[1]);
+$responses[1]->expectJsonBodyPatternForStatusProcessField('request uri', '\?a=b"c$');
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
@@ -42,7 +40,6 @@ $tester->close();
 ?>
 Done
 --EXPECT--
-string(5) "a=b"c"
 Done
 --CLEAN--
 <?php
