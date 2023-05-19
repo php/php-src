@@ -188,11 +188,14 @@
 #define GC_HAS_DESTRUCTORS  (1<<0)
 
 /* Weak maps */
-#define GC_SET_FROM_WEAKMAP_KEY(zv) do {								       \
+/* The WeakMap entry zv is first reachable by following the virtual reference
+ * from the a WeakMap key to the entry, and should not be scanned again through
+ * WeakMap entry enumeration */
+#define GC_SET_FROM_WEAKMAP_KEY(zv) do {									   \
 	zval *_z = (zv);														   \
 	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) | (Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT); \
 } while (0)
-#define GC_UNSET_FROM_WEAKMAP_KEY(zv) do {								   \
+#define GC_UNSET_FROM_WEAKMAP_KEY(zv) do {									   \
 	zval *_z = (zv);														   \
 	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) & ~(Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT); \
 } while (0)

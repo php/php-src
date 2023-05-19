@@ -76,6 +76,9 @@ size_t zend_gc_globals_size(void);
 
 #define Z_FROM_WEAKMAP_KEY (1<<0)
 
+/* The WeakMap entry zv is first reachable by following the virtual reference
+ * from the a WeakMap key to the entry, and should not be scanned again through
+ * WeakMap entry enumeration */
 #define GC_FROM_WEAKMAP_KEY(zv) (Z_TYPE_INFO_P((zv)) & (Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT))
 
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
