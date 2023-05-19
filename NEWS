@@ -46,6 +46,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-11138 (move_uploaded_file() emits open_basedir warning for
     source file). (ilutov)
+  . Fixed bug GH-11274 (POST/PATCH request switches to GET after a HTTP 308
+    redirect). (nielsdos)
 
 - Streams:
   . Fixed bug GH-10031 ([Stream] STREAM_NOTIFY_PROGRESS over HTTP emitted
