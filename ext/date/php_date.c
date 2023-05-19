@@ -1957,13 +1957,25 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 			ZVAL_STRING(zv, tzobj->tzi.tz->name);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
 			timelib_sll utc_offset = tzobj->tzi.utc_offset;
+			int seconds = utc_offset % 60;
+			size_t size;
+			const char *format;
+			if (seconds == 0) {
+				size = sizeof("+05:00");
+				format = "%c%02d:%02d";
+			} else {
+				size = sizeof("+05:00:01");
+				format = "%c%02d:%02d:%02d";
+			}
+			zend_string *tmpstr = zend_string_alloc(size - 1, 0);
 
-			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
+			/* Note: if seconds == 0, the seconds argument will be excessive and therefore ignored. */
+			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), size, format,
 				utc_offset < 0 ? '-' : '+',
 				abs((int)(utc_offset / 3600)),
-				abs((int)(utc_offset % 3600) / 60));
+				abs((int)(utc_offset % 3600) / 60),
+				abs(seconds));
 
 			ZVAL_NEW_STR(zv, tmpstr);
 			}
