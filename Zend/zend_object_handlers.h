@@ -22,8 +22,10 @@
 
 #include <stdint.h>
 
+#include "zend_hash.h"
 #include "zend_types.h"
 #include "zend_property_hooks.h"
+#include "zend_lazy_objects.h"
 
 struct _zend_property_info;
 
@@ -251,6 +253,7 @@ ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zen
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
+ZEND_API HashTable *zend_get_properties_no_lazy_init(zend_object *zobj);
 ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
 ZEND_API zend_result zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
@@ -272,13 +275,30 @@ ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
 
 static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {
+	if (UNEXPECTED(zend_lazy_object_must_init(object))) {
+		return zend_lazy_object_get_properties(object);
+	}
 	if (!object->properties) {
 		return rebuild_object_properties_internal(object);
 	}
 	return object->properties;
 }
 
+/* Implements the fast path for array cast */
 ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
+
+#define ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(object) (            \
+		/* We can use zend_std_build_object_properties_array() for objects     \
+		 * without properties ht and with standard handlers */                 \
+		Z_OBJ_P(object)->properties == NULL                                    \
+		&& Z_OBJ_HT_P(object)->get_properties_for == NULL                      \
+		&& Z_OBJ_HT_P(object)->get_properties == zend_std_get_properties       \
+		/* For initialized proxies we need to forward to the real instance */  \
+		&& (                                                                   \
+			!zend_object_is_lazy_proxy(Z_OBJ_P(object))                        \
+			|| !zend_lazy_object_initialized(Z_OBJ_P(object))                  \
+		)                                                                      \
+)
 
 /* Handler for objects that cannot be meaningfully compared.
  * Only objects with the same identity will be considered equal. */

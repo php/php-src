@@ -28,6 +28,7 @@
 #include <zend_exceptions.h>
 #include "zend_enum.h"
 #include "zend_property_hooks.h"
+#include "zend_lazy_objects.h"
 
 static const char digits[] = "0123456789abcdef";
 
@@ -124,7 +125,8 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 	} else if (Z_OBJ_P(val)->properties == NULL
 	 && Z_OBJ_HT_P(val)->get_properties_for == NULL
 	 && Z_OBJ_HT_P(val)->get_properties == zend_std_get_properties
-	 && Z_OBJ_P(val)->ce->num_hooked_props == 0) {
+	 && Z_OBJ_P(val)->ce->num_hooked_props == 0
+	 && !zend_object_is_lazy(Z_OBJ_P(val))) {
 		/* Optimized version without rebuilding properties HashTable */
 		zend_object *obj = Z_OBJ_P(val);
 		zend_class_entry *ce = obj->ce;

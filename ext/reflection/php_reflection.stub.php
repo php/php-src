@@ -250,6 +250,12 @@ class ReflectionClass implements Reflector
     /** @cvalue ZEND_ACC_READONLY_CLASS */
     public const int IS_READONLY = UNKNOWN;
 
+    /** @cvalue ZEND_LAZY_OBJECT_SKIP_INITIALIZATION_ON_SERIALIZE */
+    public const int SKIP_INITIALIZATION_ON_SERIALIZE = UNKNOWN;
+
+    /** @cvalue ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR */
+    public const int SKIP_DESTRUCTOR = UNKNOWN;
+
     public string $name;
 
     private function __clone(): void {}
@@ -370,6 +376,22 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function newInstanceArgs(array $args = []): ?object {}
 
+    public function newLazyGhost(callable $initializer, int $options = 0): object {}
+
+    public function newLazyProxy(callable $factory, int $options = 0): object {}
+
+    public function resetAsLazyGhost(object $object, callable $factory, int $options = 0): void {}
+
+    public function resetAsLazyProxy(object $object, callable $factory, int $options = 0): void {}
+
+    public function initializeLazyObject(object $object): object {}
+
+    public function isUninitializedLazyObject(object $object): bool {}
+
+    public function markLazyObjectAsInitialized(object $object): object {}
+
+    public function getLazyInitializer(object $object): ?callable {}
+
     /** @tentative-return-type */
     public function getParentClass(): ReflectionClass|false {}
 
@@ -471,6 +493,10 @@ class ReflectionProperty implements Reflector
     public function getRawValue(object $object): mixed {}
 
     public function setRawValue(object $object, mixed $value): void {}
+
+    public function setRawValueWithoutLazyInitialization(object $object, mixed $value): void {}
+
+    public function skipLazyInitialization(object $object): void {}
 
     /** @tentative-return-type */
     public function isInitialized(?object $object = null): bool {}

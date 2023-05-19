@@ -164,6 +164,20 @@ PHP 8.4 UPGRADE NOTES
   . The DSN's credentials, when set, are given priority over their PDO
     constructor counterparts, being closer to the documentation states.
 
+- Reflection:
+  . Added methods ReflectionClass::newLazyGhost(),
+    ReflectionClass::newLazyProxy(), ReflectionClass::resetAsLazyGhost(),
+    ReflectionClass::resetAsLazyProxy(),
+    ReflectionClass::isUninitializedLazyObject(),
+    ReflectionClass::initializeLazyObject(),
+    ReflectionClass::markLazyObjectAsInitialized(),
+    ReflectionClass::getLazyInitializer(),
+    ReflectionProperty::skipLazyInitialization(),
+    ReflectionProperty::setRawValueWithoutLazyInitialization() and constants
+    ReflectionClass::SKIP_*.
+    If you have a method or constant with the same name, you might encounter
+    errors if the declaration is incompatible.
+
 - SimpleXML:
   . Get methods called, or casting to a string on a SimpleXMLElement will no
     longer implicitly reset the iterator data, unless explicitly rewound.
@@ -269,6 +283,8 @@ PHP 8.4 UPGRADE NOTES
     See Zend/tests/use_function/ns_end_resets_seen_symbols_1.phpt.
   . Implemented asymmetric property visibility.
     RFC: https://wiki.php.net/rfc/asymmetric-visibility-v2
+  . Implemented lazy objects.
+    RFC: https://wiki.php.net/rfc/lazy-objects
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
@@ -393,6 +409,20 @@ PHP 8.4 UPGRADE NOTES
   . ReflectionConstant was introduced.
   . ReflectionClassConstant::isDeprecated() was introduced.
   . ReflectionGenerator::isClosed() was introduced.
+  . Multiple methods and constants related to lazy objects were introduced:
+    - ReflectionClass::newLazyGhost()
+    - ReflectionClass::newLazyProxy()
+    - ReflectionClass::resetAsLazyGhost()
+    - ReflectionClass::resetAsLazyProxy()
+    - ReflectionClass::isUninitializedLazyObject()
+    - ReflectionClass::initializeLazyObject()
+    - ReflectionClass::markLazyObjectAsInitialized()
+    - ReflectionClass::getLazyInitializer()
+    - ReflectionProperty::skipLazyInitialization()
+    - ReflectionProperty::setRawValueWithoutLazyInitialization()
+    - ReflectionClass::SKIP_INITIALIZATION_ON_SERIALIZE
+    - ReflectionClass::SKIP_DESTRUCTOR
+    RFC: https://wiki.php.net/rfc/lazy-objects
 
 - Standard:
   . stream_bucket_make_writeable() and stream_bucket_new() will now return a
@@ -779,6 +809,20 @@ PHP 8.4 UPGRADE NOTES
   . Added pg_jit to get informations on the server JIT support.
   . Added pg_set_chunked_rows_size to allow to fetch results in chunk of
     max N rows.
+
+- Reflection:
+  . Multiple methods related to lazy objects were introduced:
+    - ReflectionClass::newLazyGhost()
+    - ReflectionClass::newLazyProxy()
+    - ReflectionClass::resetAsLazyGhost()
+    - ReflectionClass::resetAsLazyProxy()
+    - ReflectionClass::isUninitializedLazyObject()
+    - ReflectionClass::initializeLazyObject()
+    - ReflectionClass::markLazyObjectAsInitialized()
+    - ReflectionClass::getLazyInitializer()
+    - ReflectionProperty::skipLazyInitialization()
+    - ReflectionProperty::setRawValueWithoutLazyInitialization()
+    RFC: https://wiki.php.net/rfc/lazy-objects
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()

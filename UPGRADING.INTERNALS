@@ -99,6 +99,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   zend_std_get_properties(). Use zend_std_get_properties_ex() or
   zend_std_get_properties() instead.
 
+* zend_object.properties must not be accessed directly. Use
+  zend_std_get_properties_ex() instead.
+
 * Removed IS_STATIC_VAR_UNINITIALIZED constant. Check for IS_NULL in the
   static_variables array instead.
 

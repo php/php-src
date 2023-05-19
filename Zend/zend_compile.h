@@ -398,7 +398,6 @@ typedef struct _zend_oparray_context {
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
-
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 #define ZEND_ACC_PPP_SET_MASK  (ZEND_ACC_PUBLIC_SET | ZEND_ACC_PROTECTED_SET | ZEND_ACC_PRIVATE_SET)
 
@@ -417,6 +416,14 @@ static zend_always_inline uint32_t zend_visibility_to_set_visibility(uint32_t vi
 
 /* call through internal function handler. e.g. Closure::invoke() */
 #define ZEND_ACC_CALL_VIA_HANDLER     ZEND_ACC_CALL_VIA_TRAMPOLINE
+
+#define ZEND_ACC_UNINSTANTIABLE (       \
+	ZEND_ACC_INTERFACE |                \
+	ZEND_ACC_TRAIT |                    \
+	ZEND_ACC_IMPLICIT_ABSTRACT_CLASS |  \
+	ZEND_ACC_EXPLICIT_ABSTRACT_CLASS |  \
+	ZEND_ACC_ENUM                       \
+)
 
 #define ZEND_SHORT_CIRCUITING_CHAIN_MASK 0x3
 #define ZEND_SHORT_CIRCUITING_CHAIN_EXPR 0

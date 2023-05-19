@@ -23,11 +23,13 @@
 #include "php.h"
 #include "php_string.h"
 #include "php_var.h"
+#include "zend_lazy_objects.h"
 #include "zend_smart_str.h"
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"
+#include "zend_types.h"
 /* }}} */
 
 struct php_serialize_data {
@@ -85,6 +87,18 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	}
 }
 /* }}} */
+
+static const char *php_var_dump_object_prefix(zend_object *obj) {
+	if (EXPECTED(!zend_object_is_lazy(obj))) {
+		return "";
+	}
+
+	if (zend_object_is_lazy_proxy(obj)) {
+		return "lazy proxy ";
+	}
+
+	return "lazy ghost ";
+}
 
 PHPAPI void php_var_dump(zval *struc, int level) /* {{{ */
 {
@@ -163,7 +177,9 @@ again:
 
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
+			const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
+
+			php_printf("%s%sobject(%s)#%d (%d) {\n", COMMON, prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
 			zend_string_release_ex(class_name, 0);
 
 			if (myht) {
@@ -360,7 +376,9 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 
 		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
+		const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
+
+		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
 		zend_string_release_ex(class_name, 0);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
@@ -1206,7 +1224,8 @@ again:
 
 				if (Z_OBJ_P(struc)->properties == NULL
 				 && Z_OBJ_HT_P(struc)->get_properties_for == NULL
-				 && Z_OBJ_HT_P(struc)->get_properties == zend_std_get_properties) {
+				 && Z_OBJ_HT_P(struc)->get_properties == zend_std_get_properties
+				 && !zend_object_is_lazy(Z_OBJ_P(struc))) {
 					/* Optimized version without rebulding properties HashTable */
 					zend_object *obj = Z_OBJ_P(struc);
 					zend_class_entry *ce = obj->ce;
