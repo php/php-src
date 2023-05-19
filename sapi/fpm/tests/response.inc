@@ -92,6 +92,37 @@ class Response
     }
 
     /**
+     * Expect that one of the processes in json status process list has a field with value that
+     * matches the supplied pattern.
+     *
+     * @param string $fieldName
+     * @param string $pattern
+     *
+     * @return Response
+     */
+    public function expectJsonBodyPatternForStatusProcessField(string $fieldName, string $pattern)
+    {
+        $rawData = $this->getBody('application/json');
+        $data = json_decode($rawData, true);
+        if (empty($data['processes']) || !is_array($data['processes'])) {
+            $this->error(
+                "The body data is not a valid status json containing processes field '$rawData'"
+            );
+        }
+        foreach ($data['processes'] as $process) {
+            if (preg_match('|' . $pattern . '|', $process[$fieldName]) !== false) {
+                return $this;
+            }
+        }
+
+        $this->error(
+            "No field $fieldName matched pattern $pattern for any process in status data '$rawData'"
+        );
+
+        return $this;
+    }
+
+    /**
      * @return Response
      */
     public function expectEmptyBody()
