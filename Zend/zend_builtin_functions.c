@@ -885,7 +885,7 @@ ZEND_FUNCTION(get_mangled_object_vars)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	properties = obj->handlers->get_properties(obj);
+	properties = zend_get_properties_no_init(obj);
 	if (!properties) {
 		ZVAL_EMPTY_ARRAY(return_value);
 		return;

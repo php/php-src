@@ -556,6 +556,7 @@ typedef struct _HashTableIterator {
 struct _zend_object {
 	zend_refcounted_h gc;
 	uint32_t          handle; // TODO: may be removed ???
+	uint32_t          flags;
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
@@ -828,6 +829,13 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_OBJ_FREE_CALLED			(1<<9)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
+
+/* object extra flags (zend_object.flags) */
+
+#define IS_OBJ_LAZY                 (1U<<31) /* Virtual proxy or uninitialized Ghost */
+#define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
+
+#define OBJ_EXTRA_FLAGS(obj)		((obj)->flags)
 
 /* Fast class cache */
 #define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
@@ -1556,6 +1564,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
  * macros for this purpose, so this workaround is easier to remove in the future. */
 #define IS_PROP_UNINIT (1<<0)
 #define IS_PROP_REINITABLE (1<<1)  /* It has impact only on readonly properties */
+#define IS_PROP_LAZY (1<<2)
 #define Z_PROP_FLAG_P(z) Z_EXTRA_P(z)
 #define ZVAL_COPY_VALUE_PROP(z, v) \
 	do { *(z) = *(v); } while (0)
