@@ -47,6 +47,10 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed parameter parsing of pg_lo_export(). (kocsismate)
 
+- Phar:
+  . Fixed bug GH-11099 (Generating phar.php during cross-compile can't be
+    done). (peter279k)
+
 - Soap:
   . Fixed bug GH-8426 (make test fail while soap extension build). (nielsdos)
 
