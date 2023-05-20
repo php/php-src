@@ -7693,7 +7693,7 @@ static void zend_check_trait_alias_modifiers(uint32_t attr) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast)
+static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast, zend_ast *type_ast)
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);
@@ -7705,7 +7705,6 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast **value_ast_ptr = &const_ast->child[1];
 		zend_ast *doc_comment_ast = const_ast->child[2];
-		zend_ast *type_ast = const_ast->child[3];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 		zval value_zv;
@@ -7752,8 +7751,9 @@ static void zend_compile_class_const_group(zend_ast *ast) /* {{{ */
 {
 	zend_ast *const_ast = ast->child[0];
 	zend_ast *attr_ast = ast->child[1];
+	zend_ast *type_ast = ast->child[2];
 
-	zend_compile_class_const_decl(const_ast, ast->attr, attr_ast);
+	zend_compile_class_const_decl(const_ast, ast->attr, attr_ast, type_ast);
 }
 /* }}} */
 
