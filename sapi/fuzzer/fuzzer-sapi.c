@@ -80,7 +80,7 @@ static void send_header(sapi_header_struct *sapi_header, void *server_context)
 {
 }
 
-static char* read_cookies()
+static char* read_cookies(void)
 {
 	/* TODO: fuzz these! */
 	return NULL;
@@ -172,7 +172,7 @@ int fuzzer_init_php(const char *extra_ini)
 	return SUCCESS;
 }
 
-int fuzzer_request_startup()
+int fuzzer_request_startup(void)
 {
 	if (php_request_startup() == FAILURE) {
 		php_module_shutdown();
@@ -188,7 +188,7 @@ int fuzzer_request_startup()
 	return SUCCESS;
 }
 
-void fuzzer_request_shutdown()
+void fuzzer_request_shutdown(void)
 {
 	zend_try {
 		/* Destroy thrown exceptions. This does not happen as part of request shutdown. */
@@ -207,7 +207,7 @@ void fuzzer_request_shutdown()
 }
 
 /* Set up a dummy stack frame so that exceptions may be thrown. */
-void fuzzer_setup_dummy_frame()
+void fuzzer_setup_dummy_frame(void)
 {
 	static zend_execute_data execute_data;
 	static zend_function func;
