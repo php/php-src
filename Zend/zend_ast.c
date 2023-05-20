@@ -1924,6 +1924,10 @@ simple_list:
 
 			zend_ast_export_visibility(str, ast->attr);
 			smart_str_appends(str, "const ");
+			if (ast->child[2]) {
+				zend_ast_export_type(str, ast->child[2], indent);
+				smart_str_appendc(str, ' ');
+			}
 
 			ast = ast->child[0];
 
