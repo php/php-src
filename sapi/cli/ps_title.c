@@ -175,11 +175,8 @@ char** save_ps_args(int argc, char** argv)
          */
         for (i = 0; (non_contiguous_area == 0) && (environ[i] != NULL); i++)
         {
-            if (end_of_area + 1 != environ[i]) {
-                non_contiguous_area = 1;
-            } else {
+            if (end_of_area + 1 == environ[i])
             	end_of_area = environ[i] + strlen(environ[i]);
-            }
         }
 
         ps_buffer = argv[0];
