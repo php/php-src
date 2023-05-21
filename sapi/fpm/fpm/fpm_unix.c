@@ -37,9 +37,9 @@
 #include <selinux/selinux.h>
 #endif
 
-#if defined(HAVE_SCHED_H)
+#if defined(HAVE_SCHED_SETAFFINITY)
 #include <sched.h>
-#elif defined(HAVE_SYS_CPUSET_H)
+#elif defined(HAVE_CPUSETAFFINITY)
 #include <sys/cpuset.h>
 typedef cpuset_t cpu_set_t;
 #endif
