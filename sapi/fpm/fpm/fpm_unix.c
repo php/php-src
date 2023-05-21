@@ -37,11 +37,9 @@
 #include <selinux/selinux.h>
 #endif
 
-#ifdef HAVE_SCHED_H
+#if defined(HAVE_SCHED_H)
 #include <sched.h>
-#endif
-
-#ifdef HAVE_SYS_CPUSET_H
+#elif defined(HAVE_SYS_CPUSET_H)
 #include <sys/cpuset.h>
 typedef cpuset_t cpu_set_t;
 #endif
@@ -478,7 +476,7 @@ static int fpm_cpuaffinity_set(cpu_set_t *c)
 
 static int fpm_setcpuaffinity(char *cpu_list)
 {
-	char *token, *buf;
+	char *token, *buf, *ptr;
     cpu_set_t c;
 	int r, cpumax, min, max;
 
@@ -486,13 +484,19 @@ static int fpm_setcpuaffinity(char *cpu_list)
 	cpumax = fpm_cpumax();
 
 	fpm_cpuaffinity_init(&c);
-	token = php_strtok_r(cpu_list, ",", &buf);
+	ptr = estrdup(cpu_list);
+	token = php_strtok_r(ptr, ",", &buf);
 
 	while (token) {
 		char *cpu_listsep;
 
+		if (!isdigit(*token)) {
+			return -1;
+		}
+
 		min = strtol(token, &cpu_listsep, 0);
-		if (errno || min < 0 || min > cpumax) {
+		if (errno || (*cpu_listsep != '\0' && *cpu_listsep != '-') || min < 0 || min > cpumax) {
+			efree(ptr);
 			return -1;
 		}
 		max = min;
@@ -501,19 +505,21 @@ static int fpm_setcpuaffinity(char *cpu_list)
 				char *err;
 				max = strtol(cpu_listsep + 1, &err, 0);
 				if (errno || *err != '\0' || max < min || max > cpumax) {
+					efree(ptr);
 					return -1;
 				}
 			} else {
+				efree(ptr);
 				return -1;
 			}
 		}
 
 		fpm_cpuaffinity_add(&c, min, max);
-
-		token = php_strtok_r(NULL, ";", &buf);
+		token = php_strtok_r(NULL, ",", &buf);
 	}
 
 	r = fpm_cpuaffinity_set(&c);
+	efree(ptr);
 	return r;
 }
 #endif
