@@ -47,27 +47,27 @@ static void mb_wchar_to_utf8_kddi_b(uint32_t *in, size_t len, mb_convert_buf *bu
 static size_t mb_utf8_sb_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_utf8_sb(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
-static int mbfilter_conv_map_tbl(int c, int *w, const unsigned short map[][3], int n)
+static bool mbfilter_conv_map_tbl(int c, int *w, const unsigned short map[][3], int n)
 {
 	for (int i = 0; i < n; i++) {
 		if (map[i][0] <= c && c <= map[i][1]) {
 			*w = c - map[i][0] + map[i][2];
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
-static int mbfilter_conv_r_map_tbl(int c, int *w, const unsigned short map[][3], int n)
+static bool mbfilter_conv_r_map_tbl(int c, int *w, const unsigned short map[][3], int n)
 {
 	/* Convert in reverse direction */
 	for (int i = 0; i < n; i++) {
 		if (map[i][2] <= c && c <= map[i][2] - map[i][0] + map[i][1]) {
 			*w = c + map[i][0] - map[i][2];
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static const unsigned short mbfl_docomo2uni_pua[4][3] = {
@@ -284,13 +284,13 @@ retry:
 			s = (filter->cache << 6) | (c & 0x3f);
 			filter->cache = 0;
 
-			if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo && mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4) > 0) {
+			if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo && mbfilter_conv_r_map_tbl(s, &s1, mbfl_docomo2uni_pua, 4)) {
 				s = mbfilter_sjis_emoji_docomo2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua, 7) > 0) {
+			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua, 7)) {
 				s = mbfilter_sjis_emoji_kddi2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua_b, 8) > 0) {
+			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_conv_r_map_tbl(s, &s1, mbfl_kddi2uni_pua_b, 8)) {
 				s = mbfilter_sjis_emoji_kddi2unicode(s1, &snd);
-			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_sb && mbfilter_conv_r_map_tbl(s, &s1, mbfl_sb2uni_pua, 6) > 0) {
+			} else if (filter->from->no_encoding == mbfl_no_encoding_utf8_sb && mbfilter_conv_r_map_tbl(s, &s1, mbfl_sb2uni_pua, 6)) {
 				s = mbfilter_sjis_emoji_sb2unicode(s1, &snd);
 			}
 
@@ -357,10 +357,10 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 	if (c >= 0 && c < 0x110000) {
 		int s1, c1;
 
-		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo && mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) ||
-			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_unicode2sjis_emoji_kddi_sjis(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7) > 0) ||
-			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_unicode2sjis_emoji_kddi_sjis(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8) > 0) ||
-			  (filter->to->no_encoding == mbfl_no_encoding_utf8_sb && mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_sb2uni_pua, 6) > 0)) {
+		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo && mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4)) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a && mbfilter_unicode2sjis_emoji_kddi_sjis(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7)) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_b && mbfilter_unicode2sjis_emoji_kddi_sjis(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua_b, 8)) ||
+			  (filter->to->no_encoding == mbfl_no_encoding_utf8_sb && mbfilter_unicode2sjis_emoji_sb(c, &s1, filter) > 0 && mbfilter_conv_map_tbl(s1, &c1, mbfl_sb2uni_pua, 6))) {
 			c = c1;
 		}
 
@@ -486,7 +486,7 @@ static size_t mb_mobile_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32
 		}
 
 		int s1 = 0, snd = 0;
-		if (mbfilter_conv_r_map_tbl(s, &s1, emoji_map, n) > 0) {
+		if (mbfilter_conv_r_map_tbl(s, &s1, emoji_map, n)) {
 			s = convert_emoji(s1, &snd);
 			if (snd) {
 				*out++ = snd;
@@ -552,7 +552,7 @@ static void mb_wchar_to_utf8_docomo(uint32_t *in, size_t len, mb_convert_buf *bu
 				}
 			}
 
-			if (s && mbfilter_conv_map_tbl(s, &c1, mbfl_docomo2uni_pua, 4) > 0) {
+			if (s && mbfilter_conv_map_tbl(s, &c1, mbfl_docomo2uni_pua, 4)) {
 				w = c1;
 			}
 
@@ -649,7 +649,7 @@ static void mb_wchar_to_utf8_kddi(uint32_t *in, size_t len, mb_convert_buf *buf,
 			}
 
 process_kuten:
-			if (s && mbfilter_conv_map_tbl(s, &c1, emoji_map, n) > 0) {
+			if (s && mbfilter_conv_map_tbl(s, &c1, emoji_map, n)) {
 				w = c1;
 			}
 
@@ -761,7 +761,7 @@ static void mb_wchar_to_utf8_sb(uint32_t *in, size_t len, mb_convert_buf *buf, b
 			}
 
 process_kuten:
-			if (s && mbfilter_conv_map_tbl(s, &c1, mbfl_sb2uni_pua, 6) > 0) {
+			if (s && mbfilter_conv_map_tbl(s, &c1, mbfl_sb2uni_pua, 6)) {
 				w = c1;
 			}
 
