@@ -1583,6 +1583,13 @@ class FuncInfo {
             $flags[] = "ZEND_ACC_DEPRECATED";
         }
 
+        foreach ($this->attributes as $attr) {
+            if ($attr->class === "Deprecated") {
+                $flags[] = "ZEND_ACC_DEPRECATED";
+                break;
+            }
+        }
+
         $php82AndAboveFlags = $flags;
         if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
             $php82AndAboveFlags[] = "ZEND_ACC_COMPILE_TIME_EVAL";
@@ -2863,6 +2870,13 @@ class ConstInfo extends VariableLike
 
         if ($this->isDeprecated) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
+        }
+
+        foreach ($this->attributes as $attr) {
+            if ($attr->class === "Deprecated") {
+                $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
+                break;
+            }
         }
 
         if ($this->flags & Modifiers::FINAL) {

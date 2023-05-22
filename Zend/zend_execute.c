@@ -43,6 +43,7 @@
 #include "zend_observer.h"
 #include "zend_system_id.h"
 #include "zend_call_stack.h"
+#include "zend_attributes.h"
 #include "Optimizer/zend_func_info.h"
 
 /* Virtual current working directory support */
@@ -1766,16 +1767,126 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 	zend_throw_error(NULL, "%s", msg);
 }
 
+ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, zend_class_entry* scope, zend_string **message_suffix)
+{
+	*message_suffix = zend_empty_string;
+
+	if (!attributes) {
+		return SUCCESS;
+	}
+
+	zend_attribute *deprecated = zend_get_attribute_str(attributes, "deprecated", sizeof("deprecated")-1);
+
+	if (!deprecated) {
+		return SUCCESS;
+	}
+
+	if (deprecated->argc == 0) {
+		return SUCCESS;
+	}
+
+	zend_result result = FAILURE;
+
+	zend_string *message = zend_empty_string;
+	zend_string *since = zend_empty_string;
+
+	zval obj;
+	ZVAL_UNDEF(&obj);
+	zval *z;
+	zend_string *property = zend_empty_string;
+
+	/* Construct the Deprecated object to correctly handle parameter processing. */
+	if (FAILURE == zend_get_attribute_object(&obj, zend_ce_deprecated, deprecated, scope, NULL)) {
+		goto out;
+	}
+
+	/* Extract the $message property. */
+	zend_string_release(property);
+	property = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), property, false, NULL)) == NULL) {
+		goto out;
+	}
+	if (Z_TYPE_P(z) == IS_STRING) {
+		message = zend_string_copy(Z_STR_P(z));
+	}
+
+	/* Extract the $since property. */
+	zend_string_release(property);
+	property = ZSTR_INIT_LITERAL("since", 0);
+	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), property, false, NULL)) == NULL) {
+		goto out;
+	}
+	if (Z_TYPE_P(z) == IS_STRING) {
+		since = zend_string_copy(Z_STR_P(z));
+	}
+
+	/* Construct the suffix. */
+	*message_suffix = zend_strpprintf_unchecked(
+		0,
+		"%s%S%s%S",
+		ZSTR_LEN(since) > 0 ? " since " : "",
+		since,
+		ZSTR_LEN(message) > 0 ? ", " : "",
+		message
+	);
+
+	result = SUCCESS;
+
+ out:
+
+	zend_string_release(since);
+	zend_string_release(message);
+	zval_ptr_dtor(&obj);
+	zend_string_release(property);
+
+	return result;
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
 {
+	zend_string *message_suffix = zend_empty_string;
+
+	if (get_deprecation_suffix_from_attribute(fbc->common.attributes, fbc->common.scope, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = fbc->type == ZEND_INTERNAL_FUNCTION ? E_DEPRECATED : E_USER_DEPRECATED;
+
 	if (fbc->common.scope) {
-		zend_error(E_DEPRECATED, "Method %s::%s() is deprecated",
+		zend_error_unchecked(code, "Method %s::%s() is deprecated%S",
 			ZSTR_VAL(fbc->common.scope->name),
-			ZSTR_VAL(fbc->common.function_name)
+			ZSTR_VAL(fbc->common.function_name),
+			message_suffix
 		);
 	} else {
-		zend_error(E_DEPRECATED, "Function %s() is deprecated", ZSTR_VAL(fbc->common.function_name));
+		zend_error_unchecked(code, "Function %s() is deprecated%S",
+			ZSTR_VAL(fbc->common.function_name),
+			message_suffix
+		);
 	}
+
+	zend_string_release(message_suffix);
+}
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name)
+{
+	zend_string *message_suffix = zend_empty_string;
+
+	if (get_deprecation_suffix_from_attribute(c->attributes, c->ce, &message_suffix) == FAILURE) {
+		return;
+	}
+
+	int code = c->ce->type == ZEND_INTERNAL_CLASS ? E_DEPRECATED : E_USER_DEPRECATED;
+	char *type = (ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE) ? "Enum case" : "Constant";
+
+	zend_error_unchecked(code, "%s %s::%s is deprecated%S",
+		type,
+		ZSTR_VAL(c->ce->name),
+		ZSTR_VAL(constant_name),
+		message_suffix
+	);
+
+	zend_string_release(message_suffix);
 }
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void)

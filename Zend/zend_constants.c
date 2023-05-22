@@ -354,7 +354,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 
 			if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_error(E_DEPRECATED, "Constant %s::%s is deprecated", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_deprecated_class_constant(c, constant_name);
 					if (EG(exception)) {
 						goto failure;
 					}
