@@ -86,3 +86,12 @@ final class SensitiveParameterValue
 
     public function __debugInfo(): array {}
 }
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_FUNCTION)]
+final class Deprecated
+{
+    public function __construct(?string $message = null) {}
+}

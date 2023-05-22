@@ -29,6 +29,7 @@ ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
 ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
+ZEND_API zend_class_entry *zend_ce_deprecated_attribute;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -77,6 +78,32 @@ static void validate_allow_dynamic_properties(
 		);
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+}
+
+void validate_deprecated_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	// TODO: More proper signature validation: Too many args, incorrect arg names.
+	if (attr->argc == 1) {
+		zval message;
+
+		/* As this is run in the middle of compilation, fetch the attribute value without
+		 * specifying a scope. The class is not fully linked yet, and we may seen an
+		 * inconsistent state. */
+		if (FAILURE == zend_get_attribute_value(&message, attr, 0, NULL)) {
+			return;
+		}
+
+		if (Z_TYPE(message) != IS_STRING) {
+			zval_ptr_dtor(&message);
+
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Deprecated::__construct: Argument #1 ($message) must be of type string, %s given",
+				zend_zval_type_name(&message)
+			);
+		}
+
+		zval_ptr_dtor(&message);
+	}
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -134,6 +161,22 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo)
 static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
 {
 	return NULL;
+}
+
+ZEND_METHOD(Deprecated, __construct)
+{
+	zend_string *message = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		ZVAL_STR(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), message);
+	} else {
+		ZVAL_NULL(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0));
+	}
 }
 
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
@@ -371,6 +414,10 @@ void zend_register_attribute_ce(void)
 	/* This is not an actual attribute, thus the zend_mark_internal_attribute() call is missing. */
 	zend_ce_sensitive_parameter_value = register_class_SensitiveParameterValue();
 	zend_ce_sensitive_parameter_value->default_object_handlers = &attributes_object_handlers_sensitive_parameter_value;
+
+	zend_ce_deprecated_attribute = register_class_Deprecated();
+	attr = zend_mark_internal_attribiute(zend_ce_deprecated_properties);
+	attr->validator = validate_deprecated_attribute;
 }
 
 void zend_attributes_shutdown(void)
