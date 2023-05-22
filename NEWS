@@ -40,6 +40,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-11134 (Incorrect match default branch optimization). (ilutov)
   . Fixed too wide OR and AND range inference. (nielsdos)
   . Fixed missing class redeclaration error with OPcache enabled. (ilutov)
+  . Fixed bug GH-11245 (In some specific cases SWITCH with one default
+    statement will cause segfault). (nielsdos)
 
 - PCNTL:
   . Fixed maximum argument count of pcntl_forkx(). (nielsdos)
