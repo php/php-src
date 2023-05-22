@@ -288,7 +288,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							case ZEND_PRE_DEC_OBJ:
 							case ZEND_PRE_INC_STATIC_PROP:
 							case ZEND_PRE_DEC_STATIC_PROP:
-								if (src < op_array->opcodes + block->start || src > op_array->opcodes + block->len) {
+								if (src < op_array->opcodes + block->start) {
 									break;
 								}
 								src->result_type = IS_UNUSED;
@@ -303,7 +303,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				} else if (opline->op1_type == IS_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					/* V = OP, FREE(V) => OP. NOP */
-					if (src >= op_array->opcodes + block->start && src <= op_array->opcodes + block->len &&
+					if (src >= op_array->opcodes + block->start &&
 					    src->opcode != ZEND_FETCH_R &&
 					    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
 					    src->opcode != ZEND_FETCH_DIM_R &&
