@@ -2005,7 +2005,7 @@ ZEND_API zend_result ZEND_FASTCALL concat_function(zval *result, zval *op1, zval
 
 has_op2_string:;
 	if (UNEXPECTED(ZSTR_LEN(op1_string) == 0)) {
-		if (EXPECTED(free_op2_string || result != op2)) {
+		if (EXPECTED(result != op2 || Z_TYPE_P(result) != IS_STRING)) {
 			if (result == orig_op1) {
 				i_zval_ptr_dtor(result);
 			}
@@ -2018,7 +2018,7 @@ has_op2_string:;
 			}
 		}
 	} else if (UNEXPECTED(ZSTR_LEN(op2_string) == 0)) {
-		if (EXPECTED(free_op1_string || result != op1)) {
+		if (EXPECTED(result != op1 || Z_TYPE_P(result) != IS_STRING)) {
 			if (result == orig_op1) {
 				i_zval_ptr_dtor(result);
 			}
