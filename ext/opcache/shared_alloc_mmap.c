@@ -76,8 +76,13 @@ static void *find_prefered_mmap_base(size_t requested_size)
 		}
 		if ((uintptr_t)execute_ex >= start) {
 			/* the current segment lays before PHP .text segment or PHP .text segment itself */
+			/*Search for candidates at the end of the free segment near the .text segment
+			  to prevent candidates from being missed due to large hole*/
 			if (last_free_addr + requested_size <= start) {
-				last_candidate = last_free_addr;
+				last_candidate = ZEND_MM_ALIGNED_SIZE_EX(start - requested_size, huge_page_size);
+				if (last_candidate + requested_size > start) {
+					last_candidate -= huge_page_size;
+				}
 			}
 			if ((uintptr_t)execute_ex < end) {
 				/* the current segment is PHP .text segment itself */
@@ -128,7 +133,10 @@ static void *find_prefered_mmap_base(size_t requested_size)
 					if ((uintptr_t)execute_ex >= e_start) {
 						/* the current segment lays before PHP .text segment or PHP .text segment itself */
 						if (last_free_addr + requested_size <= e_start) {
-							last_candidate = last_free_addr;
+							last_candidate = ZEND_MM_ALIGNED_SIZE_EX(e_start - requested_size, huge_page_size);
+							if (last_candidate + requested_size > e_start) {
+								last_candidate -= huge_page_size;
+							}
 						}
 						if ((uintptr_t)execute_ex < e_end) {
 							/* the current segment is PHP .text segment itself */
