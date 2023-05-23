@@ -6199,7 +6199,7 @@ static ir_ref zend_jit_cmp_long_long(zend_jit_ctx   *jit,
 		if (smart_branch_opcode && !exit_addr) {
 			if (smart_branch_opcode == ZEND_JMPZ ||
 			    smart_branch_opcode == ZEND_JMPZ_EX) {
-				return jit_IF_ex(jit, IR_TRUE, result ? target_label2 : target_label);
+				return jit_IF_ex(jit, IR_FALSE, result ? target_label : target_label2);
 			} else if (smart_branch_opcode == ZEND_JMPNZ ||
 			           smart_branch_opcode == ZEND_JMPNZ_EX) {
 				return jit_IF_ex(jit, IR_TRUE, result ? target_label : target_label2);
