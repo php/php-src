@@ -6135,8 +6135,24 @@ static int zend_jit_assign(zend_jit_ctx  *jit,
 			opline->op2_type, op2_addr, op2_info, res_addr, ref_addr, may_throw)) {
 		return 0;
 	}
-	if (!zend_jit_store_var_if_necessary_ex(jit, opline->op1.var, op1_addr, op1_def_info, op1_use_addr, op1_info)) {
-		return 0;
+	if (Z_MODE(op1_addr) == IS_REG) {
+		if (Z_STORE(op1_addr)) {
+			if (!zend_jit_store_var_if_necessary_ex(jit, opline->op1.var, op1_addr, op1_def_info, op1_use_addr, op1_info)) {
+				return 0;
+			}
+		} else if ((op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
+			&& Z_MODE(op1_use_addr) == IS_MEM_ZVAL
+			&& Z_REG(op1_use_addr) == ZREG_FP
+			&& EX_VAR_TO_NUM(Z_OFFSET(op1_use_addr)) < jit->current_op_array->num_args) {
+			/* We have to update type because argument may be captured by exception backtrace */
+			if ((op1_def_info & MAY_BE_ANY) == MAY_BE_LONG) {
+				jit_set_Z_TYPE_INFO(jit, op1_use_addr, IS_LONG);
+			} else if ((op1_def_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+				jit_set_Z_TYPE_INFO(jit, op1_use_addr, IS_DOUBLE);
+			} else {
+				ZEND_ASSERT(0);
+			}
+		}
 	}
 	if (opline->result_type != IS_UNUSED) {
 		if (!zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, res_info)) {
