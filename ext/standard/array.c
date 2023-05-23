@@ -5598,6 +5598,9 @@ PHP_FUNCTION(array_multisort)
 
 	/* Do the actual sort magic - bada-bim, bada-boom. */
 	zend_sort(indirect, array_size, sizeof(Bucket *), php_multisort_compare, (swap_func_t)array_bucket_p_sawp);
+	if (EG(exception)) {
+		goto clean_up;
+	}
 
 	/* Restructure the arrays based on sorted indirect - this is mostly taken from zend_hash_sort() function. */
 	for (i = 0; i < num_arrays; i++) {
@@ -5623,15 +5626,15 @@ PHP_FUNCTION(array_multisort)
 			zend_hash_rehash(hash);
 		}
 	}
+	RETVAL_TRUE;
 
-	/* Clean up. */
+clean_up:
 	for (i = 0; i < array_size; i++) {
 		efree(indirect[i]);
 	}
 	efree(indirect);
 	efree(func);
 	efree(arrays);
-	RETURN_TRUE;
 }
 /* }}} */
 

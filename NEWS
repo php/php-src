@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
+  . Fix exception handling in array_multisort(). (ilutov)
 
 08 Jun 2023, PHP 8.1.20
 
