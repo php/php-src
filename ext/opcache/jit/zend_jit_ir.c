@@ -16158,9 +16158,12 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 	}
 
 	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
-		int def_block, use_block, use, j;
+		int def_block, use_block, b, use, j;
 		zend_basic_block *bb;
 		zend_ssa_phi *p;
+		bool ret = 1;
+		zend_worklist worklist;
+		ALLOCA_FLAG(use_heap)
 
 		/* Check if live range is split by ENTRY block */
 		if (ssa->vars[var].definition >= 0) {
@@ -16170,19 +16173,14 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 			def_block = ssa->vars[var].definition_phi->block;
 		}
 
+		ZEND_WORKLIST_ALLOCA(&worklist, ssa->cfg.blocks_count, use_heap);
+
 		if (ssa->vars[var].use_chain >= 0) {
 			use = ssa->vars[var].use_chain;
 			do {
 				use_block = ssa->cfg.map[use];
-				while (use_block != def_block) {
-					bb = &ssa->cfg.blocks[use_block];
-					if (bb->flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
-						return 0;
-					}
-					use_block = bb->idom;
-					if (use_block < 0) {
-						break;
-					}
+				if (use_block != def_block) {
+					zend_worklist_push(&worklist, use_block);
 				}
 				use = zend_ssa_next_use(ssa->ops, var, use);
 			} while (use >= 0);
@@ -16196,22 +16194,33 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 				for (j = 0; j < bb->predecessors_count; j++) {
 					if (p->sources[j] == var) {
 						use_block = ssa->cfg.predecessors[bb->predecessor_offset + j];
-						while (use_block != def_block) {
-							bb = &ssa->cfg.blocks[use_block];
-							if (bb->flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
-								return 0;
-							}
-							use_block = bb->idom;
-							if (use_block < 0) {
-								break;
-							}
+						if (use_block != def_block) {
+							zend_worklist_push(&worklist, use_block);
 						}
-						break;
 					}
 				}
 			}
 			p = zend_ssa_next_use_phi(ssa, var, p);
 		}
+
+		while (zend_worklist_len(&worklist) != 0) {
+			b = zend_worklist_pop(&worklist);
+			bb = &ssa->cfg.blocks[b];
+			if (bb->flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
+				ret = 0;
+				break;
+			}
+			for (j = 0; j < bb->predecessors_count; j++) {
+				b = ssa->cfg.predecessors[bb->predecessor_offset + j];
+				if (b != def_block) {
+					zend_worklist_push(&worklist, b);
+				}
+			}
+		}
+
+		ZEND_WORKLIST_FREE_ALLOCA(&worklist, use_heap);
+
+		return ret;
 	}
 
 	return 1;
