@@ -2425,6 +2425,10 @@ PHP_FUNCTION(preg_replace_callback_array)
 			zend_argument_type_error(1, "must contain only valid callbacks");
 			goto error;
 		}
+		if (!str_idx_regex) {
+			zend_argument_type_error(1, "must contain only string patterns as keys");
+			goto error;
+		}
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 

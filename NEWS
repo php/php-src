@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.8
 
+- PCRE:
+  . Fix preg_replace_callback_array() pattern validation. (ilutov)
+
 - Standard:
   . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
 
