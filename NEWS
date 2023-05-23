@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.21
 
+- Opcache:
+  . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
+
 - Standard:
   . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
   . Fix exception handling in array_multisort(). (ilutov)
