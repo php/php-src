@@ -666,8 +666,6 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 		/* pass */
 	} else if (Z_TYPE_P(var) != IS_OBJECT) {
 		return 0;
-	} else if (Z_REFCOUNT_P(var) == 1 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)) {
-		return 0;
 	}
 
 	/* References to objects are treated as if the reference didn't exist */
