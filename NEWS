@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.20
+25 May 2023, PHP 8.1.20RC1
 
 - Core:
   . Fixed bug GH-9068 (Conditional jump or move depends on uninitialised
