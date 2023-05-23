@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.21
 
-
+- Standard:
+  . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
 
 08 Jun 2023, PHP 8.1.20
 
