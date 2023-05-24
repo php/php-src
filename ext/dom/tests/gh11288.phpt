@@ -21,7 +21,7 @@ foreach ($spans as $span) {
     }
 }
 
-var_dump($dom->saveHTML());
+var_dump(str_replace("\n", "", $dom->saveHTML()));
 
 $html = <<<HTML
 <!DOCTYPE HTML>
@@ -40,7 +40,7 @@ foreach ($spans as $span) {
     }
 }
 
-var_dump($dom->saveHTML());
+var_dump(str_replace("\n", "", $dom->saveHTML()));
 
 $html = <<<HTML
 <!DOCTYPE HTML>
@@ -59,21 +59,9 @@ foreach ($spans as $span) {
     }
 }
 
-var_dump($dom->saveHTML());
+var_dump(str_replace("\n", "", $dom->saveHTML()));
 ?>
 --EXPECT--
-string(112) "<!DOCTYPE HTML>
-<html>
-<body><i><span class="foo">Lorem</span></i><span class="foo">ipsum</span>
-</body></html>
-"
-string(112) "<!DOCTYPE HTML>
-<html>
-<body><i><span class="foo">Lorem</span></i><span class="foo">ipsum</span>
-</body></html>
-"
-string(48) "<!DOCTYPE HTML>
-<html>
-<body>abc
-</body></html>
-"
+string(108) "<!DOCTYPE HTML><html><body><i><span class="foo">Lorem</span></i><span class="foo">ipsum</span></body></html>"
+string(108) "<!DOCTYPE HTML><html><body><i><span class="foo">Lorem</span></i><span class="foo">ipsum</span></body></html>"
+string(44) "<!DOCTYPE HTML><html><body>abc</body></html>"

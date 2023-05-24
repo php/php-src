@@ -21,13 +21,7 @@ foreach ($spans as $span) {
     }
 }
 
-var_dump($dom->saveHTML());
+var_dump(str_replace("\n", "", $dom->saveHTML()));
 ?>
 --EXPECT--
-string(73) "<!DOCTYPE HTML>
-<html>
-<body>
-    <p>Loremipsumdolor</p>
-</body>
-</html>
-"
+string(67) "<!DOCTYPE HTML><html><body>    <p>Loremipsumdolor</p></body></html>"

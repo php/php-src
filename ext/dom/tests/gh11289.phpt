@@ -22,13 +22,7 @@ foreach ($divs as $div) {
     $div->replaceWith(...$fragment->childNodes);
 }
 
-var_dump($dom->saveHTML());
+var_dump(str_replace("\n", "", $dom->saveHTML()));
 ?>
 --EXPECT--
-string(61) "<!DOCTYPE HTML>
-<html>
-<body>
-    <p>Hi!</p>
-</body>
-</html>
-"
+string(55) "<!DOCTYPE HTML><html><body>    <p>Hi!</p></body></html>"
