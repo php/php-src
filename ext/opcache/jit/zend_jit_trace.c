@@ -856,11 +856,9 @@ static int zend_jit_trace_add_ret_phis(zend_jit_trace_rec *trace_buffer, uint32_
 
 static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
-	int var, use, def;
+	int var, use, def, src;
 	zend_ssa_op *op;
-	zend_ssa_var_info *info;
-	unsigned int no_val;
-	zend_ssa_alias_kind alias;
+	uint32_t n;
 
 	if (tssa->vars[ssa_var].definition_phi) {
 		uint32_t b = ssa->cfg.map[tssa_opcodes[0] - op_array->opcodes];
@@ -872,12 +870,38 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 			var = tssa->vars[ssa_var].var;
 			while (phi) {
 				if (ssa->vars[phi->ssa_var].var == var) {
-					tssa->vars[ssa_var].no_val = ssa->vars[phi->ssa_var].no_val;
-					tssa->vars[ssa_var].alias = ssa->vars[phi->ssa_var].alias;
-					memcpy(&tssa->var_info[ssa_var], &ssa->var_info[phi->ssa_var], sizeof(zend_ssa_var_info));
-					return 1;
+					src = phi->ssa_var;
+					goto copy_info;
 				}
 				phi = phi->next;
+			}
+
+			while (bb->idom >= 0) {
+				b = bb->idom;
+				bb = ssa->cfg.blocks + b;
+
+				for (n = bb->len, op = ssa->ops + bb->start + n; n > 0; n--) {
+					op--;
+					if (op->result_def >= 0 && ssa->vars[op->result_def].var == var) {
+						src = op->result_def;
+						goto copy_info;
+					} else if (op->op2_def >= 0 && ssa->vars[op->op2_def].var == var) {
+						src = op->op2_def;
+						goto copy_info;
+					} else if (op->op1_def >= 0 && ssa->vars[op->op1_def].var == var) {
+						src = op->op1_def;
+						goto copy_info;
+					}
+				}
+
+				phi = ssa->blocks[b].phis;
+				while (phi) {
+					if (ssa->vars[phi->ssa_var].var == var) {
+						src = phi->ssa_var;
+						goto copy_info;
+					}
+					phi = phi->next;
+				}
 			}
 		}
 	} else if (tssa->vars[ssa_var].definition >= 0) {
@@ -885,25 +909,16 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 		ZEND_ASSERT((tssa_opcodes[def] - op_array->opcodes) < op_array->last);
 		op = ssa->ops + (tssa_opcodes[def] - op_array->opcodes);
 		if (tssa->ops[def].op1_def == ssa_var) {
-			no_val = ssa->vars[op->op1_def].no_val;
-			alias = ssa->vars[op->op1_def].alias;
-			info = ssa->var_info + op->op1_def;
+			src = op->op1_def;
 		} else if (tssa->ops[def].op2_def == ssa_var) {
-			no_val = ssa->vars[op->op2_def].no_val;
-			alias = ssa->vars[op->op2_def].alias;
-			info = ssa->var_info + op->op2_def;
+			src = op->op2_def;
 		} else if (tssa->ops[def].result_def == ssa_var) {
-			no_val = ssa->vars[op->result_def].no_val;
-			alias = ssa->vars[op->result_def].alias;
-			info = ssa->var_info + op->result_def;
+			src = op->result_def;
 		} else {
 			assert(0);
 			return 0;
 		}
-		tssa->vars[ssa_var].no_val = no_val;
-		tssa->vars[ssa_var].alias = alias;
-		memcpy(&tssa->var_info[ssa_var], info, sizeof(zend_ssa_var_info));
-		return 1;
+		goto copy_info;
 	}
 
 	if (tssa->vars[ssa_var].phi_use_chain) {
@@ -917,27 +932,24 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 		ZEND_ASSERT((tssa_opcodes[use] - op_array->opcodes) < op_array->last);
 		op = ssa->ops + (tssa_opcodes[use] - op_array->opcodes);
 		if (tssa->ops[use].op1_use == var) {
-			no_val = ssa->vars[op->op1_use].no_val;
-			alias = ssa->vars[op->op1_use].alias;
-			info = ssa->var_info + op->op1_use;
+			src = op->op1_use;
 		} else if (tssa->ops[use].op2_use == var) {
-			no_val = ssa->vars[op->op2_use].no_val;
-			alias = ssa->vars[op->op2_use].alias;
-			info = ssa->var_info + op->op2_use;
+			src = op->op2_use;
 		} else if (tssa->ops[use].result_use == var) {
-			no_val = ssa->vars[op->result_use].no_val;
-			alias = ssa->vars[op->result_use].alias;
-			info = ssa->var_info + op->result_use;
+			src = op->result_use;
 		} else {
 			assert(0);
 			return 0;
 		}
-		tssa->vars[ssa_var].no_val = no_val;
-		tssa->vars[ssa_var].alias = alias;
-		memcpy(&tssa->var_info[ssa_var], info, sizeof(zend_ssa_var_info));
-		return 1;
+		goto copy_info;
 	}
 	return 0;
+
+copy_info:
+	tssa->vars[ssa_var].no_val = ssa->vars[src].no_val;
+	tssa->vars[ssa_var].alias = ssa->vars[src].alias;
+	memcpy(&tssa->var_info[ssa_var], &ssa->var_info[src], sizeof(zend_ssa_var_info));
+	return 1;
 }
 
 static void zend_jit_trace_propagate_range(const zend_op_array *op_array, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
