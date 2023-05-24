@@ -98,7 +98,7 @@ typedef struct _sccp_ctx {
 #define MAKE_TOP(zv) (Z_TYPE_INFO_P(zv) = TOP)
 #define MAKE_BOT(zv) (Z_TYPE_INFO_P(zv) = BOT)
 
-static void scp_dump_value(zval *zv) {
+static void scp_dump_value(const zval *zv) {
 	if (IS_TOP(zv)) {
 		fprintf(stderr, " top");
 	} else if (IS_BOT(zv)) {
@@ -1050,6 +1050,12 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_VAR:
 		{
+			SKIP_IF_TOP(op1);
+
+			if (opline->opcode == ZEND_SEND_VAR) {
+				SET_RESULT(op1, op1);
+			}
+
 			/* If the value of a SEND for an ICALL changes, we need to reconsider the
 			 * ICALL result value. Otherwise we can ignore the opcode. */
 			zend_call_info *call;
@@ -1058,7 +1064,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			call = ctx->call_map[opline - ctx->scdf.op_array->opcodes];
-			if (IS_TOP(op1) || !call || !call->caller_call_opline
+			if (!call || !call->caller_call_opline
 					|| call->caller_call_opline->opcode != ZEND_DO_ICALL) {
 				return;
 			}
@@ -2034,8 +2040,15 @@ static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
 		&ssa->ops[call->caller_init_opline - op_array->opcodes]);
 
 	for (i = 0; i < call->num_args; i++) {
-		zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
-			&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
+		zend_op *op = call->arg_info[i].opline;
+		zend_ssa_op *this_ssa_op = &ssa->ops[op - op_array->opcodes];
+
+		/* Not necessary to check ZEND_SEND_VAR_EX, because compile time calls don't support ZEND_SEND_VAR_EX. */
+		if (op->opcode == ZEND_SEND_VAR && this_ssa_op->op1_def >= 0) {
+			zend_ssa_replace_op1_def_by_op1_use(ssa, this_ssa_op);
+		}
+
+		zend_ssa_remove_instr(ssa, op, this_ssa_op);
 	}
 
 	// TODO: remove call_info completely???
@@ -2188,6 +2201,10 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				return 0;
 			}
 
+			if (opline->opcode == ZEND_SEND_VAR) {
+				return 0;
+			}
+
 			/* Compound assign or incdec -> convert to direct ASSIGN */
 
 			if (!value) {
@@ -2330,6 +2347,14 @@ static int replace_constant_operands(sccp_ctx *ctx) {
 		FOREACH_USE(var, use) {
 			zend_op *opline = &op_array->opcodes[use];
 			zend_ssa_op *ssa_op = &ssa->ops[use];
+			/* Removing the def in try_remove_definition() may reduce optimisation opportunities.
+			 * We want to keep the no_val definition until we actually replace it with a constant.
+			 * For SEND_VAR_EX we can't replace the def because the instruction may pass an argument by ref,
+			 * which can make the variable a ref if the def is replaced by the use. */
+			if (opline->opcode == ZEND_SEND_VAR && ssa_op->op1_use == i && ssa_op->op1_def >= 0) {
+				zend_ssa_replace_op1_def_by_op1_use(ssa, ssa_op);
+				opline->extended_value = 0;
+			}
 			if (try_replace_op1(ctx, opline, ssa_op, i, value)) {
 				if (opline->opcode == ZEND_NOP) {
 					removed_ops++;

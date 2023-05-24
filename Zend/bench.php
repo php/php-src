@@ -345,41 +345,7 @@ function strcat($n) {
 
 /*****/
 
-function gethrtime()
-{
-  $hrtime = hrtime();
-  return (($hrtime[0]*1000000000 + $hrtime[1]) / 1000000000);
-}
-
-function start_test()
-{
-    ob_start();
-  return gethrtime();
-}
-
-function end_test($start, $name)
-{
-  global $total;
-  $end = gethrtime();
-  ob_end_clean();
-  $total += $end-$start;
-  $num = number_format($end-$start,3);
-  $pad = str_repeat(" ", 24-strlen($name)-strlen($num));
-
-  echo $name.$pad.$num."\n";
-    ob_start();
-  return gethrtime();
-}
-
-function total()
-{
-  global $total;
-  $pad = str_repeat("-", 24);
-  echo $pad."\n";
-  $num = number_format($total,3);
-  $pad = str_repeat(" ", 24-strlen("Total")-strlen($num));
-  echo "Total".$pad.$num."\n";
-}
+require 'bench_common.php';
 
 $t0 = $t = start_test();
 simple();

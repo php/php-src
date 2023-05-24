@@ -174,6 +174,10 @@ add_op1_def:
 			}
 			break;
 		case ZEND_SEND_VAR:
+			if (opline->op1_type == IS_CV && ((build_flags & ZEND_SSA_RC_INFERENCE) || opline->op2_type == IS_UNUSED)) {
+				goto add_op1_def;
+			}
+			break;
 		case ZEND_CAST:
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
