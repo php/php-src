@@ -3728,7 +3728,12 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 					}
 				} else {
 					Z_TRY_ADDREF_P(src_zval);
-					zend_hash_next_index_insert(Z_ARRVAL_P(dest_zval), src_zval);
+					zval *zv = zend_hash_next_index_insert(Z_ARRVAL_P(dest_zval), src_zval);
+					if (EXPECTED(!zv)) {
+						Z_TRY_DELREF_P(src_zval);
+						zend_cannot_add_element();
+						return 0;
+					}
 				}
 				zval_ptr_dtor(&tmp);
 			} else {
@@ -3737,6 +3742,10 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 			}
 		} else {
 			zval *zv = zend_hash_next_index_insert(dest, src_entry);
+			if (UNEXPECTED(!zv)) {
+				zend_cannot_add_element();
+				return 0;
+			}
 			zval_add_ref(zv);
 		}
 	} ZEND_HASH_FOREACH_END();

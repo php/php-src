@@ -2194,7 +2194,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_scalar_as_array(v
 	zend_throw_error(NULL, "Cannot use a scalar value as an array");
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void)
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void)
 {
 	zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 }
