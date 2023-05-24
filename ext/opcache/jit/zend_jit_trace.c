@@ -4872,8 +4872,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (opline->result_type != IS_UNUSED) {
 							res_use_info = zend_jit_trace_type_to_info(
-								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
-									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
+							if (opline->result_type == IS_CV) {
+								res_use_info &= (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+							}
 							res_info = RES_INFO();
 							res_addr = RES_REG_ADDR();
 						} else {
@@ -4950,8 +4952,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						} else {
 							res_use_info = zend_jit_trace_type_to_info(
-								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
-									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
+							if (opline->result_type == IS_CV) {
+								res_use_info &= (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+							}
 						}
 						res_info = RES_INFO();
 						if (!zend_jit_long_math(&ctx, opline,
@@ -5041,8 +5045,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						} else {
 							res_use_info = zend_jit_trace_type_to_info(
-								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
-									& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
+							if (opline->result_type == IS_CV) {
+								res_use_info &= (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+							}
 						}
 						res_info = RES_INFO();
 						if (opline->opcode == ZEND_ADD &&
@@ -5640,8 +5646,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_TRACE_TYPE();
 						res_info = RES_INFO();
 						res_use_info = zend_jit_trace_type_to_info(
-							STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)))
-								& (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+							STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)));
+						if (opline->result_type == IS_CV) {
+							res_use_info &= (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE);
+						}
 						res_addr = RES_REG_ADDR();
 						if (Z_MODE(res_addr) != IS_REG &&
 								STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)) !=
