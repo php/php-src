@@ -216,6 +216,18 @@ static bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *
 	 || (ssa->cfg.blocks[ssa->cfg.map[use]].flags & ZEND_BB_LOOP_HEADER)) {
 		int b = ssa->cfg.map[use];
 		int prev_use = ssa->vars[var].use_chain;
+		int def_block;
+
+		if (ssa->vars[var].definition >= 0) {
+			def_block =ssa->cfg.map[ssa->vars[var].definition];
+		} else {
+			ZEND_ASSERT(ssa->vars[var].definition_phi);
+			def_block = ssa->vars[var].definition_phi->block;
+		}
+		if (dominates(ssa->cfg.blocks, def_block,
+				(ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) ? b : ssa->cfg.blocks[b].loop_header)) {
+			return 0;
+		}
 
 		while (prev_use >= 0 && prev_use != use) {
 			if (b != ssa->cfg.map[prev_use]
