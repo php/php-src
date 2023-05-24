@@ -199,8 +199,8 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 				res = zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
 				if (res) {
 					/* this model works! */
+					break;
 				}
-				break;
 			}
 		}
 	}
