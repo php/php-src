@@ -499,23 +499,23 @@ static void jit_SNAPSHOT(zend_jit_ctx *jit, ir_ref addr)
 			return;
 		}
 
-		if (stack_size) {
-			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
-			uint32_t snapshot_size, i;
+		/* Check if we need snapshot entries for polymorphic method call */
+		zend_jit_trace_info *t = jit->trace;
+		uint32_t exit_point = 0, n = 0;
 
-			/* Check if we need snapshot entries for polymorphic method call */
-			zend_jit_trace_info *t = jit->trace;
-			uint32_t exit_point = 0, n = 0;
-
-			if (addr < 0) {
-				if (t->exit_count > 0
-				 && jit->ctx.ir_base[addr].val.u64 == (uintptr_t)zend_jit_trace_get_exit_addr(t->exit_count - 1)) {
-					exit_point = t->exit_count - 1;
-					if (t->exit_info[exit_point].flags & ZEND_JIT_EXIT_METHOD_CALL) {
-						n = 2;
-					}
+		if (addr < 0) {
+			if (t->exit_count > 0
+			 && jit->ctx.ir_base[addr].val.u64 == (uintptr_t)zend_jit_trace_get_exit_addr(t->exit_count - 1)) {
+				exit_point = t->exit_count - 1;
+				if (t->exit_info[exit_point].flags & ZEND_JIT_EXIT_METHOD_CALL) {
+					n = 2;
 				}
 			}
+		}
+
+		if (stack_size || n) {
+			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
+			uint32_t snapshot_size, i;
 
 			snapshot_size = stack_size;
 			while (snapshot_size > 0) {
