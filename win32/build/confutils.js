@@ -3067,7 +3067,7 @@ function toolset_get_compiler_version()
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		if (full.match(/clang version ([\d\.]+) \((.*)\)/)) {
+		if (full.match(/clang version ([\d\.]+)(?: \((.*)\))?/)) {
 			version = RegExp.$1;
 			version = version.replace(/\./g, '');
 			version = version/100 < 1 ? version*10 : version;
@@ -3188,11 +3188,12 @@ function toolset_setup_codegen_arch()
 function toolset_setup_linker()
 {
 	var lnk = false;
+	var what = null;
 	if (VS_TOOLSET) {
 		lnk = PATH_PROG('link', null);
 	} else if (CLANG_TOOLSET) {
-		//return PATH_PROG('lld', WshShell.Environment("Process").Item("PATH"), "LINK");
-		lnk = PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
+		lnk = PATH_PROG('lld-link', WshShell.Environment("Process").Item("PATH"), "LINK");
+		what = "longversion";
 	} else if (ICC_TOOLSET) {
 		lnk = PATH_PROG('xilink', WshShell.Environment("Process").Item("PATH"), "LINK");
 	}
@@ -3201,7 +3202,7 @@ function toolset_setup_linker()
 		ERROR("Unsupported toolset");
 	}
 
-	var ver = probe_binary(lnk);
+	var ver = probe_binary(lnk, what);
 
 	var major = ver.substr(0, 2);
 	var minor = ver.substr(3, 2);
@@ -3675,7 +3676,7 @@ function get_clang_lib_dir()
 	var ret = null;
 	var ver = null;
 
-	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
+	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+)(?: \((.*)\))?/)) {
 		ver = RegExp.$1;
 	} else {
 		ERROR("Failed to determine clang lib path");
@@ -3708,7 +3709,7 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 
 	var ver = null;
 
-	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
+	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+)(?: \((.*)\))?/)) {
 		ver = RegExp.$1;
 	} else {
 		ERROR("Failed to determine clang lib path");
