@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.8
 
+- Opcache:
+  . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
+
 - PCRE:
   . Fix preg_replace_callback_array() pattern validation. (ilutov)
 
