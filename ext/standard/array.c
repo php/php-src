@@ -5782,8 +5782,10 @@ PHP_FUNCTION(array_multisort)
 	 * of the input arrays + 1. The last column is UNDEF to indicate the end
 	 * of the row. It also stores the original position for stable sorting. */
 	indirect = (Bucket **)safe_emalloc(array_size, sizeof(Bucket *), 0);
+	/* Move num_arrays multiplication to size because it's essentially impossible to overflow. */
+	Bucket *indirects = (Bucket *)safe_emalloc(array_size, sizeof(Bucket) * (num_arrays + 1), 0);
 	for (i = 0; i < array_size; i++) {
-		indirect[i] = (Bucket *)safe_emalloc((num_arrays + 1), sizeof(Bucket), 0);
+		indirect[i] = indirects + (i * (num_arrays + 1));
 	}
 	for (i = 0; i < num_arrays; i++) {
 		k = 0;
@@ -5847,9 +5849,7 @@ PHP_FUNCTION(array_multisort)
 	RETVAL_TRUE;
 
 clean_up:
-	for (i = 0; i < array_size; i++) {
-		efree(indirect[i]);
-	}
+	efree(indirects);
 	efree(indirect);
 	efree(func);
 	efree(arrays);
