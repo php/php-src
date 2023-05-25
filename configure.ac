@@ -365,6 +365,16 @@ if test "$ac_cv_func_dlopen" = "yes"; then
 fi
 AC_CHECK_LIB(m, sin)
 
+case $host_alias in
+  riscv64*)
+    AC_CHECK_LIB(atomic, __atomic_exchange_1, [
+      PHP_ADD_LIBRARY(atomic)
+    ], [
+      AC_MSG_ERROR([Problem with enabling atomic. Please check config.log for details.])
+    ])
+    ;;
+esac
+
 dnl Check for inet_aton in -lc, -lbind and -lresolv.
 PHP_CHECK_FUNC(inet_aton, resolv, bind)
 
