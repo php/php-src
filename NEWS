@@ -12,7 +12,7 @@ PHP                                                                        NEWS
   . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
   . Fix exception handling in array_multisort(). (ilutov)
 
-01 Jun 2023, PHP 8.2.7
+08 Jun 2023, PHP 8.2.7
 
 - Core:
   . Fixed bug GH-11152 (Unable to alias namespaces containing reserved class
