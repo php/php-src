@@ -866,14 +866,23 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 
 		if (bb->flags & ZEND_BB_LOOP_HEADER) {
 			zend_ssa_phi *phi = ssa->blocks[b].phis;
+			zend_ssa_phi *pi = NULL;
 
 			var = tssa->vars[ssa_var].var;
 			while (phi) {
 				if (ssa->vars[phi->ssa_var].var == var) {
-					src = phi->ssa_var;
-					goto copy_info;
+					if (phi->pi >= 0) {
+						pi = phi;
+					} else {
+						src = phi->ssa_var;
+						goto copy_info;
+					}
 				}
 				phi = phi->next;
+			}
+			if (pi) {
+				src = pi->ssa_var;
+				goto copy_info;
 			}
 
 			while (bb->idom >= 0) {
@@ -895,12 +904,21 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 				}
 
 				phi = ssa->blocks[b].phis;
+				zend_ssa_phi *pi = NULL;
 				while (phi) {
 					if (ssa->vars[phi->ssa_var].var == var) {
-						src = phi->ssa_var;
-						goto copy_info;
+						if (phi->pi >= 0) {
+							pi = phi;
+						} else {
+							src = phi->ssa_var;
+							goto copy_info;
+						}
 					}
 					phi = phi->next;
+				}
+				if (pi) {
+					src = pi->ssa_var;
+					goto copy_info;
 				}
 			}
 		}
@@ -5735,7 +5753,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_addr = OP1_REG_ADDR();
 						if (ra
 						 && ssa_op->op1_def >= 0
-						 && !ssa->vars[ssa_op->op1_def].no_val) {
+						 && (!ssa->vars[ssa_op->op1_def].no_val
+						  || STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) == IS_UNKNOWN
+						  || STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) >= IS_STRING)) {
 							op1_def_addr = OP1_DEF_REG_ADDR();
 						} else {
 							op1_def_addr = op1_addr;
