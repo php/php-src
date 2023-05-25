@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
+  . Access violation on smm_shared_globals with ALLOC_FALLBACK. (KoudelkaB)
 
 - PCRE:
   . Fix preg_replace_callback_array() pattern validation. (ilutov)
