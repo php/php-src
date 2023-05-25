@@ -4100,7 +4100,16 @@ static int zend_jit_store_var_if_necessary_ex(zend_jit_ctx *jit, int var, zend_j
 		if ((info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) ==
 		    (old_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF))) {
 			if (Z_MODE(old) != IS_REG || Z_LOAD(old) || Z_STORE(old)) {
-				set_type = 0;
+				if (JIT_G(current_frame)) {
+					uint32_t mem_type = STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var));
+
+					if (mem_type != IS_UNKNOWN
+					 && (info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == (1 << mem_type)) {
+						set_type = 0;
+					}
+				} else {
+					set_type = 0;
+				}
 			}
 		}
 		return zend_jit_spill_store(jit, src, dst, info, set_type);
@@ -6997,7 +7006,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 				jit_set_Z_TYPE_INFO(jit, res_addr, set_bool_not ? IS_TRUE : IS_FALSE);
 			}
 			if (exit_addr) {
-				if (branch_opcode == ZEND_JMPNZ) {
+				if (branch_opcode == ZEND_JMPNZ || branch_opcode == ZEND_JMPNZ_EX) {
 					ir_END_list(end_inputs);
 				} else {
 					jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
@@ -7022,7 +7031,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 				jit_set_Z_TYPE_INFO(jit, res_addr, set_bool_not ? IS_FALSE : IS_TRUE);
 			}
 			if (exit_addr) {
-				if (branch_opcode == ZEND_JMPZ) {
+				if (branch_opcode == ZEND_JMPZ || branch_opcode == ZEND_JMPZ_EX) {
 					ir_END_list(end_inputs);
 				} else {
 					jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
