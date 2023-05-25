@@ -356,13 +356,12 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	xmlNode *fragment;
 	xmlDoc *doc;
 
-	int stricterror = dom_get_strict_error(context->document);
-
 	/* Spec step 1 */
 	parentNode = prevsib->parent;
 	/* Spec step 2 */
 	if (!parentNode) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		int stricterror = dom_get_strict_error(context->document);
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 		return;
 	}
 
@@ -408,8 +407,12 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 
 	/* Spec step 1 */
 	parentNode = nextsib->parent;
-
-	/* Spec step 2 appears to be handled by dom_zvals_to_fragment */
+	/* Spec step 2 */
+	if (!parentNode) {
+		int stricterror = dom_get_strict_error(context->document);
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return;
+	}
 
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_previous_sibling = nextsib->prev;
