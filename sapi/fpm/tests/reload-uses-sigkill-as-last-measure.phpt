@@ -35,7 +35,7 @@ pcntl_sigprocmask(SIG_BLOCK, [SIGQUIT, SIGTERM]);
 EOT;
 
 $tester = new FPM\Tester($cfg, $code);
-$tester->start();
+$tester->start(extensions: ['pcntl']);
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
 $tester->signal('USR2');
