@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9cc9c0954bd7032d363ce9a531be621274b9a7e2 */
+ * Stub hash: 0a8a7869724ec5317b7c9d06f1a4251adf64a763 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3422,7 +3422,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(uniqid, arginfo_uniqid)
 #endif
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(parse_url, arginfo_parse_url)
+	ZEND_FE(parse_url, arginfo_parse_url)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(urlencode, arginfo_urlencode)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(urldecode, arginfo_urldecode)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(rawurlencode, arginfo_rawurlencode)

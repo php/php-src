@@ -52,6 +52,7 @@ $S390X_CONFIG \
 --enable-pcntl \
 --with-readline \
 --enable-mbstring \
+--enable-url \
 --with-curl \
 --with-gettext \
 --enable-sockets \

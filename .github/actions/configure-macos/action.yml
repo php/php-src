@@ -47,6 +47,7 @@ runs:
           --enable-pcntl \
           --with-readline=/usr/local/opt/readline \
           --enable-mbstring \
+          --enable-url \
           --with-curl \
           --with-gettext=/usr/local/opt/gettext \
           --enable-sockets \
