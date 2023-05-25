@@ -7175,8 +7175,6 @@ static void zend_jit_stop_hot_trace_counters(zend_op_array *op_array)
 	uint32_t i;
 
 	jit_extension = (zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
-	zend_shared_alloc_lock();
-	SHM_UNPROTECT();
 	for (i = 0; i < op_array->last; i++) {
 		/* Opline with Jit-ed code handler is skipped. */
 		if (jit_extension->trace_info[i].trace_flags &
@@ -7188,8 +7186,6 @@ static void zend_jit_stop_hot_trace_counters(zend_op_array *op_array)
 			op_array->opcodes[i].handler = jit_extension->trace_info[i].orig_handler;
 		}
 	}
-	SHM_PROTECT();
-	zend_shared_alloc_unlock();
 }
 
 /* Get the tracing op_array. */
@@ -7228,6 +7224,9 @@ static void zend_jit_stop_persistent_script(zend_persistent_script *script)
 /* Get all scripts which are accelerated by JIT */
 static void zend_jit_stop_counter_handlers(void)
 {
+	zend_shared_alloc_lock();
+	/* mprotect has an extreme overhead, avoid calls to it for every function. */
+	SHM_UNPROTECT();
 	for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
 		zend_accel_hash_entry *cache_entry;
 		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
@@ -7237,6 +7236,8 @@ static void zend_jit_stop_counter_handlers(void)
 			zend_jit_stop_persistent_script(script);
 		}
 	}
+	SHM_PROTECT();
+	zend_shared_alloc_unlock();
 }
 
 static void zend_jit_blacklist_root_trace(const zend_op *opline, size_t offset)
