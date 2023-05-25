@@ -211,6 +211,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	}
 #if ENABLE_FILE_CACHE_FALLBACK
 	if (ALLOC_FALLBACK == res) {
+		smm_shared_globals = NULL;
 		return ALLOC_FALLBACK;
 	}
 #endif
@@ -236,6 +237,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	}
 #if ENABLE_FILE_CACHE_FALLBACK
 	if (ALLOC_FALLBACK == res) {
+		smm_shared_globals = NULL;
 		return ALLOC_FALLBACK;
 	}
 #endif
