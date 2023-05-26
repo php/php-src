@@ -207,13 +207,8 @@ typedef struct {
 #endif
 } scc_recursion_entry;
 
-static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa, int var, int *index, int *dfs, int *root, zend_worklist_stack *stack) /* {{{ */
+static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa, int var, int *index, int *dfs, int *root, zend_worklist_stack *stack, scc_recursion_entry *recursion_stack) /* {{{ */
 {
-	ALLOCA_FLAG(recursion_stack_use_heap);
-	/* Manual recursion stack that tracks to which variable the recursion should "return" to.
-	 * The number of elements cannot be greater than the variable count because every time a variable is visited it is marked and won't be visited again.
-	 * Each recursion consists of three/four stack elements: (variable, current use chain iterator, current phi node iterator, optionally current sym use chain iterator). */
-	scc_recursion_entry *recursion_stack = do_alloca(sizeof(scc_recursion_entry) * ssa->vars_count, recursion_stack_use_heap);
 	uint32_t recursion_stack_idx = 1;
 
 	dfs[var] = *index;
@@ -261,8 +256,6 @@ recurse:;
 			zend_worklist_stack_push(stack, var);
 		}
 	} while (recursion_stack_idx > 0);
-
-	free_alloca(recursion_stack, recursion_stack_use_heap);
 }
 /* }}} */
 
@@ -274,6 +267,12 @@ ZEND_API int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /*
 	ALLOCA_FLAG(dfs_use_heap)
 	ALLOCA_FLAG(root_use_heap)
 	ALLOCA_FLAG(stack_use_heap)
+	ALLOCA_FLAG(recursion_stack_use_heap)
+
+	/* Manual recursion stack that tracks to which variable the recursion should "return" to.
+	 * The number of elements cannot be greater than the variable count because every time a variable is visited it is marked and won't be visited again.
+	 * Each recursion consists of three/four stack elements: (variable, current use chain iterator, current phi node iterator, optionally current sym use chain iterator). */
+	scc_recursion_entry *recursion_stack = do_alloca(sizeof(scc_recursion_entry) * ssa->vars_count, recursion_stack_use_heap);
 
 	dfs = do_alloca(sizeof(int) * ssa->vars_count, dfs_use_heap);
 	memset(dfs, -1, sizeof(int) * ssa->vars_count);
@@ -283,7 +282,7 @@ ZEND_API int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /*
 	/* Find SCCs using Tarjan's algorithm. */
 	for (j = 0; j < ssa->vars_count; j++) {
 		if (!ssa->vars[j].no_val && dfs[j] < 0) {
-			zend_ssa_check_scc_var(op_array, ssa, j, &index, dfs, root, &stack);
+			zend_ssa_check_scc_var(op_array, ssa, j, &index, dfs, root, &stack, recursion_stack);
 		}
 	}
 
@@ -307,6 +306,7 @@ ZEND_API int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /*
 	ZEND_WORKLIST_STACK_FREE_ALLOCA(&stack, stack_use_heap);
 	free_alloca(root, root_use_heap);
 	free_alloca(dfs, dfs_use_heap);
+	free_alloca(recursion_stack, recursion_stack_use_heap);
 
 	return SUCCESS;
 }
