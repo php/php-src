@@ -168,15 +168,15 @@
 	} while (0)
 
 
-#define FOR_EACH_VAR_USAGE_EX(_var, MACRO) \
+#define FOR_EACH_VAR_USAGE_EX(_var, _use, _p, MACRO) \
 	do { \
-		while (use >= 0) { \
-			FOR_EACH_DEFINED_VAR(use, MACRO); \
-			use = zend_ssa_next_use(ssa->ops, _var, use); \
+		while (_use >= 0) { \
+			FOR_EACH_DEFINED_VAR(_use, MACRO); \
+			_use = zend_ssa_next_use(ssa->ops, _var, _use); \
 		} \
-		while (p) { \
-			MACRO(p->ssa_var); \
-			p = zend_ssa_next_use_phi(ssa, _var, p); \
+		while (_p) { \
+			MACRO(_p->ssa_var); \
+			_p = zend_ssa_next_use_phi(ssa, _var, _p); \
 		} \
 	} while (0)
 
@@ -184,7 +184,7 @@
 	do { \
 		int use = ssa->vars[_var].use_chain; \
 		zend_ssa_phi *p = ssa->vars[_var].phi_use_chain; \
-		FOR_EACH_VAR_USAGE_EX(_var, MACRO); \
+		FOR_EACH_VAR_USAGE_EX(_var, use, p, MACRO); \
 	} while (0)
 
 static inline bool add_will_overflow(zend_long a, zend_long b) {
@@ -236,7 +236,7 @@ static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa,
 #endif
 
 recurse:;
-		FOR_EACH_VAR_USAGE_EX(var, CHECK_SCC_VAR);
+		FOR_EACH_VAR_USAGE_EX(var, use, p, CHECK_SCC_VAR);
 
 #ifdef SYM_RANGE
 		/* Process symbolic control-flow constraints */
