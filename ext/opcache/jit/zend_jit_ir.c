@@ -6152,8 +6152,8 @@ static int zend_jit_assign(zend_jit_ctx  *jit,
 		} else if ((op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 			&& Z_MODE(op1_use_addr) == IS_MEM_ZVAL
 			&& Z_REG(op1_use_addr) == ZREG_FP
-			&& EX_VAR_TO_NUM(Z_OFFSET(op1_use_addr)) < jit->current_op_array->num_args) {
-			/* We have to update type because argument may be captured by exception backtrace */
+			&& EX_VAR_TO_NUM(Z_OFFSET(op1_use_addr)) < jit->current_op_array->last_var) {
+			/* We have to update type of CV because it may be captured by exception backtrace or released on RETURN */
 			if ((op1_def_info & MAY_BE_ANY) == MAY_BE_LONG) {
 				jit_set_Z_TYPE_INFO(jit, op1_use_addr, IS_LONG);
 			} else if ((op1_def_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
