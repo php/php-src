@@ -10597,7 +10597,7 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 }
 /* }}} */
 
-static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
+static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
 	zval result;
@@ -10606,25 +10606,10 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 		return;
 	}
 
-	/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
-	if (ast->kind == ZEND_AST_DIM
-	 && (ast->attr & ZEND_DIM_IS)
-	 && ast->child[0]->kind == ZEND_AST_DIM) {
-		ast->child[0]->attr |= ZEND_DIM_IS;
-	}
-
-	/* We don't want to evaluate the class name of ZEND_AST_CLASS_NAME nodes. We need to be able to
-	 * differenciate between literal class names and expressions that evaluate to strings. Strings
-	 * are not actually allowed in ::class expressions.
-	 * 
-	 * ZEND_AST_COALESCE and ZEND_AST_CONDITIONAL will manually evaluate only the children for the
-	 * taken paths. */
-	if (ast->kind != ZEND_AST_CLASS_NAME && ast->kind != ZEND_AST_COALESCE && ast->kind != ZEND_AST_CONDITIONAL) {
-		zend_ast_apply(ast, zend_eval_const_expr_inner, ctx);
-	}
-
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -10637,6 +10622,8 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 			break;
 		case ZEND_AST_GREATER:
 		case ZEND_AST_GREATER_EQUAL:
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -10648,6 +10635,8 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 		case ZEND_AST_OR:
 		{
 			bool child0_is_true, child1_is_true;
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -10671,6 +10660,7 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 			break;
 		}
 		case ZEND_AST_UNARY_OP:
+			zend_eval_const_expr(&ast->child[0]);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -10681,6 +10671,7 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 			break;
 		case ZEND_AST_UNARY_PLUS:
 		case ZEND_AST_UNARY_MINUS:
+			zend_eval_const_expr(&ast->child[0]);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -10751,6 +10742,13 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 				zend_error(E_COMPILE_ERROR, "Array and string offset access syntax with curly braces is no longer supported");
 			}
 
+			/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
+			if ((ast->attr & ZEND_DIM_IS) && ast->child[0]->kind == ZEND_AST_DIM) {
+				ast->child[0]->attr |= ZEND_DIM_IS;
+			}
+
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
 			if (ast->child[0]->kind != ZEND_AST_ZVAL || ast->child[1]->kind != ZEND_AST_ZVAL) {
 				return;
 			}
@@ -10828,6 +10826,9 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 			zend_ast *name_ast;
 			zend_string *resolved_name;
 
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
+
 			if (UNEXPECTED(ast->child[1]->kind != ZEND_AST_ZVAL
 				|| Z_TYPE_P(zend_ast_get_zval(ast->child[1])) != IS_STRING)) {
 				return;
@@ -10857,6 +10858,33 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 			}
 			break;
 		}
+		// TODO: We should probably use zend_ast_apply to recursively walk nodes without
+		// special handling. It is required that all nodes that are part of a const expr
+		// are visited. Probably we should be distinguishing evaluation of const expr and
+		// normal exprs here.
+		case ZEND_AST_ARG_LIST:
+		{
+			zend_ast_list *list = zend_ast_get_list(ast);
+			for (uint32_t i = 0; i < list->children; i++) {
+				zend_eval_const_expr(&list->child[i]);
+			}
+			return;
+		}
+		case ZEND_AST_NEW:
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
+			return;
+		case ZEND_AST_NAMED_ARG:
+			zend_eval_const_expr(&ast->child[1]);
+			return;
+		case ZEND_AST_CONST_ENUM_INIT:
+			zend_eval_const_expr(&ast->child[2]);
+			return;
+		case ZEND_AST_PROP:
+		case ZEND_AST_NULLSAFE_PROP:
+			zend_eval_const_expr(&ast->child[0]);
+			zend_eval_const_expr(&ast->child[1]);
+			return;
 		default:
 			return;
 	}
@@ -10865,9 +10893,3 @@ static void zend_eval_const_expr_inner(zend_ast **ast_ptr, void *ctx) /* {{{ */
 	*ast_ptr = zend_ast_create_zval(&result);
 }
 /* }}} */
-
-
-static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
-{
-	zend_eval_const_expr_inner(ast_ptr, NULL);
-}
