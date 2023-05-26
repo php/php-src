@@ -2747,7 +2747,7 @@ COMMAND $cmd
 
         $wanted_re = null;
     }
-    if (!$passed && !$retried && $retriable && error_may_be_retried($output)) {
+    if (!$passed && !$retried && $retriable && error_may_be_retried($test, $output)) {
         $retried = true;
         goto retry;
     }
@@ -2875,9 +2875,10 @@ SH;
     return $restype[0] . 'ED';
 }
 
-function error_may_be_retried(string $output): bool
+function error_may_be_retried(TestFile $test, string $output): bool
 {
-    return preg_match('((timed out)|(connection refused)|(404: page not found)|(address already in use)|(mailbox already exists))i', $output) === 1;
+    return preg_match('((timed out)|(connection refused)|(404: page not found)|(address already in use)|(mailbox already exists))i', $output) === 1
+        || $test->hasSection('FLAKY');
 }
 
 /**
@@ -3861,6 +3862,7 @@ class TestFile
         'INI', 'ENV', 'EXTENSIONS',
         'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
         'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
+        'FLAKY',
     ];
 
     /**
