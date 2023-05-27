@@ -2834,7 +2834,7 @@ SH;
 
 function error_may_be_retried(string $output): bool
 {
-    return preg_match('((timed out)|(connection refused))i', $output) === 1;
+    return preg_match('((timed out)|(connection refused)|(404: page not found)|(address already in use)|(mailbox already exists))i', $output) === 1;
 }
 
 function expectf_to_regex(?string $wanted): string
