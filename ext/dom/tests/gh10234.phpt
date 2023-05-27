@@ -30,6 +30,14 @@ var_dump($document->saveHTML());
 $document->documentElement->textContent = '<b>hi</b>';
 var_dump($document->documentElement->textContent);
 var_dump($document->saveHTML());
+
+$document->documentElement->textContent = 'quote "test"';
+var_dump($document->documentElement->textContent);
+var_dump($document->saveHTML());
+
+$document->documentElement->textContent = "quote 'test'";
+var_dump($document->documentElement->textContent);
+var_dump($document->saveHTML());
 ?>
 --EXPECT--
 string(38) "<element attribute="value"></element>
@@ -49,4 +57,10 @@ string(71) "<element attribute="&lt;b&gt;hi&lt;/b&gt;">hello &amp; world</elemen
 "
 string(9) "<b>hi</b>"
 string(75) "<element attribute="&lt;b&gt;hi&lt;/b&gt;">&lt;b&gt;hi&lt;/b&gt;</element>
+"
+string(12) "quote "test""
+string(66) "<element attribute="&lt;b&gt;hi&lt;/b&gt;">quote "test"</element>
+"
+string(12) "quote 'test'"
+string(66) "<element attribute="&lt;b&gt;hi&lt;/b&gt;">quote 'test'</element>
 "
