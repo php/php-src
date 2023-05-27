@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.8
 
+- Core:
+  . Fixed build for the riscv64 architecture/GCC 12. (Daniil Gentili)
+
 - DOM:
   . Fixed bugs GH-11288 and GH-11289 and GH-11290 and GH-9142 (DOMExceptions
     and segfaults with replaceWith). (nielsdos)
