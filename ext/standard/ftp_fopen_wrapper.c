@@ -490,7 +490,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	} else if (read_write == 2) {
 		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
 		if (context && (tmpzval = php_stream_context_get_option(context, "ftp", "overwrite")) != NULL) {
-			allow_overwrite = Z_LVAL_P(tmpzval) ? 1 : 0;
+			allow_overwrite = zend_is_true(tmpzval);
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
