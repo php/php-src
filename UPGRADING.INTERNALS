@@ -116,6 +116,11 @@ PHP 8.3 INTERNALS UPGRADE NOTES
    - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
      There are no functional changes.
 
+ f. ext/dom
+   - A new function dom_get_doc_props_read_only() is added to gather the document
+     properties in a read-only way. This function avoids allocation when there are
+     no document properties changed yet.
+
 ========================
 4. OpCode changes
 ========================

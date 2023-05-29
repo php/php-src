@@ -297,7 +297,7 @@ readonly=no
 int dom_document_format_output_read(dom_object *obj, zval *retval)
 {
 	if (obj->document) {
-		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 		ZVAL_BOOL(retval, doc_prop->formatoutput);
 	} else {
 		ZVAL_FALSE(retval);
@@ -322,7 +322,7 @@ readonly=no
 int	dom_document_validate_on_parse_read(dom_object *obj, zval *retval)
 {
 	if (obj->document) {
-		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 		ZVAL_BOOL(retval, doc_prop->validateonparse);
 	} else {
 		ZVAL_FALSE(retval);
@@ -347,7 +347,7 @@ readonly=no
 int dom_document_resolve_externals_read(dom_object *obj, zval *retval)
 {
 	if (obj->document) {
-		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 		ZVAL_BOOL(retval, doc_prop->resolveexternals);
 	} else {
 		ZVAL_FALSE(retval);
@@ -372,7 +372,7 @@ readonly=no
 int dom_document_preserve_whitespace_read(dom_object *obj, zval *retval)
 {
 	if (obj->document) {
-		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 		ZVAL_BOOL(retval, doc_prop->preservewhitespace);
 	} else {
 		ZVAL_FALSE(retval);
@@ -397,7 +397,7 @@ readonly=no
 int dom_document_recover_read(dom_object *obj, zval *retval)
 {
 	if (obj->document) {
-		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 		ZVAL_BOOL(retval, doc_prop->recover);
 	} else {
 		ZVAL_FALSE(retval);
@@ -422,7 +422,7 @@ readonly=no
 int dom_document_substitue_entities_read(dom_object *obj, zval *retval)
 {
 	if (obj->document) {
-		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 		ZVAL_BOOL(retval, doc_prop->substituteentities);
 	} else {
 		ZVAL_FALSE(retval);
@@ -1176,7 +1176,6 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 {
 	xmlDocPtr ret;
 	xmlParserCtxtPtr ctxt = NULL;
-	dom_doc_propsptr doc_props;
 	dom_object *intern;
 	php_libxml_ref_obj *document = NULL;
 	int validate, recover, resolve_externals, keep_blanks, substitute_ent;
@@ -1189,16 +1188,12 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 		document = intern->document;
 	}
 
-	doc_props = dom_get_doc_props(document);
+	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(document);
 	validate = doc_props->validateonparse;
 	resolve_externals = doc_props->resolveexternals;
 	keep_blanks = doc_props->preservewhitespace;
 	substitute_ent = doc_props->substituteentities;
 	recover = doc_props->recover;
-
-	if (document == NULL) {
-		efree(doc_props);
-	}
 
 	xmlInitParser();
 
@@ -1387,7 +1382,6 @@ PHP_METHOD(DOMDocument, save)
 	size_t file_len = 0;
 	int bytes, format, saveempty = 0;
 	dom_object *intern;
-	dom_doc_propsptr doc_props;
 	char *file;
 	zend_long options = 0;
 
@@ -1405,7 +1399,7 @@ PHP_METHOD(DOMDocument, save)
 
 	/* encoding handled by property on doc */
 
-	doc_props = dom_get_doc_props(intern->document);
+	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	format = doc_props->formatoutput;
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
 		saveempty = xmlSaveNoEmptyTags;
@@ -1433,7 +1427,6 @@ PHP_METHOD(DOMDocument, saveXML)
 	xmlBufferPtr buf;
 	xmlChar *mem;
 	dom_object *intern, *nodeobj;
-	dom_doc_propsptr doc_props;
 	int size, format, saveempty = 0;
 	zend_long options = 0;
 
@@ -1444,7 +1437,7 @@ PHP_METHOD(DOMDocument, saveXML)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	doc_props = dom_get_doc_props(intern->document);
+	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	format = doc_props->formatoutput;
 
 	if (nodep != NULL) {
@@ -1928,7 +1921,6 @@ PHP_METHOD(DOMDocument, saveHTMLFile)
 	size_t file_len;
 	int bytes, format;
 	dom_object *intern;
-	dom_doc_propsptr doc_props;
 	char *file;
 	const char *encoding;
 
@@ -1947,7 +1939,7 @@ PHP_METHOD(DOMDocument, saveHTMLFile)
 
 	encoding = (const char *) htmlGetMetaEncoding(docp);
 
-	doc_props = dom_get_doc_props(intern->document);
+	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	format = doc_props->formatoutput;
 	bytes = htmlSaveFileFormat(file, docp, encoding, format);
 
@@ -1969,7 +1961,6 @@ PHP_METHOD(DOMDocument, saveHTML)
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
 	int format;
-	dom_doc_propsptr doc_props;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
@@ -1980,7 +1971,7 @@ PHP_METHOD(DOMDocument, saveHTML)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	doc_props = dom_get_doc_props(intern->document);
+	libxml_doc_props const* doc_props = dom_get_doc_props(intern->document);
 	format = doc_props->formatoutput;
 
 	if (nodep != NULL) {
