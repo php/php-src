@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
   . Access violation on smm_shared_globals with ALLOC_FALLBACK. (KoudelkaB)
 
+- SPL:
+  . Fixed bug GH-11338 (SplFileInfo empty getBasename with more than one
+    slash). (nielsdos)
+
 - Standard:
   . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
   . Fix exception handling in array_multisort(). (ilutov)
