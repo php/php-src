@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bugs GH-11288 and GH-11289 and GH-11290 and GH-9142 (DOMExceptions
     and segfaults with replaceWith). (nielsdos)
+  . Fixed bug GH-10234 (Setting DOMAttr::textContent results in an empty
+    attribute value). (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
