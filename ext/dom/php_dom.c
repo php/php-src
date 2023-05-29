@@ -1270,9 +1270,9 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 {
 	xmlNodePtr ret = NULL;
 
-	/* Note: The spec says that ns == NULL should change the namespace to the empty string.
-	 *       This is already done at the PHP_FUNCTIONs that create this iterator.
-	 *       The null case here actually means we want to match any namespace instead. */
+	/* Note: The spec says that ns == '' must be transformed to ns == NULL. In other words, they are equivalent.
+	 *       PHP however does not do this and internally uses the empty string everywhere when the user provides ns == NULL.
+	 *       This is because for PHP ns == NULL has another meaning: "match every namespace" instead of "match the empty namespace". */
 	bool ns_match_any = ns == NULL || (ns[0] == '*' && ns[1] == '\0');
 
 	while (nodep != NULL && (*cur <= index || index == -1)) {
