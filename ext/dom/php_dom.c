@@ -1270,10 +1270,15 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 {
 	xmlNodePtr ret = NULL;
 
+	/* Note: The spec says that ns == NULL should change the namespace to the empty string.
+	 *       This is already done at the PHP_FUNCTIONs that create this iterator.
+	 *       The null case here actually means we want to match any namespace instead. */
+	bool ns_match_any = ns == NULL || (ns[0] == '*' && ns[1] == '\0');
+
 	while (nodep != NULL && (*cur <= index || index == -1)) {
 		if (nodep->type == XML_ELEMENT_NODE) {
 			if (xmlStrEqual(nodep->name, (xmlChar *)local) || xmlStrEqual((xmlChar *)"*", (xmlChar *)local)) {
-				if (ns == NULL || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && (xmlStrEqual(nodep->ns->href, (xmlChar *)ns) || xmlStrEqual((xmlChar *)"*", (xmlChar *)ns)))) {
+				if (ns_match_any || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
 					if (*cur == index) {
 						ret = nodep;
 						break;
