@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-10234 (Setting DOMAttr::textContent results in an empty
     attribute value). (nielsdos)
   . Fix return value in stub file for DOMNodeList::item. (divinity76)
+  . Fix spec compliance error with '*' namespace for
+    DOMDocument::getElementsByTagNameNS. (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
