@@ -255,10 +255,33 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 	fragment->last = NULL;
 }
 
+static zend_result dom_hierarchy_node_list(xmlNodePtr parentNode, zval *nodes, int nodesc)
+{
+	for (int i = 0; i < nodesc; i++) {
+		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
+			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
+
+			if (instanceof_function(ce, dom_node_class_entry)) {
+				if (dom_hierarchy(parentNode, dom_object_get_node(Z_DOMOBJ_P(nodes + i))) != SUCCESS) {
+					return FAILURE;
+				}
+			}
+		}
+	}
+
+	return SUCCESS;
+}
+
 void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 {
 	xmlNode *parentNode = dom_object_get_node(context);
 	xmlNodePtr newchild, prevsib;
+
+	if (UNEXPECTED(dom_hierarchy_node_list(parentNode, nodes, nodesc) != SUCCESS)) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(context->document));
+		return;
+	}
+
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
 	if (fragment == NULL) {
@@ -293,6 +316,11 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 
 	if (parentNode->children == NULL) {
 		dom_parent_node_append(context, nodes, nodesc);
+		return;
+	}
+
+	if (UNEXPECTED(dom_hierarchy_node_list(parentNode, nodes, nodesc) != SUCCESS)) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(context->document));
 		return;
 	}
 
