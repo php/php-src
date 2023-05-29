@@ -1240,7 +1240,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 	while (nodep != NULL && (*cur <= index || index == -1)) {
 		if (nodep->type == XML_ELEMENT_NODE) {
 			if (local_match_any || xmlStrEqual(nodep->name, (xmlChar *)local)) {
-				if (ns_match_any || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
+				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
 					if (*cur == index) {
 						ret = nodep;
 						break;
