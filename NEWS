@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
   . Fix exception handling in array_multisort(). (ilutov)
 
+- MBstring
+  . Fix mb_strlen is wrong length for CP932 when 0x80. (youkidearitai)
+
 08 Jun 2023, PHP 8.1.20
 
 - Core:
