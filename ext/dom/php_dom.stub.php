@@ -467,7 +467,7 @@ class DOMNodeList implements IteratorAggregate, Countable
 
     public function getIterator(): Iterator {}
 
-    /** @return DOMNode|DOMNameSpaceNode|null */
+    /** @return DOMElement|DOMNode|DOMNameSpaceNode|null */
     public function item(int $index) {}
 }
 
