@@ -769,17 +769,28 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
+	const xmlChar *xmlChars = (const xmlChar *) ZSTR_VAL(str);
+	int type = nodep->type;
+
+	/* We can't directly call xmlNodeSetContent, because it might encode the string through
+	 * xmlStringLenGetNodeList for types XML_DOCUMENT_FRAG_NODE, XML_ELEMENT_NODE, XML_ATTRIBUTE_NODE.
+	 * See tree.c:xmlNodeSetContent in libxml.
+	 * In these cases we need to use a text node to avoid the encoding.
+	 * For the other cases, we *can* rely on xmlNodeSetContent because it is either a no-op, or handles
+	 * the content without encoding. */
+	if (type == XML_DOCUMENT_FRAG_NODE || type == XML_ELEMENT_NODE || type == XML_ATTRIBUTE_NODE) {
 		if (nodep->children) {
 			node_list_unlink(nodep->children);
 			php_libxml_node_free_list((xmlNodePtr) nodep->children);
 			nodep->children = NULL;
 		}
+
+		xmlNode *textNode = xmlNewText(xmlChars);
+		xmlAddChild(nodep, textNode);
+	} else {
+		xmlNodeSetContent(nodep, xmlChars);
 	}
 
-	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
-	xmlNodeSetContent(nodep, (xmlChar *) "");
-	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
 	zend_string_release_ex(str, 0);
 
 	return SUCCESS;
