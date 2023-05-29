@@ -50,8 +50,6 @@ void zend_dump_ht(HashTable *ht)
 
 void zend_dump_const(const zval *zv)
 {
-	zend_string *escaped_string;
-
 	switch (Z_TYPE_P(zv)) {
 		case IS_NULL:
 			fprintf(stderr, " null");
@@ -68,7 +66,8 @@ void zend_dump_const(const zval *zv)
 		case IS_DOUBLE:
 			fprintf(stderr, " float(%g)", Z_DVAL_P(zv));
 			break;
-		case IS_STRING:
+		case IS_STRING:;
+			zend_string *escaped_string;
 			escaped_string = php_addcslashes(zv->value.str, "\"\\", 2);
 			fprintf(stderr, " string(\"%s\")", ZSTR_VAL(escaped_string));
 			break;
