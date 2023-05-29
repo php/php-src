@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     and segfaults with replaceWith). (nielsdos)
   . Fixed bug GH-10234 (Setting DOMAttr::textContent results in an empty
     attribute value). (nielsdos)
+  . Fix return value in stub file for DOMNodeList::item. (divinity76)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
