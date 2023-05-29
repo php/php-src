@@ -34,6 +34,7 @@
 static zend_always_inline void objmap_cache_release_cached_obj(dom_nnodemap_object *objmap)
 {
 	if (objmap->cached_obj) {
+		/* Since the DOM is a tree there can be no cycles. */
 		if (GC_DELREF(&objmap->cached_obj->std) == 0) {
 			zend_objects_store_del(&objmap->cached_obj->std);
 		}
@@ -227,7 +228,11 @@ PHP_METHOD(DOMNodeList, item)
 			DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
 			if (cache_itemnode) {
 				/* Hold additional reference for the cache, must happen before releasing the cache
-				 * because we might be the last reference holder. */
+				 * because we might be the last reference holder.
+				 * Instead of storing and copying zvals, we store the object pointer directly.
+				 * This saves us some bytes because a pointer is smaller than a zval.
+				 * This also means we have to manually refcount the objects here, and remove the reference count
+				 * in reset_objmap_cache() and the destructor. */
 				dom_object *cached_obj = Z_DOMOBJ_P(return_value);
 				GC_ADDREF(&cached_obj->std);
 				/* If the tag is stale, all cached data is useless. Otherwise only the cached object is useless. */
