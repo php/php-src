@@ -210,7 +210,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 					curnode = curnode->next;
 				} else {
-					/* Nav the tree evey time as this is LIVE */
+					/* The collection is live, we nav the tree from the base object if we cannot
+					 * use the cache to restart from the last point. */
 					basenode = dom_object_get_node(objmap->baseobj);
 					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
 						if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
