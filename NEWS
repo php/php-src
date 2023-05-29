@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fix return value in stub file for DOMNodeList::item. (divinity76)
   . Fix spec compliance error with '*' namespace for
     DOMDocument::getElementsByTagNameNS. (nielsdos)
+  . Fix DOMElement::append() and DOMElement::prepend() hierarchy checks.
+    (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
