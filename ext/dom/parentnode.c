@@ -217,8 +217,6 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 		} else if (Z_TYPE(nodes[i]) == IS_STRING) {
 			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
 
-			xmlSetTreeDoc(newNode, documentNode);
-
 			if (!xmlAddChild(fragment, newNode)) {
 				xmlFreeNode(newNode);
 				goto hierarchy_request_err;
