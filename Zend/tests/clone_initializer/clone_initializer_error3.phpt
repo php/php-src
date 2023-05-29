@@ -11,7 +11,7 @@ class Foo
 $foo = new Foo();
 
 try {
-    $foo = clone $foo with {bar: 1};
+    $foo = clone $foo with ["bar" => 1];
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
 }

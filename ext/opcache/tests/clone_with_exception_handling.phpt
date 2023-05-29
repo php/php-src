@@ -17,7 +17,7 @@ class Foo
 $obj1 = new Foo();
 
 try {
-    clone $obj1 with {bar: []};
+    clone $obj1 with ["bar" => []];
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }

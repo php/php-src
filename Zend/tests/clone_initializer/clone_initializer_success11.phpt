@@ -11,26 +11,26 @@ class Foo
     {
         $property = "property1";
 
-        return clone $this with {$property => "value"};
+        return clone $this with [$property => "value"];
     }
 
     public function withProperty2()
     {
         $property = "string";
 
-        return clone $this with {$this->getProperty1Name() => "value"};
+        return clone $this with [$this->getProperty1Name() => "value"];
     }
 
     public function withProperty3()
     {
         $property = "property2";
 
-        return clone $this with {$property => "value"};
+        return clone $this with [$property => "value"];
     }
 
     public function withProperty4()
     {
-        return clone $this with {substr($this->getProperty1Name(), 0, 8) . "1" => "value"};
+        return clone $this with [substr($this->getProperty1Name(), 0, 8) . "1" => "value"];
     }
 
     private function getProperty1Name() {

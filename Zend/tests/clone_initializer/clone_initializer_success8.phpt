@@ -12,7 +12,7 @@ class Foo
 $foo = new Foo();
 $ref = &$foo;
 
-$bar = clone $ref with {property1: 1, property2: 2};
+$bar = clone $ref with ["property1" => 1, "property2" => 2];
 var_dump($bar);
 
 ?>

@@ -13,4 +13,4 @@ class Foo
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token ";", expecting "{" in %s on line %d
+Parse error: syntax error, unexpected token ";", expecting "[" in %s on line %d

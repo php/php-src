@@ -11,7 +11,7 @@ class Foo
     }
 }
 
-$foo = clone Foo::create() with {};
+$foo = clone Foo::create() with [];
 var_dump($foo);
 
 ?>

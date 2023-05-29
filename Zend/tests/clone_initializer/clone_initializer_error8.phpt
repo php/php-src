@@ -4,49 +4,49 @@ Test "clone with" with invalid property names
 <?php
 
 try {
-    clone new stdClass() with {$undefined => 1};
+    clone new stdClass() with [$undefined => 1];
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone new stdClass() with {$undefined => 1}; // The same as above but now using cache slots
+    clone new stdClass() with [$undefined => 1]; // The same as above but now using cache slots
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone new stdClass() with {null => 1};
+    clone new stdClass() with [null => 1];
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone new stdClass() with {null => 1}; // The same as above but now using cache slots
+    clone new stdClass() with [null => 1]; // The same as above but now using cache slots
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone new stdClass() with {[] => 1};
+    clone new stdClass() with [[] => 1];
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone new stdClass() with {[] => 1}; // The same as above but now using cache slots
+    clone new stdClass() with [[] => 1]; // The same as above but now using cache slots
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone new stdClass() with {1 => 1};
+    clone new stdClass() with [1 => 1];
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone new stdClass() with {1 => 1}; // The same as above but now using cache slots
+    clone new stdClass() with [1 => 1]; // The same as above but now using cache slots
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }

@@ -13,13 +13,13 @@ try {
 }
 
 try {
-    assert(clone new stdClass() with {} === null);
+    assert(clone new stdClass() with [] === null);
 } catch (AssertionError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    assert(clone new stdClass() with {foo: 1, bar: "abc"} === null);
+    assert(clone new stdClass() with ["foo" => 1, "bar" => "abc"] === null);
 } catch (AssertionError $e) {
     echo $e->getMessage() . "\n";
 }
@@ -27,5 +27,5 @@ try {
 ?>
 --EXPECT--
 assert(clone new stdClass() === null)
-assert(clone new stdClass() with {} === null)
-assert(clone new stdClass() with {foo: 1, bar: 'abc'} === null)
+assert(clone new stdClass() with [] === null)
+assert(clone new stdClass() with ['foo' => 1, 'bar' => 'abc'] === null)

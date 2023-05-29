@@ -11,10 +11,10 @@ class Foo
 
     public function with()
     {
-        return clone $this with {
-            bar: 1,
-            bar: 2,
-        };
+        return clone $this with [
+            "bar" => 1,
+            "bar" => 2,
+        ];
     }
 }
 

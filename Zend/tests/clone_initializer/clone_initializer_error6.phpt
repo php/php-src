@@ -17,13 +17,13 @@ function returnFoo() {
 }
 
 try {
-    clone returnFoo() with {bar: new stdClass()};
+    clone returnFoo() with ["bar" => new stdClass()];
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone returnFoo() with {bar: new stdClass()}; // The same as above but now using cache slots
+    clone returnFoo() with ["bar" => new stdClass()]; // The same as above but now using cache slots
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }

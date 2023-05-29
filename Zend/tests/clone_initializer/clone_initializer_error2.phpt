@@ -7,7 +7,7 @@ class Foo
 {
     public function withProperties()
     {
-        return clone $this with {1: "value"};
+        return clone $this with [1: "value"];
     }
 }
 

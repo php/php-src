@@ -10,8 +10,8 @@ class Foo
 }
 
 $obj1 = new Foo();
-$obj2 = clone $obj1 with {bar: new stdClass(), baz: strpos("abc", "b")};
-$obj3 = clone $obj2 with {bar: new stdClass(), baz: ["abc", "def"]}; // The same as above but now using cache slots
+$obj2 = clone $obj1 with ["bar" => new stdClass(), "baz" => strpos("abc", "b")];
+$obj3 = clone $obj2 with ["bar" => new stdClass(), "baz" => ["abc", "def"]]; // The same as above but now using cache slots
 
 var_dump($obj1);
 var_dump($obj2);

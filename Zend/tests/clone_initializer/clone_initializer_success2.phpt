@@ -7,10 +7,10 @@ class Foo
 {
     public function withProperties($property1, $property2)
     {
-        return clone $this with {
-            property1: $property1,
-            property2: $property2,
-        };
+        return clone $this with [
+            "property1" => $property1,
+            "property2" => $property2,
+        ];
     }
 }
 

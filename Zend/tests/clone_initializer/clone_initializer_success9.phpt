@@ -12,10 +12,10 @@ class Foo
 
     public function with(int $bar, stdClass $baz)
     {
-        return clone $this with {
-            bar: $bar,
-            baz: $baz,
-        };
+        return clone $this with [
+            "bar" => $bar,
+            "baz" => $baz,
+        ];
     }
 }
 

@@ -11,9 +11,9 @@ class Foo
 
     public function with()
     {
-        return clone $this with {
-            bar: 1,
-        };
+        return clone $this with [
+            "bar" => 1,
+        ];
     }
 
     public function assign()

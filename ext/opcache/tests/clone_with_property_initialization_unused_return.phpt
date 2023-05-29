@@ -9,7 +9,7 @@ opcache.opt_debug_level=0x20000
 --FILE--
 <?php
 
-clone new stdClass() with {x: 1, y: 2, z: 3};
+clone new stdClass() with ["x" => 1, "y" => 2, "z" => 3];
 
 ?>
 ===DONE===

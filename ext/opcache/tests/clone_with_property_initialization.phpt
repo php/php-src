@@ -12,7 +12,7 @@ opcache.opt_debug_level=0x20000
 function test() {
     $obj = new stdClass();
 
-    return clone $obj with {getPropertyName("a") => 2, b: new stdClass()};
+    return clone $obj with [getPropertyName("a") => 2, "b" => new stdClass()];
 }
 
 function getPropertyName($prop) {

@@ -1608,8 +1608,8 @@ clone:
 	|	T_CLONE expr T_WITH clone_property_initializer_list { $$ = zend_ast_create(ZEND_AST_CLONE, $2, $4); }
 
 clone_property_initializer_list:
-		'{' '}'	{ $$ = zend_ast_create_list(0, ZEND_AST_PROPERTY_INITIALIZER_LIST); }
-	|	'{' non_empty_clone_property_initializer_list possible_comma '}' { $$ = $2; }
+		'[' ']'	{ $$ = zend_ast_create_list(0, ZEND_AST_PROPERTY_INITIALIZER_LIST); }
+	|	'[' non_empty_clone_property_initializer_list possible_comma ']' { $$ = $2; }
 ;
 
 non_empty_clone_property_initializer_list:
@@ -1618,8 +1618,7 @@ non_empty_clone_property_initializer_list:
 ;
 
 clone_property_initializer_expr:
-		identifier ':' expr { $$ = zend_ast_create(ZEND_AST_INITIALIZER_EXPR, $1, $3); }
-	|	expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_INITIALIZER_EXPR, $1, $3); }
+		expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_INITIALIZER_EXPR, $1, $3); }
 ;
 
 %%

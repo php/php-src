@@ -16,10 +16,10 @@ class Foo
 
     public function with()
     {
-        return clone $this with {
+        return clone $this with [
             "bar" => 1,
             "bar" => 2,
-        };
+        ];
     }
 }
 

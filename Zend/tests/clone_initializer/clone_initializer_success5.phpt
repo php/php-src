@@ -4,8 +4,8 @@ Test that the "clone with" respects #[AllowDynamicProperties]
 <?php
 
 $obj1 = new stdClass();
-$obj2 = clone $obj1 with {foo: 1, bar: ""};
-$obj3 = clone $obj1 with {foo: 2, bar: []};
+$obj2 = clone $obj1 with ["foo" => 1, "bar" => ""];
+$obj3 = clone $obj1 with ["foo" => 2, "bar" => []];
 
 var_dump($obj1);
 var_dump($obj2);

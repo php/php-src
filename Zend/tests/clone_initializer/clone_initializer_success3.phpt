@@ -7,7 +7,7 @@ class Foo
 {
     public function withProperties()
     {
-        return clone $this with {};
+        return clone $this with [];
     }
 }
 

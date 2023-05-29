@@ -9,7 +9,7 @@ class Foo
 
     public function withProperties()
     {
-        return (clone $this with {})->bar;
+        return (clone $this with [])->bar;
     }
 }
 

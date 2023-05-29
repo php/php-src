@@ -15,13 +15,13 @@ class Foo
 $foo1 = new Foo(0);
 
 try {
-    $foo2 = clone $foo1 with {bar: 1};
+    $foo2 = clone $foo1 with ["bar" => 1];
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
-    $foo2 = clone $foo1 with {baz: 1};
+    $foo2 = clone $foo1 with ["baz" => 1];
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
 }

@@ -11,13 +11,13 @@ class Foo
 $obj1 = new Foo();
 
 try {
-    clone $obj1 with {bar: []};
+    clone $obj1 with ["bar" => []];
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    clone $obj1 with {bar: []}; // The same as above but now using cache slots
+    clone $obj1 with ["bar" => []]; // The same as above but now using cache slots
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
