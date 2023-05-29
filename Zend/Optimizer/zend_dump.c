@@ -70,7 +70,7 @@ void zend_dump_const(const zval *zv)
 			break;
 		case IS_STRING:
 			escaped_string = php_addcslashes(zv->value.str, "\"\\", 2);
-			fprintf(stderr, " string(\"%s\")", escaped_string->val);
+			fprintf(stderr, " string(\"%s\")", ZSTR_VAL(escaped_string));
 			break;
 		case IS_ARRAY:
 			fprintf(stderr, " array(...)");
