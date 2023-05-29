@@ -52,7 +52,7 @@ zend_smm_shared_globals *smm_shared_globals;
 #ifdef ZTS
 static MUTEX_T zts_lock;
 #endif
-int lock_file;
+int lock_file = -1;
 static char lockfile_name[MAXPATHLEN];
 #endif
 
