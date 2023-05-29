@@ -140,6 +140,17 @@ int dom_node_children_valid(xmlNodePtr node) {
 }
 /* }}} end dom_node_children_valid */
 
+static const libxml_doc_props default_doc_props = {
+	.formatoutput = false,
+	.validateonparse = false,
+	.resolveexternals = false,
+	.preservewhitespace = true,
+	.substituteentities = false,
+	.stricterror = true,
+	.recover = false,
+	.classmap = NULL,
+};
+
 /* {{{ dom_get_doc_props() */
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document)
 {
@@ -149,28 +160,31 @@ dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document)
 		return document->doc_props;
 	} else {
 		doc_props = emalloc(sizeof(libxml_doc_props));
-		doc_props->formatoutput = 0;
-		doc_props->validateonparse = 0;
-		doc_props->resolveexternals = 0;
-		doc_props->preservewhitespace = 1;
-		doc_props->substituteentities = 0;
-		doc_props->stricterror = 1;
-		doc_props->recover = 0;
-		doc_props->classmap = NULL;
+		memcpy(doc_props, &default_doc_props, sizeof(libxml_doc_props));
 		if (document) {
 			document->doc_props = doc_props;
 		}
 		return doc_props;
 	}
 }
+/* }}} */
+
+libxml_doc_props const* dom_get_doc_props_read_only(const php_libxml_ref_obj *document)
+{
+	if (document && document->doc_props) {
+		return document->doc_props;
+	} else {
+		return &default_doc_props;
+	}
+}
 
 static void dom_copy_doc_props(php_libxml_ref_obj *source_doc, php_libxml_ref_obj *dest_doc)
 {
-	dom_doc_propsptr source, dest;
+	dom_doc_propsptr dest;
 
 	if (source_doc && dest_doc) {
 
-		source = dom_get_doc_props(source_doc);
+		libxml_doc_props const* source = dom_get_doc_props_read_only(source_doc);
 		dest = dom_get_doc_props(dest_doc);
 
 		dest->formatoutput = source->formatoutput;
@@ -212,10 +226,8 @@ void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece
 
 zend_class_entry *dom_get_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece)
 {
-	dom_doc_propsptr doc_props;
-
 	if (document) {
-		doc_props = dom_get_doc_props(document);
+		libxml_doc_props const* doc_props = dom_get_doc_props_read_only(document);
 		if (doc_props->classmap) {
 			zend_class_entry *ce = zend_hash_find_ptr(doc_props->classmap, basece->name);
 			if (ce) {
@@ -230,16 +242,7 @@ zend_class_entry *dom_get_doc_classmap(php_libxml_ref_obj *document, zend_class_
 
 /* {{{ dom_get_strict_error() */
 int dom_get_strict_error(php_libxml_ref_obj *document) {
-	int stricterror;
-	dom_doc_propsptr doc_props;
-
-	doc_props = dom_get_doc_props(document);
-	stricterror = doc_props->stricterror;
-	if (document == NULL) {
-		efree(doc_props);
-	}
-
-	return stricterror;
+	return dom_get_doc_props_read_only(document)->stricterror;
 }
 /* }}} */
 
