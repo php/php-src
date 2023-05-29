@@ -179,7 +179,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 	dom_object *intern;
 	dom_object *nnmap;
 	dom_nnodemap_object *objmap;
-	int previndex=0;
+	int previndex;
 	HashTable *nodeht;
 	zval *entry;
 	bool do_curobj_undef = 1;
@@ -205,20 +205,27 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					do_curobj_undef = 0;
 				}
 			} else {
-				curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 				if (objmap->nodetype == XML_ATTRIBUTE_NODE ||
 					objmap->nodetype == XML_ELEMENT_NODE) {
+					curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 					curnode = curnode->next;
 				} else {
 					/* Nav the tree evey time as this is LIVE */
 					basenode = dom_object_get_node(objmap->baseobj);
-					if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
-						basenode->type == XML_HTML_DOCUMENT_NODE)) {
-						basenode = xmlDocGetRootElement((xmlDoc *) basenode);
-					} else if (basenode) {
-						basenode = basenode->children;
+					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
+						if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
+							basenode->type == XML_HTML_DOCUMENT_NODE)) {
+							basenode = xmlDocGetRootElement((xmlDoc *) basenode);
+						} else if (basenode) {
+							basenode = basenode->children;
+						} else {
+							goto err;
+						}
+						php_dom_mark_cache_tag_up_to_date_from_node(&iterator->cache_tag, basenode);
+						previndex = 0;
 					} else {
-						goto err;
+						previndex = iter->index - 1;
+						basenode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(
 						basenode, (char *) objmap->ns, (char *) objmap->local, &previndex, iter->index);
@@ -270,6 +277,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	}
 	iterator = emalloc(sizeof(php_dom_iterator));
 	zend_iterator_init(&iterator->intern);
+	iterator->cache_tag.modification_nr = 0;
 
 	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_dom_iterator_funcs;

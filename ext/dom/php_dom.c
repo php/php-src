@@ -1010,6 +1010,9 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap) {
+		if (objmap->cached_obj && GC_DELREF(&objmap->cached_obj->std) == 0) {
+			zend_objects_store_del(&objmap->cached_obj->std);
+		}
 		if (objmap->local) {
 			xmlFree(objmap->local);
 		}
@@ -1043,6 +1046,10 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 	objmap->ht = NULL;
 	objmap->local = NULL;
 	objmap->ns = NULL;
+	objmap->cache_tag.modification_nr = 0;
+	objmap->cached_length = -1;
+	objmap->cached_obj = NULL;
+	objmap->cached_obj_index = 0;
 
 	return &intern->std;
 }
@@ -1223,6 +1230,7 @@ bool dom_has_feature(zend_string *feature, zend_string *version)
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
 {
 	xmlNodePtr ret = NULL;
+	bool local_match_any = local[0] == '*' && local[1] == '\0';
 
 	/* Note: The spec says that ns == '' must be transformed to ns == NULL. In other words, they are equivalent.
 	 *       PHP however does not do this and internally uses the empty string everywhere when the user provides ns == NULL.
@@ -1231,7 +1239,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 
 	while (nodep != NULL && (*cur <= index || index == -1)) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			if (xmlStrEqual(nodep->name, (xmlChar *)local) || xmlStrEqual((xmlChar *)"*", (xmlChar *)local)) {
+			if (local_match_any || xmlStrEqual(nodep->name, (xmlChar *)local)) {
 				if (ns_match_any || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
 					if (*cur == index) {
 						ret = nodep;
@@ -1249,7 +1257,6 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 	}
 	return ret;
 }
-/* }}} */
 /* }}} end dom_element_get_elements_by_tag_name_ns_raw */
 
 static inline bool is_empty_node(xmlNodePtr nodep)

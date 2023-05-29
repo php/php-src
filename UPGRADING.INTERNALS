@@ -120,6 +120,12 @@ PHP 8.3 INTERNALS UPGRADE NOTES
    - A new function dom_get_doc_props_read_only() is added to gather the document
      properties in a read-only way. This function avoids allocation when there are
      no document properties changed yet.
+   - The node list returned by DOMNode::getElementsByTagName() and
+	 DOMNode::getElementsByTagNameNS() now caches the length and the last requested item.
+	 This means that the length and the last requested item are not recalculated
+	 when the node list is iterated over multiple times.
+	 If you do not use the internal PHP dom APIs to modify the document, you need to
+	 manually invalidate the cache using php_dom_invalidate_node_list_cache().
 
 ========================
 4. OpCode changes
