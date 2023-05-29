@@ -47,14 +47,14 @@ ZEND_BEGIN_MODULE_GLOBALS(libxml)
 ZEND_END_MODULE_GLOBALS(libxml)
 
 typedef struct _libxml_doc_props {
-	int formatoutput;
-	int validateonparse;
-	int resolveexternals;
-	int preservewhitespace;
-	int substituteentities;
-	int stricterror;
-	int recover;
 	HashTable *classmap;
+	bool formatoutput;
+	bool validateonparse;
+	bool resolveexternals;
+	bool preservewhitespace;
+	bool substituteentities;
+	bool stricterror;
+	bool recover;
 } libxml_doc_props;
 
 typedef struct _php_libxml_ref_obj {
