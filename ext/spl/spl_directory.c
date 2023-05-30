@@ -464,7 +464,9 @@ static void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend
 
 	path_len = ZSTR_LEN(path);
 	if (path_len > 1 && IS_SLASH_AT(ZSTR_VAL(path), path_len-1)) {
-		path_len--;
+		do {
+			path_len--;
+		} while (path_len > 1 && IS_SLASH_AT(ZSTR_VAL(path), path_len - 1));
 		intern->file_name = zend_string_init(ZSTR_VAL(path), path_len, 0);
 	} else {
 		intern->file_name = zend_string_copy(path);

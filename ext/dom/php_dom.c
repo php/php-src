@@ -1221,10 +1221,15 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 {
 	xmlNodePtr ret = NULL;
 
+	/* Note: The spec says that ns == '' must be transformed to ns == NULL. In other words, they are equivalent.
+	 *       PHP however does not do this and internally uses the empty string everywhere when the user provides ns == NULL.
+	 *       This is because for PHP ns == NULL has another meaning: "match every namespace" instead of "match the empty namespace". */
+	bool ns_match_any = ns == NULL || (ns[0] == '*' && ns[1] == '\0');
+
 	while (nodep != NULL && (*cur <= index || index == -1)) {
 		if (nodep->type == XML_ELEMENT_NODE) {
 			if (xmlStrEqual(nodep->name, (xmlChar *)local) || xmlStrEqual((xmlChar *)"*", (xmlChar *)local)) {
-				if (ns == NULL || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && (xmlStrEqual(nodep->ns->href, (xmlChar *)ns) || xmlStrEqual((xmlChar *)"*", (xmlChar *)ns)))) {
+				if (ns_match_any || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
 					if (*cur == index) {
 						ret = nodep;
 						break;

@@ -390,6 +390,10 @@ static inline void accel_unlock_all(void)
 #ifdef ZEND_WIN32
 	accel_deactivate_sub();
 #else
+	if (lock_file == -1) {
+		return;
+	}
+
 	struct flock mem_usage_unlock_all;
 
 	mem_usage_unlock_all.l_type = F_UNLCK;

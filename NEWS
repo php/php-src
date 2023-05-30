@@ -11,13 +11,23 @@ PHP                                                                        NEWS
   . Fixed bug GH-10234 (Setting DOMAttr::textContent results in an empty
     attribute value). (nielsdos)
   . Fix return value in stub file for DOMNodeList::item. (divinity76)
+  . Fix spec compliance error with '*' namespace for
+    DOMDocument::getElementsByTagNameNS. (nielsdos)
+  . Fix DOMElement::append() and DOMElement::prepend() hierarchy checks.
+    (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
   . Access violation on smm_shared_globals with ALLOC_FALLBACK. (KoudelkaB)
+  . Fixed bug GH-11336 (php still tries to unlock the shared memory ZendSem
+    with opcache.file_cache_only=1 but it was never locked). (nielsdos)
 
 - PCRE:
   . Fix preg_replace_callback_array() pattern validation. (ilutov)
+
+- SPL:
+  . Fixed bug GH-11338 (SplFileInfo empty getBasename with more than one
+    slash). (nielsdos)
 
 - Standard:
   . Fix access on NULL pointer in array_merge_recursive(). (ilutov)
