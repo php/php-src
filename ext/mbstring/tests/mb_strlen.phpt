@@ -35,6 +35,13 @@ print "-- Testing illegal bytes 0x80,0xFD-FF --\n";
 print mb_strlen("\x80\xA1", 'SJIS') . "\n";
 print mb_strlen("abc\xFD\xFE\xFF", 'SJIS') . "\n";
 
+echo "== CP932 ==\n";
+print mb_strlen("\x80\xA1", "CP932") . "\n";
+// 0xFD, 0xFE, 0xFF is reserved.
+print mb_strlen("abc\xFD\xFE\xFF", 'CP932') . "\n";
+print mb_strlen("\x80\xA1", "SJIS-win") . "\n";
+print mb_strlen("abc\xFD\xFE\xFF", 'SJIS-win') . "\n";
+
 echo "== MacJapanese ==\n";
 print mb_strlen("\x80\xA1", 'MacJapanese') . "\n";
 print mb_strlen("abc\xFD\xFE\xFF", 'MacJapanese') . "\n";
@@ -105,6 +112,11 @@ try {
 43
 72
 -- Testing illegal bytes 0x80,0xFD-FF --
+2
+6
+== CP932 ==
+2
+6
 2
 6
 == MacJapanese ==
