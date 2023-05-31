@@ -3757,13 +3757,19 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		zval *function_name = (zval*)RT_CONSTANT(opline, opline->op2);
+		/* Perform quick look-up of function */
 		/* Fetch lowercase name stored in the next literal slot */
-		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
-		if (UNEXPECTED(fbc == NULL)) {
-			if (EXPECTED(!EG(exception))) {
-				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+		zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
+		if (UNEXPECTED(func == NULL)) {
+			fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
+			if (UNEXPECTED(fbc == NULL)) {
+				if (EXPECTED(!EG(exception))) {
+					ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+				}
+				HANDLE_EXCEPTION();
 			}
-			HANDLE_EXCEPTION();
+		} else {
+			fbc = Z_FUNC_P(func);
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
