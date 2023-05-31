@@ -1,7 +1,5 @@
 --TEST--
 Local function must be able to be defined after it got pinned to the global one
---XFAIL--
-Currently fails under opcache as strlen() gets bound to the global function
 --FILE--
 <?php
 
