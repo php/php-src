@@ -2,6 +2,7 @@
 DOMDocument::getElementsByTagName() liveness with simplexml_import_dom
 --EXTENSIONS--
 dom
+simplexml
 --FILE--
 <?php
 
