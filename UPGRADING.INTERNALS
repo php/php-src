@@ -130,6 +130,8 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 	   . php_dom_is_cache_tag_stale_from_doc_ptr()
 	   . php_dom_is_cache_tag_stale_from_node()
 	   . php_dom_mark_cache_tag_up_to_date_from_node()
+   - The function dom_get_elements_by_tag_name_ns_raw() has an additional parameter to indicate
+     the base node of the node list.
 
  g. ext/libxml
    - Two new functions: php_libxml_invalidate_node_list_cache_from_doc() and

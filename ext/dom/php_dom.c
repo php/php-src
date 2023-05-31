@@ -1227,7 +1227,7 @@ bool dom_has_feature(zend_string *feature, zend_string *version)
 }
 /* }}} end dom_has_feature */
 
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
 {
 	xmlNodePtr ret = NULL;
 	bool local_match_any = local[0] == '*' && local[1] == '\0';
@@ -1248,12 +1248,26 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 					(*cur)++;
 				}
 			}
-			ret = dom_get_elements_by_tag_name_ns_raw(nodep->children, ns, local, cur, index);
-			if (ret != NULL) {
-				break;
+
+			if (nodep->children) {
+				nodep = nodep->children;
+				continue;
 			}
 		}
-		nodep = nodep->next;
+
+		if (nodep->next) {
+			nodep = nodep->next;
+		} else {
+			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+			do {
+				nodep = nodep->parent;
+				ZEND_ASSERT(nodep != NULL);
+				if (nodep == basep) {
+					return NULL;
+				}
+			} while (nodep->next == NULL);
+			nodep = nodep->next;
+		}
 	}
 	return ret;
 }

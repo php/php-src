@@ -213,23 +213,24 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					/* The collection is live, we nav the tree from the base object if we cannot
 					 * use the cache to restart from the last point. */
 					basenode = dom_object_get_node(objmap->baseobj);
+					if (UNEXPECTED(!basenode)) {
+						goto err;
+					}
 					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
-						if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
-							basenode->type == XML_HTML_DOCUMENT_NODE)) {
-							basenode = xmlDocGetRootElement((xmlDoc *) basenode);
-						} else if (basenode) {
-							basenode = basenode->children;
-						} else {
-							goto err;
-						}
 						php_dom_mark_cache_tag_up_to_date_from_node(&iterator->cache_tag, basenode);
 						previndex = 0;
+						if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
+										 basenode->type == XML_HTML_DOCUMENT_NODE)) {
+							curnode = xmlDocGetRootElement((xmlDoc *) basenode);
+						} else {
+							curnode = basenode->children;
+						}
 					} else {
 						previndex = iter->index - 1;
-						basenode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
+						curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(
-						basenode, (char *) objmap->ns, (char *) objmap->local, &previndex, iter->index);
+						basenode, curnode, (char *) objmap->ns, (char *) objmap->local, &previndex, iter->index);
 				}
 			}
 		} else {
@@ -266,7 +267,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 {
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
-	xmlNodePtr nodep, curnode=NULL;
+	xmlNodePtr curnode=NULL;
 	int curindex = 0;
 	HashTable *nodeht;
 	zval *entry;
@@ -297,24 +298,25 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 					ZVAL_COPY(&iterator->curobj, entry);
 				}
 			} else {
-				nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);
-				if (!nodep) {
+				xmlNodePtr basep = (xmlNode *)dom_object_get_node(objmap->baseobj);
+				if (!basep) {
 					goto err;
 				}
 				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
 					if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
-						curnode = (xmlNodePtr) nodep->properties;
+						curnode = (xmlNodePtr) basep->properties;
 					} else {
-						curnode = (xmlNodePtr) nodep->children;
+						curnode = (xmlNodePtr) basep->children;
 					}
 				} else {
+					xmlNodePtr nodep = basep;
 					if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 						nodep = xmlDocGetRootElement((xmlDoc *) nodep);
 					} else {
 						nodep = nodep->children;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(
-						nodep, (char *) objmap->ns, (char *) objmap->local, &curindex, 0);
+						basep, nodep, (char *) objmap->ns, (char *) objmap->local, &curindex, 0);
 				}
 			}
 		} else {

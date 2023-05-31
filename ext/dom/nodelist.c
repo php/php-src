@@ -92,13 +92,14 @@ static int get_nodelist_length(dom_object *obj)
 			}
 		}
 	} else {
+		xmlNodePtr basep = nodep;
 		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 			nodep = xmlDocGetRootElement((xmlDoc *) nodep);
 		} else {
 			nodep = nodep->children;
 		}
 		dom_get_elements_by_tag_name_ns_raw(
-			nodep, (char *) objmap->ns, (char *) objmap->local, &count, -1);
+			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, -1);
 	}
 
 	objmap->cached_length = count;
@@ -149,7 +150,7 @@ PHP_METHOD(DOMNodeList, item)
 	xmlNodePtr itemnode = NULL;
 
 	dom_nnodemap_object *objmap;
-	xmlNodePtr nodep;
+	xmlNodePtr basep;
 	int count = 0;
 
 	id = ZEND_THIS;
@@ -177,8 +178,9 @@ PHP_METHOD(DOMNodeList, item)
 						return;
 					}
 				} else if (objmap->baseobj) {
-					nodep = dom_object_get_node(objmap->baseobj);
-					if (nodep) {
+					basep = dom_object_get_node(objmap->baseobj);
+					if (basep) {
+						xmlNodePtr nodep = basep;
 						/* For now we're only able to use cache for forward search.
 						 * TODO: in the future we could extend the logic of the node list such that backwards searches
 						 *       are also possible. */
@@ -212,13 +214,13 @@ PHP_METHOD(DOMNodeList, item)
 							itemnode = nodep;
 						} else {
 							if (restart) {
-								if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-									nodep = xmlDocGetRootElement((xmlDoc*) nodep);
+								if (basep->type == XML_DOCUMENT_NODE || basep->type == XML_HTML_DOCUMENT_NODE) {
+									nodep = xmlDocGetRootElement((xmlDoc*) basep);
 								} else {
-									nodep = nodep->children;
+									nodep = basep->children;
 								}
 							}
-							itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, (char *) objmap->ns, (char *) objmap->local, &count, relative_index);
+							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, relative_index);
 						}
 						cache_itemnode = true;
 					}
@@ -238,8 +240,8 @@ PHP_METHOD(DOMNodeList, item)
 				dom_object *cached_obj = Z_DOMOBJ_P(return_value);
 				GC_ADDREF(&cached_obj->std);
 				/* If the tag is stale, all cached data is useless. Otherwise only the cached object is useless. */
-				if (php_dom_is_cache_tag_stale_from_node(&objmap->cache_tag, nodep)) {
-					php_dom_mark_cache_tag_up_to_date_from_node(&objmap->cache_tag, nodep);
+				if (php_dom_is_cache_tag_stale_from_node(&objmap->cache_tag, itemnode)) {
+					php_dom_mark_cache_tag_up_to_date_from_node(&objmap->cache_tag, itemnode);
 					reset_objmap_cache(objmap);
 				} else {
 					objmap_cache_release_cached_obj(objmap);
