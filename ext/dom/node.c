@@ -195,6 +195,8 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 			break;
 	}
 
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+
 	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
