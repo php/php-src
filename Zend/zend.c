@@ -1728,7 +1728,12 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 				zend_zval_type_name(offset));
 			return;
 		case BP_VAR_UNSET:
-			zend_type_error("Cannot access offset of type %s in unset", zend_zval_type_name(offset));
+			/* Consistent error for when trying to unset a string offset */
+			if (zend_string_equals(container, ZSTR_KNOWN(ZEND_STR_STRING))) {
+				zend_throw_error(NULL, "Cannot unset string offsets");
+			} else {
+				zend_type_error("Cannot access offset of type %s in unset", zend_zval_type_name(offset));
+			}
 			return;
 		default:
 			zend_type_error("Cannot access offset of type %s on %s",
