@@ -185,11 +185,12 @@ PHP_METHOD(DOMNodeList, item)
 						bool restart = true;
 						int relative_index = index;
 						if (index >= objmap->cached_obj_index && objmap->cached_obj && !php_dom_is_cache_tag_stale_from_node(&objmap->cache_tag, nodep)) {
-							nodep = dom_object_get_node(objmap->cached_obj);
+							xmlNodePtr cached_obj_xml_node = dom_object_get_node(objmap->cached_obj);
+
 							/* The node cannot be NULL if the cache is valid. If it is NULL, then it means we
 							 * forgot an invalidation somewhere. Take the defensive programming approach and invalidate
 							 * it here if it's NULL (except in debug mode where we would want to catch this). */
-							if (UNEXPECTED(nodep == NULL)) {
+							if (UNEXPECTED(cached_obj_xml_node == NULL)) {
 #if ZEND_DEBUG
 								ZEND_UNREACHABLE();
 #endif
@@ -197,6 +198,7 @@ PHP_METHOD(DOMNodeList, item)
 							} else {
 								restart = false;
 								relative_index -= objmap->cached_obj_index;
+								nodep = cached_obj_xml_node;
 							}
 						}
 						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
