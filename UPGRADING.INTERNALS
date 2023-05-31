@@ -125,7 +125,15 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 	 This means that the length and the last requested item are not recalculated
 	 when the node list is iterated over multiple times.
 	 If you do not use the internal PHP dom APIs to modify the document, you need to
-	 manually invalidate the cache using php_dom_invalidate_node_list_cache().
+	 manually invalidate the cache using php_libxml_invalidate_node_list_cache_from_doc().
+	 Furthermore, the following internal APIs were added to handle the cache:
+	   . php_dom_is_cache_tag_stale_from_doc_ptr()
+	   . php_dom_is_cache_tag_stale_from_node()
+	   . php_dom_mark_cache_tag_up_to_date_from_node()
+
+ g. ext/libxml
+   - Two new functions: php_libxml_invalidate_node_list_cache_from_doc() and
+     php_libxml_invalidate_node_list_cache() were added to invalidate the cache of a node list.
 
 ========================
 4. OpCode changes

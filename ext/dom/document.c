@@ -847,7 +847,7 @@ PHP_METHOD(DOMDocument, importNode)
 		}
 	}
 
-	php_dom_invalidate_node_list_cache(docp);
+	php_libxml_invalidate_node_list_cache_from_doc(docp);
 
 	DOM_RET_OBJ((xmlNodePtr) retnodep, &ret, intern);
 }
@@ -1072,7 +1072,7 @@ PHP_METHOD(DOMDocument, normalizeDocument)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	php_dom_invalidate_node_list_cache(docp);
+	php_libxml_invalidate_node_list_cache_from_doc(docp);
 
 	dom_normalize((xmlNodePtr) docp);
 }
@@ -1577,7 +1577,7 @@ PHP_METHOD(DOMDocument, xinclude)
 		php_dom_remove_xinclude_nodes(root);
 	}
 
-	php_dom_invalidate_node_list_cache(docp);
+	php_libxml_invalidate_node_list_cache_from_doc(docp);
 
 	if (err) {
 		RETVAL_LONG(err);

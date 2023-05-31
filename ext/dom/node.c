@@ -769,7 +769,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	php_dom_invalidate_node_list_cache(nodep->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 
 	const xmlChar *xmlChars = (const xmlChar *) ZSTR_VAL(str);
 	int type = nodep->type;
@@ -899,7 +899,7 @@ PHP_METHOD(DOMNode, insertBefore)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
 	}
 
-	php_dom_invalidate_node_list_cache(parentp->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(parentp->doc);
 
 	if (ref != NULL) {
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
@@ -1090,7 +1090,7 @@ PHP_METHOD(DOMNode, replaceChild)
 			nodep->doc->intSubset = (xmlDtd *) newchild;
 		}
 	}
-	php_dom_invalidate_node_list_cache(nodep->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 	DOM_RET_OBJ(oldchild, &ret, intern);
 }
 /* }}} end dom_node_replace_child */
@@ -1132,7 +1132,7 @@ PHP_METHOD(DOMNode, removeChild)
 	}
 
 	xmlUnlinkNode(child);
-	php_dom_invalidate_node_list_cache(nodep->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 	DOM_RET_OBJ(child, &ret, intern);
 }
 /* }}} end dom_node_remove_child */
@@ -1236,7 +1236,7 @@ PHP_METHOD(DOMNode, appendChild)
 
 	dom_reconcile_ns(nodep->doc, new_child);
 
-	php_dom_invalidate_node_list_cache(nodep->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 
 	DOM_RET_OBJ(new_child, &ret, intern);
 }
@@ -1347,7 +1347,7 @@ PHP_METHOD(DOMNode, normalize)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	php_dom_invalidate_node_list_cache(nodep->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 
 	dom_normalize(nodep);
 
@@ -1581,7 +1581,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETURN_THROWS();
 	}
 
-	php_dom_invalidate_node_list_cache(docp);
+	php_libxml_invalidate_node_list_cache_from_doc(docp);
 
 	if (xpath_array == NULL) {
 		if (nodep->type != XML_DOCUMENT_NODE) {

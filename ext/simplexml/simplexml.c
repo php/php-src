@@ -43,16 +43,6 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void) /* {{{ */
 }
 /* }}} */
 
-/* Similar to php_dom_invalidate_node_list_cache(), but SimpleXML shouldn't depend on ext/dom. */
-static zend_always_inline void php_sxe_invalidate_node_list_cache(xmlNodePtr node)
-{
-	ZEND_ASSERT(node != NULL);
-	xmlDocPtr docp = node->doc;
-	if (docp && docp->_private) {
-		php_libxml_invalidate_node_list_cache(docp->_private);
-	}
-}
-
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data);
@@ -452,7 +442,7 @@ long_dim:
 
 	GET_NODE(sxe, node);
 
-	php_sxe_invalidate_node_list_cache(node);
+	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
@@ -825,7 +815,7 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements
 
 	GET_NODE(sxe, node);
 
-	php_sxe_invalidate_node_list_cache(node);
+	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
 
 	if (Z_TYPE_P(member) == IS_LONG) {
 		if (sxe->iter.type != SXE_ITER_ATTRLIST) {
@@ -1700,7 +1690,7 @@ PHP_METHOD(SimpleXMLElement, addChild)
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 
-	php_sxe_invalidate_node_list_cache(node);
+	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		php_error_docref(NULL, E_WARNING, "Cannot add element to attributes");

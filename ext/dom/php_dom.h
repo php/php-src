@@ -158,13 +158,6 @@ void dom_child_node_remove(dom_object *context);
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1
 
-static zend_always_inline void php_dom_invalidate_node_list_cache(xmlDocPtr docp)
-{
-	if (docp && docp->_private) { /* not all elements have an associated document (e.g. invalid hierarchy) */
-		php_libxml_invalidate_node_list_cache(docp->_private);
-	}
-}
-
 static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php_libxml_cache_tag *cache_tag, const php_libxml_doc_ptr *doc_ptr)
 {
 	ZEND_ASSERT(cache_tag != NULL);

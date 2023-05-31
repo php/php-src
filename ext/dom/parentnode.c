@@ -280,7 +280,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 		return;
 	}
 
-	php_dom_invalidate_node_list_cache(parentNode->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(parentNode->doc);
 
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
@@ -324,7 +324,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 		return;
 	}
 
-	php_dom_invalidate_node_list_cache(parentNode->doc);
+	php_libxml_invalidate_node_list_cache_from_doc(parentNode->doc);
 
 	xmlNodePtr newchild, nextsib;
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -406,7 +406,7 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 
 	doc = prevsib->doc;
 
-	php_dom_invalidate_node_list_cache(doc);
+	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
 	/* Spec step 4: convert nodes into fragment */
 	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -457,7 +457,7 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 
 	doc = nextsib->doc;
 
-	php_dom_invalidate_node_list_cache(doc);
+	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
 	/* Spec step 4: convert nodes into fragment */
 	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -514,7 +514,7 @@ void dom_child_node_remove(dom_object *context)
 		return;
 	}
 
-	php_dom_invalidate_node_list_cache(context->document->ptr);
+	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
 
 	while (children) {
 		if (children == child) {

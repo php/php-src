@@ -105,6 +105,13 @@ static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_
 #endif
 }
 
+static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xmlDocPtr docp)
+{
+	if (docp && docp->_private) { /* docp is NULL for detached nodes */
+		php_libxml_invalidate_node_list_cache(docp->_private);
+	}
+}
+
 #define Z_LIBXML_NODE_P(zv) php_libxml_node_fetch_object(Z_OBJ_P((zv)))
 
 typedef void * (*php_libxml_export_node) (zval *object);
