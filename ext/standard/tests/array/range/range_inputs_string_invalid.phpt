@@ -37,7 +37,7 @@ Range cannot operate on an empty string
 
 Warning: range(): Argument #2 ($end) must not be empty, casted to 0 in %s on line %d
 
-Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
+Warning: range(): Argument #2 ($end) must be a single byte string if argument #1 ($start) is a single byte string, argument #1 ($start) converted to 0 in %s on line %d
 array(1) {
   [0]=>
   int(0)
@@ -45,14 +45,14 @@ array(1) {
 
 Warning: range(): Argument #1 ($start) must not be empty, casted to 0 in %s on line %d
 
-Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
+Warning: range(): Argument #1 ($start) must be a single byte string if argument #2 ($end) is a single byte string, argument #2 ($end) converted to 0 in %s on line %d
 array(1) {
   [0]=>
   int(0)
 }
 Mixing numeric float string and character
 
-Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
+Warning: range(): Argument #1 ($start) must be a single byte string if argument #2 ($end) is a single byte string, argument #2 ($end) converted to 0 in %s on line %d
 array(4) {
   [0]=>
   float(3.5)
@@ -64,7 +64,7 @@ array(4) {
   float(0.5)
 }
 
-Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
+Warning: range(): Argument #2 ($end) must be a single byte string if argument #1 ($start) is a single byte string, argument #1 ($start) converted to 0 in %s on line %d
 array(4) {
   [0]=>
   float(0)

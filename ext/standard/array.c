@@ -2928,14 +2928,14 @@ PHP_FUNCTION(range)
 		if (UNEXPECTED(start_type + end_type < 2*IS_STRING)) {
 			if (start_type < IS_STRING) {
 				if (end_type != IS_ARRAY) {
-					php_error_docref(NULL, E_WARNING, "Argument #1 ($start) must be a string if"
-						" argument #2 ($end) is a string, argument #2 ($end) converted to 0");
+					php_error_docref(NULL, E_WARNING, "Argument #1 ($start) must be a single byte string if"
+						" argument #2 ($end) is a single byte string, argument #2 ($end) converted to 0");
 				}
 				end_type = IS_LONG;
 			} else if (end_type < IS_STRING) {
 				if (start_type != IS_ARRAY) {
-					php_error_docref(NULL, E_WARNING, "Argument #2 ($end) must be a string if"
-						" argument #1 ($start) is a string, argument #1 ($start) converted to 0");
+					php_error_docref(NULL, E_WARNING, "Argument #2 ($end) must be a single byte string if"
+						" argument #1 ($start) is a single byte string, argument #1 ($start) converted to 0");
 				}
 				start_type = IS_LONG;
 			}

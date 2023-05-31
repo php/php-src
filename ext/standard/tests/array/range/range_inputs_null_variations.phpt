@@ -97,7 +97,7 @@ null with string boundary
 
 Deprecated: range(): Passing null to parameter #1 ($start) of type string|int|float is deprecated in %s on line %d
 
-Warning: range(): Argument #1 ($start) must be a string if argument #2 ($end) is a string, argument #2 ($end) converted to 0 in %s on line %d
+Warning: range(): Argument #1 ($start) must be a single byte string if argument #2 ($end) is a single byte string, argument #2 ($end) converted to 0 in %s on line %d
 array(1) {
   [0]=>
   int(0)
@@ -105,7 +105,7 @@ array(1) {
 
 Deprecated: range(): Passing null to parameter #2 ($end) of type string|int|float is deprecated in %s on line %d
 
-Warning: range(): Argument #2 ($end) must be a string if argument #1 ($start) is a string, argument #1 ($start) converted to 0 in %s on line %d
+Warning: range(): Argument #2 ($end) must be a single byte string if argument #1 ($start) is a single byte string, argument #1 ($start) converted to 0 in %s on line %d
 array(1) {
   [0]=>
   int(0)
