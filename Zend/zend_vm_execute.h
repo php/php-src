@@ -53444,14 +53444,14 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)
 	struct {
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+		char hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];
+#endif
 #ifdef ZEND_VM_IP_GLOBAL_REG
 		const zend_op *orig_opline;
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
 		zend_execute_data *orig_execute_data;
-#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-		char hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];
-#endif
 #endif
 	} vm_stack_data;
 #endif
