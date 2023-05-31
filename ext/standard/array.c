@@ -1250,6 +1250,7 @@ PHP_FUNCTION(min)
 						min = &args[i];
 					}
 				} else if (Z_TYPE(args[i]) == IS_DOUBLE && (zend_dval_to_lval((double) min_lval) == min_lval)) {
+					/* if min_lval can be exactly represented as a float, go to float dedicated code */
 					min_dval = (double) min_lval;
 					goto double_compare;
 				} else {
@@ -1269,6 +1270,7 @@ PHP_FUNCTION(min)
 						min = &args[i];
 					}
 				} else if (Z_TYPE(args[i]) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL(args[i])) == Z_LVAL(args[i]))) {
+					/* if the value can be exactly represented as a float, use float dedicated code otherwise generic */
 					if (min_dval > (double)Z_LVAL(args[i])) {
 						min_dval = (double)Z_LVAL(args[i]);
 						min = &args[i];
@@ -1337,6 +1339,7 @@ PHP_FUNCTION(max)
 						max = &args[i];
 					}
 				} else if (Z_TYPE(args[i]) == IS_DOUBLE && (zend_dval_to_lval((double) max_lval) == max_lval)) {
+					/* if max_level can be exactly represented as a float, go to float dedicated code */
 					max_dval = (double) max_lval;
 					goto double_compare;
 				} else {
@@ -1356,6 +1359,7 @@ PHP_FUNCTION(max)
 						max = &args[i];
 					}
 				} else if (Z_TYPE(args[i]) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL(args[i])) == Z_LVAL(args[i]))) {
+					/* if the value can be exactly represented as a float, use float dedicated code otherwise generic */
 					if (max_dval < (double)Z_LVAL(args[i])) {
 						max_dval = (double)Z_LVAL(args[i]);
 						max = &args[i];
