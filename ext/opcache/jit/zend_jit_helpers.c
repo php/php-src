@@ -478,7 +478,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			hval = 1;
 			goto num_index;
 		default:
-			zend_illegal_container_offset("array", dim, BP_VAR_R);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_R);
 			undef_result_after_exception();
 			return;
 	}
@@ -620,7 +620,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_illegal_container_offset("array", dim, BP_VAR_IS);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_IS);
 			undef_result_after_exception();
 			return;
 	}
@@ -722,7 +722,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			hval = 1;
 			goto num_index;
 		default:
-			zend_illegal_container_offset("array", dim, BP_VAR_IS);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_IS);
 			return 0;
 	}
 
@@ -858,7 +858,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			hval = 1;
 			goto num_index;
 		default:
-			zend_illegal_container_offset("array", dim, BP_VAR_RW);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_RW);
 			undef_result_after_exception();
 			return NULL;
 	}
@@ -991,7 +991,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_illegal_container_offset("array", dim, BP_VAR_R);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_R);
 			undef_result_after_exception();
 			if (EG(opline_before_exception)
 			 && (EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
@@ -1035,7 +1035,7 @@ try_again:
 				}
 				return offset;
 			}
-			zend_illegal_container_offset("string", dim, BP_VAR_R);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_R);
 			return 0;
 		}
 		case IS_UNDEF:
@@ -1051,7 +1051,7 @@ try_again:
 			dim = Z_REFVAL_P(dim);
 			goto try_again;
 		default:
-			zend_illegal_container_offset("string", dim, type);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, type);
 			return 0;
 	}
 
@@ -1126,7 +1126,7 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_illegal_container_offset("string", dim, BP_VAR_IS);
+				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_IS);
 				break;
 		}
 

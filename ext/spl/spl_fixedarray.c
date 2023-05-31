@@ -333,7 +333,8 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			return Z_RES_HANDLE_P(offset);
 	}
 
-	zend_illegal_container_offset("SplFixedArray", offset, BP_VAR_R);
+	/* Use SplFixedArray name from the CE */
+	zend_illegal_container_offset(spl_ce_SplFixedArray->name, offset, BP_VAR_R);
 	return 0;
 }
 
