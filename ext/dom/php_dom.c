@@ -1229,6 +1229,11 @@ bool dom_has_feature(zend_string *feature, zend_string *version)
 
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
 {
+	/* Can happen with detached document */
+	if (UNEXPECTED(nodep == NULL)) {
+		return NULL;
+	}
+
 	xmlNodePtr ret = NULL;
 	bool local_match_any = local[0] == '*' && local[1] == '\0';
 
