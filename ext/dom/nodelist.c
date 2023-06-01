@@ -99,7 +99,7 @@ static int get_nodelist_length(dom_object *obj)
 			nodep = nodep->children;
 		}
 		dom_get_elements_by_tag_name_ns_raw(
-			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, -1);
+			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, INT_MAX - 1 /* because of <= */);
 	}
 
 	objmap->cached_length = count;
