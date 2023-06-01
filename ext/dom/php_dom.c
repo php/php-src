@@ -1237,7 +1237,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 	 *       This is because for PHP ns == NULL has another meaning: "match every namespace" instead of "match the empty namespace". */
 	bool ns_match_any = ns == NULL || (ns[0] == '*' && ns[1] == '\0');
 
-	while (nodep != NULL && (*cur <= index || index == -1)) {
+	while (*cur <= index || index == -1) {
 		if (nodep->type == XML_ELEMENT_NODE) {
 			if (local_match_any || xmlStrEqual(nodep->name, (xmlChar *)local)) {
 				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
