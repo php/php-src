@@ -162,12 +162,9 @@ static uint32_t zend_jit_exit_point_by_addr(void *addr)
 				(((char*)addr - (char*)zend_jit_exit_groups[i]) / ZEND_JIT_EXIT_POINTS_SPACING);
 		}
 	}
-	ZEND_ASSERT(0 && "inalid addr");
-	return 0;
+	return (uint32_t)-1;
 }
-#endif
-
-#if ZEND_JIT_TARGET_ARM64
+#elif ZEND_JIT_TARGET_ARM64
 static zend_jit_trace_info *zend_jit_get_current_trace_info(void)
 {
 	return &zend_jit_traces[ZEND_JIT_TRACE_NUM];

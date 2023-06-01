@@ -5494,6 +5494,13 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 #if defined(_WIN32) && !defined(ZEND_JIT_IR)
 		/* reserve space for global labels */
 		*dasm_ptr = (void**)*dasm_ptr + zend_lb_MAX;
+#elif defined(_WIN32) && defined(ZEND_JIT_IR)
+		zend_jit_stub_handlers = dasm_buf;
+		*dasm_ptr = (void**)*dasm_ptr + sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+#elif defined(IR_TARGET_AARCH64) && defined(ZEND_JIT_IR)
+		zend_jit_stub_handlers = dasm_buf;
+		*dasm_ptr = (void**)*dasm_ptr + (sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])) * 2;
+		memset(zend_jit_stub_handlers, 0, (sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])) * 2 * sizeof(void*));
 #endif
 		*dasm_ptr = (void*)ZEND_MM_ALIGNED_SIZE_EX(((size_t)(*dasm_ptr)), 16);
 		zend_jit_protect();
@@ -5536,7 +5543,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	if (!reattached) {
 		zend_jit_unprotect();
 		ret = zend_jit_make_stubs();
-#if _WIN32
+#if defined(_WIN32) && !defined(ZEND_JIT_IR)
 		/* save global labels */
 		memcpy(dasm_buf, dasm_labels, sizeof(void*) * zend_lb_MAX);
 #endif
@@ -5546,9 +5553,12 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 			return FAILURE;
 		}
 	} else {
-#if _WIN32
+#if defined(_WIN32) && !defined(ZEND_JIT_IR)
 		/* restore global labels */
 		memcpy(dasm_labels, dasm_buf, sizeof(void*) * zend_lb_MAX);
+		zend_jit_init_handlers();
+#elif (defined(_WIN32) || defined(IR_TARGET_AARCH64)) && defined(ZEND_JIT_IR)
+		zend_jit_stub_handlers = dasm_buf;
 		zend_jit_init_handlers();
 #endif
 	}

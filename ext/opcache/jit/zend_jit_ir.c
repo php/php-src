@@ -335,7 +335,82 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUBS(JIT_STUB)
 };
 
+#if defined(_WIN32) || defined(IR_TARGET_AARCH64)
+/* We keep addresses in SHM to share them between sepaeate processes (on Windows) or to support veneers (on AArch64) */
+static void** zend_jit_stub_handlers = NULL;
+#else
 static void* zend_jit_stub_handlers[sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])];
+#endif
+
+#if defined(IR_TARGET_AARCH64)
+static const void *zend_jit_get_veneer(ir_ctx *ctx, const void *addr)
+{
+	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+
+	for (i = 0; i < count; i++) {
+		if (zend_jit_stub_handlers[i] == addr) {
+			return zend_jit_stub_handlers[count + i];
+		}
+	}
+
+	if (((zend_jit_ctx*)ctx)->trace
+	 && (void*)addr >= dasm_buf && (void*)addr < dasm_end) {
+		uint32_t exit_point = zend_jit_exit_point_by_addr((void*)addr);
+
+		if (exit_point != (uint32_t)-1) {
+			zend_jit_trace_info *t = ((zend_jit_ctx*)ctx)->trace;
+
+			ZEND_ASSERT(exit_point < t->exit_count);
+			return (const void*)((char*)ctx->code_buffer + ctx->code_size - (t->exit_count - exit_point) * 4);
+		}
+	}
+
+	return NULL;
+}
+
+static bool zend_jit_set_veneer(ir_ctx *ctx, const void *addr, const void *veneer)
+{
+	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+	int64_t offset;
+
+	for (i = 0; i < count; i++) {
+		if (zend_jit_stub_handlers[i] == addr) {
+			const void **ptr = (const void**)&zend_jit_stub_handlers[count + i];
+			*ptr = veneer;
+		    if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
+				const char *name = ir_disasm_find_symbol((uint64_t)(uintptr_t)addr, &offset);
+
+				if (name && !offset) {
+					if (strstr(name, "@veneer") == NULL) {
+						char *new_name;
+
+						zend_spprintf(&new_name, 0, "%s@veneer", name);
+						ir_disasm_add_symbol(new_name, (uint64_t)(uintptr_t)veneer, 4);
+						efree(new_name);
+					} else {
+						ir_disasm_add_symbol(name, (uint64_t)(uintptr_t)veneer, 4);
+					}
+				}
+			}
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static void zend_jit_commit_veneers(void)
+{
+	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
+
+	for (i = 0; i < count; i++) {
+		if (zend_jit_stub_handlers[count + i]) {
+			zend_jit_stub_handlers[i] = zend_jit_stub_handlers[count + i];
+			zend_jit_stub_handlers[count + i] = NULL;
+		}
+	}
+}
+#endif
 
 static bool zend_jit_prefer_const_addr_load(zend_jit_ctx *jit, uintptr_t addr)
 {
@@ -2505,6 +2580,9 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 		jit->ctx.mflags |= IR_X86_AVX;
 	}
+#elif defined(IR_TARGET_AARCH64)
+	jit->ctx.get_veneer = zend_jit_get_veneer;
+	jit->ctx.set_veneer = zend_jit_set_veneer;
 #endif
 
 	jit->ctx.fixed_regset = (1<<ZREG_FP) | (1<<ZREG_IP);
@@ -2682,6 +2760,13 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	if (entry) {
 		*dasm_ptr = (char*)entry + ZEND_MM_ALIGNED_SIZE_EX(*size, 16);
 	}
+
+#if defined(IR_TARGET_AARCH64)
+	if (ctx->veneers_size) {
+		zend_jit_commit_veneers();
+		*size -= ctx->veneers_size;
+	}
+#endif
 
 	return entry;
 }
@@ -15377,6 +15462,11 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 	if (jit->op_array) {
 		/* Only for function JIT */
 		_zend_jit_fix_merges(jit);
+#if defined(IR_TARGET_AARCH64)
+	} else if (jit->trace) {
+		jit->ctx.deoptimization_exits = jit->trace->exit_count;
+		jit->ctx.get_exit_addr = zend_jit_trace_get_exit_addr;
+#endif
 	}
 
 	entry = zend_jit_ir_compile(&jit->ctx, &size, str ? ZSTR_VAL(str) : NULL);
