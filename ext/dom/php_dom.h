@@ -89,6 +89,8 @@ typedef struct _dom_nnodemap_object {
 	php_libxml_cache_tag cache_tag;
 	dom_object *cached_obj;
 	int cached_obj_index;
+	bool free_local : 1;
+	bool free_ns : 1;
 } dom_nnodemap_object;
 
 typedef struct {
@@ -125,7 +127,7 @@ bool dom_has_feature(zend_string *feature, zend_string *version);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
 void php_dom_create_iterator(zval *return_value, int ce_type);
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns);
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);

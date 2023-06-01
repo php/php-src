@@ -942,7 +942,7 @@ void dom_objects_free_storage(zend_object *object)
 }
 /* }}} */
 
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns) /* {{{ */
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len) /* {{{ */
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
@@ -950,11 +950,33 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 
 	ZVAL_OBJ_COPY(&mapptr->baseobj_zv, &basenode->std);
 
+	xmlDocPtr doc = basenode->document ? basenode->document->ptr : NULL;
+
 	mapptr->baseobj = basenode;
 	mapptr->nodetype = ntype;
 	mapptr->ht = ht;
-	mapptr->local = local;
-	mapptr->ns = ns;
+
+	const xmlChar* tmp;
+
+	if (local) {
+		int len = local_len > INT_MAX ? -1 : (int) local_len;
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)local, len)) != NULL) {
+			mapptr->local = (xmlChar*) tmp;
+		} else {
+			mapptr->local = xmlCharStrndup(local, len);
+			mapptr->free_local = true;
+		}
+	}
+
+	if (ns) {
+		int len = ns_len > INT_MAX ? -1 : (int) ns_len;
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ns, len)) != NULL) {
+			mapptr->ns = (xmlChar*) tmp;
+		} else {
+			mapptr->ns = xmlCharStrndup(ns, len);
+			mapptr->free_ns = true;
+		}
+	}
 }
 /* }}} */
 
@@ -1013,10 +1035,10 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 		if (objmap->cached_obj && GC_DELREF(&objmap->cached_obj->std) == 0) {
 			zend_objects_store_del(&objmap->cached_obj->std);
 		}
-		if (objmap->local) {
+		if (objmap->free_local) {
 			xmlFree(objmap->local);
 		}
-		if (objmap->ns) {
+		if (objmap->free_ns) {
 			xmlFree(objmap->ns);
 		}
 		if (!Z_ISUNDEF(objmap->baseobj_zv)) {
@@ -1045,7 +1067,9 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 	objmap->nodetype = 0;
 	objmap->ht = NULL;
 	objmap->local = NULL;
+	objmap->free_local = false;
 	objmap->ns = NULL;
+	objmap->free_ns = false;
 	objmap->cache_tag.modification_nr = 0;
 	objmap->cached_length = -1;
 	objmap->cached_obj = NULL;
