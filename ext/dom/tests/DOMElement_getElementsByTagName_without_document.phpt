@@ -6,7 +6,9 @@ dom
 <?php
 
 $element = new DOMElement("b");
-foreach ($element->getElementsByTagName('b') as $x);
+foreach ($element->getElementsByTagName("b") as $x) {
+    var_dump($x);
+}
 
 ?>
 Done
