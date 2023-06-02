@@ -370,6 +370,7 @@ RAW_VALUE_CHARS [^\n\r;\000]
 
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|^~()!"'\000]|{LITERAL_DOLLAR})
+FALLBACK_CHARS		([^$\n\r;"'!}\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -417,7 +418,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	return ']';
 }
 
-<ST_DOUBLE_QUOTES,ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{DOLLAR_CURLY} { /* Variable start */
+<ST_DOUBLE_QUOTES,ST_SECTION_VALUE,ST_VALUE,ST_OFFSET,ST_VAR_FALLBACK>{DOLLAR_CURLY} { /* Variable start */
 	yy_push_state(ST_VARNAME);
 	return TC_DOLLAR_CURLY;
 }
@@ -432,7 +433,13 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	RETURN_TOKEN(TC_VARNAME, yytext, yyleng);
 }
 
-<ST_VARNAME>"}" { /* Variable end */
+<ST_VARNAME>"!" { /* End Variable name, fallback start */
+	yy_pop_state();
+	yy_push_state(ST_VAR_FALLBACK);
+	return '!';
+}
+
+<ST_VARNAME,ST_VAR_FALLBACK>"}" { /* Variable/fallback end */
 	yy_pop_state();
 	return '}';
 }
@@ -522,11 +529,11 @@ end_raw_value_chars:
 	return END_OF_LINE;
 }
 
-<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{CONSTANT} { /* Get constant option value */
+<ST_SECTION_VALUE,ST_VALUE,ST_VAR_FALLBACK,ST_OFFSET>{CONSTANT} { /* Get constant option value */
 	RETURN_TOKEN(TC_CONSTANT, yytext, yyleng);
 }
 
-<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{NUMBER} { /* Get number option value as string */
+<ST_SECTION_VALUE,ST_VALUE,ST_VAR_FALLBACK,ST_OFFSET>{NUMBER} { /* Get number option value as string */
 	RETURN_TOKEN(TC_NUMBER, yytext, yyleng);
 }
 
@@ -548,11 +555,15 @@ end_raw_value_chars:
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
 
+<ST_VAR_FALLBACK>{FALLBACK_CHARS}+ { /* Same as above, but excluding '}' */
+	RETURN_TOKEN(TC_STRING, yytext, yyleng);
+}
+
 <ST_SECTION_VALUE,ST_OFFSET>{SECTION_VALUE_CHARS}+ { /* Get rest as section/offset value */
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
 
-<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{TABS_AND_SPACES}*["] { /* Double quoted '"' string start */
+<ST_SECTION_VALUE,ST_VALUE,ST_VAR_FALLBACK,ST_OFFSET>{TABS_AND_SPACES}*["] { /* Double quoted '"' string start */
 	yy_push_state(ST_DOUBLE_QUOTES);
 	return '"';
 }
@@ -603,7 +614,7 @@ end_raw_value_chars:
 	return TC_QUOTED_STRING;
 }
 
-<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{WHITESPACE} {
+<ST_SECTION_VALUE,ST_VALUE,ST_OFFSET,ST_VAR_FALLBACK>{WHITESPACE} {
 	RETURN_TOKEN(TC_WHITESPACE, yytext, yyleng);
 }
 
