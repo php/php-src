@@ -33,13 +33,12 @@
 #include "zend_interfaces.h"
 #include "ext/spl/spl_iterators.h"
 
-zend_class_entry *sxe_class_entry = NULL;
 PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator;
 PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 
 PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void) /* {{{ */
 {
-	return sxe_class_entry;
+	return ce_SimpleXMLElement;
 }
 /* }}} */
 
@@ -471,7 +470,7 @@ long_dim:
 				value_str = zval_get_string(value);
 				break;
 			case IS_OBJECT:
-				if (Z_OBJCE_P(value) == sxe_class_entry) {
+				if (Z_OBJCE_P(value) == ce_SimpleXMLElement) {
 					zval zval_copy;
 					if (sxe_object_cast_ex(Z_OBJ_P(value), &zval_copy, IS_STRING) == FAILURE) {
 						zend_throw_error(NULL, "Unable to cast node to string");
@@ -2184,7 +2183,7 @@ static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 	int inherited = 0;
 
 	while (parent) {
-		if (parent == sxe_class_entry) {
+		if (parent == ce_SimpleXMLElement) {
 			break;
 		}
 		parent = parent->parent;
@@ -2242,7 +2241,7 @@ PHP_FUNCTION(simplexml_load_file)
 	char           *ns = NULL;
 	size_t             ns_len = 0;
 	zend_long            options = 0;
-	zend_class_entry *ce= sxe_class_entry;
+	zend_class_entry *ce= ce_SimpleXMLElement;
 	zend_function    *fptr_count;
 	bool       isprefix = 0;
 
@@ -2262,7 +2261,7 @@ PHP_FUNCTION(simplexml_load_file)
 	}
 
 	if (!ce) {
-		ce = sxe_class_entry;
+		ce = ce_SimpleXMLElement;
 		fptr_count = NULL;
 	} else {
 		fptr_count = php_sxe_find_fptr_count(ce);
@@ -2287,7 +2286,7 @@ PHP_FUNCTION(simplexml_load_string)
 	char           *ns = NULL;
 	size_t             ns_len = 0;
 	zend_long            options = 0;
-	zend_class_entry *ce= sxe_class_entry;
+	zend_class_entry *ce= ce_SimpleXMLElement;
 	zend_function    *fptr_count;
 	bool       isprefix = 0;
 
@@ -2315,7 +2314,7 @@ PHP_FUNCTION(simplexml_load_string)
 	}
 
 	if (!ce) {
-		ce = sxe_class_entry;
+		ce = ce_SimpleXMLElement;
 		fptr_count = NULL;
 	} else {
 		fptr_count = php_sxe_find_fptr_count(ce);
@@ -2589,7 +2588,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	zval *node;
 	php_libxml_node_object *object;
 	xmlNodePtr		nodep = NULL;
-	zend_class_entry *ce = sxe_class_entry;
+	zend_class_entry *ce = ce_SimpleXMLElement;
 	zend_function    *fptr_count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|C!", &node, &ce) == FAILURE) {
@@ -2614,7 +2613,7 @@ PHP_FUNCTION(simplexml_import_dom)
 
 	if (nodep && nodep->type == XML_ELEMENT_NODE) {
 		if (!ce) {
-			ce = sxe_class_entry;
+			ce = ce_SimpleXMLElement;
 			fptr_count = NULL;
 		} else {
 			fptr_count = php_sxe_find_fptr_count(ce);
@@ -2664,10 +2663,10 @@ ZEND_GET_MODULE(simplexml)
 /* {{{ PHP_MINIT_FUNCTION(simplexml) */
 PHP_MINIT_FUNCTION(simplexml)
 {
-	sxe_class_entry = register_class_SimpleXMLElement(zend_ce_stringable, zend_ce_countable, spl_ce_RecursiveIterator);
-	sxe_class_entry->create_object = sxe_object_new;
-	sxe_class_entry->default_object_handlers = &sxe_object_handlers;
-	sxe_class_entry->get_iterator = php_sxe_get_iterator;
+	ce_SimpleXMLElement = register_class_SimpleXMLElement(zend_ce_stringable, zend_ce_countable, spl_ce_RecursiveIterator);
+	ce_SimpleXMLElement->create_object = sxe_object_new;
+	ce_SimpleXMLElement->default_object_handlers = &sxe_object_handlers;
+	ce_SimpleXMLElement->get_iterator = php_sxe_get_iterator;
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
@@ -2690,12 +2689,9 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
 
-	/* TODO: Why do we have two variables for this? */
-	ce_SimpleXMLElement = sxe_class_entry;
-
 	ce_SimpleXMLIterator = register_class_SimpleXMLIterator(ce_SimpleXMLElement);
 
-	php_libxml_register_export(sxe_class_entry, simplexml_export_node);
+	php_libxml_register_export(ce_SimpleXMLElement, simplexml_export_node);
 
 	return SUCCESS;
 }
@@ -2704,7 +2700,7 @@ PHP_MINIT_FUNCTION(simplexml)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(simplexml) */
 PHP_MSHUTDOWN_FUNCTION(simplexml)
 {
-	sxe_class_entry = NULL;
+	ce_SimpleXMLElement = NULL;
 	return SUCCESS;
 }
 /* }}} */
