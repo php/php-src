@@ -1290,8 +1290,12 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
 			do {
 				nodep = nodep->parent;
-				ZEND_ASSERT(nodep != NULL);
 				if (nodep == basep) {
+					return NULL;
+				}
+				/* This shouldn't happen, unless there's an invalidation bug somewhere. */
+				if (UNEXPECTED(nodep == NULL)) {
+					zend_throw_error(NULL, "Current node in traversal is not in the document. Please report this as a bug in php-src.");
 					return NULL;
 				}
 			} while (nodep->next == NULL);
