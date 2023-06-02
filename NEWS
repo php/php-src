@@ -44,6 +44,9 @@ PHP                                                                        NEWS
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)
 
+- DOM:
+  . Fix bug GH-11308 (getElementsByTagName() is O(N^2)). (nielsdos)
+
 - Exif:
   . Removed unneeded codepaths in exif_process_TIFF_in_JPEG(). (nielsdos)
 

@@ -511,7 +511,6 @@ PHP_METHOD(DOMElement, getElementsByTagName)
 	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
-	xmlChar *local;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
@@ -522,8 +521,7 @@ PHP_METHOD(DOMElement, getElementsByTagName)
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
-	local = xmlCharStrndup(name, name_len);
-	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, NULL, 0);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -930,7 +928,6 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
-	xmlChar *local, *nsuri;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -941,9 +938,7 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
-	local = xmlCharStrndup(name, name_len);
-	nsuri = xmlCharStrndup(uri ? uri : "", uri_len);
-	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, uri ? uri : "", uri_len);
 
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */

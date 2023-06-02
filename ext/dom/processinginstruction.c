@@ -128,6 +128,8 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+
 	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 
 	zend_string_release_ex(str, 0);

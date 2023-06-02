@@ -82,15 +82,22 @@ typedef struct _dom_nnodemap_object {
 	dom_object *baseobj;
 	zval baseobj_zv;
 	int nodetype;
+	int cached_length;
 	xmlHashTable *ht;
 	xmlChar *local;
 	xmlChar *ns;
+	php_libxml_cache_tag cache_tag;
+	dom_object *cached_obj;
+	int cached_obj_index;
+	bool free_local : 1;
+	bool free_ns : 1;
 } dom_nnodemap_object;
 
 typedef struct {
 	zend_object_iterator intern;
 	zval curobj;
 	HashPosition pos;
+	php_libxml_cache_tag cache_tag;
 } php_dom_iterator;
 
 #include "domexception.h"
@@ -113,14 +120,14 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void dom_normalize (xmlNodePtr nodep);
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
 void php_dom_create_implementation(zval *retval);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
 void php_dom_create_iterator(zval *return_value, int ce_type);
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns);
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
@@ -152,6 +159,33 @@ void dom_child_node_remove(dom_object *context);
 
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1
+
+static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php_libxml_cache_tag *cache_tag, const php_libxml_doc_ptr *doc_ptr)
+{
+	ZEND_ASSERT(cache_tag != NULL);
+	ZEND_ASSERT(doc_ptr != NULL);
+	/* See overflow comment in php_libxml_invalidate_node_list_cache(). */
+#if SIZEOF_SIZE_T == 8
+	return cache_tag->modification_nr != doc_ptr->cache_tag.modification_nr;
+#else
+	return cache_tag->modification_nr != doc_ptr->cache_tag.modification_nr || UNEXPECTED(doc_ptr->cache_tag.modification_nr == SIZE_MAX);
+#endif
+}
+
+static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
+{
+	ZEND_ASSERT(node != NULL);
+	return !node->doc || !node->doc->_private || php_dom_is_cache_tag_stale_from_doc_ptr(cache_tag, node->doc->_private);
+}
+
+static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
+{
+	ZEND_ASSERT(cache_tag != NULL);
+	if (node->doc && node->doc->_private) {
+		const php_libxml_doc_ptr* doc_ptr = node->doc->_private;
+		cache_tag->modification_nr = doc_ptr->cache_tag.modification_nr;
+	}
+}
 
 PHP_MINIT_FUNCTION(dom);
 PHP_MSHUTDOWN_FUNCTION(dom);

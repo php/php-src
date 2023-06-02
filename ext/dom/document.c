@@ -777,7 +777,6 @@ PHP_METHOD(DOMDocument, getElementsByTagName)
 	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
-	xmlChar *local;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
@@ -788,8 +787,7 @@ PHP_METHOD(DOMDocument, getElementsByTagName)
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
-	local = xmlCharStrndup(name, name_len);
-	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, NULL, 0);
 }
 /* }}} end dom_document_get_elements_by_tag_name */
 
@@ -846,6 +844,8 @@ PHP_METHOD(DOMDocument, importNode)
 			xmlSetNs(retnodep, nsptr);
 		}
 	}
+
+	php_libxml_invalidate_node_list_cache_from_doc(docp);
 
 	DOM_RET_OBJ((xmlNodePtr) retnodep, &ret, intern);
 }
@@ -991,7 +991,6 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
-	xmlChar *local, *nsuri;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -1002,9 +1001,7 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
-	local = xmlCharStrndup(name, name_len);
-	nsuri = xmlCharStrndup(uri ? uri : "", uri_len);
-	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, uri ? uri : "", uri_len);
 }
 /* }}} end dom_document_get_elements_by_tag_name_ns */
 
@@ -1069,6 +1066,8 @@ PHP_METHOD(DOMDocument, normalizeDocument)
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+
+	php_libxml_invalidate_node_list_cache_from_doc(docp);
 
 	dom_normalize((xmlNodePtr) docp);
 }
@@ -1328,10 +1327,14 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 
 	if (id != NULL) {
 		intern = Z_DOMOBJ_P(id);
+		size_t old_modification_nr = 0;
 		if (intern != NULL) {
 			docp = (xmlDocPtr) dom_object_get_node(intern);
 			doc_prop = NULL;
 			if (docp != NULL) {
+				const php_libxml_doc_ptr *doc_ptr = docp->_private;
+				ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
+				old_modification_nr = doc_ptr->cache_tag.modification_nr;
 				php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 				doc_prop = intern->document->doc_props;
 				intern->document->doc_props = NULL;
@@ -1348,6 +1351,12 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		}
 
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);
+		/* Since iterators should invalidate, we need to start the modification number from the old counter */
+		if (old_modification_nr != 0) {
+			php_libxml_doc_ptr* doc_ptr = (php_libxml_doc_ptr*) ((php_libxml_node_object*) intern)->node; /* downcast */
+			doc_ptr->cache_tag.modification_nr = old_modification_nr;
+			php_libxml_invalidate_node_list_cache(doc_ptr);
+		}
 
 		RETURN_TRUE;
 	} else {
@@ -1562,6 +1571,8 @@ PHP_METHOD(DOMDocument, xinclude)
 	if (root) {
 		php_dom_remove_xinclude_nodes(root);
 	}
+
+	php_libxml_invalidate_node_list_cache_from_doc(docp);
 
 	if (err) {
 		RETVAL_LONG(err);
@@ -1871,10 +1882,14 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 
 	if (id != NULL && instanceof_function(Z_OBJCE_P(id), dom_document_class_entry)) {
 		intern = Z_DOMOBJ_P(id);
+		size_t old_modification_nr = 0;
 		if (intern != NULL) {
 			docp = (xmlDocPtr) dom_object_get_node(intern);
 			doc_prop = NULL;
 			if (docp != NULL) {
+				const php_libxml_doc_ptr *doc_ptr = docp->_private;
+				ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
+				old_modification_nr = doc_ptr->cache_tag.modification_nr;
 				php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 				doc_prop = intern->document->doc_props;
 				intern->document->doc_props = NULL;
@@ -1891,6 +1906,12 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		}
 
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);
+		/* Since iterators should invalidate, we need to start the modification number from the old counter */
+		if (old_modification_nr != 0) {
+			php_libxml_doc_ptr* doc_ptr = (php_libxml_doc_ptr*) ((php_libxml_node_object*) intern)->node; /* downcast */
+			doc_ptr->cache_tag.modification_nr = old_modification_nr;
+			php_libxml_invalidate_node_list_cache(doc_ptr);
+		}
 
 		RETURN_TRUE;
 	} else {

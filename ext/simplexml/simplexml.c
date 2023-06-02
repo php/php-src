@@ -442,6 +442,8 @@ long_dim:
 
 	GET_NODE(sxe, node);
 
+	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
+
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
 		elements = 0;
@@ -812,6 +814,8 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements
 	sxe = php_sxe_fetch_object(object);
 
 	GET_NODE(sxe, node);
+
+	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
 
 	if (Z_TYPE_P(member) == IS_LONG) {
 		if (sxe->iter.type != SXE_ITER_ATTRLIST) {
@@ -1685,6 +1689,8 @@ PHP_METHOD(SimpleXMLElement, addChild)
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
+
+	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		php_error_docref(NULL, E_WARNING, "Cannot add element to attributes");

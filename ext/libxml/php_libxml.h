@@ -69,6 +69,16 @@ typedef struct _php_libxml_node_ptr {
 	void *_private;
 } php_libxml_node_ptr;
 
+typedef struct {
+	size_t modification_nr;
+} php_libxml_cache_tag;
+
+/* extends php_libxml_node_ptr */
+typedef struct {
+	php_libxml_node_ptr node_ptr;
+	php_libxml_cache_tag cache_tag;
+} php_libxml_doc_ptr;
+
 typedef struct _php_libxml_node_object {
 	php_libxml_node_ptr *node;
 	php_libxml_ref_obj *document;
@@ -79,6 +89,27 @@ typedef struct _php_libxml_node_object {
 
 static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *obj) {
 	return (php_libxml_node_object *)((char*)(obj) - obj->handlers->offset);
+}
+
+static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_doc_ptr *doc_ptr)
+{
+#if SIZEOF_SIZE_T == 8
+	/* If one operation happens every nanosecond, then it would still require 584 years to overflow
+	 * the counter. So we'll just assume this never happens. */
+	doc_ptr->cache_tag.modification_nr++;
+#else
+	size_t new_modification_nr = doc_ptr->cache_tag.modification_nr + 1;
+	if (EXPECTED(new_modification_nr > 0)) { /* unsigned overflow; checking after addition results in one less instruction */
+		doc_ptr->cache_tag.modification_nr = new_modification_nr;
+	}
+#endif
+}
+
+static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xmlDocPtr docp)
+{
+	if (docp && docp->_private) { /* docp is NULL for detached nodes */
+		php_libxml_invalidate_node_list_cache(docp->_private);
+	}
 }
 
 #define Z_LIBXML_NODE_P(zv) php_libxml_node_fetch_object(Z_OBJ_P((zv)))

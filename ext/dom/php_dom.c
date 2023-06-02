@@ -942,7 +942,7 @@ void dom_objects_free_storage(zend_object *object)
 }
 /* }}} */
 
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns) /* {{{ */
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len) /* {{{ */
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
@@ -950,11 +950,33 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 
 	ZVAL_OBJ_COPY(&mapptr->baseobj_zv, &basenode->std);
 
+	xmlDocPtr doc = basenode->document ? basenode->document->ptr : NULL;
+
 	mapptr->baseobj = basenode;
 	mapptr->nodetype = ntype;
 	mapptr->ht = ht;
-	mapptr->local = local;
-	mapptr->ns = ns;
+
+	const xmlChar* tmp;
+
+	if (local) {
+		int len = local_len > INT_MAX ? -1 : (int) local_len;
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)local, len)) != NULL) {
+			mapptr->local = (xmlChar*) tmp;
+		} else {
+			mapptr->local = xmlCharStrndup(local, len);
+			mapptr->free_local = true;
+		}
+	}
+
+	if (ns) {
+		int len = ns_len > INT_MAX ? -1 : (int) ns_len;
+		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ns, len)) != NULL) {
+			mapptr->ns = (xmlChar*) tmp;
+		} else {
+			mapptr->ns = xmlCharStrndup(ns, len);
+			mapptr->free_ns = true;
+		}
+	}
 }
 /* }}} */
 
@@ -1010,10 +1032,13 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap) {
-		if (objmap->local) {
+		if (objmap->cached_obj && GC_DELREF(&objmap->cached_obj->std) == 0) {
+			zend_objects_store_del(&objmap->cached_obj->std);
+		}
+		if (objmap->free_local) {
 			xmlFree(objmap->local);
 		}
-		if (objmap->ns) {
+		if (objmap->free_ns) {
 			xmlFree(objmap->ns);
 		}
 		if (!Z_ISUNDEF(objmap->baseobj_zv)) {
@@ -1042,7 +1067,13 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 	objmap->nodetype = 0;
 	objmap->ht = NULL;
 	objmap->local = NULL;
+	objmap->free_local = false;
 	objmap->ns = NULL;
+	objmap->free_ns = false;
+	objmap->cache_tag.modification_nr = 0;
+	objmap->cached_length = -1;
+	objmap->cached_obj = NULL;
+	objmap->cached_obj_index = 0;
 
 	return &intern->std;
 }
@@ -1220,19 +1251,25 @@ bool dom_has_feature(zend_string *feature, zend_string *version)
 }
 /* }}} end dom_has_feature */
 
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
 {
+	/* Can happen with detached document */
+	if (UNEXPECTED(nodep == NULL)) {
+		return NULL;
+	}
+
 	xmlNodePtr ret = NULL;
+	bool local_match_any = local[0] == '*' && local[1] == '\0';
 
 	/* Note: The spec says that ns == '' must be transformed to ns == NULL. In other words, they are equivalent.
 	 *       PHP however does not do this and internally uses the empty string everywhere when the user provides ns == NULL.
 	 *       This is because for PHP ns == NULL has another meaning: "match every namespace" instead of "match the empty namespace". */
 	bool ns_match_any = ns == NULL || (ns[0] == '*' && ns[1] == '\0');
 
-	while (nodep != NULL && (*cur <= index || index == -1)) {
+	while (*cur <= index) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			if (xmlStrEqual(nodep->name, (xmlChar *)local) || xmlStrEqual((xmlChar *)"*", (xmlChar *)local)) {
-				if (ns_match_any || (!strcmp(ns, "") && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
+			if (local_match_any || xmlStrEqual(nodep->name, (xmlChar *)local)) {
+				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
 					if (*cur == index) {
 						ret = nodep;
 						break;
@@ -1240,16 +1277,33 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 					(*cur)++;
 				}
 			}
-			ret = dom_get_elements_by_tag_name_ns_raw(nodep->children, ns, local, cur, index);
-			if (ret != NULL) {
-				break;
+
+			if (nodep->children) {
+				nodep = nodep->children;
+				continue;
 			}
 		}
-		nodep = nodep->next;
+
+		if (nodep->next) {
+			nodep = nodep->next;
+		} else {
+			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+			do {
+				nodep = nodep->parent;
+				if (nodep == basep) {
+					return NULL;
+				}
+				/* This shouldn't happen, unless there's an invalidation bug somewhere. */
+				if (UNEXPECTED(nodep == NULL)) {
+					zend_throw_error(NULL, "Current node in traversal is not in the document. Please report this as a bug in php-src.");
+					return NULL;
+				}
+			} while (nodep->next == NULL);
+			nodep = nodep->next;
+		}
 	}
 	return ret;
 }
-/* }}} */
 /* }}} end dom_element_get_elements_by_tag_name_ns_raw */
 
 static inline bool is_empty_node(xmlNodePtr nodep)
