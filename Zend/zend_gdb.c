@@ -113,7 +113,7 @@ ZEND_API bool zend_gdb_present(void)
 #if defined(__linux__) /* netbsd while having this procfs part, does not hold the tracer pid */
 	int fd = open("/proc/self/status", O_RDONLY);
 
-	if (fd > 0) {
+	if (fd >= 0) {
 		char buf[1024];
 		ssize_t n = read(fd, buf, sizeof(buf) - 1);
 		char *s;
