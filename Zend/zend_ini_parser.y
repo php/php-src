@@ -170,7 +170,7 @@ static void zend_ini_get_constant(zval *result, zval *name)
 /* }}} */
 
 /* {{{ zend_ini_get_var() */
-static void zend_ini_get_var(zval *result, zval *name)
+static void zend_ini_get_var(zval *result, zval *name, zval *fallback)
 {
 	zval *curval;
 	char *envvar;
@@ -182,9 +182,13 @@ static void zend_ini_get_var(zval *result, zval *name)
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
 		ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
+	/* ..or if not defined, try fallback value */
+	} else if (fallback) {
+		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(fallback), strlen(Z_STRVAL_P(fallback)), ZEND_SYSTEM_INI));
 	} else {
 		zend_ini_init_string(result);
 	}
+
 }
 /* }}} */
 
@@ -440,7 +444,14 @@ expr:
 ;
 
 cfg_var_ref:
-		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2); zend_string_free(Z_STR($2)); }
+		TC_DOLLAR_CURLY TC_VARNAME '}'				{ zend_ini_get_var(&$$, &$2, NULL); zend_string_free(Z_STR($2)); }
+	|	TC_DOLLAR_CURLY TC_VARNAME '!' fallback '}'	{ zend_ini_get_var(&$$, &$2, &$4); zend_string_free(Z_STR($2)); zend_string_free(Z_STR($4)); }
+;
+
+
+fallback:
+		var_string_list	{ $$ = $1; }
+	|	%empty			{ zend_ini_init_string(&$$); }
 ;
 
 constant_literal:
