@@ -142,9 +142,9 @@ PHP_METHOD(DOMNamedNodeMap, item)
 	int count;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
 	if (index < 0 || ZEND_LONG_INT_OVFL(index)) {
 		zend_argument_value_error(1, "must be between 0 and %d", INT_MAX);
 		RETURN_THROWS();

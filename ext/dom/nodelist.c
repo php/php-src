@@ -154,9 +154,9 @@ PHP_METHOD(DOMNodeList, item)
 	int count = 0;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (index >= 0) {
 		intern = Z_DOMOBJ_P(id);
