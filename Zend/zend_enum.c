@@ -597,6 +597,7 @@ ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zv
 
 ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name) {
 	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
+	ZEND_ASSERT(c && "Must be a valid enum case");
 	ZEND_ASSERT(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE);
 
 	if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
