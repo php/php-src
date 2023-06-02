@@ -160,7 +160,7 @@ next_iter:
 	return NULL;
 } /* }}} */
 
-static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, char **name, SXE_ITER *type) /* {{{ */
+static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, char *name, SXE_ITER *type) /* {{{ */
 {
 	int         orgtype;
 	xmlNodePtr  orgnode = node;
@@ -186,7 +186,7 @@ static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, 
 	while (node) {
 		SKIP_TEXT(node)
 		if (node->type == XML_ELEMENT_NODE && match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
-			if (xmlStrEqual(node->name, (xmlChar *)*name)) {
+			if (xmlStrEqual(node->name, (xmlChar *)name)) {
 				*type = SXE_ITER_ELEMENT;
 				return orgnode;
 			}
@@ -634,7 +634,7 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 	sxe = php_sxe_fetch_object(object);
 	GET_NODE(sxe, node);
 	name = ZSTR_VAL(zname);
-	node = sxe_get_element_by_name(sxe, node, &name, &type);
+	node = sxe_get_element_by_name(sxe, node, name, &type);
 	if (node) {
 		return NULL;
 	}
