@@ -165,7 +165,6 @@ static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, 
 {
 	int         orgtype;
 	xmlNodePtr  orgnode = node;
-	xmlNodePtr  retnode = NULL;
 
 	if (sxe->iter.type != SXE_ITER_ATTRLIST)
 	{
@@ -189,23 +188,12 @@ static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, 
 		SKIP_TEXT(node)
 		if (node->type == XML_ELEMENT_NODE && match_ns(sxe, node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 			if (!xmlStrcmp(node->name, (xmlChar *)*name)) {
-				if (1||retnode)
-				{
-					*type = SXE_ITER_ELEMENT;
-					return orgnode;
-				}
-				retnode = node;
+				*type = SXE_ITER_ELEMENT;
+				return orgnode;
 			}
 		}
 next_iter:
 		node = node->next;
-	}
-
-	if (retnode)
-	{
-		*type = SXE_ITER_NONE;
-		*name = NULL;
-		return retnode;
 	}
 
 	return NULL;
