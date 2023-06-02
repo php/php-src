@@ -988,6 +988,20 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
+   `web-php-distributions` is a submodule of `web-php`. You'll now have to update
+   the commit reference to reflect the change made in web-php-distributions.
+
+   ```shell
+   cd /path/to/repos/php/web-php
+   git submodule update
+   cd distributions           # This is the submodule refering to web-php-distributions
+   git pull origin master
+   cd ..
+   git add distributions
+   git commit --gpg-sign=YOURKEYID -m "Update php-keyring.gpg in distributions"
+   git push
+   ```
+
 4. Request moderation access to php-announce@lists.php.net and
    primary-qa-tester@lists.php.net lists, so you are able to moderate your
    release announcements. All the announcements should be sent from your
