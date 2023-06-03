@@ -132,6 +132,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc);
 void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc);
 void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc);
 void dom_child_node_remove(dom_object *context);
+void dom_child_replace_with(dom_object *context, zval *nodes, int nodesc);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \

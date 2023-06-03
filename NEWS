@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     xpath query). (nielsdos)
   . Fixed bug #67440 (append_node of a DOMDocumentFragment does not reconcile
     namespaces). (nielsdos)
+  . Fixed bug #81642 (DOMChildNode::replaceWith() bug when replacing a node
+    with itself). (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
