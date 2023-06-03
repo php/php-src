@@ -40,6 +40,8 @@ PHP                                                                        NEWS
   . Fix bug #79836 (Segfault in concat_function). (nielsdos)
   . Fix bug #81705 (type confusion/UAF on set_error_handler with concat
     operation). (nielsdos)
+  . Fix GH-11348 (Closure created from magic method does not accept named
+    arguments). (nielsdos)
 
 - Date:
   . Implement More Appropriate Date/Time Exceptions RFC. (Derick)

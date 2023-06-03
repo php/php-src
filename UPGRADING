@@ -58,6 +58,7 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/readonly_amendments
   . Class, interface, trait, and enum constants now support type
     declarations. RFC: https://wiki.php.net/rfc/typed_class_constants
+  . Closures created from magic methods can now accept named arguments.
 
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
