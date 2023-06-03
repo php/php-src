@@ -1385,37 +1385,72 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 }
 /* }}} end dom_set_old_ns */
 
-void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
+static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep)
 {
 	xmlNsPtr nsptr, nsdftptr, curns, prevns = NULL;
 
-	if (nodep->type == XML_ELEMENT_NODE) {
-		/* Following if block primarily used for inserting nodes created via createElementNS */
-		if (nodep->nsDef != NULL) {
-			curns = nodep->nsDef;
-			while (curns) {
-				nsdftptr = curns->next;
-				if (curns->href != NULL) {
-					if((nsptr = xmlSearchNsByHref(doc, nodep->parent, curns->href)) &&
-						(curns->prefix == NULL || xmlStrEqual(nsptr->prefix, curns->prefix))) {
-						curns->next = NULL;
-						if (prevns == NULL) {
-							nodep->nsDef = nsdftptr;
-						} else {
-							prevns->next = nsdftptr;
-						}
-						dom_set_old_ns(doc, curns);
-						curns = prevns;
+	/* Following if block primarily used for inserting nodes created via createElementNS */
+	if (nodep->nsDef != NULL) {
+		curns = nodep->nsDef;
+		while (curns) {
+			nsdftptr = curns->next;
+			if (curns->href != NULL) {
+				if((nsptr = xmlSearchNsByHref(doc, nodep->parent, curns->href)) &&
+					(curns->prefix == NULL || xmlStrEqual(nsptr->prefix, curns->prefix))) {
+					curns->next = NULL;
+					if (prevns == NULL) {
+						nodep->nsDef = nsdftptr;
+					} else {
+						prevns->next = nsdftptr;
 					}
+					dom_set_old_ns(doc, curns);
+					curns = prevns;
 				}
-				prevns = curns;
-				curns = nsdftptr;
 			}
+			prevns = curns;
+			curns = nsdftptr;
 		}
+	}
+}
+
+void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
+{
+	if (nodep->type == XML_ELEMENT_NODE) {
+		dom_reconcile_ns_internal(doc, nodep);
 		xmlReconciliateNs(doc, nodep);
 	}
 }
 /* }}} */
+
+static void dom_reconcile_ns_list_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
+{
+	ZEND_ASSERT(nodep != NULL);
+	while (true) {
+		if (nodep->type == XML_ELEMENT_NODE) {
+			dom_reconcile_ns_internal(doc, nodep);
+			if (nodep->children) {
+				dom_reconcile_ns_list_internal(doc, nodep->children, nodep->last /* process the whole children list */);
+			}
+		}
+		if (nodep == last) {
+			break;
+		}
+		nodep = nodep->next;
+	}
+}
+
+void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
+{
+	dom_reconcile_ns_list_internal(doc, nodep, last);
+	/* Outside of the recursion above because xmlReconciliateNs() performs its own recursion. */
+	while (true) {
+		xmlReconciliateNs(doc, nodep);
+		if (nodep == last) {
+			break;
+		}
+		nodep = nodep->next;
+	}
+}
 
 /*
 http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-DocCrElNS
