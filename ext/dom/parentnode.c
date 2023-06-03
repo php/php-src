@@ -298,13 +298,14 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 			parentNode->children = newchild;
 		}
 
-		parentNode->last = fragment->last;
+		xmlNodePtr last = fragment->last;
+		parentNode->last = last;
 
 		newchild->prev = prevsib;
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
 
-		dom_reconcile_ns(parentNode->doc, newchild);
+		dom_reconcile_ns_list(parentNode->doc, newchild, last);
 	}
 
 	xmlFree(fragment);
@@ -335,13 +336,14 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 	nextsib = parentNode->children;
 
 	if (newchild) {
+		xmlNodePtr last = fragment->last;
 		parentNode->children = newchild;
 		fragment->last->next = nextsib;
-		nextsib->prev = fragment->last;
+		nextsib->prev = last;
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
 
-		dom_reconcile_ns(parentNode->doc, newchild);
+		dom_reconcile_ns_list(parentNode->doc, newchild, last);
 	}
 
 	xmlFree(fragment);
@@ -414,11 +416,13 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
+		xmlNodePtr last = fragment->last;
+
 		/* Step 5: place fragment into the parent before viable_next_sibling */
 		dom_pre_insert(viable_next_sibling, parentNode, newchild, fragment);
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
-		dom_reconcile_ns(doc, newchild);
+		dom_reconcile_ns_list(doc, newchild, last);
 	}
 
 	xmlFree(fragment);
@@ -463,6 +467,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
+		xmlNodePtr last = fragment->last;
+
 		/* Step 5: if viable_previous_sibling is null, set it to the parent's first child, otherwise viable_previous_sibling's next sibling */
 		if (!viable_previous_sibling) {
 			viable_previous_sibling = parentNode->children;
@@ -473,7 +479,7 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 		dom_pre_insert(viable_previous_sibling, parentNode, newchild, fragment);
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
-		dom_reconcile_ns(doc, newchild);
+		dom_reconcile_ns_list(doc, newchild, last);
 	}
 
 	xmlFree(fragment);
