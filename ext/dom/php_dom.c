@@ -1442,7 +1442,14 @@ static void dom_reconcile_ns_list_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlN
 void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
 {
 	dom_reconcile_ns_list_internal(doc, nodep, last);
-	xmlReconciliateNs(doc, nodep->parent /* to handle the whole inserted subtree instead of only the first child */);
+	/* Outside of the recursion above because xmlReconciliateNs() performs its own recursion. */
+	while (true) {
+		xmlReconciliateNs(doc, nodep);
+		if (nodep == last) {
+			break;
+		}
+		nodep = nodep->next;
+	}
 }
 
 /*
