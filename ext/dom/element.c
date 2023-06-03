@@ -1234,7 +1234,7 @@ PHP_METHOD(DOMElement, prepend)
 }
 /* }}} end DOMElement::prepend */
 
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
 Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, replaceWith)
@@ -1251,8 +1251,7 @@ PHP_METHOD(DOMElement, replaceWith)
 	id = ZEND_THIS;
 	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
 
-	dom_parent_node_after(intern, args, argc);
-	dom_child_node_remove(intern);
+	dom_child_replace_with(intern, args, argc);
 }
 /* }}} end DOMElement::prepend */
 
