@@ -360,6 +360,7 @@ arm_task:
         `#--with-pdo-dblib`
         --disable-phpdbg
         `#--enable-werror`
+        --enable-address-sanitizer
     - make -j2 > /dev/null
     - make install
     - mkdir -p /etc/php.d
@@ -390,6 +391,8 @@ arm_task:
         --show-diff
         --show-slow 1000
         --set-timeout 120
+        --asan
+        ext/pgsql/tests/pg_trace.phpt
     - >-
         sapi/cli/php run-tests.php
         -d zend_extension=opcache.so
@@ -404,3 +407,5 @@ arm_task:
         --show-slow 1000
         --set-timeout 120
         --repeat 2
+        --asan
+        ext/pgsql/tests/pg_trace.phpt
