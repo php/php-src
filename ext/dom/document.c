@@ -1005,6 +1005,19 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 }
 /* }}} end dom_document_get_elements_by_tag_name_ns */
 
+static bool php_dom_is_node_attached(const xmlNode *node)
+{
+	ZEND_ASSERT(node != NULL);
+	node = node->parent;
+	while (node != NULL) {
+		if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+			return true;
+		}
+		node = node->parent;
+	}
+	return false;
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBId
 Since: DOM Level 2
 */
@@ -1027,7 +1040,13 @@ PHP_METHOD(DOMDocument, getElementById)
 
 	attrp = xmlGetID(docp, (xmlChar *) idname);
 
-	if (attrp && attrp->parent) {
+	/* From the moment an ID is created, libxml2's behaviour is to cache that element, even
+	 * if that element is not yet attached to the document. Similarly, only upon destruction of
+	 * the element the ID is actually removed by libxml2. Since libxml2 has such behaviour deeply
+	 * ingrained in the library, and uses the cache for various purposes, it seems like a bad
+	 * idea and lost cause to fight it. Instead, we'll simply walk the tree upwards to check
+	 * if the node is attached to the document. */
+	if (attrp && attrp->parent && php_dom_is_node_attached(attrp->parent)) {
 		DOM_RET_OBJ((xmlNodePtr) attrp->parent, &ret, intern);
 	} else {
 		RETVAL_NULL();
