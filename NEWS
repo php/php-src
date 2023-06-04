@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     namespaces). (nielsdos)
   . Fixed bug #81642 (DOMChildNode::replaceWith() bug when replacing a node
     with itself). (nielsdos)
+  . Fixed bug #77686 (Removed elements are still returned by getElementById).
+    (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
