@@ -298,13 +298,14 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 			parentNode->children = newchild;
 		}
 
-		parentNode->last = fragment->last;
+		xmlNodePtr last = fragment->last;
+		parentNode->last = last;
 
 		newchild->prev = prevsib;
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
 
-		dom_reconcile_ns(parentNode->doc, newchild);
+		dom_reconcile_ns_list(parentNode->doc, newchild, last);
 	}
 
 	xmlFree(fragment);
@@ -335,13 +336,14 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 	nextsib = parentNode->children;
 
 	if (newchild) {
+		xmlNodePtr last = fragment->last;
 		parentNode->children = newchild;
 		fragment->last->next = nextsib;
-		nextsib->prev = fragment->last;
+		nextsib->prev = last;
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
 
-		dom_reconcile_ns(parentNode->doc, newchild);
+		dom_reconcile_ns_list(parentNode->doc, newchild, last);
 	}
 
 	xmlFree(fragment);
@@ -414,11 +416,13 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
+		xmlNodePtr last = fragment->last;
+
 		/* Step 5: place fragment into the parent before viable_next_sibling */
 		dom_pre_insert(viable_next_sibling, parentNode, newchild, fragment);
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
-		dom_reconcile_ns(doc, newchild);
+		dom_reconcile_ns_list(doc, newchild, last);
 	}
 
 	xmlFree(fragment);
@@ -463,6 +467,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
+		xmlNodePtr last = fragment->last;
+
 		/* Step 5: if viable_previous_sibling is null, set it to the parent's first child, otherwise viable_previous_sibling's next sibling */
 		if (!viable_previous_sibling) {
 			viable_previous_sibling = parentNode->children;
@@ -473,10 +479,36 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 		dom_pre_insert(viable_previous_sibling, parentNode, newchild, fragment);
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
-		dom_reconcile_ns(doc, newchild);
+		dom_reconcile_ns_list(doc, newchild, last);
 	}
 
 	xmlFree(fragment);
+}
+
+static zend_result dom_child_removal_preconditions(const xmlNodePtr child, int stricterror)
+{
+	if (dom_node_is_read_only(child) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		return FAILURE;
+	}
+
+	if (!child->parent) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		return FAILURE;
+	}
+
+	if (dom_node_children_valid(child->parent) == FAILURE) {
+		return FAILURE;
+	}
+
+	xmlNodePtr children = child->parent->children;
+	if (!children) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 
 void dom_child_node_remove(dom_object *context)
@@ -487,27 +519,11 @@ void dom_child_node_remove(dom_object *context)
 
 	stricterror = dom_get_strict_error(context->document);
 
-	if (dom_node_is_read_only(child) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		return;
-	}
-
-	if (!child->parent) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		return;
-	}
-
-	if (dom_node_children_valid(child->parent) == FAILURE) {
+	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
 		return;
 	}
 
 	children = child->parent->children;
-	if (!children) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		return;
-	}
-
 	while (children) {
 		if (children == child) {
 			xmlUnlinkNode(child);
@@ -517,6 +533,43 @@ void dom_child_node_remove(dom_object *context)
 	}
 
 	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+}
+
+void dom_child_replace_with(dom_object *context, zval *nodes, int nodesc)
+{
+	xmlNodePtr child = dom_object_get_node(context);
+	xmlNodePtr parentNode = child->parent;
+
+	int stricterror = dom_get_strict_error(context->document);
+	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+		return;
+	}
+
+	xmlNodePtr insertion_point = child->next;
+
+	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
+	if (UNEXPECTED(fragment == NULL)) {
+		return;
+	}
+
+	xmlNodePtr newchild = fragment->children;
+	xmlDocPtr doc = parentNode->doc;
+
+	if (newchild) {
+		xmlNodePtr last = fragment->last;
+
+		/* Unlink and free it unless it became a part of the fragment. */
+		if (child->parent != fragment) {
+			xmlUnlinkNode(child);
+		}
+
+		dom_pre_insert(insertion_point, parentNode, newchild, fragment);
+
+		dom_fragment_assign_parent_node(parentNode, fragment);
+		dom_reconcile_ns_list(doc, newchild, last);
+	}
+
+	xmlFree(fragment);
 }
 
 #endif

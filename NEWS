@@ -21,6 +21,12 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-11347 (Memory leak when calling a static method inside an
     xpath query). (nielsdos)
+  . Fixed bug #67440 (append_node of a DOMDocumentFragment does not reconcile
+    namespaces). (nielsdos)
+  . Fixed bug #81642 (DOMChildNode::replaceWith() bug when replacing a node
+    with itself). (nielsdos)
+  . Fixed bug #77686 (Removed elements are still returned by getElementById).
+    (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)

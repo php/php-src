@@ -110,6 +110,7 @@ int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, i
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep);
+void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void dom_normalize (xmlNodePtr nodep);
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
@@ -131,6 +132,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc);
 void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc);
 void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc);
 void dom_child_node_remove(dom_object *context);
+void dom_child_replace_with(dom_object *context, zval *nodes, int nodesc);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
