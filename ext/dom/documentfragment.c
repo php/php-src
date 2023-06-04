@@ -135,7 +135,7 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, append)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -156,7 +156,7 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, prepend)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;

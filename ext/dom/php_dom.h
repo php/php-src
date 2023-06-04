@@ -135,12 +135,12 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
 
-void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc);
-void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc);
-void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc);
-void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc);
+void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
+void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc);
+void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc);
+void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_child_node_remove(dom_object *context);
-void dom_child_replace_with(dom_object *context, zval *nodes, int nodesc);
+void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \

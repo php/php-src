@@ -1155,7 +1155,7 @@ PHP_METHOD(DOMElement, remove)
 
 PHP_METHOD(DOMElement, after)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1172,7 +1172,7 @@ PHP_METHOD(DOMElement, after)
 
 PHP_METHOD(DOMElement, before)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1192,7 +1192,7 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, append)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1213,7 +1213,7 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, prepend)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1234,7 +1234,7 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, replaceWith)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;

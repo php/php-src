@@ -124,9 +124,9 @@ int dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 }
 /* }}} */
 
-static bool dom_is_node_in_list(const zval *nodes, int nodesc, const xmlNodePtr node_to_find)
+static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNodePtr node_to_find)
 {
-	for (int i = 0; i < nodesc; i++) {
+	for (uint32_t i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
 			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
 
@@ -141,9 +141,8 @@ static bool dom_is_node_in_list(const zval *nodes, int nodesc, const xmlNodePtr 
 	return false;
 }
 
-xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, int nodesc)
+xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, uint32_t nodesc)
 {
-	int i;
 	xmlDoc *documentNode;
 	xmlNode *fragment;
 	xmlNode *newNode;
@@ -170,7 +169,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 
 	stricterror = dom_get_strict_error(document);
 
-	for (i = 0; i < nodesc; i++) {
+	for (uint32_t i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
 			ce = Z_OBJCE(nodes[i]);
 
@@ -253,9 +252,9 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 	fragment->last = NULL;
 }
 
-static zend_result dom_hierarchy_node_list(xmlNodePtr parentNode, zval *nodes, int nodesc)
+static zend_result dom_hierarchy_node_list(xmlNodePtr parentNode, zval *nodes, uint32_t nodesc)
 {
-	for (int i = 0; i < nodesc; i++) {
+	for (uint32_t i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
 			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
 
@@ -270,7 +269,7 @@ static zend_result dom_hierarchy_node_list(xmlNodePtr parentNode, zval *nodes, i
 	return SUCCESS;
 }
 
-void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
+void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	xmlNode *parentNode = dom_object_get_node(context);
 	xmlNodePtr newchild, prevsib;
@@ -311,7 +310,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 	xmlFree(fragment);
 }
 
-void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
+void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	xmlNode *parentNode = dom_object_get_node(context);
 
@@ -379,7 +378,7 @@ static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xm
 	}
 }
 
-void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
+void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	/* Spec link: https://dom.spec.whatwg.org/#dom-childnode-after */
 
@@ -432,7 +431,7 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	xmlFree(fragment);
 }
 
-void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
+void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	/* Spec link: https://dom.spec.whatwg.org/#dom-childnode-before */
 
@@ -544,7 +543,7 @@ void dom_child_node_remove(dom_object *context)
 	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 }
 
-void dom_child_replace_with(dom_object *context, zval *nodes, int nodesc)
+void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	xmlNodePtr child = dom_object_get_node(context);
 	xmlNodePtr parentNode = child->parent;

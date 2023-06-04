@@ -364,7 +364,7 @@ PHP_METHOD(DOMCharacterData, remove)
 
 PHP_METHOD(DOMCharacterData, after)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -381,7 +381,7 @@ PHP_METHOD(DOMCharacterData, after)
 
 PHP_METHOD(DOMCharacterData, before)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -398,7 +398,7 @@ PHP_METHOD(DOMCharacterData, before)
 
 PHP_METHOD(DOMCharacterData, replaceWith)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
