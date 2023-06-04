@@ -5,6 +5,8 @@ basicval=FUBAR_VARIABLE
 basicqval=FUBAR_QUOTES_VARIABLE
 falsyval=false
 emptyval=
+--INI--
+INI:WITH:COLON=ini_with_colon
 --FILE--
 <?php
 
@@ -301,7 +303,7 @@ array(29) {
     string(6) "\n\r\t"
   }
   ["variable-fallback"]=>
-  array(17) {
+  array(19) {
     ["defined1"]=>
     string(22) "Hello, FUBAR_VARIABLE!"
     ["defined2"]=>
@@ -336,6 +338,10 @@ array(29) {
     string(0) ""
     ["constant"]=>
     string(21) "this_is_test_constant"
+    ["INI:WITH:COLON"]=>
+    string(14) "ini_with_colon"
+    ["NONEXISTENT:INI:WITH:COLON"]=>
+    string(8) "fallback"
   }
 }
 Done.

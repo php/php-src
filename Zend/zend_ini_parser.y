@@ -342,6 +342,7 @@ static void normalize_value(zval *zv)
 %token TC_DOLLAR_CURLY
 %token TC_VARNAME
 %token TC_QUOTED_STRING
+%token TC_FALLBACK
 %token BOOL_TRUE
 %token BOOL_FALSE
 %token NULL_NULL
@@ -445,7 +446,7 @@ expr:
 
 cfg_var_ref:
 		TC_DOLLAR_CURLY TC_VARNAME '}'				{ zend_ini_get_var(&$$, &$2, NULL); zend_string_free(Z_STR($2)); }
-	|	TC_DOLLAR_CURLY TC_VARNAME '!' fallback '}'	{ zend_ini_get_var(&$$, &$2, &$4); zend_string_free(Z_STR($2)); zend_string_free(Z_STR($4)); }
+	|	TC_DOLLAR_CURLY TC_VARNAME TC_FALLBACK fallback '}'	{ zend_ini_get_var(&$$, &$2, &$4); zend_string_free(Z_STR($2)); zend_string_free(Z_STR($4)); }
 ;
 
 
