@@ -359,7 +359,9 @@ NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z_][a-zA-Z0-9_]*
-LABEL [^=\n\r\t;&|^$~(){}!"\[]+
+LABEL_CHAR [^=\n\r\t;&|^$~(){}!"\[\]\x00]
+/* FIXME: Is this missing a \0? */
+LABEL ({LABEL_CHAR}+)
 TOKENS [:,.\[\]"'()&|^+-/*=%$!~<>?@{}]
 OPERATORS [&|^~()!]
 DOLLAR_CURLY "${"
@@ -423,7 +425,56 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	return TC_DOLLAR_CURLY;
 }
 
-<ST_VARNAME>{LABEL} { /* Variable name */
+<ST_VARNAME>":-" { /* End Variable name, fallback start */
+fallback_lexing:
+	yy_pop_state();
+	yy_push_state(ST_VAR_FALLBACK);
+	return TC_FALLBACK;
+}
+
+<ST_VARNAME>{LABEL_CHAR} { /* Variable name */
+	if (YYCURSOR[0] == ':' && YYCURSOR[1] == '-') {
+		YYCURSOR++;
+		goto fallback_lexing;
+	}
+
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '=':
+			case '\n':
+			case '\r':
+			case '\t':
+			case ';':
+			case '&':
+			case '|':
+			case '^':
+			case '$':
+			case '~':
+			case '(':
+			case ')':
+			case '{':
+			case '}':
+			case '!':
+			case '"':
+			case '[':
+			case ']':
+				break;
+			/* ':' is only allowed if it isn't followed by '-'. */
+			case ':':
+				if (YYCURSOR[0] == '-') {
+					break;
+				} else {
+					continue;
+				}
+			default:
+				continue;
+		}
+
+		YYCURSOR--;
+		yyleng = YYCURSOR - SCNG(yy_text);
+		break;
+	}
+
 	/* Eat leading whitespace */
 	EAT_LEADING_WHITESPACE();
 
@@ -431,12 +482,6 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	EAT_TRAILING_WHITESPACE();
 
 	RETURN_TOKEN(TC_VARNAME, yytext, yyleng);
-}
-
-<ST_VARNAME>"!" { /* End Variable name, fallback start */
-	yy_pop_state();
-	yy_push_state(ST_VAR_FALLBACK);
-	return '!';
 }
 
 <ST_VARNAME,ST_VAR_FALLBACK>"}" { /* Variable/fallback end */

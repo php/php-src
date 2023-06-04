@@ -11,10 +11,10 @@ Warning: syntax error, unexpected end of file, expecting TC_DOLLAR_CURLY or TC_Q
  in %s on line %d
 bool(false)
 
-Warning: syntax error, unexpected end of file, expecting TC_VARNAME in Unknown on line 1
+Warning: syntax error, unexpected end of file, expecting TC_FALLBACK or '}' in Unknown on line 1
  in %s on line %d
 bool(false)
 
-Warning: syntax error, unexpected end of file, expecting '}' in Unknown on line 1
+Warning: syntax error, unexpected end of file, expecting TC_FALLBACK or '}' in Unknown on line 1
  in %s on line %d
 bool(false)
