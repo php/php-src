@@ -859,7 +859,6 @@ PHP_METHOD(DOMDocument, createElementNS)
 	zval *id;
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL;
-	xmlNsPtr nsptr = NULL;
 	int ret;
 	size_t uri_len = 0, name_len = 0, value_len = 0;
 	char *uri, *name, *value = NULL;
@@ -880,7 +879,7 @@ PHP_METHOD(DOMDocument, createElementNS)
 		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
 			nodep = xmlNewDocNode(docp, NULL, (xmlChar *) localname, (xmlChar *) value);
 			if (nodep != NULL && uri != NULL) {
-				nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);
+				xmlNsPtr nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);
 				if (nsptr == NULL) {
 					nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
 				}
@@ -907,9 +906,6 @@ PHP_METHOD(DOMDocument, createElementNS)
 	if (nodep == NULL) {
 		RETURN_FALSE;
 	}
-
-
-	nodep->ns = nsptr;
 
 	DOM_RET_OBJ(nodep, &ret, intern);
 }
