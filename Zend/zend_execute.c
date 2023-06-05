@@ -1521,9 +1521,9 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_array_offset_
 	zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), offset, BP_VAR_UNSET);
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset_access(const zval *offset)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset(const zval *offset, int type)
 {
-	zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), offset, BP_VAR_RW);
+	zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), offset, type);
 }
 
 static zend_never_inline void zend_assign_to_object_dim(zend_object *obj, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
@@ -1651,7 +1651,7 @@ try_again:
 				}
 				return offset;
 			}
-			zend_illegal_string_offset_access(dim);
+			zend_illegal_string_offset(dim, type);
 			return 0;
 		}
 		case IS_UNDEF:
@@ -1667,7 +1667,7 @@ try_again:
 			dim = Z_REFVAL_P(dim);
 			goto try_again;
 		default:
-			zend_illegal_string_offset_access(dim);
+			zend_illegal_string_offset(dim, type);
 			return 0;
 	}
 
@@ -2762,7 +2762,7 @@ try_string_offset:
 						ZVAL_NULL(result);
 						return;
 					}
-					zend_illegal_string_offset_access(dim);
+					zend_illegal_string_offset(dim, BP_VAR_R);
 					ZVAL_NULL(result);
 					return;
 				}
@@ -2801,7 +2801,7 @@ try_string_offset:
 					dim = Z_REFVAL_P(dim);
 					goto try_string_offset;
 				default:
-					zend_illegal_string_offset_access(dim);
+					zend_illegal_string_offset(dim, BP_VAR_R);
 					ZVAL_NULL(result);
 					return;
 			}
