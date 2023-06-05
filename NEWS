@@ -6,6 +6,12 @@ PHP                                                                        NEWS
   . Fix GH-11388 (Allow "final" modifier when importing a method from a trait).
     (nielsdos)
 
+- DOM:
+  . Fix #79700 (wrong use of libxml oldNs leads to performance problem).
+    (nielsdos)
+  . Fix #77894 (DOMNode::C14N() very slow on generated DOMDocuments even after
+    normalisation). (nielsdos)
+
 08 Jun 2023, PHP 8.3.0alpha1
 
 - CLI:

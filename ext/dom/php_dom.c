@@ -1369,10 +1369,15 @@ void dom_normalize (xmlNodePtr nodep)
 
 /* {{{ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) */
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
-	xmlNs *cur;
-
 	if (doc == NULL)
 		return;
+
+	ZEND_ASSERT(ns->next == NULL);
+
+	/* Note: we'll use a prepend strategy instead of append to
+	 * make sure we don't lose performance when the list is long.
+	 * As libxml2 could assume the xml node is the first one, we'll place our
+	 * new entries after the first one. */
 
 	if (doc->oldNs == NULL) {
 		doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
@@ -1383,13 +1388,10 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 		doc->oldNs->type = XML_LOCAL_NAMESPACE;
 		doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE);
 		doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml");
+	} else {
+		ns->next = doc->oldNs->next;
 	}
-
-	cur = doc->oldNs;
-	while (cur->next != NULL) {
-		cur = cur->next;
-	}
-	cur->next = ns;
+	doc->oldNs->next = ns;
 }
 /* }}} end dom_set_old_ns */
 
@@ -1411,6 +1413,9 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep)
 					} else {
 						prevns->next = nsdftptr;
 					}
+					/* Note: we can't get here if the ns is already on the oldNs list.
+					 * This is because in that case the definition won't be on the node, and
+					 * therefore won't be in the nodep->nsDef list. */
 					dom_set_old_ns(doc, curns);
 					curns = prevns;
 				}
@@ -1509,22 +1514,38 @@ NAMESPACE_ERR: Raised if
 
 /* {{{ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) */
 xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
-	xmlNsPtr nsptr = NULL;
-
-	*errorcode = 0;
+	xmlNsPtr nsptr;
 
 	if (! ((prefix && !strcmp (prefix, "xml") && strcmp(uri, (char *)XML_XML_NAMESPACE)) ||
 		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, (char *)DOM_XMLNS_NAMESPACE)) ||
 		   (prefix && !strcmp(uri, (char *)DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
+		/* Reuse the old namespaces from doc->oldNs if possible, before creating a new one.
+		 * This will prevent the oldNs list from growing with duplicates. */
+		xmlDocPtr doc = nodep->doc;
+		if (doc && doc->oldNs != NULL) {
+			nsptr = doc->oldNs;
+			do {
+				if (xmlStrEqual(nsptr->prefix, (xmlChar *)prefix) && xmlStrEqual(nsptr->href, (xmlChar *)uri)) {
+					goto out;
+				}
+				nsptr = nsptr->next;
+			} while (nsptr);
+		}
+		/* Couldn't reuse one, create a new one. */
 		nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
+		if (UNEXPECTED(nsptr == NULL)) {
+			goto err;
+		}
+	} else {
+		goto err;
 	}
 
-	if (nsptr == NULL) {
-		*errorcode = NAMESPACE_ERR;
-	}
-
+out:
+	*errorcode = 0;
 	return nsptr;
-
+err:
+	*errorcode = NAMESPACE_ERR;
+	return NULL;
 }
 /* }}} end dom_get_ns */
 
