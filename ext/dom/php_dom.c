@@ -1511,22 +1511,38 @@ NAMESPACE_ERR: Raised if
 
 /* {{{ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) */
 xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
-	xmlNsPtr nsptr = NULL;
-
-	*errorcode = 0;
+	xmlNsPtr nsptr;
 
 	if (! ((prefix && !strcmp (prefix, "xml") && strcmp(uri, (char *)XML_XML_NAMESPACE)) ||
 		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, (char *)DOM_XMLNS_NAMESPACE)) ||
 		   (prefix && !strcmp(uri, (char *)DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
+		/* Reuse the old namespaces from doc->oldNs if possible, before creating a new one.
+		 * This will prevent the oldNs list from growing with duplicates. */
+		xmlDocPtr doc = nodep->doc;
+		if (doc && doc->oldNs != NULL) {
+			nsptr = doc->oldNs;
+			do {
+				if (xmlStrEqual(nsptr->prefix, (xmlChar *)prefix) && xmlStrEqual(nsptr->href, (xmlChar *)uri)) {
+					goto out;
+				}
+				nsptr = nsptr->next;
+			} while (nsptr);
+		}
+		/* Couldn't reuse one, create a new one. */
 		nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
+		if (UNEXPECTED(nsptr == NULL)) {
+			goto err;
+		}
+	} else {
+		goto err;
 	}
 
-	if (nsptr == NULL) {
-		*errorcode = NAMESPACE_ERR;
-	}
-
+out:
+	*errorcode = 0;
 	return nsptr;
-
+err:
+	*errorcode = NAMESPACE_ERR;
+	return NULL;
 }
 /* }}} end dom_get_ns */
 
