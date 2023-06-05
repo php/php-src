@@ -1369,10 +1369,15 @@ void dom_normalize (xmlNodePtr nodep)
 
 /* {{{ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) */
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
-	xmlNs *cur;
-
 	if (doc == NULL)
 		return;
+
+	ZEND_ASSERT(ns->next == NULL);
+
+	/* Note: we'll use a prepend strategy instead of append to
+	 * make sure we don't lose performance when the list is long.
+	 * As libxml2 could assume the xml node is the first one, we'll place our
+	 * new entries after the first one. */
 
 	if (doc->oldNs == NULL) {
 		doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
@@ -1383,13 +1388,10 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 		doc->oldNs->type = XML_LOCAL_NAMESPACE;
 		doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE);
 		doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml");
+	} else {
+		ns->next = doc->oldNs->next;
 	}
-
-	cur = doc->oldNs;
-	while (cur->next != NULL) {
-		cur = cur->next;
-	}
-	cur->next = ns;
+	doc->oldNs->next = ns;
 }
 /* }}} end dom_set_old_ns */
 
