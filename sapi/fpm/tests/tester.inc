@@ -385,7 +385,7 @@ class Tester
     public function testConfig($silent = false)
     {
         $configFile = $this->createConfig();
-        $cmd        = self::findExecutable() . ' -tt -y ' . $configFile . ' 2>&1';
+        $cmd        = self::findExecutable() . ' -n -tt -y ' . $configFile . ' 2>&1';
         $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
         if ($code) {
@@ -426,7 +426,7 @@ class Tester
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
 
-        $cmd = [self::findExecutable(), '-y', $configFile];
+        $cmd = [self::findExecutable(), '-n', '-y', $configFile];
 
         if ($forceStderr) {
             $cmd[] = '-O';
