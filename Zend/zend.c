@@ -1732,7 +1732,7 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 			if (zend_string_equals(container, ZSTR_KNOWN(ZEND_STR_STRING))) {
 				zend_throw_error(NULL, "Cannot unset string offsets");
 			} else {
-				zend_type_error("Cannot access offset of type %s in unset", zend_zval_type_name(offset));
+				zend_type_error("Cannot unset offset of type %s on %s", zend_zval_type_name(offset), ZSTR_VAL(container));
 			}
 			return;
 		default:
