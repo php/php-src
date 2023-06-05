@@ -4553,7 +4553,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								ZVAL_STRINGL(&new_val, "'f'", sizeof("'f'")-1);
 							}
 							else {
-								zend_value_error("%s(): Field \"%s\" must be of type bool, %s (%s) given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type), Z_STRVAL_P(val));
+								zend_value_error("%s(): Field \"%s\" must be of type bool, invalid PostgreSQL string boolean value \"%s\" given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(val));
 								err = 1;
 							}
 						}
@@ -4585,7 +4585,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				}
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
-					zend_type_error("%s(): Field \"%s\" must be of type string|null|long|bool, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
+					zend_type_error("%s(): Field \"%s\" must be of type string|null|int|bool, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
 				}
 				break;
 
@@ -4629,7 +4629,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				}
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
-					zend_type_error("%s(): Field \"%s\" must be of type string|null|long|float, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
+					zend_type_error("%s(): Field \"%s\" must be of type int|null, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
 				}
 				break;
 
@@ -4678,7 +4678,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				}
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
-					zend_type_error("%s(): Field \"%s\" must be of type string|null|long|float, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
+					zend_type_error("%s(): Field \"%s\" must be of type %s|int|null, %s given", get_active_function_name(), (data_type == PG_MONEY ? "money" : "float"), ZSTR_VAL(field), Z_STRVAL_P(type));
 				}
 				break;
 
@@ -4739,7 +4739,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				}
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
-					zend_type_error("%s(): Field \"%s\" must be of type string|null|long|float, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
+					zend_type_error("%s(): Field \"%s\" must be of type string|null, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
 				}
 				break;
 
@@ -4781,7 +4781,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				}
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
-					zend_type_error("%s(): Field \"%s\" must be of type string|null|long|float, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
+					zend_type_error("%s(): Field \"%s\" must be of type int|null, %s given", get_active_function_name(), ZSTR_VAL(field), zend_zval_value_name(val));
 				}
 				break;
 
@@ -4820,9 +4820,9 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
 					if (err == 2) {
-						zend_value_error("%s(): Field \"%s\" must be of type IPv4|IPv6|null, given %s", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(val));
+						zend_value_error("%s(): Field \"%s\" must be a valid IPv4 or IPv6 address string, \"%s\" given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(val));
 					} else {
-						zend_type_error("%s(): Field \"%s\" must be of type IPv4|IPv6|null, given %s", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
+						zend_type_error("%s(): Field \"%s\" must be of type string|null, given %s", get_active_function_name(), ZSTR_VAL(field), zend_zval_value_name(val));
 					}
 				}
 				break;
@@ -5040,7 +5040,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				}
 				PGSQL_CONV_CHECK_IGNORE();
 				if (err) {
-					zend_type_error("%s(): Field \"%s\" must be of type string|null|long|float, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
+					zend_type_error("%s(): Field \"%s\" must be of type string|null, %s given", get_active_function_name(), ZSTR_VAL(field), Z_STRVAL_P(type));
 				}
 				break;
 

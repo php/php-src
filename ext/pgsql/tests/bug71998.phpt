@@ -61,6 +61,7 @@ foreach ($ips as $ip) {
     try {
     	@pg_insert($db, 'tmp_statistics', $data);
     } catch (\ValueError $e) {
+        echo $e->getMessage() . PHP_EOL;
         $r = false;
     }
 
@@ -84,6 +85,13 @@ pg_close($db);
 
 ?>
 --EXPECT--
+pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "256.257.258.259" given
+pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "fe08::7:8interface" given
+pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "schnitzel" given
+pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "10002.3.4" given
+pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "1.2.3.4.5" given
+pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "256.0.0.0" given
+pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "260.0.0.0" given
 array(2) {
   [0]=>
   string(1) "1"
