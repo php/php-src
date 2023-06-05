@@ -324,7 +324,7 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 		/* For Closure::fromCallable([$closure, "__invoke"]) return $closure. */
 		if (fcc.object && fcc.object->ce == zend_ce_closure
-				&& zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
+				&& zend_string_equals(mptr->common.function_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) {
 			RETVAL_OBJ_COPY(fcc.object);
 			zend_free_trampoline(mptr);
 			return SUCCESS;
@@ -834,7 +834,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 		if ((ZEND_CALL_INFO(call) & ZEND_CALL_HAS_THIS) &&
 			(Z_OBJCE(call->This) == zend_ce_closure)
-			&& zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
+			&& zend_string_equals(mptr->common.function_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) {
 	        zend_free_trampoline(mptr);
 	        RETURN_OBJ_COPY(Z_OBJ(call->This));
 	    }
