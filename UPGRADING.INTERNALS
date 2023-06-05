@@ -134,6 +134,8 @@ PHP 8.3 INTERNALS UPGRADE NOTES
      the base node of the node list. This function also no longer accepts -1 as the index argument.
    - The function dom_namednode_iter() has additional arguments to avoid recomputing the length of
      the strings.
+   - The functions dom_parent_node_prepend(), dom_parent_node_append(), dom_parent_node_after(), and
+     dom_parent_node_before() now use an uint32_t argument for the number of nodes instead of int.
 
  g. ext/libxml
    - Two new functions: php_libxml_invalidate_node_list_cache_from_doc() and
