@@ -20,6 +20,7 @@
 #include "ext/standard/base64.h"
 #include "ext/standard/md5.h"
 #include "ext/standard/php_random.h"
+#include "ext/hash/php_hash.h"
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
 static char *get_http_header_value(char *headers, char *type);
