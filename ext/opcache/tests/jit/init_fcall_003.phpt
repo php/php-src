@@ -11,6 +11,8 @@ opcache.jit_hot_loop=64
 opcache.jit_hot_func=127
 opcache.jit_hot_return=8
 opcache.jit_hot_side_exit=8
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 include(__DIR__ . '/init_fcall_003.inc');
