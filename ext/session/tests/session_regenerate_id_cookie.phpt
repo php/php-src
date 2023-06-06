@@ -2,6 +2,8 @@
 Test session_regenerate_id() function : basic functionality
 --EXTENSIONS--
 session
+--INI--
+session.sid_length = 32
 --SKIPIF--
 <?php
 
