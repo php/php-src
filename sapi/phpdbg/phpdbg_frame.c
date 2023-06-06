@@ -287,8 +287,8 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 			phpdbg_out(" (internal function)\n");
 		}
 
-		file = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("file"));
-		line = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("line"));
+		file = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FILE));
+		line = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_LINE));
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 	}
 

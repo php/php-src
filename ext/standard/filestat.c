@@ -889,7 +889,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		case S_IFCHR: RETURN_STRING("char");
 		case S_IFDIR: RETURN_STRING("dir");
 		case S_IFBLK: RETURN_STRING("block");
-		case S_IFREG: RETURN_STRING("file");
+		case S_IFREG: RETURN_STR(ZSTR_KNOWN(ZEND_STR_FILE)); /* "file" */
 #if defined(S_IFSOCK) && !defined(PHP_WIN32)
 		case S_IFSOCK: RETURN_STRING("socket");
 #endif
