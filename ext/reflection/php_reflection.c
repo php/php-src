@@ -1560,7 +1560,7 @@ ZEND_METHOD(Reflection, getModifierNames)
 	}
 
 	if (modifiers & ZEND_ACC_STATIC) {
-		add_next_index_stringl(return_value, "static", sizeof("static")-1);
+		add_next_index_str(return_value, ZSTR_KNOWN(ZEND_STR_STATIC));
 	}
 
 	if (modifiers & (ZEND_ACC_READONLY | ZEND_ACC_READONLY_CLASS)) {

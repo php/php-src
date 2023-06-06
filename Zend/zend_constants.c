@@ -314,7 +314,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		} else {
 			ce = scope->parent;
 		}
-	} else if (zend_string_equals_literal_ci(class_name, "static")) {
+	} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 		ce = zend_get_called_scope(EG(current_execute_data));
 		if (UNEXPECTED(!ce)) {
 			zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");
@@ -419,7 +419,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			} else {
 				ce = scope->parent;
 			}
-		} else if (zend_string_equals_literal_ci(class_name, "static")) {
+		} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
 				zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");
