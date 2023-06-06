@@ -360,7 +360,6 @@ TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z_][a-zA-Z0-9_]*
 LABEL_CHAR [^=\n\r\t;&|^$~(){}!"\[\]\x00]
-/* FIXME: Is this missing a \0? */
 LABEL ({LABEL_CHAR}+)
 TOKENS [:,.\[\]"'()&|^+-/*=%$!~<>?@{}]
 OPERATORS [&|^~()!]
@@ -372,7 +371,7 @@ RAW_VALUE_CHARS [^\n\r;\000]
 
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|^~()!"'\000]|{LITERAL_DOLLAR})
-FALLBACK_CHARS		([^$\n\r;"'!}\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
+FALLBACK_CHARS		([^$\n\r;"'}\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -600,7 +599,7 @@ end_raw_value_chars:
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
 
-<ST_VAR_FALLBACK>{FALLBACK_CHARS}+ { /* Same as above, but excluding '}' */
+<ST_VAR_FALLBACK>{FALLBACK_CHARS}+ { /* Same as below, but excluding '}' */
 	RETURN_TOKEN(TC_STRING, yytext, yyleng);
 }
 
