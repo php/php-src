@@ -15,7 +15,7 @@ new Bravo();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot access offset of type object on array in %sgh8821.php:8
+Fatal error: Uncaught TypeError: Cannot access offset of type Alpha on array in %sgh8821.php:8
 Stack trace:
 #0 %sgh8821.php(11): [constant expression]()
 #1 {main}

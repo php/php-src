@@ -141,7 +141,7 @@ bool(true)
 bool(true)
 
 -- Iteration 17 --
-Cannot access offset of type object on array
+Cannot access offset of type classA on array
 
 -- Iteration 18 --
 bool(false)

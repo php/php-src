@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-Cannot access offset of type object on array
+Cannot access offset of type stdClass on array
