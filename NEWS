@@ -89,6 +89,8 @@ PHP                                                                        NEWS
     done). (peter279k)
 
 - Soap:
+  . Fixed bug GHSA-76gg-c692-v2mw (Missing error check and insufficient random
+    bytes in HTTP Digest authentication for SOAP). (nielsdos, timwolla)
   . Fixed bug GH-8426 (make test fail while soap extension build). (nielsdos)
 
 - SPL:
