@@ -169,7 +169,7 @@ static PHP_INI_MH(OnSetFacility)
 	}
 #endif
 #ifdef LOG_USER
-	if (zend_string_equals_literal(facility, "LOG_USER") || zend_string_equals_literal(facility, "user")) {
+	if (zend_string_equals(facility, ZSTR_KNOWN(ZEND_STR_USER)) || zend_string_equals_literal(facility, "LOG_USER")) {
 		PG(syslog_facility) = LOG_USER;
 		return SUCCESS;
 	}

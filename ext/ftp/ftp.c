@@ -708,7 +708,7 @@ ftp_mlsd_parse_line(HashTable *ht, const char *input) {
 
 	/* Extract pathname */
 	ZVAL_STRINGL(&zstr, sp + 1, end - sp - 1);
-	zend_hash_str_update(ht, "name", sizeof("name")-1, &zstr);
+	zend_hash_update(ht, ZSTR_KNOWN(ZEND_STR_NAME), &zstr);
 	end = sp;
 
 	while (input < end) {

@@ -7137,7 +7137,7 @@ ZEND_METHOD(ReflectionFiber, getCallable)
 static zval *_reflection_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	if (zend_hash_exists(&object->ce->properties_info, name)
-		&& (zend_string_equals_literal(name, "name") || zend_string_equals_literal(name, "class")))
+		&& (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_NAME)) || zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_CLASS))))
 	{
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot set read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));

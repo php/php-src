@@ -1622,7 +1622,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		zval *tmp;
 		char *xquery;
 
-		tmp = zend_hash_str_find(ht, "query", sizeof("query")-1);
+		/* Find "query" key */
+		tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_QUERY));
 		if (!tmp) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_value_error(3 + mode, "must have a \"query\" key");

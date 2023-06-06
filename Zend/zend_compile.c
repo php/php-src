@@ -1429,7 +1429,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type) {
 }
 
 static bool is_generator_compatible_class_type(zend_string *name) {
-	return zend_string_equals_literal_ci(name, "Traversable")
+	return zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_TRAVERSABLE))
 		|| zend_string_equals_literal_ci(name, "Iterator")
 		|| zend_string_equals_literal_ci(name, "Generator");
 }

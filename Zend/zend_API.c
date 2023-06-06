@@ -4560,7 +4560,7 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 		}
 	}
 
-	if (zend_string_equals_literal_ci(name, "class")) {
+	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_CLASS))) {
 		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
 				"A class constant must not be called 'class'; it is reserved for class name fetching");
 	}

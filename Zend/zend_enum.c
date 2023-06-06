@@ -62,12 +62,12 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 	zend_property_info *property_info;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property_info) {
-		if (zend_string_equals_literal(property_info->name, "name")) {
+		if (zend_string_equals(property_info->name, ZSTR_KNOWN(ZEND_STR_NAME))) {
 			continue;
 		}
 		if (
 			ce->enum_backing_type != IS_UNDEF
-			&& zend_string_equals_literal(property_info->name, "value")
+			&& zend_string_equals(property_info->name, ZSTR_KNOWN(ZEND_STR_VALUE))
 		) {
 			continue;
 		}
