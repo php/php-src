@@ -1,7 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.29
+?? ??? ????, PHP 8.0.30
 
+
+08 Jun 2023, PHP 8.0.29
+
+- Soap:
+  . Fixed bug GHSA-76gg-c692-v2mw (Missing error check and insufficient random
+    bytes in HTTP Digest authentication for SOAP). (nielsdos, timwolla)
 
 14 Feb 2023, PHP 8.0.28
 
