@@ -1387,8 +1387,8 @@ typedef struct {
 	zend_fcall_info_cache fci_cache;
 } php_array_walk_context;
 
-static int php_array_walk(
-	php_array_walk_context *context, zval *array, zval *userdata, int recursive)
+static zend_result php_array_walk(
+	php_array_walk_context *context, zval *array, zval *userdata, bool recursive)
 {
 	zval args[3],		/* Arguments to userland function */
 		 retval,		/* Return value - unused */
@@ -1396,7 +1396,7 @@ static int php_array_walk(
 	HashTable *target_hash = HASH_OF(array);
 	HashPosition pos;
 	uint32_t ht_iter;
-	int result = SUCCESS;
+	zend_result result = SUCCESS;
 
 	/* Create a local copy of fci, as we want to use different arguments at different
 	 * levels of recursion. */
@@ -1538,7 +1538,7 @@ PHP_FUNCTION(array_walk)
 		Z_PARAM_ZVAL(userdata)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_walk(&context, array, userdata, 0);
+	php_array_walk(&context, array, userdata, /* recursive */ false);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1557,7 +1557,7 @@ PHP_FUNCTION(array_walk_recursive)
 		Z_PARAM_ZVAL(userdata)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_walk(&context, array, userdata, 1);
+	php_array_walk(&context, array, userdata, /* recursive */ true);
 	RETURN_TRUE;
 }
 /* }}} */
