@@ -672,9 +672,9 @@ try_again:
 					if (UNEXPECTED(php_random_bytes_throw(&nonce, sizeof(nonce)) != SUCCESS)) {
 						ZEND_ASSERT(EG(exception));
 						php_stream_close(stream);
-						convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
-						convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-						convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+						zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl")-1);
+						zend_hash_str_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket")-1);
+						zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
 						smart_str_free(&soap_headers_z);
 						smart_str_free(&soap_headers);
 						return FALSE;
