@@ -605,7 +605,7 @@ slightly different steps. We'll call attention where the steps differ.
     git fetch --all
     git pull --rebase upstream master
     cd ..
-    git commit distributions
+    git commit distributions -m "X.Y.Z tarballs"
     git push upstream master
     ```
 
