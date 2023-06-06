@@ -211,7 +211,8 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}

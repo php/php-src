@@ -4522,7 +4522,7 @@ static zend_result zend_try_compile_special_func(znode *result, zend_string *lcn
 		return zend_compile_func_cuf(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "in_array")) {
 		return zend_compile_func_in_array(result, args);
-	} else if (zend_string_equals_literal(lcname, "count")
+	} else if (zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_COUNT))
 			|| zend_string_equals_literal(lcname, "sizeof")) {
 		return zend_compile_func_count(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "get_class")) {

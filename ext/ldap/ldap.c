@@ -634,7 +634,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 			} else if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "offset", sizeof("offset") - 1)) != NULL) {
 				vlvInfo.ldvlv_attrvalue = NULL;
 				vlvInfo.ldvlv_offset = zval_get_long(tmp);
-				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "count", sizeof("count") - 1)) != NULL) {
+				/* Find "count" key */
+				if ((tmp = zend_hash_find(Z_ARRVAL_P(val), ZSTR_KNOWN(ZEND_STR_COUNT))) != NULL) {
 					vlvInfo.ldvlv_count = zval_get_long(tmp);
 				} else {
 					rc = -1;
