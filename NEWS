@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0alpha1
+?? ??? ????, PHP 8.3.0alpha2
+
+
+08 Jun 2023, PHP 8.3.0alpha1
 
 - CLI:
   . Added pdeathsig to builtin server to terminate workers when the master
