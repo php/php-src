@@ -1696,7 +1696,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 
 			zval rv;
 			zend_string *file = zval_get_string(zend_read_property_ex(zend_get_exception_base(exception), exception, ZSTR_KNOWN(ZEND_STR_FILE), /* silent */ true, &rv));
-			zend_long line = zval_get_string(zend_read_property_ex(zend_get_exception_base(exception), exception, ZSTR_KNOWN(ZEND_STR_LINE), /* silent */ true, &rv));
+			zend_long line = zval_get_long(zend_read_property_ex(zend_get_exception_base(exception), exception, ZSTR_KNOWN(ZEND_STR_LINE), /* silent */ true, &rv));
 			zend_string *msg = zval_get_string(zend_read_property_ex(zend_get_exception_base(exception), exception, ZSTR_KNOWN(ZEND_STR_MESSAGE), /* silent */ true, &rv));
 
 			phpdbg_error("Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s",
