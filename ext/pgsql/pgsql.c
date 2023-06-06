@@ -4296,7 +4296,7 @@ static php_pgsql_data_type php_pgsql_get_data_type(const zend_string *type_name)
 	/* This is stupid way to do. I'll fix it when I decide how to support
 	   user defined types. (Yasuo) */
 	/* boolean */
-	if (zend_string_equals_literal(type_name, "bool")|| zend_string_equals_literal(type_name, "boolean"))
+	if (zend_string_equals(type_name, ZSTR_KNOWN(ZEND_STR_BOOL)) ||zend_string_equals(type_name, ZSTR_KNOWN(ZEND_STR_BOOLEAN)))
 		return PG_BOOL;
 	/* object id */
 	if (zend_string_equals_literal(type_name, "oid"))

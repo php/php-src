@@ -724,7 +724,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	} else {
 		zend_update_property_string(zend_get_exception_base(ex), ex, ZEND_STRL("string"), Z_STRVAL(tmp));
 		zval_ptr_dtor(&tmp);
-		msg = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("string"), 1, &rv));
+		msg = zval_get_string(zend_read_property_ex(zend_get_exception_base(ex), ex, ZSTR_KNOWN(ZEND_STR_STRING), /* silent */ true, &rv));
 	}
 
 	phpdbg_error("Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
