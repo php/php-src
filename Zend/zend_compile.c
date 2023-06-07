@@ -7727,8 +7727,6 @@ static void zend_check_trait_alias_modifiers(uint32_t attr) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"static\" as method modifier in trait alias");
 	} else if (attr & ZEND_ACC_ABSTRACT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"abstract\" as method modifier in trait alias");
-	} else if (attr & ZEND_ACC_FINAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"final\" as method modifier in trait alias");
 	}
 }
 /* }}} */
