@@ -166,6 +166,8 @@ PHP                                                                        NEWS
   . pg_set_error_verbosity adding PGSQL_ERRORS_STATE constant. (David Carlier)
   . pg_convert/pg_insert E_WARNING on type errors had been converted to
     ValueError/TypeError exceptions. (David Carlier)
+  . Added pg_set_error_context_visibility to set the context's visibility
+    within the error messages. (David Carlier)
 
 - Phar:
   . Fix memory leak in phar_rename_archive(). (stkeke)

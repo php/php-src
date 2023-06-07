@@ -462,6 +462,25 @@ namespace {
      */
     const PGSQL_PIPELINE_ABORTED = UNKNOWN;
 #endif
+    
+    /* For pg_set_error_context_visibility() */
+
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_NEVER
+     */
+    const PGSQL_SHOW_CONTEXT_NEVER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_ERRORS
+     */
+    const PGSQL_SHOW_CONTEXT_ERRORS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_ALWAYS
+     */
+    const PGSQL_SHOW_CONTEXT_ALWAYS = UNKNOWN;
+    
 
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
@@ -951,6 +970,8 @@ namespace {
     function pg_pipeline_sync(PgSql\Connection $connection): bool {}
     function pg_pipeline_status(PgSql\Connection $connection): int {}
 #endif
+
+    function pg_set_error_context_visibility(PgSql\Connection $connection, int $visibility): int {}
 }
 
 namespace PgSql {

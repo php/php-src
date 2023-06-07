@@ -192,6 +192,9 @@ PHP 8.3 UPGRADE NOTES
   . Added posix_fpathconf call to get configuration value from a file descriptor.
   . Added posix_eaccess call to check the effective user id's permission for a path.
 
+- PGSQL:
+  . Added pg_set_error_context_visilibity to set the visibility of the context in error messages.
+
 - Random:
   . Added Randomizer::getBytesFromString().
     RFC: https://wiki.php.net/rfc/randomizer_additions
