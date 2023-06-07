@@ -1413,6 +1413,9 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep)
 					} else {
 						prevns->next = nsdftptr;
 					}
+					/* Note: we can't get here if the ns is already on the oldNs list.
+					 * This is because in that case the definition won't be on the node, and
+					 * therefore won't be in the nodep->nsDef list. */
 					dom_set_old_ns(doc, curns);
 					curns = prevns;
 				}
