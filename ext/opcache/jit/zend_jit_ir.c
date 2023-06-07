@@ -1163,7 +1163,7 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 
 	/* Disable CSE for temporary variables */
 	/* TODO: This is a workarounf to fix ext/standard/tests/strings/htmlentities20.phpt failure with tracing JIT ??? */
-	if (val > 0 && jit->ssa->vars[var].var >= jit->current_op_array->last_var) {
+	if (0 && val > 0 && jit->ssa->vars[var].var >= jit->current_op_array->last_var) {
 		ir_insn *insn = &jit->ctx.ir_base[val];
 		ir_op op = insn->op;
 
