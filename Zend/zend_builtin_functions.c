@@ -138,7 +138,7 @@ ZEND_FUNCTION(gc_status)
 
 	zend_gc_get_status(&status);
 
-	array_init_size(return_value, 3);
+	array_init_size(return_value, 8);
 
 	add_assoc_bool_ex(return_value, "running", sizeof("running")-1, status.active);
 	add_assoc_bool_ex(return_value, "protected", sizeof("protected")-1, status.gc_protected);
