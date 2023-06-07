@@ -4743,7 +4743,17 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 		op1 = jit_Z_LVAL(jit, op1_addr);
 		op2 = (same_ops) ? op1 : jit_Z_LVAL(jit, op2_addr);
 #endif
-		ref = ir_BINARY_OP_D(op, ir_INT2D(op1), ir_INT2D(op2));
+#if 1
+		/* disable CSE */
+		ir_ref old_cse_limit = jit->ctx.fold_cse_limit;
+		jit->ctx.fold_cse_limit = 0x7fffffff;
+#endif
+		op1 = ir_INT2D(op1);
+		op2 = ir_INT2D(op2);
+#if 1
+		jit->ctx.fold_cse_limit = old_cse_limit;
+#endif
+		ref = ir_BINARY_OP_D(op, op1, op2);
 		jit_set_Z_DVAL(jit, res_addr, ref);
 		if (Z_MODE(res_addr) != IS_REG) {
 			jit_set_Z_TYPE_INFO(jit, res_addr, IS_DOUBLE);
