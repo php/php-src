@@ -566,7 +566,8 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	if (newchild) {
 		xmlNodePtr last = fragment->last;
 
-		/* Unlink and free it unless it became a part of the fragment. */
+		/* Unlink it unless it became a part of the fragment.
+		 * Freeing will be taken care of by the lifetime of the returned dom object. */
 		if (child->parent != fragment) {
 			xmlUnlinkNode(child);
 		}
