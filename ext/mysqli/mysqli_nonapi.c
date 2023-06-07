@@ -988,14 +988,78 @@ PHP_FUNCTION(mysqli_get_charset)
 	state = 1;	/* all charsets are compiled in */
 	object_init(return_value);
 
-	add_property_string(return_value, "charset", (name) ? (char *)name : "");
-	add_property_string(return_value, "collation",(collation) ? (char *)collation : "");
-	add_property_string(return_value, "dir", (dir) ? (char *)dir : "");
-	add_property_long(return_value, "min_length", minlength);
-	add_property_long(return_value, "max_length", maxlength);
-	add_property_long(return_value, "number", number);
-	add_property_long(return_value, "state", state);
-	add_property_string(return_value, "comment", (comment) ? (char *)comment : "");
+	if (name) {
+		zend_update_property_string(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"charset", strlen("charset"),
+			(char *)name
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"charset", strlen("charset"),
+			zend_empty_string
+		);
+	}
+	if (collation) {
+		zend_update_property_string(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"collation", strlen("collation"),
+			(char *)collation
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"collation", strlen("collation"),
+			zend_empty_string
+		);
+	}
+	if (dir) {
+		zend_update_property_string(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"dir", strlen("dir"),
+			(char *)dir
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"dir", strlen("dir"),
+			zend_empty_string
+		);
+	}
+	zend_update_property_long(
+		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+		"min_length", strlen("min_length"),
+		minlength
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+		"max_length", strlen("max_length"),
+		maxlength
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+		"number", strlen("number"),
+		number
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+		"state", strlen("state"),
+		state
+	);
+	if (comment) {
+		zend_update_property_string(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"comment", strlen("comment"),
+			(char *)comment
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
+			"comment", strlen("comment"),
+			zend_empty_string
+		);
+	}
 }
 /* }}} */
 

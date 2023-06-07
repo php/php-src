@@ -523,12 +523,12 @@ PHP_FUNCTION(mysqli_execute_query)
 
 	if (FAIL == mysql_stmt_prepare(stmt->stmt, query, query_len)) {
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
-		
+
 		close_stmt_and_copy_errors(stmt, mysql);
 		RETURN_FALSE;
 	}
 
-	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */ 
+	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */
 	/* don't initialize stmt->query with NULL, we ecalloc()-ed the memory */
 	/* Get performance boost if reporting is switched off */
 	if (query_len && (MyG(report_mode) & MYSQLI_REPORT_INDEX)) {
@@ -647,28 +647,118 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 /* }}} */
 
 /* {{{  php_add_field_properties */
-static void php_add_field_properties(zval *value, const MYSQL_FIELD *field)
+static void php_add_field_properties(zval *z_object, const MYSQL_FIELD *field)
 {
-	add_property_str(value, "name", zend_string_copy(field->sname));
-
-	add_property_stringl(value, "orgname", (field->org_name ? field->org_name : ""), field->org_name_length);
-	add_property_stringl(value, "table", (field->table ? field->table : ""), field->table_length);
-	add_property_stringl(value, "orgtable", (field->org_table ? field->org_table : ""), field->org_table_length);
-	add_property_stringl(value, "def", (field->def ? field->def : ""), field->def_length);
-	add_property_stringl(value, "db", (field->db ? field->db : ""), field->db_length);
+	zend_update_property_str_ex(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		ZSTR_KNOWN(ZEND_STR_NAME), field->sname
+	);
+	if (field->org_name) {
+		zend_update_property_stringl(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"orgname", strlen("orgname"),
+			field->org_name, field->org_name_length
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"orgname", strlen("orgname"),
+			zend_empty_string
+		);
+	}
+	if (field->table) {
+		zend_update_property_stringl(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"table", strlen("table"),
+			field->table, field->table_length
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"table", strlen("table"),
+			zend_empty_string
+		);
+	}
+	if (field->org_table) {
+		zend_update_property_stringl(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"orgtable", strlen("orgtable"),
+			field->org_table, field->org_table_length
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"orgtable", strlen("orgtable"),
+			zend_empty_string
+		);
+	}
+	if (field->def) {
+		zend_update_property_stringl(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"def", strlen("def"),
+			field->def, field->def_length
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"def", strlen("def"),
+			zend_empty_string
+		);
+	}
+	if (field->db) {
+		zend_update_property_stringl(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"db", strlen("db"),
+			field->db, field->db_length
+		);
+	} else {
+		zend_update_property_str(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"db", strlen("db"),
+			zend_empty_string
+		);
+	}
 
 	/* FIXME: manually set the catalog to "def" due to bug in
 	 * libmysqlclient which does not initialize field->catalog
 	 * and in addition, the catalog is always be "def"
 	 */
-	add_property_string(value, "catalog", "def");
+	zend_update_property_stringl(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"catalog", strlen("catalog"),
+		"def", strlen("def")
+	);
 
-	add_property_long(value, "max_length", 0);
-	add_property_long(value, "length", field->length);
-	add_property_long(value, "charsetnr", field->charsetnr);
-	add_property_long(value, "flags", field->flags);
-	add_property_long(value, "type", field->type);
-	add_property_long(value, "decimals", field->decimals);
+	zend_update_property_long(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"max_length", strlen("max_length"),
+		0
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"length", strlen("length"),
+		field->length
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"charsetnr", strlen("charsetnr"),
+		field->charsetnr
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"flags", strlen("flags"),
+		field->flags
+	);
+	zend_update_property_long_ex(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		ZSTR_KNOWN(ZEND_STR_TYPE),
+		field->type
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"decimals", strlen("decimals"),
+		field->decimals
+	);
 }
 /* }}} */
 
