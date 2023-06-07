@@ -2833,6 +2833,36 @@ PHP_FUNCTION(pg_set_error_verbosity)
 }
 /* }}} */
 
+PHP_FUNCTION(pg_set_error_context_visibility)
+{
+	zval *pgsql_link = NULL;
+	zend_long visibility;
+	PGconn *pgsql;
+	pgsql_link_handle *link;
+
+	if (ZEND_NUM_ARGS() == 1) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &visibility) == FAILURE) {
+			RETURN_THROWS();
+		}
+		link = FETCH_DEFAULT_LINK();
+		CHECK_DEFAULT_LINK(link);
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &pgsql_link, pgsql_link_ce, &visibility) == FAILURE) {
+			RETURN_THROWS();
+		}
+		link = Z_PGSQL_LINK_P(pgsql_link);
+		CHECK_PGSQL_LINK(link);
+	}
+
+	pgsql = link->conn;
+
+	if (visibility & (PQSHOW_CONTEXT_NEVER|PQSHOW_CONTEXT_ERRORS|PQSHOW_CONTEXT_ALWAYS)) {
+		RETURN_LONG(PQsetErrorContextVisibility(pgsql, visibility));
+	} else {
+		RETURN_FALSE;
+	}
+}
+
 /* {{{ Set client encoding */
 PHP_FUNCTION(pg_set_client_encoding)
 {
@@ -3331,7 +3361,7 @@ PHP_FUNCTION(pg_result_error)
 		RETURN_FALSE;
 	}
 
-	err = (char *)PQresultErrorMessage(pgsql_result);
+	err = PQresultErrorMessage(pgsql_result);
 	RETURN_STRING(err);
 }
 /* }}} */
@@ -3365,7 +3395,7 @@ PHP_FUNCTION(pg_result_error_field)
 #endif
 				|PG_DIAG_CONTEXT|PG_DIAG_SOURCE_FILE|PG_DIAG_SOURCE_LINE
 				|PG_DIAG_SOURCE_FUNCTION)) {
-		field = (char *)PQresultErrorField(pgsql_result, (int)fieldcode);
+		field = PQresultErrorField(pgsql_result, (int)fieldcode);
 		if (field == NULL) {
 			RETURN_NULL();
 		} else {
