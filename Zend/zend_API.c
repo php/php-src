@@ -2145,46 +2145,6 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 }
 /* }}} */
 
-ZEND_API void add_property_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_RES(&tmp, r);
-	add_property_zval_ex(arg, key, key_len, &tmp);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-}
-/* }}} */
-
-ZEND_API void add_property_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_ARR(&tmp, arr);
-	add_property_zval_ex(arg, key, key_len, &tmp);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-}
-/* }}} */
-
-ZEND_API void add_property_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_OBJ(&tmp, obj);
-	add_property_zval_ex(arg, key, key_len, &tmp);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-}
-/* }}} */
-
-ZEND_API void add_property_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref) /* {{{ */
-{
-	zval tmp;
-
-	ZVAL_REF(&tmp, ref);
-	add_property_zval_ex(arg, key, key_len, &tmp);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
-}
-/* }}} */
-
 ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 {
 	size_t name_len;

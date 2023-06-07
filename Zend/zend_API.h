@@ -559,22 +559,13 @@ static zend_always_inline void add_property_stringl(zval *z_object, const char *
 static zend_always_inline void add_property_stringl_ex(zval *z_object, const char *name, size_t name_length, const char *value, size_t value_len) {
 	zend_update_property_stringl(Z_OBJCE_P(z_object), Z_OBJ_P(z_object), name, name_length, value, value_len);
 }
+/* Resource variant only has non ex version as it is rarely used */
+static zend_always_inline void add_property_resource(zval *z_object, const char *name, zend_resource *resource) {
+	zval tmp;
 
-ZEND_API void add_property_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r);
-ZEND_API void add_property_array_ex(zval *arg, const char *key, size_t key_len, zend_array *arr);
-ZEND_API void add_property_object_ex(zval *arg, const char *key, size_t key_len, zend_object *obj);
-ZEND_API void add_property_reference_ex(zval *arg, const char *key, size_t key_len, zend_reference *ref);
-static zend_always_inline void add_property_resource(zval *arg, const char *key, zend_resource *r) {
-	add_property_resource_ex(arg, key, strlen(key), r);
-}
-static zend_always_inline void add_property_array(zval *arg, const char *key, zend_array *arr) {
-	add_property_array_ex(arg, key, strlen(key), arr);
-}
-static zend_always_inline void add_property_object(zval *arg, const char *key, zend_object *obj) {
-	add_property_object_ex(arg, key, strlen(key), obj);
-}
-static zend_always_inline void add_property_reference(zval *arg, const char *key, zend_reference *ref) {
-	add_property_reference_ex(arg, key, strlen(key), ref);
+    ZVAL_RES(&tmp, resource);
+	zend_update_property(Z_OBJCE_P(z_object), Z_OBJ_P(z_object), name, strlen(name), &tmp);
+	zval_ptr_dtor(&tmp); /* Updating property will increase refcount by 1 */
 }
 
 ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zend_string *name, zval *value);
