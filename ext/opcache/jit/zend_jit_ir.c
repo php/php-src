@@ -1200,7 +1200,9 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 	}
 
 	/* Negative "var" has special meaning for IR */
-	val = ir_bind(&jit->ctx, -EX_NUM_TO_VAR(jit->ssa->vars[var].var), val);
+	if (val > 0 && jit->ssa->vars[var].var < jit->current_op_array->last_var) {
+		val = ir_bind(&jit->ctx, -EX_NUM_TO_VAR(jit->ssa->vars[var].var), val);
+	}
 	jit->ra[var].ref = val;
 
 	if (jit->ra[var].flags & ZREG_FORWARD) {
