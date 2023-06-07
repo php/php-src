@@ -4697,6 +4697,30 @@ ZEND_API void zend_declare_class_constant_string(zend_class_entry *ce, const cha
 }
 /* }}} */
 
+ZEND_API void zend_unset_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length) /* {{{ */
+{
+	zend_string *property;
+	zend_class_entry *old_scope = EG(fake_scope);
+
+	EG(fake_scope) = scope;
+
+	property = zend_string_init(name, name_length, 0);
+	object->handlers->unset_property(object, property, 0);
+	zend_string_release_ex(property, 0);
+
+	EG(fake_scope) = old_scope;
+}
+/* }}} */
+
+ZEND_API void zend_unset_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name)
+{
+	zend_class_entry *old_scope = EG(fake_scope);
+
+	EG(fake_scope) = scope;
+	object->handlers->unset_property(object, name, 0);
+	EG(fake_scope) = old_scope;
+}
+
 ZEND_API void zend_update_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zval *value) /* {{{ */
 {
 	zend_class_entry *old_scope = EG(fake_scope);
@@ -4733,22 +4757,15 @@ ZEND_API void zend_update_property_null(zend_class_entry *scope, zend_object *ob
 }
 /* }}} */
 
-ZEND_API void zend_unset_property(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length) /* {{{ */
+ZEND_API void zend_update_property_null_ex(zend_class_entry *scope, zend_object *object, zend_string *name)
 {
-	zend_string *property;
-	zend_class_entry *old_scope = EG(fake_scope);
+	zval tmp;
 
-	EG(fake_scope) = scope;
-
-	property = zend_string_init(name, name_length, 0);
-	object->handlers->unset_property(object, property, 0);
-	zend_string_release_ex(property, 0);
-
-	EG(fake_scope) = old_scope;
+	ZVAL_NULL(&tmp);
+	zend_update_property_ex(scope, object, name, &tmp);
 }
-/* }}} */
 
-ZEND_API void zend_update_property_bool(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value) /* {{{ */
+ZEND_API void zend_update_property_bool(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, bool value) /* {{{ */
 {
 	zval tmp;
 
@@ -4756,6 +4773,14 @@ ZEND_API void zend_update_property_bool(zend_class_entry *scope, zend_object *ob
 	zend_update_property(scope, object, name, name_length, &tmp);
 }
 /* }}} */
+
+ZEND_API void zend_update_property_bool_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool value)
+{
+	zval tmp;
+
+	ZVAL_BOOL(&tmp, value);
+	zend_update_property_ex(scope, object, name, &tmp);
+}
 
 ZEND_API void zend_update_property_long(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_long value) /* {{{ */
 {
@@ -4766,6 +4791,14 @@ ZEND_API void zend_update_property_long(zend_class_entry *scope, zend_object *ob
 }
 /* }}} */
 
+ZEND_API void zend_update_property_long_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zend_long value)
+{
+	zval tmp;
+
+	ZVAL_LONG(&tmp, value);
+	zend_update_property_ex(scope, object, name, &tmp);
+}
+
 ZEND_API void zend_update_property_double(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, double value) /* {{{ */
 {
 	zval tmp;
@@ -4775,6 +4808,14 @@ ZEND_API void zend_update_property_double(zend_class_entry *scope, zend_object *
 }
 /* }}} */
 
+ZEND_API void zend_update_property_double_ex(zend_class_entry *scope, zend_object *object, zend_string *name, double value)
+{
+	zval tmp;
+
+	ZVAL_DOUBLE(&tmp, value);
+	zend_update_property_ex(scope, object, name, &tmp);
+}
+
 ZEND_API void zend_update_property_str(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, zend_string *value) /* {{{ */
 {
 	zval tmp;
@@ -4783,6 +4824,14 @@ ZEND_API void zend_update_property_str(zend_class_entry *scope, zend_object *obj
 	zend_update_property(scope, object, name, name_length, &tmp);
 }
 /* }}} */
+
+ZEND_API void zend_update_property_str_ex(zend_class_entry *scope, zend_object *object, zend_string *name, zend_string *value)
+{
+	zval tmp;
+
+	ZVAL_STR(&tmp, value);
+	zend_update_property_ex(scope, object, name, &tmp);
+}
 
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value) /* {{{ */
 {
@@ -4794,6 +4843,15 @@ ZEND_API void zend_update_property_string(zend_class_entry *scope, zend_object *
 }
 /* }}} */
 
+ZEND_API void zend_update_property_string_ex(zend_class_entry *scope, zend_object *object, zend_string *name, const char *value)
+{
+	zval tmp;
+
+	ZVAL_STRING(&tmp, value);
+	Z_SET_REFCOUNT(tmp, 0);
+	zend_update_property_ex(scope, object, name, &tmp);
+}
+
 ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zend_object *object, const char *name, size_t name_length, const char *value, size_t value_len) /* {{{ */
 {
 	zval tmp;
@@ -4803,6 +4861,15 @@ ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zend_object 
 	zend_update_property(scope, object, name, name_length, &tmp);
 }
 /* }}} */
+
+ZEND_API void zend_update_property_stringl_ex(zend_class_entry *scope, zend_object *object, zend_string *name, const char *value, size_t value_len)
+{
+	zval tmp;
+
+	ZVAL_STRINGL(&tmp, value, value_len);
+	Z_SET_REFCOUNT(tmp, 0);
+	zend_update_property_ex(scope, object, name, &tmp);
+}
 
 ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zend_string *name, zval *value) /* {{{ */
 {
@@ -4858,7 +4925,15 @@ ZEND_API zend_result zend_update_static_property_null(zend_class_entry *scope, c
 }
 /* }}} */
 
-ZEND_API zend_result zend_update_static_property_bool(zend_class_entry *scope, const char *name, size_t name_length, zend_long value) /* {{{ */
+ZEND_API zend_result zend_update_static_property_null_ex(zend_class_entry *scope, zend_string *name)
+{
+	zval tmp;
+
+	ZVAL_NULL(&tmp);
+	return zend_update_static_property_ex(scope, name, &tmp);
+}
+
+ZEND_API zend_result zend_update_static_property_bool(zend_class_entry *scope, const char *name, size_t name_length, bool value) /* {{{ */
 {
 	zval tmp;
 
@@ -4866,6 +4941,14 @@ ZEND_API zend_result zend_update_static_property_bool(zend_class_entry *scope, c
 	return zend_update_static_property(scope, name, name_length, &tmp);
 }
 /* }}} */
+
+ZEND_API zend_result zend_update_static_property_bool_ex(zend_class_entry *scope, zend_string *name, bool value)
+{
+	zval tmp;
+
+	ZVAL_BOOL(&tmp, value);
+	return zend_update_static_property_ex(scope, name, &tmp);
+}
 
 ZEND_API zend_result zend_update_static_property_long(zend_class_entry *scope, const char *name, size_t name_length, zend_long value) /* {{{ */
 {
@@ -4876,6 +4959,14 @@ ZEND_API zend_result zend_update_static_property_long(zend_class_entry *scope, c
 }
 /* }}} */
 
+ZEND_API zend_result zend_update_static_property_long_ex(zend_class_entry *scope, zend_string *name, zend_long value)
+{
+	zval tmp;
+
+	ZVAL_LONG(&tmp, value);
+	return zend_update_static_property_ex(scope, name, &tmp);
+}
+
 ZEND_API zend_result zend_update_static_property_double(zend_class_entry *scope, const char *name, size_t name_length, double value) /* {{{ */
 {
 	zval tmp;
@@ -4884,6 +4975,30 @@ ZEND_API zend_result zend_update_static_property_double(zend_class_entry *scope,
 	return zend_update_static_property(scope, name, name_length, &tmp);
 }
 /* }}} */
+
+ZEND_API zend_result zend_update_static_property_double_ex(zend_class_entry *scope, zend_string *name, double value)
+{
+	zval tmp;
+
+	ZVAL_DOUBLE(&tmp, value);
+	return zend_update_static_property_ex(scope, name, &tmp);
+}
+
+ZEND_API zend_result zend_update_static_property_str(zend_class_entry *scope, const char *name, size_t name_length, zend_string *value)
+{
+	zval tmp;
+
+	ZVAL_STR(&tmp, value);
+	return zend_update_static_property(scope, name, name_length, &tmp);
+}
+
+ZEND_API zend_result zend_update_static_property_str_ex(zend_class_entry *scope, zend_string *name, zend_string *value)
+{
+	zval tmp;
+
+	ZVAL_STR(&tmp, value);
+	return zend_update_static_property_ex(scope, name, &tmp);
+}
 
 ZEND_API zend_result zend_update_static_property_string(zend_class_entry *scope, const char *name, size_t name_length, const char *value) /* {{{ */
 {
@@ -4895,6 +5010,15 @@ ZEND_API zend_result zend_update_static_property_string(zend_class_entry *scope,
 }
 /* }}} */
 
+ZEND_API zend_result zend_update_static_property_string_ex(zend_class_entry *scope, zend_string *name, const char *value)
+{
+	zval tmp;
+
+	ZVAL_STRING(&tmp, value);
+	Z_SET_REFCOUNT(tmp, 0);
+	return zend_update_static_property_ex(scope, name, &tmp);
+}
+
 ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope, const char *name, size_t name_length, const char *value, size_t value_len) /* {{{ */
 {
 	zval tmp;
@@ -4904,6 +5028,15 @@ ZEND_API zend_result zend_update_static_property_stringl(zend_class_entry *scope
 	return zend_update_static_property(scope, name, name_length, &tmp);
 }
 /* }}} */
+
+ZEND_API zend_result zend_update_static_property_stringl_ex(zend_class_entry *scope, zend_string *name, const char *value, size_t value_len)
+{
+	zval tmp;
+
+	ZVAL_STRINGL(&tmp, value, value_len);
+	Z_SET_REFCOUNT(tmp, 0);
+	return zend_update_static_property_ex(scope, name, &tmp);
+}
 
 ZEND_API zval *zend_read_property_ex(zend_class_entry *scope, zend_object *object, zend_string *name, bool silent, zval *rv) /* {{{ */
 {
