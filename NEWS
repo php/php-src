@@ -51,6 +51,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9356 Incomplete validation of IPv6 Address fields in
     subjectAltNames (James Lucas, Jakub Zelenka).
 
+- PGSQL:
+  . Fixed intermittent segfault with pg_trace. (David Carlier)
+
 - Phar:
   . Fix cross-compilation check in phar generation for FreeBSD. (peter279k)
 
