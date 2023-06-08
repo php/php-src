@@ -95,9 +95,9 @@ typedef struct {
 
 typedef struct {
 	/* This may be a fake object that isn't actually in the children list of the parent.
-	 * This is because the xmlns nodes aren't stored on the parent in libxml2, so we have to fake it.
+	 * This is because some namespace declaration nodes aren't stored on the parent in libxml2, so we have to fake it.
 	 * We could use a zval for this, but since this is always going to be an object let's save space... */
-	dom_object *parent_link;
+	dom_object *parent_intern;
 	dom_object dom;
 } dom_object_namespace_node;
 

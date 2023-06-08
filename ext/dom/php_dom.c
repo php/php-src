@@ -1050,9 +1050,9 @@ static zend_object *dom_objects_namespace_node_new(zend_class_entry *class_type)
 static void dom_object_namespace_node_free_storage(zend_object *object)
 {
 	dom_object_namespace_node *intern = php_dom_namespace_node_obj_from_obj(object);
-	if (intern->parent_link != NULL) {
+	if (intern->parent_intern != NULL) {
 		zval tmp;
-		ZVAL_OBJ(&tmp, &intern->parent_link->std);
+		ZVAL_OBJ(&tmp, &intern->parent_intern->std);
 		zval_ptr_dtor(&tmp);
 	}
 	dom_objects_free_storage(object);
@@ -1598,7 +1598,7 @@ xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr origina
 	php_dom_create_object(attrp, return_value, parent_intern);
 	/* This object must exist, because we just created an object for it via DOM_RET_OBJ. */
 	dom_object *obj = ((php_libxml_node_ptr *)attrp->_private)->_private;
-	php_dom_namespace_node_obj_from_obj(&obj->std)->parent_link = parent_intern;
+	php_dom_namespace_node_obj_from_obj(&obj->std)->parent_intern = parent_intern;
 	return attrp;
 }
 
