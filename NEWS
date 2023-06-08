@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.22
 
+- PCRE:
+  . Mangle PCRE regex cache key with JIT option. (mvorisek)
 
 06 Jul 2023, PHP 8.1.21
 
