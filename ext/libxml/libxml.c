@@ -113,7 +113,7 @@ static int php_libxml_clear_object(php_libxml_node_object *object)
 	return php_libxml_decrement_doc_ref(object);
 }
 
-static int php_libxml_unregister_node(xmlNodePtr nodep)
+static void php_libxml_unregister_node(xmlNodePtr nodep)
 {
 	php_libxml_node_object *wrapper;
 
@@ -130,8 +130,6 @@ static int php_libxml_unregister_node(xmlNodePtr nodep)
 			nodeptr->node = NULL;
 		}
 	}
-
-	return -1;
 }
 
 static void php_libxml_node_free(xmlNodePtr node)
@@ -209,9 +207,7 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 
 			curnode = node->next;
 			xmlUnlinkNode(node);
-			if (php_libxml_unregister_node(node) == 0) {
-				node->doc = NULL;
-			}
+			php_libxml_unregister_node(node);
 			php_libxml_node_free(node);
 		}
 	}
@@ -1270,9 +1266,7 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 					default:
 						php_libxml_node_free_list((xmlNodePtr) node->properties);
 				}
-				if (php_libxml_unregister_node(node) == 0) {
-					node->doc = NULL;
-				}
+				php_libxml_unregister_node(node);
 				php_libxml_node_free(node);
 			} else {
 				php_libxml_unregister_node(node);
