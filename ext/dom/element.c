@@ -378,23 +378,9 @@ PHP_METHOD(DOMElement, getAttributeNode)
 
 	if (attrp->type == XML_NAMESPACE_DECL) {
 		xmlNsPtr original = (xmlNsPtr) attrp;
-		xmlNsPtr curns = xmlNewNs(NULL, original->href, NULL);
-		if (original->prefix) {
-			curns->prefix = xmlStrdup(original->prefix);
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) original->prefix, original->href);
-		} else {
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", original->href);
-		}
-		attrp->type = XML_NAMESPACE_DECL;
-		attrp->parent = nodep;
-		attrp->ns = curns;
-
-		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 		/* Keep parent alive, because we're a fake child. */
 		GC_ADDREF(&intern->std);
-		/* This object must exist, because we just created an object for it via DOM_RET_OBJ. */
-		dom_object *obj = ((php_libxml_node_ptr *)attrp->_private)->_private;
-		php_dom_namespace_node_obj_from_obj(&obj->std)->parent_link = intern;
+		(void) php_dom_create_fake_namespace_decl(nodep, original, return_value, intern);
 	} else {
 		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 	}

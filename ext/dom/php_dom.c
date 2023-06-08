@@ -1580,6 +1580,28 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 }
 /* }}} end dom_get_nsdecl */
 
+/* Note: Assumes the additional lifetime was already added in the caller. */
+xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern)
+{
+	xmlNodePtr attrp;
+	xmlNsPtr curns = xmlNewNs(NULL, original->href, NULL);
+	if (original->prefix) {
+		curns->prefix = xmlStrdup(original->prefix);
+		attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) original->prefix, original->href);
+	} else {
+		attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", original->href);
+	}
+	attrp->type = XML_NAMESPACE_DECL;
+	attrp->parent = nodep;
+	attrp->ns = curns;
+
+	php_dom_create_object(attrp, return_value, parent_intern);
+	/* This object must exist, because we just created an object for it via DOM_RET_OBJ. */
+	dom_object *obj = ((php_libxml_node_ptr *)attrp->_private)->_private;
+	php_dom_namespace_node_obj_from_obj(&obj->std)->parent_link = parent_intern;
+	return attrp;
+}
+
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	zval offset_copy;
