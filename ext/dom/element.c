@@ -388,9 +388,16 @@ PHP_METHOD(DOMElement, getAttributeNode)
 		attrp->type = XML_NAMESPACE_DECL;
 		attrp->parent = nodep;
 		attrp->ns = curns;
-	}
 
-	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+		/* Keep parent alive, because we're a fake child. */
+		GC_ADDREF(&intern->std);
+		/* This object must exist, because we just created an object for it via DOM_RET_OBJ. */
+		dom_object *obj = ((php_libxml_node_ptr *)attrp->_private)->_private;
+		php_dom_namespace_node_obj_from_obj(&obj->std)->parent_link = intern;
+	} else {
+		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+	}
 }
 /* }}} end dom_element_get_attribute_node */
 

@@ -93,6 +93,18 @@ typedef struct {
 	HashPosition pos;
 } php_dom_iterator;
 
+typedef struct {
+	/* This may be a fake object that isn't actually in the children list of the parent.
+	 * This is because the xmlns nodes aren't stored on the parent in libxml2, so we have to fake it.
+	 * We could use a zval for this, but since this is always going to be an object let's save space... */
+	dom_object *parent_link;
+	dom_object dom;
+} dom_object_namespace_node;
+
+static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
+	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
+}
+
 #include "domexception.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);

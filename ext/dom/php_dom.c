@@ -61,6 +61,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
 
 zend_object_handlers dom_object_handlers;
 zend_object_handlers dom_nnodemap_object_handlers;
+zend_object_handlers dom_object_namespace_node_handlers;
 #ifdef LIBXML_XPATH_ENABLED
 zend_object_handlers dom_xpath_object_handlers;
 #endif
@@ -85,6 +86,9 @@ static HashTable dom_namespace_node_prop_handlers;
 static HashTable dom_xpath_prop_handlers;
 #endif
 /* }}} */
+
+static zend_object *dom_objects_namespace_node_new(zend_class_entry *class_type);
+static void dom_object_namespace_node_free_storage(zend_object *object);
 
 typedef int (*dom_read_t)(dom_object *obj, zval *retval);
 typedef int (*dom_write_t)(dom_object *obj, zval *newval);
@@ -570,6 +574,10 @@ PHP_MINIT_FUNCTION(dom)
 	dom_nnodemap_object_handlers.read_dimension = dom_nodelist_read_dimension;
 	dom_nnodemap_object_handlers.has_dimension = dom_nodelist_has_dimension;
 
+	memcpy(&dom_object_namespace_node_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
+	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
+	dom_object_namespace_node_handlers.free_obj = dom_object_namespace_node_free_storage;
+
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
 	dom_domexception_class_entry = register_class_DOMException(zend_ce_exception);
@@ -604,7 +612,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_ptr(&classes, dom_node_class_entry->name, &dom_node_prop_handlers);
 
 	dom_namespace_node_class_entry = register_class_DOMNameSpaceNode();
-	dom_namespace_node_class_entry->create_object = dom_objects_new;
+	dom_namespace_node_class_entry->create_object = dom_objects_namespace_node_new;
 
 	zend_hash_init(&dom_namespace_node_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "nodeName", sizeof("nodeName")-1, dom_node_node_name_read, NULL);
@@ -1001,10 +1009,8 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 }
 /* }}} */
 
-static dom_object* dom_objects_set_class(zend_class_entry *class_type) /* {{{ */
+static void dom_objects_set_class_ex(zend_class_entry *class_type, dom_object *intern) /* {{{ */
 {
-	dom_object *intern = zend_object_alloc(sizeof(dom_object), class_type);
-
 	zend_class_entry *base_class = class_type;
 	while ((base_class->type != ZEND_INTERNAL_CLASS || base_class->info.internal.module->module_number != dom_module_entry.module_number) && base_class->parent != NULL) {
 		base_class = base_class->parent;
@@ -1014,10 +1020,14 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type) /* {{{ */
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
+}
 
+static dom_object* dom_objects_set_class(zend_class_entry *class_type)
+{
+	dom_object *intern = zend_object_alloc(sizeof(dom_object), class_type);
+	dom_objects_set_class_ex(class_type, intern);
 	return intern;
 }
-/* }}} */
 
 /* {{{ dom_objects_new */
 zend_object *dom_objects_new(zend_class_entry *class_type)
@@ -1027,6 +1037,26 @@ zend_object *dom_objects_new(zend_class_entry *class_type)
 	return &intern->std;
 }
 /* }}} */
+
+static zend_object *dom_objects_namespace_node_new(zend_class_entry *class_type)
+{
+	ZEND_ASSERT(class_type == dom_namespace_node_class_entry);
+	dom_object_namespace_node *intern = zend_object_alloc(sizeof(dom_object_namespace_node), dom_namespace_node_class_entry);
+	dom_objects_set_class_ex(dom_namespace_node_class_entry, &intern->dom);
+	intern->dom.std.handlers = &dom_object_namespace_node_handlers;
+	return &intern->dom.std;
+}
+
+static void dom_object_namespace_node_free_storage(zend_object *object)
+{
+	dom_object_namespace_node *intern = php_dom_namespace_node_obj_from_obj(object);
+	if (intern->parent_link != NULL) {
+		zval tmp;
+		ZVAL_OBJ(&tmp, &intern->parent_link->std);
+		zval_ptr_dtor(&tmp);
+	}
+	dom_objects_free_storage(object);
+}
 
 #ifdef LIBXML_XPATH_ENABLED
 /* {{{ zend_object dom_xpath_objects_new(zend_class_entry *class_type) */
