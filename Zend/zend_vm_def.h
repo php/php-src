@@ -4549,6 +4549,8 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY, SPEC(OBSERVER
 
 	ZEND_OBSERVER_FCALL_END(generator->execute_data, &generator->retval);
 
+	EG(current_execute_data) = EX(prev_execute_data);
+
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
 
@@ -7837,6 +7839,7 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 	cleanup_live_vars(execute_data, op_num, 0);
 	if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
 		zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
+		EG(current_execute_data) = EX(prev_execute_data);
 		zend_generator_close(generator, 1);
 		ZEND_VM_RETURN();
 	} else {
@@ -7930,6 +7933,7 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 		case ZEND_USER_OPCODE_RETURN:
 			if (UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_GENERATOR) != 0)) {
 				zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
+				EG(current_execute_data) = EX(prev_execute_data);
 				zend_generator_close(generator, 1);
 				ZEND_VM_RETURN();
 			} else {
