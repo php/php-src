@@ -344,8 +344,8 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		&class_type->function_table, "rewind", sizeof("rewind") - 1);
 	funcs_ptr->zf_valid = zend_hash_str_find_ptr(
 		&class_type->function_table, "valid", sizeof("valid") - 1);
-	funcs_ptr->zf_key = zend_hash_str_find_ptr(
-		&class_type->function_table, "key", sizeof("key") - 1);
+	funcs_ptr->zf_key = zend_hash_find_ptr(
+		&class_type->function_table, ZSTR_KNOWN(ZEND_STR_KEY));
 	funcs_ptr->zf_current = zend_hash_str_find_ptr(
 		&class_type->function_table, "current", sizeof("current") - 1);
 	funcs_ptr->zf_next = zend_hash_str_find_ptr(

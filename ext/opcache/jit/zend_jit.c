@@ -4822,7 +4822,7 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
 		JIT_G(opt_flags) = ZEND_JIT_REG_ALLOC_GLOBAL | ZEND_JIT_CPU_AVX;
 		return SUCCESS;
-	} else if (zend_string_equals_literal_ci(jit, "function")) {
+	} else if (zend_string_equals_ci(jit, ZSTR_KNOWN(ZEND_STR_FUNCTION))) {
 		JIT_G(enabled) = 1;
 		JIT_G(on) = 1;
 		JIT_G(opt_level) = ZEND_JIT_LEVEL_OPT_SCRIPT;

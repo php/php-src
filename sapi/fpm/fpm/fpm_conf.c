@@ -534,7 +534,7 @@ static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{
 {
 	zend_string *val = Z_STR_P(value);
 	struct fpm_worker_pool_config_s  *c = *config;
-	if (zend_string_equals_literal_ci(val, "static")) {
+	if (zend_string_equals_ci(val, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 		c->pm = PM_STYLE_STATIC;
 	} else if (zend_string_equals_literal_ci(val, "dynamic")) {
 		c->pm = PM_STYLE_DYNAMIC;

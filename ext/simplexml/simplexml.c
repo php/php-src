@@ -2191,7 +2191,8 @@ static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 	}
 
 	if (inherited) {
-		fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		fptr_count = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (fptr_count->common.scope == parent) {
 			fptr_count = NULL;
 		}

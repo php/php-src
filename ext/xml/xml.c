@@ -762,7 +762,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 	if (parser->lastwasopen) {
 		zval *myval;
 		/* check if the current tag already has a value - if yes append to that! */
-		if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
+		if ((myval = zend_hash_find(Z_ARRVAL_P(parser->ctag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
 			size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 			Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
 			strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
@@ -781,7 +781,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
 			if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
 				if (zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
-					if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
+					if ((myval = zend_hash_find(Z_ARRVAL_P(curtag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
 						size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
 						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
