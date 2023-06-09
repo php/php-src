@@ -1009,7 +1009,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 }
 /* }}} */
 
-static void dom_objects_set_class_ex(zend_class_entry *class_type, dom_object *intern) /* {{{ */
+static void dom_objects_set_class_ex(zend_class_entry *class_type, dom_object *intern)
 {
 	zend_class_entry *base_class = class_type;
 	while ((base_class->type != ZEND_INTERNAL_CLASS || base_class->info.internal.module->module_number != dom_module_entry.module_number) && base_class->parent != NULL) {
@@ -1040,9 +1040,8 @@ zend_object *dom_objects_new(zend_class_entry *class_type)
 
 static zend_object *dom_objects_namespace_node_new(zend_class_entry *class_type)
 {
-	ZEND_ASSERT(class_type == dom_namespace_node_class_entry);
-	dom_object_namespace_node *intern = zend_object_alloc(sizeof(dom_object_namespace_node), dom_namespace_node_class_entry);
-	dom_objects_set_class_ex(dom_namespace_node_class_entry, &intern->dom);
+	dom_object_namespace_node *intern = zend_object_alloc(sizeof(dom_object_namespace_node), class_type);
+	dom_objects_set_class_ex(class_type, &intern->dom);
 	intern->dom.std.handlers = &dom_object_namespace_node_handlers;
 	return &intern->dom.std;
 }
@@ -1596,7 +1595,7 @@ xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr origina
 	attrp->ns = curns;
 
 	php_dom_create_object(attrp, return_value, parent_intern);
-	/* This object must exist, because we just created an object for it via DOM_RET_OBJ. */
+	/* This object must exist, because we just created an object for it via php_dom_create_object(). */
 	dom_object *obj = ((php_libxml_node_ptr *)attrp->_private)->_private;
 	php_dom_namespace_node_obj_from_obj(&obj->std)->parent_intern = parent_intern;
 	return attrp;
