@@ -158,9 +158,8 @@ static bool zend_observer_remove_handler(void **first_handler, void *old_handler
 			} else {
 				if (cur_handler != last_handler) {
 					memmove(cur_handler, cur_handler + 1, sizeof(cur_handler) * (last_handler - cur_handler));
-				} else {
-					*last_handler = NULL;
 				}
+				*last_handler = NULL;
 			}
 			return true;
 		}
@@ -196,7 +195,7 @@ ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observ
 	if (*end_handler != ZEND_OBSERVER_NOT_OBSERVED) {
 		// there's no space for new handlers, then it's forbidden to call this function
 		ZEND_ASSERT(end_handler[registered_observers - 1] == NULL);
-		memmove(end_handler + 1, end_handler, registered_observers - 1);
+		memmove(end_handler + 1, end_handler, sizeof(end_handler) * (registered_observers - 1));
 	}
 	*end_handler = end;
 }
