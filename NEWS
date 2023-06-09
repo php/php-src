@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fix GH-11388 (Allow "final" modifier when importing a method from a trait).
     (nielsdos)
+  . Fixed bug GH-11406 (segfault with unpacking and magic method closure).
+    (nielsdos)
 
 - DOM:
   . Fix #79700 (wrong use of libxml oldNs leads to performance problem).

@@ -14,12 +14,15 @@ class Test {
 
 $test = new Test;
 
+$array = ["unpacked"];
+
 echo "-- Non-static cases --\n";
 $test->test(1, 2, a: 123);
 $test->test(...)(1, 2);
 $test->test(...)(1, 2, a: 123, b: $test);
 $test->test(...)(a: 123, b: $test);
 $test->test(...)();
+$test->test(...)(...$array);
 
 echo "-- Static cases --\n";
 Test::testStatic(1, 2, a: 123);
@@ -27,6 +30,16 @@ Test::testStatic(...)(1, 2);
 Test::testStatic(...)(1, 2, a: 123, b: $test);
 Test::testStatic(...)(a: 123, b: $test);
 Test::testStatic(...)();
+Test::testStatic(...)(...$array);
+
+echo "-- Reflection tests --\n";
+$reflectionFunction = new ReflectionFunction(Test::fail(...));
+var_dump($reflectionFunction->getParameters());
+$argument = $reflectionFunction->getParameters()[0];
+var_dump($argument->isVariadic());
+$type = $argument->getType();
+var_dump($type);
+var_dump($type->getName());
 
 ?>
 --EXPECT--
@@ -70,6 +83,11 @@ array(2) {
 string(4) "test"
 array(0) {
 }
+string(4) "test"
+array(1) {
+  [0]=>
+  string(8) "unpacked"
+}
 -- Static cases --
 string(10) "testStatic"
 array(3) {
@@ -110,3 +128,20 @@ array(2) {
 string(10) "testStatic"
 array(0) {
 }
+string(10) "testStatic"
+array(1) {
+  [0]=>
+  string(8) "unpacked"
+}
+-- Reflection tests --
+array(1) {
+  [0]=>
+  object(ReflectionParameter)#4 (1) {
+    ["name"]=>
+    string(9) "arguments"
+  }
+}
+bool(true)
+object(ReflectionNamedType)#5 (0) {
+}
+string(5) "mixed"
