@@ -928,9 +928,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_contains_i, 0, 2, _IS_BOOL, 
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_str_starts_with arginfo_str_contains_i
-
-#define arginfo_str_ends_with arginfo_str_contains_i
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chunk_split, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
