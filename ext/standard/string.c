@@ -1577,6 +1577,20 @@ PHP_FUNCTION(strstr)
 /* }}} */
 
 /* {{{ Checks if a string contains another */
+PHP_FUNCTION(str_contains_i)
+{
+	zend_string *haystack, *needle;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_STR(needle)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(php_memnistr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack)));
+}
+/* }}} */
+
+/* {{{ Checks if a string contains another */
 PHP_FUNCTION(str_contains)
 {
 	zend_string *haystack, *needle;
