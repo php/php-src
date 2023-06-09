@@ -101,24 +101,18 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 							zval child;
 							/* not sure, if we need this... it's copied from xpath.c */
 							if (node->type == XML_NAMESPACE_DECL) {
-								xmlNsPtr curns;
-								xmlNodePtr nsparent;
+								xmlNodePtr nsparent = node->_private;
+								xmlNsPtr original = (xmlNsPtr) node;
 
-								nsparent = node->_private;
-								curns = xmlNewNs(NULL, node->name, NULL);
-								if (node->children) {
-									curns->prefix = xmlStrdup((xmlChar *) node->children);
-								}
-								if (node->children) {
-									node = xmlNewDocNode(node->doc, NULL, (xmlChar *) node->children, node->name);
-								} else {
-									node = xmlNewDocNode(node->doc, NULL, (xmlChar *) "xmlns", node->name);
-								}
-								node->type = XML_NAMESPACE_DECL;
-								node->parent = nsparent;
-								node->ns = curns;
+								/* Make sure parent dom object exists, so we can take an extra reference. */
+								zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+								php_dom_create_object(nsparent, &parent_zval, &intern->dom);
+								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
+
+								node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
+							} else {
+								php_dom_create_object(node, &child, &intern->dom);
 							}
-							php_dom_create_object(node, &child, &intern->dom);
 							add_next_index_zval(&fci.params[i], &child);
 						}
 					} else {
@@ -421,24 +415,18 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 					zval child;
 
 					if (node->type == XML_NAMESPACE_DECL) {
-						xmlNsPtr curns;
-						xmlNodePtr nsparent;
+						xmlNodePtr nsparent = node->_private;
+						xmlNsPtr original = (xmlNsPtr) node;
 
-						nsparent = node->_private;
-						curns = xmlNewNs(NULL, node->name, NULL);
-						if (node->children) {
-							curns->prefix = xmlStrdup((xmlChar *) node->children);
-						}
-						if (node->children) {
-							node = xmlNewDocNode(docp, NULL, (xmlChar *) node->children, node->name);
-						} else {
-							node = xmlNewDocNode(docp, NULL, (xmlChar *) "xmlns", node->name);
-						}
-						node->type = XML_NAMESPACE_DECL;
-						node->parent = nsparent;
-						node->ns = curns;
+						/* Make sure parent dom object exists, so we can take an extra reference. */
+						zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+						php_dom_create_object(nsparent, &parent_zval, &intern->dom);
+						dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
+
+						node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
+					} else {
+						php_dom_create_object(node, &child, &intern->dom);
 					}
-					php_dom_create_object(node, &child, &intern->dom);
 					add_next_index_zval(&retval, &child);
 				}
 			} else {

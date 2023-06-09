@@ -150,6 +150,7 @@ int dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+/* Note: the object returned is not necessarily a node, but can be an attribute or a namespace declaration. */
 static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ */
 {
 	int len;
@@ -376,25 +377,13 @@ PHP_METHOD(DOMElement, getAttributeNode)
 	}
 
 	if (attrp->type == XML_NAMESPACE_DECL) {
-		xmlNsPtr curns;
-		xmlNodePtr nsparent;
-
-		nsparent = attrp->_private;
-		curns = xmlNewNs(NULL, attrp->name, NULL);
-		if (attrp->children) {
-			curns->prefix = xmlStrdup((xmlChar *) attrp->children);
-		}
-		if (attrp->children) {
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) attrp->children, attrp->name);
-		} else {
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", attrp->name);
-		}
-		attrp->type = XML_NAMESPACE_DECL;
-		attrp->parent = nsparent;
-		attrp->ns = curns;
+		xmlNsPtr original = (xmlNsPtr) attrp;
+		/* Keep parent alive, because we're a fake child. */
+		GC_ADDREF(&intern->std);
+		(void) php_dom_create_fake_namespace_decl(nodep, original, return_value, intern);
+	} else {
+		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 	}
-
-	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 }
 /* }}} end dom_element_get_attribute_node */
 

@@ -100,6 +100,18 @@ typedef struct {
 	php_libxml_cache_tag cache_tag;
 } php_dom_iterator;
 
+typedef struct {
+	/* This may be a fake object that isn't actually in the children list of the parent.
+	 * This is because some namespace declaration nodes aren't stored on the parent in libxml2, so we have to fake it.
+	 * We could use a zval for this, but since this is always going to be an object let's save space... */
+	dom_object *parent_intern;
+	dom_object dom;
+} dom_object_namespace_node;
+
+static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
+	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
+}
+
 #include "domexception.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);
@@ -134,6 +146,7 @@ xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
+xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern);
 
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc);
