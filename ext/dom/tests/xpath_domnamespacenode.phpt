@@ -17,7 +17,7 @@ var_dump($nodes->item(0));
 
 ?>
 --EXPECT--
-object(DOMNameSpaceNode)#3 (8) {
+object(DOMNameSpaceNode)#4 (8) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>
