@@ -130,6 +130,7 @@
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
 	ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
 /* Used for IPv6 Address peer verification */
 #define EXPAND_IPV6_ADDRESS(_str, _bytes) \
 	do { \
@@ -144,6 +145,8 @@
 			_bytes[14] << 8 | _bytes[15] \
 		); \
 	} while(0)
+#define HAVE_IPV6_SAN 1
+#endif
 
 #if PHP_OPENSSL_API_VERSION < 0x10100
 static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
@@ -456,16 +459,17 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
 	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
 
-#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+#ifdef HAVE_IPV6_SAN
 	/* detect if subject name is an IPv6 address and expand once if required */
-    char subject_name_ipv6_expanded[40];
-    unsigned char ipv6[16];
-    bool subject_name_is_ipv6 = false;
-    subject_name_ipv6_expanded[0] = 0;
+	char subject_name_ipv6_expanded[40];
+	unsigned char ipv6[16];
+	bool subject_name_is_ipv6 = false;
+	subject_name_ipv6_expanded[0] = 0;
+
 	if (inet_pton(AF_INET6, subject_name, &ipv6)) {
-    	EXPAND_IPV6_ADDRESS(subject_name_ipv6_expanded, ipv6);
-    	subject_name_is_ipv6 = true;
-    }
+		EXPAND_IPV6_ADDRESS(subject_name_ipv6_expanded, ipv6);
+		subject_name_is_ipv6 = true;
+	}
 #endif
 
 	for (i = 0; i < alt_name_count; i++) {
@@ -506,7 +510,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 					return 1;
 				}
 			}
-#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+#ifdef HAVE_IPV6_SAN
 			else if (san->d.ip->length == 16 && subject_name_is_ipv6) {
 				ipbuffer[0] = 0;
 				EXPAND_IPV6_ADDRESS(ipbuffer, san->d.iPAddress->data);
