@@ -2840,26 +2840,19 @@ PHP_FUNCTION(pg_set_error_context_visibility)
 	PGconn *pgsql;
 	pgsql_link_handle *link;
 
-	if (ZEND_NUM_ARGS() == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &visibility) == FAILURE) {
-			RETURN_THROWS();
-		}
-		link = FETCH_DEFAULT_LINK();
-		CHECK_DEFAULT_LINK(link);
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &pgsql_link, pgsql_link_ce, &visibility) == FAILURE) {
-			RETURN_THROWS();
-		}
-		link = Z_PGSQL_LINK_P(pgsql_link);
-		CHECK_PGSQL_LINK(link);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &pgsql_link, pgsql_link_ce, &visibility) == FAILURE) {
+		RETURN_THROWS();
 	}
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
 
 	pgsql = link->conn;
 
-	if (visibility & (PQSHOW_CONTEXT_NEVER|PQSHOW_CONTEXT_ERRORS|PQSHOW_CONTEXT_ALWAYS)) {
+	if (visibility == PQSHOW_CONTEXT_NEVER || visibility & (PQSHOW_CONTEXT_ERRORS|PQSHOW_CONTEXT_ALWAYS)) {
 		RETURN_LONG(PQsetErrorContextVisibility(pgsql, visibility));
 	} else {
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be one of PGSQL_SHOW_CONTEXT_NEVER, PGSQL_SHOW_CONTEXT_ERRORS or PGSQL_SHOW_CONTEXT_ALWAYS");
+		RETURN_THROWS();
 	}
 }
 

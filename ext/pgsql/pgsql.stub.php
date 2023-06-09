@@ -972,7 +972,7 @@ namespace {
 #endif
 
     /** @param PgSql\Connection|int $connection */
-    function pg_set_error_context_visibility($connection, int $visibility = UNKNOWN): int|false {}
+    function pg_set_error_context_visibility(PgSql\Connection $connection, int $visibility): int {}
 }
 
 namespace PgSql {
