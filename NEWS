@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   . Fixed bug #70359 (print_r() on DOMAttr causes Segfault in
     php_libxml_node_free_list()). (nielsdos)
   . Fixed bug #78577 (Crash in DOMNameSpace debug info handlers). (nielsdos)
+  . Fix lifetime issue with getAttributeNodeNS(). (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
