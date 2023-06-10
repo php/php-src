@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Streams:
   . Implement GH-8641 (STREAM_NOTIFY_COMPLETED over HTTP never emitted).
     (nielsdos, Jakub Zelenka)
+  . Fix bug GH-10406 (fgets on a redis socket connection fails on PHP 8.3).
+    (Jakub Zelenka)
 
 08 Jun 2023, PHP 8.3.0alpha1
 
