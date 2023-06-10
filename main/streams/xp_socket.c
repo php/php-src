@@ -168,7 +168,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	/* Special handling for blocking read. */
 	if (sock->is_blocked) {
 		/* Find out if there is any data buffered from the previous read. */
-		bool has_buffered_data = stream->didread > 0;
+		bool has_buffered_data = stream->has_buffered_data;
 		/* No need to wait if there is any data buffered or no timeout. */
 		bool dont_wait = has_buffered_data ||
 				(sock->timeout.tv_sec == 0 && sock->timeout.tv_usec == 0);
