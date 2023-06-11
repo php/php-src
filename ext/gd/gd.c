@@ -1189,9 +1189,8 @@ PHP_FUNCTION(imagerotate)
 	gdImagePtr im_dst, im_src;
 	double degrees;
 	zend_long color;
-	bool ignoretransparent = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Odl|b", &SIM, gd_image_ce,  &degrees, &color, &ignoretransparent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Odl", &SIM, gd_image_ce,  &degrees, &color) == FAILURE) {
 		RETURN_THROWS();
 	}
 
