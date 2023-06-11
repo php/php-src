@@ -1656,7 +1656,7 @@ PHP_FUNCTION(stristr)
 	if (part) {
 		RETURN_STRINGL(ZSTR_VAL(haystack), found_offset);
 	}
-	RETURN_STRINGL(ZSTR_VAL(haystack) + found_offset, ZSTR_LEN(haystack) - found_offset);
+	RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
 }
 /* }}} */
 
@@ -1684,7 +1684,7 @@ PHP_FUNCTION(strstr)
 	if (part) {
 		RETURN_STRINGL(ZSTR_VAL(haystack), found_offset);
 	}
-	RETURN_STRINGL(ZSTR_VAL(haystack) + found_offset, ZSTR_LEN(haystack) - found_offset);
+	RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
 }
 /* }}} */
 
@@ -1934,10 +1934,13 @@ PHP_FUNCTION(strrchr)
 	zend_string *haystack, *needle;
 	const char *found = NULL;
 	zend_long found_offset;
+	bool part = 0;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
 
 	found = zend_memrchr(ZSTR_VAL(haystack), *ZSTR_VAL(needle), ZSTR_LEN(haystack));
@@ -1945,6 +1948,9 @@ PHP_FUNCTION(strrchr)
 		RETURN_FALSE;
 	}
 	found_offset = found - ZSTR_VAL(haystack);
+	if (part) {
+		RETURN_STRINGL(ZSTR_VAL(haystack), found_offset);
+	}
 	RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
 }
 /* }}} */
