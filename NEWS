@@ -31,6 +31,7 @@ PHP                                                                        NEWS
     php_libxml_node_free_list()). (nielsdos)
   . Fixed bug #78577 (Crash in DOMNameSpace debug info handlers). (nielsdos)
   . Fix lifetime issue with getAttributeNodeNS(). (nielsdos)
+  . Fix "invalid state error" with cloned namespace declarations. (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
