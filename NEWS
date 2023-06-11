@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fix #77894 (DOMNode::C14N() very slow on generated DOMDocuments even after
     normalisation). (nielsdos)
 
+- GD:
+  . Removed imagerotate "ignore_transparent" argument since it has no effect.
+    (David Carlier)
+
 - Streams:
   . Implement GH-8641 (STREAM_NOTIFY_COMPLETED over HTTP never emitted).
     (nielsdos, Jakub Zelenka)

@@ -112,6 +112,10 @@ PHP 8.3 UPGRADE NOTES
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
 
+- Gd:
+  . Changed imagerotate signature, removed the `ignore_transparent` argument
+    as it was not used internally anyway from PHP 7.x.
+
 - Intl:
   . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
     now returns true on success, previously null was returned.
