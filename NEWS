@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Introduced Zend guard recursion protection to fix __debugInfo issue.
     (Jakub Zelenka)
 
+- Standard:
+  . Added $before_needle argument to strrchr(). (HypeMC)
+
 17 Aug 2023, PHP 8.3.0beta3
 
 - Core:
