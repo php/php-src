@@ -10604,6 +10604,14 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 		return;
 	}
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		/* Abort evaluation due to stack usage. Note that compiling this
+		 * expression is likely to also fail. */
+		return;
+	}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
 			zend_eval_const_expr(&ast->child[0]);
