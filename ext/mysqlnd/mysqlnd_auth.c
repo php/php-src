@@ -927,7 +927,10 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 			char *xor_str = do_alloca(passwd_len + 1, use_heap);
 			memcpy(xor_str, passwd, passwd_len);
 			xor_str[passwd_len] = '\0';
-			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
+			/* https://dev.mysql.com/doc/dev/mysql-server/latest/page_caching_sha2_authentication_exchanges.html
+			 * This tells us that the nonce is 20 (==SCRAMBLE_LENGTH) bytes long.
+			 * In a 5.5+ server we might get additional scramble data in php_mysqlnd_greet_read, not used by this authentication method. */
+			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, SCRAMBLE_LENGTH);
 			ret = mysqlnd_sha256_public_encrypt(conn, server_public_key, passwd_len, auth_data_len, xor_str);
 			free_alloca(xor_str, use_heap);
 		}
