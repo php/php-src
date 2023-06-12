@@ -47,6 +47,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9356 Incomplete validation of IPv6 Address fields in
     subjectAltNames (James Lucas, Jakub Zelenka).
 
+- Phar:
+  . Fix cross-compilation check in phar generation for FreeBSD. (peter279k)
+
 - SPL:
   . Fixed bug GH-11338 (SplFileInfo empty getBasename with more than one
     slash). (nielsdos)
