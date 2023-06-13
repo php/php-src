@@ -83,7 +83,7 @@ MAILSTREAM DEFAULTPROTO;
 #endif
 
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en);
-static void _php_imap_add_body(zval *arg, BODY *body);
+static void _php_imap_add_body(zval *arg, const BODY *body);
 static zend_string* _php_imap_parse_address(ADDRESS *addresslist, zval *paddress);
 static zend_string* _php_rfc822_write_address(ADDRESS *addresslist);
 
@@ -4429,14 +4429,13 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 /* }}} */
 
 /* {{{ _php_imap_add_body */
-void _php_imap_add_body(zval *arg, BODY *body)
+void _php_imap_add_body(zval *arg, const BODY *body)
 {
 	php_imap_populate_body_struct_object(arg, body);
 
 	/* multipart message ? */
 	if (body->type == TYPEMULTIPART) {
 		zval z_content_part_list;
-		PART *content_part;
 
 		array_init(&z_content_part_list);
 		for (const PART *content_part = body->CONTENT_PART; content_part; content_part = content_part->next) {
@@ -4452,10 +4451,10 @@ void _php_imap_add_body(zval *arg, BODY *body)
 	if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
 		zval message_list, message;
 
-		body = body->CONTENT_MSG_BODY;
+		const BODY *message_body = body->CONTENT_MSG_BODY;
 		array_init(&message_list);
 		object_init(&message);
-		_php_imap_add_body(&message, body);
+		_php_imap_add_body(&message, message_body);
 		php_imap_list_add_object(&message_list, &message);
 		php_imap_hash_add_object(arg, "parts", &message_list);
 	}
