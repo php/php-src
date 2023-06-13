@@ -259,21 +259,6 @@ static zval *php_imap_hash_add_object(zval *arg, char *key, zval *tmp)
 }
 /* }}} */
 
-/* {{{ php_imap_list_add_object */
-static inline zval *php_imap_list_add_object(zval *arg, zval *tmp)
-{
-	HashTable *symtable;
-
-	if (Z_TYPE_P(arg) == IS_OBJECT) {
-		symtable = Z_OBJPROP_P(arg);
-	} else {
-		symtable = Z_ARRVAL_P(arg);
-	}
-
-	return zend_hash_next_index_insert(symtable, tmp);
-}
-/* }}} */
-
 /* {{{ mail_newfolderobjectlist
  *
  * Mail instantiate FOBJECTLIST
@@ -1382,7 +1367,7 @@ static void php_imap_populate_mailbox_object(zval *z_object, const FOBJECTLIST *
 /* Author: CJH */
 PHP_FUNCTION(imap_getmailboxes)
 {
-	zval *imap_conn_obj, mboxob;
+	zval *imap_conn_obj;
 	zend_string *ref, *pat;
 	php_imap_object *imap_conn_struct;
 	FOBJECTLIST *cur=NIL;
@@ -1405,9 +1390,10 @@ PHP_FUNCTION(imap_getmailboxes)
 	array_init(return_value);
 	cur=IMAPG(imap_folder_objects);
 	while (cur != NIL) {
+		zval mboxob;
 		object_init(&mboxob);
 		php_imap_populate_mailbox_object(&mboxob, cur);
-		php_imap_list_add_object(return_value, &mboxob);
+		zend_hash_next_index_insert_new(Z_ARR_P(return_value), &mboxob);
 		cur=cur->next;
 	}
 	mail_free_foblist(&IMAPG(imap_folder_objects), &IMAPG(imap_folder_objects_tail));
@@ -1741,7 +1727,7 @@ PHP_FUNCTION(imap_lsub)
 /* Author: CJH */
 PHP_FUNCTION(imap_getsubscribed)
 {
-	zval *imap_conn_obj, mboxob;
+	zval *imap_conn_obj;
 	zend_string *ref, *pat;
 	php_imap_object *imap_conn_struct;
 	FOBJECTLIST *cur=NIL;
@@ -1764,12 +1750,14 @@ PHP_FUNCTION(imap_getsubscribed)
 	}
 
 	array_init(return_value);
-	cur=IMAPG(imap_sfolder_objects);
+	cur = IMAPG(imap_sfolder_objects);
 	while (cur != NIL) {
+		zval mboxob;
 		object_init(&mboxob);
 		php_imap_populate_mailbox_object(&mboxob, cur);
-		php_imap_list_add_object(return_value, &mboxob);
-		cur=cur->next;
+		zend_hash_next_index_insert_new(Z_ARR_P(return_value), &mboxob);
+
+		cur = cur->next;
 	}
 	mail_free_foblist (&IMAPG(imap_sfolder_objects), &IMAPG(imap_sfolder_objects_tail));
 	IMAPG(folderlist_style) = FLIST_ARRAY; /* reset to default */
@@ -2197,14 +2185,14 @@ static void php_imap_construct_address_object(zval *z_object, const ADDRESS *add
 	}
 }
 
-static void php_imap_construct_list_of_addresses(zval *list, const ADDRESS *const address_list)
+static void php_imap_construct_list_of_addresses(HashTable *list, const ADDRESS *const address_list)
 {
 	const ADDRESS *current_address = address_list;
 	do {
 		zval tmp_object;
 		object_init(&tmp_object);
 		php_imap_construct_address_object(&tmp_object, current_address);
-		php_imap_list_add_object(list, &tmp_object);
+		zend_hash_next_index_insert_new(list, &tmp_object);
 	} while ((current_address = current_address->next));
 }
 
@@ -2232,7 +2220,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 	address_list = env->to;
 
 	if (address_list) {
-		php_imap_construct_list_of_addresses(return_value, address_list);
+		php_imap_construct_list_of_addresses(Z_ARR_P(return_value), address_list);
 	}
 
 	mail_free_envelope(&env);
@@ -2969,7 +2957,7 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 				"value", strlen("value"),
 				disposition_parameter->value
 			);
-			php_imap_list_add_object(&z_disposition_parameter_list, &z_disposition_parameter);
+			zend_hash_next_index_insert_new(Z_ARR(z_disposition_parameter_list), &z_disposition_parameter);
 		} while ((disposition_parameter = disposition_parameter->next));
 		php_imap_hash_add_object(z_object, "dparameters", &z_disposition_parameter_list);
 	} else {
@@ -3006,7 +2994,7 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 				body_parameters->value
 			);
 
-			php_imap_list_add_object(&z_body_parameter_list, &z_body_parameter);
+			zend_hash_next_index_insert_new(Z_ARR(z_body_parameter_list), &z_body_parameter);
 		} while ((body_parameters = body_parameters->next));
 	} else {
 		object_init(&z_body_parameter_list);
@@ -3193,7 +3181,8 @@ PHP_FUNCTION(imap_fetch_overview)
 					"udate", strlen("udate"),
 					mail_longdate(elt)
 				);
-				php_imap_list_add_object(return_value, &myoverview);
+
+				zend_hash_next_index_insert_new(Z_ARR_P(return_value), &myoverview);
 			}
 		}
 	}
@@ -4246,7 +4235,7 @@ static zend_string* _php_imap_parse_address (ADDRESS *address_list, zval *paddre
 
 	fulladdress = _php_rfc822_write_address(addresstmp);
 
-	php_imap_construct_list_of_addresses(paddress, address_list);
+	php_imap_construct_list_of_addresses(Z_ARR_P(paddress), address_list);
 	return fulladdress;
 }
 /* }}} */
@@ -4442,7 +4431,7 @@ void _php_imap_add_body(zval *arg, const BODY *body)
 			zval z_content_part;
 			object_init(&z_content_part);
 			_php_imap_add_body(&z_content_part, &content_part->body);
-			php_imap_list_add_object(&z_content_part_list, &z_content_part);
+			zend_hash_next_index_insert_new(Z_ARR(z_content_part_list), &z_content_part);
 		}
 		php_imap_hash_add_object(arg, "parts", &z_content_part_list);
 	}
@@ -4455,7 +4444,7 @@ void _php_imap_add_body(zval *arg, const BODY *body)
 		array_init(&message_list);
 		object_init(&message);
 		_php_imap_add_body(&message, message_body);
-		php_imap_list_add_object(&message_list, &message);
+		zend_hash_next_index_insert_new(Z_ARR(message_list), &message);
 		php_imap_hash_add_object(arg, "parts", &message_list);
 	}
 }
