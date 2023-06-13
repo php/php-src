@@ -14,10 +14,12 @@
 /ext/curl @adoy
 /ext/date @derickr
 /ext/dba @Girgias
+/ext/dom @nielsdos
 /ext/ffi @dstogov
 /ext/gmp @Girgias
 /ext/imap @Girgias
 /ext/json @bukka
+/ext/libxml @nielsdos
 /ext/mbstring @alexdowad
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
