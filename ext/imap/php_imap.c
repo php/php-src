@@ -1606,22 +1606,22 @@ PHP_FUNCTION(imap_headerinfo)
 	zend_update_property_str(
 		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
 		"Flagged", strlen("Flagged"),
-		(cache->recent | cache->seen) ? ZSTR_CHAR('F') : ZSTR_CHAR(' ')
+		cache->flagged ? ZSTR_CHAR('F') : ZSTR_CHAR(' ')
 	);
 	zend_update_property_str(
 		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
 		"Answered", strlen("Answered"),
-		(cache->recent | cache->seen) ? ZSTR_CHAR('A') : ZSTR_CHAR(' ')
+		cache->answered ? ZSTR_CHAR('A') : ZSTR_CHAR(' ')
 	);
 	zend_update_property_str(
 		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
 		"Deleted", strlen("Deleted"),
-		(cache->recent | cache->seen) ? ZSTR_CHAR('D') : ZSTR_CHAR(' ')
+		cache->deleted ? ZSTR_CHAR('D') : ZSTR_CHAR(' ')
 	);
 	zend_update_property_str(
 		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
 		"Draft", strlen("Draft"),
-		(cache->recent | cache->seen) ? ZSTR_CHAR('X') : ZSTR_CHAR(' ')
+		cache->draft ? ZSTR_CHAR('X') : ZSTR_CHAR(' ')
 	);
 
 	snprintf(dummy, sizeof(dummy), "%4ld", cache->msgno);
@@ -2219,9 +2219,7 @@ static void php_imap_construct_address_object(zval *z_object, const ADDRESS *add
 
 static void php_imap_construct_list_of_addresses(zval *list, const ADDRESS *const address_list)
 {
-	const ADDRESS *current_address;
-
-	current_address = address_list;
+	const ADDRESS *current_address = address_list;
 	do {
 		zval tmp_object;
 		object_init(&tmp_object);
@@ -2970,15 +2968,16 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 
 	if (body->disposition.parameter) {
 		PARAMETER *disposition_parameter = body->disposition.parameter;
-		zval z_disposition_parameters, z_disposition_parameter;
+		zval z_disposition_parameter_list;
 
 		zend_update_property_long(
 			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
 			"ifdparameters", strlen("ifdparameters"),
 			1
 		);
-		array_init(&z_disposition_parameters);
+		array_init(&z_disposition_parameter_list);
 		do {
+			zval z_disposition_parameter;
 			object_init(&z_disposition_parameter);
 			zend_update_property_string(
 				Z_OBJCE_P(&z_disposition_parameter), Z_OBJ_P(&z_disposition_parameter),
@@ -2990,9 +2989,9 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 				"value", strlen("value"),
 				disposition_parameter->value
 			);
-			php_imap_list_add_object(&z_disposition_parameters, &z_disposition_parameter);
+			php_imap_list_add_object(&z_disposition_parameter_list, &z_disposition_parameter);
 		} while ((disposition_parameter = disposition_parameter->next));
-		php_imap_hash_add_object(z_object, "dparameters", &z_disposition_parameters);
+		php_imap_hash_add_object(z_object, "dparameters", &z_disposition_parameter_list);
 	} else {
 		zend_update_property_long(
 			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
@@ -3003,8 +3002,7 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 #endif
 
 	PARAMETER *body_parameters = body->parameter;
-	zval z_body_parameters;
-	zval z_body_parameter;
+	zval z_body_parameter_list;
 
 	if (body_parameters) {
 		zend_update_property_long(
@@ -3013,8 +3011,9 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 			1
 		);
 
-		array_init(&z_body_parameters);
+		array_init(&z_body_parameter_list);
 		do {
+			zval z_body_parameter;
 			object_init(&z_body_parameter);
 			zend_update_property_string(
 				Z_OBJCE_P(&z_body_parameter), Z_OBJ_P(&z_body_parameter),
@@ -3027,17 +3026,17 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 				body_parameters->value
 			);
 
-			php_imap_list_add_object(&z_body_parameters, &z_body_parameter);
+			php_imap_list_add_object(&z_body_parameter_list, &z_body_parameter);
 		} while ((body_parameters = body_parameters->next));
 	} else {
-		object_init(&z_body_parameters);
+		object_init(&z_body_parameter_list);
 		zend_update_property_long(
 			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
 			"ifparameters", strlen("ifparameters"),
 			0
 		);
 	}
-	php_imap_hash_add_object(z_object, "parameters", &z_body_parameters);
+	php_imap_hash_add_object(z_object, "parameters", &z_body_parameter_list);
 }
 
 /* {{{ Read the structure of a specified body section of a specific message */
@@ -3047,7 +3046,6 @@ PHP_FUNCTION(imap_bodystruct)
 	zend_long msgno;
 	zend_string *section;
 	php_imap_object *imap_conn_struct;
-	BODY *body;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OlS", &imap_conn_obj, php_imap_ce, &msgno, &section) == FAILURE) {
 		RETURN_THROWS();
@@ -3057,7 +3055,7 @@ PHP_FUNCTION(imap_bodystruct)
 
 	PHP_IMAP_CHECK_MSGNO(msgno, 2);
 
-	body = mail_body(imap_conn_struct->imap_stream, msgno, (unsigned char*)ZSTR_VAL(section));
+	const BODY *body = mail_body(imap_conn_struct->imap_stream, msgno, (unsigned char*)ZSTR_VAL(section));
 	if (body == NULL) {
 		RETURN_FALSE;
 	}
@@ -4457,29 +4455,29 @@ void _php_imap_add_body(zval *arg, BODY *body)
 
 	/* multipart message ? */
 	if (body->type == TYPEMULTIPART) {
-		zval z_content_parts;
+		zval z_content_part_list;
 		PART *content_part;
 
-		array_init(&z_content_parts);
-		for (content_part = body->CONTENT_PART; content_part; content_part = content_part->next) {
+		array_init(&z_content_part_list);
+		for (const PART *content_part = body->CONTENT_PART; content_part; content_part = content_part->next) {
 			zval z_content_part;
 			object_init(&z_content_part);
 			_php_imap_add_body(&z_content_part, &content_part->body);
-			php_imap_list_add_object(&z_content_parts, &z_content_part);
+			php_imap_list_add_object(&z_content_part_list, &z_content_part);
 		}
-		php_imap_hash_add_object(arg, "parts", &z_content_parts);
+		php_imap_hash_add_object(arg, "parts", &z_content_part_list);
 	}
 
 	/* encapsulated message ? */
 	if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
-		zval messages, message;
+		zval message_list, message;
 
 		body = body->CONTENT_MSG_BODY;
-		array_init(&messages);
+		array_init(&message_list);
 		object_init(&message);
 		_php_imap_add_body(&message, body);
-		php_imap_list_add_object(&messages, &message);
-		php_imap_hash_add_object(arg, "parts", &messages);
+		php_imap_list_add_object(&message_list, &message);
+		php_imap_hash_add_object(arg, "parts", &message_list);
 	}
 }
 /* }}} */
