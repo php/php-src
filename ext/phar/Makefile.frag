@@ -35,7 +35,7 @@ TEST_PHP_EXECUTABLE_RES = $(shell echo "$(TEST_PHP_EXECUTABLE)" | grep -c 'Exec 
 
 $(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
 	-@(echo "Generating phar.php"; \
-	if [ $(TEST_PHP_EXECUTABLE_RES) -ne 1 ]; then \
+	if [ "$(TEST_PHP_EXECUTABLE_RES)" != 1 ]; then \
 		$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(srcdir)/build_precommand.php > $(builddir)/phar.php; \
 	else \
 		echo "Skipping phar.php generating during cross compilation"; \
@@ -43,7 +43,7 @@ $(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcd
 
 $(builddir)/phar.phar: $(builddir)/phar.php $(builddir)/phar/phar.inc $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
 	-@(echo "Generating phar.phar"; \
-	if [ $(TEST_PHP_EXECUTABLE_RES) -ne 1 ]; then \
+	if [ "$(TEST_PHP_EXECUTABLE_RES)" != 1 ]; then \
 		rm -f $(builddir)/phar.phar; \
 		rm -f $(srcdir)/phar.phar; \
 		$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(builddir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x \\.svn -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/; \
@@ -53,7 +53,7 @@ $(builddir)/phar.phar: $(builddir)/phar.php $(builddir)/phar/phar.inc $(srcdir)/
 	fi)
 
 install-pharcmd: pharcmd
-	@(if [ $(TEST_PHP_EXECUTABLE_RES) -ne 1 ]; then \
+	@(if [ "$(TEST_PHP_EXECUTABLE_RES)" != 1 ]; then \
 		$(mkinstalldirs) $(INSTALL_ROOT)$(bindir); \
 		$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)/$(program_prefix)phar$(program_suffix).phar; \
 		rm -f $(INSTALL_ROOT)$(bindir)/$(program_prefix)phar$(program_suffix); \
