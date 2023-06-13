@@ -1447,12 +1447,42 @@ PHP_FUNCTION(imap_listscan)
 
 /* }}} */
 
+static void php_imap_populate_mailbox_properties_object(zval *z_object, const MAILSTREAM *imap_stream)
+{
+	char date[100];
+	rfc822_date(date);
+	zend_update_property_string(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"Date", strlen("Date"),
+		date
+	);
+	zend_update_property_string(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"Driver", strlen("Driver"),
+		imap_stream->dtb->name
+	);
+	zend_update_property_string(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"Mailbox", strlen("Mailbox"),
+		imap_stream->mailbox
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"Nmsgs", strlen("Nmsgs"),
+		imap_stream->nmsgs
+	);
+	zend_update_property_long(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"Recent", strlen("Recent"),
+		imap_stream->recent
+	);
+}
+
 /* {{{ Get mailbox properties */
 PHP_FUNCTION(imap_check)
 {
 	zval *imap_conn_obj;
 	php_imap_object *imap_conn_struct;
-	char date[100];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &imap_conn_obj, php_imap_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -1465,33 +1495,8 @@ PHP_FUNCTION(imap_check)
 	}
 
 	if (imap_conn_struct->imap_stream->mailbox) {
-		rfc822_date(date);
 		object_init(return_value);
-		zend_update_property_string(
-			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-			"Date", strlen("Date"),
-			date
-		);
-		zend_update_property_string(
-			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-			"Driver", strlen("Driver"),
-			imap_conn_struct->imap_stream->dtb->name
-		);
-		zend_update_property_string(
-			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-			"Mailbox", strlen("Mailbox"),
-			imap_conn_struct->imap_stream->mailbox
-		);
-		zend_update_property_long(
-			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-			"Nmsgs", strlen("Nmsgs"),
-			imap_conn_struct->imap_stream->nmsgs
-		);
-		zend_update_property_long(
-			Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-			"Recent", strlen("Recent"),
-			imap_conn_struct->imap_stream->recent
-		);
+		php_imap_populate_mailbox_properties_object(return_value, imap_conn_struct->imap_stream);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2076,7 +2081,6 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 {
 	zval *imap_conn_obj;
 	php_imap_object *imap_conn_struct;
-	char date[100];
 	unsigned long msgno;
 	zend_ulong unreadmsg = 0, deletedmsg = 0, msize = 0;
 
@@ -2114,35 +2118,11 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	);
 	zend_update_property_long(
 		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-		"Nmsgs", strlen("Nmsgs"),
-		imap_conn_struct->imap_stream->nmsgs
-	);
-	zend_update_property_long(
-		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
 		"Size", strlen("Size"),
 		msize
 	);
-	rfc822_date(date);
-	zend_update_property_string(
-		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-		"Date", strlen("Date"),
-		date
-	);
-	zend_update_property_string(
-		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-		"Driver", strlen("Driver"),
-		imap_conn_struct->imap_stream->dtb->name
-	);
-	zend_update_property_string(
-		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-		"Mailbox", strlen("Mailbox"),
-		imap_conn_struct->imap_stream->mailbox
-	);
-	zend_update_property_long(
-		Z_OBJCE_P(return_value), Z_OBJ_P(return_value),
-		"Recent", strlen("Recent"),
-		imap_conn_struct->imap_stream->recent
-	);
+
+	php_imap_populate_mailbox_properties_object(return_value, imap_conn_struct->imap_stream);
 }
 /* }}} */
 
