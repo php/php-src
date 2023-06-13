@@ -787,7 +787,7 @@ Since: DOM Level 2
 PHP_METHOD(DOMElement, getAttributeNodeNS)
 {
 	zval *id;
-	xmlNodePtr elemp, fakeAttrp;
+	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	size_t uri_len, name_len;
@@ -808,21 +808,9 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 			xmlNsPtr nsptr;
 			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
-				xmlNsPtr curns;
-				curns = xmlNewNs(NULL, nsptr->href, NULL);
-				if (nsptr->prefix) {
-					curns->prefix = xmlStrdup((xmlChar *) nsptr->prefix);
-				}
-				if (nsptr->prefix) {
-					fakeAttrp = xmlNewDocNode(elemp->doc, NULL, (xmlChar *) nsptr->prefix, nsptr->href);
-				} else {
-					fakeAttrp = xmlNewDocNode(elemp->doc, NULL, (xmlChar *)"xmlns", nsptr->href);
-				}
-				fakeAttrp->type = XML_NAMESPACE_DECL;
-				fakeAttrp->parent = elemp;
-				fakeAttrp->ns = curns;
-
-				DOM_RET_OBJ(fakeAttrp, &ret, intern);
+				/* Keep parent alive, because we're a fake child. */
+				GC_ADDREF(&intern->std);
+				(void) php_dom_create_fake_namespace_decl(elemp, nsptr, return_value, intern);
 			} else {
 				RETURN_NULL();
 			}

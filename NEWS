@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed build for the riscv64 architecture/GCC 12. (Daniil Gentili)
 
+- Curl:
+  . Fixed bug GH-11433 (Unable to set CURLOPT_ACCEPT_ENCODING to NULL).
+    (nielsdos)
+
 - DOM:
   . Fixed bugs GH-11288 and GH-11289 and GH-11290 and GH-9142 (DOMExceptions
     and segfaults with replaceWith). (nielsdos)
@@ -30,6 +34,8 @@ PHP                                                                        NEWS
   . Fixed bug #70359 (print_r() on DOMAttr causes Segfault in
     php_libxml_node_free_list()). (nielsdos)
   . Fixed bug #78577 (Crash in DOMNameSpace debug info handlers). (nielsdos)
+  . Fix lifetime issue with getAttributeNodeNS(). (nielsdos)
+  . Fix "invalid state error" with cloned namespace declarations. (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
