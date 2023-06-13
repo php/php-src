@@ -50,6 +50,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fix preg_replace_callback_array() pattern validation. (ilutov)
 
+- Phar:
+  . Fix cross-compilation check in phar generation for FreeBSD. (peter279k)
+
 - SPL:
   . Fixed bug GH-11338 (SplFileInfo empty getBasename with more than one
     slash). (nielsdos)
