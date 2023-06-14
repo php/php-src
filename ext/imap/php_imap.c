@@ -3187,21 +3187,25 @@ PHP_FUNCTION(imap_fetch_overview)
 }
 /* }}} */
 
-static bool header_injection(zend_string *str, bool adrlist)
+static bool header_injection(const zend_string *str, bool adrlist)
 {
-	char *p = ZSTR_VAL(str);
+	const char *p = ZSTR_VAL(str);
 
 	while ((p = strpbrk(p, "\r\n")) != NULL) {
-		if (!(p[0] == '\r' && p[1] == '\n')
-		 /* adrlists do not support folding, but swallow trailing line breaks */
-		 && !((adrlist && p[1] == '\0')
-		  /* other headers support folding */
-		  || (!adrlist && (p[1] == ' ' || p[1] == '\t')))) {
-			return 1;
+		if (
+			!(p[0] == '\r' && p[1] == '\n')
+			/* adrlists do not support folding, but swallow trailing line breaks */
+			&& !(
+				(adrlist && p[1] == '\0')
+				/* other headers support folding */
+				|| (!adrlist && (p[1] == ' ' || p[1] == '\t'))
+			)
+		) {
+			return true;
 		}
 		p++;
 	}
-	return 0;
+	return false;
 }
 
 /* {{{ Create a MIME message based on given envelope and body sections */
