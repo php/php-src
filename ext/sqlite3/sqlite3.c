@@ -1982,7 +1982,9 @@ PHP_METHOD(SQLite3Result, fetchArray)
 							Z_ADDREF(data);
 						}
 					}
-					zend_symtable_add_new(Z_ARR_P(return_value), result_obj->column_names[i], &data);
+					/* Note: we can't use the "add_new" variant here instead of "update" because
+					 * when the same column name is encountered, the last result should be taken. */
+					zend_symtable_update(Z_ARR_P(return_value), result_obj->column_names[i], &data);
 				}
 			}
 			break;
