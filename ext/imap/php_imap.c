@@ -4123,7 +4123,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 static long _php_rfc822_soutr (void *stream, char *string)
 {
 	smart_str *ret = (smart_str*)stream;
-	int len = strlen(string);
+	size_t len = strlen(string);
 
 	smart_str_appendl(ret, string, len);
 	return LONGT;
@@ -4151,14 +4151,10 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 
 #else
 
-/* {{{ _php_rfc822_len
- * Calculate string length based on imap's rfc822_cat function.
- */
-static int _php_rfc822_len(char *str)
+/* Calculate string length based on imap's rfc822_cat function. */
+static size_t _php_rfc822_len(const char *const str)
 {
-	int len;
-	char *p;
-
+	/* Non existent or empty string */
 	if (!str || !*str) {
 		return 0;
 	}
@@ -4166,11 +4162,12 @@ static int _php_rfc822_len(char *str)
 	/* strings with special characters will need to be quoted, as a safety measure we
 	 * add 2 bytes for the quotes just in case.
 	 */
-	len = strlen(str) + 2;
-	p = str;
+	size_t len = strlen(str) + 2;
+
 	/* rfc822_cat() will escape all " and \ characters, therefore we need to increase
 	 * our buffer length to account for these characters.
 	 */
+	const char *p = str;
 	while ((p = strpbrk(p, "\\\""))) {
 		p++;
 		len++;
@@ -4178,35 +4175,30 @@ static int _php_rfc822_len(char *str)
 
 	return len;
 }
-/* }}} */
 
-/* {{{ _php_imap_get_address_size */
-static int _php_imap_address_size (ADDRESS *addresslist)
+static size_t _php_imap_address_size(const ADDRESS *const address_list)
 {
-	ADDRESS *tmp;
-	int ret=0, num_ent=0;
+	size_t total_size = 0;
+	unsigned int nb_addresses = 0;
+	const ADDRESS *current_address = address_list;
 
-	tmp = addresslist;
-
-	if (tmp) do {
-		ret += _php_rfc822_len(tmp->personal);
-		ret += _php_rfc822_len(tmp->adl);
-		ret += _php_rfc822_len(tmp->mailbox);
-		ret += _php_rfc822_len(tmp->host);
-		num_ent++;
-	} while ((tmp = tmp->next));
+	if (current_address) do {
+		total_size += _php_rfc822_len(current_address->personal);
+		total_size += _php_rfc822_len(current_address->adl);
+		total_size += _php_rfc822_len(current_address->mailbox);
+		total_size += _php_rfc822_len(current_address->host);
+		nb_addresses++;
+	} while ((current_address = current_address->next));
 
 	/*
 	 * rfc822_write_address_full() needs some extra space for '<>,', etc.
-	 * for this perpouse we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
+	 * for this purpose we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
 	 * by default this buffer is 10 bytes long
-	*/
-	ret += (ret) ? num_ent*PHP_IMAP_ADDRESS_SIZE_BUF : 0;
+	 */
+	total_size += nb_addresses * PHP_IMAP_ADDRESS_SIZE_BUF;
 
-	return ret;
+	return total_size;
 }
-
-/* }}} */
 
 /* {{{ _php_rfc822_write_address */
 static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
