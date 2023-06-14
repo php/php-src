@@ -82,6 +82,7 @@ PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
 PHPAPI zend_class_entry *reflection_named_type_ptr;
+PHPAPI zend_class_entry *reflection_relative_class_type_ptr;
 PHPAPI zend_class_entry *reflection_intersection_type_ptr;
 PHPAPI zend_class_entry *reflection_union_type_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
@@ -1366,6 +1367,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 
 typedef enum {
 	NAMED_TYPE = 0,
+	RELATIVE_TYPE = 3,
 	UNION_TYPE = 1,
 	INTERSECTION_TYPE = 2
 } reflection_type_kind;
@@ -1393,6 +1395,11 @@ static reflection_type_kind get_type_kind(zend_type type) {
 		if (type_mask_without_null != 0) {
 			return UNION_TYPE;
 		}
+
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(type));
+		if (ZEND_TYPE_IS_RELATIVE_SELF(type) || ZEND_TYPE_IS_RELATIVE_PARENT(type)) {
+			return RELATIVE_TYPE;
+		}
 		return NAMED_TYPE;
 	}
 	if (type_mask_without_null == MAY_BE_BOOL || ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY) {
@@ -1402,12 +1409,22 @@ static reflection_type_kind get_type_kind(zend_type type) {
 	if ((type_mask_without_null & (type_mask_without_null - 1)) != 0) {
 		return UNION_TYPE;
 	}
+
+	/* "static" is a relative type */
+	if (type_mask_without_null == MAY_BE_STATIC) {
+		return RELATIVE_TYPE;
+	}
 	return NAMED_TYPE;
 }
 
-/* {{{ reflection_type_factory */
-static void reflection_type_factory(zend_type type, zval *object, bool legacy_behavior)
-{
+/* ReflectionType private constructor
+ * The object_ce is used to be able to resolve back the "self", "parent", and "static" ReflectionNamedTypes
+ * This can be NULL, e.g. when constructing types of a free function
+ */
+static void reflection_type_factory(
+	zend_type type, zval *object, bool legacy_behavior,
+	zend_class_entry *object_ce
+) {
 	reflection_object *intern;
 	type_reference *reference;
 	reflection_type_kind type_kind = get_type_kind(type);
@@ -1424,6 +1441,9 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 		case NAMED_TYPE:
 			reflection_instantiate(reflection_named_type_ptr, object);
 			break;
+		case RELATIVE_TYPE:
+			reflection_instantiate(reflection_relative_class_type_ptr, object);
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
@@ -1433,6 +1453,7 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 	reference->legacy_behavior = legacy_behavior && type_kind == NAMED_TYPE && !is_mixed && !is_only_null;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
+	intern->ce = object_ce;
 
 	/* Property types may be resolved during the lifetime of the ReflectionType.
 	 * If we reference a string, make sure it doesn't get released. However, only
@@ -1443,7 +1464,6 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 		zend_string_addref(ZEND_TYPE_NAME(type));
 	}
 }
-/* }}} */
 
 /* {{{ reflection_function_factory */
 static void reflection_function_factory(zend_function *function, zval *closure_object, zval *object)
@@ -2698,17 +2718,14 @@ ZEND_METHOD(ReflectionParameter, getClass)
 		 * TODO: Think about moving these checks to the compiler or some sort of
 		 * lint-mode.
 		 */
-		zend_string *class_name;
-
-		class_name = ZEND_TYPE_NAME(param->arg_info->type);
-		if (zend_string_equals_literal_ci(class_name, "self")) {
+		if (ZEND_TYPE_IS_RELATIVE_SELF(param->arg_info->type)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses \"self\" as type but function is not a class member");
 				RETURN_THROWS();
 			}
-		} else if (zend_string_equals_literal_ci(class_name, "parent")) {
+		} else if (ZEND_TYPE_IS_RELATIVE_PARENT(param->arg_info->type)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -2722,6 +2739,7 @@ ZEND_METHOD(ReflectionParameter, getClass)
 			}
 			ce = ce->parent;
 		} else {
+			zend_string *class_name = ZEND_TYPE_NAME(param->arg_info->type);
 			ce = zend_lookup_class(class_name);
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -2763,7 +2781,7 @@ ZEND_METHOD(ReflectionParameter, getType)
 	if (!ZEND_TYPE_IS_SET(param->arg_info->type)) {
 		RETURN_NULL();
 	}
-	reflection_type_factory(param->arg_info->type, return_value, 1);
+	reflection_type_factory(param->arg_info->type, return_value, /* legacy_behavior */ true, intern->ce);
 }
 /* }}} */
 
@@ -3135,19 +3153,64 @@ ZEND_METHOD(ReflectionNamedType, isBuiltin)
 }
 /* }}} */
 
-static void append_type(zval *return_value, zend_type type) {
+/* {{{ Returns whether type is a builtin type */
+ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
+{
+	reflection_object *intern;
+	type_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	/* Unbound closures can use relative class types */
+	if (!intern->ce) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Cannot resolve relative class name for a closure");
+		RETURN_THROWS();
+	}
+
+	if (intern->ce->ce_flags & ZEND_ACC_TRAIT) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Cannot resolve relative class name for a trait");
+		RETURN_THROWS();
+	}
+
+	/* Support for legacy behaviour of nullable types and ReflectionNamedType */
+	bool allows_null = ZEND_TYPE_PURE_MASK(param->type) & MAY_BE_NULL;
+	zend_type resolved_type;
+	/* For static resolved name is the name of the class */
+	if (ZEND_TYPE_PURE_MASK(param->type) & MAY_BE_STATIC) {
+		if (intern->ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Cannot resolve \"static\" type of an interface");
+			RETURN_THROWS();
+		}
+		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->name, allows_null, /*extra flags */ 0);
+	} else {
+		ZEND_ASSERT(ZEND_TYPE_IS_RELATIVE_SELF(param->type) || ZEND_TYPE_IS_RELATIVE_PARENT(param->type));
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(param->type));
+		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_NAME(param->type), allows_null, /*extra flags */ 0);
+	}
+
+	reflection_type_factory(resolved_type, return_value, /* legacy_behavior */ true, intern->ce);
+}
+/* }}} */
+
+static void append_type(zval *return_value, zend_type type, zend_class_entry *object_ce) {
 	zval reflection_type;
 	/* Drop iterable BC bit for type list */
 	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) {
 		ZEND_TYPE_FULL_MASK(type) &= ~_ZEND_TYPE_ITERABLE_BIT;
 	}
 
-	reflection_type_factory(type, &reflection_type, 0);
+	reflection_type_factory(type, &reflection_type, /* legacy_behavior */ false, object_ce);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &reflection_type);
 }
 
-static void append_type_mask(zval *return_value, uint32_t type_mask) {
-	append_type(return_value, (zend_type) ZEND_TYPE_INIT_MASK(type_mask));
+static void append_type_mask(zval *return_value, uint32_t type_mask, zend_class_entry *object_ce) {
+	append_type(return_value, (zend_type) ZEND_TYPE_INIT_MASK(type_mask), object_ce);
 }
 
 /* {{{ Returns the types that are part of this union type */
@@ -3166,46 +3229,53 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
-			append_type(return_value, *list_type);
+			append_type(return_value, *list_type, /* object_ce */ intern->ce);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
 		zend_string *name = ZEND_TYPE_NAME(param->type);
-		append_type(return_value, (zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
+		uint32_t type_flags = 0;
+		if (ZEND_TYPE_IS_RELATIVE_SELF(param->type)) {
+			type_flags = _ZEND_TYPE_SELF_BIT;
+		}
+		if (ZEND_TYPE_IS_RELATIVE_PARENT(param->type)) {
+			type_flags = _ZEND_TYPE_PARENT_BIT;
+		}
+		append_type(return_value, (zend_type) ZEND_TYPE_INIT_CLASS(name, /* allow_null */ false, /* extra flags */ type_flags), /* object_ce */ intern->ce);
 	}
 
 	type_mask = ZEND_TYPE_PURE_MASK(param->type);
 	ZEND_ASSERT(!(type_mask & MAY_BE_VOID));
 	ZEND_ASSERT(!(type_mask & MAY_BE_NEVER));
 	if (type_mask & MAY_BE_STATIC) {
-		append_type_mask(return_value, MAY_BE_STATIC);
+		append_type_mask(return_value, MAY_BE_STATIC, /* object_ce */ intern->ce);
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
-		append_type_mask(return_value, MAY_BE_CALLABLE);
+		append_type_mask(return_value, MAY_BE_CALLABLE, /* object_ce */ NULL);
 	}
 	if (type_mask & MAY_BE_OBJECT) {
-		append_type_mask(return_value, MAY_BE_OBJECT);
+		append_type_mask(return_value, MAY_BE_OBJECT, /* object_ce */ NULL);
 	}
 	if (type_mask & MAY_BE_ARRAY) {
-		append_type_mask(return_value, MAY_BE_ARRAY);
+		append_type_mask(return_value, MAY_BE_ARRAY, /* object_ce */ NULL);
 	}
 	if (type_mask & MAY_BE_STRING) {
-		append_type_mask(return_value, MAY_BE_STRING);
+		append_type_mask(return_value, MAY_BE_STRING, /* object_ce */ NULL);
 	}
 	if (type_mask & MAY_BE_LONG) {
-		append_type_mask(return_value, MAY_BE_LONG);
+		append_type_mask(return_value, MAY_BE_LONG, /* object_ce */ NULL);
 	}
 	if (type_mask & MAY_BE_DOUBLE) {
-		append_type_mask(return_value, MAY_BE_DOUBLE);
+		append_type_mask(return_value, MAY_BE_DOUBLE, /* object_ce */ NULL);
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
-		append_type_mask(return_value, MAY_BE_BOOL);
+		append_type_mask(return_value, MAY_BE_BOOL, /* object_ce */ NULL);
 	} else if (type_mask & MAY_BE_TRUE) {
-		append_type_mask(return_value, MAY_BE_TRUE);
+		append_type_mask(return_value, MAY_BE_TRUE, /* object_ce */ NULL);
 	} else if (type_mask & MAY_BE_FALSE) {
-		append_type_mask(return_value, MAY_BE_FALSE);
+		append_type_mask(return_value, MAY_BE_FALSE, /* object_ce */ NULL);
 	}
 	if (type_mask & MAY_BE_NULL) {
-		append_type_mask(return_value, MAY_BE_NULL);
+		append_type_mask(return_value, MAY_BE_NULL, /* object_ce */ NULL);
 	}
 }
 /* }}} */
@@ -3226,7 +3296,7 @@ ZEND_METHOD(ReflectionIntersectionType, getTypes)
 
 	array_init(return_value);
 	ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
-		append_type(return_value, *list_type);
+		append_type(return_value, *list_type, /* object_ce */ intern->ce);
 	} ZEND_TYPE_LIST_FOREACH_END();
 }
 /* }}} */
@@ -3649,7 +3719,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getReturnType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, 1);
+	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, /* legacy_behavior */ true, intern->ce);
 }
 /* }}} */
 
@@ -3685,7 +3755,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getTentativeReturnType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, 1);
+	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, /* legacy_behavior */ true, intern->ce);
 }
 /* }}} */
 
@@ -3906,7 +3976,7 @@ ZEND_METHOD(ReflectionClassConstant, getType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(ref->type, return_value, 1);
+	reflection_type_factory(ref->type, return_value, /* legacy_behavior */ true, intern->ce);
 }
 
 /* Returns whether class constant has a type */
@@ -5926,7 +5996,7 @@ ZEND_METHOD(ReflectionProperty, getType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(ref->prop->type, return_value, 1);
+	reflection_type_factory(ref->prop->type, return_value, /* legacy_behavior */ true, intern->ce);
 }
 /* }}} */
 
@@ -7015,7 +7085,7 @@ ZEND_METHOD(ReflectionEnum, getBackingType)
 		RETURN_NULL();
 	} else {
 		zend_type type = ZEND_TYPE_INIT_CODE(ce->enum_backing_type, 0, 0);
-		reflection_type_factory(type, return_value, 0);
+		reflection_type_factory(type, return_value, /* legacy_behavior */ false, /* object_ce */ NULL);
 	}
 }
 
@@ -7408,6 +7478,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_named_type_ptr = register_class_ReflectionNamedType(reflection_type_ptr);
 	reflection_named_type_ptr->create_object = reflection_objects_new;
 	reflection_named_type_ptr->default_object_handlers = &reflection_object_handlers;
+
+	reflection_relative_class_type_ptr = register_class_ReflectionRelativeClassType(reflection_named_type_ptr);
+	reflection_relative_class_type_ptr->create_object = reflection_objects_new;
+	reflection_relative_class_type_ptr->default_object_handlers = &reflection_object_handlers;
 
 	reflection_union_type_ptr = register_class_ReflectionUnionType(reflection_type_ptr);
 	reflection_union_type_ptr->create_object = reflection_objects_new;
