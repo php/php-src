@@ -164,7 +164,7 @@ static inline double php_round_helper(double value, int mode) {
 
 /* {{{ _php_math_round */
 /*
- * Rounds a number to a certain number of decimal places in a certain rounding
+ * Rounds a floating point to a certain number of decimal places in a certain rounding
  * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
@@ -249,6 +249,108 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 }
 /* }}} */
 
+/* {{{ _php_math_round_long */
+/*
+ * Rounds a zend_long to a certain number of decimal places in a certain rounding
+ * mode. For the specifics of the algorithm, see TODO: http://wiki.php.net/rfc/int_rounding
+ */
+PHPAPI zend_result _php_math_round_long(zend_long value, int places, int mode, zend_long *result) {
+	static const zend_long powers[] = {
+		1, 10, 100, 1000, 10000,
+		100000, 1000000, 10000000, 100000000, 1000000000,
+#if SIZEOF_ZEND_LONG >= 8
+		10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000,
+		1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000
+#elif SIZEOF_ZEND_LONG > 8
+# error "Unknown SIZEOF_ZEND_LONG"
+#endif
+    };
+
+	zend_long tmp_value = value;
+	zend_long power;
+	zend_long power_half;
+	zend_long rest;
+
+	// Boolean if the number of places used matches the number of places possible
+	int max_places = 0;
+
+	// Simple case - long that does not need to be rounded
+	if (places >= 0) {
+		*result = tmp_value;
+		return SUCCESS;
+	}
+
+	if (-places > sizeof(powers) / sizeof(powers[0]) - 1) {
+		// Special case for rounding to the same number of places as max length possible
+		// as this would overflow the power of 10
+		if (places == -MAX_LENGTH_OF_LONG + 1) {
+			max_places = 1;
+			rest = tmp_value;
+			tmp_value = 0;
+			power_half = powers[-places - 1] * 5;
+		} else {
+			// Rounding more places will allways be zero
+			*result = 0;
+			return SUCCESS;
+		}
+	} else {
+		power = powers[-places];
+		rest = tmp_value % power;
+		power_half = power / 2;
+		tmp_value = tmp_value / power;
+	}
+
+	if (value >= 0) {
+		if ((mode == PHP_ROUND_HALF_UP && rest >= power_half)
+			|| (mode == PHP_ROUND_HALF_DOWN && rest > power_half)
+			|| (mode == PHP_ROUND_HALF_EVEN && (rest > power_half || (rest == power_half && tmp_value % 2 == 1)))
+			|| (mode == PHP_ROUND_HALF_ODD && (rest > power_half || (rest == power_half && tmp_value % 2 == 0)))
+		) {
+			if (max_places) {
+				return FAILURE; // would overflow
+			}
+
+			tmp_value = tmp_value * power;
+
+			if (tmp_value > ZEND_LONG_MAX - power) {
+				return FAILURE; // would overflow
+			}
+			tmp_value = tmp_value + power;
+		} else if (max_places) {
+			tmp_value = 0;
+		} else {
+			tmp_value = tmp_value * power;
+		}
+	} else {
+		if ((mode == PHP_ROUND_HALF_UP && rest <= -power_half)
+			|| (mode == PHP_ROUND_HALF_DOWN && rest < -power_half)
+			|| (mode == PHP_ROUND_HALF_EVEN && (rest < -power_half || (rest == -power_half && tmp_value % 2 == -1)))
+			|| (mode == PHP_ROUND_HALF_ODD && (rest < -power_half || (rest == -power_half && tmp_value % 2 == 0)))
+		) {
+			if (max_places) {
+				return FAILURE; // would underflow
+			}
+
+			tmp_value = tmp_value * power;
+
+			if (tmp_value < ZEND_LONG_MIN + power) {
+				return FAILURE; // would underflow
+			}
+
+			tmp_value = tmp_value - power;
+		} else if (max_places) {
+			tmp_value = 0;
+		} else {
+			tmp_value = tmp_value * power;
+		}
+	}
+
+	*result = tmp_value;
+	return SUCCESS;
+}
+/* }}} */
+
+
 /* {{{ Return the absolute value of the number */
 PHP_FUNCTION(abs)
 {
@@ -283,7 +385,7 @@ PHP_FUNCTION(ceil)
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
-			RETURN_DOUBLE(zval_get_double(value));
+			RETURN_ZVAL(value, 1, 0);
 		case IS_DOUBLE:
 			RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
 		EMPTY_SWITCH_DEFAULT_CASE();
@@ -302,7 +404,7 @@ PHP_FUNCTION(floor)
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
-			RETURN_DOUBLE(zval_get_double(value));
+			RETURN_ZVAL(value, 1, 0);
 		case IS_DOUBLE:
 			RETURN_DOUBLE(floor(Z_DVAL_P(value)));
 		EMPTY_SWITCH_DEFAULT_CASE();
@@ -317,6 +419,7 @@ PHP_FUNCTION(round)
 	int places = 0;
 	zend_long precision = 0;
 	zend_long mode = PHP_ROUND_HALF_UP;
+	zend_long return_val_l;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_NUMBER(value)
@@ -346,10 +449,10 @@ PHP_FUNCTION(round)
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
-			/* Simple case - long that doesn't need to be rounded. */
-			if (places >= 0) {
-				RETURN_DOUBLE(zval_get_double(value));
+			if (_php_math_round_long(Z_LVAL_P(value), places, (int)mode, &return_val_l) == SUCCESS) {
+				RETURN_LONG(return_val_l);
 			}
+
 			ZEND_FALLTHROUGH;
 
 		case IS_DOUBLE:

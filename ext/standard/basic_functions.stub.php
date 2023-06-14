@@ -3069,13 +3069,13 @@ function mail(string $to, string $subject, string $message, array|string $additi
 function abs(int|float $num): int|float {}
 
 /** @compile-time-eval */
-function ceil(int|float $num): float {}
+function ceil(int|float $num): int|float {}
 
 /** @compile-time-eval */
-function floor(int|float $num): float {}
+function floor(int|float $num): int|float {}
 
 /** @compile-time-eval */
-function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
+function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): int|float {}
 
 /** @compile-time-eval */
 function sin(float $num): float {}

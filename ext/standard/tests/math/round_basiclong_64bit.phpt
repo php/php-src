@@ -18,41 +18,160 @@ $longVals = array(
     MAX_64Bit -1, MAX_64Bit + 1, MIN_64Bit + 1, MIN_64Bit - 1
 );
 
+$precisions = array(
+    0,
+    -1,
+    -5,
+    -10,
+    -11,
+    -17,
+    -19,
+    -20,
+);
 
 foreach ($longVals as $longVal) {
-   echo "--- testing: $longVal ---\n";
-   var_dump(round($longVal));
+    echo "--- testing: ";
+    var_dump($longVal);
+    foreach ($precisions as $precision) {
+        echo "... with precision " . $precision . ": ";
+        var_dump(round($longVal, $precision));
+    }
 }
 
 ?>
 --EXPECT--
---- testing: 9223372036854775807 ---
-float(9.223372036854776E+18)
---- testing: -9223372036854775808 ---
-float(-9.223372036854776E+18)
---- testing: 2147483647 ---
-float(2147483647)
---- testing: -2147483648 ---
-float(-2147483648)
---- testing: 9223372034707292160 ---
-float(9.223372034707292E+18)
---- testing: -9223372034707292160 ---
-float(-9.223372034707292E+18)
---- testing: 2147483648 ---
-float(2147483648)
---- testing: -2147483649 ---
-float(-2147483649)
---- testing: 4294967294 ---
-float(4294967294)
---- testing: 4294967295 ---
-float(4294967295)
---- testing: 4294967293 ---
-float(4294967293)
---- testing: 9223372036854775806 ---
-float(9.223372036854776E+18)
---- testing: 9.2233720368548E+18 ---
-float(9.223372036854776E+18)
---- testing: -9223372036854775807 ---
-float(-9.223372036854776E+18)
---- testing: -9.2233720368548E+18 ---
-float(-9.223372036854776E+18)
+--- testing: int(9223372036854775807)
+... with precision 0: int(9223372036854775807)
+... with precision -1: float(9.223372036854776E+18)
+... with precision -5: float(9.2233720368548E+18)
+... with precision -10: float(9.22337204E+18)
+... with precision -11: int(9223372000000000000)
+... with precision -17: int(9200000000000000000)
+... with precision -19: float(1.0E+19)
+... with precision -20: int(0)
+--- testing: int(-9223372036854775808)
+... with precision 0: int(-9223372036854775808)
+... with precision -1: float(-9.223372036854776E+18)
+... with precision -5: float(-9.2233720368548E+18)
+... with precision -10: float(-9.22337204E+18)
+... with precision -11: int(-9223372000000000000)
+... with precision -17: int(-9200000000000000000)
+... with precision -19: float(-1.0E+19)
+... with precision -20: int(0)
+--- testing: int(2147483647)
+... with precision 0: int(2147483647)
+... with precision -1: int(2147483650)
+... with precision -5: int(2147500000)
+... with precision -10: int(0)
+... with precision -11: int(0)
+... with precision -17: int(0)
+... with precision -19: int(0)
+... with precision -20: int(0)
+--- testing: int(-2147483648)
+... with precision 0: int(-2147483648)
+... with precision -1: int(-2147483650)
+... with precision -5: int(-2147500000)
+... with precision -10: int(0)
+... with precision -11: int(0)
+... with precision -17: int(0)
+... with precision -19: int(0)
+... with precision -20: int(0)
+--- testing: int(9223372034707292160)
+... with precision 0: int(9223372034707292160)
+... with precision -1: int(9223372034707292160)
+... with precision -5: int(9223372034707300000)
+... with precision -10: int(9223372030000000000)
+... with precision -11: int(9223372000000000000)
+... with precision -17: int(9200000000000000000)
+... with precision -19: float(1.0E+19)
+... with precision -20: int(0)
+--- testing: int(-9223372034707292160)
+... with precision 0: int(-9223372034707292160)
+... with precision -1: int(-9223372034707292160)
+... with precision -5: int(-9223372034707300000)
+... with precision -10: int(-9223372030000000000)
+... with precision -11: int(-9223372000000000000)
+... with precision -17: int(-9200000000000000000)
+... with precision -19: float(-1.0E+19)
+... with precision -20: int(0)
+--- testing: int(2147483648)
+... with precision 0: int(2147483648)
+... with precision -1: int(2147483650)
+... with precision -5: int(2147500000)
+... with precision -10: int(0)
+... with precision -11: int(0)
+... with precision -17: int(0)
+... with precision -19: int(0)
+... with precision -20: int(0)
+--- testing: int(-2147483649)
+... with precision 0: int(-2147483649)
+... with precision -1: int(-2147483650)
+... with precision -5: int(-2147500000)
+... with precision -10: int(0)
+... with precision -11: int(0)
+... with precision -17: int(0)
+... with precision -19: int(0)
+... with precision -20: int(0)
+--- testing: int(4294967294)
+... with precision 0: int(4294967294)
+... with precision -1: int(4294967290)
+... with precision -5: int(4295000000)
+... with precision -10: int(0)
+... with precision -11: int(0)
+... with precision -17: int(0)
+... with precision -19: int(0)
+... with precision -20: int(0)
+--- testing: int(4294967295)
+... with precision 0: int(4294967295)
+... with precision -1: int(4294967300)
+... with precision -5: int(4295000000)
+... with precision -10: int(0)
+... with precision -11: int(0)
+... with precision -17: int(0)
+... with precision -19: int(0)
+... with precision -20: int(0)
+--- testing: int(4294967293)
+... with precision 0: int(4294967293)
+... with precision -1: int(4294967290)
+... with precision -5: int(4295000000)
+... with precision -10: int(0)
+... with precision -11: int(0)
+... with precision -17: int(0)
+... with precision -19: int(0)
+... with precision -20: int(0)
+--- testing: int(9223372036854775806)
+... with precision 0: int(9223372036854775806)
+... with precision -1: float(9.223372036854776E+18)
+... with precision -5: float(9.2233720368548E+18)
+... with precision -10: float(9.22337204E+18)
+... with precision -11: int(9223372000000000000)
+... with precision -17: int(9200000000000000000)
+... with precision -19: float(1.0E+19)
+... with precision -20: int(0)
+--- testing: float(9.223372036854776E+18)
+... with precision 0: float(9.223372036854776E+18)
+... with precision -1: float(9.223372036854776E+18)
+... with precision -5: float(9.2233720368548E+18)
+... with precision -10: float(9.22337204E+18)
+... with precision -11: float(9.223372E+18)
+... with precision -17: float(9.2E+18)
+... with precision -19: float(1.0E+19)
+... with precision -20: float(0)
+--- testing: int(-9223372036854775807)
+... with precision 0: int(-9223372036854775807)
+... with precision -1: float(-9.223372036854776E+18)
+... with precision -5: float(-9.2233720368548E+18)
+... with precision -10: float(-9.22337204E+18)
+... with precision -11: int(-9223372000000000000)
+... with precision -17: int(-9200000000000000000)
+... with precision -19: float(-1.0E+19)
+... with precision -20: int(0)
+--- testing: float(-9.223372036854776E+18)
+... with precision 0: float(-9.223372036854776E+18)
+... with precision -1: float(-9.223372036854776E+18)
+... with precision -5: float(-9.2233720368548E+18)
+... with precision -10: float(-9.22337204E+18)
+... with precision -11: float(-9.223372E+18)
+... with precision -17: float(-9.2E+18)
+... with precision -19: float(-1.0E+19)
+... with precision -20: float(-0)

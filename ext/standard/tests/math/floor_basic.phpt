@@ -7,10 +7,14 @@ precision=14
 echo "*** Testing floor() : basic functionality ***\n";
 $values = array(0,
                 -0,
+                0.0,
+                -0.0,
                 0.5,
                 -0.5,
                 1,
                 -1,
+                1.0,
+                -1.0,
                 1.5,
                 -1.5,
                 2.6,
@@ -37,16 +41,28 @@ foreach($values as $value) {
 *** Testing floor() : basic functionality ***
 
 -- floor 0 --
-float(0)
+int(0)
+
+-- floor 0 --
+int(0)
 
 -- floor 0 --
 float(0)
+
+-- floor -0 --
+float(-0)
 
 -- floor 0.5 --
 float(0)
 
 -- floor -0.5 --
 float(-1)
+
+-- floor 1 --
+int(1)
+
+-- floor -1 --
+int(-1)
 
 -- floor 1 --
 float(1)
@@ -67,10 +83,10 @@ float(2)
 float(-3)
 
 -- floor 31 --
-float(31)
+int(31)
 
 -- floor 95 --
-float(95)
+int(95)
 
 -- floor 10.5 --
 float(10)
@@ -85,15 +101,15 @@ float(3950)
 float(-3950)
 
 -- floor 039 --
-float(39)
+int(39)
 
 -- floor 1 --
-float(1)
+int(1)
 
 -- floor  --
-float(0)
+int(0)
 
 -- floor  --
 
 Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
