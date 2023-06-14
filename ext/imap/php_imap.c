@@ -3891,10 +3891,9 @@ PHP_FUNCTION(imap_search)
 	php_imap_object *imap_conn_struct;
 	char *search_criteria;
 	MESSAGELIST *cur;
-	int argc = ZEND_NUM_ARGS();
 	SEARCHPGM *pgm = NIL;
 
-	if (zend_parse_parameters(argc, "OS|lS", &imap_conn_obj, php_imap_ce, &criteria, &flags, &charset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|lS", &imap_conn_obj, php_imap_ce, &criteria, &flags, &charset) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3911,7 +3910,7 @@ PHP_FUNCTION(imap_search)
 	IMAPG(imap_messages) = IMAPG(imap_messages_tail) = NIL;
 	pgm = mail_criteria(search_criteria);
 
-	mail_search_full(imap_conn_struct->imap_stream, (argc == 4 ? ZSTR_VAL(charset) : NIL), pgm, flags);
+	mail_search_full(imap_conn_struct->imap_stream, (charset ? ZSTR_VAL(charset) : NIL), pgm, flags);
 
 	if (pgm && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&pgm);
