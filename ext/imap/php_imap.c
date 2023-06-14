@@ -245,20 +245,6 @@ static void imap_object_destroy(zend_object *zobj) {
 		RETURN_FALSE;	\
 	}	\
 
-/* {{{ php_imap_hash_add_object */
-static zval *php_imap_hash_add_object(zval *arg, char *key, zval *tmp)
-{
-	HashTable *symtable;
-
-	if (Z_TYPE_P(arg) == IS_OBJECT) {
-		symtable = Z_OBJPROP_P(arg);
-	} else {
-		symtable = Z_ARRVAL_P(arg);
-	}
-	return zend_hash_str_update(symtable, key, strlen(key), tmp);
-}
-/* }}} */
-
 /* {{{ mail_newfolderobjectlist
  *
  * Mail instantiate FOBJECTLIST
@@ -2959,7 +2945,13 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 			);
 			zend_hash_next_index_insert_new(Z_ARR(z_disposition_parameter_list), &z_disposition_parameter);
 		} while ((disposition_parameter = disposition_parameter->next));
-		php_imap_hash_add_object(z_object, "dparameters", &z_disposition_parameter_list);
+
+		zend_update_property(
+			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+			"dparameters", strlen("dparameters"),
+			&z_disposition_parameter_list
+		);
+		zval_ptr_dtor(&z_disposition_parameter_list);
 	} else {
 		zend_update_property_long(
 			Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
@@ -3004,7 +2996,13 @@ static void php_imap_populate_body_struct_object(zval *z_object, const BODY *bod
 			0
 		);
 	}
-	php_imap_hash_add_object(z_object, "parameters", &z_body_parameter_list);
+
+	zend_update_property(
+		Z_OBJCE_P(z_object), Z_OBJ_P(z_object),
+		"parameters", strlen("parameters"),
+		&z_body_parameter_list
+	);
+	zval_ptr_dtor(&z_body_parameter_list);
 }
 
 /* {{{ Read the structure of a specified body section of a specific message */
@@ -4243,9 +4241,6 @@ static zend_string* _php_imap_parse_address (ADDRESS *address_list, zval *paddre
 /* {{{ _php_make_header_object */
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 {
-	zval paddress;
-	zend_string *fulladdress=NULL;
-
 	object_init(myzvalue);
 
 	if (en->remail) {
@@ -4316,101 +4311,157 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
 	}
 
 	if (en->to) {
-		array_init(&paddress);
-		fulladdress = _php_imap_parse_address(en->to, &paddress);
-		if (fulladdress) {
+		zval to_address_parts;
+		zend_string *to_full_address = NULL;
+
+		array_init(&to_address_parts);
+		to_full_address = _php_imap_parse_address(en->to, &to_address_parts);
+		if (to_full_address) {
 			zend_update_property_str(
 				Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
 				"toaddress", strlen("toaddress"),
-				fulladdress
+				to_full_address
 			);
-			zend_string_release(fulladdress);
+			zend_string_release(to_full_address);
 		}
-		php_imap_hash_add_object(myzvalue, "to", &paddress);
+		zend_update_property(
+			Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
+			"to", strlen("to"),
+			&to_address_parts
+		);
+		zval_ptr_dtor(&to_address_parts);
 	}
 
 	if (en->from) {
-		array_init(&paddress);
-		fulladdress = _php_imap_parse_address(en->from, &paddress);
-		if (fulladdress) {
+		zval from_address_parts;
+		zend_string *from_full_address = NULL;
+
+		array_init(&from_address_parts);
+		from_full_address = _php_imap_parse_address(en->from, &from_address_parts);
+		if (from_full_address) {
 			zend_update_property_str(
 				Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
 				"fromaddress", strlen("fromaddress"),
-				fulladdress
+				from_full_address
 			);
-			zend_string_release(fulladdress);
+			zend_string_release(from_full_address);
 		}
-		php_imap_hash_add_object(myzvalue, "from", &paddress);
+		zend_update_property(
+			Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
+			"from", strlen("from"),
+			&from_address_parts
+		);
+		zval_ptr_dtor(&from_address_parts);
 	}
 
 	if (en->cc) {
-		array_init(&paddress);
-		fulladdress = _php_imap_parse_address(en->cc, &paddress);
-		if (fulladdress) {
+		zval cc_address_parts;
+		zend_string *cc_full_address = NULL;
+
+		array_init(&cc_address_parts);
+		cc_full_address = _php_imap_parse_address(en->cc, &cc_address_parts);
+		if (cc_full_address) {
 			zend_update_property_str(
 				Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
 				"ccaddress", strlen("ccaddress"),
-				fulladdress
+				cc_full_address
 			);
-			zend_string_release(fulladdress);
+			zend_string_release(cc_full_address);
 		}
-		php_imap_hash_add_object(myzvalue, "cc", &paddress);
+		zend_update_property(
+			Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
+			"cc", strlen("cc"),
+			&cc_address_parts
+		);
+		zval_ptr_dtor(&cc_address_parts);
 	}
 
 	if (en->bcc) {
-		array_init(&paddress);
-		fulladdress = _php_imap_parse_address(en->bcc, &paddress);
-		if (fulladdress) {
+		zval bcc_address_parts;
+		zend_string *bcc_full_address = NULL;
+
+		array_init(&bcc_address_parts);
+		bcc_full_address = _php_imap_parse_address(en->bcc, &bcc_address_parts);
+		if (bcc_full_address) {
 			zend_update_property_str(
 				Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
 				"bccaddress", strlen("bccaddress"),
-				fulladdress
+				bcc_full_address
 			);
-			zend_string_release(fulladdress);
+			zend_string_release(bcc_full_address);
 		}
-		php_imap_hash_add_object(myzvalue, "bcc", &paddress);
+		zend_update_property(
+			Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
+			"bcc", strlen("bcc"),
+			&bcc_address_parts
+		);
+		zval_ptr_dtor(&bcc_address_parts);
 	}
 
 	if (en->reply_to) {
-		array_init(&paddress);
-		fulladdress = _php_imap_parse_address(en->reply_to, &paddress);
-		if (fulladdress) {
+		zval reply_to_address_parts;
+		zend_string *reply_to_full_address = NULL;
+
+		array_init(&reply_to_address_parts);
+		reply_to_full_address = _php_imap_parse_address(en->reply_to, &reply_to_address_parts);
+		if (reply_to_full_address) {
 			zend_update_property_str(
 				Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
 				"reply_toaddress", strlen("reply_toaddress"),
-				fulladdress
+				reply_to_full_address
 			);
-			zend_string_release(fulladdress);
+			zend_string_release(reply_to_full_address);
 		}
-		php_imap_hash_add_object(myzvalue, "reply_to", &paddress);
+		zend_update_property(
+			Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
+			"reply_to", strlen("reply_to"),
+			&reply_to_address_parts
+		);
+		zval_ptr_dtor(&reply_to_address_parts);
 	}
 
 	if (en->sender) {
-		array_init(&paddress);
-		fulladdress = _php_imap_parse_address(en->sender, &paddress);
-		if (fulladdress) {
+		zval sender_address_parts;
+		zend_string *sender_full_address = NULL;
+
+		array_init(&sender_address_parts);
+		sender_full_address = _php_imap_parse_address(en->sender, &sender_address_parts);
+		if (sender_full_address) {
 			zend_update_property_str(
 				Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
 				"senderaddress", strlen("senderaddress"),
-				fulladdress
+				sender_full_address
 			);
-			zend_string_release(fulladdress);
+			zend_string_release(sender_full_address);
 		}
-		php_imap_hash_add_object(myzvalue, "sender", &paddress);
+		zend_update_property(
+			Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
+			"sender", strlen("sender"),
+			&sender_address_parts
+		);
+		zval_ptr_dtor(&sender_address_parts);
 	}
 
 	if (en->return_path) {
-		array_init(&paddress);
-		fulladdress = _php_imap_parse_address(en->return_path, &paddress);
-		if (fulladdress) {
+		zval return_path_address_parts;
+		zend_string *return_path_full_address = NULL;
+
+		array_init(&return_path_address_parts);
+		return_path_full_address = _php_imap_parse_address(en->return_path, &return_path_address_parts);
+		if (return_path_full_address) {
 			zend_update_property_str(
 				Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
 				"return_pathaddress", strlen("return_pathaddress"),
-				fulladdress
+				return_path_full_address
 			);
-			zend_string_release(fulladdress);
+			zend_string_release(return_path_full_address);
 		}
-		php_imap_hash_add_object(myzvalue, "return_path", &paddress);
+		zend_update_property(
+			Z_OBJCE_P(myzvalue), Z_OBJ_P(myzvalue),
+			"return_path", strlen("return_path"),
+			&return_path_address_parts
+		);
+		zval_ptr_dtor(&return_path_address_parts);
 		// From rebase might need?
 		//add_assoc_object(myzvalue, "return_path", &paddress);
 	}
@@ -4433,7 +4484,13 @@ void _php_imap_add_body(zval *arg, const BODY *body)
 			_php_imap_add_body(&z_content_part, &content_part->body);
 			zend_hash_next_index_insert_new(Z_ARR(z_content_part_list), &z_content_part);
 		}
-		php_imap_hash_add_object(arg, "parts", &z_content_part_list);
+
+		zend_update_property(
+			Z_OBJCE_P(arg), Z_OBJ_P(arg),
+			"parts", strlen("parts"),
+			&z_content_part_list
+		);
+		zval_ptr_dtor(&z_content_part_list);
 	}
 
 	/* encapsulated message ? */
@@ -4445,7 +4502,13 @@ void _php_imap_add_body(zval *arg, const BODY *body)
 		object_init(&message);
 		_php_imap_add_body(&message, message_body);
 		zend_hash_next_index_insert_new(Z_ARR(message_list), &message);
-		php_imap_hash_add_object(arg, "parts", &message_list);
+
+		zend_update_property(
+			Z_OBJCE_P(arg), Z_OBJ_P(arg),
+			"parts", strlen("parts"),
+			&message_list
+		);
+		zval_ptr_dtor(&message_list);
 	}
 }
 /* }}} */
