@@ -36,6 +36,8 @@ PHP                                                                        NEWS
   . Fixed bug #78577 (Crash in DOMNameSpace debug info handlers). (nielsdos)
   . Fix lifetime issue with getAttributeNodeNS(). (nielsdos)
   . Fix "invalid state error" with cloned namespace declarations. (nielsdos)
+  . Fixed bug #55294 and #47530 and #47847 (various namespace reconciliation
+    issues). (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
