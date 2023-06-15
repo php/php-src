@@ -21,12 +21,14 @@
 
 #if defined(IR_TARGET_X86)
 # define IR_REG_SP            4 /* IR_REG_RSP */
+# define IR_REG_FP            5 /* IR_REG_RBP */
 # define ZREG_FP              6 /* IR_REG_RSI */
 # define ZREG_IP              7 /* IR_REG_RDI */
 # define ZREG_FIRST_FPR       8
 # define IR_REGSET_PRESERVED ((1<<3) | (1<<5) | (1<<6) | (1<<7)) /* all preserved registers */
 #elif defined(IR_TARGET_X64)
 # define IR_REG_SP            4 /* IR_REG_RSP */
+# define IR_REG_FP            5 /* IR_REG_RBP */
 # define ZREG_FP             14 /* IR_REG_R14 */
 # define ZREG_IP             15 /* IR_REG_R15 */
 # define ZREG_FIRST_FPR      16
@@ -42,6 +44,7 @@
 # endif
 #elif defined(IR_TARGET_AARCH64)
 # define IR_REG_SP           31 /* IR_REG_RSP */
+# define IR_REG_FP           29 /* IR_REG_X29 */
 # define ZREG_FP             27 /* IR_REG_X27 */
 # define ZREG_IP             28 /* IR_REG_X28 */
 # define ZREG_FIRST_FPR      32
@@ -676,9 +679,17 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 
 				if (ref > 0) {
 					if (reg != ZREG_NONE) {
-						t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = IR_REG_NUM(reg);
 						if (reg & IR_REG_SPILL_LOAD) {
-							t->stack_map[t->exit_info[exit_point].stack_offset + var].flags |= ZREG_LOAD;
+							ZEND_ASSERT(!(reg & IR_REG_SPILL_SPECIAL));
+							/* spill slot on a CPU stack */
+							t->stack_map[t->exit_info[exit_point].stack_offset + var].ref = ref;
+							t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = ZREG_NONE;
+							t->stack_map[t->exit_info[exit_point].stack_offset + var].flags |= ZREG_SPILL_SLOT;
+						} else if (reg & IR_REG_SPILL_SPECIAL) {
+							/* spill slot on a VM stack */
+							t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
+						} else {
+							t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = IR_REG_NUM(reg);
 						}
 					} else {
 						t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
@@ -1149,6 +1160,29 @@ static ir_ref jit_Z_DVAL_ref(zend_jit_ctx *jit, ir_ref ref)
 	return ir_LOAD_D(ref);
 }
 
+static bool zend_jit_spilling_may_cause_conflict(zend_jit_ctx *jit, int var, ir_ref val)
+{
+//	if (jit->ctx.ir_base[val].op == IR_RLOAD) {
+//		/* Deoptimization */
+//		return 0;
+//	}
+//	if (jit->ctx.ir_base[val].op == IR_LOAD
+//	 && jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op == IR_ADD
+//	 && jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op1].op == IR_RLOAD
+//	 && jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op1].op2 == ZREG_FP
+//	 && IR_IS_CONST_REF(jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op2)
+//	 && jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op2].val.addr == (uintptr_t)EX_NUM_TO_VAR(jit->ssa->vars[var].var)) {
+//		/* LOAD from the same location (the LOAD is pinned) */
+//		// TODO: should be anti-dependent with the following stores ???
+//		return 0;
+//	}
+//	if (jit->ssa->vars[var].var < jit->current_op_array->last_var) {
+//		/* IS_CV */
+//		return 0;
+//	}
+	return 1;
+}
+
 static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 {
 	int var;
@@ -1161,46 +1195,8 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 	}
 	ZEND_ASSERT(jit->ra && jit->ra[var].ref == IR_NULL);
 
-	/* Disable CSE for temporary variables */
-	/* TODO: This is a workarounf to fix ext/standard/tests/strings/htmlentities20.phpt failure with tracing JIT ??? */
-	if (0 && val > 0 && jit->ssa->vars[var].var >= jit->current_op_array->last_var) {
-		ir_insn *insn = &jit->ctx.ir_base[val];
-		ir_op op = insn->op;
-
-		if (op <= IR_LAST_FOLDABLE_OP && jit->ctx.prev_insn_chain[op]) {
-			if (jit->ctx.prev_insn_chain[op] == val) {
-				if (insn->prev_insn_offset) {
-					jit->ctx.prev_insn_chain[op] = val - (ir_ref)(uint32_t)insn->prev_insn_offset;
-				} else {
-					jit->ctx.prev_insn_chain[op] = IR_UNUSED;
-				}
-			} else {
-				ir_ref prev = jit->ctx.prev_insn_chain[op];
-				ir_ref tmp;
-
-				while (prev) {
-					insn = &jit->ctx.ir_base[prev];
-					if (!insn->prev_insn_offset) {
-						break;
-					}
-					tmp = prev - (ir_ref)(uint32_t)insn->prev_insn_offset;
-					if (tmp == val) {
-						ir_ref offset = jit->ctx.ir_base[tmp].prev_insn_offset;
-
-						if (!offset || prev - tmp + offset > 0xffff) {
-							insn->prev_insn_offset = 0;
-						} else {
-							insn->prev_insn_offset = prev - tmp + offset;
-						}
-					}
-					prev = tmp;
-				}
-			}
-		}
-	}
-
 	/* Negative "var" has special meaning for IR */
-	if (val > 0 && jit->ssa->vars[var].var < jit->current_op_array->last_var) {
+	if (val > 0 && !zend_jit_spilling_may_cause_conflict(jit, var, val)) {
 		val = ir_bind(&jit->ctx, -EX_NUM_TO_VAR(jit->ssa->vars[var].var), val);
 	}
 	jit->ra[var].ref = val;
@@ -2623,7 +2619,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			jit->ctx.fixed_call_stack_size = 16;
 #endif
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-			jit->ctx.fixed_regset |= (1<<5); /* prevent %rbp (%r5) usage */
+			jit->ctx.fixed_regset |= (1<<IR_REG_FP); /* prevent %rbp (%r5) usage */
 #endif
 		}
 	}
@@ -4134,6 +4130,43 @@ static int zend_jit_store_reg(zend_jit_ctx *jit, uint32_t info, int var, int8_t 
 		if (jit->ra && jit->ra[var].ref == IR_NULL) {
 			zend_jit_def_reg(jit, ZEND_ADDR_REG(var), src);
 		} else if (!in_mem) {
+			jit_set_Z_DVAL(jit, dst, src);
+			if (set_type &&
+			    (Z_REG(dst) != ZREG_FP ||
+			     !JIT_G(current_frame) ||
+			     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_DOUBLE)) {
+				jit_set_Z_TYPE_INFO(jit, dst, IS_DOUBLE);
+			}
+		}
+	} else {
+		ZEND_UNREACHABLE();
+	}
+	return 1;
+}
+
+static int zend_jit_store_spill_slot(zend_jit_ctx *jit, uint32_t info, int var, int8_t reg, int32_t offset, bool set_type)
+{
+	zend_jit_addr src;
+	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
+
+	if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
+		src = ir_LOAD_L(ir_ADD_OFFSET(ir_RLOAD_A(reg), offset));
+		if (jit->ra && jit->ra[var].ref == IR_NULL) {
+			zend_jit_def_reg(jit, ZEND_ADDR_REG(var), src);
+		} else {
+			jit_set_Z_LVAL(jit, dst, src);
+			if (set_type &&
+			    (Z_REG(dst) != ZREG_FP ||
+			     !JIT_G(current_frame) ||
+			     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_LONG)) {
+				jit_set_Z_TYPE_INFO(jit, dst, IS_LONG);
+			}
+		}
+	} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+		src = ir_LOAD_D(ir_ADD_OFFSET(ir_RLOAD_A(reg), offset));
+		if (jit->ra && jit->ra[var].ref == IR_NULL) {
+			zend_jit_def_reg(jit, ZEND_ADDR_REG(var), src);
+		} else {
 			jit_set_Z_DVAL(jit, dst, src);
 			if (set_type &&
 			    (Z_REG(dst) != ZREG_FP ||
@@ -6169,6 +6202,9 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 			phi = ir_PHI_N(res_inputs->count, res_inputs->refs);
 		}
 		if (Z_MODE(var_addr) == IS_REG) {
+			if ((var_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) || ref_addr) {
+				phi = ir_emit2(&jit->ctx, IR_OPT(IR_COPY, jit->ctx.ir_base[phi].type), phi, 1);
+			}
 			zend_jit_def_reg(jit, var_addr, phi);
 			if (real_res_addr) {
 				if (var_def_info & MAY_BE_LONG) {
@@ -15547,6 +15583,20 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 			}
 		} else {
 			/* Only for tracing JIT */
+			zend_jit_trace_info *t = jit->trace;
+			zend_jit_trace_stack *stack;
+			uint32_t i;
+
+			if (t) {
+				for (i = 0; i < t->stack_map_size; i++) {
+					stack = t->stack_map + i;
+					if (stack->flags & ZREG_SPILL_SLOT) {
+						stack->reg = (jit->ctx.flags & IR_USE_FRAME_POINTER) ? IR_REG_FP : IR_REG_SP;
+						stack->ref = ir_get_spill_slot_offset(&jit->ctx, stack->ref);
+					}
+				}
+			}
+
 			zend_jit_trace_add_code(entry, size);
 
 #if ZEND_JIT_SUPPORT_CLDEMOTE
@@ -16023,12 +16073,12 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 
 					if (STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE)) {
 						/* op3 is used as a flag that the value is already stored in memory.
-						 * In case the IR framework desides to spill the result of IR_LOAD,
+						 * In case the IR framework decides to spill the result of IR_LOAD,
 						 * it doesn't have to store the value once again.
 						 *
 						 * See: insn->op3 check in ir_emit_rload()
 						 */
-						ir_set_op(&jit->ctx, ref, 3, 1);
+						ir_set_op(&jit->ctx, ref, 3, EX_NUM_TO_VAR(i));
 					}
 				}
 			}

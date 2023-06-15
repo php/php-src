@@ -147,7 +147,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
     JIT_CFLAGS="-I@ext_builddir@/jit/ir -D${IR_TARGET} -DIR_PHP"
     if test "$ZEND_DEBUG" = "yes"; then
-      JIT_CFLAGS="${JIT_CFLAGS} -DIR_DEBUG"
+      JIT_CFLAGS="${JIT_CFLAGS} -DIR_DEBUG -DIR_DEBUG_MESSAGES"
     fi
   fi
 

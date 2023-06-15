@@ -169,15 +169,18 @@ ZEND_EXT_API void zend_jit_restart(void);
 #define ZREG_LOAD           (1<<0)
 #define ZREG_STORE          (1<<1)
 #define ZREG_LAST_USE       (1<<2)
+
 #define ZREG_PI             (1<<3)
 #define ZREG_PHI            (1<<4)
 #define ZREG_FORWARD        (1<<5)
-#define ZREG_CONST          (1<<6)
-#define ZREG_ZVAL_COPY      (1<<7)
 
-#define ZREG_TYPE_ONLY      (1<<3)
-#define ZREG_ZVAL_ADDREF    (1<<4)
-#define ZREG_THIS           (1<<5)
+#define ZREG_SPILL_SLOT     (1<<3)
+
+#define ZREG_CONST          (1<<4)
+#define ZREG_ZVAL_COPY      (2<<4)
+#define ZREG_TYPE_ONLY      (3<<4)
+#define ZREG_ZVAL_ADDREF    (4<<4)
+#define ZREG_THIS           (5<<4)
 
 #define ZREG_NONE           -1
 

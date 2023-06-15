@@ -3863,15 +3863,18 @@ static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack
 	uint32_t i;
 
 	for (i = 0; i < stack_size; i++) {
-#ifdef ZEND_JIT_IR
-		if (STACK_FLAGS(stack, i) & (ZREG_CONST|ZREG_ZVAL_COPY|ZREG_TYPE_ONLY|ZREG_ZVAL_ADDREF)) {
-			return 1;
-		}
-#endif
+#ifndef ZEND_JIT_IR
 		if (STACK_REG(stack, i) != ZREG_NONE
 		 && !(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))) {
 			return 1;
 		}
+#else
+		if (STACK_FLAGS(stack, i) & ~(ZREG_LOAD|ZREG_STORE|ZREG_LAST_USE)) {
+			return 1;
+		} else if (STACK_REG(stack, i) != ZREG_NONE) {
+			return 1;
+		}
+#endif
 	}
 	return 0;
 }
@@ -4000,6 +4003,29 @@ static int zend_jit_trace_deoptimization(
 			ZEND_ASSERT(reg != ZREG_NONE);
 			ZEND_ASSERT(check2 == -1);
 			check2 = i;
+		} else if (STACK_FLAGS(parent_stack, i) & ZREG_SPILL_SLOT) {
+			if (ssa && ssa->vars[i].no_val) {
+				/* pass */
+			} else {
+				uint8_t type = STACK_TYPE(parent_stack, i);
+
+				if (!zend_jit_store_spill_slot(jit, 1 << type, i, reg, STACK_REF(parent_stack, i),
+						STACK_MEM_TYPE(parent_stack, i) != type)) {
+					return 0;
+				}
+				if (stack) {
+					if (jit->ra && jit->ra[i].ref) {
+						SET_STACK_TYPE(stack, i, type, 0);
+						if ((STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE)) != 0) {
+							SET_STACK_REF_EX(stack, i, jit->ra[i].ref, ZREG_LOAD);
+						} else {
+							SET_STACK_REF(stack, i, jit->ra[i].ref);
+						}
+					} else {
+						SET_STACK_TYPE(stack, i, type, 1);
+					}
+				}
+			}
 		} else if (reg != ZREG_NONE) {
 			if (ssa && ssa->vars[i].no_val) {
 				/* pass */
@@ -8476,6 +8502,16 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					fprintf(stderr, "(zval_try_addref)");
 				} else if (STACK_FLAGS(stack, j) == ZREG_ZVAL_COPY) {
 					fprintf(stderr, "zval_copy(%s)", zend_reg_name(STACK_REG(stack, j)));
+				} else if (STACK_FLAGS(stack, j) & ZREG_SPILL_SLOT) {
+					if (STACK_REG(stack, j) == ZREG_NONE) {
+						fprintf(stderr, "(spill=0x%x", STACK_REF(stack, j));
+					} else {
+						fprintf(stderr, "(spill=0x%x(%s)", STACK_REF(stack, j), zend_reg_name(STACK_REG(stack, j)));
+					}
+					if (STACK_FLAGS(stack, j) != 0) {
+						fprintf(stderr, ":%x", STACK_FLAGS(stack, j));
+					}
+					fprintf(stderr, ")");
 				} else if (STACK_REG(stack, j) != ZREG_NONE) {
 					fprintf(stderr, "(%s", zend_reg_name(STACK_REG(stack, j)));
 					if (STACK_FLAGS(stack, j) != 0) {
@@ -9137,6 +9173,17 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				repeat_last_opline = 1;
 			} else {
 				ZVAL_COPY(EX_VAR_NUM(i), val);
+			}
+		} else if (STACK_FLAGS(stack, i) & ZREG_SPILL_SLOT) {
+			ZEND_ASSERT(STACK_REG(stack, i) != ZREG_NONE);
+			uintptr_t ptr = (uintptr_t)regs->gpr[STACK_REG(stack, i)] + STACK_REF(stack, i);
+
+			if (STACK_TYPE(stack, i) == IS_LONG) {
+				ZVAL_LONG(EX_VAR_NUM(i), *(zend_long*)ptr);
+			} else if (STACK_TYPE(stack, i) == IS_DOUBLE) {
+				ZVAL_DOUBLE(EX_VAR_NUM(i), *(double*)ptr);
+			} else {
+				ZEND_UNREACHABLE();
 			}
 		} else if (STACK_REG(stack, i) != ZREG_NONE) {
 			if (STACK_TYPE(stack, i) == IS_LONG) {
