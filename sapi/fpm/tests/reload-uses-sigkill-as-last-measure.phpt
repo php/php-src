@@ -1,5 +1,5 @@
 --TEST--
-If SIGQUIT and SIGTERM during reloading fail, SIGKILL should be sent
+FPM: If SIGQUIT and SIGTERM during reloading fail, SIGKILL should be sent
 --EXTENSIONS--
 pcntl
 --SKIPIF--
