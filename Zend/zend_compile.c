@@ -10014,6 +10014,9 @@ static void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Dynamic class names are not allowed in compile-time class constant references");
 	}
+	if (Z_TYPE_P(zend_ast_get_zval(class_ast)) != IS_STRING) {
+		zend_throw_error(NULL, "Class name must be a valid object or a string");
+	}
 
 	class_name = zend_ast_get_str(class_ast);
 	fetch_type = zend_get_class_fetch_type(class_name);
