@@ -1451,7 +1451,7 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 }
 /* }}} end dom_set_old_ns */
 
-static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep)
+static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr search_parent)
 {
 	xmlNsPtr nsptr, nsdftptr, curns, prevns = NULL;
 
@@ -1461,7 +1461,7 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep)
 		while (curns) {
 			nsdftptr = curns->next;
 			if (curns->href != NULL) {
-				if((nsptr = xmlSearchNsByHref(doc, nodep->parent, curns->href)) &&
+				if((nsptr = xmlSearchNsByHref(doc, search_parent, curns->href)) &&
 					(curns->prefix == NULL || xmlStrEqual(nsptr->prefix, curns->prefix))) {
 					curns->next = NULL;
 					if (prevns == NULL) {
@@ -1482,23 +1482,34 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep)
 	}
 }
 
+static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
+{
+	/* Put on stack to avoid allocation.
+	 * Although libxml2 currently does not use this for the reconciliation, it still
+	 * makes sense to do this just in case libxml2's internal change in the future. */
+	xmlDOMWrapCtxt dummy_ctxt = {0};
+	xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
+}
+
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 {
+	/* Although the node type will be checked by the libxml2 API,
+	 * we still want to do the internal reconciliation conditionally. */
 	if (nodep->type == XML_ELEMENT_NODE) {
-		dom_reconcile_ns_internal(doc, nodep);
-		xmlReconciliateNs(doc, nodep);
+		dom_reconcile_ns_internal(doc, nodep, nodep->parent);
+		dom_libxml_reconcile_ensure_namespaces_are_declared(nodep);
 	}
 }
 /* }}} */
 
-static void dom_reconcile_ns_list_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
+static void dom_reconcile_ns_list_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last, xmlNodePtr search_parent)
 {
 	ZEND_ASSERT(nodep != NULL);
 	while (true) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			dom_reconcile_ns_internal(doc, nodep);
+			dom_reconcile_ns_internal(doc, nodep, search_parent);
 			if (nodep->children) {
-				dom_reconcile_ns_list_internal(doc, nodep->children, nodep->last /* process the whole children list */);
+				dom_reconcile_ns_list_internal(doc, nodep->children, nodep->last /* process the whole children list */, search_parent);
 			}
 		}
 		if (nodep == last) {
@@ -1510,10 +1521,12 @@ static void dom_reconcile_ns_list_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlN
 
 void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
 {
-	dom_reconcile_ns_list_internal(doc, nodep, last);
-	/* Outside of the recursion above because xmlReconciliateNs() performs its own recursion. */
+	dom_reconcile_ns_list_internal(doc, nodep, last, nodep->parent);
+	/* The loop is outside of the recursion in the above call because
+	 * dom_libxml_reconcile_ensure_namespaces_are_declared() performs its own recursion. */
 	while (true) {
-		xmlReconciliateNs(doc, nodep);
+		/* The internal libxml2 call will already check the node type, no need for us to do it here. */
+		dom_libxml_reconcile_ensure_namespaces_are_declared(nodep);
 		if (nodep == last) {
 			break;
 		}
