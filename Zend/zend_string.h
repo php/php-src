@@ -593,6 +593,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_PORT,                   "port") \
 	_(ZEND_STR_USER,                   "user") \
 	_(ZEND_STR_PASS,                   "pass") \
+	_(ZEND_STR_PASSWORD,               "password") \
 	_(ZEND_STR_PATH,                   "path") \
 	_(ZEND_STR_QUERY,                  "query") \
 	_(ZEND_STR_FRAGMENT,               "fragment") \
