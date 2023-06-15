@@ -31,7 +31,7 @@ $(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc
 
 
 TEST_PHP_EXECUTABLE = $(shell $(PHP_EXECUTABLE) -v 2>&1)
-TEST_PHP_EXECUTABLE_RES = $(shell echo "$(TEST_PHP_EXECUTABLE)" | grep -c 'Exec format error')
+TEST_PHP_EXECUTABLE_RES = $(shell [ -z "$(TEST_PHP_EXECUTABLE)" ] || echo "$(TEST_PHP_EXECUTABLE)" | grep -q "Exec format error" && echo 1 || echo 0)
 
 $(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
 	-@(echo "Generating phar.php"; \
