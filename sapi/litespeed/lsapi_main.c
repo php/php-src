@@ -1347,7 +1347,7 @@ static int cli_main( int argc, char * argv[] )
                         php_request_shutdown( NULL );
                     }
                 } else {
-                    php_printf("Could not open input file: %s.\n", *p);
+                    fprintf(stderr, "Could not open input file: %s.\n", *p);
                 }
             } else {
                 cli_usage();

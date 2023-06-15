@@ -1927,7 +1927,7 @@ PHP_FUNCTION(session_module_name)
 	}
 
 	if (name) {
-		if (zend_string_equals_literal_ci(name, "user")) {
+		if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_USER))) {
 			zend_argument_value_error(1, "cannot be \"user\"");
 			RETURN_THROWS();
 		}
@@ -1967,7 +1967,7 @@ static inline void set_user_save_handler_ini(void) {
 	zend_string *ini_name, *ini_val;
 
 	ini_name = ZSTR_INIT_LITERAL("session.save_handler", 0);
-	ini_val = ZSTR_INIT_LITERAL("user", 0);
+	ini_val = ZSTR_KNOWN(ZEND_STR_USER);
 	PS(set_handler) = 1;
 	zend_alter_ini_entry(ini_name, ini_val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	PS(set_handler) = 0;

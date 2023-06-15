@@ -234,7 +234,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} else if (info->num_from_encodings == 1) {
 		from_encoding = info->from_encodings[0];
 	} else {
-		from_encoding = mb_guess_encoding_for_strings((const unsigned char**)val_list, len_list, num, info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
+		from_encoding = mb_guess_encoding_for_strings((const unsigned char**)val_list, len_list, num, info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection), false);
 		if (!from_encoding) {
 			if (info->report_errors) {
 				php_error_docref(NULL, E_WARNING, "Unable to detect encoding");

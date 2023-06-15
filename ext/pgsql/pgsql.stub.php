@@ -183,6 +183,19 @@ namespace {
      * @cvalue PQERRORS_VERBOSE
      */
     const PGSQL_ERRORS_VERBOSE = UNKNOWN;
+    #if PGVERSION_NUM > 110000
+    /**
+     * @var int
+     * @cvalue PQERRORS_SQLSTATE
+     */
+    const PGSQL_ERRORS_SQLSTATE = UNKNOWN;
+    #else
+    /**
+     * @var int
+     * @cvalue PQERRORS_TERSE
+     */
+    const PGSQL_ERRORS_SQLSTATE = UNKNOWN;
+    #endif
 
     /* For lo_seek() */
 
@@ -449,6 +462,25 @@ namespace {
      */
     const PGSQL_PIPELINE_ABORTED = UNKNOWN;
 #endif
+    
+    /* For pg_set_error_context_visibility() */
+
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_NEVER
+     */
+    const PGSQL_SHOW_CONTEXT_NEVER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_ERRORS
+     */
+    const PGSQL_SHOW_CONTEXT_ERRORS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQSHOW_CONTEXT_ALWAYS
+     */
+    const PGSQL_SHOW_CONTEXT_ALWAYS = UNKNOWN;
+    
 
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
@@ -456,7 +488,7 @@ namespace {
 
     function pg_connect_poll(PgSql\Connection $connection): int {}
 
-    function pg_close(?PgSql\Connection $connection = null): bool {}
+    function pg_close(?PgSql\Connection $connection = null): true {}
 
     /** @refcount 1 */
     function pg_dbname(?PgSql\Connection $connection = null): string {}
@@ -678,7 +710,7 @@ namespace {
 
     function pg_trace(string $filename, string $mode = "w", ?PgSql\Connection $connection = null, int $trace_mode = 0): bool {}
 
-    function pg_untrace(?PgSql\Connection $connection = null): bool {}
+    function pg_untrace(?PgSql\Connection $connection = null): true {}
 
     /**
      * @param PgSql\Connection $connection
@@ -938,6 +970,8 @@ namespace {
     function pg_pipeline_sync(PgSql\Connection $connection): bool {}
     function pg_pipeline_status(PgSql\Connection $connection): int {}
 #endif
+
+    function pg_set_error_context_visibility(PgSql\Connection $connection, int $visibility): int {}
 }
 
 namespace PgSql {

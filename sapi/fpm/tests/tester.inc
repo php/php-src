@@ -826,6 +826,10 @@ class Tester
                     $requestData['uri'] ?? null
                 );
 
+                if (isset($requestData['delay'])) {
+                    usleep($requestData['delay']);
+                }
+
                 return [
                     'client'    => $client,
                     'requestId' => $client->async_request($params, false),

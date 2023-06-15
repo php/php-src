@@ -147,11 +147,9 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	if (attrp->children) {
-		node_list_unlink(attrp->children);
-	}
-
-	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
+	dom_remove_all_children((xmlNodePtr) attrp);
+	xmlNodePtr node = xmlNewTextLen((xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+	xmlAddChild((xmlNodePtr) attrp, node);
 
 	zend_string_release_ex(str, 0);
 	return SUCCESS;

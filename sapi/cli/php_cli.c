@@ -574,7 +574,7 @@ static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *scri
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
-		php_printf("Could not open input file: %s\n", script_file);
+		fprintf(stderr, "Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}
 
@@ -1076,7 +1076,7 @@ do_repeat:
 
 					if (EG(exception)) {
 						zval rv;
-						zval *msg = zend_read_property(zend_ce_exception, EG(exception), "message", sizeof("message")-1, 0, &rv);
+						zval *msg = zend_read_property_ex(zend_ce_exception, EG(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), /* silent */ false, &rv);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zend_object_release(EG(exception));
 						EG(exception) = NULL;

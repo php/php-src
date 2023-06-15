@@ -250,7 +250,7 @@ ZEND_API const HashTable zend_empty_array = {
 	.gc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT),
 	.u.flags = HASH_FLAG_UNINITIALIZED,
 	.nTableMask = HT_MIN_MASK,
-	.arData = (Bucket*)&uninitialized_bucket[2],
+	{.arData = (Bucket*)&uninitialized_bucket[2]},
 	.nNumUsed = 0,
 	.nNumOfElements = 0,
 	.nTableSize = HT_MIN_SIZE,
@@ -1312,7 +1312,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 						}
 					}
 				} else {
-					uint32_t iter_pos = zend_hash_iterators_lower_pos(ht, 0);
+					uint32_t iter_pos = zend_hash_iterators_lower_pos(ht, i + 1);
 
 					while (++i < ht->nNumUsed) {
 						p++;

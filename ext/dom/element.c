@@ -150,6 +150,7 @@ int dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+/* Note: the object returned is not necessarily a node, but can be an attribute or a namespace declaration. */
 static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ */
 {
 	int len;
@@ -376,25 +377,13 @@ PHP_METHOD(DOMElement, getAttributeNode)
 	}
 
 	if (attrp->type == XML_NAMESPACE_DECL) {
-		xmlNsPtr curns;
-		xmlNodePtr nsparent;
-
-		nsparent = attrp->_private;
-		curns = xmlNewNs(NULL, attrp->name, NULL);
-		if (attrp->children) {
-			curns->prefix = xmlStrdup((xmlChar *) attrp->children);
-		}
-		if (attrp->children) {
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) attrp->children, attrp->name);
-		} else {
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", attrp->name);
-		}
-		attrp->type = XML_NAMESPACE_DECL;
-		attrp->parent = nsparent;
-		attrp->ns = curns;
+		xmlNsPtr original = (xmlNsPtr) attrp;
+		/* Keep parent alive, because we're a fake child. */
+		GC_ADDREF(&intern->std);
+		(void) php_dom_create_fake_namespace_decl(nodep, original, return_value, intern);
+	} else {
+		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 	}
-
-	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 }
 /* }}} end dom_element_get_attribute_node */
 
@@ -511,7 +500,6 @@ PHP_METHOD(DOMElement, getElementsByTagName)
 	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
-	xmlChar *local;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
@@ -522,8 +510,7 @@ PHP_METHOD(DOMElement, getElementsByTagName)
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
-	local = xmlCharStrndup(name, name_len);
-	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, NULL, 0);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -798,7 +785,7 @@ Since: DOM Level 2
 PHP_METHOD(DOMElement, getAttributeNodeNS)
 {
 	zval *id;
-	xmlNodePtr elemp, fakeAttrp;
+	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	size_t uri_len, name_len;
@@ -819,21 +806,9 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 			xmlNsPtr nsptr;
 			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
-				xmlNsPtr curns;
-				curns = xmlNewNs(NULL, nsptr->href, NULL);
-				if (nsptr->prefix) {
-					curns->prefix = xmlStrdup((xmlChar *) nsptr->prefix);
-				}
-				if (nsptr->prefix) {
-					fakeAttrp = xmlNewDocNode(elemp->doc, NULL, (xmlChar *) nsptr->prefix, nsptr->href);
-				} else {
-					fakeAttrp = xmlNewDocNode(elemp->doc, NULL, (xmlChar *)"xmlns", nsptr->href);
-				}
-				fakeAttrp->type = XML_NAMESPACE_DECL;
-				fakeAttrp->parent = elemp;
-				fakeAttrp->ns = curns;
-
-				DOM_RET_OBJ(fakeAttrp, &ret, intern);
+				/* Keep parent alive, because we're a fake child. */
+				GC_ADDREF(&intern->std);
+				(void) php_dom_create_fake_namespace_decl(elemp, nsptr, return_value, intern);
 			} else {
 				RETURN_NULL();
 			}
@@ -930,7 +905,6 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
-	xmlChar *local, *nsuri;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -941,9 +915,7 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
-	local = xmlCharStrndup(name, name_len);
-	nsuri = xmlCharStrndup(uri ? uri : "", uri_len);
-	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri);
+	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, uri ? uri : "", uri_len);
 
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
@@ -1160,7 +1132,7 @@ PHP_METHOD(DOMElement, remove)
 
 PHP_METHOD(DOMElement, after)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1177,7 +1149,7 @@ PHP_METHOD(DOMElement, after)
 
 PHP_METHOD(DOMElement, before)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1197,7 +1169,7 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, append)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1218,7 +1190,7 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, prepend)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1234,12 +1206,12 @@ PHP_METHOD(DOMElement, prepend)
 }
 /* }}} end DOMElement::prepend */
 
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
 Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, replaceWith)
 {
-	int argc;
+	uint32_t argc;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
@@ -1251,8 +1223,7 @@ PHP_METHOD(DOMElement, replaceWith)
 	id = ZEND_THIS;
 	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
 
-	dom_parent_node_after(intern, args, argc);
-	dom_child_node_remove(intern);
+	dom_child_replace_with(intern, args, argc);
 }
 /* }}} end DOMElement::prepend */
 

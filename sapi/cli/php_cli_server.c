@@ -361,7 +361,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	zval *val;
 	struct timeval tv = {0};
 
-	if (NULL != (val = zend_hash_str_find(&client->request.headers, "host", sizeof("host")-1))) {
+	if (NULL != (val = zend_hash_find(&client->request.headers, ZSTR_KNOWN(ZEND_STR_HOST)))) {
 		smart_str_appends_ex(buffer, "Host: ", persistent);
 		smart_str_append_ex(buffer, Z_STR_P(val), persistent);
 		smart_str_appends_ex(buffer, "\r\n", persistent);

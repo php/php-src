@@ -318,7 +318,7 @@ static void fpm_pctl_kill_idle_child(struct fpm_child_s *child) /* {{{ */
 	if (child->idle_kill) {
 		fpm_pctl_kill(child->pid, FPM_PCTL_KILL);
 	} else {
-		child->idle_kill = 1;
+		child->idle_kill = true;
 		fpm_pctl_kill(child->pid, FPM_PCTL_QUIT);
 	}
 }

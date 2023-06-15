@@ -90,7 +90,7 @@ static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc);
 
 static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding);
 
-static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict);
+static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict, bool order_significant);
 
 static zend_string* mb_mime_header_encode(zend_string *input, const mbfl_encoding *incode, const mbfl_encoding *outcode, bool base64, char *linefeed, size_t linefeed_len, zend_long indent);
 
@@ -452,7 +452,7 @@ static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *a
 		list_size = MBSTRG(current_detect_order_list_size);
 	}
 
-	return (const zend_encoding*)mb_guess_encoding((unsigned char*)arg_string, arg_length, (const mbfl_encoding **)list, list_size, false);
+	return (const zend_encoding*)mb_guess_encoding((unsigned char*)arg_string, arg_length, (const mbfl_encoding **)list, list_size, false, false);
 }
 
 static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from)
@@ -1016,6 +1016,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->internal_encoding_set = 0;
 	mbstring_globals->http_output_set = 0;
 	mbstring_globals->http_input_set = 0;
+	mbstring_globals->all_encodings_list = NULL;
 }
 /* }}} */
 
@@ -1155,6 +1156,13 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 
 	MBSTRG(outconv_enabled) = false;
 	MBSTRG(outconv_state) = 0;
+
+	if (MBSTRG(all_encodings_list)) {
+		GC_DELREF(MBSTRG(all_encodings_list));
+		zend_hash_destroy(MBSTRG(all_encodings_list));
+		efree(MBSTRG(all_encodings_list));
+		MBSTRG(all_encodings_list) = NULL;
+	}
 
 #ifdef HAVE_MBREGEX
 	PHP_RSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -1807,7 +1815,6 @@ static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && GC_FLAGS(string) & IS_STR_VALID_UTF8) {
 		return mb_fast_strlen_utf8((unsigned char*)ZSTR_VAL(string), ZSTR_LEN(string));
 	}
-
 
 	uint32_t wchar_buf[128];
 	unsigned char *in = (unsigned char*)ZSTR_VAL(string);
@@ -2687,7 +2694,7 @@ MBSTRING_API zend_string* php_mb_convert_encoding(const char *input, size_t leng
 		from_encoding = *from_encodings;
 	} else {
 		/* auto detect */
-		from_encoding = mb_guess_encoding((unsigned char*)input, length, from_encodings, num_from_encodings, MBSTRG(strict_detection));
+		from_encoding = mb_guess_encoding((unsigned char*)input, length, from_encodings, num_from_encodings, MBSTRG(strict_detection), true);
 		if (!from_encoding) {
 			php_error_docref(NULL, E_WARNING, "Unable to detect character encoding");
 			return NULL;
@@ -2988,28 +2995,38 @@ struct candidate {
 	size_t in_len;
 	uint64_t demerits; /* Wide bit size to prevent overflow */
 	unsigned int state;
+	float multiplier;
 };
 
-static size_t init_candidate_array(struct candidate *array, size_t length, const mbfl_encoding **encodings, const unsigned char **in, size_t *in_len, size_t n, bool strict)
+static size_t init_candidate_array(struct candidate *array, size_t length, const mbfl_encoding **encodings, const unsigned char **in, size_t *in_len, size_t n, bool strict, bool order_significant)
 {
 	size_t j = 0;
 
 	for (size_t i = 0; i < length; i++) {
 		const mbfl_encoding *enc = encodings[i];
 
+		array[j].enc = enc;
+		array[j].state = 0;
+		array[j].demerits = 0;
+
 		/* If any candidate encodings have specialized validation functions, use them
 		 * to eliminate as many candidates as possible */
-		if (strict && enc->check != NULL) {
+		if (enc->check != NULL) {
 			for (size_t k = 0; k < n; k++) {
 				if (!enc->check((unsigned char*)in[k], in_len[k])) {
-					goto skip_to_next;
+					if (strict) {
+						goto skip_to_next;
+					} else {
+						array[j].demerits += 500;
+					}
 				}
 			}
 		}
 
-		array[j].enc = enc;
-		array[j].state = 0;
-		array[j].demerits = 0;
+		/* This multiplier can optionally be used to make candidate encodings listed
+		 * first more likely to be chosen. It is a weight factor which multiplies
+		 * the number of demerits counted for each candidate. */
+		array[j].multiplier = order_significant ? 1.0 + ((0.3 * i) / length) : 1.0;
 		j++;
 skip_to_next: ;
 	}
@@ -3085,10 +3102,14 @@ try_next_encoding:
 		}
 	}
 
+	for (size_t i = 0; i < length; i++) {
+		array[i].demerits *= array[i].multiplier;
+	}
+
 	return length;
 }
 
-MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned char **strings, size_t *str_lengths, size_t n, const mbfl_encoding **elist, unsigned int elist_size, bool strict)
+MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned char **strings, size_t *str_lengths, size_t n, const mbfl_encoding **elist, unsigned int elist_size, bool strict, bool order_significant)
 {
 	if (elist_size == 0) {
 		return NULL;
@@ -3109,7 +3130,7 @@ MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned c
 
 	/* Allocate on stack; when we return, this array is automatically freed */
 	struct candidate *array = alloca(elist_size * sizeof(struct candidate));
-	elist_size = init_candidate_array(array, elist_size, elist, strings, str_lengths, n, strict);
+	elist_size = init_candidate_array(array, elist_size, elist, strings, str_lengths, n, strict, order_significant);
 
 	while (n--) {
 		start_string(array, elist_size, strings[n], str_lengths[n]);
@@ -3133,9 +3154,9 @@ MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned c
 /* When doing 'strict' detection, any string which is invalid in the candidate encoding
  * is rejected. With non-strict detection, we just continue, but apply demerits for
  * each invalid byte sequence */
-static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict)
+static const mbfl_encoding* mb_guess_encoding(unsigned char *in, size_t in_len, const mbfl_encoding **elist, unsigned int elist_size, bool strict, bool order_significant)
 {
-	return mb_guess_encoding_for_strings((const unsigned char**)&in, &in_len, 1, elist, elist_size, strict);
+	return mb_guess_encoding_for_strings((const unsigned char**)&in, &in_len, 1, elist, elist_size, strict, order_significant);
 }
 
 /* {{{ Encodings of the given string is returned (as a string) */
@@ -3154,8 +3175,17 @@ PHP_FUNCTION(mb_detect_encoding)
 		Z_PARAM_BOOL(strict)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Should we pay attention to the order of the provided candidate encodings and prefer
+	 * the earlier ones (if more than one candidate encoding matches)?
+	 * If the entire list of supported encodings returned by `mb_list_encodings` is passed
+	 * in, then don't treat the order as significant */
+	bool order_significant = true;
+
 	/* make encoding list */
 	if (encoding_ht) {
+		if (encoding_ht == MBSTRG(all_encodings_list)) {
+			order_significant = false;
+		}
 		if (FAILURE == php_mb_parse_encoding_array(encoding_ht, &elist, &size, 2)) {
 			RETURN_THROWS();
 		}
@@ -3187,7 +3217,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	if (size == 1 && *elist == &mbfl_encoding_utf8 && (GC_FLAGS(str) & IS_STR_VALID_UTF8)) {
 		ret = &mbfl_encoding_utf8;
 	} else {
-		ret = mb_guess_encoding((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), elist, size, strict);
+		ret = mb_guess_encoding((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), elist, size, strict, order_significant);
 	}
 
 	efree(ZEND_VOIDP(elist));
@@ -3205,10 +3235,22 @@ PHP_FUNCTION(mb_list_encodings)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	array_init(return_value);
-	for (const mbfl_encoding **encodings = mbfl_get_supported_encodings(); *encodings; encodings++) {
-		add_next_index_string(return_value, (*encodings)->name);
+	if (MBSTRG(all_encodings_list) == NULL) {
+		/* Initialize shared array of supported encoding names
+		 * This is done so that we can check if `mb_list_encodings()` is being
+		 * passed to other mbstring functions using a cheap pointer equality check */
+		HashTable *array = emalloc(sizeof(HashTable));
+		zend_hash_init(array, 80, NULL, zval_ptr_dtor_str, false);
+		for (const mbfl_encoding **encodings = mbfl_get_supported_encodings(); *encodings; encodings++) {
+			zval tmp;
+			ZVAL_STRING(&tmp, (*encodings)->name);
+			zend_hash_next_index_insert(array, &tmp);
+		}
+		MBSTRG(all_encodings_list) = array;
 	}
+
+	GC_ADDREF(MBSTRG(all_encodings_list));
+	RETURN_ARR(MBSTRG(all_encodings_list));
 }
 /* }}} */
 
@@ -3536,8 +3578,15 @@ PHP_FUNCTION(mb_convert_variables)
 
 	from_encoding = MBSTRG(current_internal_encoding);
 
+	bool order_significant = true;
+
 	/* pre-conversion encoding */
 	if (from_enc_ht) {
+		if (from_enc_ht == MBSTRG(all_encodings_list)) {
+			/* If entire list of supported encodings returned by `mb_list_encodings` is passed
+			 * in, then don't treat the order of the list as significant */
+			order_significant = false;
+		}
 		if (php_mb_parse_encoding_array(from_enc_ht, &elist, &elistsz, 2) == FAILURE) {
 			RETURN_THROWS();
 		}
@@ -3575,7 +3624,7 @@ PHP_FUNCTION(mb_convert_variables)
 				RETURN_FALSE;
 			}
 		}
-		from_encoding = mb_guess_encoding_for_strings(val_list, len_list, num, elist, elistsz, MBSTRG(strict_detection));
+		from_encoding = mb_guess_encoding_for_strings(val_list, len_list, num, elist, elistsz, MBSTRG(strict_detection), order_significant);
 		efree(ZEND_VOIDP(val_list));
 		efree(len_list);
 		if (!from_encoding) {
@@ -4162,7 +4211,6 @@ PHP_FUNCTION(mb_send_mail)
 						*head_enc,	/* header transfer encoding */
 						*body_enc;	/* body transfer encoding */
 	const mbfl_language *lang;
-	int err = 0;
 	HashTable ht_headers;
 	zval *s;
 
@@ -4293,7 +4341,7 @@ PHP_FUNCTION(mb_send_mail)
 	/* Subject: */
 	const mbfl_encoding *enc = MBSTRG(current_internal_encoding);
 	if (enc == &mbfl_encoding_pass) {
-		enc = mb_guess_encoding((unsigned char*)ZSTR_VAL(subject), ZSTR_LEN(subject), MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+		enc = mb_guess_encoding((unsigned char*)ZSTR_VAL(subject), ZSTR_LEN(subject), MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection), false);
 	}
 	const char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : CRLF;
 	size_t line_sep_len = strlen(line_sep);
@@ -4303,7 +4351,7 @@ PHP_FUNCTION(mb_send_mail)
 	/* message body */
 	const mbfl_encoding *msg_enc = MBSTRG(current_internal_encoding);
 	if (msg_enc == &mbfl_encoding_pass) {
-		msg_enc = mb_guess_encoding((unsigned char*)message, message_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
+		msg_enc = mb_guess_encoding((unsigned char*)message, message_len, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection), false);
 	}
 
 	unsigned int num_errors = 0;
@@ -4377,7 +4425,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
 
-	RETVAL_BOOL(!err && php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL));
+	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL));
 
 	if (extra_cmd) {
 		zend_string_release_ex(extra_cmd, 0);

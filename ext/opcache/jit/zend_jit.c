@@ -144,6 +144,31 @@ static zend_jit_trace_info *zend_jit_get_current_trace_info(void);
 static uint32_t zend_jit_trace_find_exit_point(const void* addr);
 #endif
 
+#if ZEND_JIT_TARGET_X86 && defined(__linux__)
+# if PHP_HAVE_BUILTIN_CPU_SUPPORTS && defined(__GNUC__) && (ZEND_GCC_VERSION >= 11000)
+# define ZEND_JIT_SUPPORT_CLDEMOTE 1
+# else
+# define ZEND_JIT_SUPPORT_CLDEMOTE 0
+# endif
+#endif
+
+#if ZEND_JIT_SUPPORT_CLDEMOTE
+#include <immintrin.h>
+#pragma GCC push_options
+#pragma GCC target("cldemote")
+// check cldemote by CPUID when JIT startup
+static int cpu_support_cldemote = 0;
+static inline void shared_cacheline_demote(uintptr_t start, size_t size) {
+    uintptr_t cache_line_base = start & ~0x3F;
+    do {
+        _cldemote((void *)cache_line_base);
+        // next cacheline start size
+        cache_line_base += 64;
+    } while (cache_line_base < start + size);
+}
+#pragma GCC pop_options
+#endif
+
 static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        const zend_op  *opline,
                                        zend_jit_addr   var_use_addr,
@@ -341,6 +366,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					case ZEND_DECLARE_ANON_CLASS:
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
+					case ZEND_BIND_INIT_STATIC_OR_JMP:
 						return 1;
 					case ZEND_DO_ICALL:
 					case ZEND_DO_UCALL:
@@ -423,6 +449,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 					return 1;
 				case ZEND_DO_ICALL:
 				case ZEND_DO_UCALL:
@@ -973,6 +1000,12 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 
 	/* flush the hardware I-cache */
 	JIT_CACHE_FLUSH(entry, entry + size);
+	/* hint to the hardware to push out the cache line that contains the linear address */
+#if ZEND_JIT_SUPPORT_CLDEMOTE
+	if (cpu_support_cldemote && JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+		shared_cacheline_demote((uintptr_t)entry, size);
+	}
+#endif
 
 	if (trace_num) {
 		zend_jit_trace_add_code(entry, dasm_getpclabel(dasm_state, 1));
@@ -4018,6 +4051,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_ASSERT_CHECK:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 					if (!zend_jit_handler(&dasm_state, opline,
 							zend_may_throw(opline, ssa_op, op_array, ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
@@ -4788,7 +4822,7 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		JIT_G(trigger) = ZEND_JIT_ON_HOT_TRACE;
 		JIT_G(opt_flags) = ZEND_JIT_REG_ALLOC_GLOBAL | ZEND_JIT_CPU_AVX;
 		return SUCCESS;
-	} else if (zend_string_equals_literal_ci(jit, "function")) {
+	} else if (zend_string_equals_ci(jit, ZSTR_KNOWN(ZEND_STR_FUNCTION))) {
 		JIT_G(enabled) = 1;
 		JIT_G(on) = 1;
 		JIT_G(opt_level) = ZEND_JIT_LEVEL_OPT_SCRIPT;
@@ -4900,6 +4934,10 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 
 #ifdef HAVE_GDB
 	zend_jit_gdb_init();
+#endif
+
+#if ZEND_JIT_SUPPORT_CLDEMOTE
+	cpu_support_cldemote = zend_cpu_supports_cldemote();
 #endif
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP

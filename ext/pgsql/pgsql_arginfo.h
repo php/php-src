@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f18a73443942daa2b3695e8750c8daaea6b96194 */
+ * Stub hash: a37be19da43ac0838655b0ba7e34382e9c7424f5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -12,7 +12,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_connect_poll, 0, 1, IS_LONG, 
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_close, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_close, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
 ZEND_END_ARG_INFO()
 
@@ -41,7 +41,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_parameter_status, 0, 1, MAY_B
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_pg_ping arginfo_pg_close
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_ping, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_query, 0, 1, PgSql\\Result, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
@@ -297,7 +299,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pg_clientencoding arginfo_pg_dbname
 
-#define arginfo_pg_end_copy arginfo_pg_close
+#define arginfo_pg_end_copy arginfo_pg_ping
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_put_line, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection)
@@ -470,6 +472,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_pipeline_status, 0, 1, IS_LON
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_error_context_visibility, 0, 2, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, visibility, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
@@ -572,6 +579,7 @@ ZEND_FUNCTION(pg_pipeline_sync);
 #if defined(LIBPQ_HAS_PIPELINING)
 ZEND_FUNCTION(pg_pipeline_status);
 #endif
+ZEND_FUNCTION(pg_set_error_context_visibility);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -701,6 +709,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(LIBPQ_HAS_PIPELINING)
 	ZEND_FE(pg_pipeline_status, arginfo_pg_pipeline_status)
 #endif
+	ZEND_FE(pg_set_error_context_visibility, arginfo_pg_set_error_context_visibility)
 	ZEND_FE_END
 };
 
@@ -754,6 +763,12 @@ static void register_pgsql_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_TERSE", PQERRORS_TERSE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_DEFAULT", PQERRORS_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_VERBOSE", PQERRORS_VERBOSE, CONST_PERSISTENT);
+#if PGVERSION_NUM > 110000
+	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_SQLSTATE", PQERRORS_SQLSTATE, CONST_PERSISTENT);
+#endif
+#if !(PGVERSION_NUM > 110000)
+	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_SQLSTATE", PQERRORS_TERSE, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_CUR", SEEK_CUR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_END", SEEK_END, CONST_PERSISTENT);
@@ -827,6 +842,9 @@ static void register_pgsql_symbols(int module_number)
 #if defined(LIBPQ_HAS_PIPELINING)
 	REGISTER_LONG_CONSTANT("PGSQL_PIPELINE_ABORTED", PQ_PIPELINE_ABORTED, CONST_PERSISTENT);
 #endif
+	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_NEVER", PQSHOW_CONTEXT_NEVER, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ERRORS", PQSHOW_CONTEXT_ERRORS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ALWAYS", PQSHOW_CONTEXT_ALWAYS, CONST_PERSISTENT);
 }
 
 static zend_class_entry *register_class_PgSql_Connection(void)

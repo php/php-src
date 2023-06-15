@@ -83,11 +83,6 @@ static bool spl_fixedarray_empty(spl_fixedarray *array)
 	return true;
 }
 
-static void spl_fixedarray_illegal_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s on FixedArray", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
 static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
@@ -287,7 +282,8 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	ZEND_ASSERT(parent);
 
 	if (UNEXPECTED(inherited)) {
-		zend_function *fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		zend_function *fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (fptr_count->common.scope == parent) {
 			fptr_count = NULL;
 		}
@@ -338,7 +334,8 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			return Z_RES_HANDLE_P(offset);
 	}
 
-	spl_fixedarray_illegal_offset(offset);
+	/* Use SplFixedArray name from the CE */
+	zend_illegal_container_offset(spl_ce_SplFixedArray->name, offset, BP_VAR_R);
 	return 0;
 }
 

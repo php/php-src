@@ -6,10 +6,10 @@ repository available according to the release schedule.
 The release schedule for each version is published on the
 [PHP wiki](https://wiki.php.net):
 
+- [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
 - [PHP 8.1](https://wiki.php.net/todo/php81)
 - [PHP 8.0](https://wiki.php.net/todo/php80)
-- [PHP 7.4](https://wiki.php.net/todo/php74)
 
 The PHP project publishes builds every two weeks.
 
@@ -605,7 +605,7 @@ slightly different steps. We'll call attention where the steps differ.
     git fetch --all
     git pull --rebase upstream master
     cd ..
-    git commit distributions
+    git commit distributions -m "X.Y.Z tarballs"
     git push upstream master
     ```
 
@@ -985,6 +985,20 @@ volunteers to begin the selection process for the next release managers.
    gpg php-keyring.gpg  # verify all the keys are present, including yours
    git add -p
    git commit --gpg-sign=YOURKEYID -m "Update PHP release manager keyring"
+   git push
+   ```
+
+   `web-php-distributions` is a submodule of `web-php`. You'll now have to update
+   the commit reference to reflect the change made in web-php-distributions.
+
+   ```shell
+   cd /path/to/repos/php/web-php
+   git submodule update
+   cd distributions           # This is the submodule refering to web-php-distributions
+   git pull origin master
+   cd ..
+   git add distributions
+   git commit --gpg-sign=YOURKEYID -m "Update php-keyring.gpg in distributions"
    git push
    ```
 

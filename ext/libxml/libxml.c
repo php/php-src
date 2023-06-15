@@ -113,7 +113,7 @@ static int php_libxml_clear_object(php_libxml_node_object *object)
 	return php_libxml_decrement_doc_ref(object);
 }
 
-static int php_libxml_unregister_node(xmlNodePtr nodep)
+static void php_libxml_unregister_node(xmlNodePtr nodep)
 {
 	php_libxml_node_object *wrapper;
 
@@ -130,8 +130,6 @@ static int php_libxml_unregister_node(xmlNodePtr nodep)
 			nodeptr->node = NULL;
 		}
 	}
-
-	return -1;
 }
 
 static void php_libxml_node_free(xmlNodePtr node)
@@ -209,9 +207,7 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 
 			curnode = node->next;
 			xmlUnlinkNode(node);
-			if (php_libxml_unregister_node(node) == 0) {
-				node->doc = NULL;
-			}
+			php_libxml_unregister_node(node);
 			php_libxml_node_free(node);
 		}
 	}
@@ -514,6 +510,8 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
 		} else {
 			php_error_docref(NULL, level, "%s in Entity, line: %d", msg, parser->input->line);
 		}
+	} else {
+		php_error_docref(NULL, E_WARNING, "%s", msg);
 	}
 }
 
@@ -1161,8 +1159,14 @@ PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object,
 				object->node->_private = private_data;
 			}
 		} else {
+			if (UNEXPECTED(node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE)) {
+				php_libxml_doc_ptr *doc_ptr = emalloc(sizeof(php_libxml_doc_ptr));
+				doc_ptr->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
+				object->node = (php_libxml_node_ptr *) doc_ptr; /* downcast */
+			} else {
+				object->node = emalloc(sizeof(php_libxml_node_ptr));
+			}
 			ret_refcount = 1;
-			object->node = emalloc(sizeof(php_libxml_node_ptr));
 			object->node->node = node;
 			object->node->refcount = 1;
 			object->node->_private = private_data;
@@ -1262,9 +1266,7 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 					default:
 						php_libxml_node_free_list((xmlNodePtr) node->properties);
 				}
-				if (php_libxml_unregister_node(node) == 0) {
-					node->doc = NULL;
-				}
+				php_libxml_unregister_node(node);
 				php_libxml_node_free(node);
 			} else {
 				php_libxml_unregister_node(node);

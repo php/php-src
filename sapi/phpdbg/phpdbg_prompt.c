@@ -715,8 +715,8 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	EG(exception) = NULL;
 
 	zend_call_known_instance_method_with_0_params(ex->ce->__tostring, ex, &tmp);
-	file = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("file"), 1, &rv));
-	line = zval_get_long(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("line"), 1, &rv));
+	file = zval_get_string(zend_read_property_ex(zend_get_exception_base(ex), ex, ZSTR_KNOWN(ZEND_STR_FILE), /* silent */ true, &rv));
+	line = zval_get_long(zend_read_property_ex(zend_get_exception_base(ex), ex, ZSTR_KNOWN(ZEND_STR_LINE), /* silent */ true, &rv));
 
 	if (EG(exception)) {
 		EG(exception) = NULL;
@@ -724,7 +724,7 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 	} else {
 		zend_update_property_string(zend_get_exception_base(ex), ex, ZEND_STRL("string"), Z_STRVAL(tmp));
 		zval_ptr_dtor(&tmp);
-		msg = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("string"), 1, &rv));
+		msg = zval_get_string(zend_read_property_ex(zend_get_exception_base(ex), ex, ZSTR_KNOWN(ZEND_STR_STRING), /* silent */ true, &rv));
 	}
 
 	phpdbg_error("Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
@@ -1695,9 +1695,9 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			PHPDBG_G(handled_exception) = exception;
 
 			zval rv;
-			zend_string *file = zval_get_string(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("file"), 1, &rv));
-			zend_long line = zval_get_long(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("line"), 1, &rv));
-			zend_string *msg = zval_get_string(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("message"), 1, &rv));
+			zend_string *file = zval_get_string(zend_read_property_ex(zend_get_exception_base(exception), exception, ZSTR_KNOWN(ZEND_STR_FILE), /* silent */ true, &rv));
+			zend_long line = zval_get_long(zend_read_property_ex(zend_get_exception_base(exception), exception, ZSTR_KNOWN(ZEND_STR_LINE), /* silent */ true, &rv));
+			zend_string *msg = zval_get_string(zend_read_property_ex(zend_get_exception_base(exception), exception, ZSTR_KNOWN(ZEND_STR_MESSAGE), /* silent */ true, &rv));
 
 			phpdbg_error("Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s",
 				ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line,

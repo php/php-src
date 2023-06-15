@@ -17,4 +17,4 @@ echo "\n", (new DatetimeZone('+01:45:30'))->getName();
    'timezone_type' => 1,
    'timezone' => '+00:49',
 ))
-+01:45
++01:45:30

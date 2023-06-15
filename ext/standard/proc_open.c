@@ -917,7 +917,7 @@ static zend_result set_proc_descriptor_from_array(zval *descitem, descriptorspec
 	} else if (zend_string_equals_literal(ztype, "socket")) {
 		/* Set descriptor to socketpair */
 		retval = set_proc_descriptor_to_socket(&descriptors[ndesc]);
-	} else if (zend_string_equals_literal(ztype, "file")) {
+	} else if (zend_string_equals(ztype, ZSTR_KNOWN(ZEND_STR_FILE))) {
 		/* Set descriptor to file */
 		if ((zfile = get_string_parameter(descitem, 1, "file name parameter for 'file'")) == NULL) {
 			goto finish;
@@ -940,7 +940,7 @@ static zend_result set_proc_descriptor_from_array(zval *descitem, descriptorspec
 
 		retval = redirect_proc_descriptor(
 			&descriptors[ndesc], (int)Z_LVAL_P(ztarget), descriptors, ndesc, nindex);
-	} else if (zend_string_equals_literal(ztype, "null")) {
+	} else if (zend_string_equals(ztype, ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE))) {
 		/* Set descriptor to blackhole (discard all data written) */
 		retval = set_proc_descriptor_to_blackhole(&descriptors[ndesc]);
 	} else if (zend_string_equals_literal(ztype, "pty")) {

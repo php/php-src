@@ -363,6 +363,18 @@ PHP_FUNCTION(http_response_code)
 
 	if (response_code)
 	{
+		if (SG(headers_sent) && !SG(request_info).no_headers) {
+			const char *output_start_filename = php_output_get_start_filename();
+			int output_start_lineno = php_output_get_start_lineno();
+
+			if (output_start_filename) {
+				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent "
+					"(output started at %s:%d)", output_start_filename, output_start_lineno);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Cannot set response code - headers already sent");
+			}
+			RETURN_FALSE;
+		}
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;

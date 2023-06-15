@@ -211,6 +211,9 @@ struct _php_stream  {
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	uint8_t fclose_stdiocast:2;
 
+	/* flag to mark whether the stream has buffered data */
+	uint8_t has_buffered_data:1;
+
 	char mode[16];			/* "rwb" etc. ala stdio */
 
 	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
@@ -227,7 +230,6 @@ struct _php_stream  {
 	size_t readbuflen;
 	zend_off_t readpos;
 	zend_off_t writepos;
-	ssize_t didread;
 
 	/* how much data to read when filling buffer */
 	size_t chunk_size;

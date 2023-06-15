@@ -22,6 +22,9 @@ var_dump(mb_strrpos($string_ascii, 'is', 4, 'ISO-8859-1'));
 echo "\n-- ASCII string 2 --\n";
 var_dump(mb_strrpos($string_ascii, 'hello, world'));
 
+echo "\n-- ASCII string with negative offset --\n";
+var_dump(mb_strrpos($string_ascii, 'hello', -1, 'ISO-8859-1'));
+
 echo "\n-- Multibyte string 1 --\n";
 $needle1 = base64_decode('44CC');
 var_dump(mb_strrpos($string_mb, $needle1));
@@ -39,6 +42,9 @@ echo "Done";
 int(15)
 
 -- ASCII string 2 --
+bool(false)
+
+-- ASCII string with negative offset --
 bool(false)
 
 -- Multibyte string 1 --

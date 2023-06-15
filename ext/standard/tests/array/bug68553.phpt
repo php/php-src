@@ -79,5 +79,5 @@ array(8) {
     NULL
   }
 }
-Cannot access offset of type object on array
+Cannot access offset of type stdClass on array
 Cannot access offset of type array on array

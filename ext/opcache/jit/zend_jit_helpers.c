@@ -27,21 +27,6 @@ static ZEND_COLD void undef_result_after_exception(void) {
 	}
 }
 
-static ZEND_COLD void zend_jit_illegal_array_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s on array", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
-static ZEND_COLD void zend_jit_illegal_empty_or_isset_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s in isset or empty", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
-static ZEND_COLD void zend_jit_illegal_string_offset(zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s on string", zend_zval_value_name(offset));
-}
-
 static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
 {
 	void **run_time_cache;
@@ -493,7 +478,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_R);
 			undef_result_after_exception();
 			return;
 	}
@@ -635,7 +620,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_IS);
 			undef_result_after_exception();
 			return;
 	}
@@ -737,7 +722,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_empty_or_isset_offset(dim);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_IS);
 			return 0;
 	}
 
@@ -873,7 +858,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_RW);
 			undef_result_after_exception();
 			return NULL;
 	}
@@ -1006,7 +991,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_jit_illegal_array_offset(dim);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_R);
 			undef_result_after_exception();
 			if (EG(opline_before_exception)
 			 && (EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
@@ -1029,7 +1014,8 @@ num_index:
 	return retval;
 }
 
-static zend_never_inline zend_long zend_check_string_offset(zval *dim/*, int type*/)
+/* type is one of the BP_VAR_* constants */
+static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
 {
 	zend_long offset;
 
@@ -1049,7 +1035,7 @@ try_again:
 				}
 				return offset;
 			}
-			zend_jit_illegal_string_offset(dim);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_R);
 			return 0;
 		}
 		case IS_UNDEF:
@@ -1065,7 +1051,7 @@ try_again:
 			dim = Z_REFVAL_P(dim);
 			goto try_again;
 		default:
-			zend_jit_illegal_string_offset(dim);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, type);
 			return 0;
 	}
 
@@ -1103,7 +1089,7 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 		if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
 			GC_ADDREF(str);
 		}
-		offset = zend_check_string_offset(dim/*, BP_VAR_R*/);
+		offset = zend_check_string_offset(dim, BP_VAR_R);
 		if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
 			zend_string *ret = zend_jit_fetch_dim_str_offset(str, offset);
 			zend_string_efree(str);
@@ -1140,7 +1126,7 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_jit_illegal_string_offset(dim);
+				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_IS);
 				break;
 		}
 
@@ -1242,7 +1228,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
 		GC_ADDREF(s);
-		offset = zend_check_string_offset(dim/*, BP_VAR_W*/);
+		offset = zend_check_string_offset(dim, BP_VAR_W);
 		if (UNEXPECTED(GC_DELREF(s) == 0)) {
 			zend_string_efree(s);
 			if (result) {
@@ -1418,7 +1404,7 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 			zend_throw_error(NULL, "[] operator not supported for strings");
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-				zend_check_string_offset(dim/*, BP_VAR_RW*/);
+				zend_check_string_offset(dim, BP_VAR_RW);
 			}
 			zend_wrong_string_offset_error();
 		}
@@ -1606,7 +1592,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			zend_throw_error(NULL, "[] operator not supported for strings");
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-				zend_check_string_offset(dim/*, BP_VAR_RW*/);
+				zend_check_string_offset(dim, BP_VAR_RW);
 			}
 			zend_wrong_string_offset_error();
 		}

@@ -542,6 +542,9 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
 
+	zend_result retval;
+	bool old_eof = stream->eof;
+
 	if (stream->readfilters.head) {
 		size_t to_read_now = MIN(size, stream->chunk_size);
 		char *chunk_buf;
@@ -562,7 +565,8 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size);
 			if (justread < 0 && stream->writepos == stream->readpos) {
 				efree(chunk_buf);
-				return FAILURE;
+				retval = FAILURE;
+				goto out_check_eof;
 			} else if (justread > 0) {
 				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 0, 0);
 
@@ -633,7 +637,8 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					 * further reads should fail. */
 					stream->eof = 1;
 					efree(chunk_buf);
-					return FAILURE;
+					retval = FAILURE;
+					goto out_is_eof;
 			}
 
 			if (justread <= 0) {
@@ -643,7 +648,6 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 
 		efree(chunk_buf);
 		return SUCCESS;
-
 	} else {
 		/* is there enough data in the buffer ? */
 		if (stream->writepos - stream->readpos < (zend_off_t)size) {
@@ -670,18 +674,27 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					stream->readbuflen - stream->writepos
 					);
 			if (justread < 0) {
-				return FAILURE;
+				retval = FAILURE;
+				goto out_check_eof;
 			}
 			stream->writepos += justread;
+			retval = SUCCESS;
+			goto out_check_eof;
 		}
 		return SUCCESS;
 	}
+
+out_check_eof:
+	if (old_eof != stream->eof) {
+out_is_eof:
+		php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
+	}
+	return retval;
 }
 
 PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 {
-	ssize_t toread = 0;
-	stream->didread = 0;
+	ssize_t toread = 0, didread = 0;
 
 	while (size > 0) {
 
@@ -700,7 +713,8 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			stream->readpos += toread;
 			size -= toread;
 			buf += toread;
-			stream->didread += toread;
+			didread += toread;
+			stream->has_buffered_data = 1;
 		}
 
 		/* ignore eof here; the underlying state might have changed */
@@ -713,14 +727,14 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			if (toread < 0) {
 				/* Report an error if the read failed and we did not read any data
 				 * before that. Otherwise return the data we did read. */
-				if (stream->didread == 0) {
+				if (didread == 0) {
 					return toread;
 				}
 				break;
 			}
 		} else {
 			if (php_stream_fill_read_buffer(stream, size) != SUCCESS) {
-				if (stream->didread == 0) {
+				if (didread == 0) {
 					return -1;
 				}
 				break;
@@ -737,9 +751,10 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			}
 		}
 		if (toread > 0) {
-			stream->didread += toread;
+			didread += toread;
 			buf += toread;
 			size -= toread;
+			stream->has_buffered_data = 1;
 		} else {
 			/* EOF, or temporary end of data (for non-blocking mode). */
 			break;
@@ -753,11 +768,12 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 		}
 	}
 
-	if (stream->didread > 0) {
-		stream->position += stream->didread;
+	if (didread > 0) {
+		stream->position += didread;
+		stream->has_buffered_data = 0;
 	}
 
-	return stream->didread;
+	return didread;
 }
 
 /* Like php_stream_read(), but reading into a zend_string buffer. This has some similarity
@@ -1124,6 +1140,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
 {
 	ssize_t didwrite = 0;
+	ssize_t retval;
 
 	/* if we have a seekable stream we need to ensure that data is written at the
 	 * current stream->position. This means invalidating the read buffer and then
@@ -1134,15 +1151,19 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position);
 	}
 
+	bool old_eof = stream->eof;
+
 	while (count > 0) {
 		ssize_t justwrote = stream->ops->write(stream, buf, count);
 		if (justwrote <= 0) {
 			/* If we already successfully wrote some bytes and a write error occurred
 			 * later, report the successfully written bytes. */
 			if (didwrite == 0) {
-				return justwrote;
+				retval = justwrote;
+				goto out;
 			}
-			return didwrite;
+			retval = didwrite;
+			goto out;
 		}
 
 		buf += justwrote;
@@ -1151,7 +1172,13 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 		stream->position += justwrote;
 	}
 
-	return didwrite;
+	retval = didwrite;
+
+out:
+	if (old_eof != stream->eof) {
+		php_stream_notify_completed(PHP_STREAM_CONTEXT(stream));
+	}
+	return retval;
 }
 
 /* push some data through the write filter chain.
@@ -2315,7 +2342,6 @@ PHPAPI php_stream_context *php_stream_context_alloc(void)
 	php_stream_context *context;
 
 	context = ecalloc(1, sizeof(php_stream_context));
-	context->notifier = NULL;
 	array_init(&context->options);
 
 	context->res = zend_register_resource(context, php_le_stream_context());
