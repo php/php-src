@@ -111,27 +111,27 @@ var_dump($dom1->firstElementChild->firstElementChild->namespaceURI);
 -- Test append and attributes: with default namespace variation --
 NULL
 NULL
-string(0) ""
+NULL
 NULL
 string(7) "some:ns"
 <?xml version="1.0"?>
-<with xmlns="some:ns"><a/><b/><c xmlns=""/><d xmlns:x="some:ns" x:attrib="val"/><e attrib1="val" attrib2="val"/></with>
+<with xmlns="some:ns"><a xmlns=""/><b xmlns=""/><c xmlns=""/><d xmlns:x="some:ns" xmlns="" x:attrib="val"/><e attrib1="val" attrib2="val"/></with>
 <?xml version="1.0"?>
-<with xmlns="some:ns"><a/><b/><c xmlns=""/><d xmlns:x="some:ns" x:attrib="val"/><e attrib1="val" attrib2="val"/><subtree><subtreechild1 xmlns="some:ns"><subtreechild2/></subtreechild1></subtree></with>
+<with xmlns="some:ns"><a xmlns=""/><b xmlns=""/><c xmlns=""/><d xmlns:x="some:ns" xmlns="" x:attrib="val"/><e attrib1="val" attrib2="val"/><subtree xmlns=""><subtreechild1 xmlns="some:ns"><subtreechild2 xmlns=""/></subtreechild1></subtree></with>
 <?xml version="1.0"?>
-<with xmlns="some:ns"><a/><b/><c xmlns=""/><d xmlns:x="some:ns" x:attrib="val"/><e attrib1="val" attrib2="val"/><subtree><subtreechild1 xmlns="some:ns"><subtreechild2/></subtreechild1></subtree><child3><child4/></child3><child5/></with>
+<with xmlns="some:ns"><a xmlns=""/><b xmlns=""/><c xmlns=""/><d xmlns:x="some:ns" xmlns="" x:attrib="val"/><e attrib1="val" attrib2="val"/><subtree xmlns=""><subtreechild1 xmlns="some:ns"><subtreechild2 xmlns=""/></subtreechild1></subtree><child3 xmlns=""><child4/></child3><child5 xmlns=""/></with>
 -- Test append and attributes: without default namespace variation --
 NULL
 NULL
-string(0) ""
+NULL
 NULL
 string(7) "some:ns"
 <?xml version="1.0"?>
-<with><a/><b/><c xmlns=""/><d xmlns:x="some:ns" x:attrib="val"/><e xmlns="some:ns" attrib1="val" attrib2="val"/></with>
+<with><a/><b/><c/><d xmlns:x="some:ns" x:attrib="val"/><e xmlns="some:ns" attrib1="val" attrib2="val"/></with>
 <?xml version="1.0"?>
-<with><a/><b/><c xmlns=""/><d xmlns:x="some:ns" x:attrib="val"/><e xmlns="some:ns" attrib1="val" attrib2="val"/><subtree><subtreechild1 xmlns="some:ns"><subtreechild2/></subtreechild1></subtree></with>
+<with><a/><b/><c/><d xmlns:x="some:ns" x:attrib="val"/><e xmlns="some:ns" attrib1="val" attrib2="val"/><subtree><subtreechild1 xmlns="some:ns"><subtreechild2 xmlns=""/></subtreechild1></subtree></with>
 <?xml version="1.0"?>
-<with><a/><b/><c xmlns=""/><d xmlns:x="some:ns" x:attrib="val"/><e xmlns="some:ns" attrib1="val" attrib2="val"/><subtree><subtreechild1 xmlns="some:ns"><subtreechild2/></subtreechild1></subtree><child3><child4/></child3><child5/></with>
+<with><a/><b/><c/><d xmlns:x="some:ns" x:attrib="val"/><e xmlns="some:ns" attrib1="val" attrib2="val"/><subtree><subtreechild1 xmlns="some:ns"><subtreechild2 xmlns=""/></subtreechild1></subtree><child3><child4/></child3><child5/></with>
 -- Test import --
 NULL
 <?xml version="1.0"?>
@@ -141,7 +141,7 @@ NULL
 <with xmlns=""><none/></with>
 NULL
 <?xml version="1.0"?>
-<with xmlns="some:ns"><none/></with>
+<with xmlns="some:ns"><none xmlns=""/></with>
 NULL
 <?xml version="1.0"?>
 <with xmlns=""><none><div xmlns="some:ns"/></none></with>
@@ -155,6 +155,6 @@ string(3) "a:b"
 string(3) "a:b"
 NULL
 <?xml version="1.0"?>
-<parent xmlns="a:b"><child1/><child2/></parent>
+<parent xmlns="a:b"><child1/><child2 xmlns=""/></parent>
 string(3) "a:b"
 string(3) "a:b"
