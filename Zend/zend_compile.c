@@ -1354,10 +1354,10 @@ static zend_string *add_intersection_type(zend_string *str,
 	ZEND_TYPE_LIST_FOREACH(intersection_type_list, single_type) {
 		ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*single_type));
 		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*single_type));
-		zend_string *name = ZEND_TYPE_NAME(*single_type);
-		zend_string *resolved = resolve_class_name(name, scope);
-		intersection_str = add_type_string(intersection_str, resolved, /* is_intersection */ true);
-		zend_string_release(resolved);
+		ZEND_ASSERT(!ZEND_TYPE_IS_RELATIVE_SELF(*single_type) && "Compile time disallowed to have 'self' in intersection");
+		ZEND_ASSERT(!ZEND_TYPE_IS_RELATIVE_PARENT(*single_type) && "Compile time disallowed to have 'parent' in intersection");
+
+		intersection_str = add_type_string(intersection_str, ZEND_TYPE_NAME(*single_type), /* is_intersection */ true);
 	} ZEND_TYPE_LIST_FOREACH_END();
 
 	ZEND_ASSERT(intersection_str);
@@ -1389,13 +1389,30 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			}
 			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
 			ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*list_type));
-			zend_string *name = ZEND_TYPE_NAME(*list_type);
-			zend_string *resolved = resolve_class_name(name, scope);
-			str = add_type_string(str, resolved, /* is_intersection */ false);
-			zend_string_release(resolved);
+
+			/* We already have resolved types from compile time
+			 * Mimic unresolved types for BC with "self" and "parent" */
+			if (!scope && ZEND_TYPE_IS_RELATIVE_SELF(*list_type)) {
+				str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_SELF), /* is_intersection */ false);
+			} else if (!scope && ZEND_TYPE_IS_RELATIVE_PARENT(*list_type)) {
+				str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_PARENT), /* is_intersection */ false);
+			} else {
+				zend_string *name = ZEND_TYPE_NAME(*list_type);
+				zend_string *resolved = resolve_class_name(name, scope);
+				str = add_type_string(str, resolved, /* is_intersection */ false);
+				zend_string_release(resolved);
+			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+		/* We already have resolved types from compile time
+		 * Mimic unresolved types for BC with "self" and "parent" */
+		if (!scope && ZEND_TYPE_IS_RELATIVE_SELF(type)) {
+			str = ZSTR_KNOWN(ZEND_STR_SELF);
+		} else if (!scope && ZEND_TYPE_IS_RELATIVE_PARENT(type)) {
+			str = ZSTR_KNOWN(ZEND_STR_PARENT);
+		} else {
+			str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
+		}
 	}
 
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
@@ -6620,14 +6637,14 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
-		zend_string *class_name = zend_ast_get_str(ast);
-		uint8_t type_code = zend_lookup_builtin_type_by_name(class_name);
+		zend_string *type_name = zend_ast_get_str(ast);
+		uint8_t type_code = zend_lookup_builtin_type_by_name(type_name);
 
 		if (type_code != 0) {
 			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type declaration '%s' must be unqualified",
-					ZSTR_VAL(zend_string_tolower(class_name)));
+					ZSTR_VAL(zend_string_tolower(type_name)));
 			}
 
 			/* Transform iterable into a type union alias */
@@ -6641,38 +6658,58 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			return (zend_type) ZEND_TYPE_INIT_CODE(type_code, 0, 0);
 		} else {
 			const char *correct_name;
-			zend_string *orig_name = zend_ast_get_str(ast);
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
+			uint32_t type_flags = 0;
+			zend_string *class_name = type_name;
+
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
 				zend_assert_valid_class_name(class_name);
 			} else {
+				ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_SELF || fetch_type == ZEND_FETCH_CLASS_PARENT);
+
 				zend_ensure_valid_class_fetch_type(fetch_type);
+				if (fetch_type == ZEND_FETCH_CLASS_SELF) {
+					type_flags = _ZEND_TYPE_SELF_BIT;
+					/* Scope might be unknown for unbound closures and traits */
+					if (zend_is_scope_known()) {
+						class_name = CG(active_class_entry)->name;
+						ZEND_ASSERT(class_name && "must know class name when resolving self type at compile time");
+					}
+				} else {
+					ZEND_ASSERT(fetch_type == ZEND_FETCH_CLASS_PARENT);
+					type_flags = _ZEND_TYPE_PARENT_BIT;
+					/* Scope might be unknown for unbound closures and traits */
+					if (zend_is_scope_known()) {
+						class_name = CG(active_class_entry)->parent_name;
+						ZEND_ASSERT(class_name && "must know class name when resolving parent type at compile time");
+					}
+				}
 				zend_string_addref(class_name);
 			}
 
 			if (ast->attr == ZEND_NAME_NOT_FQ
-					&& zend_is_confusable_type(orig_name, &correct_name)
-					&& zend_is_not_imported(orig_name)) {
+					&& zend_is_confusable_type(type_name, &correct_name)
+					&& zend_is_not_imported(type_name)) {
 				const char *extra =
 					FC(current_namespace) ? " or import the class with \"use\"" : "";
 				if (correct_name) {
 					zend_error(E_COMPILE_WARNING,
 						"\"%s\" will be interpreted as a class name. Did you mean \"%s\"? "
 						"Write \"\\%s\"%s to suppress this warning",
-						ZSTR_VAL(orig_name), correct_name, ZSTR_VAL(class_name), extra);
+						ZSTR_VAL(type_name), correct_name, ZSTR_VAL(class_name), extra);
 				} else {
 					zend_error(E_COMPILE_WARNING,
 						"\"%s\" is not a supported builtin type "
 						"and will be interpreted as a class name. "
 						"Write \"\\%s\"%s to suppress this warning",
-						ZSTR_VAL(orig_name), ZSTR_VAL(class_name), extra);
+						ZSTR_VAL(type_name), ZSTR_VAL(class_name), extra);
 				}
 			}
 
 			class_name = zend_new_interned_string(class_name);
 			zend_alloc_ce_cache(class_name);
-			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, 0, 0);
+			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, /* allow null */ false, type_flags);
 		}
 	}
 }
@@ -6754,7 +6791,34 @@ static void zend_is_type_list_redundant_by_single_type(zend_type_list *type_list
 		}
 		if (zend_string_equals_ci(ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(type))) {
 			zend_string *single_type_str = zend_type_to_string(type);
-			zend_error_noreturn(E_COMPILE_ERROR, "Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
+			if (
+				ZEND_TYPE_IS_RELATIVE_SELF(type)
+				|| ZEND_TYPE_IS_RELATIVE_PARENT(type)
+			) {
+				if ( (
+					ZEND_TYPE_FULL_MASK(type)
+					& ZEND_TYPE_FULL_MASK(type_list->types[i])
+					& (_ZEND_TYPE_SELF_BIT|_ZEND_TYPE_PARENT_BIT)) != 0
+				) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
+				}
+				/* zend_type_to_string() will return "self" or "parent" where the resolved type is stored in
+				 * ZEND_TYPE_NAME() */
+				zend_error_noreturn(E_COMPILE_ERROR, "%s resolves to %s which is redundant",
+					ZSTR_VAL(single_type_str), ZSTR_VAL(ZEND_TYPE_NAME(type))
+				);
+			} else if (
+				ZEND_TYPE_IS_RELATIVE_SELF(type_list->types[i])
+				|| ZEND_TYPE_IS_RELATIVE_PARENT(type_list->types[i])
+			) {
+				/* zend_type_to_string() will return "self" or "parent" where the resolved type is stored in
+				 * ZEND_TYPE_NAME() */
+				zend_error_noreturn(E_COMPILE_ERROR, "%s resolves to %s which is redundant",
+					ZEND_TYPE_IS_RELATIVE_SELF(type_list->types[i]) ? "self" : "parent", ZSTR_VAL(ZEND_TYPE_NAME(type))
+				);
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR, "Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
+			}
 		}
 	}
 }
@@ -6795,6 +6859,7 @@ static zend_type zend_compile_typename_ex(
 					/* Switch from single name to name list. */
 					type_list->num_types = 1;
 					type_list->types[0] = type;
+					/* Clear MAY_BE_* type flags */
 					ZEND_TYPE_FULL_MASK(type_list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
 				}
 				/* Mark type as list type */
@@ -6841,6 +6906,7 @@ static zend_type zend_compile_typename_ex(
 					"Type contains both true and false, bool should be used instead");
 			}
 			ZEND_TYPE_FULL_MASK(type) |= ZEND_TYPE_PURE_MASK(single_type);
+			/* Clear MAY_BE_* type flags */
 			ZEND_TYPE_FULL_MASK(single_type) &= ~_ZEND_TYPE_MAY_BE_MASK;
 
 			if (ZEND_TYPE_IS_COMPLEX(single_type)) {
@@ -6848,13 +6914,18 @@ static zend_type zend_compile_typename_ex(
 					/* The first class type can be stored directly as the type ptr payload. */
 					ZEND_TYPE_SET_PTR(type, ZEND_TYPE_NAME(single_type));
 					ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_NAME_BIT;
+					/* Add flags indicating the named type is self/parent */
+					ZEND_TYPE_FULL_MASK(type) |= (ZEND_TYPE_FULL_MASK(single_type) & _ZEND_TYPE_RELATIVE_TYPE_MASK);
 				} else {
 					if (type_list->num_types == 0) {
 						/* Switch from single name to name list. */
 						type_list->num_types = 1;
 						type_list->types[0] = type;
+						/* Clear MAY_BE_* type flags */
 						ZEND_TYPE_FULL_MASK(type_list->types[0]) &= ~_ZEND_TYPE_MAY_BE_MASK;
 						ZEND_TYPE_SET_LIST(type, type_list);
+						/* Clear flags indicating the named type is self/parent */
+						ZEND_TYPE_FULL_MASK(type) &= ~_ZEND_TYPE_RELATIVE_TYPE_MASK;
 					}
 
 					type_list->types[type_list->num_types++] = single_type;
@@ -6916,10 +6987,11 @@ static zend_type zend_compile_typename_ex(
 				zend_string_release_ex(standard_type_str, false);
 			}
 			/* Check for "self" and "parent" too */
-			if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(single_type), "self")
-					|| zend_string_equals_literal_ci(ZEND_TYPE_NAME(single_type), "parent")) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type %s cannot be part of an intersection type", ZSTR_VAL(ZEND_TYPE_NAME(single_type)));
+			if (ZEND_TYPE_IS_RELATIVE_SELF(single_type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Type self cannot be part of an intersection type");
+			}
+			if (ZEND_TYPE_IS_RELATIVE_PARENT(single_type)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Type parent cannot be part of an intersection type");
 			}
 
 			/* Add type to the type list */

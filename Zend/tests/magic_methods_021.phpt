@@ -12,7 +12,7 @@ class Foo2 {
 }
 
 class Foo3 {
-    public static function __set_state(array $data): Foo3|self {}
+    public static function __set_state(array $data): Foo3|Foo2 {}
 }
 
 ?>
