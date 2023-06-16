@@ -56,6 +56,10 @@ PHP_METHOD(DOMElement, __construct)
 	if (uri_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
+			/* https://dom.spec.whatwg.org/#validate-and-extract: demands us to set an empty string uri to NULL */
+			if (uri_len == 0) {
+				uri = NULL;
+			}
 			nodep = xmlNewNode (NULL, (xmlChar *)localname);
 			if (nodep != NULL && uri != NULL) {
 				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);

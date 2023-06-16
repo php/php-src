@@ -38,6 +38,8 @@ PHP                                                                        NEWS
   . Fix "invalid state error" with cloned namespace declarations. (nielsdos)
   . Fixed bug #55294 and #47530 and #47847 (various namespace reconciliation
     issues). (nielsdos)
+  . Fixed bug GH-11404 (DOMDocument::saveXML and friends omit xmlns=""
+    declaration for null namespace). (nielsdos)
 
 - Opcache:
   . Fix allocation loop in zend_shared_alloc_startup(). (nielsdos)
