@@ -25,6 +25,7 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
+#include "zend_exceptions.h"
 
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr);
@@ -378,7 +379,7 @@ static bool add_post_var(zval *arr, post_var_data_t *var, bool eof)
 
 static inline int add_post_vars(zval *arr, post_var_data_t *vars, bool eof)
 {
-	uint64_t max_vars = PG(max_input_vars);
+	uint64_t max_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
 
 	vars->ptr = ZSTR_VAL(vars->str.s);
 	vars->end = ZSTR_VAL(vars->str.s) + ZSTR_LEN(vars->str.s);
@@ -538,8 +539,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			}
 		}
 
-		if (++count > PG(max_input_vars)) {
-			php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
+		if (++count > max_input_vars) {
+			php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", max_input_vars);
 			break;
 		}
 

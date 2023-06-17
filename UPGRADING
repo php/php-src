@@ -143,6 +143,11 @@ PHP 8.4 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . Added request_parse_body() function that allows parsing RFC1867 (multipart)
+    requests in non-POST HTTP requests.
+    RFC: https://wiki.php.net/rfc/rfc1867-non-post
+
 - Date:
   . Added static methods
     DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.

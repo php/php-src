@@ -2222,6 +2222,8 @@ static void php_cli_server_request_shutdown(php_cli_server *server, php_cli_serv
 	destroy_request_info(&SG(request_info));
 	SG(server_context) = NULL;
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 }
 /* }}} */
 
@@ -2315,6 +2317,8 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 			sapi_module.send_headers = send_header_func;
 			SG(sapi_headers).send_default_content_type = 1;
 			SG(rfc1867_uploaded_files) = NULL;
+			SG(request_parse_body_context).throw_exceptions = false;
+			memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 		}
 		if (FAILURE == php_cli_server_begin_send_static(server, client)) {
 			php_cli_server_close_connection(server, client);
