@@ -160,6 +160,10 @@ PHP 8.3 UPGRADE NOTES
   . pg_insert and pg_convert raises a ValueError or a TypeError instead of a WARNING when the
     value/type of a field does not match properly with a PostGreSQL's type.
 
+- Sqlite:
+  . SQLite3::close, SQLite3Result::finalize and SQLite3Stmt::close are void.
+    Previously, they always returned true.
+
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling

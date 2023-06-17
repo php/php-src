@@ -28,7 +28,7 @@ while ($result = $results->fetchArray(SQLITE3_NUM))
 $results->finalize();
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -47,5 +47,4 @@ array(2) {
   string(1) "a"
 }
 Closing database
-bool(true)
 Done

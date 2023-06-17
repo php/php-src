@@ -31,7 +31,7 @@ var_dump($results->numRows());
 $results->finalize();
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -44,5 +44,4 @@ SELECTING results
 Number of rows
 int(2)
 Closing database
-bool(true)
 Done

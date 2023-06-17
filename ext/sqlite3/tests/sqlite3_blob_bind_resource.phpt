@@ -26,7 +26,7 @@ $f = fopen("hello://there", "r");
 var_dump($insert_stmt->bindParam(1, $f, SQLITE3_BLOB));
 var_dump($insert_stmt->execute());
 
-var_dump($insert_stmt->close());
+$insert_stmt->close();
 fclose($f);
 
 ?>
@@ -36,5 +36,4 @@ bool(true)
 bool(true)
 object(SQLite3Result)#%d (%d) {
 }
-bool(true)
 +++DONE+++

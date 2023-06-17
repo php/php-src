@@ -311,8 +311,8 @@ class SQLite3
     /** @tentative-return-type */
     public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = ""): void {}
 
-    /** @return bool */
-    public function close() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function close(): void {}
 
     /** @tentative-return-type */
     public static function version(): array {}
@@ -397,7 +397,7 @@ class SQLite3Stmt
     public function clear(): bool {}
 
     /** @tentative-return-type */
-    public function close(): bool {}
+    public function close(): void {}
 
     /** @tentative-return-type */
     public function execute(): SQLite3Result|false {}
@@ -435,6 +435,6 @@ class SQLite3Result
     /** @tentative-return-type */
     public function reset(): bool {}
 
-    /** @return bool */
-    public function finalize() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function finalize(): void {}
 }

@@ -17,7 +17,7 @@ echo "Dropping database\n";
 var_dump($db->exec('DROP TABLE test'));
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -30,5 +30,4 @@ bool(false)
 Dropping database
 bool(true)
 Closing database
-bool(true)
 Done

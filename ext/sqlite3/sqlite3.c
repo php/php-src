@@ -194,8 +194,6 @@ PHP_METHOD(SQLite3, close)
 		}
 		db_obj->initialised = 0;
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1418,8 +1416,6 @@ PHP_METHOD(SQLite3Stmt, close)
 	if(stmt_obj->db_obj) {
 		zend_llist_del_element(&(stmt_obj->db_obj->free_list), object, (int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2054,8 +2050,6 @@ PHP_METHOD(SQLite3Result, finalize)
 	} else {
 		sqlite3_reset(result_obj->stmt_obj->stmt);
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 

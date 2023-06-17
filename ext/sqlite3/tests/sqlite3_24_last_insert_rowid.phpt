@@ -18,7 +18,7 @@ var_dump($db->exec("INSERT INTO test (time, id) VALUES (" . TIMENOW . ", 'b')"))
 var_dump($db->lastInsertRowID());
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -30,5 +30,4 @@ int(1)
 bool(true)
 int(2)
 Closing database
-bool(true)
 Done

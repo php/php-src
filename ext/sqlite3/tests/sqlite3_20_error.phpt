@@ -14,7 +14,7 @@ if (!$result) {
     echo "Error Msg: " . $db->lastErrorMsg() . "\n";
 }
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -24,5 +24,4 @@ Warning: SQLite3::query(): Unable to prepare statement: 1, no such table: non_ex
 Error Code: 1
 Error Msg: no such table: non_existent_table
 Closing database
-bool(true)
 Done

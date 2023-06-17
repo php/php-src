@@ -18,7 +18,7 @@ try{
 var_dump($db->enableExceptions(false));
 $db->query("SELECT * FROM non_existent_table");
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -28,5 +28,4 @@ bool(true)
 
 Warning: SQLite3::query(): no such table: non_existent_table in %s on line %d
 Closing database
-bool(true)
 Done

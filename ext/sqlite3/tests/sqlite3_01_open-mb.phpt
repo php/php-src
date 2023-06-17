@@ -10,7 +10,7 @@ $db = new SQLite3($db_file);
 //require_once(__DIR__ . '/new_db.inc');
 
 var_dump($db);
-var_dump($db->close());
+$db->close();
 
 unlink($db_file);
 echo "Done\n";
@@ -18,5 +18,4 @@ echo "Done\n";
 --EXPECTF--
 object(SQLite3)#%d (0) {
 }
-bool(true)
 Done

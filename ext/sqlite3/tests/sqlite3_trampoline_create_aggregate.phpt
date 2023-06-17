@@ -41,7 +41,7 @@ $db->createAggregate('S', $step, $finalize, 1);
 print_r($db->querySingle("SELECT S(a), S(b) FROM test", true));
 
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECT--
@@ -71,5 +71,4 @@ Array
     [S(b)] => -1,-3,-6,-10,-14
 )
 Closing database
-bool(true)
 Done

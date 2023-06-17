@@ -20,7 +20,7 @@ var_dump($insert_stmt->bindValue(1, 'a', SQLITE3_TEXT));
 var_dump($insert_stmt->bindValue(2, 'TEST TEST', SQLITE3_BLOB));
 $insert_stmt->execute();
 echo "Closing statement\n";
-var_dump($insert_stmt->close());
+$insert_stmt->close();
 $stream = $db->openBlob('test', 'data', 1);
 var_dump($stream);
 echo "Stream Contents\n";
@@ -42,7 +42,7 @@ var_dump(fwrite($stream, 'ABCD ABCD ABCD'));
 echo "Closing Stream\n";
 var_dump(fclose($stream));
 echo "Closing database\n";
-var_dump($db->close());
+$db->close();
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -53,7 +53,6 @@ BINDING Parameter
 bool(true)
 bool(true)
 Closing statement
-bool(true)
 resource(%d) of type (stream)
 Stream Contents
 string(9) "TEST TEST"
@@ -76,5 +75,4 @@ bool(false)
 Closing Stream
 bool(true)
 Closing database
-bool(true)
 Done

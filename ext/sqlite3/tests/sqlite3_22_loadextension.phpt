@@ -22,7 +22,7 @@ $directory = __DIR__;
 touch($directory . '/myext.txt');
 
 var_dump($db->loadExtension('myext.txt'));
-var_dump($db->close());
+$db->close();
 unlink($directory . '/myext.txt');
 
 echo "Done\n";
@@ -30,5 +30,4 @@ echo "Done\n";
 --EXPECTF--
 Warning: SQLite3::loadExtension(): Unable to load extension at '.%emyext.txt' in %s on line %d
 bool(false)
-bool(true)
 Done

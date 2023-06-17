@@ -9,14 +9,12 @@ require_once(__DIR__ . '/new_db.inc');
 
 $stmt = $db->prepare("SELECT 1");
 
-var_dump($stmt->close());
+$stmt->close();
 
-var_dump($db->close());
+$db->close();
 
 print "done";
 
 ?>
 --EXPECT--
-bool(true)
-bool(true)
 done
