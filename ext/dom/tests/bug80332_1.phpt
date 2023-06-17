@@ -59,13 +59,13 @@ Attribute [null] name: attr1
 Attribute [null] value: value1
 Attribute [null] isset: yes
 
-Attribute ['attr2'] name: attr1
-Attribute ['attr2'] value: value1
+Attribute ['attr2'] name: attr2
+Attribute ['attr2'] value: value2
 Attribute ['attr2'] isset: yes
 
-Attribute ['hi'] name: attr1
-Attribute ['hi'] value: value1
-Attribute ['hi'] isset: yes
+Attribute ['hi'] name: /
+Attribute ['hi'] value: /
+Attribute ['hi'] isset: no
 
 Attribute ['0'] name: attr1
 Attribute ['0'] value: value1

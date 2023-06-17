@@ -31,7 +31,7 @@
 * Since:
 */
 
-static int get_nodelist_length(dom_object *obj)
+int php_dom_get_nodelist_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *) obj->ptr;
 	if (!objmap) {
@@ -82,7 +82,7 @@ Since:
 */
 int dom_nodelist_length_read(dom_object *obj, zval *retval)
 {
-	ZVAL_LONG(retval, get_nodelist_length(obj));
+	ZVAL_LONG(retval, php_dom_get_nodelist_length(obj));
 	return SUCCESS;
 }
 
@@ -99,36 +99,15 @@ PHP_METHOD(DOMNodeList, count)
 	}
 
 	intern = Z_DOMOBJ_P(id);
-	RETURN_LONG(get_nodelist_length(intern));
+	RETURN_LONG(php_dom_get_nodelist_length(intern));
 }
 /* }}} end dom_nodelist_count */
 
-/* }}} */
-
-/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
-Since:
-*/
-PHP_METHOD(DOMNodeList, item)
+void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
 {
-	zval *id;
-	zend_long index;
 	int ret;
-	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
-
-	dom_nnodemap_object *objmap;
-	xmlNodePtr nodep, curnode;
-	int count = 0;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		RETURN_THROWS();
-	}
-
 	if (index >= 0) {
-		intern = Z_DOMOBJ_P(id);
-
-		objmap = (dom_nnodemap_object *)intern->ptr;
 		if (objmap != NULL) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
@@ -145,10 +124,11 @@ PHP_METHOD(DOMNodeList, item)
 						return;
 					}
 				} else if (objmap->baseobj) {
-					nodep = dom_object_get_node(objmap->baseobj);
+					xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
 					if (nodep) {
+						int count = 0;
 						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-							curnode = nodep->children;
+							xmlNodePtr curnode = nodep->children;
 							while (count < index && curnode != NULL) {
 								count++;
 								curnode = curnode->next;
@@ -174,6 +154,22 @@ PHP_METHOD(DOMNodeList, item)
 	}
 
 	RETVAL_NULL();
+}
+
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
+Since:
+*/
+PHP_METHOD(DOMNodeList, item)
+{
+	zend_long index;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+	dom_nnodemap_object *objmap = intern->ptr;
+	php_dom_nodelist_get_item_into_zval(objmap, index, return_value);
 }
 /* }}} end dom_nodelist_item */
 

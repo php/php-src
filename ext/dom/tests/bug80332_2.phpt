@@ -42,6 +42,6 @@ list[null] id attribute: 1
 list['0'] id attribute: 1
 list['0.5'] id attribute: 1
 list['1'] id attribute: 2
-list['attr2'] id attribute: 1
-list['hi'] id attribute: 1
+list['attr2'] id attribute: /
+list['hi'] id attribute: /
 list['2147483647'] id attribute: /
