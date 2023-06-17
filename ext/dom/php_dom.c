@@ -1491,6 +1491,22 @@ static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep
 	xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
 }
 
+static bool dom_must_replace_namespace_by_empty_default(xmlDocPtr doc, xmlNodePtr nodep)
+{
+	xmlNsPtr default_ns = xmlSearchNs(doc, nodep->parent, NULL);
+	return default_ns != NULL && default_ns->href != NULL && default_ns->href[0] != '\0';
+}
+
+static void dom_replace_namespace_by_empty_default(xmlDocPtr doc, xmlNodePtr nodep)
+{
+	ZEND_ASSERT(nodep->ns == NULL);
+	/* The node uses the default empty namespace, but the current default namespace is non-empty.
+	 * We can't unconditionally do this because otherwise libxml2 creates an xmlns="" declaration.
+	 * Note: there's no point searching the oldNs list, because we haven't found it in the tree anyway.
+	 *       Ideally this would be pre-allocated but unfortunately libxml2 doesn't offer such a functionality. */
+	xmlSetNs(nodep, xmlNewNs(nodep, (const xmlChar *) "", NULL));
+}
+
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 {
 	/* Although the node type will be checked by the libxml2 API,
@@ -1498,6 +1514,10 @@ void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 	if (nodep->type == XML_ELEMENT_NODE) {
 		dom_reconcile_ns_internal(doc, nodep, nodep->parent);
 		dom_libxml_reconcile_ensure_namespaces_are_declared(nodep);
+		/* Check nodep->ns first to avoid an expensive lookup. */
+		if (nodep->ns == NULL && dom_must_replace_namespace_by_empty_default(doc, nodep)) {
+			dom_replace_namespace_by_empty_default(doc, nodep);
+		}
 	}
 }
 /* }}} */
@@ -1521,12 +1541,30 @@ static void dom_reconcile_ns_list_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlN
 
 void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
 {
+	bool did_compute_must_replace_namespace_by_empty_default = false;
+	bool must_replace_namespace_by_empty_default = false;
+
 	dom_reconcile_ns_list_internal(doc, nodep, last, nodep->parent);
+
 	/* The loop is outside of the recursion in the above call because
 	 * dom_libxml_reconcile_ensure_namespaces_are_declared() performs its own recursion. */
 	while (true) {
 		/* The internal libxml2 call will already check the node type, no need for us to do it here. */
 		dom_libxml_reconcile_ensure_namespaces_are_declared(nodep);
+
+		/* We don't have to handle the children, because if their ns's are NULL they'll just take on the default
+		 * which should've been reconciled before. */
+		if (nodep->ns == NULL) {
+			/* This is an optimistic approach: we assume that most of the time we don't need the result of the computation. */
+			if (!did_compute_must_replace_namespace_by_empty_default) {
+				did_compute_must_replace_namespace_by_empty_default = true;
+				must_replace_namespace_by_empty_default = dom_must_replace_namespace_by_empty_default(doc, nodep);
+			}
+			if (must_replace_namespace_by_empty_default) {
+				dom_replace_namespace_by_empty_default(doc, nodep);
+			}
+		}
+
 		if (nodep == last) {
 			break;
 		}
