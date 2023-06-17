@@ -50,6 +50,7 @@
 
 #include <zend_hash.h>
 #include "html_tables.h"
+#include "zend_exceptions.h"
 
 /* Macro for disabling flag of translation of non-basic entities where this isn't supported.
  * Not appropriate for html_entity_decode/htmlspecialchars_decode */
@@ -1559,3 +1560,125 @@ PHP_FUNCTION(get_html_translation_table)
 	}
 }
 /* }}} */
+
+static zend_result cache_request_parse_body_option(HashTable *options, zval *option, int cache_offset)
+{
+	if (option) {
+		zend_long result;
+		if (Z_TYPE_P(option) == IS_STRING) {
+			zend_string *errstr;
+			result = zend_ini_parse_quantity(Z_STR_P(option), &errstr);
+			if (errstr) {
+				zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+				zend_string_release(errstr);
+			}
+		} else if (Z_TYPE_P(option) == IS_LONG) {
+			result = Z_LVAL_P(option);
+		} else {
+			zend_value_error("Invalid %s value in $options argument", zend_get_type_by_const(Z_TYPE_P(option)));
+			return FAILURE;
+		}
+		SG(request_parse_body_context).options_cache[cache_offset].set = true;
+		SG(request_parse_body_context).options_cache[cache_offset].value = result;
+	} else {
+		SG(request_parse_body_context).options_cache[cache_offset].set = false;
+	}
+
+	return SUCCESS;
+}
+
+static zend_result cache_request_parse_body_options(HashTable *options)
+{
+	zend_string *key;
+	zval *value;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(options, key, value) {
+		if (!key) {
+			zend_value_error("Invalid integer key in $options argument");
+			return FAILURE;
+		}
+		if (ZSTR_LEN(key) == 0) {
+			zend_value_error("Invalid empty string key in $options argument");
+			return FAILURE;
+		}
+
+#define CHECK_OPTION(name) \
+	if (zend_string_equals_literal_ci(key, #name)) { \
+		if (cache_request_parse_body_option(options, value, REQUEST_PARSE_BODY_OPTION_ ## name) == FAILURE) { \
+			return FAILURE; \
+		} \
+		continue; \
+	}
+
+		switch (ZSTR_VAL(key)[0]) {
+			case 'm':
+			case 'M':
+				CHECK_OPTION(max_file_uploads);
+				CHECK_OPTION(max_input_vars);
+				CHECK_OPTION(max_multipart_body_parts);
+				break;
+			case 'p':
+			case 'P':
+				CHECK_OPTION(post_max_size);
+				break;
+			case 'u':
+			case 'U':
+				CHECK_OPTION(upload_max_filesize);
+				break;
+		}
+
+		zend_value_error("Invalid key \"%s\" in $options argument", ZSTR_VAL(key));
+		return FAILURE;
+	} ZEND_HASH_FOREACH_END();
+
+#undef CACHE_OPTION
+
+	return SUCCESS;
+}
+
+PHP_FUNCTION(request_parse_body)
+{
+	HashTable *options = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_NULL(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SG(request_parse_body_context).throw_exceptions = true;
+	if (options) {
+		if (cache_request_parse_body_options(options) == FAILURE) {
+			goto exit;
+		}
+	}
+
+	if (!SG(request_info).content_type) {
+		zend_throw_error(NULL, "Request does not provide a content type");
+		goto exit;
+	}
+
+	sapi_read_post_data();
+	if (!SG(request_info).post_entry) {
+		zend_throw_exception_ex(NULL, 0, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
+		goto exit;
+	}
+
+	zval post, files, old_post, old_files;
+	zval *global_post = &PG(http_globals)[TRACK_VARS_POST];
+	zval *global_files = &PG(http_globals)[TRACK_VARS_FILES];
+
+	ZVAL_COPY_VALUE(&old_post, global_post);
+	ZVAL_COPY_VALUE(&old_files, global_files);
+	array_init(global_post);
+	array_init(global_files);
+	sapi_handle_post(global_post);
+	ZVAL_COPY_VALUE(&post, global_post);
+	ZVAL_COPY_VALUE(&files, global_files);
+	ZVAL_COPY_VALUE(global_post, &old_post);
+	ZVAL_COPY_VALUE(global_files, &old_files);
+
+	RETVAL_ARR(zend_new_pair(&post, &files));
+
+exit:
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
+}

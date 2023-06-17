@@ -2289,6 +2289,13 @@ function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE |
  */
 function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, string $encoding = "UTF-8"): array {}
 
+/**
+ * @param array|null $options
+ * @return array<int, array>
+ * @refcount 1
+ */
+function request_parse_body(?array $options = null): array {}
+
 /* }}} */
 
 /* assert.c */

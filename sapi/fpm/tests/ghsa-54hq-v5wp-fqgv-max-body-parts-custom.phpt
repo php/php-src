@@ -46,7 +46,7 @@ $tester->close();
 
 ?>
 --EXPECT--
-Warning: PHP Request Startup: Multipart body parts limit exceeded 10. To increase the limit change max_multipart_body_parts in php.ini. in Unknown on line 0
+Warning: Multipart body parts limit exceeded 10. To increase the limit change max_multipart_body_parts in php.ini. in Unknown on line 0
 int(10)
 --CLEAN--
 <?php

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7584d1aec417e84718a7a60e244cb00df2dc039f */
+ * Stub hash: d45833d18fb6cd9db147418fac9bc22ce07bd3a9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -790,6 +790,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_html_translation_table, 0, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, table, IS_LONG, 0, "HTML_SPECIALCHARS")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"UTF-8\"")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_request_parse_body, 0, 0, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_assert, 0, 1, _IS_BOOL, 0)
@@ -2534,6 +2538,7 @@ ZEND_FUNCTION(htmlspecialchars_decode);
 ZEND_FUNCTION(html_entity_decode);
 ZEND_FUNCTION(htmlentities);
 ZEND_FUNCTION(get_html_translation_table);
+ZEND_FUNCTION(request_parse_body);
 ZEND_FUNCTION(assert);
 ZEND_FUNCTION(assert_options);
 ZEND_FUNCTION(bin2hex);
@@ -3167,6 +3172,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(html_entity_decode, arginfo_html_entity_decode)
 	ZEND_FE(htmlentities, arginfo_htmlentities)
 	ZEND_FE(get_html_translation_table, arginfo_get_html_translation_table)
+	ZEND_FE(request_parse_body, arginfo_request_parse_body)
 	ZEND_FE(assert, arginfo_assert)
 	ZEND_DEP_FE(assert_options, arginfo_assert_options)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(bin2hex, arginfo_bin2hex)
