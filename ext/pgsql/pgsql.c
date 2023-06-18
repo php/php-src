@@ -175,6 +175,7 @@ static void pgsql_link_free(pgsql_link_handle *link)
 		PQclear(res);
 	}
 	if (!link->persistent) {
+		PQuntrace(link->conn);
 		PQfinish(link->conn);
 	}
 	PGG(num_links)--;

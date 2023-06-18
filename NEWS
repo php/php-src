@@ -54,6 +54,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fix preg_replace_callback_array() pattern validation. (ilutov)
 
+- PGSQL:
+  . Fixed intermittent segfault with pg_trace. (David Carlier)
+
 - Phar:
   . Fix cross-compilation check in phar generation for FreeBSD. (peter279k)
 
