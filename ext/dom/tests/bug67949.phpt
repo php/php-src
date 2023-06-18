@@ -86,7 +86,7 @@ bool(true)
 string(4) "data"
 string(4) "test"
 testing read_dimension with null offset
-Cannot access node list without offset
+Cannot access DOMNodeList without offset
 testing attribute access
 string(4) "href"
 ==DONE==

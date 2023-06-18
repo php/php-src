@@ -61,6 +61,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
 
 zend_object_handlers dom_object_handlers;
 zend_object_handlers dom_nnodemap_object_handlers;
+zend_object_handlers dom_nodelist_object_handlers;
 zend_object_handlers dom_object_namespace_node_handlers;
 #ifdef LIBXML_XPATH_ENABLED
 zend_object_handlers dom_xpath_object_handlers;
@@ -580,6 +581,8 @@ void dom_objects_free_storage(zend_object *object);
 void dom_nnodemap_objects_free_storage(zend_object *object);
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
+static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
+static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
 #ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
@@ -600,8 +603,12 @@ PHP_MINIT_FUNCTION(dom)
 
 	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_nnodemap_object_handlers.free_obj = dom_nnodemap_objects_free_storage;
-	dom_nnodemap_object_handlers.read_dimension = dom_nodelist_read_dimension;
-	dom_nnodemap_object_handlers.has_dimension = dom_nodelist_has_dimension;
+	dom_nnodemap_object_handlers.read_dimension = dom_nodemap_read_dimension;
+	dom_nnodemap_object_handlers.has_dimension = dom_nodemap_has_dimension;
+
+	memcpy(&dom_nodelist_object_handlers, &dom_nnodemap_object_handlers, sizeof(zend_object_handlers));
+	dom_nodelist_object_handlers.read_dimension = dom_nodelist_read_dimension;
+	dom_nodelist_object_handlers.has_dimension = dom_nodelist_has_dimension;
 
 	memcpy(&dom_object_namespace_node_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
@@ -698,7 +705,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_nodelist_class_entry = register_class_DOMNodeList(zend_ce_aggregate, zend_ce_countable);
 	dom_nodelist_class_entry->create_object = dom_nnodemap_objects_new;
-	dom_nodelist_class_entry->default_object_handlers = &dom_nnodemap_object_handlers;
+	dom_nodelist_class_entry->default_object_handlers = &dom_nodelist_object_handlers;
 	dom_nodelist_class_entry->get_iterator = php_dom_get_iterator;
 
 	zend_hash_init(&dom_nodelist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
@@ -1110,7 +1117,7 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
+zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type)
 {
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
@@ -1133,7 +1140,6 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 
 	return &intern->std;
 }
-/* }}} */
 
 void php_dom_create_iterator(zval *return_value, int ce_type) /* {{{ */
 {
@@ -1712,34 +1718,50 @@ xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr origina
 	return attrp;
 }
 
+static bool dom_nodemap_or_nodelist_process_offset_as_named(zval *offset, zend_long *lval)
+{
+	if (Z_TYPE_P(offset) == IS_STRING) {
+		/* See zval_get_long_func() */
+		double dval;
+		zend_uchar is_numeric_string_type;
+		if (0 == (is_numeric_string_type = is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), lval, &dval, true))) {
+			return true;
+		} else if (is_numeric_string_type == IS_DOUBLE) {
+			*lval = zend_dval_to_lval_cap(dval);
+		}
+	} else {
+		*lval = zval_get_long(offset);
+	}
+	return false;
+}
+
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
-	zval offset_copy;
-
-	if (!offset) {
-		zend_throw_error(NULL, "Cannot access node list without offset");
+	if (UNEXPECTED(!offset)) {
+		zend_throw_error(NULL, "Cannot access DOMNodeList without offset");
 		return NULL;
 	}
 
-	ZVAL_LONG(&offset_copy, zval_get_long(offset));
+	zend_long lval;
+	if (dom_nodemap_or_nodelist_process_offset_as_named(offset, &lval)) {
+		/* does not support named lookup */
+		ZVAL_NULL(rv);
+		return rv;
+	}
 
-	zend_call_method_with_1_params(object, object->ce, NULL, "item", rv, &offset_copy);
-
+	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, lval, rv);
 	return rv;
 } /* }}} end dom_nodelist_read_dimension */
 
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
 {
-	zend_long offset = zval_get_long(member);
-	zval rv;
-
-	if (offset < 0) {
+	zend_long offset;
+	if (dom_nodemap_or_nodelist_process_offset_as_named(member, &offset)) {
+		/* does not support named lookup */
 		return 0;
-	} else {
-		zval *length = zend_read_property(
-			object->ce, object, "length", sizeof("length") - 1, 0, &rv);
-		return length && offset < Z_LVAL_P(length);
 	}
+
+	return offset >= 0 && offset < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodelist_has_dimension */
 
 void dom_remove_all_children(xmlNodePtr nodep)
@@ -1751,5 +1773,40 @@ void dom_remove_all_children(xmlNodePtr nodep)
 		nodep->last = NULL;
 	}
 }
+
+static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
+{
+	if (UNEXPECTED(!offset)) {
+		zend_throw_error(NULL, "Cannot access DOMNamedNodeMap without offset");
+		return NULL;
+	}
+
+	zend_long lval;
+	if (dom_nodemap_or_nodelist_process_offset_as_named(offset, &lval)) {
+		/* exceptional case, switch to named lookup */
+		php_dom_named_node_map_get_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STRVAL_P(offset), rv);
+		return rv;
+	}
+
+	/* see PHP_METHOD(DOMNamedNodeMap, item) */
+	if (UNEXPECTED(lval < 0 || ZEND_LONG_INT_OVFL(lval))) {
+		zend_value_error("must be between 0 and %d", INT_MAX);
+		return NULL;
+	}
+
+	php_dom_named_node_map_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, lval, rv);
+	return rv;
+} /* }}} end dom_nodemap_read_dimension */
+
+static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty)
+{
+	zend_long offset;
+	if (dom_nodemap_or_nodelist_process_offset_as_named(member, &offset)) {
+		/* exceptional case, switch to named lookup */
+		return php_dom_named_node_map_get_named_item(php_dom_obj_from_obj(object)->ptr, Z_STRVAL_P(member), false) != NULL;
+	}
+
+	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
+} /* }}} end dom_nodemap_has_dimension */
 
 #endif /* HAVE_DOM */

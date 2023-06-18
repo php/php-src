@@ -157,6 +157,15 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc);
 
 void dom_remove_all_children(xmlNodePtr nodep);
 
+/* nodemap and nodelist APIs */
+xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const char *named, bool may_transform);
+void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const char *named, zval *return_value);
+xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
+void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
+void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
+int php_dom_get_namednodemap_length(dom_object *obj);
+int php_dom_get_nodelist_length(dom_object *obj);
+
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
