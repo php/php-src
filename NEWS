@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-11433 (Unable to set CURLOPT_ACCEPT_ENCODING to NULL).
     (nielsdos)
 
+- Date:
+  . Fixed bug GH-11455 (Segmentation fault with custom object date properties).
+    (nielsdos)
+
 - DOM:
   . Fixed bugs GH-11288 and GH-11289 and GH-11290 and GH-9142 (DOMExceptions
     and segfaults with replaceWith). (nielsdos)
