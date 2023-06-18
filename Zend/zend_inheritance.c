@@ -1946,6 +1946,102 @@ static zend_class_entry *fixup_trait_scope(const zend_function *fn, zend_class_e
 	return fn->common.scope->ce_flags & ZEND_ACC_TRAIT ? ce : fn->common.scope;
 }
 
+/* We cannot modify the type in-place (e.g. via a pointer) as it is written to SHM */
+static zend_type zend_resolve_single_type(zend_type type, const zend_class_entry *const ce)
+{
+	/* Only built-in types + static */
+	if (!ZEND_TYPE_IS_COMPLEX(type)) {
+		return type;
+	}
+
+	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(type) || (ZEND_TYPE_HAS_LIST(type)));
+	if (ZEND_TYPE_HAS_NAME(type)) {
+		if (ZEND_TYPE_IS_RELATIVE_SELF(type)) {
+			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
+			return resolved_type;
+		} else if (ZEND_TYPE_IS_RELATIVE_PARENT(type)) {
+			if (!ce->parent) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use trait which has \"parent\" as a type when current class scope has no parent");
+				return (zend_type) ZEND_TYPE_INIT_NONE(0);
+			}
+			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->parent->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
+			return resolved_type;
+		} else {
+			return type;
+		}
+	}
+
+	/* Intersection types cannot have relative class_types */
+	if (ZEND_TYPE_IS_INTERSECTION(type)) {
+		return type;
+	}
+
+	const zend_type_list *union_type_list = ZEND_TYPE_LIST(type);
+	zend_type *single_type;
+
+	/* TODO Only do allocation if need to resolve types, as type is stored in SHM */
+	zend_type_list *new_union_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(union_type_list->num_types));
+	memcpy(new_union_type_list, union_type_list, ZEND_TYPE_LIST_SIZE(union_type_list->num_types));
+
+	ZEND_TYPE_LIST_FOREACH(new_union_type_list, single_type) {
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*single_type) || (ZEND_TYPE_IS_INTERSECTION(*single_type)));
+
+		/* Intersections types cannot have self or parent */
+		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
+			continue;
+		}
+		if (ZEND_TYPE_IS_RELATIVE_SELF(*single_type)) {
+			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(*single_type));
+			memmove(single_type, &resolved_type, sizeof(zend_type));
+		}
+		if (ZEND_TYPE_IS_RELATIVE_PARENT(*single_type)) {
+			if (!ce->parent) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use trait which has \"parent\" as a type when current class scope has no parent");
+				return (zend_type) ZEND_TYPE_INIT_NONE(0);
+			}
+			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->parent->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(*single_type));
+			memmove(single_type, &resolved_type, sizeof(zend_type));
+		}
+	} ZEND_TYPE_LIST_FOREACH_END();
+
+	zend_type new_type = (zend_type) ZEND_TYPE_INIT_NONE(0);
+	ZEND_TYPE_SET_LIST(new_type, new_union_type_list);
+	ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_ARENA_BIT;
+	/* Inform that the type list is a union type */
+	ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_UNION_BIT;
+	return new_type;
+}
+
+static void zend_resolve_trait_relative_class_types(zend_function *const fn, const zend_class_entry *const ce)
+{
+	/* We are adding trait methods to another trait, delay resolution */
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		return;
+	}
+	/* No type info */
+	if (!fn->common.arg_info) {
+		return;
+	}
+
+	bool has_return_type = fn->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE;
+	/* Variadic parameters are not counted as part of the standard number of arguments */
+	bool has_variadic_type = fn->common.fn_flags & ZEND_ACC_VARIADIC;
+	uint32_t num_args = fn->common.num_args + has_variadic_type;
+	/* TODO Only do allocation if need to resolve types, as arg_info is stored in SHM */
+	size_t allocated_size = sizeof(zend_arg_info) * (has_return_type + num_args);
+
+	zend_arg_info *new_arg_infos = zend_arena_alloc(&CG(arena), allocated_size);
+	memcpy(new_arg_infos, fn->common.arg_info - has_return_type, allocated_size);
+	fn->common.arg_info = new_arg_infos + has_return_type;
+
+	for (uint32_t i = 0; i < num_args + has_return_type; i++) {
+		zend_type type = new_arg_infos[i].type;
+		new_arg_infos[i].type = zend_resolve_single_type(type, ce);
+	}
+}
+
 static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_string *key, zend_function *fn) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
@@ -1992,10 +2088,13 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
 		memcpy(new_fn, fn, sizeof(zend_internal_function));
+		zend_resolve_trait_relative_class_types(new_fn, ce);
 		new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 	} else {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_fn, fn, sizeof(zend_op_array));
+		zend_resolve_trait_relative_class_types(new_fn, ce);
+		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 	}
 	new_fn->common.fn_flags |= ZEND_ACC_TRAIT_CLONE;
