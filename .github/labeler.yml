@@ -5,10 +5,14 @@
 - Zend/Optimizer/**/*
 
 "Category: Build System":
-- build/*
-- scripts/**/*
 - '**/*.m4'
 - '**/*.w32'
+- build/**/*
+- buildconf
+- buildconf.bat
+- configure.ac
+- scripts/**/*
+- win32/build/**/*
 
 "Extension: bcmath":
 - ext/bcmath/**/*
