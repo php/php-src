@@ -21,7 +21,13 @@
 
 BEGIN_EXTERN_C()
 
+HashTable *zend_weakmap_get_key_entry_gc(zend_object *object, zval **table, int *n);
+HashTable *zend_weakmap_get_entry_gc(zend_object *object, zval **table, int *n);
+HashTable *zend_weakmap_get_object_key_entry_gc(zend_object *object, zval **table, int *n);
+HashTable *zend_weakmap_get_object_entry_gc(zend_object *object, zval **table, int *n);
+
 extern ZEND_API zend_class_entry *zend_ce_weakref;
+extern ZEND_API zend_class_entry *zend_ce_weakmap;
 
 void zend_register_weakref_ce(void);
 
@@ -61,9 +67,6 @@ static zend_always_inline zend_object *zend_weakref_key_to_object(zend_ulong key
 {
 	return (zend_object *) (((uintptr_t) key) << ZEND_MM_ALIGNMENT_LOG2);
 }
-
-HashTable *zend_weakmap_get_object_entries_gc(zend_object *object, zval **table, int *n);
-HashTable *zend_weakmap_get_object_values_gc(zend_object *object, zval **table, int *n);
 
 END_EXTERN_C()
 

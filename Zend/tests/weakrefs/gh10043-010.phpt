@@ -1,5 +1,5 @@
 --TEST--
-Self-referencing map entry GC - 011
+Self-referencing map entry GC - 010
 --FILE--
 <?php
 
