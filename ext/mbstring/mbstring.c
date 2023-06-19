@@ -3066,6 +3066,7 @@ static size_t count_demerits(struct candidate *array, size_t length, bool strict
 {
 	uint32_t wchar_buf[128];
 	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
+	const size_t full_array_length = length;
 
 	while ((strict || length > 1) && finished < length) {
 		for (size_t i = 0; i < length; i++) {
@@ -3086,7 +3087,8 @@ try_next_encoding:
 							if (length == 0) {
 								return 0;
 							}
-							memmove(&array[i], &array[i+1], (length - i) * sizeof(struct candidate));
+							/* Remove entry i from the array by shifting everything one place to the left. */
+							memmove(&array[i], &array[i+1], (full_array_length - i - 1) * sizeof(struct candidate));
 							goto try_next_encoding;
 						} else {
 							array[i].demerits += 1000;
