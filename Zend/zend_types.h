@@ -628,6 +628,12 @@ struct _zend_ast_ref {
 #define ZEND_GUARD_RECURSION_DEBUG	(1<<4)
 #define ZEND_GUARD_RECURSION_JSON	(1<<5)
 
+#define ZEND_GUARD_RECURSION_TYPE(t) ZEND_GUARD_RECURSION_ ## t
+
+#define ZEND_GUARD_IS_RECURSIVE(pg, t)			((*pg & ZEND_GUARD_RECURSION_TYPE(t)) != 0)
+#define ZEND_GUARD_PROTECT_RECURSION(pg, t)		*pg |= ZEND_GUARD_RECURSION_TYPE(t)
+#define ZEND_GUARD_UNPROTECT_RECURSION(pg, t)	*pg &= ~ZEND_GUARD_RECURSION_TYPE(t)
+
 static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }

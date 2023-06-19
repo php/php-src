@@ -542,14 +542,19 @@ static void zend_property_guard_dtor(zval *el) /* {{{ */ {
 }
 /* }}} */
 
+static zend_always_inline zval *zend_get_guard_value(zend_object *zobj)
+{
+	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS);
+	return zobj->properties_table + zobj->ce->default_properties_count;
+}
+
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
 {
 	HashTable *guards;
 	zval *zv;
 	uint32_t *ptr;
 
-	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS);
-	zv = zobj->properties_table + zobj->ce->default_properties_count;
+	zv = zend_get_guard_value(zobj);
 	if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
 		zend_string *str = Z_STR_P(zv);
 		if (EXPECTED(str == member) ||
@@ -588,6 +593,12 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 	return (uint32_t*)zend_hash_add_new_ptr(guards, member, ptr);
 }
 /* }}} */
+
+ZEND_API uint32_t *zend_get_recursion_guard(zend_object *zobj)
+{
+	zval *zv = zend_get_guard_value(zobj);
+	return &Z_GUARD_P(zv);
+}
 
 ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
 {
