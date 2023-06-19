@@ -23,7 +23,7 @@ readonly class Url implements \Stringable {
     public ?string $password;
     public ?string $path;
     public ?string $query;
-    public string $fragment;
+    public ?string $fragment;
 
     public function __construct(
         string $scheme,

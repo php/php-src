@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: edd46b59ba2e031a6b4d7fa6704295cd88a62e49 */
+ * Stub hash: f6424cef1dc6ce6c28ec7ecff00fbbb41d1e6b70 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Url_Url___construct, 0, 0, 8)
 	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 0)
@@ -148,7 +148,7 @@ static zend_class_entry *register_class_Url_Url(zend_class_entry *class_entry_St
 	zval property_fragment_default_value;
 	ZVAL_UNDEF(&property_fragment_default_value);
 	zend_string *property_fragment_name = zend_string_init("fragment", sizeof("fragment") - 1, 1);
-	zend_declare_typed_property(class_entry, property_fragment_name, &property_fragment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_declare_typed_property(class_entry, property_fragment_name, &property_fragment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_fragment_name);
 
 	return class_entry;
