@@ -68,6 +68,8 @@ PHP 8.3 UPGRADE NOTES
     * range() now produce a list of characters if one of the boundary inputs is
       a string digit instead of casting the other input to int
       (e.g. range('5', 'z');)
+  . The file() flags error check now catches all invalid flags. Notably
+    FILE_APPEND was previously silently accepted.
 
 ========================================
 2. New Features
@@ -355,3 +357,6 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- Standard:
+  . The file() flags error check is now about 7% faster.
