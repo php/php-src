@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed GH-11573 (RecursiveDirectoryIterator::hasChildren is slow).
     (nielsdos)
 
+- Standard:
+  . Added support for rounding negative places in number_format().
+    (Marc Bennewitz)
+
 - Streams:
   . Implemented GH-11242 (_php_stream_copy_to_mem: Allow specifying a maximum
     length without allocating a buffer of that size). (Jakub Zelenka)

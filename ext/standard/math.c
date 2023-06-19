@@ -1030,8 +1030,8 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 		d = -d;
 	}
 
-	dec = MAX(0, dec);
 	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
+	dec = MAX(0, dec);
 	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;

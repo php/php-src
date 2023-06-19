@@ -219,6 +219,10 @@ PHP 8.3 UPGRADE NOTES
     Previously arrays and objects where ignored whilst every other value was cast to int.
     Moreover, objects that define a numeric cast (e.g. GMP) are now casted instead of ignored.
     RFC: https://wiki.php.net/rfc/saner-array-sum-product
+  . number_format() $decimal parameter handles rounding to negative places. It
+    means that when $decimals is negative, $num is rounded to $decimals
+    significant digits before the decimal point. Previously negative $decimals
+    got silently ignored and the number got rounded to zero decimal places.
 
 ========================================
 6. New Functions
