@@ -44,10 +44,6 @@ PHP 8.3 UPGRADE NOTES
   . Static variable initializers can now contain arbitrary expressions.
     RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
 
-- DOM:
-  . Assignment to DOMAttr::$value and DOMAttr::$nodeValue no longer expands
-    entities in the new value.
-
 - FFI:
   . C functions that have a return type of void now return null instead of
     returning the following object object(FFI\CData:void) { }

@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fix #77894 (DOMNode::C14N() very slow on generated DOMDocuments even after
     normalisation). (nielsdos)
+  . Revert changes to DOMAttr::$value and DOMAttr::$nodeValue expansion.
+    (nielsdos)
 
 - GD:
   . Removed imagerotate "ignore_transparent" argument since it has no effect.
