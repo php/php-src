@@ -421,11 +421,11 @@ function main(): void
 
             switch ($switch) {
                 case 'j':
-                    $workers = substr($argv[$i], 2);
-                    if ($workers == 0 || !preg_match('/^\d+$/', $workers)) {
-                        error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
+                    $workers_raw = substr($argv[$i], strlen("-j"));
+                    $workers = filter_var($workers_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+                    if ($workers === false) {
+                        error("'{$workers_raw}' is not a valid number of workers, try e.g. -j16 for 16 workers");
                     }
-                    $workers = intval($workers, 10);
                     // Don't use parallel testing infrastructure if there is only one worker.
                     if ($workers === 1) {
                         $workers = null;
@@ -528,18 +528,19 @@ function main(): void
                     $just_save_results = true;
                     break;
                 case '--set-timeout':
-                    $timeout = $argv[++$i] ?? '';
+                    $timeout_raw = $argv[++$i] ?? '';
+                    $timeout = filter_var($timeout_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
                     if (!preg_match('/^\d+$/', $timeout)) {
-                        error("'$timeout' is not a valid number of seconds, try e.g. --set-timeout 60 for 1 minute");
+                        error("'{$timeout_raw}' is not a valid number of seconds, try e.g. --set-timeout 60 for 1 minute");
                     }
-                    $environment['TEST_TIMEOUT'] = intval($timeout, 10);
+                    $environment['TEST_TIMEOUT'] = $timeout;
                     break;
                 case '--context':
-                    $context_line_count = $argv[++$i] ?? '';
-                    if (!preg_match('/^\d+$/', $context_line_count)) {
-                        error("'$context_line_count' is not a valid number of lines of context, try e.g. --context 3 for 3 lines");
+                    $context_line_count_raw = $argv[++$i] ?? '';
+                    $context_line_count = filter_var($context_line_count_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+                    if ($context_line_count === false) {
+                        error("'{$context_line_count_raw}' is not a valid number of lines of context, try e.g. --context 3 for 3 lines");
                     }
-                    $context_line_count = intval($context_line_count, 10);
                     break;
                 case '--show-all':
                     foreach ($cfgfiles as $file) {
@@ -547,11 +548,11 @@ function main(): void
                     }
                     break;
                 case '--show-slow':
-                    $slow_min_ms = $argv[++$i] ?? '';
-                    if (!preg_match('/^\d+$/', $slow_min_ms)) {
-                        error("'$slow_min_ms' is not a valid number of milliseconds, try e.g. --show-slow 1000 for 1 second");
+                    $slow_min_ms_raw = $argv[++$i] ?? '';
+                    $slow_min_ms = filter_var($slow_min_ms_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+                    if ($slow_min_ms === false) {
+                        error("'{$slow_min_ms_raw}' is not a valid number of milliseconds, try e.g. --show-slow 1000 for 1 second");
                     }
-                    $slow_min_ms = intval($slow_min_ms, 10);
                     break;
                 case '--temp-source':
                     $temp_source = $argv[++$i];
@@ -694,7 +695,7 @@ function main(): void
         if (IS_WINDOWS) {
             $pass_options .= " -c " . escapeshellarg($conf_passed);
         } else {
-            $pass_options .= " -c '" . realpath($conf_passed) . "'";
+            $pass_options .= " -c " . escapeshellarg(realpath($conf_passed));
         }
     }
 
@@ -1189,13 +1190,13 @@ function system_with_timeout(
 
     $descriptorspec = [];
     if ($captureStdIn) {
-        $descriptorspec[0] = ['pipe', 'r'];
+        $descriptorspec[0] = ['pipe', 'rb'];
     }
     if ($captureStdOut) {
-        $descriptorspec[1] = ['pipe', 'w'];
+        $descriptorspec[1] = ['pipe', 'wb'];
     }
     if ($captureStdErr) {
-        $descriptorspec[2] = ['pipe', 'w'];
+        $descriptorspec[2] = ['pipe', 'wb'];
     }
     $proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, ['suppress_errors' => true]);
 
@@ -2348,11 +2349,11 @@ TEST $file
     $args = $test->hasSection('ARGS') ? ' -- ' . $test->getSection('ARGS') : '';
 
     if ($preload && !empty($test_file)) {
-        save_text($preload_filename, "<?php opcache_compile_file('$test_file');");
+        save_text($preload_filename, "<?php opcache_compile_file(" . var_export($test_file, true) . ");");
         $local_pass_options = $pass_options;
         unset($pass_options);
         $pass_options = $local_pass_options;
-        $pass_options .= " -d opcache.preload=" . $preload_filename;
+        $pass_options .= " -d opcache.preload=" . escapeshellarg($preload_filename);
     }
 
     if ($test->sectionNotEmpty('POST_RAW')) {
@@ -2971,24 +2972,31 @@ function settings2params(array $ini_settings): string
     $settings = '';
 
     foreach ($ini_settings as $name => $value) {
-        if (is_array($value)) {
-            foreach ($value as $val) {
-                $val = addslashes($val);
-                $settings .= " -d \"$name=$val\"";
-            }
-        } else {
-            if (IS_WINDOWS && !empty($value) && $value[0] == '"') {
-                $len = strlen($value);
-
-                if ($value[$len - 1] == '"') {
-                    $value[0] = "'";
-                    $value[$len - 1] = "'";
+        if (IS_WINDOWS) {
+            if (is_array($value)) {
+                foreach ($value as $val) {
+                    $val = addslashes($val);
+                    $settings .= " -d \"$name=$val\"";
                 }
             } else {
-                $value = addslashes($value);
-            }
+                if (!empty($value) && $value[0] == '"') {
+                    $len = strlen($value);
 
-            $settings .= " -d \"$name=$value\"";
+                    if ($value[$len - 1] == '"') {
+                        $value[0] = "'";
+                        $value[$len - 1] = "'";
+                    }
+                } else {
+                    $value = addslashes($value);
+                }
+
+                $settings .= " -d \"$name=$value\"";
+            }
+        } else {
+            // !IS_WINDOWS
+            foreach ((is_array($value) ? $value : [$value]) as $val) {
+                $settings .= " -d " . escapeshellarg($name) . "=" . escapeshellarg($val);
+            }
         }
     }
 
@@ -3321,7 +3329,7 @@ class JUnit
             $this->enabled = false;
             return;
         }
-        if (!$workerID && !$this->fp = fopen($fileName, 'w')) {
+        if (!$workerID && !$this->fp = fopen($fileName, 'wb')) {
             throw new Exception("Failed to open $fileName for writing.");
         }
     }
