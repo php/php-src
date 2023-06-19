@@ -3083,8 +3083,9 @@ try_next_encoding:
 						if (strict) {
 							/* This candidate encoding is not valid, eliminate it from consideration */
 							length--;
-							if (length == 0) {
-								return 0;
+							if (i == length) {
+								/* The eliminated candidate was the last valid one in the list */
+								goto next_iteration;
 							}
 							memmove(&array[i], &array[i+1], (length - i) * sizeof(struct candidate));
 							goto try_next_encoding;
@@ -3100,6 +3101,7 @@ try_next_encoding:
 				}
 			}
 		}
+next_iteration: ;
 	}
 
 	for (size_t i = 0; i < length; i++) {
