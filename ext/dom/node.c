@@ -531,6 +531,7 @@ Since: DOM Level 2
 int dom_node_namespace_uri_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
+	char *str = NULL;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -542,19 +543,20 @@ int dom_node_namespace_uri_read(dom_object *obj, zval *retval)
 		case XML_ATTRIBUTE_NODE:
 		case XML_NAMESPACE_DECL:
 			if (nodep->ns != NULL) {
-				char *str = (char *) nodep->ns->href;
-				/* https://dom.spec.whatwg.org/#concept-attribute: namespaceUri is "null or a non-empty string" */
-				if (str != NULL && str[0] != '\0') {
-					ZVAL_STRING(retval, str);
-					return SUCCESS;
-				}
+				str = (char *) nodep->ns->href;
 			}
 			break;
 		default:
+			str = NULL;
 			break;
 	}
 
-	ZVAL_NULL(retval);
+	if (str != NULL) {
+		ZVAL_STRING(retval, str);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
 	return SUCCESS;
 }
 
