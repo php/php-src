@@ -602,6 +602,8 @@ struct _zend_jit_trace_stack_frame {
 	uint32_t                    call_level;
 	uint32_t                    _info;
 	int                         used_stack;
+	int                         old_checked_stack;
+	int                         old_peek_checked_stack;
 	zend_jit_trace_stack        stack[1];
 };
 

@@ -6578,7 +6578,8 @@ done:
 			op_array_ssa = &jit_extension->func_info.ssa;
 			top = frame;
 			if (frame->prev) {
-				checked_stack -= frame->used_stack;
+				checked_stack = frame->old_checked_stack;
+				peek_checked_stack = frame->old_peek_checked_stack;
 				frame = frame->prev;
 				stack = frame->stack;
 				ZEND_ASSERT(&frame->func->op_array == op_array);
@@ -6751,24 +6752,40 @@ done:
 					}
 				}
 			}
+			call->old_checked_stack = checked_stack;
+			call->old_peek_checked_stack = peek_checked_stack;
 			if (p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL) {
 				frame->call_level++;
-				call->used_stack = 0;
+				call->used_stack = checked_stack = peek_checked_stack = 0;
 			} else {
 				if (p->func) {
 					call->used_stack = zend_vm_calc_used_stack(init_opline->extended_value, (zend_function*)p->func);
 				} else {
 					call->used_stack = (ZEND_CALL_FRAME_SLOT + init_opline->extended_value) * sizeof(zval);
 				}
-				checked_stack += call->used_stack;
-				if (checked_stack > peek_checked_stack) {
-					peek_checked_stack = checked_stack;
+				switch (init_opline->opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_DYNAMIC_CALL:
+					//case ZEND_INIT_STATIC_METHOD_CALL:
+					//case ZEND_INIT_USER_CALL:
+					//case ZEND_NEW:
+						checked_stack += call->used_stack;
+						if (checked_stack > peek_checked_stack) {
+							peek_checked_stack = checked_stack;
+						}
+						break;
+					default:
+						checked_stack = peek_checked_stack = 0;
 				}
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
 			call = frame->call;
 			if (call) {
-				checked_stack -= call->used_stack;
+				checked_stack = call->old_checked_stack;
+				peek_checked_stack = call->old_peek_checked_stack;
 				top = call;
 				frame->call = call->prev;
 			}
