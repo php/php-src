@@ -3068,8 +3068,8 @@ static size_t count_demerits(struct candidate *array, size_t length, bool strict
 	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
 
 	while ((strict || length > 1) && finished < length) {
-		for (size_t i = 0; i < length; i++) {
-try_next_encoding:
+		/* Iterate in reverse order to avoid moving candidates that can be eliminated. */
+		for (size_t i = length - 1; i != (size_t)-1; i--) {
 			/* Do we still have more input to process for this candidate encoding? */
 			if (array[i].in_len) {
 				const mbfl_encoding *enc = array[i].enc;
@@ -3083,11 +3083,10 @@ try_next_encoding:
 						if (strict) {
 							/* This candidate encoding is not valid, eliminate it from consideration */
 							length--;
-							if (i == length) {
+							if (i < length) {
 								/* The eliminated candidate was the last valid one in the list */
-								goto next_iteration;
+								memmove(&array[i], &array[i+1], (length - i) * sizeof(struct candidate));
 							}
-							memmove(&array[i], &array[i+1], (length - i) * sizeof(struct candidate));
 							goto try_next_encoding;
 						} else {
 							array[i].demerits += 1000;
@@ -3100,8 +3099,8 @@ try_next_encoding:
 					finished++;
 				}
 			}
+try_next_encoding:;
 		}
-next_iteration: ;
 	}
 
 	for (size_t i = 0; i < length; i++) {
