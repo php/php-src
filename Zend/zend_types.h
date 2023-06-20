@@ -634,6 +634,8 @@ struct _zend_ast_ref {
 #define ZEND_GUARD_PROTECT_RECURSION(pg, t)		*pg |= ZEND_GUARD_RECURSION_TYPE(t)
 #define ZEND_GUARD_UNPROTECT_RECURSION(pg, t)	*pg &= ~ZEND_GUARD_RECURSION_TYPE(t)
 
+#define ZEND_RECURSION
+
 static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }
@@ -873,6 +875,25 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_IS_RECURSIVE_P(zv)        Z_IS_RECURSIVE(*(zv))
 #define Z_PROTECT_RECURSION_P(zv)   Z_PROTECT_RECURSION(*(zv))
 #define Z_UNPROTECT_RECURSION_P(zv) Z_UNPROTECT_RECURSION(*(zv))
+
+#define ZEND_GUARD_OR_GC_IS_RECURSIVE(pg, t, zobj) \
+	pg ? ZEND_GUARD_IS_RECURSIVE(pg, t) : GC_IS_RECURSIVE(zobj)
+
+#define ZEND_GUARD_OR_GC_PROTECT_RECURSION(pg, t, zobj) do { \
+		if (pg) { \
+			ZEND_GUARD_PROTECT_RECURSION(pg, t); \
+		} else { \
+			GC_PROTECT_RECURSION(zobj); \
+		} \
+	} while(0)
+
+#define ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(pg, t, zobj) do { \
+		if (pg) { \
+			ZEND_GUARD_UNPROTECT_RECURSION(pg, t); \
+		} else { \
+			GC_UNPROTECT_RECURSION(zobj); \
+		} \
+	} while(0)
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
 #define Z_CONSTANT(zval)			(Z_TYPE(zval) == IS_CONSTANT_AST)

@@ -536,6 +536,8 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zval *val
 	zval retval, fname;
 	zend_result return_code;
 
+	ZEND_ASSERT(guard != NULL);
+
 	if (ZEND_GUARD_IS_RECURSIVE(guard, JSON)) {
 		encoder->error_code = PHP_JSON_ERROR_RECURSION;
 		if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {

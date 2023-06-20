@@ -546,6 +546,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				HashTable *properties;
 
 				zend_object *zobj = Z_OBJ_P(expr);
+				uint32_t *guard = zend_get_recursion_guard(zobj);
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(zobj);
 				smart_str_appends(buf, ZSTR_VAL(class_name));
 				zend_string_release_ex(class_name, 0);
@@ -561,7 +562,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					smart_str_appendc(buf, '\n');
 				}
 
-				if (GC_IS_RECURSIVE(Z_OBJ_P(expr))) {
+				if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
@@ -571,9 +572,9 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					break;
 				}
 
-				GC_PROTECT_RECURSION(Z_OBJ_P(expr));
+				ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 				print_hash(buf, properties, indent, 1);
-				GC_UNPROTECT_RECURSION(Z_OBJ_P(expr));
+				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 
 				zend_release_properties(properties);
 				break;

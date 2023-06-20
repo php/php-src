@@ -544,7 +544,6 @@ static void zend_property_guard_dtor(zval *el) /* {{{ */ {
 
 static zend_always_inline zval *zend_get_guard_value(zend_object *zobj)
 {
-	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS);
 	return zobj->properties_table + zobj->ce->default_properties_count;
 }
 
@@ -554,6 +553,8 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 	zval *zv;
 	uint32_t *ptr;
 
+
+	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS);
 	zv = zend_get_guard_value(zobj);
 	if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
 		zend_string *str = Z_STR_P(zv);
@@ -596,6 +597,9 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 
 ZEND_API uint32_t *zend_get_recursion_guard(zend_object *zobj)
 {
+	if (!(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
+		return NULL;
+	}
 	zval *zv = zend_get_guard_value(zobj);
 	return &Z_GUARD_P(zv);
 }
