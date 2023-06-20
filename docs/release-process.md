@@ -426,7 +426,6 @@ slightly different steps. We'll call attention where the steps differ.
    * `internals@lists.php.net`
    * `php-general@lists.php.net`
    * `php-qa@lists.php.net`
-   * `primary-qa-tester@lists.php.net`
 
    In the announcement message, point out the location of the release and the
    possible release date of either the next RC or the final release. Also
@@ -1002,25 +1001,14 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Request moderation access to php-announce@lists.php.net and
-   primary-qa-tester@lists.php.net lists, so you are able to moderate your
-   release announcements. All the announcements should be sent from your
-   @php.net address.
+4. Request moderation access to php-announce@lists.php.net
+   so you are able to moderate your release announcements. All the announcements
+   should be sent from your @php.net address.
 
    > 💬 **Hint** \
    > To send email from your @php.net address, you will need to use a custom
    > SMTP server. If you use Gmail, you may
    > "[Send emails from a different address or alias][]."
-
-   > 💡 **Tip** \
-   > Make sure that you are set as a moderator for
-   > `primary-qa-tester@lists.php.net` by having someone (Hannes, Dan, Derick)
-   > run the following commands for you:
-   >
-   > ```shell
-   > ssh lists.php.net
-   > sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
-   > ```
 
 5. Make sure you have the following repositories cloned locally:
 
