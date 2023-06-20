@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0alpha2
+?? ??? ????, PHP 8.3.0alpha3
+
+
+22 Jun 2023, PHP 8.3.0alpha2
 
 - Core:
   . Fix GH-11388 (Allow "final" modifier when importing a method from a trait).
