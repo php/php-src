@@ -5522,6 +5522,132 @@ PHP_FUNCTION(mb_chr)
 }
 /* }}} */
 
+PHP_FUNCTION(mb_str_pad)
+{
+	zend_string *input, *encoding_str = NULL, *pad = NULL;
+	zend_long pad_to_length;
+	zend_long pad_type_val = PHP_STR_PAD_RIGHT;
+
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STR(input)
+		Z_PARAM_LONG(pad_to_length)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(pad)
+		Z_PARAM_LONG(pad_type_val)
+		Z_PARAM_STR_OR_NULL(encoding_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const mbfl_encoding *encoding = php_mb_get_encoding(encoding_str, 5);
+	if (!encoding) {
+		RETURN_THROWS();
+	}
+
+	size_t input_length = mb_get_strlen(input, encoding);
+
+	/* If resulting string turns out to be shorter than input string,
+	   we simply copy the input and return. */
+	if (pad_to_length < 0 || (size_t)pad_to_length <= input_length) {
+		RETURN_STR_COPY(input);
+	}
+
+	if (ZSTR_LEN(pad) == 0) {
+		zend_argument_value_error(3, "must be a non-empty string");
+		RETURN_THROWS();
+	}
+
+	if (pad_type_val < PHP_STR_PAD_LEFT || pad_type_val > PHP_STR_PAD_BOTH) {
+		zend_argument_value_error(4, "must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
+		RETURN_THROWS();
+	}
+
+	size_t pad_length = mb_get_strlen(pad, encoding);
+
+	size_t num_mb_pad_chars = pad_to_length - input_length;
+
+	/* We need to figure out the left/right padding lengths. */
+	size_t left_pad = 0, right_pad = 0; /* Initialize here to silence compiler warnings. */
+	switch (pad_type_val) {
+		case PHP_STR_PAD_RIGHT:
+			right_pad = num_mb_pad_chars;
+			break;
+
+		case PHP_STR_PAD_LEFT:
+			left_pad = num_mb_pad_chars;
+			break;
+
+		case PHP_STR_PAD_BOTH:
+			left_pad = num_mb_pad_chars / 2;
+			right_pad = num_mb_pad_chars - left_pad;
+			break;
+	}
+
+	/* How many full block copies need to happen, and how many characters are then left over? */
+	size_t full_left_pad_copies = left_pad / pad_length;
+	size_t full_right_pad_copies = right_pad / pad_length;
+	size_t remaining_left_pad_chars = left_pad % pad_length;
+	size_t remaining_right_pad_chars = right_pad % pad_length;
+
+	if (UNEXPECTED(full_left_pad_copies > SIZE_MAX / ZSTR_LEN(pad) || full_right_pad_copies > SIZE_MAX / ZSTR_LEN(pad))) {
+		goto overflow_no_release;
+	}
+
+	/* Compute the number of bytes required for the padding */
+	size_t full_left_pad_bytes = full_left_pad_copies * ZSTR_LEN(pad);
+	size_t full_right_pad_bytes = full_right_pad_copies * ZSTR_LEN(pad);
+
+	/* No special fast-path handling necessary for zero-length pads because these functions will not
+	 * allocate memory in case a zero-length pad is required. */
+	zend_string *remaining_left_pad_str = mb_get_substr(pad, 0, remaining_left_pad_chars, encoding);
+	zend_string *remaining_right_pad_str = mb_get_substr(pad, 0, remaining_right_pad_chars, encoding);
+
+	if (UNEXPECTED(full_left_pad_bytes > ZSTR_MAX_LEN - ZSTR_LEN(remaining_left_pad_str)
+		|| full_right_pad_bytes > ZSTR_MAX_LEN - ZSTR_LEN(remaining_right_pad_str))) {
+		goto overflow;
+	}
+
+	size_t left_pad_bytes = full_left_pad_bytes + ZSTR_LEN(remaining_left_pad_str);
+	size_t right_pad_bytes = full_right_pad_bytes + ZSTR_LEN(remaining_right_pad_str);
+
+	if (UNEXPECTED(left_pad_bytes > ZSTR_MAX_LEN - right_pad_bytes
+		|| ZSTR_LEN(input) > ZSTR_MAX_LEN - left_pad_bytes - right_pad_bytes)) {
+		goto overflow;
+	}
+
+	zend_string *result = zend_string_alloc(ZSTR_LEN(input) + left_pad_bytes + right_pad_bytes, false);
+	char *buffer = ZSTR_VAL(result);
+
+	/* First we pad the left. */
+	for (size_t i = 0; i < full_left_pad_copies; i++, buffer += ZSTR_LEN(pad)) {
+		memcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
+	}
+	memcpy(buffer, ZSTR_VAL(remaining_left_pad_str), ZSTR_LEN(remaining_left_pad_str));
+	buffer += ZSTR_LEN(remaining_left_pad_str);
+
+	/* Then we copy the input string. */
+	memcpy(buffer, ZSTR_VAL(input), ZSTR_LEN(input));
+	buffer += ZSTR_LEN(input);
+
+	/* Finally, we pad on the right. */
+	for (size_t i = 0; i < full_right_pad_copies; i++, buffer += ZSTR_LEN(pad)) {
+		memcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
+	}
+	memcpy(buffer, ZSTR_VAL(remaining_right_pad_str), ZSTR_LEN(remaining_right_pad_str));
+
+	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
+
+	zend_string_release_ex(remaining_left_pad_str, false);
+	zend_string_release_ex(remaining_right_pad_str, false);
+
+	RETURN_NEW_STR(result);
+
+overflow:
+	zend_string_release_ex(remaining_left_pad_str, false);
+	zend_string_release_ex(remaining_right_pad_str, false);
+overflow_no_release:
+	zend_throw_error(NULL, "String size overflow");
+	RETURN_THROWS();
+}
+
 /* {{{ */
 PHP_FUNCTION(mb_scrub)
 {

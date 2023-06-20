@@ -208,6 +208,10 @@ PHP 8.3 UPGRADE NOTES
     the given $depth and $options.
     RFC: https://wiki.php.net/rfc/json_validate
 
+- MBString:
+  . Added mb_str_pad(), which is the mbstring equivalent of str_pad().
+    RFC: https://wiki.php.net/rfc/mb_str_pad
+
 - Posix:
   . Added posix_sysconf call to get runtime informations.
   . Added posix_pathconf call to get configuration value from a directory/file.
