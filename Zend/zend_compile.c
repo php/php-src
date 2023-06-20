@@ -7343,8 +7343,9 @@ static void add_stringable_interface(zend_class_entry *ce) {
 static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, bool has_body) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
-	bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
 	uint32_t fn_flags = op_array->fn_flags;
+	bool in_interface = ce->ce_flags & ZEND_ACC_INTERFACE;
+	bool is_private = fn_flags & ZEND_ACC_PRIVATE;
 
 	zend_string *lcname;
 
@@ -7352,12 +7353,15 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 		zend_error(E_COMPILE_ERROR, "Cannot use 'readonly' as method modifier");
 	}
 
-	if ((fn_flags & ZEND_ACC_PRIVATE) && (fn_flags & ZEND_ACC_FINAL) && !zend_is_constructor(name)) {
+	if (is_private && (fn_flags & ZEND_ACC_FINAL) && !zend_is_constructor(name)) {
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
 	}
 
 	if (in_interface) {
-		if (!(fn_flags & ZEND_ACC_PUBLIC)) {
+		/* Interfaces methods are allowed to be private only if they
+		 * have a method body, meaning they are a default method.
+		 */
+		if ((fn_flags & ZEND_ACC_PROTECTED) || (is_private && !has_body)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "
 				"%s::%s() must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
@@ -7373,13 +7377,11 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 		/* Interface methods with bodies are called "default methods"
 		 * and this feature is proposed for PHP 8.3.
 		 */
-		op_array->fn_flags |= has_body
-			? (ZEND_ACC_DEFAULT_METHOD | ZEND_ACC_PUBLIC)
-			: ZEND_ACC_ABSTRACT;
+		op_array->fn_flags |= has_body ? ZEND_ACC_DEFAULT_METHOD : ZEND_ACC_ABSTRACT;
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
-		if ((op_array->fn_flags & ZEND_ACC_PRIVATE) && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
+		if (is_private && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private",
 				in_interface ? "Interface" : "Abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
