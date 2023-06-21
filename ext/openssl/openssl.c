@@ -4371,6 +4371,7 @@ clean_exit:
 #endif
 
 static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
+#if PHP_OPENSSL_API_VERSION >= 0x30000
 	int nid = NID_undef;
 	BIGNUM *p = NULL, *a = NULL, *b = NULL, *order = NULL, *g_x = NULL, *g_y = NULL, *cofactor = NULL;
 	BIGNUM *x = NULL, *y = NULL, *d = NULL;
