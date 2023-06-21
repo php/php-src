@@ -422,8 +422,8 @@ function main(): void
             switch ($switch) {
                 case 'j':
                     $workers_raw = substr($argv[$i], strlen("-j"));
-                    $workers = filter_var($workers_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-                    if ($workers === false) {
+                    $workers = try_string_to_int($workers_raw, 1);
+                    if ($workers === null) {
                         error("'{$workers_raw}' is not a valid number of workers, try e.g. -j16 for 16 workers");
                     }
                     // Don't use parallel testing infrastructure if there is only one worker.
@@ -529,16 +529,16 @@ function main(): void
                     break;
                 case '--set-timeout':
                     $timeout_raw = $argv[++$i] ?? '';
-                    $timeout = filter_var($timeout_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-                    if (!preg_match('/^\d+$/', $timeout)) {
+                    $timeout = try_string_to_int($timeout_raw, 0);
+                    if ($timeout === null) {
                         error("'{$timeout_raw}' is not a valid number of seconds, try e.g. --set-timeout 60 for 1 minute");
                     }
                     $environment['TEST_TIMEOUT'] = $timeout;
                     break;
                 case '--context':
                     $context_line_count_raw = $argv[++$i] ?? '';
-                    $context_line_count = filter_var($context_line_count_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-                    if ($context_line_count === false) {
+                    $context_line_count = try_string_to_int($context_line_count_raw, 0);
+                    if ($context_line_count === null) {
                         error("'{$context_line_count_raw}' is not a valid number of lines of context, try e.g. --context 3 for 3 lines");
                     }
                     break;
@@ -549,8 +549,8 @@ function main(): void
                     break;
                 case '--show-slow':
                     $slow_min_ms_raw = $argv[++$i] ?? '';
-                    $slow_min_ms = filter_var($slow_min_ms_raw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-                    if ($slow_min_ms === false) {
+                    $slow_min_ms = try_string_to_int($slow_min_ms_raw, 0);
+                    if ($slow_min_ms === null) {
                         error("'{$slow_min_ms_raw}' is not a valid number of milliseconds, try e.g. --show-slow 1000 for 1 second");
                     }
                     break;
@@ -3971,6 +3971,18 @@ function bless_failed_tests(array $failedTests): void
         $args[] = $test['name'];
     }
     proc_open($args, [], $pipes);
+}
+
+
+function try_string_to_int($value, int $min_value = PHP_INT_MIN): ?int
+{
+    if(is_string($value) && is_numeric($value) && strpos($value, '.') === false) {
+        $casted = (int) $value;
+        if ($casted >= $min_value) {
+            return $casted;
+        }
+    }
+    return null;
 }
 
 /*
