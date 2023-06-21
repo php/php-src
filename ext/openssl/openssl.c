@@ -99,14 +99,6 @@
 #define HAVE_EVP_PKEY_EC 1
 #endif
 
-/* the OPENSSL_EC_EXPLICIT_CURVE value was added
- * in OpenSSL 1.1.0; previous versions should 
- * use 0 instead.
- */
-#ifndef OPENSSL_EC_EXPLICIT_CURVE
-#define OPENSSL_EC_EXPLICIT_CURVE 0x000
-#endif
-
 ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 /* FIXME: Use the openssl constants instead of
