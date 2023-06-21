@@ -23,6 +23,13 @@ var_dump($details["bits"]);
 var_dump(strlen($details["key"]));
 var_dump($details["ec"]["curve_name"]);
 var_dump($details["type"] == OPENSSL_KEYTYPE_EC);
+$public_key = openssl_pkey_get_public($details["key"]);
+$details_public_key = openssl_pkey_get_details($public_key);
+var_dump(strlen($details["key"]));
+var_dump($details_public_key["ec"]["curve_name"]);
+var_dump($details["type"] == OPENSSL_KEYTYPE_EC);
+var_dump($details_public_key["ec"]["x"] === $details["ec"]["x"]);
+var_dump($details_public_key["ec"]["y"] === $details["ec"]["y"]);
 
 // EC - generate keypair with explicit parameters (SM2 curve)
 echo "Testing openssl_pkey_new with ec explicit parameters (SM2 curve)\n";
@@ -48,6 +55,12 @@ $details = openssl_pkey_get_details($ec);
 var_dump($details['bits']);
 var_dump(strlen($details['key']));
 var_dump($details['type'] == OPENSSL_KEYTYPE_EC);
+$public_key = openssl_pkey_get_public($details["key"]);
+$details_public_key = openssl_pkey_get_details($public_key);
+var_dump(strlen($details["key"]));
+var_dump($details["type"] == OPENSSL_KEYTYPE_EC);
+var_dump($details_public_key["ec"]["x"] === $details["ec"]["x"]);
+var_dump($details_public_key["ec"]["y"] === $details["ec"]["y"]);
 ?>
 --EXPECTF--
 Testing openssl_pkey_new with ec curve_name SM2
@@ -57,7 +70,16 @@ int(256)
 int(178)
 string(3) "SM2"
 bool(true)
+int(178)
+string(3) "SM2"
+bool(true)
+bool(true)
+bool(true)
 Testing openssl_pkey_new with ec explicit parameters (SM2 curve)
 int(256)
 int(475)
+bool(true)
+int(475)
+bool(true)
+bool(true)
 bool(true)
