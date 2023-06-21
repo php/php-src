@@ -4273,100 +4273,147 @@ cleanup:
 #ifdef HAVE_EVP_PKEY_EC
 #if PHP_OPENSSL_API_VERSION < 0x30000
 static bool php_openssl_pkey_init_legacy_ec(EC_KEY *eckey, zval *data, bool *is_private) {
+	BIGNUM *p = NULL, *a = NULL, *b = NULL, *order = NULL, *g_x = NULL, *g_y = NULL , *cofactor = NULL;
+	BIGNUM *x = NULL, *y = NULL, *d = NULL;
+	EC_POINT *point_g = NULL;
+	EC_POINT *point_q = NULL;
 	EC_GROUP *group = NULL;
-	EC_POINT *pnt = NULL;
-	BIGNUM *d = NULL;
-	zval *bn;
-	zval *x;
-	zval *y;
+	BN_CTX *bctx = BN_CTX_new();
 
 	*is_private = false;
 
-	if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1)) != NULL &&
-			Z_TYPE_P(bn) == IS_STRING) {
-		int nid = OBJ_sn2nid(Z_STRVAL_P(bn));
-		if (nid != NID_undef) {
-			group = EC_GROUP_new_by_curve_name(nid);
-			if (!group) {
-				php_openssl_store_errors();
+	zval *curve_name_zv = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1);
+	if (curve_name_zv && Z_TYPE_P(curve_name_zv) == IS_STRING && Z_STRLEN_P(curve_name_zv) > 0) {
+		int nid = OBJ_sn2nid(Z_STRVAL_P(curve_name_zv));
+		if (nid == NID_undef) {
+			php_error_docref(NULL, E_WARNING, "Unknown elliptic curve (short) name %s", Z_STRVAL_P(curve_name_zv));
+			goto clean_exit;
+		}
+
+		if (!(group = EC_GROUP_new_by_curve_name(nid))) {
+			goto clean_exit;
+		}
+		EC_GROUP_set_asn1_flag(group, OPENSSL_EC_NAMED_CURVE);
+	} else {
+		OPENSSL_PKEY_SET_BN(data, p);
+		OPENSSL_PKEY_SET_BN(data, a);
+		OPENSSL_PKEY_SET_BN(data, b);
+		OPENSSL_PKEY_SET_BN(data, order);
+
+		if (!(p && a && b && order)) {
+			if (!p && !a && !b && !order) {
+				php_error_docref(NULL, E_WARNING, "Missing params: curve_name");
+			} else {
+				php_error_docref(
+					NULL, E_WARNING, "Missing params: curve_name or p, a, b, order");
+			}
+			goto clean_exit;
+		}
+
+		if (!(group = EC_GROUP_new_curve_GFp(p, a, b, bctx))) {
+			goto clean_exit;
+		}
+
+		if (!(point_g = EC_POINT_new(group))) {
+			goto clean_exit;
+		}
+
+		zval *generator_zv = zend_hash_str_find(Z_ARRVAL_P(data), "generator", sizeof("generator") - 1);
+		if (generator_zv && Z_TYPE_P(generator_zv) == IS_STRING && Z_STRLEN_P(generator_zv) > 0) {
+			if (!(EC_POINT_oct2point(group, point_g, (unsigned char *)Z_STRVAL_P(generator_zv), Z_STRLEN_P(generator_zv), bctx))) {
 				goto clean_exit;
 			}
-			EC_GROUP_set_asn1_flag(group, OPENSSL_EC_NAMED_CURVE);
-			EC_GROUP_set_point_conversion_form(group, POINT_CONVERSION_UNCOMPRESSED);
-			if (!EC_KEY_set_group(eckey, group)) {
-				php_openssl_store_errors();
+		} else {
+			OPENSSL_PKEY_SET_BN(data, g_x);
+			OPENSSL_PKEY_SET_BN(data, g_y);
+
+			if (!g_x || !g_y) {
+				php_error_docref(
+					NULL, E_WARNING, "Missing params: generator or g_x and g_y");
+				goto clean_exit;
+			}
+
+			if (!EC_POINT_set_affine_coordinates_GFp(group, point_g, g_x, g_y, bctx)) {
 				goto clean_exit;
 			}
 		}
+
+		zval *seed_zv = zend_hash_str_find(Z_ARRVAL_P(data), "seed", sizeof("seed") - 1);
+		if (seed_zv && Z_TYPE_P(seed_zv) == IS_STRING && Z_STRLEN_P(seed_zv) > 0) {
+			if (!EC_GROUP_set_seed(group, (unsigned char *)Z_STRVAL_P(seed_zv), Z_STRLEN_P(seed_zv))) {
+				goto clean_exit;
+			}
+		}
+
+		/*
+		 * OpenSSL uses 0 cofactor as a marker for "unknown cofactor".
+		 * So accept cofactor == NULL or cofactor >= 0.
+		 * Internally, the lib will check the cofactor value.
+		 */
+		OPENSSL_PKEY_SET_BN(data, cofactor);
+		if (!EC_GROUP_set_generator(group, point_g, order, cofactor)) {
+			goto clean_exit;
+		}
+		EC_GROUP_set_asn1_flag(group, OPENSSL_EC_EXPLICIT_CURVE);
 	}
 
-	if (group == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unknown curve name");
+	EC_GROUP_set_point_conversion_form(group, POINT_CONVERSION_UNCOMPRESSED);
+
+	if (!EC_KEY_set_group(eckey, group)) {
 		goto clean_exit;
 	}
 
-	// The public key 'pnt' can be calculated from 'd' or is defined by 'x' and 'y'
-	if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "d", sizeof("d") - 1)) != NULL &&
-			Z_TYPE_P(bn) == IS_STRING) {
+	OPENSSL_PKEY_SET_BN(data, d);
+	OPENSSL_PKEY_SET_BN(data, x);
+	OPENSSL_PKEY_SET_BN(data, y);
+
+	if (d) {
 		*is_private = true;
-		d = BN_bin2bn((unsigned char*) Z_STRVAL_P(bn), Z_STRLEN_P(bn), NULL);
 		if (!EC_KEY_set_private_key(eckey, d)) {
-			php_openssl_store_errors();
-			goto clean_exit;
-		}
-		// Calculate the public key by multiplying the Point Q with the public key
-		// P = d * Q
-		pnt = EC_POINT_new(group);
-		if (!pnt || !EC_POINT_mul(group, pnt, d, NULL, NULL, NULL)) {
-			php_openssl_store_errors();
 			goto clean_exit;
 		}
 
-		BN_free(d);
-	} else if ((x = zend_hash_str_find(Z_ARRVAL_P(data), "x", sizeof("x") - 1)) != NULL &&
-			Z_TYPE_P(x) == IS_STRING &&
-			(y = zend_hash_str_find(Z_ARRVAL_P(data), "y", sizeof("y") - 1)) != NULL &&
-			Z_TYPE_P(y) == IS_STRING) {
-		pnt = EC_POINT_new(group);
-		if (pnt == NULL) {
-			php_openssl_store_errors();
+		point_q = EC_POINT_new(group);
+		if (!point_q || !EC_POINT_mul(group, point_q, d, NULL, NULL, bctx)) {
 			goto clean_exit;
 		}
-		if (!EC_POINT_set_affine_coordinates_GFp(
-				group, pnt, BN_bin2bn((unsigned char*) Z_STRVAL_P(x), Z_STRLEN_P(x), NULL),
-				BN_bin2bn((unsigned char*) Z_STRVAL_P(y), Z_STRLEN_P(y), NULL), NULL)) {
-			php_openssl_store_errors();
+	} else if (x && y) {
+		/* OpenSSL does not allow setting EC_PUB_X/EC_PUB_Y, so convert to encoded format. */
+		point_q = EC_POINT_new(group);
+		if (!point_q || !EC_POINT_set_affine_coordinates_GFp(group, point_q, x, y, bctx)) {
 			goto clean_exit;
 		}
 	}
 
-	if (pnt != NULL) {
-		if (!EC_KEY_set_public_key(eckey, pnt)) {
-			php_openssl_store_errors();
+	if (point_q != NULL) {
+		if (!EC_KEY_set_public_key(eckey, point_q)) {
 			goto clean_exit;
 		}
-		EC_POINT_free(pnt);
-		pnt = NULL;
 	}
 
 	if (!EC_KEY_check_key(eckey)) {
 		*is_private = true;
 		PHP_OPENSSL_RAND_ADD_TIME();
 		EC_KEY_generate_key(eckey);
-		php_openssl_store_errors();
-	}
-	if (EC_KEY_check_key(eckey)) {
-		EC_GROUP_free(group);
-		return true;
-	} else {
-		php_openssl_store_errors();
 	}
 
 clean_exit:
-	BN_free(d);
-	EC_POINT_free(pnt);
+	php_openssl_store_errors();
+	BN_CTX_free(bctx);
 	EC_GROUP_free(group);
-	return false;
+	EC_POINT_free(point_g);
+	EC_POINT_free(point_q);
+	BN_free(p);
+	BN_free(a);
+	BN_free(b);
+	BN_free(order);
+	BN_free(g_x);
+	BN_free(g_y);
+	BN_free(cofactor);
+	BN_free(d);
+	BN_free(x);
+	BN_free(y);
+	return EC_KEY_check_key(eckey);
 }
 #endif
 
