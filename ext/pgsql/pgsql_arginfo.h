@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a37be19da43ac0838655b0ba7e34382e9c7424f5 */
+ * Stub hash: fb57575ac2153c888b95c18a7bf6d6a7e200f5dc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -472,10 +472,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_pipeline_status, 0, 1, IS_LON
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_error_context_visibility, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, visibility, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 
 ZEND_FUNCTION(pg_connect);
@@ -579,7 +581,9 @@ ZEND_FUNCTION(pg_pipeline_sync);
 #if defined(LIBPQ_HAS_PIPELINING)
 ZEND_FUNCTION(pg_pipeline_status);
 #endif
+#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_FUNCTION(pg_set_error_context_visibility);
+#endif
 
 
 static const zend_function_entry ext_functions[] = {
@@ -709,7 +713,9 @@ static const zend_function_entry ext_functions[] = {
 #if defined(LIBPQ_HAS_PIPELINING)
 	ZEND_FE(pg_pipeline_status, arginfo_pg_pipeline_status)
 #endif
+#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	ZEND_FE(pg_set_error_context_visibility, arginfo_pg_set_error_context_visibility)
+#endif
 	ZEND_FE_END
 };
 
@@ -842,9 +848,15 @@ static void register_pgsql_symbols(int module_number)
 #if defined(LIBPQ_HAS_PIPELINING)
 	REGISTER_LONG_CONSTANT("PGSQL_PIPELINE_ABORTED", PQ_PIPELINE_ABORTED, CONST_PERSISTENT);
 #endif
+#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_NEVER", PQSHOW_CONTEXT_NEVER, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ERRORS", PQSHOW_CONTEXT_ERRORS, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ALWAYS", PQSHOW_CONTEXT_ALWAYS, CONST_PERSISTENT);
+#endif
 }
 
 static zend_class_entry *register_class_PgSql_Connection(void)
