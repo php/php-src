@@ -219,7 +219,8 @@ PHP 8.3 UPGRADE NOTES
   . Added posix_eaccess call to check the effective user id's permission for a path.
 
 - PGSQL:
-  . Added pg_set_error_context_visilibity to set the visibility of the context in error messages.
+  . Added pg_set_error_context_visilibity to set the visibility of the context
+    in error messages (with libpq >= 9.6).
 
 - Random:
   . Added Randomizer::getBytesFromString().
