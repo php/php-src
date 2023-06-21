@@ -211,7 +211,7 @@ freebsd_task:
 arm_task:
   name: ARM_DEBUG_NTS
   arm_container:
-    image: gcc:12
+    image: debian:12
     additional_containers:
       - name: mysql
         image: mysql:8
@@ -233,6 +233,9 @@ arm_task:
     - apt-get update -y
     - >-
         apt-get install -y
+        gcc
+        g++
+        autoconf
         bison
         re2c
         locales
@@ -249,6 +252,7 @@ arm_task:
         libsasl2-dev
         libxpm-dev
         libzip-dev
+        libbz2-dev
         libsqlite3-dev
         libwebp-dev
         libonig-dev
