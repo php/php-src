@@ -19,7 +19,7 @@ if ($exit_code !== 0) {
     function getNice($id)
     {
         $res = shell_exec('ps -p ' . $id .' -o "pid,nice"');
-        preg_match('/^\s*\w+\s+\w+\s*(\d+)\s+(\d+)/m', $res, $matches);
+        preg_match('/^\s*\w+\s+\w+\s*(\d+)\s+(-?\d+)/m', $res, $matches);
         if (count($matches) > 2)
             return $matches[2];
         else
