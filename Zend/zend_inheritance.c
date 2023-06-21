@@ -1162,9 +1162,11 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Access level to %s::%s() must be %s (as in class %s)%s",
-			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name),
-			zend_visibility_string(parent_flags & ZEND_ACC_PPP_MASK),
-			ZEND_FN_SCOPE_NAME(parent), (parent_flags & ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			ZEND_FN_SCOPE_NAME(child),
+			ZSTR_VAL(child->common.function_name),
+			zend_visibility_string(parent_flags),
+			ZEND_FN_SCOPE_NAME(parent),
+			(parent_flags & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 	}
 
 	if (!checked) {
