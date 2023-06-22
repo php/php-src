@@ -1,5 +1,5 @@
 --TEST--
-Collection: Array access with string key
+Collection: Dictionary
 --FILE--
 <?php
 class Article
@@ -9,7 +9,7 @@ class Article
 	}
 }
 
-collection Articles(string => Article)
+collection(Dict) Articles(string => Article)
 {
 }
 

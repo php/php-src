@@ -280,7 +280,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
-%type <ast> collection_declaration_statement collection_type
+%type <ast> collection_declaration_statement collection_type_list
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list
@@ -661,12 +661,15 @@ enum_case_expr:
 
 collection_declaration_statement:
 		T_COLLECTION { $<num>$ = CG(zend_lineno); }
-		T_STRING '(' collection_type T_DOUBLE_ARROW collection_type ')' backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $9, zend_ast_get_str($3), NULL, NULL, $11, $5, $7); }
+		'(' T_STRING ')'
+		T_STRING '(' collection_type_list ')' backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $10, zend_ast_get_str($6), NULL, $4, $12, NULL, $8); }
 ;
 
-collection_type:
-		type_expr { $$ = $1; }
+collection_type_list:
+		collection_type_list T_DOUBLE_ARROW type_expr { $$ = zend_ast_list_add($1, $3); }
+	|	type_expr { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
+;
 
 extends_from:
 		%empty				{ $$ = NULL; }

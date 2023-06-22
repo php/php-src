@@ -1,5 +1,5 @@
 --TEST--
-Collection: Array access with integer key
+Collection: Sequence
 --FILE--
 <?php
 class Article
@@ -9,24 +9,24 @@ class Article
 	}
 }
 
-collection Articles(int => Article)
+collection(Seq) Articles(Article)
 {
 }
 
 $c = new Articles;
-$c[9] = new Article("First Test");
+$c[] = new Article("First Test");
 $c[] = new Article("Second Test");
 
 var_dump($c);
 
-var_dump(isset($c[8]));
-var_dump(isset($c[9]));
-var_dump(isset($c[10]));
+var_dump(isset($c[0]));
+var_dump(isset($c[1]));
+var_dump(isset($c[2]));
 
-var_dump($c[10]);
+var_dump($c[1]);
 
-unset($c[9]);
-var_dump(isset($c[9]));
+unset($c[1]);
+var_dump(isset($c[1]));
 
 try {
 	var_dump(isset($c["eleven"]));
@@ -38,21 +38,21 @@ try {
 object(Articles)#%d (%d) {
   ["value"]=>
   array(2) {
-    [9]=>
+    [0]=>
     object(Article)#%d (%d) {
       ["title"]=>
       string(10) "First Test"
     }
-    [10]=>
+    [1]=>
     object(Article)#%d (%d) {
       ["title"]=>
       string(11) "Second Test"
     }
   }
 }
+bool(true)
+bool(true)
 bool(false)
-bool(true)
-bool(true)
 object(Article)#%d (%d) {
   ["title"]=>
   string(11) "Second Test"

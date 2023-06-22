@@ -1562,16 +1562,7 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_ENUM);
 }
 
-/*
- * The collection keyword must be followed by whitespace and another identifier.
- * This avoids the BC break of using collection in classes, namespaces, functions and constants.
- */
-<ST_IN_SCRIPTING>"collection"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
-	yyless(10);
-	RETURN_TOKEN_WITH_STR(T_STRING, 0);
-}
-<ST_IN_SCRIPTING>"collection"{WHITESPACE_OR_COMMENTS}[a-zA-Z_\x80-\xff] {
-	yyless(10);
+<ST_IN_SCRIPTING>"collection" {
 	RETURN_TOKEN_WITH_IDENT(T_COLLECTION);
 }
 

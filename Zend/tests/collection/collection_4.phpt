@@ -1,13 +1,22 @@
 --TEST--
-Collection: Syntax
+Collection with Trait
 --FILE--
 <?php
-collection Articles(int => Article)
+trait Shuffler
 {
 	public function shuffle()
 	{
-		return array_shuffle($this->value);
+		$values = $this->value;
+		shuffle($values);
+
+		return $values;
 	}
+}
+
+
+collection(Dict) Articles(int => Article)
+{
+	use Shuffler;
 }
 
 class Article
@@ -17,12 +26,15 @@ class Article
 
 
 $c = new Articles;
-$c[] = new Article("First Test");
+$c[0] = new Article("First Test");
 
 var_dump($c->shuffle());
 ?>
 --EXPECTF--
-object(Articles)#%d (%d) {
-  ["value"]=>
-  uninitialized(array)
+array(1) {
+  [0]=>
+  object(Article)#%d (%d) {
+    ["title":"Article":private]=>
+    string(10) "First Test"
+  }
 }

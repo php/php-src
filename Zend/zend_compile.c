@@ -2046,6 +2046,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	ce->attributes = NULL;
 	ce->enum_backing_type = IS_UNDEF;
 	ce->backed_enum_table = NULL;
+	ce->collection_key_type = IS_UNDEF;
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;
@@ -8947,6 +8948,28 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 	zend_type_release(type, 0);
 }
 
+static void zend_compile_collection_data_structure(zend_class_entry *ce, zend_ast *collection_data_structure_ast)
+{
+	zend_string *struct_type = zend_ast_get_str(collection_data_structure_ast);
+
+	if (zend_string_equals_literal_ci(struct_type, "seq")) {
+		if (ce->collection_key_type != IS_UNDEF) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Collection sequences may not have a key type defined");
+		}
+		ce->collection_key_type = IS_LONG;
+		ce->collection_data_structure = ZEND_COLLECTION_SEQ;
+	} else if (zend_string_equals_literal_ci(struct_type, "dict")) {
+		if (ce->collection_key_type == IS_UNDEF) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Collection dictionaries must have a key type defined");
+		}
+		ce->collection_data_structure = ZEND_COLLECTION_DICT;
+	} else {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Collection data structure must be Seq or Dict, %s given",
+			ZSTR_VAL(struct_type));
+	}
+}
+
 static void zend_compile_collection_key_type(zend_class_entry *ce, zend_ast *collection_key_type_ast)
 {
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
@@ -8986,9 +9009,9 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *extends_ast = decl->child[0];
 	zend_ast *implements_ast = decl->child[1];
+	zend_ast *collection_data_structure_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
-	zend_ast *collection_key_type_ast = decl->child[3];
-	zend_ast *collection_item_type_ast = decl->child[4];
+	zend_ast *collection_types_list_ast = decl->child[4];
 	zend_ast *enum_backing_type_ast = decl->child[4];
 	zend_string *name, *lcname;
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
@@ -9065,11 +9088,11 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 
 	CG(active_class_entry) = ce;
 
-	if (decl->child[3] && !(ce->ce_flags & ZEND_ACC_COLLECTION)) {
+	if (decl->child[3]) {
 		zend_compile_attributes(&ce->attributes, decl->child[3], 0, ZEND_ATTRIBUTE_TARGET_CLASS, 0);
 	}
 
-	if (implements_ast) {
+	if (implements_ast && !(ce->ce_flags & ZEND_ACC_COLLECTION)) {
 		zend_compile_implements(implements_ast);
 	}
 
@@ -9082,8 +9105,24 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	}
 
 	if (ce->ce_flags & ZEND_ACC_COLLECTION) {
-		zend_compile_collection_key_type(ce, collection_key_type_ast);
-		zend_compile_collection_item_type(ce, collection_item_type_ast);
+		zend_ast_list *list = zend_ast_get_list(collection_types_list_ast);
+
+		switch (list->children) {
+			case 1:
+				zend_compile_collection_item_type(ce, list->child[0]);
+				break;
+			case 2:
+				zend_compile_collection_key_type(ce, list->child[0]);
+				zend_compile_collection_item_type(ce, list->child[1]);
+				break;
+			default:
+				zend_error_noreturn(E_COMPILE_ERROR, "Invalid collection data types signature");
+				break;
+		}
+
+		/* The data structure is compiled after the key/value types so it can do heuristics */
+		zend_compile_collection_data_structure(ce, collection_data_structure_ast);
+
 		zend_collection_add_interfaces(ce);
 		zend_collection_register_handlers(ce);
 		zend_collection_register_props(ce);

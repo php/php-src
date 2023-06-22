@@ -99,38 +99,31 @@ static void create_array_if_needed(zend_class_entry *ce, zend_object *object)
 	zval_ptr_dtor(&new_array);
 }
 
-void zend_collection_add_item(zend_object *object, zval *offset, zval *value)
+static void seq_add_item(zend_object *object, zval *value)
 {
 	zend_class_entry *ce = object->ce;
 	zval rv;
 	zval *value_prop;
 
-	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
+	create_array_if_needed(ce, object);
+	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+	Z_ADDREF_P(value);
+	add_next_index_zval(value_prop, value);
+}
 
-	if (!zend_check_type(&ce->collection_item_type, value, NULL, ce, 0, false)) {
-		zend_string *type_str = zend_type_to_string(ce->collection_item_type);
-		zend_type_error(
-			"Value type %s does not match collection item type %s",
-			zend_zval_type_name(value),
-			ZSTR_VAL(type_str)
-		);
-		zend_string_release(type_str);
-		return;
-	}
+static void dict_add_item(zend_object *object, zval *offset, zval *value)
+{
+	zend_class_entry *ce = object->ce;
+	zval rv;
+	zval *value_prop;
 
-	if (!offset && ce->collection_key_type == IS_LONG) {
-		create_array_if_needed(ce, object);
-		value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
-		Z_ADDREF_P(value);
-		add_next_index_zval(value_prop, value);
-		return;
-	} else if (offset && ce->collection_key_type == IS_LONG && Z_TYPE_P(offset) == IS_LONG) {
+	if (ce->collection_key_type == IS_LONG && Z_TYPE_P(offset) == IS_LONG) {
 		create_array_if_needed(ce, object);
 		value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
 		Z_ADDREF_P(value);
 		add_index_zval(value_prop, Z_LVAL_P(offset), value);
 		return;
-	} else if (offset && ce->collection_key_type == IS_STRING && Z_TYPE_P(offset) == IS_STRING) {
+	} else if (ce->collection_key_type == IS_STRING && Z_TYPE_P(offset) == IS_STRING) {
 		create_array_if_needed(ce, object);
 		value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
 		Z_ADDREF_P(value);
@@ -143,7 +136,43 @@ void zend_collection_add_item(zend_object *object, zval *offset, zval *value)
 			zend_get_type_by_const(ce->collection_key_type)
 		);
 	}
+}
 
+
+void zend_collection_add_item(zend_object *object, zval *offset, zval *value)
+{
+	zend_class_entry *ce = object->ce;
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
+
+	if (offset && ce->collection_data_structure == ZEND_COLLECTION_SEQ) {
+		zend_value_error("Specifying an offset for sequence collections is not allowed");
+		return;
+	}
+
+	if (!offset && ce->collection_data_structure == ZEND_COLLECTION_DICT) {
+		zend_value_error("Specifying an offset for dictionary collections is required");
+		return;
+	}
+
+	if (!zend_check_type(&ce->collection_item_type, value, NULL, ce, 0, false)) {
+		zend_string *type_str = zend_type_to_string(ce->collection_item_type);
+		zend_type_error(
+			"Value type %s does not match collection item type %s",
+			zend_zval_type_name(value),
+			ZSTR_VAL(type_str)
+		);
+		zend_string_release(type_str);
+		return;
+	}
+
+	switch (ce->collection_data_structure) {
+		case ZEND_COLLECTION_SEQ:
+			seq_add_item(object, value);
+			break;
+		case ZEND_COLLECTION_DICT:
+			dict_add_item(object, offset, value);
+			break;
+	}
 }
 
 static int key_type_allowed(zend_class_entry *ce, zval *offset)

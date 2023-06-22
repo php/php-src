@@ -2,7 +2,7 @@
 Collection: Syntax
 --FILE--
 <?php
-collection Articles(int => Article)
+collection(Dict) Articles(int => Article)
 {
 }
 
