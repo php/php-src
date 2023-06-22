@@ -7,7 +7,8 @@ PHP                                                                        NEWS
 
 - Soap:
   . Fixed bug GHSA-76gg-c692-v2mw (Missing error check and insufficient random
-    bytes in HTTP Digest authentication for SOAP). (nielsdos, timwolla)
+    bytes in HTTP Digest authentication for SOAP).
+    (CVE-2023-3247) (nielsdos, timwolla)
 
 14 Feb 2023, PHP 8.0.28
 
