@@ -54,11 +54,11 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 
 #define META_DEF_BUFSIZE 8192
 
-#define PHP_FILE_USE_INCLUDE_PATH (1 << 0)
-#define PHP_FILE_IGNORE_NEW_LINES (1 << 1)
-#define PHP_FILE_SKIP_EMPTY_LINES (1 << 2)
-#define PHP_FILE_APPEND (1 << 3)
-#define PHP_FILE_NO_DEFAULT_CONTEXT (1 << 4)
+#define PHP_FILE_USE_INCLUDE_PATH (1 << 3) // avoid collision with the PHP_LOCK_ constants.
+#define PHP_FILE_IGNORE_NEW_LINES (1 << 4)
+#define PHP_FILE_SKIP_EMPTY_LINES (1 << 5)
+#define PHP_FILE_APPEND (1 << 6)
+#define PHP_FILE_NO_DEFAULT_CONTEXT (1 << 7)
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,

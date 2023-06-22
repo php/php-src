@@ -25,7 +25,7 @@ ini_set( 'include_path',$file_path.'/file_variation' );
 
 file_put_contents( $file_path1."/file1_variation.tmp", "aaaaaaaaaaaaaaabbbbbbbbbbb111111111222222222" );
 var_dump( file("file1_variation.tmp", FILE_USE_INCLUDE_PATH) );
-var_dump( file($file_path1."/file1_variation.tmp", 1) );
+var_dump( file($file_path1."/file1_variation.tmp", FILE_USE_INCLUDE_PATH) );
 
 echo "*** Using file function to remove line containing a key string ***\n";
 $file_handle = fopen($file_path."/file2_variation.tmp", "w");
