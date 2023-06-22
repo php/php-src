@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Mangle PCRE regex cache key with JIT option. (mvorisek)
 
+- PDO SQLite:
+  . Fix GH-11492 (Make test failure: ext/pdo_sqlite/tests/bug_42589.phpt).
+    (KapitanOczywisty, CViniciusSDias)
+
 - Session:
   . Removed broken url support for transferring session ID. (ilutov)
 
