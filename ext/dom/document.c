@@ -877,10 +877,6 @@ PHP_METHOD(DOMDocument, createElementNS)
 
 	if (errorcode == 0) {
 		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
-			/* https://dom.spec.whatwg.org/#validate-and-extract: demands us to set an empty string uri to NULL */
-			if (uri_len == 0) {
-				uri = NULL;
-			}
 			nodep = xmlNewDocNode(docp, NULL, (xmlChar *) localname, (xmlChar *) value);
 			if (nodep != NULL && uri != NULL) {
 				xmlNsPtr nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);

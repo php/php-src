@@ -463,6 +463,7 @@ namespace {
     const PGSQL_PIPELINE_ABORTED = UNKNOWN;
 #endif
     
+#ifdef HAVE_PG_CONTEXT_VISIBILITY
     /* For pg_set_error_context_visibility() */
 
     /**
@@ -480,7 +481,7 @@ namespace {
      * @cvalue PQSHOW_CONTEXT_ALWAYS
      */
     const PGSQL_SHOW_CONTEXT_ALWAYS = UNKNOWN;
-    
+#endif
 
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
@@ -971,7 +972,9 @@ namespace {
     function pg_pipeline_status(PgSql\Connection $connection): int {}
 #endif
 
+#ifdef HAVE_PG_CONTEXT_VISIBILITY
     function pg_set_error_context_visibility(PgSql\Connection $connection, int $visibility): int {}
+#endif
 }
 
 namespace PgSql {

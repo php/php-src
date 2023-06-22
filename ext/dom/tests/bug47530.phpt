@@ -121,7 +121,7 @@ test_appendChild_with_shadowing();
 <html xmlns="https://php.net/something" xmlns:ns="https://php.net/whatever"><element ns:foo="https://php.net/bar"/></html>
 -- Test document fragment without import --
 <?xml version="1.0"?>
-<html xmlns=""><element xmlns:foo="https://php.net/bar"><foo:bar/><bar/></element></html>
+<html xmlns=""><element xmlns:foo="https://php.net/bar"><foo:bar/><bar xmlns=""/></element></html>
 string(7) "foo:bar"
 string(19) "https://php.net/bar"
 -- Test document import --

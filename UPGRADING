@@ -44,16 +44,33 @@ PHP 8.3 UPGRADE NOTES
   . Static variable initializers can now contain arbitrary expressions.
     RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
 
-- DOM:
-  . Assignment to DOMAttr::$value and DOMAttr::$nodeValue no longer expands
-    entities in the new value.
-
 - FFI:
   . C functions that have a return type of void now return null instead of
     returning the following object object(FFI\CData:void) { }
 
 - Filesystem:
   . file() flags error check now catches all invalid flags, notably FILE_APPEND, previously some invalid flags were silently accepted ( https://github.com/php/php-src/pull/11483 )
+
+- Standard:
+  . The range() function has had various changes:
+    * A TypeError is now thrown when passing objects, resources, or arrays
+      as the boundary inputs
+    * A more descriptive ValueError is thrown when passing 0 for $step
+    * A ValueError is now thrown when using a negative $step for increasing ranges
+    * If $step is a float that can be interpreted as an int, it is now done so
+    * A ValueError is now thrown if any argument is infinity or NAN
+    * An E_WARNING is now emitted if $start or $end is the empty string.
+      The value continues to be cast to the value 0.
+    * An E_WARNING is now emitted if $start or $end has more than one byte,
+      only if it is a non-numeric string.
+    * An E_WARNING is now emitted if $start or $end is cast to an integer
+      because the other boundary input is a number. (e.g. range(5, 'z');)
+    * An E_WARNING is now emitted if $step is a float when trying to generate
+      a range of characters, except if both boundary inputs are numeric strings
+      (e.g. range('5', '9', 0.5); does not produce a warning)
+    * range() now produce a list of characters if one of the boundary inputs is
+      a string digit instead of casting the other input to int
+      (e.g. range('5', 'z');)
 
 ========================================
 2. New Features
@@ -115,8 +132,12 @@ PHP 8.3 UPGRADE NOTES
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
 
+- Gd:
+  . Changed imagerotate signature, removed the `ignore_transparent` argument
+    as it was not used internally anyway from PHP 7.x.
+
 - Intl:
-  . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone) 
+  . datefmt_set_timezone (and its alias IntlDateformatter::setTimeZone)
     now returns true on success, previously null was returned.
   . IntlBreakiterator::setText() now returns false on failure, previously
     null was returned.
@@ -190,6 +211,10 @@ PHP 8.3 UPGRADE NOTES
     the given $depth and $options.
     RFC: https://wiki.php.net/rfc/json_validate
 
+- MBString:
+  . Added mb_str_pad(), which is the mbstring equivalent of str_pad().
+    RFC: https://wiki.php.net/rfc/mb_str_pad
+
 - Posix:
   . Added posix_sysconf call to get runtime informations.
   . Added posix_pathconf call to get configuration value from a directory/file.
@@ -197,7 +222,8 @@ PHP 8.3 UPGRADE NOTES
   . Added posix_eaccess call to check the effective user id's permission for a path.
 
 - PGSQL:
-  . Added pg_set_error_context_visilibity to set the visibility of the context in error messages.
+  . Added pg_set_error_context_visilibity to set the visibility of the context
+    in error messages (with libpq >= 9.6).
 
 - Random:
   . Added Randomizer::getBytesFromString().

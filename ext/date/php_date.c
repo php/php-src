@@ -2333,7 +2333,9 @@ static void add_common_properties(HashTable *myht, zend_object *zobj)
 	common = zend_std_get_properties(zobj);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL_IND(common, name, prop) {
-		zend_hash_add(myht, name, prop);
+		if (zend_hash_add(myht, name, prop) != NULL) {
+			Z_TRY_ADDREF_P(prop);
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 

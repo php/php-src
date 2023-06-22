@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0alpha2
+?? ??? ????, PHP 8.3.0alpha3
+
+- MBString:
+  . Implement mb_str_pad() RFC. (nielsdos)
+
+22 Jun 2023, PHP 8.3.0alpha2
 
 - Core:
   . Fix GH-11388 (Allow "final" modifier when importing a method from a trait).
@@ -13,6 +18,12 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fix #77894 (DOMNode::C14N() very slow on generated DOMDocuments even after
     normalisation). (nielsdos)
+  . Revert changes to DOMAttr::$value and DOMAttr::$nodeValue expansion.
+    (nielsdos)
+
+- GD:
+  . Removed imagerotate "ignore_transparent" argument since it has no effect.
+    (David Carlier)
 
 - Streams:
   . Implement GH-8641 (STREAM_NOTIFY_COMPLETED over HTTP never emitted).
