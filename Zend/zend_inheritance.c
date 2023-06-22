@@ -3508,6 +3508,12 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 			zend_enum_register_funcs(ce);
 		}
 
+		if (ce->ce_flags & ZEND_ACC_COLLECTION) {
+			/* Only register builtin collection methods during inheritance to avoid persisting them
+			 * in opcache. */
+			zend_collection_register_funcs(ce);
+		}
+
 		if (parent) {
 			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 				add_dependency_obligation(ce, parent);

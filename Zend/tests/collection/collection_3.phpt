@@ -16,6 +16,7 @@ collection(Dict) Articles(string => Article)
 $c = new Articles;
 $c["nine"] = new Article("First Test");
 $c["ten"] = new Article("Second Test");
+$c->add("seven", new Article("Third Test"));
 
 var_dump($c);
 
@@ -37,7 +38,7 @@ try {
 --EXPECTF--
 object(Articles)#%d (%d) {
   ["value"]=>
-  array(2) {
+  array(3) {
     ["nine"]=>
     object(Article)#%d (%d) {
       ["title"]=>
@@ -47,6 +48,11 @@ object(Articles)#%d (%d) {
     object(Article)#%d (%d) {
       ["title"]=>
       string(11) "Second Test"
+    }
+    ["seven"]=>
+    object(Article)#%d (%d) {
+      ["title"]=>
+      string(10) "Third Test"
     }
   }
 }

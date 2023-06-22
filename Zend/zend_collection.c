@@ -94,8 +94,79 @@ void zend_collection_register_handlers(zend_class_entry *ce)
 	zend_dict_collection_object_handlers.clone_obj = NULL;
 	zend_dict_collection_object_handlers.compare = zend_objects_not_comparable;
 	ce->default_object_handlers = &zend_dict_collection_object_handlers;
+}
 
-	ce->default_object_handlers = &zend_collection_object_handlers;
+static void seq_add_item(zend_object *object, zval *value);
+static void dict_add_item(zend_object *object, zval *key, zval *value);
+
+static ZEND_NAMED_FUNCTION(zend_collection_seq_add_func)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	seq_add_item(Z_OBJ_P(ZEND_THIS), value);
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_dict_add_func)
+{
+	zval *key, *value;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(key)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dict_add_item(Z_OBJ_P(ZEND_THIS), key, value);
+}
+
+static void zend_collection_register_func(zend_class_entry *ce, zend_known_string_id name_id, zend_internal_function *zif)
+{
+	zend_string *name = ZSTR_KNOWN(name_id);
+	zif->type = ZEND_INTERNAL_FUNCTION;
+	zif->module = EG(current_module);
+	zif->scope = ce;
+	zif->T = ZEND_OBSERVER_ENABLED;
+    if (EG(active)) { // at run-time
+		ZEND_MAP_PTR_INIT(zif->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
+	} else {
+		ZEND_MAP_PTR_NEW(zif->run_time_cache);
+	}
+
+	if (!zend_hash_add_ptr(&ce->function_table, name, zif)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	}
+}
+
+
+void zend_collection_register_funcs(zend_class_entry *ce)
+{
+	const uint32_t fn_flags = ZEND_ACC_PUBLIC|ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_ARENA_ALLOCATED;
+
+	switch (ce->collection_data_structure) {
+		case ZEND_COLLECTION_SEQ:
+			zend_internal_function *seq_add_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+			seq_add_function->handler = zend_collection_seq_add_func;
+			seq_add_function->function_name = ZSTR_KNOWN(ZEND_STR_ADD);
+			seq_add_function->fn_flags = fn_flags;
+			seq_add_function->num_args = 1;
+			seq_add_function->required_num_args = 1;
+			seq_add_function->arg_info = (zend_internal_arg_info *) (arginfo_class_SeqCollection_add + 1);
+			zend_collection_register_func(ce, ZEND_STR_ADD, seq_add_function);
+			break;
+		case ZEND_COLLECTION_DICT:
+			zend_internal_function *dict_add_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
+			dict_add_function->handler = zend_collection_dict_add_func;
+			dict_add_function->function_name = ZSTR_KNOWN(ZEND_STR_ADD);
+			dict_add_function->fn_flags = fn_flags;
+			dict_add_function->num_args = 2;
+			dict_add_function->required_num_args = 2;
+			dict_add_function->arg_info = (zend_internal_arg_info *) (arginfo_class_DictCollection_add + 1);
+			zend_collection_register_func(ce, ZEND_STR_ADD, dict_add_function);
+			break;
+	}
 }
 
 void zend_collection_register_props(zend_class_entry *ce)

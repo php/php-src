@@ -17,11 +17,13 @@ $c = new Articles;
 $c[] = new Article("First Test");
 $c[] = new Article("Second Test");
 
+$c->add(new Article("Third Test"));
+
 var_dump($c);
 
 var_dump(isset($c[0]));
 var_dump(isset($c[1]));
-var_dump(isset($c[2]));
+var_dump(isset($c[3]));
 
 var_dump($c[1]);
 
@@ -37,7 +39,7 @@ try {
 --EXPECTF--
 object(Articles)#%d (%d) {
   ["value"]=>
-  array(2) {
+  array(3) {
     [0]=>
     object(Article)#%d (%d) {
       ["title"]=>
@@ -47,6 +49,11 @@ object(Articles)#%d (%d) {
     object(Article)#%d (%d) {
       ["title"]=>
       string(11) "Second Test"
+    }
+    [2]=>
+    object(Article)#%d (%d) {
+      ["title"]=>
+      string(10) "Third Test"
     }
   }
 }

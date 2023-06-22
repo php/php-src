@@ -36,6 +36,7 @@ void zend_collection_add_interfaces(zend_class_entry *ce);
 
 void zend_collection_register_handlers(zend_class_entry *ce);
 void zend_collection_register_props(zend_class_entry *ce);
+void zend_collection_register_funcs(zend_class_entry *ce);
 
 void zend_collection_add_item(zend_object *object, zval *offset, zval *value);
 int zend_collection_has_item(zend_object *object, zval *offset);
