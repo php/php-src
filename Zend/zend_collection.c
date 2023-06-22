@@ -20,9 +20,13 @@
 #include "zend_API.h"
 #include "zend_collection_arginfo.h"
 #include "zend_execute.h"
+#include "zend_extensions.h"
+#include "zend_observer.h"
 
-ZEND_API zend_class_entry *zend_ce_collection;
-ZEND_API zend_object_handlers zend_collection_object_handlers;
+ZEND_API zend_class_entry *zend_ce_seq_collection;
+ZEND_API zend_class_entry *zend_ce_dict_collection;
+ZEND_API zend_object_handlers zend_seq_collection_object_handlers;
+ZEND_API zend_object_handlers zend_dict_collection_object_handlers;
 
 static int zend_implement_collection(zend_class_entry *interface, zend_class_entry *class_type)
 {
@@ -39,12 +43,19 @@ static int zend_implement_collection(zend_class_entry *interface, zend_class_ent
 
 void zend_register_collection_ce(void)
 {
-	zend_ce_collection = register_class_Collection();
-	zend_ce_collection->interface_gets_implemented = zend_implement_collection;
+	zend_ce_seq_collection = register_class_SeqCollection();
+	zend_ce_seq_collection->interface_gets_implemented = zend_implement_collection;
 
-	memcpy(&zend_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zend_collection_object_handlers.clone_obj = NULL;
-	zend_collection_object_handlers.compare = zend_objects_not_comparable;
+	memcpy(&zend_seq_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_seq_collection_object_handlers.clone_obj = NULL;
+	zend_seq_collection_object_handlers.compare = zend_objects_not_comparable;
+
+	zend_ce_dict_collection = register_class_DictCollection();
+	zend_ce_dict_collection->interface_gets_implemented = zend_implement_collection;
+
+	memcpy(&zend_dict_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_dict_collection_object_handlers.clone_obj = NULL;
+	zend_dict_collection_object_handlers.compare = zend_objects_not_comparable;
 }
 
 void zend_collection_add_interfaces(zend_class_entry *ce)
@@ -57,17 +68,32 @@ void zend_collection_add_interfaces(zend_class_entry *ce)
 
 	ce->interface_names = erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 
-	ce->interface_names[num_interfaces_before].name = zend_string_copy(zend_ce_collection->name);
-	ce->interface_names[num_interfaces_before].lc_name = ZSTR_INIT_LITERAL("collection", 0);
+	switch (ce->collection_data_structure) {
+		case ZEND_COLLECTION_SEQ:
+			ce->interface_names[num_interfaces_before].name = zend_string_copy(zend_ce_seq_collection->name);
+			ce->interface_names[num_interfaces_before].lc_name = ZSTR_INIT_LITERAL("seqcollection", 0);
+			ce->default_object_handlers = &zend_seq_collection_object_handlers;
+			break;
+		case ZEND_COLLECTION_DICT:
+			ce->interface_names[num_interfaces_before].name = zend_string_copy(zend_ce_dict_collection->name);
+			ce->interface_names[num_interfaces_before].lc_name = ZSTR_INIT_LITERAL("dictcollection", 0);
+			ce->default_object_handlers = &zend_dict_collection_object_handlers;
+			break;
+	}
 
-	ce->default_object_handlers = &zend_collection_object_handlers;
 }
 
 void zend_collection_register_handlers(zend_class_entry *ce)
 {
-	memcpy(&zend_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zend_collection_object_handlers.clone_obj = NULL;
-	zend_collection_object_handlers.compare = zend_objects_not_comparable;
+	memcpy(&zend_seq_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_seq_collection_object_handlers.clone_obj = NULL;
+	zend_seq_collection_object_handlers.compare = zend_objects_not_comparable;
+	ce->default_object_handlers = &zend_seq_collection_object_handlers;
+
+	memcpy(&zend_dict_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	zend_dict_collection_object_handlers.clone_obj = NULL;
+	zend_dict_collection_object_handlers.compare = zend_objects_not_comparable;
+	ce->default_object_handlers = &zend_dict_collection_object_handlers;
 
 	ce->default_object_handlers = &zend_collection_object_handlers;
 }

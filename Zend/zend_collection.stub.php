@@ -2,6 +2,12 @@
 
 /** @generate-class-entries */
 
-interface Collection
+interface SeqCollection
 {
+	public function add(mixed $value) : void;
+}
+
+interface DictCollection
+{
+	public function add(mixed $key, mixed $value) : void;
 }
