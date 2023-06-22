@@ -627,24 +627,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	pcre_cache_entry *ret;
 
 	if (locale_aware && BG(ctype_string)) {
-		key = zend_string_concat3(
-			ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)),
-			ZSTR_VAL(regex), ZSTR_LEN(regex),
-#ifdef HAVE_PCRE_JIT_SUPPORT
-			PCRE_G(jit) ? "1" : "0", 1
-#else
-			"", 0
-#endif
-		);
-	} else {
-#ifdef HAVE_PCRE_JIT_SUPPORT
 		key = zend_string_concat2(
-			ZSTR_VAL(regex), ZSTR_LEN(regex),
-			PCRE_G(jit) ? "1" : "0", 1
-		);
-#else
+			ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)),
+			ZSTR_VAL(regex), ZSTR_LEN(regex));
+	} else {
 		key = regex;
-#endif
 	}
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
@@ -799,7 +786,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		return NULL;
 	}
 
-	if (locale_aware && BG(ctype_string)) {
+	if (key != regex) {
 		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(ctype_string));
 		if (!tables) {
 			zend_string *_k;
