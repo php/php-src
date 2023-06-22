@@ -1489,7 +1489,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 {
 	zval *ppid;
 	zval *data;
-	char *p, *value;
+	char *value;
 	size_t lensess;
 
 	switch (PS(session_status)) {
@@ -1556,21 +1556,6 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 				ZVAL_DEREF(data);
 				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
 					ppid2sid(ppid);
-				}
-			}
-			/* Check the REQUEST_URI symbol for a string of the form
-			 * '<session-name>=<session-id>' to allow URLs of the form
-			 * http://yoursite/<session-name>=<session-id>/script.php */
-			if (!PS(id) && zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER)) == SUCCESS &&
-				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
-				Z_TYPE_P(data) == IS_STRING &&
-				(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
-				p[lensess] == '='
-				) {
-				char *q;
-				p += lensess + 1;
-				if ((q = strpbrk(p, "/?\\"))) {
-					PS(id) = zend_string_init(p, q - p, 0);
 				}
 			}
 			/* Check whether the current request was referred to by

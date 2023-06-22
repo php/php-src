@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Mangle PCRE regex cache key with JIT option. (mvorisek)
 
+- Session:
+  . Removed broken url support for transferring session ID. (ilutov)
+
 06 Jul 2023, PHP 8.2.8
 
 - CLI:
