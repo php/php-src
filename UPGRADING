@@ -52,6 +52,9 @@ PHP 8.3 UPGRADE NOTES
   . C functions that have a return type of void now return null instead of
     returning the following object object(FFI\CData:void) { }
 
+- Filesystem:
+  . file() flags error check now catches all invalid flags, notably FILE_APPEND, previously some invalid flags were silently accepted ( https://github.com/php/php-src/pull/11483 )
+
 ========================================
 2. New Features
 ========================================
@@ -329,3 +332,6 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- Filesystem:
+  . file() flags error check is now about 7% faster ( https://github.com/php/php-src/pull/11483 )
