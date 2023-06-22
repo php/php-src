@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.22
 
+- CLI:
+  . Fix interrupted CLI output causing the process to exit. (nielsdos)
+
 - Date:
   . Fixed bug GH-11368 (Date modify returns invalid datetime). (Derick)
 
