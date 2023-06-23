@@ -4981,6 +4981,12 @@ static void init_check_utf8(void)
 
 #if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
 
+/* GCC prior to version 8 does not define all intrinsics. See GH-11514.
+ * Use a workaround from https://stackoverflow.com/questions/32630458/setting-m256i-to-the-value-of-two-m128i-values */
+#if defined(__GNUC__) && !defined(__llvm__) && !defined(__INTEL_COMPILER) && __GNUC__ < 8
+# define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
+#endif
+
 /* Take (256-bit) `hi` and `lo` as a 512-bit value, shift down by some
  * number of bytes, then take the low 256 bits
  * This is used to take some number of trailing bytes from the previous 32-byte
