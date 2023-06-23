@@ -39,6 +39,9 @@
 #define PREG_GREP_INVERT			(1<<0)
 
 #define PREG_JIT                    (1<<3)
+/* Whether JIT compiling has been attempted. This is necessary to avoid retrying JIT compilation
+ * repeatedly when compilation fails. */
+#define PREG_JIT_ATTEMPTED          (1<<4)
 
 #define PCRE_CACHE_SIZE 4096
 
@@ -585,6 +588,30 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, co
 }
 /* }}} */
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+static uint32_t pcre_jit_compile_regex(pcre2_code *re) {
+	int rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
+	if (EXPECTED(rc >= 0)) {
+		size_t jit_size = 0;
+		if (!pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, &jit_size) && jit_size > 0) {
+			return (PREG_JIT|PREG_JIT_ATTEMPTED);
+		}
+	} else if (rc == PCRE2_ERROR_NOMEMORY) {
+		php_error_docref(NULL, E_WARNING,
+			"Allocation of JIT memory failed, PCRE JIT will be disabled. "
+			"This is likely caused by security restrictions. "
+			"Either grant PHP permission to allocate executable memory, or set pcre.jit=0");
+		PCRE_G(jit) = 0;
+	} else {
+		PCRE2_UCHAR error[128];
+		pcre2_get_error_message(rc, error, sizeof(error));
+		php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
+	}
+	return PREG_JIT_ATTEMPTED;
+}
+#endif
+
 /* {{{ pcre_get_compiled_regex_cache */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware)
 {
@@ -626,7 +653,13 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		return (pcre_cache_entry*)Z_PTR_P(zv);
+		pcre_cache_entry *pce = (pcre_cache_entry*)Z_PTR_P(zv);
+#ifdef HAVE_PCRE_JIT_SUPPORT
+		if (!(pce->preg_options & PREG_JIT_ATTEMPTED) && PCRE_G(jit)) {
+			pce->preg_options |= pcre_jit_compile_regex(re);
+		}
+#endif
+		return pce;
 	}
 
 	p = ZSTR_VAL(regex);
@@ -806,24 +839,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (PCRE_G(jit)) {
-		/* Enable PCRE JIT compiler */
-		rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
-		if (EXPECTED(rc >= 0)) {
-			size_t jit_size = 0;
-			if (!pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, &jit_size) && jit_size > 0) {
-				poptions |= PREG_JIT;
-			}
-		} else if (rc == PCRE2_ERROR_NOMEMORY) {
-			php_error_docref(NULL, E_WARNING,
-				"Allocation of JIT memory failed, PCRE JIT will be disabled. "
-				"This is likely caused by security restrictions. "
-				"Either grant PHP permission to allocate executable memory, or set pcre.jit=0");
-			PCRE_G(jit) = 0;
-		} else {
-			pcre2_get_error_message(rc, error, sizeof(error));
-			php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
-			pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-		}
+		poptions |= pcre_jit_compile_regex(re);
 	}
 #endif
 	efree(pattern);
@@ -1263,7 +1279,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if ((pce->preg_options & PREG_JIT) && options) {
+	if ((pce->preg_options & PREG_JIT) && options && PCRE_G(jit)) {
 		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	} else
@@ -1405,7 +1421,7 @@ error:
 
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if ((pce->preg_options & PREG_JIT)) {
+		if ((pce->preg_options & PREG_JIT) && PCRE_G(jit)) {
 			if (PCRE2_UNSET == start_offset2 || start_offset2 > subject_len) {
 				pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
 				break;
@@ -1625,7 +1641,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if ((pce->preg_options & PREG_JIT) && options) {
+	if ((pce->preg_options & PREG_JIT) && options && PCRE_G(jit)) {
 		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	} else
@@ -1800,7 +1816,7 @@ error:
 		}
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (pce->preg_options & PREG_JIT) {
+		if ((pce->preg_options & PREG_JIT) && PCRE_G(jit)) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
@@ -1881,7 +1897,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if ((pce->preg_options & PREG_JIT) && options) {
+	if ((pce->preg_options & PREG_JIT) && options && PCRE_G(jit)) {
 		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	} else
@@ -2008,7 +2024,7 @@ error:
 			break;
 		}
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if ((pce->preg_options & PREG_JIT)) {
+		if ((pce->preg_options & PREG_JIT) && PCRE_G(jit)) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
@@ -2551,7 +2567,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if ((pce->preg_options & PREG_JIT) && options) {
+	if ((pce->preg_options & PREG_JIT) && options && PCRE_G(jit)) {
 		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	} else
@@ -2654,7 +2670,7 @@ error:
 		}
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (pce->preg_options & PREG_JIT) {
+		if ((pce->preg_options & PREG_JIT) && PCRE_G(jit)) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
@@ -2894,7 +2910,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* Perform the match */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if ((pce->preg_options & PREG_JIT) && options) {
+		if ((pce->preg_options & PREG_JIT) && options && PCRE_G(jit)) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
