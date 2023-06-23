@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.9
 
+- CLI:
+  . Fix interrupted CLI output causing the process to exit. (nielsdos)
+
 - PDO SQLite:
   . Fix GH-11492 (Make test failure: ext/pdo_sqlite/tests/bug_42589.phpt).
     (KapitanOczywisty, CViniciusSDias)
