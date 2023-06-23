@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 
 - MBString:
   . Implement mb_str_pad() RFC. (nielsdos)
+  . Fixed bug GH-11514 (PHP 8.3 build fails with --enable-mbstring enabled).
+    (nielsdos)
 
 22 Jun 2023, PHP 8.3.0alpha2
 
