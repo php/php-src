@@ -14,6 +14,9 @@ $intlcal->setTime(strtotime('2012-02-29 05:06:07 +0000') * 1000);
 //print_R($intlcal);
 var_dump($intlcal->isSet(IntlCalendar::FIELD_MONTH));
 var_dump($intlcal->clear(IntlCalendar::FIELD_MONTH));
+if (defined('IntlCalendar::FIELD_ORDINAL_MONTH')) {
+    $intlcal->clear(IntlCalendar::FIELD_ORDINAL_MONTH);
+}
 var_dump($intlcal->isSet(IntlCalendar::FIELD_MONTH));
 //print_R($intlcal);
 var_dump(
@@ -26,4 +29,4 @@ bool(true)
 bool(true)
 bool(false)
 float(1327813567000)
-float(1327813567000)
+float(1327813567000)
