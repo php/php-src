@@ -1356,7 +1356,7 @@ static void pcntl_signal_handler(int signo)
 		 *       We therefore cannot avoid the first waitpid() call. */
 		int status;
 		pid_t pid;
-		do {
+		while (true) {
 			do {
 				errno = 0;
 				pid = waitpid(WAIT_ANY, &status, WNOHANG);
@@ -1381,7 +1381,7 @@ static void pcntl_signal_handler(int signo)
 			} else {
 				break;
 			}
-		} while (pid);
+		}
 	} else {
 single_signal:;
 		psig->signo = signo;
