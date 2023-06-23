@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
+ * Stub hash: 83df0ee51c0d1923855ade64b2138b7980bcab1c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -105,6 +105,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, _IS_B
 	ZEND_ARG_TYPE_INFO(0, src_width, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, src_height, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GD_COPY_ROTATED)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyrotated, 0, 9, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, dst_image, GdImage, 0)
+	ZEND_ARG_OBJ_INFO(0, src_image, GdImage, 0)
+	ZEND_ARG_TYPE_INFO(0, dst_x, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, dst_y, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, src_x, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, src_y, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, src_width, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, src_height, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, angle, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 #if defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagegrabwindow, 0, 1, GdImage, MAY_BE_FALSE)
@@ -595,6 +609,9 @@ ZEND_FUNCTION(imagecolorresolvealpha);
 ZEND_FUNCTION(imagecolorclosestalpha);
 ZEND_FUNCTION(imagecolorexactalpha);
 ZEND_FUNCTION(imagecopyresampled);
+#if defined(HAVE_GD_COPY_ROTATED)
+ZEND_FUNCTION(imagecopyrotated);
+#endif
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(imagegrabwindow);
 #endif
@@ -736,6 +753,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecolorclosestalpha, arginfo_imagecolorclosestalpha)
 	ZEND_FE(imagecolorexactalpha, arginfo_imagecolorexactalpha)
 	ZEND_FE(imagecopyresampled, arginfo_imagecopyresampled)
+#if defined(HAVE_GD_COPY_ROTATED)
+	ZEND_FE(imagecopyrotated, arginfo_imagecopyrotated)
+#endif
 #if defined(PHP_WIN32)
 	ZEND_FE(imagegrabwindow, arginfo_imagegrabwindow)
 #endif
