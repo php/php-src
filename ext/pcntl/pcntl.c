@@ -1055,21 +1055,64 @@ static void pcntl_signal_handler(int signo)
 		/* oops, too many signals for us to track, so we'll forget about this one */
 		return;
 	}
-	PCNTL_G(spares) = psig->next;
 
-	psig->signo = signo;
-	psig->next = NULL;
+	struct php_pcntl_pending_signal *psig_first = psig;
+
+	/* Standard signals may be merged into a single one.
+	 * POSIX specifies that SIGCHLD has the si_pid field (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/signal.h.html),
+	 * so we'll handle the merging for that signal.
+	 * See also: https://www.gnu.org/software/libc/manual/html_node/Merged-Signals.html */
+	if (signo == SIGCHLD) {
+		/* Note: The first waitpid result is not necessarily the pid that was passed above!
+		 *       We therefore cannot avoid the first waitpid() call. */
+		int status;
+		pid_t pid;
+		while (true) {
+			do {
+				errno = 0;
+				/* Although Linux specifies that WNOHANG will never result in EINTR, POSIX doesn't say so:
+				 * https://pubs.opengroup.org/onlinepubs/9699919799/functions/waitpid.html */
+				pid = waitpid(WAIT_ANY, &status, WNOHANG);
+			} while (pid <= 0 && errno == EINTR);
+			if (pid <= 0) {
+				if (UNEXPECTED(psig == psig_first)) {
+					/* Don't handle multiple, revert back to the single signal handling. */
+					goto single_signal;
+				}
+				break;
+			}
+
+			psig->signo = signo;
 
 #ifdef HAVE_STRUCT_SIGINFO_T
-	psig->siginfo = *siginfo;
+			psig->siginfo = *siginfo;
+			psig->siginfo.si_pid = pid;
 #endif
+
+			if (EXPECTED(psig->next)) {
+				psig = psig->next;
+			} else {
+				break;
+			}
+		}
+	} else {
+single_signal:;
+		psig->signo = signo;
+
+#ifdef HAVE_STRUCT_SIGINFO_T
+		psig->siginfo = *siginfo;
+#endif
+	}
+
+	PCNTL_G(spares) = psig->next;
+	psig->next = NULL;
 
 	/* the head check is important, as the tick handler cannot atomically clear both
 	 * the head and tail */
 	if (PCNTL_G(head) && PCNTL_G(tail)) {
-		PCNTL_G(tail)->next = psig;
+		PCNTL_G(tail)->next = psig_first;
 	} else {
-		PCNTL_G(head) = psig;
+		PCNTL_G(head) = psig_first;
 	}
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = 1;
