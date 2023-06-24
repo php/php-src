@@ -352,8 +352,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-	BASIC_MINIT_SUBMODULE(hrtime)
-
 	return SUCCESS;
 }
 /* }}} */
