@@ -69,6 +69,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_fibers.h"
+#include "zend_time.h"
 
 #ifndef ZEND_GC_DEBUG
 # define ZEND_GC_DEBUG 0
@@ -219,6 +220,11 @@ typedef struct _zend_gc_globals {
 
 	uint32_t gc_runs;
 	uint32_t collected;
+
+	zend_time_t activated_at;
+	zend_time_t collector_time;
+	zend_time_t dtor_time;
+	zend_time_t free_time;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -439,6 +445,9 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 
 	gc_globals->gc_runs = 0;
 	gc_globals->collected = 0;
+	gc_globals->collector_time = 0;
+	gc_globals->dtor_time = 0;
+	gc_globals->free_time = 0;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -479,6 +488,10 @@ void gc_reset(void)
 		GC_G(gc_runs) = 0;
 		GC_G(collected) = 0;
 
+		GC_G(collector_time) = 0;
+		GC_G(dtor_time) = 0;
+		GC_G(free_time) = 0;
+
 #if GC_BENCH
 		GC_G(root_buf_length) = 0;
 		GC_G(root_buf_peak) = 0;
@@ -488,6 +501,8 @@ void gc_reset(void)
 		GC_G(zval_marked_grey) = 0;
 #endif
 	}
+
+	GC_G(activated_at) = zend_monotonic_time();
 }
 
 ZEND_API bool gc_enable(bool enable)
@@ -1469,6 +1484,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 	bool should_rerun_gc = 0;
 	bool did_rerun_gc = 0;
 
+	zend_time_t start_time = zend_monotonic_time();
+
 rerun_gc:
 	if (GC_G(num_roots)) {
 		int count;
@@ -1482,6 +1499,7 @@ rerun_gc:
 		stack.next = NULL;
 
 		if (GC_G(gc_active)) {
+			GC_G(collector_time) += zend_monotonic_time() - start_time;
 			return 0;
 		}
 
@@ -1561,6 +1579,7 @@ rerun_gc:
 			 *
 			 * The root buffer might be reallocated during destructors calls,
 			 * make sure to reload pointers as necessary. */
+			zend_time_t dtor_start_time = zend_monotonic_time();
 			idx = GC_FIRST_ROOT;
 			while (idx != end) {
 				current = GC_IDX2PTR(idx);
@@ -1582,11 +1601,13 @@ rerun_gc:
 				}
 				idx++;
 			}
+			GC_G(dtor_time) += zend_monotonic_time() - dtor_start_time;
 
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
 				zend_get_gc_buffer_release();
 				zend_fiber_switch_unblock();
+				GC_G(collector_time) += zend_monotonic_time() - start_time;
 				return 0;
 			}
 		}
@@ -1595,6 +1616,7 @@ rerun_gc:
 
 		/* Destroy zvals. The root buffer may be reallocated. */
 		GC_TRACE("Destroying zvals");
+		zend_time_t free_start_time = zend_monotonic_time();
 		idx = GC_FIRST_ROOT;
 		while (idx != end) {
 			current = GC_IDX2PTR(idx);
@@ -1645,6 +1667,8 @@ rerun_gc:
 			current++;
 		}
 
+		GC_G(free_time) += zend_monotonic_time() - free_start_time;
+
 		zend_fiber_switch_unblock();
 
 		GC_TRACE("Collection finished");
@@ -1666,6 +1690,7 @@ rerun_gc:
 finish:
 	zend_get_gc_buffer_release();
 	zend_gc_root_tmpvars();
+	GC_G(collector_time) += zend_monotonic_time() - start_time;
 	return total_count;
 }
 
@@ -1679,6 +1704,10 @@ ZEND_API void zend_gc_get_status(zend_gc_status *status)
 	status->threshold = GC_G(gc_threshold);
 	status->buf_size = GC_G(buf_size);
 	status->num_roots = GC_G(num_roots);
+	status->application_time = zend_monotonic_time() - GC_G(activated_at);
+	status->collector_time = GC_G(collector_time);
+	status->dtor_time = GC_G(dtor_time);
+	status->free_time = GC_G(free_time);
 }
 
 ZEND_API zend_get_gc_buffer *zend_get_gc_buffer_create(void) {
