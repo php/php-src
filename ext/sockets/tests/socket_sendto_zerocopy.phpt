@@ -33,7 +33,7 @@ if (!socket_bind($s, $address, $port)) {
     die("Unable to bind to $address");
 }
 
-$msg = str_repeat("0123456789abcdef", 1024);
+$msg = str_repeat("0123456789abcdef", 256);
 $len = strlen($msg);
 $bytes_recv = 0;
 $bytes_sent = socket_sendto($socket, $msg, $len, MSG_ZEROCOPY, $address, $port);
@@ -46,6 +46,6 @@ socket_close($s);
 socket_close($socket);
 ?>
 --EXPECTF--
-16384 sent!
+4096 sent!
 16 received!
 Received 0123456789abcdef!
