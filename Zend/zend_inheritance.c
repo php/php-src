@@ -1946,6 +1946,31 @@ static zend_class_entry *fixup_trait_scope(const zend_function *fn, zend_class_e
 	return fn->common.scope->ce_flags & ZEND_ACC_TRAIT ? ce : fn->common.scope;
 }
 
+/* If the type was resolved then either the zend_string pointer is different, or the zend_type_list is */
+static inline bool zend_was_type_resolved(zend_type original_type, zend_type resolved_type)
+{
+	return original_type.ptr != resolved_type.ptr;
+}
+
+static zend_type zend_resolve_name_type(zend_type type, const zend_class_entry *const ce)
+{
+	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(type));
+	if (ZEND_TYPE_IS_RELATIVE_SELF(type)) {
+		zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
+		return resolved_type;
+	} else if (ZEND_TYPE_IS_RELATIVE_PARENT(type)) {
+		if (!ce->parent) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use trait which has \"parent\" as a type when current class scope has no parent");
+			return (zend_type) ZEND_TYPE_INIT_NONE(0);
+		}
+		zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->parent->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
+		return resolved_type;
+	} else {
+		return type;
+	}
+}
+
 /* We cannot modify the type in-place (e.g. via a pointer) as it is written to SHM */
 static zend_type zend_resolve_single_type(zend_type type, const zend_class_entry *const ce)
 {
@@ -1956,20 +1981,7 @@ static zend_type zend_resolve_single_type(zend_type type, const zend_class_entry
 
 	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(type) || (ZEND_TYPE_HAS_LIST(type)));
 	if (ZEND_TYPE_HAS_NAME(type)) {
-		if (ZEND_TYPE_IS_RELATIVE_SELF(type)) {
-			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
-			return resolved_type;
-		} else if (ZEND_TYPE_IS_RELATIVE_PARENT(type)) {
-			if (!ce->parent) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot use trait which has \"parent\" as a type when current class scope has no parent");
-				return (zend_type) ZEND_TYPE_INIT_NONE(0);
-			}
-			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->parent->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
-			return resolved_type;
-		} else {
-			return type;
-		}
+		return zend_resolve_name_type(type, ce);
 	}
 
 	/* Intersection types cannot have relative class_types */
@@ -1977,41 +1989,41 @@ static zend_type zend_resolve_single_type(zend_type type, const zend_class_entry
 		return type;
 	}
 
-	const zend_type_list *union_type_list = ZEND_TYPE_LIST(type);
-	zend_type *single_type;
+	zend_type_list *union_type_list = ZEND_TYPE_LIST(type);
+	bool has_resolved_type = false;
+	/* We don't use ZEND_TYPE_LIST_FOREACH() as we need to keep track of the array index */
+	for (uint32_t i = 0; i < union_type_list->num_types; i++) {
+		zend_type single_type = union_type_list->types[i];
 
-	/* TODO Only do allocation if need to resolve types, as type is stored in SHM */
-	zend_type_list *new_union_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(union_type_list->num_types));
-	memcpy(new_union_type_list, union_type_list, ZEND_TYPE_LIST_SIZE(union_type_list->num_types));
-
-	ZEND_TYPE_LIST_FOREACH(new_union_type_list, single_type) {
-		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*single_type) || (ZEND_TYPE_IS_INTERSECTION(*single_type)));
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(single_type) || (ZEND_TYPE_IS_INTERSECTION(single_type)));
 
 		/* Intersections types cannot have self or parent */
-		if (ZEND_TYPE_IS_INTERSECTION(*single_type)) {
+		if (ZEND_TYPE_IS_INTERSECTION(single_type)) {
 			continue;
 		}
-		if (ZEND_TYPE_IS_RELATIVE_SELF(*single_type)) {
-			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(*single_type));
-			memmove(single_type, &resolved_type, sizeof(zend_type));
-		}
-		if (ZEND_TYPE_IS_RELATIVE_PARENT(*single_type)) {
-			if (!ce->parent) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Cannot use trait which has \"parent\" as a type when current class scope has no parent");
-				return (zend_type) ZEND_TYPE_INIT_NONE(0);
-			}
-			zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->parent->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(*single_type));
-			memmove(single_type, &resolved_type, sizeof(zend_type));
-		}
-	} ZEND_TYPE_LIST_FOREACH_END();
 
-	zend_type new_type = (zend_type) ZEND_TYPE_INIT_NONE(0);
-	ZEND_TYPE_SET_LIST(new_type, new_union_type_list);
-	ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_ARENA_BIT;
-	/* Inform that the type list is a union type */
-	ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_UNION_BIT;
-	return new_type;
+		zend_type resolved_type = zend_resolve_name_type(single_type, ce);
+		if (zend_was_type_resolved(type, resolved_type)) {
+			if (!has_resolved_type) {
+				const zend_type_list *old_union_type_list = ZEND_TYPE_LIST(type);
+				union_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(old_union_type_list->num_types));
+				memcpy(union_type_list, old_union_type_list, ZEND_TYPE_LIST_SIZE(old_union_type_list->num_types));
+				has_resolved_type = true;
+			}
+			union_type_list->types[i] = resolved_type;
+		}
+	}
+
+	if (has_resolved_type) {
+		zend_type new_type = (zend_type) ZEND_TYPE_INIT_NONE(0);
+		ZEND_TYPE_SET_LIST(new_type, union_type_list);
+		ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_ARENA_BIT;
+		/* Inform that the type list is a union type */
+		ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_UNION_BIT;
+		return new_type;
+	} else {
+		return type;
+	}
 }
 
 static void zend_resolve_trait_relative_class_types(zend_function *const fn, const zend_class_entry *const ce)
@@ -2037,7 +2049,7 @@ static void zend_resolve_trait_relative_class_types(zend_function *const fn, con
 	for (uint32_t i = 0; i < num_args + has_return_type; i++) {
 		zend_type type = new_arg_infos[i].type;
 		zend_type resolved_type = zend_resolve_single_type(type, ce);
-		if (type.ptr != resolved_type.ptr) {
+		if (zend_was_type_resolved(type, resolved_type)) {
 			if (!has_resolved_type) {
 				new_arg_infos = zend_arena_alloc(&CG(arena), allocated_size);
 				memcpy(new_arg_infos, fn->common.arg_info - has_return_type, allocated_size);
