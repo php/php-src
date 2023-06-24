@@ -2029,16 +2029,23 @@ static void zend_resolve_trait_relative_class_types(zend_function *const fn, con
 	/* Variadic parameters are not counted as part of the standard number of arguments */
 	bool has_variadic_type = fn->common.fn_flags & ZEND_ACC_VARIADIC;
 	uint32_t num_args = fn->common.num_args + has_variadic_type;
-	/* TODO Only do allocation if need to resolve types, as arg_info is stored in SHM */
 	size_t allocated_size = sizeof(zend_arg_info) * (has_return_type + num_args);
 
-	zend_arg_info *new_arg_infos = zend_arena_alloc(&CG(arena), allocated_size);
-	memcpy(new_arg_infos, fn->common.arg_info - has_return_type, allocated_size);
-	fn->common.arg_info = new_arg_infos + has_return_type;
+	zend_arg_info *new_arg_infos = fn->common.arg_info - has_return_type;
+	bool has_resolved_type = false;
 
 	for (uint32_t i = 0; i < num_args + has_return_type; i++) {
 		zend_type type = new_arg_infos[i].type;
-		new_arg_infos[i].type = zend_resolve_single_type(type, ce);
+		zend_type resolved_type = zend_resolve_single_type(type, ce);
+		if (type.ptr != resolved_type.ptr) {
+			if (!has_resolved_type) {
+				new_arg_infos = zend_arena_alloc(&CG(arena), allocated_size);
+				memcpy(new_arg_infos, fn->common.arg_info - has_return_type, allocated_size);
+				fn->common.arg_info = new_arg_infos + has_return_type;
+				has_resolved_type = true;
+			}
+			new_arg_infos[i].type = resolved_type;
+		}
 	}
 }
 
