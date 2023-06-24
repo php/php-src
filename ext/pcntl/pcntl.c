@@ -1362,7 +1362,7 @@ static void pcntl_signal_handler(int signo)
 				errno = 0;
 				/* Although Linux specifies that WNOHANG will never result in EINTR, POSIX doesn't say so:
 				 * https://pubs.opengroup.org/onlinepubs/9699919799/functions/waitpid.html */
-				pid = waitpid(WAIT_ANY, &status, WNOHANG);
+				pid = waitpid(WAIT_ANY, &status, WNOHANG | WUNTRACED);
 			} while (pid <= 0 && errno == EINTR);
 			if (pid <= 0) {
 				if (UNEXPECTED(psig == psig_first)) {
