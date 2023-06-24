@@ -2970,36 +2970,23 @@ function settings2array(array $settings, &$ini_settings): void
 function settings2params(array $ini_settings): string
 {
     $settings = '';
-
+    $deep = null;
     foreach ($ini_settings as $name => $value) {
-        if (IS_WINDOWS) {
-            if (is_array($value)) {
-                foreach ($value as $val) {
-                    $val = addslashes($val);
-                    $settings .= " -d \"$name=$val\"";
-                }
-            } else {
-                if (!empty($value) && $value[0] == '"') {
-                    $len = strlen($value);
-
-                    if ($value[$len - 1] == '"') {
-                        $value[0] = "'";
-                        $value[$len - 1] = "'";
-                    }
-                } else {
-                    $value = addslashes($value);
-                }
-
-                $settings .= " -d \"$name=$value\"";
-            }
+        if (is_array($value)) {
+            $deep = true;
         } else {
-            // !IS_WINDOWS
-            foreach ((is_array($value) ? $value : [$value]) as $val) {
-                $settings .= " -d " . escapeshellarg($name) . "=" . escapeshellarg($val);
+            $deep = false;
+            $value = [$value];
+        }
+        foreach ($value as $val) {
+            if (IS_WINDOWS && $deep && strlen($val) >= 2 && str_starts_with($val, '"') && str_ends_with($val, '"')) {
+                // hack introduced in cee97080d1f5c7469d4f877698f91ef9f97a3199
+                // for unexplained/unknown reasons
+                $val = substr($val, strlen('"'), -strlen('"'));
             }
+            $settings .= " -d " . escapeshellarg($name) . '=' . escapeshellarg($val);
         }
     }
-
     return $settings;
 }
 
