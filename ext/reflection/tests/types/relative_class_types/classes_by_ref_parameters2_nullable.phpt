@@ -1,5 +1,5 @@
 --TEST--
-ReflectionTypes of relative class types (self, parent) in classes, parameter types
+ReflectionTypes of relative class types (self, parent) in classes, by-ref parameter nullable types
 --FILE--
 <?php
 
@@ -8,12 +8,12 @@ class A {
 }
 
 class B extends A {
-    public function foo(self ...$o) { return $o; }
+    public function foo(?self &$o) { return $o; }
 }
 
 class C extends B {
-    public function bar(parent ...$o) { return $o; }
-    public function ping(self ...$o) { return $o; }
+    public function bar(?parent &$o) { return $o; }
+    public function ping(?self &$o) { return $o; }
 }
 
 class D extends C {}
@@ -56,48 +56,48 @@ foreach ($instances as $instance) {
 Class: A
 Class: B
 	Method: foo
-		Type: self
+		Type: ?self
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: ?B
 			Instance of: ReflectionNamedType
-				B::foo(): Argument #1 must be of type B, A given, called in %s on line %d
+				B::foo(): Argument #1 ($o) must be of type ?B, A given, called in %s on line %d
 Class: C
 	Method: bar
-		Type: parent
+		Type: ?parent
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: ?B
 			Instance of: ReflectionNamedType
-				C::bar(): Argument #1 must be of type B, A given, called in %s on line %d
+				C::bar(): Argument #1 ($o) must be of type ?B, A given, called in %s on line %d
 	Method: ping
-		Type: self
+		Type: ?self
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
+			Resolved Type: ?C
 			Instance of: ReflectionNamedType
-				C::ping(): Argument #1 must be of type C, A given, called in %s on line %d
-				C::ping(): Argument #1 must be of type C, B given, called in %s on line %d
+				C::ping(): Argument #1 ($o) must be of type ?C, A given, called in %s on line %d
+				C::ping(): Argument #1 ($o) must be of type ?C, B given, called in %s on line %d
 	Method: foo
-		Type: self
+		Type: ?self
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: ?B
 			Instance of: ReflectionNamedType
-				B::foo(): Argument #1 must be of type B, A given, called in %s on line %d
+				B::foo(): Argument #1 ($o) must be of type ?B, A given, called in %s on line %d
 Class: D
 	Method: bar
-		Type: parent
+		Type: ?parent
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: ?B
 			Instance of: ReflectionNamedType
-				C::bar(): Argument #1 must be of type B, A given, called in %s on line %d
+				C::bar(): Argument #1 ($o) must be of type ?B, A given, called in %s on line %d
 	Method: ping
-		Type: self
+		Type: ?self
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
+			Resolved Type: ?C
 			Instance of: ReflectionNamedType
-				C::ping(): Argument #1 must be of type C, A given, called in %s on line %d
-				C::ping(): Argument #1 must be of type C, B given, called in %s on line %d
+				C::ping(): Argument #1 ($o) must be of type ?C, A given, called in %s on line %d
+				C::ping(): Argument #1 ($o) must be of type ?C, B given, called in %s on line %d
 	Method: foo
-		Type: self
+		Type: ?self
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: ?B
 			Instance of: ReflectionNamedType
-				B::foo(): Argument #1 must be of type B, A given, called in %s on line %d
+				B::foo(): Argument #1 ($o) must be of type ?B, A given, called in %s on line %d
