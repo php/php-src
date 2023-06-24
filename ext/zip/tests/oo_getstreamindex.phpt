@@ -34,7 +34,11 @@ fclose($fp);
 
 echo "== Index, changed\n";
 $fp = $zip->getStreamIndex(1);
-var_dump($zip->status);
+if (version_compare(ZipArchive::LIBZIP_VERSION, "1.10.0", "<")) {
+    var_dump($zip->status === 15);
+} else {
+    var_dump($zip->status === 0);
+}
 $zip->clearError();
 
 echo "== Index, unchanged\n";
@@ -60,7 +64,7 @@ string(3) "foo"
 int(0)
 string(3) "foo"
 == Index, changed
-int(15)
+bool(true)
 == Index, unchanged
 int(0)
 string(3) "bar"
