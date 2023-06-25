@@ -2891,16 +2891,16 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 		if (nullsafe) {
-			if (obj_node.op_type == IS_TMP_VAR) {
+			if (obj_node.op_type & (IS_TMP_VAR | IS_VAR)) {
 				/* Flush delayed oplines */
 				zend_op *opline = NULL, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
 				uint32_t var = obj_node.u.op.var;
 				uint32_t count = zend_stack_count(&CG(delayed_oplines_stack));
 				uint32_t i = count;
 
-				while (i > 0 && oplines[i-1].result_type == IS_TMP_VAR && oplines[i-1].result.var == var) {
+				while (i > 0 && oplines[i-1].result_type & (IS_TMP_VAR | IS_VAR) && oplines[i-1].result.var == var) {
 					i--;
-					if (oplines[i].op1_type == IS_TMP_VAR) {
+					if (oplines[i].op1_type & (IS_TMP_VAR | IS_VAR)) {
 						var = oplines[i].op1.var;
 					} else {
 						break;
