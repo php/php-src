@@ -1022,7 +1022,7 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getDeclarationName(): string {
-        return implode('_', $this->name->parts);
+        return implode('_', $this->name->getParts());
     }
 
     public function getFunctionName(): string {
@@ -1034,12 +1034,12 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getArgInfoName(): string {
-        $underscoreName = implode('_', $this->name->parts);
+        $underscoreName = implode('_', $this->name->getParts());
         return "arginfo_$underscoreName";
     }
 
     public function getMethodSynopsisFilename(): string {
-        return implode('_', $this->name->parts);
+        return implode('_', $this->name->getParts());
     }
 
     public function getNameForAttributes(): string {
@@ -1073,7 +1073,7 @@ class MethodName implements FunctionOrMethodName {
     }
 
     public function getDeclarationClassName(): string {
-        return implode('_', $this->className->parts);
+        return implode('_', $this->className->getParts());
     }
 
     public function getDeclaration(): string {
@@ -2496,13 +2496,13 @@ class ClassInfo {
     {
         $params = [];
         foreach ($this->extends as $extends) {
-            $params[] = "zend_class_entry *class_entry_" . implode("_", $extends->parts);
+            $params[] = "zend_class_entry *class_entry_" . implode("_", $extends->getParts());
         }
         foreach ($this->implements as $implements) {
-            $params[] = "zend_class_entry *class_entry_" . implode("_", $implements->parts);
+            $params[] = "zend_class_entry *class_entry_" . implode("_", $implements->getParts());
         }
 
-        $escapedName = implode("_", $this->name->parts);
+        $escapedName = implode("_", $this->name->getParts());
 
         $code = '';
 
@@ -2527,7 +2527,7 @@ class ClassInfo {
             $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, class_{$escapedName}_methods);\n";
         } else {
             $code .= "\tzend_class_entry ce, *class_entry;\n\n";
-            if (count($this->name->parts) > 1) {
+            if (count($this->name->getParts()) > 1) {
                 $className = $this->name->getLast();
                 $namespace = addslashes((string) $this->name->slice(0, -1));
 
@@ -2548,7 +2548,7 @@ class ClassInfo {
 
         $implements = array_map(
             function (Name $item) {
-                return "class_entry_" . implode("_", $item->parts);
+                return "class_entry_" . implode("_", $item->getParts());
             },
             $this->type === "interface" ? $this->extends : $this->implements
         );
@@ -2917,7 +2917,7 @@ class ClassInfo {
     }
 
     public static function getClassSynopsisFilename(Name $name): string {
-        return strtolower(str_replace("_", "-", implode('-', $name->parts)));
+        return strtolower(str_replace("_", "-", implode('-', $name->getParts())));
     }
 
     public static function getClassSynopsisReference(Name $name): string {
@@ -3797,8 +3797,8 @@ function parseStubFile(string $code): FileInfo {
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
     $prettyPrinter = new class extends Standard {
-        protected function pName_FullyQualified(Name\FullyQualified $node) {
-            return implode('\\', $node->parts);
+        protected function pName_FullyQualified(Name\FullyQualified $node): string {
+            return implode('\\', $node->getParts());
         }
     };
 
@@ -4102,7 +4102,7 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
 
     $functionEntryName = "ext_functions";
     if ($className) {
-        $underscoreName = implode("_", $className->parts);
+        $underscoreName = implode("_", $className->getParts());
         $functionEntryName = "class_{$underscoreName}_methods";
     }
 
@@ -4685,7 +4685,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.15.1";
+    $version = "5.0.0alpha3";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
