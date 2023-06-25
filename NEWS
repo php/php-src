@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-11500 (Namespace reuse in createElementNS() generates wrong
     output). (nielsdos)
+  . Implemented DOMDocument::adoptNode(). Previously this always threw a
+    "not yet implemented" exception. (nielsdos)
 
 - Fileinfo:
   . Fix GH-11408 (Unable to build PHP 8.3.0 alpha 1 / fileinfo extension).
