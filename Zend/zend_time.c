@@ -86,7 +86,7 @@ zend_result zend_startup_time(void)
 
 #else
 	/* Timer unavailable. */
-# error "Monotonic timer unavailable"
+	return FAILURE;
 #endif
 
 	return SUCCESS;
