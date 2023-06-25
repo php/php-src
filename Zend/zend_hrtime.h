@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_TIME_H
-#define ZEND_TIME_H
+#ifndef ZEND_HRTIME_H
+#define ZEND_HRTIME_H
 
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -25,75 +25,78 @@
 # include <time.h>
 #endif
 
-#define ZEND_TIME_PLATFORM_POSIX   0
-#define ZEND_TIME_PLATFORM_WINDOWS 0
-#define ZEND_TIME_PLATFORM_APPLE   0
-#define ZEND_TIME_PLATFORM_HPUX    0
-#define ZEND_TIME_PLATFORM_AIX     0
+/* This file reuses code parts from the cross-platform timer library
+	Public Domain - 2011 Mattias Jansson / Rampant Pixels */
+
+#define ZEND_HRTIME_PLATFORM_POSIX   0
+#define ZEND_HRTIME_PLATFORM_WINDOWS 0
+#define ZEND_HRTIME_PLATFORM_APPLE   0
+#define ZEND_HRTIME_PLATFORM_HPUX    0
+#define ZEND_HRTIME_PLATFORM_AIX     0
 
 #if defined(_POSIX_TIMERS) && ((_POSIX_TIMERS > 0) || defined(__OpenBSD__)) && defined(_POSIX_MONOTONIC_CLOCK) && defined(CLOCK_MONOTONIC)
-# undef  ZEND_TIME_PLATFORM_POSIX
-# define ZEND_TIME_PLATFORM_POSIX 1
+# undef  ZEND_HRTIME_PLATFORM_POSIX
+# define ZEND_HRTIME_PLATFORM_POSIX 1
 #elif defined(_WIN32) || defined(_WIN64)
-# undef  ZEND_TIME_PLATFORM_WINDOWS
-# define ZEND_TIME_PLATFORM_WINDOWS 1
+# undef  ZEND_HRTIME_PLATFORM_WINDOWS
+# define ZEND_HRTIME_PLATFORM_WINDOWS 1
 #elif defined(__APPLE__)
-# undef  ZEND_TIME_PLATFORM_APPLE
-# define ZEND_TIME_PLATFORM_APPLE 1
+# undef  ZEND_HRTIME_PLATFORM_APPLE
+# define ZEND_HRTIME_PLATFORM_APPLE 1
 #elif (defined(__hpux) || defined(hpux)) || ((defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
-# undef  ZEND_TIME_PLATFORM_HPUX
-# define ZEND_TIME_PLATFORM_HPUX 1
+# undef  ZEND_HRTIME_PLATFORM_HPUX
+# define ZEND_HRTIME_PLATFORM_HPUX 1
 #elif defined(_AIX)
-# undef  ZEND_TIME_PLATFORM_AIX
-# define ZEND_TIME_PLATFORM_AIX 1
+# undef  ZEND_HRTIME_PLATFORM_AIX
+# define ZEND_HRTIME_PLATFORM_AIX 1
 #endif
 
-#define ZEND_MONOTONIC_TIME_AVAILABLE (ZEND_TIME_PLATFORM_POSIX || ZEND_TIME_PLATFORM_WINDOWS || ZEND_TIME_PLATFORM_APPLE || ZEND_TIME_PLATFORM_HPUX || ZEND_TIME_PLATFORM_AIX)
+#define ZEND_HRTIME_AVAILABLE (ZEND_HRTIME_PLATFORM_POSIX || ZEND_HRTIME_PLATFORM_WINDOWS || ZEND_HRTIME_PLATFORM_APPLE || ZEND_HRTIME_PLATFORM_HPUX || ZEND_HRTIME_PLATFORM_AIX)
 
 #include "zend_portability.h"
 #include "zend_types.h"
 
 BEGIN_EXTERN_C()
 
-#if ZEND_TIME_PLATFORM_WINDOWS
+#if ZEND_HRTIME_PLATFORM_WINDOWS
 
-extern double zend_timer_scale = .0;
+extern double zend_hrtime_timer_scale = .0;
 
-#elif ZEND_TIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE
 
 # include <mach/mach_time.h>
 # include <string.h>
-extern mach_timebase_info_data_t zend_timerlib_info;
+extern mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
 #endif
 
 #define ZEND_NANO_IN_SEC 1000000000
 
-typedef uint64_t zend_time_t;
+typedef uint64_t zend_hrtime_t;
 
-zend_result zend_startup_time(void);
+zend_result zend_startup_hrtime(void);
 
-static zend_always_inline zend_time_t zend_monotonic_time(void)
+static zend_always_inline zend_hrtime_t zend_hrtime(void)
 {
-#if ZEND_TIME_PLATFORM_WINDOWS
+#if ZEND_HRTIME_PLATFORM_WINDOWS
 	LARGE_INTEGER lt = {0};
 	QueryPerformanceCounter(&lt);
-	return (zend_time_t)((zend_time_t)lt.QuadPart * zend_timer_scale);
-#elif ZEND_TIME_PLATFORM_APPLE
-	return (zend_time_t)mach_absolute_time() * zend_timerlib_info.numer / zend_timerlib_info.denom;
-#elif ZEND_TIME_PLATFORM_POSIX
+	return (zend_hrtime_t)((zend_hrtime_t)lt.QuadPart * zend_timer_scale);
+#elif ZEND_HRTIME_PLATFORM_APPLE
+	return (zend_hrtime_t)mach_absolute_time() * zend_timerlib_info.numer / zend_timerlib_info.denom;
+#elif ZEND_HRTIME_PLATFORM_POSIX
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
 	if (0 == clock_gettime(CLOCK_MONOTONIC, &ts)) {
-		return ((zend_time_t) ts.tv_sec * (zend_time_t)ZEND_NANO_IN_SEC) + ts.tv_nsec;
+		return ((zend_hrtime_t) ts.tv_sec * (zend_hrtime_t)ZEND_NANO_IN_SEC) + ts.tv_nsec;
 	}
 	return 0;
-#elif ZEND_TIME_PLATFORM_HPUX
-	return (zend_time_t) gethrtime();
-#elif  ZEND_TIME_PLATFORM_AIX
+#elif ZEND_HRTIME_PLATFORM_HPUX
+	return (zend_hrtime_t) gethrtime();
+#elif  ZEND_HRTIME_PLATFORM_AIX
 	timebasestruct_t t;
 	read_wall_time(&t, TIMEBASE_SZ);
 	time_base_to_time(&t, TIMEBASE_SZ);
-	return (zend_time_t) t.tb_high * (zend_time_t)NANO_IN_SEC + t.tb_low;
+	return (zend_hrtime_t) t.tb_high * (zend_hrtime_t)NANO_IN_SEC + t.tb_low;
 #else
 	return 0;
 #endif
@@ -101,4 +104,4 @@ static zend_always_inline zend_time_t zend_monotonic_time(void)
 
 END_EXTERN_C()
 
-#endif /* ZEND_TIME_H */
+#endif /* ZEND_HRTIME_H */

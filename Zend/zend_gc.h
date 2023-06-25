@@ -24,7 +24,7 @@
 # define GC_BENCH 0
 #endif
 
-#include "zend_time.h"
+#include "zend_hrtime.h"
 
 BEGIN_EXTERN_C()
 
@@ -37,10 +37,10 @@ typedef struct _zend_gc_status {
 	uint32_t threshold;
 	uint32_t buf_size;
 	uint32_t num_roots;
-	zend_time_t application_time;
-	zend_time_t collector_time;
-	zend_time_t dtor_time;
-	zend_time_t free_time;
+	zend_hrtime_t application_time;
+	zend_hrtime_t collector_time;
+	zend_hrtime_t dtor_time;
+	zend_hrtime_t free_time;
 } zend_gc_status;
 
 ZEND_API extern int (*gc_collect_cycles)(void);

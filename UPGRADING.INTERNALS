@@ -67,9 +67,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   - zend_set_user_opcode_handler
   - zend_ssa_inference
 * Removed unused macros PHP_FNV1_32A_INIT and PHP_FNV1A_64_INIT. See GH-11114.
-* Removed ext/standard/hrtime.h, PHP_HRTIME_ macros, HRTIME_AVAILABLE, and
-  php_hrtime_current().
-* Added Zend/zend_time.h, ZEND_MONOTONIC_TIME_AVAILABLE, zend_monotonic_time()
+* ext/standard/hrtime.h was moved to Zend/zend_hrtime.h
+  * The prefix of PHP_HRTIME_ macros was changed to ZEND_HRTIME_
+  * The HRTIME_AVAILABLE macro was renamed to ZEND_HRTIME_AVAILABLE
+  * The ··php_hrtime_current() function was renamed to zend_hrtime()
 
 ========================
 2. Build system changes

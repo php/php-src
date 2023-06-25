@@ -16,7 +16,7 @@
  */
 
 #include "zend.h"
-#include "zend_time.h"
+#include "zend_hrtime.h"
 
 /* This file reuses code parts from the cross-platform timer library
 	Public Domain - 2011 Mattias Jansson / Rampant Pixels */
@@ -31,13 +31,13 @@
 
 # define WIN32_LEAN_AND_MEAN
 
-double zend_timer_scale = .0;
+double zend_hrtime_timer_scale = .0;
 
 #elif ZEND_TIME_PLATFORM_APPLE
 
 # include <mach/mach_time.h>
 # include <string.h>
-mach_timebase_info_data_t zend_timerlib_info;
+mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
 #elif ZEND_TIME_PLATFORM_HPUX
 
@@ -50,7 +50,7 @@ mach_timebase_info_data_t zend_timerlib_info;
 
 #endif
 
-zend_result zend_startup_time(void)
+zend_result zend_startup_hrtime(void)
 {
 #if ZEND_TIME_PLATFORM_WINDOWS
 
@@ -58,11 +58,11 @@ zend_result zend_startup_time(void)
 	if (!QueryPerformanceFrequency(&tf) || 0 == tf.QuadPart) {
 		return FAILURE;
 	}
-	zend_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_time_t)tf.QuadPart;
+	zend_hrtime_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_hrtime_t)tf.QuadPart;
 
 #elif ZEND_TIME_PLATFORM_APPLE
 
-	if (mach_timebase_info(&zend_timerlib_info)) {
+	if (mach_timebase_info(&zend_hrtime_timerlib_info)) {
 		return FAILURE;
 	}
 

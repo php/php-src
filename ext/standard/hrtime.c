@@ -16,7 +16,7 @@
  */
 
 #include "php.h"
-#include "zend_time.h"
+#include "zend_hrtime.h"
 
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 #define PHP_RETURN_HRTIME(t) RETURN_LONG((zend_long)t)
@@ -46,9 +46,9 @@
 	delivered timestamp is monotonic and cannot be adjusted. */
 PHP_FUNCTION(hrtime)
 {
-#if ZEND_MONOTONIC_TIME_AVAILABLE
+#if ZEND_HRTIME_AVAILABLE
 	bool get_as_num = 0;
-	zend_time_t t = zend_monotonic_time();
+	zend_hrtime_t t = zend_hrtime();
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -60,8 +60,8 @@ PHP_FUNCTION(hrtime)
 	} else {
 		array_init_size(return_value, 2);
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		add_next_index_long(return_value, (zend_long)(t / (zend_time_t)ZEND_NANO_IN_SEC));
-		add_next_index_long(return_value, (zend_long)(t % (zend_time_t)ZEND_NANO_IN_SEC));
+		add_next_index_long(return_value, (zend_long)(t / (zend_hrtime_t)ZEND_NANO_IN_SEC));
+		add_next_index_long(return_value, (zend_long)(t % (zend_hrtime_t)ZEND_NANO_IN_SEC));
 	}
 #else
 	RETURN_FALSE;
