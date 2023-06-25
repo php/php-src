@@ -128,7 +128,7 @@ PHP 8.3 UPGRADE NOTES
     cycle collection, in seconds
     "free_time" => float: Time freeing values during cycle collection, in
     seconds
-    See GH-9336, GH-???
+    See GH-9336, GH-11523
   . class_alias() now supports creating an alias of an internal class.
   . Setting `open_basedir` at runtime using `ini_set('open_basedir', ...);` no
     longer accepts paths containing the parent directory (`..`). Previously,
