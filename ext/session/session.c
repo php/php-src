@@ -2843,6 +2843,8 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->mod_user_is_open = 0;
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = 0;
+	ps_globals->session_started_filename = NULL;
+	ps_globals->session_started_lineno = 0;
 	/* Unset user defined handlers */
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_open);
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_close);
@@ -2865,8 +2867,6 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	PS(module_number) = module_number;
 
 	PS(session_status) = php_session_none;
-	PS(session_started_filename) = NULL;
-	PS(session_started_lineno) = 0;
 	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBMM
