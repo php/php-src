@@ -60,7 +60,7 @@ BEGIN_EXTERN_C()
 
 #if ZEND_HRTIME_PLATFORM_WINDOWS
 
-extern double zend_hrtime_timer_scale = .0;
+extern double zend_hrtime_timer_scale;
 
 #elif ZEND_HRTIME_PLATFORM_APPLE
 
