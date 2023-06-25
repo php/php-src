@@ -81,9 +81,9 @@ static zend_always_inline zend_hrtime_t zend_hrtime(void)
 #if ZEND_HRTIME_PLATFORM_WINDOWS
 	LARGE_INTEGER lt = {0};
 	QueryPerformanceCounter(&lt);
-	return (zend_hrtime_t)((zend_hrtime_t)lt.QuadPart * zend_timer_scale);
+	return (zend_hrtime_t)((zend_hrtime_t)lt.QuadPart * zend_hrtime_timer_scale);
 #elif ZEND_HRTIME_PLATFORM_APPLE
-	return (zend_hrtime_t)mach_absolute_time() * zend_timerlib_info.numer / zend_timerlib_info.denom;
+	return (zend_hrtime_t)mach_absolute_time() * zend_hrtime_timerlib_info.numer / zend_hrtime_timerlib_info.denom;
 #elif ZEND_HRTIME_PLATFORM_POSIX
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
 	if (0 == clock_gettime(CLOCK_MONOTONIC, &ts)) {

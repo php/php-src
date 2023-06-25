@@ -21,29 +21,29 @@
 /* This file reuses code parts from the cross-platform timer library
 	Public Domain - 2011 Mattias Jansson / Rampant Pixels */
 
-#if ZEND_TIME_PLATFORM_POSIX
+#if ZEND_HRTIME_PLATFORM_POSIX
 
 # include <unistd.h>
 # include <time.h>
 # include <string.h>
 
-#elif ZEND_TIME_PLATFORM_WINDOWS
+#elif ZEND_HRTIME_PLATFORM_WINDOWS
 
 # define WIN32_LEAN_AND_MEAN
 
 double zend_hrtime_timer_scale = .0;
 
-#elif ZEND_TIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE
 
 # include <mach/mach_time.h>
 # include <string.h>
 mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
-#elif ZEND_TIME_PLATFORM_HPUX
+#elif ZEND_HRTIME_PLATFORM_HPUX
 
 # include <sys/time.h>
 
-#elif ZEND_TIME_PLATFORM_AIX
+#elif ZEND_HRTIME_PLATFORM_AIX
 
 # include <sys/time.h>
 # include <sys/systemcfg.h>
@@ -52,7 +52,7 @@ mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
 zend_result zend_startup_hrtime(void)
 {
-#if ZEND_TIME_PLATFORM_WINDOWS
+#if ZEND_HRTIME_PLATFORM_WINDOWS
 
 	LARGE_INTEGER tf = {0};
 	if (!QueryPerformanceFrequency(&tf) || 0 == tf.QuadPart) {
@@ -60,13 +60,13 @@ zend_result zend_startup_hrtime(void)
 	}
 	zend_hrtime_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_hrtime_t)tf.QuadPart;
 
-#elif ZEND_TIME_PLATFORM_APPLE
+#elif ZEND_HRTIME_PLATFORM_APPLE
 
 	if (mach_timebase_info(&zend_hrtime_timerlib_info)) {
 		return FAILURE;
 	}
 
-#elif ZEND_TIME_PLATFORM_POSIX
+#elif ZEND_HRTIME_PLATFORM_POSIX
 
 #if !_POSIX_MONOTONIC_CLOCK
 #ifdef _SC_MONOTONIC_CLOCK
@@ -76,11 +76,11 @@ zend_result zend_startup_hrtime(void)
 #endif
 #endif
 
-#elif ZEND_TIME_PLATFORM_HPUX
+#elif ZEND_HRTIME_PLATFORM_HPUX
 
 	/* pass */
 
-#elif ZEND_TIME_PLATFORM_AIX
+#elif ZEND_HRTIME_PLATFORM_AIX
 
 	/* pass */
 
