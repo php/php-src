@@ -130,6 +130,8 @@ PHP 8.3 UPGRADE NOTES
 
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
+  . Implemented DOMDocument::adoptNode(). Previously this always threw a
+    "not yet implemented" exception.
 
 - Gd:
   . Changed imagerotate signature, removed the `ignore_transparent` argument
